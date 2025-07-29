@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-fit h-fit rounded bg-neutral-white select-none">
+  <div class="flex w-fit h-fit rounded bg-background-light select-none">
     <BaseToggle
       class="m-0.5"
       v-for="(toggle, index) in toggles"

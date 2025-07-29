@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="bg-neutral-lightest grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
+      class="bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
       :class="[
         baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
           ? ''
@@ -46,7 +46,7 @@
       ]"
     >
       <div
-        class="z-40 top-0 pt-3 pb-2 bg-neutral-lightest"
+        class="z-40 top-0 pt-3 pb-2 bg-background-normal"
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !expandFilters },
@@ -89,7 +89,7 @@
         :class="[
           'z-40 pl-[1%] right-0 pb-4',
           {
-            'top-0 bg-neutral-lightest pt-4':
+            'top-0 bg-background-normal pt-4':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
               baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
           },

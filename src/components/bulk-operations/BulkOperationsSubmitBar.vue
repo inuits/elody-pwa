@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="bulk-operation-submit-bar"
-    class="flex justify-between rounded-2xl p-3 w-full h-full bg-neutral-white"
+    class="flex justify-between rounded-2xl p-3 w-full h-full bg-background-light"
   >
     <div class="flex items-center">
       <div v-if="disabled" class="h-auto mt-1">

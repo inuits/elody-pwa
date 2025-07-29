@@ -15,7 +15,7 @@ export const defaultInput: Input = {
   borderColor: "border-none",
   disabledStyle: {
     textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-neutral-lightest",
+    bgColor: "disabled:bg-background-normal",
     borderColor: "disabled:border-none",
   },
 };

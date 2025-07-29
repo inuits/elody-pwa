@@ -9,6 +9,9 @@
   --color-accent-light: #DCF4F9;
   --color-accent-normal: #6BC6B3;
   --color-accent-accent: #0CB2BC;
+  --color-accent-highlight: #E8EEF0;
+  --color-highlight-bg: #4169E1;
+  --color-highlight-text: #FFFFFF;
 
   /* Colors */
   --color-white: #FFFFFF;
@@ -24,6 +27,8 @@
   --color-text-subtitle: #FFFFFF;
   --color-text-placeholder: #9CA3AF;
 
+  --color-background-normal: #F2F7F8;
+  --color-background-light: #FFFFFF;
   --color-background-frosted: rgba(220, 244, 249, 0.25);
 
   --color-status-new: #6BC6B3;
@@ -178,6 +183,16 @@
 }
 @utility bg-multiselect-spinner {
   background-image: var(--bg-multiselect-spinner);
+}
+
+::selection {
+  background-color: var(--color-highlight-bg);
+  color: var(--color-highlight-text);
+}
+
+::-moz-selection {
+  background-color: var(--color-highlight-bg);
+  color: var(--color-highlight-text);
 }
 
 @plugin "@tailwindcss/forms";

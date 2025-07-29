@@ -1,7 +1,7 @@
 <template>
   <base-modal
     :modal-type="TypeModals.SaveSearchPicker"
-    modal-color="bg-neutral-white"
+    modal-color="bg-background-light"
     @hide-modal="handleCloseModal"
   >
     <div class="bg-neutral-20 w-full h-full flex flex-col overflow-auto">

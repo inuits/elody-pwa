@@ -22,7 +22,7 @@
               <div
                 v-for="(relation, index) in relationArray"
                 :key="index"
-                class="bg-neutral-white py-2"
+                class="bg-background-light py-2"
               >
                 <entity-element-relation :relation="relation" />
               </div>

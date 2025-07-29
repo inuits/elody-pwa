@@ -2,7 +2,7 @@
   <div class="h-full">
     <div
       v-if="!loading && entity"
-      class="h-full w-full flex bg-neutral-lightest z-2 overflow-y-auto pb-4"
+      class="h-full w-full flex bg-background-normal z-2 overflow-y-auto pb-4"
     >
       <entity-column
         v-if="columnList != 'no-values'"

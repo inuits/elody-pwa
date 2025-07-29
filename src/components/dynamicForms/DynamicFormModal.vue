@@ -4,8 +4,8 @@
     :cancel-button-availabe="false"
     :modal-color="
       getModalInfo(TypeModals.DynamicForm).formQuery === 'GetUploadForm'
-        ? 'bg-neutral-lightest'
-        : 'bg-neutral-white'
+        ? 'bg-background-normal'
+        : 'bg-background-light'
     "
     :modalHeightStyle="'max-h-[90vh]'"
     @hide-modal="handleCloseModal"

@@ -4,7 +4,7 @@
     :cancel-button-availabe="false"
     @hide-modal="closeModal(TypeModals.Search)"
   >
-    <div class="bg-neutral-lightest h-full">
+    <div class="bg-background-normal h-full">
       <search-bar
         :input-enabled="true"
         @updateFilters="updateBaseLibraryFilters"

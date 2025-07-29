@@ -2,7 +2,7 @@
   <div
     ref="dropzoneView"
     :class="[
-      'bg-neutral-white w-full h-full border-dashed border-[3px] border-text-light rounded-xl',
+      'bg-background-light w-full h-full border-dashed border-[3px] border-text-light rounded-xl',
       { 'flex justify-center items-center': fileCount === 0 },
       style,
     ]"

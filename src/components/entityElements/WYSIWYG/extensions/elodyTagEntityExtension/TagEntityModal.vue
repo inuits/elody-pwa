@@ -64,7 +64,7 @@
           />
         </div>
       </div>
-      <div class="bg-neutral-lightest rounded-md">
+      <div class="bg-background-normal rounded-md">
         <div class="p-2 bg-gray-200">
           <h4 class="text-md font-bold">
             {{

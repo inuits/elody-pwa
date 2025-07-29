@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center justify-center w-9 h-9 rounded bg-neutral-white cursor-pointer select-none"
+    class="flex items-center justify-center w-9 h-9 rounded bg-background-light cursor-pointer select-none"
     :class="{
       'drop-shadow-[0_0_3px_rgba(9,30,66,0.13)]':
         isPartOfToggleGroup && !toggleOn,

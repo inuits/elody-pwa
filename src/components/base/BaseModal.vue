@@ -45,7 +45,7 @@ const props = withDefaults(
   {
     modalHeightStyle: "max-h-[75vh] my-[12.5vh]",
     iconHeight: 18,
-    modalColor: "bg-neutral-white",
+    modalColor: "bg-background-light",
     cancelButtonAvailabe: false,
   },
 );

@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="bulkOperationsPromiseIsResolved"
-    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-neutral-white"
+    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-background-light"
   >
     <div class="flex justify-start items-center">
       <div
@@ -9,7 +9,7 @@
         :class="
           useExtendedBulkOperations && itemsSelected
             ? `text-neutral-white bg-accent-normal`
-            : `text-text-body bg-neutral-light`
+            : `text-text-body bg-accent-highlight`
         "
       >
         <span>

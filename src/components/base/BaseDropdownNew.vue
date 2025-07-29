@@ -46,29 +46,29 @@ type Dropdown = {
 };
 
 const defaultDropdown: Dropdown = {
-  style: "text-text-body bg-neutral-white border-none rounded-lg",
+  style: "text-text-body bg-background-light border-none rounded-lg",
   hoverStyle:
-    "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
+    "hover:text-accent-accent hover:bg-background-normal hover:border-none",
 };
 const defaultFullWidthDropdown: Dropdown = {
-  style: "text-text-body bg-neutral-white border-none rounded-lg w-full",
+  style: "text-text-body bg-background-light border-none rounded-lg w-full",
   hoverStyle:
-    "hover:text-accent-accent hover:bg-neutral-lightest hover:border-none",
+    "hover:text-accent-accent hover:bg-background-normal hover:border-none",
 };
 const defaultWithBorderDropdown: Dropdown = {
   style:
-    "text-text-body bg-neutral-white border-[rgba(0,58,82,0.6)] rounded-lg w-full",
+    "text-text-body bg-background-light border-[rgba(0,58,82,0.6)] rounded-lg w-full",
   hoverStyle:
-    "hover:text-accent-accent hover:bg-neutral-lightest hover:border-[rgba(0,58,82,0.6)]",
+    "hover:text-accent-accent hover:bg-background-normal hover:border-[rgba(0,58,82,0.6)]",
 };
 const accentAccentDropdown: Dropdown = {
   style: "text-neutral-white bg-accent-accent border-none rounded-lg",
   hoverStyle: defaultDropdown.hoverStyle,
 };
 const neutralLightDropdown: Dropdown = {
-  style: "text-text-body bg-neutral-light border-none rounded-lg w-full",
+  style: "text-text-body bg-accent-highlight border-none rounded-lg w-full",
   hoverStyle:
-    "hover:text-[rgba(0,58,82,0.8)] hover:bg-neutral-lightest hover:border-none",
+    "hover:text-[rgba(0,58,82,0.8)] hover:bg-background-normal hover:border-none",
 };
 
 type DropdownStyle =

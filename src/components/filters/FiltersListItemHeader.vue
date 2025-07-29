@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="filters-list-item"
-    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-neutral-light cursor-pointer select-none"
+    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-accent-highlight cursor-pointer select-none"
     :class="{ 'bg-accent-normal text-neutral-white': isActive }"
     @click="$emit('toggle')"
   >

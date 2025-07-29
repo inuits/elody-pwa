@@ -113,7 +113,7 @@ const accentNormalInput: Input = {
   disabledStyle: {
     textColor: "disabled:text-text-light",
     bgColor: "disabled:accent-neutral-white",
-    borderColor: "disabled:border-neutral-light",
+    borderColor: "disabled:border-accent-highlight",
   },
 };
 

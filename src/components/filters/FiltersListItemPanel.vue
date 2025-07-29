@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="filters-list-item-panel"
-    class="flex flex-col gap-4 p-6 bg-neutral-light"
+    class="flex flex-col gap-4 p-6 bg-accent-highlight"
   >
     <div class="flex w-full justify-start gap-4">
       <AdvancedDropdown

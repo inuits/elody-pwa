@@ -65,10 +65,10 @@ type Button = {
 };
 const defaultButton: Button = {
   textColor: "text-text-body",
-  bgColor: "bg-neutral-lightest",
+  bgColor: "bg-background-normal",
   hoverStyle: {
     textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-neutral-lightest",
+    bgColor: "hover:bg-background-normal",
   },
   activeStyle: {
     textColor: "active:text-accent-accent",
@@ -76,7 +76,7 @@ const defaultButton: Button = {
   },
   disabledStyle: {
     textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-neutral-lightest",
+    bgColor: "disabled:bg-background-normal",
   },
 };
 const accentAccentButton: Button = {

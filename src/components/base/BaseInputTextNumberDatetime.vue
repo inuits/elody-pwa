@@ -78,11 +78,11 @@ type Input = {
 };
 const defaultInput: Input = {
   textColor: "text-text-body",
-  bgColor: "bg-neutral-white",
+  bgColor: "bg-background-light",
   borderColor: "border-none",
   disabledStyle: {
     textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-neutral-lightest",
+    bgColor: "disabled:bg-background-normal",
     borderColor: "disabled:border-none",
   },
 };
@@ -98,7 +98,7 @@ const defaultWithBorderInput: Input = {
 };
 const defaultWithDarkBackgroundInput: Input = {
   textColor: defaultInput.textColor,
-  bgColor: "bg-neutral-light",
+  bgColor: "bg-accent-highlight",
   borderColor: defaultInput.borderColor,
   disabledStyle: {
     textColor: defaultInput.disabledStyle.textColor,

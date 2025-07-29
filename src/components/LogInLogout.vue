@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="!bg-background-light">
     <div
       class="flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap"
     >

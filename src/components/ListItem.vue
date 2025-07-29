@@ -7,10 +7,10 @@
           :class="[
             'border rounded cursor-pointer list-none z-[-1]',
             {
-              'flex items-center gap-2 p-1 mb-2': viewMode === 'list',
+              'flex items-center gap-2 p-1.5 mb-2': viewMode === 'list',
             },
             {
-              'p-1 mb-2 flex flex-col w-[300px] min-h-[350px]':
+              'p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]':
                 viewMode === 'grid',
             },
             {
@@ -21,8 +21,8 @@
             { '!border-status-deleted': isMarkedAsToBeDeleted },
             { 'grayscale brightness-95 !cursor-default': isDisabled },
             { 'animate-pulse': loading },
-            { 'bg-neutral-white': !isActiveListItem },
-            { 'border-neutral-light': !isActiveListItem },
+            { 'bg-background-light': !isActiveListItem },
+            { 'border-accent-highlight': !isActiveListItem },
             {
               'border-4 border-neutral-800 bg-accent-light/30':
                 isActiveListItem,
@@ -58,7 +58,7 @@
           </div>
           <div
             :class="[
-              'flex items-center rounded-2xl p-2 bg-neutral-light',
+              'flex items-center rounded-2xl p-2 bg-accent-highlight',
               { 'mb-4': viewMode === 'grid' },
             ]"
             v-show="useEditHelper.isEdit"

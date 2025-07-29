@@ -2,11 +2,11 @@
   <div class="hidden">
     <div
       ref="dropzonePreview"
-      class="dz-file-preview border border-neutral-light rounded-md w-full mi-h-28 items-right mb-2 hover:bg-blue-default10 relative"
+      class="dz-file-preview border border-accent-highlight rounded-md w-full mi-h-28 items-right mb-2 hover:bg-blue-default10 relative"
     >
       <div class="flex flex-row p-3">
         <div
-          class="flex justify-center items-center bg-neutral-light rounded-lg w-10 h-8 mt-1 mr-2"
+          class="flex justify-center items-center bg-accent-highlight rounded-lg w-10 h-8 mt-1 mr-2"
         >
           <unicon
             :name="Unicons.Image.name"
@@ -25,7 +25,7 @@
         <div>
           <a
             data-dz-remove
-            class="cursor-pointer flex justify-center items-center bg-neutral-light rounded-lg w-10 h-8 mt-1 mr-2"
+            class="cursor-pointer flex justify-center items-center bg-accent-highlight rounded-lg w-10 h-8 mt-1 mr-2"
           >
             <unicon :name="Unicons.Trash.name" height="14" />
           </a>

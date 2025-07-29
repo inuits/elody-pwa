@@ -2,7 +2,7 @@
   <BaseModal
     :modal-type="TypeModals.Delete"
     :cancel-button-availabe="numberOfBlockingQueryEntities <= 0"
-    modal-color="bg-neutral-lightest"
+    modal-color="bg-background-normal"
     @hide-modal="closeModal(TypeModals.Delete)"
   >
     <div

@@ -54,7 +54,7 @@
         type="button"
         :disabled="disabled"
         @click="emit('clickUploadButton')"
-        class="flex h-max self-center justify-center items-center w-full p-2 rounded-md cursor-pointer outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-neutral-lightest active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-neutral-lightest"
+        class="flex h-max self-center justify-center items-center w-full p-2 rounded-md cursor-pointer outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-background-normal active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-background-normal"
       >
         <unicon
           v-if="props.icon !== DamsIcons.NoIcon"
@@ -67,7 +67,7 @@
     </div>
     <div
       v-if="progressIndicatorType === ActionProgressIndicatorType.ProgressSteps"
-      class="w-full flex items-center p-2 bg-neutral-white h-[48px]"
+      class="w-full flex items-center p-2 bg-background-light h-[48px]"
     >
       <div
         v-for="(progressStep, index) in uploadProgress"

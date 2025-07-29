@@ -7,7 +7,7 @@
     class="flex flex-col h-full"
   >
     <template v-slot:content>
-      <div class="mx-1 mb-1 bg-neutral-lightest">
+      <div class="mx-1 mb-1 bg-background-normal">
         <WktMap
           v-if="element.type === MapTypes.WktMap && shouldDisplayMap"
           :wkt="mapData"

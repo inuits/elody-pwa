@@ -1,5 +1,5 @@
 <template>
-  <div :class="['flex', { 'p-4 bg-neutral-lightest': inputEnabled }]">
+  <div :class="['flex', { 'p-4 bg-background-normal': inputEnabled }]">
     <div class="flex w-full bg-neutral-0 rounded-lg">
       <input
         v-if="inputEnabled"

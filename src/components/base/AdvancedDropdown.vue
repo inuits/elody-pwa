@@ -11,7 +11,7 @@
     }"
   >
     <VueSelect
-      class="!text-text-body !bg-neutral-white border-none !rounded-lg"
+      class="!text-text-body !bg-background-light border-none !rounded-lg"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? undefined : 'body'"
       :options="filterDropdownOptions"
@@ -240,7 +240,7 @@ body > .menu {
 }
 
 div.menu-option.selected {
-  background-color: var(--color-neutral-light) !important;
+  background-color: var(--color-accent-highlight) !important;
 }
 
 div.menu-option {
@@ -250,7 +250,7 @@ div.menu-option {
 div.menu-option:hover {
   background-color: color-mix(
     in srgb,
-    var(--color-neutral-light) 30%,
+    var(--color-accent-highlight) 30%,
     transparent
   ) !important;
 }

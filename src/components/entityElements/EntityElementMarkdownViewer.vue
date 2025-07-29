@@ -4,7 +4,7 @@
     :label="element.label"
   >
     <template v-slot:content>
-      <div v-if="element.markdownContent" class="h-full bg-neutral-light p-4">
+      <div v-if="element.markdownContent" class="h-full bg-accent-highlight p-4">
         <vue-markdown class="md" :source="element.markdownContent" />
       </div>
     </template>

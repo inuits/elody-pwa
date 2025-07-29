@@ -5,7 +5,7 @@
     >
       <div
         :class="[
-          'flex justify-center items-center bg-neutral-light h-full',
+          'flex justify-center items-center bg-accent-highlight h-full',
           { 'rounded-t-xl rounded-br-xl': showHistory },
           { 'rounded-xl': !showHistory },
         ]"
@@ -56,7 +56,7 @@
     </div>
     <div
       v-if="showHistory"
-      class="absolute bg-neutral-light rounded-b-md z-[70]"
+      class="absolute bg-accent-highlight rounded-b-md z-[70]"
     >
       <ul>
         <li
@@ -77,7 +77,7 @@
             </div>
             <div
               :class="[
-                'cursor-pointer hover:bg-neutral-lightest w-full flex px-4',
+                'cursor-pointer hover:bg-background-normal w-full flex px-4',
                 { 'justify-between': breadcrumbRoute.icon },
                 { 'justify-end': !breadcrumbRoute.icon },
               ]"

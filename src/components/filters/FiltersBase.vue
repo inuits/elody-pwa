@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="filter-base"
-    class="relative bg-neutral-white w-full"
+    class="relative bg-background-light w-full"
     :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
   >
@@ -9,8 +9,8 @@
       class=""
       :class="[
         'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
-        { 'border-neutral-light rounded-t': expandFilters },
-        { 'border-neutral-white rounded-xl': !expandFilters },
+        { 'border-accent-highlight rounded-t': expandFilters },
+        { 'border-background-light rounded-xl': !expandFilters },
       ]"
       @click="() => emit('expandFilters', expandFilters)"
     >
@@ -26,7 +26,7 @@
             (selectedSavedFilter || lastActiveFilter) &&
             auth.isAuthenticated.value === true
           "
-          class="bg-neutral-light border-neutral-light rounded py-1 px-2 ml-2"
+          class="bg-accent-highlight border-accent-highlight rounded py-1 px-2 ml-2"
         >
           <span class="text-text-body">
             {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
@@ -41,10 +41,10 @@
 
     <div
       :class="[
-        'w-full rounded-b bg-neutral-white',
+        'w-full rounded-b bg-background-light',
         { hidden: !expandFilters },
         {
-          'scrollable border-x border-b-2 border-neutral-light': expandFilters,
+          'scrollable border-x border-b-2 border-accent-highlight': expandFilters,
         },
       ]"
     >
