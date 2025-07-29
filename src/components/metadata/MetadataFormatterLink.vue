@@ -3,7 +3,7 @@
     :is="requiredAuthForThisEntity ? 'p' : 'a'"
     :class="[{ underline: !requiredAuthForThisEntity }, 'text-sm']"
     :href="link"
-    :style="{ color: requiredAuthForThisEntity ? '#000' : '#1d4ed8' }"
+    :style="{ color: requiredAuthForThisEntity ? '#000' : 'var(--color-text-link)' }"
     @click.stop
   >
     {{ label }}
