@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute w-full bg-neutral-0 z-[5] p-2 shadow-sm flex justify-between items-center h-10"
+    class="absolute w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10"
   >
     <div class="pt-[10px] flex flex-row">
       <button ref="fullPageRef" class="mr-2 ml-2">

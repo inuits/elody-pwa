@@ -1,7 +1,7 @@
 <template>
   <div
     @click="toggleCheck"
-    class="rounded h-full w-9 bg-neutral-0 cursor-pointer flex items-center justify-center"
+    class="rounded h-full w-9 bg-background-light cursor-pointer flex items-center justify-center"
   >
     <unicon v-if="checked" :name="iconOn" />
     <unicon v-else :name="iconOff" />

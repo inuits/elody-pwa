@@ -5,7 +5,7 @@
     modalHeightStyle="max-h-[75vh] my-[12.5vh]"
     @hide-modal="handleCloseModal"
   >
-    <div class="bg-neutral-0 w-full">
+    <div class="bg-background-light w-full">
       <dynamic-form
         v-if="getModalInfo(TypeModals.SaveSearch).open"
         :dynamic-form-query="getModalInfo(TypeModals.SaveSearch).formQuery"

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="progressPercentage" class="w-full bg-neutral-0 rounded-md">
+  <div v-if="progressPercentage" class="w-full bg-background-light rounded-md">
     <div class="top-0 w-full"></div>
 
     <progress

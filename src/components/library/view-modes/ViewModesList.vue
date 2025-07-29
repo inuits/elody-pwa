@@ -128,7 +128,7 @@
           previewComponentEnabled &&
           entities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[68vh] overflow-y-auto bg-neutral-0 rounded-lg"
+        class="my-2 h-fit max-h-[68vh] overflow-y-auto bg-background-light rounded-lg"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"

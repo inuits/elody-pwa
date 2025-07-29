@@ -26,7 +26,7 @@
         >
       </l-map>
     </div>
-    <div class="bg-neutral-0 w-full pb-2">
+    <div class="bg-background-light w-full pb-2">
       <div v-for="data in mapData" class="px-2 py-1" :key="data.key">
         <entity-element-coordinate-edit
           v-if="data.inputField && data.unit === Unit.CoordinatesDefault"

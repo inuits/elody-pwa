@@ -8,7 +8,7 @@
     :class="{ 'animate-pulse bg-neutral-20 text-neutral-20': loading }"
   >
     <div
-      class="flex flex-col w-full h-full items-center bg-neutral-0 border-neutral-30 border-solid border-2 rounded-t-md"
+      class="flex flex-col w-full h-full items-center bg-background-light border-neutral-30 border-solid border-2 rounded-t-md"
     >
       <div class="w-full h-full px-2 max-h-[62vh] flex flex-col">
         <div class="flex items-center justify-between w-full my-1">

@@ -9,7 +9,7 @@
       v-on:expand-media-list="resizeColumn"
     />
     <div
-      class="h-full w-full border-solid border-neutral-30 border-2 bg-neutral-0 rounded-t-md @container/window"
+      class="h-full w-full border-solid border-neutral-30 border-2 bg-background-light rounded-t-md @container/window"
     >
       <div
         class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row"

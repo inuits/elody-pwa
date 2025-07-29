@@ -2,7 +2,7 @@
   <div
     v-if="editorLoaded"
     :class="[
-      'bg-neutral-0 rounded-t-md relative',
+      'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
     ]"
   >

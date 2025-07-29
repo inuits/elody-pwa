@@ -9,11 +9,11 @@
     <template v-slot:content>
       <canvas
         v-show="!loading"
-        class="bg-neutral-0"
+        class="bg-background-light"
         ref="canvasRef"
         id="chart"
       ></canvas>
-      <p v-if="loading" class="p-4 text-center bg-neutral-0 text-text-body">
+      <p v-if="loading" class="p-4 text-center bg-background-light text-text-body">
         loading...
       </p>
     </template>
