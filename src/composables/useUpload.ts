@@ -436,13 +436,11 @@ const useUpload = () => {
     );
     let parsedResult;
     if (!response.ok) {
-      //const httpErrorMessage = handleHttpError(response);
+      if (!isDryRun) toggleUploadStatus();
       __updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
       );
-      toggleUploadStatus();
-      //return Promise.reject(httpErrorMessage);
       parsedResult = JSON.parse(await response.text()).extensions.response.body;
     } else {
       parsedResult = JSON.parse(await response.text());
