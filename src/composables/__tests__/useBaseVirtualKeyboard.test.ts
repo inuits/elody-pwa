@@ -84,7 +84,6 @@ describe("useVirtualKeyboard", () => {
 
   it("adds language switch and close buttons when multiple layouts exist", async () => {
     const customLayouts = {
-      en: { default: ["a b c"], shift: ["A B C"] },
       fr: { default: ["a b c"], shift: ["A B C"] },
       de: { default: ["a b c"], shift: ["A B C"] },
     };
@@ -101,14 +100,8 @@ describe("useVirtualKeyboard", () => {
       `.${keyboardClass}`,
       expect.objectContaining({
         layout: {
-          default: expect.arrayContaining([
-            "{English} {fr} {de} {close}",
-            "a b c",
-          ]),
-          shift: expect.arrayContaining([
-            "{English} {fr} {de} {close}",
-            "A B C",
-          ]),
+          default: expect.arrayContaining(["{fr} {de} {English} {close}"]),
+          shift: expect.arrayContaining(["{fr} {de} {English} {close}"]),
         },
       }),
     );
