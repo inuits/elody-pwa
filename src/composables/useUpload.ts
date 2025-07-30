@@ -957,16 +957,15 @@ const useUpload = () => {
       .item(0);
     if (!errorContainer || !errors) return;
 
+    errorContainer.innerHTML = "";
     if (errors.length <= 0) {
       filePreview.classList.remove("border-2", "border-red-default");
       errorContainer.classList.add("hidden");
-      errorContainer.innerHTML = "";
       return;
     }
 
     const errorList = document.createElement("ul");
     errorList.classList.add("list-disc");
-    errorContainer.appendChild(errorList);
     errors.forEach((error: string) => {
       const errorNode = document.createElement("li");
       const htmlLinkElement = checkErrorMessageForLinks(error);
@@ -977,6 +976,7 @@ const useUpload = () => {
       }
       errorList.appendChild(errorNode);
     });
+    errorContainer.appendChild(errorList);
 
     filePreview.classList.add("border-2", "border-red-default");
     errorContainer.classList.remove("hidden");
@@ -1086,16 +1086,23 @@ const useUpload = () => {
   };
 };
 
+const mapMissingFileNamesToErrors = (): string[] => {
+  return missingFileNames.value.map(
+    (filename: string) =>
+      `${getTranslatedMessage("actions.upload.missing", [filename])}`,
+  );
+}
+
 watch(
-  () => missingFileNames.value,
+  () => [missingFileNames.value, dryRunErrors.value],
   () => {
-    if (csvFile.value) {
-      const errorMessages: string[] = missingFileNames.value.map(
-        (filename: string) =>
-          `${getTranslatedMessage("actions.upload.missing", [filename])}`,
-      );
-      useUpload().__handleFileThumbnailError(csvFile.value, errorMessages);
-    }
+    if (!csvFile.value) return;
+
+    const errors = [
+      ...dryRunErrors.value,
+      ...mapMissingFileNamesToErrors(),
+    ];
+    useUpload().__handleFileThumbnailError(csvFile.value, errors);
   },
 );
 
