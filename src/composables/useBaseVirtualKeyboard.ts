@@ -88,8 +88,8 @@ export const useVirtualKeyboard = (
 
   const initializeLayoutsAndDisplay = () => {
     processedFinalLayouts = { ...props.layouts };
-    if (!processedFinalLayouts["en"]) {
-      processedFinalLayouts["en"] = defaultEnglishLayout;
+    if (!processedFinalLayouts["English"]) {
+      processedFinalLayouts["English"] = defaultEnglishLayout;
     }
 
     const availableLangCodes = Object.keys(processedFinalLayouts);
@@ -116,8 +116,8 @@ export const useVirtualKeyboard = (
   };
 
   const setupKeyboard = () => {
-    const initialLangCode = processedFinalLayouts["en"]
-      ? "en"
+    const initialLangCode = processedFinalLayouts["English"]
+      ? "English"
       : Object.keys(processedFinalLayouts)[0];
     const currentKeyboardLayout: SimpleKeyboardLayout =
       processedFinalLayouts[initialLangCode];
@@ -171,9 +171,13 @@ export const useVirtualKeyboard = (
       return;
     }
 
-    if (button.startsWith("{") && button.endsWith("}") && button.length === 4) {
-      const langCode = button.substring(1, 3);
-      handleLanguageSwitch(langCode);
+    const strippedButton = button.substring(1, button.length - 1);
+    const isButtonLangCode =
+      button.startsWith("{") &&
+      button.endsWith("}") &&
+      !!processedFinalLayouts[strippedButton];
+    if (isButtonLangCode) {
+      handleLanguageSwitch(strippedButton);
       return;
     }
 
