@@ -101,8 +101,14 @@ describe("useVirtualKeyboard", () => {
       `.${keyboardClass}`,
       expect.objectContaining({
         layout: {
-          default: expect.arrayContaining(["{en} {fr} {de} {close}", "a b c"]),
-          shift: expect.arrayContaining(["{en} {fr} {de} {close}", "A B C"]),
+          default: expect.arrayContaining([
+            "{English} {fr} {de} {close}",
+            "a b c",
+          ]),
+          shift: expect.arrayContaining([
+            "{English} {fr} {de} {close}",
+            "A B C",
+          ]),
         },
       }),
     );
