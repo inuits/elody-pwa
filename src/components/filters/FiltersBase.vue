@@ -165,9 +165,7 @@ export type FiltersBaseAPI = {
     advancedFilters: AdvancedFilters,
     value: any,
   ) => void;
-  removeFilterFromList: (
-    key: string,
-  ) => void;
+  removeFilterFromList: (key: string) => void;
   getNormalizedFiltersForApi: () => AdvancedFilterInput[];
 };
 

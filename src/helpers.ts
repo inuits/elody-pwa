@@ -497,7 +497,7 @@ export const getEntityTitle = (entity: BaseEntity): string => {
 };
 
 export const getFromExpressEndpoint = async (
-  endpoint: "config" | "translation" | "version" | "url-mapping",
+  endpoint: "version" | "app-configs",
 ) => {
   const response = await fetch(
     import.meta.env.VUE_APP_CONFIG_URL
@@ -508,15 +508,8 @@ export const getFromExpressEndpoint = async (
   return await response.json();
 };
 
-export const getApplicationDetails = async () => {
-  const [config, translations, version, urlMapping] = await Promise.all([
-    getFromExpressEndpoint("config"),
-    getFromExpressEndpoint("translation"),
-    getFromExpressEndpoint("version"),
-    getFromExpressEndpoint("url-mapping"),
-  ]);
-
-  return { config, translations, version, urlMapping };
+export const getApplicationDetails = () => {
+  return getFromExpressEndpoint("app-configs");
 };
 
 export const getFormattersSettings = async () => {

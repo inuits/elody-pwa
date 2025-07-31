@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoading" class="flex items-center justify-center">
-    <SpinnerLoader />
+    <SpinnerLoader theme="accent" :dimensions="10" />
   </div>
   <div v-else class="grow">
     <AutocompleteFilter
@@ -8,7 +8,8 @@
       :filter="filter"
       :initial-input-value="lastTypedValue"
       :options="options"
-      @searchOptions="searchOptions"
+      :is-loading="isSearching"
+      @searchOptions="handleSearchOptions"
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
     />
@@ -23,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   AutocompleteSelectionOptions,
   AdvancedFilterTypes,
@@ -33,7 +34,6 @@ import CheckboxFilter from "./CheckboxFilter.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useFilterOptions } from "@/composables/useFilterOptions";
 import { type FilterListItem } from "@/composables/useStateManagement";
-
 import { useRoute } from "vue-router";
 import type {
   AdvancedFilterInput,
@@ -43,16 +43,20 @@ import type {
 const props = defineProps<{
   filter: FilterListItem;
   lastTypedValue: string;
+  isOpen: boolean;
 }>();
 
-defineEmits(["updateValue", "filterOptions"]);
+const emit = defineEmits(["updateValue", "filterOptions"]);
 
 const { options, setFilters, getOptions, getBaseOptions, init } =
   useFilterOptions();
 const route = useRoute();
 
-const isLoading = ref<boolean>(true);
-const initialAmountOfOptions = ref<number>(0);
+const isLoading = ref(true);
+const isSearching = ref(false);
+const initialAmountOfOptions = ref(0);
+const hasFetchedOptions = ref(false);
+const isInitialized = ref(false);
 
 const useAutocomplete = computed(() => {
   if (
@@ -70,24 +74,38 @@ const useAutocomplete = computed(() => {
   );
 });
 
-onMounted(async () => {
+const initialize = async () => {
+  if (isInitialized.value) return;
+
   try {
-    isLoading.value = true;
     await init(
       (props.filter.advancedFilter?.entityType ||
         route.meta.entityType) as Entitytyping,
       props.filter.advancedFilter.filterOptionsMapping,
     );
+    isInitialized.value = true;
+  } catch (error) {
+    console.error("Initialization failed:", error);
+  }
+};
 
+const loadOptions = async () => {
+  if (!isInitialized.value) {
+    await initialize();
+  }
+
+  try {
     await fetchSelectionOptions(
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
     );
     initialAmountOfOptions.value = options.value.length;
+    hasFetchedOptions.value = true;
     isLoading.value = false;
   } catch (error) {
+    console.error("Failed to load options:", error);
     isLoading.value = false;
   }
-});
+};
 
 const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
   if (!filters) return;
@@ -96,15 +114,22 @@ const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
   await getSelectionOptions();
 };
 
-const searchOptions = async (searchValue: string) => {
+const handleSearchOptions = async (searchValue: string) => {
   const newFilters =
     props.filter.advancedFilter.advancedFilterInputForRetrievingOptions;
-  const normalizedFitlers = newFilters?.map(buildFilterForSearch(searchValue));
+  const normalizedFilters = newFilters?.map(buildFilterForSearch(searchValue));
 
-  if (!normalizedFitlers) return;
+  if (!normalizedFilters) return;
 
-  await setFilters(normalizedFitlers);
-  await getSelectionOptions();
+  try {
+    isSearching.value = true;
+    await setFilters(normalizedFilters);
+    await getSelectionOptions();
+  } catch (error) {
+    console.error("Search failed:", error);
+  } finally {
+    isSearching.value = false;
+  }
 };
 
 const buildFilterForSearch =
@@ -115,23 +140,26 @@ const buildFilterForSearch =
     }
 
     const shouldReplaceFilterValue = filter.value === "*";
-    const updatedFilter = { ...filter };
-    updatedFilter.value = shouldReplaceFilterValue
-      ? searchValue || "*"
-      : filter.value;
-    updatedFilter.match_exact = false;
-
-    return updatedFilter;
+    return {
+      ...filter,
+      value: shouldReplaceFilterValue ? searchValue || "*" : filter.value,
+      match_exact: false,
+    };
   };
 
 const getSelectionOptions = async () => {
-  const useNewWayToFetchOptions =
-    props.filter.advancedFilter.useNewWayToFetchOptions;
-
-  if (useNewWayToFetchOptions) {
-    return getBaseOptions();
-  }
-
-  return getOptions();
+  return props.filter.advancedFilter.useNewWayToFetchOptions
+    ? getBaseOptions()
+    : getOptions();
 };
+
+watch(
+  () => props.isOpen,
+  async (isOpen) => {
+    if (isOpen && !hasFetchedOptions.value) {
+      await loadOptions();
+    }
+  },
+  { immediate: true },
+);
 </script>

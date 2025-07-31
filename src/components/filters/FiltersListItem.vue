@@ -22,6 +22,7 @@
         :is="matcherComponent"
         :filter="filter"
         :last-typed-value="lastTypedValue"
+        :is-open="isOpen"
         @new-input-value="updateLastTypedValue"
         @filter-options="updateFilterOptions"
         @updateValue="updateFilterValue"
@@ -124,18 +125,18 @@ const resetFilter = () => {
   lastTypedValue.value = "";
   emit("deactivateFilter", props.filter.advancedFilter.key, true);
 
-  const shouldResetToDefault = [
-    Matchers.AnyMatcher,
-    Matchers.NoneMatcher,
-  ].includes(selectedMatcher.value);
-  if (!shouldResetToDefault) {
-    reloadMatcherComponent();
-    return;
-  }
+  const defaultMatcherValue = getDefaultMatcher();
 
-  const defaultMatcher = getDefaultMatcher();
-  if (defaultMatcher) {
-    selectedMatcher.value = defaultMatcher;
+  const isNeutralMatcher = [Matchers.AnyMatcher, Matchers.NoneMatcher].includes(
+    selectedMatcher.value,
+  );
+
+  const shouldUpdateToDefault =
+    defaultMatcherValue && defaultMatcherValue !== selectedMatcher.value;
+
+  if (isNeutralMatcher || shouldUpdateToDefault) {
+    selectedMatcher.value = defaultMatcherValue;
+    return;
   }
 };
 

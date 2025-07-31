@@ -11,11 +11,29 @@ import type {
 import {
   GetPermissionMappingDocument,
   GetPermissionMappingEntityDetailDocument,
+  GetAdvancedPermissionsDocument,
   GetAdvancedPermissionDocument,
   Entitytyping,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
+
+interface PermissionResult {
+  permission: string;
+  hasPermission: boolean;
+}
+
+interface AdvancedPermissionsResponse {
+  AdvancedPermissions: PermissionResult[];
+}
+
+interface MenuItem {
+  can?: string[];
+  subMenu?: {
+    [key: string]: MenuItem;
+  };
+  [key: string]: any;
+}
 
 const ignorePermissions = ref<boolean>(false);
 const isPermissionsLoaded = ref<boolean>(false);
@@ -129,6 +147,64 @@ const usePermissions = () => {
     }
   };
 
+  const fetchAdvancedPermissions = async (
+    permissions: string[],
+  ): Promise<Record<string, boolean>> => {
+    const variables = {
+      permissions,
+      ...(parentEntityId && { parentEntityId }),
+      ...(childEntityId && { childEntityId }),
+    };
+
+    try {
+      const { data } = await apolloClient.query<AdvancedPermissionsResponse>({
+        query: GetAdvancedPermissionsDocument,
+        variables,
+        fetchPolicy: "no-cache",
+      });
+
+      data.AdvancedPermissions.forEach(({ permission, hasPermission }) => {
+        advancedPermissions[permission] = hasPermission;
+      });
+
+      return permissions.reduce<Record<string, boolean>>((acc, permission) => {
+        acc[permission] = advancedPermissions[permission] ?? false;
+        return acc;
+      }, {});
+    } catch (error) {
+      console.error("Failed to fetch advanced permissions:", error);
+
+      return permissions.reduce<Record<string, boolean>>((acc, permission) => {
+        acc[permission] = false;
+        return acc;
+      }, {});
+    }
+  };
+
+  const extractMenuPermissions = (menu: MenuItem): string[] => {
+    const permissions: string[] = [];
+
+    function traverse(item: MenuItem) {
+      if (item.can && item.can.length > 0) {
+        permissions.push(item.can[0]);
+      }
+
+      if (item.subMenu) {
+        Object.values(item.subMenu).forEach((subItem) => {
+          traverse(subItem);
+        });
+      }
+    }
+
+    Object.values(menu).forEach((item) => {
+      if (typeof item === "object" && item !== null) {
+        traverse(item);
+      }
+    });
+
+    return permissions;
+  };
+
   const setExtraVariables = (variables?: {
     parentEntityId?: string;
     childEntityId: string;
@@ -202,8 +278,10 @@ const usePermissions = () => {
     fetchUpdateAndDeletePermission,
     numberOfEntities,
     fetchAdvancedPermission,
+    fetchAdvancedPermissions,
     fetchPermissionsForDropdownOptions,
     fetchPermissionsOfContextMenu,
+    extractMenuPermissions,
     setExtraVariables,
   };
 };

@@ -1,6 +1,6 @@
+import type { TypeModals } from "@/generated-types/queries";
 import {
   type MenuItem,
-  TypeModals,
   type GetMenuQueryVariables,
   type GetMenuQuery,
   GetMenuDocument,
@@ -9,7 +9,9 @@ import {
 import { useBaseModal } from "@/composables/useBaseModal";
 import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import { usePermissions } from "@/composables/usePermissions";
 const { openModal } = useBaseModal();
+const { extractMenuPermissions, fetchAdvancedPermissions } = usePermissions();
 
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
 const selectedMenuItemPath = ref<string>(undefined);
@@ -46,7 +48,7 @@ export const useMenuHelper = () => {
           openModal(
             _menuItem.typeLink?.modal?.typeModal as TypeModals,
             ModalStyle.Center,
-            _menuItem.typeLink?.modal?.formQuery
+            _menuItem.typeLink?.modal?.formQuery,
           );
         },
       };
@@ -67,10 +69,19 @@ export const useMenuHelper = () => {
   const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
   const { onResult } = useQuery<GetMenuQuery>(GetMenuDocument, queryVariables);
   const getMenuEntities = () => {
-    onResult((value) => {
-      menuItems.value = Object.values(value.data?.Menu?.menu || {}).filter(
-        (menu) => menu?.typeLink
+    onResult(async (value) => {
+      if (value.loading || value.partial) {
+        return;
+      }
+
+      const menu = Object.values(value.data?.Menu?.menu || {}).filter(
+        (menu) => menu?.typeLink,
       );
+      const extractedPermissions = await extractMenuPermissions(menu);
+      if (extractedPermissions.length !== 0)
+        await fetchAdvancedPermissions(extractedPermissions);
+
+      menuItems.value = menu;
       setSelectedMenuItem(menuItems.value[0]);
     });
   };

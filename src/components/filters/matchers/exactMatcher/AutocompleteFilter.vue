@@ -5,6 +5,7 @@
     autocomplete-style="default"
     :placeholder="placeholder"
     :no-options-text="noOptionsText"
+    :loading="isLoading"
     @search-change="debouncedHandleSearchChange"
     :search-filter="
       function (option: any) {
@@ -26,6 +27,7 @@ const props = defineProps<{
   filter: FilterListItem;
   options: DropdownOption[];
   initialInputValue?: string;
+  isLoading?: boolean;
 }>();
 
 const emit = defineEmits(["updateValue", "newInputValue", "searchOptions"]);

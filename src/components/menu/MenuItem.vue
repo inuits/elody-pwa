@@ -75,7 +75,9 @@
           @click="setSelectedMenuItem(menuitem)"
           :subMenuItem="submenuItem"
           :show="isBeingHovered as boolean"
-          @isActive="(isActiveChild: boolean) => isActiveChild = isActiveChild"
+          @isActive="
+            (isActiveChild: boolean) => (isActiveChild = isActiveChild)
+          "
         />
       </div>
     </transition-group>
@@ -112,7 +114,7 @@ const { can, fetchAdvancedPermission } = usePermissions();
 const menuSubitem = ref<Array<MenuItem>>([]);
 const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
-  () => menuAction.value?.menuItemType === MenuItemType.link
+  () => menuAction.value?.menuItemType === MenuItemType.link,
 );
 const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
 const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
@@ -133,7 +135,7 @@ const showMenuItem = computed(() => {
   );
 });
 const iconColor = computed(() =>
-  isActive.value ? "accent-normal" : "text-body"
+  isActive.value ? "accent-normal" : "text-body",
 );
 const isActiveParentOrSubmenu = computed(() => {
   const routePath = route.path.substring(route.path.lastIndexOf("/") + 1);
@@ -150,7 +152,7 @@ const handleSubMenu = () => {
   const submenu = props.menuitem.subMenu;
   if (submenu) {
     menuSubitem.value = Object.values(submenu).filter(
-      (menu: MenuItem) => menu.typeLink
+      (menu: MenuItem) => menu.typeLink,
     );
   }
 };
