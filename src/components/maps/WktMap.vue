@@ -9,6 +9,7 @@
       <Map.OlView
         ref="viewRef"
         :zoom="7"
+        :maxZoom="17"
         :center="mapCenter"
         :projection="projection"
       />
@@ -16,7 +17,9 @@
       <Layers.OlTileLayer>
         <Sources.OlSourceXyz
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          :attributions="['Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community']"
+          :attributions="[
+            'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+          ]"
         />
       </Layers.OlTileLayer>
 
