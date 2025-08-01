@@ -33,7 +33,7 @@
           data-cy="metadata-value"
           class="underline"
           target="_blank"
-          :href="processedLink"
+          :href="readableValue"
           v-html="processedLink"
           @click.stop
         ></a>
