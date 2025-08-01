@@ -14,7 +14,7 @@
         {{ t(element.label) }}
       </h1>
     </div>
-    <div v-else class="py-2 flex gap-2">
+    <div v-else class="pl-2 py-2 flex gap-2">
       <metadata-title :metadata="element" />
       <WYSIGYGVirtualKeyboard
         v-if="element.hasVirtualKeyboard && useEditHelper.isEdit"
