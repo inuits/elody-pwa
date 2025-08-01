@@ -199,9 +199,7 @@ export const useBaseLibrary = (
     if (entitiesLoading.value) return;
     entitiesLoading.value = true;
 
-    const queueExecution = Promise.all(
-      promiseQueue.value.map((promise) => promise(entityType)),
-    );
+    await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
 
     _route = route;
@@ -209,49 +207,42 @@ export const useBaseLibrary = (
       shouldUseStateForRoute &&
       _route?.name !== "SingleEntity" &&
       getStateForRoute(_route)?.queryVariables;
-
-    if (variables) {
-      queryVariables = variables;
-    } else if (!variables && shouldUseStateForRoute) {
+    if (variables) queryVariables = variables;
+    else if (!variables && shouldUseStateForRoute)
       updateStateForRoute(_route, { queryVariables });
-    }
-
     if (
       !variables ||
       _route?.name === "SingleEntity" ||
       !shouldUseStateForRoute
-    ) {
+    )
       variables = queryVariables;
-    }
 
-    const apolloQuery = apolloClient.query({
-      query: manipulateQuery.value
-        ? manipulationQuery.value.document
-        : GetEntitiesDocument,
-      variables,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    });
-
-    try {
-      const [_, result] = await Promise.all([queueExecution, apolloQuery]);
-
-      const fetchedEntities = result.data.Entities;
-      if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
-        entities.value = fetchedEntities?.results as Entity[];
-        totalEntityCount.value = fetchedEntities?.count || 0;
-        if (shouldUseStateForRoute)
-          updateStateForRoute(_route, {
-            entityCountOnPage: fetchedEntities.results.length,
-            totalEntityCount: fetchedEntities.count,
-          });
-      }
-    } catch (error) {
-      entities.value = [];
-      entitiesLoading.value = false;
-    } finally {
-      entitiesLoading.value = false;
-    }
+    await apolloClient
+      .query({
+        query: manipulateQuery.value
+          ? manipulationQuery.value.document
+          : GetEntitiesDocument,
+        variables,
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      })
+      .then((result) => {
+        const fetchedEntities = result.data.Entities;
+        if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
+          entities.value = fetchedEntities?.results as Entity[];
+          totalEntityCount.value = fetchedEntities?.count || 0;
+          if (shouldUseStateForRoute)
+            updateStateForRoute(_route, {
+              entityCountOnPage: fetchedEntities.results.length,
+              totalEntityCount: fetchedEntities.count,
+            });
+        }
+        entitiesLoading.value = false;
+      })
+      .catch(() => {
+        entities.value = [];
+        entitiesLoading.value = false;
+      });
   };
 
   const getEntityById = async (
