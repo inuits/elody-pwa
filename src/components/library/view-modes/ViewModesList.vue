@@ -246,7 +246,7 @@ const getLinkSettings = (
   listItemRouteName: string = "",
   force = false,
 ) => {
-  if ((!props.enableNavigation || previewComponentEnabled) && !force) {
+  if ((!props.enableNavigation || previewComponentEnabled.value) && !force) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
       entity.type.toLowerCase() === Entitytyping.Mediafile
@@ -270,7 +270,7 @@ const isEntityDisabled = (entity: Entity) => {
 };
 
 const entityWrapperHandler = (entity: Entity) => {
-  if (previewComponentEnabled) togglePreviewComponent(entity.id || entity.uuid);
+  if (previewComponentEnabled.value) togglePreviewComponent(entity.id || entity.uuid);
   if (isEntityDisabled(entity) || !props.enableNavigation) return;
   updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
 };
