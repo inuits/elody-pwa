@@ -59,8 +59,7 @@
     <ViewModesMap
       v-else-if="previewComponent.type === PreviewTypes.Map"
       :map-type="
-        getBasicMapProperties(configPerViewMode[ViewModes.ViewModesMap])
-          .mapType
+        getBasicMapProperties(configPerViewMode[ViewModes.ViewModesMap]).mapType
       "
       :config="configPerViewMode[ViewModes.ViewModesMap]"
       :entities="getEntitiesOrEntity()"
@@ -133,7 +132,10 @@ const emit = defineEmits<{
 }>();
 
 provide("IsPreviewElement", true);
-provide("showCurrentPreviewFlow", props.previewComponent.showCurrentPreviewFlow);
+provide(
+  "showCurrentPreviewFlow",
+  props.previewComponent.showCurrentPreviewFlow,
+);
 const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
 const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
 

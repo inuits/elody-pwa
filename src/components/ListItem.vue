@@ -191,20 +191,6 @@
             />
           </div>
 
-          <!--    //TEMP: Disable arrow on list item-->
-          <!--    <div-->
-          <!--      v-if="!isPreview && isEnableNavigation && viewMode !== 'grid'"-->
-          <!--      class="flex flex-row"-->
-          <!--      @click="() => emit('navigateTo')"-->
-          <!--    >-->
-          <!--      <slot>-->
-          <!--        <unicon-->
-          <!--          :name="Unicons.AngleRight.name"-->
-          <!--          class="h-5.5 w-5.5 text-text-body"-->
-          <!--        />-->
-          <!--      </slot>-->
-          <!--    </div>-->
-
           <div v-if="viewMode === 'list'" class="flex">
             <BaseContextMenuActions
               :context-menu-actions="contextMenuActions"
@@ -218,7 +204,19 @@
             />
           </div>
           <div
-            v-if="
+            v-if="previewComponentEnabled"
+            class="flex flex-row"
+            @click="() => emit('navigateTo')"
+          >
+            <slot>
+              <unicon
+                :name="Unicons.AngleRight.name"
+                class="h-5.5 w-5.5 text-text-body"
+              />
+            </slot>
+          </div>
+          <div
+            v-else-if="
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
               baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
             "
@@ -229,12 +227,12 @@
               <template #activator="{ on }">
                 <div v-on="on" class="flex">
                   <unicon
-                    v-if="previewComponentIconVisible"
+                    v-if="previewComponentFeatureEnabled"
                     :name="Unicons.Eye.name"
                     class="h-5.5 w-5.5 text-text-body mx-1"
                     :class="{
                       '!text-accent-accent fill-current':
-                        previewComponentEnabled,
+                        previewComponentCurrentActive,
                     }"
                   />
                 </div>
@@ -243,7 +241,7 @@
                 <span class="text-sm text-text-placeholder">
                   <div>
                     {{
-                      previewComponentEnabled
+                      previewComponentCurrentActive
                         ? t("preview-component.close")
                         : t("preview-component.open")
                     }}
@@ -343,7 +341,8 @@ const props = withDefaults(
     viewMode?: "list" | "grid";
     refetchEntities?: Function;
     previewComponentEnabled: boolean;
-    previewComponentIconVisible: boolean;
+    previewComponentCurrentActive: boolean;
+    previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
   }>(),
   {
@@ -452,7 +451,7 @@ const isActiveListItem = computed<boolean>(() => {
   if (
     props.previewComponentListItemsCoverage ===
       ListItemCoverageTypes.OneListItem &&
-    props.previewComponentEnabled
+    props.previewComponentCurrentActive
   )
     return true;
   return false;

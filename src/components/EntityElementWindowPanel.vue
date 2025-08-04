@@ -31,7 +31,12 @@
         </div>
         <div
           v-else
-          :class="[{ 'grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2  max-w-full': canBeMultipleColumns }]"
+          :class="[
+            {
+              'grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2  max-w-full':
+                canBeMultipleColumns,
+            },
+          ]"
         >
           <div
             v-for="(metadata, index) in metadatafields"

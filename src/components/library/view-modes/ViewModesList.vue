@@ -110,12 +110,23 @@
             :entity-list-elements="entityListElements"
             :view-mode="mode"
             :refetch-entities="refetchEntities"
-            :preview-component-enabled="
+            :preview-component-enabled="previewComponentEnabled"
+            :preview-component-current-active="
               isPreviewComponentEnabledForListItem(entity.id)
             "
-            :preview-component-icon-visible="previewComponent !== undefined"
+            :preview-component-feature-enabled="previewComponent !== undefined"
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
+            "
+            @navigate-to="
+              () => {
+                const path = getLinkSettings(
+                  entity,
+                  listItemRouteName,
+                  true,
+                ).path;
+                router.push(path);
+              }
             "
             @toggle-preview-component="
               (previewForEntityId) => togglePreviewComponent(previewForEntityId)
@@ -175,7 +186,7 @@ import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
-import { apolloClient } from "@/main";
+import { apolloClient, router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 
 const props = withDefaults(
@@ -213,7 +224,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     mode: "list",
     refetchEntities: undefined,
-    showCurrentEntityFlow: true
+    showCurrentEntityFlow: true,
   },
 );
 
@@ -230,8 +241,12 @@ const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
 );
 
-const getLinkSettings = (entity: Entity, listItemRouteName: string = "") => {
-  if (!props.enableNavigation) {
+const getLinkSettings = (
+  entity: Entity,
+  listItemRouteName: string = "",
+  force = false,
+) => {
+  if ((!props.enableNavigation || previewComponentEnabled) && !force) {
     if (
       props.parentEntityIdentifiers.length > 0 &&
       entity.type.toLowerCase() === Entitytyping.Mediafile
@@ -255,6 +270,7 @@ const isEntityDisabled = (entity: Entity) => {
 };
 
 const entityWrapperHandler = (entity: Entity) => {
+  if (previewComponentEnabled) togglePreviewComponent(entity.id || entity.uuid);
   if (isEntityDisabled(entity) || !props.enableNavigation) return;
   updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
 };
@@ -352,15 +368,20 @@ watch(
   () => {
     if (props.entities.length > 0)
       configurePreviewComponentWithNewEntities(props.entities);
-    if (!previewForEntity.value && previewComponent.value?.openByDefault && props.entities?.[0]?.id)
+    if (
+      !previewForEntity.value &&
+      previewComponent.value?.openByDefault &&
+      props.entities?.[0]?.id
+    )
       togglePreviewComponent(props.entities[0].id);
   },
 );
 
 const containerNameForPreview = computed(() => {
-  return props.showCurrentEntityFlow ? 'preview' : 'preview-without-current-entity-flow'
-})
-
+  return props.showCurrentEntityFlow
+    ? "preview"
+    : "preview-without-current-entity-flow";
+});
 </script>
 
 <style scoped>
