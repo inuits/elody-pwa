@@ -12,7 +12,7 @@
         <p class="w-full flex items-center">
           {{ finishedStatusMessage }}
         </p>
-        <div class="w-1/5 @max-4xl/modal:hidden">
+        <div class="w-1/5 @max-6xl/modal:hidden">
           <base-button-new
             icon="Redo"
             :label="t('actions.labels.reset-upload')"
@@ -20,7 +20,7 @@
             @click="resetUpload()"
           />
         </div>
-        <div class="@4xl/modal:hidden">
+        <div class="@6xl/modal:hidden">
           <base-button-new
             icon="Redo"
             button-style="accentAccent"
