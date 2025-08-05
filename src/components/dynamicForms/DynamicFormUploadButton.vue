@@ -43,12 +43,22 @@
           />
         </div>
       </div>
-      <progress-bar
-        v-if="uploadStatus !== UploadStatus.Finished && mediafiles.length > 0"
-        :progress="amountUploaded"
-        progress-bar-type="steps"
-        :total-amount-of-steps="mediafiles.length"
-      />
+      <div v-if="uploadStatus === 'uploading'" class="w-full flex">
+        <progress-bar
+          v-if="mediafiles.length > 0"
+          :progress="amountUploaded"
+          progress-bar-type="steps"
+          :total-amount-of-steps="mediafiles.length"
+        />
+        <div class="w-1/4 px-2">
+          <base-button-new
+            icon="Ban"
+            :label="t('actions.labels.cancel-upload')"
+            button-style="accentAccent"
+            @click="resetUpload()"
+          />
+        </div>
+      </div>
       <button
         v-if="uploadStatus === 'no-upload'"
         type="button"
