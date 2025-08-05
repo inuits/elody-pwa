@@ -32,6 +32,7 @@ export enum UploadStatus {
 
 import { router } from "@/main";
 import { getTranslatedMessage } from "@/helpers";
+import { useDropzone } from "@/composables/useDropzone";
 
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
@@ -256,6 +257,7 @@ const useUpload = () => {
       ProgressStepStatus.Loading,
     );
     toggleUploadStatus();
+    toggleDeleteFileButtons();
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
       await __uploadXml();
@@ -783,6 +785,7 @@ const useUpload = () => {
       if (reinitializeDynamicFormFunc.value)
         reinitializeDynamicFormFunc.value();
     }
+    toggleDeleteFileButtons();
     dryRunErrors.value = [];
     dryRunComplete.value = false;
     missingFileNames.value = [];
@@ -1048,6 +1051,17 @@ const useUpload = () => {
     return anchor;
   };
 
+  const toggleDeleteFileButtons = () => {
+    document
+      .querySelectorAll("[data-dz-remove]")
+      .forEach((deleteFileButton) => {
+        const classes = deleteFileButton.classList;
+        if (classes.contains("hidden"))
+          deleteFileButton.classList.remove("hidden");
+        else deleteFileButton.classList.add("hidden");
+      });
+  };
+
   return {
     resetUpload,
     addFileToUpload,
@@ -1091,17 +1105,14 @@ const mapMissingFileNamesToErrors = (): string[] => {
     (filename: string) =>
       `${getTranslatedMessage("actions.upload.missing", [filename])}`,
   );
-}
+};
 
 watch(
   () => [missingFileNames.value, dryRunErrors.value],
   () => {
     if (!csvFile.value) return;
 
-    const errors = [
-      ...dryRunErrors.value,
-      ...mapMissingFileNamesToErrors(),
-    ];
+    const errors = [...dryRunErrors.value, ...mapMissingFileNamesToErrors()];
     useUpload().__handleFileThumbnailError(csvFile.value, errors);
   },
 );
