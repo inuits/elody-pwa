@@ -1,8 +1,8 @@
 <template>
-  <div v-show="isLoading" class="flex items-center justify-center">
+  <div v-if="isLoading" class="flex items-center justify-center">
     <SpinnerLoader theme="accent" :dimensions="10" />
   </div>
-  <div v-show="!isLoading" class="grow">
+  <div v-else class="grow">
     <AutocompleteFilter
       v-if="useAutocomplete"
       ref="filterComponentRef"
