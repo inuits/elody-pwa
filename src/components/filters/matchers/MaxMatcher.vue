@@ -45,4 +45,13 @@ const emit = defineEmits<{
 
 const { inputMax, inputTimeMax, determineInputType, determinePlaceholder } =
   useMinMaxAdvancedFilter(props.filter, emit);
+
+const reset = () => {
+  inputMax.value = "";
+  inputTimeMax.value = "";
+};
+
+defineExpose({
+  reset,
+});
 </script>

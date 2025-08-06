@@ -1,8 +1,5 @@
 <template>
-  <div v-if="loading" class="flex items-center justify-center">
-    <SpinnerLoader />
-  </div>
-  <div v-else>
+  <div>
     <BaseInputCheckbox
       v-for="option in filterOptions"
       :key="option.option.value"
@@ -58,5 +55,13 @@ watch(filterOptions.value, (newValue) => {
   const value = selectedValues.length > 0 ? selectedValues : undefined;
 
   emit("updateValue", value);
+});
+
+const reset = () => {
+  filterOptions.value = [];
+};
+
+defineExpose({
+  reset,
 });
 </script>

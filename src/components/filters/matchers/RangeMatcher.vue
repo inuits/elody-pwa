@@ -50,4 +50,13 @@ watch([from, to], () => {
     max: to.value,
   });
 });
+
+const reset = () => {
+  from.value = 0;
+  to.value = 0;
+};
+
+defineExpose({
+  reset,
+});
 </script>

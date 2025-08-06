@@ -88,4 +88,12 @@ const applyInitialValue = (options: DropdownOption[]) => {
     }
   });
 };
+
+const reset = () => {
+  selectedOptions.value = [];
+};
+
+defineExpose({
+  reset,
+});
 </script>

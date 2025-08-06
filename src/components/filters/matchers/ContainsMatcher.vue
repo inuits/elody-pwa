@@ -53,6 +53,14 @@ const emitNewValue = () => {
 watch(input, () => {
   emitNewValue();
 });
+
+const reset = () => {
+  input.value = "";
+};
+
+defineExpose({
+  reset,
+});
 </script>
 
 <style></style>

@@ -49,4 +49,15 @@ watch(options.value, (newValue) => {
   const selectedOption = newValue.find((option) => option.isSelected);
   emit("updateValue", selectedOption?.value);
 });
+
+const reset = () => {
+  options.value = [
+    { isSelected: false, value: true },
+    { isSelected: false, value: false },
+  ];
+};
+
+defineExpose({
+  reset,
+});
 </script>

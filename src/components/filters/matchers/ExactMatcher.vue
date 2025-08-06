@@ -1,6 +1,7 @@
 <template>
   <component
     :is="activeFilterComponent"
+    ref="exactFilterComponentRef"
     :filter="filter"
     :last-typed-value="lastTypedValue"
     @update-value="$emit('updateValue', $event)"
@@ -10,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { AdvancedFilterTypes } from "@/generated-types/queries";
 import InputFilter from "./exactMatcher/ExactFilterInput.vue";
 import SelectionFilter from "./exactMatcher/ExactSelectionFilter.vue";
@@ -23,6 +24,8 @@ const props = defineProps({
 
 defineEmits(["updateValue", "filterOptions", "newInputValue"]);
 
+const exactFilterComponentRef = ref();
+
 const activeFilterComponent = computed(() => {
   switch (props.filter.advancedFilter.type) {
     case AdvancedFilterTypes.Boolean:
@@ -32,5 +35,15 @@ const activeFilterComponent = computed(() => {
     default:
       return InputFilter;
   }
+});
+
+const reset = () => {
+  if (exactFilterComponentRef.value) {
+    exactFilterComponentRef?.value?.reset();
+  }
+};
+
+defineExpose({
+  reset,
 });
 </script>

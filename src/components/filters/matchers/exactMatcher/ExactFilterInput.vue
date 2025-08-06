@@ -86,4 +86,14 @@ watch([inputValue, dateValue, timeValue], () => {
 
   emit("updateValue", value, Boolean(props.filter.inputFromState));
 });
+
+const reset = () => {
+  dateValue.value = "";
+  timeValue.value = "";
+  inputValue.value = "";
+};
+
+defineExpose({
+  reset,
+});
 </script>

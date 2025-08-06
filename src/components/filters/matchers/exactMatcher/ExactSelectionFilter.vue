@@ -1,10 +1,11 @@
 <template>
-  <div v-if="isLoading" class="flex items-center justify-center">
+  <div v-show="isLoading" class="flex items-center justify-center">
     <SpinnerLoader theme="accent" :dimensions="10" />
   </div>
-  <div v-else class="grow">
+  <div v-show="!isLoading" class="grow">
     <AutocompleteFilter
       v-if="useAutocomplete"
+      ref="filterComponentRef"
       :filter="filter"
       :initial-input-value="lastTypedValue"
       :options="options"
@@ -15,8 +16,10 @@
     />
     <CheckboxFilter
       v-else
+      ref="filterComponentRef"
       :filter="filter"
       :options="options"
+      :loading="false"
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
     />
@@ -57,6 +60,7 @@ const isSearching = ref(false);
 const initialAmountOfOptions = ref(0);
 const hasFetchedOptions = ref(false);
 const isInitialized = ref(false);
+const filterComponentRef = ref();
 
 const useAutocomplete = computed(() => {
   if (
@@ -162,4 +166,14 @@ watch(
   },
   { immediate: true },
 );
+
+const reset = () => {
+  if (filterComponentRef.value) {
+    filterComponentRef.value.reset();
+  }
+};
+
+defineExpose({
+  reset,
+});
 </script>

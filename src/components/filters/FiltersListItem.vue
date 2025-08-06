@@ -19,6 +19,7 @@
     >
       <component
         v-if="selectedMatcher"
+        ref="matcherComponentRef"
         :is="matcherComponent"
         :filter="filter"
         :last-typed-value="lastTypedValue"
@@ -70,6 +71,7 @@ const matcherComponent = ref();
 const selectedMatcher = ref<string>();
 const filterOptions = ref<string[]>([]);
 const lastTypedValue = ref<string>("");
+const matcherComponentRef = ref();
 
 const filterLabel = computed(() => t(props.filter.advancedFilter.label || ""));
 const tooltipText = computed(() =>
@@ -124,6 +126,10 @@ const reloadMatcherComponent = () => {
 const resetFilter = () => {
   lastTypedValue.value = "";
   emit("deactivateFilter", props.filter.advancedFilter.key, true);
+
+  if (matcherComponentRef.value) {
+    matcherComponentRef.value.reset();
+  }
 
   const defaultMatcherValue = getDefaultMatcher();
 
