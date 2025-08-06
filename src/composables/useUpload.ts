@@ -1,6 +1,6 @@
 import type Dropzone from "dropzone";
 import { type DropzoneFile } from "dropzone";
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, inject, ref, toRaw, watch } from "vue";
 import type {
   Entitytyping,
   UploadEntityTypes,
@@ -17,6 +17,8 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useErrorCodes } from "@/composables/useErrorCodes";
+import { router } from "@/main";
+import { getTranslatedMessage } from "@/helpers";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
@@ -26,13 +28,12 @@ type UploadSettings = {
 
 export enum UploadStatus {
   NoUpload = "no-upload",
+  Paused = "paused",
   Uploading = "uploading",
   Finished = "upload-finished",
 }
 
-import { router } from "@/main";
-import { getTranslatedMessage } from "@/helpers";
-import { useDropzone } from "@/composables/useDropzone";
+const config: any = inject("config");
 
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
@@ -41,6 +42,7 @@ const amountUploaded = ref<number>(0);
 const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
+const lastUploadedFileIndex = ref<number>(-1);
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
     (file: DropzoneFile) =>
@@ -216,9 +218,7 @@ const useUpload = () => {
 
   const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
-    config: any,
-    t: Function,
-  ) => {
+  ): Promise<void> => {
     const generator = uploadGenerator(
       config,
       isLinkedUpload ? useEntitySingle().getEntityUuid() : "",
@@ -228,7 +228,7 @@ const useUpload = () => {
 
     for await (const upload of generator) {
       if (!upload?.response.ok) {
-        __uploadExceptionHandler(upload?.response.text(), upload.file, t);
+        __uploadExceptionHandler(upload?.response.text(), upload.file);
         errors.push(upload?.response.text());
         continue;
       }
@@ -250,7 +250,7 @@ const useUpload = () => {
     }
   };
 
-  const upload = async (isLinkedUpload: boolean, config: any, t: Function) => {
+  const upload = async (isLinkedUpload: boolean) => {
     if (!validateFiles()) return;
     __updateGlobalUploadProgress(
       ProgressStepType.Upload,
@@ -285,7 +285,7 @@ const useUpload = () => {
 
     if (uploadFlow.value === UploadFlow.CsvOnly)
       await __uploadCsvWithoutMediafiles();
-    else await __uploadMediafilesWithTicketUrl(isLinkedUpload, config, t);
+    else await __uploadMediafilesWithTicketUrl(isLinkedUpload, config);
   };
 
   const uploadCsvForReordering = async (parentId: string) => {
@@ -305,10 +305,11 @@ const useUpload = () => {
   const __uploadExceptionHandler = (
     errorDescription: string | undefined,
     file: DropzoneFile,
-    t: Function,
   ) => {
     if (!errorDescription)
-      errorDescription = t("dropzone.errorNotification.description") as string;
+      errorDescription = getTranslatedMessage(
+        "dropzone.errorNotification.description",
+      ) as string;
     __updateFileThumbnails(
       file,
       ProgressStepType.Upload,
@@ -652,6 +653,7 @@ const useUpload = () => {
       return Promise.reject(httpErrorMessage);
     }
 
+    lastUploadedFileIndex.value = files.value.indexOf(file);
     return {
       response,
       file: file,
@@ -668,14 +670,18 @@ const useUpload = () => {
       ProgressStepStatus.Complete,
     );
 
-    const filesToUpload = mediafiles.value;
+    let filesToUpload = mediafiles.value;
+    if (lastUploadedFileIndex.value !== -1)
+      filesToUpload = mediafiles.value.slice(lastUploadedFileIndex.value);
+
     for (const file of filesToUpload) {
-      __updateFileThumbnails(
-        file,
-        ProgressStepType.Prepare,
-        ProgressStepStatus.Loading,
-      );
       try {
+        if (uploadStatus.value === UploadStatus.Paused) break;
+        __updateFileThumbnails(
+          file,
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Loading,
+        );
         const url = await __getUploadUrl(file, entityId);
         __updateFileThumbnails(
           file,
@@ -774,6 +780,21 @@ const useUpload = () => {
     );
   };
 
+  const pauseUpload = () => {
+    if (uploadFlow.value !== UploadFlow.MediafilesOnly)
+      throw Error(
+        "Pausing an upload is only allowed in 'mediafilesOnly' flows",
+      );
+    uploadStatus.value = UploadStatus.Paused;
+  };
+
+  const resumeUpload = () => {
+    if (uploadStatus.value !== UploadStatus.Paused)
+      throw Error("Unable to resume an upload that has not been paused");
+    uploadStatus.value = UploadStatus.Uploading;
+    __uploadMediafilesWithTicketUrl(true);
+  };
+
   const resetUpload = (isDryRunReset: boolean = false) => {
     if (!isDryRunReset) {
       standaloneFileType.value = undefined;
@@ -785,7 +806,7 @@ const useUpload = () => {
       if (reinitializeDynamicFormFunc.value)
         reinitializeDynamicFormFunc.value();
     }
-    toggleDeleteFileButtons();
+    lastUploadedFileIndex.value = -1;
     dryRunErrors.value = [];
     dryRunComplete.value = false;
     missingFileNames.value = [];
@@ -1063,6 +1084,8 @@ const useUpload = () => {
   };
 
   return {
+    pauseUpload,
+    resumeUpload,
     resetUpload,
     addFileToUpload,
     removeFileToUpload,

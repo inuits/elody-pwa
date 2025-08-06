@@ -43,7 +43,13 @@
           />
         </div>
       </div>
-      <div v-if="uploadStatus === 'uploading'" class="w-full flex">
+      <div
+        v-if="
+          uploadStatus === UploadStatus.Uploading ||
+          uploadStatus === UploadStatus.Paused
+        "
+        class="w-full flex"
+      >
         <progress-bar
           v-if="mediafiles.length > 0"
           :progress="amountUploaded"
@@ -52,10 +58,18 @@
         />
         <div class="w-1/4 px-2">
           <base-button-new
-            icon="Ban"
-            :label="t('actions.labels.cancel-upload')"
+            v-if="uploadStatus === UploadStatus.Uploading"
+            icon="Pause"
+            :label="t('actions.labels.pause-upload')"
             button-style="accentAccent"
-            @click="resetUpload()"
+            @click="pauseUpload()"
+          />
+          <base-button-new
+            v-if="uploadStatus === UploadStatus.Paused"
+            icon="Play"
+            :label="t('actions.labels.resume-upload')"
+            button-style="accentAccent"
+            @click="pauseUpload()"
           />
         </div>
       </div>
@@ -137,6 +151,8 @@ const {
   amountUploaded,
   mediafiles,
   resetUpload,
+  pauseUpload,
+  resumeUpload,
   missingFileNames,
   failedUploads,
   uploadFlow,
