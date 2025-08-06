@@ -63,6 +63,7 @@
               <MetadataFormatter
                 v-if="metadata.value?.formatter"
                 v-bind="metadata.value"
+                :translation-key="metadata.valueTranslationKey"
               />
               <ViewModesAutocompleteRelations
                 v-else-if="

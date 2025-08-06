@@ -96,7 +96,7 @@ const props = withDefaults(
 );
 
 const id = computed(() => asString(props.entityId || route.params["id"]));
-const useEditHelper = computed(() => useEditMode(id.value));
+const useEditHelper = ref(useEditMode(id.value));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
 const { getEditableMetadataKeys } = useFormHelper();
@@ -193,6 +193,7 @@ watch(
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value && !oldvalue) router.push("/notFound");
     if (!entity.value || !entity.value.intialValues) return;
+    useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     useEntitySingle().setEntityType(entityType.value);
     entityForBreadcrumb.value = entity.value;

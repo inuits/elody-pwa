@@ -10,6 +10,7 @@
     v-if="formatterType === CustomFormatterTypes.Pill && label"
     :formatter="formatter"
     :label="readableLabel"
+    :translation-key="translationKey"
   />
   <MetadataRegexpFormatter
     v-if="formatterType === CustomFormatterTypes.RegexpMatch && label"
@@ -34,6 +35,7 @@ const props = withDefaults(
     label: string | string[];
     link: string;
     entity: any;
+    translationKey?: string;
   }>(),
   {
     link: "",

@@ -10,18 +10,22 @@
       color: pillSettings?.text,
     }"
   >
-    {{ label }}
+    {{ displayValue }}
   </div>
 </template>
 
 <script lang="ts" setup>
-import { formattersSettings } from "@/main";
-
 import { computed } from "vue";
+import { formattersSettings } from "@/main";
+import { useI18n } from "vue-i18n";
+
 const props = defineProps<{
   formatter: string;
   label: string;
+  translationKey?: string;
 }>();
+
+const { t } = useI18n();
 
 const pillSettings = computed(() => {
   let [formatterType, pillType] = props.formatter.split("|");
@@ -31,5 +35,19 @@ const pillSettings = computed(() => {
     if (!pillType) pillType = props.label.toLowerCase();
     return formattersSettings[formatterType][pillType];
   }
+});
+
+const displayValue = computed(() => {
+  if (props.translationKey) {
+    const key = props.translationKey;
+    const normalizedTranslationKey = key.replace(
+      "$value",
+      String(props.label),
+    );
+    const translated = t(normalizedTranslationKey);
+    if (translated !== normalizedTranslationKey) return translated;
+  }
+
+  return props.label;
 });
 </script>

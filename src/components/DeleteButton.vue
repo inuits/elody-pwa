@@ -30,6 +30,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");
@@ -37,7 +38,7 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const entityId = computed<string>(
-  () => entityFormData?.id || route.params["id"],
+  () => entityFormData?.id || useEntitySingle().getEntityUuid() || route.params["id"],
 );
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { displaySuccessNotification } = useBaseNotification();
