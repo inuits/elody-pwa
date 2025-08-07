@@ -284,7 +284,7 @@ const useUpload = (config: any) => {
 
     if (uploadFlow.value === UploadFlow.CsvOnly)
       await __uploadCsvWithoutMediafiles();
-    else await __uploadMediafilesWithTicketUrl(isLinkedUpload, config);
+    else await __uploadMediafilesWithTicketUrl(isLinkedUpload);
   };
 
   const uploadCsvForReordering = async (parentId: string) => {
