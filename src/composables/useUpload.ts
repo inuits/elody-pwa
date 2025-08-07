@@ -801,12 +801,14 @@ const useUpload = (config: any) => {
       ProgressStepStatus.Paused,
     );
     uploadStatus.value = UploadStatus.Paused;
+    toggleDeleteFileButtons();
   };
 
   const resumeUpload = () => {
     if (uploadStatus.value !== UploadStatus.Paused)
       throw Error("Unable to resume an upload that has not been paused");
     currentUploadAbortController.value = undefined;
+    toggleDeleteFileButtons();
     uploadStatus.value = UploadStatus.Uploading;
     __uploadMediafilesWithTicketUrl(true);
   };
