@@ -1,17 +1,15 @@
 import type Dropzone from "dropzone";
 import { type DropzoneFile } from "dropzone";
-import { computed, inject, ref, toRaw, watch } from "vue";
-import type {
-  Entitytyping,
-  UploadEntityTypes,
-} from "@/generated-types/queries";
+import { computed, ref, toRaw, watch } from "vue";
 import {
   type ActionProgressStep,
+  type Entitytyping,
   ProgressStepStatus,
   ProgressStepType,
+  TypeModals,
+  type UploadEntityTypes,
   UploadFieldType,
   UploadFlow,
-  TypeModals,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -32,8 +30,6 @@ export enum UploadStatus {
   Uploading = "uploading",
   Finished = "upload-finished",
 }
-
-const config: any = inject("config");
 
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
@@ -75,7 +71,7 @@ const csvOnlyUploadSFailed = ref<boolean>(false);
 const extraMediafileType = ref<string | undefined>(undefined);
 const jobIdentifier = ref<string | undefined>(undefined);
 
-const useUpload = () => {
+const useUpload = (config: any) => {
   let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
     "not-prefetched-yet";
 
@@ -672,7 +668,7 @@ const useUpload = () => {
 
     let filesToUpload = mediafiles.value;
     if (lastUploadedFileIndex.value !== -1)
-      filesToUpload = mediafiles.value.slice(lastUploadedFileIndex.value);
+      filesToUpload = mediafiles.value.slice(lastUploadedFileIndex.value + 1);
 
     for (const file of filesToUpload) {
       try {
@@ -785,6 +781,10 @@ const useUpload = () => {
       throw Error(
         "Pausing an upload is only allowed in 'mediafilesOnly' flows",
       );
+    __updateGlobalUploadProgress(
+      ProgressStepType.Upload,
+      ProgressStepStatus.Paused,
+    );
     uploadStatus.value = UploadStatus.Paused;
   };
 

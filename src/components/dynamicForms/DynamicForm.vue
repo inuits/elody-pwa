@@ -326,7 +326,7 @@ const {
   __getCsvString,
   resetUpload,
   mediafiles,
-} = useUpload();
+} = useUpload(config);
 const {
   handleHttpError,
   getMessageAndCodeFromApolloError,

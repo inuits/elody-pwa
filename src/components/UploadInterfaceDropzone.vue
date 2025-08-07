@@ -75,7 +75,7 @@ import type {
   UploadFlow,
 } from "@/generated-types/queries";
 import Papa from "papaparse";
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 import { downloadCsv, mapModelValueToDropdownOptions } from "@/helpers";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
@@ -110,9 +110,8 @@ const props = withDefaults(
     extraMediafileType: undefined,
   },
 );
-
-const { initializeUpload } = useUpload();
-const { files } = useUpload();
+const config: any = inject("config");
+const { initializeUpload, files } = useUpload(config);
 
 const dropzone = new useDropzone();
 const selectedItem = ref<DropdownOption | undefined>(

@@ -483,7 +483,7 @@ const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm } = useFormHelper();
-const { uploadStatus } = useUpload();
+const { uploadStatus } = useUpload(config);
 const {
   setAcceptedTypes,
   setEntityUuid,

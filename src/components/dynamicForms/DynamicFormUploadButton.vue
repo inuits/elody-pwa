@@ -56,7 +56,7 @@
           progress-bar-type="steps"
           :total-amount-of-steps="mediafiles.length"
         />
-        <div class="w-1/4 px-2">
+        <div class="w-1/4 px-2" v-if="uploadFlow === UploadFlow.MediafilesOnly">
           <base-button-new
             v-if="uploadStatus === UploadStatus.Uploading"
             icon="Pause"
@@ -69,7 +69,7 @@
             icon="Play"
             :label="t('actions.labels.resume-upload')"
             button-style="accentAccent"
-            @click="pauseUpload()"
+            @click="resumeUpload()"
           />
         </div>
       </div>
@@ -121,7 +121,7 @@ import {
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
 import useUpload, { UploadStatus } from "@/composables/useUpload";
 import ProgressBar from "@/components/ProgressBar.vue";
@@ -145,6 +145,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const config: any = inject("config");
 const {
   uploadProgress,
   uploadStatus,
@@ -157,7 +158,7 @@ const {
   failedUploads,
   uploadFlow,
   csvOnlyUploadSFailed,
-} = useUpload();
+} = useUpload(config);
 
 const finishedStatusMessage = computed(() => {
   if (uploadFlow.value === UploadFlow.CsvOnly) {

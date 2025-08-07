@@ -47,7 +47,7 @@ import { type Form, type FormTab, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { onMounted, computed, ref, watch, watchEffect } from "vue";
+import { onMounted, computed, ref, watch, watchEffect, inject } from "vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import BaseTab from "@/components/BaseTab.vue";
@@ -55,11 +55,12 @@ import BaseTabs from "@/components/BaseTabs.vue";
 import useUpload from "@/composables/useUpload";
 
 const formTabs = ref<Form | null>(null);
+const config: any = inject("config");
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
 const { getDynamicFormTabs } = useDynamicForm();
-const { resetUpload } = useUpload();
+const { resetUpload } = useUpload(config);
 
 watchEffect(() => {
   (async () => {

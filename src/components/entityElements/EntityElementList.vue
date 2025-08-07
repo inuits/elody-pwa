@@ -18,7 +18,10 @@
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
       @close-preview-component="emit('closePreviewComponent')"
-      @toggle-element-collapse="(entityId, elementLabel) => emit('toggleElementCollapse', entityId, elementLabel)"
+      @toggle-element-collapse="
+        (entityId, elementLabel) =>
+          emit('toggleElementCollapse', entityId, elementLabel)
+      "
     >
       <template v-slot:content>
         <div
@@ -150,10 +153,11 @@ import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory
 import useUpload, { UploadStatus } from "@/composables/useUpload";
 import { usePermissions } from "@/composables/usePermissions";
 
+const config: any = inject("config");
 const { createCustomContext } = useBulkOperations();
 const { loadDocument } = useImport();
 const { mediafileSelectionState } = useEntityMediafileSelector();
-const { uploadStatus } = useUpload();
+const { uploadStatus } = useUpload(config);
 const {
   setIdentifiers,
   setQueryRelationType,
@@ -207,7 +211,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "closePreviewComponent"): void;
-  (event: "toggleElementCollapse", entityId: string, elementLabel: string): void;
+  (
+    event: "toggleElementCollapse",
+    entityId: string,
+    elementLabel: string,
+  ): void;
 }>();
 
 provide("mediafileViewerContext", props.customQueryFilters);

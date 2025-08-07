@@ -174,8 +174,7 @@ const cleanupAfterDeletion = async () => {
     router.push({ name: pageInfo.value.parentRouteName });
   else router.push({ path: previousPageInfo.value.fullPath });
 
-  createNotificationOverwrite(
-    NotificationType.default,
+  displaySuccessNotification(
     t("notifications.success.entity-deleted.title"),
     t("notifications.success.entity-deleted.description"),
   );

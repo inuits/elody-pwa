@@ -37,6 +37,12 @@
       :name="Unicons.Cog.name"
       height="16"
     />
+    <unicon
+      v-if="status === ProgressStepStatus.Paused"
+      class="fill-neutral-white"
+      :name="Unicons.Pause.name"
+      height="16"
+    />
     <p v-if="showLabel" :class="`${labelColor}`">{{ translatedLabel }}</p>
   </div>
 </template>
@@ -71,13 +77,15 @@ const labelColor = computed(() => {
   if (props.status === ProgressStepStatus.Complete) return "text-green-default";
   if (props.status === ProgressStepStatus.Incomplete)
     return "text-neutral-white";
+  if (props.status === ProgressStepStatus.Paused) return "text-neutral-white";
   if (props.status === ProgressStepStatus.Failed) return "text-neutral-white";
-  return "bg-neutral-30";
+  return "text-black";
 });
 const bgColor = computed(() => {
   if (props.status === ProgressStepStatus.Loading) return "bg-accent-accent";
   if (props.status === ProgressStepStatus.Complete) return "bg-green-light";
   if (props.status === ProgressStepStatus.Incomplete) return "bg-orange-light";
+  if (props.status === ProgressStepStatus.Paused) return "bg-orange-light";
   if (props.status === ProgressStepStatus.Failed) return "bg-red-default";
   return "bg-neutral-30";
 });
