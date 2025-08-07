@@ -39,6 +39,9 @@ const dryRunComplete = ref<boolean>(false);
 const dryRunErrors = ref<string[]>([]);
 const files = ref<DropzoneFile[]>([]);
 const lastUploadedFileIndex = ref<number>(-1);
+const currentUploadAbortController = ref<AbortController | undefined>(
+  undefined,
+);
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
     (file: DropzoneFile) =>
@@ -590,7 +593,14 @@ const useUpload = (config: any) => {
       uploadUrl = "url";
     }
 
-    if (!uploadUrl) throw new Error("Upload url is undefined.");
+    if (!uploadUrl) {
+      __updateFileThumbnails(
+        file,
+        ProgressStepType.Prepare,
+        ProgressStepStatus.Failed,
+      );
+      throw new Error("Upload url is undefined.");
+    }
     return uploadUrl;
   };
 
@@ -631,7 +641,10 @@ const useUpload = (config: any) => {
       config.api.storageApiUrl,
       file,
     );
+    currentUploadAbortController.value = new AbortController();
+    const signal = currentUploadAbortController.value.signal;
     const response = await fetch(extUrl, {
+      signal,
       method: "POST",
       body: formData,
     });
@@ -668,7 +681,7 @@ const useUpload = (config: any) => {
 
     let filesToUpload = mediafiles.value;
     if (lastUploadedFileIndex.value !== -1)
-      filesToUpload = mediafiles.value.slice(lastUploadedFileIndex.value + 1);
+      filesToUpload = mediafiles.value.slice(lastUploadedFileIndex.value);
 
     for (const file of filesToUpload) {
       try {
@@ -781,6 +794,8 @@ const useUpload = (config: any) => {
       throw Error(
         "Pausing an upload is only allowed in 'mediafilesOnly' flows",
       );
+    if (currentUploadAbortController.value)
+      currentUploadAbortController.value.abort();
     __updateGlobalUploadProgress(
       ProgressStepType.Upload,
       ProgressStepStatus.Paused,
@@ -791,6 +806,7 @@ const useUpload = (config: any) => {
   const resumeUpload = () => {
     if (uploadStatus.value !== UploadStatus.Paused)
       throw Error("Unable to resume an upload that has not been paused");
+    currentUploadAbortController.value = undefined;
     uploadStatus.value = UploadStatus.Uploading;
     __uploadMediafilesWithTicketUrl(true);
   };
