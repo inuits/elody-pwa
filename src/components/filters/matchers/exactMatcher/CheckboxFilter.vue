@@ -15,7 +15,6 @@
 
 <script lang="ts" setup>
 import { onMounted, watch, ref } from "vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import type { DropdownOption } from "@/generated-types/queries";
 import { type FilterListItem } from "@/composables/useStateManagement";
@@ -27,9 +26,12 @@ const props = defineProps<{
 
 const emit = defineEmits(["updateValue", "filterOptions"]);
 
-const filterOptions = ref<{ isSelected: boolean; option: DropdownOption }[]>(
-  [],
-);
+interface FilterOption {
+  isSelected: boolean;
+  option: DropdownOption;
+}
+
+const filterOptions = ref<FilterOption[]>([]);
 
 onMounted(async () => {
   normalizeOptions(props.options);
@@ -48,17 +50,22 @@ const normalizeOptions = (options: DropdownOption[]) => {
   });
 };
 
-watch(filterOptions.value, (newValue) => {
-  const selectedValues = newValue
-    .filter((option) => option.isSelected)
-    .map((option) => option.option.value);
-  const value = selectedValues.length > 0 ? selectedValues : undefined;
+watch(
+  filterOptions,
+  (newValue = []) => {
+    const selectedValues = newValue
+      .filter((option) => option.isSelected)
+      .map((option) => option.option.value);
+    const value = selectedValues.length > 0 ? selectedValues : undefined;
 
-  emit("updateValue", value);
-});
+    emit("updateValue", value);
+  },
+  { deep: true },
+);
 
 const reset = () => {
   filterOptions.value = [];
+  normalizeOptions(props.options);
 };
 
 defineExpose({
