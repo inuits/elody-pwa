@@ -5,6 +5,10 @@
     :label="element.label"
     :use-vshow-instead-of-vif="element.type === MediaFileElementTypes.Map"
     class="flex flex-col h-full"
+    @toggle-element-collapse="
+      (entityId, elementLabel) =>
+        emit('toggleElementCollapse', entityId, elementLabel)
+    "
   >
     <template v-slot:actions>
       <div
@@ -99,6 +103,14 @@ const props = defineProps<{
   identifiers: string[];
   relationType: string;
   entityId: string;
+}>();
+
+const emit = defineEmits<{
+  (
+    event: "toggleElementCollapse",
+    entityId: string,
+    elementLabel: string,
+  ): void;
 }>();
 
 const { t } = useI18n();

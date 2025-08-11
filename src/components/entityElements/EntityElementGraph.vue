@@ -4,6 +4,10 @@
     :entity-id="entityId"
     :label="element.label"
     class="flex flex-col h-full"
+    @toggle-element-collapse="
+      (entityId, elementLabel) =>
+        emit('toggleElementCollapse', entityId, elementLabel)
+    "
   >
     <template v-slot:actions />
     <template v-slot:content>
@@ -35,6 +39,14 @@ import { useQuery } from "@vue/apollo-composable";
 
 const props = defineProps<{
   element: GraphElement;
+}>();
+
+const emit = defineEmits<{
+  (
+    event: "toggleElementCollapse",
+    entityId: string,
+    elementLabel: string,
+  ): void;
 }>();
 
 const loading = ref<boolean>(true);

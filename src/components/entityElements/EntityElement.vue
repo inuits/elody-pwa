@@ -57,6 +57,10 @@
         :identifiers="identifiers"
         :relationType="element.relationType"
         :entity-id="id"
+        @toggle-element-collapse="
+          (entityId, elementLabel) =>
+            emit('toggleElementCollapse', entityId, elementLabel)
+        "
       />
       <entity-element-single-media
         v-if="element.__typename === 'SingleMediaFileElement'"
@@ -72,6 +76,10 @@
       <entity-element-graph
         v-if="element.__typename === 'GraphElement' && !isEdit"
         :element="element"
+        @toggle-element-collapse="
+          (entityId, elementLabel) =>
+            emit('toggleElementCollapse', entityId, elementLabel)
+        "
       />
       <entity-element-manifest-viewer
         v-if="element.__typename === 'ManifestViewerElement'"
