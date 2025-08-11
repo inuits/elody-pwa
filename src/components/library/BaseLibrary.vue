@@ -21,10 +21,11 @@
       v-else
       class="bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
       :class="[
-        baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
+        (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
+        baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder)
           ? ''
           : parentEntityIdentifiers.length > 0
-            ? 'px-3 pt-3'
+            ? 'px-3'
             : 'px-6',
         {
           '!bg-white grid-rows-[0vh_1fr]':
@@ -87,7 +88,7 @@
       <div
         v-if="showCurrentEntityFlow"
         :class="[
-          'z-40 pl-[1%] right-0 pb-4',
+          'z-40 right-0 pb-4',
           {
             'top-0 bg-background-normal pt-4':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
@@ -98,15 +99,16 @@
               baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
           },
           { 'col-span-2': !enableAdvancedFilters },
+          { 'pl-[1%]': enableAdvancedFilters },
           { sticky: hasStickyBars },
         ]"
       >
         <div class="h-fit flex flex-row items-center gap-y-4">
           <div
-            v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+            v-if="toggles.length > 1 && baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
             class="mr-2"
           >
-            <BaseToggleGroup v-if="toggles.length > 1" :toggles="toggles" />
+            <BaseToggleGroup :toggles="toggles" />
           </div>
           <div
             v-if="
