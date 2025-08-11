@@ -35,7 +35,7 @@ import { auth } from "@/main";
 
 const route = useRoute();
 const config: any = inject("config");
-const showSearch = config.features.simpleSearch;
+const showSearch = config.features.simpleSearch.hasSimpleSearch;
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
