@@ -21,8 +21,7 @@
       v-else
       class="bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
       :class="[
-        (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
-        baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder)
+        baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
           ? ''
           : parentEntityIdentifiers.length > 0
             ? 'px-3'
