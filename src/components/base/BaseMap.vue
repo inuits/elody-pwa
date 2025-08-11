@@ -39,7 +39,7 @@
         <metadata-wrapper
           v-else
           :form-id="formId"
-          :is-edit="isEdit"
+          :is-edit="useEditHelper.isEdit"
           v-model:metadata="data as MetadataField"
         />
       </div>
@@ -61,7 +61,7 @@ import {
   type LeafletMouseEvent,
   type PointExpression,
 } from "leaflet";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useEditMode } from "@/composables/useEdit";
 import EntityElementCoordinateEdit from "../EntityElementCoordinateEdit.vue";
 import type { MediaFileElement } from "@/generated-types/queries";
@@ -76,7 +76,11 @@ const props = defineProps<{
 
 const zoom = ref<number>(15);
 const formId = computed(() => props.entityUuid);
-const { isEdit } = useEditMode();
+const useEditHelper = ref(useEditMode(formId.value));
+
+onMounted(() => {
+  useEditHelper.value = useEditMode(formId.value);
+});
 
 const createNewCoordinatesObject = (coordinatesObject: any) => {
   coordinatesObject.value = { longitude: 1, latitude: 1 };

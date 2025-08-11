@@ -2,7 +2,7 @@
   <div
     data-cy="metadata-wrapper"
     v-if="inputField && isPermitted"
-    class="text-text-light text-sm px-2"
+    class="text-text-light text-sm"
   >
     <p data-cy="metadata-label">
       {{ label ? t(label) : t("metadata.no-label") }}
@@ -65,14 +65,14 @@ const props = defineProps({
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
-const { isEdit } = useEditMode();
+const useEditHelper = ref(useEditMode(props.entityUuid));
 const decimalPointStep = 0.000001;
 const { getForm } = useFormHelper();
 const form: FormContext | undefined = getForm(props.entityUuid);
 const { errorMessage } = useField("intialValues." + props.fieldKey);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 const coordinateEditIsDisabled = computed(() => {
-  if (!isEdit.value) return true;
+  if (!useEditHelper.value.isEdit) return true;
   if (!props.inputField?.validation?.available_if) return false;
   return !conditionalFieldIsAvailable(
     props.inputField.validation.available_if as Conditional,
@@ -88,6 +88,7 @@ const isPermitted = ref<boolean>(false);
 onMounted(async () => {
   setFormValues(computedLatitude.value, computedLongitude.value);
   await isPermittedToDisplay();
+  useEditHelper.value = useEditMode(props.entityUuid);
 });
 
 const isPermittedToDisplay = async () => {
