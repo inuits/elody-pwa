@@ -72,8 +72,16 @@ watch(selectedOptions, (newValue) => {
   );
 });
 
+const getActiveValuesArray = (): string[] => {
+  if (Array.isArray(props.filter.inputFromState?.value))
+    return props.filter.inputFromState?.value;
+  else if (props.filter.inputFromState?.value)
+    return [props.filter.inputFromState.value];
+  return [];
+};
+
 const applyInitialValue = (options: DropdownOption[]) => {
-  const activeValues: string[] = props.filter.inputFromState?.value || [];
+  const activeValues: string[] = getActiveValuesArray();
 
   activeValues.forEach((value) => {
     const existingOption = options.find((opt) => opt.value === value);
