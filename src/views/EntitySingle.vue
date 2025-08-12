@@ -128,12 +128,6 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
   }),
 );
 
-onBeforeMount(() => {
-  onError(() => {
-    router.replace("/notFound");
-  });
-});
-
 const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();

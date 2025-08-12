@@ -158,7 +158,7 @@ export const useErrorCodes = (): {
   const handleNotFound = (
     errorCodeType: ErrorCodeType = ErrorCodeType.Read,
   ) => {
-    router.push("/not-found");
+    router.push("/notFound");
   };
 
   const showNotification = (
