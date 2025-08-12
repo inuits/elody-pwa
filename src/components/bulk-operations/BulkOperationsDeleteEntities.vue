@@ -26,17 +26,14 @@
           />
         </div>
       </div>
-      <div v-if="isDeleting">
-        <spinner-loader
-          class="w-full flex justify-center py-4"
-          theme="accent"
-          :dimensions="16"
-        />
+      <div v-if="isDeleting" class="w-full flex justify-center py-4">
+        <spinner-loader class="" theme="accent" :dimensions="16" />
       </div>
     </div>
     <div class="flex justify-between mt-4">
       <div>
         <BaseButtonNew
+          :disabled="isDeleting"
           :label="
             t('confirm.delete-entities.confirm', { type: getCurrentRouteTitle })
           "
@@ -49,6 +46,7 @@
 
       <div>
         <BaseButtonNew
+          :disabled="isDeleting"
           :label="t('confirm.delete-entities.cancel')"
           button-style="default"
           button-size="small"
