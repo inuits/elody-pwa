@@ -82,7 +82,6 @@ const getActiveValuesArray = (): string[] => {
 
 const applyInitialValue = (options: DropdownOption[]) => {
   const activeValues: string[] = getActiveValuesArray();
-  console.log(props.filter.inputFromState?.value, activeValues);
 
   activeValues.forEach((value) => {
     const existingOption = options.find((opt) => opt.value === value);
