@@ -201,9 +201,9 @@ export const useErrorCodes = (): {
 
     if (Object.keys(authHandlers).includes(genericCodePart))
       handleAuthCodes(genericCodePart, errorCodeType);
-    if (errorCodeType === ErrorCodeType.Read)
+    else if (errorCodeType === ErrorCodeType.Read)
       handleReadTypeError(code, message);
-    if (errorCodeType === ErrorCodeType.Write)
+    else if (errorCodeType === ErrorCodeType.Write)
       handleWriteTypeError(code, message);
   };
 
@@ -286,7 +286,7 @@ export const useErrorCodes = (): {
     }
 
     handleErrorByCodeType(code);
-    return message;
+    return message as string;
   };
 
   const handleHttpError = async (httpResponse: Response): Promise<string> => {

@@ -191,7 +191,7 @@ watch(
   () => result.value,
   (newvalue, oldvalue) => {
     entity.value = result.value?.Entity as BaseEntity;
-    if (!entity.value && !oldvalue) router.push("/notFound");
+    // if (!entity.value && !oldvalue) router.push("/notFound");
     if (!entity.value || !entity.value.intialValues) return;
     useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
