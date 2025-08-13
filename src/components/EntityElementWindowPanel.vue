@@ -1,7 +1,10 @@
 <template>
   <div
-    class="border-solid border-neutral-30 border-b-2 p-2"
-    :class="[{ 'pl-10  py-0': parentIsListItem }]"
+    :class="[
+      { 'pl-10  py-0': parentIsListItem },
+      { 'border-b-2': canBeMultipleColumns },
+      'border-solid border-neutral-30 p-2',
+    ]"
   >
     <div
       v-if="panel.label"
