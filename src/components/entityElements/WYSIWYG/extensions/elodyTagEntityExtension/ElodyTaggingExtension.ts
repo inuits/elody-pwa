@@ -1,4 +1,9 @@
-import { mergeAttributes, Node, Extension } from "@tiptap/core";
+import {
+  mergeAttributes,
+  Node,
+  Extension,
+  type CommandProps,
+} from "@tiptap/core";
 import { EditorState } from "prosemirror-state";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
@@ -22,8 +27,9 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, ref } from "vue";
+import { computed, type HTMLAttributes, ref } from "vue";
 import { apolloClient } from "@/main";
+import type { EditorView } from "prosemirror-view";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
@@ -107,40 +113,25 @@ const generateExtensionNameFromConfiguration = (
 
 const getNodeFromSelection = (
   state: EditorState,
-): boolean | { node: any; pos: any } => {
-  let node = undefined;
-  let pos = undefined;
-  const { selection } = state;
+): false | { node: Node; pos: number } => {
+  const { selection, doc } = state;
   const { empty, anchor } = selection;
 
   if (!empty) {
     return false;
   }
 
-  state.doc.nodesBetween(anchor - 1, anchor, (node, pos) => {
-    node = node;
-    pos = pos;
+  let foundNode: Node | null = null;
+  let foundPos: number | null = null;
+
+  doc.nodesBetween(anchor - 1, anchor, (n, p) => {
+    foundNode = n;
+    foundPos = p;
   });
 
-  return { node, pos };
-};
-
-const hasEnterInSelection = (state: EditorState): boolean => {
-  if (!state) return false;
-
-  const { from, to } = state.selection;
-
-  let hasEnter: boolean = false;
-
-  state.doc.nodesBetween(from, to, (node, pos) => {
-    if (node.type.name === "hardBreak" || node.type.name === "paragraph") {
-      if (node.type.name === "paragraph" && pos === from) return hasEnter;
-      hasEnter = true;
-      return false;
-    }
-  });
-
-  return hasEnter;
+  return foundNode && foundPos !== null
+    ? { node: foundNode, pos: foundPos }
+    : false;
 };
 
 export const createTipTapNodeExtension = (
@@ -164,12 +155,12 @@ export const createTipTapNodeExtension = (
     selectable: false,
     atom: true,
     addAttributes() {
-      const attributes = {
+      const attributes: { [key: string]: any } = {
         entityId: {
           default: null,
           parseHTML: (element: HTMLElement) =>
             element.getAttribute("data-entity-id"),
-          renderHTML: (attributes) => {
+          renderHTML: (attributes: { [key: string]: string }) => {
             if (!attributes.entityId) {
               return {};
             }
@@ -183,7 +174,7 @@ export const createTipTapNodeExtension = (
           default: null,
           parseHTML: (element: HTMLElement) =>
             element.getAttribute("data-label"),
-          renderHTML: (attributes) => {
+          renderHTML: (attributes: { [key: string]: string }) => {
             if (!attributes.label) {
               return {};
             }
@@ -196,13 +187,13 @@ export const createTipTapNodeExtension = (
       };
 
       if (additionalAttributes) {
-        additionalAttributes.forEach((attribute) => {
+        additionalAttributes.forEach((attribute: string) => {
           attributes[attribute] = {
             [attribute]: {
               default: null,
               parseHTML: (element: HTMLElement) =>
                 element.getAttribute(`data-${attribute}`),
-              renderHTML: (attributes) => {
+              renderHTML: (attributes: { [key: string]: string }) => {
                 if (!attributes[attribute]) {
                   return {};
                 }
@@ -223,7 +214,7 @@ export const createTipTapNodeExtension = (
         {
           tag: "elody-" + extensionConfiguration.tag,
           getAttrs: (element) => {
-            const attributes = {
+            const attributes: { [key: string]: any } = {
               entityId: element.getAttribute("data-entity-id"),
               label: element.getAttribute("data-label"),
             };
@@ -256,7 +247,7 @@ export const createGlobalCommandsExtension = Extension.create({
     return {
       openTagModal:
         () =>
-        ({ state }) => {
+        ({ state }: CommandProps) => {
           const { selection } = state;
           const { from, to } = selection;
           const selectedText = state.doc.textBetween(from, to, " ");
@@ -278,13 +269,22 @@ export const createGlobalCommandsExtension = Extension.create({
           relationType: string,
           newText: string | undefined,
         ) =>
-        async ({ commands, state, view }) => {
-          const configurationItem: TaggableEntityConfigurationFromEntity =
-            getExtensionConfigurationForEntity(entity);
-          const additionalAttributes = {};
+        async ({
+          commands,
+          state,
+          view,
+        }: {
+          commands: any;
+          state: EditorState;
+          view: EditorView;
+        }) => {
+          const configurationItem:
+            | TaggableEntityConfigurationFromEntity
+            | undefined = getExtensionConfigurationForEntity(entity);
+          const additionalAttributes: { [key: string]: string } = {};
 
           if (!entity) throw Error("Error tagging text: no entity to tag");
-          if (!configurationItem.tag)
+          if (!configurationItem || !configurationItem.tag)
             throw Error(
               "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
             );
@@ -328,12 +328,12 @@ export const createGlobalCommandsExtension = Extension.create({
         },
       untagSelectedText:
         () =>
-        async ({ editor, state }) => {
+        async ({ editor, state }: { editor: Editor; state: EditorState }) => {
           const { selection, doc } = state;
           const { from, to } = selection;
 
-          let selectedNode = null;
-          let nodePos = null;
+          let selectedNode: Node | null = null;
+          let nodePos: number | null = null;
 
           doc.nodesBetween(from, to, (node, pos) => {
             if (node.attrs?.entityId) {
@@ -378,7 +378,7 @@ export const createGlobalCommandsExtension = Extension.create({
   addKeyboardShortcuts() {
     return {
       Backspace: () =>
-        this.editor.commands.command(({ tr, state }) => {
+        this.editor.commands.command(({ tr, state }: CommandProps): boolean => {
           const { node, pos } = getNodeFromSelection(state);
           const { getEntityUuid } = useEntitySingle();
           const entityId = getEntityUuid();
@@ -401,7 +401,9 @@ export const createGlobalCommandsExtension = Extension.create({
               BulkOperationsContextEnum.TagEntityModal,
               false,
             );
+            return true;
           }
+          return false;
         }),
     };
   },
