@@ -122,6 +122,7 @@ import { auth } from "@/main";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const props = withDefaults(
   defineProps<{
@@ -278,7 +279,7 @@ const handleSelectedBulkOperation = () => {
   let modalStyle = ModalStyle.CenterWide;
 
   initializeGeneralProperties(
-    route.params.id,
+    useEntitySingle().getEntityUuid() || route.params.id,
     modal?.formRelationType,
     route.meta.type,
     props.refetchEntities,
