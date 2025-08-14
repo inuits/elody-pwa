@@ -177,7 +177,7 @@ export default defineComponent({
           .length > 1,
     );
 
-    const downloadImage = async () => {
+    const getDownloadLink = async (): Promise<string> => {
       if (!_props.mediafileId)
         throw Error(
           `Could not download madiafile with id "${_props.mediafileId}"`,
@@ -192,13 +192,21 @@ export default defineComponent({
         },
       );
       const image = await fetch(await imageUrl.text());
-      const blob = await image.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${_props.originalFilename}`;
-      link.click();
-      URL.revokeObjectURL(url);
+      return image.url;
+    };
+
+    const createDownloadButton = (downloadLink: string): void => {
+      const a = document.createElement("a");
+      a.href = downloadLink;
+      a.download = _props.originalFilename || ""; // optional — lets you suggest a filename
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    const downloadImage = async () => {
+      const downloadLink: string = await getDownloadLink();
+      createDownloadButton(downloadLink);
       downloadImageLoadingRef.value = false;
     };
 
