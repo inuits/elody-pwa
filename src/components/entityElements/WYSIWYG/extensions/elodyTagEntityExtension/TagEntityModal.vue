@@ -169,12 +169,10 @@ const applyReplacementSettingsToSelectedText = (): string => {
       const parsedRegex = parseRegexFromString(
         settingsItem.replacementCharactersRegex,
       );
-      console.log(parsedRegex);
       if (!parsedRegex) return;
       result = result.replace(parsedRegex, settingsItem.characterToReplaceWith);
     },
   );
-  console.log(result);
   return result;
 };
 
