@@ -4,7 +4,8 @@ type ExtensionInfo = {
   importName: string;
   from: () => any;
   isNamedExport?: boolean;
-  configuration?: WysiwygExtensions[];
+  configuration?: { [key: string]: any };
+  extend?: { [key: string]: any };
 };
 
 export const useWYSIWYGEditor = (): {
@@ -32,10 +33,9 @@ export const useWYSIWYGEditor = (): {
         importName: "Color",
         from: () => import("@tiptap/extension-color"),
         isNamedExport: true,
-        configuration: [
-          WysiwygExtensions.TextStyle,
-          WysiwygExtensions.ListItem,
-        ],
+        configuration: {
+          types: [WysiwygExtensions.TextStyle, WysiwygExtensions.ListItem],
+        },
       },
       [WysiwygExtensions.ListItem]: {
         importName: "ListItem",
@@ -48,7 +48,7 @@ export const useWYSIWYGEditor = (): {
       [WysiwygExtensions.TextStyle]: {
         importName: "TextStyle",
         from: () => import("@tiptap/extension-text-style"),
-        configuration: [WysiwygExtensions.ListItem],
+        configuration: { types: [WysiwygExtensions.ListItem] },
       },
       [WysiwygExtensions.Italic]: {
         importName: "Italic",
@@ -57,6 +57,17 @@ export const useWYSIWYGEditor = (): {
       [WysiwygExtensions.Bold]: {
         importName: "Bold",
         from: () => import("@tiptap/extension-bold"),
+      },
+      [WysiwygExtensions.HardBreak]: {
+        importName: "HardBreak",
+        from: () => import("@tiptap/extension-hard-break"),
+        extend: {
+          addKeyboardShortcuts() {
+            return {
+              Enter: () => this.editor.commands.setHardBreak(),
+            };
+          },
+        },
       },
     };
 
@@ -71,8 +82,8 @@ export const useWYSIWYGEditor = (): {
           const module = await from();
           return isNamedExport ? module[importName] : module.default;
         } catch (e) {
-          console.error(`Error importing ${extension}:`, error);
-          throw error;
+          console.error(`Error importing ${extension}:`, e);
+          throw e;
         }
       }),
     );
@@ -84,24 +95,32 @@ export const useWYSIWYGEditor = (): {
   ): any[] => {
     return extensions
       .map((extension: WysiwygExtensions) => {
-        const extensionConfig: extensionInfo =
+        const extensionConfig: ExtensionInfo =
           editorExtensionImportMapping[extension];
 
         const importedExtension = importedExtensions.find(
-          (ext) => ext.name.toLowerCase() === extension.toLowerCase(),
+          (ext: any) => ext.name.toLowerCase() === extension.toLowerCase(),
         );
 
         if (!importedExtension) {
           throw Error(`Tiptap extension with name '${extension}' not found.`);
         }
 
+        let configuredExtension = importedExtension;
+
         if (extensionConfig.configuration) {
-          return importedExtension.configure({
-            types: extensionConfig.configuration,
-          });
+          configuredExtension = configuredExtension.configure(
+            extensionConfig.configuration,
+          );
         }
 
-        return importedExtension;
+        if (extensionConfig.extend) {
+          configuredExtension = configuredExtension.extend(
+            extensionConfig.extend,
+          );
+        }
+
+        return configuredExtension;
       })
       .filter(Boolean);
   };

@@ -27,9 +27,10 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, type HTMLAttributes, ref } from "vue";
+import { computed, ref } from "vue";
 import { apolloClient } from "@/main";
 import type { EditorView } from "prosemirror-view";
+import { DOMSerializer } from "prosemirror-model";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
@@ -134,6 +135,27 @@ const getNodeFromSelection = (
     : false;
 };
 
+const getSelectionHTML = (state: EditorState): string => {
+  const { from, to } = state.selection;
+
+  if (from === to) {
+    return "";
+  }
+
+  const slice = state.doc.cut(from, to);
+
+  const serializer = DOMSerializer.fromSchema(state.schema);
+  const container = document.createElement("div");
+
+  container.appendChild(serializer.serializeFragment(slice.content));
+
+  return Array.from(container.childNodes)
+    .map((node) =>
+      node instanceof HTMLElement ? node.innerHTML : node.textContent || "",
+    )
+    .join("");
+};
+
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
 ) => {
@@ -233,11 +255,16 @@ export const createTipTapNodeExtension = (
       ];
     },
     renderHTML({ node, HTMLAttributes }) {
-      return [
-        "elody-" + extensionConfiguration.tag,
-        mergeAttributes(HTMLAttributes),
-        node.attrs.label,
-      ];
+      const el = document.createElement("elody-" + extensionConfiguration.tag);
+      Object.entries(mergeAttributes(HTMLAttributes)).forEach(
+        ([key, value]) => {
+          if (value != null) el.setAttribute(key, value as string);
+        },
+      );
+
+      el.innerHTML = (node.attrs.label || "").replace(/\n/g, "<br>");
+
+      return el;
     },
   });
 };
@@ -249,8 +276,7 @@ export const createGlobalCommandsExtension = Extension.create({
         () =>
         ({ state }: CommandProps) => {
           const { selection } = state;
-          const { from, to } = selection;
-          const selectedText = state.doc.textBetween(from, to, " ");
+          let selectedText = getSelectionHTML(state);
 
           const { openModal } = useBaseModal();
           openModal(
@@ -264,11 +290,7 @@ export const createGlobalCommandsExtension = Extension.create({
           );
         },
       linkEntityToTaggedText:
-        (
-          entity: InBulkProcessableItem,
-          relationType: string,
-          newText: string | undefined,
-        ) =>
+        (entity: InBulkProcessableItem) =>
         async ({
           commands,
           state,
@@ -308,13 +330,16 @@ export const createGlobalCommandsExtension = Extension.create({
 
           const { selection } = state;
           const { from, to } = selection;
-          let selectedText = state.doc.textBetween(from, to, " ");
+          let selectedHTML = getSelectionHTML(state);
+
+          const labelText = selectedHTML.replace(/<br\s*\/?>/gi, "\n");
 
           const newNodeContent = {
             type: configurationItem.extensionName,
             attrs: {
-              label: selectedText,
               entityId: entity.id,
+              label: labelText,
+              ...additionalAttributes,
             },
           };
 
@@ -610,15 +635,6 @@ export const tagEntity = (
 ) => {
   addRelations([entityToTag], relationType, parentEntityId, true);
   dequeueAllItemsForBulkProcessing(context);
-};
-
-export const untagEntity = async (
-  parentEntityId: string,
-  relationType: string,
-  tagToDelete: InBulkProcessableItem,
-  context: Context,
-) => {
-  await deleteRelations(parentEntityId, relationType, [tagToDelete], context);
 };
 
 const getEntityTypeByTagFromMapping = (tag: string): string => {

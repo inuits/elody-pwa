@@ -169,11 +169,12 @@ const applyReplacementSettingsToSelectedText = (): string => {
       const parsedRegex = parseRegexFromString(
         settingsItem.replacementCharactersRegex,
       );
+      console.log(parsedRegex);
       if (!parsedRegex) return;
       result = result.replace(parsedRegex, settingsItem.characterToReplaceWith);
     },
   );
-
+  console.log(result);
   return result;
 };
 
@@ -275,11 +276,7 @@ const tagExistingEntityFlow = () => {
 
   tagEntity(entityToTag, relationType, parentId.value, context);
 
-  props.editor.commands.linkEntityToTaggedText(
-    entityToTag,
-    relationType,
-    newTaggingText,
-  );
+  props.editor.commands.linkEntityToTaggedText(entityToTag);
 };
 
 onMounted(() => {

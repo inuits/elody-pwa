@@ -496,11 +496,7 @@ const tagNewlyCreatedEntity = (entity: Entity): void => {
     parentId,
     BulkOperationsContextEnum.TagEntityModal,
   );
-  modalInfo.editor.commands.linkEntityToTaggedText(
-    entity,
-    relationType,
-    newText,
-  );
+  modalInfo.editor.commands.linkEntityToTaggedText(entity);
 };
 
 const submitActionFunction = async (field: FormAction) => {

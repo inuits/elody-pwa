@@ -148,6 +148,7 @@ onMounted(async () => {
     content: initialValue.value,
     onUpdate({ editor }) {
       if (!form.value) return;
+      console.log(editor.getHTML());
       form.value.setFieldValue(
         `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
         editor.getHTML(),

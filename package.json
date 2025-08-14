@@ -27,6 +27,7 @@
     "@tiptap/extension-bold": "^2.11.3",
     "@tiptap/extension-color": "^2.11.2",
     "@tiptap/extension-document": "^2.11.2",
+    "@tiptap/extension-hard-break": "^3.1.0",
     "@tiptap/extension-italic": "^2.11.3",
     "@tiptap/extension-list-item": "^2.11.2",
     "@tiptap/extension-paragraph": "^2.11.2",
