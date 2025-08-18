@@ -198,7 +198,7 @@ export default defineComponent({
     const createDownloadButton = (downloadLink: string): void => {
       const a = document.createElement("a");
       a.href = downloadLink;
-      a.download = _props.originalFilename || ""; // optional — lets you suggest a filename
+      a.download = _props.originalFilename || "";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
