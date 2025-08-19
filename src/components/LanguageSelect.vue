@@ -58,6 +58,17 @@ const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
     (language) => language.value === locale.value,
   )?.value;
+  setLanguageDirection(locale.value);
+};
+
+const setLanguageDirection = (languageKey: string): void => {
+  const rtlLanguages = ["ar"];
+
+  if (rtlLanguages.includes(languageKey)) {
+    document.dir = "rtl";
+    return;
+  }
+  document.dir = "ltr";
 };
 
 onBeforeMount(() => {
