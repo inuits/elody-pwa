@@ -44,7 +44,8 @@
         'w-full rounded-b bg-background-light',
         { hidden: !expandFilters },
         {
-          'scrollable border-x border-b-2 border-accent-highlight': expandFilters,
+          'scrollable border-x border-b-2 border-accent-highlight':
+            expandFilters,
         },
       ]"
     >
@@ -99,7 +100,9 @@
           :key="filter.advancedFilter.key || ''"
           :filter="filter"
           :matchers="getMatchers(filter.advancedFilter.type)"
+          :getNormalizedActiveFilters="getNormalizedFiltersForApi"
           :clear-all-active-filters="clearAllActiveFilters"
+          :refetch-filter-options="fetchEntities"
           @activate-filter="activateFilter"
           @deactivate-filter="
             (key, forceApply = false) => {
@@ -213,6 +216,7 @@ const emit = defineEmits<{
 }>();
 
 const clearAllActiveFilters = ref<boolean>(false);
+const fetchEntities = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
 const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
@@ -452,6 +456,11 @@ const applyFilters = (saveState = false, force = true) => {
   if (saveState && props.shouldUseStateForRoute) saveFiltersToState();
 
   emit("applyFilters", getNormalizedFiltersForApi(), saveState, force);
+
+  if (force) {
+    fetchEntities.value = true;
+    setTimeout(() => (fetchEntities.value = false), 50);
+  }
 };
 
 const getAngleIcon = computed<DamsIcons>(() =>

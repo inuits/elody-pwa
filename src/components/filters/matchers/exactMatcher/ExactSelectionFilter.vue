@@ -23,6 +23,7 @@
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
     />
+    <div v-if="options.length === 0">No options available</div>
   </div>
 </template>
 
@@ -47,12 +48,19 @@ const props = defineProps<{
   filter: FilterListItem;
   lastTypedValue: string;
   isOpen: boolean;
+  getNormalizedActiveFilters: Function;
+  refetchFilterOptions: boolean;
 }>();
 
 const emit = defineEmits(["updateValue", "filterOptions"]);
 
-const { options, setFilters, getOptions, getBaseOptions, init } =
-  useFilterOptions();
+const {
+  options,
+  setFilters,
+  getOptions,
+  loadOptionsAndFacetsInParallel,
+  init,
+} = useFilterOptions();
 const route = useRoute();
 
 const isLoading = ref(true);
@@ -151,9 +159,18 @@ const buildFilterForSearch =
     };
   };
 
+const facetsFilters = computed(() => {
+  return props.filter.advancedFilter.facets
+    ? [
+        ...props.filter.advancedFilter.facets,
+        ...props.getNormalizedActiveFilters(),
+      ]
+    : undefined;
+});
+
 const getSelectionOptions = async () => {
   return props.filter.advancedFilter.useNewWayToFetchOptions
-    ? getBaseOptions()
+    ? loadOptionsAndFacetsInParallel(facetsFilters.value)
     : getOptions();
 };
 
@@ -165,6 +182,20 @@ watch(
     }
   },
   { immediate: true },
+);
+
+watch(
+  () => props.refetchFilterOptions,
+  async (refetchFilterOptions) => {
+    const hasToRefetchOptions =
+      refetchFilterOptions &&
+      (props.isOpen || (!props.isOpen && isInitialized.value)) &&
+      !!props.filter.advancedFilter.facets;
+    if (hasToRefetchOptions) {
+      isLoading.value = true;
+      await loadOptions();
+    }
+  },
 );
 
 const reset = () => {

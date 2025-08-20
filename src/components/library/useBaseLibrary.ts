@@ -27,6 +27,7 @@ export const useBaseLibrary = (
   let _route: RouteLocationNormalizedLoaded | undefined;
   const config: any = inject("config");
   const entities = shallowRef<Entity[]>([]);
+  const facets = shallowRef<any>([]);
   const placeholderEntities = shallowRef<Entity[]>([]);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
@@ -231,6 +232,7 @@ export const useBaseLibrary = (
         if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
           entities.value = fetchedEntities?.results as Entity[];
           totalEntityCount.value = fetchedEntities?.count || 0;
+          facets.value = fetchedEntities.facets || [];
           if (shouldUseStateForRoute)
             updateStateForRoute(_route, {
               entityCountOnPage: fetchedEntities.results.length,
@@ -294,6 +296,7 @@ export const useBaseLibrary = (
   return {
     enqueuePromise,
     entities,
+    facets,
     placeholderEntities,
     entitiesLoading,
     getCustomBulkOperations,

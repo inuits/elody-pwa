@@ -24,6 +24,8 @@
         :filter="filter"
         :last-typed-value="lastTypedValue"
         :is-open="isOpen"
+        :getNormalizedActiveFilters="getNormalizedActiveFilters"
+        :refetchFilterOptions="refetchFilterOptions || clearAllActiveFilters"
         @new-input-value="updateLastTypedValue"
         @filter-options="updateFilterOptions"
         @updateValue="updateFilterValue"
@@ -51,6 +53,8 @@ interface Props {
   filter: FilterListItem;
   matchers: DropdownOption[];
   clearAllActiveFilters: boolean;
+  getNormalizedActiveFilters: Function;
+  refetchFilterOptions: boolean;
 }
 
 const props = defineProps<Props>();

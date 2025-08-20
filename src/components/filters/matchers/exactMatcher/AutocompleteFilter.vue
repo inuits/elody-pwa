@@ -84,16 +84,11 @@ const applyInitialValue = (options: DropdownOption[]) => {
   const activeValues: string[] = getActiveValuesArray();
 
   activeValues.forEach((value) => {
-    const existingOption = options.find((opt) => opt.value === value);
-
-    if (existingOption) {
-      selectedOptions.value.push(existingOption);
-    } else {
-      selectedOptions.value.push({
-        label: value,
-        value: value,
-      });
-    }
+    const option = options.find((opt) => opt.value === value) ?? {
+      label: value,
+      value,
+    };
+    selectedOptions.value.push(option);
   });
 };
 

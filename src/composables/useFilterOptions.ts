@@ -26,20 +26,11 @@ type FilterOptionsMappingType = {
 
 export const useFilterOptions = () => {
   const { loadDocument } = useImport();
-  const {
-    entities,
-    entitiesLoading,
-    getEntities,
-    setAdvancedFilters,
-    setEntityType,
-    setsearchInputType,
-  } = useBaseLibrary(apolloClient as ApolloClient<any>);
-  const {
-    initializeFilters,
-    getNormalizedFiltersForApi,
-    transformFilterInputIntoAdvancedFilters,
-    setVariables,
-  } = useFiltersBaseNew();
+  const optionsLibrary = useBaseLibrary(apolloClient as ApolloClient<any>);
+  const facetsLibrary = useBaseLibrary(apolloClient as ApolloClient<any>);
+
+  const optionsFiltersManager = useFiltersBaseNew();
+  const facetsFiltersManager = useFiltersBaseNew();
   const dropdownOptions = ref<DropdownOption[]>([]);
   const isLoading = ref<boolean>(false);
   const filterOptionsMapping = ref<FilterOptionsMappingType | undefined>(
@@ -47,6 +38,9 @@ export const useFilterOptions = () => {
   );
   const query = ref<any>();
   const entityType = ref<string | Entitytyping>("");
+  const rawOptions = ref<DropdownOption[]>([]);
+  const facetCounts = ref<Map<string, number>>(new Map());
+  const hasFacets = ref<boolean>(false);
 
   const init = async (
     entityTypeToSet: string | Entitytyping,
@@ -54,31 +48,124 @@ export const useFilterOptions = () => {
   ) => {
     query.value = await loadDocument("GetFilterOptions");
     entityType.value = entityTypeToSet;
-    setVariables({
-      entityType: entityTypeToSet,
-    });
+    optionsFiltersManager.setVariables({ entityType: entityTypeToSet });
+    facetsFiltersManager.setVariables({ entityType: entityTypeToSet });
     filterOptionsMapping.value = filterOptionsMappingValue;
   };
 
   const getBaseOptions = async () => {
     try {
-      const entityTypeToSet = getNormalizedFiltersForApi().find(
-        (filter) => filter.type === AdvancedFilterTypes.Type,
-      )?.value;
-      setAdvancedFilters(getNormalizedFiltersForApi());
-      setsearchInputType(SearchInputType.AdvancedInputType);
-      setEntityType(entityTypeToSet || (entityType.value as Entitytyping));
+      const entityTypeToSet = optionsFiltersManager
+        .getNormalizedFiltersForApi()
+        .find((filter) => filter.type === AdvancedFilterTypes.Type)?.value;
+      optionsLibrary.setAdvancedFilters(
+        optionsFiltersManager.getNormalizedFiltersForApi(),
+      );
+      optionsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
+      optionsLibrary.setEntityType(
+        entityTypeToSet || (entityType.value as Entitytyping),
+      );
 
-      await getEntities(undefined);
+      await optionsLibrary.getEntities(undefined);
       isLoading.value = false;
     } catch (error) {
       isLoading.value = false;
     }
   };
 
+  const parseFacetsToCountMap = (rawFacets: any[]): Map<string, number> => {
+    const countMap = new Map<string, number>();
+    if (!Array.isArray(rawFacets)) {
+      return countMap;
+    }
+
+    for (const facetGroup of rawFacets) {
+      const facetEntries = Object.values(facetGroup)[0];
+
+      if (Array.isArray(facetEntries)) {
+        for (const entry of facetEntries) {
+          if (entry._id && typeof entry.count === "number") {
+            countMap.set(entry._id, entry.count);
+          }
+        }
+      }
+    }
+
+    return countMap;
+  };
+
+  const loadOptionsAndFacetsInParallel = async (
+    facetRequestFilters?: AdvancedFilterInput[],
+  ) => {
+    isLoading.value = true;
+
+    const fetchOptionsTask = async (): Promise<BaseEntity[]> => {
+      const entityTypeToSet = optionsFiltersManager
+        .getNormalizedFiltersForApi()
+        .find((filter) => filter.type === AdvancedFilterTypes.Type)?.value;
+      await optionsLibrary.setAdvancedFilters(
+        optionsFiltersManager.getNormalizedFiltersForApi(),
+      );
+      await optionsLibrary.setEntityType(
+        entityTypeToSet || (entityType.value as Entitytyping),
+      );
+      optionsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
+      await optionsLibrary.getEntities(undefined);
+
+      return optionsLibrary.entities.value || [];
+    };
+
+    const fetchFacetsTask = async (): Promise<any[]> => {
+      if (!facetRequestFilters) return [];
+      hasFacets.value = true;
+
+      await facetsFiltersManager.initializeFilters({
+        advancedFilters:
+          facetsFiltersManager.transformFilterInputIntoAdvancedFilters(
+            facetRequestFilters,
+          ),
+        fromState: false,
+      });
+
+      const entityTypeToSet = facetsFiltersManager
+        .getNormalizedFiltersForApi({ ignoreFacets: false })
+        .find((filter) => filter.type === AdvancedFilterTypes.Type)?.value;
+      await facetsLibrary.setEntityType(entityTypeToSet);
+      facetsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
+      await facetsLibrary.setAdvancedFilters(
+        facetsFiltersManager.getNormalizedFiltersForApi({
+          ignoreFacets: false,
+        }),
+      );
+
+      await facetsLibrary.getEntities(undefined);
+
+      return facetsLibrary.facets.value;
+    };
+
+    try {
+      const [fetchedEntities, rawFacetData] = await Promise.all([
+        fetchOptionsTask(),
+        fetchFacetsTask(),
+      ]);
+
+      optionsLibrary.entities.value = fetchedEntities;
+      facetCounts.value = parseFacetsToCountMap(rawFacetData);
+    } catch (error) {
+      console.error("Failed to load options or facets in parallel:", error);
+      rawOptions.value = [];
+      facetCounts.value = new Map();
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   const setFilters = async (newFilters: AdvancedFilterInput[]) => {
-    await initializeFilters({
-      advancedFilters: transformFilterInputIntoAdvancedFilters(newFilters),
+    await optionsFiltersManager.initializeFilters({
+      advancedFilters:
+        optionsFiltersManager.transformFilterInputIntoAdvancedFilters(
+          newFilters,
+        ),
       fromState: false,
     });
   };
@@ -88,12 +175,14 @@ export const useFilterOptions = () => {
       const result = await apolloClient.query({
         query: query.value,
         variables: {
-          input: getNormalizedFiltersForApi().map((filter) => ({
-            ...filter,
-            // TODO: should be defined in the GRAPHQL, not here
-            provide_value_options_for_key:
-              filter.type !== AdvancedFilterTypes.Type,
-          })),
+          input: optionsFiltersManager
+            .getNormalizedFiltersForApi()
+            .map((filter) => ({
+              ...filter,
+              // TODO: should be defined in the GRAPHQL, not here
+              provide_value_options_for_key:
+                filter.type !== AdvancedFilterTypes.Type,
+            })),
           limit: 11,
           entityType: entityType.value,
         },
@@ -108,7 +197,10 @@ export const useFilterOptions = () => {
     }
   };
 
-  const getOptionFromEntity = (entity: BaseEntity): DropdownOption => {
+  const getOptionFromEntity = (
+    entity: BaseEntity,
+    counts: Map<string, number>,
+  ): DropdownOption => {
     const { label: labelPath = "", value: valuePath = "" } =
       filterOptionsMapping.value || {};
 
@@ -119,45 +211,80 @@ export const useFilterOptions = () => {
       | string
       | undefined;
 
-    return {
+    const baseOption = {
       icon: DamsIcons.NoIcon,
       label: labelValue || getEntityTitle(entity),
       value: valueValue || entity.id,
     };
+
+    const count = counts.get(baseOption.value);
+    if (count !== undefined) {
+      baseOption.label = `${baseOption.label} (${count})`;
+    }
+
+    return baseOption;
   };
 
   const getOptionsFromArrayValue = (
     entity: BaseEntity,
     path: string,
+    counts: Map<string, number>,
   ): DropdownOption[] => {
     const arrayValue = extractValueFromObject(entity, path);
-    if (!Array.isArray(arrayValue)) return [getOptionFromEntity(entity)];
+    if (!Array.isArray(arrayValue)) {
+      return [getOptionFromEntity(entity, counts)];
+    }
 
-    return arrayValue.map((item) => ({
-      icon: DamsIcons.NoIcon,
-      label: item,
-      value: item,
-    }));
+    return arrayValue.map((item) => {
+      const baseOption = {
+        icon: DamsIcons.NoIcon,
+        label: item,
+        value: item,
+      };
+
+      const count = counts.get(baseOption.value);
+      if (count !== undefined) {
+        baseOption.label = `${baseOption.label} (${count})`;
+      }
+      return baseOption;
+    });
   };
 
   const getOptionsForEntity = (entity: BaseEntity): DropdownOption[] => {
     const { label: labelPath = "", value: valuePath = "" } =
       filterOptionsMapping.value || {};
 
-    if (labelPath === valuePath) {
-      return getOptionsFromArrayValue(entity, labelPath);
+    const counts = facetCounts.value;
+
+    if (labelPath === valuePath && labelPath) {
+      return getOptionsFromArrayValue(entity, labelPath, counts);
     }
 
-    return [getOptionFromEntity(entity)];
+    return [getOptionFromEntity(entity, counts)];
   };
 
   const options = computed<DropdownOption[]>(() => {
-    if (dropdownOptions.value?.length > 0) return dropdownOptions.value;
-    return entities.value?.flatMap(getOptionsForEntity) || [];
+    const opts =
+      dropdownOptions.value?.length > 0
+        ? dropdownOptions.value
+        : optionsLibrary.entities.value?.flatMap(getOptionsForEntity) || [];
+
+    if (hasFacets.value) {
+      return opts.filter((option) => {
+        const count = facetCounts.value.get(option.value);
+        return typeof count === "number" && count > 0;
+      });
+    }
+
+    return opts;
   });
 
   const loading = computed<boolean>(() => {
-    return isLoading.value || entitiesLoading.value;
+    return (
+      isLoading.value ||
+      optionsLibrary.entitiesLoading.value ||
+      facetsLibrary.entitiesLoading.value
+    );
   });
 
   return {
@@ -165,8 +292,9 @@ export const useFilterOptions = () => {
     setFilters,
     getOptions,
     getBaseOptions,
-    entities,
-    entitiesLoading,
+    loadOptionsAndFacetsInParallel,
+    entities: optionsLibrary.entities,
+    entitiesLoading: optionsLibrary.entitiesLoading,
     options,
     dropdownOptions,
     loading,

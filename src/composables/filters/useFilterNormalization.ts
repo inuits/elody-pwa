@@ -3,7 +3,6 @@ import { Matchers, AdvancedFilterTypes } from "@/generated-types/queries";
 import type {
   AdvancedFilterInput,
   AdvancedFilter,
-  DropdownOption,
 } from "@/generated-types/queries";
 import { type FilterListItem } from "@/composables/useStateManagement";
 
@@ -12,19 +11,25 @@ export const useFilterNormalization = () => {
 
   const normalizeFilterForApi = (
     filter: FilterListItem,
+    ignoreFacets: boolean = true,
   ): AdvancedFilterInput => {
     const newFilter: AdvancedFilterInput = {
       type: filter.advancedFilter.type,
       parent_key: filter.advancedFilter.parentKey,
       key: filter.advancedFilter.key,
       value: filter.inputFromState?.value ?? undefined,
-      match_exact: filter.inputFromState?.match_exact ?? undefined,
+      match_exact: ignoreFacets
+        ? (filter.inputFromState?.match_exact ?? undefined)
+        : undefined,
       item_types: filter.inputFromState?.item_types ?? undefined,
       distinct_by: filter.advancedFilter.distinctBy ?? undefined,
       metadata_key_as_label:
         filter.inputFromState?.metadata_key_as_label ?? undefined,
       aggregation: filter.advancedFilter.aggregation,
       operator: filter.advancedFilter.operator ?? undefined,
+      facets: ignoreFacets
+        ? undefined
+        : (getNormalizedFacets(filter.advancedFilter.facets) ?? undefined),
     };
 
     if (filter.advancedFilter.lookup) {
@@ -41,10 +46,39 @@ export const useFilterNormalization = () => {
 
   const getNormalizedFiltersForApi = (
     filters: FilterListItem[],
+    ignoreFacets: boolean = true,
   ): AdvancedFilterInput[] => {
     return filters
       .filter((filter) => filter.isActive)
-      .map(normalizeFilterForApi);
+      .map((filter) =>
+        normalizeFilterForApi(
+          filter,
+          ignoreFacets || !filter.advancedFilter.facets,
+        ),
+      );
+  };
+
+  const getNormalizedFacets = (facets?: any[]) => {
+    if (!facets) return;
+
+    const facetFilter = facets.map((item: any) => {
+      const facet: { key: string; lookups?: { [key: string]: string } } = {
+        key: item.key,
+      };
+
+      if (item.lookups) {
+        facet.lookups = {
+          from: item.lookup.from,
+          local_field: item.lookup.local_field,
+          foreign_field: item.lookup.foreign_field,
+          as: item.lookup.as,
+        };
+      }
+
+      return facet;
+    });
+
+    return JSON.parse(JSON.stringify(facetFilter));
   };
 
   const shouldMatchExact = (matcher?: string): boolean => {

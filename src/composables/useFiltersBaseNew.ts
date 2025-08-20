@@ -7,8 +7,15 @@ export const useFiltersBaseNew = () => {
   const normalization = useFilterNormalization();
   const state = useFilterState();
 
-  const getNormalizedFiltersForApi = () => {
-    return normalization.getNormalizedFiltersForApi(state.filters.value);
+  const getNormalizedFiltersForApi = ({
+    ignoreFacets = true,
+  }: {
+    ignoreFacets?: boolean;
+  } = {}) => {
+    return normalization.getNormalizedFiltersForApi(
+      state.filters.value,
+      ignoreFacets,
+    );
   };
 
   return {

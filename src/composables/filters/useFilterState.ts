@@ -128,6 +128,7 @@ export const useFilterState = () => {
       match_exact: filter.matchExact ?? true,
       distinct_by: filter.distinctBy,
       metadata_key_as_label: filter.metadataKeyAsLabel,
+      facets: filter.facets,
       ...(filter.lookup ? { lookup: filter.lookup } : {}),
     };
   };
