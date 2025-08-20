@@ -115,6 +115,8 @@ import {
   getHomeRoute,
 } from "@/helpers";
 import { useModalActions } from "@/composables/useModalActions";
+import { useRoute } from "vue-router";
+import { useStateManagement } from "@/composables/useStateManagement";
 
 const entityTypeMappingByContext: {
   [key: string]: Entitytyping;
@@ -152,7 +154,10 @@ const { t } = useI18n();
 const { displayErrorNotification } = useBaseNotification();
 const { getThumbnail } = useThumbnailHelper();
 const { getModalInfo, closeModal } = useBaseModal();
+const { getStateForRoute } = useStateManagement();
 
+const route = useRoute();
+const state = getStateForRoute(route);
 const modal = getModalInfo(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
@@ -217,9 +222,12 @@ const exportCsv = async () => {
       fieldQueryParameter += `&field[]=${option.key.value}`;
   });
 
-  const exportURL = `/api/export/csv?type=${
-    entityType.value
-  }&ids=${getEnqueuedItems(context.value)
+  const state = getStateForRoute(route);
+  const exportURL = `/api/export/csv?order_by=${
+    state.queryVariables.searchValue.order_by
+  }&asc=${
+    Number(state.queryVariables.searchValue.isAsc)
+  }&type=${entityType.value}&ids=${getEnqueuedItems(context.value)
     .map((item) => item.id)
     .join(",")}${fieldQueryParameter}`;
 
