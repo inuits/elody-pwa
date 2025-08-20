@@ -258,8 +258,15 @@ export const createTipTapNodeExtension = (
         },
       ];
     },
-    renderHTML({ node, HTMLAttributes }) {
-      return ["elody-" + extensionConfiguration.tag, HTMLAttributes, 0];
+    renderHTML({ HTMLAttributes }) {
+      return [
+        "elody-" + extensionConfiguration.tag,
+        {
+          ...HTMLAttributes,
+          contenteditable: "false",
+        },
+        0,
+      ];
     },
   });
 };
@@ -342,7 +349,7 @@ export const createGlobalCommandsExtension = Extension.create({
               entityId: entity.id,
               ...additionalAttributes,
             },
-            content: inlineContent.toJSON(), // ✅ valid JSON
+            content: inlineContent.toJSON(),
           };
 
           Object.assign(newNodeContent.attrs, additionalAttributes);
