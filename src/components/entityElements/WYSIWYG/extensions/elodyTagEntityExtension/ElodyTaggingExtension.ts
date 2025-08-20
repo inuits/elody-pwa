@@ -30,7 +30,10 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref } from "vue";
 import { apolloClient } from "@/main";
 import type { EditorView } from "prosemirror-view";
-import { DOMSerializer } from "prosemirror-model";
+import {
+  DOMSerializer,
+  DOMParser as ProseMirrorDOMParser,
+} from "prosemirror-model";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
@@ -176,6 +179,7 @@ export const createTipTapNodeExtension = (
     inline: true,
     selectable: false,
     atom: true,
+    content: "inline*",
     addAttributes() {
       const attributes: { [key: string]: any } = {
         entityId: {
@@ -255,16 +259,7 @@ export const createTipTapNodeExtension = (
       ];
     },
     renderHTML({ node, HTMLAttributes }) {
-      const el = document.createElement("elody-" + extensionConfiguration.tag);
-      Object.entries(mergeAttributes(HTMLAttributes)).forEach(
-        ([key, value]) => {
-          if (value != null) el.setAttribute(key, value as string);
-        },
-      );
-
-      el.innerHTML = (node.attrs.label || "").replace(/\n/g, "<br>");
-
-      return el;
+      return ["elody-" + extensionConfiguration.tag, HTMLAttributes, 0];
     },
   });
 };
@@ -328,19 +323,26 @@ export const createGlobalCommandsExtension = Extension.create({
             });
           }
 
-          const { selection } = state;
+          const { selection, schema } = state;
           const { from, to } = selection;
           let selectedHTML = getSelectionHTML(state);
 
-          const labelText = selectedHTML.replace(/<br\s*\/?>/gi, "\n");
+          const dom = new window.DOMParser().parseFromString(
+            selectedHTML,
+            "text/html",
+          ).body;
+          const parsed = ProseMirrorDOMParser.fromSchema(schema).parse(dom);
+
+          const inlineContent =
+            parsed.content.firstChild?.content ?? parsed.content;
 
           const newNodeContent = {
             type: configurationItem.extensionName,
             attrs: {
               entityId: entity.id,
-              label: labelText,
               ...additionalAttributes,
             },
+            content: inlineContent.toJSON(), // ✅ valid JSON
           };
 
           Object.assign(newNodeContent.attrs, additionalAttributes);
@@ -633,6 +635,7 @@ export const tagEntity = (
   parentEntityId: string,
   context: Context,
 ) => {
+  console.log(entityToTag, relationType, parentEntityId, context);
   addRelations([entityToTag], relationType, parentEntityId, true);
   dequeueAllItemsForBulkProcessing(context);
 };
