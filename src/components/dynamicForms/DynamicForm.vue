@@ -136,11 +136,11 @@
         </div>
         <DynamicFormUploadButton
           v-if="
-            (field.__typename === 'FormAction' &&
-              (field as FormAction).actionType == ActionType.Upload) ||
+            field.__typename === 'FormAction' &&
+            (field as FormAction).actionType == ActionType.Upload ||
+            (field as FormAction).actionType == ActionType.UploadWithMetadata ||
             (field as FormAction).actionType == ActionType.UploadWithOcr ||
-            (field as FormAction).actionType ==
-              ActionType.UploadCsvForReordening ||
+            (field as FormAction).actionType == ActionType.UploadCsvForReordening ||
             (field as FormAction).actionType == ActionType.UpdateMetadata ||
             (field as FormAction).actionType == ActionType.SubmitWithUpload
           "
@@ -160,10 +160,11 @@
           v-if="
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload &&
-            field.actionType !== ActionType.SubmitWithUpload &&
+            field.actionType !== ActionType.UploadWithMetadata &&
+            field.actionType !== ActionType.UploadWithOcr &&
             field.actionType !== ActionType.UploadCsvForReordening &&
             field.actionType !== ActionType.UpdateMetadata &&
-            field.actionType !== ActionType.UploadWithOcr
+            field.actionType !== ActionType.SubmitWithUpload
           "
           :class="[
             { 'mt-5 mb-10': !isButtonDisabled },
@@ -467,9 +468,24 @@ const isFormValid = async () => {
   return !formContainsErrors.value;
 };
 
-const uploadActionFunction = async () => {
+const uploadActionFunction = async (field: FormAction) => {
   if (!enableUploadButton.value) return;
-  await upload(isLinkedUpload.value, config, t);
+  await upload(isLinkedUpload.value, undefined, config, t);
+  if (jobIdentifier.value) {
+    goToEntityPageById(
+      jobIdentifier.value,
+      { type: "job", __typename: "job" },
+      "SingleEntity",
+      props.router,
+    );
+  }
+};
+
+const uploadWithMetadataActionFunction = async (field: FormAction) => {
+  if (!enableUploadButton.value) return;
+  const entityInput = await createEntityFromFormInput(field.creationType);
+
+  await upload(isLinkedUpload.value, entityInput, config, t);
   if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,
@@ -737,6 +753,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     submitWithUpload: () => submitWithUploadActionFunction(field),
     updateMetadata: () => updateMetdataActionFunction(field),
     upload: () => uploadActionFunction(field),
+    uploadWithMetadata: () => uploadWithMetadataActionFunction(field),
     uploadWithOcr: () => uploadActionFunction(field),
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),

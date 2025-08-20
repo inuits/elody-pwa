@@ -3,6 +3,7 @@ import { type DropzoneFile } from "dropzone";
 import { computed, ref, toRaw, watch } from "vue";
 import {
   type ActionProgressStep,
+  type EntityInput,
   type Entitytyping,
   ProgressStepStatus,
   ProgressStepType,
@@ -217,10 +218,12 @@ const useUpload = (config: any) => {
 
   const __uploadMediafilesWithTicketUrl = async (
     isLinkedUpload: boolean,
+    entityInput: EntityInput | undefined = undefined,
   ): Promise<void> => {
     const generator = uploadGenerator(
       config,
       isLinkedUpload ? useEntitySingle().getEntityUuid() : "",
+      entityInput,
     );
 
     const errors = [];
@@ -249,7 +252,7 @@ const useUpload = (config: any) => {
     }
   };
 
-  const upload = async (isLinkedUpload: boolean) => {
+  const upload = async (isLinkedUpload: boolean, entityInput: EntityInput) => {
     if (!validateFiles()) return;
     __updateGlobalUploadProgress(
       ProgressStepType.Upload,
@@ -284,7 +287,7 @@ const useUpload = (config: any) => {
 
     if (uploadFlow.value === UploadFlow.CsvOnly)
       await __uploadCsvWithoutMediafiles();
-    else await __uploadMediafilesWithTicketUrl(isLinkedUpload);
+    else await __uploadMediafilesWithTicketUrl(isLinkedUpload, entityInput);
   };
 
   const uploadCsvForReordering = async (parentId: string) => {
@@ -502,6 +505,7 @@ const useUpload = (config: any) => {
   const __getUploadUrlForMediafileOnEntity = async (
     entityId: string,
     file: DropzoneFile,
+    entityInput: EntityInput | undefined = undefined,
   ): Promise<string> => {
     const response = await fetch(
       `/api/upload/single?entityId=${entityId}&hasRelation=true&filename=${encodeURIComponent(
@@ -510,6 +514,7 @@ const useUpload = (config: any) => {
       {
         headers: { "Content-Type": "application/json" },
         method: "POST",
+        body: JSON.stringify({ entityInput }),
       },
     );
 
@@ -558,7 +563,11 @@ const useUpload = (config: any) => {
     }
   };
 
-  const __getUploadUrl = async (file: DropzoneFile, entityId: string = "") => {
+  const __getUploadUrl = async (
+      file: DropzoneFile,
+      entityId: string = "",
+      entityInput: EntityInput | undefined = undefined,
+    ) => {
     let uploadUrl: string | undefined = undefined;
 
     if (
@@ -586,7 +595,7 @@ const useUpload = (config: any) => {
       uploadFlow.value === UploadFlow.MediafilesOnly ||
       uploadFlow.value === UploadFlow.OptionalMediafiles
     ) {
-      uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file);
+      uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file, entityInput);
     }
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
@@ -669,7 +678,11 @@ const useUpload = (config: any) => {
     };
   };
 
-  async function* uploadGenerator(config: any, entityId: string = "") {
+  async function* uploadGenerator(
+    config: any,
+    entityId: string = "",
+    entityInput: EntityInput | undefined = undefined,
+  ) {
     __updateGlobalUploadProgress(
       ProgressStepType.Validate,
       ProgressStepStatus.Complete,
@@ -691,7 +704,7 @@ const useUpload = (config: any) => {
           ProgressStepType.Prepare,
           ProgressStepStatus.Loading,
         );
-        const url = await __getUploadUrl(file, entityId);
+        const url = await __getUploadUrl(file, entityId, entityInput);
         __updateFileThumbnails(
           file,
           ProgressStepType.Prepare,
