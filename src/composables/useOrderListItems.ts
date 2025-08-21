@@ -14,7 +14,7 @@ const {
   setSelectedSkip,
   selectedSkip,
 } = useLibraryBar();
-const { setEditMode, save, disableEditMode } = useEditMode();
+const { enableEdit, save, disableEdit } = useEditMode();
 
 type OrderItem = {
   field: String;
@@ -117,7 +117,7 @@ const useOrderListItems = () => {
     sortList(formId);
     EventBus.emit("orderList_changed", form);
     await saveForm(formId);
-    setEditMode();
+    enableEdit();
   };
   const changeOrder = (form: any, indexToSave: number, countUp: boolean) => {
     if (form.length - 1 < indexToSave) return;
@@ -239,12 +239,12 @@ const useOrderListItems = () => {
       const oldValue = savedState.value?.oldValue;
       const newValue = savedState.value?.newValue;
       const form = orderItemsPerForm.value[formId];
-      disableEditMode();
+      disableEdit();
 
       if (newValue < oldValue) {
         if (orderItemsPerForm.value[formId][0].initialValue > oldValue) return;
         savedState.value = null;
-        setEditMode();
+        enableEdit();
         let indexToSave = form.length - 1;
         const isMultipage =
           oldValue - newValue > pagination.value || isAsc.value
@@ -266,7 +266,7 @@ const useOrderListItems = () => {
         )
           return;
         savedState.value = null;
-        setEditMode();
+        enableEdit();
         let indexToSave = 0;
         const multiPageIndexCompare =
           orderItemsPerForm.value[formId].length - (indexToSave + 1);

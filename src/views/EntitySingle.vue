@@ -171,21 +171,20 @@ const determineContextsForMediafileViewer = () => {
 };
 
 router.beforeEach(() => {
-  if (useEditHelper.value.isEdit) useEditHelper.value.disableEditMode();
+  if (useEditHelper.value.isEdit) useEditHelper.value.disableEdit();
 });
 
 onBeforeRouteUpdate(async (to: any) => {
   queryVariables.id = to.params.id;
   queryVariables.type = entityType.value;
   columnList.value = "no-values";
-  useEditHelper.value.disableEditMode();
+  useEditHelper.value.disableEdit();
 });
 
 watch(
   () => result.value,
   (newvalue, oldvalue) => {
     entity.value = result.value?.Entity as BaseEntity;
-    // if (!entity.value && !oldvalue) router.push("/notFound");
     if (!entity.value || !entity.value.intialValues) return;
     useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);

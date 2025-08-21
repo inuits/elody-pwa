@@ -122,7 +122,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   );
 
   form.resetForm({ values: form.values });
-  useEditHelper.disableEditMode();
+  useEditHelper.disableEdit();
 });
 
 provide("entityFormData", {

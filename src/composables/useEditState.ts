@@ -18,14 +18,19 @@ export const useEditState = (editStateName: string) => {
   const isSaved = ref(false);
 
   const showErrors = computed(() => buttonClicked.value && isDisabled.value);
-  const isEdit = computed(() => editMode.value === "edit");
+  const isEdit = ref<boolean>(false);
+
+  const enableEdit = () => (isEdit.value = true);
 
   const setEditMode = (mode: EditModes = "edit") => {
     editMode.value = mode;
     resetButtonClicked();
   };
 
-  const disableEditMode = () => applyPermittedEditMode();
+  const disableEdit = () => {
+    isEdit.value = false;
+    applyPermittedEditMode();
+  };
 
   const setSubmitFunction = (editSubmitFn: Callback | undefined) => {
     submitFn.value = editSubmitFn;
@@ -50,7 +55,7 @@ export const useEditState = (editStateName: string) => {
     const discardEvent = new CustomEvent("discardEdit", {
       detail: { editState: editStateName },
     });
-    disableEditMode();
+    disableEdit();
     submitFn.value = undefined;
     toBeDeleted.value = [];
     document.dispatchEvent(discardEvent);
@@ -87,6 +92,7 @@ export const useEditState = (editStateName: string) => {
   };
 
   return {
+    enableEdit,
     editStateName,
     buttonClicked,
     isDisabled,
@@ -98,7 +104,7 @@ export const useEditState = (editStateName: string) => {
     showErrors,
     isEdit,
     setEditMode,
-    disableEditMode,
+    disableEdit,
     setSubmitFunction,
     setRefetchFn,
     hideEditButton,

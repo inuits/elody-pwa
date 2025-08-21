@@ -72,7 +72,7 @@ describe("useDeleteRelations", () => {
     });
     (useEditMode as any).mockReturnValue({
       save: mockSave,
-      disableEditMode: vi.fn(),
+      disableEdit: vi.fn(),
     });
     (useI18n as any).mockReturnValue({
       t: mockT,

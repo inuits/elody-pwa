@@ -168,7 +168,7 @@ const deleteSelectedItems = async () => {
 const cleanupAfterDeletion = async () => {
   await getTenants();
   closeModal(TypeModals.Delete);
-  useEditHelper.disableEditMode();
+  useEditHelper.disableEdit();
 
   if (pageInfo.value.parentRouteName !== "SingleEntity")
     router.push({ name: pageInfo.value.parentRouteName });

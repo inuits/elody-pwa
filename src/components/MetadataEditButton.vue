@@ -16,7 +16,7 @@
       "
       :icon="DamsIcons.Edit"
       button-style="accentNormal"
-      @click="() => editModeHelper.setEditMode()"
+      @click="() => editModeHelper.enableEdit()"
     />
     <base-button-new
       v-else

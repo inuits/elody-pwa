@@ -38,7 +38,10 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const entityId = computed<string>(
-  () => entityFormData?.id || useEntitySingle().getEntityUuid() || route.params["id"],
+  () =>
+    entityFormData?.id ||
+    useEntitySingle().getEntityUuid() ||
+    route.params["id"],
 );
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { displaySuccessNotification } = useBaseNotification();
@@ -56,13 +59,12 @@ const deleteAvailable = ref<boolean>(false);
 watch(
   () => useEditHelper.value,
   () => {
-    deleteAvailable.value = (
+    deleteAvailable.value =
       useEditHelper.value.editMode === "edit-delete" ||
-      useEditHelper.value.editMode === "delete"
-    );
+      useEditHelper.value.editMode === "delete";
   },
   { deep: true },
-)
+);
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
@@ -83,7 +85,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   if (isDeleted) {
     await getTenants();
     closeModal(TypeModals.Confirm);
-    useEditHelper.value.disableEditMode();
+    useEditHelper.value.disableEdit();
     router.push({ name: context ? context : "Home" });
     displaySuccessNotification(
       t("notifications.success.entityDeleted.title"),

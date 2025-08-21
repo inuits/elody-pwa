@@ -105,7 +105,7 @@ export function useDeleteRelations() {
       "notifications.success.entityUpdated.description",
     );
 
-    disableEditMode();
+    disableEdit();
   };
 
   return {
