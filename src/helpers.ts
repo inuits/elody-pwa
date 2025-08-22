@@ -622,6 +622,7 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
   if (!entity.intialValues) return "";
   return (
     entity.intialValues.title ||
+    entity.intialValues.preferredTitle ||
     entity.intialValues.name ||
     entity.intialValues.original_filename ||
     entity.intialValues.filename ||
