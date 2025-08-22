@@ -9,7 +9,7 @@
       :filter="filter"
       :initial-input-value="lastTypedValue"
       :options="options"
-      :is-loading="isSearching"
+      :is-loading="isLoadingOptions"
       @searchOptions="handleSearchOptions"
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
@@ -52,7 +52,7 @@ const props = defineProps<{
   refetchFilterOptions: boolean;
 }>();
 
-const emit = defineEmits(["updateValue", "filterOptions"]);
+defineEmits(["updateValue", "filterOptions"]);
 
 const {
   options,
@@ -60,11 +60,11 @@ const {
   getOptions,
   loadOptionsAndFacetsInParallel,
   init,
+  loading: isLoadingOptions,
 } = useFilterOptions();
 const route = useRoute();
 
 const isLoading = ref(true);
-const isSearching = ref(false);
 const initialAmountOfOptions = ref(0);
 const hasFetchedOptions = ref(false);
 const isInitialized = ref(false);
@@ -134,13 +134,10 @@ const handleSearchOptions = async (searchValue: string) => {
   if (!normalizedFilters) return;
 
   try {
-    isSearching.value = true;
     await setFilters(normalizedFilters);
     await getSelectionOptions();
   } catch (error) {
     console.error("Search failed:", error);
-  } finally {
-    isSearching.value = false;
   }
 };
 

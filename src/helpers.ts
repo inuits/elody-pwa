@@ -769,14 +769,6 @@ export const extractTitleKeyFromMetadataFilter = (metadataFilter: string) => {
   return metadataFilter.split(".")[1];
 };
 
-export const debounce = (fn: Function, ms = 300) => {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return function (this: any, ...args: any[]) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn.apply(this, args), ms);
-  };
-};
-
 export const extractValueFromObject = (object: any, path: string): unknown => {
   if (!path) return null;
 
@@ -805,6 +797,24 @@ export const extractValueFromObject = (object: any, path: string): unknown => {
   }
 
   return current;
+};
+
+export const isAbortError = (error: any): boolean => {
+  if (!error) return false;
+
+  if (error.name === "AbortError") {
+    return true;
+  }
+
+  if (error.networkError?.name === "AbortError") {
+    return true;
+  }
+
+  if (error.networkError?.message?.toLowerCase().includes("aborted")) {
+    return true;
+  }
+
+  return false;
 };
 
 export const sanitizeHtml = (content: any) => {

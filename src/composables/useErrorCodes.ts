@@ -6,7 +6,7 @@ import { auth, router } from "@/main";
 import { ErrorCodeType } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { getTranslatedMessage } from "@/helpers";
+import { getTranslatedMessage, isAbortError } from "@/helpers";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -265,6 +265,12 @@ export const useErrorCodes = (): {
   };
 
   const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
+    const isAborted = isAbortError(error);
+
+    if (isAborted) {
+      return;
+    }
+
     const graphqlErrorMessage =
       error.response.errors[0]?.extensions?.response?.body?.message ||
       error.response.errors[0]?.message;

@@ -17,6 +17,7 @@ import { asString, createPlaceholderEntities } from "@/helpers";
 import { ref, shallowRef, watch, inject } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
+import { isAbortError } from "@/helpers";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
@@ -196,8 +197,9 @@ export const useBaseLibrary = (
 
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
+    signal?: AbortSignal,
   ): Promise<void> => {
-    if (entitiesLoading.value) return;
+    if (entitiesLoading.value && !signal) return;
     entitiesLoading.value = true;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
@@ -218,33 +220,42 @@ export const useBaseLibrary = (
     )
       variables = queryVariables;
 
-    await apolloClient
-      .query({
+    try {
+      const result = await apolloClient.query({
         query: manipulateQuery.value
           ? manipulationQuery.value.document
           : GetEntitiesDocument,
         variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
-      })
-      .then((result) => {
-        const fetchedEntities = result.data.Entities;
-        if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
-          entities.value = fetchedEntities?.results as Entity[];
-          totalEntityCount.value = fetchedEntities?.count || 0;
-          facets.value = fetchedEntities.facets || [];
-          if (shouldUseStateForRoute)
-            updateStateForRoute(_route, {
-              entityCountOnPage: fetchedEntities.results.length,
-              totalEntityCount: fetchedEntities.count,
-            });
-        }
-        entitiesLoading.value = false;
-      })
-      .catch(() => {
-        entities.value = [];
-        entitiesLoading.value = false;
+        context: {
+          fetchOptions: {
+            signal,
+          },
+        },
       });
+
+      const fetchedEntities = result.data.Entities;
+      if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
+        entities.value = fetchedEntities?.results as Entity[];
+        totalEntityCount.value = fetchedEntities?.count || 0;
+        facets.value = fetchedEntities.facets || [];
+        if (shouldUseStateForRoute) {
+          updateStateForRoute(_route, {
+            entityCountOnPage: fetchedEntities.results.length,
+            totalEntityCount: fetchedEntities.count,
+          });
+        }
+      }
+    } catch (error: any) {
+      const isAborted = isAbortError(error);
+
+      if (!isAborted) {
+        console.error("Failed to get entities:", error);
+      }
+    } finally {
+      entitiesLoading.value = false;
+    }
   };
 
   const getEntityById = async (

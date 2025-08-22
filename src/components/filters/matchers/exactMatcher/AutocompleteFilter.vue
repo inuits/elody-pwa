@@ -21,7 +21,7 @@ import { useI18n } from "vue-i18n";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import type { DropdownOption } from "@/generated-types/queries";
 import { type FilterListItem } from "@/composables/useStateManagement";
-import { debounce } from "@/helpers";
+import debounce from "lodash.debounce";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -62,7 +62,7 @@ const debouncedHandleSearchChange = debounce((value: string) => {
     "searchOptions",
     value?.length >= minDropdownSearchCharacters.value ? value : "",
   );
-}, 300);
+}, 250);
 
 watch(selectedOptions, (newValue) => {
   emit(
