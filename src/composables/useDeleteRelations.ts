@@ -68,7 +68,7 @@ export function useDeleteRelations() {
     collection: Collection,
     modalType?: TypeModals,
   ) => {
-    const { disableEditMode } = useEditMode(entityId);
+    const { disableEdit } = useEditMode(entityId);
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
