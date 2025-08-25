@@ -4,7 +4,7 @@ import { convertSizeToTailwind } from "@/helpers";
 import { ref } from "vue";
 
 const useColumnResizeHelper = () => {
-  let defaultColumnConfig: Record<string, Column[]> = {};
+  const defaultColumnConfig: Record<string, Column[]> = {};
   const currentColumnConfig = ref<Record<string, Column[]> | {}>({});
 
   const setInitialColumns = (entityId: string, columns: Column[]) => {

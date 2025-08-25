@@ -106,7 +106,7 @@ const useEditHelper = useEditMode(props.entity.id);
 const { locale } = useI18n();
 
 const intialValues = ref<IntialValues | "no-values">("no-values");
-const relationValues = ref<{ [key: string]: Object } | "no-values">(
+const relationValues = ref<{ [key: string]: object } | "no-values">(
   "no-values",
 );
 
@@ -168,7 +168,7 @@ const getWindowElementPanels = (
   return panels;
 };
 
-const resizeColumn = (toggled: Boolean) => {
+const resizeColumn = (toggled: boolean) => {
   if (toggled) {
     setColumnSizes(props.entity.id, [ColumnSizes.Fifty, ColumnSizes.Fifty]);
   } else {

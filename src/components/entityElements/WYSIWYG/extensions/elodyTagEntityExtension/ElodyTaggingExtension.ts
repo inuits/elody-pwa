@@ -4,7 +4,7 @@ import {
   Extension,
   type CommandProps,
 } from "@tiptap/core";
-import { EditorState } from "prosemirror-state";
+import type { EditorState } from "prosemirror-state";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   AdvancedFilterTypes,
@@ -278,7 +278,7 @@ export const createGlobalCommandsExtension = Extension.create({
         () =>
         ({ state }: CommandProps) => {
           const { selection } = state;
-          let selectedText = getSelectionHTML(state);
+          const selectedText = getSelectionHTML(state);
 
           const { openModal } = useBaseModal();
           openModal(
@@ -332,7 +332,7 @@ export const createGlobalCommandsExtension = Extension.create({
 
           const { selection, schema } = state;
           const { from, to } = selection;
-          let selectedHTML = getSelectionHTML(state);
+          const selectedHTML = getSelectionHTML(state);
 
           const dom = new window.DOMParser().parseFromString(
             selectedHTML,

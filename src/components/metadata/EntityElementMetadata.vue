@@ -29,23 +29,12 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <a
-          data-cy="metadata-value"
-          class="underline"
-          target="_blank"
-          :href="processedDisplayValue"
-          v-html="processedLink"
-          @click.stop
-        ></a>
+        <SanitizedHtml :html-content="processedLink"></SanitizedHtml>
       </div>
 
-      <p
-        data-cy="metadata-value"
-        v-else-if="stringIsHtml(readableValue)"
-        v-html="processedDisplayValue"
-      />
+      <p data-cy="metadata-value" v-else-if="stringIsHtml(readableValue)" />
       <p v-else data-cy="metadata-value" class="whitespace-pre-line">
-        {{ displayValue }}
+        <SanitizedHtml :html-content="processedDisplayValue"></SanitizedHtml>
       </p>
     </div>
   </div>
@@ -64,7 +53,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
-import { sanitizeHtml } from "@/helpers";
+import SanitizedHtml from "@/components/SanitizedHtml.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -97,11 +86,13 @@ const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
 });
 
-const processedLink = computed(() =>
-  sanitizeHtml(processTextWithLinks(t(props.linkText) || readableValue.value)),
+const processedLink = computed<string>(() =>
+  processTextWithLinks(t(props.linkText) || readableValue.value).toString(),
 );
 
-const processedDisplayValue = computed(() => sanitizeHtml(displayValue.value));
+const processedDisplayValue = computed<string>(() =>
+  displayValue.value.toString(),
+);
 
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;

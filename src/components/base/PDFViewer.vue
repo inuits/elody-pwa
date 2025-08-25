@@ -73,7 +73,7 @@ export default defineComponent({
     const pageRendering = ref<boolean>(false);
     const pageNumPending = ref(null);
     const scale = ref<number>(1);
-    const url = ref<String>("");
+    const url = ref<string>("");
     const canvas = ref<HTMLCanvasElement | undefined>(undefined);
     const spaceForPage = ref<HTMLDivElement | undefined>(undefined);
     const pageContainer = ref<HTMLDivElement | undefined>(undefined);
@@ -97,17 +97,17 @@ export default defineComponent({
       pageRendering.value = true;
       // Using promise to fetch the page
       pdfDoc?.getPage(num).then(function (page) {
-        let viewport = page.getViewport({ scale: scale.value });
+        const viewport = page.getViewport({ scale: scale.value });
         canvas.value.height = viewport.height;
         canvas.value.width = viewport.width;
 
         // Render PDF page into canvas context
-        let renderContext = {
+        const renderContext = {
           canvasContext: ctx.value,
           viewport: viewport,
         };
         determineDecentralization();
-        let renderTask = page.render(renderContext);
+        const renderTask = page.render(renderContext);
 
         // Wait for rendering to finish
         renderTask.promise.then(function () {

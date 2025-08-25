@@ -52,7 +52,7 @@ watch(
   () => getModalInfo(TypeModals.SaveSearch).open,
   async (isOpen: boolean) => {
     if (isOpen) {
-      let userEmail = await auth.user.email;
+      const userEmail = await auth.user.email;
       addRelations(
         [{ id: userEmail, value: userEmail }],
         "hasUser",

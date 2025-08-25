@@ -89,7 +89,7 @@ onResult((result) => {
     data: result.data.GraphData,
     options: {
       onResize: () => {
-        for (let id in Chart.instances) Chart.instances[id].resize();
+        for (const id in Chart.instances) Chart.instances[id].resize();
       },
       scales: {
         y: {

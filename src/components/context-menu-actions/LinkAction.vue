@@ -19,9 +19,9 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 const props = defineProps<{
-  label: String;
-  icon: String;
-  entityId: String;
+  label: string;
+  icon: string;
+  entityId: string;
   entityType: Entitytyping;
 }>();
 

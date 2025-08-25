@@ -156,7 +156,7 @@ const downloadCsvTemplate = async (filePath: any) => {
   if (files.value.length > 0) {
     const header = results.meta.fields as string[];
     const filenameIndex = header.indexOf(csvHeaders.filename);
-    let columnToAddFilename =
+    const columnToAddFilename =
       filenameIndex === -1 ? csvHeaders.file_identifier : csvHeaders.filename;
     const type = results.data[0]["type"];
 

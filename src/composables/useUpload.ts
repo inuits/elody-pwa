@@ -759,7 +759,7 @@ const useUpload = (config: any) => {
     isValidationFile: boolean = false,
   ) => {
     failedUploads.value = failedUploads.value.filter(
-      (fileName: String) => fileName !== fileToRemove.name,
+      (fileName: string) => fileName !== fileToRemove.name,
     );
     files.value = files.value.filter(
       (file: DropzoneFile) => file !== fileToRemove,

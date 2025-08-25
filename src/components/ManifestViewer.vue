@@ -106,7 +106,7 @@ onBeforeRouteLeave((to, from, next) => {
     dequeueAllItemsForBulkProcessing(context);
     const windows = miradorInstance.value.store.getState().windows;
     const windowIds = [];
-    for (let windowId in windows) windowIds.push(windowId);
+    for (const windowId in windows) windowIds.push(windowId);
     windowIds.forEach((id) => {
       const manifest = windows[id].manifestId;
       enqueueItemForBulkProcessing(context, { id: manifest });

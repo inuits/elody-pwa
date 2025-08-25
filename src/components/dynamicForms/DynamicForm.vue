@@ -429,7 +429,7 @@ const createEntityFromFormInput = async (
   entityType: Entitytyping,
   relations: BaseRelationValuesInput[] | undefined = undefined,
 ): Promise<EntityInput> => {
-  let entity: EntityInput = { type: entityType };
+  const entity: EntityInput = { type: entityType };
   entity.metadata = Object.keys(form.value?.values.intialValues)
     .map((key) => {
       if (key === "ttl") {
@@ -819,9 +819,9 @@ const closeAndDeleteForm = () => {
 };
 
 const downloadDataFromResponse = (data: any) => {
-  let blob = new Blob([data], { type: "text/csv" });
-  let url = window.URL.createObjectURL(blob);
-  let a = document.createElement("a");
+  const blob = new Blob([data], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
   a.href = url;
   a.download = "data.csv";
   a.click();

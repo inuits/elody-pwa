@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 // THIS FILE IS GENERATED, DO NOT EDIT!
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;

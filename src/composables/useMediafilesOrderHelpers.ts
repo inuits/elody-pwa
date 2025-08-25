@@ -21,7 +21,7 @@ export const compareMediafileOrder = (newArray: MediaFile[]): orderDiff[] => {
   return diff;
 };
 
-export const removeMediafilesFromOrdering = (toBeDeleted: String[]) => {
+export const removeMediafilesFromOrdering = (toBeDeleted: string[]) => {
   toBeDeleted.forEach((id) => {
     let index = -1;
     let decrementOrder: boolean = false;

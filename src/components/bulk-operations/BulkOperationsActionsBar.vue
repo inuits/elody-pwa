@@ -132,7 +132,7 @@ const props = withDefaults(
     showButton?: boolean;
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
-    customBulkOperations?: String | undefined;
+    customBulkOperations?: string | undefined;
     refetchEntities: Function;
     enableSelection?: boolean;
     parentEntityId?: string | undefined;

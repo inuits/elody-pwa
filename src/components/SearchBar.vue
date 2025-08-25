@@ -87,7 +87,7 @@ const applyFilterToLibrary = () => {
   if (entityTypeFilters.value !== undefined)
     filters = [...entityTypeFilters.value];
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
-  for (let index in metadataKeys) {
+  for (const index in metadataKeys) {
     filters.push({
       key: [`elody:1|metadata.${metadataKeys[index]}.value`],
       value: inputValue.value,

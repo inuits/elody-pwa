@@ -205,7 +205,7 @@ const { refetch: refetchMediafiles, onResult: mediafilesResult } =
   );
 
 const bulkSelect = () => {
-  for (let csvExportOption of csvExportOptions.value)
+  for (const csvExportOption of csvExportOptions.value)
     enqueueItemForBulkProcessing(
       BulkOperationsContextEnum.BulkOperationsCsvExport,
       {
@@ -254,7 +254,7 @@ const exportCsv = async () => {
 onResult((result) => {
   if (result.data) {
     csvExportOptions.value = [];
-    for (let key of result.data.BulkOperationCsvExportKeys.options)
+    for (const key of result.data.BulkOperationCsvExportKeys.options)
       csvExportOptions.value.push({ isSelected: key.required, key });
   }
 });

@@ -17,7 +17,7 @@ const {
 const { enableEdit, save, disableEdit } = useEditMode();
 
 type OrderItem = {
-  field: String;
+  field: string;
   initialValue: number;
   currentValue: number;
   status?: EditStatus;
@@ -49,7 +49,7 @@ const useOrderListItems = () => {
   const isFormEmpty = (formId: string) => {
     return orderItemsPerForm.value[formId].length <= 0;
   };
-  const getOrderItemInList = (formId: string, field: String): OrderItem => {
+  const getOrderItemInList = (formId: string, field: string): OrderItem => {
     return orderItemsPerForm.value[formId].filter(
       (item) => item.field === field,
     )[0];

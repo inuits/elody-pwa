@@ -197,7 +197,7 @@ export const getEntityIdFromRoute = (): string | undefined => {
   return asString(useRoute()?.params["id"]) || undefined;
 };
 
-export const setupI18n = (translations: Object, applicationLocale: string) => {
+export const setupI18n = (translations: object, applicationLocale: string) => {
   return createI18n({
     legacy: false,
     globalInjection: true,
@@ -229,7 +229,7 @@ export const processTextWithLinks = (value: unknown) => {
   return textWithLinks;
 };
 
-export const stringIsUrl = (value: unknown): Boolean => {
+export const stringIsUrl = (value: unknown): boolean => {
   try {
     if (value && typeof value !== "string") return false;
 
@@ -294,7 +294,7 @@ export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
   entityId: string,
-  mediafileViewerContext: String,
+  mediafileViewerContext: string,
   typeOfInputField?: string,
 ): string => {
   const form = useFormHelper().getForm(entityId);
@@ -821,5 +821,21 @@ export const isAbortError = (error: any): boolean => {
 export const sanitizeHtml = (content: any) => {
   return DOMPurify.sanitize(content, {
     FORBID_TAGS: ["style"],
+    USE_PROFILES: { html: true },
+    ALLOWED_TAGS: [
+      "a",
+      "p",
+      "span",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "li",
+      "ol",
+      "ul",
+      "br",
+    ],
   });
 };

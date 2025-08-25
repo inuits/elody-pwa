@@ -5,7 +5,6 @@
       type !== 'textarea' && type !== 'checkbox' && type !== 'resizableTextarea'
     "
     ref="baseInput"
-    class=""
     :class="[
       'border rounded-lg focus:ring-0',
       { 'w-full h-full': type !== 'color' },
@@ -107,7 +106,10 @@ const defaultWithDarkBackgroundInput: Input = {
   },
 };
 
-type InputStyle = "default" | "defaultWithBorder" | "defaultWithDarkBackgroundInput";
+type InputStyle =
+  | "default"
+  | "defaultWithBorder"
+  | "defaultWithDarkBackgroundInput";
 const inputStyles: Record<InputStyle, Input> = {
   default: defaultInput,
   defaultWithBorder: defaultWithBorderInput,

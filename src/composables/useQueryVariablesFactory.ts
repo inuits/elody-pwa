@@ -5,25 +5,25 @@ import { type AdvancedFilterInputType } from "@/generated-types/queries";
 const { selectedPaginationLimitOption, selectedSkip, queryVariables } =
   useLibraryBar();
 
-const entityType = ref<String>();
-const relationType = ref<String>();
-const identifiers = ref<String>();
-const searchInputType = ref<String>();
+const entityType = ref<string>();
+const relationType = ref<string>();
+const identifiers = ref<string>();
+const searchInputType = ref<string>();
 const advancedFilterInputs = ref<AdvancedFilterInputType[]>();
 
 const changePaginationNumber = ref<number | undefined>(undefined);
 
 export const useQueryVariablesFactory = () => {
-  const setEntityType = (value: String) => {
+  const setEntityType = (value: string) => {
     if (value !== undefined) entityType.value = value;
   };
-  const setQueryRelationType = (value: String) => {
+  const setQueryRelationType = (value: string) => {
     if (value !== undefined) relationType.value = value;
   };
-  const setIdentifiers = (value: String) => {
+  const setIdentifiers = (value: string) => {
     if (value !== undefined) identifiers.value = value;
   };
-  const setSearchInputType = (value: String) => {
+  const setSearchInputType = (value: string) => {
     if (value !== undefined) searchInputType.value = value;
   };
   const setAdvancedFilterInputs = (value: AdvancedFilterInputType) => {

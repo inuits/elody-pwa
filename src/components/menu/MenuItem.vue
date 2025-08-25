@@ -123,8 +123,8 @@ const route = useRoute();
 const props = defineProps<{
   menuitem: MenuItem;
   icon: DamsIcons;
-  isExpanded: Boolean;
-  isBeingHovered: Boolean;
+  isExpanded: boolean;
+  isBeingHovered: boolean;
 }>();
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);

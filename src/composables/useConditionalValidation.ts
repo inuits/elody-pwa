@@ -5,7 +5,7 @@ const useConditionalValidation = () => {
   const conditionalFieldIsAvailable = (
     availableIf: Conditional,
     formId: string,
-    mediafileViewerContext: String
+    mediafileViewerContext: string
   ): boolean => {
     let isValid: boolean = false;
     if (!formId || !availableIf.field) return isValid;
@@ -31,7 +31,7 @@ const useConditionalValidation = () => {
   const conditionalFieldIsRequired = (
     requiredIf: Conditional,
     formId: string,
-    mediafileViewerContext: String
+    mediafileViewerContext: string
   ): boolean => {
     let isValid: boolean = false;
     if (!formId || !requiredIf.field) return isValid;

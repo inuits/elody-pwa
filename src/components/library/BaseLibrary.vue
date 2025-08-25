@@ -343,7 +343,7 @@ export type BaseLibraryProps = {
   baseLibraryMode?: BaseLibraryModes;
   entityListElements?: EntityListElement[];
   allowedActionsOnRelations?: RelationActions[];
-  customBulkOperations?: String | undefined;
+  customBulkOperations?: string | undefined;
   enableSaveSearchFilters?: boolean;
   shouldUseStateForRoute?: boolean;
   customQueryEntityPickerList?: string;
@@ -577,7 +577,7 @@ if (useOtherQuery.value) {
 
 const bulkSelect = (items = entities.value) => {
   if (props.predefinedEntities) items = props.predefinedEntities;
-  for (let entity of items) {
+  for (const entity of items) {
     if (
       !props.idsOfNonSelectableEntities.includes(entity.id) ||
       !props.idsOfNonSelectableEntities.includes(entity.uuid)

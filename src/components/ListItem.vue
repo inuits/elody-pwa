@@ -322,7 +322,7 @@ const props = withDefaults(
     loading?: boolean;
     teaserMetadata?: Metadata[];
     intialValues?: IntialValues | undefined;
-    relationValues?: Object;
+    relationValues?: object;
     media?: string;
     thumbIcon?: string;
     small?: boolean;

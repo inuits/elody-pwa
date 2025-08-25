@@ -1,3 +1,5 @@
+import type {
+  Entitytyping} from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   type AdvancedFilterInputType,
@@ -6,7 +8,6 @@ import {
   DamsIcons,
   type DropdownOption,
   EditStatus,
-  Entitytyping,
   SearchInputType,
 } from "@/generated-types/queries";
 import { computed, inject } from "vue";
@@ -50,7 +51,7 @@ export const useGetDropdownOptions = (
     relationFilter: AdvancedFilterInput | undefined,
   ): AdvancedFilterInput => {
     if (relationFilter) {
-      let completeRelationFilter =  omitDeep(relationFilter, '__typename');
+      const completeRelationFilter =  omitDeep(relationFilter, '__typename');
       if (completeRelationFilter.value.includes("$parentId"))
         completeRelationFilter.value = [parent];
       return completeRelationFilter;

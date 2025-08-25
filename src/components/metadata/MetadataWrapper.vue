@@ -201,7 +201,7 @@ const props = withDefaults(
     isEdit: boolean;
     formId: string;
     metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
-    linkedEntityId?: String;
+    linkedEntityId?: string;
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
     showErrors?: boolean;

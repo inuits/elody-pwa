@@ -38,11 +38,11 @@ import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const props = defineProps<{
-  label: String;
-  icon: String;
+  label: string;
+  icon: string;
   action: ContextMenuElodyActionEnum;
   entityType: Entitytyping;
-  entityId: String;
+  entityId: string;
   relation?:
     | { idx: number; relation: object }
     | "no-relation-found"

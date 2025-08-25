@@ -29,10 +29,10 @@ const props = withDefaults(
 const emit = defineEmits(["expandMediaList"]);
 const rounding = props.orientation == "right" ? "rounded-r-md" : "rounded-l-md";
 const arrows = [Unicons.AngleRight.name, Unicons.AngleLeft.name];
-let currentArrow = ref<string>(
+const currentArrow = ref<string>(
   props.orientation == "right" ? arrows[0] : arrows[1]
 );
-const toggled = ref<Boolean>(false);
+const toggled = ref<boolean>(false);
 
 const toggleExpandedMediaList = () => {
   toggled.value = !toggled.value;

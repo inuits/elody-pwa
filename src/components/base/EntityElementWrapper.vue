@@ -89,7 +89,7 @@ withDefaults(
   defineProps<{
     label: string;
     entityId: string;
-    isCollapsed: Boolean;
+    isCollapsed: boolean;
     baseLibraryMode?: BaseLibraryModes;
     useVshowInsteadOfVif?: boolean;
     previewLabel?: string;

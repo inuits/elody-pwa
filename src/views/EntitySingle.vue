@@ -135,7 +135,7 @@ const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
 const entityForBreadcrumb = ref<Entity>();
 
-const addContextToState = (context: String): void => {
+const addContextToState = (context: string): void => {
   mediafileViewerContexts.value.push(context);
   addMediafileSelectionStateContext(context);
 };

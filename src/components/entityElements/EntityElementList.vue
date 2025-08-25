@@ -168,8 +168,8 @@ const { fetchAdvancedPermission } = usePermissions();
 
 const props = withDefaults(
   defineProps<{
-    isCollapsed: Boolean;
-    enableAdvancedFilters: Boolean;
+    isCollapsed: boolean;
+    enableAdvancedFilters: boolean;
     types: string[];
     label: string;
     type?: MediaFileElementTypes;
