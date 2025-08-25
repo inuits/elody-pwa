@@ -111,7 +111,7 @@ export const useSaveSearchHepler = () => {
     const initialValues = { ...entity.intialValues };
     initialValues.filters = newFilters;
 
-    const { __typename, ...filters } = initialValues;
+    const { ...filters } = initialValues;
 
     const result = await mutate({
       id: entity.uuid,

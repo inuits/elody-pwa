@@ -51,7 +51,7 @@ export const useInheritedRelations = () => {
       const entity = await getEntityById(entityType, relation?.key);
       const key = extractValueFromObject(entity, valueKey) as string[];
       return key?.[0] || null;
-    } catch (e: any) {
+    } catch {
       return null;
     }
   };

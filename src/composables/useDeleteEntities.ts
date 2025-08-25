@@ -9,7 +9,6 @@ import { type InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
 import { useImport } from "./useImport";
-import { goToEntityPageById } from "@/helpers";
 
 export const useDeleteEntities = () => {
   const { mutate } = useMutation<BulkDeleteEntitiesMutation>(
@@ -44,7 +43,9 @@ export const useDeleteEntities = () => {
     let path;
     if ((types as string[])[0].toLowerCase() === Entitytyping?.Job) {
       path = Collection.Jobs;
-    } else if ((types as string[])[0].toLowerCase() === Entitytyping?.Mediafile) {
+    } else if (
+      (types as string[])[0].toLowerCase() === Entitytyping?.Mediafile
+    ) {
       path = Collection.Mediafiles;
     } else {
       path = Collection.Entities;
@@ -57,8 +58,7 @@ export const useDeleteEntities = () => {
       skipItemsWithRelationDuringBulkDelete,
     });
 
-    if (result?.data)
-      return result.data.bulkDeleteEntities || true;
+    if (result?.data) return result.data.bulkDeleteEntities || true;
     return false;
   };
 

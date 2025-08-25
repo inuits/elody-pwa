@@ -2,7 +2,6 @@ import type { RouteLocationNormalizedLoaded } from "vue-router";
 import type {
   AdvancedFilter,
   AdvancedFilterInput,
-  DropdownOption,
   GetEntitiesQueryVariables,
 } from "@/generated-types/queries";
 import type { SavedSearchType } from "@/composables/useSaveSearchHepler";

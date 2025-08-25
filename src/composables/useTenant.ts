@@ -22,7 +22,7 @@ const isAllTenantsLoaded = ref<boolean>(false);
 
 const useTenant = (
   apolloClient: ApolloClient<any>,
-  config?: { features: { hasTenantSelect: boolean; hideSuperTenant: boolean } }
+  config?: { features: { hasTenantSelect: boolean; hideSuperTenant: boolean } },
 ) => {
   const tenantsLoaded = ref<
     "not-loaded" | "no-switcher" | "loaded" | "switching"
@@ -82,8 +82,7 @@ const useTenant = (
           .then((result) => {
             tenants.value = [];
             const entities = result.data.Tenants;
-            entities &&
-              entities.results &&
+            if (entities && entities.results) {
               entities.results.forEach((entity) => {
                 if (entity && entity.__typename === "Tenant") {
                   const id = entity.uuid as string;
@@ -104,6 +103,8 @@ const useTenant = (
                     });
                 }
               });
+            }
+
             isAllTenantsLoaded.value = true;
           });
       } catch {
@@ -116,7 +117,7 @@ const useTenant = (
 
   const tenantsAsDropdownOptions = computed<DropdownOption[]>(() => {
     const options: DropdownOption[] = [];
-    tenants.value !== "no-tenants" &&
+    if (tenants.value !== "no-tenants")
       tenants.value.forEach((tenant) => {
         options.push({
           value: tenant.id,
@@ -168,7 +169,7 @@ const useTenant = (
     if (selectedTenantValue !== (await getTennantFromSession()).id)
       router.push({ name: "Home" });
 
-    selectedTenantValue && (await setTennantInSession(selectedTenantValue));
+    if (selectedTenantValue) await setTennantInSession(selectedTenantValue);
     router.push({ name: "Home", force: true });
     tenantsLoaded.value = "switching";
   };
@@ -190,7 +191,7 @@ const useTenant = (
   const getIdFromCode = (codeToFind: string) => {
     if (tenants.value !== "no-tenants") {
       const tenantResult = tenants.value.find(
-        ({ code }) => code === codeToFind
+        ({ code }) => code === codeToFind,
       );
       return tenantResult && tenantResult.id;
     }

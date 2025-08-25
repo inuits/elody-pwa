@@ -7,19 +7,19 @@ export const useImport = () => {
     try {
       const queries = await getQueries();
       return queries[`${queryName}Document`];
-    } catch (e) {}
+    } catch {}
   };
   const loadQuery = async (queryName: string) => {
     try {
       const queries = await getQueries();
       return queries[`${queryName}Query`];
-    } catch (e) {}
+    } catch {}
   };
   const loadQueryVariables = async (queryName: string) => {
     try {
       const queries = await getQueries();
       return queries[`${queryName}QueryVariables`];
-    } catch (e) {}
+    } catch {}
   };
 
   return {

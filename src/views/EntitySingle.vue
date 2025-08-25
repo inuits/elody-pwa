@@ -48,7 +48,6 @@ import {
   watch,
   inject,
   computed,
-  onBeforeMount,
   provide,
   onUnmounted,
 } from "vue";
@@ -70,7 +69,7 @@ const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
 
-const { locale, t } = useI18n();
+const { locale } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
 const {
   clearBreadcrumbPath,
@@ -119,7 +118,7 @@ watch(entityType, (value) => {
   queryVariables.type = value;
 });
 
-const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
+const { result, refetch } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   () => ({
@@ -183,7 +182,7 @@ onBeforeRouteUpdate(async (to: any) => {
 
 watch(
   () => result.value,
-  (newvalue, oldvalue) => {
+  () => {
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value || !entity.value.intialValues) return;
     useEditHelper.value = useEditMode(entity.value.id);

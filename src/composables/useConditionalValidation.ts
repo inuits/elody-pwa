@@ -5,7 +5,7 @@ const useConditionalValidation = () => {
   const conditionalFieldIsAvailable = (
     availableIf: Conditional,
     formId: string,
-    mediafileViewerContext: string
+    mediafileViewerContext: string,
   ): boolean => {
     let isValid: boolean = false;
     if (!formId || !availableIf.field) return isValid;
@@ -14,7 +14,7 @@ const useConditionalValidation = () => {
         PanelType.Metadata,
         availableIf.field,
         formId,
-        mediafileViewerContext
+        mediafileViewerContext,
       ).toLowerCase();
 
       if (availableIf.ifAnyValue && fieldValue.length) return true;
@@ -22,7 +22,7 @@ const useConditionalValidation = () => {
       if (!availableIf.value) return isValid;
 
       isValid = fieldValue === availableIf.value.toLowerCase();
-    } catch (e) {
+    } catch {
       return isValid;
     }
     return isValid;
@@ -31,7 +31,7 @@ const useConditionalValidation = () => {
   const conditionalFieldIsRequired = (
     requiredIf: Conditional,
     formId: string,
-    mediafileViewerContext: string
+    mediafileViewerContext: string,
   ): boolean => {
     let isValid: boolean = false;
     if (!formId || !requiredIf.field) return isValid;
@@ -40,7 +40,7 @@ const useConditionalValidation = () => {
         PanelType.Metadata,
         requiredIf.field,
         formId,
-        mediafileViewerContext
+        mediafileViewerContext,
       ).toLowerCase();
 
       if (requiredIf.ifAnyValue && fieldValue.length) return true;
@@ -48,7 +48,7 @@ const useConditionalValidation = () => {
       if (!requiredIf.value) return isValid;
 
       isValid = fieldValue === requiredIf.value.toLowerCase();
-    } catch (e) {
+    } catch {
       return isValid;
     }
     return isValid;

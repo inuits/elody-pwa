@@ -15,7 +15,7 @@ const confirmModalConfiguration = ref<ConfirmModalConfiguration | undefined>(
 const pathToNavigate = ref<string | undefined>(undefined);
 
 type ButtonConfiguration = {
-  buttonCallback: Function;
+  buttonCallback: () => any;
   buttonStyle?: ButtonStyle;
   buttonSize?: ButtonSize;
 };

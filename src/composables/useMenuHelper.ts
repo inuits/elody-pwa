@@ -26,7 +26,7 @@ export enum MenuItemType {
 
 type MenuAction = {
   menuItemType: MenuItemType;
-  action: Function | string;
+  action: () => void | string;
 };
 
 export const useMenuHelper = () => {
@@ -95,7 +95,7 @@ export const useMenuHelper = () => {
       if (menuItem.subMenu) {
         const entries = Object.entries(menuItem.subMenu);
         for (let i = 2; i < entries.length; i += 1) {
-          const [objectKey, objectValue] = entries[i];
+          const [, objectValue] = entries[i];
           if (!objectValue.typeLink.route) return;
           const destination = objectValue?.typeLink?.route.destination;
           if (destination)

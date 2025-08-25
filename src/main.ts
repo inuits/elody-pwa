@@ -68,7 +68,7 @@ const start = async (): Promise<void> => {
   defineValidationRules();
 
   if (config.customization) applyCustomization(config.customization);
-  auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
+  auth = auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 
   const head = createHead();
   router = createRouter({

@@ -90,7 +90,7 @@ export const parseRegexFromString = (raw: string): RegExp | undefined => {
   if (!raw) return undefined;
   const match = raw.match(/^\/(.*)\/([gimsuy]*)$/);
   if (!match) return undefined;
-  let [_, pattern, flags] = match;
+  const [pattern, flags] = match;
 
   pattern = pattern.replace(/\\\\/g, "\\");
 
@@ -203,7 +203,6 @@ export const setupI18n = (translations: object, applicationLocale: string) => {
     globalInjection: true,
     locale: applicationLocale,
     fallbackLocale: "en",
-    // @ts-ignore
     messages: translations,
     missingWarn: false,
     fallbackWarn: false,

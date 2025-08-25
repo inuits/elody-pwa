@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
-import { sortFilters } from "./test-utils";
 
 describe("transformFilterInputIntoAdvancedFilters", () => {
   it("should transform filter inputs correctly", () => {

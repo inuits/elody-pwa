@@ -5,7 +5,7 @@ import { ref } from "vue";
 
 const useColumnResizeHelper = () => {
   const defaultColumnConfig: Record<string, Column[]> = {};
-  const currentColumnConfig = ref<Record<string, Column[]> | {}>({});
+  const currentColumnConfig = ref<Record<string, Column[]>>({});
 
   const setInitialColumns = (entityId: string, columns: Column[]) => {
     defaultColumnConfig[entityId] = JSON.parse(JSON.stringify(columns));
@@ -86,9 +86,12 @@ const useColumnResizeHelper = () => {
   };
 };
 
-const useEntityElementCollapseHelper = (currentColumnConfig: Record<string, Column[]> | {}) => {
+const useEntityElementCollapseHelper = (
+  currentColumnConfig: Record<string, Column[]>,
+) => {
   const getElementByLabel = (
-    entityId: string, elementLabel: string,
+    entityId: string,
+    elementLabel: string,
   ): { column: Column | undefined; element: Elements | undefined } => {
     try {
       let toggleElement: Elements | undefined = undefined;

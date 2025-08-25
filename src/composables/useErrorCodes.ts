@@ -20,28 +20,29 @@ export const useErrorCodes = (): {
     error: string,
   ) => Promise<{ code: string; message: string }>;
 } => {
-  let t;
   const { displayErrorNotification } = useBaseNotification();
 
-  const authHandlers: Record<string, Function> = {
-    "1001": (errorCodeType: ErrorCodeType) => handleUnauthorized(errorCodeType),
+  const authHandlers: Record<string, (errorCodeType: ErrorCodeType) => void> = {
+    "1001": () => handleUnauthorized(),
     "1003": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
     "1004": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
     "1008": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
   };
 
-  const readHandlers: Record<string, Function> = {
+  const readHandlers: Record<string, () => void> = {
     R0004: () => handleNotFound(),
   };
 
-  const writeHandlers: Record<string, Function> = {};
+  const writeHandlers: Record<string, () => void> = {};
 
-  const statusCodeHandlers: Record<number | string, Function> = {
-    401: (errorCodeType: ErrorCodeType) => handleUnauthorized(errorCodeType),
+  const statusCodeHandlers: Record<
+    number | string,
+    (errorCodeType: ErrorCodeType, errorMessage?: string) => void
+  > = {
+    401: () => handleUnauthorized(),
     403: (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
-    404: (errorCodeType: ErrorCodeType) => handleNotFound(errorCodeType),
-    default: (errorCodeType: ErrorCodeType, errorMessage: string) =>
-      showNotification(errorCodeType, errorMessage),
+    404: () => handleNotFound(),
+    default: (errorMessage: string) => showNotification(errorMessage),
   };
 
   const __parseVariableStringToVariableObject = (
@@ -110,7 +111,7 @@ export const useErrorCodes = (): {
         message: translatedMessage,
         variables: variableObjects,
       };
-    } catch (e) {
+    } catch {
       return { code: undefined, message: errorMessage, variables: undefined };
     }
   };
@@ -124,9 +125,7 @@ export const useErrorCodes = (): {
     return getTranslatedMessage(`error-codes.${code}`, variables);
   };
 
-  const handleUnauthorized = async (
-    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
-  ) => {
+  const handleUnauthorized = async () => {
     const { setTennantInSession } = useTenant();
     const { closeAllModals } = useBaseModal();
 
@@ -155,16 +154,11 @@ export const useErrorCodes = (): {
     router.push("/accessDenied");
   };
 
-  const handleNotFound = (
-    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
-  ) => {
+  const handleNotFound = () => {
     router.push("/notFound");
   };
 
-  const showNotification = (
-    errorCodeType: ErrorCodeType = ErrorCodeType.Read,
-    errorMessage: string,
-  ) => {
+  const showNotification = (errorMessage: string) => {
     displayErrorNotification("Error", errorMessage);
   };
 
@@ -183,7 +177,7 @@ export const useErrorCodes = (): {
     writeHandlers[code]();
   };
 
-  const handleReadTypeError = (code: string, message: string): void => {
+  const handleReadTypeError = (code: string): void => {
     if (!Object.keys(readHandlers).includes(code)) return;
     readHandlers[code]();
   };
@@ -201,8 +195,7 @@ export const useErrorCodes = (): {
 
     if (Object.keys(authHandlers).includes(genericCodePart))
       handleAuthCodes(genericCodePart, errorCodeType);
-    else if (errorCodeType === ErrorCodeType.Read)
-      handleReadTypeError(code, message);
+    else if (errorCodeType === ErrorCodeType.Read) handleReadTypeError(code);
     else if (errorCodeType === ErrorCodeType.Write)
       handleWriteTypeError(code, message);
   };
@@ -268,18 +261,18 @@ export const useErrorCodes = (): {
     const isAborted = isAbortError(error);
 
     if (isAborted) {
-      return;
+      return "";
     }
 
     const graphqlErrorMessage =
       error.response.errors[0]?.extensions?.response?.body?.message ||
       error.response.errors[0]?.message;
 
-    const { code, message, variables } =
+    const { code, message } =
       await extractErrorComponentsFromErrorResponse(graphqlErrorMessage);
 
     if (!code) {
-      const { statusCode, message } = __extractStatusCodeAndMessageFromResponse(
+      const { statusCode } = __extractStatusCodeAndMessageFromResponse(
         "graphql",
         error,
       );
@@ -288,7 +281,7 @@ export const useErrorCodes = (): {
         ErrorCodeType.Read,
         graphqlErrorMessage,
       );
-      return;
+      return "";
     }
 
     handleErrorByCodeType(code);
@@ -302,7 +295,7 @@ export const useErrorCodes = (): {
       responseBody?.extensions?.response?.body?.message ||
       responseBody?.extensions?.response?.body;
 
-    const { code, message, variables } =
+    const { code, message } =
       await extractErrorComponentsFromErrorResponse(httpErrorMessage);
 
     if (!code) {

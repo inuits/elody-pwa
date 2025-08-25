@@ -1,9 +1,11 @@
-import type { ApolloClient } from "@apollo/client/core";
+export const useShareLink = (/* apolloClient: ApolloClient<any> */) => {
+  const createShareLink = () => {
+    throw new Error("createShareLink not implemented yet");
+  };
 
-export const useShareLink = (apolloClient: ApolloClient<any>) => {
-  const createShareLink = () => {};
-
-  const deleteShareLink = () => {};
+  const deleteShareLink = () => {
+    throw new Error("deleteShareLink not implemented yet");
+  };
 
   return { createShareLink, deleteShareLink };
 };

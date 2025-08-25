@@ -63,14 +63,14 @@ const containsXml = computed(
   () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
 );
 const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
-const uploadValidationFn = ref<Function>(() => {
+const uploadValidationFn = ref<() => boolean>(() => {
   return false;
 });
 const enableUploadButton = computed(() => uploadValidationFn.value());
 const missingFileNames = ref<string[]>([]);
 const failedUploads = ref<string[]>([]);
 const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
-const reinitializeDynamicFormFunc = ref<Function | undefined>(undefined);
+const reinitializeDynamicFormFunc = ref<() => void>(() => {});
 const csvOnlyUploadSFailed = ref<boolean>(false);
 const extraMediafileType = ref<string | undefined>(undefined);
 const jobIdentifier = ref<string | undefined>(undefined);
@@ -84,7 +84,7 @@ const useUpload = (config: any) => {
 
     const settingsObject: {
       [key: string]: {
-        checkUploadValidityFn: Function;
+        checkUploadValidityFn: () => boolean;
       };
     } = {
       updateMetadata: {
@@ -564,10 +564,10 @@ const useUpload = (config: any) => {
   };
 
   const __getUploadUrl = async (
-      file: DropzoneFile,
-      entityId: string = "",
-      entityInput: EntityInput | undefined = undefined,
-    ) => {
+    file: DropzoneFile,
+    entityId: string = "",
+    entityInput: EntityInput | undefined = undefined,
+  ) => {
     let uploadUrl: string | undefined = undefined;
 
     if (
@@ -595,7 +595,11 @@ const useUpload = (config: any) => {
       uploadFlow.value === UploadFlow.MediafilesOnly ||
       uploadFlow.value === UploadFlow.OptionalMediafiles
     ) {
-      uploadUrl = await __getUploadUrlForMediafileOnEntity(entityId, file, entityInput);
+      uploadUrl = await __getUploadUrlForMediafileOnEntity(
+        entityId,
+        file,
+        entityInput,
+      );
     }
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
@@ -834,8 +838,7 @@ const useUpload = (config: any) => {
       failedUploads.value = [];
       amountUploaded.value = 0;
       resetUploadDropzone();
-      if (reinitializeDynamicFormFunc.value)
-        reinitializeDynamicFormFunc.value();
+      reinitializeDynamicFormFunc.value();
     }
     lastUploadedFileIndex.value = -1;
     dryRunErrors.value = [];

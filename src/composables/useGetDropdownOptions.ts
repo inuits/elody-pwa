@@ -1,5 +1,4 @@
-import type {
-  Entitytyping} from "@/generated-types/queries";
+import type { Entitytyping } from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   type AdvancedFilterInputType,
@@ -51,7 +50,7 @@ export const useGetDropdownOptions = (
     relationFilter: AdvancedFilterInput | undefined,
   ): AdvancedFilterInput => {
     if (relationFilter) {
-      const completeRelationFilter =  omitDeep(relationFilter, '__typename');
+      const completeRelationFilter = omitDeep(relationFilter, "__typename");
       if (completeRelationFilter.value.includes("$parentId"))
         completeRelationFilter.value = [parent];
       return completeRelationFilter;
@@ -75,7 +74,10 @@ export const useGetDropdownOptions = (
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
       filters =
         parent !== "fetchAll" && (relationType || fromRelationType)
-          ? [...filters, getRelationFilter(parent, fromRelationType, relationFilter)]
+          ? [
+              ...filters,
+              getRelationFilter(parent, fromRelationType, relationFilter),
+            ]
           : filters;
       entityTypeToSet =
         filters.find(
@@ -124,7 +126,7 @@ export const useGetDropdownOptions = (
     value: string,
     searchFilterInput: AdvancedFilterInput,
   ) => {
-    const { __typename, ...filterProps } = searchFilterInput;
+    const { ...filterProps } = searchFilterInput;
     return { ...filterProps, value };
   };
 

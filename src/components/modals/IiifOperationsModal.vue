@@ -41,6 +41,7 @@
           <div class="flex justify-center p-4">
             <button
               v-for="scale in availableScales"
+              :key="scale"
               :class="[
                 'p-2 mx-2 w-[60px] h-[40px] rounded-lg text-white cursor-pointer',
                 { 'bg-accent-accent': scale === currentScale },
@@ -61,6 +62,7 @@
           <div class="flex justify-center p-4">
             <button
               v-for="format in availableFormats"
+              :key="format"
               :class="[
                 'p-2 mx-2 w-[60px] h-[40px] rounded-lg text-white cursor-pointer',
                 { 'bg-accent-accent': format === currentFormat },

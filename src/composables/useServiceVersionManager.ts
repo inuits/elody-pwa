@@ -3,8 +3,8 @@ import { ElodyServices } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 
-const pwaVersion = ref<string>();
-const apolloGraphqlVersion = ref<string>();
+const pwaVersion = ref<string>("");
+const apolloGraphqlVersion = ref<string>("");
 
 const { displaySuccessNotification } = useBaseNotification();
 
@@ -18,20 +18,18 @@ export const useServiceVersionManager = (): {
   getPwaVersion: () => Promise<string>;
   compareServiceVersions: () => void;
 } => {
-  const __setServiceVersionMapper: Record<ElodyServices, Function> = {
+  const __setServiceVersionMapper: Record<
+    ElodyServices,
+    (version: string) => string
+  > = {
     [ElodyServices.Pwa]: (version) => {
       pwaVersion.value = version;
-      return pwaVersion;
+      return pwaVersion.value;
     },
     [ElodyServices.ApolloGraphql]: (version) => {
       apolloGraphqlVersion.value = version;
       return apolloGraphqlVersion.value;
     },
-  };
-
-  const __getServiceVersionMapper: Record<ElodyServices, Function> = {
-    [ElodyServices.Pwa]: () => pwaVersion.value,
-    [ElodyServices.ApolloGraphql]: () => apolloGraphqlVersion.value,
   };
 
   const setVersion = (newVersion: string, service: ElodyServices) => {

@@ -22,8 +22,8 @@ const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 export type EntityValues = {
   intialValues?: IntialValues;
   relationValues?: { [key: string]: any };
-  relationMetadata?: IntialValues | {};
-  relatedEntityData?: IntialValues | {};
+  relationMetadata?: IntialValues;
+  relatedEntityData?: IntialValues;
 };
 
 const useFormHelper = () => {
@@ -482,7 +482,7 @@ const useFormHelper = () => {
         return [];
       }
 
-      const { inheritFrom, ...rest } = relation;
+      const { ...rest } = relation;
 
       return {
         ...rest,

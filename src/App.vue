@@ -39,13 +39,11 @@
 </template>
 
 <script setup lang="ts">
-import type { Context } from "./composables/useBulkOperations";
 //import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
 import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
 import ConfirmModal from "./components/base/ConfirmModal.vue";
 import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
-import DeleteModal from "@/components/modals/DeleteModal.vue";
 import SearchModal from "@/components/modals/SearchModal.vue";
 import SavedSearchesPickerModal from "@/components/modals/SavedSearchesPickerModal.vue";
 import TheHeader from "@/components/TheHeader.vue";

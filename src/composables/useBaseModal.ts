@@ -1,4 +1,4 @@
-import { watch, reactive, ref, readonly } from "vue";
+import { reactive, ref, readonly } from "vue";
 import {
   type DeleteQueryOptions,
   ModalStyle,
@@ -86,7 +86,7 @@ export const useBaseModal = () => {
         modals[modalType].open = false;
       }
       _someModalIsOpened.value = Object.values(modals).some((m) => m.open);
-    } catch (e) {
+    } catch {
       console.info(`Could not close ${modalType} modal`);
     }
   };

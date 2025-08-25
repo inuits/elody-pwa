@@ -25,7 +25,7 @@ const useThumbnailHelper = (): {
         return Unicons.FileAlt.name;
 
       return Unicons.NoImage.name;
-    } catch (e) {
+    } catch {
       return Unicons.NoImage.name;
     }
   };

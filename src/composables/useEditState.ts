@@ -12,7 +12,7 @@ export const useEditState = (editStateName: string) => {
   const isDisabled = ref(false);
   const editMode = ref<EditModes>("no-edit");
   const submitFn = ref<Callback | undefined>();
-  const refetchFn = ref<Function | undefined>();
+  const refetchFn = ref<() => any>(() => {});
 
   const toBeDeleted = ref<string[]>([]);
   const isSaved = ref(false);
@@ -36,7 +36,7 @@ export const useEditState = (editStateName: string) => {
     submitFn.value = editSubmitFn;
   };
 
-  const setRefetchFn = (refetch: Function) => {
+  const setRefetchFn = (refetch: () => any) => {
     refetchFn.value = refetch;
   };
 
