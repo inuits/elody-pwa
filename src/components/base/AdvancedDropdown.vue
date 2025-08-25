@@ -117,7 +117,7 @@ const entityFormData: any = inject("entityFormData");
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
 const { isEdit } = useEditMode(entityId.value);
 const { someModalIsOpened } = useBaseModal();
-const selectedItem = ref<any | undefined>(undefined);
+const selectedItem = ref<any | any[] | undefined>(undefined);
 
 const deselectItem = () => {
   emit("update:modelValue", "");

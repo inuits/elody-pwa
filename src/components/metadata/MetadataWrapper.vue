@@ -332,8 +332,8 @@ const isMaxDateToday = computed(() => {
 });
 
 const unescapeString = (str: string | undefined): string => {
-  return str.replace(/\\\\/g, '\\');
-}
+  return str.replace(/\\\\/g, "\\");
+};
 
 const getValidationRules = (metadata: PanelMetaData): string => {
   let rules: string;
@@ -464,7 +464,8 @@ if (typeof props.metadata.value !== "object") {
   watch(
     () => props.metadata.value,
     () => {
-      setNewValue(props.metadata.value);
+      if (typeof props.metadata.value === "object") return;
+      setNewValue(rawNewValue);
     },
   );
 }
@@ -474,7 +475,6 @@ watch(
     setNewValue(props.metadata.value);
   },
 );
-
 watch(
   () => props.formId,
   () => {

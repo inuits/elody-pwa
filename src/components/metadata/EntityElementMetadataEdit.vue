@@ -135,7 +135,7 @@ const props = defineProps<{
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 
 const { addEditableMetadataKeys, addMappedRelations } = useFormHelper();
-const metadataValue = computed<string | string[]>({
+const metadataValue = computed<string | string[] | number | number[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
       if (props.value?.formatter.startsWith("pill")) {
@@ -183,11 +183,11 @@ const getValueFromMetadata = (
   if (Array.isArray(newValue)) {
     const returnArray = [];
     newValue.forEach((metadataItem) => {
-      if (isDateTime(metadataItem.value)) {
+      if (isDateTime(metadataItem)) {
         returnArray.push(
-          addCurrentTimeZoneToDateTimeString(metadataItem.value),
+          addCurrentTimeZoneToDateTimeString(metadataItem),
         );
-      } else returnArray.push(metadataItem.value);
+      } else returnArray.push(metadataItem);
     });
     return returnArray;
   }
