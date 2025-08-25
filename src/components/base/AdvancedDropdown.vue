@@ -54,6 +54,14 @@
           </p>
         </div>
       </template>
+      <template #tag="{ option }">
+        <div class="flex m-1 bg-gray-100 rounded-md">
+          <div class="text-sm text-black px-2 py-1">
+            {{ t(option.label) }}
+          </div>
+          <button class="hover:bg-red-200 px-2" type="button" @click="() => removeOptionFromListOfOptions(option)">&times;</button>
+        </div>
+      </template>
     </VueSelect>
   </div>
 </template>
@@ -156,6 +164,12 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
     return viewMode && numberOfEntities;
   });
 });
+
+const removeOptionFromListOfOptions = (option: any) => {
+  if (!Array.isArray(selectedItem.value)) return;
+  selectedItem.value = selectedItem.value.filter((selectedOption) => selectedOption !== option.value);
+  emit("update:modelValue", selectedItem.value);
+}
 
 const shouldCalculateWidth = ref(false);
 const calculatedWidth = ref(200);
