@@ -48,7 +48,7 @@ const props = defineProps<{
   filter: FilterListItem;
   lastTypedValue: string;
   isOpen: boolean;
-  getNormalizedActiveFilters: Function;
+  getNormalizedActiveFilters: () => any;
   refetchFilterOptions: boolean;
 }>();
 

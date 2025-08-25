@@ -55,7 +55,7 @@ const emit = defineEmits(["setShowErrors"]);
 const props = defineProps<{
   formId: string;
   inputFieldType: BaseFieldType;
-  closeAndDeleteForm: Function;
+  closeAndDeleteForm: () => void;
 }>();
 
 const { t } = useI18n();
@@ -140,9 +140,12 @@ const doImport = async (folder: string) => {
 };
 
 const doCsvImport = async (folder) => {
-  const result = await mutateAsync(queries.value.StartUploadMagazinesWithCsvDocument, {
-    folder: folder,
-  });
+  const result = await mutateAsync(
+    queries.value.StartUploadMagazinesWithCsvDocument,
+    {
+      folder: folder,
+    },
+  );
   const jobIdentifier = result?.data?.StartUploadMagazinesWithCsv;
   if (jobIdentifier) {
     goToEntityPageById(
@@ -153,7 +156,7 @@ const doCsvImport = async (folder) => {
     );
   }
   props.closeAndDeleteForm();
-}
+};
 
 const doMetsImport = async (folder) => {
   const form = getForm(props.formId);
@@ -164,11 +167,14 @@ const doMetsImport = async (folder) => {
   }
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
 
-  const result = await mutateAsync(queries.value.StartUploadMagazinesWithMetsDocument, {
-    folder: folder,
-    externalSystem: form?.values.intialValues["external_system"],
-    externalId: form?.values.intialValues["external_id"],
-  });
+  const result = await mutateAsync(
+    queries.value.StartUploadMagazinesWithMetsDocument,
+    {
+      folder: folder,
+      externalSystem: form?.values.intialValues["external_system"],
+      externalId: form?.values.intialValues["external_id"],
+    },
+  );
   const jobIdentifier = result?.data?.StartUploadMagazinesWithMets;
   if (jobIdentifier) {
     goToEntityPageById(

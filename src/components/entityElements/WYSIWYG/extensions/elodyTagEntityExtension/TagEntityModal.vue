@@ -95,7 +95,6 @@ import {
   DamsIcons,
   EntityPickerMode,
   Entitytyping,
-  type MetadataInput,
   type TaggableEntityConfiguration,
   TypeModals,
   type WysiwygElement,
@@ -110,7 +109,6 @@ import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { Unicons } from "@/types";
 import {
   BulkOperationsContextEnum,
-  type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import type { Editor } from "@tiptap/vue-3";
@@ -126,7 +124,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();
-const { closeModal, getModalInfo, updateModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -143,7 +141,7 @@ const parentId = computed(() => route.params["id"]);
 const formIndex: number = 0;
 const selectionLimit: number = 1;
 const taggingConfiguration: TaggableEntityConfiguration[] =
-  props.element.taggingConfiguration?.taggableEntityConfiguration!;
+  props.element.taggingConfiguration.taggableEntityConfiguration!;
 const acceptedTypes = computed(() =>
   taggingConfiguration.map(
     (configurationItem) => configurationItem.taggableEntityType,
@@ -245,16 +243,6 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   return [...typeFilters, ...metadataFilters];
 });
 
-const getNewTaggingTextFromTeaserMetadata = (
-  teaserMetadataKey: string,
-  taggedEntity: InBulkProcessableItem,
-) => {
-  return taggedEntity.teaserMetadata.filter(
-    (teaserMetadataItem: MetadataInput) =>
-      teaserMetadataItem.key === teaserMetadataKey,
-  )[0].value;
-};
-
 const tagExistingEntityFlow = () => {
   const context = BulkOperationsContextEnum.TagEntityModal;
   if (!isBulkSelectionLimitReached(context)) return;
@@ -262,13 +250,7 @@ const tagExistingEntityFlow = () => {
   const entityToTag = getEnqueuedItems(context)[0];
   const entityTypeConfigurationItem: TaggableEntityConfiguration =
     getExtensionConfigurationForEntity({ type: entityToTag.type });
-  const newTaggingTextKey = extractTitleKeyFromMetadataFilter(
-    entityTypeConfigurationItem.metadataFilterForTagContent,
-  );
-  const newTaggingText = getNewTaggingTextFromTeaserMetadata(
-    newTaggingTextKey,
-    entityToTag,
-  );
+
   const relationType = entityTypeConfigurationItem.relationType;
   if (!entityToTag) return;
 

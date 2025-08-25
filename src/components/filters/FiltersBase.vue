@@ -178,7 +178,7 @@ const props = withDefaults(
     manipulationQuery: object | undefined;
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
-    setAdvancedFilters: Function;
+    setAdvancedFilters: () => void;
     enableSaveSearchFilters: boolean;
     entityType: Entitytyping;
     shouldUseStateForRoute: boolean;

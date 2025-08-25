@@ -53,7 +53,7 @@ interface Props {
   filter: FilterListItem;
   matchers: DropdownOption[];
   clearAllActiveFilters: boolean;
-  getNormalizedActiveFilters: Function;
+  getNormalizedActiveFilters: () => any;
   refetchFilterOptions: boolean;
 }
 
@@ -120,11 +120,6 @@ const getDefaultMatcher = (): string | undefined => {
 
 const updateSelectedMatcher = (matcher: string) => {
   selectedMatcher.value = matcher;
-};
-
-const reloadMatcherComponent = () => {
-  matcherComponent.value = undefined;
-  loadMatcher();
 };
 
 const resetFilter = () => {
