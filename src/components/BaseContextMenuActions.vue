@@ -1,22 +1,23 @@
 <template>
   <div
-    v-if="hasAvailableContextMenuActions"
     @click.stop.prevent="openContextMenu"
     class="flex items-center justify-center"
   >
     <unicon :name="Unicons.EllipsisVThinline.name" />
-    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
-      <context-menu-action
-        :context-menu-actions="availableContextMenuActions"
-        :parent-entity-id="parentEntityId"
-        :entity-id="entityId"
-        :entity-type="entityType"
-        :relation="relation"
-        :bulk-operations-context="bulkOperationsContext"
-        :refetch-entities="refetchEntities"
-        @toggle-loading="handleEmit"
-      />
-    </base-context-menu>
+    <div v-if="hasAvailableContextMenuActions">
+      <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
+        <context-menu-action
+          :context-menu-actions="availableContextMenuActions"
+          :parent-entity-id="parentEntityId"
+          :entity-id="entityId"
+          :entity-type="entityType"
+          :relation="relation"
+          :bulk-operations-context="bulkOperationsContext"
+          :refetch-entities="refetchEntities"
+          @toggle-loading="handleEmit"
+        />
+      </base-context-menu>
+    </div>
   </div>
 </template>
 
@@ -47,7 +48,7 @@ const props = withDefaults(
   {
     contextMenuActions: undefined,
     refetchEntities: undefined,
-  }
+  },
 );
 
 const emit = defineEmits(["toggleLoading"]);
@@ -66,7 +67,7 @@ const openContextMenu = (event: Event) => {
 const { fetchPermissionsOfContextMenu, setExtraVariables } = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const availableContextMenuActions = ref<ContextMenuActions | undefined>(
-  undefined
+  undefined,
 );
 
 const hasAvailableContextMenuActions = computed(() => {
@@ -102,7 +103,7 @@ watch(
   () => props.contextMenuActions,
   async () => {
     await initializeMenuActions();
-  }
+  },
 );
 
 const initializeMenuActions = async () => {
