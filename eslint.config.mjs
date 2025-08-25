@@ -18,7 +18,12 @@ export default [
     includeIgnoreFile(gitignorePath, "Imported .gitignore patterns"),
   ),
   {
-    files: ["src/**/*.vue", "src/**/*.ts", "!src/generated-types/**"],
+    files: [
+      "src/**/*.vue",
+      "src/**/*.ts",
+      "!src/generated-types/**",
+      "!**.d.ts",
+    ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "vue/multi-word-component-names": "off",
