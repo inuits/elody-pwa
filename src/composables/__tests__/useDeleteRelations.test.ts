@@ -169,7 +169,7 @@ describe("useDeleteRelations", () => {
       expect(
         useBaseNotification().displaySuccessNotification,
       ).toHaveBeenCalled();
-      expect(useEditMode().disableEditMode).toHaveBeenCalled();
+      expect(useEditMode().disableEdit).toHaveBeenCalled();
     });
 
     it("should not proceed if form is not found", async () => {
