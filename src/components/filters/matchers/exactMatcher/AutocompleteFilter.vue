@@ -46,7 +46,7 @@ const selectedOptions = ref<DropdownOption[]>([]);
 const searchQuery = ref("");
 
 const minDropdownSearchCharacters = computed(
-  () => props.filter.advancedFilter.minDropdownSearchCharacters || 3,
+  () => props.filter.advancedFilter.minDropdownSearchCharacters || 1,
 );
 
 const placeholder = computed(() => t("filters.matcher-placeholders.keyword"));
