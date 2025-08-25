@@ -465,7 +465,7 @@ if (typeof props.metadata.value !== "object") {
     () => props.metadata.value,
     () => {
       if (typeof props.metadata.value === "object") return;
-      setNewValue(rawNewValue);
+      setNewValue(props.metadata.value);
     },
   );
 }
