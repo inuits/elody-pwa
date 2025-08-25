@@ -54,7 +54,7 @@ const queryVariables = computed(() => {
   return { id: entityId.value, type: entityType.value };
 });
 
-const { result, refetch, onError, loading } = useQuery<GetEntityByIdQuery>(
+const { result, refetch } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   () => ({

@@ -96,7 +96,7 @@ const closeExpanded = (event: any) => {
   }
 };
 
-router.afterEach((to) => {
+router.afterEach(() => {
   changeExpandedStateOfMenu(false);
 });
 </script>

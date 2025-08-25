@@ -36,7 +36,6 @@ const { isEdit } = useEditMode();
 const {
   getCodeById,
   getIdFromCode,
-  getLabelById,
   isAllTenantsLoaded,
   selectedTenant,
   selectTenant,

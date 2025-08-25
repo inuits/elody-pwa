@@ -1,6 +1,6 @@
 <template>
   <HeatMap
-    v-if="mapType === MapTypes.HeatMap"
+    v-if="refMapType === MapTypes.HeatMap"
     :config="config"
     :entities="entities"
     :entities-loading="entitiesLoading"
@@ -47,7 +47,7 @@ const props = withDefaults(
 
 const { getBasicMapProperties } = useMaps();
 
-const mapType = ref<MapTypes | undefined>(undefined);
+const refMapType = ref<MapTypes | undefined>(undefined);
 
 const wktOfEntities = computed(() => {
   const wkts: string[] = props.entities.map((entity: Entity) => {
@@ -69,8 +69,8 @@ const calculateCenter = (entities: Entity[]) => {
   let coordinates = entity?.intialValues?.[keyToGetCoordinates];
   if (coordinates) {
     center.value = [
-        (coordinates as { latitude: number }).latitude,
-        (coordinates as { longitude: number }).longitude,
+      (coordinates as { latitude: number }).latitude,
+      (coordinates as { longitude: number }).longitude,
     ];
   }
 
@@ -78,13 +78,13 @@ const calculateCenter = (entities: Entity[]) => {
   if (coordinates) {
     center.value = fromLonLat([coordinates[1], coordinates[0]]);
   }
-}
+};
 
 watch(
   () => props.mapType,
   () => {
     if (props.mapType !== undefined) {
-      mapType.value = props.mapType;
+      refMapType.value = props.mapType;
     }
   },
   { immediate: true },

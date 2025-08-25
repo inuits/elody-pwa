@@ -13,10 +13,7 @@
     >
       ( {{ t("metadata.labels.one-of-required") }} )
     </p>
-    <p
-      v-else-if="isOptionalField"
-      class="pl-1"
-    >
+    <p v-else-if="isOptionalField" class="pl-1">
       ( {{ t("metadata.labels.optional") }} )
     </p>
     <base-tooltip
@@ -51,7 +48,6 @@ import type {
 } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
 import { computed, inject } from "vue";
-import { useEditState } from "@/composables/useEditState";
 
 const props = withDefaults(
   defineProps<{
@@ -71,10 +67,10 @@ const useEditHelper = useEditMode(entityFormData?.id);
 const { t } = useI18n();
 
 const isOptionalField = computed(() => {
-  return props.metadata?.inputField &&
-    !props.isFieldRequired &&
-    useEditHelper.isEdit;
-})
+  return (
+    props.metadata?.inputField && !props.isFieldRequired && useEditHelper.isEdit
+  );
+});
 </script>
 
 <style scoped></style>

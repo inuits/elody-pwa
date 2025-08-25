@@ -40,7 +40,7 @@ import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 
 const props = defineProps<{
   inputFieldType: BaseFieldType;
-  closeAndDeleteForm: Function;
+  closeAndDeleteForm: () => void;
 }>();
 
 const { t } = useI18n();

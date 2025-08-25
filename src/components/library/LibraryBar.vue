@@ -65,10 +65,10 @@ import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 const props = withDefaults(
   defineProps<{
-    setLimit: Function;
+    setLimit: (limit: number) => void;
     selectedPaginationLimitOption: number;
-    setSortKey: Function;
-    setSortOrder: Function;
+    setSortKey: (sortKey: string) => void;
+    setSortOrder: (sortOrder: string) => void;
     filtersAvailableOnDetailPage?: boolean;
   }>(),
   {
@@ -90,7 +90,9 @@ const emit = defineEmits<{
 const isAsc = ref<boolean>(false);
 const paginationLimitOptions = ref<DropdownOption[]>([]);
 const paginationLimitOptionsPromiseIsResolved = ref<boolean>(false);
-const selectedPaginationLimitOption = ref<number>(props.selectedPaginationLimitOption);
+const selectedPaginationLimitOption = ref<number>(
+  props.selectedPaginationLimitOption,
+);
 const selectedSortOption = ref<any>();
 const sortOptions = ref<DropdownOption[]>([]);
 const sortOptionsPromiseIsResolved = ref<boolean>(false);
@@ -184,7 +186,11 @@ onMounted(() => {
 
 watch(
   () => selectedPaginationLimitOption.value,
-  async () => await props.setLimit(selectedPaginationLimitOption.value, selectedPaginationLimitOption.value !== -1),
+  async () =>
+    await props.setLimit(
+      selectedPaginationLimitOption.value,
+      selectedPaginationLimitOption.value !== -1,
+    ),
   { deep: true },
 );
 watch(

@@ -108,7 +108,6 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
-import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();

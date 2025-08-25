@@ -13,16 +13,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  BaseFieldType,
-} from "@/generated-types/queries";
+import { BaseFieldType } from "@/generated-types/queries";
 import ImportFromNetworkDrive from "@/components/imports/ImportFromNetworkDrive.vue";
 
 const emit = defineEmits(["setShowErrors"]);
 
-const props = defineProps<{
+defineProps<{
   formId: string;
   inputFieldType: BaseFieldType;
-  closeAndDeleteForm: Function;
+  closeAndDeleteForm: () => void;
 }>();
 </script>

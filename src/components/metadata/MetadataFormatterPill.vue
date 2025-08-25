@@ -28,9 +28,10 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const pillSettings = computed(() => {
-  let [formatterType, pillType] = props.formatter.split("|");
+  const [formatterType, pillTypeInit] = props.formatter.split("|");
+  let pillType = pillTypeInit;
   if (pillType === "auto") {
-    return {background: props.label, text: "#FFFFFF"}
+    return { background: props.label, text: "#FFFFFF" };
   } else {
     if (!pillType) pillType = props.label.toLowerCase();
     return formattersSettings[formatterType][pillType];
@@ -40,10 +41,7 @@ const pillSettings = computed(() => {
 const displayValue = computed(() => {
   if (props.translationKey) {
     const key = props.translationKey;
-    const normalizedTranslationKey = key.replace(
-      "$value",
-      String(props.label),
-    );
+    const normalizedTranslationKey = key.replace("$value", String(props.label));
     const translated = t(normalizedTranslationKey);
     if (translated !== normalizedTranslationKey) return translated;
   }

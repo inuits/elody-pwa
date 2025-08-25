@@ -104,7 +104,10 @@
       >
         <div class="h-fit flex flex-row items-center gap-y-4">
           <div
-            v-if="toggles.length > 1 && baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+            v-if="
+              toggles.length > 1 &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
             class="mr-2"
           >
             <BaseToggleGroup :toggles="toggles" />
@@ -378,7 +381,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   entityListElements: undefined,
-  allowedActionsOnRelations: [],
+  allowedActionsOnRelations: () => [],
   customBulkOperations: undefined,
   enableSaveSearchFilters: true,
   shouldUseStateForRoute: true,
@@ -623,7 +626,7 @@ const initializeBaseLibrary = async () => {
       enqueuePromise(sortOptionsPromise);
       await getEntities(route);
       isInitialLoading.value = false;
-    } catch (e: any) {
+    } catch {
       isInitialLoading.value = false;
     }
   }
@@ -793,7 +796,7 @@ watch(
         setSkip(state?.queryVariables?.skip || 1);
         await getEntities(route);
         isInitialLoading.value = false;
-      } catch (e: any) {
+      } catch {
         isInitialLoading.value = false;
       }
     }

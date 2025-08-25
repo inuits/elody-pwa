@@ -26,7 +26,7 @@ const props = withDefaults(
   defineProps<{
     tabs: string[];
   }>(),
-  { tabs: [] },
+  { tabs: () => [] },
 );
 
 const state = reactive({

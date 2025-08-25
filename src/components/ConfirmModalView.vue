@@ -87,7 +87,7 @@ const { t } = useI18n();
 const { confirmModalConfiguration } = useConfirmModal();
 const { closeModal } = useBaseModal();
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     onlyButtons: boolean;
   }>(),
@@ -119,7 +119,7 @@ const buttonSizes = computed(() => {
   };
 });
 
-const performConfirmFunction = (callback: Function) => {
+const performConfirmFunction = (callback: () => void) => {
   callback();
   closeModal(TypeModals.Confirm);
 };
