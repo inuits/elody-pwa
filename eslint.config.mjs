@@ -21,6 +21,7 @@ export default [
     files: ["src/**/*.vue", "src/**/*.ts", "!src/generated-types/**"],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
+      "vue/multi-word-component-names": "off",
       "vue/no-v-html": "error",
     },
   },
