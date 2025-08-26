@@ -1,7 +1,6 @@
 {
   "name": "dams",
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "run-s generate dev-only",
     "dev-only": "vite",
