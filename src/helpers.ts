@@ -90,7 +90,7 @@ export const parseRegexFromString = (raw: string): RegExp | undefined => {
   if (!raw) return undefined;
   const match = raw.match(/^\/(.*)\/([gimsuy]*)$/);
   if (!match) return undefined;
-  const [pattern, flags] = match;
+  let [pattern, flags] = match;
 
   pattern = pattern.replace(/\\\\/g, "\\");
 
