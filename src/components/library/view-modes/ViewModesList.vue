@@ -316,7 +316,7 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
-      if (previewComponent.value?.openByDefault && refEntities.value?.[0]?.id)
+      if (previewComponent.value?.openByDefault && refEntities.value[0]?.id)
         togglePreviewComponent(refEntities.value[0].id);
     });
 };
@@ -374,15 +374,15 @@ watch(
 );
 watch(
   () => refEntities.value,
-  () => {
-    if (refEntities.length > 0)
-      configurePreviewComponentWithNewEntities(refEntities);
+  (newEntities) => {
+    if (newEntities.length > 0)
+      configurePreviewComponentWithNewEntities(newEntities);
     if (
       !previewForEntity.value &&
       previewComponent.value?.openByDefault &&
-      refEntities?.[0]?.id
+      newEntities[0]?.id
     )
-      togglePreviewComponent(refEntities[0].id);
+      togglePreviewComponent(newEntities[0].id);
   },
 );
 
