@@ -22,7 +22,7 @@ type SubmitArguments = BaseRelationValuesInput[] | (() => any);
 const parentId = ref<string | undefined>(undefined);
 const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
-const callbackFunction = ref<() => any>(() => {});
+const callbackFunction = ref<() => any | undefined>(undefined);
 const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
 
 const downloadMediafilesInformation = ref<
@@ -176,7 +176,7 @@ export const useModalActions = () => {
   };
 
   const initializePropertiesForCreateEntity = (): void => {
-    if (!parentId.value) callbackFunction.value = () => {};
+    if (!parentId.value) callbackFunction.value = undefined;
   };
 
   const initializePropertiesForSavedSearch = (savedSearchInfo: any): void => {
@@ -224,7 +224,7 @@ export const useModalActions = () => {
     parentId.value = undefined;
     relationType.value = undefined;
     collection.value = undefined;
-    callbackFunction.value = () => {};
+    callbackFunction.value = undefined;
     bulkOperationType.value = undefined;
     downloadMediafilesInformation.value = undefined;
     savedSearchInformation.value = undefined;
