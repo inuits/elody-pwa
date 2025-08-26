@@ -1,5 +1,5 @@
 <template>
-  <div v-html="cleanContent"></div>
+  <p data-cy="metadata-value" v-html="cleanContent"></p>
 </template>
 
 <script lang="ts" setup>

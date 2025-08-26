@@ -21,10 +21,13 @@
     </div>
     <div v-else>
       <div class="flex items-center" v-if="stringIsUrl(readableValue)">
-        <div v-if="(linkIcon && Unicons[linkIcon]) || linkIcon" class="pr-2">
+        <div
+          v-if="(linkIcon && Unicons[linkIcon as DamsIcons]) || linkIcon"
+          class="pr-2"
+        >
           <unicon
-            v-if="linkIcon && Unicons[linkIcon]"
-            :name="Unicons[linkIcon].name"
+            v-if="linkIcon && Unicons[linkIcon as DamsIcons]"
+            :name="Unicons[linkIcon as DamsIcons].name"
             height="12"
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
@@ -32,16 +35,18 @@
         <SanitizedHtml :html-content="processedLink"></SanitizedHtml>
       </div>
 
-      <p data-cy="metadata-value" v-else-if="stringIsHtml(readableValue)" />
+      <p v-else-if="stringIsHtml(readableValue)">
+        <SanitizedHtml :html-content="readableValue"></SanitizedHtml>
+      </p>
       <p v-else data-cy="metadata-value" class="whitespace-pre-line">
-        <SanitizedHtml :html-content="processedDisplayValue"></SanitizedHtml>
+        {{ processedDisplayValue }}
       </p>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Unit } from "@/generated-types/queries";
+import type { Unit, DamsIcons } from "@/generated-types/queries";
 import { BaseLibraryModes } from "@/generated-types/queries";
 import {
   convertUnitToReadbleFormat,
