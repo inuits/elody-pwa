@@ -50,7 +50,7 @@ const props = withDefaults(
     loading?: boolean;
     noOptionsText?: string;
     canCreateOption?: boolean;
-    searchFilter?: Function;
+    searchFilter?: () => any;
   }>(),
   {
     selectType: "multi",

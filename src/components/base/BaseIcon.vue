@@ -9,9 +9,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { PropType } from "vue";
 import { Unicon } from "vue-unicons";
-import type { Unicons } from "../../types";
 
 export default defineComponent({
   name: "BaseIcon",
@@ -23,7 +21,7 @@ export default defineComponent({
   setup(props) {
     return {
       icon: Unicon.lib.find(
-        (i: any) => i.name === props.name && i.style === props.iconStyle
+        (i: any) => i.name === props.name && i.style === props.iconStyle,
       ).path,
     };
   },

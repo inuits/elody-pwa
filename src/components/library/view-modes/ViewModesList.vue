@@ -52,7 +52,7 @@
           </div>
         </div>
         <component
-          v-for="entity in entitiesLoading ? placeholderEntities : entities"
+          v-for="entity in entitiesLoading ? placeholderEntities : refEntities"
           :key="entity.id + '_list'"
           :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
           :to="
@@ -137,14 +137,14 @@
       <div
         v-if="
           previewComponentEnabled &&
-          entities?.find((entity) => entity.id === previewForEntity)
+          refEntities?.find((entity) => entity.id === previewForEntity)
         "
         class="my-2 h-fit max-h-[80vh] overflow-y-auto bg-background-light rounded-lg"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
           :entity-type="entityType"
-          :entities="entities"
+          :entities="refEntities"
           :config-per-view-mode="configPerViewMode"
           :entity-id="previewForEntity"
           @close-preview-component="closePreviewComponent"
@@ -207,7 +207,7 @@ const props = withDefaults(
     allowedActionsOnRelations?: RelationActions[];
     mode: "list" | "grid";
     config?: ConfigItem[];
-    refetchEntities?: Function;
+    refetchEntities?: () => Promise<void>;
     expandFilters: boolean;
     entityType: Entitytyping;
     configPerViewMode: object;
@@ -231,6 +231,7 @@ const props = withDefaults(
 const previewComponent = ref<PreviewComponent | undefined>(undefined);
 const previewComponentEnabled = ref<boolean>(false);
 const previewForEntity = ref<string | undefined>(undefined);
+const refEntities = ref<Entity[]>(props.entities);
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const { getMediaFilenameFromEntity } = useListItemHelper();
@@ -239,6 +240,13 @@ const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
 const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
+);
+
+watch(
+  () => props.entities,
+  (newValue) => {
+    refEntities.value = newValue;
+  },
 );
 
 const getLinkSettings = (
@@ -278,7 +286,7 @@ const entityWrapperHandler = (entity: Entity) => {
 
 EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
   let itemsFound: boolean = false;
-  props.entities.forEach((entity) => {
+  refEntities.value.forEach((entity) => {
     const fieldKeyWithId = `order-${entity.id}`;
     const item = orderItems.filter((item) => item.field === fieldKeyWithId)[0];
     if (!item) return;
@@ -287,11 +295,11 @@ EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
     itemsFound = true;
   });
   if (itemsFound) {
-    props.entities.sort(
+    refEntities.value.sort(
       (value, nextValue) =>
         value.intialValues.order > nextValue.intialValues.order,
     );
-    if (!queryVariables.value.searchValue.isAsc) props.entities.reverse();
+    if (!queryVariables.value.searchValue.isAsc) refEntities.value.reverse();
   }
 });
 
@@ -308,8 +316,8 @@ const getPreviewItemsForEntity = async () => {
     })
     .then((result) => {
       previewComponent.value = result.data.PreviewComponents?.previewComponent;
-      if (previewComponent.value?.openByDefault && props.entities?.[0]?.id)
-        togglePreviewComponent(props.entities[0].id);
+      if (previewComponent.value?.openByDefault && refEntities.value?.[0]?.id)
+        togglePreviewComponent(refEntities.value[0].id);
     });
 };
 
@@ -365,16 +373,16 @@ watch(
   { immediate: true },
 );
 watch(
-  () => props.entities,
+  () => refEntities.value,
   () => {
-    if (props.entities.length > 0)
-      configurePreviewComponentWithNewEntities(props.entities);
+    if (refEntities.length > 0)
+      configurePreviewComponentWithNewEntities(refEntities);
     if (
       !previewForEntity.value &&
       previewComponent.value?.openByDefault &&
-      props.entities?.[0]?.id
+      refEntities?.[0]?.id
     )
-      togglePreviewComponent(props.entities[0].id);
+      togglePreviewComponent(refEntities[0].id);
   },
 );
 

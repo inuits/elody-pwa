@@ -136,11 +136,12 @@
         </div>
         <DynamicFormUploadButton
           v-if="
-            field.__typename === 'FormAction' &&
-            (field as FormAction).actionType == ActionType.Upload ||
+            (field.__typename === 'FormAction' &&
+              (field as FormAction).actionType == ActionType.Upload) ||
             (field as FormAction).actionType == ActionType.UploadWithMetadata ||
             (field as FormAction).actionType == ActionType.UploadWithOcr ||
-            (field as FormAction).actionType == ActionType.UploadCsvForReordening ||
+            (field as FormAction).actionType ==
+              ActionType.UploadCsvForReordening ||
             (field as FormAction).actionType == ActionType.UpdateMetadata ||
             (field as FormAction).actionType == ActionType.SubmitWithUpload
           "
@@ -237,7 +238,6 @@ import {
   calculateFutureDate,
   goToEntityPage,
   goToEntityPageById,
-  extractTitleKeyFromMetadataFilter,
 } from "@/helpers";
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
@@ -468,7 +468,7 @@ const isFormValid = async () => {
   return !formContainsErrors.value;
 };
 
-const uploadActionFunction = async (field: FormAction) => {
+const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
   await upload(isLinkedUpload.value, undefined, config, t);
   if (jobIdentifier.value) {
@@ -498,14 +498,9 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
   const parentId = route.params["id"];
-  const { relationType, metadataFilterForTagContent } =
-    getExtensionConfigurationForEntity(entity);
+  const { relationType } = getExtensionConfigurationForEntity(entity);
   const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
-  const titleKey = extractTitleKeyFromMetadataFilter(
-    metadataFilterForTagContent,
-  );
 
-  const newText = entity.intialValues[titleKey].toLowerCase();
   tagEntity(
     entity,
     relationType,
@@ -528,7 +523,9 @@ const submitActionFunction = async (field: FormAction) => {
       .CreateEntity;
     showErrors.value = false;
     await getTenants();
-    const callbackFunction: Function = extractActionArguments(field.actionType);
+    const callbackFunction: () => any = extractActionArguments(
+      field.actionType as ActionType,
+    );
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
       if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
@@ -573,7 +570,9 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
 
     showErrors.value = false;
     await getTenants();
-    const callbackFunction: Function = extractActionArguments(field.actionType);
+    const callbackFunction: () => any = extractActionArguments(
+      field.actionType as ActionType,
+    );
     if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
     else {
       useBaseModal().closeModal(TypeModals.DynamicForm);
@@ -596,7 +595,9 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = await createEntityFromFormInput(field.creationType);
-  entityInput.metadata?.push(...extractActionArguments(field.actionType));
+  entityInput.metadata?.push(
+    ...extractActionArguments(field.actionType as ActionType),
+  );
   const entity = (await performSubmitAction(document, entityInput)).data
     .CreateEntity;
   emit("entityCreated", { ...entity, metadata: entityInput.metadata });
@@ -611,20 +612,18 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
 const downloadActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   try {
-    const variables = extractActionArguments(field.actionType);
+    const variables = extractActionArguments(field.actionType as ActionType);
     const document = await getQuery(field.actionQuery as string);
     const entityInput = await createEntityFromFormInput(
       field.creationType,
       variables.relations,
     );
-    const entity = (
-      await performDownloadAction(
-        document,
-        variables,
-        entityInput,
-        form.value.values,
-      )
-    ).data.DownloadItemsInZip;
+    await performDownloadAction(
+      document,
+      variables,
+      entityInput,
+      form.value.values,
+    );
     displaySuccessNotification(
       t("notifications.success.downloadEntityCreated.title"),
       t("notifications.success.downloadEntityCreated.description"),
@@ -748,13 +747,13 @@ const startOcrActionFunction = async (field: FormAction) => {
 const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
 
-  const actionFunctions: { [key: string]: Function } = {
+  const actionFunctions: { [key: string]: () => any } = {
     submit: () => submitActionFunction(field),
     submitWithUpload: () => submitWithUploadActionFunction(field),
     updateMetadata: () => updateMetdataActionFunction(field),
-    upload: () => uploadActionFunction(field),
+    upload: () => uploadActionFunction(),
     uploadWithMetadata: () => uploadWithMetadataActionFunction(field),
-    uploadWithOcr: () => uploadActionFunction(field),
+    uploadWithOcr: () => uploadActionFunction(),
     download: () => downloadActionFunction(field),
     ocr: () => startOcrActionFunction(field),
     endpoint: () => callEndpointActionFunction(field),

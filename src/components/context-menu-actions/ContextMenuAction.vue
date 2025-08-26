@@ -41,14 +41,14 @@ import type { Context } from "@/composables/useBulkOperations";
 
 const emit = defineEmits(["toggleLoading"]);
 
-const props = defineProps<{
+defineProps<{
   contextMenuActions: ContextMenuActions;
   entityId: string;
   entityType: Entitytyping;
   parentEntityId?: string;
   relation?: object;
   bulkOperationsContext: Context;
-  refetchEntities: Function;
+  refetchEntities: () => any;
 }>();
 
 const handleEmit = () => {

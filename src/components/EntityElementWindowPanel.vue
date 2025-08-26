@@ -174,7 +174,7 @@ const relationArray = computed((): PanelRelation[] => {
           throw Error("Value can not be spread");
         }
         returnArray.push(...relationList);
-      } catch (e) {
+      } catch {
         returnArray = relationList;
       }
     }

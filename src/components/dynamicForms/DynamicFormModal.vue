@@ -111,8 +111,8 @@ const initializeModal = () => {
 const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
     Object.entries(value)
-      .filter(([_, nestedValue]) => nestedValue.__typename === "FormTab")
-      .map(([nestedKey, _]) => t("entity." + nestedKey)),
+      .filter(([, nestedValue]) => nestedValue.__typename === "FormTab")
+      .map(([nestedKey]) => t("entity." + nestedKey)),
   );
 });
 

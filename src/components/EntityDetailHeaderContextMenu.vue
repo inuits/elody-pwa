@@ -38,9 +38,7 @@ import {
   GetEntityDetailContextMenuActionsDocument,
   type GetEntityDetailContextMenuActionsQuery,
 } from "@/generated-types/queries";
-import { useRoute } from "vue-router";
 
-const route = useRoute();
 const entityDetails = inject("entityFormData");
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const entityId = computed<string>(() => entityDetails.id);

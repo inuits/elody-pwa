@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import { Unicons } from "@/types";
-import { ref, type PropType } from "vue";
+import { ref } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -24,13 +24,13 @@ const props = withDefaults(
   {
     isHidden: false,
     orientation: "right",
-  }
+  },
 );
 const emit = defineEmits(["expandMediaList"]);
 const rounding = props.orientation == "right" ? "rounded-r-md" : "rounded-l-md";
 const arrows = [Unicons.AngleRight.name, Unicons.AngleLeft.name];
 const currentArrow = ref<string>(
-  props.orientation == "right" ? arrows[0] : arrows[1]
+  props.orientation == "right" ? arrows[0] : arrows[1],
 );
 const toggled = ref<boolean>(false);
 

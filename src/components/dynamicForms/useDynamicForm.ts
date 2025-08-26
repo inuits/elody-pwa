@@ -1,4 +1,4 @@
-import { type EntityInput, ModalStyle } from "@/generated-types/queries";
+import { type EntityInput } from "@/generated-types/queries";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
@@ -39,7 +39,7 @@ const useDynamicForm = () => {
         dynamicForm.value = result.data;
         dynamicFormLoaded.value = true;
       })
-      .catch((e: any) => {
+      .catch(() => {
         dynamicFormLoaded.value = true;
       });
   };

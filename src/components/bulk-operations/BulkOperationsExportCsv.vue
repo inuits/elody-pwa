@@ -157,7 +157,6 @@ const { getModalInfo, closeModal } = useBaseModal();
 const { getStateForRoute } = useStateManagement();
 
 const route = useRoute();
-const state = getStateForRoute(route);
 const modal = getModalInfo(TypeModals.BulkOperations);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
@@ -225,9 +224,9 @@ const exportCsv = async () => {
   const state = getStateForRoute(route);
   const exportURL = `/api/export/csv?order_by=${
     state.queryVariables.searchValue.order_by
-  }&asc=${
-    Number(state.queryVariables.searchValue.isAsc)
-  }&type=${entityType.value}&ids=${getEnqueuedItems(context.value)
+  }&asc=${Number(
+    state.queryVariables.searchValue.isAsc,
+  )}&type=${entityType.value}&ids=${getEnqueuedItems(context.value)
     .map((item) => item.id)
     .join(",")}${fieldQueryParameter}`;
 

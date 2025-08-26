@@ -1,9 +1,4 @@
-import {
-  mergeAttributes,
-  Node,
-  Extension,
-  type CommandProps,
-} from "@tiptap/core";
+import { Node, Extension, type CommandProps } from "@tiptap/core";
 import type { EditorState } from "prosemirror-state";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
@@ -277,7 +272,6 @@ export const createGlobalCommandsExtension = Extension.create({
       openTagModal:
         () =>
         ({ state }: CommandProps) => {
-          const { selection } = state;
           const selectedText = getSelectionHTML(state);
 
           const { openModal } = useBaseModal();

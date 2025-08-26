@@ -10,15 +10,13 @@
         height="21"
         class="mt-1 ml-5"
       />
-      <transition v-if="isExpanded">
-        <span
-          v-if="auth.isAuthenticated.value === false"
-          @click="auth.redirectToLogin()"
-          class="overflow-hidden px-4 font-bold"
-        >
-          {{ t("navigation.log-in") }}
-        </span>
-      </transition>
+      <span
+        v-if="auth.isAuthenticated.value === false && isExpanded"
+        @click="auth.redirectToLogin()"
+        class="overflow-hidden px-4 font-bold"
+      >
+        {{ t("navigation.log-in") }}
+      </span>
     </div>
 
     <div
@@ -55,11 +53,9 @@
           height="20"
           class="mt-1 ml-5"
         />
-        <transition v-if="isExpanded">
-          <span class="overflow-hidden px-4 font-bold">
-            {{ getUserName(auth) }}
-          </span>
-        </transition>
+        <span v-if="isExpanded" class="overflow-hidden px-4 font-bold">
+          {{ getUserName(auth) }}
+        </span>
       </div>
       <div
         class="flex flex-row hover:text-accent-accent cursor-pointer whitespace-nowrap"
@@ -94,14 +90,13 @@
           height="20"
           class="mt-1 ml-5"
         />
-        <transition v-if="isExpanded">
-          <span
-            @click="() => openConfirmationModal()"
-            class="overflow-hidden px-4 font-bold"
-          >
-            {{ t("navigation.log-out") }}
-          </span>
-        </transition>
+        <span
+          v-if="isExpanded"
+          @click="() => openConfirmationModal()"
+          class="overflow-hidden px-4 font-bold"
+        >
+          {{ t("navigation.log-out") }}
+        </span>
       </div>
     </div>
   </div>

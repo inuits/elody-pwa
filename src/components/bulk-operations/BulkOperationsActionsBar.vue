@@ -133,14 +133,14 @@ const props = withDefaults(
     confirmSelectionButton?: boolean;
     entityType: Entitytyping;
     customBulkOperations?: string | undefined;
-    refetchEntities: Function;
+    refetchEntities: () => any;
     enableSelection?: boolean;
     parentEntityId?: string | undefined;
     relationType: string;
     skipItemsWithRelationDuringBulkDelete?: string[];
     selectedPaginationLimitOption: number;
     excludePagination: boolean;
-    setSkip?: Function;
+    setSkip?: (skip: number) => void;
     showPagination?: boolean;
     isLoading?: boolean;
   }>(),
@@ -213,7 +213,7 @@ onResult((result) => {
     if (!result.data) return;
     bulkOperations.value =
       result.data?.BulkOperations?.bulkOperationOptions?.options;
-  } catch (e) {
+  } catch {
     emit("setBulkOperationsAvailable", false);
   }
 });

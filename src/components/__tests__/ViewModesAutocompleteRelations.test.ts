@@ -1,8 +1,4 @@
-import { mount } from "@vue/test-utils";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { Entitytyping, AdvancedFilterTypes } from "@/generated-types/queries";
-import { flushPromises } from "@vue/test-utils";
-import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
+import { describe, it, expect, vi } from "vitest";
 
 vi.mock("@vue/apollo-composable", () => ({
   useMutation: () => ({

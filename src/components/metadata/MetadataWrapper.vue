@@ -2,42 +2,42 @@
   <div
     data-cy="metadata-wrapper"
     v-if="
-      (!metadata.showOnlyInEditMode ||
-        (metadata.showOnlyInEditMode && isEdit)) &&
+      (!refMetadata.showOnlyInEditMode ||
+        (refMetadata.showOnlyInEditMode && isEdit)) &&
       isPermitted
     "
     :key="label"
   >
     <metadata-title
-      :metadata="metadata"
+      :metadata="refMetadata"
       :is-field-required="isFieldRequired"
       :is-one-of-required-metadata-field="isOneOfRequiredMetadataField"
       :is-one-of-required-relation-field="isOneOfRequiredRelationField"
     />
     <entity-element-metadata-edit
-      v-if="isEdit && metadata.inputField"
+      v-if="isEdit && refMetadata.inputField"
       :fieldKey="
         isMetadataOnRelation || isRootdataOnRelation
           ? `${fieldKeyWithId}`
-          : metadata.key
+          : refMetadata.key
       "
-      :label="metadata.label as string"
+      :label="refMetadata.label as string"
       v-model:value="value"
-      :field="metadata.inputField"
-      :hidden-field="metadata.hiddenField"
+      :field="refMetadata.inputField"
+      :hidden-field="refMetadata.hiddenField"
       :formId="formId"
       :formFlow="formFlow"
-      :unit="metadata.unit"
-      :link-text="metadata.linkText"
+      :unit="refMetadata.unit"
+      :link-text="refMetadata.linkText"
       :isMetadataOnRelation="isMetadataOnRelation"
       :isRootdataOnRelation="isRootdataOnRelation"
       :error="errorMessage"
-      :relation-filter="metadata.inputField.relationFilter"
+      :relation-filter="refMetadata.inputField.relationFilter"
       :show-errors="
         showErrors ||
         (meta.dirty &&
           !fieldIsValid &&
-          metadata.inputField?.validation?.fastValidationMessage)
+          refMetadata.inputField?.validation?.fastValidationMessage)
       "
       :field-is-valid="fieldIsValid"
       :is-field-required="isFieldRequired"
@@ -57,60 +57,61 @@
           >
             <MetadataTruncatedText
               @overflow-status="handleOverflowStatus"
-              :disabled="!linkedEntityId && !metadata.lineClamp"
-              :line-clamp="metadata.lineClamp || 1"
+              :disabled="!linkedEntityId && !refMetadata.lineClamp"
+              :line-clamp="refMetadata.lineClamp || 1"
             >
               <MetadataFormatter
-                v-if="metadata.value?.formatter"
-                v-bind="metadata.value"
-                :translation-key="metadata.valueTranslationKey"
+                v-if="refMetadata.value?.formatter"
+                v-bind="refMetadata.value"
+                :translation-key="refMetadata.valueTranslationKey"
               />
               <ViewModesAutocompleteRelations
                 v-else-if="
-                  (metadata.inputField?.type ===
+                  (refMetadata.inputField?.type ===
                     InputFieldTypes.DropdownMultiselectRelations ||
-                    metadata.inputField?.type ===
+                    refMetadata.inputField?.type ===
                       InputFieldTypes.DropdownSingleselectRelations) &&
-                  metadata.value &&
-                  !metadata.value?.formatter &&
-                  metadata.value?.length > 0
+                  refMetadata.value &&
+                  !refMetadata.value?.formatter &&
+                  refMetadata.value?.length > 0
                 "
-                v-model="metadata.value"
+                v-model="refMetadata"
                 :is-read-only="true"
-                :field-name="metadata.label"
+                :field-name="refMetadata.label"
                 :formId="formId"
                 :metadata-key-to-get-options-for="
                   metadataKeyToGetOptionsForRelationDropdown
                 "
                 :advanced-filter-input-for-retrieving-options="
-                  metadata.inputField.advancedFilterInputForRetrievingOptions
+                  refMetadata.inputField.advancedFilterInputForRetrievingOptions
                 "
                 :advanced-filter-input-for-retrieving-related-options="
-                  metadata.inputField
+                  refMetadata.inputField
                     .advancedFilterInputForRetrievingRelatedOptions
                 "
                 :advanced-filter-input-for-retrieving-all-options="
-                  metadata.inputField.advancedFilterInputForRetrievingAllOptions
+                  refMetadata.inputField
+                    .advancedFilterInputForRetrievingAllOptions
                 "
-                :relation-filter="metadata.inputField.relationFilter"
-                :is-metadata-field="metadata.inputField?.isMetadataField"
-                :relation-type="metadata.inputField?.relationType"
-                :from-relation-type="metadata.inputField?.fromRelationType"
+                :relation-filter="refMetadata.inputField.relationFilter"
+                :is-metadata-field="refMetadata.inputField?.isMetadataField"
+                :relation-type="refMetadata.inputField?.relationType"
+                :from-relation-type="refMetadata.inputField?.fromRelationType"
                 :disabled="true"
                 @click.stop.prevent
               />
               <ViewModesAutocompleteMetadata
                 v-else-if="
-                  metadata.inputField?.type ===
+                  refMetadata.inputField?.type ===
                     InputFieldTypes.DropdownMultiselectMetadata ||
-                  metadata.inputField?.type ===
+                  refMetadata.inputField?.type ===
                     InputFieldTypes.DropdownSingleselectMetadata
                 "
-                v-model:model-value="metadata.value"
-                :metadata-dropdown-options="metadata.inputField.options"
+                v-model:model-value="refMetadata"
+                :metadata-dropdown-options="refMetadata.inputField.options"
                 :formId="formId"
                 :select-type="
-                  metadata.inputField.type ===
+                  refMetadata.inputField.type ===
                   InputFieldTypes.DropdownSingleselectMetadata
                     ? 'single'
                     : 'multi'
@@ -121,20 +122,20 @@
               />
               <entity-element-metadata
                 v-else
-                :label="metadata.label as string"
+                :label="refMetadata.label as string"
                 v-model:value="value"
-                :link-text="metadata.linkText"
-                :link-icon="metadata.linkIcon"
-                :unit="metadata.unit"
+                :link-text="refMetadata.linkText"
+                :link-icon="refMetadata.linkIcon"
+                :unit="refMetadata.unit"
                 :base-library-mode="baseLibraryMode"
-                :custom-value="metadata.customValue"
-                :translation-key="metadata.valueTranslationKey"
+                :custom-value="refMetadata.customValue"
+                :translation-key="refMetadata.valueTranslationKey"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard
-              v-if="metadata.copyToClipboard"
+              v-if="refMetadata.copyToClipboard"
               class="w-6 h-6"
-              :value="metadata.value"
+              :value="refMetadata.value"
               @click.stop.prevent
             />
           </div>
@@ -142,20 +143,20 @@
         <template #default>
           <entity-element-metadata
             class="text-text-placeholder"
-            :label="metadata.label as string"
+            :label="refMetadata.label as string"
             v-model:value="metadataValueToDisplayOnTooltip"
-            :link-text="metadata.linkText"
-            :link-icon="metadata.linkIcon"
-            :unit="metadata.unit"
+            :link-text="refMetadata.linkText"
+            :link-icon="refMetadata.linkIcon"
+            :unit="refMetadata.unit"
             :base-library-mode="baseLibraryMode"
           />
         </template>
       </base-tooltip>
       <MetadataValueTooltip
         class="grow-0 shrink-0 basis-0 items-center"
-        v-if="metadata.valueTooltip?.type && metadata.value"
-        :value-tooltip="metadata.valueTooltip"
-        :entity="metadata.value?.entity"
+        v-if="refMetadata.valueTooltip?.type && refMetadata.value"
+        :value-tooltip="refMetadata.valueTooltip"
+        :entity="refMetadata.value?.entity"
       />
     </div>
   </div>
@@ -215,6 +216,16 @@ const props = withDefaults(
 
 const showTooltip = ref<boolean>(false);
 const isPermitted = ref<boolean>(false);
+const refMetadata = ref<
+  PanelMetaData | PanelRelationMetaData | PanelRelationRootData
+>(props.metadata);
+
+watch(
+  () => props.metadata,
+  (newValue) => {
+    refMetadata.value = newValue;
+  },
+);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
@@ -228,8 +239,8 @@ const setNewValue = (
     | BaseRelationValuesInput[],
 ) => {
   if (
-    props.metadata?.inputField &&
-    props.metadata.inputField.type === InputFieldTypes.Date
+    refMetadata.value?.inputField &&
+    refMetadata.value.inputField.type === InputFieldTypes.Date
   ) {
     const parsedDate = DateTime.fromISO(newValue);
     if (parsedDate.isValid) value.value = parsedDate.toFormat("yyyy-MM-dd");
@@ -248,31 +259,31 @@ defineExpose({
 });
 
 const metadataValueToDisplayOnTooltip = computed(
-  () => props.metadata?.value?.label || value.value,
+  () => refMetadata.value?.value?.label || value.value,
 );
 
 const isMetadataOnRelation = computed(
-  () => props.metadata.__typename === "PanelRelationMetaData",
+  () => refMetadata.value.__typename === "PanelRelationMetaData",
 );
 const isRootdataOnRelation = computed(
-  () => props.metadata.__typename === "PanelRelationRootData",
+  () => refMetadata.value.__typename === "PanelRelationRootData",
 );
 const fieldKeyWithId = computed(
   () =>
-    `${props.metadata.key}${
+    `${refMetadata.value.key}${
       props.linkedEntityId ? "-" + props.linkedEntityId : ""
     }`,
 );
 const fieldIsValid = computed(() => meta.valid);
 
 const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
-  const field = props.metadata.inputField;
+  const field = refMetadata.value.inputField;
   if (field.entityType) return field.entityType;
 
   const fieldKey =
     isMetadataOnRelation.value || isRootdataOnRelation.value
       ? fieldKeyWithId.value
-      : props.metadata.key;
+      : refMetadata.value.key;
 
   return field.advancedFilterInputForSearchingOptions?.item_types
     ? field.advancedFilterInputForSearchingOptions?.item_types[0]
@@ -282,42 +293,42 @@ const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
 const { conditionalFieldIsRequired } = useConditionalValidation();
 
 const isRequiredRelationField = computed(() => {
-  return !!props.metadata?.inputField?.validation?.value?.includes(
+  return !!refMetadata.value?.inputField?.validation?.value?.includes(
     ValidationRules.HasRequiredRelation,
   );
 });
 const isOneOfRequiredRelationField = computed(() => {
-  return !!props.metadata?.inputField?.validation?.value?.includes(
+  return !!refMetadata.value?.inputField?.validation?.value?.includes(
     ValidationRules.HasOneOfRequiredRelations,
   );
 });
 const isOneOfRequiredMetadataField = computed(() => {
-  return !!props.metadata?.inputField?.validation?.value?.includes(
+  return !!refMetadata.value?.inputField?.validation?.value?.includes(
     ValidationRules.HasOneOfRequiredMetadata,
   );
 });
 const isRegexField = computed(() => {
-  return !!props.metadata?.inputField?.validation?.value?.includes(
+  return !!refMetadata.value?.inputField?.validation?.value?.includes(
     ValidationRules.Regex,
   );
 });
 
 const isFieldRequired = computed(() => {
   if (
-    props.metadata?.inputField?.validation?.value?.includes(
+    refMetadata.value?.inputField?.validation?.value?.includes(
       ValidationRules.Required,
     ) ||
-    props.metadata?.inputField?.validation?.value?.includes(
+    refMetadata.value?.inputField?.validation?.value?.includes(
       ValidationRules.HasRequiredRelation,
     ) ||
-    props.metadata?.inputField?.validation?.value?.includes(
+    refMetadata.value?.inputField?.validation?.value?.includes(
       ValidationRules.HasOneOfRequiredRelations,
     )
   )
     return true;
-  if (props.metadata?.inputField?.validation?.required_if) {
+  if (refMetadata.value?.inputField?.validation?.required_if) {
     return conditionalFieldIsRequired(
-      props.metadata?.inputField?.validation?.required_if,
+      refMetadata.value?.inputField?.validation?.required_if,
       props.formId,
       mediafileViewerContext,
     );
@@ -326,7 +337,7 @@ const isFieldRequired = computed(() => {
 });
 
 const isMaxDateToday = computed(() => {
-  return props.metadata?.inputField?.validation?.value?.includes(
+  return refMetadata.value?.inputField?.validation?.value?.includes(
     ValidationRules.MaxDateToday,
   );
 });
@@ -391,20 +402,20 @@ const getValidationRules = (metadata: PanelMetaData): string => {
   return rules;
 };
 
-const rules = computed(() => getValidationRules(props.metadata));
+const rules = computed(() => getValidationRules(refMetadata.value));
 const label = computed(() =>
-  props.metadata.label
-    ? t(props.metadata.label as string)
+  refMetadata.value.label
+    ? t(refMetadata.value.label as string)
     : t("metadata.no-label"),
 );
 
 const veeValidateField = computed(() => {
-  if (!props.metadata?.inputField && !props.linkedEntityId) {
-    const key = fieldKeyWithId.value || props.metadata.key;
+  if (!refMetadata.value?.inputField && !props.linkedEntityId) {
+    const key = fieldKeyWithId.value || refMetadata.value.key;
     return `${ValidationFields.IntialValues}.${key}`;
   }
   if (isRegexField.value) {
-    const key = fieldKeyWithId.value || props.metadata.key;
+    const key = fieldKeyWithId.value || refMetadata.value.key;
     return `${ValidationFields.IntialValues}.${key}`;
   }
   if (isMetadataOnRelation.value)
@@ -416,19 +427,19 @@ const veeValidateField = computed(() => {
     !props.isEdit
   ) {
     return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
-      props.metadata,
+      refMetadata.value,
     )}`;
   } else if (
     isRequiredRelationField.value ||
     isOneOfRequiredRelationField.value
   ) {
-    return `${ValidationFields.RelationValues}.${props.metadata.inputField.relationType}`;
-  } else if (props.metadata.inputField)
+    return `${ValidationFields.RelationValues}.${refMetadata.value.inputField.relationType}`;
+  } else if (refMetadata.value.inputField)
     return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
-      props.metadata,
+      refMetadata.value,
     )}`;
   else if (props.linkedEntityId === undefined)
-    return `${ValidationFields.RelationValues}.${props.metadata.key}`;
+    return `${ValidationFields.RelationValues}.${refMetadata.value.key}`;
   else return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId.value}`;
 });
 
@@ -438,8 +449,8 @@ const { errorMessage, value, meta } = useField<
 
 onMounted(async () => {
   await isPermittedToDisplay();
-  if (props.metadata.hiddenField?.hidden) return;
-  setNewValue(props.metadata.value);
+  if (refMetadata.value.hiddenField?.hidden) return;
+  setNewValue(refMetadata.value.value);
 });
 
 const updatePermissionVariables = () => {
@@ -450,7 +461,7 @@ const updatePermissionVariables = () => {
 };
 
 const isPermittedToDisplay = async () => {
-  const permissions = props.metadata.can;
+  const permissions = refMetadata.value.can;
   const hasPermissionsToCheck = permissions && permissions?.length > 0;
 
   if (!hasPermissionsToCheck) {
@@ -460,19 +471,19 @@ const isPermittedToDisplay = async () => {
   isPermitted.value = await fetchAdvancedPermission(permissions);
 };
 
-if (typeof props.metadata.value !== "object") {
+if (typeof refMetadata.value.value !== "object") {
   watch(
-    () => props.metadata.value,
+    () => refMetadata.value.value,
     () => {
-      if (typeof props.metadata.value === "object") return;
-      setNewValue(props.metadata.value);
+      if (typeof refMetadata.value.value === "object") return;
+      setNewValue(refMetadata.value.value);
     },
   );
 }
 watch(
   () => props.isEdit,
   () => {
-    setNewValue(props.metadata.value);
+    setNewValue(refMetadata.value.value);
   },
 );
 watch(

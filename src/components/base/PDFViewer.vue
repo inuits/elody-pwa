@@ -44,7 +44,6 @@
 </template>
 
 <script lang="ts">
-// @ts-nocheck
 import { defineComponent, onMounted, watch, ref, toRefs } from "vue";
 import type { PropType } from "vue";
 //PDFJS imports

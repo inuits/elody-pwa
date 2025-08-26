@@ -52,7 +52,6 @@ export default defineComponent({
         const dragonOption: OpenSeadragon.Options = {
           element: OpenSeadragonDiv.value,
           prefixUrl: "/static/openseadragon/images/",
-          // @ts-ignore
           toolbar: document.getElementById("OpenSeadragon-toolbar"),
           tileSources: `/api/iiif/3/${props.imageFilename}/info.json`,
         };
@@ -79,7 +78,7 @@ export default defineComponent({
               try {
                 loading.value = true;
                 viewer.open(`/api/iiif/3/${value}/info.json`);
-              } catch (e) {
+              } catch {
                 loading.value = false;
               }
             }

@@ -13,7 +13,6 @@
 import BaseModal from "@/components/base/BaseModal.vue";
 import { TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { computed } from "vue";
 
 const { closeModal } = useBaseModal();
 </script>

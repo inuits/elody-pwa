@@ -339,7 +339,7 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid";
-    refetchEntities?: Function;
+    refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
     previewComponentCurrentActive: boolean;
     previewComponentFeatureEnabled: boolean;

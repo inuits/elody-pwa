@@ -4,7 +4,10 @@
     :label="element.label"
   >
     <template v-slot:content>
-      <div v-if="element.markdownContent" class="h-full bg-accent-highlight p-4">
+      <div
+        v-if="element.markdownContent"
+        class="h-full bg-accent-highlight p-4"
+      >
         <vue-markdown class="md" :source="element.markdownContent" />
       </div>
     </template>
@@ -15,7 +18,7 @@ import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import type { MarkdownViewerElement } from "@/generated-types/queries";
 import VueMarkdown from "vue-markdown-render";
 
-const props = defineProps<{ element: MarkdownViewerElement }>();
+defineProps<{ element: MarkdownViewerElement }>();
 </script>
 
 <style>

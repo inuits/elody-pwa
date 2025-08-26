@@ -1,12 +1,12 @@
 <template>
-  <dropzone-view
+  <Dropzone-view
     v-model="dropzoneView"
     :dropzone-label="dropzoneLabel"
     :isValidation="isValidationFile"
     :file-count="fileCount"
     :style="viewStyle"
   />
-  <dropzone-preview
+  <Dropzone-preview
     v-model="dropzonePreview"
     :isValidationFile="isValidationFile"
   />
@@ -38,7 +38,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{
+defineEmits<{
   (event: "updateFilesInDropzone", filesInDropzone: DropzoneFile[]): void;
 }>();
 const { dynamicFormUploadFields } = useDynamicForm();
@@ -66,15 +66,15 @@ onMounted(() => {
     dropzone.removeEventListeners();
   });
 
-  dropzone.on("dragleave", (event) => {
+  dropzone.on("dragleave", (event: DragEvent) => {
     event.preventDefault();
     dropzone.element.classList.remove("dropzone-highlight");
   });
-  dropzone.on("drop", (event) => {
+  dropzone.on("drop", (event: Event) => {
     event.preventDefault();
     dropzone.element.classList.remove("dropzone-highlight");
   });
-  dropzone.on("dragover", (event) => {
+  dropzone.on("dragover", (event: DragEvent) => {
     event.preventDefault();
     dropzone.element.classList.add("dropzone-highlight");
   });

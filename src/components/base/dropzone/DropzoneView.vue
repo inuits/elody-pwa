@@ -22,7 +22,7 @@ import { onMounted, ref } from "vue";
 
 const dropzoneView = ref<HTMLDivElement>();
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     modelValue: HTMLDivElement | undefined;
     dropzoneLabel: string;

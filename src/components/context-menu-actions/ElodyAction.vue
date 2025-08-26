@@ -48,7 +48,7 @@ const props = defineProps<{
     | "no-relation-found"
     | undefined;
   bulkOperationsContext: Context;
-  refetchEntities: Function;
+  refetchEntities: () => any;
 }>();
 
 const { deleteRelations, submit } = useDeleteRelations();

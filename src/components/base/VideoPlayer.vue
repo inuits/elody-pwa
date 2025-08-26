@@ -8,7 +8,7 @@
 </template>
 <script lang="ts" setup>
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
-import { onMounted, ref, inject } from "vue";
+import { ref, inject } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
 
 const props = defineProps<{
@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 
 const { getValueOfMediafile } = useEntityMediafileSelector();
-const { getMediafile, getMediafilePath } = useGetMediafile();
+const { getMediafilePath } = useGetMediafile();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 

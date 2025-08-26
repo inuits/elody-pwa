@@ -8,7 +8,7 @@
 <script lang="ts" setup>
 import type { PanelRelation } from "@/generated-types/queries";
 
-const props = defineProps<{
+defineProps<{
   relation: PanelRelation;
 }>();
 </script>

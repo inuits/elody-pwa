@@ -87,8 +87,7 @@ const { displaySuccessNotification, displayErrorNotification } =
 const { dequeueAllItemsForBulkProcessing, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getCallbackFunction, getInformationForBulkDeleteEntities } =
-  useModalActions();
+const { getInformationForBulkDeleteEntities } = useModalActions();
 const { deleteEntities, getDeletionForm, form } = useDeleteEntities();
 
 const modal = computed(() => {

@@ -61,7 +61,7 @@ const getImage = async () => {
     blobUrl.value = URL.createObjectURL(blob);
     imageUrl.value = blobUrl.value;
     isLoading.value = false;
-  } catch (_error: any) {
+  } catch {
     isLoading.value = false;
     emitError();
   }

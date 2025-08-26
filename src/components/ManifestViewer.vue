@@ -20,7 +20,6 @@
 <script lang="ts" setup>
 import { computed, onMounted, watch, ref } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
-// @ts-ignore
 import Mirador from "mirador/dist/mirador.min.js";
 import BaseTabs from "./BaseTabs.vue";
 import BaseTab from "./BaseTab.vue";

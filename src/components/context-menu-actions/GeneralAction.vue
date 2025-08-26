@@ -47,7 +47,7 @@ const doGeneralAction = async () => {
         );
         EventBus.emit(props.action);
       });
-  } catch (e) {
+  } catch {
     displayErrorNotification(
       t("notifications.errors.validation-error.title"),
       t("notifications.errors.validation-error.title"),

@@ -122,20 +122,20 @@ const route = useRoute();
 const entityFormData: any = inject("entityFormData");
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
 const { isEdit } = useEditMode(entityId.value);
-const defaultOption: DropdownOption = {
+const initialOption: DropdownOption = {
   icon: DamsIcons.AngleDown,
   label: "dropdown.select-option",
   value: "",
 };
-const allOptions = computed(() => [defaultOption, ...props.options]);
-const selectedItem = ref<DropdownOption>(props.defaultOption || defaultOption);
+const allOptions = computed(() => [initialOption, ...props.options]);
+const selectedItem = ref<DropdownOption>(props.defaultOption || initialOption);
 const selectedItemLabel = computed(() => {
   if (Array.isArray(selectedItem.value)) return selectedItem.value[0]?.label;
   return selectedItem.value?.label;
 });
 
 const selectDefaultItem = () => {
-  selectedItem.value = defaultOption;
+  selectedItem.value = initialOption;
 };
 defineExpose({
   selectDefaultItem,
@@ -160,7 +160,7 @@ const selectItem = (event: Event) => {
   if (
     !newlySelectedOption ||
     newlySelectedOption === selectedItem.value ||
-    newlySelectedOption === defaultOption
+    newlySelectedOption === initialOption
   )
     return;
   selectedItem.value = newlySelectedOption;

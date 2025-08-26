@@ -54,7 +54,7 @@
       :class="['flex flex-col w-full', `${getDropzoneSize(dropzoneSize)}`]"
       :key="uploadFieldType"
     >
-      <dropzone
+      <Dropzone
         :dropzone="dropzone"
         :dropzone-label="dropzoneLabel"
         view-style="p-3 h-full overflow-x-hidden mb-4 grow"

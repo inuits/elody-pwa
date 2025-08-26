@@ -43,7 +43,7 @@ const props = withDefaults(
     parentEntityId?: string;
     relation?: object | string;
     bulkOperationsContext: Context;
-    refetchEntities?: Function;
+    refetchEntities?: () => Promise<void>;
   }>(),
   {
     contextMenuActions: undefined,
@@ -76,7 +76,7 @@ const hasAvailableContextMenuActions = computed(() => {
 });
 
 const getAvailableContextMenuActions = () => {
-  const { __typename, ...menuActions } = { ...props.contextMenuActions };
+  const { ...menuActions } = { ...props.contextMenuActions };
   const availableOptions: Partial<ContextMenuActions> = { ...menuActions };
 
   for (const key in availableOptions) {

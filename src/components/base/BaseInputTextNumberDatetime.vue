@@ -125,7 +125,9 @@ const props = withDefaults(
     min?: number;
     max?: number;
     disabled?: boolean;
-    isValidPredicate?: Function;
+    isValidPredicate?: (
+      value: string | number | boolean | undefined,
+    ) => boolean;
     placeholder?: string;
   }>(),
   {

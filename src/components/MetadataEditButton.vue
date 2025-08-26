@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watch, inject, computed, onMounted } from "vue";
+import { watch, inject, computed } from "vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import BaseButtonNew, {
   type ButtonSize,
@@ -41,7 +41,7 @@ import { DamsIcons } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 import type { useEditState } from "@/composables/useEditState";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     buttonSize?: ButtonSize;
     readmodeLabel?: string;
