@@ -499,12 +499,16 @@ onMounted(() => {
   emit("filterMatcherMappingPromise", filterMatcherMappingPromise);
   emit("advancedFiltersPromise", advancedFiltersPromise);
   lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
+  updateFilterVariables();
+});
+
+const updateFilterVariables = () => {
   setVariables({
     parentIds: props.parentEntityIdentifiers,
     entityType: props.entityType,
     entity: parentEntity?.value,
   });
-});
+}
 
 if (props.parentEntityIdentifiers.length > 0)
   watch(
@@ -550,6 +554,15 @@ watch(
     setActiveSavedFilter(null);
     lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
   },
+);
+
+watch(
+  () => parentEntity,
+  () => {
+    updateFilterVariables();
+    handleAdvancedFilters();
+  },
+  { deep: true }
 );
 
 const clearAllFilters = async ({

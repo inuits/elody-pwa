@@ -303,7 +303,7 @@ const handleSelectedBulkOperation = () => {
     bulkOperationType === BulkOperationTypes.ReorderEntities ||
     bulkOperationType === BulkOperationTypes.DeleteEntities
   ) {
-    setCallbackFunctions([props.refetchEntities]);
+    setCallbackFunctions([refetchParentEntity, props.refetchEntities]);
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {

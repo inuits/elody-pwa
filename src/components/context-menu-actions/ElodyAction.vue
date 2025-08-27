@@ -69,6 +69,7 @@ const useEditHelper = useEditMode(entityFormData.id);
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
+const refetchParentEntity: any = inject("RefetchParentEntity");
 
 const entityTypeLabel = computed(() =>
   t(`entity-translations.singular.${props.entityType}`),
@@ -97,6 +98,7 @@ const deleteRelation = async () => {
     [props.relation.relation],
     props.bulkOperationsContext,
   );
+  await refetchParentEntity();
   await props.refetchEntities();
 };
 

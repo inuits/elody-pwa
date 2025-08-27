@@ -56,7 +56,7 @@ import { useDeleteRelations } from "@/composables/useDeleteRelations";
 const { t } = useI18n();
 const { getEnqueuedItems } = useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getRelationType, getParentId, getCollection } = useModalActions();
+const { getRelationType, getParentId, getCollection, getCallbackFunctions } = useModalActions();
 const useEditHelper = useEditMode(getParentId());
 
 const { deleteRelations, submit } = useDeleteRelations();
@@ -70,7 +70,7 @@ const getSelectedItems = () => {
   return getEnqueuedItems(context);
 };
 
-const deleteSelectedRelations = () => {
+const deleteSelectedRelations = async () => {
   useEditHelper.setSubmitFunction(() =>
     submit(
       getParentId() as string,
@@ -84,6 +84,10 @@ const deleteSelectedRelations = () => {
     getSelectedItems(),
     modal.value.context as Context,
   );
+  const callbackFunctions = getCallbackFunctions() || [];
+  for (const callback of callbackFunctions) {
+    if (callback) await callback();
+  }
 };
 </script>
 
