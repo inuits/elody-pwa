@@ -835,6 +835,8 @@ export const sanitizeHtml = (content: any) => {
       "ol",
       "ul",
       "br",
+      "b",
+      "i",
     ],
   });
 };

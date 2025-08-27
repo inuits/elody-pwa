@@ -40,7 +40,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).not.toContain("<script>");
     expect(contentDiv.html()).toContain("Hello world");
   });
@@ -54,7 +54,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).not.toContain("onerror");
     expect(contentDiv.html()).toContain('<img src="invalid-image">');
   });
@@ -67,7 +67,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).not.toContain("href");
     expect(contentDiv.text()).toContain("Click me");
   });
@@ -81,7 +81,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).not.toContain("onerror");
     expect(contentDiv.html()).toContain('<div>Hello<img src="x"></div>');
   });
@@ -94,7 +94,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).toContain("<b>bold</b>");
     expect(contentDiv.html()).toContain("<i>italic</i>");
   });
@@ -107,7 +107,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).toContain(
       "First line<br>Second line<br>Third line",
     );
@@ -121,7 +121,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.element.innerHTML).toBe("");
   });
 
@@ -134,7 +134,7 @@ describe("File Content Sanitization", () => {
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
-    const contentDiv = wrapper.find("p");
+    const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     const sanitizedHtml = contentDiv.html();
 
     expect(sanitizedHtml).toContain("<b>Safe and bold</b>");
