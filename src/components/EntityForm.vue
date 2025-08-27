@@ -111,6 +111,8 @@ const submit = useSubmitForm<EntityValues>(async () => {
   });
 
   if (!result?.data?.mutateEntityValues) return;
+  console.log("Executing refetch function from here");
+  callRefetchFns();
   mutatedEntity = result.data.mutateEntityValues as Entity;
   setValues({
     intialValues: mutatedEntity.intialValues,
@@ -135,17 +137,24 @@ provide("entityFormData", {
     )?.type || Collection.Entities,
 });
 
-const callRefetchFn = () => {
-  const refetch = useEditHelper.refetchFn;
-  if (refetch) refetch();
+const callRefetchFns = async () => {
+  console.log("CALL REFETCH FNS FROM HERE!");
+  const refetchFunctions = useEditHelper.refetchFns;
+  if (refetchFunctions && refetchFunctions.length > 0) {
+    for (const refetch of refetchFunctions) {
+      console.log("Executing 1 refetch function to be precise!");
+      if (refetch) await refetch();
+    }
+  }
+  useEditHelper.clearRefetchFunctions();
 };
 
 onMounted(async () => {
-  document.addEventListener("discardEdit", () => callRefetchFn);
+  document.addEventListener("discardEdit", () => callRefetchFns);
   if (!isPreviewElement) updateDeleteQueryOptions(props.deleteQueryOptions);
 });
 onUnmounted(() => {
-  document.removeEventListener("discardEdit", () => callRefetchFn);
+  document.removeEventListener("discardEdit", () => callRefetchFns);
 });
 
 watch(useEditHelper, () => {

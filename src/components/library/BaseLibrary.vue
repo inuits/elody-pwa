@@ -222,6 +222,7 @@
             :refetch-entities="refetchEntities"
             :entity-type="entityType"
             :show-current-entity-flow="showCurrentEntityFlow"
+            @add-refetch-function-to-edit-state="addRefetchFunctionToEditState"
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
@@ -307,6 +308,8 @@ import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useEditMode } from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
@@ -399,6 +402,7 @@ const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const showCurrentPreviewFlow: boolean = inject("showCurrentPreviewFlow", true);
+const { getEntityUuid } = useEntitySingle();
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
@@ -406,11 +410,13 @@ const { getGlobalState, updateGlobalState, getStateForRoute } =
   useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
+const useEditHelper = useEditMode(getEntityUuid());
 
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
 const isInitialLoading = ref<boolean>(true);
+const refetchFunctionAdded = ref<boolean>(false);
 
 const showCurrentEntityFlow = computed(() => {
   if (!isPreviewElement) return true;
@@ -772,6 +778,13 @@ const unSetQueryVariablesForMapViewmode = (): void => {
   setPaginationLimit(20, true);
 };
 
+const addRefetchFunctionToEditState = (): void => {
+  if (refetchFunctionAdded.value) return;
+  console.log("Going to add refetch function, because refetchFunctionAdded = !", refetchFunctionAdded.value);
+  useEditHelper.addRefetchFunction(refetchEntities);
+  refetchFunctionAdded.value = true
+};
+
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
@@ -902,6 +915,17 @@ watch(
     setLocale(newValue);
     refetchEntities();
   },
+);
+
+watch(
+  () => useEditHelper.isEdit,
+  (isEdit: boolean) => {
+    if (!isEdit) {
+      console.log("Setting refetchFunctionAdded = false!");
+      refetchFunctionAdded.value = false;
+    }
+  },
+  { immediate: true },
 );
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {

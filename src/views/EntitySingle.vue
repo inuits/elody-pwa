@@ -184,6 +184,9 @@ onBeforeRouteUpdate(async (to: any) => {
 watch(
   () => result.value,
   () => {
+    console.log("-----------------------------");
+    console.log("NEW RESULT");
+
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value || !entity.value.intialValues) return;
     useEditHelper.value = useEditMode(entity.value.id);
@@ -237,8 +240,7 @@ watch(
         } else useEditHelper.value.hideEditButton();
       });
     }
-
-    useEditHelper.value.setRefetchFn(refetch);
+    useEditHelper.value.addRefetchFunction(refetch);
     loading.value = false;
   },
 );

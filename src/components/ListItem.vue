@@ -169,6 +169,7 @@
                 v-model:metadata="metadataItem as MetadataField"
                 :is-edit="useEditHelper.isEdit"
                 :linked-entity-id="intialValues?.id || itemId"
+                @add-refetch-function-to-edit-state="() => emit('addRefetchFunctionToEditState')"
               />
             </div>
           </div>
@@ -375,6 +376,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "navigateTo"): void;
   (event: "togglePreviewComponent", previewForEntityId: string): void;
+  (event: "addRefetchFunctionToEditState"): void;
 }>();
 
 const { t } = useI18n();

@@ -191,12 +191,6 @@ import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
-const { t } = useI18n();
-const { getForm, getKeyBasedOnInputField } = useFormHelper();
-const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
-
-const mediafileViewerContext: any = inject("mediafileViewerContext");
-
 const props = withDefaults(
   defineProps<{
     isEdit: boolean;
@@ -213,6 +207,15 @@ const props = withDefaults(
     showErrors: false,
   },
 );
+
+const emit = defineEmits<{
+  (event: "addRefetchFunctionToEditState"): void;
+}>();
+
+const mediafileViewerContext: any = inject("mediafileViewerContext");
+const { getForm, getKeyBasedOnInputField } = useFormHelper();
+const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
+const { t } = useI18n();
 
 const showTooltip = ref<boolean>(false);
 const isPermitted = ref<boolean>(false);
@@ -251,6 +254,9 @@ const setNewValue = (
   const form = getForm(props.formId);
   if (form) {
     form.setFieldValue(veeValidateField.value, value.value);
+  }
+  if (isMetadataOnRelation.value && props.isEdit && meta.dirty) {
+    emit('addRefetchFunctionToEditState');
   }
 };
 
