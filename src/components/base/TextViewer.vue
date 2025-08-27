@@ -1,15 +1,16 @@
 <template>
   <div class="flex w-full h-full relative">
     <div class="w-full h-full p-4 bg-neutral-20 overflow-y-scroll">
-      <sanitized-html :html-content="fileContent" />
+      <sanitized-html :mode="SanitizeMode.Html" :content="fileContent" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useGetMediafile } from "@/composables/useGetMediafile";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { SanitizeMode } from "@/generated-types/queries";
 
 interface Source {
   intialValues: {

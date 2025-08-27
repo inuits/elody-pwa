@@ -32,11 +32,14 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <SanitizedHtml :html-content="processedLink"></SanitizedHtml>
+        <SanitizedHtml :content="processedLink"></SanitizedHtml>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)">
-        <SanitizedHtml :html-content="readableValue"></SanitizedHtml>
+        <SanitizedHtml
+          :mode="SanitizeMode.Html"
+          :content="processedDisplayValue.toString()"
+        ></SanitizedHtml>
       </p>
       <p v-else data-cy="metadata-value" class="whitespace-pre-line">
         {{ processedDisplayValue }}
@@ -46,8 +49,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { Unit, DamsIcons } from "@/generated-types/queries";
-import { BaseLibraryModes } from "@/generated-types/queries";
+import {
+  BaseLibraryModes,
+  type DamsIcons,
+  SanitizeMode,
+  type Unit,
+} from "@/generated-types/queries";
 import {
   convertUnitToReadbleFormat,
   processTextWithLinks,

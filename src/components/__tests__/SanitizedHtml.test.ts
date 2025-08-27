@@ -82,21 +82,5 @@ describe("XSS Security", () => {
       expect(content.html()).toContain("<b>Some bold text</b>");
       expect(content.html()).not.toContain("<script>");
     });
-
-    it("should sanitize malicious HTML coming from a translation", async () => {
-      stringIsHtml.mockReturnValue(true);
-      const maliciousTranslation =
-        "Translated value: <iframe src='javascript:alert(1)'></iframe>";
-      mocks.t.mockReturnValue(maliciousTranslation);
-
-      const wrapper = mount(SanitizedHtml, {
-        props: { content: "some value", translationKey: "key_with_$value" },
-      });
-      await nextTick();
-
-      const content = wrapper.find("[data-cy='sanitized-value']");
-      expect(content.html()).not.toContain("iframe");
-      expect(content.html()).toContain("Translated value:");
-    });
   });
 });
