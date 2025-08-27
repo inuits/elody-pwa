@@ -221,7 +221,7 @@ const usePermissions = () => {
       .map((option: DropdownOption) => option.can as string[]);
 
     const promises = listOfPermissions.map((item: string[]) => {
-      return fetchAdvancedPermission(item);
+      return fetchAdvancedPermission(item, true);
     });
 
     await Promise.all(promises);
