@@ -132,6 +132,7 @@ const permissionToEdit = ref<boolean>();
 const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
+provide("RefetchParentEntity", refetch);
 const entityForBreadcrumb = ref<Entity>();
 
 const addContextToState = (context: string): void => {

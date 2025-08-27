@@ -17,17 +17,16 @@ export type DownloadMediafilesInformation = {
   includeAssetCsv: boolean;
 };
 
-type SubmitArguments = BaseRelationValuesInput[] | (() => any);
-
+type SubmitArguments = BaseRelationValuesInput[] | Function[] | undefined;
 const parentId = ref<string | undefined>(undefined);
 const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
-const callbackFunction = ref<() => any | undefined>(undefined);
+const callbackFunctions = ref<Function[] | undefined>(undefined);
 const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
 
 const downloadMediafilesInformation = ref<
   DownloadMediafilesInformation | undefined
->(undefined);
+>(undefined)
 const savedSearchInformation = ref<any | undefined>(undefined);
 const deletionInformation = ref<{ title: string } | undefined>(undefined);
 const skipItemsWithRelationDuringBulkDelete = ref<string[] | undefined>(
@@ -47,7 +46,7 @@ export const useModalActions = () => {
       return relations;
     }
 
-    return callbackFunction.value;
+    return callbackFunctions.value;
   };
 
   const getArgumentsForDownload = (): {
@@ -150,13 +149,13 @@ export const useModalActions = () => {
     parent: string,
     relation: string,
     col: Collection,
-    callbackFn: () => any,
+    callbackFns: Function[],
     bulkoperationType: BulkOperationTypes,
   ): void => {
     parentId.value = parent;
     relationType.value = relation;
     collection.value = col;
-    callbackFunction.value = callbackFn;
+    callbackFunctions.value = callbackFns;
     bulkOperationType.value = bulkoperationType;
   };
 
@@ -176,7 +175,7 @@ export const useModalActions = () => {
   };
 
   const initializePropertiesForCreateEntity = (): void => {
-    if (!parentId.value) callbackFunction.value = undefined;
+    if (!parentId.value) callbackFunctions.value = undefined;
   };
 
   const initializePropertiesForSavedSearch = (savedSearchInfo: any): void => {
@@ -208,23 +207,23 @@ export const useModalActions = () => {
     return bulkOperationType.value;
   };
 
-  const getCallbackFunction = () => {
-    return callbackFunction.value;
+  const getCallbackFunctions = (): Function[] | undefined => {
+    return callbackFunctions.value;
   };
 
   const getRelationType = () => relationType.value;
 
   const getCollection = () => collection.value;
 
-  const setCallbackFunction = (callback: () => any) => {
-    callbackFunction.value = callback;
+  const setCallbackFunctions = (callback: Function[]) => {
+    callbackFunctions.value = callback;
   };
 
   const resetAllProperties = () => {
     parentId.value = undefined;
     relationType.value = undefined;
     collection.value = undefined;
-    callbackFunction.value = undefined;
+    callbackFunctions.value = undefined;
     bulkOperationType.value = undefined;
     downloadMediafilesInformation.value = undefined;
     savedSearchInformation.value = undefined;
@@ -242,10 +241,10 @@ export const useModalActions = () => {
     initializePropertiesForBulkDeleteEntities,
     getParentId,
     getBulkOperationType,
-    getCallbackFunction,
+    getCallbackFunctions,
     getInformationForDelete,
     getInformationForBulkDeleteEntities,
-    setCallbackFunction,
+    setCallbackFunctions,
     getRelationType,
     getCollection,
     resetAllProperties,

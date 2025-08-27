@@ -117,7 +117,7 @@ const useEditHelper = useEditMode(getEntityId());
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
 const { displaySuccessNotification } = useBaseNotification();
-const { getCallbackFunction } = useModalActions();
+const { getCallbackFunctions } = useModalActions();
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -210,8 +210,10 @@ const submit = useSubmitForm<EntityValues>(async () => {
     t("notifications.success.entityUpdated.description"),
   );
   if (form) form.resetForm({ values: form.values });
-  const callback = getCallbackFunction();
-  if (callback) await callback();
+  const callbackFunctions = getCallbackFunctions();
+  for (const callback of callbackFunctions) {
+    if (callback) await callback();
+  }
   closeModal(TypeModals.DynamicForm);
 });
 

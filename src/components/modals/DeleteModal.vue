@@ -124,7 +124,7 @@ const { closeModal, getModalInfo } = useBaseModal();
 const { initializeConfirmModal } = useConfirmModal();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
-const { getParentId, getCallbackFunction, getInformationForDelete } =
+const { getParentId, getCallbackFunctions, getInformationForDelete } =
   useModalActions();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
@@ -182,7 +182,10 @@ const cleanupAfterDeletion = async () => {
 
 const deleteButtonClicked = async () => {
   await deleteSelectedItems();
-  getCallbackFunction()?.();
+  const callbackFunctions = getCallbackFunctions();
+  for (const callback of callbackFunctions) {
+    if (callback) callback();
+  }
   await cleanupAfterDeletion();
 };
 

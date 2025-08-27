@@ -112,7 +112,7 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { apolloClient } from "@/main";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useQuery } from "@vue/apollo-composable";
 import { useImport } from "@/composables/useImport";
@@ -176,6 +176,7 @@ const emit = defineEmits<{
   (event: "initializeEntityPickerComponent"): void;
 }>();
 
+const refetchParentEntity: any = inject("RefetchParentEntity");
 const route = useRoute();
 const { getStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
@@ -204,7 +205,7 @@ const {
   initializePropertiesForCreateEntity,
   initializePropertiesForBulkDeleteRelations,
   initializePropertiesForBulkDeleteEntities,
-  setCallbackFunction,
+  setCallbackFunctions,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 
@@ -282,7 +283,10 @@ const handleSelectedBulkOperation = () => {
     useEntitySingle().getEntityUuid() || route.params.id,
     modal?.formRelationType,
     route.meta.type,
-    props.refetchEntities,
+    [
+      refetchParentEntity,
+      props.refetchEntities
+    ],
     bulkOperationType,
   );
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
@@ -299,7 +303,7 @@ const handleSelectedBulkOperation = () => {
     bulkOperationType === BulkOperationTypes.ReorderEntities ||
     bulkOperationType === BulkOperationTypes.DeleteEntities
   ) {
-    setCallbackFunction(props.refetchEntities);
+    setCallbackFunctions([props.refetchEntities]);
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {

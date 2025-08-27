@@ -340,7 +340,7 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
-const { extractActionArguments, getCallbackFunction } = useModalActions();
+const { extractActionArguments, getCallbackFunctions } = useModalActions();
 const route = useRoute();
 
 const { mutate } = useMutation<
@@ -523,10 +523,15 @@ const submitActionFunction = async (field: FormAction) => {
       .CreateEntity;
     showErrors.value = false;
     await getTenants();
-    const callbackFunction: () => any = extractActionArguments(
-      field.actionType as ActionType,
+    const callbackFunctions: Function[] | undefined = extractActionArguments(
+      field.actionType
     );
-    if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
+    if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
+      for (const callback of callbackFunctions) {
+        console.log("Executing callback");
+        if (callback) await callback();
+      }
+    }
     else {
       if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
         tagNewlyCreatedEntity(entity);
@@ -690,8 +695,12 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
   if (formContainsErrors.value) return;
   try {
     await uploadCsvForReordering(extractActionArguments(field.actionType));
-    const callback = getCallbackFunction();
-    if (callback) await callback();
+    const callbackFunctions = getCallbackFunctions();
+    if (callbackFunctions !== undefined) {
+      for (const callback of callbackFunctions) {
+        if (callback) await callback();
+      }
+    }
     closeAndDeleteForm();
     displaySuccessNotification(
       t("notifications.success.csvReordering.title"),

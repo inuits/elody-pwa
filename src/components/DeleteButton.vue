@@ -103,7 +103,7 @@ const openDeleteModal = () => {
       form.values.uuid,
       undefined,
       route.meta.type,
-      deleteEntity,
+      [deleteEntity],
       undefined,
     );
     initializePropertiesForDeletion(title);
