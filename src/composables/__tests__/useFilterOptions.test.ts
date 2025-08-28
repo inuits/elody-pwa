@@ -100,4 +100,22 @@ describe("useFilterOptions - data mapping", () => {
       { icon: expect.anything(), label: "Fallback Title 2", value: "2" },
     ]);
   });
+
+  it("extracts dropdown options labels and values from formatter value correctly", async () => {
+    const { options, entities, init } = useFilterOptions();
+
+    const mockEntities = [
+      { id: "1", name: "Entity 1", title: { label: 'title1', formatter: 'pill' } },
+      { id: "2", name: "Entity 2", title: { label: 'title2', formatter: 'pill' } },
+    ];
+
+    await init("TEST_ENTITY", { value: "title", label: "title" });
+    
+    entities.value = mockEntities;
+
+    expect(options.value).toEqual([
+      { icon: expect.anything(), label: "title1", value: "title1" },
+      { icon: expect.anything(), label: "title2", value: "title2" },
+    ]);
+  });
 });

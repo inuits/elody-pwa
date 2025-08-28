@@ -215,8 +215,8 @@ export const useFilterOptions = () => {
 
     const baseOption = {
       icon: DamsIcons.NoIcon,
-      label: labelValue || getEntityTitle(entity),
-      value: valueValue || entity.id,
+      label: getReadableProp(labelValue) || getEntityTitle(entity),
+      value: getReadableProp(valueValue) || entity.id,
     };
 
     const count = counts.get(baseOption.value);
@@ -240,8 +240,8 @@ export const useFilterOptions = () => {
     return arrayValue.map((item) => {
       const baseOption = {
         icon: DamsIcons.NoIcon,
-        label: item,
-        value: item,
+        label: getReadableProp(item),
+        value: getReadableProp(item),
       };
 
       const count = counts.get(baseOption.value);
@@ -251,6 +251,11 @@ export const useFilterOptions = () => {
       return baseOption;
     });
   };
+
+  const getReadableProp = (labelProp?: string | { label: string, formatter: string}) => {
+    if (!labelProp) return "";
+    return typeof labelProp === 'string' ? labelProp : labelProp.label;
+  }
 
   const getOptionsForEntity = (entity: BaseEntity): DropdownOption[] => {
     const { label: labelPath = "", value: valuePath = "" } =
