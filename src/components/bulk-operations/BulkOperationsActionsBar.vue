@@ -206,6 +206,8 @@ const {
   initializePropertiesForBulkDeleteRelations,
   initializePropertiesForBulkDeleteEntities,
   setCallbackFunctions,
+  resetAllProperties,
+  getCallbackFunctions,
 } = useModalActions();
 const { openModal, getModalInfo } = useBaseModal();
 
@@ -286,7 +288,7 @@ const handleSelectedBulkOperation = () => {
     [
       refetchParentEntity,
       props.refetchEntities
-    ],
+    ].filter(Boolean),
     bulkOperationType,
   );
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
@@ -303,7 +305,7 @@ const handleSelectedBulkOperation = () => {
     bulkOperationType === BulkOperationTypes.ReorderEntities ||
     bulkOperationType === BulkOperationTypes.DeleteEntities
   ) {
-    setCallbackFunctions([refetchParentEntity, props.refetchEntities]);
+    setCallbackFunctions([refetchParentEntity, props.refetchEntities].filter(Boolean));
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
@@ -344,6 +346,19 @@ watch(
     if (!type) return;
     refetch({ entityType: type });
   },
+);
+
+watch(
+  () => [
+    getModalInfo(TypeModals.DynamicForm).open,
+    getModalInfo(TypeModals.BulkOperations).open, 
+    getModalInfo(TypeModals.BulkOperationsDeleteEntities).open
+  ].some(isOpen => isOpen),
+  (isAnyModalOpen) => {
+    if (!isAnyModalOpen) {
+      resetAllProperties();
+    }
+  }
 );
 
 watch(

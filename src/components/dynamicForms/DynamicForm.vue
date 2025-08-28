@@ -528,7 +528,6 @@ const submitActionFunction = async (field: FormAction) => {
     );
     if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
       for (const callback of callbackFunctions) {
-        console.log("Executing callback");
         if (callback) await callback();
       }
     }
@@ -575,10 +574,14 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
 
     showErrors.value = false;
     await getTenants();
-    const callbackFunction: () => any = extractActionArguments(
+    const callbackFunctions: Function[] | undefined = extractActionArguments(
       field.actionType as ActionType,
     );
-    if (config.features.hasBulkSelect && callbackFunction) callbackFunction();
+    if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
+      for (const callback of callbackFunctions) {
+        if (callback) await callback();
+      }
+    }
     else {
       useBaseModal().closeModal(TypeModals.DynamicForm);
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);

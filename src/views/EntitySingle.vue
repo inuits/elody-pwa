@@ -271,5 +271,9 @@ watch(
   },
 );
 
-onUnmounted(() => useEditMode(id.value, "delete"));
+onUnmounted(() => {
+    useEditMode(id.value, "delete");
+    useEntitySingle().setEntityUuid("");
+  }
+);
 </script>
