@@ -40,10 +40,7 @@ export const useEditState = (editStateName: string) => {
     functionName: string,
     refetch: () => any,
   ): void => {
-    if (refetchFns.value[functionName]) {
-      console.log("Refetch already added");
-      return;
-    }
+    if (refetchFns.value[functionName]) return;
     refetchFns.value[functionName] = refetch;
   };
 
