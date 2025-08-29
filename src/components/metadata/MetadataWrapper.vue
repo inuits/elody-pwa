@@ -256,7 +256,7 @@ const setNewValue = (
     form.setFieldValue(veeValidateField.value, value.value);
   }
   if (isMetadataOnRelation.value && props.isEdit && meta.dirty) {
-    emit('addRefetchFunctionToEditState');
+    emit("addRefetchFunctionToEditState");
   }
 };
 

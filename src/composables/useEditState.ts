@@ -12,7 +12,7 @@ export const useEditState = (editStateName: string) => {
   const isDisabled = ref(false);
   const editMode = ref<EditModes>("no-edit");
   const submitFn = ref<Callback | undefined>();
-  const refetchFns = ref<Callback[]>([]);
+  const refetchFns = ref<{ [key: string]: () => void }>({});
 
   const toBeDeleted = ref<string[]>([]);
   const isSaved = ref(false);
@@ -36,15 +36,19 @@ export const useEditState = (editStateName: string) => {
     submitFn.value = editSubmitFn;
   };
 
-  const addRefetchFunction = (refetch: () => any) => {
-    console.log("Adding refetch function!");
-    refetchFns.value.push(refetch);
-    console.log("refetchFns:", refetchFns.value);
+  const addRefetchFunction = (
+    functionName: string,
+    refetch: () => any,
+  ): void => {
+    if (refetchFns.value[functionName]) {
+      console.log("Refetch already added");
+      return;
+    }
+    refetchFns.value[functionName] = refetch;
   };
 
   const clearRefetchFunctions = () => {
-    console.log("REFETCH FUNCTIONS ARE GETTING CLEARED!");
-    refetchFns.value = [];
+    refetchFns.value = {};
   };
 
   const hideEditButton = () => setEditMode("no-edit");

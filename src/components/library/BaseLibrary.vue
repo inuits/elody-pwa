@@ -416,7 +416,6 @@ const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
 const isInitialLoading = ref<boolean>(true);
-const refetchFunctionAdded = ref<boolean>(false);
 
 const showCurrentEntityFlow = computed(() => {
   if (!isPreviewElement) return true;
@@ -779,10 +778,10 @@ const unSetQueryVariablesForMapViewmode = (): void => {
 };
 
 const addRefetchFunctionToEditState = (): void => {
-  if (refetchFunctionAdded.value) return;
-  console.log("Going to add refetch function, because refetchFunctionAdded = !", refetchFunctionAdded.value);
-  useEditHelper.addRefetchFunction(refetchEntities);
-  refetchFunctionAdded.value = true
+  const refetchFunctions = useEditHelper.refetchFns.value;
+  const functionName = props.useOtherQuery?.name || "refetchEntities";
+  if (refetchFunctions?.[functionName]) return;
+  useEditHelper.addRefetchFunction(functionName, refetchEntities);
 };
 
 onMounted(async () => {
@@ -915,17 +914,6 @@ watch(
     setLocale(newValue);
     refetchEntities();
   },
-);
-
-watch(
-  () => useEditHelper.isEdit,
-  (isEdit: boolean) => {
-    if (!isEdit) {
-      console.log("Setting refetchFunctionAdded = false!");
-      refetchFunctionAdded.value = false;
-    }
-  },
-  { immediate: true },
 );
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {

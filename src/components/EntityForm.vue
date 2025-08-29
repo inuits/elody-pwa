@@ -111,8 +111,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   });
 
   if (!result?.data?.mutateEntityValues) return;
-  console.log("Executing refetch function from here");
-  callRefetchFns();
+  await callRefetchFns();
   mutatedEntity = result.data.mutateEntityValues as Entity;
   setValues({
     intialValues: mutatedEntity.intialValues,
@@ -138,12 +137,12 @@ provide("entityFormData", {
 });
 
 const callRefetchFns = async () => {
-  console.log("CALL REFETCH FNS FROM HERE!");
-  const refetchFunctions = useEditHelper.refetchFns;
+  const refetchFunctions: (() => void)[] = Object.values(
+    useEditHelper.refetchFns,
+  );
   if (refetchFunctions && refetchFunctions.length > 0) {
     for (const refetch of refetchFunctions) {
-      console.log("Executing 1 refetch function to be precise!");
-      if (refetch) await refetch();
+      if (refetch) refetch();
     }
   }
   useEditHelper.clearRefetchFunctions();
