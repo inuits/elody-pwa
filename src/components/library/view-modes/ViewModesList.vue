@@ -131,7 +131,9 @@
             @toggle-preview-component="
               (previewForEntityId) => togglePreviewComponent(previewForEntityId)
             "
-            @add-refetch-function-to-edit-state="() => emit('addRefetchFunctionToEditState')"
+            @add-refetch-function-to-edit-state="
+              () => emit('addRefetchFunctionToEditState')
+            "
           />
         </component>
       </div>
@@ -189,7 +191,6 @@ import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient, router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
-import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 
 const props = withDefaults(
   defineProps<{
