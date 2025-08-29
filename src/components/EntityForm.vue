@@ -111,7 +111,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
   });
 
   if (!result?.data?.mutateEntityValues) return;
-  await callRefetchFns();
+  await useEditHelper.performRefetchFunctions();
   mutatedEntity = result.data.mutateEntityValues as Entity;
   setValues({
     intialValues: mutatedEntity.intialValues,
@@ -136,24 +136,16 @@ provide("entityFormData", {
     )?.type || Collection.Entities,
 });
 
-const callRefetchFns = async () => {
-  const refetchFunctions: (() => void)[] = Object.values(
-    useEditHelper.refetchFns,
-  );
-  if (refetchFunctions && refetchFunctions.length > 0) {
-    for (const refetch of refetchFunctions) {
-      if (refetch) refetch();
-    }
-  }
-  useEditHelper.clearRefetchFunctions();
-};
-
 onMounted(async () => {
-  document.addEventListener("discardEdit", () => callRefetchFns);
+  document.addEventListener("discardEdit", () =>
+    useEditHelper.performRefetchFunctions(),
+  );
   if (!isPreviewElement) updateDeleteQueryOptions(props.deleteQueryOptions);
 });
 onUnmounted(() => {
-  document.removeEventListener("discardEdit", () => callRefetchFns);
+  document.removeEventListener("discardEdit", () =>
+    useEditHelper.performRefetchFunctions(),
+  );
 });
 
 watch(useEditHelper, () => {

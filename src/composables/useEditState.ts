@@ -47,6 +47,16 @@ export const useEditState = (editStateName: string) => {
     refetchFns.value[functionName] = refetch;
   };
 
+  const performRefetchFunctions = async () => {
+    const refetchFunctions: (() => void)[] = Object.values(refetchFns.value);
+    if (refetchFunctions && refetchFunctions.length > 0) {
+      for (const refetch of refetchFunctions) {
+        if (refetch) refetch();
+      }
+    }
+    clearRefetchFunctions();
+  };
+
   const clearRefetchFunctions = () => {
     refetchFns.value = {};
   };
@@ -125,5 +135,6 @@ export const useEditState = (editStateName: string) => {
     setDisableState,
     clickButton,
     resetButtonClicked,
+    performRefetchFunctions,
   };
 };
