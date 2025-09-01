@@ -42,7 +42,6 @@ export const useInputValidation = () => {
   }): void => {
     const rulesTranslations =
       extractValidationTranslationsFromAllTranslations(translations);
-    console.log(rulesTranslations);
     configure({
       generateMessage: localize(rulesTranslations),
     });
@@ -178,5 +177,6 @@ export const useInputValidation = () => {
 
   return {
     initializeInputValidation,
+    extractValidationTranslationsFromAllTranslations,
   };
 };
