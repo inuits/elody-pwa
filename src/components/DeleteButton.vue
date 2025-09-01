@@ -31,6 +31,7 @@ import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { getRouteMetadataInfoFromEntity } from "@/helpers";
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");
@@ -45,7 +46,7 @@ const entityId = computed<string>(
 );
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { displaySuccessNotification } = useBaseNotification();
-const { previousPageInfo } = usePageInfo();
+const { pageInfo, previousPageInfo } = usePageInfo();
 const useEditHelper = computed(() => useEditMode(entityId.value));
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
@@ -55,7 +56,10 @@ const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 
-const deleteAvailable = ref<boolean>(false);
+const deleteAvailable = ref<boolean>(
+  useEditHelper.value.editMode === "edit-delete" ||
+  useEditHelper.value.editMode === "delete"
+);
 watch(
   () => useEditHelper.value,
   () => {
@@ -74,7 +78,7 @@ const entityType = computed(() => {
 const deleteEntity = async (deleteMediafiles: boolean = false) => {
   const id = entityId.value;
   const type = entityType.value;
-  const context = previousPageInfo.value.parentRouteName;
+  let context = previousPageInfo.value.parentRouteName;
 
   if (context) dequeueItemForBulkProcessing(context, id);
 
@@ -86,6 +90,8 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
     await getTenants();
     closeModal(TypeModals.Confirm);
     useEditHelper.value.disableEdit();
+    if (context === "SingleEntity")
+      context = getRouteMetadataInfoFromEntity(config, type)?.title;
     router.push({ name: context ? context : "Home" });
     displaySuccessNotification(
       t("notifications.success.entityDeleted.title"),
