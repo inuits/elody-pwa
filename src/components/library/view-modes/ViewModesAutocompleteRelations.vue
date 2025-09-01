@@ -1,6 +1,6 @@
 <template>
   <base-input-autocomplete
-    v-show="selectedDropdownOptions.length > 0 || isEdit"
+    v-show="selectedDropdownOptions.length > 0 || isEdit || mode === 'create'"
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
     :options="!disabled ? entityDropdownOptions : selectedDropdownOptions"
     :relationType="relationType"
@@ -22,7 +22,7 @@
     :can-create-option="canCreateOption"
     @add-option="handleCreatingFromTag"
   />
-  <p v-show="selectedDropdownOptions.length == 0 && !isEdit">
+  <p v-show="selectedDropdownOptions.length == 0 && !isEdit && mode !== 'create'">
     {{ "-" }}
   </p>
 </template>
