@@ -23,7 +23,6 @@ import { onError } from "@apollo/client/link/error";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
 import Notifications from "@kyvg/vue3-notification";
@@ -32,6 +31,7 @@ import { type I18n } from "vue-i18n";
 import type { GraphQLError } from "graphql/error";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { ElodyServices } from "@/generated-types/queries";
+import { useInputValidation } from "@/composables/useInputValidation";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -61,7 +61,7 @@ const start = async (): Promise<void> => {
   typeUrlMapping = urlMapping;
   const { setVersion, getPwaVersion } = useServiceVersionManager();
 
-  const { defineValidationRules } = useFormHelper();
+  const { defineValidationRules } = useInputValidation();
 
   setVersion(version["apollo-graphql-version"], ElodyServices.ApolloGraphql);
   setVersion(await getPwaVersion(), ElodyServices.Pwa);

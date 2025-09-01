@@ -7,13 +7,11 @@ import {
   type PanelMetaData,
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
-import { defineRule, type FormContext, useForm } from "vee-validate";
+import { type FormContext, useForm } from "vee-validate";
 import { ref, inject } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useInheritedRelations } from "./useInheritedRelations";
-import { all } from "@vee-validate/rules";
-import { DateTime } from "luxon";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -88,139 +86,6 @@ const useFormHelper = () => {
 
   const deleteForms = () => {
     forms.value = {};
-  };
-
-  const defineValidationRules = () => {
-    Object.entries(all).forEach(([name, rule]) => {
-      defineRule(name, rule);
-    });
-    defineRule(ValidationRules.HasRequiredRelation, getHasSpecificRelationRule);
-    defineRule(
-      ValidationRules.HasOneOfRequiredRelations,
-      getHasOneOfSpecificRelationsRule,
-    );
-    defineRule(
-      ValidationRules.HasOneOfRequiredMetadata,
-      getHasOneOfSpecificMetadataRule,
-    );
-    defineRule(ValidationRules.MaxDateToday, getMaxDateTodayRule);
-    defineRule(ValidationRules.ExistingDate, mustBeExistingDateRule);
-    defineRule(ValidationRules.Regex, regexValidator);
-  };
-
-  const getHasSpecificRelationRule = (
-    value: BaseRelationValuesInput[],
-    parameters: string[],
-  ): boolean => {
-    if (!Array.isArray(value)) {
-      return false;
-    }
-    const relations = value.filter(
-      (relation: BaseRelationValuesInput) =>
-        relation.editStatus !== EditStatus.Deleted,
-    );
-    const [amount = 1, relationType, exact = false] = parameters[0].split(":");
-    const specificRelationsLength =
-      relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type === relationType,
-      )?.length || 0;
-
-    if (exact == "true") return specificRelationsLength == Number(amount);
-    else return specificRelationsLength >= Number(amount);
-  };
-
-  const getHasOneOfSpecificRelationsRule = (
-    value: BaseRelationValuesInput[],
-    parameters: string[],
-    ctx: any,
-  ) => {
-    if (!Array.isArray(value)) {
-      return false;
-    }
-    const relationValues = ctx.form.relationValues;
-    const [amount = 1, ...relationTypes] = parameters[0].split(":");
-    let specificRelationsLength = 0;
-    relationTypes.forEach(async (relationType: string) => {
-      specificRelationsLength += relationValues[relationType]?.length || 0;
-    });
-    const isValid = specificRelationsLength >= Number(amount);
-    if (isValid) {
-      relationTypes.forEach((relationType) => {
-        if (relationValues[relationType] === undefined)
-          relationValues[relationType] = [];
-      });
-    }
-    return isValid;
-  };
-
-  const getHasOneOfSpecificMetadataRule = (
-    value: any,
-    parameters: string[],
-    ctx: any,
-  ) => {
-    const intialValues = ctx.form.intialValues;
-    const [amount = 1, ...includedMetadataFields] = parameters[0].split(":");
-    let filledInMetadataFields = 0;
-    includedMetadataFields.forEach(async (metadataField: string) => {
-      filledInMetadataFields += intialValues[metadataField]?.length ? 1 : 0;
-    });
-    return filledInMetadataFields >= Number(amount);
-  };
-
-  const getMaxDateTodayRule = (value: string): string | boolean => {
-    if (!value) return true;
-
-    const timestamp = new Date(value).getTime();
-    const now = Date.now();
-    if (now < timestamp) return "notifications.errors.future-date-error.title";
-    return true;
-  };
-
-  const mustBeExistingDateRule = (value: string): boolean | string => {
-    if (!value) return true;
-    if (!DateTime.fromJSDate(new Date(value)).isValid)
-      return "notifications.errors.construct-date-error.title";
-    return true;
-  };
-
-  const getSingleParam = <TParam = unknown>(
-    params: [TParam] | Record<string, TParam>,
-    paramName: string,
-  ) => {
-    return Array.isArray(params) ? params[0] : params[paramName];
-  };
-
-  const isEmpty = (value: unknown): boolean => {
-    if (value === null || value === undefined || value === "") {
-      return true;
-    }
-
-    if (Array.isArray(value) && value.length === 0) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const regexValidator = (
-    value: unknown,
-    params: [string | RegExp] | { regex: RegExp | string },
-  ): boolean => {
-    if (isEmpty(value)) {
-      return true;
-    }
-
-    let regex = getSingleParam(params, "regex");
-    if (typeof regex === "string") {
-      regex = regex.replace(/\?\./g, "|");
-      regex = new RegExp(regex);
-    }
-
-    if (Array.isArray(value)) {
-      return value.every((val) => regexValidator(val, { regex }));
-    }
-
-    return regex.test(String(value));
   };
 
   const __isNotEmpty = (str: any) => str.trim() !== "";
@@ -615,7 +480,6 @@ const useFormHelper = () => {
     editableFields,
     createEntityValues,
     formContainsValues,
-    defineValidationRules,
     discardEditForForm,
     addRelations,
     addMappedRelations,
