@@ -1,7 +1,9 @@
 <template>
   <base-input-autocomplete
+    v-show="selectedDropdownOptions.length > 0 || isEdit"
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
     :options="!disabled ? entityDropdownOptions : selectedDropdownOptions"
+    :relationType="relationType"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
@@ -20,22 +22,27 @@
     :can-create-option="canCreateOption"
     @add-option="handleCreatingFromTag"
   />
+  <p v-show="selectedDropdownOptions.length == 0 && !isEdit">
+    {{ "-" }}
+  </p>
 </template>
 
 <script lang="ts" setup>
 import type {
+  AdvancedFilterInput,
   DropdownOption,
   Entitytyping,
-  AdvancedFilterInput,
 } from "@/generated-types/queries";
-import { computed, onMounted, ref, watch } from "vue";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import { getEntityIdFromRoute } from "@/helpers";
-import { useManageEntities } from "@/composables/useManageEntities";
 import isEqual from "lodash.isequal";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { computed, onMounted, ref, watch } from "vue";
+import { getEntityIdFromRoute } from "@/helpers";
+import { useEditMode } from "@/composables/useEdit";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
+import { useManageEntities } from "@/composables/useManageEntities";
 
 const props = withDefaults(
   defineProps<{
@@ -70,11 +77,13 @@ const props = withDefaults(
   },
 );
 
+
 const isCreatingEntity = ref<boolean>(false);
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
 const { createEntity } = useManageEntities();
+const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 
 const advancedFilterInputForRetrievingAllOptions = computed(() => {
   if (props.advancedFilterInputForRetrievingAllOptions.length > 0)

@@ -157,7 +157,7 @@ export const goToEntityPageById = (
   listItemRouteName: string,
   router: Router,
 ) => {
-  router.replace({
+  router.push({
     name: listItemRouteName,
     params: {
       id: entityId,

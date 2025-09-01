@@ -27,14 +27,39 @@
       }
     "
     :on-create="handleTagCreate"
-  />
+  >
+    <template v-slot:tag="{ option, handleTagRemove, disabled }">
+      <div
+        :class="[
+          classes.tag,
+          {
+            'pr-2 hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 cursor-pointer': !isEdit
+          }
+        ]"
+        @click.stop="handleTagClick(option)"
+      >
+        {{ option.label }}
+        <span
+          v-if="!disabled"
+          class="multiselect-tag-remove"
+          @click.prevent.stop="handleTagRemove(option, $event)"
+        >
+          <span class="multiselect-tag-remove-icon"></span>
+        </span>
+      </div>
+    </template>
+  </Multiselect>
 </template>
 
 <script lang="ts" setup>
 import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
+import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, onMounted, ref, watch } from "vue";
+import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useEditMode } from "@/composables/useEdit";
+import { useRouter } from "vue-router";
 
 type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
@@ -43,6 +68,7 @@ const props = withDefaults(
     modelValue: DropdownOption[] | undefined;
     options: DropdownOption[];
     autocompleteStyle: AutocompleteStyle;
+    relationType: string;
     selectType?: "multi" | "single";
     placeholder?: string;
     disabled?: boolean;
@@ -69,7 +95,9 @@ const emit = defineEmits<{
   (event: "addOption", option: DropdownOption[]): void;
 }>();
 
+const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
+const router = useRouter()
 const classes = ref();
 const searchValue = ref<string>();
 
@@ -105,7 +133,7 @@ const setClasses = () => {
     "outline-1 outline-accent-normal outline-offset-0";
   classes.value["tagsSearch"] =
     "multiselect-tags-search !border-none focus:ring-0 p-0";
-  classes.value["tag"] = "multiselect-tag bg-accent-normal !opacity-100";
+  classes.value["tag"] = "multiselect-tag !bg-accent-accent !opacity-100";
   classes.value["dropdown"] = "multiselect-dropdown -bottom-px";
 
   if (props.autocompleteStyle === "defaultWithBorder") {
@@ -130,6 +158,19 @@ watch(
 const handleTagCreate = async (option: any) => {
   emit("addOption", option);
   return false;
+};
+
+const handleTagClick = async (tag: DropdownOption) => {
+  if (isEdit) return;
+  const linkFormattersSettings = (await getFormattersSettings())?.link;
+  const [entityType, linkSetting] = Object.entries(linkFormattersSettings).find(([key, value]) => value.relationType === props.relationType) || [];
+  if (entityType && linkSetting)
+    goToEntityPageById(
+      tag.value,
+      { type: entityType },
+      "SingleEntity",
+      router,
+    );
 };
 </script>
 
