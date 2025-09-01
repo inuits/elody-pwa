@@ -61,11 +61,11 @@ const start = async (): Promise<void> => {
   typeUrlMapping = urlMapping;
   const { setVersion, getPwaVersion } = useServiceVersionManager();
 
-  const { defineValidationRules } = useInputValidation();
+  const { initializeInputValidation } = useInputValidation();
 
   setVersion(version["apollo-graphql-version"], ElodyServices.ApolloGraphql);
   setVersion(await getPwaVersion(), ElodyServices.Pwa);
-  defineValidationRules();
+  initializeInputValidation(translations);
 
   if (config.customization) applyCustomization(config.customization);
   auth = auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));

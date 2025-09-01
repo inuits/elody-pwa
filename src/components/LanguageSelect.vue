@@ -26,6 +26,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import { setLocale } from "@vee-validate/i18n";
 
 const { closeModal } = useBaseModal();
 const { availableLocales, locale, t } = useI18n();
@@ -59,6 +60,7 @@ const setSelectedLanguageOption = (): void => {
     (language) => language.value === locale.value,
   )?.value;
   setLanguageDirection(locale.value);
+  setLocale(locale.value);
 };
 
 const setLanguageDirection = (languageKey: string): void => {

@@ -1,5 +1,6 @@
 import { all } from "@vee-validate/rules";
-import { defineRule } from "vee-validate";
+import { localize } from "@vee-validate/i18n";
+import { defineRule, configure } from "vee-validate";
 import {
   type BaseRelationValuesInput,
   EditStatus,
@@ -8,7 +9,14 @@ import {
 import { DateTime } from "luxon";
 
 export const useInputValidation = () => {
-  const defineValidationRules = () => {
+  const initializeInputValidation = (translations: {
+    [key: string]: any;
+  }): void => {
+    _defineValidationRules();
+    _addCustomValidationRuleTranslations(translations);
+  };
+
+  const _defineValidationRules = () => {
     Object.entries(all).forEach(([name, rule]) => {
       defineRule(name, rule);
     });
@@ -27,6 +35,34 @@ export const useInputValidation = () => {
     defineRule(ValidationRules.MaxDateToday, _getMaxDateTodayRule);
     defineRule(ValidationRules.ExistingDate, _mustBeExistingDateRule);
     defineRule(ValidationRules.Regex, _regexValidator);
+  };
+
+  const _addCustomValidationRuleTranslations = (translations: {
+    [key: string]: any;
+  }): void => {
+    const rulesTranslations =
+      extractValidationTranslationsFromAllTranslations(translations);
+    console.log(rulesTranslations);
+    configure({
+      generateMessage: localize(rulesTranslations),
+    });
+  };
+
+  const extractValidationTranslationsFromAllTranslations = (translations: {
+    [key: string]: any;
+  }): { [key: string]: any } => {
+    const validationTranslations: { [key: string]: any } = {};
+    const languageKeysWithValidationTranslations: string[] = Object.keys(
+      translations,
+    ).filter((languageKey: string) =>
+      Object.keys(translations[languageKey]).includes("input-validation"),
+    );
+
+    languageKeysWithValidationTranslations.forEach((languageKey: string) => {
+      validationTranslations[languageKey] =
+        translations[languageKey]["input-validation"];
+    });
+    return validationTranslations;
   };
 
   const _getHasSpecificRelationRule = (
@@ -141,6 +177,6 @@ export const useInputValidation = () => {
   };
 
   return {
-    defineValidationRules,
+    initializeInputValidation,
   };
 };
