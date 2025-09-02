@@ -167,6 +167,7 @@ const applyReplacementSettingsToSelectedText = (): string => {
       const parsedRegex = parseRegexFromString(
         settingsItem.replacementCharactersRegex,
       );
+      console.log(settingsItem, parsedRegex);
       if (!parsedRegex) return;
       result = result.replace(parsedRegex, settingsItem.characterToReplaceWith);
     },

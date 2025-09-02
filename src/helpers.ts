@@ -87,17 +87,17 @@ export const goToEntityTypeRoute = (
 };
 
 export const parseRegexFromString = (raw: string): RegExp | undefined => {
-  if (!raw) return undefined;
-  const match = raw.match(/^\/(.*)\/([gimsuy]*)$/);
-  if (!match) return undefined;
-  let [pattern, flags] = match;
-
-  pattern = pattern.replace(/\\\\/g, "\\");
-
   try {
+    if (!raw) return undefined;
+    const match = raw.match(/^\/(.*)\/([gimsuy]*)$/);
+    if (!match) return undefined;
+    let [, pattern, flags] = match;
+
+    pattern = pattern.replace(/\\\\/g, "\\");
+
     return new RegExp(pattern, flags);
   } catch (e) {
-    console.warn("Something went wrong while parsing regex", e);
+    console.error("Something went wrong while parsing regex", e);
     return undefined;
   }
 };
