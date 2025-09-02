@@ -30,19 +30,20 @@
   >
     <template v-slot:tag="{ option, handleTagRemove, disabled }">
       <div
+        class="cursor-default"
         :class="[
           classes.tag,
           {
-            'pr-2 hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 cursor-pointer':
-              !isEdit,
+            'pr-2 hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
+              !isEdit && relationType,
           },
         ]"
-        @click.stop="handleTagClick(option)"
+        @click.stop="() => emit('handleTagClick', option)"
       >
         {{ option.label }}
         <span
           v-if="!disabled"
-          class="multiselect-tag-remove"
+          class="multiselect-tag-remove !cursor-pointer"
           @click.prevent.stop="handleTagRemove(option, $event)"
         >
           <span class="multiselect-tag-remove-icon"></span>
@@ -57,10 +58,8 @@ import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, onBeforeMount, ref, watch } from "vue";
-import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
-import { useRouter } from "vue-router";
 
 type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
@@ -69,7 +68,7 @@ const props = withDefaults(
     modelValue: DropdownOption[] | undefined;
     options: DropdownOption[];
     autocompleteStyle: AutocompleteStyle;
-    relationType: string;
+    relationType?: string;
     selectType?: "multi" | "single";
     placeholder?: string;
     disabled?: boolean;
@@ -91,14 +90,14 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
-  (event: "searchChange", value: string): void;
   (event: "addOption", option: DropdownOption[]): void;
+  (event: "handleTagClick", option: DropdownOption[]): void;
+  (event: "searchChange", value: string): void;
+  (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
 }>();
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
-const router = useRouter();
 const classes = ref();
 const searchValue = ref<string>();
 
@@ -159,17 +158,6 @@ watch(
 const handleTagCreate = async (option: any) => {
   emit("addOption", option);
   return false;
-};
-
-const handleTagClick = async (tag: DropdownOption) => {
-  if (isEdit) return;
-  const linkFormattersSettings = (await getFormattersSettings())?.link;
-  const [entityType, linkSetting] =
-    Object.entries(linkFormattersSettings).find(
-      ([key, value]) => value.relationType === props.relationType,
-    ) || [];
-  if (entityType && linkSetting)
-    goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
 };
 </script>
 

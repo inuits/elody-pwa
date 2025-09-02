@@ -21,6 +21,7 @@
     "
     :can-create-option="canCreateOption"
     @add-option="handleCreatingFromTag"
+    @handle-tag-click="handleTagClick"
   />
   <p v-show="selectedDropdownOptions.length === 0 && !isEdit && mode !== 'create' && !isLoading">
     {{ "-" }}
@@ -39,10 +40,12 @@ import isEqual from "lodash.isequal";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, onMounted, ref, watch } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
+import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useManageEntities } from "@/composables/useManageEntities";
+import { useRouter } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -78,12 +81,13 @@ const props = withDefaults(
 );
 
 
-const isCreatingEntity = ref<boolean>(false);
-const selectedDropdownOptions = ref<DropdownOption[]>([]);
-const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 const entityId = getEntityIdFromRoute();
+const isCreatingEntity = ref<boolean>(false);
+const router = useRouter();
+const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { createEntity } = useManageEntities();
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
+const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 
 const advancedFilterInputForRetrievingAllOptions = computed(() => {
   if (props.advancedFilterInputForRetrievingAllOptions.length > 0)
@@ -257,6 +261,17 @@ const dependentRelationValues = computed(() => {
   const form = getFormWithRelationFieldCheck(props.formId, props.dependsOn);
   return form ? form.values.relationValues[props.dependsOn] : null;
 });
+
+const handleTagClick = async (tag: DropdownOption) => {
+  if (isEdit) return;
+  const linkFormattersSettings = (await getFormattersSettings())?.link || {};
+  const [entityType, linkSetting] =
+    Object.entries(linkFormattersSettings).find(
+      ([, value]) => (value as any).relationType === props.relationType,
+    ) || [];
+  if (entityType && linkSetting)
+    goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
+};
 
 watch(
   () => dependentRelationValues.value,
