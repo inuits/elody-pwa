@@ -33,8 +33,9 @@
         :class="[
           classes.tag,
           {
-            'pr-2 hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 cursor-pointer': !isEdit
-          }
+            'pr-2 hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 cursor-pointer':
+              !isEdit,
+          },
         ]"
         @click.stop="handleTagClick(option)"
       >
@@ -55,7 +56,7 @@
 import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeMount, ref, watch } from "vue";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
@@ -97,7 +98,7 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
-const router = useRouter()
+const router = useRouter();
 const classes = ref();
 const searchValue = ref<string>();
 
@@ -148,7 +149,7 @@ const setClasses = () => {
   }
 };
 
-onMounted(() => setClasses());
+onBeforeMount(() => setClasses());
 
 watch(
   () => [inputValue.value, props.options],
@@ -163,14 +164,12 @@ const handleTagCreate = async (option: any) => {
 const handleTagClick = async (tag: DropdownOption) => {
   if (isEdit) return;
   const linkFormattersSettings = (await getFormattersSettings())?.link;
-  const [entityType, linkSetting] = Object.entries(linkFormattersSettings).find(([key, value]) => value.relationType === props.relationType) || [];
+  const [entityType, linkSetting] =
+    Object.entries(linkFormattersSettings).find(
+      ([key, value]) => value.relationType === props.relationType,
+    ) || [];
   if (entityType && linkSetting)
-    goToEntityPageById(
-      tag.value,
-      { type: entityType },
-      "SingleEntity",
-      router,
-    );
+    goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
 };
 </script>
 
