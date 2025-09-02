@@ -216,18 +216,6 @@ export const setCssVariable = (variableName: string, value: string): void => {
 
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
-export const processTextWithLinks = (value: unknown) => {
-  if (value && typeof value !== "string") return value;
-
-  const stringValue = value as string;
-  const pattern = /\b(https?:\/\/\S+)\b/g;
-  const textWithLinks = stringValue.replace(
-    pattern,
-    '<a class="underline" target="_blank" href="$1">$1</a>',
-  );
-  return textWithLinks;
-};
-
 export const stringIsUrl = (value: unknown): boolean => {
   try {
     if (value && typeof value !== "string") return false;

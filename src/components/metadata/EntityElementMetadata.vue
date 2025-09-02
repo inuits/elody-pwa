@@ -57,7 +57,6 @@ import {
 } from "@/generated-types/queries";
 import {
   convertUnitToReadbleFormat,
-  processTextWithLinks,
   stringIsHtml,
   stringIsUrl,
 } from "@/helpers";

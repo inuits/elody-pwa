@@ -13,7 +13,6 @@ vi.mock(import("@/helpers"), async (importOriginal) => {
       .mockImplementation((_unit, value) => value ?? ""),
     stringIsUrl: vi.fn(),
     stringIsHtml: vi.fn(),
-    processTextWithLinks: vi.fn().mockImplementation((text) => text),
   };
 });
 
