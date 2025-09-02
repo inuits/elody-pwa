@@ -110,7 +110,7 @@ describe("XSS Security", () => {
       expect(link.exists()).toBe(true);
       expect(link.html()).not.toContain("onerror");
       expect(link.html()).toContain(
-        '<a data-cy="sanitized-value" href="http://safe.url">some_key</a>',
+        '<a class="underline" data-cy="sanitized-value" href="http://safe.url" target="_blank">some_key</a>',
       );
     });
   });
