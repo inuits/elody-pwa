@@ -54,7 +54,13 @@ describe("useInputValidation", () => {
       extractValidationTranslationsFromAllTranslations(mockTranslations);
 
     expect(validationTranslations).toHaveProperty("en");
+    expect(validationTranslations["en"]).toBe(
+      mockTranslations["en"]["input-validation"],
+    );
     expect(validationTranslations).toHaveProperty("nl");
+    expect(validationTranslations["nl"]).toBe(
+      mockTranslations["nl"]["input-validation"],
+    );
     expect(validationTranslations).not.toHaveProperty("ar");
   });
 });
