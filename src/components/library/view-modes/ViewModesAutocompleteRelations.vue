@@ -1,13 +1,13 @@
 <template>
   <base-input-autocomplete
-    v-show="selectedDropdownOptions.length > 0 || isEdit || mode === 'create'"
+    v-show="selectedDropdownOptions.length > 0 || isEdit || mode === 'create' || isLoading"
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
     :options="!disabled ? entityDropdownOptions : selectedDropdownOptions"
     :relationType="relationType"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
-    :loading="entitiesLoading || relatedEntitiesLoading || isCreatingEntity"
+    :loading="isLoading"
     @search-change="
       (value: string) => {
         getAutocompleteOptions(value);
@@ -22,7 +22,7 @@
     :can-create-option="canCreateOption"
     @add-option="handleCreatingFromTag"
   />
-  <p v-show="selectedDropdownOptions.length == 0 && !isEdit && mode !== 'create'">
+  <p v-show="selectedDropdownOptions.length === 0 && !isEdit && mode !== 'create' && !isLoading">
     {{ "-" }}
   </p>
 </template>
@@ -126,6 +126,10 @@ const {
   props.formId,
   props.relationFilter,
 );
+
+const isLoading = computed(() => {
+  return entitiesLoading.value || relatedEntitiesLoading.value || isCreatingEntity.value;
+});
 
 onMounted(async () => {
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
