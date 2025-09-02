@@ -6,9 +6,11 @@
   ></div>
   <a
     v-else-if="mode === SanitizeMode.Link"
+    class="underline"
     data-cy="sanitized-value"
     :href="cleanContent"
-    >{{ linkText }}</a
+    target="_blank"
+    >{{ linkText || cleanContent }}</a
   >
 </template>
 

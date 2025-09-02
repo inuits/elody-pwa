@@ -30,6 +30,55 @@ vi.mock("vue-i18n", () => ({
   }),
 }));
 
+describe("Display a link or show html content", () => {
+  it("Should display a link with as innercontent the link itself", async () => {
+    const content = "https://example.com/";
+    const wrapper = mount(SanitizedHtml, {
+      props: { content: content },
+    });
+    await nextTick();
+
+    const link = wrapper.find("[data-cy='sanitized-value']");
+    expect(link.exists()).toBe(true);
+    expect(link.html()).toContain(
+      '<a class="underline" data-cy="sanitized-value" href="https://example.com/" target="_blank">https://example.com/</a>',
+    );
+  });
+
+  it("Should display a link with as innercontent an alternative link text", async () => {
+    const content = "https://example.com/";
+    const linkText = "example.com";
+    const wrapper = mount(SanitizedHtml, {
+      props: { content: content, linkText: linkText },
+    });
+    await nextTick();
+
+    const link = wrapper.find("[data-cy='sanitized-value']");
+    expect(link.exists()).toBe(true);
+    expect(link.html()).toContain(
+      '<a class="underline" data-cy="sanitized-value" href="https://example.com/" target="_blank">example.com</a>',
+    );
+  });
+
+  it("Should display the html that was passed to the component", async () => {
+    const content = "<ul><li>test</li></ul>";
+    const wrapper = mount(SanitizedHtml, {
+      props: { content: content, mode: SanitizeMode.Html },
+    });
+    await nextTick();
+
+    const html = wrapper.find("[data-cy='sanitized-value']");
+    expect(html.exists()).toBe(true);
+    expect(html.html()).toContain(
+      '<div data-cy="sanitized-value">\n' +
+        "  <ul>\n" +
+        "    <li>test</li>\n" +
+        "  </ul>\n" +
+        "</div>",
+    );
+  });
+});
+
 describe("XSS Security", () => {
   describe("Link Sanitization (v-html on links)", () => {
     it("should sanitize XSS in the text of a URL value", async () => {

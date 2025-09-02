@@ -32,7 +32,7 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <SanitizedHtml :content="processedLink"></SanitizedHtml>
+        <SanitizedHtml :content="processedDisplayValue"></SanitizedHtml>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)">
@@ -97,10 +97,6 @@ const readableValue = computed(() => {
   if (isCoordinates.value) return {};
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
 });
-
-const processedLink = computed<string>(() =>
-  processTextWithLinks(t(props.linkText) || readableValue.value).toString(),
-);
 
 const processedDisplayValue = computed<string>(() =>
   displayValue.value.toString(),
