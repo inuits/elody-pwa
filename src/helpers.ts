@@ -91,11 +91,11 @@ export const parseRegexFromString = (raw: string): RegExp | undefined => {
     if (!raw) return undefined;
     const match = raw.match(/^\/(.*)\/([gimsuy]*)$/);
     if (!match) return undefined;
-    let [, pattern, flags] = match;
+    const [, pattern, flags] = match;
 
-    pattern = pattern.replace(/\\\\/g, "\\");
+    const newPattern = pattern.replace(/\\\\/g, "\\");
 
-    return new RegExp(pattern, flags);
+    return new RegExp(newPattern, flags);
   } catch (e) {
     console.error("Something went wrong while parsing regex", e);
     return undefined;
@@ -221,9 +221,8 @@ export const stringIsUrl = (value: unknown): boolean => {
     if (value && typeof value !== "string") return false;
 
     const stringValue = value as string;
-    const pattern: RegExp = /\bhttps?:\/\/\S+/gi;
-    const matches: RegExpMatchArray | null = stringValue.match(pattern);
-    return !(!matches || matches.length === 0);
+    new URL(stringValue);
+    return true;
   } catch {
     return false;
   }
@@ -807,7 +806,7 @@ export const isAbortError = (error: any): boolean => {
 
 export const sanitizeHtml = (content: any) => {
   return DOMPurify.sanitize(content, {
-    FORBID_TAGS: ["style"],
+    FORBID_TAGS: ["style", "img", "video", "audio", "script"],
     USE_PROFILES: { html: true },
     ALLOWED_TAGS: [
       "a",
