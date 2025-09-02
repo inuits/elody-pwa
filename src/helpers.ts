@@ -806,7 +806,7 @@ export const isAbortError = (error: any): boolean => {
 
 export const sanitizeHtml = (content: any) => {
   return DOMPurify.sanitize(content, {
-    FORBID_TAGS: ["style", "img", "video", "audio", "script"],
+    FORBID_TAGS: ["style", "img", "video", "audio", "script", "svg"],
     USE_PROFILES: { html: true },
     ALLOWED_TAGS: [
       "a",
