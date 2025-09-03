@@ -190,6 +190,7 @@ import { DateTime } from "luxon";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import { sanitizeHtml } from "@/helpers";
 
 const props = withDefaults(
   defineProps<{
@@ -241,6 +242,9 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
+  const form = getForm(props.formId);
+  if (!form) return;
+
   if (
     refMetadata.value?.inputField &&
     refMetadata.value.inputField.type === InputFieldTypes.Date
@@ -251,10 +255,8 @@ const setNewValue = (
     value.value = newValue;
   }
 
-  const form = getForm(props.formId);
-  if (form) {
-    form.setFieldValue(veeValidateField.value, value.value);
-  }
+  form.setFieldValue(veeValidateField.value, value.value);
+
   if (isMetadataOnRelation.value && props.isEdit && meta.dirty) {
     emit("addRefetchFunctionToEditState");
   }
@@ -353,59 +355,58 @@ const unescapeString = (str: string | undefined): string => {
 };
 
 const getValidationRules = (metadata: PanelMetaData): string => {
+  const validation = metadata?.inputField?.validation;
+  if (!validation?.value) return "no_xss";
+
   let rules: string;
-  if (metadata?.inputField?.validation?.value === ValidationRules.CustomValue)
-    rules = metadata?.inputField?.validation?.customValue;
-  else rules = metadata?.inputField?.validation?.value?.join("|") as string;
-  if (isRegexField.value) {
-    const rule = ValidationRules.Regex;
-    let regex = metadata?.inputField?.validation?.regex?.replace(
-      /^\/|\/$/g,
-      "",
-    );
-    regex = regex?.replace(/\|/g, "?.");
-    regex = unescapeString(regex);
-    rules = `${rule}:${regex}`;
+  if (validation.value === ValidationRules.CustomValue) {
+    rules = validation.customValue;
+  } else {
+    rules = (validation.value as string[]).join("|");
   }
+
+  if (isRegexField.value) {
+    const rawRegex = validation.regex?.replace(/^\/|\/$/g, "") ?? "";
+    const cleanedRegex = unescapeString(rawRegex.replace(/\|/g, "?."));
+    return `${ValidationRules.Regex}:${cleanedRegex}|no_xss`;
+  }
+
   if (
     (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
     !props.isEdit
   ) {
-    return "required";
+    return "required|no_xss";
   }
+
   if (isRequiredRelationField.value) {
-    const relationType =
-      metadata?.inputField?.validation?.has_required_relation?.relationType;
-    const amount =
-      metadata?.inputField?.validation?.has_required_relation?.amount;
-    const exact =
-      metadata?.inputField?.validation?.has_required_relation?.exact || false;
-    return `${rules}:${amount}:${relationType}:${exact}`;
+    const {
+      relationType,
+      amount,
+      exact = false,
+    } = validation.has_required_relation ?? {};
+    return `${rules}:${amount}:${relationType}:${exact}|no_xss`;
   }
+
   if (isOneOfRequiredRelationField.value) {
-    const relationTypes =
-      metadata?.inputField?.validation?.has_one_of_required_relations?.relationTypes.join(
-        ":",
-      );
-    const amount =
-      metadata?.inputField?.validation?.has_one_of_required_relations?.amount;
-    return `${rules}:${amount}:${relationTypes}`;
+    const { relationTypes = [], amount } =
+      validation.has_one_of_required_relations ?? {};
+    return `${rules}:${amount}:${relationTypes.join(":")}|no_xss`;
   }
+
   if (isOneOfRequiredMetadataField.value) {
-    const relationTypes =
-      metadata?.inputField?.validation?.has_one_of_required_metadata?.includedMetadataFields.join(
-        ":",
-      );
-    const amount =
-      metadata?.inputField?.validation?.has_one_of_required_metadata?.amount;
-    return `${rules}:${amount}:${relationTypes}`;
+    const { includedMetadataFields = [], amount } =
+      validation.has_one_of_required_metadata ?? {};
+    return `${rules}:${amount}:${includedMetadataFields.join(":")}|no_xss`;
   }
-  if (isFieldRequired.value)
-    return rules.includes(ValidationRules.Required)
+
+  if (isFieldRequired.value) {
+    const withRequired = rules.includes(ValidationRules.Required)
       ? rules
       : `${rules}|required`;
-  if (isMaxDateToday.value) return rules;
-  return rules;
+    return `${withRequired}|no_xss`;
+  }
+
+  return `${rules}|no_xss`;
 };
 
 const rules = computed(() => getValidationRules(refMetadata.value));
@@ -449,7 +450,7 @@ const veeValidateField = computed(() => {
   else return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId.value}`;
 });
 
-const { errorMessage, value, meta } = useField<
+const { errorMessage, value, meta, setErrors } = useField<
   string | BaseRelationValuesInput[]
 >(veeValidateField, rules, { label: label });
 

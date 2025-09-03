@@ -74,11 +74,8 @@
       :disabled="fieldEditIsDisabled"
     />
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
-      <p v-if="field.validation.fastValidationMessage">
-        {{ t(field.validation.fastValidationMessage) }}
-      </p>
-      <p v-else>
-        {{ t(error) }}
+      <p>
+        {{ computedError }}
       </p>
     </div>
   </div>
@@ -132,6 +129,12 @@ const props = defineProps<{
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
+const computedError = computed<string>(() => {
+  const fastValidationMessage = props.field?.validation
+    ?.fastValidationMessage as string;
+  if (fastValidationMessage) return t(fastValidationMessage);
+  else return t(props.error as string);
+});
 
 const { addEditableMetadataKeys, addMappedRelations } = useFormHelper();
 const metadataValue = computed<string | string[] | number | number[]>({
@@ -183,9 +186,7 @@ const getValueFromMetadata = (
     const returnArray = [];
     newValue.forEach((metadataItem) => {
       if (isDateTime(metadataItem)) {
-        returnArray.push(
-          addCurrentTimeZoneToDateTimeString(metadataItem),
-        );
+        returnArray.push(addCurrentTimeZoneToDateTimeString(metadataItem));
       } else returnArray.push(metadataItem);
     });
     return returnArray;

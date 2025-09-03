@@ -7,6 +7,7 @@ import {
   ValidationRules,
 } from "@/generated-types/queries";
 import { DateTime } from "luxon";
+import { sanitizeHtml } from "@/helpers";
 
 export const useInputValidation = () => {
   const initializeInputValidation = (translations: {
@@ -35,6 +36,7 @@ export const useInputValidation = () => {
     defineRule(ValidationRules.MaxDateToday, _getMaxDateTodayRule);
     defineRule(ValidationRules.ExistingDate, _mustBeExistingDateRule);
     defineRule(ValidationRules.Regex, _regexValidator);
+    defineRule(ValidationRules.NoXss, _xssValidator);
   };
 
   const _addCustomValidationRuleTranslations = (translations: {
@@ -158,6 +160,16 @@ export const useInputValidation = () => {
     }
 
     return regex.test(String(value));
+  };
+
+  const _xssValidator = (value: unknown): boolean => {
+    if (typeof value !== "string") return true;
+
+    // If it contains < or > but NOT a real tag, allow it
+    const looksLikeTag = /<\s*\/?\s*\w+[^>]*>/.test(value);
+    if (!looksLikeTag) return true;
+
+    return sanitizeHtml(value) === value;
   };
 
   const _getSingleParam = <TParam = unknown>(
