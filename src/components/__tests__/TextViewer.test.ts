@@ -83,7 +83,8 @@ describe("File Content Sanitization", () => {
 
     const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).not.toContain("onerror");
-    expect(contentDiv.html()).toContain('<div>Hello<img src="x"></div>');
+    expect(contentDiv.html()).not.toContain("<img src=x");
+    expect(contentDiv.html()).toContain(`<div>Hello</div>`);
   });
 
   it("should preserve safe HTML tags like <b> and <i>", async () => {
