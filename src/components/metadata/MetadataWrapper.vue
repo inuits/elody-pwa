@@ -242,9 +242,6 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
-  const form = getForm(props.formId);
-  if (!form) return;
-
   if (
     refMetadata.value?.inputField &&
     refMetadata.value.inputField.type === InputFieldTypes.Date
@@ -254,6 +251,9 @@ const setNewValue = (
   } else {
     value.value = newValue;
   }
+
+  const form = getForm(props.formId);
+  if (!form) return;
 
   form.setFieldValue(veeValidateField.value, value.value);
 
