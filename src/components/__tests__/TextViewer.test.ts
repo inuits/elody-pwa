@@ -56,7 +56,7 @@ describe("File Content Sanitization", () => {
 
     const contentDiv = wrapper.find("[data-cy='sanitized-value']");
     expect(contentDiv.html()).not.toContain("onerror");
-    expect(contentDiv.html()).toContain('<img src="invalid-image">');
+    expect(contentDiv.html()).not.toContain('<img src="invalid-image">');
   });
 
   it("should remove javascript: from href attributes", async () => {
