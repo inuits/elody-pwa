@@ -356,39 +356,47 @@ export const createGlobalCommandsExtension = Extension.create({
         },
       untagSelectedText:
         () =>
-        async ({ editor, state }: { editor: Editor; state: EditorState }) => {
-          const { selection, doc } = state;
+        async ({
+          editor,
+          state,
+          commands,
+          view,
+        }: {
+          editor: Editor;
+          state: EditorState;
+          commands: any;
+          view: EditorView;
+        }) => {
+          const { selection, schema } = state;
           const { from, to } = selection;
 
-          let selectedNode: Node | null = null;
-          let nodePos: number | null = null;
+          if (selection.empty) {
+            throw new Error("No node selected to untag");
+          }
 
-          doc.nodesBetween(from, to, (node, pos) => {
-            if (node.attrs?.entityId) {
-              selectedNode = node;
-              nodePos = pos;
-              return false;
-            }
-          });
+          const node = state.doc.nodeAt(from);
 
-          if (!selectedNode || nodePos === null) return;
+          if (!node) {
+            throw new Error("No node found at selection");
+          }
 
-          const nodeContent: string = selectedNode.attrs.label;
-          const entityId = selectedNode.attrs.entityId;
-          const insertEndPos = nodePos + nodeContent.length;
+          if (!customExtensionNames.value.includes(node.type.name)) {
+            throw new Error("Selected node is not a tagged entity node");
+          }
 
-          editor
-            .chain()
-            .focus()
-            .deleteRange({ from: nodePos, to: nodePos + selectedNode.nodeSize })
-            .insertContentAt(nodePos, nodeContent)
-            .setTextSelection(insertEndPos)
-            .run();
+          const inlineContent = node.content;
+          const entityId = node.attrs.entityId;
+
+          commands.deleteRange({ from, to });
+          commands.insertContentAt(from, inlineContent.toJSON());
+          commands.setTextSelection(from + inlineContent.size);
+
+          view.dom.ownerDocument.defaultView?.getSelection()?.collapseToEnd();
 
           const entityExtensionConfiguration =
             extensionConfiguration.value.find(
               (mappingItem: TaggableEntityConfiguration) =>
-                mappingItem.extensionName === selectedNode.type.name,
+                mappingItem.extensionName === node.type.name,
             );
 
           if (entityExtensionConfiguration) {
