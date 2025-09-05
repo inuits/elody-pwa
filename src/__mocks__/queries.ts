@@ -3896,7 +3896,7 @@ export type WysiwygElementMetadataKeyArgs = {
 };
 
 
-export type WysiwygElementVirtulKeyboardLayoutsArgs = {
+export type WysiwygElementVirtualKeyboardLayoutsArgs = {
   input?: InputMaybe<Array<Scalars['String']>>;
 };
 
