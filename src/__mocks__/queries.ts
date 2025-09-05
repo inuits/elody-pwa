@@ -3872,7 +3872,7 @@ export type WysiwygElement = {
   label: Scalars['String'];
   metadataKey: Scalars['String'];
   taggingConfiguration?: Maybe<TaggingExtensionConfiguration>;
-  virtulKeyboardLayouts?: Maybe<Scalars['JSON']>;
+  virtualKeyboardLayouts?: Maybe<Scalars['JSON']>;
 };
 
 

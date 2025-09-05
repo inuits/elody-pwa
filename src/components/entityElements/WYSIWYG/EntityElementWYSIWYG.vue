@@ -17,10 +17,10 @@
     <div v-else class="pl-2 py-2 flex gap-2">
       <metadata-title :metadata="element" />
       <WYSIGYGVirtualKeyboard
-        v-if="element.hasVirtualKeyboard && useEditHelper.isEdit"
+        v-if="element.virtualKeyboardLayouts && useEditHelper.isEdit"
         :editor="editor"
         :keyboardClass="element.metadataKey"
-        :extra-layouts="element?.virtulKeyboardLayouts"
+        :extra-layouts="element?.virtualKeyboardLayouts"
       />
     </div>
     <div
