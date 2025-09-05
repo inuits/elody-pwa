@@ -37,7 +37,12 @@
           :extensions="element.extensions"
           :displayInline="displayInline"
       /></Transition>
-      <editor-content :editor="editor" />
+      <div class="flex">
+        <div v-if="element.showLineNumbers" class="mt-[3px]">
+          <div class="text-xl mt-3" v-for="n in paragraphAmount">{{ n }}.</div>
+        </div>
+        <div class="w-full"><editor-content :editor="editor" /></div>
+      </div>
     </div>
     <TagEntityModal
       v-if="
@@ -71,6 +76,7 @@ import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
+import type { HTMLContent } from "@tiptap/core";
 
 const props = withDefaults(
   defineProps<{
@@ -84,8 +90,11 @@ const props = withDefaults(
 );
 
 const editor = ref<Editor | undefined>(undefined);
-const { importEditorExtensions, getExtensionConfiguration } =
-  useWYSIWYGEditor();
+const {
+  importEditorExtensions,
+  getExtensionConfiguration,
+  countLinesOfContent,
+} = useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
 const { updateModal } = useBaseModal();
 const useEditHelper = useEditMode(props.formId);
@@ -95,6 +104,7 @@ const form = computed(() => getForm(props.formId));
 const editorNode = ref<HTMLDivElement | undefined>(undefined);
 const initialValue = ref<string>("");
 const editorLoaded = ref<boolean>(false);
+const paragraphAmount = ref<number>(0);
 
 const resetContent = () => {
   const content = editor.value?.options?.content;
@@ -131,6 +141,8 @@ onMounted(async () => {
     editorExtensions.push(...taggingExtensions);
   }
 
+  paragraphAmount.value = countLinesOfContent(initialValue.value);
+
   editor.value = new Editor({
     extensions: editorExtensions,
     editorProps: {
@@ -147,10 +159,12 @@ onMounted(async () => {
     editable: useEditHelper.isEdit,
     content: initialValue.value,
     onUpdate({ editor }) {
+      const htmlContent = editor.getHTML() as HTMLContent;
+      paragraphAmount.value = countLinesOfContent(htmlContent);
       if (!form.value) return;
       form.value.setFieldValue(
         `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
-        editor.getHTML(),
+        htmlContent,
       );
     },
   });

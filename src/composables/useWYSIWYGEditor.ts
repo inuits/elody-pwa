@@ -1,4 +1,5 @@
 import { WysiwygExtensions } from "@/generated-types/queries";
+import type { HTMLContent } from "@tiptap/core";
 
 type ExtensionInfo = {
   importName: string;
@@ -12,6 +13,7 @@ export const useWYSIWYGEditor = (): {
   editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo>;
   importEditorExtensions: (extensions: WysiwygExtensions[]) => Promise<any>;
   getExtensionConfiguration: (extensions: WysiwygExtensions[]) => any[];
+  countLinesOfContent: (content: HTMLContent) => number;
 } => {
   const editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo> =
     {
@@ -125,9 +127,14 @@ export const useWYSIWYGEditor = (): {
       .filter(Boolean);
   };
 
+  const countLinesOfContent = (content: HTMLContent): number => {
+    return content.split("<br>").length;
+  };
+
   return {
     importEditorExtensions,
     getExtensionConfiguration,
     editorExtensionImportMapping,
+    countLinesOfContent,
   };
 };
