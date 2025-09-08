@@ -1,6 +1,11 @@
 <template>
   <base-input-autocomplete
-    v-show="selectedDropdownOptions.length > 0 || isEdit || mode === 'create' || isLoading"
+    v-show="
+      selectedDropdownOptions.length > 0 ||
+      isEdit ||
+      mode === 'create' ||
+      isLoading
+    "
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
     :options="!disabled ? entityDropdownOptions : selectedDropdownOptions"
     :relationType="relationType"
@@ -8,22 +13,30 @@
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
     :loading="isLoading"
-    @search-change="
-      (value: string) => {
-        getAutocompleteOptions(value);
-      }
-    "
+    @search-change="debouncedGetAutocompleteOptions"
     @update:model-value="
       (value: DropdownOption[] | DropdownOption | undefined) => {
         if (value && !Array.isArray(value)) value = [value];
         handleSelect(value);
       }
     "
+    :search-filter="
+      (option: unknown) => {
+        return option;
+      }
+    "
     :can-create-option="canCreateOption"
     @add-option="handleCreatingFromTag"
     @handle-tag-click="handleTagClick"
   />
-  <p v-show="selectedDropdownOptions.length === 0 && !isEdit && mode !== 'create' && !isLoading">
+  <p
+    v-show="
+      selectedDropdownOptions.length === 0 &&
+      !isEdit &&
+      mode !== 'create' &&
+      !isLoading
+    "
+  >
     {{ "-" }}
   </p>
 </template>
@@ -37,8 +50,9 @@ import type {
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import isEqual from "lodash.isequal";
+import debounce from "lodash.debounce";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
@@ -80,7 +94,6 @@ const props = withDefaults(
   },
 );
 
-
 const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
 const router = useRouter();
@@ -88,6 +101,14 @@ const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const { createEntity } = useManageEntities();
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
+
+const debouncedGetAutocompleteOptions = debounce((value: string) => {
+  getAutocompleteOptions(value);
+}, 250);
+
+onBeforeUnmount(() => {
+  debouncedGetAutocompleteOptions.cancel();
+});
 
 const advancedFilterInputForRetrievingAllOptions = computed(() => {
   if (props.advancedFilterInputForRetrievingAllOptions.length > 0)
@@ -122,7 +143,7 @@ const {
   entitiesLoading: relatedEntitiesLoading,
 } = useGetDropdownOptions(
   props.metadataKeyToGetOptionsFor as Entitytyping,
-  props.formId as string ?? entityId as string,
+  (props.formId as string) ?? (entityId as string),
   props.relationType,
   props.fromRelationType,
   props.advancedFilterInputForSearchingOptions,
@@ -132,7 +153,11 @@ const {
 );
 
 const isLoading = computed(() => {
-  return entitiesLoading.value || relatedEntitiesLoading.value || isCreatingEntity.value;
+  return (
+    entitiesLoading.value ||
+    relatedEntitiesLoading.value ||
+    isCreatingEntity.value
+  );
 });
 
 onMounted(async () => {
@@ -140,7 +165,7 @@ onMounted(async () => {
     if (props.isMetadataField) preSelect();
     else await initAutocompleteOption();
   } else {
-    const preSelectValue = props.modelValue
+    const preSelectValue = props.modelValue;
     await initAutocompleteOption();
     if (props.advancedFilterInputForRetrievingOptions)
       if (props.isMetadataField) preSelect(preSelectValue);
@@ -237,11 +262,12 @@ const handleCreatingFromTag = async (option: any) => {
   }
 };
 
-const preSelect = (preSelectValue: DropdownOption | DropdownOption[] | undefined) => {
-  let selection: DropdownOption[] = []
+const preSelect = (
+  preSelectValue: DropdownOption | DropdownOption[] | undefined,
+) => {
+  let selection: DropdownOption[] = [];
   if (preSelectValue) {
-    if (Array.isArray(preSelectValue))
-      selection = preSelectValue;
+    if (Array.isArray(preSelectValue)) selection = preSelectValue;
     else selection = [preSelectValue];
   } else {
     if (Array.isArray(props.modelValue))
@@ -250,7 +276,7 @@ const preSelect = (preSelectValue: DropdownOption | DropdownOption[] | undefined
       });
     else if (props.modelValue)
       selection = [{ label: props.modelValue, value: props.modelValue }];
-    else selection = []
+    else selection = [];
   }
   handleSelect(selection, true);
 };

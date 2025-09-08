@@ -9,7 +9,7 @@ import {
   EditStatus,
   SearchInputType,
 } from "@/generated-types/queries";
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
@@ -28,9 +28,12 @@ export const useGetDropdownOptions = (
   relationFilter?: AdvancedFilterInput,
 ) => {
   const apolloClient = inject(DefaultApolloClient);
+  const abortController = ref<AbortController | null>(null);
+  const currentRequestId = ref(0);
+  const isLoading = ref(false);
+
   const {
     entities,
-    entitiesLoading,
     getEntities,
     setAdvancedFilters,
     setEntityType,
@@ -65,8 +68,18 @@ export const useGetDropdownOptions = (
   };
 
   const initialize = async () => {
+    if (abortController.value) {
+      abortController.value.abort();
+      isLoading.value = false;
+    }
+
+    abortController.value = new AbortController();
+    currentRequestId.value++;
+    const requestId = currentRequestId.value;
+
     let filters;
     let entityTypeToSet = entityType;
+    isLoading.value = true;
     if (
       advancedFilterInputForRetrievingOptions &&
       advancedFilterInputForRetrievingOptions.length > 0
@@ -94,11 +107,33 @@ export const useGetDropdownOptions = (
     setsearchInputType(SearchInputType.AdvancedInputType);
     setEntityType(entityTypeToSet as Entitytyping);
 
-    await getEntities(undefined);
+    try {
+      if (requestId === currentRequestId.value) {
+        await getEntities(undefined, abortController.value.signal);
+      }
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("Request failed:", error);
+      }
+    } finally {
+      if (requestId === currentRequestId.value) {
+        isLoading.value = false;
+      }
+    }
   };
 
-  const getAutocompleteOptions = (searchValue: string) => {
+  const getAutocompleteOptions = async (searchValue: string) => {
+    if (abortController.value) {
+      abortController.value.abort();
+      isLoading.value = false;
+    }
+
+    abortController.value = new AbortController();
+    currentRequestId.value++;
+    const requestId = currentRequestId.value;
+
     let advancedFilters;
+    isLoading.value = true;
     if (
       advancedFilterInputForRetrievingOptions &&
       advancedFilterInputForRetrievingOptions.length > 0
@@ -110,7 +145,10 @@ export const useGetDropdownOptions = (
     } else {
       const isEmptyAdvancedSearchFilter =
         !searchFilterInput || Object.values(searchFilterInput).includes(null);
-      if (isEmptyAdvancedSearchFilter) return;
+      if (isEmptyAdvancedSearchFilter) {
+        isLoading.value = false;
+        return;
+      }
 
       advancedFilters =
         searchValue === ""
@@ -119,7 +157,20 @@ export const useGetDropdownOptions = (
     }
 
     setAdvancedFilters(advancedFilters as AdvancedFilterInput[]);
-    getEntities(undefined);
+
+    try {
+      if (requestId === currentRequestId.value) {
+        await getEntities(undefined, abortController.value.signal);
+      }
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("Request failed:", error);
+      }
+    } finally {
+      if (requestId === currentRequestId.value) {
+        isLoading.value = false;
+      }
+    }
   };
 
   const getSearchFilter = (
@@ -231,7 +282,7 @@ export const useGetDropdownOptions = (
   return {
     initialize,
     getAutocompleteOptions,
-    entitiesLoading,
+    entitiesLoading: isLoading,
     entityDropdownOptions,
     getFormWithRelationFieldCheck,
     getVariableValueForFilter,
