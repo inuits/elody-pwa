@@ -412,6 +412,7 @@ const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
 const useEditHelper = useEditMode(getEntityUuid());
 
+const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
@@ -798,6 +799,10 @@ watch(
       router.currentRoute.value.name !== "SingleEntity"
     ) {
       try {
+        if (abortController.value) abortController.value?.abort();
+        const newAbortController = new AbortController();
+        abortController.value = newAbortController;
+
         isInitialLoading.value = true;
         setsearchInputType(SearchInputType.AdvancedInputType);
         setEntityType(entityType.value);
@@ -806,10 +811,11 @@ watch(
         enqueuePromise(sortOptionsPromise);
         const state = getStateForRoute(route, true);
         setSkip(state?.queryVariables?.skip || 1);
-        await getEntities(route);
+        await getEntities(route, newAbortController.signal);
         isInitialLoading.value = false;
       } catch {
         isInitialLoading.value = false;
+        abortController.value = null;
       }
     }
   },
