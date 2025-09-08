@@ -1,6 +1,7 @@
 <template>
   <div class="hidden">
     <div
+      data-dz-file-preview
       ref="dropzonePreview"
       class="dz-file-preview border border-accent-highlight rounded-md w-full mi-h-28 items-right mb-2 hover:bg-blue-default10 relative"
     >

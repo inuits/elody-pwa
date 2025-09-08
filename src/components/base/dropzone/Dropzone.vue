@@ -43,8 +43,13 @@ defineEmits<{
 }>();
 const { dynamicFormUploadFields } = useDynamicForm();
 
-const { addFileToUpload, removeFileToUpload, files, uploadStatus } =
-  useUpload();
+const {
+  addFileToUpload,
+  removeFileToUpload,
+  files,
+  uploadStatus,
+  toggleDeleteFileButtons,
+} = useUpload();
 
 onMounted(() => {
   const dropzone = props.dropzone.initDropzone(

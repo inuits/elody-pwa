@@ -259,7 +259,7 @@ const useUpload = (config: any) => {
       ProgressStepStatus.Loading,
     );
     toggleUploadStatus();
-    toggleDeleteFileButtons();
+    setDeleteFileButtonVisibility("invisible");
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
       await __uploadXml();
@@ -675,7 +675,8 @@ const useUpload = (config: any) => {
       return Promise.reject(httpErrorMessage);
     }
 
-    lastUploadedFileIndex.value = files.value.indexOf(file);
+    file.status = "uploaded";
+
     return {
       response,
       file: file,
@@ -702,6 +703,8 @@ const useUpload = (config: any) => {
 
     for (const file of filesToUpload) {
       try {
+        lastUploadedFileIndex.value = files.value.indexOf(file);
+        file.status = "uploading";
         if (uploadStatus.value === UploadStatus.Paused) break;
         __updateFileThumbnails(
           file,
@@ -818,14 +821,14 @@ const useUpload = (config: any) => {
       ProgressStepStatus.Paused,
     );
     uploadStatus.value = UploadStatus.Paused;
-    toggleDeleteFileButtons();
+    setDeleteFileButtonVisibility("visible");
   };
 
   const resumeUpload = () => {
     if (uploadStatus.value !== UploadStatus.Paused)
       throw Error("Unable to resume an upload that has not been paused");
     currentUploadAbortController.value = undefined;
-    toggleDeleteFileButtons();
+    setDeleteFileButtonVisibility("invisible");
     uploadStatus.value = UploadStatus.Uploading;
     __uploadMediafilesWithTicketUrl(true);
   };
@@ -1052,6 +1055,7 @@ const useUpload = (config: any) => {
   };
 
   const extractLinkContent = (error: string): string | undefined => {
+    if (!error) return undefined;
     const linkRegex = /\$LINK\(([^)]+)\)/;
     const match = error.match(linkRegex);
 
@@ -1106,15 +1110,34 @@ const useUpload = (config: any) => {
     return anchor;
   };
 
-  const toggleDeleteFileButtons = () => {
-    document
-      .querySelectorAll("[data-dz-remove]")
-      .forEach((deleteFileButton) => {
-        const classes = deleteFileButton.classList;
-        if (classes.contains("hidden"))
-          deleteFileButton.classList.remove("hidden");
-        else deleteFileButton.classList.add("hidden");
-      });
+  const setDeleteFileButtonVisibility = (
+    visibility: "visible" | "invisible" = "visible",
+  ) => {
+    const previews = document.querySelectorAll<HTMLDivElement>(
+      "[data-dz-file-preview]",
+    );
+    const uploadedStatuses = ["uploaded", "uploading"];
+    const filesThatHaveBeenUploaded = files.value.filter((file: DropzoneFile) =>
+      uploadedStatuses.includes(file.status),
+    );
+
+    previews.forEach((previewItem) => {
+      const previewFilename: string | undefined =
+        previewItem.querySelector("[data-dz-name]")?.innerHTML;
+      const deleteFileButton = previewItem.querySelector("[data-dz-remove]");
+      const hasBeenUploaded: boolean = !!filesThatHaveBeenUploaded.find(
+        (file: DropzoneFile) => file.name === previewFilename,
+      );
+
+      if (visibility === "invisible") {
+        deleteFileButton?.classList.add("hidden");
+        return;
+      }
+
+      if (!hasBeenUploaded && deleteFileButton) {
+        deleteFileButton.classList.remove("hidden");
+      }
+    });
   };
 
   return {

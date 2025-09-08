@@ -524,14 +524,13 @@ const submitActionFunction = async (field: FormAction) => {
     showErrors.value = false;
     await getTenants();
     const callbackFunctions: Function[] | undefined = extractActionArguments(
-      field.actionType
+      field.actionType,
     );
     if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
       for (const callback of callbackFunctions) {
         if (callback) await callback();
       }
-    }
-    else {
+    } else {
       if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
         tagNewlyCreatedEntity(entity);
       else
@@ -581,8 +580,7 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
       for (const callback of callbackFunctions) {
         if (callback) await callback();
       }
-    }
-    else {
+    } else {
       useBaseModal().closeModal(TypeModals.DynamicForm);
       setTimeout(() => goToEntityPage(entity, "SingleEntity", props.router), 1);
     }
