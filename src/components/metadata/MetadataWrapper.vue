@@ -107,7 +107,7 @@
                   refMetadata.inputField?.type ===
                     InputFieldTypes.DropdownSingleselectMetadata
                 "
-                v-model:model-value="refMetadata"
+                v-model:model-value="value"
                 :metadata-dropdown-options="refMetadata.inputField.options"
                 :formId="formId"
                 :select-type="

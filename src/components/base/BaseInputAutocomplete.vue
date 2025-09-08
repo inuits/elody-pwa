@@ -33,8 +33,9 @@
         class="cursor-default"
         :class="[
           classes.tag,
+          { 'pr-2': !isEdit },
           {
-            'pr-2 hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
+            'hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
               !isEdit && relationType,
           },
         ]"
