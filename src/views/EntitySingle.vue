@@ -4,14 +4,19 @@
       v-if="!loading && entity"
       class="h-full w-full flex bg-background-normal z-2 overflow-y-auto pb-4"
     >
-      <entity-column
-        v-if="columnList != 'no-values'"
-        :entity="entity"
-        :columnList="columnList"
-        :identifiers="identifiers"
-        :id="entity.id"
-        :entity-type="entityType"
-      />
+      <div class="relative h-full w-full">
+        <div v-if="saveClicked" class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-[100]">
+          <spinner-loader theme="accent" />
+        </div>
+        <entity-column
+          v-if="columnList != 'no-values'"
+          :entity="entity"
+          :columnList="columnList"
+          :identifiers="identifiers"
+          :id="entity.id"
+          :entity-type="entityType"
+        />
+      </div>
       <edit-modal :entityId="entity.id" />
       <DeleteModal></DeleteModal>
     </div>
@@ -98,6 +103,7 @@ const id = computed(() => asString(props.entityId || route.params["id"]));
 const useEditHelper = ref(useEditMode(id.value));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);
+const saveClicked = ref<boolean>(false);
 const { getEditableMetadataKeys } = useFormHelper();
 
 const entityType = computed(() => {
@@ -267,6 +273,14 @@ watch(
     queryVariables.preferredLanguage = newLocale;
     refetch(queryVariables);
   },
+);
+
+watch(
+  () => useEditHelper.value.buttonClicked,
+  (value) => {
+    saveClicked.value = value;
+  },
+  { immediate: true },
 );
 
 onUnmounted(() => {
