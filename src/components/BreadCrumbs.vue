@@ -147,7 +147,6 @@ const currentRouteTitle = ref<string>("");
 watch(
   () => [locale.value, rootRoute.value.rootTitle],
   () => {
-    console.log("here", rootRoute.value);
     currentRouteTitle.value = t(rootRoute.value.rootTitle);
   },
 );
