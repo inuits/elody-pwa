@@ -237,7 +237,10 @@ watch(
     if (!requiresCustomQuery.value) return;
     if (uploadStatus.value === UploadStatus.Uploading)
       queryLoaded.value = false;
-    else if (uploadStatus.value === UploadStatus.Finished)
+    else if (
+      uploadStatus.value === UploadStatus.Finished ||
+      uploadStatus.value === UploadStatus.Paused
+    )
       await useCustomQuery();
   },
 );
