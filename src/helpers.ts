@@ -1,22 +1,23 @@
-import type { Unit } from "@/generated-types/queries";
 import {
-  PanelType,
-  type PanelInfo,
-  type PanelMetaData,
-  type WindowElementPanel,
-  type EntityListElement,
-  type Entity,
   type BaseEntity,
-  type IntialValues,
-  type Metadata,
+  type BaseRelationValuesInput,
   type ColumnList,
-  Entitytyping,
-  InputFieldTypes,
-  RouteNames,
-  GetCustomFormattersSettingsDocument,
   DamsIcons,
   type DropdownOption,
+  type Entity,
+  type EntityListElement,
+  Entitytyping,
+  GetCustomFormattersSettingsDocument,
+  InputFieldTypes,
+  type IntialValues,
+  type Metadata,
   type MetadataInput,
+  type PanelInfo,
+  type PanelMetaData,
+  PanelType,
+  RouteNames,
+  type Unit,
+  type WindowElementPanel,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { i18n } from "@/main.ts";
@@ -28,8 +29,8 @@ import {
   useRoute,
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
-import { apolloClient, typeUrlMapping, auth } from "@/main";
-import { toRaw, isProxy } from "vue";
+import { apolloClient, auth, typeUrlMapping } from "@/main";
+import { isProxy, toRaw } from "vue";
 import DOMPurify from "dompurify";
 
 export const goToEntityPage = (
@@ -733,6 +734,18 @@ export const mapModelValueToDropdownOptions = (
       __typename: "DropdownOption",
     },
   ];
+};
+
+export const mapRelationValuesToDropdownOptions = (relations: BaseRelationValuesInput[]) => {
+  const relationDropdowns: DropdownOption[] = [];
+  relations.forEach((relation: BaseRelationValuesInput) => {
+    relationDropdowns.push({
+      icon: DamsIcons.NoIcon,
+      label: relation.value,
+      value: relation.key
+    });
+  });
+  return relationDropdowns;
 };
 
 export const requiresAuthForEntity = (

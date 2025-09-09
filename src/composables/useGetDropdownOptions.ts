@@ -1,4 +1,3 @@
-import type { Entitytyping } from "@/generated-types/queries";
 import {
   type AdvancedFilterInput,
   type AdvancedFilterInputType,
@@ -8,14 +7,17 @@ import {
   type DropdownOption,
   EditStatus,
   SearchInputType,
+  type BaseRelationValuesInput,
+  type Entitytyping,
 } from "@/generated-types/queries";
 import { computed, inject, ref } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
-import { getEntityTitle } from "@/helpers";
+import { getEntityTitle, mapRelationValuesToDropdownOptions } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { omitDeep } from "@apollo/client/utilities";
+import type { FormContext } from "vee-validate";
 
 export const useGetDropdownOptions = (
   entityType: Entitytyping,
@@ -28,6 +30,7 @@ export const useGetDropdownOptions = (
   relationFilter?: AdvancedFilterInput,
 ) => {
   const apolloClient = inject(DefaultApolloClient);
+  const relationDropdowns = ref<DropdownOption[] | undefined>(undefined);
   const abortController = ref<AbortController | null>(null);
   const currentRequestId = ref(0);
   const isLoading = ref(false);
@@ -71,6 +74,12 @@ export const useGetDropdownOptions = (
     if (abortController.value) {
       abortController.value.abort();
       isLoading.value = false;
+    }
+
+    const form = useFormHelper().getForm(formId);
+    if (form && relationType && parent !== "fetchAll") {
+      getRelationDropdownsFromCurrentEntity(form);
+      return;
     }
 
     abortController.value = new AbortController();
@@ -183,7 +192,7 @@ export const useGetDropdownOptions = (
 
   const entityDropdownOptions = computed<DropdownOption[]>(
     () =>
-      entities.value.map((entity: BaseEntity) => {
+      relationDropdowns.value || entities.value.map((entity: BaseEntity) => {
         return {
           icon: DamsIcons.NoIcon,
           label: getEntityTitle(entity),
@@ -248,6 +257,12 @@ export const useGetDropdownOptions = (
     if (returnIdAtIndex === -1) return relations.map((rel) => rel.key);
     return relations[returnIdAtIndex].key;
   };
+
+  const getRelationDropdownsFromCurrentEntity = (form: FormContext) => {
+    const relationValues = form.values.relationValues[relationType]?.filter((relation: BaseRelationValuesInput) => relation.editStatus !== EditStatus.Deleted);
+    if (!relationValues) return;
+    relationDropdowns.value = mapRelationValuesToDropdownOptions(relationValues);
+  }
 
   const getFormWithRelationFieldCheck = (formId: string, field: string) => {
     const form = useFormHelper().getForm(formId);
