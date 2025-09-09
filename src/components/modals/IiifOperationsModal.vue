@@ -121,7 +121,10 @@ const getImage = () => {
 
 const scaleDimensions = (scale: number): { width: number; height: number } => {
   if (!originalWidth || !originalHeight) return { width: 0, height: 0 };
-  return { width: originalWidth * scale, height: originalHeight * scale };
+  return {
+    width: Math.floor(originalWidth * scale),
+    height: Math.floor(originalHeight * scale),
+  };
 };
 
 watch(
