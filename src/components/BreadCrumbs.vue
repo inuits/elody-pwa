@@ -51,7 +51,7 @@
           { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
         ]"
       >
-        {{ getCurrentRouteTitle }}
+        {{ currentRouteTitle }}
       </div>
     </div>
     <div
@@ -111,7 +111,7 @@
 
 <script lang="ts" setup>
 import CustomIcon from "./CustomIcon.vue";
-import { ref, computed, inject } from "vue";
+import { ref, computed, inject, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
@@ -127,13 +127,13 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const config: any = inject("config");
 
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
 const breadCrumbRoutesExist = computed(
-  () => breadcrumbRoutes.value.length > 0 || getCurrentRouteTitle.value,
+  () => breadcrumbRoutes.value.length > 0 || currentRouteTitle.value,
 );
 const router = useRouter();
 const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
@@ -142,16 +142,18 @@ const { discardEditForForm } = useFormHelper();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
 
+const currentRouteTitle = ref<string>("");
+
+watch(
+  () => [locale.value, rootRoute.value.rootTitle],
+  () => {
+    console.log("here", rootRoute.value);
+    currentRouteTitle.value = t(rootRoute.value.rootTitle);
+  },
+);
+
 router.beforeEach(() => {
   showHistory.value = false;
-});
-
-const getCurrentRouteTitle = computed<string>(() => {
-  try {
-    return t(rootRoute.value.rootTitle);
-  } catch {
-    return undefined;
-  }
 });
 
 const toggleList = () => {
