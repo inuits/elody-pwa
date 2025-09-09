@@ -76,7 +76,11 @@ const start = async (): Promise<void> => {
     history: createWebHistory(import.meta.env.BASE_URL),
   });
 
-  auth.changeRedirectRoute(window.location.origin + window.location.pathname);
+  if (
+    !window.location.pathname.includes("/accessDenied") ||
+    !window.location.pathname.includes("/unauthorized")
+  )
+    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
   addRouterNavigationGuards(router, config);
 
   const authCode = new URLSearchParams(window.location.search).get("code");
