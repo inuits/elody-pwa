@@ -1,5 +1,6 @@
 import { WysiwygExtensions } from "@/generated-types/queries";
 import type { HTMLContent } from "@tiptap/core";
+import { ref, type Ref } from "vue";
 
 type ExtensionInfo = {
   importName: string;
@@ -13,8 +14,16 @@ export const useWYSIWYGEditor = (): {
   editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo>;
   importEditorExtensions: (extensions: WysiwygExtensions[]) => Promise<any>;
   getExtensionConfiguration: (extensions: WysiwygExtensions[]) => any[];
-  countLinesOfContent: (content: HTMLContent) => number;
+  addLineMarkers: (
+    editorContainer: HTMLDivElement,
+    content: HTMLContent,
+  ) => void;
+  lineNumberMarkers: Ref<string[]>;
 } => {
+  const editorHeight = ref<number>(0);
+  const lineBreaksInContent = ref<number>(0);
+  const lineNumberMarkers = ref<string[]>(["1."]);
+
   const editorExtensionImportMapping: Record<WysiwygExtensions, ExtensionInfo> =
     {
       // Base-extensions if you don't want to use the starterkit
@@ -127,14 +136,54 @@ export const useWYSIWYGEditor = (): {
       .filter(Boolean);
   };
 
-  const countLinesOfContent = (content: HTMLContent): number => {
-    return content.split("<br>").length;
+  const addLineMarkers = (
+    editorContainer: HTMLDivElement,
+    content: HTMLContent,
+  ): void => {
+    const lineHeight: number = 40;
+    const currentEditorHeight = editorContainer.getBoundingClientRect().height;
+    const currentLineBreakAmount = content.split("<br>").length;
+
+    if (!content) {
+      lineNumberMarkers.value = ["1."];
+    }
+
+    const previousLineBreakAmount = lineBreaksInContent.value;
+
+    if (
+      currentLineBreakAmount != previousLineBreakAmount &&
+      !lineNumberMarkers.value.includes(`${currentLineBreakAmount}.`)
+    ) {
+      if (currentLineBreakAmount > previousLineBreakAmount)
+        lineNumberMarkers.value.push(`${currentLineBreakAmount}.`);
+
+      if (currentLineBreakAmount < previousLineBreakAmount)
+        lineNumberMarkers.value.pop();
+
+      lineBreaksInContent.value = currentLineBreakAmount;
+      editorHeight.value = currentEditorHeight;
+      return;
+    }
+
+    if (!editorHeight.value) editorHeight.value = currentEditorHeight;
+
+    const previousEditorHeight = editorHeight.value;
+
+    if (currentEditorHeight > previousEditorHeight) {
+      const wrapAmount: number =
+        (currentEditorHeight - previousEditorHeight) / lineHeight;
+      for (let x = 0; x <= wrapAmount - 1; x++) {
+        lineNumberMarkers.value.push("\u00A0");
+      }
+      editorHeight.value = currentEditorHeight;
+    }
   };
 
   return {
     importEditorExtensions,
     getExtensionConfiguration,
     editorExtensionImportMapping,
-    countLinesOfContent,
+    addLineMarkers,
+    lineNumberMarkers,
   };
 };

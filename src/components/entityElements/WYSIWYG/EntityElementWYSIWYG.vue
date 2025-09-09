@@ -39,9 +39,17 @@
       /></Transition>
       <div class="flex">
         <div v-if="element.showLineNumbers" class="mt-[3px]">
-          <div class="text-xl mt-3" v-for="n in paragraphAmount">{{ n }}.</div>
+          <div
+            class="text-xl mt-3"
+            v-for="marker in lineNumberMarkers"
+            :key="marker"
+          >
+            {{ marker }}
+          </div>
         </div>
-        <div class="w-full"><editor-content :editor="editor" /></div>
+        <div ref="editorContainer" class="w-full">
+          <editor-content :editor="editor" />
+        </div>
       </div>
     </div>
     <TagEntityModal
@@ -93,18 +101,19 @@ const editor = ref<Editor | undefined>(undefined);
 const {
   importEditorExtensions,
   getExtensionConfiguration,
-  countLinesOfContent,
+  addLineMarkers,
+  lineNumberMarkers,
 } = useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
 const { updateModal } = useBaseModal();
 const useEditHelper = useEditMode(props.formId);
+const editorContainer = ref<HTMLDivElement | undefined>(undefined);
 const { t } = useI18n();
 
 const form = computed(() => getForm(props.formId));
 const editorNode = ref<HTMLDivElement | undefined>(undefined);
 const initialValue = ref<string>("");
 const editorLoaded = ref<boolean>(false);
-const paragraphAmount = ref<number>(0);
 
 const resetContent = () => {
   const content = editor.value?.options?.content;
@@ -141,13 +150,11 @@ onMounted(async () => {
     editorExtensions.push(...taggingExtensions);
   }
 
-  paragraphAmount.value = countLinesOfContent(initialValue.value);
-
   editor.value = new Editor({
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2`,
+        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2" : "mx-4"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2`,
       },
       handleClickOn: (view, pos, node) => {
         if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
@@ -160,7 +167,8 @@ onMounted(async () => {
     content: initialValue.value,
     onUpdate({ editor }) {
       const htmlContent = editor.getHTML() as HTMLContent;
-      paragraphAmount.value = countLinesOfContent(htmlContent);
+      addLineMarkers(editorContainer.value!, htmlContent);
+
       if (!form.value) return;
       form.value.setFieldValue(
         `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
