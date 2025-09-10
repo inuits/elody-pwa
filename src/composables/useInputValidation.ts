@@ -151,7 +151,7 @@ export const useInputValidation = () => {
 
     let regex = _getSingleParam(params, "regex");
     if (typeof regex === "string") {
-      regex = regex.replace(/\?\./g, "|");
+      regex = regex.replace(/\?\.c/g, ",").replace(/\?\./g, "|");
       regex = new RegExp(regex);
     }
 
@@ -187,8 +187,13 @@ export const useInputValidation = () => {
     return Array.isArray(value) && value.length === 0;
   };
 
+  const __test__ = {
+    _regexValidator,
+  };
+
   return {
     initializeInputValidation,
     extractValidationTranslationsFromAllTranslations,
+    __test__,
   };
 };

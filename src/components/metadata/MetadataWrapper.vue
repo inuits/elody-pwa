@@ -367,7 +367,7 @@ const getValidationRules = (metadata: PanelMetaData): string => {
 
   if (isRegexField.value) {
     const rawRegex = validation.regex?.replace(/^\/|\/$/g, "") ?? "";
-    const cleanedRegex = unescapeString(rawRegex.replace(/\|/g, "?."));
+    const cleanedRegex = unescapeString(rawRegex.replace(/\|/g, "?.")).replace(/,/g, "?.c");
     return `${ValidationRules.Regex}:${cleanedRegex}|no_xss`;
   }
 
