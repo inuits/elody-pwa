@@ -32,7 +32,7 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <SanitizedHtml :content="processedDisplayValue"></SanitizedHtml>
+        <SanitizedHtml :content="processedDisplayValue" :link-text="t(linkText)"></SanitizedHtml>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)">
