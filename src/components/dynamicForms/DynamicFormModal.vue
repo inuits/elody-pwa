@@ -28,13 +28,13 @@
         </baseTabs>
       </template>
       <div class="h-full">
-        <dynamic-form
-          v-if="getModalInfo(TypeModals.DynamicForm).open && !shouldRenderTabs"
-          :key="getModalInfo(TypeModals.DynamicForm).formQuery"
-          :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-          :router="useRouter()"
-          :tab-name="''"
-        />
+          <dynamic-form
+            v-if="getModalInfo(TypeModals.DynamicForm).open && !shouldRenderTabs"
+            :key="getModalInfo(TypeModals.DynamicForm).formQuery"
+            :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+            :router="useRouter()"
+            :tab-name="''"
+          />
       </div>
     </div>
   </BaseModal>
@@ -101,9 +101,13 @@ const initializeModal = () => {
       buttonCallback: () => {
         changeCloseConfirmation(TypeModals.DynamicForm, false);
         closeModal(TypeModals.DynamicForm);
+        clearFormTabs();
+        resetUpload();
       },
     },
-    declineButton: { buttonCallback: () => closeModal(TypeModals.Confirm) },
+    declineButton: {
+      buttonCallback: () => closeModal(TypeModals.Confirm),
+    },
     translationKey: "discard-modal",
   });
 };
@@ -148,6 +152,8 @@ const formTabArray = computed(() => {
 
 const handleCloseModal = () => {
   closeModal(TypeModals.DynamicForm);
+
+  if (getModalInfo(TypeModals.DynamicForm).closeConfirmation) return;
   clearFormTabs();
   resetUpload();
 };

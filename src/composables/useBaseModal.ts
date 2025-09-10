@@ -13,12 +13,14 @@ export type ModalInfo = {
   deleteQueryOptions?: DeleteQueryOptions;
   closeConfirmation: boolean;
   context?: Context;
+  modalStyle: ModalStyle;
   [key: string]: any;
 };
 
 const initialModalInfo: ModalInfo = {
   open: false,
   closeConfirmation: false,
+  modalStyle: ModalStyle.Center
 };
 
 const getInitialModals = (): { [key: string]: ModalInfo } => {
@@ -30,7 +32,6 @@ const getInitialModals = (): { [key: string]: ModalInfo } => {
 };
 
 const modals = reactive<{ [key: string]: ModalInfo }>(getInitialModals());
-const currentModalStyle = ref<ModalStyle>(ModalStyle.Center);
 const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 const _someModalIsOpened = ref(false);
@@ -53,13 +54,13 @@ export const useBaseModal = () => {
     if (modals[modalType].open) return;
 
     _someModalIsOpened.value = true;
-    currentModalStyle.value = modalStyle;
 
     const updatedModal = {
       open: true,
       formQuery,
       deleteQueryOptions,
       askForCloseConfirmation,
+      modalStyle,
       ...modalTypeSpecificInfo,
     };
 
@@ -117,7 +118,6 @@ export const useBaseModal = () => {
     openModal,
     changeCloseConfirmation,
     modalToCloseAfterConfirm,
-    currentModalStyle,
     someModalIsOpened,
     closeAllModals,
   };

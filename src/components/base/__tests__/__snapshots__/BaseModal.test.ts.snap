@@ -1,0 +1,37 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BaseModal > Snapshot Tests > matches snapshot for center modal 1`] = `
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-xl min-w-[50vw] w-fit m-auto max-h-[75vh] my-[12.5vh] @container/modal">
+  <div data-v-5078ddf1="" class="flex justify-end p-2" data-testid="modal-header">
+    <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
+  </div>
+  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+</dialog>"
+`;
+
+exports[`BaseModal > Snapshot Tests > matches snapshot for center wide modal 1`] = `
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-xl min-w-[80vw] w-fit m-auto max-h-[90vh] @container/modal">
+  <div data-v-5078ddf1="" class="flex justify-end p-2" data-testid="modal-header">
+    <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
+  </div>
+  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+</dialog>"
+`;
+
+exports[`BaseModal > Snapshot Tests > matches snapshot for left modal 1`] = `
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" class="grid grid-rows-[max-content_1fr] base-modal--opened @container/modal">
+  <div data-v-5078ddf1="" class="flex justify-end p-2" data-testid="modal-header">
+    <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
+  </div>
+  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+</dialog>"
+`;
+
+exports[`BaseModal > Snapshot Tests > matches snapshot for right modal 1`] = `
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" class="grid grid-rows-[max-content_1fr] base-modal--opened min-w-[40vw] w-fit h-screen max-h-screen mr-0 my-0 @container/modal">
+  <div data-v-5078ddf1="" class="flex justify-end p-2" data-testid="modal-header">
+    <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
+  </div>
+  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+</dialog>"
+`;

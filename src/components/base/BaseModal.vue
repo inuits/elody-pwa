@@ -1,7 +1,9 @@
 <template>
   <dialog
     ref="dialog"
+    data-testid="modal-dialog"
     @close="hideModal"
+    @cancel="handleCancel"
     :class="[
       {
         'grid grid-rows-[max-content_1fr] base-modal--opened': getModalInfo(
@@ -15,15 +17,22 @@
       `@container/modal`,
     ]"
   >
-    <div v-if="!cancelButtonAvailabe" class="flex justify-end p-2">
+    <div
+      v-if="!cancelButtonAvailabe"
+      class="flex justify-end p-2"
+      data-testid="modal-header"
+    >
       <unicon
         :name="Unicons.Close.name"
         :height="iconHeight"
         class="cursor-pointer"
+        data-testid="modal-close-button"
         @click="hideModal"
       />
     </div>
-    <slot />
+    <div data-testid="modal-content">
+      <slot />
+    </div>
   </dialog>
 </template>
 
@@ -52,8 +61,11 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
-const { currentModalStyle, getModalInfo } = useBaseModal();
+const { getModalInfo } = useBaseModal();
 const dialog = ref<HTMLDialogElement>();
+const currentModalStyle = computed(
+  () => getModalInfo(props.modalType).modalStyle,
+);
 const modalStyle = computed(() => modalStyles[currentModalStyle.value]);
 
 const modalStyles: { [key: string]: string } = {
@@ -76,6 +88,11 @@ watch(
     document.body.classList.remove("overflow-hidden");
   },
 );
+
+const handleCancel = (event: Event) => {
+  event.preventDefault();
+  hideModal();
+};
 
 const hideModal = () => {
   emit("update:modalState", "hide");
