@@ -32,6 +32,7 @@ import type { GraphQLError } from "graphql/error";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
+import { useApp } from "@/composables/useApp";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -107,9 +108,19 @@ const start = async (): Promise<void> => {
     cache: new InMemoryCache(),
   });
 
+  setIgnorePermissions(config.IGNORE_PERMISSIONS);
+  const [formattersSettingsResult] = await Promise.all([
+    getFormattersSettings(),
+  ]);
+  formattersSettings = formattersSettingsResult;
+
+  await useApp().initApp(auth, config, apolloClient);
+
+  addRouterNavigationGuards(router, config);
+
   const app = createApp(App)
     .use(i18n)
-    .use(Unicon, {
+    .use(Unicon as any, {
       fill: "currentColor",
     })
     .use(Notifications)
@@ -133,11 +144,7 @@ const start = async (): Promise<void> => {
       environment: config.NOMAD_NAMESPACE,
     });
   }
-  setIgnorePermissions(config.IGNORE_PERMISSIONS);
-  const [formattersSettingsResult] = await Promise.all([
-    getFormattersSettings(),
-  ]);
-  formattersSettings = formattersSettingsResult;
+  
   app.mount("#app");
 };
 start();

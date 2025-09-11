@@ -49,26 +49,17 @@ import SavedSearchesPickerModal from "@/components/modals/SavedSearchesPickerMod
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
-import { inject, onMounted } from "vue";
 import { useApp } from "@/composables/useApp";
-import { auth } from "@/main";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
 import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 
-const config = inject<{
-  features: { hasTenantSelect: boolean };
-  allowAnonymousUsers: boolean;
-}>("config");
-
 const route = useRoute();
-const { initApp, showSplashScreen } = useApp();
+const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
 const { someModalIsOpened } = useBaseModal();
-
-onMounted(async () => await initApp(auth, config));
 
 useHead({
   meta: [

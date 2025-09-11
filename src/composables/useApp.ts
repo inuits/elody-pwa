@@ -1,21 +1,24 @@
 import type { ApolloClient } from "@apollo/client/core";
 import useTenant from "@/composables/useTenant";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import { inject, ref, watch } from "vue";
+import { ref, watch } from "vue";
+import { router } from "@/main";
 
 const showSplashScreen = ref<boolean>(true);
 const currentTenant = ref<string | undefined>();
 
 export const useApp = () => {
-  const initApp = async (auth: any, config: any) => {
-    const apolloClient = inject(DefaultApolloClient);
+  const initApp = async (
+    auth: any,
+    config: any,
+    apolloClient: ApolloClient<any>,
+  ) => {
     const { initTenants, selectedTenant, selectedTenantName, tenantsLoaded } =
       useTenant(apolloClient as ApolloClient<any>, config);
 
     showSplashScreen.value = true;
 
     if (auth.isAuthenticated.value || config.allowAnonymousUsers) {
-      await initTenants();
+      await initTenants(router.currentRoute.value.params);
       currentTenant.value = selectedTenantName.value;
       showSplashScreen.value = false;
 
@@ -24,7 +27,7 @@ export const useApp = () => {
           showSplashScreen.value = true;
           if (tenantsLoaded.value === "loaded")
             if (auth.isAuthenticated.value || config.allowAnonymousUsers) {
-              await initTenants();
+              await initTenants(router.currentRoute.value.params);
               currentTenant.value = selectedTenantName.value;
               showSplashScreen.value = false;
             } else {

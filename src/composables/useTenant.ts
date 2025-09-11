@@ -10,7 +10,7 @@ import {
   setPermissionsMappings,
   resetAdvancedPermissions,
 } from "@/composables/usePermissions";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
 
@@ -34,14 +34,13 @@ const useTenant = (
   const hideSuperTenant: boolean =
     (config && config.features.hideSuperTenant) || false;
   const router = useRouter();
-  const route = useRoute();
 
-  const initTenants = async () => {
+  const initTenants = async (routeParams?: any) => {
     if (hasTenantSelect) {
       await apolloClient.cache.reset();
       await getTenants();
-      if (route.params?.tenant) {
-        const tenantInUrl = getIdFromCode(route.params?.tenant as string) || "";
+      if (routeParams?.tenant) {
+        const tenantInUrl = getIdFromCode(routeParams?.tenant as string) || "";
         if (tenantInUrl) await setTennantInSession(tenantInUrl);
       }
       const tenantFromSession = await getTennantFromSession();
@@ -141,7 +140,7 @@ const useTenant = (
         });
 
       if (filterResult && filterResult.length === 1) {
-        return { id: filterResult[0].id, label: filterResult[0].label };
+        return { id: filterResult[0].id, label: filterResult[0].label, code: filterResult[0].code };
       } else {
         return "no-tenant-in-session";
       }
@@ -166,7 +165,8 @@ const useTenant = (
 
   const selectTenant = async (selectedTenantValue: string) => {
     selectedTenant.value = selectedTenantValue;
-    if (selectedTenantValue !== (await getTennantFromSession()).id)
+    const currentTenant = await getTennantFromSession();
+    if (currentTenant !== "no-tenant-in-session" && selectedTenantValue !== currentTenant.id)
       router.push({ name: "Home" });
 
     if (selectedTenantValue) await setTennantInSession(selectedTenantValue);
