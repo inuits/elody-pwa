@@ -150,6 +150,7 @@
           :entities="refEntities"
           :config-per-view-mode="configPerViewMode"
           :entity-id="previewForEntity"
+          :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -215,6 +216,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     configPerViewMode: object;
     showCurrentEntityFlow?: boolean;
+    cropMediafileCoordinatesKey?: string;
   }>(),
   {
     disablePreviews: false,
@@ -228,6 +230,7 @@ const props = withDefaults(
     mode: "list",
     refetchEntities: undefined,
     showCurrentEntityFlow: true,
+    cropMediafileCoordinatesKey: "",
   },
 );
 

@@ -112,7 +112,8 @@ const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityId, getRelationType } = useEntityPickerModal();
+const { getEntityId, getRelationType, setCropMode, setCropCoordinatesKey } =
+  useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
 const { getForm } = useFormHelper();
 const { parseFormValuesToFormInput } = useFormHelper();
@@ -214,6 +215,8 @@ const submit = useSubmitForm<EntityValues>(async () => {
   for (const callback of callbackFunctions) {
     if (callback) await callback();
   }
+  setCropMode(false);
+  setCropCoordinatesKey("");
   closeModal(TypeModals.DynamicForm);
 });
 

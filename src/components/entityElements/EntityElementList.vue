@@ -86,6 +86,7 @@
               customQueryEntityPickerListFilters
             "
             :id="id"
+            :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
           />
           <BaseLibrary
             class="flex-1"
@@ -195,6 +196,7 @@ const props = withDefaults(
     filtersNeedContext?: EntitySubelement[];
     id: string;
     previewLabel?: string;
+    cropMediafileCoordinatesKey?: string;
   }>(),
   {
     enableAdvancedFilters: false,

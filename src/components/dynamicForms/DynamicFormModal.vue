@@ -53,6 +53,7 @@ import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
 import useUpload from "@/composables/useUpload";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 const formTabs = ref<Form | null>(null);
 const config: any = inject("config");
@@ -61,6 +62,7 @@ const { initializeConfirmModal } = useConfirmModal();
 const { t } = useI18n();
 const { getDynamicFormTabs } = useDynamicForm();
 const { resetUpload } = useUpload(config);
+const { setCropCoordinatesKey, setCropMode } = useEntityPickerModal();
 
 watchEffect(() => {
   (async () => {
@@ -156,6 +158,8 @@ const handleCloseModal = () => {
   if (getModalInfo(TypeModals.DynamicForm).closeConfirmation) return;
   clearFormTabs();
   resetUpload();
+  setCropMode(false);
+  setCropCoordinatesKey("");
 };
 </script>
 

@@ -45,6 +45,7 @@
         :can="element.can"
         :id="id"
         :preview-label="previewLabel"
+        :cropMediafileCoordinatesKey="element.cropMediafileCoordinatesKey"
         @close-preview-component="emit('closePreviewComponent')"
         @toggle-element-collapse="
           (entityId, elementLabel) =>

@@ -8,6 +8,8 @@ const parentEntityType = ref<Entitytyping[]>([]);
 const relationType = ref<string | "no-type-set">("no-type-set");
 const customGetEntitiesQuery = ref<string>("");
 const customGetEntitiesFiltersQuery = ref<string>("");
+const isCropModeEnabled = ref<boolean>(false);
+const cropCoordinatesKey = ref<string>("");
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -38,6 +40,14 @@ const useEntityPickerModal = () => {
     customGetEntitiesFiltersQuery.value = query;
   };
 
+  const setCropMode = (state: boolean) => {
+    isCropModeEnabled.value = state;
+  };
+
+  const setCropCoordinatesKey = (value: string) => {
+    cropCoordinatesKey.value = value;
+  };
+
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
   const getEntityId = () => entityId.value;
@@ -46,6 +56,8 @@ const useEntityPickerModal = () => {
   const getCustomGetEntitiesQuery = () => customGetEntitiesQuery.value;
   const getCustomGetEntitiesFiltersQuery = () =>
     customGetEntitiesFiltersQuery.value;
+  const getIsCropModeEnabled = () => isCropModeEnabled.value;
+  const getCropCoordinatesKey = () => cropCoordinatesKey.value;
 
   return {
     getAcceptedTypes,
@@ -62,6 +74,10 @@ const useEntityPickerModal = () => {
     setCustomGetEntitiesQuery,
     setCustomGetEntitiesFiltersQuery,
     setEntityId,
+    getIsCropModeEnabled,
+    setCropMode,
+    setCropCoordinatesKey,
+    getCropCoordinatesKey,
   };
 };
 

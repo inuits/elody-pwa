@@ -104,6 +104,8 @@ import {
   uniWindowMaximize,
   uniCopy,
   uniKeyboard,
+  uniCropAlt,
+  uniCancel,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -125,6 +127,8 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   BookOpen: uniBookOpen,
   BrightnessPlus: uniBrightnessPlus,
   Car: uniCar,
+  Cancel: uniCancel,
+  Crop: uniCropAlt,
   Check: uniCheck,
   CheckCircle: uniCheckCircle,
   CheckSquare: uniCheckSquare,

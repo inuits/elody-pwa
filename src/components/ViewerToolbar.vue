@@ -3,7 +3,7 @@
     class="absolute w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10"
   >
     <div class="pt-[10px] flex flex-row">
-      <button ref="fullPageRef" class="mr-2 ml-2">
+      <button ref="fullPageRef" class="a1 mr-2 ml-2">
         <unicon
           :name="Unicons.Desktop.name"
           height="20"
@@ -24,6 +24,59 @@
           class="text-neutral-700 cursor-pointer"
         />
       </button>
+
+      <BaseTooltip v-if="enableSelection" position="top" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <button
+              ref="cropRef"
+              :disabled="!canCrop"
+              @click="$emit('toggle-selection')"
+              class="ml-2 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            >
+              <unicon
+                :name="Unicons.Crop.name"
+                height="20"
+                class="text-neutral-700"
+              />
+            </button>
+          </div>
+        </template>
+        <span class="text-sm text-text-placeholder">
+          {{
+            canCrop
+              ? $t("tooltip.media-viewer.selection")
+              : $t("tooltip.media-viewer.selection-disabled")
+          }}
+        </span>
+      </BaseTooltip>
+
+      <BaseTooltip v-if="enableSelection" position="top" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <button
+              ref="cancelRef"
+              :disabled="!canCrop"
+              @click="$emit('cancel-selection')"
+              class="ml-2 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            >
+              <unicon
+                :name="Unicons.Cancel.name"
+                height="20"
+                class="text-neutral-700"
+              />
+            </button>
+          </div>
+        </template>
+        <span class="text-sm text-text-placeholder">
+          {{
+            canCrop
+              ? $t("tooltip.media-viewer.remove-selected-area")
+              : $t("tooltip.media-viewer.selection-disabled")
+          }}
+        </span>
+      </BaseTooltip>
+
       <button
         v-if="mediafileId && !downloadImageLoadingRef"
         @click="downloadImage"
@@ -98,141 +151,108 @@
   </div>
 </template>
 
-<script lang="ts">
-import {
-  computed,
-  defineComponent,
-  inject,
-  onMounted,
-  type PropType,
-  ref,
-} from "vue";
+<script setup lang="ts">
+import { ref, computed, onMounted, inject } from "vue";
 import { Unicons } from "../types";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useMediafileCrop } from "@/composables/useMediafileCrop";
 
-export default defineComponent({
-  name: "ViewerToolbar",
-  components: { SpinnerLoader, BaseTooltip },
-  props: {
-    zoomIn: {
-      type: Object as PropType<HTMLDivElement | string | null>,
-      default: null,
-    },
-    zoomOut: {
-      type: Object as PropType<HTMLDivElement | string | null>,
-      default: null,
-    },
-    fullPage: {
-      type: Object as PropType<HTMLDivElement | string | null>,
-      default: null,
-    },
-    home: {
-      type: Object as PropType<HTMLDivElement | string | null>,
-      default: null,
-    },
-    originalFilename: {
-      type: String,
-      default: "",
-    },
-    mediafileId: {
-      type: String,
-      default: "",
-    },
-  },
-  emits: [
-    "update:zoomIn",
-    "update:zoomOut",
-    "update:fullPage",
-    "update:home",
-    "togglePreviewComponent:entityId",
-  ],
-  setup: (_props, { emit }) => {
-    const zoomInRef = ref<HTMLDivElement | undefined>(undefined);
-    const zoomOutRef = ref<HTMLDivElement | undefined>(undefined);
-    const fullPageRef = ref<HTMLDivElement | undefined>(undefined);
-    const homeRef = ref<HTMLDivElement | undefined>(undefined);
-    const downloadImageLoadingRef = ref<boolean>(false);
-    const {
-      mediafileSelectionState,
-      selectNextMediafile,
-      selectPreviousMediafile,
-    } = useEntityMediafileSelector();
-    const mediafileViewerContext: any = inject("mediafileViewerContext");
-    const { openModal } = useBaseModal();
+const props = defineProps<{
+  zoomIn?: HTMLDivElement | string | null;
+  zoomOut?: HTMLDivElement | string | null;
+  fullPage?: HTMLDivElement | string | null;
+  home?: HTMLDivElement | string | null;
+  originalFilename?: string;
+  mediafileId?: string;
+  enableSelection?: boolean;
+}>();
 
-    onMounted(() => {
-      emit("update:zoomIn", zoomInRef.value);
-      emit("update:zoomOut", zoomOutRef.value);
-      emit("update:fullPage", fullPageRef.value);
-      emit("update:home", homeRef.value);
-    });
+const emit = defineEmits<{
+  (event: "update:zoomIn", value: HTMLDivElement | undefined): void;
+  (event: "update:zoomOut", value: HTMLDivElement | undefined): void;
+  (event: "update:fullPage", value: HTMLDivElement | undefined): void;
+  (event: "update:home", value: HTMLDivElement | undefined): void;
+  (event: "update:crop", value: HTMLDivElement | undefined): void;
+  (event: "update:cancel", value: HTMLDivElement | undefined): void;
+  (event: "togglePreviewComponent:entityId", id: string): void;
+  (event: "toggle-selection"): void;
+  (event: "cancel-selection"): void;
+}>();
 
-    const viewerContainsMultipleMediafiles = computed(
-      () =>
-        mediafileSelectionState.value[mediafileViewerContext].mediafiles
-          .length > 1,
-    );
+const zoomInRef = ref<HTMLDivElement>();
+const zoomOutRef = ref<HTMLDivElement>();
+const fullPageRef = ref<HTMLDivElement>();
+const homeRef = ref<HTMLDivElement>();
+const cropRef = ref<HTMLDivElement>();
+const cancelRef = ref<HTMLDivElement>();
+const downloadImageLoadingRef = ref(false);
 
-    const getDownloadLink = async (): Promise<string> => {
-      if (!_props.mediafileId)
-        throw Error(
-          `Could not download madiafile with id "${_props.mediafileId}"`,
-        );
-      downloadImageLoadingRef.value = true;
-      const imageUrl = await fetch(
-        `/api/mediafiles/${_props.mediafileId}/download`,
-        {
-          headers: {
-            Accept: "image/jpeg",
-          },
-        },
-      );
-      const image = await fetch(await imageUrl.text());
-      return image.url;
-    };
+const { selectNextMediafile, selectPreviousMediafile } =
+  useEntityMediafileSelector();
+const mediafileViewerContext: any = inject("mediafileViewerContext");
+const { openModal } = useBaseModal();
 
-    const createDownloadButton = (downloadLink: string): void => {
-      const a = document.createElement("a");
-      a.href = downloadLink;
-      a.download = _props.originalFilename || "";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
+const { isSelectable } = useMediafileCrop();
+const canCrop = computed(() =>
+  Boolean(
+    props.mediafileId &&
+      isSelectable(props.mediafileId) &&
+      props.enableSelection,
+  ),
+);
 
-    const downloadImage = async () => {
-      const downloadLink: string = await getDownloadLink();
-      createDownloadButton(downloadLink);
-      downloadImageLoadingRef.value = false;
-    };
-
-    const togglePreviewComponent = (id: string): void => {
-      emit("togglePreviewComponent:entityId", id);
-    };
-
-    const openIiifOperationsModal = () => {
-      openModal(TypeModals.IiifOperationsModal, ModalStyle.Center);
-    };
-
-    return {
-      Unicons,
-      zoomInRef,
-      zoomOutRef,
-      fullPageRef,
-      homeRef,
-      downloadImageLoadingRef,
-      mediafileViewerContext,
-      downloadImage,
-      viewerContainsMultipleMediafiles,
-      selectNextMediafile,
-      selectPreviousMediafile,
-      togglePreviewComponent,
-      openIiifOperationsModal,
-    };
-  },
+onMounted(() => {
+  emit("update:zoomIn", zoomInRef.value);
+  emit("update:zoomOut", zoomOutRef.value);
+  emit("update:fullPage", fullPageRef.value);
+  emit("update:home", homeRef.value);
+  emit("update:crop", cropRef.value);
+  emit("update:cancel", cancelRef.value);
 });
+
+const viewerContainsMultipleMediafiles = computed(
+  () => mediafileViewerContext && mediafileViewerContext.mediafiles?.length > 1,
+);
+
+const getDownloadLink = async (): Promise<string> => {
+  if (!props.mediafileId) {
+    throw Error(`Could not download mediafile with id "${props.mediafileId}"`);
+  }
+  downloadImageLoadingRef.value = true;
+  const imageUrl = await fetch(
+    `/api/mediafiles/${props.mediafileId}/download`,
+    {
+      headers: { Accept: "image/jpeg" },
+    },
+  );
+  const image = await fetch(await imageUrl.text());
+  return image.url;
+};
+
+const createDownloadButton = (downloadLink: string): void => {
+  const a = document.createElement("a");
+  a.href = downloadLink;
+  a.download = props.originalFilename || "";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
+const downloadImage = async () => {
+  const downloadLink = await getDownloadLink();
+  createDownloadButton(downloadLink);
+  downloadImageLoadingRef.value = false;
+};
+
+const togglePreviewComponent = (id: string): void => {
+  emit("togglePreviewComponent:entityId", id);
+};
+
+const openIiifOperationsModal = () => {
+  openModal(TypeModals.IiifOperationsModal, ModalStyle.Center);
+};
 </script>

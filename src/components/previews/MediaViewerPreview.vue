@@ -4,6 +4,7 @@
       :key="entityId"
       :mediafiles="mediafiles"
       :current-mediafile="currentMediafile"
+      :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
       @toggle-preview-component="
         (id: string) => emit('togglePreviewComponent', id)
       "
@@ -20,6 +21,7 @@ withDefaults(
     currentMediafile?: Entity | undefined;
     mediafiles: Entity[];
     entityId: string | undefined;
+    cropMediafileCoordinatesKey: string;
   }>(),
   {
     currentMediafile: undefined,

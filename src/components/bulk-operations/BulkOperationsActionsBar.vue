@@ -72,6 +72,7 @@
           :label="$t('bulk-operations.confirm-selection')"
           :icon="DamsIcons.Check"
           button-style="accentAccent"
+          :disabled="!itemsSelected"
           button-size="small"
           @click="emit('confirmSelection', getEnqueuedItems(context))"
         />
@@ -173,7 +174,11 @@ const emit = defineEmits<{
     bulkOperationsPromise: () => Promise<void>,
   ): void;
   (event: "applyCustomBulkOperations"): void;
-  (event: "initializeEntityPickerComponent"): void;
+  (
+    event: "initializeEntityPickerComponent",
+    enableCropMode: boolean,
+    keyToSaveCropCoordinates: string,
+  ): void;
 }>();
 
 const refetchParentEntity: any = inject("RefetchParentEntity");
@@ -285,10 +290,7 @@ const handleSelectedBulkOperation = () => {
     useEntitySingle().getEntityUuid() || route.params.id,
     modal?.formRelationType,
     route.meta.type,
-    [
-      refetchParentEntity,
-      props.refetchEntities
-    ].filter(Boolean),
+    [refetchParentEntity, props.refetchEntities].filter(Boolean),
     bulkOperationType,
   );
   if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
@@ -296,8 +298,13 @@ const handleSelectedBulkOperation = () => {
       getEnqueuedItems(props.context),
       props.context,
     );
-  if (bulkOperationType === BulkOperationTypes.AddRelation)
-    emit("initializeEntityPickerComponent");
+  if (bulkOperationType === BulkOperationTypes.AddRelation) {
+    emit(
+      "initializeEntityPickerComponent",
+      modal!.enableImageCrop || false,
+      modal!.keyToSaveCropCoordinates || "",
+    );
+  }
   if (bulkOperationType === BulkOperationTypes.CreateEntity)
     initializePropertiesForCreateEntity();
 
@@ -305,7 +312,9 @@ const handleSelectedBulkOperation = () => {
     bulkOperationType === BulkOperationTypes.ReorderEntities ||
     bulkOperationType === BulkOperationTypes.DeleteEntities
   ) {
-    setCallbackFunctions([refetchParentEntity, props.refetchEntities].filter(Boolean));
+    setCallbackFunctions(
+      [refetchParentEntity, props.refetchEntities].filter(Boolean),
+    );
   }
 
   if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
@@ -349,16 +358,17 @@ watch(
 );
 
 watch(
-  () => [
-    getModalInfo(TypeModals.DynamicForm).open,
-    getModalInfo(TypeModals.BulkOperations).open, 
-    getModalInfo(TypeModals.BulkOperationsDeleteEntities).open
-  ].some(isOpen => isOpen),
+  () =>
+    [
+      getModalInfo(TypeModals.DynamicForm).open,
+      getModalInfo(TypeModals.BulkOperations).open,
+      getModalInfo(TypeModals.BulkOperationsDeleteEntities).open,
+    ].some((isOpen) => isOpen),
   (isAnyModalOpen) => {
     if (!isAnyModalOpen) {
       resetAllProperties();
     }
-  }
+  },
 );
 
 watch(

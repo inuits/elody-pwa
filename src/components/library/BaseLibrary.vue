@@ -183,7 +183,11 @@
               async () => await applyCustomBulkOperations()
             "
             @initialize-entity-picker-component="
-              () => initializeEntityPickerComponent()
+              (cropState: boolean, keyToSaveCropCoordinates: string) =>
+                initializeEntityPickerComponent(
+                  cropState,
+                  keyToSaveCropCoordinates,
+                )
             "
             @refetch="async () => await refetchEntities()"
           />
@@ -223,6 +227,7 @@
             :entity-type="entityType"
             :show-current-entity-flow="showCurrentEntityFlow"
             @add-refetch-function-to-edit-state="addRefetchFunctionToEditState"
+            :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
@@ -361,6 +366,7 @@ export type BaseLibraryProps = {
   id: string;
   entityTypeAsCenterPoint?: string;
   centerCoordinatesKey?: string;
+  cropMediafileCoordinatesKey?: string;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -391,6 +397,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   filtersNeedContext: undefined,
   ignoreFetchingData: false,
   centerCoordinatesKey: "",
+  cropMediafileCoordinatesKey: "",
 });
 
 const emit = defineEmits<{
@@ -502,6 +509,8 @@ const {
   setCustomGetEntitiesQuery,
   setCustomGetEntitiesFiltersQuery,
   setParentEntityType,
+  setCropMode,
+  setCropCoordinatesKey,
 } = useEntityPickerModal();
 
 const displayList = ref<boolean>(false);
@@ -707,7 +716,10 @@ const applyCustomBulkOperations = async () => {
   await getCustomBulkOperations();
 };
 
-const initializeEntityPickerComponent = () => {
+const initializeEntityPickerComponent = (
+  enableCropMode: boolean,
+  keyToSaveCropCoordinates: string,
+) => {
   setAcceptedTypes([props.entityType] as Entitytyping[]);
   setEntityUuid(props.parentEntityIdentifiers[0]);
   setEntityId(props.id);
@@ -715,6 +727,8 @@ const initializeEntityPickerComponent = () => {
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
+  setCropMode(enableCropMode);
+  setCropCoordinatesKey(keyToSaveCropCoordinates);
 };
 
 const configPerViewMode = computed(() => {

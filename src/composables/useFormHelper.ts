@@ -171,6 +171,7 @@ const useFormHelper = () => {
         key: item.id,
         type: relationType,
         editStatus: EditStatus.New,
+        metadata: item.metadata ? item.metadata : undefined,
         value: item.value,
       });
     });

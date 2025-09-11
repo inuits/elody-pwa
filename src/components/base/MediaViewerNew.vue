@@ -30,6 +30,9 @@
         @toggle-preview-component:entity-id="
           (id: string) => emit('togglePreviewComponent', id)
         "
+        @select-area="addMediafileCropCoordinates"
+        :enable-selection="isCropModeEnabled"
+        :crop-sizes="cropSizes"
       />
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
@@ -90,6 +93,10 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import {
+  useMediafileCrop,
+  CropAreaCoordinates,
+} from "@/composables/useMediafileCrop";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
@@ -99,7 +106,9 @@ const props = defineProps<{
   currentMediafile?: Entity | undefined;
   mediafiles?: MediaFileEntity[];
   loading?: boolean;
+  cropMediafileCoordinatesKey: string;
 }>();
+
 const emit = defineEmits<{
   (event: "togglePreviewComponent", entityId: string): void;
 }>();
@@ -119,6 +128,11 @@ const dimensions = computed<{ width: number; height: number } | undefined>(() =>
   getMediaDimensions(),
 );
 const { t } = useI18n();
+const { cropSizes, addMediafileCropCoordinates, isCropModeEnabled } =
+  useMediafileCrop({
+    currentMediafile: props.currentMediafile,
+    cropMediafileCoordinatesKey: props.cropMediafileCoordinatesKey,
+  });
 
 const getMediaDimensions = ():
   | { width: number; height: number }

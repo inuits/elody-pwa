@@ -20,6 +20,7 @@ export type InBulkProcessableItem = {
   id: string;
   value?: string;
   type?: string;
+  metadata?: { key: string; value: unknown }[];
 };
 
 const items = ref<{ [key: string]: InBulkProcessableItem[] }>({});
@@ -74,6 +75,11 @@ export const useBulkOperations = () => {
   const isEnqueued = (context: Context, itemId: string) =>
     items.value[context]?.find((item) => item.id == itemId) !== undefined;
 
+  const getEnqueuedItem = (context: Context, itemId: string) => {
+    const item = items.value[context]?.find((item) => item.id == itemId);
+    return item;
+  };
+
   const triggerBulkSelectionEvent = (context: Context) => {
     contextWhereSelectionEventIsTriggered.value = context;
     setTimeout(() => (contextWhereSelectionEventIsTriggered.value = ""), 50);
@@ -97,6 +103,7 @@ export const useBulkOperations = () => {
     enqueueItemForBulkProcessing,
     dequeueItemForBulkProcessing,
     dequeueAllItemsForBulkProcessing,
+    getEnqueuedItem,
     getEnqueuedItems,
     getEnqueuedItemCount,
     isEnqueued,

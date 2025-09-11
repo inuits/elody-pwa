@@ -70,6 +70,7 @@
       :current-mediafile="getEntitiesOrEntity()"
       :mediafiles="entities"
       :entity-id="entityId"
+      :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
       @toggle-preview-component="
         (id: string) => emit('togglePreviewComponent', id)
       "
@@ -123,6 +124,7 @@ const props = withDefaults(
     entities: Entity[];
     configPerViewMode: object;
     entityId: string | undefined;
+    cropMediafileCoordinatesKey: string;
   }>(),
   {},
 );
