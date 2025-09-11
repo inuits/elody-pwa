@@ -33,6 +33,9 @@ vi.mock("@/main", () => {
   };
 });
 
+vi.mock("openseadragon", () => ({}));
+vi.mock("openseadragon-select-plugin", () => ({}));
+
 describe("ViewModesList", () => {
   afterEach(() => {
     vi.clearAllMocks();
