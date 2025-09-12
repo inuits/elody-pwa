@@ -40,7 +40,6 @@ export const useGetDropdownOptions = (
   };
 
   const getDropdownOptionsState = (): ReturnType<typeof useGetDropdownOptionsState> => {
-    console.log("Logging dropdown states:", dropdownOptionsStates.value);
     if (!dropdownOptionsStates.value[dropdownOptionsStateName]) return createNewDropdownOptionsState();
     return dropdownOptionsStates.value[dropdownOptionsStateName];
   };
