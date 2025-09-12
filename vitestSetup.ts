@@ -58,6 +58,37 @@ vi.mock("@/generated-types/queries", async () => {
   return await import("@/__mocks__/queries");
 });
 
+// Mock OpenSeadragon and related plugins
+vi.mock("openseadragon", () => ({
+  default: vi.fn().mockImplementation(() => ({
+    addHandler: vi.fn(),
+    removeHandler: vi.fn(),
+    viewport: {
+      imageToViewerElementCoordinates: vi.fn().mockReturnValue({ x: 0, y: 0 }),
+    },
+    addOverlay: vi.fn(),
+    removeOverlay: vi.fn(),
+  }))
+}));
+
+vi.mock("openseadragon-select-plugin", () => ({
+  ShapeNames: {
+    RectShape: "RectShape",
+    PolygonShape: "PolygonShape", 
+    BrushShape: "BrushShape"
+  }
+}));
+
+vi.mock("@/utils/openseadragonPlugin", () => ({
+  loadSelectionPlugin: vi.fn().mockResolvedValue({
+    ShapeNames: {
+      RectShape: "RectShape",
+      PolygonShape: "PolygonShape", 
+      BrushShape: "BrushShape"
+    }
+  })
+}));
+
 vi.mock("@/main", () => {
   const actualModule = vi.importActual("@/main");
 

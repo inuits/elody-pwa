@@ -1,7 +1,9 @@
 import OpenSeadragon from "openseadragon";
 
-// Make OpenSeadragon available globally
-(window as any).OpenSeadragon = OpenSeadragon;
+// Make OpenSeadragon available globally (only in browser environment)
+if (typeof window !== 'undefined') {
+  (window as any).OpenSeadragon = OpenSeadragon;
+}
 
 // Helper function to safely load the plugin
 export const loadSelectionPlugin = async () => {
