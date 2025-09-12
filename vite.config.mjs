@@ -6,7 +6,6 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 import tailwindSvgPlugin from "./plugin/vite-plugin-tailwind-svg.js";
-import commonjs from "vite-plugin-commonjs";
 
 const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
@@ -25,7 +24,6 @@ const viteConfig = defineConfig({
     vueDevTools(),
     tailwindSvgPlugin(),
     tailwindcss(),
-    commonjs(),
   ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
@@ -36,6 +34,7 @@ const viteConfig = defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "openseadragon-select-plugin": "openseadragon-select-plugin/dist/index.umd.js"
     },
     dedupe: ["vue"],
     conditions: ["import", "module", "browser", "default"],
@@ -54,6 +53,11 @@ const viteConfig = defineConfig({
   build: {
     sourcemap: false,
     minify: "esbuild",
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      // You can also be more specific
+      include: /node_modules|openseadragon-select-plugin/,
+    },
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
       output: {
@@ -97,7 +101,13 @@ const viteConfig = defineConfig({
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: ["openseadragon-select-plugin"],
+    include: [
+      "openseadragon-select-plugin",
+    ],
+    // Force esbuild to handle CommonJS properly
+    esbuildOptions: {
+      plugins: [],
+    },
   },
 });
 
