@@ -27,29 +27,14 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import OpenSeadragon from "openseadragon";
+import { ShapeNames } from "openseadragon-select-plugin";
 import ViewerToolbar from "./ViewerToolbar.vue";
 import IiifOperationsModal from "@/components/modals/IiifOperationsModal.vue";
 import { CropAreaCoordinates } from "@/composables/useMediafileCrop";
-import { loadSelectionPlugin } from "@/utils/openseadragonPlugin";
-
-let ShapeNames: any = null;
-let pluginLoaded = false;
-
-// Load the plugin dynamically
-const loadPlugin = async () => {
-  if (pluginLoaded) return;
-  try {
-    const plugin = await loadSelectionPlugin();
-    ShapeNames = plugin.ShapeNames;
-    pluginLoaded = true;
-  } catch (error) {
-    console.error("Failed to load selection plugin:", error);
-  }
-};
 
 interface Selection {
   rect: any;
-  shape: any;
+  shape: string;
   overlay: any;
 }
 
@@ -58,7 +43,7 @@ const props = defineProps<{
   isPublic?: boolean;
   originalFilename?: string;
   mediafileId?: string;
-  dimensions?: { width: number; height: number };
+  dimensions?: Record<string, any>;
   enableSelection?: boolean;
   cropSizes?: CropAreaCoordinates;
 }>();
@@ -107,7 +92,7 @@ const initViewer = () => {
   viewer = OpenSeadragon(dragonOption);
 };
 
-const toggleSelection = async () => {
+const toggleSelection = () => {
   if (!viewer) return;
   if (isSelecting.value) {
     selectionObj?.disable();
@@ -115,36 +100,26 @@ const toggleSelection = async () => {
   } else {
     isSelecting.value = true;
     undoLastSelection();
-    await startSelection();
+    startSelection();
   }
 };
 
-const startSelection = async () => {
+const startSelection = () => {
   if (!viewer) return;
   if (selectionObj?.isEnabled) return;
 
-  // Load the plugin if not already loaded
-  await loadPlugin();
-  
-  if (!ShapeNames) {
-    console.error("Selection plugin not available");
-    return;
-  }
-
   selectionObj = viewer.selection({
-    onSelection: (rect: any, shape: any) => {
+    onSelection: (rect: any, shape: string) => {
       const selection: Selection = { rect, shape, overlay: null };
 
       if (viewer) {
         selection.overlay = viewer.addOverlay({
-          element: document.createElement('div'),
-          placement: 'TOP_LEFT',
           x: rect.x + rect.width / 2,
           y: rect.y + rect.height / 2,
           width: rect.width,
           height: rect.height,
           className: "selection-overlay",
-        } as any);
+        });
 
         selections.value.push(selection);
         const size: CropAreaCoordinates = {

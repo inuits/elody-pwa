@@ -6,6 +6,7 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 import tailwindSvgPlugin from "./plugin/vite-plugin-tailwind-svg.js";
+import commonjs from 'vite-plugin-commonjs'
 
 const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
@@ -24,6 +25,14 @@ const viteConfig = defineConfig({
     vueDevTools(),
     tailwindSvgPlugin(),
     tailwindcss(),
+    commonjs({
+      filter(id) {
+        // node_modules is excluded by default, so we need to include it explicitly
+        if (id.includes('node_modules/openseadragon-select-plugin')) {
+          return true
+        }
+      }
+    }),
   ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
