@@ -36,6 +36,7 @@ const viteConfig = defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
     dedupe: ["vue"],
+    conditions: ['import', 'module', 'browser', 'default'],
   },
   server: {
     host: "0.0.0.0",
@@ -64,7 +65,7 @@ const viteConfig = defineConfig({
             "@sentry/tracing",
             "@sentry/vue",
           ],
-          openseadragon: ["openseadragon"],
+          openseadragon: ["openseadragon", "openseadragon-select-plugin"],
           pdfjs: ["pdfjs-dist"],
           ol: ["ol"],
           chart: [
@@ -96,13 +97,10 @@ const viteConfig = defineConfig({
     exclude: [
       "session-vue-3-oidc-library",
       "date-fns",
+    ],
+    include: [
       "openseadragon-select-plugin",
     ],
-  },
-  build: {
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
   },
 });
 
