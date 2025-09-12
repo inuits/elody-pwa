@@ -55,7 +55,6 @@ const viteConfig = defineConfig({
     minify: "esbuild",
     commonjsOptions: {
       transformMixedEsModules: true,
-      // You can also be more specific
       include: /node_modules|openseadragon-select-plugin/,
     },
     rollupOptions: {
@@ -104,7 +103,6 @@ const viteConfig = defineConfig({
     include: [
       "openseadragon-select-plugin",
     ],
-    // Force esbuild to handle CommonJS properly
     esbuildOptions: {
       plugins: [],
     },
