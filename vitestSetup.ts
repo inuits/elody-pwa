@@ -58,7 +58,6 @@ vi.mock("@/generated-types/queries", async () => {
   return await import("@/__mocks__/queries");
 });
 
-// Mock OpenSeadragon and related plugins
 vi.mock("openseadragon", () => ({
   default: vi.fn().mockImplementation(() => ({
     addHandler: vi.fn(),
