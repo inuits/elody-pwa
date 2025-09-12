@@ -6,7 +6,7 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 import tailwindSvgPlugin from "./plugin/vite-plugin-tailwind-svg.js";
-import commonjs from "@rollup/plugin-commonjs";
+import commonjs from "vite-plugin-commonjs";
 
 const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
@@ -25,9 +25,7 @@ const viteConfig = defineConfig({
     vueDevTools(),
     tailwindSvgPlugin(),
     tailwindcss(),
-    commonjs({
-      include: /node_modules\/openseadragon-select-plugin/,
-    }),
+    commonjs(),
   ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
@@ -40,7 +38,7 @@ const viteConfig = defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
     dedupe: ["vue"],
-    conditions: ['import', 'module', 'browser', 'default'],
+    conditions: ["import", "module", "browser", "default"],
   },
   server: {
     host: "0.0.0.0",
@@ -98,13 +96,8 @@ const viteConfig = defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: [
-      "session-vue-3-oidc-library",
-      "date-fns",
-    ],
-    include: [
-      "openseadragon-select-plugin",
-    ],
+    exclude: ["session-vue-3-oidc-library", "date-fns"],
+    include: ["openseadragon-select-plugin"],
   },
 });
 
