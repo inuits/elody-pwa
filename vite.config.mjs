@@ -34,7 +34,6 @@ const viteConfig = defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "openseadragon-select-plugin": "openseadragon-select-plugin/dist/index.umd.min.js",
     },
     dedupe: ["vue"],
   },
@@ -94,7 +93,16 @@ const viteConfig = defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ["session-vue-3-oidc-library", "date-fns"],
+    exclude: [
+      "session-vue-3-oidc-library",
+      "date-fns",
+      "openseadragon-select-plugin",
+    ],
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
 });
 
