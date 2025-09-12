@@ -34,6 +34,7 @@ const viteConfig = defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "openseadragon-select-plugin": "openseadragon-select-plugin/dist/index.umd.min.js",
     },
     dedupe: ["vue"],
   },
