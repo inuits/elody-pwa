@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { useGetDropdownOptions } from "../useGetDropdownOptions";
+import { useGetDropdownOptionsState } from "../useGetDropdownOptionsState";
 import { EditStatus, type Entitytyping } from "@/generated-types/queries";
 import { type FormContext } from "vee-validate";
 
@@ -16,7 +16,7 @@ vi.mock("@/composables/useFormHelper", () => ({
 }));
 
 describe("GetVariableValueForFilter", () => {
-  const { getVariableValueForFilter } = useGetDropdownOptions(
+  const { getVariableValueForFilter } = useGetDropdownOptionsState(
     "entityTypeMock" as Entitytyping,
     "parentMock",
   );
@@ -141,7 +141,7 @@ describe("GetVariableValueForFilter", () => {
 });
 
 describe("hasNewRelations", () => {
-  const { hasNewRelations } = useGetDropdownOptions(
+  const { hasNewRelations } = useGetDropdownOptionsState(
     "entityType" as Entitytyping,
     "parent",
   );
@@ -175,7 +175,7 @@ describe("hasNewRelations", () => {
 });
 
 describe("findNewRelationValue", () => {
-  const { findNewRelationValue } = useGetDropdownOptions(
+  const { findNewRelationValue } = useGetDropdownOptionsState(
     "entityType" as Entitytyping,
     "parent",
   );

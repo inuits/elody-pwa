@@ -7,7 +7,7 @@
       isLoading
     "
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
-    :options="!disabled ? entityDropdownOptions : selectedDropdownOptions"
+    :options="!disabled ? allEntitiesHelper.entityDropdownOptions : selectedDropdownOptions"
     :relationType="relationType"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
@@ -52,14 +52,15 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import isEqual from "lodash.isequal";
 import debounce from "lodash.debounce";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { useRouter } from "vue-router";
+import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
+import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 
 const props = withDefaults(
   defineProps<{
@@ -94,6 +95,8 @@ const props = withDefaults(
   },
 );
 
+const allEntitiesHelper = ref<typeof useGetDropdownOptionsState>();
+const relatedEntitiesHelper = ref<typeof useGetDropdownOptionsState>();
 const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
 const router = useRouter();
@@ -103,67 +106,38 @@ const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { replaceRelationsFromSameType, addRelations } = useFormHelper();
 
 const debouncedGetAutocompleteOptions = debounce((value: string) => {
-  getAutocompleteOptions(value);
+  allEntitiesHelper.value.getAutocompleteOptions(value);
 }, 250);
 
 onBeforeUnmount(() => {
   debouncedGetAutocompleteOptions.cancel();
 });
 
-const advancedFilterInputForRetrievingAllOptions = computed(() => {
-  if (props.advancedFilterInputForRetrievingAllOptions.length > 0)
-    return props.advancedFilterInputForRetrievingAllOptions;
-  return props.advancedFilterInputForRetrievingOptions;
-});
-const advancedFilterInputForRetrievingRelatedOptions = computed(() => {
-  if (props.advancedFilterInputForRetrievingRelatedOptions.length > 0)
-    return props.advancedFilterInputForRetrievingRelatedOptions;
-  return props.advancedFilterInputForRetrievingOptions;
-});
-
-const {
-  initialize,
-  entityDropdownOptions,
-  entitiesLoading,
-  getAutocompleteOptions,
-  getFormWithRelationFieldCheck,
-} = useGetDropdownOptions(
-  props.metadataKeyToGetOptionsFor as Entitytyping,
-  "fetchAll",
-  undefined,
-  undefined,
-  props.advancedFilterInputForSearchingOptions,
-  advancedFilterInputForRetrievingAllOptions.value,
-  props.formId,
-);
-
-const {
-  initialize: relatedEntitiesInitialize,
-  entityDropdownOptions: relatedEntitiesOptions,
-  entitiesLoading: relatedEntitiesLoading,
-} = useGetDropdownOptions(
-  props.metadataKeyToGetOptionsFor as Entitytyping,
-  (props.formId as string) ?? (entityId as string),
-  props.relationType,
-  props.fromRelationType,
-  props.advancedFilterInputForSearchingOptions,
-  advancedFilterInputForRetrievingRelatedOptions.value,
-  props.formId,
-  props.relationFilter,
-);
-
 const isLoading = computed(() => {
   return (
-    entitiesLoading.value ||
-    relatedEntitiesLoading.value ||
+    allEntitiesHelper.value.entitiesLoading.value ||
+    relatedEntitiesHelper.value.entitiesLoading.value ||
     isCreatingEntity.value
   );
 });
 
+onBeforeMount(() => {
+  allEntitiesHelper.value = useGetDropdownOptions(
+    `${props.formId}-${props.relationType}-fetchAll`,
+    "get",
+  );
+  relatedEntitiesHelper.value = useGetDropdownOptions(
+    `${props.formId}-${props.relationType}-fetchRelations`,
+    "get",
+  );
+})
+
 onMounted(async () => {
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
     if (props.isMetadataField) preSelect();
-    else await initAutocompleteOption();
+    else {
+      await initAutocompleteOption();
+    }
   } else {
     const preSelectValue = props.modelValue;
     await initAutocompleteOption();
@@ -173,24 +147,28 @@ onMounted(async () => {
 });
 
 const initAutocompleteOption = async () => {
-  await initialize();
-  if (
-    (props.formId || entityId) &&
-    (props.relationType || props.fromRelationType) &&
-    props.mode !== "create"
-  ) {
-    await relatedEntitiesInitialize();
+  if (props.isReadOnly) {
+    if (
+      (props.formId || entityId) &&
+      (props.relationType || props.fromRelationType) &&
+      props.mode !== "create"
+    ) {
+      await relatedEntitiesHelper.value.initialize();
+    }
+  }
+  else {
+    await allEntitiesHelper.value.initialize();
   }
 
   if (
     props.autoSelectable &&
-    entityDropdownOptions.value.length === 1 &&
-    relatedEntitiesOptions.value.length === 0
+    allEntitiesHelper.value.entityDropdownOptions.value.length === 1 &&
+    relatedEntitiesHelper.value.entityDropdownOptions.value.length === 0
   ) {
-    populateSelectedOptions(entityDropdownOptions.value);
-    handleSelect(entityDropdownOptions.value);
+    populateSelectedOptions(allEntitiesHelper.value.entityDropdownOptions);
+    handleSelect(allEntitiesHelper.value.entityDropdownOptions);
   } else {
-    populateSelectedOptions(relatedEntitiesOptions.value);
+    populateSelectedOptions(relatedEntitiesHelper.value.entityDropdownOptions);
   }
 };
 
@@ -284,7 +262,7 @@ const preSelect = (
 const dependentRelationValues = computed(() => {
   if (!props.dependsOn || props.disabled) return null;
 
-  const form = getFormWithRelationFieldCheck(props.formId, props.dependsOn);
+  const form = allEntitiesHelper.value.getFormWithRelationFieldCheck(props.formId, props.dependsOn);
   return form ? form.values.relationValues[props.dependsOn] : null;
 });
 
@@ -302,7 +280,7 @@ const handleTagClick = async (tag: DropdownOption) => {
 watch(
   () => dependentRelationValues.value,
   (newValue: any, oldValue: any) => {
-    getAutocompleteOptions("");
+    allEntitiesHelper.value.getAutocompleteOptions("");
     if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
 
     const hasNoUpdates = isEqual(

@@ -67,13 +67,8 @@
               />
               <ViewModesAutocompleteRelations
                 v-else-if="
-                  (refMetadata.inputField?.type ===
-                    InputFieldTypes.DropdownMultiselectRelations ||
-                    refMetadata.inputField?.type ===
-                      InputFieldTypes.DropdownSingleselectRelations) &&
-                  refMetadata.value &&
-                  !refMetadata.value?.formatter &&
-                  refMetadata.value?.length > 0
+                  refMetadata.inputField?.type === InputFieldTypes.DropdownMultiselectRelations ||
+                  refMetadata.inputField?.type === InputFieldTypes.DropdownSingleselectRelations
                 "
                 v-model="refMetadata"
                 :is-read-only="true"
@@ -178,8 +173,17 @@ import {
   type BaseRelationValuesInput,
   type PanelRelationMetaData,
   type PanelRelationRootData,
+  type Entitytyping,
 } from "@/generated-types/queries";
-import { computed, onMounted, watch, inject, ref } from "vue";
+import {
+  computed,
+  onMounted,
+  watch,
+  inject,
+  ref,
+  onBeforeMount,
+  onUnmounted,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { useField } from "vee-validate";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
@@ -190,7 +194,7 @@ import { DateTime } from "luxon";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
-import { sanitizeHtml } from "@/helpers";
+import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 
 const props = withDefaults(
   defineProps<{
@@ -223,13 +227,6 @@ const isPermitted = ref<boolean>(false);
 const refMetadata = ref<
   PanelMetaData | PanelRelationMetaData | PanelRelationRootData
 >(props.metadata);
-
-watch(
-  () => props.metadata,
-  (newValue) => {
-    refMetadata.value = newValue;
-  },
-);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
@@ -367,7 +364,10 @@ const getValidationRules = (metadata: PanelMetaData): string => {
 
   if (isRegexField.value) {
     const rawRegex = validation.regex?.replace(/^\/|\/$/g, "") ?? "";
-    const cleanedRegex = unescapeString(rawRegex.replace(/\|/g, "?.")).replace(/,/g, "?.c");
+    const cleanedRegex = unescapeString(rawRegex.replace(/\|/g, "?.")).replace(
+      /,/g,
+      "?.c",
+    );
     return `${ValidationRules.Regex}:${cleanedRegex}|no_xss`;
   }
 
@@ -454,12 +454,6 @@ const { errorMessage, value, meta, setErrors } = useField<
   string | BaseRelationValuesInput[]
 >(veeValidateField, rules, { label: label });
 
-onMounted(async () => {
-  await isPermittedToDisplay();
-  if (refMetadata.value.hiddenField?.hidden) return;
-  setNewValue(refMetadata.value.value);
-});
-
 const updatePermissionVariables = () => {
   setExtraVariables({
     parentEntityId: props.formId,
@@ -478,6 +472,62 @@ const isPermittedToDisplay = async () => {
   isPermitted.value = await fetchAdvancedPermission(permissions);
 };
 
+const advancedFilterInputForRetrievingAllOptions = computed(() => {
+  if (
+    refMetadata.value.inputField.advancedFilterInputForRetrievingAllOptions
+      .length > 0
+  )
+    return refMetadata.value.inputField
+      .advancedFilterInputForRetrievingAllOptions;
+  return refMetadata.value.inputField.advancedFilterInputForRetrievingOptions;
+});
+const advancedFilterInputForRetrievingRelatedOptions = computed(() => {
+  if (
+    refMetadata.value.inputField.advancedFilterInputForRetrievingRelatedOptions
+      .length > 0
+  )
+    return refMetadata.value.inputField
+      .advancedFilterInputForRetrievingRelatedOptions;
+  return refMetadata.value.inputField.advancedFilterInputForRetrievingOptions;
+});
+
+const initializeDropdownOptionStates = () => {
+  useGetDropdownOptions(
+    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
+    "get",
+    metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
+    "fetchAll",
+    undefined,
+    undefined,
+    refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
+    advancedFilterInputForRetrievingAllOptions.value,
+    props.formId,
+  );
+  useGetDropdownOptions(
+    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
+    "get",
+    metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
+    props.formId as string,
+    refMetadata.value.inputField?.relationType,
+    refMetadata.value.inputField?.fromRelationType,
+    refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
+    advancedFilterInputForRetrievingRelatedOptions.value,
+    props.formId,
+    refMetadata.value.inputField.relationFilter,
+  );
+};
+
+const deleteDropdownOptionStates = () => {
+  useGetDropdownOptions(
+    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
+    "delete"
+  );
+  useGetDropdownOptions(
+    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
+    "delete"
+  );
+}
+
 if (typeof refMetadata.value.value !== "object") {
   watch(
     () => refMetadata.value.value,
@@ -487,6 +537,12 @@ if (typeof refMetadata.value.value !== "object") {
     },
   );
 }
+watch(
+  () => props.metadata,
+  (newValue) => {
+    refMetadata.value = newValue;
+  },
+);
 watch(
   () => props.isEdit,
   () => {
@@ -500,4 +556,22 @@ watch(
   },
   { immediate: true },
 );
+
+onMounted(async () => {
+  await isPermittedToDisplay();
+  if (refMetadata.value.hiddenField?.hidden) return;
+  setNewValue(refMetadata.value.value);
+});
+onBeforeMount(() => {
+  if (
+    refMetadata.value.inputField?.type ===
+      InputFieldTypes.DropdownMultiselectRelations ||
+    refMetadata.value.inputField?.type ===
+      InputFieldTypes.DropdownSingleselectRelations
+  )
+    initializeDropdownOptionStates();
+});
+onUnmounted(() => {
+  deleteDropdownOptionStates();
+});
 </script>
