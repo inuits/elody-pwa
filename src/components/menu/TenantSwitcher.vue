@@ -21,7 +21,7 @@ import useTenant from "@/composables/useTenant";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { inject, computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 const apolloClient = inject(DefaultApolloClient);
@@ -31,10 +31,8 @@ const config = inject<{
 
 const { t } = useI18n();
 const route = useRoute();
-const router = useRouter();
 const { isEdit } = useEditMode();
 const {
-  getCodeById,
   getIdFromCode,
   isAllTenantsLoaded,
   selectedTenant,
@@ -65,10 +63,6 @@ const normalizeTenantMetadataToId = (tenant: string): string => {
   return getIdFromCode(tenant) || tenant;
 };
 
-const normalizeTenantIdToMetadata = (tenant: string): string => {
-  return getCodeById(tenant) || tenant;
-};
-
 watch(
   () => isAllTenantsLoaded.value,
   (loaded: boolean) => {
@@ -77,16 +71,6 @@ watch(
     tenant.value =
       (tenantParam && normalizeTenantMetadataToId(tenantParam)) ||
       selectedTenant.value;
-    router.replace({
-      name: route.name as string,
-      params: {
-        ...route.params,
-        tenant:
-          tenantParam ||
-          normalizeTenantIdToMetadata(selectedTenant.value || ""),
-      },
-      query: route.query,
-    });
   },
   { immediate: true },
 );

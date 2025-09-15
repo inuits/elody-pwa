@@ -78,7 +78,6 @@ const start = async (): Promise<void> => {
   });
 
   auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-  addRouterNavigationGuards(router, config);
 
   const authCode = new URLSearchParams(window.location.search).get("code");
   auth.authCode = authCode;

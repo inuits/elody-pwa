@@ -24,7 +24,18 @@ const handleTenantParameterInUrl = (
   next: NavigationGuardNext,
   router: Router,
 ) => {
-  const { selectedTenant, getCodeById } = useTenant();
+  const { selectedTenant, getCodeById } = (useTenant as any)();
+  if (selectedTenant.value && to.params.tenant) {
+    const selectedCode =
+      getCodeById(selectedTenant.value) || selectedTenant.value;
+    const urlCode = Array.isArray(to.params.tenant)
+      ? String(to.params.tenant[0])
+      : String(to.params.tenant);
+    if (urlCode !== selectedCode && !to.path.includes("not-found")) {
+      router.replace({ name: "Home", params: { tenant: selectedCode } });
+      return;
+    }
+  }
 
   if (
     !to.params.tenant &&
@@ -80,7 +91,7 @@ const handleAlternativeRoutes = async (
     return next();
   }
 
-  const userRole = auth.user?.role || "fallback";
+  const userRole = auth?.user?.role || "fallback";
   const alternativeRoute = alternativeRoutes[userRole];
 
   if (
@@ -103,7 +114,9 @@ const checkForNewVersion = async (): Promise<void> => {
 export const addRouterNavigationGuards = (router: Router, config: any) => {
   router.afterEach(() => {
     handleRequiredAuthentication(router);
-    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
+    auth?.changeRedirectRoute?.(
+      window.location.origin + window.location.pathname,
+    );
     checkForNewVersion();
   });
 

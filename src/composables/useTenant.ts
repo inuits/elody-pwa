@@ -140,7 +140,11 @@ const useTenant = (
         });
 
       if (filterResult && filterResult.length === 1) {
-        return { id: filterResult[0].id, label: filterResult[0].label, code: filterResult[0].code };
+        return {
+          id: filterResult[0].id,
+          label: filterResult[0].label,
+          code: filterResult[0].code,
+        } as tenant;
       } else {
         return "no-tenant-in-session";
       }
@@ -165,13 +169,14 @@ const useTenant = (
 
   const selectTenant = async (selectedTenantValue: string) => {
     selectedTenant.value = selectedTenantValue;
-    const currentTenant = await getTennantFromSession();
-    if (currentTenant !== "no-tenant-in-session" && selectedTenantValue !== currentTenant.id)
-      router.push({ name: "Home" });
-
     if (selectedTenantValue) await setTennantInSession(selectedTenantValue);
-    router.push({ name: "Home", force: true });
-    tenantsLoaded.value = "switching";
+
+    const code = getCodeById(selectedTenantValue) || selectedTenantValue;
+    const target = router.resolve({
+      name: "Home",
+      params: { tenant: code },
+    });
+    window.location.assign(target.href);
   };
 
   const getLabelById = (idToFind: string) => {
