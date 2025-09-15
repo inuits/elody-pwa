@@ -351,11 +351,11 @@ const useUpload = (config: any) => {
   ): Promise<void> => {
     try {
       const errors = await getDryRunErrors(dryRunResult);
-      if (dryRunResult?.mediafiles?.length) {
-        requiredMediafiles.value = dryRunResult.mediafiles.map(
-          (mediafile: any) => mediafile.filename,
-        );
-      }
+      const mediafiles: any[] = dryRunResult.mediafiles || [];
+      requiredMediafiles.value = mediafiles.map(
+        (mediafile: any) => mediafile.filename,
+      );
+
       dryRunErrors.value = errors;
       dryRunComplete.value = true;
 
