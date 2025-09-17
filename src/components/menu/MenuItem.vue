@@ -53,7 +53,7 @@
         v-show="isExpanded"
         class="w-full grid grid-cols-[1fr_auto] items-center"
       >
-        <span class="w-100 px-4 font-bold">
+        <span class="px-4 font-bold">
           {{ t(menuitem?.label) }}
         </span>
         <div

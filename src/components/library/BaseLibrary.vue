@@ -46,7 +46,7 @@
       ]"
     >
       <div
-        class="z-40 top-0 pt-3 pb-2 bg-background-normal"
+        class="z-header top-0 pt-3 pb-2 bg-background-normal"
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !expandFilters },
@@ -87,7 +87,7 @@
       <div
         v-if="showCurrentEntityFlow"
         :class="[
-          'z-40 right-0 pb-4',
+          'z-header right-0 pb-4',
           {
             'top-0 bg-background-normal pt-4':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
@@ -150,7 +150,7 @@
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
             showCurrentEntityFlow
           "
-          :class="[{ sticky: hasStickyBars }, 'top-[5vh] my-3']"
+          :class="[{ sticky: hasStickyBars }, 'top-[5vh] my-3 z-header']"
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"

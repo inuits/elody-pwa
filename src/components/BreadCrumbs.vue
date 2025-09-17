@@ -1,7 +1,7 @@
 <template>
   <div v-if="breadCrumbRoutesExist">
     <div
-      class="flex flex-wrap gap-2 min-[900px]:h-10 min-[900px]:flex-nowrap z-[70] relative"
+      class="flex flex-wrap gap-2 min-[900px]:h-10 min-[900px]:flex-nowrap relative z-notification"
     >
       <div
         :class="[
@@ -56,7 +56,7 @@
     </div>
     <div
       v-if="showHistory"
-      class="absolute bg-accent-highlight rounded-b-md z-[70]"
+      class="absolute bg-accent-highlight rounded-b-md z-notification"
     >
       <ul>
         <li
@@ -103,7 +103,7 @@
     </div>
     <div
       v-if="showHistory"
-      class="absolute top-0 left-0 h-screen w-screen z-[60]"
+      class="absolute top-0 left-0 h-screen w-screen z-backdrop"
       @click="showHistory = false"
     ></div>
   </div>

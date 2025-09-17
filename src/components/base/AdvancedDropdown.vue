@@ -250,7 +250,7 @@ watch(
 }
 
 body > .menu {
-  --vs-menu-z-index: 9999 !important;
+  --vs-menu-z-index: var(--z-dropdown) !important;
 }
 
 div.menu-option.selected {
@@ -277,7 +277,7 @@ div.menu-option:hover {
 }
 
 .vue-advanced-select .menu {
-  --vs-menu-z-index: 9999 !important;
+  --vs-menu-z-index: var(--z-dropdown) !important;
 }
 
 .vue-advanced-select .vue-select,

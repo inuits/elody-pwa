@@ -18,7 +18,7 @@
         <div
           ref="defaultSlotRef"
           v-if="hasContent && hover"
-          :class="`shadow-lg rounded bg-background-light max-w-${maxWidth} p-2 z-[1000]`"
+          :class="`shadow-lg rounded bg-background-light max-w-${maxWidth} p-2 z-tooltip`"
           :style="floatingStyles"
         >
           <slot> </slot>

@@ -106,9 +106,53 @@
 
   --spacing-76: 305px; /* Convert from theme.spacing */
 
+  /* Z-Index utilities */
+  --z-index-hidden: -1;
+  --z-index-background: 0;
+  --z-index-content: 1;
+  --z-index-content-raised: 5;
+  --z-index-edit-modal: 20;
+  --z-index-popover: 25;
+  --z-index-sticky: 35;
+  --z-index-header: 38;
+  --z-index-navigation: 40;
+  --z-index-navigation-sub: 42;
+  --z-index-dropdown: 44;
+  --z-index-overlay: 48;
+  --z-index-backdrop: 49;
+  --z-index-modal: 50;
+  --z-index-modal-content: 55;
+  --z-index-tooltip: 60;
+  --z-index-notification: 65;
+  --z-index-virtual-keyboard: 70;
+  --z-index-context-menu: 58;
+  --z-index-system: 80;
+
+  /* Z-Index Utilities for Tailwind classes */
+  --z-hidden: var(--z-index-hidden);
+  --z-background: var(--z-index-background);
+  --z-content: var(--z-index-content);
+  --z-content-raised: var(--z-index-content-raised);
+  --z-navigation: var(--z-index-navigation);
+  --z-navigation-sub: var(--z-index-navigation-sub);
+  --z-dropdown: var(--z-index-dropdown);
+  --z-popover: var(--z-index-popover);
+  --z-sticky: var(--z-index-sticky);
+  --z-header: var(--z-index-header);
+  --z-overlay: var(--z-index-overlay);
+  --z-backdrop: var(--z-index-backdrop);
+  --z-edit-modal: var(--z-index-edit-modal);
+  --z-modal: var(--z-index-modal);
+  --z-modal-content: var(--z-index-modal-content);
+  --z-tooltip: var(--z-index-tooltip);
+  --z-notification: var(--z-index-notification);
+  --z-virtual-keyboard: var(--z-index-virtual-keyboard);
+  --z-context-menu: var(--z-index-context-menu);
+  --z-system: var(--z-index-system);
+
+  /* Legacy variables - to be removed after migration */
   --z-index-1: 1;
   --z-index-2: 2;
-
 }
 
 

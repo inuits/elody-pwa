@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="editModeHelper.isEdit"
-    class="flex justify-center fixed bottom-0 w-[calc(100%-6rem)] p-5 z-[200]"
+    class="flex justify-center fixed bottom-0 w-[calc(100%-6rem)] p-5 z-edit-modal"
   >
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"

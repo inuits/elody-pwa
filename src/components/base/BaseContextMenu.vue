@@ -50,7 +50,7 @@ const getStyles = () => {
 <style scoped>
 .context-menu {
   position: fixed;
-  z-index: 900;
+  z-index: var(--z-context-menu);
   background-color: #fff;
   border: 1px solid #ccc;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);

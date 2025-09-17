@@ -256,7 +256,7 @@ export default defineComponent({
   top: 100%;
   right: 0;
   bottom: 0;
-  z-index: -1;
+  z-index: var(--z-hidden);
   cursor: default;
   -webkit-user-select: none;
   -moz-user-select: none;

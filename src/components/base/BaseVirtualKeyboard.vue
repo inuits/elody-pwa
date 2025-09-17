@@ -73,7 +73,7 @@ watch(
   position: fixed;
   align-content: center;
   bottom: 100px;
-  z-index: 99;
+  z-index: var(--z-virtual-keyboard);
   max-width: 50%;
   left: 50%;
   transform: translateX(-50%);
