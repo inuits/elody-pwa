@@ -18,6 +18,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { router } from "@/main";
 import { getTranslatedMessage } from "@/helpers";
+import { useOcrUpload } from "@/composables/upload/useOcrUpload";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
@@ -200,7 +201,7 @@ const useUpload = (config: any) => {
     try {
       await __batchEntities(__getCsvBlob(), false);
       toggleUploadStatus();
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Complete,
       );
@@ -208,7 +209,7 @@ const useUpload = (config: any) => {
     } catch (error: Promise<string>) {
       csvOnlyUploadSFailed.value = true;
       const message = await error;
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
       );
@@ -234,7 +235,7 @@ const useUpload = (config: any) => {
         errors.push(upload?.response.text());
         continue;
       }
-      __updateFileThumbnails(
+      updateFileThumbnails(
         upload.file,
         ProgressStepType.Upload,
         ProgressStepStatus.Complete,
@@ -246,7 +247,7 @@ const useUpload = (config: any) => {
     const uploadStatus: ProgressStepStatus = failedUploads.value.length
       ? ProgressStepStatus.Failed
       : ProgressStepStatus.Complete;
-    __updateGlobalUploadProgress(ProgressStepType.Upload, uploadStatus);
+    updateGlobalUploadProgress(ProgressStepType.Upload, uploadStatus);
     if (errors.length > 0) {
       throw errors.join(", ");
     }
@@ -254,7 +255,7 @@ const useUpload = (config: any) => {
 
   const upload = async (isLinkedUpload: boolean, entityInput: EntityInput) => {
     if (!validateFiles()) return;
-    __updateGlobalUploadProgress(
+    updateGlobalUploadProgress(
       ProgressStepType.Upload,
       ProgressStepStatus.Loading,
     );
@@ -269,7 +270,7 @@ const useUpload = (config: any) => {
         ProgressStepType.Validate,
         ProgressStepType.Upload,
       ].forEach((status: ProgressStepType) => {
-        __updateGlobalUploadProgress(status, ProgressStepStatus.Complete);
+        updateGlobalUploadProgress(status, ProgressStepStatus.Complete);
       });
 
       toggleUploadStatus();
@@ -280,7 +281,7 @@ const useUpload = (config: any) => {
       uploadFlow.value === UploadFlow.MediafilesOnly ||
       uploadFlow.value === UploadFlow.OptionalMediafiles
     )
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Complete,
       );
@@ -312,7 +313,7 @@ const useUpload = (config: any) => {
       errorDescription = getTranslatedMessage(
         "dropzone.errorNotification.description",
       ) as string;
-    __updateFileThumbnails(
+    updateFileThumbnails(
       file,
       ProgressStepType.Upload,
       ProgressStepStatus.Failed,
@@ -351,11 +352,15 @@ const useUpload = (config: any) => {
   ): Promise<void> => {
     try {
       const errors = await getDryRunErrors(dryRunResult);
-      const mediafiles: any[] = dryRunResult.mediafiles || [];
-      requiredMediafiles.value = mediafiles.map(
-        (mediafile: any) => mediafile.filename,
-      );
+      const mediafilesInDryRun: any[] = dryRunResult.mediafiles || [];
 
+      if (uploadFlow.value === UploadFlow.MediafilesWithOcr) {
+        useOcrUpload().handleOcrDryRunResult(mediafilesInDryRun);
+      } else {
+        requiredMediafiles.value = mediafilesInDryRun.map(
+          (mediafile: any) => mediafile.filename,
+        );
+      }
       dryRunErrors.value = errors;
       dryRunComplete.value = true;
 
@@ -363,8 +368,8 @@ const useUpload = (config: any) => {
         ? ProgressStepStatus.Failed
         : ProgressStepStatus.Complete;
 
-      __updateGlobalUploadProgress(ProgressStepType.Validate, dryRunStatus);
-      __updateFileThumbnails(
+      updateGlobalUploadProgress(ProgressStepType.Validate, dryRunStatus);
+      updateFileThumbnails(
         file,
         ProgressStepType.Validate,
         dryRunStatus,
@@ -375,20 +380,21 @@ const useUpload = (config: any) => {
         mediafiles?.value && mediafiles.value.length
       )
         mediafiles.value.forEach((mediafile: DropzoneFile) => {
-          __updateFileThumbnails(
+          updateFileThumbnails(
             mediafile,
             ProgressStepType.Validate,
             ProgressStepStatus.Complete,
           );
         });
       verifyAllNeededFilesArePresent();
-    } catch {
+    } catch (e) {
+      console.error(e);
       dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
       );
-      __updateFileThumbnails(
+      updateFileThumbnails(
         file,
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
@@ -397,11 +403,11 @@ const useUpload = (config: any) => {
   };
 
   const dryRunCsv = async (file: DropzoneFile) => {
-    __updateGlobalUploadProgress(
+    updateGlobalUploadProgress(
       ProgressStepType.Validate,
       ProgressStepStatus.Loading,
     );
-    __updateFileThumbnails(
+    updateFileThumbnails(
       file,
       ProgressStepType.Validate,
       ProgressStepStatus.Loading,
@@ -413,11 +419,11 @@ const useUpload = (config: any) => {
     } catch (error: Promise<string>) {
       const message = await error;
       dryRunErrors.value.push(message);
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
       );
-      __updateFileThumbnails(
+      updateFileThumbnails(
         file,
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
@@ -442,7 +448,7 @@ const useUpload = (config: any) => {
     let parsedResult;
     if (!response.ok) {
       if (!isDryRun) toggleUploadStatus();
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
       );
@@ -520,7 +526,7 @@ const useUpload = (config: any) => {
 
     if (!response.ok) {
       const httpErrorMessage = await handleHttpError(response);
-      __updateFileThumbnails(
+      updateFileThumbnails(
         file,
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
@@ -607,7 +613,7 @@ const useUpload = (config: any) => {
     }
 
     if (!uploadUrl) {
-      __updateFileThumbnails(
+      updateFileThumbnails(
         file,
         ProgressStepType.Prepare,
         ProgressStepStatus.Failed,
@@ -627,13 +633,13 @@ const useUpload = (config: any) => {
       const origin = new URL(storageApiUrl).origin;
       return origin + urlObject.pathname + "?" + urlObject.searchParams;
     } catch (e: any) {
-      __updateFileThumbnails(
+      updateFileThumbnails(
         file,
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
         ["Something went wrong during upload"],
       );
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
       );
@@ -642,7 +648,7 @@ const useUpload = (config: any) => {
   };
 
   const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
-    __updateFileThumbnails(
+    updateFileThumbnails(
       file,
       ProgressStepType.Upload,
       ProgressStepStatus.Loading,
@@ -666,7 +672,7 @@ const useUpload = (config: any) => {
       const httpErrorMessage = (
         await getMessageAndCodeFromErrorString(await response.text())
       ).message;
-      __updateFileThumbnails(
+      updateFileThumbnails(
         file,
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
@@ -688,11 +694,11 @@ const useUpload = (config: any) => {
     entityId: string = "",
     entityInput: EntityInput | undefined = undefined,
   ) {
-    __updateGlobalUploadProgress(
+    updateGlobalUploadProgress(
       ProgressStepType.Validate,
       ProgressStepStatus.Complete,
     );
-    __updateGlobalUploadProgress(
+    updateGlobalUploadProgress(
       ProgressStepType.Prepare,
       ProgressStepStatus.Complete,
     );
@@ -706,20 +712,20 @@ const useUpload = (config: any) => {
         lastUploadedFileIndex.value = files.value.indexOf(file);
         file.status = "uploading";
         if (uploadStatus.value === UploadStatus.Paused) break;
-        __updateFileThumbnails(
+        updateFileThumbnails(
           file,
           ProgressStepType.Prepare,
           ProgressStepStatus.Loading,
         );
         const url = await __getUploadUrl(file, entityId, entityInput);
-        __updateFileThumbnails(
+        updateFileThumbnails(
           file,
           ProgressStepType.Prepare,
           ProgressStepStatus.Complete,
         );
         yield await __uploadFile(file, url, config);
       } catch (error) {
-        __updateFileThumbnails(
+        updateFileThumbnails(
           file,
           ProgressStepType.Upload,
           ProgressStepStatus.Failed,
@@ -755,9 +761,9 @@ const useUpload = (config: any) => {
 
     if (uploadFlow.value === UploadFlow.MediafilesOnly)
       return !containsCsv.value && mediafiles.value.length > 0;
-
+    console.log("Before OCR if");
     if (uploadFlow.value === UploadFlow.MediafilesWithOcr)
-      return containsCsv.value && mediafiles.value.length > 0;
+      return useOcrUpload().checkOcrFileValidity();
     return false;
   };
 
@@ -775,7 +781,7 @@ const useUpload = (config: any) => {
       resetUpload(true);
     }
     if (!mediafiles.value.length)
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Empty,
       );
@@ -787,7 +793,7 @@ const useUpload = (config: any) => {
   ): Promise<void> => {
     files.value.push(fileToAdd);
     if (!isValidationFile) {
-      __updateFileThumbnails(
+      updateFileThumbnails(
         fileToAdd,
         ProgressStepType.Validate,
         ProgressStepStatus.Complete,
@@ -816,7 +822,7 @@ const useUpload = (config: any) => {
       );
     if (currentUploadAbortController.value)
       currentUploadAbortController.value.abort();
-    __updateGlobalUploadProgress(
+    updateGlobalUploadProgress(
       ProgressStepType.Upload,
       ProgressStepStatus.Paused,
     );
@@ -853,6 +859,26 @@ const useUpload = (config: any) => {
     __resetFileThumbnails();
   };
 
+  const processExtraneousFiles = (requiredFileNames: string[]): boolean => {
+    let areAllFilesPresent = true;
+    if (!dryRunComplete.value) return false;
+    if (uploadFlow.value === UploadFlow.MediafilesWithOcr)
+      requiredFileNames.push(...useOcrUpload().optionalFileNames.value);
+
+    mediafiles.value.forEach((file: DropzoneFile) => {
+      if (!requiredFileNames.includes(file.name)) {
+        areAllFilesPresent = false;
+        updateFileThumbnails(
+          file,
+          ProgressStepType.Validate,
+          ProgressStepStatus.Failed,
+          [`${file.name} is not in CSV`],
+        );
+      }
+    });
+    return areAllFilesPresent;
+  };
+
   const verifyAllNeededFilesArePresent = (): boolean => {
     try {
       missingFileNames.value = [];
@@ -872,7 +898,7 @@ const useUpload = (config: any) => {
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
 
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Loading,
       );
@@ -887,19 +913,9 @@ const useUpload = (config: any) => {
         }
       });
 
-      mediafiles.value.forEach((file: DropzoneFile) => {
-        if (!requiredFileNames.includes(file.name) && dryRunComplete.value) {
-          areAllFilesPresent = false;
-          __updateFileThumbnails(
-            file,
-            ProgressStepType.Validate,
-            ProgressStepStatus.Failed,
-            [`${file.name} is not in CSV`],
-          );
-        }
-      });
+      areAllFilesPresent = processExtraneousFiles(requiredFileNames);
 
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         areAllFilesPresent
           ? ProgressStepStatus.Complete
@@ -911,7 +927,7 @@ const useUpload = (config: any) => {
           uploadFlow.value === UploadFlow.MediafilesWithOcr) &&
         mediafiles.value.length <= 0
       ) {
-        __updateGlobalUploadProgress(
+        updateGlobalUploadProgress(
           ProgressStepType.Prepare,
           ProgressStepStatus.Failed,
         );
@@ -920,7 +936,7 @@ const useUpload = (config: any) => {
 
       return areAllFilesPresent;
     } catch {
-      __updateGlobalUploadProgress(
+      updateGlobalUploadProgress(
         ProgressStepType.Prepare,
         ProgressStepStatus.Failed,
       );
@@ -939,7 +955,7 @@ const useUpload = (config: any) => {
     uploadProgress.value = newProgress;
   };
 
-  const __updateGlobalUploadProgress = (
+  const updateGlobalUploadProgress = (
     stepType: ProgressStepType,
     status: ProgressStepStatus,
   ): void => {
@@ -972,12 +988,12 @@ const useUpload = (config: any) => {
   ) => {
     Object.values(ProgressStepType).forEach(
       (progressStepType: ProgressStepType) => {
-        __updateFileThumbnails(file, progressStepType, progressStepStatus);
+        updateFileThumbnails(file, progressStepType, progressStepStatus);
       },
     );
   };
 
-  const __updateFileThumbnails = (
+  const updateFileThumbnails = (
     file: DropzoneFile,
     stepType: ProgressStepType,
     status: ProgressStepStatus,
@@ -1161,11 +1177,11 @@ const useUpload = (config: any) => {
     requiredMediafiles,
     csvOnlyUploadSFailed,
     verifyAllNeededFilesArePresent,
-    __updateGlobalUploadProgress,
+    updateGlobalUploadProgress,
     dryRunComplete,
     uploadProgress,
     amountUploaded,
-    __updateFileThumbnails,
+    updateFileThumbnails,
     initializeUpload,
     uploadCsvForReordering,
     uploadFlow,
@@ -1177,6 +1193,7 @@ const useUpload = (config: any) => {
     __getCsvString,
     extraMediafileType,
     __handleFileThumbnailError,
+    containsCsv,
   };
 };
 
@@ -1230,7 +1247,7 @@ watch(
       mediafiles.value.length !== 0;
 
     if (shouldResetGlobalUploadProgress) {
-      useUpload().__updateGlobalUploadProgress(
+      useUpload().updateGlobalUploadProgress(
         ProgressStepType.Upload,
         ProgressStepStatus.Complete,
       );

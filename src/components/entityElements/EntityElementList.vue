@@ -151,7 +151,7 @@ import { watch, ref, onBeforeMount, computed, provide, inject } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
-import useUpload, { UploadStatus } from "@/composables/useUpload";
+import useUpload, { UploadStatus } from "@/composables/upload/useUpload";
 import { usePermissions } from "@/composables/usePermissions";
 
 const config: any = inject("config");

@@ -16,7 +16,7 @@
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
 import { onMounted, ref, watch } from "vue";
-import useUpload, { UploadStatus } from "@/composables/useUpload";
+import useUpload, { UploadStatus } from "@/composables/upload/useUpload";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import type { DropzoneFile } from "dropzone";
 
@@ -43,13 +43,8 @@ defineEmits<{
 }>();
 const { dynamicFormUploadFields } = useDynamicForm();
 
-const {
-  addFileToUpload,
-  removeFileToUpload,
-  files,
-  uploadStatus,
-  toggleDeleteFileButtons,
-} = useUpload();
+const { addFileToUpload, removeFileToUpload, files, uploadStatus } =
+  useUpload();
 
 onMounted(() => {
   const dropzone = props.dropzone.initDropzone(

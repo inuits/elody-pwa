@@ -234,7 +234,7 @@ import { computed, inject, ref, watch, onUnmounted } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
-import useUpload from "@/composables/useUpload";
+import useUpload from "@/composables/upload/useUpload";
 import {
   calculateFutureDate,
   goToEntityPage,
@@ -590,7 +590,7 @@ const submitActionFunction = async (field: FormAction) => {
       .CreateEntity;
     showErrors.value = false;
     await getTenants();
-    const callbackFunctions: Function[] | undefined = extractActionArguments(
+    const callbackFunctions: [() => void] | undefined = extractActionArguments(
       field.actionType,
     );
     if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
@@ -640,7 +640,7 @@ const submitWithUploadActionFunction = async (field: FormAction) => {
 
     showErrors.value = false;
     await getTenants();
-    const callbackFunctions: Function[] | undefined = extractActionArguments(
+    const callbackFunctions: [() => void] | undefined = extractActionArguments(
       field.actionType as ActionType,
     );
     if (config.features.hasBulkSelect && callbackFunctions !== undefined) {

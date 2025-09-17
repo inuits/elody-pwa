@@ -68,7 +68,7 @@
 <script lang="ts" setup>
 import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzone } from "@/composables/useDropzone";
-import useUpload from "@/composables/useUpload";
+import useUpload from "@/composables/upload/useUpload";
 import type {
   DropdownOption,
   UploadFieldType,

@@ -28,13 +28,13 @@
         </baseTabs>
       </template>
       <div class="h-full">
-          <dynamic-form
-            v-if="getModalInfo(TypeModals.DynamicForm).open && !shouldRenderTabs"
-            :key="getModalInfo(TypeModals.DynamicForm).formQuery"
-            :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
-            :router="useRouter()"
-            :tab-name="''"
-          />
+        <dynamic-form
+          v-if="getModalInfo(TypeModals.DynamicForm).open && !shouldRenderTabs"
+          :key="getModalInfo(TypeModals.DynamicForm).formQuery"
+          :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
+          :router="useRouter()"
+          :tab-name="''"
+        />
       </div>
     </div>
   </BaseModal>
@@ -52,7 +52,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
-import useUpload from "@/composables/useUpload";
+import useUpload from "@/composables/upload/useUpload";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 const formTabs = ref<Form | null>(null);
