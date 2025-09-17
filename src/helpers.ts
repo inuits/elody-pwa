@@ -344,6 +344,7 @@ export const getMetadataFields = (
         tooltip: (value as PanelMetaData).tooltip,
         lineClamp: (value as PanelMetaData).lineClamp,
         valueTranslationKey: (value as PanelMetaData).valueTranslationKey,
+        onlyForEntityTypes: (value as PanelMetaData).onlyForEntityTypes,
         can: (value as PanelMetaData).can,
       };
 

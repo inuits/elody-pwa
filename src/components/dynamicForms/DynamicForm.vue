@@ -201,7 +201,6 @@
 <script setup lang="ts">
 import { useBaseModal } from "@/composables/useBaseModal";
 import type {
-  Entitytyping,
   ActionProgress,
   ActionProgressStep,
   Entity,
@@ -214,6 +213,7 @@ import type {
   PanelMetaData,
   UploadContainer,
   UploadField,
+  RelationFieldInput,
 } from "@/generated-types/queries";
 import {
   ActionProgressIndicatorType,
@@ -226,6 +226,7 @@ import {
   RouteNames,
   TypeModals,
   UploadFlow,
+  Entitytyping,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -395,6 +396,20 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   return normalizeFields(formTabObjects);
 });
 
+const fieldTypeMap = computed<Record<string, string[]>>(() => {
+  if (!Array.isArray(getFieldArray.value)) return;
+
+  return getFieldArray.value?.reduce(
+    (map, field) => {
+      if (field.onlyForEntityTypes && field.onlyForEntityTypes.length > 0) {
+        map[field.key] = field.onlyForEntityTypes;
+      }
+      return map;
+    },
+    {} as Record<string, string[]>,
+  );
+});
+
 const getFieldArray = computed(() => {
   return modalFormFields ? modalFormFields : formFields.value || [];
 });
@@ -428,36 +443,82 @@ const isLinkedUpload = computed<boolean>(() => {
 const createEntityFromFormInput = async (
   entityType: Entitytyping,
   relations: BaseRelationValuesInput[] | undefined = undefined,
+  onlyAllowedFields: boolean = false,
 ): Promise<EntityInput> => {
   const entity: EntityInput = { type: entityType };
-  entity.metadata = Object.keys(form.value?.values.intialValues)
-    .map((key) => {
-      if (key === "ttl") {
-        return {
-          key,
-          value: calculateFutureDate(form.value?.values.intialValues[key]),
-        };
-      }
-      return { key, value: form.value?.values.intialValues[key] };
-    })
-    .filter((metadataItem: MetadataInput) => metadataItem.value);
-  entity.relations = relations
-    ? [
-        ...relations,
-        ...parseRelationValuesForFormSubmit(form.value?.values?.relationValues),
-        ...(await parseInheritedRelationValuesFromFormSubmit(
-          form.value?.values?.relationValues,
-        )),
-      ]
-    : [
-        ...parseRelationValuesForFormSubmit(form.value?.values.relationValues),
-        ...(await parseInheritedRelationValuesFromFormSubmit(
-          form.value?.values?.relationValues,
-        )),
-      ];
+
+  const initialValues = form.value?.values?.intialValues || {};
+  const keysToInclude = getMetadataKeysToInclude(entityType, onlyAllowedFields);
+
+  entity.metadata = extractMetadataFromValues(initialValues, keysToInclude);
+  if (onlyAllowedFields) {
+    entity.relations = [];
+  } else {
+    entity.relations = await buildEntityRelations(relations) as RelationFieldInput[];
+  }
   return entity;
 };
 
+const getMetadataKeysToInclude = (
+  entityType: Entitytyping,
+  onlyAllowedFields: boolean,
+): string[] => {
+  const initialValues = form.value?.values?.intialValues || {};
+  const allKeys = Object.keys(initialValues);
+
+  const map = fieldTypeMap.value;
+  if (onlyAllowedFields) {
+    if (!map) return [];
+    return allKeys.filter((key) => {
+      const allowedTypes = map[key];
+      if (!Array.isArray(allowedTypes)) return false;
+      return allowedTypes.some((t) => String(t) === String(entityType));
+    });
+  }
+
+  if (!map) return allKeys;
+  return allKeys.filter((key) => {
+    const allowedTypes = map[key];
+    if (!Array.isArray(allowedTypes)) return true;
+    return allowedTypes.some((t) => String(t) === String(entityType));
+  });
+};
+
+const extractMetadataFromValues = (
+  initialValues: Record<string, any>,
+  keys: string[],
+): MetadataInput[] =>
+  keys
+    .map((key) =>
+      key === "ttl"
+        ? { key, value: calculateFutureDate(initialValues[key]) }
+        : { key, value: initialValues[key] },
+    )
+    .filter((item: MetadataInput) => item.value);
+
+const buildEntityRelations = async (
+  baseRelations?: BaseRelationValuesInput[],
+) => {
+  const fromForm = parseRelationValuesForFormSubmit(
+    form.value?.values?.relationValues,
+  );
+  const inherited = await parseInheritedRelationValuesFromFormSubmit(
+    form.value?.values?.relationValues,
+  );
+  return baseRelations && baseRelations.length > 0
+    ? [...baseRelations, ...fromForm, ...inherited]
+    : [...fromForm, ...inherited];
+};
+
+const hasFieldsForEntityType = (entityType: Entitytyping): boolean => {
+  const map = fieldTypeMap.value;
+  if (!map) return false;
+  return Object.values(map).some((types) =>
+    Array.isArray(types)
+      ? types.some((t) => String(t) === String(entityType))
+      : false,
+  );
+};
 const getQuery = async (queryName: string) => {
   return await loadDocument(queryName);
 };
@@ -470,7 +531,13 @@ const isFormValid = async () => {
 
 const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
-  await upload(isLinkedUpload.value, undefined, config, t);
+  const hasFieldsForEntityTypeValue = hasFieldsForEntityType(
+    Entitytyping.Mediafile,
+  );
+  const mediafilesEntity = hasFieldsForEntityTypeValue
+    ? await createEntityFromFormInput(Entitytyping.Mediafile, undefined, true)
+    : undefined;
+  await upload(isLinkedUpload.value, mediafilesEntity, config, t);
   if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,
