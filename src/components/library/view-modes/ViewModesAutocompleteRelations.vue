@@ -122,13 +122,10 @@ const isLoading = computed(() => {
 });
 
 onBeforeMount(() => {
-  console.log(props.formId);
-  console.log(props.relationType);
   allEntitiesHelper.value = useGetDropdownOptions(
     `${props.formId}-${props.relationType}-fetchAll`,
     "get",
   );
-  console.log(allEntitiesHelper.value);
   relatedEntitiesHelper.value = useGetDropdownOptions(
     `${props.formId}-${props.relationType}-fetchRelations`,
     "get",
@@ -139,7 +136,6 @@ onMounted(async () => {
   const dependentRelationValues = computed(() => {
     if (!props.dependsOn || props.disabled) return null;
 
-    console.log(allEntitiesHelper.value);
     const form = allEntitiesHelper.value.getFormWithRelationFieldCheck(props.formId, props.dependsOn);
     return form ? form.values.relationValues[props.dependsOn] : null;
   });
