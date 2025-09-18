@@ -122,10 +122,13 @@ const isLoading = computed(() => {
 });
 
 onBeforeMount(() => {
+  console.log(props.formId);
+  console.log(props.relationType);
   allEntitiesHelper.value = useGetDropdownOptions(
     `${props.formId}-${props.relationType}-fetchAll`,
     "get",
   );
+  console.log(allEntitiesHelper.value);
   relatedEntitiesHelper.value = useGetDropdownOptions(
     `${props.formId}-${props.relationType}-fetchRelations`,
     "get",
@@ -133,6 +136,35 @@ onBeforeMount(() => {
 })
 
 onMounted(async () => {
+  const dependentRelationValues = computed(() => {
+    if (!props.dependsOn || props.disabled) return null;
+
+    console.log(allEntitiesHelper.value);
+    const form = allEntitiesHelper.value.getFormWithRelationFieldCheck(props.formId, props.dependsOn);
+    return form ? form.values.relationValues[props.dependsOn] : null;
+  });
+
+  watch(
+    () => dependentRelationValues.value,
+    (newValue: any, oldValue: any) => {
+      allEntitiesHelper.value.getAutocompleteOptions("");
+      if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
+
+      const hasNoUpdates = isEqual(
+        newValue
+          .flatMap((item: { editStatus?: string }) => item.editStatus)
+          .filter(Boolean),
+        oldValue
+          .flatMap((item: { editStatus?: string }) => item.editStatus)
+          .filter(Boolean),
+      );
+      if (hasNoUpdates) return;
+
+      handleSelect([]);
+    },
+    { deep: true },
+  );
+
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
     if (props.isMetadataField) preSelect();
     else {
@@ -259,13 +291,6 @@ const preSelect = (
   handleSelect(selection, true);
 };
 
-const dependentRelationValues = computed(() => {
-  if (!props.dependsOn || props.disabled) return null;
-
-  const form = allEntitiesHelper.value.getFormWithRelationFieldCheck(props.formId, props.dependsOn);
-  return form ? form.values.relationValues[props.dependsOn] : null;
-});
-
 const handleTagClick = async (tag: DropdownOption) => {
   if (isEdit) return;
   const linkFormattersSettings = (await getFormattersSettings())?.link || {};
@@ -276,25 +301,4 @@ const handleTagClick = async (tag: DropdownOption) => {
   if (entityType && linkSetting)
     goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
 };
-
-watch(
-  () => dependentRelationValues.value,
-  (newValue: any, oldValue: any) => {
-    allEntitiesHelper.value.getAutocompleteOptions("");
-    if (!Array.isArray(newValue) || !Array.isArray(oldValue)) return;
-
-    const hasNoUpdates = isEqual(
-      newValue
-        .flatMap((item: { editStatus?: string }) => item.editStatus)
-        .filter(Boolean),
-      oldValue
-        .flatMap((item: { editStatus?: string }) => item.editStatus)
-        .filter(Boolean),
-    );
-    if (hasNoUpdates) return;
-
-    handleSelect([]);
-  },
-  { deep: true },
-);
 </script>
