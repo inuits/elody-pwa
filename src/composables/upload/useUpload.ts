@@ -896,25 +896,34 @@ const useUpload = (config: any) => {
   };
 
   const extractLinkContent = (error: string): string | undefined => {
-    if (!error) return undefined;
-    const linkRegex = /\$LINK\(([^)]+)\)/;
-    const match = error.match(linkRegex);
+    try {
+      if (!error) return undefined;
+      const linkRegex = /\$LINK\(([^)]+)\)/;
+      const match = error.match(linkRegex);
 
-    if (match && match[1]) return match[1];
-
-    return undefined;
+      if (match && match[1]) return match[1];
+      return undefined;
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
   };
 
   const extractLinkArguments = (
     linkContent: string,
   ): [string, string] | undefined => {
-    const partsRegex = /([^,]+)\s*,\s*([^)]+)/;
-    const match = linkContent.match(partsRegex);
+    try {
+      const partsRegex = /([^,]+)\s*,\s*([^)]+)/;
+      const match = linkContent.match(partsRegex);
 
-    if (match && match[1] && match[2])
-      return [match[1].trim(), match[2].trim()];
+      if (match && match[1] && match[2])
+        return [match[1].trim(), match[2].trim()];
 
-    return undefined;
+      return undefined;
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
   };
 
   const extractEntityId = (entityIdWithName: string): string | undefined => {
