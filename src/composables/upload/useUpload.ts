@@ -22,7 +22,7 @@ import { useOcrUpload } from "@/composables/upload/useOcrUpload";
 import {
   type UploadFlowConfiguration,
   useUploadFlowConfiguration,
-} from "@/composables/upload/useUploadConfiguration";
+} from "@/composables/upload/useUploadFlowConfiguration";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
@@ -72,9 +72,9 @@ const uploadFlowConfiguration = computed<UploadFlowConfiguration | undefined>(
   () =>
     useUploadFlowConfiguration().getUploadFlowConfiguration(uploadFlow.value),
 );
-const uploadValidationFn = ref<() => boolean>(() => {
-  return false;
-});
+const uploadValidationFn = computed<() => boolean>(
+  () => uploadFlowConfiguration.value?.checkUploadValidity,
+);
 const enableUploadButton = computed(() => uploadValidationFn.value());
 const missingFileNames = ref<string[]>([]);
 const failedUploads = ref<string[]>([]);
@@ -85,129 +85,19 @@ const extraMediafileType = ref<string | undefined>(undefined);
 const jobIdentifier = ref<string | undefined>(undefined);
 
 const useUpload = (config: any) => {
-  let _prefetchedUploadUrls: string[] | "not-prefetched-yet" =
+  let prefetchedUploadUrls: string[] | "not-prefetched-yet" =
     "not-prefetched-yet";
 
   const initializeUpload = (uploadSettings: UploadSettings): void => {
     uploadFlow.value = uploadSettings.uploadFlow;
 
-    const settingsObject: {
-      [key: string]: {
-        checkUploadValidityFn: () => boolean;
-      };
-    } = {
-      updateMetadata: {
-        checkUploadValidityFn: () => __checkUploadValidityUpdateMetadata(),
-      },
-      csvOnly: {
-        checkUploadValidityFn: () => __checkUploadValidityCsvOnly(),
-      },
-      mediafilesOnly: {
-        checkUploadValidityFn: () => __checkUploadValidityMediafilesOnly(),
-      },
-      mediafilesWithRequiredCsv: {
-        checkUploadValidityFn: () => __checkUploadValidityMediafilesWithCsv(),
-      },
-      mediafilesWithOptionalCsv: {
-        checkUploadValidityFn: () => __checkUploadValidityMediafilesWithCsv(),
-      },
-      uploadCsvForReordening: {
-        checkUploadValidityFn: () =>
-          __checkUploadValidityuploadCsvForReordening(),
-      },
-      mediafilesWithOcr: {
-        checkUploadValidityFn: () => __checkUploadValidityMediafilesWithOcr(),
-      },
-      optionalMediafiles: {
-        checkUploadValidityFn: () => __checkUploadValidityOptionalMediafiles(),
-      },
-      xmlMarc: {
-        checkUploadValidityFn: () => __checkUploadValidityXmlFile(),
-      },
-    };
-    uploadValidationFn.value =
-      settingsObject[uploadSettings.uploadFlow].checkUploadValidityFn;
-
     if (uploadSettings.extraMediafileType)
       extraMediafileType.value = uploadSettings.extraMediafileType;
   };
 
-  const __checkUploadValidityUpdateMetadata = (): boolean => {
-    return containsCsv.value;
-  };
-
-  const __checkUploadValidityXmlFile = (): boolean => {
-    return containsXml.value;
-  };
-
-  const __checkUploadValidityCsvOnly = (): boolean => {
-    return (
-      containsCsv.value &&
-      uploadProgress.value
-        .filter(
-          (progressStep: ActionProgressStep) =>
-            progressStep.stepType !== ProgressStepType.Upload,
-        )
-        .every(
-          (progressStep: ActionProgressStep) =>
-            progressStep.status === ProgressStepStatus.Complete,
-        )
-    );
-  };
-
-  const __checkUploadValidityMediafilesOnly = (): boolean => {
-    return !!mediafiles.value.length;
-  };
-
-  const __checkUploadValidityMediafilesWithCsv = (): boolean => {
-    if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv) {
-      return (
-        verifyAllNeededFilesArePresent() &&
-        containsCsv.value &&
-        uploadProgress.value
-          .filter(
-            (progressStep: ActionProgressStep) =>
-              progressStep.stepType !== ProgressStepType.Upload,
-          )
-          .every(
-            (progressStep: ActionProgressStep) =>
-              progressStep.status === ProgressStepStatus.Complete,
-          )
-      );
-    }
-    return (
-      !!mediafiles.value.length &&
-      !missingFileNames.value.length &&
-      !!standaloneFileType.value
-    );
-  };
-
-  const __checkUploadValidityuploadCsvForReordening = (): boolean => {
-    return containsCsv.value;
-  };
-
-  const __checkUploadValidityMediafilesWithOcr = (): boolean => {
-    return (
-      containsCsv.value &&
-      uploadProgress.value
-        .filter(
-          (progressStep: ActionProgressStep) =>
-            progressStep.stepType !== ProgressStepType.Upload,
-        )
-        .every(
-          (progressStep: ActionProgressStep) =>
-            progressStep.status === ProgressStepStatus.Complete,
-        )
-    );
-  };
-
-  const __checkUploadValidityOptionalMediafiles = (): boolean => {
-    return true;
-  };
-
   const __uploadCsvWithoutMediafiles = async () => {
     try {
-      await __batchEntities(__getCsvBlob(), false);
+      await batchEntities(getCsvBlob(), false);
       toggleUploadStatus();
       updateGlobalUploadProgress(
         ProgressStepType.Upload,
@@ -303,7 +193,7 @@ const useUpload = (config: any) => {
     const response = await fetch(`/api/upload/csv?parentId=${parentId}`, {
       headers: { "Content-Type": "text/csv" },
       method: "POST",
-      body: __getCsvBlob(),
+      body: getCsvBlob(),
     });
     if (!response.ok)
       throw new Error(
@@ -422,7 +312,7 @@ const useUpload = (config: any) => {
     );
     let dryRunResult;
     try {
-      dryRunResult = await __batchEntities(__getCsvBlob(), true);
+      dryRunResult = await batchEntities(getCsvBlob(), true);
       await handleDryRunResult(dryRunResult, file);
     } catch (error: Promise<string>) {
       const message = await error;
@@ -440,7 +330,7 @@ const useUpload = (config: any) => {
     }
   };
 
-  const __batchEntities = async (
+  const batchEntities = async (
     csv: Blob,
     isDryRun: boolean = false,
   ): Promise<string[] | number> => {
@@ -482,7 +372,7 @@ const useUpload = (config: any) => {
       uploadStatus.value = UploadStatus.Uploading;
   };
 
-  const __getUploadUrlForStandaloneMediafile = async (
+  const getUploadUrlForStandaloneMediafile = async (
     file: DropzoneFile,
     type?: Entitytyping,
   ) => {
@@ -516,35 +406,6 @@ const useUpload = (config: any) => {
     return JSON.parse(await response.text());
   };
 
-  const __getUploadUrlForMediafileOnEntity = async (
-    entityId: string,
-    file: DropzoneFile,
-    entityInput: EntityInput | undefined = undefined,
-  ): Promise<string> => {
-    const response = await fetch(
-      `/api/upload/single?entityId=${entityId}&hasRelation=true&filename=${encodeURIComponent(
-        file.name,
-      )}`,
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-        body: JSON.stringify({ entityInput }),
-      },
-    );
-
-    if (!response.ok) {
-      const httpErrorMessage = await handleHttpError(response);
-      updateFileThumbnails(
-        file,
-        ProgressStepType.Upload,
-        ProgressStepStatus.Failed,
-        [httpErrorMessage],
-      );
-      return Promise.reject(httpErrorMessage);
-    }
-    return JSON.parse(await response.text());
-  };
-
   const __getCsvFile = (): DropzoneFile => {
     return files.value.find(
       (file: DropzoneFile) =>
@@ -568,7 +429,7 @@ const useUpload = (config: any) => {
     });
   };
 
-  const __getCsvBlob = () => {
+  const getCsvBlob = () => {
     try {
       const csvFile = __getCsvFile();
       return new Blob([csvFile], { type: csvFile.type });
@@ -582,42 +443,15 @@ const useUpload = (config: any) => {
     entityId: string = "",
     entityInput: EntityInput | undefined = undefined,
   ) => {
-    let uploadUrl: string | undefined = undefined;
+    let uploadUrl: string | undefined;
 
-    if (
-      uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
-      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv ||
-      uploadFlow.value === UploadFlow.MediafilesWithOcr
-    ) {
-      if (containsCsv.value) {
-        if (_prefetchedUploadUrls === "not-prefetched-yet")
-          _prefetchedUploadUrls = (await __batchEntities(
-            __getCsvBlob(),
-            false,
-          )) as string[];
-        uploadUrl = _prefetchedUploadUrls.find((url: string) =>
-          decodeURIComponent(url).includes(file.name),
-        );
-      } else {
-        uploadUrl = await __getUploadUrlForStandaloneMediafile(
-          file,
-          standaloneFileType.value as UploadEntityTypes,
-        );
-      }
-    }
-    if (
-      uploadFlow.value === UploadFlow.MediafilesOnly ||
-      uploadFlow.value === UploadFlow.OptionalMediafiles
-    ) {
-      uploadUrl = await __getUploadUrlForMediafileOnEntity(
+    const uploadUrlFunction = uploadFlowConfiguration.value!.getUploadUrl;
+    if (uploadUrlFunction) {
+      uploadUrl = await uploadUrlFunction({
         entityId,
         file,
         entityInput,
-      );
-    }
-
-    if (uploadFlow.value === UploadFlow.XmlMarc) {
-      uploadUrl = "url";
+      });
     }
 
     if (!uploadUrl) {
@@ -628,6 +462,7 @@ const useUpload = (config: any) => {
       );
       throw new Error("Upload url is undefined.");
     }
+
     return uploadUrl;
   };
 
@@ -749,7 +584,7 @@ const useUpload = (config: any) => {
         };
       }
     }
-    _prefetchedUploadUrls = "not-prefetched-yet";
+    prefetchedUploadUrls = "not-prefetched-yet";
   }
 
   const validateFiles = () => {
@@ -1185,6 +1020,10 @@ const useUpload = (config: any) => {
     __handleFileThumbnailError,
     containsCsv,
     containsXml,
+    prefetchedUploadUrls,
+    batchEntities,
+    getCsvBlob,
+    getUploadUrlForStandaloneMediafile,
   };
 };
 

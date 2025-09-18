@@ -1,17 +1,17 @@
 import useUpload from "@/composables/upload/useUpload";
 
-export const useXmlMarcUpload = (): {
+export const useCsvReorderingUpload = (): {
   checkUploadValidity: () => boolean;
   checkFileValidity: () => boolean;
 } => {
-  const { containsXml } = useUpload({});
+  const { containsCsv } = useUpload({});
 
   const checkUploadValidity = (): boolean => {
-    return containsXml.value;
+    return containsCsv.value;
   };
 
   const checkFileValidity = (): boolean => {
-    return containsXml.value;
+    return true;
   };
 
   return { checkFileValidity, checkUploadValidity };

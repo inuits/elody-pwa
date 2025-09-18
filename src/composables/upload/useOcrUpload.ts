@@ -2,6 +2,7 @@ import useUpload from "@/composables/upload/useUpload";
 import { computed, ref, type Ref, watch } from "vue";
 import type { DropzoneFile } from "dropzone";
 import {
+  type ActionProgressStep,
   ProgressStepStatus,
   ProgressStepType,
 } from "@/generated-types/queries";
@@ -10,6 +11,7 @@ import { getTranslatedMessage } from "@/helpers";
 const optionalFileNames = ref<string[]>([]);
 
 export const useOcrUpload = (): {
+  checkUploadValidity: () => boolean;
   handleOcrDryRunResult: (mediafilesInDryRun: any[]) => void;
   checkFileValidity: () => boolean;
   optionalFileNames: Ref<string[]>;
@@ -21,7 +23,23 @@ export const useOcrUpload = (): {
     containsCsv,
     updateGlobalUploadProgress,
     dryRunErrors,
+    uploadProgress,
   } = useUpload({});
+
+  const checkUploadValidity = (): boolean => {
+    return (
+      containsCsv.value &&
+      uploadProgress.value
+        .filter(
+          (progressStep: ActionProgressStep) =>
+            progressStep.stepType !== ProgressStepType.Upload,
+        )
+        .every(
+          (progressStep: ActionProgressStep) =>
+            progressStep.status === ProgressStepStatus.Complete,
+        )
+    );
+  };
 
   const containsOptionalFile = computed<boolean>(() => {
     if (!optionalFileNames.value) return true;
@@ -87,5 +105,6 @@ export const useOcrUpload = (): {
     handleOcrDryRunResult,
     checkFileValidity,
     optionalFileNames,
+    checkUploadValidity,
   };
 };
