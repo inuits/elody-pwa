@@ -11,7 +11,7 @@ const optionalFileNames = ref<string[]>([]);
 
 export const useOcrUpload = (): {
   handleOcrDryRunResult: (mediafilesInDryRun: any[]) => void;
-  checkOcrFileValidity: () => boolean;
+  checkFileValidity: () => boolean;
   optionalFileNames: Ref<string[]>;
 } => {
   const {
@@ -56,7 +56,7 @@ export const useOcrUpload = (): {
     );
   };
 
-  const checkOcrFileValidity = (): boolean => {
+  const checkFileValidity = (): boolean => {
     return (
       containsCsv.value &&
       mediafiles.value.length > 0 &&
@@ -85,7 +85,7 @@ export const useOcrUpload = (): {
 
   return {
     handleOcrDryRunResult,
-    checkOcrFileValidity,
+    checkFileValidity,
     optionalFileNames,
   };
 };

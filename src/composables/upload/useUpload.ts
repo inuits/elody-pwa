@@ -19,6 +19,10 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 import { router } from "@/main";
 import { getTranslatedMessage } from "@/helpers";
 import { useOcrUpload } from "@/composables/upload/useOcrUpload";
+import {
+  type UploadFlowConfiguration,
+  useUploadFlowConfiguration,
+} from "@/composables/upload/useUploadConfiguration";
 
 type UploadSettings = {
   uploadType: UploadFieldType;
@@ -64,6 +68,10 @@ const containsXml = computed(
   () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
 );
 const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
+const uploadFlowConfiguration = computed<UploadFlowConfiguration | undefined>(
+  () =>
+    useUploadFlowConfiguration().getUploadFlowConfiguration(uploadFlow.value),
+);
 const uploadValidationFn = ref<() => boolean>(() => {
   return false;
 });
@@ -745,26 +753,8 @@ const useUpload = (config: any) => {
   }
 
   const validateFiles = () => {
-    if (uploadFlow.value === UploadFlow.CsvOnly) return containsCsv.value;
-    if (uploadFlow.value === UploadFlow.XmlMarc) return containsXml.value;
-
-    if (
-      uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv ||
-      uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv
-    ) {
-      if (uploadFlow.value === UploadFlow.MediafilesWithRequiredCsv)
-        return containsCsv.value && verifyAllNeededFilesArePresent();
-      else return mediafiles.value.length > 0;
-    }
-
-    if (uploadFlow.value === UploadFlow.OptionalMediafiles) return true;
-
-    if (uploadFlow.value === UploadFlow.MediafilesOnly)
-      return !containsCsv.value && mediafiles.value.length > 0;
-    console.log("Before OCR if");
-    if (uploadFlow.value === UploadFlow.MediafilesWithOcr)
-      return useOcrUpload().checkOcrFileValidity();
-    return false;
+    if (!uploadFlowConfiguration.value) return false;
+    return uploadFlowConfiguration.value.validateFiles();
   };
 
   const removeFileToUpload = (
@@ -1194,6 +1184,7 @@ const useUpload = (config: any) => {
     extraMediafileType,
     __handleFileThumbnailError,
     containsCsv,
+    containsXml,
   };
 };
 
