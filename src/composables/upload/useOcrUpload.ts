@@ -7,6 +7,7 @@ import {
   ProgressStepType,
 } from "@/generated-types/queries";
 import { getTranslatedMessage } from "@/helpers";
+import { UploadFlow } from "@/__mocks__/queries";
 
 const optionalFileNames = ref<string[]>([]);
 
@@ -24,6 +25,7 @@ export const useOcrUpload = (): {
     updateGlobalUploadProgress,
     dryRunErrors,
     uploadProgress,
+    uploadFlow,
   } = useUpload({});
 
   const checkUploadValidity = (): boolean => {
@@ -85,18 +87,20 @@ export const useOcrUpload = (): {
   watch(
     () => mediafiles.value.length,
     () => {
-      if (!containsOptionalFile.value) {
-        if (!dryRunErrors.value.includes(optionalFilesMissingMessage.value))
-          dryRunErrors.value.push(optionalFilesMissingMessage.value);
+      if (uploadFlow.value === UploadFlow.MediafilesWithOcr) {
+        if (!containsOptionalFile.value) {
+          if (!dryRunErrors.value.includes(optionalFilesMissingMessage.value))
+            dryRunErrors.value.push(optionalFilesMissingMessage.value);
 
-        updateGlobalUploadProgress(
-          ProgressStepType.Prepare,
-          ProgressStepStatus.Incomplete,
-        );
-      } else {
-        dryRunErrors.value = dryRunErrors.value.filter(
-          (error: string) => error !== optionalFilesMissingMessage.value,
-        );
+          updateGlobalUploadProgress(
+            ProgressStepType.Prepare,
+            ProgressStepStatus.Incomplete,
+          );
+        } else {
+          dryRunErrors.value = dryRunErrors.value.filter(
+            (error: string) => error !== optionalFilesMissingMessage.value,
+          );
+        }
       }
     },
   );
