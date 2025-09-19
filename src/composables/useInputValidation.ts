@@ -35,6 +35,7 @@ export const useInputValidation = () => {
     );
     defineRule(ValidationRules.MaxDateToday, _getMaxDateTodayRule);
     defineRule(ValidationRules.ExistingDate, _mustBeExistingDateRule);
+    defineRule(ValidationRules.Url, _urlValidator);
     defineRule(ValidationRules.Regex, _regexValidator);
     defineRule(ValidationRules.NoXss, _xssValidator);
   };
@@ -138,6 +139,13 @@ export const useInputValidation = () => {
     if (!value) return true;
     if (!DateTime.fromJSDate(new Date(value)).isValid)
       return "notifications.errors.construct-date-error.title";
+    return true;
+  };
+
+  const _urlValidator = (value: string): boolean | string => {
+    if (!value) return true;
+    try { new URL(value) }
+    catch (e) { return "notifications.errors.no-url-error.title" }
     return true;
   };
 
