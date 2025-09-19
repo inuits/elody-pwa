@@ -372,7 +372,7 @@ const useUpload = (config: any) => {
       );
       if (
         dryRunStatus === ProgressStepStatus.Complete &&
-        mediafiles.value.length
+        mediafiles?.value && mediafiles.value.length
       )
         mediafiles.value.forEach((mediafile: DropzoneFile) => {
           __updateFileThumbnails(
