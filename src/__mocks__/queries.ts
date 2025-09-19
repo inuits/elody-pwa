@@ -471,6 +471,10 @@ export enum BulkOperationTypes {
   StartOcr = 'startOcr'
 }
 
+export enum BulkNavigationPages {
+  DetailPage = 'detailPage',
+};
+
 export type BulkOperations = {
   __typename?: 'BulkOperations';
   options: Array<DropdownOption>;

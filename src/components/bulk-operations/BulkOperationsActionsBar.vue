@@ -94,36 +94,23 @@
 
 <script lang="ts" setup>
 import type { Entitytyping } from "@/generated-types/queries";
-import {
-  ActionContextEntitiesSelectionType,
-  BulkOperationTypes,
-  DamsIcons,
-  type DropdownOption,
-  GetBulkOperationsDocument,
-  type GetBulkOperationsQuery,
-  ModalStyle,
-  RouteNames,
-  TypeModals,
-} from "@/generated-types/queries";
+import { DamsIcons } from "@/generated-types/queries";
 import {
   type Context,
   type InBulkProcessableItem,
-  useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { useModalActions } from "@/composables/useModalActions";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import { apolloClient } from "@/main";
-import { computed, inject, onMounted, ref, watch } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useQuery } from "@vue/apollo-composable";
-import { useImport } from "@/composables/useImport";
-import { useRoute } from "vue-router";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import { auth } from "@/main";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
-import { useStateManagement } from "@/composables/useStateManagement";
 import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
-import useEntitySingle from "@/composables/useEntitySingle";
+import { useRoute } from "vue-router";
+import { useStateManagement } from "@/composables/useStateManagement";
+import {
+  useBulkOperationsActionsBar,
+  type BulkOperationsActionsBarProps,
+  type BulkOperationsActionsBarEmits,
+} from "@/composables/useBulkOperationsActionsBar";
 
 const props = withDefaults(
   defineProps<{
@@ -181,222 +168,24 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const refetchParentEntity: any = inject("RefetchParentEntity");
 const route = useRoute();
 const { getStateForRoute } = useStateManagement();
-const { loadDocument } = useImport();
-const refetchEnabled = ref<boolean>(false);
-const entityType = computed(() => props.entityType || route.meta.entityType);
-const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
-  GetBulkOperationsDocument,
-  { entityType: entityType.value },
-  () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) }),
-);
-const bulkOperations = ref<DropdownOption[]>([]);
-const selectedBulkOperation = ref<DropdownOption>();
-const bulkOperationsPromiseIsResolved = ref<boolean>(
-  !props.customBulkOperations,
-);
-const selectedSkip = ref<number>(1);
 
 const {
+  bulkOperations,
+  selectedBulkOperation,
+  bulkOperationsPromiseIsResolved,
+  selectedSkip,
+  hasBulkOperationsWithItemsSelection,
+  itemsSelected,
+  handleSelectedBulkOperation,
+  setSkip,
   getEnqueuedItemCount,
   getEnqueuedItems,
   dequeueAllItemsForBulkProcessing,
-} = useBulkOperations();
-const {
-  initializeGeneralProperties,
-  initializePropertiesForDownload,
-  initializePropertiesForCreateEntity,
-  initializePropertiesForBulkDeleteRelations,
-  initializePropertiesForBulkDeleteEntities,
-  setCallbackFunctions,
-  resetAllProperties,
-  getCallbackFunctions,
-} = useModalActions();
-const { openModal, getModalInfo } = useBaseModal();
-
-onResult((result) => {
-  try {
-    if (!result.data) return;
-    bulkOperations.value =
-      result.data?.BulkOperations?.bulkOperationOptions?.options;
-  } catch {
-    emit("setBulkOperationsAvailable", false);
-  }
-});
-
-const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
-  const operationsWithContext = bulkOperations.value?.filter(
-    (item: DropdownOption) => {
-      if (!item.actionContext) return true;
-      return (
-        item.actionContext?.entitiesSelectionType ===
-        ActionContextEntitiesSelectionType.SomeSelected
-      );
-    },
-  );
-  return (bulkOperations.value && operationsWithContext?.length > 0) || false;
-});
-
-const itemsSelected = computed<boolean>(
-  () => getEnqueuedItemCount(props.context) > 0,
-);
-
-const customBulkOperationsPromise = async () => {
-  const query = await loadDocument(props.customBulkOperations);
-  return apolloClient
-    .query({
-      query: query,
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    })
-    .then((result) => {
-      const bulkOperationsResult =
-        result.data?.CustomBulkOperations.bulkOperationOptions;
-      bulkOperations.value = bulkOperationsResult?.options || [];
-      bulkOperationsPromiseIsResolved.value = true;
-    });
-};
-
-const setSelectedSkipFromState = ({
-  updateSkipGlobally = true,
-}: { updateSkipGlobally?: boolean } = {}) => {
-  const state = getStateForRoute(route, true);
-  const skip = state?.queryVariables?.skip || 1;
-  selectedSkip.value = skip;
-  if (updateSkipGlobally) props.setSkip(skip);
-};
-
-const setSkip = async (newSkip: number) => {
-  await props.setSkip(newSkip, true);
-};
-
-onMounted(() => {
-  if (!props.excludePagination && props.showPagination)
-    setSelectedSkipFromState();
-  if (entityType.value && !props.customBulkOperations)
-    refetchEnabled.value = true;
-  refetch();
-});
-
-const handleSelectedBulkOperation = () => {
-  if (!selectedBulkOperation.value) return;
-  const modal = selectedBulkOperation.value?.bulkOperationModal;
-  const bulkOperationType = selectedBulkOperation.value?.value;
-  let modalStyle = ModalStyle.CenterWide;
-
-  initializeGeneralProperties(
-    useEntitySingle().getEntityUuid() || route.params.id,
-    modal?.formRelationType,
-    route.meta.type,
-    [refetchParentEntity, props.refetchEntities].filter(Boolean),
-    bulkOperationType,
-  );
-  if (bulkOperationType === BulkOperationTypes.DownloadMediafiles)
-    initializePropertiesForDownload(
-      getEnqueuedItems(props.context),
-      props.context,
-    );
-  if (bulkOperationType === BulkOperationTypes.AddRelation) {
-    emit(
-      "initializeEntityPickerComponent",
-      modal!.enableImageCrop || false,
-      modal!.keyToSaveCropCoordinates || "",
-    );
-  }
-  if (bulkOperationType === BulkOperationTypes.CreateEntity)
-    initializePropertiesForCreateEntity();
-
-  if (
-    bulkOperationType === BulkOperationTypes.ReorderEntities ||
-    bulkOperationType === BulkOperationTypes.DeleteEntities
-  ) {
-    setCallbackFunctions(
-      [refetchParentEntity, props.refetchEntities].filter(Boolean),
-    );
-  }
-
-  if (bulkOperationType === BulkOperationTypes.DeleteEntities) {
-    modalStyle = ModalStyle.Center;
-    initializePropertiesForBulkDeleteEntities(
-      modal?.skipItemsWithRelationDuringBulkDelete,
-    );
-  }
-
-  if (bulkOperationType === BulkOperationTypes.DeleteRelations) {
-    initializePropertiesForBulkDeleteRelations(props.relationType);
-  }
-
-  openModal(
-    modal.typeModal,
-    modalStyle,
-    modal.formQuery,
-    undefined,
-    modal.askForCloseConfirmation,
-    bulkOperationType === BulkOperationTypes.ExportCsvOfMediafilesFromAsset
-      ? RouteNames.Mediafiles
-      : props.context,
-  );
-};
-
-watch(
-  () =>
-    getModalInfo(TypeModals.DynamicForm).open ||
-    getModalInfo(TypeModals.BulkOperations).open,
-  (isBulkOperationModalOpen: boolean | undefined) => {
-    if (!isBulkOperationModalOpen) selectedBulkOperation.value = undefined;
-  },
-);
-
-watch(
-  () => entityType.value,
-  (type: Entitytyping) => {
-    if (!type) return;
-    refetch({ entityType: type });
-  },
-);
-
-watch(
-  () =>
-    [
-      getModalInfo(TypeModals.DynamicForm).open,
-      getModalInfo(TypeModals.BulkOperations).open,
-      getModalInfo(TypeModals.BulkOperationsDeleteEntities).open,
-    ].some((isOpen) => isOpen),
-  (isAnyModalOpen) => {
-    if (!isAnyModalOpen) {
-      resetAllProperties();
-    }
-  },
-);
-
-watch(
-  () => props.customBulkOperations,
-  () => {
-    if (!props.customBulkOperations || bulkOperationsPromiseIsResolved.value)
-      return;
-    emit("customBulkOperationsPromise", customBulkOperationsPromise);
-    emit("applyCustomBulkOperations");
-  },
-  { immediate: true },
-);
-
-watch(
-  () => hasBulkOperationsWithItemsSelection.value,
-  (hasBulkOperations: boolean) => {
-    if (props.confirmSelectionButton) return;
-    emit("setBulkOperationsAvailable", hasBulkOperations);
-  },
-  { immediate: true },
-);
-
-watch(
-  () => props.isLoading,
-  (currentState: boolean) => {
-    if (currentState) return;
-    setSelectedSkipFromState({ updateSkipGlobally: false });
-  },
+} = useBulkOperationsActionsBar(
+  props as BulkOperationsActionsBarProps,
+  emit as BulkOperationsActionsBarEmits,
 );
 </script>
 

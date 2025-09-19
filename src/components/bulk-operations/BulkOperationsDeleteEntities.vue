@@ -160,7 +160,7 @@ const deleteSelectedItems = async () => {
 
     isDeleting.value = false;
 
-    if (jobIdentifier) {
+    if (jobIdentifier && typeof jobIdentifier === "string") {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
       dequeueAllItemsForBulkProcessing(context);
       displaySuccessNotification(

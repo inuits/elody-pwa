@@ -215,7 +215,7 @@ export const useModalActions = () => {
 
   const getCollection = () => collection.value;
 
-  const setCallbackFunctions = (callback: Function[]) => {
+  const setCallbackFunctions = (callback: Function[] | undefined) => {
     callbackFunctions.value = callback;
   };
 
