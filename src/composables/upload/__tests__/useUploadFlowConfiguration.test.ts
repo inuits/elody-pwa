@@ -40,8 +40,26 @@ describe("useUploadFlowConfiguration", () => {
 
     files.value = [createMockDropzoneFile("test.csv", "text/csv")];
 
-    it("Should check if a csv is present", () => {
+    it("Should be truthy when a csv file is present in the files array", () => {
       expect(csvOnlyUploadConfiguration?.validateFiles()).toBeTruthy();
+    });
+  });
+
+  describe("useCsvReorderingUpload", () => {
+    const csvReordeningUploadConfiguration = getUploadFlowConfiguration(
+      UploadFlow.UploadCsvForReordening,
+    );
+
+    files.value = [createMockDropzoneFile("test.csv", "text/csv")];
+
+    it("File validation should be truthy when a csv file is present in the files array", () => {
+      expect(csvReordeningUploadConfiguration?.validateFiles()).toBeTruthy();
+    });
+
+    it("Upload validity should always be true", () => {
+      expect(
+        csvReordeningUploadConfiguration?.checkUploadValidity(),
+      ).toBeTruthy();
     });
   });
 });
