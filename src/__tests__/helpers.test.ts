@@ -13,6 +13,7 @@ import {
   type ColumnList,
   InputFieldTypes,
 } from "@/generated-types/queries";
+import type { DropzoneFile } from "dropzone";
 
 const mockTranslations = {
   notification: {
@@ -28,6 +29,20 @@ const getNestedValue = (obj: any, path: string): string => {
     path.split(".").reduce((acc, key) => acc?.[key], obj) ||
     `missing.translation.${path}`
   );
+};
+
+export const createMockDropzoneFile = (
+  name = "test.csv",
+  type = "text/csv",
+  contents = "id,name\n1,test",
+): DropzoneFile => {
+  const file = new File([contents], name, { type });
+
+  const dropzoneFile = file as unknown as DropzoneFile;
+  (dropzoneFile as any).upload = { progress: 0, bytesSent: 0 };
+  (dropzoneFile as any).status = "added";
+
+  return dropzoneFile;
 };
 
 vi.mock("@/main", () => ({
