@@ -31,20 +31,6 @@ const getNestedValue = (obj: any, path: string): string => {
   );
 };
 
-export const createMockDropzoneFile = (
-  name = "test.csv",
-  type = "text/csv",
-  contents = "id,name\n1,test",
-): DropzoneFile => {
-  const file = new File([contents], name, { type });
-
-  const dropzoneFile = file as unknown as DropzoneFile;
-  (dropzoneFile as any).upload = { progress: 0, bytesSent: 0 };
-  (dropzoneFile as any).status = "added";
-
-  return dropzoneFile;
-};
-
 vi.mock("@/main", () => ({
   typeUrlMapping: {
     mapping: {
@@ -364,3 +350,17 @@ describe("extractValueFromObject", () => {
     });
   });
 });
+
+export const createMockDropzoneFile = (
+  name = "test.csv",
+  type = "text/csv",
+  contents = "id,name\n1,test",
+): DropzoneFile => {
+  const file = new File([contents], name, { type });
+
+  const dropzoneFile = file as unknown as DropzoneFile;
+  (dropzoneFile as any).upload = { progress: 0, bytesSent: 0 };
+  (dropzoneFile as any).status = "added";
+
+  return dropzoneFile;
+};
