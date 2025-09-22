@@ -372,26 +372,6 @@ const useUpload = (config: any) => {
       uploadStatus.value = UploadStatus.Uploading;
   };
 
-  const getUploadUrlForStandaloneMediafile = async (
-    file: DropzoneFile,
-    type?: Entitytyping,
-  ) => {
-    const response = await fetch(
-      `/api/upload/single?filename=${file.name}${type ? "&type=" + type : ""}`,
-      {
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      },
-    );
-
-    if (!response.ok) {
-      const httpErrorMessage = handleHttpError(response);
-      return Promise.reject(httpErrorMessage);
-    }
-
-    return JSON.parse(await response.text());
-  };
-
   // TODO: this is temp handler for demo #139636
   const __uploadXml = async (): Promise<string> => {
     const response = await fetch(`api/upload/xml`, {
@@ -1032,7 +1012,6 @@ const useUpload = (config: any) => {
     prefetchedUploadUrls,
     batchEntities,
     getCsvBlob,
-    getUploadUrlForStandaloneMediafile,
   };
 };
 

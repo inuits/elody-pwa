@@ -26,7 +26,7 @@ export const useSharedUploadLogic = (): {
   const { handleHttpError } = useErrorCodes();
 
   const getUploadUrl = async (file: DropzoneFile): Promise<string> => {
-    if (!containsCsv.value) return await _getUploadUrlBatch(file);
+    if (containsCsv.value) return await _getUploadUrlBatch(file);
     return _getUploadUrlStandalone(file);
   };
 
@@ -48,10 +48,20 @@ export const useSharedUploadLogic = (): {
   };
 
   const _getUploadUrlStandalone = async (file: DropzoneFile) => {
-    return await getUploadUrlForStandaloneMediafile(
-      file,
-      standaloneFileType.value,
+    const response = await fetch(
+      `/api/upload/single?filename=${file.name}${standaloneFileType.value ? "&type=" + standaloneFileType.value : ""}`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      },
     );
+
+    if (!response.ok) {
+      const httpErrorMessage = handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
+    }
+
+    return JSON.parse(await response.text());
   };
 
   const getUploadUrlForMediafileOnEntity = async (
