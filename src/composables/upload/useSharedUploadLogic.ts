@@ -7,6 +7,8 @@ import {
 } from "@/generated-types/queries";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 
+let prefetchedUploadUrls: string[] = [];
+
 export const useSharedUploadLogic = (): {
   getUploadUrl: (file: DropzoneFile) => Promise<string>;
   getUploadUrlForMediafileOnEntity: (
@@ -19,7 +21,6 @@ export const useSharedUploadLogic = (): {
     containsCsv,
     getCsvBlob,
     batchEntities,
-    getUploadUrlForStandaloneMediafile,
     standaloneFileType,
     updateFileThumbnails,
   } = useUpload({});
@@ -31,10 +32,7 @@ export const useSharedUploadLogic = (): {
   };
 
   const _getUploadUrlBatch = async (file: DropzoneFile): Promise<string> => {
-    let prefetchedUploadUrls: string[] | "not-prefetched-yet" = useUpload(
-      {},
-    ).prefetchedUploadUrls;
-    if (prefetchedUploadUrls === "not-prefetched-yet")
+    if (!prefetchedUploadUrls.length)
       prefetchedUploadUrls = (await batchEntities(
         getCsvBlob(),
         false,

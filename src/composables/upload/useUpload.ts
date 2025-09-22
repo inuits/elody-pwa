@@ -85,9 +85,6 @@ const extraMediafileType = ref<string | undefined>(undefined);
 const jobIdentifier = ref<string | undefined>(undefined);
 
 const useUpload = (config: any) => {
-  let prefetchedUploadUrls: string[] | "not-prefetched-yet" =
-    "not-prefetched-yet";
-
   const initializeUpload = (uploadSettings: UploadSettings): void => {
     uploadFlow.value = uploadSettings.uploadFlow;
 
@@ -434,6 +431,8 @@ const useUpload = (config: any) => {
       });
     }
 
+    console.log(uploadUrl);
+
     if (!uploadUrl) {
       updateFileThumbnails(
         file,
@@ -564,7 +563,6 @@ const useUpload = (config: any) => {
         };
       }
     }
-    prefetchedUploadUrls = "not-prefetched-yet";
   }
 
   const validateFiles = () => {
@@ -1009,7 +1007,6 @@ const useUpload = (config: any) => {
     __handleFileThumbnailError,
     containsCsv,
     containsXml,
-    prefetchedUploadUrls,
     batchEntities,
     getCsvBlob,
   };
