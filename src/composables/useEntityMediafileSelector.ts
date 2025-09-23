@@ -2,7 +2,7 @@ import {
   KeyValueSource,
   type MediaFileEntity,
 } from "@/generated-types/queries";
-import { reactive, ref } from "vue";
+import { reactive, type Reactive, ref } from "vue";
 
 type MediaFileRootKeys = "id" | "uuid";
 
@@ -25,7 +25,7 @@ type MediafileSelectionState = {
 };
 
 const mediafileSelectionState = ref<{
-  [key: string]: reactive<MediafileSelectionState>;
+  [key: string]: Reactive<MediafileSelectionState>;
 }>({});
 
 export const useEntityMediafileSelector = () => {
