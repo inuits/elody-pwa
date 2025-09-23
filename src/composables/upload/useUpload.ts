@@ -431,8 +431,6 @@ const useUpload = (config: any) => {
       });
     }
 
-    console.log(uploadUrl);
-
     if (!uploadUrl) {
       updateFileThumbnails(
         file,
@@ -973,7 +971,6 @@ const useUpload = (config: any) => {
       if (a.name < b.name) return -1;
       else return 1;
     });
-    console.log(files.value);
   };
 
   return {
