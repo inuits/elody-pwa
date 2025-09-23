@@ -43,7 +43,7 @@ defineEmits<{
 }>();
 const { dynamicFormUploadFields } = useDynamicForm();
 
-const { addFileToUpload, removeFileToUpload, files, uploadStatus } =
+const { addFileToUpload, removeFileToUpload, files, uploadStatus, sortFiles } =
   useUpload();
 
 onMounted(() => {
@@ -81,11 +81,28 @@ onMounted(() => {
 
   dynamicFormUploadFields.value.push(dropzone);
 
+  const sortPreviewsAlphabetically = () => {
+    sortFiles();
+    const viewChildren = [...dropzoneView.value!.children];
+    const filePreviews = viewChildren.filter((viewChild) =>
+      viewChild.hasAttribute("data-dz-file-preview"),
+    );
+
+    const sortedViewChildren = filePreviews.sort((a, b) => {
+      return a.innerText.localeCompare(b.innerText);
+    });
+
+    sortedViewChildren.forEach((child) => {
+      dropzoneView.value!.appendChild(child);
+    });
+  };
+
   watch(
     () => files.value.length,
     () => {
-      filesInDropzone.value = dropzone.files;
+      filesInDropzone.value = files.value;
       fileCount.value = dropzone.files.length;
+      sortPreviewsAlphabetically();
     },
     { immediate: true },
   );

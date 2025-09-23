@@ -4,7 +4,6 @@ import { computed, ref, toRaw, watch } from "vue";
 import {
   type ActionProgressStep,
   type EntityInput,
-  type Entitytyping,
   ProgressStepStatus,
   ProgressStepType,
   TypeModals,
@@ -272,7 +271,8 @@ const useUpload = (config: any) => {
       );
       if (
         dryRunStatus === ProgressStepStatus.Complete &&
-        mediafiles?.value && mediafiles.value.length
+        mediafiles?.value &&
+        mediafiles.value.length
       )
         mediafiles.value.forEach((mediafile: DropzoneFile) => {
           updateFileThumbnails(
@@ -968,6 +968,14 @@ const useUpload = (config: any) => {
     });
   };
 
+  const sortFiles = (): void => {
+    files.value = files.value.sort((a, b) => {
+      if (a.name < b.name) return -1;
+      else return 1;
+    });
+    console.log(files.value);
+  };
+
   return {
     pauseUpload,
     resumeUpload,
@@ -1009,6 +1017,7 @@ const useUpload = (config: any) => {
     containsXml,
     batchEntities,
     getCsvBlob,
+    sortFiles,
   };
 };
 
