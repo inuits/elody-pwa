@@ -3,20 +3,22 @@
     @click.stop.prevent="openContextMenu"
     class="flex items-center justify-center"
   >
-    <unicon :name="Unicons.EllipsisVThinline.name" />
     <div v-if="hasAvailableContextMenuActions">
-      <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
-        <context-menu-action
-          :context-menu-actions="availableContextMenuActions"
-          :parent-entity-id="parentEntityId"
-          :entity-id="entityId"
-          :entity-type="entityType"
-          :relation="relation"
-          :bulk-operations-context="bulkOperationsContext"
-          :refetch-entities="refetchEntities"
-          @toggle-loading="handleEmit"
-        />
-      </base-context-menu>
+      <unicon :name="Unicons.EllipsisVThinline.name" />
+      <div>
+        <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
+          <context-menu-action
+            :context-menu-actions="availableContextMenuActions"
+            :parent-entity-id="parentEntityId"
+            :entity-id="entityId"
+            :entity-type="entityType"
+            :relation="relation"
+            :bulk-operations-context="bulkOperationsContext"
+            :refetch-entities="refetchEntities"
+            @toggle-loading="handleEmit"
+          />
+        </base-context-menu>
+      </div>
     </div>
   </div>
 </template>
