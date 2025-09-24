@@ -198,11 +198,12 @@ onMounted(async () => {
 watch(
   () => primaryPreviewElement.value,
   () => {
-    if (primaryPreviewElement.value)
+    if (primaryPreviewElement.value) {
       addMediafileSelectionStateContext(
         primaryPreviewElement.value.column.elements.entityListElement
           .customQueryFilters,
       );
+    }
   },
   { immediate: true },
 );

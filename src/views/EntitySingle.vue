@@ -5,7 +5,10 @@
       class="h-full w-full flex bg-background-normal z-2 overflow-y-auto pb-4"
     >
       <div class="relative h-full w-full">
-        <div v-if="showSavingSpinner" class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-[100]">
+        <div
+          v-if="showSavingSpinner"
+          class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-[100]"
+        >
           <spinner-loader theme="accent" />
         </div>
         <entity-column
@@ -100,7 +103,9 @@ const props = withDefaults(
 );
 
 const id = computed(() => asString(props.entityId || route.params["id"]));
-const showSavingSpinner = computed(() => useEditHelper.value.buttonClicked && !useEditHelper.value.showErrors);
+const showSavingSpinner = computed(
+  () => useEditHelper.value.buttonClicked && !useEditHelper.value.showErrors,
+);
 const useEditHelper = ref(useEditMode(id.value));
 const identifiers = ref<string[]>([]);
 const loading = ref<boolean>(true);

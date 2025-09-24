@@ -30,10 +30,12 @@ const mediafileSelectionState = ref<{
 
 export const useEntityMediafileSelector = () => {
   const addMediafileSelectionStateContext = (context: string): void => {
-    mediafileSelectionState.value[context] = reactive<MediafileSelectionState>({
-      mediafiles: [],
-      selectedMediafile: undefined,
-    });
+    if (!mediafileSelectionState.value[context])
+      mediafileSelectionState.value[context] =
+        reactive<MediafileSelectionState>({
+          mediafiles: [],
+          selectedMediafile: undefined,
+        });
   };
 
   const getValueOfMediafile = (

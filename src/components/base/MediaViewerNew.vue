@@ -117,13 +117,13 @@ const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { mediafiles } = toRefs(props);
 const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();
-const mimetype = computed<string>(() =>
-  getValueOfMediafile(
+const mimetype = computed<string>(() => {
+  return getValueOfMediafile(
     mediafileViewerContext,
     "mimetype",
     mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
-  ),
-);
+  );
+});
 const dimensions = computed<{ width: number; height: number } | undefined>(() =>
   getMediaDimensions(),
 );

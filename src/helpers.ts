@@ -737,13 +737,15 @@ export const mapModelValueToDropdownOptions = (
   ];
 };
 
-export const mapRelationValuesToDropdownOptions = (relations: BaseRelationValuesInput[]) => {
+export const mapRelationValuesToDropdownOptions = (
+  relations: BaseRelationValuesInput[],
+) => {
   const relationDropdowns: DropdownOption[] = [];
   relations.forEach((relation: BaseRelationValuesInput) => {
     relationDropdowns.push({
       icon: DamsIcons.NoIcon,
       label: relation.value,
-      value: relation.key
+      value: relation.key,
     });
   });
   return relationDropdowns;
