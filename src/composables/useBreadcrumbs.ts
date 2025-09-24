@@ -137,18 +137,29 @@ const useBreadcrumbs = (config: any) => {
 
   const createFilters = (
     parentId: string[],
-    entityType: Entitytyping,
+    entityTypes: Entitytyping | Entitytyping[],
     relation: string,
     key?: string | undefined,
     entity?: Entity | undefined,
   ) => {
-    const advancedFilters: AdvancedFilterInput[] = [
-      {
-        match_exact: true,
-        type: AdvancedFilterTypes.Type,
-        value: entityType,
-      },
-    ];
+    const advancedFilters: AdvancedFilterInput[] = [];
+    if (!Array.isArray(entityTypes))
+      advancedFilters.push(
+        {
+          match_exact: true,
+          type: AdvancedFilterTypes.Type,
+          value: entityTypes,
+        },
+      );
+    else
+      advancedFilters.push(
+        {
+          match_exact: true,
+          type: AdvancedFilterTypes.Selection,
+          key: "type",
+          value: entityTypes,
+        },
+      );
 
     const extractedIds = entity
       ? extractValueFromObject(entity, relation)
@@ -164,7 +175,7 @@ const useBreadcrumbs = (config: any) => {
     advancedFilters.push(relationFitler);
 
     const queryVariables: GetEntitiesQueryVariables = {
-      type: entityType,
+      type: Array.isArray(entityTypes) ? entityTypes[0] : entityTypes,
       limit: 20,
       skip: 1,
       searchValue: {
