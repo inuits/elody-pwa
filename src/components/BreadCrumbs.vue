@@ -145,9 +145,14 @@ const { closeModal } = useBaseModal();
 const currentRouteTitle = ref<string>("");
 
 watch(
-  () => [locale.value, rootRoute.value.rootTitle],
+  () => [locale.value, rootRoute.value?.rootTitle],
   () => {
-    currentRouteTitle.value = t(rootRoute.value.rootTitle);
+    const titleKey = rootRoute.value?.rootTitle as string;
+    if (titleKey) {
+      currentRouteTitle.value = t(titleKey);
+    } else {
+      currentRouteTitle.value = "";
+    }
   },
 );
 
