@@ -1,8 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import { useBulkOperationsActionsBar } from "../useBulkOperationsActionsBar";
-import type { BulkOperationsActionsBarProps, BulkOperationsActionsBarEmits } from "../useBulkOperationsActionsBar";
-import { BulkOperationTypes, ModalStyle, RouteNames, Entitytyping, BulkNavigationPages } from "@/generated-types/queries";
+import type {
+  BulkOperationsActionsBarProps,
+  BulkOperationsActionsBarEmits,
+} from "../useBulkOperationsActionsBar";
+import {
+  BulkOperationTypes,
+  ModalStyle,
+  RouteNames,
+  Entitytyping,
+  BulkNavigationPages,
+} from "@/generated-types/queries";
 
 vi.mock("@/main", () => ({
   apolloClient: {
@@ -19,7 +28,9 @@ vi.mock("@vue/apollo-composable", () => ({
 
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({
-    getEnqueuedItemCount: vi.fn((context) => context === 'test-context' ? 3 : 0),
+    getEnqueuedItemCount: vi.fn((context) =>
+      context === "test-context" ? 3 : 0,
+    ),
     getEnqueuedItems: vi.fn(() => [{ id: "1" }, { id: "2" }, { id: "3" }]),
     dequeueAllItemsForBulkProcessing: vi.fn(),
   }),
@@ -57,7 +68,7 @@ vi.mock("@/composables/useImport", () => ({
 vi.mock("@/composables/useStateManagement", () => ({
   useStateManagement: () => ({
     getStateForRoute: vi.fn(() => ({
-      queryVariables: { skip: 10 }
+      queryVariables: { skip: 10 },
     })),
   }),
 }));
@@ -70,15 +81,17 @@ vi.mock("@/composables/useEntitySingle", () => ({
 
 vi.mock("vue-router", () => ({
   useRoute: () => ({
-    meta: { type: 'test-type', entityType: Entitytyping.Asset },
+    meta: { type: "test-type", entityType: Entitytyping.Asset },
     params: { id: "route-entity-456" },
     query: {},
   }),
 }));
 
 describe("useBulkOperationsActionsBar", () => {
-  const createMockProps = (overrides?: Partial<BulkOperationsActionsBarProps>): BulkOperationsActionsBarProps => ({
-    context: 'test-context' as any,
+  const createMockProps = (
+    overrides?: Partial<BulkOperationsActionsBarProps>,
+  ): BulkOperationsActionsBarProps => ({
+    context: "test-context" as any,
     totalItemsCount: 100,
     useExtendedBulkOperations: true,
     showButton: true,
@@ -125,10 +138,15 @@ describe("useBulkOperationsActionsBar", () => {
     });
 
     it("should set bulkOperationsPromiseIsResolved to false when customBulkOperations is provided", () => {
-      const props = createMockProps({ customBulkOperations: "custom-operations" });
+      const props = createMockProps({
+        customBulkOperations: "custom-operations",
+      });
       const emit = createMockEmit();
 
-      const { bulkOperationsPromiseIsResolved } = useBulkOperationsActionsBar(props, emit);
+      const { bulkOperationsPromiseIsResolved } = useBulkOperationsActionsBar(
+        props,
+        emit,
+      );
 
       expect(bulkOperationsPromiseIsResolved.value).toBe(false);
     });
@@ -145,7 +163,7 @@ describe("useBulkOperationsActionsBar", () => {
     });
 
     it("should calculate itemsSelected as false for different context", () => {
-      const props = createMockProps({ context: 'different-context' as any });
+      const props = createMockProps({ context: "different-context" as any });
       const emit = createMockEmit();
 
       const { itemsSelected } = useBulkOperationsActionsBar(props, emit);
@@ -170,20 +188,31 @@ describe("useBulkOperationsActionsBar", () => {
 
       const { determineModalStyle } = useBulkOperationsActionsBar(props, emit);
 
-      expect(determineModalStyle(BulkOperationTypes.DeleteEntities)).toBe(ModalStyle.Center);
-      expect(determineModalStyle(BulkOperationTypes.DownloadMediafiles)).toBe(ModalStyle.CenterWide);
+      expect(determineModalStyle(BulkOperationTypes.DeleteEntities)).toBe(
+        ModalStyle.Center,
+      );
+      expect(determineModalStyle(BulkOperationTypes.DownloadMediafiles)).toBe(
+        ModalStyle.CenterWide,
+      );
     });
 
     it("should get modal context for operation correctly", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { getModalContextForOperation } = useBulkOperationsActionsBar(props, emit);
+      const { getModalContextForOperation } = useBulkOperationsActionsBar(
+        props,
+        emit,
+      );
 
-      expect(getModalContextForOperation(BulkOperationTypes.ExportCsvOfMediafilesFromAsset))
-        .toBe(RouteNames.Mediafiles || "Mediafiles");
-      expect(getModalContextForOperation(BulkOperationTypes.DownloadMediafiles))
-        .toBe(props.context);
+      expect(
+        getModalContextForOperation(
+          BulkOperationTypes.ExportCsvOfMediafilesFromAsset,
+        ),
+      ).toBe(RouteNames.Mediafiles || "Mediafiles");
+      expect(
+        getModalContextForOperation(BulkOperationTypes.DownloadMediafiles),
+      ).toBe(props.context);
     });
 
     it("should get refetch callbacks correctly", () => {
@@ -204,32 +233,42 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
-      const mockConfig = { typeModal: 'test' as any };
-      executeOperationSpecificInitialization(BulkOperationTypes.DownloadMediafiles, mockConfig);
+      const mockConfig = { typeModal: "test" as any };
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.DownloadMediafiles,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForDownload).toHaveBeenCalled();
+      expect(
+        mockModalActions.initializePropertiesForDownload,
+      ).toHaveBeenCalled();
     });
 
     it("should execute add relation operation initialization", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'test' as any,
+        typeModal: "test" as any,
         enableImageCrop: true,
         keyToSaveCropCoordinates: "test-key",
       };
 
-      executeOperationSpecificInitialization(BulkOperationTypes.AddRelation, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.AddRelation,
+        mockConfig,
+      );
 
       expect(emit).toHaveBeenCalledWith(
         "initializeEntityPickerComponent",
         true,
-        "test-key"
+        "test-key",
       );
     });
 
@@ -237,30 +276,40 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'DynamicForm' as any,
+        typeModal: "DynamicForm" as any,
         pageToNavigateToAfterCreation: BulkNavigationPages.DetailPage,
       };
 
-      executeOperationSpecificInitialization(BulkOperationTypes.AddRelation, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.AddRelation,
+        mockConfig,
+      );
 
-      expect(mockModalActions.setCallbackFunctions).toHaveBeenCalledWith(undefined);
+      expect(mockModalActions.setCallbackFunctions).toHaveBeenCalledWith(
+        undefined,
+      );
     });
 
     it("should not set callbacks when pageToNavigateToAfterCreation is null for AddRelation", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'DynamicForm' as any,
+        typeModal: "DynamicForm" as any,
         pageToNavigateToAfterCreation: null,
       };
 
-      executeOperationSpecificInitialization(BulkOperationTypes.AddRelation, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.AddRelation,
+        mockConfig,
+      );
 
       expect(mockModalActions.setCallbackFunctions).not.toHaveBeenCalled();
     });
@@ -269,51 +318,71 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
-      const mockConfig = { typeModal: 'test' as any };
-      executeOperationSpecificInitialization(BulkOperationTypes.CreateEntity, mockConfig);
+      const mockConfig = { typeModal: "test" as any };
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.CreateEntity,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForCreateEntity).toHaveBeenCalled();
+      expect(
+        mockModalActions.initializePropertiesForCreateEntity,
+      ).toHaveBeenCalled();
     });
 
     it("should set callbacks to undefined when pageToNavigateToAfterCreation (detail page) for CreateEntity", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'DynamicForm' as any,
+        typeModal: "DynamicForm" as any,
         formQuery: "GetWorkCreateForm",
         formRelationType: "isWorkFor",
         askForCloseConfirmation: true,
         pageToNavigateToAfterCreation: BulkNavigationPages.DetailPage,
       };
 
-      executeOperationSpecificInitialization(BulkOperationTypes.CreateEntity, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.CreateEntity,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForCreateEntity).toHaveBeenCalled();
-      expect(mockModalActions.setCallbackFunctions).toHaveBeenCalledWith(undefined);
+      expect(
+        mockModalActions.initializePropertiesForCreateEntity,
+      ).toHaveBeenCalled();
+      expect(mockModalActions.setCallbackFunctions).toHaveBeenCalledWith(
+        undefined,
+      );
     });
 
     it("should not set callbacks when pageToNavigateToAfterCreation is null for CreateEntity", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'DynamicForm' as any,
+        typeModal: "DynamicForm" as any,
         formQuery: "GetWorkCreateForm",
         formRelationType: "isWorkFor",
         askForCloseConfirmation: true,
         pageToNavigateToAfterCreation: null,
       };
 
-      executeOperationSpecificInitialization(BulkOperationTypes.CreateEntity, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.CreateEntity,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForCreateEntity).toHaveBeenCalled();
+      expect(
+        mockModalActions.initializePropertiesForCreateEntity,
+      ).toHaveBeenCalled();
       expect(mockModalActions.setCallbackFunctions).not.toHaveBeenCalled();
     });
 
@@ -321,10 +390,14 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
-      const mockConfig = { typeModal: 'test' as any };
-      executeOperationSpecificInitialization(BulkOperationTypes.ReorderEntities, mockConfig);
+      const mockConfig = { typeModal: "test" as any };
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.ReorderEntities,
+        mockConfig,
+      );
 
       expect(mockModalActions.setCallbackFunctions).toHaveBeenCalled();
     });
@@ -333,17 +406,22 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'test' as any,
+        typeModal: "test" as any,
         skipItemsWithRelationDuringBulkDelete: ["item1", "item2"],
       };
 
-      executeOperationSpecificInitialization(BulkOperationTypes.DeleteEntities, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.DeleteEntities,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForBulkDeleteEntities)
-        .toHaveBeenCalledWith(["item1", "item2"]);
+      expect(
+        mockModalActions.initializePropertiesForBulkDeleteEntities,
+      ).toHaveBeenCalledWith(["item1", "item2"]);
       expect(mockModalActions.setCallbackFunctions).toHaveBeenCalled();
     });
 
@@ -351,23 +429,29 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
-      const mockConfig = { typeModal: 'test' as any };
-      executeOperationSpecificInitialization(BulkOperationTypes.DeleteRelations, mockConfig);
+      const mockConfig = { typeModal: "test" as any };
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.DeleteRelations,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForBulkDeleteRelations)
-        .toHaveBeenCalledWith("test-relation");
+      expect(
+        mockModalActions.initializePropertiesForBulkDeleteRelations,
+      ).toHaveBeenCalledWith("test-relation");
     });
 
     it("should handle unknown operation types gracefully", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
-      const mockConfig = { typeModal: 'test' as any };
-      
+      const mockConfig = { typeModal: "test" as any };
+
       expect(() => {
         executeOperationSpecificInitialization("UnknownOperation", mockConfig);
       }).not.toThrow();
@@ -379,19 +463,23 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { handleSelectedBulkOperation, selectedBulkOperation } = useBulkOperationsActionsBar(props, emit);
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(props, emit);
 
       selectedBulkOperation.value = undefined;
       handleSelectedBulkOperation();
 
-      expect(mockModalActions.initializeGeneralProperties).not.toHaveBeenCalled();
+      expect(
+        mockModalActions.initializeGeneralProperties,
+      ).not.toHaveBeenCalled();
     });
 
     it("should return early when bulk operation modal config is missing", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { handleSelectedBulkOperation, selectedBulkOperation } = useBulkOperationsActionsBar(props, emit);
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(props, emit);
 
       selectedBulkOperation.value = {
         value: BulkOperationTypes.DownloadMediafiles,
@@ -400,17 +488,20 @@ describe("useBulkOperationsActionsBar", () => {
 
       handleSelectedBulkOperation();
 
-      expect(mockModalActions.initializeGeneralProperties).not.toHaveBeenCalled();
+      expect(
+        mockModalActions.initializeGeneralProperties,
+      ).not.toHaveBeenCalled();
     });
 
     it("should execute complete bulk operation flow", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { handleSelectedBulkOperation, selectedBulkOperation } = useBulkOperationsActionsBar(props, emit);
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'TestModal' as any,
+        typeModal: "TestModal" as any,
         formRelationType: "test-relation-type",
         formQuery: "test-query",
         askForCloseConfirmation: true,
@@ -428,16 +519,16 @@ describe("useBulkOperationsActionsBar", () => {
         "test-relation-type",
         "test-type",
         expect.any(Array),
-        BulkOperationTypes.DownloadMediafiles
+        BulkOperationTypes.DownloadMediafiles,
       );
 
       expect(mockBaseModal.openModal).toHaveBeenCalledWith(
-        'TestModal',
+        "TestModal",
         ModalStyle.CenterWide,
         "test-query",
         undefined,
         true,
-        props.context
+        props.context,
       );
     });
   });
@@ -452,7 +543,7 @@ describe("useBulkOperationsActionsBar", () => {
 
       await setSkip(25);
 
-      expect(mockSetSkip).toHaveBeenCalledWith(25);
+      expect(mockSetSkip).toHaveBeenCalledWith(25, true);
     });
 
     it("should handle missing setSkip function gracefully", async () => {
@@ -477,7 +568,11 @@ describe("useBulkOperationsActionsBar", () => {
       } = useBulkOperationsActionsBar(props, emit);
 
       expect(getEnqueuedItemCount(props.context)).toBe(3);
-      expect(getEnqueuedItems(props.context)).toEqual([{ id: "1" }, { id: "2" }, { id: "3" }]);
+      expect(getEnqueuedItems(props.context)).toEqual([
+        { id: "1" },
+        { id: "2" },
+        { id: "3" },
+      ]);
       expect(dequeueAllItemsForBulkProcessing).toBeDefined();
     });
 
@@ -506,17 +601,22 @@ describe("useBulkOperationsActionsBar", () => {
       const props = createMockProps();
       const emit = createMockEmit();
 
-      const { executeOperationSpecificInitialization } = useBulkOperationsActionsBar(props, emit);
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
 
       const mockConfig = {
-        typeModal: 'test' as any,
+        typeModal: "test" as any,
         skipItemsWithRelationDuringBulkDelete: [null, "item1", null, "item2"],
       } as any;
 
-      executeOperationSpecificInitialization(BulkOperationTypes.DeleteEntities, mockConfig);
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.DeleteEntities,
+        mockConfig,
+      );
 
-      expect(mockModalActions.initializePropertiesForBulkDeleteEntities)
-        .toHaveBeenCalledWith(["item1", "item2"]);
+      expect(
+        mockModalActions.initializePropertiesForBulkDeleteEntities,
+      ).toHaveBeenCalledWith(["item1", "item2"]);
     });
   });
 });
