@@ -1,8 +1,8 @@
-import { computed, inject, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useQuery } from '@vue/apollo-composable';
+import { computed, inject, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useQuery } from "@vue/apollo-composable";
 
-import type { Entitytyping } from '@/generated-types/queries';
+import type { Entitytyping } from "@/generated-types/queries";
 import {
   ActionContextEntitiesSelectionType,
   BulkOperationTypes,
@@ -14,18 +14,18 @@ import {
   TypeModals,
   BulkNavigationPages,
   type BulkOperationModal,
-} from '@/generated-types/queries';
+} from "@/generated-types/queries";
 import {
   type Context,
   type InBulkProcessableItem,
   useBulkOperations,
-} from '@/composables/useBulkOperations';
-import { useModalActions } from '@/composables/useModalActions';
-import { useBaseModal } from '@/composables/useBaseModal';
-import { useImport } from '@/composables/useImport';
-import { useStateManagement } from '@/composables/useStateManagement';
-import useEntitySingle from '@/composables/useEntitySingle';
-import { apolloClient } from '@/main';
+} from "@/composables/useBulkOperations";
+import { useModalActions } from "@/composables/useModalActions";
+import { useBaseModal } from "@/composables/useBaseModal";
+import { useImport } from "@/composables/useImport";
+import { useStateManagement } from "@/composables/useStateManagement";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { apolloClient } from "@/main";
 
 export interface BulkOperationsActionsBarProps {
   context: Context;
@@ -42,7 +42,7 @@ export interface BulkOperationsActionsBarProps {
   skipItemsWithRelationDuringBulkDelete?: string[];
   selectedPaginationLimitOption: number;
   excludePagination: boolean;
-  setSkip?: (skip: number) => void;
+  setSkip?: (skip: number, forceFetch?: boolean) => void;
   showPagination?: boolean;
   isLoading?: boolean;
 }
@@ -51,28 +51,38 @@ export interface BulkOperationsActionsBarEmits {
   (event: "selectPage"): void;
   (event: "selectAll"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
-  (event: "setBulkOperationsAvailable", isBulkOperationsAvailable: boolean): void;
+  (
+    event: "setBulkOperationsAvailable",
+    isBulkOperationsAvailable: boolean,
+  ): void;
   (event: "refetch"): void;
-  (event: "customBulkOperationsPromise", bulkOperationsPromise: () => Promise<void>): void;
+  (
+    event: "customBulkOperationsPromise",
+    bulkOperationsPromise: () => Promise<void>,
+  ): void;
   (event: "applyCustomBulkOperations"): void;
-  (event: "initializeEntityPickerComponent", enableCropMode: boolean, keyToSaveCropCoordinates: string): void;
+  (
+    event: "initializeEntityPickerComponent",
+    enableCropMode: boolean,
+    keyToSaveCropCoordinates: string,
+  ): void;
 }
 
 export const useBulkOperationsActionsBar = (
   props: BulkOperationsActionsBarProps,
-  emit: BulkOperationsActionsBarEmits
+  emit: BulkOperationsActionsBarEmits,
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
   const route = useRoute();
   const { getStateForRoute } = useStateManagement();
   const { loadDocument } = useImport();
-  
+
   const {
     getEnqueuedItemCount,
     getEnqueuedItems,
     dequeueAllItemsForBulkProcessing,
   } = useBulkOperations();
-  
+
   const {
     initializeGeneralProperties,
     initializePropertiesForDownload,
@@ -82,17 +92,19 @@ export const useBulkOperationsActionsBar = (
     setCallbackFunctions,
     resetAllProperties,
   } = useModalActions();
-  
+
   const { openModal, getModalInfo } = useBaseModal();
 
   const refetchEnabled = ref<boolean>(false);
   const bulkOperations = ref<DropdownOption[]>([]);
   const selectedBulkOperation = ref<DropdownOption>();
-  const bulkOperationsPromiseIsResolved = ref<boolean>(!props.customBulkOperations);
+  const bulkOperationsPromiseIsResolved = ref<boolean>(
+    !props.customBulkOperations,
+  );
   const selectedSkip = ref<number>(1);
 
   const entityType = computed(() => props.entityType || route.meta.entityType);
-  
+
   const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
     const operationsWithContext = bulkOperations.value?.filter(
       (item: DropdownOption) => {
@@ -118,7 +130,7 @@ export const useBulkOperationsActionsBar = (
 
   onResult((result) => {
     try {
-      if (!result.data || !('BulkOperations' in result.data)) return;
+      if (!result.data || !("BulkOperations" in result.data)) return;
       bulkOperations.value =
         result.data?.BulkOperations?.bulkOperationOptions?.options || [];
     } catch {
@@ -162,7 +174,10 @@ export const useBulkOperationsActionsBar = (
       bulkOperationModalConfig.enableImageCrop || false,
       bulkOperationModalConfig.keyToSaveCropCoordinates || "",
     );
-    if (bulkOperationModalConfig.pageToNavigateToAfterCreation === BulkNavigationPages.DetailPage) {
+    if (
+      bulkOperationModalConfig.pageToNavigateToAfterCreation ===
+      BulkNavigationPages.DetailPage
+    ) {
       setCallbackFunctions(undefined);
     }
   };
@@ -171,7 +186,10 @@ export const useBulkOperationsActionsBar = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
     initializePropertiesForCreateEntity();
-    if (bulkOperationModalConfig.pageToNavigateToAfterCreation === BulkNavigationPages.DetailPage) {
+    if (
+      bulkOperationModalConfig.pageToNavigateToAfterCreation ===
+      BulkNavigationPages.DetailPage
+    ) {
       setCallbackFunctions(undefined);
     }
   };
@@ -183,9 +201,10 @@ export const useBulkOperationsActionsBar = (
   const initializeDeleteEntitiesOperation = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
-    const skipItems = bulkOperationModalConfig?.skipItemsWithRelationDuringBulkDelete?.filter(
-      (item): item is string => item != null
-    ) || [];
+    const skipItems =
+      bulkOperationModalConfig?.skipItemsWithRelationDuringBulkDelete?.filter(
+        (item): item is string => item != null,
+      ) || [];
     initializePropertiesForBulkDeleteEntities(skipItems);
     setCallbackFunctions(getRefetchCallbacks());
   };
@@ -218,9 +237,9 @@ export const useBulkOperationsActionsBar = (
 
   const customBulkOperationsPromise = async () => {
     if (!props.customBulkOperations) {
-      throw new Error('Custom bulk operations document is not provided');
+      throw new Error("Custom bulk operations document is not provided");
     }
-    
+
     const query = await loadDocument(props.customBulkOperations);
     return apolloClient
       .query({
@@ -249,7 +268,7 @@ export const useBulkOperationsActionsBar = (
 
   const setSkip = async (newSkip: number) => {
     if (props.setSkip) {
-      await props.setSkip(newSkip);
+      await props.setSkip(newSkip, true);
     }
   };
 
@@ -258,7 +277,8 @@ export const useBulkOperationsActionsBar = (
       return;
     }
 
-    const bulkOperationModalConfig = selectedBulkOperation.value.bulkOperationModal;
+    const bulkOperationModalConfig =
+      selectedBulkOperation.value.bulkOperationModal;
     const operationType = selectedBulkOperation.value.value;
 
     if (!bulkOperationModalConfig || !operationType) {
@@ -324,7 +344,10 @@ export const useBulkOperationsActionsBar = (
   watch(
     () => props.customBulkOperations,
     () => {
-      if (!props.customBulkOperations || bulkOperationsPromiseIsResolved.value) {
+      if (
+        !props.customBulkOperations ||
+        bulkOperationsPromiseIsResolved.value
+      ) {
         return;
       }
       emit("customBulkOperationsPromise", customBulkOperationsPromise);
@@ -365,17 +388,17 @@ export const useBulkOperationsActionsBar = (
     selectedBulkOperation,
     bulkOperationsPromiseIsResolved,
     selectedSkip,
-    
+
     entityType,
     hasBulkOperationsWithItemsSelection,
     itemsSelected,
-    
+
     handleSelectedBulkOperation,
     setSkip,
     getEnqueuedItemCount,
     getEnqueuedItems,
     dequeueAllItemsForBulkProcessing,
-    
+
     executeOperationSpecificInitialization,
     determineModalStyle,
     getModalContextForOperation,
@@ -384,4 +407,6 @@ export const useBulkOperationsActionsBar = (
   };
 };
 
-export type UseBulkOperationsActionsBar = ReturnType<typeof useBulkOperationsActionsBar>;
+export type UseBulkOperationsActionsBar = ReturnType<
+  typeof useBulkOperationsActionsBar
+>;
