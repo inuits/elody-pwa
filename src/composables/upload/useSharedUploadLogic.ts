@@ -15,8 +15,7 @@ export const useSharedUploadLogic = (): {
     entityInput: EntityInput | undefined,
   ) => Promise<string>;
 } => {
-  let prefetchedUploadUrls: string[] = [];
-
+  let { prefetchedUploadUrls } = useUpload({});
   const {
     containsCsv,
     getCsvBlob,
@@ -91,5 +90,8 @@ export const useSharedUploadLogic = (): {
     return JSON.parse(await response.text());
   };
 
-  return { getUploadUrl, getUploadUrlForMediafileOnEntity };
+  return {
+    getUploadUrl,
+    getUploadUrlForMediafileOnEntity,
+  };
 };

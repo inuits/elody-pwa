@@ -83,6 +83,8 @@ const csvOnlyUploadSFailed = ref<boolean>(false);
 const extraMediafileType = ref<string | undefined>(undefined);
 const jobIdentifier = ref<string | undefined>(undefined);
 
+let prefetchedUploadUrls: string[] = [];
+
 const useUpload = (config: any) => {
   const initializeUpload = (uploadSettings: UploadSettings): void => {
     uploadFlow.value = uploadSettings.uploadFlow;
@@ -650,6 +652,7 @@ const useUpload = (config: any) => {
       resetUploadDropzone();
       reinitializeDynamicFormFunc.value();
     }
+    prefetchedUploadUrls = [];
     lastUploadedFileIndex.value = -1;
     dryRunErrors.value = [];
     dryRunComplete.value = false;
@@ -1015,6 +1018,7 @@ const useUpload = (config: any) => {
     batchEntities,
     getCsvBlob,
     sortFiles,
+    prefetchedUploadUrls,
   };
 };
 
