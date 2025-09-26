@@ -128,10 +128,16 @@
               :set-sort-order="setSortOrder"
               :filters-available-on-detail-page="filtersAvailableOnDetailPage"
               @pagination-limit-options-promise="
-                (promise) => (paginationLimitOptionsPromise = promise)
+                (promise) => {
+                  console.log('ASSIGNING PAGINATION OPTIONS PROMISE');
+                  paginationLimitOptionsPromise = promise
+                }
               "
               @sort-options-promise="
-                (promise) => (sortOptionsPromise = promise)
+                (promise) => {
+                  console.log('ASSIGNING SORT OPTIONS PROMISE');
+                  sortOptionsPromise = promise
+                }
               "
             />
           </div>
@@ -469,6 +475,7 @@ const {
   placeholderEntities,
   entitiesLoading,
   getCustomBulkOperations,
+  fetchAllPromises,
   getEntities,
   getEntityById,
   manipulationQuery,
@@ -648,6 +655,12 @@ const initializeBaseLibrary = async () => {
 };
 
 const initializeDeepRelations = async () => {
+  setEntityType(
+    (props.filterType as Entitytyping) ||
+    props.entityType ||
+    Entitytyping.BaseEntity,
+  );
+
   if (isDeepRelationWithBreadcrumbInfo.value && breadcrumbPathFinished.value) {
     const positionOfRelation =
       breadcrumbRoutes.value.length -
@@ -673,9 +686,15 @@ const initializeDeepRelations = async () => {
       parentId = entityResult.id;
       entity = entityResult;
     }
-    if (entity && props.fetchDeepRelations.entityType === entity.type)
+
+    if (entity && props.fetchDeepRelations.entityTypes.some(entityType => entityType === entity.type))
       entities.value = [entity];
   }
+
+  enqueuePromise(paginationLimitOptionsPromise);
+  enqueuePromise(sortOptionsPromise);
+  await fetchAllPromises();
+  isInitialLoading.value = false;
 };
 
 const getDisplayPreferences = () => {

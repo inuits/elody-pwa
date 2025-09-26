@@ -195,6 +195,11 @@ export const useBaseLibrary = (
     );
   };
 
+  const fetchAllPromises = async () => {
+    await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
+    while (promiseQueue.value.length > 0) promiseQueue.value.shift();
+  }
+
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
     signal?: AbortSignal,
@@ -311,6 +316,7 @@ export const useBaseLibrary = (
     placeholderEntities,
     entitiesLoading,
     getCustomBulkOperations,
+    fetchAllPromises,
     getEntities,
     getEntityById,
     manipulationQuery,
