@@ -162,7 +162,12 @@
                 (metadata) => !metadata.showOnlyInEditMode,
               )"
               :key="metadataItem ? metadataItem.key : `no-key_${idx}`"
-              :class="teaserMetadataStyle"
+              :class="[
+                teaserMetadataStyle,
+                idx < 1 && teaserMetadata[0]?.value?.formatter
+                  ? 'w-fit whitespace-nowrap mr-4'   // keep first and second element tight at the start when first element is a label pill
+                  : 'w-full'        // all others stay full width
+              ]"
             >
               <metadata-wrapper
                 :form-id="formId || 'listview'"

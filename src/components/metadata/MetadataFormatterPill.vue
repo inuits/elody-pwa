@@ -31,7 +31,7 @@ const pillSettings = computed(() => {
   const [formatterType, pillTypeInit] = props.formatter.split("|");
   let pillType = pillTypeInit;
   if (pillType === "auto") {
-    return { background: props.label, text: "#FFFFFF" };
+    return { background: "#6DBBDE", text: "#FFFFFF" };
   } else {
     if (!pillType) pillType = props.label.toLowerCase();
     return formattersSettings[formatterType][pillType];
