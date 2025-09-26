@@ -7,8 +7,6 @@ import {
 } from "@/generated-types/queries";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 
-let prefetchedUploadUrls: string[] = [];
-
 export const useSharedUploadLogic = (): {
   getUploadUrl: (file: DropzoneFile) => Promise<string>;
   getUploadUrlForMediafileOnEntity: (
@@ -17,6 +15,8 @@ export const useSharedUploadLogic = (): {
     entityInput: EntityInput | undefined,
   ) => Promise<string>;
 } => {
+  let prefetchedUploadUrls: string[] = [];
+
   const {
     containsCsv,
     getCsvBlob,
