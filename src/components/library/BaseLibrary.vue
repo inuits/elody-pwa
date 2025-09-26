@@ -128,16 +128,10 @@
               :set-sort-order="setSortOrder"
               :filters-available-on-detail-page="filtersAvailableOnDetailPage"
               @pagination-limit-options-promise="
-                (promise) => {
-                  console.log('ASSIGNING PAGINATION OPTIONS PROMISE');
-                  paginationLimitOptionsPromise = promise
-                }
+                (promise) => (paginationLimitOptionsPromise = promise)
               "
               @sort-options-promise="
-                (promise) => {
-                  console.log('ASSIGNING SORT OPTIONS PROMISE');
-                  sortOptionsPromise = promise
-                }
+                (promise) => (sortOptionsPromise = promise)
               "
             />
           </div>
@@ -657,8 +651,8 @@ const initializeBaseLibrary = async () => {
 const initializeDeepRelations = async () => {
   setEntityType(
     (props.filterType as Entitytyping) ||
-    props.entityType ||
-    Entitytyping.BaseEntity,
+      props.entityType ||
+      Entitytyping.BaseEntity,
   );
 
   if (isDeepRelationWithBreadcrumbInfo.value && breadcrumbPathFinished.value) {
@@ -687,7 +681,12 @@ const initializeDeepRelations = async () => {
       entity = entityResult;
     }
 
-    if (entity && props.fetchDeepRelations.entityTypes.some(entityType => entityType === entity.type))
+    if (
+      entity &&
+      props.fetchDeepRelations.entityTypes.some(
+        (entityType) => entityType === entity.type,
+      )
+    )
       entities.value = [entity];
   }
 
