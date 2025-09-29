@@ -128,7 +128,8 @@ const { getParentId, getCallbackFunctions, getInformationForDelete } =
   useModalActions();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
-const { pageInfo, previousPageInfo } = usePageInfo();
+const { pageInfo, previousPageInfo, cleanupPreviousPageInfoById } =
+  usePageInfo();
 const { deleteEntities } = useDeleteEntities();
 const { displaySuccessNotification } = useBaseNotification();
 
@@ -170,9 +171,15 @@ const cleanupAfterDeletion = async () => {
   closeModal(TypeModals.Delete);
   useEditHelper.disableEdit();
 
+  if (parentId.value) {
+    cleanupPreviousPageInfoById(parentId.value);
+  }
+
   if (pageInfo.value.parentRouteName !== "SingleEntity")
     router.push({ name: pageInfo.value.parentRouteName });
-  else router.push({ path: previousPageInfo.value.fullPath });
+  if (previousPageInfo.value.fullPath) {
+    router.push({ path: previousPageInfo.value.fullPath });
+  } else router.push({ path: "/" });
 
   displaySuccessNotification(
     t("notifications.success.entity-deleted.title"),

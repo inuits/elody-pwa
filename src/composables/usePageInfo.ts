@@ -1,7 +1,12 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-type infoTypes = "routerTitle" | "routeType" | "parentRouteName" | "entityId" | "fullPath";
+type infoTypes =
+  | "routerTitle"
+  | "routeType"
+  | "parentRouteName"
+  | "entityId"
+  | "fullPath";
 
 type PageInfo = {
   routerTitle: string;
@@ -33,9 +38,24 @@ export const usePageInfo = () => {
   };
   const updatePreviousPageInfo = (
     input: string,
-    type: infoTypes = "routerTitle"
+    type: infoTypes = "routerTitle",
   ) => {
     previousPageInfo.value[type] = input;
+  };
+
+  const cleanupPreviousPageInfoByIdById = (deletedEntityId: string) => {
+    if (
+      previousPageInfo.value.fullPath &&
+      previousPageInfo.value.fullPath.includes(deletedEntityId)
+    ) {
+      previousPageInfo.value = {
+        routerTitle: "",
+        routeType: "",
+        parentRouteName: "",
+        entityId: "",
+        fullPath: "",
+      };
+    }
   };
 
   router.afterEach((to, from) => {
@@ -49,7 +69,7 @@ export const usePageInfo = () => {
       from.matched.length > 1 ? from.matched[1] : from.matched[0];
     updatePreviousPageInfo(
       parentRouteFrom.name?.toString() || "",
-      "parentRouteName"
+      "parentRouteName",
     );
     updatePreviousPageInfo(from.meta.type as string, "routeType");
     updatePreviousPageInfo(from.meta.title as string);
@@ -61,5 +81,6 @@ export const usePageInfo = () => {
     pageInfo,
     previousPageInfo,
     updatePageInfo,
+    cleanupPreviousPageInfoById: cleanupPreviousPageInfoByIdById,
   };
 };
