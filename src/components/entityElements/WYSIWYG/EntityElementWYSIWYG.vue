@@ -147,7 +147,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2`,
+        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2 whitespace-nowrap! overflow-x-auto!`,
       },
       handleClickOn: (view, pos, node) => {
         if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
@@ -202,6 +202,8 @@ watch(
 </script>
 
 <style>
+@reference "tailwindcss";
+
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;
@@ -210,5 +212,9 @@ watch(
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+.tiptap p {
+  @apply inline m-0;
 }
 </style>
