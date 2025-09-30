@@ -15,7 +15,7 @@ export const useSharedUploadLogic = (): {
     entityInput: EntityInput | undefined,
   ) => Promise<string>;
 } => {
-  let { prefetchedUploadUrls } = useUpload({});
+  const { prefetchedUploadUrls } = useUpload({});
   const {
     containsCsv,
     getCsvBlob,
@@ -31,12 +31,12 @@ export const useSharedUploadLogic = (): {
   };
 
   const _getUploadUrlBatch = async (file: DropzoneFile): Promise<string> => {
-    if (!prefetchedUploadUrls.length)
-      prefetchedUploadUrls = (await batchEntities(
+    if (!prefetchedUploadUrls.value.length)
+      prefetchedUploadUrls.value = (await batchEntities(
         getCsvBlob(),
         false,
       )) as string[];
-    const fileUploadUrl = prefetchedUploadUrls.find((url: string) =>
+    const fileUploadUrl = prefetchedUploadUrls.value.find((url: string) =>
       decodeURIComponent(url).includes(file.name),
     );
     if (!fileUploadUrl)

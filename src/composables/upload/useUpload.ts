@@ -82,8 +82,7 @@ const reinitializeDynamicFormFunc = ref<() => void>(() => {});
 const csvOnlyUploadSFailed = ref<boolean>(false);
 const extraMediafileType = ref<string | undefined>(undefined);
 const jobIdentifier = ref<string | undefined>(undefined);
-
-let prefetchedUploadUrls: string[] = [];
+const prefetchedUploadUrls = ref<string[]>([]);
 
 const useUpload = (config: any) => {
   const initializeUpload = (uploadSettings: UploadSettings): void => {
@@ -652,7 +651,7 @@ const useUpload = (config: any) => {
       resetUploadDropzone();
       reinitializeDynamicFormFunc.value();
     }
-    prefetchedUploadUrls = [];
+    prefetchedUploadUrls.value = [];
     lastUploadedFileIndex.value = -1;
     dryRunErrors.value = [];
     dryRunComplete.value = false;
