@@ -2,6 +2,7 @@
   <dialog
     ref="dialog"
     data-testid="modal-dialog"
+    closedby="none"
     @close="hideModal"
     @cancel="handleCancel"
     :class="[
@@ -37,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onUnmounted } from "vue";
 import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -68,6 +69,15 @@ const currentModalStyle = computed(
 );
 const modalStyle = computed(() => modalStyles[currentModalStyle.value]);
 
+const handleDocumentEsc = (event: KeyboardEvent) => {
+  if (event.key !== "Escape") return;
+  if (!getModalInfo(props.modalType).open) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  handleCancel(event);
+};
+
 const modalStyles: { [key: string]: string } = {
   right: `min-w-[40vw] w-fit h-screen max-h-screen mr-0 my-0`,
   rightWide: `min-w-[80vw] w-fit h-screen max-h-screen mr-0 my-0`,
@@ -82,8 +92,11 @@ watch(
     if (isModalOpen) {
       dialog.value?.showModal();
       document.body.classList.add("overflow-hidden");
+      document.addEventListener("keydown", handleDocumentEsc, true);
       return;
     }
+
+    document.removeEventListener("keydown", handleDocumentEsc, true);
     dialog.value?.close();
     document.body.classList.remove("overflow-hidden");
   },
@@ -91,14 +104,23 @@ watch(
 
 const handleCancel = (event: Event) => {
   event.preventDefault();
+  event.stopPropagation();
   hideModal();
 };
 
 const hideModal = () => {
+  if (!getModalInfo(props.modalType).open) {
+    return;
+  }
+
   emit("update:modalState", "hide");
   emit("hideModal", "hide");
   useModalActions().resetAllProperties();
 };
+
+onUnmounted(() => {
+  document.removeEventListener("keydown", handleDocumentEsc, true);
+});
 </script>
 
 <style scoped>
