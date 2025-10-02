@@ -70,7 +70,7 @@
                   refMetadata.inputField?.type === InputFieldTypes.DropdownMultiselectRelations ||
                   refMetadata.inputField?.type === InputFieldTypes.DropdownSingleselectRelations
                 "
-                v-model="refMetadata"
+                v-model="refMetadata.value"
                 :is-read-only="true"
                 :field-name="refMetadata.label"
                 :formId="formId"
