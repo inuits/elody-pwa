@@ -92,6 +92,21 @@ const usePermissions = () => {
   let parentEntityId: string | undefined = undefined;
   let childEntityId: string | undefined = undefined;
 
+  const createCacheKey = (
+    permission: string,
+    parentId?: string,
+    childId?: string,
+  ): string => {
+    const parts = [permission];
+    if (parentId) {
+      parts.push(`parent:${parentId}`);
+    }
+    if (childId) {
+      parts.push(`child:${childId}`);
+    }
+    return parts.join("|");
+  };
+
   const can = (
     permission: Permission.Canread | Permission.Cancreate,
     entity: Entitytyping | undefined,
@@ -116,8 +131,10 @@ const usePermissions = () => {
     forceFetch: boolean = false,
   ) => {
     const permission = permissions[0];
-    if (!forceFetch && permission in advancedPermissions) {
-      return advancedPermissions[permission];
+    const cacheKey = createCacheKey(permission, parentEntityId, childEntityId);
+
+    if (!forceFetch && cacheKey in advancedPermissions) {
+      return advancedPermissions[cacheKey];
     }
 
     const variables: { [key: string]: string } = {
@@ -136,7 +153,7 @@ const usePermissions = () => {
         })
         .then((result) => {
           const isPermitted = result.data.AdvancedPermission;
-          advancedPermissions[permission] = isPermitted;
+          advancedPermissions[cacheKey] = isPermitted;
 
           return isPermitted;
         });
@@ -164,11 +181,21 @@ const usePermissions = () => {
       });
 
       data.AdvancedPermissions.forEach(({ permission, hasPermission }) => {
-        advancedPermissions[permission] = hasPermission;
+        const cacheKey = createCacheKey(
+          permission,
+          parentEntityId,
+          childEntityId,
+        );
+        advancedPermissions[cacheKey] = hasPermission;
       });
 
       return permissions.reduce<Record<string, boolean>>((acc, permission) => {
-        acc[permission] = advancedPermissions[permission] ?? false;
+        const cacheKey = createCacheKey(
+          permission,
+          parentEntityId,
+          childEntityId,
+        );
+        acc[permission] = advancedPermissions[cacheKey] ?? false;
         return acc;
       }, {});
     } catch (error) {
@@ -221,7 +248,7 @@ const usePermissions = () => {
       .map((option: DropdownOption) => option.can as string[]);
 
     const promises = listOfPermissions.map((item: string[]) => {
-      return fetchAdvancedPermission(item, true);
+      return fetchAdvancedPermission(item);
     });
 
     await Promise.all(promises);
