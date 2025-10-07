@@ -174,7 +174,7 @@ export type FiltersBaseAPI = {
 
 const props = withDefaults(
   defineProps<{
-    expandFilters: boolean;
+    expandFilters?: boolean;
     manipulationQuery: object | undefined;
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
@@ -194,6 +194,7 @@ const props = withDefaults(
     filtersNeedContext: undefined,
     additionalDefaultFiltersEnabled: false,
     onRegisterApi: undefined,
+    expandFilters: false,
   },
 );
 

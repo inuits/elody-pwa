@@ -41,7 +41,7 @@ const props = withDefaults(
   defineProps<{
     contextMenuActions?: ContextMenuActions;
     entityId: string;
-    entityType: Entitytyping;
+    entityType?: Entitytyping;
     parentEntityId?: string;
     relation?: object | string;
     bulkOperationsContext: Context;

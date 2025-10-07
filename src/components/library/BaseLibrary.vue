@@ -126,7 +126,6 @@
               :selected-pagination-limit-option="selectedPaginationLimitOption"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
-              :filters-available-on-detail-page="filtersAvailableOnDetailPage"
               @pagination-limit-options-promise="
                 (promise) => (paginationLimitOptionsPromise = promise)
               "

@@ -124,10 +124,10 @@ const props = withDefaults(
     refetchEntities: () => any;
     enableSelection?: boolean;
     parentEntityId?: string | undefined;
-    relationType: string;
+    relationType?: string;
     skipItemsWithRelationDuringBulkDelete?: string[];
     selectedPaginationLimitOption: number;
-    excludePagination: boolean;
+    excludePagination?: boolean;
     setSkip?: (skip: number) => void;
     showPagination?: boolean;
     isLoading?: boolean;
@@ -144,6 +144,7 @@ const props = withDefaults(
     excludePagination: false,
     showPagination: true,
     isLoading: false,
+    relationType: "",
   },
 );
 

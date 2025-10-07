@@ -1,7 +1,7 @@
 <template>
   <base-tooltip position="top-right" :tooltip-offset="8">
     <template #activator="{ on }">
-      <div v-on="isPreviewElement ? on : ''">
+      <div v-on="isPreviewElement ? on : {}">
         <li
           data-cy="list-item"
           :class="[
@@ -67,7 +67,7 @@
             <div v-if="!loading" class="w-16 pr-2">
               <div
                 v-for="metadataItem in onlyEditableTeaserMetadata"
-                :key="metadataItem ? metadataItem.key : 'no-key'"
+                :key="`${formId}_${metadataItem.key || 'no-key'}`"
                 class="w-1/1"
               >
                 <metadata-wrapper
@@ -77,6 +77,7 @@
                   :is-edit="useEditHelper.isEdit"
                   :linked-entity-id="intialValues?.id || itemId"
                   :should-hide="true"
+                  :entity-type="entityTypename"
                 />
               </div>
             </div>
@@ -158,10 +159,8 @@
             ]"
           >
             <div
-              v-for="(metadataItem, idx) in teaserMetadata.filter(
-                (metadata) => !metadata.showOnlyInEditMode,
-              )"
-              :key="metadataItem ? metadataItem.key : `no-key_${idx}`"
+              v-for="(metadataItem, idx) in onlyReadModeTeaserMetadata"
+              :key="`${formId || idx}_${metadataItem?.key || idx}`"
               :class="[
                 teaserMetadataStyle,
                 idx < 1 && teaserMetadata[0]?.value?.formatter
@@ -174,6 +173,7 @@
                 v-model:metadata="metadataItem as MetadataField"
                 :is-edit="useEditHelper.isEdit"
                 :linked-entity-id="intialValues?.id || itemId"
+                :entity-type="entityTypename"
                 @add-refetch-function-to-edit-state="() => emit('addRefetchFunctionToEditState')"
               />
             </div>
@@ -311,7 +311,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
-import { useFieldArray } from "vee-validate";
+//import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
@@ -386,9 +386,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { deleteTeaserMetadataItemInState } = useFormHelper();
+/*
 const { update, remove } = useFieldArray(
   `relationValues.${props.relationType}`,
 );
+*/
 const { getEntityUuid } = useEntitySingle();
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
@@ -421,6 +423,9 @@ const teaserMetadataStyle = computed<string>(() => {
     listStylesBasedOnAmount[amountOfTeaserMetadataItems],
   );
 });
+const onlyReadModeTeaserMetadata = computed(() => props.teaserMetadata.filter(
+  (metadata) => !metadata.showOnlyInEditMode
+));
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
@@ -464,6 +469,7 @@ const isActiveListItem = computed<boolean>(() => {
   return false;
 });
 
+/*
 watch(
   () => isMarkedAsToBeDeleted.value,
   () => {
@@ -483,6 +489,7 @@ watch(
       }
   },
 );
+*/
 
 watch(
   () => useEditHelper.isEdit,
@@ -496,10 +503,12 @@ watch(
   },
 );
 
+/*
 const removePreviewItem = (idx: number) => {
   deleteTeaserMetadataItemInState(props.itemId);
   remove(idx);
 };
+*/
 
 const createWindowPanelsFromEntityListElements = (
   entityListElement: EntityListElement,

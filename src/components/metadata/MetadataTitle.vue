@@ -62,7 +62,7 @@ const props = withDefaults(
   },
 );
 
-const entityFormData: any = inject("entityFormData");
+const entityFormData: any = inject("entityFormData", {});
 const useEditHelper = useEditMode(entityFormData?.id);
 const { t } = useI18n();
 

@@ -212,7 +212,7 @@ const props = withDefaults(
     mode: "list" | "grid";
     config?: ConfigItem[];
     refetchEntities?: () => Promise<void>;
-    expandFilters: boolean;
+    expandFilters?: boolean;
     entityType: Entitytyping;
     configPerViewMode: object;
     showCurrentEntityFlow?: boolean;
@@ -231,6 +231,7 @@ const props = withDefaults(
     refetchEntities: undefined,
     showCurrentEntityFlow: true,
     cropMediafileCoordinatesKey: "",
+    expandFilters: false,
   },
 );
 

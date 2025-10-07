@@ -64,6 +64,7 @@
                 v-if="refMetadata.value?.formatter"
                 v-bind="refMetadata.value"
                 :translation-key="refMetadata.valueTranslationKey"
+                :entity="{type: entityType}"
               />
               <ViewModesAutocompleteRelations
                 v-else-if="
@@ -205,6 +206,7 @@ const props = withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     formFlow?: "edit" | "create";
     showErrors?: boolean;
+    entityType?: Entitytyping;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,

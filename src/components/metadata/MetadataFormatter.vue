@@ -33,7 +33,7 @@ const props = withDefaults(
   defineProps<{
     formatter: string;
     label: string | string[];
-    link: string;
+    link?: string;
     entity: any;
     translationKey?: string;
   }>(),

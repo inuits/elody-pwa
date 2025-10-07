@@ -205,6 +205,7 @@ export const useBaseLibrary = (
     signal?: AbortSignal,
   ): Promise<void> => {
     if (entitiesLoading.value && !signal) return;
+    console.log("getEntities");
     entitiesLoading.value = true;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
@@ -239,6 +240,7 @@ export const useBaseLibrary = (
           },
         },
       });
+      console.log("RESULTS ENTERED PWA");
 
       const fetchedEntities = result.data.Entities;
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
