@@ -39,7 +39,14 @@
           },
         ]"
       >
-        <div v-for="(panel, index) in panels" :key="index">
+        <div
+          v-for="(panel, index) in panels"
+          :key="index"
+          :class="{
+            'border-solid border-neutral-30 border-b-2':
+              props.element.layout !== WindowElementLayout.HorizontalGrid,
+          }"
+        >
           <entity-element-window-panel
             :panel="panel"
             :identifiers="identifiers"
@@ -92,7 +99,7 @@ const computedIsEdit = computed(
 );
 
 const resizeColumn = (toggled: boolean) => {
-  emit('resizeColumn', toggled);
+  emit("resizeColumn", toggled);
 };
 
 const panels = computed<WindowElementPanel[]>(() => {
