@@ -454,7 +454,9 @@ const createEntityFromFormInput = async (
   if (onlyAllowedFields) {
     entity.relations = [];
   } else {
-    entity.relations = await buildEntityRelations(relations) as RelationFieldInput[];
+    entity.relations = (await buildEntityRelations(
+      relations,
+    )) as RelationFieldInput[];
   }
   return entity;
 };
@@ -892,6 +894,7 @@ const closeAndDeleteForm = () => {
   closeModal(TypeModals.DynamicForm);
   changeExpandedState(false);
   deleteForm(props.dynamicFormQuery);
+  resetUpload();
 };
 
 const downloadDataFromResponse = (data: any) => {
