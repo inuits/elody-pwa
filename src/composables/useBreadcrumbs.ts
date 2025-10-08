@@ -144,22 +144,18 @@ const useBreadcrumbs = (config: any) => {
   ) => {
     const advancedFilters: AdvancedFilterInput[] = [];
     if (!Array.isArray(entityTypes))
-      advancedFilters.push(
-        {
-          match_exact: true,
-          type: AdvancedFilterTypes.Type,
-          value: entityTypes,
-        },
-      );
+      advancedFilters.push({
+        match_exact: true,
+        type: AdvancedFilterTypes.Type,
+        value: entityTypes,
+      });
     else
-      advancedFilters.push(
-        {
-          match_exact: true,
-          type: AdvancedFilterTypes.Selection,
-          key: "type",
-          value: entityTypes,
-        },
-      );
+      advancedFilters.push({
+        match_exact: true,
+        type: AdvancedFilterTypes.Selection,
+        key: "type",
+        value: entityTypes,
+      });
 
     const extractedIds = entity
       ? extractValueFromObject(entity, relation)
@@ -216,12 +212,8 @@ const useBreadcrumbs = (config: any) => {
   };
 
   useRouter()?.afterEach((to) => {
-    const excludedRouteTitles: string[] = ["Single Asset", "Single Entity"];
-    if (
-      excludedRouteTitles.includes(to.meta.title as string) ||
-      !to.meta.breadcrumbs
-    )
-      return;
+    const isDetailPage = !!to.params["id"];
+    if (isDetailPage || !to.meta.breadcrumbs) return;
     const breadcrumbs = to.meta.breadcrumbs as BreadcrumbRoute[];
     const overviewPage = breadcrumbs[breadcrumbs.length - 1];
     clearBreadcrumbPathAndAddOverviewPage(

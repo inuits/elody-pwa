@@ -1,15 +1,9 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-type infoTypes =
-  | "routerTitle"
-  | "routeType"
-  | "parentRouteName"
-  | "entityId"
-  | "fullPath";
+type infoTypes = "routeType" | "parentRouteName" | "entityId" | "fullPath";
 
 type PageInfo = {
-  routerTitle: string;
   routeType: string;
   parentRouteName: string;
   entityId: string;
@@ -17,29 +11,33 @@ type PageInfo = {
 };
 
 const previousPageInfo = ref<PageInfo>({
-  routerTitle: "",
   routeType: "",
   parentRouteName: "",
   entityId: "",
   fullPath: "",
 });
 const pageInfo = ref<PageInfo>({
-  routerTitle: "",
   routeType: "",
   parentRouteName: "",
   entityId: "",
+  fullPath: "",
 });
 
 export const usePageInfo = () => {
   const router = useRouter();
 
-  const updatePageInfo = (input: string, type: infoTypes = "routerTitle") => {
+  const updatePageInfo = (input: string, type: infoTypes) => {
+    if (!type) {
+      console.error("Type is missing");
+      return;
+    }
     pageInfo.value[type] = input;
   };
-  const updatePreviousPageInfo = (
-    input: string,
-    type: infoTypes = "routerTitle",
-  ) => {
+  const updatePreviousPageInfo = (input: string, type: infoTypes) => {
+    if (!type) {
+      console.error("Type is missing");
+      return;
+    }
     previousPageInfo.value[type] = input;
   };
 
@@ -49,7 +47,6 @@ export const usePageInfo = () => {
       previousPageInfo.value.fullPath.includes(deletedEntityId)
     ) {
       previousPageInfo.value = {
-        routerTitle: "",
         routeType: "",
         parentRouteName: "",
         entityId: "",
@@ -62,8 +59,6 @@ export const usePageInfo = () => {
     const parentRouteTo = to.matched.length > 1 ? to.matched[1] : to.matched[0];
     updatePageInfo(parentRouteTo.name?.toString() || "", "parentRouteName");
     updatePageInfo(to.meta.type as string, "routeType");
-    updatePageInfo(to.meta.title as string);
-    updatePageInfo(to.meta.uuid as string);
 
     const parentRouteFrom =
       from.matched.length > 1 ? from.matched[1] : from.matched[0];
@@ -72,8 +67,6 @@ export const usePageInfo = () => {
       "parentRouteName",
     );
     updatePreviousPageInfo(from.meta.type as string, "routeType");
-    updatePreviousPageInfo(from.meta.title as string);
-    updatePreviousPageInfo(from.meta.uuid as string);
     updatePreviousPageInfo(from.fullPath as string, "fullPath");
   });
 
