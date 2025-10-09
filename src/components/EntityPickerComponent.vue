@@ -115,8 +115,7 @@ const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { getEntityId, getRelationType, setCropMode, setCropCoordinatesKey } =
   useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
-const { getForm } = useFormHelper();
-const { parseFormValuesToFormInput } = useFormHelper();
+const { parseFormValuesToFormInput, getForm } = useFormHelper();
 const { displaySuccessNotification } = useBaseNotification();
 const { getCallbackFunctions } = useModalActions();
 

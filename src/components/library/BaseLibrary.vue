@@ -276,7 +276,6 @@ import {
   type BaseEntity,
   BaseLibraryModes,
   type BaseRelationValuesInput,
-  ContextMenuGeneralActionEnum,
   DamsIcons,
   DeepRelationsFetchStrategy,
   type DropdownOption,
@@ -299,7 +298,6 @@ import { useBulkOperations } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import EventBus from "@/EventBus";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
@@ -952,19 +950,4 @@ watch(
     refetchEntities();
   },
 );
-
-EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
-  if (
-    props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
-    "getPrimaryMediafileFilters"
-  )
-    await getEntities(route);
-});
-EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
-  if (
-    props.useOtherQuery?.filtersDocument?.definitions[0]?.name?.value ===
-    "getPrimaryThumbnailFilters"
-  )
-    await getEntities(route);
-});
 </script>

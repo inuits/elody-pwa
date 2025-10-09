@@ -127,16 +127,17 @@
 
 <script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import type {
-  Entitytyping,
-  EntitySubelement,
-  AdvancedFilterInput,
-  AdvancedFilters,
-  DropdownOption,
-  FilterMatcherMap,
-  GetFilterMatcherMappingQuery,
-  AdvancedFilterTypes,
-  AdvancedFilter,
+import {
+  type Entitytyping,
+  type EntitySubelement,
+  type AdvancedFilterInput,
+  type AdvancedFilters,
+  type DropdownOption,
+  type FilterMatcherMap,
+  type GetFilterMatcherMappingQuery,
+  type AdvancedFilterTypes,
+  type AdvancedFilter,
+  ContextMenuGeneralActionEnum,
 } from "@/generated-types/queries";
 import {
   DamsIcons,
@@ -162,6 +163,7 @@ import {
 import { auth } from "@/main";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { useFormHelper } from "@/composables/useFormHelper";
+import EventBus from "@/EventBus";
 
 export type FiltersBaseAPI = {
   initializeAndActivateNewFilter: (
@@ -509,7 +511,7 @@ const updateFilterVariables = () => {
     entityType: props.entityType,
     entity: parentEntity?.value,
   });
-}
+};
 
 if (props.parentEntityIdentifiers.length > 0)
   watch(
@@ -563,7 +565,7 @@ watch(
     updateFilterVariables();
     handleAdvancedFilters();
   },
-  { deep: true }
+  { deep: true },
 );
 
 const clearAllFilters = async ({
@@ -593,6 +595,13 @@ const clearAllFilters = async ({
 
   applyFilters(saveState);
 };
+
+EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
+  handleAdvancedFilters();
+});
+EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
+  handleAdvancedFilters();
+});
 </script>
 
 <style>
