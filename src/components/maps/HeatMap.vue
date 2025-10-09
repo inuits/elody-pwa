@@ -30,8 +30,16 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import { ref, onBeforeMount, watch, shallowReactive, onMounted, onBeforeUnmount } from "vue";
-import debounce from 'lodash.debounce';
+import {
+  ref,
+  onBeforeMount,
+  watch,
+  shallowReactive,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
+import debounce from "lodash.debounce";
 import {
   type Item,
   Map as OLMap,
@@ -39,8 +47,8 @@ import {
   Sources,
   MapControls,
 } from "vue3-openlayers";
-import VectorSource from 'ol/source/Vector';
-import View from 'ol/View';
+import VectorSource from "ol/source/Vector";
+import View from "ol/View";
 import { Feature } from "ol";
 import {
   type AdvancedFilters,
@@ -75,7 +83,7 @@ const {
   fetchGeoFilter,
   getGeojsonPolygonFromMap,
   extractGeojsonFeaturesFromEntities,
-  handlePointerMove
+  handlePointerMove,
 } = useMaps();
 
 const mapRef = ref<InstanceType<typeof OLMap.OlMap> | undefined>(undefined);
@@ -83,6 +91,7 @@ const heatmapSource = shallowReactive(new VectorSource());
 const view = ref<View | undefined>(undefined);
 const contextMenuItems = ref<Item[]>([]);
 const geoFilters = ref<AdvancedFilters | undefined>(undefined);
+const hotspotZoomed = ref<boolean>(false);
 
 contextMenuItems.value = [
   {
@@ -97,10 +106,10 @@ contextMenuItems.value = [
 const clearAndAddFeatures = (features: Feature[]) => {
   heatmapSource.clear();
   heatmapSource.addFeatures(features);
-}
+};
 
 const safeAddFeatures = (features: Feature[]): void => {
-  if ('requestIdleCallback' in window) {
+  if ("requestIdleCallback" in window) {
     requestIdleCallback(() => clearAndAddFeatures(features));
   } else {
     // Fallback for older browsers
@@ -115,8 +124,8 @@ const updateHeatmapFromGeoJson = (newEntities: Entity[]) => {
   };
   const format = new GeoJSON();
   const features = format.readFeatures(geojsonFeatures, {
-    dataProjection: 'EPSG:3857',
-    featureProjection: 'EPSG:3857',
+    dataProjection: "EPSG:3857",
+    featureProjection: "EPSG:3857",
   });
   safeAddFeatures(features);
 };
@@ -141,14 +150,36 @@ const addViewToMap = () => {
     zoom: props.zoom,
   });
   mapRef.value?.map.setView(view.value);
-}
+};
 
 const initializeHeatmap = async () => {
   geoFilters.value = await fetchGeoFilter();
   handleMoveBoundingBox();
 };
 
-onBeforeMount( async () => await initializeHeatmap());
+const zoomToHotspot = () => {
+  const map = mapRef.value?.map;
+  const src = heatmapSource;
+
+  if (map && src && src.getFeatures().length > 0 && !hotspotZoomed.value) {
+    const features = src.getFeatures();
+    if (!features.length) return;
+
+    const coords = features.map((f) => f.getGeometry().getCoordinates());
+    const avg = coords
+      .reduce((acc, c) => [acc[0] + c[0], acc[1] + c[1]], [0, 0])
+      .map((v) => v / coords.length);
+
+    map.getView().animate({
+      center: avg,
+      zoom: 10,
+      duration: 800,
+    });
+    hotspotZoomed.value = true;
+  }
+};
+
+onBeforeMount(async () => await initializeHeatmap());
 onMounted(() => addViewToMap());
 onBeforeUnmount(() => {
   if (!props.filtersBaseApi) return;
@@ -159,9 +190,13 @@ onBeforeUnmount(() => {
 
 watch(
   () => props.entities,
-  () => {
-    if (props.entitiesLoading || props.entities?.length <= 0) return;
-    updateHeatmapFromGeoJson(props.entities);
+  async (newEntities) => {
+    if (props.entitiesLoading || !newEntities?.length) return;
+
+    updateHeatmapFromGeoJson(newEntities);
+
+    await nextTick();
+    zoomToHotspot();
   },
   { immediate: true },
 );
