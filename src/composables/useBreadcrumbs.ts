@@ -163,7 +163,7 @@ const useBreadcrumbs = (config: any) => {
 
     const relationFitler: AdvancedFilterInput = {
       type: AdvancedFilterTypes.Selection,
-      key: extractedIds ? key : [`elody:1|relations.${relation}.key`],
+      key: key,
       value: extractedIds || parentId,
       match_exact: true,
     };
