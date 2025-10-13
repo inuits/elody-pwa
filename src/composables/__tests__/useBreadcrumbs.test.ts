@@ -22,13 +22,13 @@ describe("useBreadcrumbs", () => {
   it("Should have correct filters when creating them", async () => {
     const id = "test_id";
     const entityType = Entitytyping.BaseEntity;
-    const relation = "hasBaseEntity";
+    const key = ["elody:1|relations.hasBaseEntity.key"];
 
     const createFiltersSpy = vi.spyOn(useBreadcrumbs(config), "createFilters");
-    const createdFilters = createFiltersSpy(id, entityType, relation);
+    const createdFilters = createFiltersSpy(id, entityType, undefined, key);
 
     expect(createFiltersSpy).toHaveBeenCalledTimes(1);
-    expect(createFiltersSpy).toHaveBeenCalledWith(id, entityType, relation);
+    expect(createFiltersSpy).toHaveBeenCalledWith(id, entityType, undefined, key);
     expect(createFiltersSpy).toHaveReturned();
     expect(createdFilters).toEqual({
       type: "BaseEntity",

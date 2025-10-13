@@ -138,7 +138,7 @@ const useBreadcrumbs = (config: any) => {
   const createFilters = (
     parentId: string[],
     entityTypes: Entitytyping | Entitytyping[],
-    relation: string,
+    relation: string | undefined,
     key?: string | undefined,
     entity?: Entity | undefined,
   ) => {
