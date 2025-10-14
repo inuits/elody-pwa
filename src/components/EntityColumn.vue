@@ -176,6 +176,14 @@ const resizeColumn = (toggled: boolean) => {
   }
 };
 
+const assignIntialAndRelationValues = () => {
+  intialValues.value = determineDefaultIntialValues(
+    props.entity.intialValues,
+    props.entity.entityView,
+  );
+  relationValues.value = props.entity.relationValues;
+};
+
 watch(
   () => columns.value,
   () => {
@@ -190,10 +198,13 @@ onBeforeRouteUpdate(async () => {
 });
 
 onMounted(() => {
-  intialValues.value = determineDefaultIntialValues(
-    props.entity.intialValues,
-    props.entity.entityView,
-  );
-  relationValues.value = props.entity.relationValues;
+  assignIntialAndRelationValues();
 });
+
+watch(
+  () => props.entity,
+  () => {
+    assignIntialAndRelationValues();
+  }
+)
 </script>

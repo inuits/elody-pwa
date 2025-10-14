@@ -165,7 +165,7 @@ watch(useEditHelper, () => {
 });
 
 watch(
-  () => props.intialValues,
+  () => [props.intialValues, props.relationValues],
   () => {
     setValues({
       intialValues: structuredClone(deepToRaw(props.intialValues)),
