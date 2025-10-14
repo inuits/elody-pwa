@@ -290,9 +290,10 @@ import {
   ViewModes,
   type ViewModesWithConfig,
 } from "@/generated-types/queries";
-import type {
-  Context,
-  InBulkProcessableItem,
+import {
+  BulkOperationsContextEnum,
+  type Context,
+  type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
@@ -447,7 +448,10 @@ const enableSelection = computed<boolean>(() => {
 });
 const additionalDefaultFiltersEnabled = computed(() => {
   return (
-    props.enableAdvancedFilters && manipulationQuery.value?.filtersDocument
+    props.enableAdvancedFilters &&
+    manipulationQuery.value?.filtersDocument &&
+    props.bulkOperationsContext !==
+      BulkOperationsContextEnum.EntityElementListEntityPickerModal
   );
 });
 
