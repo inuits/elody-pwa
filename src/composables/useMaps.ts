@@ -3,6 +3,7 @@ import {
   type AdvancedFilters,
   type ConfigItem,
   type Entity,
+  type MapElement,
 } from "@/generated-types/queries";
 import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
@@ -12,16 +13,19 @@ import { useListItemHelper } from "@/composables/useListItemHelper";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 import { ref } from "vue";
 import type { Map as OLMap } from "vue3-openlayers";
-import type { default as Map } from 'ol/Map';
+import type { default as Map } from "ol/Map";
 import GeoJSON, { type GeoJSONGeometry } from "ol/format/GeoJSON";
 import { fromExtent } from "ol/geom/Polygon";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
+import type VectorSource from "ol/source/Vector";
+import type { Geometry } from "geojson";
 
 export const useMaps = () => {
   const { setHoveredListItem } = useListItemHelper();
   const { getQueryDocument, queryAsync } = useGraphqlAsync();
 
   const hoveredFeature = ref<string | undefined>(undefined);
+  const hotspotZoomed = ref<boolean>(false);
 
   const getBasicMapProperties = (config: ConfigItem[]) => {
     if (!config) return [];
@@ -57,7 +61,7 @@ export const useMaps = () => {
           src: "/marker.png",
           scale: 0.075,
         }),
-      })
+      }),
     );
     return markerFeature;
   };
@@ -76,12 +80,16 @@ export const useMaps = () => {
     return result.data.GeoFilterForMap as AdvancedFilters;
   };
 
-  const activateNewGeoFilter = (filtersBaseApi: FiltersBaseAPI, geoFilters: AdvancedFilters, geojsonPolygon: GeoJSONGeometry) => {
+  const activateNewGeoFilter = (
+    filtersBaseApi: FiltersBaseAPI,
+    geoFilters: AdvancedFilters,
+    geojsonPolygon: GeoJSONGeometry,
+  ) => {
     Object.values(geoFilters)?.forEach((advancedFilter: AdvancedFilter) => {
       filtersBaseApi.removeFilterFromList(advancedFilter.key);
     });
-    filtersBaseApi.initializeAndActivateNewFilter(geoFilters, geojsonPolygon)
-  }
+    filtersBaseApi.initializeAndActivateNewFilter(geoFilters, geojsonPolygon);
+  };
 
   const getGeojsonPolygonFromMap = (map: Map): GeoJSONGeometry => {
     const extent = map.getView().calculateExtent(map.getSize());
@@ -89,23 +97,38 @@ export const useMaps = () => {
     const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
     const geojsonFormat = new GeoJSON();
     return geojsonFormat.writeGeometryObject(polygon4326);
-  }
+  };
+
+  // Todo: This function should be adjusted so that the map element can be resolved from each available column, the current implementation only allows it to be in the first column (it should also allow multiple heatmaps in one column)
+  const getMapElementFromEntity = (entity: Entity): MapElement | undefined => {
+    return (
+      (entity.mapElement as MapElement) ??
+      (entity.entityView.column.elements.mapElement as MapElement)
+    );
+  };
 
   const extractGeojsonFeaturesFromEntities = (newEntities: Entity[]): any[] => {
     const featuresArray = [];
     for (let i = 0; i < newEntities.length; i++) {
       const entity = newEntities[i];
-      const feature =
-        entity.mapElement?.geoJsonFeature?.value ??
-        entity.entityView.column.elements.mapElement?.geoJsonFeature?.value;
+      const mapElement = getMapElementFromEntity(entity);
+      if (!mapElement) {
+        console.error("Entity has no map element", entity);
+        return [];
+      }
+      const feature = mapElement.geoJsonFeature?.value as GeoJSONGeometry;
+
       if (feature) {
         featuresArray.push(feature);
       }
     }
     return featuresArray;
-  }
+  };
 
-  const handlePointerMove = (event: Event, mapRef: InstanceType<typeof OLMap.OlMap>): void => {
+  const handlePointerMove = (
+    event: Event,
+    mapRef: InstanceType<typeof OLMap.OlMap>,
+  ): void => {
     const feature = mapRef.forEachFeatureAtPixel(
       event.pixel,
       (feature) => feature,
@@ -118,6 +141,25 @@ export const useMaps = () => {
     setHoveredListItem(hoveredFeature.value);
   };
 
+  const zoomToHotspot = (map: Map, src: VectorSource<Feature<Geometry>>) => {
+    if (map && src && src.getFeatures().length > 0 && !hotspotZoomed.value) {
+      const features = src.getFeatures();
+      if (!features) return;
+
+      const coords = features.map((f) => f.getGeometry()?.getCoordinates());
+      const avg = coords
+        .reduce((acc, c) => [acc[0] + c[0], acc[1] + c[1]], [0, 0])
+        .map((v) => v / coords.length);
+
+      map.getView().animate({
+        center: avg,
+        zoom: 10,
+        duration: 800,
+      });
+      hotspotZoomed.value = true;
+    }
+  };
+
   return {
     geoToMercator,
     getBasicMapProperties,
@@ -127,6 +169,8 @@ export const useMaps = () => {
     activateNewGeoFilter,
     getGeojsonPolygonFromMap,
     extractGeojsonFeaturesFromEntities,
-    handlePointerMove
+    handlePointerMove,
+    zoomToHotspot,
+    getMapElementFromEntity,
   };
 };

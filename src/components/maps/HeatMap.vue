@@ -7,7 +7,46 @@
       style="height: 65vh"
       @moveend="debouncedHandleMoveBoundingBox"
       @pointermove="(event) => handlePointerMove(event, mapRef)"
+      @singleclick="handleMapClick"
     >
+      <OLMap.OlOverlay
+        v-if="detailPopUp.isVisible"
+        :position="detailPopUp.position"
+        :offset="[0, -15]"
+        positioning="bottom-center"
+      >
+        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
+          <div
+            v-if="featureLoading"
+            class="h-full w-full flex items-center justify-center"
+          >
+            <spinner-loader theme="accent" />
+          </div>
+          <div v-else-if="featureResult">
+            <div class="flex justify-end items-center">
+              <button @click="detailPopUp.isVisible = false">
+                <unicon
+                  class="cursor-pointer"
+                  :name="Unicons.Close.name"
+                  :height="18"
+                />
+              </button>
+            </div>
+            <div>
+              <div
+                v-for="item of popUpDetailConfiguration"
+                :key="item.key"
+                class="pb-2"
+              >
+                <div v-if="featureResult.Entity.intialValues[item.key]">
+                  <p class="font-bold">{{ t(item.label) }}</p>
+                  <p>{{ featureResult.Entity.intialValues[item.key] }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </OLMap.OlOverlay>
       <Layers.OlTileLayer>
         <Sources.OlSourceOsm />
       </Layers.OlTileLayer>
@@ -38,6 +77,7 @@ import {
   onMounted,
   onBeforeUnmount,
   nextTick,
+  computed,
 } from "vue";
 import debounce from "lodash.debounce";
 import {
@@ -53,16 +93,21 @@ import { Feature } from "ol";
 import {
   type AdvancedFilters,
   type AdvancedFilter,
-  type ConfigItem,
   type Entity,
+  GetEntityByIdDocument,
+  type GetEntityByIdQuery,
+  type GetEntityByIdQueryVariables,
 } from "@/generated-types/queries";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import { useMaps } from "@/composables/useMaps";
 import GeoJSON from "ol/format/GeoJSON";
+import { useQuery } from "@vue/apollo-composable";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { Unicons } from "@/types";
+import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 
 const props = withDefaults(
   defineProps<{
-    config: ConfigItem[];
     entities: Entity[];
     entitiesLoading: boolean;
     center: number[];
@@ -84,6 +129,7 @@ const {
   getGeojsonPolygonFromMap,
   extractGeojsonFeaturesFromEntities,
   handlePointerMove,
+  zoomToHotspot,
 } = useMaps();
 
 const mapRef = ref<InstanceType<typeof OLMap.OlMap> | undefined>(undefined);
@@ -91,7 +137,25 @@ const heatmapSource = shallowReactive(new VectorSource());
 const view = ref<View | undefined>(undefined);
 const contextMenuItems = ref<Item[]>([]);
 const geoFilters = ref<AdvancedFilters | undefined>(undefined);
-const hotspotZoomed = ref<boolean>(false);
+const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
+  useHeatMapDetailPopUp();
+const getEntityQueryVariables = computed<GetEntityByIdQueryVariables>(() => {
+  return {
+    id: detailPopUp.entityId!,
+    type: "",
+  };
+});
+
+const { result: featureResult, loading: featureLoading } =
+  useQuery<GetEntityByIdQuery>(
+    GetEntityByIdDocument,
+    getEntityQueryVariables,
+    () => ({
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "no-cache",
+      enabled: !!detailPopUp.entityId,
+    }),
+  );
 
 contextMenuItems.value = [
   {
@@ -157,26 +221,15 @@ const initializeHeatmap = async () => {
   handleMoveBoundingBox();
 };
 
-const zoomToHotspot = () => {
+const handleMapClick = (event: any) => {
   const map = mapRef.value?.map;
-  const src = heatmapSource;
+  if (!map) return;
 
-  if (map && src && src.getFeatures().length > 0 && !hotspotZoomed.value) {
-    const features = src.getFeatures();
-    if (!features.length) return;
-
-    const coords = features.map((f) => f.getGeometry().getCoordinates());
-    const avg = coords
-      .reduce((acc, c) => [acc[0] + c[0], acc[1] + c[1]], [0, 0])
-      .map((v) => v / coords.length);
-
-    map.getView().animate({
-      center: avg,
-      zoom: 10,
-      duration: 800,
-    });
-    hotspotZoomed.value = true;
-  }
+  const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
+  if (!feature) return;
+  detailPopUp.position = feature.getGeometry()?.getCoordinates();
+  detailPopUp.entityId = feature.values_.id[0];
+  if (detailPopUp.entityId) detailPopUp.isVisible = true;
 };
 
 onBeforeMount(async () => await initializeHeatmap());
@@ -192,11 +245,11 @@ watch(
   () => props.entities,
   async (newEntities) => {
     if (props.entitiesLoading || !newEntities?.length) return;
-
     updateHeatmapFromGeoJson(newEntities);
+    setEntityDetailConfigurations(newEntities);
 
     await nextTick();
-    zoomToHotspot();
+    zoomToHotspot(mapRef.value?.map, heatmapSource);
   },
   { immediate: true },
 );
