@@ -18,9 +18,9 @@
         <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
           <div
             v-if="featureLoading"
-            class="h-full w-full flex items-center justify-center"
+            class="h-full w-full flex items-center justify-center py-4"
           >
-            <spinner-loader theme="accent" />
+            <spinner-loader theme="accent" dimensions="10" />
           </div>
           <div v-else-if="featureResult">
             <div class="flex justify-end items-center">
