@@ -44,6 +44,12 @@
                   <p>{{ featureResult.Entity.intialValues[item.key] }}</p>
                 </div>
               </div>
+              <router-link
+                class="underline text-accent-accent"
+                :to="`/${featureResult.Entity.type}/${featureResult.Entity.id}`"
+                target="_blank"
+                >Open in other tab</router-link
+              >
             </div>
           </div>
         </div>
