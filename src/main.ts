@@ -1,8 +1,9 @@
+import './otel';
 import {
-  ApolloClient,
-  InMemoryCache,
-  type NormalizedCacheObject,
-  createHttpLink,
+    ApolloClient,
+    InMemoryCache,
+    type NormalizedCacheObject,
+    createHttpLink,
 } from "@apollo/client/core";
 import "./assets/main.css";
 import * as Sentry from "@sentry/vue";
@@ -15,11 +16,14 @@ import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import {
-  getApplicationDetails,
-  getFormattersSettings,
-  setupI18n,
+    getApplicationDetails,
+    getFormattersSettings,
+    setupI18n,
 } from "@/helpers";
 import { onError } from "@apollo/client/link/error";
+import { setContext } from "@apollo/client/link/context";
+import { context as otelContext, propagation } from "@opentelemetry/api";
+import { W3CTraceContextPropagator } from "@opentelemetry/core";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
@@ -41,109 +45,125 @@ export let bulkSelectAllSizeLimit: number = 999999;
 export let formattersSettings: any = {};
 export let router: Router;
 export let typeUrlMapping:
-  | {
-      mapping: { [type: string]: string };
-      reverseMapping: { [type: string]: string };
-    }
-  | undefined;
+    | {
+    mapping: { [type: string]: string };
+    reverseMapping: { [type: string]: string };
+}
+    | undefined;
 
 const applyCustomization = (rulesObject: any) => {
-  if (rulesObject.applicationTitle)
-    document.title = rulesObject.applicationTitle;
+    if (rulesObject.applicationTitle)
+        document.title = rulesObject.applicationTitle;
 };
 
 const start = async (): Promise<void> => {
-  Unicon.add(Object.values(Unicons));
+    Unicon.add(Object.values(Unicons));
 
-  const { config, translations, version, urlMapping } =
-    await getApplicationDetails();
-  i18n = setupI18n(translations, config.customization.applicationLocale);
+    const { config, translations, version, urlMapping } =
+        await getApplicationDetails();
+    i18n = setupI18n(translations, config.customization.applicationLocale);
 
-  typeUrlMapping = urlMapping;
-  const { setVersion, getPwaVersion } = useServiceVersionManager();
+    typeUrlMapping = urlMapping;
+    const { setVersion, getPwaVersion } = useServiceVersionManager();
 
-  const { initializeInputValidation } = useInputValidation();
+    const { initializeInputValidation } = useInputValidation();
 
-  setVersion(version["apollo-graphql-version"], ElodyServices.ApolloGraphql);
-  setVersion(await getPwaVersion(), ElodyServices.Pwa);
-  initializeInputValidation(translations);
+    setVersion(version["apollo-graphql-version"], ElodyServices.ApolloGraphql);
+    setVersion(await getPwaVersion(), ElodyServices.Pwa);
+    initializeInputValidation(translations);
 
-  if (config.customization) applyCustomization(config.customization);
-  auth = auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
+    if (config.customization) applyCustomization(config.customization);
+    auth = auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 
-  const head = createHead();
-  router = createRouter({
-    routes: addComponentToRoutes(config.routerConfig),
-    history: createWebHistory(import.meta.env.BASE_URL),
-  });
-
-  auth.changeRedirectRoute(window.location.origin + window.location.pathname);
-
-  const authCode = new URLSearchParams(window.location.search).get("code");
-  auth.authCode = authCode;
-
-  if (authCode) {
-    await auth.processAuthCode(authCode);
-    if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
-      await auth.redirectToLogin();
-  } else {
-    await auth.verifyServerAuth();
-  }
-
-  bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
-
-  const graphqlErrorInterceptor = onError((error: GraphQLError) => {
-    const { handleGraphqlError } = useErrorCodes();
-    handleGraphqlError(error);
-  });
-
-  apolloClient = new ApolloClient({
-    link: graphqlErrorInterceptor.concat(
-      createHttpLink({
-        uri: config.graphQlLink || "/api/graphql",
-        headers: { "Apollo-Require-Preflight": "true" },
-      }),
-    ),
-    cache: new InMemoryCache(),
-  });
-
-  setIgnorePermissions(config.IGNORE_PERMISSIONS);
-  const [formattersSettingsResult] = await Promise.all([
-    getFormattersSettings(),
-  ]);
-  formattersSettings = formattersSettingsResult;
-
-  await useApp().initApp(auth, config, apolloClient);
-
-  addRouterNavigationGuards(router, config);
-
-  const app = createApp(App)
-    .use(i18n)
-    .use(Unicon as any, {
-      fill: "currentColor",
-    })
-    .use(Notifications)
-    .use(router)
-    .use(auth)
-    .use(head)
-    .provide("config", config)
-    .provide(DefaultApolloClient, apolloClient);
-
-  if (config.SENTRY_ENABLED) {
-    Sentry.init({
-      app,
-      sendClientReports: false,
-      integrations: [
-        new BrowserTracing({
-          routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-          tracingOrigins: ["*"],
-        }),
-      ],
-      dsn: config.SENTRY_DSN_FRONTEND,
-      environment: config.NOMAD_NAMESPACE,
+    const head = createHead();2
+    router = createRouter({
+        routes: addComponentToRoutes(config.routerConfig),
+        history: createWebHistory(import.meta.env.BASE_URL),
     });
-  }
-  
-  app.mount("#app");
+
+    auth.changeRedirectRoute(window.location.origin + window.location.pathname);
+
+    const authCode = new URLSearchParams(window.location.search).get("code");
+    auth.authCode = authCode;
+
+    if (authCode) {
+        await auth.processAuthCode(authCode);
+        if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
+            await auth.redirectToLogin();
+    } else {
+        await auth.verifyServerAuth();
+    }
+
+    bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
+
+    const graphqlErrorInterceptor = onError((error: GraphQLError) => {
+        const { handleGraphqlError } = useErrorCodes();
+        handleGraphqlError(error);
+    });
+
+    const propagator = new W3CTraceContextPropagator();
+
+    const injectTraceLink = setContext((_, { headers }) => {
+        const carrier: Record<string, string> = {};
+        propagation.inject(otelContext.active(), carrier, { set: (c, k, v) => (c[k] = v) }, propagator);
+
+        return {
+            headers: {
+                ...headers,
+                ...carrier,
+                "Apollo-Require-Preflight": "true", // behoud je bestaande header
+            },
+        };
+    });
+
+    apolloClient = new ApolloClient({
+      link: graphqlErrorInterceptor.concat(
+        injectTraceLink.concat(
+          createHttpLink({
+            uri: config.graphQlLink || "/api/graphql",
+          })
+        )
+      ),
+      cache: new InMemoryCache(),
+    });
+
+    setIgnorePermissions(config.IGNORE_PERMISSIONS);
+    const [formattersSettingsResult] = await Promise.all([
+        getFormattersSettings(),
+    ]);
+    formattersSettings = formattersSettingsResult;
+
+    await useApp().initApp(auth, config, apolloClient);
+
+    addRouterNavigationGuards(router, config);
+
+    const app = createApp(App)
+        .use(i18n)
+        .use(Unicon as any, {
+            fill: "currentColor",
+        })
+        .use(Notifications)
+        .use(router)
+        .use(auth)
+        .use(head)
+        .provide("config", config)
+        .provide(DefaultApolloClient, apolloClient);
+
+    if (config.SENTRY_ENABLED) {
+        Sentry.init({
+            app,
+            sendClientReports: false,
+            integrations: [
+                new BrowserTracing({
+                    routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+                    tracingOrigins: ["*"],
+                }),
+            ],
+            dsn: config.SENTRY_DSN_FRONTEND,
+            environment: config.NOMAD_NAMESPACE,
+        });
+    }
+
+    app.mount("#app");
 };
 start();
