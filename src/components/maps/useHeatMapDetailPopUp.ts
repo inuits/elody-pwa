@@ -1,4 +1,4 @@
-import { computed, reactive, ref } from "vue";
+import { computed, type ComputedRef, reactive, ref } from "vue";
 import type { Entity, MapFeatureMetadata } from "@/generated-types/queries";
 import { useMaps } from "@/composables/useMaps";
 
@@ -14,7 +14,7 @@ export const useHeatMapDetailPopUp = (): {
   getDetailConfigurationForEntity(
     entityId: string,
   ): MapFeatureMetadata | undefined;
-  popUpDetailConfiguration: MapFeatureMetadata | undefined;
+  popUpDetailConfiguration: ComputedRef<MapFeatureMetadata | undefined>;
 } => {
   const detailPopUp = reactive<DetailPopUp>({
     isVisible: false,

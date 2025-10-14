@@ -10,10 +10,11 @@
       @singleclick="handleMapClick"
     >
       <OLMap.OlOverlay
-        v-if="detailPopUp.isVisible"
+        v-if="detailPopUp.isVisible && popUpDetailConfiguration"
         :position="detailPopUp.position"
         :offset="[0, -15]"
         positioning="bottom-center"
+        :autoPan="true"
       >
         <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
           <div
@@ -130,6 +131,7 @@ const {
   extractGeojsonFeaturesFromEntities,
   handlePointerMove,
   zoomToHotspot,
+  hotspotZoomed,
 } = useMaps();
 
 const mapRef = ref<InstanceType<typeof OLMap.OlMap> | undefined>(undefined);
@@ -223,7 +225,7 @@ const initializeHeatmap = async () => {
 
 const handleMapClick = (event: any) => {
   const map = mapRef.value?.map;
-  if (!map) return;
+  if (!map || !hotspotZoomed.value) return;
 
   const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
   if (!feature) return;

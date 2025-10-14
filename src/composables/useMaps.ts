@@ -172,5 +172,6 @@ export const useMaps = () => {
     handlePointerMove,
     zoomToHotspot,
     getMapElementFromEntity,
+    hotspotZoomed,
   };
 };
