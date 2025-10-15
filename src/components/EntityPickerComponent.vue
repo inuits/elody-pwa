@@ -20,7 +20,7 @@
         entityPickerMode === EntityPickerMode.Emit ? [entityUuid] : undefined
       "
       :ids-of-non-selectable-entities="
-        enableNonSelectableEntities ? getAlreadySelectedEntityIds() : []
+        enableNonSelectableEntities ? allAlreadySelectedEntityIds : []
       "
       list-item-route-name="SingleEntity"
       @entities-updated="
@@ -53,7 +53,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { inject, onMounted, provide, ref, unref } from "vue";
+import { computed, inject, onBeforeMount, onMounted, provide, ref, unref } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
@@ -112,8 +112,13 @@ const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
-const { getEntityId, getRelationType, setCropMode, setCropCoordinatesKey } =
-  useEntityPickerModal();
+const {
+  getEntityId,
+  getRelationType,
+  getRefetchEntitiesFunction,
+  setCropMode,
+  setCropCoordinatesKey
+} = useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
 const { parseFormValuesToFormInput, getForm } = useFormHelper();
 const { displaySuccessNotification } = useBaseNotification();
@@ -132,6 +137,8 @@ const form = getForm(getEntityId());
 const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const queryLoaded = ref<boolean>(false);
+const alreadySelectedEntityIdsFetched = ref<string[]>([]);
+const allAlreadySelectedEntityIds = computed(() => [...alreadySelectedEntityIdsFetched.value, ...getAlreadySelectedEntityIds()]);
 
 const emitUpdatedEntities = (numberOfEntities: number) => {
   if (props.entityPickerMode === EntityPickerMode.Save) return;
@@ -219,8 +226,21 @@ const submit = useSubmitForm<EntityValues>(async () => {
   closeModal(TypeModals.DynamicForm);
 });
 
+const refetchRelationsWithNoLimit = async (): string[] => {
+  const refetchEntities = getRefetchEntitiesFunction();
+  if (!refetchEntities) return;
+
+  const relatedEntities = await refetchEntities(-1);
+  if (relatedEntities?.results?.length <= 0) return;
+  alreadySelectedEntityIdsFetched.value = relatedEntities.results.map(entity => entity.id);
+}
+
 onMounted(async () => {
   if (props.customQuery && props.customFiltersQuery) await getCustomQuery();
   else ignoreCustomQuery.value = true;
+});
+
+onBeforeMount(async () => {
+  refetchRelationsWithNoLimit();
 });
 </script>

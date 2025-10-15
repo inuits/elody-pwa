@@ -5,6 +5,7 @@ const acceptedTypes = ref<Entitytyping[]>([]);
 const entityUuid = ref<string>("");
 const entityId = ref<string>("");
 const parentEntityType = ref<Entitytyping[]>([]);
+const refetchEntitiesFunction = ref<Function | undefined>(undefined);
 const relationType = ref<string | "no-type-set">("no-type-set");
 const customGetEntitiesQuery = ref<string>("");
 const customGetEntitiesFiltersQuery = ref<string>("");
@@ -26,6 +27,10 @@ const useEntityPickerModal = () => {
 
   const setParentEntityType = (parentEntityTypes: Entitytyping[]) => {
     parentEntityType.value = parentEntityTypes;
+  };
+
+  const setRefetchEntitiesFunction = (refetchEntities: Function) => {
+    refetchEntitiesFunction.value = refetchEntities;
   };
 
   const setRelationType = (type: string) => {
@@ -52,6 +57,7 @@ const useEntityPickerModal = () => {
   const getEntityUuid = () => entityUuid.value;
   const getEntityId = () => entityId.value;
   const getParentEntityType = () => parentEntityType.value;
+  const getRefetchEntitiesFunction = () => refetchEntitiesFunction.value;
   const getRelationType = () => relationType.value;
   const getCustomGetEntitiesQuery = () => customGetEntitiesQuery.value;
   const getCustomGetEntitiesFiltersQuery = () =>
@@ -64,10 +70,12 @@ const useEntityPickerModal = () => {
     getEntityUuid,
     getEntityId,
     getParentEntityType,
+    getRefetchEntitiesFunction,
     getRelationType,
     setAcceptedTypes,
     setEntityUuid,
     setParentEntityType,
+    setRefetchEntitiesFunction,
     setRelationType,
     getCustomGetEntitiesQuery,
     getCustomGetEntitiesFiltersQuery,

@@ -288,14 +288,14 @@ import {
   SearchInputType,
   TypeModals,
   ViewModes,
-  type ViewModesWithConfig,
+  type ViewModesWithConfig
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
+  useBulkOperations
 } from "@/composables/useBulkOperations";
-import { useBulkOperations } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
@@ -319,11 +319,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useMaps } from "@/composables/useMaps";
 import { computed, inject, onMounted, ref, watch } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import {
-  breadcrumbPathFinished,
-  breadcrumbRoutes,
-  useBreadcrumbs,
-} from "@/composables/useBreadcrumbs";
+import { breadcrumbPathFinished, breadcrumbRoutes, useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -511,6 +507,7 @@ const {
   setCustomGetEntitiesQuery,
   setCustomGetEntitiesFiltersQuery,
   setParentEntityType,
+  setRefetchEntitiesFunction,
   setCropMode,
   setCropCoordinatesKey,
 } = useEntityPickerModal();
@@ -616,8 +613,8 @@ const bulkSelect = (items = entities.value) => {
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 
-const refetchEntities = async () => {
-  await getEntities(route);
+const refetchEntities = async (limitForEntityPicker = undefined): Promise<Entity[] | void> => {
+  return await getEntities(route, new AbortController().signal, limitForEntityPicker);
 };
 
 const initializeBaseLibrary = async () => {
@@ -743,6 +740,7 @@ const initializeEntityPickerComponent = (
   setEntityUuid(props.parentEntityIdentifiers[0]);
   setEntityId(props.id);
   setParentEntityType(props.parentEntityType || route.meta.entityType);
+  setRefetchEntitiesFunction(refetchEntities);
   setRelationType(props.relationType);
   setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);

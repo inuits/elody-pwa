@@ -203,7 +203,8 @@ export const useBaseLibrary = (
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
     signal?: AbortSignal,
-  ): Promise<void> => {
+    limitForEntityPicker?: number,
+  ): Promise<Entity[] | void> => {
     if (entitiesLoading.value && !signal) return;
     entitiesLoading.value = true;
 
@@ -224,6 +225,7 @@ export const useBaseLibrary = (
       !shouldUseStateForRoute
     )
       variables = queryVariables;
+    if (limitForEntityPicker) variables.limit = limitForEntityPicker;
 
     try {
       const result = await apolloClient.query({
@@ -241,6 +243,8 @@ export const useBaseLibrary = (
       });
 
       const fetchedEntities = result.data.Entities;
+      if (limitForEntityPicker) return fetchedEntities;
+
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
         entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
