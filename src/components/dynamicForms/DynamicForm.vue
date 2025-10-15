@@ -25,7 +25,7 @@
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
       </p>
       <div
-        v-for="(field, index) in getFieldArray"
+        v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
@@ -188,7 +188,7 @@
           @click="performActionButtonClickEvent(field)"
         />
         <p
-          v-if="submitErrors && index === getFieldArray.length - 1"
+          v-if="submitErrors && index === getSortedFieldArray.length - 1"
           class="text-red-default"
         >
           {{ submitErrors }}
@@ -397,9 +397,9 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
 });
 
 const fieldTypeMap = computed<Record<string, string[]>>(() => {
-  if (!Array.isArray(getFieldArray.value)) return;
+  if (!Array.isArray(getSortedFieldArray.value)) return;
 
-  return getFieldArray.value?.reduce(
+  return getSortedFieldArray.value?.reduce(
     (map, field) => {
       if (field.onlyForEntityTypes && field.onlyForEntityTypes.length > 0) {
         map[field.key] = field.onlyForEntityTypes;
@@ -413,6 +413,10 @@ const fieldTypeMap = computed<Record<string, string[]>>(() => {
 const getFieldArray = computed(() => {
   return modalFormFields ? modalFormFields : formFields.value || [];
 });
+
+const getSortedFieldArray = computed(() => {
+  return getFieldArray.value?.sort((a) => a.__typename === 'FormAction' ? 1 : 0);
+})
 
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
