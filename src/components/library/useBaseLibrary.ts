@@ -295,7 +295,7 @@ export const useBaseLibrary = (
       if (entitiesLoading.value) {
         let placeholderAmount = 20;
         if (queryVariables.limit) placeholderAmount = queryVariables.limit;
-        else if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) {
+        if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) {
           placeholderAmount = 1;
           const entityCountOnPage = getStateForRoute(_route)?.entityCountOnPage;
           if (entityCountOnPage !== undefined)
