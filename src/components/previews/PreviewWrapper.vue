@@ -69,6 +69,7 @@
       v-else-if="previewComponent.type === PreviewTypes.MediaViewer"
       :current-mediafile="getEntitiesOrEntity()"
       :mediafiles="entities"
+      :mediafiles-loading="entitiesLoading"
       :entity-id="entityId"
       :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
       @toggle-preview-component="
@@ -122,6 +123,7 @@ const props = withDefaults(
     previewComponent: PreviewComponent;
     entityType: Entitytyping;
     entities: Entity[];
+    entitiesLoading: boolean;
     configPerViewMode: object;
     entityId: string | undefined;
     cropMediafileCoordinatesKey: string;

@@ -148,6 +148,7 @@
           :preview-component="previewComponent!"
           :entity-type="entityType"
           :entities="refEntities"
+          :entities-loading="entitiesLoading"
           :config-per-view-mode="configPerViewMode"
           :entity-id="previewForEntity"
           :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"

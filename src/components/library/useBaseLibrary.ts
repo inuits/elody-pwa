@@ -292,7 +292,7 @@ export const useBaseLibrary = (
   watch(
     () => entitiesLoading.value,
     () => {
-      if (entitiesLoading.value && _route?.name !== "SingleEntity") {
+      if (entitiesLoading.value) {
         let placeholderAmount = 20;
         if (queryVariables.limit) placeholderAmount = queryVariables.limit;
         else if (baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) {
