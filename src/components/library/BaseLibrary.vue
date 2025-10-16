@@ -403,6 +403,7 @@ const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const showCurrentPreviewFlow: boolean = inject("showCurrentPreviewFlow", true);
+const parentEntity: Entity = inject("ParentEntityProvider");
 const { getEntityUuid } = useEntitySingle();
 const route = useRoute();
 const router = useRouter();
@@ -667,12 +668,13 @@ const initializeDeepRelations = async () => {
   } else if (isDeepRelationUsingMethods.value) {
     const routeConfig = props.fetchDeepRelations.routeConfig;
     let parentId = props.parentEntityIdentifiers[0];
-    let entity: Entity;
+    let entity: Entity = parentEntity?.value;
     for (const index in routeConfig) {
       const entityResult = await iterateOverBreadcrumbs(
         parentId,
         [routeConfig[index]],
         false,
+        entity,
       );
       if (!entityResult) break;
       parentId = entityResult.id;
