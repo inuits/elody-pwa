@@ -289,7 +289,9 @@ export const useErrorCodes = (): {
   };
 
   const handleHttpError = async (httpResponse: Response): Promise<string> => {
-    if (new URL(httpResponse.url).pathname.includes("api/iiif")) return "";
+    const pathname: string = new URL(httpResponse.url).pathname;
+    if (pathname.includes("api/iiif") || pathname.includes("api/mediafile"))
+      return "";
     const responseBody = await httpResponse.json();
     const httpErrorMessage: string =
       responseBody?.extensions?.response?.body?.message ||
