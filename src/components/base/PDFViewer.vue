@@ -241,7 +241,8 @@ async function initialRender(): Promise<void> {
   }
 
   try {
-    const filePath = props.source.initialValues?.original_file_location;
+    const filePath = props.source.intialValues?.original_file_location;
+    console.log(filePath);
     if (!filePath) {
       error.value =
         "Mediafile has no 'original_file_location', unable to locate source file";
