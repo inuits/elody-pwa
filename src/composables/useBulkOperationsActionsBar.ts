@@ -1,4 +1,4 @@
-import { computed, inject, onMounted, ref, watch } from "vue";
+import { computed, inject, onBeforeMount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useQuery } from "@vue/apollo-composable";
 
@@ -8,7 +8,6 @@ import {
   BulkOperationTypes,
   type DropdownOption,
   GetBulkOperationsDocument,
-  type GetBulkOperationsQuery,
   ModalStyle,
   RouteNames,
   TypeModals,
@@ -122,21 +121,24 @@ export const useBulkOperationsActionsBar = (
     () => getEnqueuedItemCount(props.context) > 0,
   );
 
-  const { refetch, onResult } = useQuery<GetBulkOperationsQuery>(
-    GetBulkOperationsDocument,
-    { entityType: entityType.value },
-    () => ({ enabled: entityType.value ? refetchEnabled.value : ref(false) }),
-  );
-
-  onResult((result) => {
+  const fetchBulkOperations = async (): Promise<void> => {
     try {
+      const variables = {
+        entityType: entityType.value
+      };
+      const result = await apolloClient.query({
+        query: await determineBulkOperationsQuery(),
+        variables,
+        fetchPolicy: "no-cache",
+        notifyOnNetworkStatusChange: true,
+      });
+
       if (!result.data || !("BulkOperations" in result.data)) return;
-      bulkOperations.value =
-        result.data?.BulkOperations?.bulkOperationOptions?.options || [];
+      bulkOperations.value = result.data?.BulkOperations?.bulkOperationOptions?.options || [];
     } catch {
       emit("setBulkOperationsAvailable", false);
     }
-  });
+  };
 
   const getRefetchCallbacks = () => {
     return [refetchParentEntity, props.refetchEntities].filter(Boolean);
@@ -308,6 +310,16 @@ export const useBulkOperationsActionsBar = (
     );
   };
 
+  const determineBulkOperationsQuery = async (): Promise<string> => {
+    try {
+      const query = route!.meta!.queries!.getBulkOperations;
+      return await loadDocument(query);
+    } catch (error) {
+      return GetBulkOperationsDocument;
+    } finally {
+    }
+  };
+
   watch(
     () =>
       getModalInfo(TypeModals.DynamicForm).open ||
@@ -321,9 +333,8 @@ export const useBulkOperationsActionsBar = (
 
   watch(
     () => entityType.value,
-    (type: Entitytyping) => {
-      if (!type) return;
-      refetch({ entityType: type });
+    async () => {
+      await fetchBulkOperations();
     },
   );
 
@@ -373,14 +384,15 @@ export const useBulkOperationsActionsBar = (
     },
   );
 
-  onMounted(() => {
+  onMounted(async () => {
     if (!props.excludePagination && props.showPagination) {
       setSelectedSkipFromState();
     }
     if (entityType.value && !props.customBulkOperations) {
       refetchEnabled.value = true;
     }
-    refetch();
+
+    if (refetchEnabled.value) await fetchBulkOperations();
   });
 
   return {

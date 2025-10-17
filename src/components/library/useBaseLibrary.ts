@@ -18,6 +18,7 @@ import { ref, shallowRef, watch, inject } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import { isAbortError } from "@/helpers";
+import { useImport } from "@/composables/useImport";
 
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
@@ -200,6 +201,17 @@ export const useBaseLibrary = (
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
   }
 
+  const determineEntitiesQuery = async (route: RouteLocationNormalizedLoaded, manipulationQueryDocument: string | undefined): Promise<any> => {
+    if (manipulationQueryDocument) return manipulationQueryDocument;
+    try {
+      const { loadDocument } = useImport();
+      const query = route!.meta!.queries!.getEntities;
+      return await loadDocument(query);
+    } catch (error) {
+      return GetEntitiesDocument;
+    }
+  };
+
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
     signal?: AbortSignal,
@@ -229,9 +241,7 @@ export const useBaseLibrary = (
 
     try {
       const result = await apolloClient.query({
-        query: manipulateQuery.value
-          ? manipulationQuery.value.document
-          : GetEntitiesDocument,
+        query: await determineEntitiesQuery(_route, manipulationQuery.value?.document),
         variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,

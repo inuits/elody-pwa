@@ -55,13 +55,13 @@ import {
   GetPaginationLimitOptionsDocument,
   type GetPaginationLimitOptionsQuery,
   GetSortOptionsDocument,
-  type GetSortOptionsQuery,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import { useImport } from "@/composables/useImport";
 
 const props = withDefaults(
   defineProps<{
@@ -102,6 +102,7 @@ const sortDirectionOptions = ref<DropdownOption[]>([
   { label: "library.asc", value: "asc", icon: DamsIcons.SortUp },
 ]);
 const { getStateForRoute } = useStateManagement();
+const { loadDocument } = useImport();
 const { t } = useI18n();
 const route = useRoute();
 
@@ -134,8 +135,8 @@ const paginationLimitOptionsPromise = async () => {
 
 const sortOptionsPromise = async (entityType: Entitytyping) => {
   return apolloClient
-    .query<GetSortOptionsQuery>({
-      query: GetSortOptionsDocument,
+    .query({
+      query: await determineSortOptionsQuery(),
       variables: { entityType },
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
@@ -177,6 +178,15 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       setIsAsc(sortOrder);
       sortOptionsPromiseIsResolved.value = true;
     });
+};
+
+const determineSortOptionsQuery = async (): Promise<any> => {
+  try {
+    const query = route!.meta!.queries!.getSortOptions;
+    return await loadDocument(query);
+  } catch (error) {
+    return GetSortOptionsDocument;
+  }
 };
 
 onMounted(() => {

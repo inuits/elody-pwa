@@ -164,6 +164,7 @@ import { auth } from "@/main";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
+import { useImport } from "@/composables/useImport";
 
 export type FiltersBaseAPI = {
   initializeAndActivateNewFilter: (
@@ -236,6 +237,7 @@ const filterMatcherMapping = ref<FilterMatcherMap>({
   metadata_on_relation: [],
 });
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
+const { loadDocument } = useImport();
 const { isSaved } = useEditMode();
 const { t } = useI18n();
 const {
@@ -335,6 +337,16 @@ const advancedFiltersPromise = async (entityType: Entitytyping) => {
   }
 };
 
+const determineFilterQuery = async (queryDocument: string): Promise<any> => {
+  if (queryDocument) return queryDocument;
+  try {
+    const query = props.route!.meta!.queries!.getFilters;
+    return await loadDocument(query);
+  } catch (error) {
+    return GetAdvancedFiltersDocument;
+  }
+};
+
 const fetchEntityFilters = async ({
   queryDocument,
   entityType,
@@ -345,7 +357,7 @@ const fetchEntityFilters = async ({
   const variables = buildFilterVariables(entityType);
 
   const result = await apolloClient.query({
-    query: queryDocument || GetAdvancedFiltersDocument,
+    query: await determineFilterQuery(queryDocument),
     variables,
     fetchPolicy: "no-cache",
     notifyOnNetworkStatusChange: true,
