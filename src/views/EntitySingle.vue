@@ -7,7 +7,7 @@
       <div class="relative h-full w-full">
         <div
           v-if="showSavingSpinner"
-          class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-[100]"
+          class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
         >
           <spinner-loader theme="accent" />
         </div>
@@ -104,7 +104,7 @@ const props = withDefaults(
 
 const id = computed(() => asString(props.entityId || route.params["id"]));
 const showSavingSpinner = computed(
-  () => useEditHelper.value.buttonClicked && !useEditHelper.value.showErrors,
+  () => useEditHelper.value.buttonClicked && useEditHelper.value.isSaving,
 );
 const useEditHelper = ref(useEditMode(id.value));
 const identifiers = ref<string[]>([]);

@@ -127,6 +127,7 @@
   --z-index-virtual-keyboard: 70;
   --z-index-context-menu: 58;
   --z-index-system: 80;
+  --z-index-entity-single-spinner: 1001;
 
   /* Z-Index Utilities for Tailwind classes */
   --z-hidden: var(--z-index-hidden);
@@ -149,6 +150,7 @@
   --z-virtual-keyboard: var(--z-index-virtual-keyboard);
   --z-context-menu: var(--z-index-context-menu);
   --z-system: var(--z-index-system);
+  --z-entity-single-spinner: var(--z-index-entity-single-spinner);
 
   /* Legacy variables - to be removed after migration */
   --z-index-1: 1;

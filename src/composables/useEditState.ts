@@ -16,6 +16,7 @@ export const useEditState = (editStateName: string) => {
 
   const toBeDeleted = ref<string[]>([]);
   const isSaved = ref(false);
+  const isSaving = ref(false);
 
   const showErrors = computed(() => buttonClicked.value && isDisabled.value);
   const isEdit = ref<boolean>(false);
@@ -63,10 +64,17 @@ export const useEditState = (editStateName: string) => {
   const save = async (force = false) => {
     if (!force && isDisabled.value) return;
     isSaved.value = false;
-
-    if (submitFn.value) await submitFn.value();
-    submitFn.value = undefined;
-    isSaved.value = true;
+    isSaving.value = true;
+    try {
+      if (submitFn.value) await submitFn.value();
+      submitFn.value = undefined;
+      isSaved.value = true;
+      isSaving.value = false;
+    } catch (error) {
+      console.error("Error saving:", error);
+      isSaved.value = false;
+      isSaving.value = false;
+    }
   };
 
   const discard = () => {
@@ -119,6 +127,7 @@ export const useEditState = (editStateName: string) => {
     refetchFns,
     toBeDeleted,
     isSaved,
+    isSaving,
     showErrors,
     isEdit,
     setEditMode,

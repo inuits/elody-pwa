@@ -43,7 +43,8 @@ export const useErrorCodes = (): {
     401: () => handleUnauthorized(),
     403: (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
     404: () => handleNotFound(),
-    default: (errorMessage: string) => showNotification(errorMessage),
+    default: (_errorCodeType: ErrorCodeType, errorMessage?: string) =>
+      showNotification(errorMessage || "An unknown error occurred"),
   };
 
   const __parseVariableStringToVariableObject = (
