@@ -20,7 +20,7 @@
         entityPickerMode === EntityPickerMode.Emit ? [entityUuid] : undefined
       "
       :ids-of-non-selectable-entities="
-        enableNonSelectableEntities ? allAlreadySelectedEntityIds : []
+        enableNonSelectableEntities ? alreadySelectedEntityIdsFetched : []
       "
       list-item-route-name="SingleEntity"
       @entities-updated="
@@ -138,7 +138,6 @@ const ignoreCustomQuery = ref<boolean>(false);
 const newQuery = ref<object | undefined>(undefined);
 const queryLoaded = ref<boolean>(false);
 const alreadySelectedEntityIdsFetched = ref<string[]>([]);
-const allAlreadySelectedEntityIds = computed(() => [...alreadySelectedEntityIdsFetched.value, ...getAlreadySelectedEntityIds()]);
 
 const emitUpdatedEntities = (numberOfEntities: number) => {
   if (props.entityPickerMode === EntityPickerMode.Save) return;
