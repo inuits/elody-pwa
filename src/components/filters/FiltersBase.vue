@@ -506,7 +506,6 @@ onMounted(() => {
 });
 
 const updateFilterVariables = () => {
-  console.log(parentEntity?.value);
   setVariables({
     parentIds: props.parentEntityIdentifiers,
     entityType: props.entityType,
