@@ -15,9 +15,10 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
 import { apolloClient } from "@/main";
 import EventBus from "@/EventBus";
-import { useFormHelper } from "@/composables/useFormHelper";
+import { inject } from "vue";
 
 const emit = defineEmits(["toggleLoading"]);
+const refetchParentEntity: any = inject("RefetchParentEntity");
 
 const props = defineProps<{
   label: string;
@@ -30,8 +31,6 @@ const { t } = useI18n();
 const { displaySuccessNotification, displayErrorNotification } =
   useBaseNotification();
 const { loadDocument } = useImport();
-const { getForm } = useFormHelper();
-const form = getForm(props.parentEntityId);
 
 const doGeneralAction = async () => {
   const document = await loadDocument(props.action);
@@ -43,12 +42,12 @@ const doGeneralAction = async () => {
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
-      .then((result: any) => {
+      .then(async () => {
         displaySuccessNotification(
           t("notifications.success.entityUpdated.title"),
           t("notifications.success.entityUpdated.description"),
         );
-        setNewEntityValues(result);
+        await refetchParentEntity()
         EventBus.emit(props.action);
       });
   } catch {
@@ -71,21 +70,5 @@ const createVariables = () => {
       mediafileId: props.entityId,
     };
   }
-};
-
-const setNewEntityValues = (result): void => {
-  if (!form) {
-    console.error(
-      `Unable to update entity values, form with id ${props.parentEntityId} does not exist`,
-    );
-    return;
-  }
-  const updatedEntity =
-    result.data.setPrimaryMediafile || result.data.setPrimaryThumbnail;
-  form.setValues({
-    intialValues: updatedEntity.intialValues,
-    relationValues: updatedEntity.relationValues,
-  });
-  console.log(form.values);
 };
 </script>

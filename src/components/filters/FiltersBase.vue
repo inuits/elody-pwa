@@ -506,6 +506,7 @@ onMounted(() => {
 });
 
 const updateFilterVariables = () => {
+  console.log(parentEntity?.value);
   setVariables({
     parentIds: props.parentEntityIdentifiers,
     entityType: props.entityType,
@@ -597,9 +598,11 @@ const clearAllFilters = async ({
 };
 
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryMediafile, async () => {
+  updateFilterVariables();
   handleAdvancedFilters();
 });
 EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
+  updateFilterVariables();
   handleAdvancedFilters();
 });
 </script>
