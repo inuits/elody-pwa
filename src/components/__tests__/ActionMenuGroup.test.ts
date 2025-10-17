@@ -30,10 +30,7 @@ vi.mock("session-vue-3-oidc-library", () => ({
 
 const mocks = vi.hoisted(() => {
   return {
-    advancedPermissions: {
-      can_do_whatever_you_want: true,
-      no_way: false,
-    },
+    advancedPermissions: {} as Record<string, boolean>,
   };
 });
 
@@ -43,6 +40,16 @@ vi.mock("@/composables/usePermissions", () => ({
     fetchAdvancedPermission: vi.fn(),
     fetchPermissionsForDropdownOptions: vi.fn(),
     setExtraVariables: vi.fn(),
+    createPermissionCacheKey: vi.fn((options) => {
+      let key = options.permission;
+      if (options.parentEntityId) {
+        key += `|parent:${options.parentEntityId}`;
+      }
+      if (options.childEntityId) {
+        key += `|child:${options.childEntityId}`;
+      }
+      return key;
+    }),
   }),
   ignorePermissions: { value: false },
   advancedPermissions: mocks.advancedPermissions,
@@ -126,6 +133,7 @@ describe("ActionMenuGroup", () => {
 
   it("contains only permitted options", async () => {
     mocks.advancedPermissions["can_do_whatever_you_want"] = true;
+    mocks.advancedPermissions["take_whats_mine"] = false;
 
     const wrapper = mount(ActionMenuGroup, {
       props: {
@@ -154,6 +162,7 @@ describe("ActionMenuGroup", () => {
     expect(wrapper.vm.availableOptions.length).toBe(0);
 
     mocks.advancedPermissions["no_way"] = true;
+    mocks.advancedPermissions["different_no_way"] = false;
     await wrapper.setProps({
       options: [
         { ...bulkOption, can: ["no_way"] },

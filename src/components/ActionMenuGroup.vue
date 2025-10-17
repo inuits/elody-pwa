@@ -70,8 +70,11 @@ import {
 import { getValueForPanelMetadata } from "@/helpers";
 
 const emit = defineEmits(["update:modelValue"]);
-const { fetchPermissionsForDropdownOptions, setExtraVariables } =
-  usePermissions();
+const {
+  fetchPermissionsForDropdownOptions,
+  setExtraVariables,
+  createPermissionCacheKey,
+} = usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -168,7 +171,12 @@ const getAvailableOptions = () => {
   const permittedOptions = props.options.filter((item: DropdownOption) => {
     return (
       !item.can ||
-      (item.can && item.can.length > 0 && advancedPermissions[item.can[0]])
+      (item.can &&
+        item.can.length > 0 &&
+        advancedPermissions[createPermissionCacheKey({ 
+          permission: item.can[0], 
+          parentEntityId: props.parentEntityId 
+        })])
     );
   });
 
@@ -176,7 +184,12 @@ const getAvailableOptions = () => {
     return (
       !item?.requiresAuth ||
       (item?.requiresAuth && auth.isAuthenticated.value === true) ||
-      (item.can && item.can.length > 0 && advancedPermissions[item.can[0]])
+      (item.can &&
+        item.can.length > 0 &&
+        advancedPermissions[createPermissionCacheKey({ 
+          permission: item.can[0], 
+          parentEntityId: props.parentEntityId 
+        })])
     );
   });
 };

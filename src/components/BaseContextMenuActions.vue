@@ -66,7 +66,11 @@ const openContextMenu = (event: Event) => {
   });
 };
 
-const { fetchPermissionsOfContextMenu, setExtraVariables } = usePermissions();
+const {
+  fetchPermissionsOfContextMenu,
+  setExtraVariables,
+  createPermissionCacheKey,
+} = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const availableContextMenuActions = ref<ContextMenuActions | undefined>(
   undefined,
@@ -88,7 +92,13 @@ const getAvailableContextMenuActions = () => {
     if (
       permission &&
       permission.length > 0 &&
-      !advancedPermissions[permission[0] as string]
+      !advancedPermissions[
+        createPermissionCacheKey({
+          permission: permission[0] as string,
+          parentEntityId: props.parentEntityId,
+          childEntityId: props.entityId,
+        })
+      ]
     ) {
       delete availableOptions[key as keyof typeof menuActions];
     }

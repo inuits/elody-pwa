@@ -116,6 +116,7 @@ import { useRoute } from "vue-router";
 import { getUserName } from "../helpers";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { resetAdvancedPermissions } from "@/composables/usePermissions";
 
 defineProps({
   isExpanded: Boolean,
@@ -135,6 +136,7 @@ const { setTennantInSession } = useTenant();
 
 const performLogout = async () => {
   await auth.logout();
+  resetAdvancedPermissions();
   useStateManagement().clearStorage();
   setTennantInSession("");
   if (route.meta.requiresAuth === true) await auth.redirectToLogin();

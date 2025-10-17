@@ -7,6 +7,7 @@ import { ErrorCodeType } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { getTranslatedMessage, isAbortError } from "@/helpers";
+import { resetAdvancedPermissions } from "@/composables/usePermissions";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -130,6 +131,7 @@ export const useErrorCodes = (): {
     const { closeAllModals } = useBaseModal();
 
     await auth.logout();
+    resetAdvancedPermissions();
     useStateManagement().clearStorage();
     setTennantInSession("");
     closeAllModals();

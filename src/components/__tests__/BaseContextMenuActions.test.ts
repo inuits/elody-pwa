@@ -4,6 +4,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import type { Entitytyping } from "@/generated-types/queries";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
+import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 
 vi.mock("@/types", () => ({
   Unicons: {
@@ -27,10 +28,7 @@ vi.mock("@/main", () => {
 
 const mocks = vi.hoisted(() => {
   return {
-    advancedPermissions: {
-      can_delete: false,
-      no_way: false,
-    },
+    advancedPermissions: {} as Record<string, boolean>,
   };
 });
 
@@ -40,6 +38,16 @@ vi.mock("@/composables/usePermissions", () => ({
     fetchAdvancedPermission: vi.fn(),
     fetchPermissionsOfContextMenu: vi.fn(),
     setExtraVariables: vi.fn(),
+    createPermissionCacheKey: vi.fn((options) => {
+      let key = options.permission;
+      if (options.parentEntityId) {
+        key += `|parent:${options.parentEntityId}`;
+      }
+      if (options.childEntityId) {
+        key += `|child:${options.childEntityId}`;
+      }
+      return key;
+    }),
   }),
   ignorePermissions: { value: false },
   advancedPermissions: mocks.advancedPermissions,
@@ -65,40 +73,42 @@ describe("BaseContextMenuActions", () => {
   } as ContextMenuActions;
 
   it("contains 1 option if permission is granted", async () => {
-    mocks.advancedPermissions["can_delete"] = true;
+    mocks.advancedPermissions["can_delete|child:2f4d"] = true;
 
     const wrapper = shallowMount(BaseContextMenuActions, {
       props: {
         contextMenuActions,
-        formId: "24",
         entityId: "2f4d",
         entityType: "BaseType" as Entitytyping,
+        bulkOperationsContext: BulkOperationsContextEnum.Home,
       },
     });
 
     await flushPromises();
 
-    expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(2);
+    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
+    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(2);
     expect(wrapper.vm.availableContextMenuActions).toStrictEqual(
       contextMenuActions,
     );
   });
 
   it("has only basic option if permission is not granted", async () => {
-    mocks.advancedPermissions["can_delete"] = false;
+    mocks.advancedPermissions["can_delete|child:24"] = false;
 
     const wrapper = shallowMount(BaseContextMenuActions, {
       props: {
         contextMenuActions,
-        formId: "24",
         entityId: "24",
         entityType: "BaseType" as Entitytyping,
+        bulkOperationsContext: BulkOperationsContextEnum.Home,
       },
     });
 
     await flushPromises();
 
-    expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(1);
+    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
+    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(1);
     expect(wrapper.vm.availableContextMenuActions).toStrictEqual({
       doLinkAction: contextMenuActions.doLinkAction,
     });
@@ -120,29 +130,30 @@ describe("BaseContextMenuActions", () => {
     const wrapper = shallowMount(BaseContextMenuActions, {
       props: {
         contextMenuActions: basicContextMenuActions,
-        formId: "24",
         entityId: "24",
         entityType: "BaseType" as Entitytyping,
+        bulkOperationsContext: BulkOperationsContextEnum.Home,
       },
     });
 
     await flushPromises();
 
-    expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(2);
+    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
+    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(2);
     expect(wrapper.vm.availableContextMenuActions).toStrictEqual(
       basicContextMenuActions,
     );
   });
 
   it("contains the option to render if options were provided with delay", async () => {
-    mocks.advancedPermissions["can_delete"] = true;
+    mocks.advancedPermissions["can_delete|child:24"] = true;
 
     const wrapper = shallowMount(BaseContextMenuActions, {
       props: {
         contextMenuActions: undefined,
-        formId: "24",
         entityId: "24",
         entityType: "BaseType" as Entitytyping,
+        bulkOperationsContext: BulkOperationsContextEnum.Home,
       },
     });
 
@@ -156,8 +167,9 @@ describe("BaseContextMenuActions", () => {
 
     await flushPromises();
 
-    expect(Object.keys(wrapper.vm.availableContextMenuActions).length).toBe(2);
-    expect(Object.keys(wrapper.vm.availableContextMenuActions)).toStrictEqual(
+    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
+    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(2);
+    expect(Object.keys(wrapper.vm.availableContextMenuActions!)).toStrictEqual(
       Object.keys(contextMenuActions),
     );
   });
