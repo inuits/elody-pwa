@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
+import { useFilterNormalization } from "@/composables/filters/useFilterNormalization";
+import { Matchers, AdvancedFilterTypes } from "@/generated-types/queries";
 import { sortFilters } from "./test-utils";
 
 describe("useFiltersBaseNew - Filter Normalization", () => {
@@ -1041,5 +1043,317 @@ describe("useFiltersBaseNew - Filter Normalization", () => {
         },
       ]),
     );
+  });
+});
+
+describe("useFilterNormalization - normalizeFilterValue", () => {
+  const { normalizeFilterValue } = useFilterNormalization();
+
+  const createTestFilter = (
+    type: AdvancedFilterTypes,
+    key: any = ["test.key"],
+  ) => ({
+    advancedFilter: {
+      type,
+      key,
+      defaultValue: null,
+      hidden: false,
+      isDisplayedByDefault: true,
+      options: [],
+    } as any,
+  });
+
+  describe("AnyMatcher", () => {
+    it("returns '*' for any filter type with AnyMatcher", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        "any value",
+        Matchers.AnyMatcher,
+      );
+      expect(result).toBe("*");
+    });
+  });
+
+  describe("NoneMatcher", () => {
+    it("returns empty string for any filter type with NoneMatcher", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        "any value",
+        Matchers.NoneMatcher,
+      );
+      expect(result).toBe("");
+    });
+  });
+
+  describe("ExactMatcher", () => {
+    it("normalizes text filter value for ExactMatcher", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        "test text",
+        Matchers.ExactMatcher,
+      );
+      expect(result).toBe("test text");
+    });
+
+    it("normalizes date filter value for ExactMatcher with datetime", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Date);
+      const dateTime = "2025-04-01T10:30:00";
+      const result = normalizeFilterValue(
+        filter,
+        dateTime,
+        Matchers.ExactMatcher,
+      );
+      expect(result).toContain("2025-04-01T10:30:00");
+    });
+
+    it("normalizes date filter value for ExactMatcher with plain date", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Date);
+      const result = normalizeFilterValue(
+        filter,
+        "2025-04-01",
+        Matchers.ExactMatcher,
+      );
+      expect(result).toBe("2025-04-01");
+    });
+
+    it("normalizes boolean filter value for ExactMatcher with array", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Boolean);
+      const result = normalizeFilterValue(
+        filter,
+        [true],
+        Matchers.ExactMatcher,
+      );
+      expect(result).toBe(true);
+    });
+
+    it("normalizes boolean filter value for ExactMatcher with single value", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Boolean);
+      const result = normalizeFilterValue(filter, false, Matchers.ExactMatcher);
+      expect(result).toBe(false);
+    });
+
+    it("normalizes selection filter value for ExactMatcher with array of objects", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const selectionArray = [
+        { value: "option1", label: "Option 1" },
+        { value: "option2", label: "Option 2" },
+      ];
+
+      const result = normalizeFilterValue(
+        filter,
+        selectionArray,
+        Matchers.ExactMatcher,
+      );
+      expect(result).toEqual(["option1", "option2"]);
+    });
+
+    it("normalizes selection filter value for ExactMatcher with array of strings", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const result = normalizeFilterValue(
+        filter,
+        ["option1", "option2"],
+        Matchers.ExactMatcher,
+      );
+      expect(result).toEqual(["option1", "option2"]);
+    });
+
+    it("normalizes selection filter value for ExactMatcher with single object", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const singleSelection = { value: "option1", label: "Option 1" };
+
+      const result = normalizeFilterValue(
+        filter,
+        singleSelection,
+        Matchers.ExactMatcher,
+      );
+      expect(result).toBe("option1");
+    });
+
+    it("normalizes selection filter value for ExactMatcher with single string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const result = normalizeFilterValue(
+        filter,
+        "option1",
+        Matchers.ExactMatcher,
+      );
+      expect(result).toBe("option1");
+    });
+
+    it("normalizes number filter value for ExactMatcher", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const result = normalizeFilterValue(filter, 42, Matchers.ExactMatcher);
+      expect(result).toBe(42);
+    });
+  });
+
+  describe("ContainsMatcher", () => {
+    it("normalizes string value to string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        "test string",
+        Matchers.ContainsMatcher,
+      );
+      expect(result).toBe("test string");
+    });
+
+    it("converts non-string value to string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        123,
+        Matchers.ContainsMatcher,
+      );
+      expect(result).toBe("123");
+    });
+
+    it("converts boolean to string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        true,
+        Matchers.ContainsMatcher,
+      );
+      expect(result).toBe("true");
+    });
+  });
+
+  describe("MinIncludedMatcher", () => {
+    it("normalizes range value with min only", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: 10, max: 50 };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.MinIncludedMatcher,
+      );
+      expect(result).toEqual({ min: 10, included: true });
+    });
+
+    it("returns undefined when min is null", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: null, max: 50 };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.MinIncludedMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when min is undefined", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: undefined, max: 50 };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.MinIncludedMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("MaxIncludedMatcher", () => {
+    it("normalizes range value with max only", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: 10, max: 50 };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.MaxIncludedMatcher,
+      );
+      expect(result).toEqual({ max: 50, included: true });
+    });
+
+    it("returns undefined when max is null", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: 10, max: null };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.MaxIncludedMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when max is undefined", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: 10, max: undefined };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.MaxIncludedMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("InBetweenMatcher", () => {
+    it("normalizes range value with both min and max", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: 10, max: 50 };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.InBetweenMatcher,
+      );
+      expect(result).toEqual({ min: 10, max: 50, included: true });
+    });
+
+    it("returns undefined when min is null", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: null, max: 50 };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.InBetweenMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when max is null", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: 10, max: null };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.InBetweenMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when both min and max are undefined", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const rangeValue = { min: undefined, max: undefined };
+      const result = normalizeFilterValue(
+        filter,
+        rangeValue,
+        Matchers.InBetweenMatcher,
+      );
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("Unknown matcher", () => {
+    it("returns value as-is for unknown matcher", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        "test value",
+        "UnknownMatcher" as any,
+      );
+      expect(result).toBe("test value");
+    });
+  });
+
+  describe("No matcher provided", () => {
+    it("returns value as-is when no matcher is provided", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(filter, "test value");
+      expect(result).toBe("test value");
+    });
   });
 });

@@ -139,7 +139,7 @@ export const useFilterNormalization = () => {
   const normalizeContainsValue = (value: any) =>
     typeof value === "string" ? value : String(value);
   const normalizeMinValue = (value: any) =>
-    isNil(value?.min) ? undefined : { max: value.min, included: true };
+    isNil(value?.min) ? undefined : { min: value.min, included: true };
   const normalizeMaxValue = (value: any) =>
     isNil(value?.max) ? undefined : { max: value.max, included: true };
   const normalizeRangeValue = (value: any) =>
