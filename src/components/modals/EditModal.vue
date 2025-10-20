@@ -5,6 +5,7 @@
   >
     <BulkOperationsSubmitBar
       :button-label="$t('bulk-operations.save')"
+      tooltip-label="save"
       :button-icon="DamsIcons.Save"
       :show-delete-button="editModeHelper.editMode === 'edit-delete'"
       :disabled="editModeHelper.showErrors"
