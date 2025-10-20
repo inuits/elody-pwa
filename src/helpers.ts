@@ -218,14 +218,15 @@ export const setCssVariable = (variableName: string, value: string): void => {
 export const asString = (x: string | string[]) => (Array.isArray(x) ? x[0] : x);
 
 export const stringIsUrl = (value: unknown): boolean => {
+  if (value && typeof value !== "string") return false;
+  const stringValue = value as string;
   try {
-    if (value && typeof value !== "string") return false;
-
-    const stringValue = value as string;
-    new URL(stringValue);
-    return true;
+    const url = new URL(stringValue);
+    return url.protocol === "http:" || url.protocol === "https:";
   } catch {
-    return false;
+    return /^[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(
+      stringValue,
+    );
   }
 };
 
@@ -481,9 +482,12 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   if (entity.intialValues?.name) title = entity.intialValues.name;
   if (entity.intialValues?.email) title = entity.intialValues.email;
   if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
-  if (entity.intialValues?.originalTitle) title = entity.intialValues.originalTitle;
-  if (entity.intialValues?.preferred_title) title = entity.intialValues.preferred_title;
-  if (entity.intialValues?.original_headtitle) title = entity.intialValues.original_headtitle;
+  if (entity.intialValues?.originalTitle)
+    title = entity.intialValues.originalTitle;
+  if (entity.intialValues?.preferred_title)
+    title = entity.intialValues.preferred_title;
+  if (entity.intialValues?.original_headtitle)
+    title = entity.intialValues.original_headtitle;
   return title;
 };
 
