@@ -141,7 +141,6 @@ import {
 } from "@/generated-types/queries";
 import {
   DamsIcons,
-  GetAdvancedFiltersDocument,
   GetFilterMatcherMappingDocument,
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
@@ -343,7 +342,7 @@ const determineFilterQuery = async (queryDocument: string): Promise<any> => {
     const query = props.route!.meta!.queries!.getFilters;
     return await loadDocument(query);
   } catch (error) {
-    return GetAdvancedFiltersDocument;
+    return await loadDocument("GetAdvancedFilters");
   }
 };
 

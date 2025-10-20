@@ -54,7 +54,6 @@ import {
   type Entitytyping,
   GetPaginationLimitOptionsDocument,
   type GetPaginationLimitOptionsQuery,
-  GetSortOptionsDocument,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { onMounted, ref, watch } from "vue";
@@ -185,7 +184,7 @@ const determineSortOptionsQuery = async (): Promise<any> => {
     const query = route!.meta!.queries!.getSortOptions;
     return await loadDocument(query);
   } catch (error) {
-    return GetSortOptionsDocument;
+    return await loadDocument("GetSortOptions");
   }
 };
 

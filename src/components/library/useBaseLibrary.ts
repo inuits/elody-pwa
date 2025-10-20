@@ -4,7 +4,6 @@ import isEqual from "lodash.isequal";
 import type { SearchInputType } from "@/generated-types/queries";
 import {
   Entitytyping,
-  GetEntitiesDocument,
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
@@ -203,12 +202,12 @@ export const useBaseLibrary = (
 
   const determineEntitiesQuery = async (route: RouteLocationNormalizedLoaded, manipulationQueryDocument: string | undefined): Promise<any> => {
     if (manipulationQueryDocument) return manipulationQueryDocument;
+    const { loadDocument } = useImport();
     try {
-      const { loadDocument } = useImport();
       const query = route!.meta!.queries!.getEntities;
       return await loadDocument(query);
     } catch (error) {
-      return GetEntitiesDocument;
+      return await loadDocument("GetEntities");
     }
   };
 

@@ -1,13 +1,11 @@
-import { computed, inject, onBeforeMount, onMounted, ref, watch } from "vue";
+import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { useQuery } from "@vue/apollo-composable";
 
 import type { Entitytyping } from "@/generated-types/queries";
 import {
   ActionContextEntitiesSelectionType,
   BulkOperationTypes,
   type DropdownOption,
-  GetBulkOperationsDocument,
   ModalStyle,
   RouteNames,
   TypeModals,
@@ -315,8 +313,7 @@ export const useBulkOperationsActionsBar = (
       const query = route!.meta!.queries!.getBulkOperations;
       return await loadDocument(query);
     } catch (error) {
-      return GetBulkOperationsDocument;
-    } finally {
+      return await loadDocument("GetBulkOperations");
     }
   };
 
