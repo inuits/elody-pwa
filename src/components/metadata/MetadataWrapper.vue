@@ -60,7 +60,6 @@
               :disabled="!linkedEntityId && !refMetadata.lineClamp"
               :line-clamp="refMetadata.lineClamp || 1"
             >
-              {{ refMetadata.value }}
               <MetadataFormatter
                 v-if="refMetadata.value?.formatter"
                 v-bind="refMetadata.value"
@@ -573,4 +572,9 @@ onBeforeMount(() => {
 onUnmounted(() => {
   deleteDropdownOptionStates();
 });
+
+watch(
+  () => refMetadata.value,
+  (newValue) => console.log(newValue),
+);
 </script>
