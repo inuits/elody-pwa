@@ -574,7 +574,7 @@ onUnmounted(() => {
 });
 
 watch(
-  () => refMetadata.value,
+  () => refMetadata.value.value,
   (newValue) => console.log(newValue),
 );
 </script>
