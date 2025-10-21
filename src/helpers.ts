@@ -224,9 +224,7 @@ export const stringIsUrl = (value: unknown): boolean => {
     const url = new URL(stringValue);
     return url.protocol === "http:" || url.protocol === "https:";
   } catch {
-    return /^[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(
-      stringValue,
-    );
+    return /^(https?:\/\/|www\.)/i.test(stringValue);
   }
 };
 
