@@ -59,7 +59,13 @@
           <div class="text-sm text-black px-2 py-1">
             {{ t(option.label) }}
           </div>
-          <button class="hover:bg-red-200 px-2" type="button" @click="() => removeOptionFromListOfOptions(option)">&times;</button>
+          <button
+            class="hover:bg-red-200 px-2"
+            type="button"
+            @click="() => removeOptionFromListOfOptions(option)"
+          >
+            &times;
+          </button>
         </div>
       </template>
     </VueSelect>
@@ -132,6 +138,7 @@ const deselectItem = () => {
 };
 
 const handleUpdateItem = (value: any) => {
+  console.log("update value", value);
   if (!value && !props.clearable)
     selectedItem.value = selectedItem.value || props.options[0].value;
   emit("update:modelValue", selectedItem.value);
@@ -167,9 +174,11 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
 
 const removeOptionFromListOfOptions = (option: any) => {
   if (!Array.isArray(selectedItem.value)) return;
-  selectedItem.value = selectedItem.value.filter((selectedOption) => selectedOption !== option.value);
+  selectedItem.value = selectedItem.value.filter(
+    (selectedOption) => selectedOption !== option.value,
+  );
   emit("update:modelValue", selectedItem.value);
-}
+};
 
 const shouldCalculateWidth = ref(false);
 const calculatedWidth = ref(200);
@@ -187,8 +196,8 @@ const calculateWidth = () => {
   span.style.visibility = "hidden";
   span.style.whiteSpace = "nowrap";
   span.style.font = `
-    ${getComputedStyle(document.body).getPropertyValue("--vs-font-weight")} 
-    ${getComputedStyle(document.body).getPropertyValue("--vs-font-size")} 
+    ${getComputedStyle(document.body).getPropertyValue("--vs-font-weight")}
+    ${getComputedStyle(document.body).getPropertyValue("--vs-font-size")}
     ${getComputedStyle(document.body).getPropertyValue("--vs-font-family")}
   `;
 
@@ -220,6 +229,7 @@ watch(
 watch(
   () => props.options,
   () => {
+    console.log("options", props.options);
     if (props.options.length === 0 || !props.selectFirstOptionByDefault) return;
     selectedItem.value = props.options[0].value;
     emit("update:modelValue", selectedItem.value);
@@ -229,6 +239,7 @@ watch(
 watch(
   () => props.modelValue,
   () => {
+    console.log("modelvalue", props.modelValue);
     if (!props.modelValue) return;
     if (typeof props.modelValue === "string") {
       selectedItem.value = props.options.find(
