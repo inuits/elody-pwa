@@ -59,7 +59,9 @@ const useFormHelper = () => {
       console.error(`Unable to discard, no form with key: ${key}`);
       return;
     }
+    console.log("Form will be reset:", form);
     form.resetForm();
+    console.log("Form has been reset:", form);
   };
 
   const addForm = (key: string, form: FormContext<any>) => {
