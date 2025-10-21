@@ -44,6 +44,8 @@ const props = withDefaults(
 
 const formatterType = computed(() => {
   const [type] = props.formatter.split("|");
+  console.log("type:", type);
+  console.log("label:", props.label);
   return type;
 });
 
