@@ -15,10 +15,11 @@
       :icon="primaryOption.icon"
       @click.stop=" (event: MouseEvent) => {
         handleEmit(primaryOption);
-        contextMenuHandler.openContextMenu({
-              x: event.clientX,
-              y: event.clientY,
-        });
+        if (primaryOption.value === BulkOperationTypes.OpenDropdown)
+          contextMenuHandler.openContextMenu({
+                x: event.clientX,
+                y: event.clientY,
+          });
       }"
     />
     <BaseButtonNew
@@ -37,7 +38,7 @@
       "
     />
 
-    <div v-if="subDropdownOptions?.length > 0" class="!m-0">
+    <div v-if="hasSubDropdownOptions" class="!m-0">
       <BaseContextMenu
         :context-menu="contextMenuHandler.getContextMenu()"
         :direction="ContextMenuDirection.Left"
@@ -82,6 +83,7 @@ import {
   DamsIcons,
   type DropdownOption,
   Entitytyping,
+  BulkOperationTypes,
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
@@ -165,6 +167,10 @@ const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
 
 const hasSecondaryOptions = computed(() => {
   return filterSecondaryDropdownOptions.value.length > 0;
+});
+
+const hasSubDropdownOptions = computed(() => {
+  return props.subDropdownOptions.length > 0;
 });
 
 const handleEmit = (action: DropdownOption) => {
