@@ -343,12 +343,6 @@ const isFieldRequired = computed(() => {
   return false;
 });
 
-const isMaxDateToday = computed(() => {
-  return refMetadata.value?.inputField?.validation?.value?.includes(
-    ValidationRules.MaxDateToday,
-  );
-});
-
 const unescapeString = (str: string | undefined): string => {
   return str.replace(/\\\\/g, "\\");
 };
@@ -452,7 +446,7 @@ const veeValidateField = computed(() => {
   else return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId.value}`;
 });
 
-const { errorMessage, value, meta, setErrors } = useField<
+const { errorMessage, value, meta } = useField<
   string | BaseRelationValuesInput[]
 >(veeValidateField, rules, { label: label });
 
