@@ -59,7 +59,13 @@
           <div class="text-sm text-black px-2 py-1">
             {{ t(option.label) }}
           </div>
-          <button class="hover:bg-red-200 px-2" type="button" @click="() => removeOptionFromListOfOptions(option)">&times;</button>
+          <button
+            class="hover:bg-red-200 px-2"
+            type="button"
+            @click="() => removeOptionFromListOfOptions(option)"
+          >
+            &times;
+          </button>
         </div>
       </template>
     </VueSelect>
@@ -128,12 +134,14 @@ const { someModalIsOpened } = useBaseModal();
 const selectedItem = ref<any | any[] | undefined>(undefined);
 
 const deselectItem = () => {
+  console.log("Emitted from deselect");
   emit("update:modelValue", "");
 };
 
 const handleUpdateItem = (value: any) => {
   if (!value && !props.clearable)
     selectedItem.value = selectedItem.value || props.options[0].value;
+  console.log("Emitted from update item");
   emit("update:modelValue", selectedItem.value);
 };
 
@@ -167,9 +175,12 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
 
 const removeOptionFromListOfOptions = (option: any) => {
   if (!Array.isArray(selectedItem.value)) return;
-  selectedItem.value = selectedItem.value.filter((selectedOption) => selectedOption !== option.value);
+  selectedItem.value = selectedItem.value.filter(
+    (selectedOption) => selectedOption !== option.value,
+  );
+  console.log("Emitted from removeOptionFromListOfOptions");
   emit("update:modelValue", selectedItem.value);
-}
+};
 
 const shouldCalculateWidth = ref(false);
 const calculatedWidth = ref(200);
@@ -222,6 +233,7 @@ watch(
   () => {
     if (props.options.length === 0 || !props.selectFirstOptionByDefault) return;
     selectedItem.value = props.options[0].value;
+    console.log("Emitted from watch options");
     emit("update:modelValue", selectedItem.value);
   },
   { immediate: true },
