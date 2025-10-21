@@ -1,7 +1,6 @@
 import {
   type BaseRelationValuesInput,
   EditStatus,
-  ValidationRules,
   type IntialValues,
   type MetadataValuesInput,
   type PanelMetaData,
@@ -55,7 +54,12 @@ const useFormHelper = () => {
   };
 
   const discardEditForForm = (key: string) => {
-    getForm(key)?.resetForm();
+    const form = getForm(key);
+    if (!form) {
+      console.error(`Unable to discard, no form with key: ${key}`);
+      return;
+    }
+    form.resetForm();
   };
 
   const addForm = (key: string, form: FormContext<any>) => {
