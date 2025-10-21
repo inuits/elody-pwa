@@ -13,7 +13,13 @@
       :label="t(primaryOption.label, [entityTypeLabel])"
       :tooltip-label="primaryOption.actionContext?.labelForTooltip"
       :icon="primaryOption.icon"
-      @click="handleEmit(primaryOption)"
+      @click.stop=" (event: MouseEvent) => {
+        handleEmit(primaryOption);
+        contextMenuHandler.openContextMenu({
+              x: event.clientX,
+              y: event.clientY,
+        });
+      }"
     />
     <BaseButtonNew
       v-if="hasSecondaryOptions"
@@ -21,27 +27,50 @@
       :icon="DamsIcons.EllipsisV"
       class="!w-max !p-2"
       @click.stop="
-        (event: MouseEvent) =>
+        (event: MouseEvent) => {
+          clearSubDropdownOptions();
           contextMenuHandler.openContextMenu({
             x: event.clientX,
             y: event.clientY,
-          })
+          });
+        }
       "
     />
 
-    <BaseContextMenu
-      :context-menu="contextMenuHandler.getContextMenu()"
-      :direction="ContextMenuDirection.Left"
-    >
-      <BaseContextMenuItem
-        v-for="(option, idx) in filterSecondaryDropdownOptions"
-        :key="idx"
-        :label="t(option?.label, [entityTypeLabel])"
-        :tooltip-label="option?.actionContext?.labelForTooltip"
-        :disable="!option.active"
-        @clicked="handleEmit(option)"
-      />
-    </BaseContextMenu>
+    <div v-if="subDropdownOptions?.length > 0" class="!m-0">
+      <BaseContextMenu
+        :context-menu="contextMenuHandler.getContextMenu()"
+        :direction="ContextMenuDirection.Left"
+      >
+        <BaseContextMenuItem
+          v-for="(option, idx) in subDropdownOptions"
+          :key="idx"
+          :label="
+            t(option?.label, [
+              t(`entity-translations.plural.${props.entityType}`),
+            ])
+          "
+          :tooltip-label="option?.actionContext?.labelForTooltip"
+          :disable="!option.active"
+          @clicked="handleEmit(option)"
+        />
+      </BaseContextMenu>
+    </div>
+    <div v-else>
+      <BaseContextMenu
+        :context-menu="contextMenuHandler.getContextMenu()"
+        :direction="ContextMenuDirection.Left"
+      >
+        <BaseContextMenuItem
+          v-for="(option, idx) in filterSecondaryDropdownOptions"
+          :key="idx"
+          :label="t(option?.label, [entityTypeLabel])"
+          :tooltip-label="option?.actionContext?.labelForTooltip"
+          :disable="!option.active"
+          @clicked="handleEmit(option)"
+        />
+      </BaseContextMenu>
+    </div>
   </div>
 </template>
 
@@ -49,25 +78,21 @@
 import { computed, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
-  ActionContextEntitiesSelectionType,
-  ActionContextViewModeTypes,
   ContextMenuDirection,
   DamsIcons,
   type DropdownOption,
   Entitytyping,
-  PanelType,
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
-import { useEditMode } from "@/composables/useEdit";
 import { auth } from "@/main";
 import {
   usePermissions,
   advancedPermissions,
 } from "@/composables/usePermissions";
-import { getValueForPanelMetadata } from "@/helpers";
+import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
 
 const emit = defineEmits(["update:modelValue"]);
 const {
@@ -84,15 +109,17 @@ const props = withDefaults(
     itemsSelected?: boolean;
     entityType: Entitytyping;
     parentEntityId?: string | undefined;
+    subDropdownOptions?: DropdownOption[];
+    clearSubDropdownOptions: Function;
   }>(),
   {
     isMainActionDisabled: false,
     itemsSelected: false,
     options: () => [],
+    subDropdownOptions: () => [],
   },
 );
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
-const useEditHelper = useEditMode(props.parentEntityId);
 const { t } = useI18n();
 
 const availableOptions = ref<DropdownOption[]>([]);
@@ -107,7 +134,11 @@ const primaryOption = computed(() => {
   if (option) {
     option = {
       ...option,
-      active: determineActiveState(option),
+      active: determineActiveState(
+        option,
+        props.parentEntityId,
+        props.itemsSelected,
+      ),
     };
   }
   return option;
@@ -123,7 +154,11 @@ const secondaryOptions = computed(() => {
 
 const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
   return secondaryOptions.value.map((dropdownOption) => {
-    dropdownOption.active = determineActiveState(dropdownOption);
+    dropdownOption.active = determineActiveState(
+      dropdownOption,
+      props.parentEntityId,
+      props.itemsSelected,
+    );
     return dropdownOption;
   });
 });
@@ -136,47 +171,18 @@ const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
 };
 
-const determineActiveState = (item: DropdownOption) => {
-  if (!item.actionContext) return true;
-
-  let metadataConditionAccepts = true;
-  if (item.actionContext.matchMetadataValue) {
-    item.actionContext.matchMetadataValue.forEach((condition) => {
-      const result = getValueForPanelMetadata(
-        PanelType.Metadata,
-        condition.matchKey,
-        props.parentEntityId,
-        undefined,
-      );
-      if (result !== undefined && result.toString() != condition.matchValue)
-        metadataConditionAccepts = false;
-    });
-  }
-
-  let isActive = false;
-  const activeViewMode = item.actionContext.activeViewMode;
-  const entitiesSelectionType = item.actionContext.entitiesSelectionType;
-  const viewMode = useEditHelper.isEdit
-    ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
-    : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
-  const numberOfEntities = props.itemsSelected
-    ? entitiesSelectionType === ActionContextEntitiesSelectionType.SomeSelected
-    : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
-  isActive = viewMode && numberOfEntities;
-
-  return isActive && metadataConditionAccepts;
-};
-
 const getAvailableOptions = () => {
   const permittedOptions = props.options.filter((item: DropdownOption) => {
     return (
       !item.can ||
       (item.can &&
         item.can.length > 0 &&
-        advancedPermissions[createPermissionCacheKey({ 
-          permission: item.can[0], 
-          parentEntityId: props.parentEntityId 
-        })])
+        advancedPermissions[
+          createPermissionCacheKey({
+            permission: item.can[0],
+            parentEntityId: props.parentEntityId,
+          })
+        ])
     );
   });
 
@@ -186,10 +192,12 @@ const getAvailableOptions = () => {
       (item?.requiresAuth && auth.isAuthenticated.value === true) ||
       (item.can &&
         item.can.length > 0 &&
-        advancedPermissions[createPermissionCacheKey({ 
-          permission: item.can[0], 
-          parentEntityId: props.parentEntityId 
-        })])
+        advancedPermissions[
+          createPermissionCacheKey({
+            permission: item.can[0],
+            parentEntityId: props.parentEntityId,
+          })
+        ])
     );
   });
 };

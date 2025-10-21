@@ -11,6 +11,8 @@ import {
   TypeModals,
   BulkNavigationPages,
   type BulkOperationModal,
+  ActionContextViewModeTypes,
+  PanelType
 } from "@/generated-types/queries";
 import {
   type Context,
@@ -23,6 +25,8 @@ import { useImport } from "@/composables/useImport";
 import { useStateManagement } from "@/composables/useStateManagement";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { apolloClient } from "@/main";
+import { getValueForPanelMetadata } from "@/helpers";
+import { useEditMode } from "@/composables/useEdit";
 
 export interface BulkOperationsActionsBarProps {
   context: Context;
@@ -92,6 +96,7 @@ export const useBulkOperationsActionsBar = (
 
   const { openModal, getModalInfo } = useBaseModal();
 
+  const subDropdownOptions = ref<DropdownOption[]>([]);
   const refetchEnabled = ref<boolean>(false);
   const bulkOperations = ref<DropdownOption[]>([]);
   const selectedBulkOperation = ref<DropdownOption>();
@@ -272,6 +277,10 @@ export const useBulkOperationsActionsBar = (
     }
   };
 
+  const clearSubDropdownOptions = () => {
+    subDropdownOptions.value = [];
+  };
+
   const handleSelectedBulkOperation = () => {
     if (!selectedBulkOperation.value) {
       return;
@@ -280,6 +289,13 @@ export const useBulkOperationsActionsBar = (
     const bulkOperationModalConfig =
       selectedBulkOperation.value.bulkOperationModal;
     const operationType = selectedBulkOperation.value.value;
+
+    if (operationType === BulkOperationTypes.OpenDropdown) {
+      subDropdownOptions.value = selectedBulkOperation.value?.subOptions.map((dropdownOption) => {
+        dropdownOption.active = determineActiveState(dropdownOption, props.parentEntityId, itemsSelected.value);
+        return dropdownOption;
+      });
+    }
 
     if (!bulkOperationModalConfig || !operationType) {
       return;
@@ -397,17 +413,16 @@ export const useBulkOperationsActionsBar = (
     selectedBulkOperation,
     bulkOperationsPromiseIsResolved,
     selectedSkip,
-
     entityType,
     hasBulkOperationsWithItemsSelection,
     itemsSelected,
-
+    subDropdownOptions,
+    clearSubDropdownOptions,
     handleSelectedBulkOperation,
     setSkip,
     getEnqueuedItemCount,
     getEnqueuedItems,
     dequeueAllItemsForBulkProcessing,
-
     executeOperationSpecificInitialization,
     determineModalStyle,
     getModalContextForOperation,
@@ -419,3 +434,36 @@ export const useBulkOperationsActionsBar = (
 export type UseBulkOperationsActionsBar = ReturnType<
   typeof useBulkOperationsActionsBar
 >;
+
+export const determineActiveState = (item: DropdownOption, parentEntityId: string | undefined, itemsSelected: boolean) => {
+  const useEditHelper = useEditMode(parentEntityId);
+
+  if (!item.actionContext) return true;
+
+  let metadataConditionAccepts = true;
+  if (item.actionContext.matchMetadataValue) {
+    item.actionContext.matchMetadataValue.forEach((condition) => {
+      const result = getValueForPanelMetadata(
+        PanelType.Metadata,
+        condition.matchKey,
+        parentEntityId,
+        undefined,
+      );
+      if (result !== undefined && result.toString() != condition.matchValue)
+        metadataConditionAccepts = false;
+    });
+  }
+
+  let isActive = false;
+  const activeViewMode = item.actionContext.activeViewMode;
+  const entitiesSelectionType = item.actionContext.entitiesSelectionType;
+  const viewMode = useEditHelper.isEdit
+    ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
+    : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
+  const numberOfEntities = itemsSelected
+    ? entitiesSelectionType === ActionContextEntitiesSelectionType.SomeSelected
+    : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
+  isActive = viewMode && numberOfEntities;
+
+  return isActive && metadataConditionAccepts;
+};

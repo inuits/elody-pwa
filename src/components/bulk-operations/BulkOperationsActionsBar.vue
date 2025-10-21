@@ -86,6 +86,8 @@
           :items-selected="itemsSelected"
           :entity-type="entityType"
           :parent-entity-id="parentEntityId"
+          :sub-dropdown-options="subDropdownOptions"
+          :clear-sub-dropdown-options="clearSubDropdownOptions"
         />
       </div>
     </div>
@@ -93,8 +95,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Entitytyping } from "@/generated-types/queries";
-import { DamsIcons } from "@/generated-types/queries";
+import {
+  type Entitytyping,
+  DamsIcons,
+} from "@/generated-types/queries";
 import {
   type Context,
   type InBulkProcessableItem,
@@ -179,6 +183,8 @@ const {
   selectedSkip,
   hasBulkOperationsWithItemsSelection,
   itemsSelected,
+  subDropdownOptions,
+  clearSubDropdownOptions,
   handleSelectedBulkOperation,
   setSkip,
   getEnqueuedItemCount,
