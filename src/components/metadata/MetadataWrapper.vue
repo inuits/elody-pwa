@@ -60,16 +60,19 @@
               :disabled="!linkedEntityId && !refMetadata.lineClamp"
               :line-clamp="refMetadata.lineClamp || 1"
             >
+              {{ refMetadata.value }}
               <MetadataFormatter
                 v-if="refMetadata.value?.formatter"
                 v-bind="refMetadata.value"
                 :translation-key="refMetadata.valueTranslationKey"
-                :entity="{type: entityType}"
+                :entity="{ type: entityType }"
               />
               <ViewModesAutocompleteRelations
                 v-else-if="
-                  refMetadata.inputField?.type === InputFieldTypes.DropdownMultiselectRelations ||
-                  refMetadata.inputField?.type === InputFieldTypes.DropdownSingleselectRelations
+                  refMetadata.inputField?.type ===
+                    InputFieldTypes.DropdownMultiselectRelations ||
+                  refMetadata.inputField?.type ===
+                    InputFieldTypes.DropdownSingleselectRelations
                 "
                 v-model="refMetadata.value"
                 :is-read-only="true"
@@ -516,13 +519,13 @@ const initializeDropdownOptionStates = () => {
 const deleteDropdownOptionStates = () => {
   useGetDropdownOptions(
     `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
-    "delete"
+    "delete",
   );
   useGetDropdownOptions(
     `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
-    "delete"
+    "delete",
   );
-}
+};
 
 if (typeof refMetadata.value.value !== "object") {
   watch(
