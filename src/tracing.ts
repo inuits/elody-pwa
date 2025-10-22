@@ -6,7 +6,7 @@ import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions"
 import { Resource } from "@opentelemetry/resources";
 
 const exporter = new OTLPTraceExporter({
-  url: "http://alloy:4318/v1/traces",
+  url: "http://alloy.localhost:8000/otlp/v1/traces",
 });
 
 const provider = new WebTracerProvider({
