@@ -10,10 +10,12 @@
       minWidth: shouldCalculateWidth ? `${calculatedWidth}px` : 'auto',
     }"
   >
+
+  
     <VueSelect
       class="!text-text-body !bg-background-light border-none !rounded-lg"
       v-model="selectedItem"
-      :teleport="someModalIsOpened ? undefined : 'body'"
+      :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
       :options="filterDropdownOptions"
       :placeholder="label"
       :is-disabled="disable"
@@ -22,6 +24,9 @@
       :should-autofocus-option="false"
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
+      :classes="{
+        menuContainer: `border border-gray-200 rounded-md shadow-lg ${someModalIsOpened && '!fixed'}`
+      }"
     >
       <template #option="{ option }">
         <div v-if="option.value !== selectedItem" class="mr-2">
