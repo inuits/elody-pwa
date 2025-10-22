@@ -28,9 +28,7 @@ const props = withDefaults(
 );
 
 const getStyles = () => {
-  const styles: { [key: string]: string } = {
-    top: `${props.contextMenu.position.y}px`,
-  };
+  const styles: { [key: string]: string } = { };
 
   if (
     document.body.clientWidth - props.contextMenu.position.x < 250 ||
@@ -41,6 +39,14 @@ const getStyles = () => {
     }px`;
   } else {
     styles["left"] = `${props.contextMenu.position.x}px`;
+  }
+
+  if (document.body.clientHeight - props.contextMenu.position.y < 250) {
+    styles["bottom"] = `${
+      document.body.clientHeight - props.contextMenu.position.y
+    }px`;
+  } else {
+    styles["top"] = `${props.contextMenu.position.y}px`
   }
 
   return styles;
