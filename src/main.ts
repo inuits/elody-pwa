@@ -1,3 +1,4 @@
+import "./tracing";
 import {
   ApolloClient,
   InMemoryCache,
@@ -33,6 +34,7 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
+import { context, propagation } from "@opentelemetry/api";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -102,6 +104,14 @@ const start = async (): Promise<void> => {
       createHttpLink({
         uri: config.graphQlLink || "/api/graphql",
         headers: { "Apollo-Require-Preflight": "true" },
+        fetch: (uri, options) => {
+          const activeContext = context.active();
+          const headers = new Headers(options?.headers || {});
+          propagation.inject(activeContext, headers, {
+            set: (h, k, v) => h.set(k, v),
+          });
+          return fetch(uri, { ...options, headers });
+        },
       }),
     ),
     cache: new InMemoryCache(),
@@ -143,7 +153,7 @@ const start = async (): Promise<void> => {
       environment: config.NOMAD_NAMESPACE,
     });
   }
-  
+
   app.mount("#app");
 };
 start();

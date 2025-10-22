@@ -186,13 +186,14 @@ import {
   getMappedSlug,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, watch, onMounted, onUnmounted } from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient, router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
+import { trace, context, propagation } from "@opentelemetry/api";
 
 const props = withDefaults(
   defineProps<{
@@ -402,6 +403,28 @@ const containerNameForPreview = computed(() => {
   return props.showCurrentEntityFlow
     ? "preview"
     : "preview-without-current-entity-flow";
+});
+
+let listViewTracingSpan: any = null;
+
+onMounted(() => {
+  const tracer = trace.getTracer("frontend");
+  listViewTracingSpan = tracer.startSpan(`ListView flow: ${props.entityType}`, {
+    attributes: {
+      "ui.component": "ListView",
+      "entity.type": props.entityType,
+      state: "mounted",
+    },
+  });
+
+  listViewTracingSpan.addEvent("ListView mounted");
+});
+
+onUnmounted(() => {
+  if (listViewTracingSpan) {
+    listViewTracingSpan.addEvent("ListView unmounted");
+    listViewTracingSpan.end();
+  }
 });
 </script>
 
