@@ -177,6 +177,7 @@ import {
   type PanelRelationMetaData,
   type PanelRelationRootData,
   type Entitytyping,
+  type BaseEntity,
 } from "@/generated-types/queries";
 import {
   computed,
@@ -221,6 +222,7 @@ const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
+const parentEntity: BaseEntity = inject("ParentEntityProvider");
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
 const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
@@ -505,7 +507,7 @@ const initializeDropdownOptionStates = () => {
     `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
     "get",
     metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    props.formId as string,
+    parentEntity?.value,
     refMetadata.value.inputField?.relationType,
     refMetadata.value.inputField?.fromRelationType,
     refMetadata.value.inputField.advancedFilterInputForSearchingOptions,

@@ -13,13 +13,13 @@ import { computed, inject, ref } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
-import { getEntityTitle } from "@/helpers";
+import { extractValueFromObject, getEntityTitle } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { omitDeep } from "@apollo/client/utilities";
 
 export const useGetDropdownOptionsState = (
   entityType: Entitytyping,
-  parent: "fetchAll" | string,
+  parent: "fetchAll" | BaseEntity,
   relationType: string = "",
   fromRelationType: string = "",
   searchFilterInput?: AdvancedFilterInput,
@@ -54,8 +54,17 @@ export const useGetDropdownOptionsState = (
   ): AdvancedFilterInput => {
     if (relationFilter) {
       const completeRelationFilter = omitDeep(relationFilter, "__typename");
-      if (completeRelationFilter.value.includes("$parentId"))
-        completeRelationFilter.value = [parent];
+
+      let value = completeRelationFilter.value;
+      if (typeof value === "string" && value.startsWith("$")) {
+        const path = value.substring(1);
+        if (path.includes("parentId"))
+          value = [parent];
+        else
+          value = extractValueFromObject(parent, path) ?? [];
+      }
+      completeRelationFilter.value = value;
+
       return completeRelationFilter;
     }
 
@@ -88,7 +97,7 @@ export const useGetDropdownOptionsState = (
         parent !== "fetchAll" && (relationType || fromRelationType)
           ? [
               ...filters,
-              getRelationFilter(parent, fromRelationType, relationFilter),
+              getRelationFilter(formId, fromRelationType, relationFilter),
             ]
           : filters;
       entityTypeToSet =
@@ -99,7 +108,7 @@ export const useGetDropdownOptionsState = (
       filters =
         parent === "fetchAll" || !fromRelationType
           ? [baseTypeFilter]
-          : [getRelationFilter(parent, fromRelationType, relationFilter)];
+          : [getRelationFilter(formId, fromRelationType, relationFilter)];
     }
     setIsSearchLibrary(false);
     setAdvancedFilters(filters as AdvancedFilterInput[]);

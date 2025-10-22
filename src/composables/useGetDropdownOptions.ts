@@ -3,6 +3,7 @@ import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsS
 import type {
   AdvancedFilterInput,
   Entitytyping,
+  BaseEntity,
 } from "@/generated-types/queries";
 
 const dropdownOptionsStates = ref<Record<string, ReturnType<typeof useGetDropdownOptionsState>>>({});
@@ -11,7 +12,7 @@ export const useGetDropdownOptions = (
   dropdownOptionsStateName: string = "GlobalDropdownOptionsState",
   mode: "get" | "delete" = "get",
   entityType?: Entitytyping,
-  parent?: "fetchAll" | string,
+  parent?: "fetchAll" | BaseEntity,
   relationType: string = "",
   fromRelationType: string = "",
   searchFilterInput?: AdvancedFilterInput,
