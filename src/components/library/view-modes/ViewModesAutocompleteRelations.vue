@@ -304,10 +304,4 @@ watch(
     populateSelectedOptions(dropdownOptions);
   }
 )
-watch(
-  () => allEntitiesHelper.value?.entityDropdownOptions,
-  (dropdownOptions: DropdownOption[]) => {
-    populateSelectedOptions(dropdownOptions);
-  }
-)
 </script>
