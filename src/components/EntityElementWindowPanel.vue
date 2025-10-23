@@ -82,6 +82,8 @@
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
               :custom-bulk-operations="metadata.customBulkOperations"
+              :custom-query-entity-picker-list="metadata.customQueryEntityPickerList"
+              :custom-query-entity-picker-list-filters="metadata.customQueryEntityPickerListFilters"
               :filters-need-context="metadata.filtersNeedContext"
               :search-input-type="metadata.searchInputType"
               :base-library-mode="metadata.baseLibraryMode"
