@@ -78,8 +78,7 @@ export const useGetDropdownOptionsState = (
 
   const initialize = async () => {
     if (abortController.value) {
-      abortController.value.abort();
-      isLoading.value = false;
+      return;
     }
     abortController.value = new AbortController();
     currentRequestId.value++;

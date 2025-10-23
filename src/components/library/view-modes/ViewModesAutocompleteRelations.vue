@@ -297,4 +297,17 @@ const handleTagClick = async (tag: DropdownOption) => {
   if (entityType && linkSetting)
     goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
 };
+
+watch(
+  () => relatedEntitiesHelper.value?.entityDropdownOptions,
+  (dropdownOptions: DropdownOption[]) => {
+    populateSelectedOptions(dropdownOptions);
+  }
+)
+watch(
+  () => allEntitiesHelper.value?.entityDropdownOptions,
+  (dropdownOptions: DropdownOption[]) => {
+    populateSelectedOptions(dropdownOptions);
+  }
+)
 </script>
