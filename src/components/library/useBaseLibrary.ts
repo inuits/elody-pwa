@@ -142,7 +142,7 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     queryVariables.skip = skip;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_routes);
+    if (forceFetch && _route !== undefined) await getEntities(_route);
   };
 
   const setLimit = async (
