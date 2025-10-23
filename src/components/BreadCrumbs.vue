@@ -133,7 +133,7 @@ const config: any = inject("config");
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
 const breadCrumbRoutesExist = computed(
-  () => breadcrumbRoutes.value.length > 0 || currentRouteTitle.value,
+  () => breadcrumbRoutes.value.length > 0 || !!currentRouteTitle.value,
 );
 const router = useRouter();
 const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
@@ -154,6 +154,7 @@ watch(
       currentRouteTitle.value = "";
     }
   },
+  { immediate: true }
 );
 
 router.beforeEach(() => {

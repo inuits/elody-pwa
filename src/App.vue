@@ -52,9 +52,10 @@ import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
-import CreateSavedSearchModal from "./components/CreateSavedSearchModal.vue";
+import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
 import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 
 const route = useRoute();
 const { showSplashScreen } = useApp();
@@ -73,6 +74,8 @@ useHead({
 const refreshPage = (): void => {
   window.location.reload();
 };
+
+useCrossTabAuthSync();
 </script>
 
 <style>

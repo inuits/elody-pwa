@@ -103,51 +103,34 @@
 </template>
 
 <script lang="ts" setup>
-import useTenant from "@/composables/useTenant";
-import { inject } from "vue";
 import { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
-import { useApp } from "@/composables/useApp";
 import { auth } from "@/main";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
 import { getUserName } from "../helpers";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { useStateManagement } from "@/composables/useStateManagement";
-import { resetAdvancedPermissions } from "@/composables/usePermissions";
+import { useLogout } from "@/composables/useLogout";
 
 defineProps({
   isExpanded: Boolean,
 });
 
-const config = inject<{
-  features: { hasTenantSelect: boolean };
-  allowAnonymousUsers: boolean;
-}>("config");
-
-const route = useRoute();
-const { initApp } = useApp();
 const { t } = useI18n();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
-const { setTennantInSession } = useTenant();
+const { performLogout } = useLogout();
 
-const performLogout = async () => {
-  await auth.logout();
-  resetAdvancedPermissions();
-  useStateManagement().clearStorage();
-  setTennantInSession("");
-  if (route.meta.requiresAuth === true) await auth.redirectToLogin();
-  await initApp(auth, config);
+const handleLogout = async () => {
+  await performLogout();
 };
 
 const openConfirmationModal = () => {
   initializeConfirmModal({
     confirmButton: {
       buttonCallback: async () => {
-        await performLogout();
+        await handleLogout();
       },
     },
     declineButton: {
