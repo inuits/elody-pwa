@@ -14,8 +14,8 @@ const provider = new WebTracerProvider({
     [SemanticResourceAttributes.SERVICE_NAME]: "frontend",
   }),
 });
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 provider.register({
   propagator: new W3CTraceContextPropagator(),
 });

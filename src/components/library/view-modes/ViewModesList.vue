@@ -194,6 +194,7 @@ import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient, router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { trace, context, propagation } from "@opentelemetry/api";
+import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
 
 const props = withDefaults(
   defineProps<{
@@ -417,13 +418,27 @@ onMounted(() => {
     },
   });
 
+  console.log(
+    "[Tracing] Started ListView span:",
+    listViewTracingSpan.spanContext(),
+  );
+
   listViewTracingSpan.addEvent("ListView mounted");
 });
+
+const provider =
+  (trace.getTracerProvider?.() as WebTracerProvider) ?? undefined;
 
 onUnmounted(() => {
   if (listViewTracingSpan) {
     listViewTracingSpan.addEvent("ListView unmounted");
     listViewTracingSpan.end();
+
+    window.addEventListener("beforeunload", () => {
+      provider.forceFlush().catch((err) => {
+        console.warn("[Tracing] flush failed on unload", err);
+      });
+    });
   }
 });
 </script>
