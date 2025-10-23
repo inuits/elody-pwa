@@ -178,6 +178,7 @@ contextMenuItems.value = [
 const clearAndAddFeatures = (features: Feature[]) => {
   heatmapSource.clear();
   heatmapSource.addFeatures(features);
+  zoomToHotspot(mapRef.value?.map, heatmapSource);
 };
 
 const safeAddFeatures = (features: Feature[]): void => {
@@ -255,9 +256,6 @@ watch(
     if (props.entitiesLoading || !newEntities?.length) return;
     updateHeatmapFromGeoJson(newEntities);
     setEntityDetailConfigurations(newEntities);
-
-    await nextTick();
-    zoomToHotspot(mapRef.value?.map, heatmapSource);
   },
   { immediate: true },
 );
