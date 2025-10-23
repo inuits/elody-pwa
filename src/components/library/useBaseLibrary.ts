@@ -38,6 +38,10 @@ export const useBaseLibrary = (
   const totalEntityCount = ref<number>(0);
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
+  const getEntitiesAbortController = ref<AbortController | undefined>(
+    undefined,
+  );
+
   let queryVariables: GetEntitiesQueryVariables = {
     type: entityType,
     limit: 20,
@@ -138,7 +142,7 @@ export const useBaseLibrary = (
   ): Promise<void> => {
     queryVariables.skip = skip;
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) await getEntities(_routes);
   };
 
   const setLimit = async (
@@ -198,25 +202,30 @@ export const useBaseLibrary = (
   const fetchAllPromises = async () => {
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
-  }
+  };
 
-  const determineEntitiesQuery = async (route: RouteLocationNormalizedLoaded, manipulationQueryDocument: string | undefined): Promise<any> => {
+  const determineEntitiesQuery = async (
+    route: RouteLocationNormalizedLoaded,
+    manipulationQueryDocument: string | undefined,
+  ): Promise<any> => {
     if (manipulationQueryDocument) return manipulationQueryDocument;
     const { loadDocument } = useImport();
     try {
       const query = route!.meta!.queries!.getEntities;
       return await loadDocument(query);
-    } catch (error) {
+    } catch {
       return await loadDocument("GetEntities");
     }
   };
 
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
-    signal?: AbortSignal,
     limitForEntityPicker?: number,
   ): Promise<Entity[] | void> => {
-    if (entitiesLoading.value && !signal) return;
+    if (getEntitiesAbortController.value)
+      getEntitiesAbortController.value.abort();
+    getEntitiesAbortController.value = new AbortController();
+    if (entitiesLoading.value) return;
     entitiesLoading.value = true;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
@@ -239,14 +248,18 @@ export const useBaseLibrary = (
     if (limitForEntityPicker) variables.limit = limitForEntityPicker;
 
     try {
+      const requestSignal = getEntitiesAbortController.value!.signal;
       const result = await apolloClient.query({
-        query: await determineEntitiesQuery(_route, manipulationQuery.value?.document),
+        query: await determineEntitiesQuery(
+          _route,
+          manipulationQuery.value?.document,
+        ),
         variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
         context: {
           fetchOptions: {
-            signal,
+            signal: requestSignal,
           },
         },
       });
