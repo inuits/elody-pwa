@@ -82,6 +82,16 @@ const entityTypeFilters = computed(() =>
     }),
 );
 
+const createKeyBasedOnFormat = (metadataKey: string): string[] => {
+  const clientKeyFormat = config.features.simpleSearch.clientKeyFormat;
+  if (!clientKeyFormat || clientKeyFormat.length === 0) {
+    return [`elody:1|metadata.${metadataKey}.value`];
+  }
+  return clientKeyFormat.map((format: string) =>
+    format.replace(/\$metadata_key/g, metadataKey)
+  );
+};
+
 const applyFilterToLibrary = () => {
   let filters: Array<AdvancedFilterInput> = [];
   if (entityTypeFilters.value !== undefined)
@@ -89,7 +99,7 @@ const applyFilterToLibrary = () => {
   const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
   for (const index in metadataKeys) {
     filters.push({
-      key: [`elody:1|metadata.${metadataKeys[index]}.value`],
+      key: createKeyBasedOnFormat(metadataKeys[index]),
       value: inputValue.value,
       type: AdvancedFilterTypes.Text,
       operator: Operator.Or,
