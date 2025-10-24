@@ -25,7 +25,7 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
-        menuContainer: `border border-gray-200 rounded-md shadow-lg ${someModalIsOpened && '!fixed'}`
+        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0`
       }"
     >
       <template #option="{ option }">
