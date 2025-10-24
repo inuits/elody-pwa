@@ -288,13 +288,13 @@ import {
   SearchInputType,
   TypeModals,
   ViewModes,
-  type ViewModesWithConfig,
+  type ViewModesWithConfig
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
-  useBulkOperations,
+  useBulkOperations
 } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
@@ -319,11 +319,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useMaps } from "@/composables/useMaps";
 import { computed, inject, onMounted, ref, watch } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import {
-  breadcrumbPathFinished,
-  breadcrumbRoutes,
-  useBreadcrumbs,
-} from "@/composables/useBreadcrumbs";
+import { breadcrumbPathFinished, breadcrumbRoutes, useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -418,6 +414,7 @@ const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
 const useEditHelper = useEditMode(getEntityUuid());
 
+const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const selectedPaginationLimitOption = ref<number>();
@@ -617,10 +614,8 @@ const bulkSelect = (items = entities.value) => {
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 
-const refetchEntities = async (
-  limitForEntityPicker = undefined,
-): Promise<Entity[] | void> => {
-  return await getEntities(route, limitForEntityPicker);
+const refetchEntities = async (limitForEntityPicker = undefined): Promise<Entity[] | void> => {
+  return await getEntities(route, new AbortController().signal, limitForEntityPicker);
 };
 
 const initializeBaseLibrary = async () => {
@@ -808,7 +803,7 @@ const determineViewModes = (viewModes: any[]) => {
 };
 
 const setQueryVariablesForMapViewmode = (): void => {
-  setPaginationLimit(-1, false);
+  setPaginationLimit(-1);
   setSkip(1);
 };
 const unSetQueryVariablesForMapViewmode = (): void => {
@@ -837,6 +832,10 @@ watch(
       router.currentRoute.value.name !== "SingleEntity"
     ) {
       try {
+        if (abortController.value) abortController.value?.abort();
+        const newAbortController = new AbortController();
+        abortController.value = newAbortController;
+
         isInitialLoading.value = true;
         setsearchInputType(SearchInputType.AdvancedInputType);
         setEntityType(entityType.value);
@@ -845,10 +844,11 @@ watch(
         enqueuePromise(sortOptionsPromise);
         const state = getStateForRoute(route, true);
         setSkip(state?.queryVariables?.skip || 1);
-        await getEntities(route);
+        await getEntities(route, newAbortController.signal);
         isInitialLoading.value = false;
       } catch {
         isInitialLoading.value = false;
+        abortController.value = null;
       }
     }
   },
@@ -916,9 +916,7 @@ watch([displayGrid, expandFilters], () => {
 watch(
   () => displayMap.value,
   () => {
-    if (!displayMap.value) {
-      entities.value = entities.value.slice(0, 20);
-    }
+    if (!displayMap.value) entities.value = entities.value.splice(0, 20);
   },
   { flush: "pre" },
 );
