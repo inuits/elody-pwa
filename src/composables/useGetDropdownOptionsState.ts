@@ -116,7 +116,7 @@ export const useGetDropdownOptionsState = (
 
     try {
       if (requestId === currentRequestId.value) {
-        await getEntities(undefined, abortController.value.signal);
+        await getEntities(undefined);
       }
     } catch (error: any) {
       if (error.name !== "AbortError") {
@@ -167,7 +167,7 @@ export const useGetDropdownOptionsState = (
 
     try {
       if (requestId === currentRequestId.value) {
-        await getEntities(undefined, abortController.value.signal);
+        await getEntities(undefined);
       }
     } catch (error: any) {
       if (error.name !== "AbortError") {

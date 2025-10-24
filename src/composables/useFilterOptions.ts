@@ -40,7 +40,6 @@ export const useFilterOptions = () => {
   const facetCounts = ref<Map<string, number>>(new Map());
   const hasFacets = ref<boolean>(false);
 
-  const abortController = ref<AbortController | null>(null);
   const currentRequestId = ref(0);
 
   const init = async (
@@ -91,10 +90,6 @@ export const useFilterOptions = () => {
   const loadOptionsAndFacetsInParallel = async (
     facetRequestFilters?: AdvancedFilterInput[],
   ) => {
-    abortController.value?.abort();
-
-    const newAbortController = new AbortController();
-    abortController.value = newAbortController;
     const requestId = ++currentRequestId.value;
     isLoading.value = true;
 
@@ -111,7 +106,7 @@ export const useFilterOptions = () => {
       );
       optionsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
 
-      await optionsLibrary.getEntities(undefined, newAbortController.signal);
+      await optionsLibrary.getEntities(undefined);
 
       return optionsLibrary.entities.value || [];
     };
@@ -140,7 +135,7 @@ export const useFilterOptions = () => {
         }),
       );
 
-      await facetsLibrary.getEntities(undefined, newAbortController.signal);
+      await facetsLibrary.getEntities(undefined);
 
       return facetsLibrary.facets.value;
     };
