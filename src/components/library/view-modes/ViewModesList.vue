@@ -193,8 +193,7 @@ import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient, router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
-import { trace, context, propagation } from "@opentelemetry/api";
-import { WebTracerProvider } from "@opentelemetry/sdk-trace-web";
+import { trace, context } from "@opentelemetry/api";
 
 const props = withDefaults(
   defineProps<{
@@ -406,39 +405,39 @@ const containerNameForPreview = computed(() => {
     : "preview-without-current-entity-flow";
 });
 
-let listViewTracingSpan: any = null;
+let listSpan: any;
 
-onMounted(() => {
+onMounted(async () => {
   const tracer = trace.getTracer("frontend");
-  listViewTracingSpan = tracer.startSpan(`ListView flow: ${props.entityType}`, {
+  listSpan = tracer.startSpan(`ListView flow: ${props.entityType}`, {
     attributes: {
       "ui.component": "ListView",
       "entity.type": props.entityType,
-      state: "mounted",
+      "ui.state": "mounting",
     },
   });
 
-  console.log(
-    "[Tracing] Started ListView span:",
-    listViewTracingSpan.spanContext(),
-  );
+  listSpan.addEvent("UI/ListView route");
+  listSpan.addEvent("DOM loading state visible");
 
-  listViewTracingSpan.addEvent("ListView mounted");
+  await context.with(trace.setSpan(context.active(), listSpan), async () => {
+    try {
+      await getPreviewItemsForEntity();
+    } catch (e) {
+      listSpan.recordException(e as Error);
+      throw e;
+    }
+  });
+
+  listSpan.addEvent("Process response");
+  listSpan.addEvent("Stop loading state");
+  listSpan.addEvent("List visible");
 });
 
-const provider =
-  (trace.getTracerProvider?.() as WebTracerProvider) ?? undefined;
-
 onUnmounted(() => {
-  if (listViewTracingSpan) {
-    listViewTracingSpan.addEvent("ListView unmounted");
-    listViewTracingSpan.end();
-
-    window.addEventListener("beforeunload", () => {
-      provider.forceFlush().catch((err) => {
-        console.warn("[Tracing] flush failed on unload", err);
-      });
-    });
+  if (listSpan) {
+    listSpan.setAttribute("ui.state", "unmounted");
+    listSpan.end();
   }
 });
 </script>

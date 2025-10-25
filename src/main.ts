@@ -3,7 +3,9 @@ import {
   ApolloClient,
   InMemoryCache,
   type NormalizedCacheObject,
-  createHttpLink,
+  ApolloLink,
+  HttpLink,
+  from,
 } from "@apollo/client/core";
 import "./assets/main.css";
 import * as Sentry from "@sentry/vue";
@@ -99,21 +101,10 @@ const start = async (): Promise<void> => {
     handleGraphqlError(error);
   });
 
+  const httpLink = new HttpLink({ uri: "/api/graphql" });
+
   apolloClient = new ApolloClient({
-    link: graphqlErrorInterceptor.concat(
-      createHttpLink({
-        uri: config.graphQlLink || "/api/graphql",
-        headers: { "Apollo-Require-Preflight": "true" },
-        fetch: (uri, options) => {
-          const activeContext = context.active();
-          const headers = new Headers(options?.headers || {});
-          propagation.inject(activeContext, headers, {
-            set: (h, k, v) => h.set(k, v),
-          });
-          return fetch(uri, { ...options, headers });
-        },
-      }),
-    ),
+    link: from([graphqlErrorInterceptor, httpLink]),
     cache: new InMemoryCache(),
   });
 
@@ -143,12 +134,6 @@ const start = async (): Promise<void> => {
     Sentry.init({
       app,
       sendClientReports: false,
-      integrations: [
-        new BrowserTracing({
-          routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-          tracingOrigins: ["*"],
-        }),
-      ],
       dsn: config.SENTRY_DSN_FRONTEND,
       environment: config.NOMAD_NAMESPACE,
     });

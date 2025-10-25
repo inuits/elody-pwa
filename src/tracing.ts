@@ -4,12 +4,17 @@ import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { W3CTraceContextPropagator } from "@opentelemetry/core";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import { Resource } from "@opentelemetry/resources";
+import { ZoneContextManager } from "@opentelemetry/context-zone";
+import { registerInstrumentations } from "@opentelemetry/instrumentation";
+import { FetchInstrumentation } from "@opentelemetry/instrumentation-fetch";
+import { UserInteractionInstrumentation } from "@opentelemetry/instrumentation-user-interaction";
+import { XMLHttpRequestInstrumentation } from "@opentelemetry/instrumentation-xml-http-request";
 
 const exporter = new OTLPTraceExporter({
   url: "http://alloy.localhost:8000/otlp/v1/traces",
 });
 
-const provider = new WebTracerProvider({
+export const provider = new WebTracerProvider({
   resource: new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: "frontend",
   }),
@@ -18,6 +23,16 @@ const provider = new WebTracerProvider({
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 provider.register({
   propagator: new W3CTraceContextPropagator(),
+  contextManager: new ZoneContextManager(),
+});
+
+registerInstrumentations({
+  tracerProvider: provider,
+  instrumentations: [
+    new FetchInstrumentation(),
+    new XMLHttpRequestInstrumentation(),
+    new UserInteractionInstrumentation(),
+  ],
 });
 
 console.log("[Tracing] Frontend OpenTelemetry initialized");
