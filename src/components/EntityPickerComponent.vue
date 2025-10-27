@@ -35,6 +35,7 @@
 <script lang="ts" setup>
 import type { Entity } from "@/generated-types/queries";
 import {
+  type BaseEntity,
   type AdvancedFilterInput,
   type BaseRelationValuesInput,
   Collection,
@@ -247,14 +248,19 @@ const submit = useSubmitForm<EntityValues>(async () => {
 });
 
 const refetchRelationsWithNoLimit = async (): string[] => {
+  alreadySelectedEntityIdsFetched.value = [props.entityUuid]
+
   const refetchEntities = getRefetchEntitiesFunction();
   if (!refetchEntities) return;
 
   const relatedEntities = await refetchEntities(-1);
   if (relatedEntities?.results?.length <= 0) return;
-  alreadySelectedEntityIdsFetched.value = relatedEntities.results.map(
-    (entity) => entity.id,
-  );
+  alreadySelectedEntityIdsFetched.value = [
+    ...alreadySelectedEntityIdsFetched.value,
+    ...relatedEntities.results.map(
+      (entity: BaseEntity) => entity.id,
+    )
+  ]
 };
 
 onMounted(async () => {
