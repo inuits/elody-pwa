@@ -454,16 +454,20 @@ export const determineActiveState = (item: DropdownOption, parentEntityId: strin
     });
   }
 
-  let isActive = false;
-  const activeViewMode = item.actionContext.activeViewMode;
-  const entitiesSelectionType = item.actionContext.entitiesSelectionType;
-  const viewMode = useEditHelper.isEdit
-    ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
-    : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
-  const numberOfEntities = itemsSelected
-    ? entitiesSelectionType === ActionContextEntitiesSelectionType.SomeSelected
-    : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
-  isActive = viewMode && numberOfEntities;
+  let viewMode = true, numberOfEntities = true;
 
+  const activeViewMode = item.actionContext.activeViewMode;
+  if (activeViewMode)
+    viewMode = useEditHelper.isEdit
+      ? activeViewMode.includes(ActionContextViewModeTypes.EditMode)
+      : activeViewMode.includes(ActionContextViewModeTypes.ReadMode);
+
+  const entitiesSelectionType = item.actionContext.entitiesSelectionType;
+  if (entitiesSelectionType)
+    numberOfEntities = itemsSelected
+      ? entitiesSelectionType === ActionContextEntitiesSelectionType.SomeSelected
+      : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
+
+  const isActive = viewMode && numberOfEntities;
   return isActive && metadataConditionAccepts;
 };

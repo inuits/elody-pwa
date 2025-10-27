@@ -574,9 +574,4 @@ onBeforeMount(() => {
 onUnmounted(() => {
   deleteDropdownOptionStates();
 });
-
-watch(
-  () => refMetadata.value.value,
-  (newValue) => console.log(newValue),
-);
 </script>
