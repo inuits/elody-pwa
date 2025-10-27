@@ -53,7 +53,14 @@ import {
 } from "@/composables/useBulkOperations";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { computed, inject, onBeforeMount, onMounted, provide, ref, unref } from "vue";
+import {
+  inject,
+  onBeforeMount,
+  onMounted,
+  provide,
+  ref,
+  unref,
+} from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
@@ -67,7 +74,6 @@ import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
 import { useModalActions } from "@/composables/useModalActions";
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
-
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
 }>();
@@ -117,12 +123,13 @@ const {
   getRelationType,
   getRefetchEntitiesFunction,
   setCropMode,
-  setCropCoordinatesKey
+  setCropCoordinatesKey,
 } = useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
 const { parseFormValuesToFormInput, getForm } = useFormHelper();
-const { displaySuccessNotification } = useBaseNotification();
 const { getCallbackFunctions } = useModalActions();
+const { displayWarningNotification, displaySuccessNotification } =
+  useBaseNotification();
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -144,12 +151,26 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
   emit("entitiesUpdated", numberOfEntities);
 };
 
-const saveRelations = (selectedItems: InBulkProcessableItem[]) => {
+const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
+
+  if (useEditHelper?.isEdit) {
+    useEditHelper.clickButton();
+    await useEditHelper.save();
+    if (useEditHelper.isDisabled) {
+      closeModal(TypeModals.DynamicForm);
+      displayWarningNotification(
+        "notifications.warning.entity-not-updated.title",
+        "notifications.warning.entity-not-updated.description",
+      );
+      return;
+    }
+  }
+
   addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
   useEditHelper.setSubmitFunction(submit);
-  useEditHelper.save(true);
+  await useEditHelper.save(true);
 };
 
 const getCustomQuery = async () => {
@@ -231,8 +252,10 @@ const refetchRelationsWithNoLimit = async (): string[] => {
 
   const relatedEntities = await refetchEntities(-1);
   if (relatedEntities?.results?.length <= 0) return;
-  alreadySelectedEntityIdsFetched.value = relatedEntities.results.map(entity => entity.id);
-}
+  alreadySelectedEntityIdsFetched.value = relatedEntities.results.map(
+    (entity) => entity.id,
+  );
+};
 
 onMounted(async () => {
   if (props.customQuery && props.customFiltersQuery) await getCustomQuery();

@@ -264,6 +264,7 @@ import {
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
+import { useEditMode } from "@/composables/useEdit";
 
 const props = withDefaults(
   defineProps<{
@@ -302,7 +303,7 @@ const {
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
 } = useFormHelper();
-const { displaySuccessNotification } = useBaseNotification();
+const { displaySuccessNotification, displayWarningNotification } = useBaseNotification();
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const {
@@ -341,7 +342,8 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
-const { extractActionArguments, getCallbackFunctions } = useModalActions();
+const { extractActionArguments, getCallbackFunctions, getParentId } =
+  useModalActions();
 const route = useRoute();
 
 const { mutate } = useMutation<
@@ -415,8 +417,10 @@ const getFieldArray = computed(() => {
 });
 
 const getSortedFieldArray = computed(() => {
-  return getFieldArray.value?.sort((a) => a.__typename === 'FormAction' ? 1 : 0);
-})
+  return getFieldArray.value?.sort((a) =>
+    a.__typename === "FormAction" ? 1 : 0,
+  );
+});
 
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
@@ -584,6 +588,20 @@ const tagNewlyCreatedEntity = (entity: Entity): void => {
 };
 
 const submitActionFunction = async (field: FormAction) => {
+  const useEditHelper = useEditMode(getParentId());
+  if (useEditHelper?.isEdit) {
+    useEditHelper.clickButton();
+    await useEditHelper.save();
+    if (useEditHelper.isDisabled) {
+      closeModal(TypeModals.DynamicForm);
+      displayWarningNotification(
+        "notifications.warning.entity-not-updated.title",
+        "notifications.warning.entity-not-updated.description",
+      );
+      return;
+    }
+  }
+
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
   const entityInput = await createEntityFromFormInput(
@@ -613,6 +631,10 @@ const submitActionFunction = async (field: FormAction) => {
         );
     }
     closeAndDeleteForm();
+    displaySuccessNotification(
+      t("notifications.success.entityCreated.title"),
+      t("notifications.success.entityCreated.description"),
+    );
   } catch (e: ApolloError) {
     console.error(e);
     const errorObject = await getMessageAndCodeFromApolloError(e);
