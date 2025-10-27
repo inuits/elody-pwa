@@ -13,8 +13,8 @@
     >
       ( {{ t("metadata.labels.one-of-required") }} )
     </p>
-    <p v-else-if="isOptionalField" class="pl-1">
-      ( {{ t("metadata.labels.optional") }} )
+    <p v-else-if="isRequiredField" class="pl-1">
+      *
     </p>
     <base-tooltip
       v-if="metadata?.tooltip"
@@ -66,9 +66,9 @@ const entityFormData: any = inject("entityFormData", {});
 const useEditHelper = useEditMode(entityFormData?.id);
 const { t } = useI18n();
 
-const isOptionalField = computed(() => {
+const isRequiredField = computed(() => {
   return (
-    props.metadata?.inputField && !props.isFieldRequired && useEditHelper.isEdit
+    props.metadata?.inputField && props.isFieldRequired && useEditHelper.isEdit
   );
 });
 </script>
