@@ -12,7 +12,6 @@ import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
 import { addComponentToRoutes } from "./views/router";
-import { BrowserTracing } from "@sentry/tracing";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
@@ -36,7 +35,6 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
-import { context, propagation } from "@opentelemetry/api";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;

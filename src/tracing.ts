@@ -34,5 +34,3 @@ registerInstrumentations({
     new UserInteractionInstrumentation(),
   ],
 });
-
-console.log("[Tracing] Frontend OpenTelemetry initialized");
