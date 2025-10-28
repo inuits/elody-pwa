@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { type Ref, ref } from "vue";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 import type {
   AdvancedFilterInput,
@@ -12,7 +12,7 @@ export const useGetDropdownOptions = (
   dropdownOptionsStateName: string = "GlobalDropdownOptionsState",
   mode: "get" | "delete" = "get",
   entityType?: Entitytyping,
-  parent?: "fetchAll" | BaseEntity,
+  parent?: Ref<BaseEntity | "fetchAll">,
   relationType: string = "",
   fromRelationType: string = "",
   searchFilterInput?: AdvancedFilterInput,

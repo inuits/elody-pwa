@@ -187,6 +187,7 @@ import {
   ref,
   onBeforeMount,
   onUnmounted,
+  toRef,
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useField } from "vee-validate";
@@ -496,7 +497,7 @@ const initializeDropdownOptionStates = () => {
     `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
     "get",
     metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    "fetchAll",
+    toRef("fetchAll"),
     undefined,
     undefined,
     refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
@@ -507,7 +508,7 @@ const initializeDropdownOptionStates = () => {
     `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
     "get",
     metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    parentEntity?.value,
+    parentEntity,
     refMetadata.value.inputField?.relationType,
     refMetadata.value.inputField?.fromRelationType,
     refMetadata.value.inputField.advancedFilterInputForSearchingOptions,

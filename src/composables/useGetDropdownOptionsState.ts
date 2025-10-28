@@ -9,7 +9,7 @@ import {
   SearchInputType,
   type Entitytyping,
 } from "@/generated-types/queries";
-import { computed, inject, ref } from "vue";
+import { computed, inject, type Ref, ref } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
@@ -19,7 +19,7 @@ import { omitDeep } from "@apollo/client/utilities";
 
 export const useGetDropdownOptionsState = (
   entityType: Entitytyping,
-  parent: "fetchAll" | BaseEntity,
+  parent: Ref<BaseEntity | "fetchAll">,
   relationType: string = "",
   fromRelationType: string = "",
   searchFilterInput?: AdvancedFilterInput,
@@ -59,9 +59,9 @@ export const useGetDropdownOptionsState = (
       if (typeof value === "string" && value.startsWith("$")) {
         const path = value.substring(1);
         if (path.includes("parentId"))
-          value = [parent];
+          value = [parent.value];
         else
-          value = extractValueFromObject(parent, path) ?? [];
+          value = extractValueFromObject(parent.value, path) ?? [];
       }
       completeRelationFilter.value = value;
 
@@ -93,7 +93,7 @@ export const useGetDropdownOptionsState = (
     ) {
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
       filters =
-        parent !== "fetchAll" && (relationType || fromRelationType)
+        parent.value !== "fetchAll" && (relationType || fromRelationType)
           ? [
               ...filters,
               getRelationFilter(formId, fromRelationType, relationFilter),
@@ -105,7 +105,7 @@ export const useGetDropdownOptionsState = (
         )?.value || entityType;
     } else {
       filters =
-        parent === "fetchAll" || !fromRelationType
+        parent.value === "fetchAll" || !fromRelationType
           ? [baseTypeFilter]
           : [getRelationFilter(formId, fromRelationType, relationFilter)];
     }
@@ -117,6 +117,7 @@ export const useGetDropdownOptionsState = (
     try {
       if (requestId === currentRequestId.value) {
         await getEntities(undefined);
+        abortController.value = undefined;
       }
     } catch (error: any) {
       if (error.name !== "AbortError") {

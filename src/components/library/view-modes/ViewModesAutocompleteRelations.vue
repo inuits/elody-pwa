@@ -303,5 +303,5 @@ watch(
   (dropdownOptions: DropdownOption[]) => {
     populateSelectedOptions(dropdownOptions);
   }
-)
+);
 </script>
