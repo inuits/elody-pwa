@@ -18,6 +18,7 @@
           :identifiers="identifiers"
           :id="entity.id"
           :entity-type="entityType"
+          @mutated-entity-updated="setMutatedEntity"
         />
       </div>
       <edit-modal :entityId="entity.id" />
@@ -145,6 +146,10 @@ const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
 provide("RefetchParentEntity", refetch);
 const entityForBreadcrumb = ref<Entity>();
+
+const setMutatedEntity = (mutatedEntity: Entity) => {
+  entity.value = mutatedEntity;
+}
 
 const addContextToState = (context: string): void => {
   mediafileViewerContexts.value.push(context);

@@ -24,6 +24,7 @@ import {
   inject,
   onMounted,
   onUnmounted,
+  ref,
   unref,
   watch,
   computed,
@@ -48,6 +49,10 @@ const props = defineProps<{
   deleteQueryOptions?: DeleteQueryOptions;
   locale: string;
   fields: Record<string, PanelMetaData>;
+}>();
+
+const emit = defineEmits<{
+  (event: "mutatedEntityUpdated", mutatedEntity: Entity): void
 }>();
 
 const config: any = inject("config");
@@ -81,7 +86,7 @@ const form = createForm(props.id, {
   relatedEntityData: {},
   uuid: props.uuid,
 });
-let mutatedEntity: Entity | undefined;
+let mutatedEntity = ref<Entity | undefined>(undefined);
 const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
 
 const { setValues } = form;
@@ -112,10 +117,11 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   if (!result?.data?.mutateEntityValues) return;
   await useEditHelper.performRefetchFunctions();
-  mutatedEntity = result.data.mutateEntityValues as Entity;
+  mutatedEntity.value = result.data.mutateEntityValues as Entity;
+  emit("mutatedEntityUpdated", mutatedEntity.value);
   setValues({
-    intialValues: mutatedEntity.intialValues,
-    relationValues: mutatedEntity.relationValues,
+    intialValues: mutatedEntity.value.intialValues,
+    relationValues: mutatedEntity.value.relationValues,
   });
   displaySuccessNotification(
     t("notifications.success.entityUpdated.title"),
@@ -151,6 +157,7 @@ onUnmounted(() => {
 watch(useEditHelper, () => {
   if (useEditHelper.isEdit) {
     useEditHelper.setSubmitFunction(submit);
+    mutatedEntity.value = undefined;
   }
 
   const contextsToReset: BulkOperationsContextEnum[] = [
@@ -160,8 +167,6 @@ watch(useEditHelper, () => {
   contextsToReset.forEach((context: BulkOperationsContextEnum) =>
     dequeueAllItemsForBulkProcessing(context),
   );
-
-  mutatedEntity = undefined;
 });
 
 watch(

@@ -10,6 +10,7 @@
     :delete-query-options="entity.deleteQueryOptions"
     :locale="locale"
     :fields="panelsFields"
+    @mutated-entity-updated="(mutatedEntity: BaseEntity) => emit('mutatedEntityUpdated', mutatedEntity)"
   >
     <div
       :class="[
@@ -53,6 +54,7 @@ import {
   onMounted,
 } from "vue";
 import {
+  type Entity,
   type ColumnList,
   type Column,
   type Entitytyping,
@@ -90,7 +92,10 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(["closePreviewComponent"]);
+const emit = defineEmits<{
+  (event: "closePreviewComponent"): void,
+  (event: "mutatedEntityUpdated", mutatedEntity: Entity): void
+}>();
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const {
