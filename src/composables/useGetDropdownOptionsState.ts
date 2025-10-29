@@ -58,10 +58,7 @@ export const useGetDropdownOptionsState = (
       let value = completeRelationFilter.value;
       if (typeof value === "string" && value.startsWith("$")) {
         const path = value.substring(1);
-        if (path.includes("parentId"))
-          value = [parent.value];
-        else
-          value = extractValueFromObject(parent.value, path) ?? [];
+        value = extractValueFromObject(parent.value, path) ?? [];
       }
       completeRelationFilter.value = value;
 
