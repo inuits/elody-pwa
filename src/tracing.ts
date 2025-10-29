@@ -11,7 +11,7 @@ import { UserInteractionInstrumentation } from "@opentelemetry/instrumentation-u
 import { XMLHttpRequestInstrumentation } from "@opentelemetry/instrumentation-xml-http-request";
 
 const exporter = new OTLPTraceExporter({
-  url: "http://alloy.localhost:8000/otlp/v1/traces",
+  url: "/api/traces",
 });
 
 export const provider = new WebTracerProvider({
