@@ -17,7 +17,7 @@ export type DownloadMediafilesInformation = {
   includeAssetCsv: boolean;
 };
 
-type SubmitArguments = BaseRelationValuesInput[] | Function[] | undefined;
+type SubmitArguments = { [key: string]: BaseRelationValuesInput[] } | Function[] | undefined;
 const parentId = ref<string | undefined>(undefined);
 const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
@@ -35,15 +35,17 @@ const skipItemsWithRelationDuringBulkDelete = ref<string[] | undefined>(
 
 export const useModalActions = () => {
   const getArgumentsForSubmit = (): SubmitArguments => {
-    const relations: BaseRelationValuesInput[] = [];
+    const relation: { [key: string]: BaseRelationValuesInput[] } = {};
     if (parentId.value !== undefined) {
-      relations.push({
-        key: parentId.value,
-        type: relationType.value,
-        editStatus: EditStatus.New,
-      });
+      relation[relationType.value] = [
+        {
+          key: parentId.value,
+          type: relationType.value,
+          editStatus: EditStatus.New,
+        }
+      ]
       parentId.value = undefined;
-      return relations;
+      return relation;
     }
 
     return callbackFunctions.value;

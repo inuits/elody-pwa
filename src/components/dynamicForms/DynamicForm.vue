@@ -604,10 +604,17 @@ const submitActionFunction = async (field: FormAction) => {
 
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
-  const entityInput = await createEntityFromFormInput(
-    field.creationType,
-    extractActionArguments(field.actionType), //Use this
-  );
+  const relations = extractActionArguments(field.actionType);
+  if (form.value) {
+    const { setValues } = form.value;
+    setValues({
+      relationValues: {
+        ...form.value.values.relationValues,
+        ...relations
+      },
+    });
+  }
+  const entityInput = await createEntityFromFormInput(field.creationType);
   let entity: Entity;
   try {
     entity = (await performSubmitAction(document, entityInput)).data
