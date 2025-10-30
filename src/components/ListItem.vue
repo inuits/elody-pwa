@@ -169,11 +169,12 @@
               ]"
             >
               <metadata-wrapper
-                :form-id="formId || 'listview'"
+                :form-id="formId"
                 v-model:metadata="metadataItem as MetadataField"
                 :is-edit="useEditHelper.isEdit"
                 :linked-entity-id="intialValues?.id || itemId"
                 :entity-type="entityTypename"
+                :list-item-entity="listItemEntity"
                 @add-refetch-function-to-edit-state="() => emit('addRefetchFunctionToEditState')"
               />
             </div>
@@ -290,7 +291,7 @@ import {
   type BaseRelationValuesInput,
   type ContextMenuActions,
   DamsIcons,
-  EditStatus,
+  type BaseEntity,
   type EntityListElement,
   type Entitytyping,
   type IntialValues,
@@ -311,7 +312,6 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
-//import { useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
@@ -322,6 +322,7 @@ const props = withDefaults(
   defineProps<{
     bulkOperationsContext: Context;
     contextMenuActions?: ContextMenuActions;
+    listItemEntity?: BaseEntity;
     itemId?: string;
     itemType?: Entitytyping;
     entityTypename?: Entitytyping;

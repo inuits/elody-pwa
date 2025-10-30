@@ -15,7 +15,7 @@
       :is-one-of-required-relation-field="isOneOfRequiredRelationField"
     />
     <entity-element-metadata-edit
-      v-if="isEdit && refMetadata.inputField"
+      v-if="isEdit && refMetadata.inputField && !refMetadata.nonEditableField"
       :fieldKey="
         isMetadataOnRelation || isRootdataOnRelation
           ? `${fieldKeyWithId}`
@@ -76,7 +76,7 @@
                 v-model="refMetadata.value"
                 :is-read-only="true"
                 :field-name="refMetadata.label"
-                :formId="formId"
+                :formId="linkedEntityId || formId"
                 :metadata-key-to-get-options-for="
                   metadataKeyToGetOptionsForRelationDropdown
                 "
@@ -211,6 +211,7 @@ const props = withDefaults(
     formFlow?: "edit" | "create";
     showErrors?: boolean;
     entityType?: Entitytyping;
+    listItemEntity?: BaseEntity;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -494,7 +495,7 @@ const advancedFilterInputForRetrievingRelatedOptions = computed(() => {
 
 const initializeDropdownOptionStates = () => {
   useGetDropdownOptions(
-    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
+    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
     "get",
     metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
     toRef("fetchAll"),
@@ -502,29 +503,29 @@ const initializeDropdownOptionStates = () => {
     undefined,
     refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
     advancedFilterInputForRetrievingAllOptions.value,
-    props.formId,
+    props.linkedEntityId || props.formId,
   );
   useGetDropdownOptions(
-    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
+    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
     "get",
     metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    parentEntity,
+    props.listItemEntity !== undefined ? toRef(props.listItemEntity) : parentEntity,
     refMetadata.value.inputField?.relationType,
     refMetadata.value.inputField?.fromRelationType,
     refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
     advancedFilterInputForRetrievingRelatedOptions.value,
-    props.formId,
+    props.linkedEntityId || props.formId,
     refMetadata.value.inputField.relationFilter,
   );
 };
 
 const deleteDropdownOptionStates = () => {
   useGetDropdownOptions(
-    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
+    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
     "delete",
   );
   useGetDropdownOptions(
-    `${props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
+    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
     "delete",
   );
 };

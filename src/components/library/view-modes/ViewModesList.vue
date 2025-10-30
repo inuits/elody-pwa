@@ -63,6 +63,7 @@
           @click="entityWrapperHandler(entity)"
         >
           <ListItem
+            :list-item-entity="entity"
             :item-id="entity.id"
             :item-type="entity.type"
             :bulk-operations-context="bulkOperationsContext"
