@@ -41,7 +41,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const {
   position = "top-end",
   tooltipOffset = 0,
-  maxWidth = 56,
+  maxWidth = "[14rem]",
   enableAutoPlacement = true,
 } = defineProps<{
   position: Placement;
