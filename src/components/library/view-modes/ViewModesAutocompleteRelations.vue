@@ -214,7 +214,7 @@ const mapDropdownOptionsToBulkProcessableItem = (
 };
 
 const populateSelectedOptions = (options: DropdownOption[]) => {
-  if (options.length === 0) return;
+  if (options.length === 0 && selectedDropdownOptions.value?.length === 0) return;
   selectedDropdownOptions.value = options;
 };
 

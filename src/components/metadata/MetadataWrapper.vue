@@ -91,6 +91,9 @@
                   refMetadata.inputField
                     .advancedFilterInputForRetrievingAllOptions
                 "
+                :advanced-filter-input-for-searching-options="
+                  refMetadata.inputField.advancedFilterInputForSearchingOptions
+                "
                 :relation-filter="refMetadata.inputField.relationFilter"
                 :is-metadata-field="refMetadata.inputField?.isMetadataField"
                 :relation-type="refMetadata.inputField?.relationType"
