@@ -56,22 +56,22 @@
           progress-bar-type="steps"
           :total-amount-of-steps="mediafiles.length"
         />
-        <div class="w-1/4 px-2" v-if="uploadFlow === UploadFlow.MediafilesOnly">
-          <base-button-new
-            v-if="uploadStatus === UploadStatus.Uploading"
-            icon="Pause"
-            :label="t('actions.labels.pause-upload')"
-            button-style="accentAccent"
-            @click="pauseUpload()"
-          />
-          <base-button-new
-            v-if="uploadStatus === UploadStatus.Paused"
-            icon="Play"
-            :label="t('actions.labels.resume-upload')"
-            button-style="accentAccent"
-            @click="resumeUpload()"
-          />
-        </div>
+        <!--        <div class="w-1/4 px-2" v-if="uploadFlow === UploadFlow.MediafilesOnly">-->
+        <!--          <base-button-new-->
+        <!--            v-if="uploadStatus === UploadStatus.Uploading"-->
+        <!--            icon="Pause"-->
+        <!--            :label="t('actions.labels.pause-upload')"-->
+        <!--            button-style="accentAccent"-->
+        <!--            @click="pauseUpload()"-->
+        <!--          />-->
+        <!--          <base-button-new-->
+        <!--            v-if="uploadStatus === UploadStatus.Paused"-->
+        <!--            icon="Play"-->
+        <!--            :label="t('actions.labels.resume-upload')"-->
+        <!--            button-style="accentAccent"-->
+        <!--            @click="resumeUpload()"-->
+        <!--          />-->
+        <!--        </div>-->
       </div>
       <button
         v-if="uploadStatus === 'no-upload'"
