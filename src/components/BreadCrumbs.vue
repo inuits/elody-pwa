@@ -205,11 +205,12 @@ const checkNavigationAvailable = (route: any) => {
 };
 
 const navigateToEntity = (route: any) => {
+  console.log("Navigate to route: ", route);
   if (route.id) {
     router.replace({
       params: {
         id: route.id,
-        type: route.type,
+        type: Array.isArray(route.type) ? route.type[0] : route.type,
       },
     });
   } else if (route.overviewPage) {
