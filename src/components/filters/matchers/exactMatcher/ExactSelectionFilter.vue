@@ -23,7 +23,6 @@
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
     />
-    <div v-if="options.length === 0">No options available</div>
   </div>
 </template>
 
