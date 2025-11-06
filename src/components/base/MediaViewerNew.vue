@@ -9,7 +9,7 @@
       class="w-full"
     >
       <IIIFViewer
-        v-if="viewerType === ElodyViewers.Iiif"
+        v-if="viewerType === ElodyViewers.Iiif && !displayProcessingImage"
         :imageFilename="
           getValueOfMediafile(mediafileViewerContext, 'transcode_filename') ||
           getValueOfMediafile(mediafileViewerContext, 'filename') ||
@@ -34,6 +34,15 @@
         :enable-selection="isCropModeEnabled"
         :crop-sizes="cropSizes"
       />
+      <div v-if="displayProcessingImage" class="flex justify-center flex-col items-center h-full">
+        <unicon
+          name="image-slash"
+          class="h-15 w-15 p-1 text-text-body rounded-sm outline-none self-center"
+        />
+        <div class="text-text-body">
+          {{ t("media-viewer.processing-image") }}
+        </div>
+      </div>
       <VideoPlayer
         v-if="viewerType === ElodyViewers.Video"
         :source="
@@ -158,6 +167,16 @@ const viewerMap: Record<string, ElodyViewers> = {
   video: ElodyViewers.Video,
   text: ElodyViewers.Text,
 };
+
+const displayProcessingImage = computed<boolean>(() => {
+  if (viewerType.value !== ElodyViewers.Iiif) return false;
+  const hasTranscodeFilename = !!getValueOfMediafile(
+    mediafileViewerContext,
+    "transcode_filename",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+  );
+  return hasTranscodeFilename ? false : true;
+});
 
 const viewerType = computed<ElodyViewers | undefined>(() => {
   try {
