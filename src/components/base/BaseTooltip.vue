@@ -18,8 +18,8 @@
         <div
           ref="defaultSlotRef"
           v-if="hasContent && hover"
-          :class="`shadow-lg rounded bg-background-light max-w-${maxWidth} p-2 z-tooltip`"
-          :style="floatingStyles"
+          class="shadow-lg rounded bg-background-light p-2 z-tooltip"
+          :style="{ maxWidth: maxWidth, ...floatingStyles }"
         >
           <slot> </slot>
         </div>
@@ -41,7 +41,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const {
   position = "top-end",
   tooltipOffset = 0,
-  maxWidth = "[14rem]",
+  maxWidth = "14rem",
   enableAutoPlacement = true,
 } = defineProps<{
   position: Placement;

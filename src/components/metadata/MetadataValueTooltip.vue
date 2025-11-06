@@ -3,7 +3,7 @@
     class="w-full"
     position="right-end"
     :tooltip-offset="8"
-    :max-width="isPreviewType ? '[24rem]' : '[14rem]'"
+    :max-width="isPreviewType ? '24rem' : '14rem'"
     :enable-auto-placement="false"
     v-if="canBeShownForPreviewType || canBeShownForPlaneType"
   >
