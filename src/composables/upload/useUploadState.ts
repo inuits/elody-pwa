@@ -7,7 +7,7 @@ import {
   UploadFieldType,
   UploadFlow,
 } from "@/generated-types/queries";
-console.log("useUploadState loaded", UploadStatus);
+
 const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
 const uploadProgress = ref<ActionProgressStep[]>([]);
 const amountUploaded = ref<number>(0);
