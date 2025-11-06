@@ -196,8 +196,12 @@
           data-cy="base-library-grid-container"
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
+          <ListItemSkeleton
+            v-if="showViewModesList && entitiesLoading"
+            :amount="placeholderEntitiesAmount"
+          />
           <ViewModesList
-            v-if="showViewModesList"
+            v-if="showViewModesList && !entitiesLoading"
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
             :entities-loading="entitiesLoading"
@@ -288,13 +292,13 @@ import {
   SearchInputType,
   TypeModals,
   ViewModes,
-  type ViewModesWithConfig
+  type ViewModesWithConfig,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   type Context,
   type InBulkProcessableItem,
-  useBulkOperations
+  useBulkOperations,
 } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
@@ -320,7 +324,12 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useMaps } from "@/composables/useMaps";
 import { computed, inject, onMounted, ref, watch } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import { breadcrumbPathFinished, breadcrumbRoutes, useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import {
+  breadcrumbPathFinished,
+  breadcrumbRoutes,
+  useBreadcrumbs,
+} from "@/composables/useBreadcrumbs";
+import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -466,6 +475,7 @@ const {
   enqueuePromise,
   entities,
   placeholderEntities,
+  placeholderEntitiesAmount,
   entitiesLoading,
   getCustomBulkOperations,
   fetchAllPromises,
@@ -615,8 +625,14 @@ const bulkSelect = (items = entities.value) => {
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 
-const refetchEntities = async (limitForEntityPicker = undefined): Promise<Entity[] | void> => {
-  return await getEntities(route, new AbortController().signal, limitForEntityPicker);
+const refetchEntities = async (
+  limitForEntityPicker = undefined,
+): Promise<Entity[] | void> => {
+  return await getEntities(
+    route,
+    new AbortController().signal,
+    limitForEntityPicker,
+  );
 };
 
 const initializeBaseLibrary = async () => {

@@ -30,6 +30,7 @@ export const useBaseLibrary = (
   const entities = shallowRef<Entity[]>([]);
   const facets = shallowRef<any>([]);
   const placeholderEntities = shallowRef<Entity[]>([]);
+  const placeholderEntitiesAmount = ref<number>(0);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
   const manipulateQuery = ref<boolean>(false);
@@ -314,10 +315,9 @@ export const useBaseLibrary = (
           if (entityCountOnPage !== undefined)
             placeholderAmount = entityCountOnPage;
         }
-        placeholderEntities.value =
-          createPlaceholderEntities(placeholderAmount);
+        placeholderEntitiesAmount.value = placeholderAmount > 20 ? 20 : placeholderAmount;
       } else {
-        placeholderEntities.value = [];
+        placeholderEntitiesAmount.value = 1;
       }
     },
   );
@@ -327,6 +327,7 @@ export const useBaseLibrary = (
     entities,
     facets,
     placeholderEntities,
+    placeholderEntitiesAmount,
     entitiesLoading,
     getCustomBulkOperations,
     fetchAllPromises,

@@ -168,7 +168,16 @@
                   : 'w-full'        // all others stay full width
               ]"
             >
+              <ReadOnlyMetadataWrapper
+                v-if="!useEditHelper.isEdit"
+                :form-id="formId || 'listview'"
+                :metadata="metadataItem as MetadataField"
+                :is-edit="useEditHelper.isEdit"
+                :linked-entity-id="intialValues?.id || itemId"
+                :entity-type="entityTypename"
+              />
               <metadata-wrapper
+                v-else
                 :form-id="formId"
                 v-model:metadata="metadataItem as MetadataField"
                 :is-edit="useEditHelper.isEdit"
@@ -317,6 +326,7 @@ import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
+import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
 
 const props = withDefaults(
   defineProps<{
