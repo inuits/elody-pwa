@@ -53,7 +53,11 @@ describe("ViewModesList", () => {
     } as PreviewComponent;
 
     it("enables previewcomponent (media type) with preview enabled for only 1 list items with the given id", async () => {
-      const wrapper = shallowMount(ViewModesList);
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }, { id: "entity2" }],
+        },
+      });
       await flushPromises();
 
       wrapper.vm.previewComponent = previewComponentMediaViewer;
@@ -72,7 +76,11 @@ describe("ViewModesList", () => {
     });
 
     it("enables previewcomponent (map type) with preview enabled for all list items", async () => {
-      const wrapper = shallowMount(ViewModesList);
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }, { id: "entity2" }],
+        },
+      });
       await flushPromises();
 
       wrapper.vm.previewComponent = previewComponentMap;
@@ -89,7 +97,11 @@ describe("ViewModesList", () => {
     });
 
     it("changes current previewForEntity when new entities are fetched and ListItemCoverageTypes is OneListItem", async () => {
-      const wrapper = shallowMount(ViewModesList);
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }, { id: "entity2" }],
+        },
+      });
       await flushPromises();
 
       wrapper.vm.previewComponent = previewComponentMediaViewer;
