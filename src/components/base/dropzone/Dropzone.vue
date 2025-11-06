@@ -16,7 +16,8 @@
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
 import { onMounted, ref, watch } from "vue";
-import useUpload, { UploadStatus } from "@/composables/upload/useUpload";
+import useUpload from "@/composables/upload/useUpload";
+import { UploadStatus } from "@/composables/upload/types";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import type { DropzoneFile } from "dropzone";
 

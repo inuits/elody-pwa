@@ -302,7 +302,8 @@ import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperation
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
-import useUpload, { UploadStatus } from "@/composables/upload/useUpload";
+import useUpload from "@/composables/upload/useUpload";
+import { UploadStatus } from "@/composables/upload/types";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";

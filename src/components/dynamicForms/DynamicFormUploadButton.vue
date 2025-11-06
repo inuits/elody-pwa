@@ -123,7 +123,8 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { computed, inject } from "vue";
 import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
-import useUpload, { UploadStatus } from "@/composables/upload/useUpload";
+import useUpload from "@/composables/upload/useUpload";
+import { UploadStatus } from "@/composables/upload/types";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 

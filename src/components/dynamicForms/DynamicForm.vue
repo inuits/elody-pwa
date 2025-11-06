@@ -998,7 +998,9 @@ watch(
   },
 );
 
-onUnmounted(() => (dynamicFormLoaded.value = false));
+onUnmounted(() => {
+  dynamicFormLoaded.value = false;
+});
 </script>
 
 <style scoped></style>

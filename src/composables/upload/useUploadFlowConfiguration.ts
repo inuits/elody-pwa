@@ -11,7 +11,7 @@ import { useUpdateMetadataUpload } from "@/composables/upload/useUpdateMetadataU
 import { useCsvReorderingUpload } from "@/composables/upload/useCsvReorderingUpload";
 import { useSharedUploadLogic } from "@/composables/upload/useSharedUploadLogic";
 import type { DropzoneFile } from "dropzone";
-import type { type EntityInput } from "@/generated-types/queries";
+import type { EntityInput } from "@/generated-types/queries";
 
 export type UploadContext = {
   entityId?: string;

@@ -1,14 +1,12 @@
 import type Dropzone from "dropzone";
 import { type DropzoneFile } from "dropzone";
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, toRaw, watch, onUnmounted } from "vue";
 import {
   type ActionProgressStep,
   type EntityInput,
   ProgressStepStatus,
   ProgressStepType,
   TypeModals,
-  type UploadEntityTypes,
-  UploadFieldType,
   UploadFlow,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -22,40 +20,16 @@ import {
   type UploadFlowConfiguration,
   useUploadFlowConfiguration,
 } from "@/composables/upload/useUploadFlowConfiguration";
-
-type UploadSettings = {
-  uploadType: UploadFieldType;
-  uploadFlow: UploadFlow;
-  extraMediafileType: string | undefined;
-};
-
-export enum UploadStatus {
-  NoUpload = "no-upload",
-  Paused = "paused",
-  Uploading = "uploading",
-  Finished = "upload-finished",
-}
+import { useUploadState } from "./useUploadState";
+import { type UploadSettings, UploadStatus } from "./types";
 
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
-const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
-const uploadProgress = ref<ActionProgressStep[]>([]);
-const amountUploaded = ref<number>(0);
-const dryRunComplete = ref<boolean>(false);
-const dryRunErrors = ref<string[]>([]);
-const files = ref<DropzoneFile[]>([]);
-const lastUploadedFileIndex = ref<number>(-1);
-const currentUploadAbortController = ref<AbortController | undefined>(
-  undefined,
-);
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
     (file: DropzoneFile) =>
       file.type !== "text/csv" && file.type !== "application/vnd.ms-excel",
   ),
 );
-const uploadProgressPercentage = ref<number>(0);
-const uploadType = ref<UploadFieldType>(UploadFieldType.Batch);
-const requiredMediafiles = ref<string[]>([]);
 const csvFile = computed(() => {
   return files.value.find(
     (file: DropzoneFile) =>
@@ -66,7 +40,6 @@ const containsCsv = computed(() => !!csvFile.value);
 const containsXml = computed(
   () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
 );
-const uploadFlow = ref<UploadFlow>(UploadFlow.MediafilesOnly);
 const uploadFlowConfiguration = computed<UploadFlowConfiguration | undefined>(
   () =>
     useUploadFlowConfiguration().getUploadFlowConfiguration(uploadFlow.value),
@@ -75,16 +48,33 @@ const uploadValidationFn = computed<() => boolean>(
   () => uploadFlowConfiguration.value?.checkUploadValidity,
 );
 const enableUploadButton = computed(() => uploadValidationFn.value());
-const missingFileNames = ref<string[]>([]);
-const failedUploads = ref<string[]>([]);
-const standaloneFileType = ref<UploadEntityTypes | undefined>(undefined);
-const reinitializeDynamicFormFunc = ref<() => void>(() => {});
-const csvOnlyUploadSFailed = ref<boolean>(false);
-const extraMediafileType = ref<string | undefined>(undefined);
-const jobIdentifier = ref<string | undefined>(undefined);
-const prefetchedUploadUrls = ref<string[]>([]);
+
+const {
+  uploadStatus,
+  uploadProgress,
+  amountUploaded,
+  dryRunComplete,
+  dryRunErrors,
+  files,
+  lastUploadedFileIndex,
+  currentUploadAbortController,
+  uploadProgressPercentage,
+  uploadType,
+  requiredMediafiles,
+  uploadFlow,
+  missingFileNames,
+  failedUploads,
+  standaloneFileType,
+  reinitializeDynamicFormFunc,
+  csvOnlyUploadSFailed,
+  jobIdentifier,
+  prefetchedUploadUrls,
+  extraMediafileType,
+  resetState: resetUploadState,
+} = useUploadState();
 
 const useUpload = (config: any) => {
+
   const initializeUpload = (uploadSettings: UploadSettings): void => {
     uploadFlow.value = uploadSettings.uploadFlow;
 
@@ -818,6 +808,7 @@ const useUpload = (config: any) => {
 
     if (status !== ProgressStepStatus.Failed && !errors.length) return;
     __handleFileThumbnailError(file, errors);
+    console.trace(" show me1")
   };
 
   const __handleFileThumbnailError = (
@@ -974,6 +965,10 @@ const useUpload = (config: any) => {
       else return 1;
     });
   };
+
+  onUnmounted(() => {
+    resetUploadState();
+  });
 
   return {
     pauseUpload,

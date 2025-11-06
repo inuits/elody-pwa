@@ -1,5 +1,5 @@
 import useUpload from "@/composables/upload/useUpload";
-import { computed, ref, type Ref, watch } from "vue";
+import { computed, type Ref, watch } from "vue";
 import type { DropzoneFile } from "dropzone";
 import {
   type ActionProgressStep,
@@ -8,8 +8,9 @@ import {
 } from "@/generated-types/queries";
 import { getTranslatedMessage } from "@/helpers";
 import { UploadFlow } from "@/__mocks__/queries";
+import { useUploadState } from "./useUploadState";
 
-const optionalFileNames = ref<string[]>([]);
+const { optionalFileNames } = useUploadState();
 
 export const useOcrUpload = (): {
   checkUploadValidity: () => boolean;
