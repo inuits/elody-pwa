@@ -808,7 +808,6 @@ const useUpload = (config: any) => {
 
     if (status !== ProgressStepStatus.Failed && !errors.length) return;
     __handleFileThumbnailError(file, errors);
-    console.trace(" show me1")
   };
 
   const __handleFileThumbnailError = (
