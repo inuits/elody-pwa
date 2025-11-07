@@ -464,7 +464,6 @@ const getPreviewItemsForEntity = async () => {
     .query({
       query: GetPreviewComponentsDocument,
       variables: { entityType: props.entityType },
-      fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
