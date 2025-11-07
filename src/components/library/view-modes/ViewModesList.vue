@@ -321,7 +321,7 @@ import {
   getMappedSlug,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref, watch, nextTick } from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
@@ -547,8 +547,16 @@ watch(
 
 watch(
   () => refEntities.value,
-  (newValue) => {
+  async (newValue) => {
     logWithTime('[ViewModesList] refEntities updated, will trigger render', {
+      count: newValue.length,
+      mode: props.mode,
+      entitiesLoading: props.entitiesLoading,
+    });
+    
+    // Wait for DOM to update
+    await nextTick();
+    logWithTime('[ViewModesList] DOM updated after refEntities change', {
       count: newValue.length,
       mode: props.mode,
       entitiesLoading: props.entitiesLoading,
@@ -559,9 +567,16 @@ watch(
 
 watch(
   () => props.entitiesLoading,
-  (newValue, oldValue) => {
+  async (newValue, oldValue) => {
     if (oldValue === true && newValue === false) {
       logWithTime('[ViewModesList] Loading finished, rendering entities', {
+        entitiesCount: refEntities.value.length,
+        mode: props.mode,
+      });
+      
+      // Wait for DOM to update
+      await nextTick();
+      logWithTime('[ViewModesList] DOM updated - skeleton should be hidden, entities visible', {
         entitiesCount: refEntities.value.length,
         mode: props.mode,
       });
