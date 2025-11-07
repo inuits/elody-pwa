@@ -205,7 +205,6 @@ const checkNavigationAvailable = (route: any) => {
 };
 
 const navigateToEntity = (route: any) => {
-  console.log("Navigate to route: ", route);
   if (route.id) {
     router.replace({
       params: {
