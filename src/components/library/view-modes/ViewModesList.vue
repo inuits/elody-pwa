@@ -155,8 +155,8 @@
 
         <!-- List Mode: BaseVirtualScroll -->
         <BaseVirtualScroll
-          v-if="mode === 'list'"
-          :items="entitiesLoading ? placeholderEntities : refEntities"
+          v-if="mode === 'list' && !entitiesLoading"
+          :items="refEntities"
           :itemSize="62"
           :height="refEntities.length === 0 ? '0px' : '80vh'"
           width="100%"
@@ -391,6 +391,12 @@ const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
 );
 
+const logWithTime = (message: string, ...args: any[]) => {
+  const now = new Date();
+  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+  console.log(`[${time}] [${now.getTime()}]`, message, ...args);
+};
+
 watch(
   () => props.entities,
   (newValue) => {
@@ -525,16 +531,16 @@ watch(
   { immediate: true },
 );
 watch(
-  () => refEntities.value,
+  () => refEntities,
   (newEntities) => {
-    if (newEntities.length > 0)
-      configurePreviewComponentWithNewEntities(newEntities);
+    if (newEntities.value.length > 0)
+      configurePreviewComponentWithNewEntities(newEntities.value);
     if (
       !previewForEntity.value &&
       previewComponent.value?.openByDefault &&
-      newEntities[0]?.id
+      newEntities.value[0]?.id
     )
-      togglePreviewComponent(newEntities[0].id);
+      togglePreviewComponent(newEntities.value[0].id);
   },
 );
 
@@ -543,12 +549,6 @@ const containerNameForPreview = computed(() => {
     ? "preview"
     : "preview-without-current-entity-flow";
 });
-
-const logWithTime = (message: string, ...args: any[]) => {
-  const now = new Date();
-  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
-  console.log(`[${time}] [${now.getTime()}]`, message, ...args);
-};
 
 onMounted(() => {
   logWithTime('[ViewModesList] Mounted (list rendered)', {

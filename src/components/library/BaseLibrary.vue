@@ -197,11 +197,11 @@
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ListItemSkeleton
-            v-if="showViewModesList && entitiesLoading"
+            v-show="entitiesLoading"
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
-            v-if="showViewModesList && !entitiesLoading"
+            v-show="showViewModesList && !entitiesLoading"
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
             :entities-loading="entitiesLoading"
