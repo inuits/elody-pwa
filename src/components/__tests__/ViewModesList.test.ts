@@ -99,7 +99,7 @@ describe("ViewModesList", () => {
     it("changes current previewForEntity when new entities are fetched and ListItemCoverageTypes is OneListItem", async () => {
       const wrapper = shallowMount(ViewModesList, {
         props: {
-          entities: [{ id: "entity1" }, { id: "entity2" }],
+          entities: [{ id: "test" }],
         },
       });
       await flushPromises();

@@ -542,6 +542,7 @@ watch(
     )
       togglePreviewComponent(newEntities.value[0].id);
   },
+  { deep: true }
 );
 
 const containerNameForPreview = computed(() => {
