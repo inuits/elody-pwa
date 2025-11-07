@@ -424,12 +424,6 @@ const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
 const useEditHelper = useEditMode(getEntityUuid());
 
-const logWithTime = (message: string, ...args: any[]) => {
-  const now = new Date();
-  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
-  console.log(`[${time}] [${now.getTime()}]`, message, ...args);
-};
-
 const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
@@ -441,23 +435,14 @@ const showCurrentEntityFlow = computed(() => {
   return showCurrentPreviewFlow !== undefined ? showCurrentPreviewFlow : true;
 });
 const showViewModesList = computed(() => {
-  const result =
+  return (
     displayList.value ||
     displayGrid.value ||
     (entitiesLoading.value &&
       !displayMap.value &&
       (route?.name !== "SingleEntity" ||
-        props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary));
-  logWithTime('[showViewModesList] Computed evaluation:', {
-    result,
-    displayList: displayList.value,
-    displayGrid: displayGrid.value,
-    entitiesLoading: entitiesLoading.value,
-    displayMap: displayMap.value,
-    routeName: route?.name,
-    baseLibraryMode: props.baseLibraryMode,
-  });
-  return result;
+        props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
+  );
 });
 const enableSelection = computed<boolean>(() => {
   return (
@@ -984,29 +969,6 @@ watch(
       return;
     setLocale(newValue);
     refetchEntities();
-  },
-);
-
-watch(
-  () => entitiesLoading.value,
-  (newValue, oldValue) => {
-    if (oldValue === true && newValue === false) {
-      logWithTime('[BaseLibrary] entitiesLoading changed to false (loading finished)', {
-        entitiesCount: entities.value.length,
-      });
-    }
-  },
-);
-
-watch(
-  () => [showViewModesList.value, entitiesLoading.value],
-  ([newShowViewModesList, newEntitiesLoading]) => {
-    logWithTime('[BaseLibrary] Render state changed:', {
-      showViewModesList: newShowViewModesList,
-      entitiesLoading: newEntitiesLoading,
-      willRenderViewModesList: newShowViewModesList && !newEntitiesLoading,
-      entitiesCount: entities.value.length,
-    });
   },
 );
 </script>

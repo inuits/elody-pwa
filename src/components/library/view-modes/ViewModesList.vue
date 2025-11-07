@@ -321,7 +321,7 @@ import {
   getMappedSlug,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, inject, onMounted, onUnmounted, ref, watch, nextTick } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
@@ -390,12 +390,6 @@ const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
 const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
 );
-
-const logWithTime = (message: string, ...args: any[]) => {
-  const now = new Date();
-  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
-  console.log(`[${time}] [${now.getTime()}]`, message, ...args);
-};
 
 watch(
   () => props.entities,
@@ -542,63 +536,13 @@ watch(
     )
       togglePreviewComponent(newEntities.value[0].id);
   },
-  { deep: true }
-);
-
-watch(
-  () => refEntities.value,
-  async (newValue) => {
-    logWithTime('[ViewModesList] refEntities updated, will trigger render', {
-      count: newValue.length,
-      mode: props.mode,
-      entitiesLoading: props.entitiesLoading,
-    });
-    
-    // Wait for DOM to update
-    await nextTick();
-    logWithTime('[ViewModesList] DOM updated after refEntities change', {
-      count: newValue.length,
-      mode: props.mode,
-      entitiesLoading: props.entitiesLoading,
-    });
-  },
-  { deep: true }
-);
-
-watch(
-  () => props.entitiesLoading,
-  async (newValue, oldValue) => {
-    if (oldValue === true && newValue === false) {
-      logWithTime('[ViewModesList] Loading finished, rendering entities', {
-        entitiesCount: refEntities.value.length,
-        mode: props.mode,
-      });
-      
-      // Wait for DOM to update
-      await nextTick();
-      logWithTime('[ViewModesList] DOM updated - skeleton should be hidden, entities visible', {
-        entitiesCount: refEntities.value.length,
-        mode: props.mode,
-      });
-    }
-  }
+  { deep: true },
 );
 
 const containerNameForPreview = computed(() => {
   return props.showCurrentEntityFlow
     ? "preview"
     : "preview-without-current-entity-flow";
-});
-
-onMounted(() => {
-  logWithTime('[ViewModesList] Mounted (list rendered)', {
-    entitiesCount: props.entities.length,
-    mode: props.mode,
-  });
-});
-
-onUnmounted(() => {
-  logWithTime('[ViewModesList] Unmounted (list removed)');
 });
 </script>
 
