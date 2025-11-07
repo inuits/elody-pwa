@@ -20,6 +20,8 @@
 </template>
 
 <script lang="ts" setup>
+import { onMounted, onUnmounted } from 'vue';
+
 interface Props {
   amount?: number;
 }
@@ -28,6 +30,19 @@ withDefaults(defineProps<Props>(), {
   amount: 20,
 });
 
+const logWithTime = (message: string, ...args: any[]) => {
+  const now = new Date();
+  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+  console.log(`[${time}] [${now.getTime()}]`, message, ...args);
+};
+
+onMounted(() => {
+  logWithTime('[ListItemSkeleton] Mounted (skeleton shown)');
+});
+
+onUnmounted(() => {
+  logWithTime('[ListItemSkeleton] Unmounted (skeleton hidden)');
+});
 </script>
 
 <style scoped>

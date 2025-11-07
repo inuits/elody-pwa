@@ -321,7 +321,7 @@ import {
   getMappedSlug,
   updateEntityMediafileOnlyForMediafiles,
 } from "@/helpers";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
 import type { OrderItem } from "@/composables/useOrderListItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
@@ -542,6 +542,23 @@ const containerNameForPreview = computed(() => {
   return props.showCurrentEntityFlow
     ? "preview"
     : "preview-without-current-entity-flow";
+});
+
+const logWithTime = (message: string, ...args: any[]) => {
+  const now = new Date();
+  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+  console.log(`[${time}] [${now.getTime()}]`, message, ...args);
+};
+
+onMounted(() => {
+  logWithTime('[ViewModesList] Mounted (list rendered)', {
+    entitiesCount: props.entities.length,
+    mode: props.mode,
+  });
+});
+
+onUnmounted(() => {
+  logWithTime('[ViewModesList] Unmounted (list removed)');
 });
 </script>
 
