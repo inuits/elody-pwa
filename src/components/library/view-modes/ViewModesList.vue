@@ -545,6 +545,30 @@ watch(
   { deep: true }
 );
 
+watch(
+  () => refEntities.value,
+  (newValue) => {
+    logWithTime('[ViewModesList] refEntities updated, will trigger render', {
+      count: newValue.length,
+      mode: props.mode,
+      entitiesLoading: props.entitiesLoading,
+    });
+  },
+  { deep: true }
+);
+
+watch(
+  () => props.entitiesLoading,
+  (newValue, oldValue) => {
+    if (oldValue === true && newValue === false) {
+      logWithTime('[ViewModesList] Loading finished, rendering entities', {
+        entitiesCount: refEntities.value.length,
+        mode: props.mode,
+      });
+    }
+  }
+);
+
 const containerNameForPreview = computed(() => {
   return props.showCurrentEntityFlow
     ? "preview"
