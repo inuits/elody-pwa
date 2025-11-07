@@ -24,6 +24,12 @@ export const useBaseLibrary = (
   shouldUseStateForRoute: boolean = true,
   baseLibraryMode: BaseLibraryModes = BaseLibraryModes.NormalBaseLibrary,
 ) => {
+  const logWithTime = (message: string, ...args: any[]) => {
+    const now = new Date();
+    const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+    console.log(`[${time}] [${now.getTime()}]`, message, ...args);
+  };
+
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
   const config: any = inject("config");
@@ -217,13 +223,21 @@ export const useBaseLibrary = (
     signal?: AbortSignal,
     limitForEntityPicker?: number,
   ): Promise<Entity[] | void> => {
-    if (entitiesLoading.value && !signal) return;
+    logWithTime('[getEntities] START');
+    if (entitiesLoading.value && !signal) {
+      logWithTime('[getEntities] Already loading, returning early');
+      return;
+    }
     entitiesLoading.value = true;
+    logWithTime('[getEntities] Set entitiesLoading to true');
 
+    logWithTime('[getEntities] Processing promise queue (count:', promiseQueue.value.length, ')');
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
+    logWithTime('[getEntities] Promise queue processed');
 
     _route = route;
+    logWithTime('[getEntities] Checking state management');
     let variables =
       shouldUseStateForRoute &&
       _route?.name !== "SingleEntity" &&
@@ -238,8 +252,10 @@ export const useBaseLibrary = (
     )
       variables = queryVariables;
     if (limitForEntityPicker) variables.limit = limitForEntityPicker;
+    logWithTime('[getEntities] Variables prepared');
 
     try {
+      logWithTime('[getEntities] Starting Apollo query');
       const result = await apolloClient.query({
         query: await determineEntitiesQuery(_route, manipulationQuery.value?.document),
         variables,
@@ -252,10 +268,13 @@ export const useBaseLibrary = (
         },
       });
 
+      logWithTime('[getEntities] Apollo query completed');
       const fetchedEntities = result.data.Entities;
       if (limitForEntityPicker) return fetchedEntities;
 
+      logWithTime('[getEntities] Comparing entities with isEqual');
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
+        logWithTime('[getEntities] Entities changed, updating state');
         entities.value = fetchedEntities?.results as Entity[];
         totalEntityCount.value = fetchedEntities?.count || 0;
         facets.value = fetchedEntities.facets || [];
@@ -265,15 +284,22 @@ export const useBaseLibrary = (
             totalEntityCount: fetchedEntities.count,
           });
         }
+        logWithTime('[getEntities] State updated');
+      } else {
+        logWithTime('[getEntities] Entities unchanged, skipping update');
       }
     } catch (error: any) {
       const isAborted = isAbortError(error);
 
       if (!isAborted) {
-        console.error("Failed to get entities:", error);
+        console.error("[getEntities] Failed to get entities:", error);
+        logWithTime("[getEntities] ERROR occurred");
+      } else {
+        logWithTime('[getEntities] Query aborted');
       }
     } finally {
       entitiesLoading.value = false;
+      logWithTime('[getEntities] COMPLETED (entitiesLoading set to false)');
     }
   };
 
