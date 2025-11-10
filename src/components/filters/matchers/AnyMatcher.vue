@@ -18,6 +18,12 @@ const emit = defineEmits<{
 onMounted(() => {
   emit("updateValue", "*");
 });
+
+const reset = () => {};
+
+defineExpose({
+  reset,
+});
 </script>
 
 <style></style>
