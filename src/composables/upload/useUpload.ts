@@ -1,6 +1,6 @@
 import type Dropzone from "dropzone";
 import { type DropzoneFile } from "dropzone";
-import { computed, ref, toRaw, watch, onUnmounted } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import {
   type ActionProgressStep,
   type EntityInput,
@@ -964,10 +964,6 @@ const useUpload = (config: any) => {
       else return 1;
     });
   };
-
-  onUnmounted(() => {
-    resetUploadState();
-  });
 
   return {
     pauseUpload,

@@ -265,6 +265,7 @@ import {
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 import { useEditMode } from "@/composables/useEdit";
+import { useUploadState } from "@/composables/upload/useUploadState";
 
 const props = withDefaults(
   defineProps<{
@@ -1000,6 +1001,7 @@ watch(
 
 onUnmounted(() => {
   dynamicFormLoaded.value = false;
+  useUploadState().resetState();
 });
 </script>
 
