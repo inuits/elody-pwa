@@ -11,13 +11,18 @@
   >
     <template v-slot:actions />
     <template v-slot:content>
-      <canvas
-        v-show="!loading"
-        class="bg-background-light"
-        ref="canvasRef"
-        id="chart"
-      ></canvas>
-      <p v-if="loading" class="p-4 text-center bg-background-light text-text-body">
+      <div class="relative flex-1 min-h-0">
+        <canvas
+          v-show="!loading"
+          class="bg-background-light"
+          ref="canvasRef"
+          id="chart"
+        ></canvas>
+      </div>
+      <p
+        v-if="loading"
+        class="p-4 text-center bg-background-light text-text-body"
+      >
         loading...
       </p>
     </template>
@@ -84,20 +89,25 @@ onResult((result) => {
   Chart.register(Colors);
   chart?.destroy();
 
-  chart = new Chart(canvasRef.value, {
-    type: props.element.type,
-    data: result.data.GraphData,
-    options: {
-      onResize: () => {
-        for (const id in Chart.instances) Chart.instances[id].resize();
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
+  try {
+    chart = new Chart(canvasRef.value, {
+      type: props.element.type,
+      data: result.data.GraphData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
         },
       },
-    },
-  });
+    });
+    loading.value = false;
+  } catch (error) {
+    console.error("Error creating chart:", error);
+    loading.value = false;
+  }
 
   loading.value = false;
 });
