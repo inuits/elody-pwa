@@ -1,5 +1,5 @@
 <template>
-  <div ref="copyButton" @click.stop.prevent="copyToClipboard">
+  <div class="cursor-pointer" ref="copyButton" @click.stop.prevent="copyToClipboard">
     <unicon :name="Unicons.Copy.name" @click.stop.prevent="copyToClipboard" />
   </div>
 </template>
