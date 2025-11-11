@@ -26,6 +26,7 @@
                 relation.type === relationType,
             )"
             :key="item.key"
+            :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
           >
             <ListItem
               :key="item.key + '_preview'"
@@ -60,6 +61,7 @@
               ? undefined
               : getLinkSettings(entity, listItemRouteName).path
           "
+          :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
           @click="entityWrapperHandler(entity)"
         >
           <ListItem
@@ -134,6 +136,18 @@
             @add-refetch-function-to-edit-state="
               () => emit('addRefetchFunctionToEditState')
             "
+
+            :v-memo="[
+              entity.id,
+              entity.intialValues,
+              entity.teaserMetadata,
+              entity.relationValues,
+              findRelation(entity.id, relationType, props.parentEntityIdentifiers[0]),
+              isPreviewComponentEnabledForListItem(entity.id),
+              isEntityDisabled(entity),
+              entitiesLoading,
+              mode
+            ]"
           />
         </component>
       </div>
@@ -466,5 +480,15 @@ const containerNameForPreview = computed(() => {
   .responsive-grid {
     grid-template-columns: 100%;
   }
+}
+
+.list-item-list {
+  content-visibility: auto;
+  contain-intrinsic-size: 62px; 
+}
+
+.list-item-grid {
+  content-visibility: auto;
+  contain-intrinsic-size: 300px; 
 }
 </style>
