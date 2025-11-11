@@ -51,225 +51,91 @@
             />
           </div>
         </div>
-
-        <!-- TODO: Grid Mode: BaseVirtualGrid -->
-        <div
-          v-if="mode === 'grid'"
-          :class="{
-            'grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-2 justify-items-center max-w-full':
-              mode === 'grid',
-          }"
+        <component
+          v-for="entity in refEntities"
+          :key="entity.id + '_list'"
+          :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
+          :to="
+            entitiesLoading
+              ? undefined
+              : getLinkSettings(entity, listItemRouteName).path
+          "
+          @click="entityWrapperHandler(entity)"
         >
-          <component
-            v-for="entity in entitiesLoading
-              ? placeholderEntities
-              : refEntities"
-            :key="entity.id + '_list'"
-            :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
-            :to="
-              entitiesLoading
-                ? undefined
-                : getLinkSettings(entity, listItemRouteName).path
+          <ListItem
+            :item-id="entity.id"
+            :item-type="entity.type"
+            :bulk-operations-context="bulkOperationsContext"
+            :context-menu-actions="
+              parentEntityIdentifiers?.length > 0
+                ? entity.teaserMetadata?.contextMenuActions
+                : undefined
             "
-            @click="entityWrapperHandler(entity)"
-          >
-            <ListItem
-              :list-item-entity="entity"
-              :item-id="entity.id"
-              :item-type="entity.type"
-              :bulk-operations-context="bulkOperationsContext"
-              :context-menu-actions="
-                parentEntityIdentifiers?.length > 0
-                  ? entity.teaserMetadata?.contextMenuActions
-                  : undefined
-              "
-              :entityTypename="getMappedSlug(entity)"
-              :teaser-metadata="
-                formatTeaserMetadata(
-                  entity.teaserMetadata,
-                  entity.intialValues,
-                  previewComponentEnabled,
-                ) as Metadata[]
-              "
-              :intialValues="entity.intialValues"
-              :relationValues="entity.relationValues"
-              :media="
-                entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
-              "
-              :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
-              :is-media-type="
-                Object.values(MediaTypeEntities).includes(entity.type)
-              "
-              :small="listItemRouteName === 'SingleMediafile'"
-              :loading="entitiesLoading"
-              :is-markable-as-to-be-deleted="
-                allowedActionsOnRelations.includes(
-                  RelationActions.RemoveRelation,
-                ) && parentEntityIdentifiers.length > 0
-              "
-              :is-disabled="isEntityDisabled(entity)"
-              :relation="
-                findRelation(
-                  entity.id,
-                  relationType,
-                  props.parentEntityIdentifiers[0],
-                )
-              "
-              :relation-type="relationType"
-              :has-selection="enableSelection"
-              :base-library-mode="baseLibraryMode"
-              :is-enable-navigation="enableNavigation"
-              :entity-list-elements="entityListElements"
-              :view-mode="mode"
-              :refetch-entities="refetchEntities"
-              :preview-component-enabled="previewComponentEnabled"
-              :preview-component-current-active="
-                isPreviewComponentEnabledForListItem(entity.id)
-              "
-              :preview-component-feature-enabled="
-                previewComponent !== undefined
-              "
-              :preview-component-list-items-coverage="
-                previewComponent?.listItemsCoverage
-              "
-              @navigate-to="
-                () => {
-                  const path = getLinkSettings(
-                    entity,
-                    listItemRouteName,
-                    true,
-                  ).path;
-                  router.push(path);
-                }
-              "
-              @toggle-preview-component="
-                (previewForEntityId) =>
-                  togglePreviewComponent(previewForEntityId)
-              "
-              @add-refetch-function-to-edit-state="
-                () => emit('addRefetchFunctionToEditState')
-              "
-            />
-          </component>
-        </div>
-
-        <!-- List Mode: BaseVirtualScroll -->
-        <BaseVirtualScroll
-          v-if="mode === 'list' && !entitiesLoading"
-          :items="refEntities"
-          :itemSize="62"
-          :height="refEntities.length === 0 ? '0px' : '80vh'"
-          width="100%"
-          container-class="virtual-scroll-container"
-          :dynamic-height="true"
-        >
-          <template #default="{ item, style }">
-            <component
-              :key="(item as Entity).id + '_list'"
-              :is="
-                entitiesLoading ? 'div' : getLinkSettings(item as Entity).tag
-              "
-              :to="
-                entitiesLoading
-                  ? undefined
-                  : getLinkSettings(item as Entity, listItemRouteName).path
-              "
-              :style="style"
-              @click="entityWrapperHandler(item as Entity)"
-            >
-              <ListItem
-                :list-item-entity="item as Entity"
-                :item-id="(item as Entity).id"
-                :item-type="(item as Entity).type as Entitytyping"
-                :bulk-operations-context="bulkOperationsContext"
-                :context-menu-actions="
-                  parentEntityIdentifiers?.length > 0
-                    ? ((item as Entity).teaserMetadata?.contextMenuActions ??
-                      undefined)
-                    : undefined
-                "
-                :entityTypename="getMappedSlug(item as Entity) as Entitytyping"
-                :teaser-metadata="
-                  formatTeaserMetadata(
-                    ((item as Entity).teaserMetadata as unknown as Record<
-                      string,
-                      Metadata
-                    >) || {},
-                    (item as Entity).intialValues as unknown as Record<
-                      string,
-                      IntialValues
-                    >,
-                    previewComponentEnabled,
-                  ) as Metadata[]
-                "
-                :intialValues="(item as Entity).intialValues"
-                :relationValues="(item as Entity).relationValues"
-                :media="
-                  entitiesLoading
-                    ? undefined
-                    : getMediaFilenameFromEntity(item as Entity)
-                "
-                :thumb-icon="
-                  entitiesLoading ? undefined : getThumbnail(item as Entity)
-                "
-                :is-media-type="
-                  Object.values(MediaTypeEntities).includes(
-                    (item as Entity).type as MediaTypeEntities,
-                  )
-                "
-                :small="listItemRouteName === 'SingleMediafile'"
-                :loading="entitiesLoading"
-                :is-markable-as-to-be-deleted="
-                  allowedActionsOnRelations.includes(
-                    RelationActions.RemoveRelation,
-                  ) && parentEntityIdentifiers.length > 0
-                "
-                :is-disabled="isEntityDisabled(item as Entity)"
-                :relation="
-                  findRelation(
-                    (item as Entity).id,
-                    relationType,
-                    props.parentEntityIdentifiers[0],
-                  )
-                "
-                :relation-type="relationType"
-                :has-selection="enableSelection"
-                :base-library-mode="baseLibraryMode"
-                :is-enable-navigation="enableNavigation"
-                :entity-list-elements="entityListElements"
-                :view-mode="mode"
-                :refetch-entities="refetchEntities"
-                :preview-component-enabled="previewComponentEnabled"
-                :preview-component-current-active="
-                  isPreviewComponentEnabledForListItem((item as Entity).id)
-                "
-                :preview-component-feature-enabled="
-                  previewComponent !== undefined
-                "
-                :preview-component-list-items-coverage="
-                  previewComponent?.listItemsCoverage
-                "
-                @navigate-to="
-                  () => {
-                    const path = getLinkSettings(
-                      item as Entity,
-                      listItemRouteName,
-                      true,
-                    ).path;
-                    router.push(path);
-                  }
-                "
-                @toggle-preview-component="
-                  (previewForEntityId) =>
-                    togglePreviewComponent(previewForEntityId)
-                "
-                @add-refetch-function-to-edit-state="
-                  () => emit('addRefetchFunctionToEditState')
-                "
-              />
-            </component>
-          </template>
-        </BaseVirtualScroll>
+            :entityTypename="getMappedSlug(entity)"
+            :teaser-metadata="
+              formatTeaserMetadata(
+                entity.teaserMetadata,
+                entity.intialValues,
+                previewComponentEnabled,
+              ) as Metadata[]
+            "
+            :intialValues="entity.intialValues"
+            :relationValues="entity.relationValues"
+            :media="
+              entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
+            "
+            :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
+            :is-media-type="
+              Object.values(MediaTypeEntities).includes(entity.type)
+            "
+            :small="listItemRouteName === 'SingleMediafile'"
+            :loading="entitiesLoading"
+            :is-markable-as-to-be-deleted="
+              allowedActionsOnRelations.includes(
+                RelationActions.RemoveRelation,
+              ) && parentEntityIdentifiers.length > 0
+            "
+            :is-disabled="isEntityDisabled(entity)"
+            :relation="
+              findRelation(
+                entity.id,
+                relationType,
+                props.parentEntityIdentifiers[0],
+              )
+            "
+            :relation-type="relationType"
+            :has-selection="enableSelection"
+            :base-library-mode="baseLibraryMode"
+            :is-enable-navigation="enableNavigation"
+            :entity-list-elements="entityListElements"
+            :view-mode="mode"
+            :refetch-entities="refetchEntities"
+            :preview-component-enabled="previewComponentEnabled"
+            :preview-component-current-active="
+              isPreviewComponentEnabledForListItem(entity.id)
+            "
+            :preview-component-feature-enabled="previewComponent !== undefined"
+            :preview-component-list-items-coverage="
+              previewComponent?.listItemsCoverage
+            "
+            @navigate-to="
+              () => {
+                const path = getLinkSettings(
+                  entity,
+                  listItemRouteName,
+                  true,
+                ).path;
+                router.push(path);
+              }
+            "
+            @toggle-preview-component="
+              (previewForEntityId) => togglePreviewComponent(previewForEntityId)
+            "
+            @add-refetch-function-to-edit-state="
+              () => emit('addRefetchFunctionToEditState')
+            "
+          />
+        </component>
       </div>
       <div
         v-if="
@@ -305,7 +171,6 @@ import {
   type EntityListElement,
   Entitytyping,
   GetPreviewComponentsDocument,
-  type IntialValues,
   ListItemCoverageTypes,
   MediaTypeEntities,
   type Metadata,
@@ -328,7 +193,6 @@ import EventBus from "@/EventBus";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import { apolloClient, router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
-import BaseVirtualScroll from "@/components/base/BaseVirtualScroll.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -369,7 +233,6 @@ const props = withDefaults(
     showCurrentEntityFlow: true,
     cropMediafileCoordinatesKey: "",
     expandFilters: false,
-    entitiesLoading: false,
   },
 );
 
@@ -410,10 +273,6 @@ const getLinkSettings = (
     ) {
       return { tag: "div", path: undefined };
     }
-    return { tag: "div", path: undefined };
-  }
-
-  if (!entity) {
     return { tag: "div", path: undefined };
   }
 
@@ -464,6 +323,7 @@ const getPreviewItemsForEntity = async () => {
     .query({
       query: GetPreviewComponentsDocument,
       variables: { entityType: props.entityType },
+      fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
@@ -525,18 +385,17 @@ watch(
   { immediate: true },
 );
 watch(
-  () => refEntities,
+  () => refEntities.value,
   (newEntities) => {
-    if (newEntities.value.length > 0)
-      configurePreviewComponentWithNewEntities(newEntities.value);
+    if (newEntities.length > 0)
+      configurePreviewComponentWithNewEntities(newEntities);
     if (
       !previewForEntity.value &&
       previewComponent.value?.openByDefault &&
-      newEntities.value[0]?.id
+      newEntities[0]?.id
     )
-      togglePreviewComponent(newEntities.value[0].id);
+      togglePreviewComponent(newEntities[0].id);
   },
-  { deep: true },
 );
 
 const containerNameForPreview = computed(() => {
