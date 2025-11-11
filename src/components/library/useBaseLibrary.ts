@@ -12,7 +12,7 @@ import {
   BaseLibraryModes,
 } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
-import { asString, createPlaceholderEntities } from "@/helpers";
+import { asString } from "@/helpers";
 import { ref, shallowRef, watch, inject } from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";

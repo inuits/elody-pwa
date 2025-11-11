@@ -20,13 +20,10 @@
         <div v-if="Array.isArray(relations)">
           <div
             v-show="!disablePreviews"
-            v-for="item in relations?.filter(
-              (relation) =>
-                relation.editStatus === EditStatus.New &&
-                relation.type === relationType,
-            )"
+            v-for="item in filteredRelations"
             :key="item.key"
             :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
+            v-memo="[item.key, item.editStatus, mode, entitiesLoading]"
           >
             <ListItem
               :key="item.key + '_preview'"
@@ -63,6 +60,18 @@
           "
           :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
           @click="entityWrapperHandler(entity)"
+
+          v-memo="[
+            entity.id,
+            entity.intialValues,
+            entity.teaserMetadata,
+            entity.relationValues,
+            findRelation(entity.id, relationType, props.parentEntityIdentifiers[0]),
+            isPreviewComponentEnabledForListItem(entity.id),
+            isEntityDisabled(entity),
+            entitiesLoading,
+            mode
+          ]"
         >
           <ListItem
             :item-id="entity.id"
@@ -136,18 +145,6 @@
             @add-refetch-function-to-edit-state="
               () => emit('addRefetchFunctionToEditState')
             "
-
-            :v-memo="[
-              entity.id,
-              entity.intialValues,
-              entity.teaserMetadata,
-              entity.relationValues,
-              findRelation(entity.id, relationType, props.parentEntityIdentifiers[0]),
-              isPreviewComponentEnabledForListItem(entity.id),
-              isEntityDisabled(entity),
-              entitiesLoading,
-              mode
-            ]"
           />
         </component>
       </div>
@@ -267,6 +264,14 @@ const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
 const relations = computed<BaseRelationValuesInput[]>(
   () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
 );
+
+const filteredRelations = computed(() => {
+  return relations.value?.filter(
+    (relation) =>
+      relation.editStatus === EditStatus.New &&
+      relation.type === props.relationType,
+  ) || [];
+});
 
 watch(
   () => props.entities,

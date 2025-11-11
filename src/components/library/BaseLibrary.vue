@@ -20,30 +20,7 @@
     <div
       v-else
       class="bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
-      :class="[
-        baseLibraryMode === BaseLibraryModes.BasicBaseLibrary
-          ? ''
-          : parentEntityIdentifiers.length > 0
-            ? 'px-3'
-            : 'px-6',
-        {
-          '!bg-white grid-rows-[0vh_1fr]':
-            baseLibraryMode === BaseLibraryModes.BasicBaseLibrary,
-        },
-        {
-          'grid-rows-[5vh_1fr]':
-            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
-        },
-        {
-          'grid-rows-[1vh_1fr]':
-            baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-            (baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary &&
-              showCurrentEntityFlow),
-        },
-        {
-          'grid-rows-[1fr_0vh]': !showCurrentEntityFlow,
-        },
-      ]"
+      :class="wrapperClasses"
     >
       <div
         class="z-header top-0 pt-3 pb-2 bg-background-normal"
@@ -460,6 +437,29 @@ const additionalDefaultFiltersEnabled = computed(() => {
     props.bulkOperationsContext !==
       BulkOperationsContextEnum.EntityElementListEntityPickerModal
   );
+});
+
+const wrapperClasses = computed(() => {
+  const classes: (string | Record<string, boolean>)[] = [];
+  const mode = props.baseLibraryMode;
+
+  if (mode !== BaseLibraryModes.BasicBaseLibrary) {
+    classes.push(props.parentEntityIdentifiers.length > 0 ? 'px-3' : 'px-6');
+  }
+
+  classes.push({
+    '!bg-white grid-rows-[0vh_1fr]':
+      mode === BaseLibraryModes.BasicBaseLibrary,
+    'grid-rows-[5vh_1fr]':
+      mode === BaseLibraryModes.NormalBaseLibrary,
+    'grid-rows-[1vh_1fr]':
+      mode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+      (mode === BaseLibraryModes.PreviewBaseLibrary &&
+        showCurrentEntityFlow.value),
+    'grid-rows-[1fr_0vh]': !showCurrentEntityFlow.value,
+  });
+
+  return classes;
 });
 
 const handleRegisterAPI = (api: FiltersBaseAPI) => {
