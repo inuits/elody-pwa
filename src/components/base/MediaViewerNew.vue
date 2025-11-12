@@ -32,7 +32,10 @@
         :enable-selection="isCropModeEnabled"
         :crop-sizes="cropSizes"
       />
-      <div v-if="displayProcessingImage" class="flex justify-center flex-col items-center h-full">
+      <div
+        v-if="displayProcessingImage"
+        class="flex justify-center flex-col items-center h-full"
+      >
         <unicon
           name="image-slash"
           class="h-15 w-15 p-1 text-text-body rounded-sm outline-none self-center"
@@ -168,7 +171,7 @@ const displayProcessingImage = computed<boolean>(() => {
   if (viewerType.value !== ElodyViewers.Iiif) return false;
   const hasTranscodeFilename = !!getValueOfMediafile(
     mediafileViewerContext,
-    "transcode_filename",
+    "display_filename",
     mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
   );
   return hasTranscodeFilename ? false : true;
