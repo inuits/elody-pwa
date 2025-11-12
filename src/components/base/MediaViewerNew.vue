@@ -11,9 +11,7 @@
       <IIIFViewer
         v-if="viewerType === ElodyViewers.Iiif && !displayProcessingImage"
         :imageFilename="
-          getValueOfMediafile(mediafileViewerContext, 'transcode_filename') ||
-          getValueOfMediafile(mediafileViewerContext, 'filename') ||
-          ''
+          getValueOfMediafile(mediafileViewerContext, 'display_filename') || ''
         "
         :originalFilename="
           getValueOfMediafile(mediafileViewerContext, 'original_filename')
@@ -43,17 +41,19 @@
           {{ t("media-viewer.processing-image") }}
         </div>
       </div>
-      <VideoPlayer
+      <AudioAndVideoPlayer
         v-if="viewerType === ElodyViewers.Video"
         :source="
           mediafileSelectionState[mediafileViewerContext].selectedMediafile
         "
+        media-type="Video"
       />
-      <AudioPlayer
+      <AudioAndVideoPlayer
         v-if="viewerType === ElodyViewers.Audio"
         :source="
           mediafileSelectionState[mediafileViewerContext].selectedMediafile
         "
+        media-type="Audio"
       />
       <PDFViewer
         v-if="viewerType === ElodyViewers.Pdf"
@@ -93,19 +93,15 @@ import {
   KeyValueSource,
   type MediaFileEntity,
 } from "@/generated-types/queries";
-import AudioPlayer from "@/components/base/AudioPlayer.vue";
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
-import VideoPlayer from "@/components/base/VideoPlayer.vue";
 import { computed, toRefs, watch, inject, defineAsyncComponent } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import {
-  useMediafileCrop,
-  CropAreaCoordinates,
-} from "@/composables/useMediafileCrop";
+import { useMediafileCrop } from "@/composables/useMediafileCrop";
+import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),

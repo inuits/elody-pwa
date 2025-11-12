@@ -2,11 +2,7 @@
   <div class="flex w-full h-full justify-center items-center">
     <audio controls class="w-full">
       <source
-        :src="
-          source && source?.filename
-            ? '/api/mediafile/' + source.filename
-            : 'no-src'
-        "
+        :src="'/api/mediafile/' + source.id"
         :type="source && source?.mimetype ? source?.mimetype : 'no-type'"
       />
       {{ $t("audio.no-support") }}

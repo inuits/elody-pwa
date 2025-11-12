@@ -57,8 +57,8 @@ vi.mock("@/composables/useEntityMediafileSelector", () => ({
 }));
 
 vi.mock("@/components/IIIFViewer.vue", () => mocks.IIIFViewer);
-vi.mock("@/components/base/VideoPlayer.vue", () => mocks.VideoPlayer);
-vi.mock("@/components/base/AudioPlayer.vue", () => mocks.AudioPlayer);
+vi.mock("@/components/base/AudioAndVideoPlayer.vue", () => mocks.VideoPlayer);
+vi.mock("@/components/base/AudioAndVideoPlayer.vue", () => mocks.AudioPlayer);
 vi.mock("@/components/base/TextViewer.vue", () => mocks.TextViewer);
 vi.mock("@/components/SpinnerLoader.vue", () => mocks.SpinnerLoader);
 vi.mock("@/types", () => ({

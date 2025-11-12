@@ -91,7 +91,7 @@ const decentralizeFromLeft = ref<boolean>(false);
 const decentralizeFromTop = ref<boolean>(false);
 const error = ref<string | null>(null);
 
-const { getMediafile, getMediafilePath } = useGetMediafile();
+const { getMediafile } = useGetMediafile();
 
 let currentObjectUrl: string | null = null;
 let currentRenderTask: any = null;
@@ -241,14 +241,13 @@ async function initialRender(): Promise<void> {
   }
 
   try {
-    const filePath = props.source.intialValues?.original_file_location;
+    const filePath = props.source.id;
     if (!filePath) {
-      error.value =
-        "Mediafile has no 'original_file_location', unable to locate source file";
+      error.value = "Mediafile has no 'id', unable to locate source file";
       loading.value = false;
       return;
     }
-    url.value = `/api/mediafile/${getMediafilePath(filePath)}`;
+    url.value = `/api/mediafile/${filePath}`;
     const response = await getMediafile(url.value);
     if (!response || !response.ok) {
       throw new Error("Failed to fetch PDF");

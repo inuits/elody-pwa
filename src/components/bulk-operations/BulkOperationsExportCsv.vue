@@ -222,13 +222,17 @@ const exportCsv = async () => {
   });
 
   const state = getStateForRoute(route);
-  const exportURL = `/api/export/csv?order_by=${
-    state.queryVariables.searchValue.order_by
-  }&asc=${Number(
-    state.queryVariables.searchValue.isAsc,
-  )}&type=${entityType.value}&ids=${getEnqueuedItems(context.value)
+  let exportURL: string = `/api/export/csv?ids=${getEnqueuedItems(context.value)
     .map((item) => item.id)
-    .join(",")}${fieldQueryParameter}`;
+    .join(",")}${fieldQueryParameter}\`;`;
+  if (state?.queryVariables)
+    exportURL = `/api/export/csv?order_by=${
+      state.queryVariables.searchValue.order_by
+    }&asc=${Number(
+      state.queryVariables.searchValue.isAsc,
+    )}&type=${entityType.value}&ids=${getEnqueuedItems(context.value)
+      .map((item) => item.id)
+      .join(",")}${fieldQueryParameter}`;
 
   await fetch(encodeURI(exportURL), {
     method: "GET",
