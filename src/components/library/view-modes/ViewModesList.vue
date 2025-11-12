@@ -49,8 +49,9 @@
             />
           </div>
         </div>
-          <component
-          v-for="entity in processedEntities" :key="entity.id + '_list'" 
+        <component
+          v-for="entity in processedEntities"
+          :key="entity.id + '_list'"
           :is="entity.componentTag"
           :to="entity.componentPath"
           :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
@@ -263,6 +264,8 @@ const processedEntities = computed(() => {
       previewEnabled,
     ];
 
+    console.log(entity.type);
+
     return {
       originalEntity: entity,
       id: entity.id,
@@ -280,7 +283,9 @@ const processedEntities = computed(() => {
       relationValues: entity.relationValues,
       media: mediaFilename,
       thumbIcon: thumbnail,
-      isMediaType: Object.values(MediaTypeEntities).includes(entity.type),
+      isMediaType: Object.values(MediaTypeEntities).includes(
+        entity.type.toLowerCase(),
+      ),
       isMarkable:
         props.allowedActionsOnRelations.includes(
           RelationActions.RemoveRelation,
