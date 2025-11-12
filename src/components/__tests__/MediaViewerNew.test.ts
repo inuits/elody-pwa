@@ -101,7 +101,7 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       if (field === "width") return 1200;
       if (field === "id") return "test-mediafile-123";
       if (field === "filename") return "test-image.jpg";
-      if (field === "transcode_filename") return "test-image-transcoded.jpg";
+      if (field === "display_filename") return "test-image-transcoded.jpg";
       if (field === "original_filename") return "original-test-image.jpg";
       return null;
     });
