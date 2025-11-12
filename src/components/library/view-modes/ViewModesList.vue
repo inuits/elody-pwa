@@ -49,71 +49,31 @@
             />
           </div>
         </div>
-        <component
-          v-for="entity in refEntities"
-          :key="entity.id + '_list'"
-          :is="entitiesLoading ? 'div' : getLinkSettings(entity).tag"
-          :to="
-            entitiesLoading
-              ? undefined
-              : getLinkSettings(entity, listItemRouteName).path
-          "
+          <component
+          v-for="entity in processedEntities" :key="entity.id + '_list'" 
+          :is="entity.componentTag"
+          :to="entity.componentPath"
           :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
-          @click="entityWrapperHandler(entity)"
-
-          v-memo="[
-            entity.id,
-            entity.intialValues,
-            entity.teaserMetadata,
-            entity.relationValues,
-            findRelation(entity.id, relationType, props.parentEntityIdentifiers[0]),
-            isPreviewComponentEnabledForListItem(entity.id),
-            isEntityDisabled(entity),
-            entitiesLoading,
-            mode
-          ]"
+          @click="entityWrapperHandler(entity.originalEntity)"
+          v-memo="entity.memoKey"
         >
           <ListItem
             :item-id="entity.id"
             :item-type="entity.type"
             :bulk-operations-context="bulkOperationsContext"
-            :context-menu-actions="
-              parentEntityIdentifiers?.length > 0
-                ? entity.teaserMetadata?.contextMenuActions
-                : undefined
-            "
-            :entityTypename="getMappedSlug(entity)"
-            :teaser-metadata="
-              formatTeaserMetadata(
-                entity.teaserMetadata,
-                entity.intialValues,
-                previewComponentEnabled,
-              ) as Metadata[]
-            "
+            :context-menu-actions="entity.contextMenu"
+            :entityTypename="entity.entityTypename"
+            :teaser-metadata="entity.teaserMetadata"
             :intialValues="entity.intialValues"
             :relationValues="entity.relationValues"
-            :media="
-              entitiesLoading ? undefined : getMediaFilenameFromEntity(entity)
-            "
-            :thumb-icon="entitiesLoading ? undefined : getThumbnail(entity)"
-            :is-media-type="
-              Object.values(MediaTypeEntities).includes(entity.type)
-            "
+            :media="entity.media"
+            :thumb-icon="entity.thumbIcon"
+            :is-media-type="entity.isMediaType"
             :small="listItemRouteName === 'SingleMediafile'"
             :loading="entitiesLoading"
-            :is-markable-as-to-be-deleted="
-              allowedActionsOnRelations.includes(
-                RelationActions.RemoveRelation,
-              ) && parentEntityIdentifiers.length > 0
-            "
-            :is-disabled="isEntityDisabled(entity)"
-            :relation="
-              findRelation(
-                entity.id,
-                relationType,
-                props.parentEntityIdentifiers[0],
-              )
-            "
+            :is-markable-as-to-be-deleted="entity.isMarkable"
+            :is-disabled="entity.isDisabled"
+            :relation="entity.relation"
             :relation-type="relationType"
             :has-selection="enableSelection"
             :base-library-mode="baseLibraryMode"
@@ -122,21 +82,14 @@
             :view-mode="mode"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
-            :preview-component-current-active="
-              isPreviewComponentEnabledForListItem(entity.id)
-            "
+            :preview-component-current-active="entity.isPreviewActive"
             :preview-component-feature-enabled="previewComponent !== undefined"
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
             "
             @navigate-to="
               () => {
-                const path = getLinkSettings(
-                  entity,
-                  listItemRouteName,
-                  true,
-                ).path;
-                router.push(path);
+                router.push(entity.forcedNavigationPath);
               }
             "
             @toggle-preview-component="
@@ -266,11 +219,79 @@ const relations = computed<BaseRelationValuesInput[]>(
 );
 
 const filteredRelations = computed(() => {
-  return relations.value?.filter(
-    (relation) =>
-      relation.editStatus === EditStatus.New &&
-      relation.type === props.relationType,
-  ) || [];
+  return (
+    relations.value?.filter(
+      (relation) =>
+        relation.editStatus === EditStatus.New &&
+        relation.type === props.relationType,
+    ) || []
+  );
+});
+
+const processedEntities = computed(() => {
+  const currentMode = props.mode;
+  const previewEnabled = previewComponentEnabled.value;
+  const parentId = props.parentEntityIdentifiers[0];
+  const rType = props.relationType;
+
+  return refEntities.value.map((entity) => {
+    const linkSettings = getLinkSettings(entity, props.listItemRouteName);
+    const forcedLinkSettings = getLinkSettings(
+      entity,
+      props.listItemRouteName,
+      true,
+    );
+    const relation = findRelation(entity.id, rType as string, parentId);
+    const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
+    const isDisabled = isEntityDisabled(entity);
+    const formattedMetadata = formatTeaserMetadata(
+      entity.teaserMetadata,
+      entity.intialValues,
+      previewEnabled,
+    );
+    const mediaFilename = getMediaFilenameFromEntity(entity);
+    const thumbnail = getThumbnail(entity);
+
+    const memoKey = [
+      entity.intialValues,
+      entity.teaserMetadata,
+      entity.relationValues,
+      relation,
+      isPreviewActive,
+      isDisabled,
+      currentMode,
+      previewEnabled,
+    ];
+
+    return {
+      originalEntity: entity,
+      id: entity.id,
+      type: entity.type,
+      componentTag: linkSettings.tag,
+      componentPath: linkSettings.path,
+      forcedNavigationPath: forcedLinkSettings.path,
+
+      contextMenu: parentId
+        ? entity.teaserMetadata?.contextMenuActions
+        : undefined,
+      entityTypename: getMappedSlug(entity),
+      teaserMetadata: formattedMetadata,
+      intialValues: entity.intialValues,
+      relationValues: entity.relationValues,
+      media: mediaFilename,
+      thumbIcon: thumbnail,
+      isMediaType: Object.values(MediaTypeEntities).includes(entity.type),
+      isMarkable:
+        props.allowedActionsOnRelations.includes(
+          RelationActions.RemoveRelation,
+        ) && props.parentEntityIdentifiers.length > 0,
+      isDisabled: isDisabled,
+      relation: relation,
+      isPreviewActive: isPreviewActive,
+
+      memoKey: memoKey,
+    };
+  });
 });
 
 watch(
@@ -489,11 +510,11 @@ const containerNameForPreview = computed(() => {
 
 .list-item-list {
   content-visibility: auto;
-  contain-intrinsic-size: 62px; 
+  contain-intrinsic-size: 62px;
 }
 
 .list-item-grid {
   content-visibility: auto;
-  contain-intrinsic-size: 300px; 
+  contain-intrinsic-size: 300px;
 }
 </style>
