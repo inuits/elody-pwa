@@ -284,7 +284,7 @@ const processedEntities = computed(() => {
       media: mediaFilename,
       thumbIcon: thumbnail,
       isMediaType: Object.values(MediaTypeEntities).includes(
-        entity.type.toLowerCase(),
+        entity.type?.toLowerCase(),
       ),
       isMarkable:
         props.allowedActionsOnRelations.includes(
