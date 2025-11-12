@@ -74,7 +74,6 @@ const {
 } = useUploadState();
 
 const useUpload = (config: any) => {
-
   const initializeUpload = (uploadSettings: UploadSettings): void => {
     uploadFlow.value = uploadSettings.uploadFlow;
 
@@ -129,10 +128,10 @@ const useUpload = (config: any) => {
       amountUploaded.value++;
     }
     toggleUploadStatus();
-    const uploadStatus: ProgressStepStatus = failedUploads.value.length
+    const globalUploadStatus: ProgressStepStatus = failedUploads.value.length
       ? ProgressStepStatus.Failed
       : ProgressStepStatus.Complete;
-    updateGlobalUploadProgress(ProgressStepType.Upload, uploadStatus);
+    updateGlobalUploadProgress(ProgressStepType.Upload, globalUploadStatus);
     if (errors.length > 0) {
       throw errors.join(", ");
     }
