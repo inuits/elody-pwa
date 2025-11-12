@@ -264,8 +264,6 @@ const processedEntities = computed(() => {
       previewEnabled,
     ];
 
-    console.log(entity.type);
-
     return {
       originalEntity: entity,
       id: entity.id,
