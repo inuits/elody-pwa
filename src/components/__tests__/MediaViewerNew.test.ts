@@ -22,13 +22,9 @@ const mocks = vi.hoisted(() => {
       ],
       emits: ["selectArea", "toggle-preview-component:entity-id"],
     },
-    VideoPlayer: {
+    AudioAndVideoPlayer: {
       default: {},
-      template: '<div class="video-player"></div>',
-    },
-    AudioPlayer: {
-      default: {},
-      template: '<div class="audio-player"></div>',
+      template: '<div class="audio-and-video-player"></div>',
     },
     PDFViewer: {
       default: {},
@@ -57,8 +53,10 @@ vi.mock("@/composables/useEntityMediafileSelector", () => ({
 }));
 
 vi.mock("@/components/IIIFViewer.vue", () => mocks.IIIFViewer);
-vi.mock("@/components/base/AudioAndVideoPlayer.vue", () => mocks.VideoPlayer);
-vi.mock("@/components/base/AudioAndVideoPlayer.vue", () => mocks.AudioPlayer);
+vi.mock(
+  "@/components/base/AudioAndVideoPlayer.vue",
+  () => mocks.AudioAndVideoPlayer,
+);
 vi.mock("@/components/base/TextViewer.vue", () => mocks.TextViewer);
 vi.mock("@/components/SpinnerLoader.vue", () => mocks.SpinnerLoader);
 vi.mock("@/types", () => ({
@@ -133,8 +131,7 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
         },
         stubs: {
           IIIFViewer: mocks.IIIFViewer,
-          VideoPlayer: mocks.VideoPlayer,
-          AudioPlayer: mocks.AudioPlayer,
+          AudioAndVideoPlayer: mocks.AudioAndVideoPlayer,
           PDFViewer: mocks.PDFViewer,
           TextViewer: mocks.TextViewer,
           SpinnerLoader: mocks.SpinnerLoader,
@@ -231,7 +228,9 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       await nextTick();
 
       expect(wrapper.findComponent(mocks.IIIFViewer).exists()).toBe(false);
-      expect(wrapper.findComponent(mocks.VideoPlayer).exists()).toBe(true);
+      expect(wrapper.findComponent(mocks.AudioAndVideoPlayer).exists()).toBe(
+        true,
+      );
     });
 
     it("should pass correct props to IIIFViewer for cropping", async () => {
