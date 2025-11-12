@@ -273,7 +273,10 @@ async function initialRender(): Promise<void> {
       ctx.value = canvas.value.getContext("2d");
     }
 
-    // render first page
+    await nextTick();
+    loading.value = false;
+    await nextTick();
+
     await renderPage(pageNum.value);
 
     // setup resize observer to recompute decentralization
