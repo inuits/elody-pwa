@@ -218,24 +218,9 @@ const viewerContainsMultipleMediafiles = computed(
   () => mediafileViewerContext && mediafileViewerContext.mediafiles?.length > 1,
 );
 
-const getDownloadLink = async (): Promise<string> => {
-  if (!props.mediafileId) {
-    throw Error(`Could not download mediafile with id "${props.mediafileId}"`);
-  }
-  downloadImageLoadingRef.value = true;
-  const imageUrl = await fetch(
-    `/api/mediafiles/${props.mediafileId}/download`,
-    {
-      headers: { Accept: "image/jpeg" },
-    },
-  );
-  const image = await fetch(await imageUrl.text());
-  return image.url;
-};
-
-const createDownloadButton = (downloadLink: string): void => {
+const createDownloadButton = (): void => {
   const a = document.createElement("a");
-  a.href = downloadLink;
+  a.href = `/api/mediafile/${props.mediafileId}`;
   a.download = props.originalFilename || "";
   a.target = "_blank";
   document.body.appendChild(a);
@@ -244,8 +229,8 @@ const createDownloadButton = (downloadLink: string): void => {
 };
 
 const downloadImage = async () => {
-  const downloadLink = await getDownloadLink();
-  createDownloadButton(downloadLink);
+  downloadImageLoadingRef.value = true;
+  createDownloadButton();
   downloadImageLoadingRef.value = false;
 };
 
