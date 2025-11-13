@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-full relative">
-    <div v-if="mediaType === 'Video'">
+    <div class="h-full" v-if="mediaType === 'Video'">
       <video class="w-full h-full bg-white" preload="auto" controls>
         <source :src="getFileUrl()" :type="mimetype" />
         Video not supported
