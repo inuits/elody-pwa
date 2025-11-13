@@ -237,6 +237,7 @@ const createDownloadButton = (downloadLink: string): void => {
   const a = document.createElement("a");
   a.href = downloadLink;
   a.download = props.originalFilename || "";
+  a.target = "_blank";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
