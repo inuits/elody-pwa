@@ -1,7 +1,7 @@
 <template>
   <div class="max-h-[80vh] overflow-y-auto">
     <div
-      v-for="index in amount"
+      v-for="index in amountRef"
       :key="`skeleton-${index}`"
       class="border rounded cursor-pointer list-none z-[-1] flex items-center gap-2 p-1.5 mb-2 bg-background-light border-accent-highlight"
     >
@@ -26,13 +26,17 @@
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue';
+
 interface Props {
   amount?: number;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   amount: 20,
 });
+
+const amountRef = ref(props.amount || 20);
 </script>
 
 <style scoped>
