@@ -392,6 +392,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
     PERCENT: (value: string) =>
       Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
     VOLT: (value: string) => `${value} V`,
+    PX: (value: string) => `${value}px`,
   };
 
   const details = unit.split("_");
