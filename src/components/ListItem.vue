@@ -1,282 +1,233 @@
 <template>
-  <base-tooltip position="top-right" :tooltip-offset="8">
-    <template #activator="{ on }">
-      <div v-on="isPreviewElement ? on : {}">
-        <li
-          data-cy="list-item"
-          :class="[
-            'border rounded cursor-pointer list-none z-[-1]',
-            {
-              'flex items-center gap-2 p-1.5 mb-2': viewMode === 'list',
-            },
-            {
-              'p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]':
-                viewMode === 'grid',
-            },
-            {
-              'border-dashed border-2 !border-accent-normal':
-                isPreview || isMarkedAsToBeDeleted,
-            },
-            { '!border-status-new': isPreview },
-            { '!border-status-deleted': isMarkedAsToBeDeleted },
-            { 'grayscale brightness-95 !cursor-default': isDisabled },
-            { 'animate-pulse': loading },
-            { 'bg-background-light': !isActiveListItem },
-            { 'border-accent-highlight': !isActiveListItem },
-            {
-              'border-4 border-neutral-800 bg-accent-light/30':
-                isActiveListItem,
-            },
-          ]"
+  <li data-cy="list-item" :class="wrapperClasses">
+    <div
+      v-if="isGridMode && !isPreviewElement"
+      class="flex justify-between items-center pb-2"
+    >
+      <BaseInputCheckbox
+        v-if="
+          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+          !isPreview &&
+          hasSelection &&
+          isGridMode
+        "
+        :class="[{ invisible: isDisabled }, 'text-center']"
+        v-model="isChecked"
+        :item="{ id: itemId, teaserMetadata, type: itemType }"
+        :bulk-operations-context="bulkOperationsContext"
+        input-style="accentNormal"
+      />
+      <BaseContextMenuActions
+        :context-menu-actions="contextMenuActions"
+        :parent-entity-id="formId"
+        :entity-id="itemId"
+        :entity-type="entityTypename"
+        :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
+        @toggle-loading="toggleLoading"
+      />
+    </div>
+    <div
+      :class="[
+        'flex items-center rounded-2xl p-2 bg-accent-highlight',
+        { 'mb-4': isGridMode },
+      ]"
+      v-show="useEditHelper.isEdit"
+      v-if="onlyEditableTeaserMetadata.length > 0"
+    >
+      <div v-if="!loading" class="w-16 pr-2">
+        <div
+          v-for="metadataItem in onlyEditableTeaserMetadata"
+          :key="`${formId}_${metadataItem.key || 'no-key'}`"
+          class="w-1/1"
         >
-          <div
-            v-if="viewMode === 'grid' && !isPreviewElement"
-            class="flex justify-between items-center pb-2"
-          >
-            <BaseInputCheckbox
-              v-if="
-                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-                !isPreview &&
-                hasSelection &&
-                viewMode === 'grid'
-              "
-              :class="[{ invisible: isDisabled }, 'text-center']"
-              v-model="isChecked"
-              :item="{ id: itemId, teaserMetadata, type: itemType }"
-              :bulk-operations-context="bulkOperationsContext"
-              input-style="accentNormal"
-            />
-            <BaseContextMenuActions
-              :context-menu-actions="contextMenuActions"
-              :parent-entity-id="formId"
-              :entity-id="itemId"
-              :entity-type="entityTypename"
-              :relation="relation"
-              :bulk-operations-context="bulkOperationsContext"
-              @toggle-loading="toggleLoading"
-            />
-          </div>
-          <div
-            :class="[
-              'flex items-center rounded-2xl p-2 bg-accent-highlight',
-              { 'mb-4': viewMode === 'grid' },
-            ]"
-            v-show="useEditHelper.isEdit"
-            v-if="onlyEditableTeaserMetadata.length > 0"
-          >
-            <div v-if="!loading" class="w-16 pr-2">
-              <div
-                v-for="metadataItem in onlyEditableTeaserMetadata"
-                :key="`${formId}_${metadataItem.key || 'no-key'}`"
-                class="w-1/1"
-              >
-                <metadata-wrapper
-                  ref="orderMetadataChild"
-                  :form-id="formId"
-                  v-model:metadata="metadataItem as MetadataField"
-                  :is-edit="useEditHelper.isEdit"
-                  :linked-entity-id="intialValues?.id || itemId"
-                  :should-hide="true"
-                  :entity-type="entityTypename"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <BaseInputCheckbox
-              v-if="
-                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-                !isPreview &&
-                hasSelection &&
-                viewMode === 'list'
-              "
-              :class="[{ invisible: isDisabled }, 'text-center']"
-              v-model="isChecked"
-              :item="{
-                id: itemId,
-                teaserMetadata,
-                relationValues,
-                type: itemType,
-              }"
-              :bulk-operations-context="bulkOperationsContext"
-              input-style="accentNormal"
-            />
-          </div>
-          <div
-            v-if="canShowCopyRight() && media && !imageSrcError"
-            :class="[
-              'flex items-center',
-              { 'justify-center mb-4 h-[50%]': viewMode === 'grid' },
-            ]"
-          >
-            <ImageViewer
-              v-if="canShowCopyRight() && media && !imageSrcError"
-              :key="`${itemId}-image-${imageSize}`"
-              class="object-cover self-center outline-none"
-              :height-class="viewMode === 'list' ? 'h-10' : '!h-48'"
-              :width-class="viewMode === 'list' ? 'w-10' : '!w-48'"
-              :url="
-                mediaIsLink
-                  ? media
-                  : `/api/iiif/3/${media}/square/^${imageSize},/0/default.jpg`
-              "
-              :mediaIsLink="mediaIsLink"
-              @error="setNoImage()"
-            />
-          </div>
-          <div
-            v-if="
-              !canShowCopyRight() ||
-              (media && imageSrcError) ||
-              (!media && isMediaType)
-            "
-            :key="`${itemId}-icon-${imageSize}`"
-            :class="[
-              { 'h-10 w-10': viewMode === 'list' },
-              {
-                'h-48 w-48 flex flex-col justify-center items-center shadow-sm mb-4':
-                  viewMode === 'grid',
-              },
-              'text-neutral-700 rounded-sm outline-none self-center',
-            ]"
-          >
-            <unicon
-              :name="thumbIcon"
-              class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none self-center"
-            />
-            <div v-if="viewMode === 'grid'" class="text-neutral-70">
-              No media
-            </div>
-          </div>
-
-          <div
-            v-if="!loading"
-            :class="[
-              'w-full',
-              { 'flex items-center': viewMode === 'list' },
-              { 'p-4': viewMode === 'grid' },
-            ]"
-          >
-            <div
-              v-for="(metadataItem, idx) in onlyReadModeTeaserMetadata"
-              :key="`${formId || idx}_${metadataItem?.key || idx}`"
-              :class="[
-                teaserMetadataStyle,
-                idx < 1 && teaserMetadata[0]?.value?.formatter
-                  ? 'w-fit whitespace-nowrap mr-4'   // keep first and second element tight at the start when first element is a label pill
-                  : 'w-full'        // all others stay full width
-              ]"
-            >
-              <ReadOnlyMetadataWrapper
-                v-if="!useEditHelper.isEdit"
-                :form-id="formId || 'listview'"
-                :metadata="metadataItem as MetadataField"
-                :is-edit="useEditHelper.isEdit"
-                :linked-entity-id="intialValues?.id || itemId"
-                :entity-type="entityTypename"
-              />
-              <metadata-wrapper
-                v-else
-                :form-id="formId"
-                v-model:metadata="metadataItem as MetadataField"
-                :is-edit="useEditHelper.isEdit"
-                :linked-entity-id="intialValues?.id || itemId"
-                :entity-type="entityTypename"
-                :list-item-entity="listItemEntity"
-                @add-refetch-function-to-edit-state="() => emit('addRefetchFunctionToEditState')"
-              />
-            </div>
-          </div>
-
-          <div class="w-full" v-else>
-            <div class="bg-neutral-100 h-4 w-1/4 opacity-40 mb-2"></div>
-            <div class="bg-neutral-100 h-4 w-5/6 opacity-40"></div>
-          </div>
-
-          <div
-            v-if="false"
-            :class="[{ 'flex justify-end': viewMode === 'grid' }]"
-            @click.stop
-          >
-            <BaseToggle
-              v-model="isMarkedAsToBeDeleted"
-              :icon-on="DamsIcons.CrossCircle"
-              :icon-off="DamsIcons.Trash"
-              :icon-height="22"
-            />
-          </div>
-
-          <div v-if="viewMode === 'list'" class="flex">
-            <BaseContextMenuActions
-              :context-menu-actions="contextMenuActions"
-              :parent-entity-id="formId"
-              :entity-id="itemId"
-              :entity-type="entityTypename"
-              :relation="relation"
-              :bulk-operations-context="bulkOperationsContext"
-              :refetch-entities="refetchEntities"
-              @toggle-loading="toggleLoading"
-            />
-          </div>
-          <div
-            v-if="previewComponentEnabled"
-            class="flex flex-row"
-            @click="() => emit('navigateTo')"
-          >
-            <slot>
-              <unicon
-                :name="Unicons.AngleRight.name"
-                class="h-5.5 w-5.5 text-text-body"
-              />
-            </slot>
-          </div>
-          <div
-            v-else-if="
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
-            "
-            class="flex"
-            @click.stop.prevent="emit('togglePreviewComponent', itemId)"
-          >
-            <base-tooltip position="top-right" :tooltip-offset="8">
-              <template #activator="{ on }">
-                <div v-on="on" class="flex">
-                  <unicon
-                    v-if="previewComponentFeatureEnabled"
-                    :name="Unicons.Eye.name"
-                    class="h-5.5 w-5.5 text-text-body mx-1"
-                    :class="{
-                      '!text-accent-accent fill-current':
-                        previewComponentCurrentActive,
-                    }"
-                  />
-                </div>
-              </template>
-              <template #default>
-                <span class="text-sm text-text-placeholder">
-                  <div>
-                    {{
-                      previewComponentCurrentActive
-                        ? t("preview-component.close")
-                        : t("preview-component.open")
-                    }}
-                  </div>
-                </span>
-              </template>
-            </base-tooltip>
-          </div>
-        </li>
-      </div>
-    </template>
-    <template #default>
-      <span class="text-sm text-text-placeholder">
-        <div>
-          {{ getTitleOrNameFromEntity({ intialValues: intialValues }) }}
+          <metadata-wrapper
+            ref="orderMetadataChild"
+            :form-id="formId"
+            v-model:metadata="metadataItem as MetadataField"
+            :is-edit="useEditHelper.isEdit"
+            :linked-entity-id="intialValues?.id || itemId"
+            :should-hide="true"
+            :entity-type="entityTypename"
+          />
         </div>
-      </span>
-    </template>
-  </base-tooltip>
+      </div>
+    </div>
+
+    <div>
+      <BaseInputCheckbox
+        v-if="
+          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+          !isPreview &&
+          hasSelection &&
+          isListMode
+        "
+        :class="[{ invisible: isDisabled }, 'text-center']"
+        v-model="isChecked"
+        :item="{
+          id: itemId,
+          teaserMetadata,
+          relationValues,
+          type: itemType,
+        }"
+        :bulk-operations-context="bulkOperationsContext"
+        input-style="accentNormal"
+      />
+    </div>
+    <div
+      v-if="canShowCopyRight() && media && !imageSrcError"
+      :class="[
+        'flex items-center',
+        { 'justify-center mb-4 h-[50%]': isGridMode },
+      ]"
+    >
+      <ImageViewer
+        v-if="canShowCopyRight() && media && !imageSrcError"
+        :key="`${itemId}-image-${imageSize}`"
+        class="object-cover self-center outline-none"
+        :height-class="isListMode ? 'h-10' : '!h-48'"
+        :width-class="isListMode ? 'w-10' : '!w-48'"
+        :url="
+          mediaIsLink
+            ? media
+            : `/api/iiif/3/${media}/square/^${imageSize},/0/default.jpg`
+        "
+        :mediaIsLink="mediaIsLink"
+        @error="setNoImage()"
+      />
+    </div>
+    <div
+      v-if="
+        !canShowCopyRight() ||
+        (media && imageSrcError) ||
+        (!media && isMediaType)
+      "
+      :key="`${itemId}-icon-${imageSize}`"
+      :class="[
+        { 'h-10 w-10': isListMode },
+        {
+          'h-48 w-48 flex flex-col justify-center items-center shadow-sm mb-4':
+            isGridMode,
+        },
+        'text-neutral-700 rounded-sm outline-none self-center',
+      ]"
+    >
+      <unicon
+        :name="thumbIcon"
+        class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none self-center"
+      />
+      <div v-if="isGridMode" class="text-neutral-70">No media</div>
+    </div>
+
+    <div
+      :class="[
+        'w-full',
+        { 'flex items-center': isListMode },
+        { 'p-4': isGridMode },
+      ]"
+    >
+      <div
+        v-for="(metadataItem, idx) in onlyReadModeTeaserMetadata"
+        :key="`${formId || idx}_${metadataItem?.key || idx}`"
+        :class="[
+          teaserMetadataStyle,
+          idx < 1 && teaserMetadata[0]?.value?.formatter
+            ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
+            : 'w-full', // all others stay full width
+        ]"
+      >
+        <ReadOnlyMetadataWrapper
+          v-if="!useEditHelper.isEdit"
+          :form-id="formId || 'listview'"
+          :metadata="metadataItem as MetadataField"
+          :is-edit="useEditHelper.isEdit"
+          :linked-entity-id="intialValues?.id || itemId"
+          :entity-type="entityTypename"
+        />
+        <metadata-wrapper
+          v-else
+          :form-id="formId"
+          v-model:metadata="metadataItem as MetadataField"
+          :is-edit="useEditHelper.isEdit"
+          :linked-entity-id="intialValues?.id || itemId"
+          :entity-type="entityTypename"
+          :list-item-entity="listItemEntity"
+          @add-refetch-function-to-edit-state="
+            () => emit('addRefetchFunctionToEditState')
+          "
+        />
+      </div>
+    </div>
+
+    <div v-if="false" :class="[{ 'flex justify-end': isGridMode }]" @click.stop>
+      <BaseToggle
+        v-model="isMarkedAsToBeDeleted"
+        :icon-on="DamsIcons.CrossCircle"
+        :icon-off="DamsIcons.Trash"
+        :icon-height="22"
+      />
+    </div>
+
+    <div v-if="isListMode" class="flex">
+      <BaseContextMenuActions
+        :context-menu-actions="contextMenuActions"
+        :parent-entity-id="formId"
+        :entity-id="itemId"
+        :entity-type="entityTypename"
+        :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
+        :refetch-entities="refetchEntities"
+        @toggle-loading="toggleLoading"
+      />
+    </div>
+    <div
+      v-if="previewComponentEnabled"
+      class="flex flex-row"
+      @click="() => emit('navigateTo')"
+    >
+      <slot>
+        <unicon
+          :name="Unicons.AngleRight.name"
+          class="h-5.5 w-5.5 text-text-body"
+        />
+      </slot>
+    </div>
+    <div
+      v-else-if="
+        baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+        baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+      "
+      class="flex"
+      @click.stop.prevent="emit('togglePreviewComponent', itemId)"
+    >
+      <base-tooltip position="top-right" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on" class="flex">
+            <unicon
+              v-if="previewComponentFeatureEnabled"
+              :name="Unicons.Eye.name"
+              class="h-5.5 w-5.5 text-text-body mx-1"
+              :class="{
+                '!text-accent-accent fill-current':
+                  previewComponentCurrentActive,
+              }"
+            />
+          </div>
+        </template>
+        <template #default>
+          <span class="text-sm text-text-placeholder">
+            <div>
+              {{
+                previewComponentCurrentActive
+                  ? t("preview-component.close")
+                  : t("preview-component.open")
+              }}
+            </div>
+          </span>
+        </template>
+      </base-tooltip>
+    </div>
+  </li>
   <template v-if="entityListElements">
     <div
       v-for="(entityListElement, idx) in entityListElements"
@@ -310,7 +261,7 @@ import {
   PanelType,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import { stringIsUrl, asString, getTitleOrNameFromEntity } from "@/helpers";
+import { stringIsUrl, asString } from "@/helpers";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
@@ -321,7 +272,6 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
-import { useFormHelper } from "@/composables/useFormHelper";
 import BaseContextMenuActions from "./BaseContextMenuActions.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
@@ -396,12 +346,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { deleteTeaserMetadataItemInState } = useFormHelper();
-/*
-const { update, remove } = useFieldArray(
-  `relationValues.${props.relationType}`,
-);
-*/
+
 const { getEntityUuid } = useEntitySingle();
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
@@ -413,9 +358,9 @@ const formId = computed(() => getEntityUuid());
 const useEditHelper = useEditMode(
   getEntityUuid() || asString(router.currentRoute.value.params.id),
 );
-const imageSize = computed(() => (props.viewMode === "grid" ? 500 : 100));
+const imageSize = computed(() => (isGridMode.value ? 500 : 100));
 const teaserMetadataStyle = computed<string>(() => {
-  if (props.viewMode === "grid") return "w-full";
+  if (isGridMode.value) return "w-full";
   const amountOfTeaserMetadataItems: string | number =
     props.teaserMetadata.length >= 4 ? "default" : props.teaserMetadata.length;
 
@@ -434,9 +379,9 @@ const teaserMetadataStyle = computed<string>(() => {
     listStylesBasedOnAmount[amountOfTeaserMetadataItems],
   );
 });
-const onlyReadModeTeaserMetadata = computed(() => props.teaserMetadata.filter(
-  (metadata) => !metadata.showOnlyInEditMode
-));
+const onlyReadModeTeaserMetadata = computed(() =>
+  props.teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode),
+);
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
@@ -464,6 +409,34 @@ const onlyEditableTeaserMetadata = computed(() =>
   props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode),
 );
 
+const isGridMode = computed(() => props.viewMode === "grid");
+const isListMode = computed(() => props.viewMode === "list");
+
+const wrapperClasses = computed(() => {
+  return [
+    "border rounded cursor-pointer list-none z-[-1]",
+    {
+      "flex items-center gap-2 p-1.5 mb-2": isListMode.value,
+    },
+    {
+      "p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]": isGridMode.value,
+    },
+    {
+      "border-dashed border-2 !border-accent-normal":
+        props.isPreview || isMarkedAsToBeDeleted.value,
+    },
+    { "!border-status-new": props.isPreview },
+    { "!border-status-deleted": isMarkedAsToBeDeleted.value },
+    { "grayscale brightness-95 !cursor-default": props.isDisabled },
+    { "animate-pulse": loading.value },
+    { "bg-background-light": !isActiveListItem.value },
+    { "border-accent-highlight": !isActiveListItem.value },
+    {
+      "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+    },
+  ];
+});
+
 const isActiveListItem = computed<boolean>(() => {
   if (
     props.previewComponentListItemsCoverage ===
@@ -480,28 +453,6 @@ const isActiveListItem = computed<boolean>(() => {
   return false;
 });
 
-/*
-watch(
-  () => isMarkedAsToBeDeleted.value,
-  () => {
-    if (props.relation !== "no-relation-found")
-      if (props.isPreview) {
-        removePreviewItem(props.relation.idx);
-      } else if (isMarkedAsToBeDeleted.value) {
-        update(props.relation.idx, {
-          ...props.relation.relation,
-          editStatus: EditStatus.Deleted,
-        });
-      } else {
-        update(props.relation.idx, {
-          ...props.relation.relation,
-          editStatus: EditStatus.Unchanged,
-        });
-      }
-  },
-);
-*/
-
 watch(
   () => useEditHelper.isEdit,
   (isEdit: boolean) => (!isEdit ? (isMarkedAsToBeDeleted.value = false) : ""),
@@ -513,13 +464,6 @@ watch(
     setNoImage(false);
   },
 );
-
-/*
-const removePreviewItem = (idx: number) => {
-  deleteTeaserMetadataItemInState(props.itemId);
-  remove(idx);
-};
-*/
 
 const createWindowPanelsFromEntityListElements = (
   entityListElement: EntityListElement,
