@@ -82,7 +82,7 @@ const hasAvailableContextMenuActions = computed(() => {
 });
 
 const getAvailableContextMenuActions = () => {
-  const { ...menuActions } = { ...props.contextMenuActions };
+  const { __typename, ...menuActions } = { ...props.contextMenuActions };
   const availableOptions: Partial<ContextMenuActions> = { ...menuActions };
 
   for (const key in availableOptions) {
