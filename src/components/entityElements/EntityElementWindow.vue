@@ -34,7 +34,7 @@
       <div
         :class="[
           {
-            'grid grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))] gap-2 justify-items-center max-w-full':
+            'grid grid-cols-2 gap-2 justify-items-center max-w-full':
               props.element.layout === WindowElementLayout.HorizontalGrid,
           },
         ]"
@@ -42,10 +42,13 @@
         <div
           v-for="(panel, index) in panels"
           :key="index"
-          :class="{
-            'border-solid border-neutral-30 border-b-2':
-              props.element.layout !== WindowElementLayout.HorizontalGrid,
-          }"
+          :class="[
+            'w-full',
+            {
+              'border-solid border-neutral-30 border-b-2':
+                props.element.layout !== WindowElementLayout.HorizontalGrid,
+            },
+          ]"
         >
           <entity-element-window-panel
             :panel="panel"

@@ -1,5 +1,5 @@
 <template>
-  <div :class="[{ 'pl-10  py-0': parentIsListItem }, ' p-2']">
+  <div :class="[{ 'pl-10  py-0': parentIsListItem }, ' p-2 w-full']">
     <div
       v-if="panel.label"
       @click="toggleIsCollapsed()"
@@ -82,8 +82,12 @@
               :custom-query-relation-type="metadata.customQueryRelationType"
               :custom-query-filters="metadata.customQueryFilters"
               :custom-bulk-operations="metadata.customBulkOperations"
-              :custom-query-entity-picker-list="metadata.customQueryEntityPickerList"
-              :custom-query-entity-picker-list-filters="metadata.customQueryEntityPickerListFilters"
+              :custom-query-entity-picker-list="
+                metadata.customQueryEntityPickerList
+              "
+              :custom-query-entity-picker-list-filters="
+                metadata.customQueryEntityPickerListFilters
+              "
               :filters-need-context="metadata.filtersNeedContext"
               :search-input-type="metadata.searchInputType"
               :base-library-mode="metadata.baseLibraryMode"
