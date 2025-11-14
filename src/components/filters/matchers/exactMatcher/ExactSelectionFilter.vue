@@ -2,7 +2,7 @@
   <div v-if="isLoading" class="flex items-center justify-center">
     <SpinnerLoader theme="accent" :dimensions="10" />
   </div>
-  <div v-else class="grow">
+  <div v-if="showFilters" class="grow">
     <AutocompleteFilter
       v-if="useAutocomplete"
       ref="filterComponentRef"
@@ -23,12 +23,15 @@
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
     />
-    <div v-if="options.length === 0">No options available</div>
+  </div>
+  <div v-if="!showFilters">
+    {{ t("filters.noOptionsAvailable") }}
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   AutocompleteSelectionOptions,
   AdvancedFilterTypes,
@@ -69,6 +72,7 @@ const initialAmountOfOptions = ref(0);
 const hasFetchedOptions = ref(false);
 const isInitialized = ref(false);
 const filterComponentRef = ref();
+const { t } = useI18n();
 
 const useAutocomplete = computed(() => {
   if (
@@ -84,6 +88,10 @@ const useAutocomplete = computed(() => {
   return (
     initialAmountOfOptions.value > 10 || initialAmountOfOptions.value === 0
   );
+});
+
+const showFilters = computed(() => {
+  return !isLoading.value && initialAmountOfOptions.value !== 0;
 });
 
 const initialize = async () => {
