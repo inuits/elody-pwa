@@ -174,7 +174,7 @@
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ListItemSkeleton
-            v-show="entitiesLoading"
+            v-show="entitiesLoading && !displayMap"
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
