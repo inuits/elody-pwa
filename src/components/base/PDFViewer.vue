@@ -54,15 +54,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onUnmounted, nextTick } from "vue";
 import type { Ref } from "vue";
+import { nextTick, onUnmounted, ref, watch } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
-const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 import "pdfjs-dist/build/pdf.worker";
 
 import PdfToolbar from "../PdfToolbar.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { useGetMediafile } from "@/composables/useGetMediafile";
+import { CacheStrategy, useGetMediafile } from "@/composables/useGetMediafile";
+
+const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 
 type SourceType = {
   initialValues?: {
@@ -248,7 +249,11 @@ async function initialRender(): Promise<void> {
       return;
     }
     url.value = `/api/mediafile/${filePath}`;
-    const response = await getMediafile(url.value);
+    const response = await getMediafile(
+      url.value,
+      undefined,
+      CacheStrategy.noCache,
+    );
     if (!response || !response.ok) {
       throw new Error("Failed to fetch PDF");
     }
