@@ -39,7 +39,13 @@
       /></Transition>
       <div class="flex">
         <div v-if="element.showLineNumbers" class="mt-[3px]">
-          <div class="text-xl mt-3" v-for="n in paragraphAmount">{{ n }}.</div>
+          <div
+            class="text-xl mt-3"
+            v-for="n in paragraphAmount"
+            :key="`${element.label}-paragraph-${n}`"
+          >
+            {{ n }}.
+          </div>
         </div>
         <div class="w-full"><editor-content :editor="editor" /></div>
       </div>
@@ -63,6 +69,7 @@ import {
   TypeModals,
   ValidationFields,
   type WysiwygElement,
+  type WysiwygElementConfiguration,
   WysiwygExtensions,
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
@@ -105,6 +112,9 @@ const editorNode = ref<HTMLDivElement | undefined>(undefined);
 const initialValue = ref<string>("");
 const editorLoaded = ref<boolean>(false);
 const paragraphAmount = ref<number>(0);
+const wysiwygElementConfiguration = ref<
+  WysiwygElementConfiguration | undefined
+>(props.element.wysiwygElementConfiguration || undefined);
 
 const resetContent = () => {
   const content = editor.value?.options?.content;
@@ -147,7 +157,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2 whitespace-nowrap! overflow-x-auto!`,
+        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2 whitespace-nowrap! overflow-x-auto! ${wysiwygElementConfiguration.value?.styleConfiguration?.displayTextItalic ? "italic" : ""}`,
       },
       handleClickOn: (view, pos, node) => {
         if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
