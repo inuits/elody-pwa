@@ -66,6 +66,10 @@
       <entity-element-single-media
         v-if="element.__typename === 'SingleMediaFileElement'"
         :element="element"
+        @toggle-element-collapse="
+          (entityId, elementLabel) =>
+            emit('toggleElementCollapse', entityId, elementLabel)
+        "
       />
       <entity-element-window
         v-if="element.__typename === 'WindowElement'"
