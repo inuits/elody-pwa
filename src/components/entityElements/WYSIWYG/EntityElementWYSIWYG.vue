@@ -17,10 +17,13 @@
     <div v-else class="pl-2 py-2 flex gap-2">
       <metadata-title :metadata="element" />
       <WYSIGYGVirtualKeyboard
-        v-if="element.virtualKeyboardLayouts && useEditHelper.isEdit"
+        v-if="
+          wysiwygElementConfiguration.virtualKeyboardLayouts &&
+          useEditHelper.isEdit
+        "
         :editor="editor"
         :keyboardClass="element.metadataKey"
-        :extra-layouts="element?.virtualKeyboardLayouts"
+        :extra-layouts="wysiwygElementConfiguration.virtualKeyboardLayouts"
       />
     </div>
     <div
@@ -38,7 +41,10 @@
           :displayInline="displayInline"
       /></Transition>
       <div class="flex">
-        <div v-if="element.showLineNumbers" class="mt-[3px]">
+        <div
+          v-if="wysiwygElementConfiguration.showLineNumbers"
+          class="mt-[3px]"
+        >
           <div
             class="text-xl mt-3"
             v-for="n in paragraphAmount"
