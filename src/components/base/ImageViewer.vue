@@ -1,5 +1,5 @@
 <template>
-  <div ref="containerRef">
+  <div ref="containerRef" :class="[heightClass, widthClass]">
     <div
       v-if="isLoading"
       :class="[
