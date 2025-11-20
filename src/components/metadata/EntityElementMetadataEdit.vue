@@ -47,6 +47,7 @@
       v-model:model-value="metadataValue"
       :metadata-dropdown-options="field.options"
       :formId="formId"
+      :canCreateOption="field.canCreateEntityFromOption"
       :select-type="
         field.type === InputFieldTypes.DropdownSingleselectMetadata
           ? 'single'

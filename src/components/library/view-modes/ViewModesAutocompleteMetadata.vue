@@ -12,6 +12,7 @@
         filterAutocompleteOptions(value);
       }
     "
+    @add-option="handleCreatingFromTag"
   />
   <p v-else data-cy="metadata-value">
     {{ "-" }}
@@ -66,5 +67,10 @@ const filterAutocompleteOptions = (value: string): void => {
   dropdownOptions.value = props.metadataDropdownOptions.filter(
     (option: DropdownOption) => option.value.includes(value),
   );
+};
+
+const handleCreatingFromTag = async (option: any) => {
+  if (!props.canCreateOption) return;
+  inputValue.value = [...inputValue.value, option];
 };
 </script>
