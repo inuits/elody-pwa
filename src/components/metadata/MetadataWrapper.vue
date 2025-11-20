@@ -250,6 +250,7 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
+  console.log("setNewValue", newValue);
   if (
     refMetadata.value?.inputField &&
     refMetadata.value.inputField.type === InputFieldTypes.Date
@@ -512,7 +513,9 @@ const initializeDropdownOptionStates = () => {
     `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
     "get",
     metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    props.listItemEntity !== undefined ? toRef(props.listItemEntity) : parentEntity,
+    props.listItemEntity !== undefined
+      ? toRef(props.listItemEntity)
+      : parentEntity,
     refMetadata.value.inputField?.relationType,
     refMetadata.value.inputField?.fromRelationType,
     refMetadata.value.inputField.advancedFilterInputForSearchingOptions,

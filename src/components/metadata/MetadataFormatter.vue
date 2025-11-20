@@ -44,6 +44,7 @@ const props = withDefaults(
 
 const formatterType = computed(() => {
   const [type] = props.formatter.split("|");
+  console.log("Type: ", type);
   return type;
 });
 
@@ -53,6 +54,7 @@ const readableLabel = computed(() => {
   if (isLabelArray) {
     return props.label.length > 0 ? props.label.join(", ") : "-";
   }
+  console.log("Label: ", props.label);
   return props.label ? props.label : "-";
 });
 </script>

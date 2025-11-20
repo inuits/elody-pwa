@@ -10,8 +10,6 @@
       minWidth: shouldCalculateWidth ? `${calculatedWidth}px` : 'auto',
     }"
   >
-
-  
     <VueSelect
       class="!text-text-body !bg-background-light border-none !rounded-lg"
       v-model="selectedItem"
@@ -25,7 +23,7 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
-        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0`
+        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0`,
       }"
     >
       <template #option="{ option }">
@@ -146,6 +144,7 @@ const deselectItem = () => {
 const handleUpdateItem = (value: any) => {
   if (!value && !props.clearable)
     selectedItem.value = selectedItem.value || props.options[0].value;
+  console.log("Emit newly selected item", selectedItem.value);
   emit("update:modelValue", selectedItem.value);
 };
 

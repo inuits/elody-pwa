@@ -152,6 +152,7 @@ const metadataValue = computed<string | string[] | number | number[]>({
   },
   set(newValue) {
     const valueFromMetadata = getValueFromMetadata(newValue);
+    console.log("Emit newly selected item", valueFromMetadata);
     emit("update:value", valueFromMetadata);
   },
 });
