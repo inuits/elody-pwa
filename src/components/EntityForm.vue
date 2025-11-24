@@ -80,8 +80,8 @@ const { mutate } = useMutation<
 >(MutateEntityValuesDocument);
 
 const form = createForm(props.id, {
-  intialValues: structuredClone(deepToRaw(props.intialValues)),
-  relationValues: structuredClone(deepToRaw(props.relationValues)),
+  intialValues: JSON.parse(JSON.stringify(deepToRaw(props.intialValues))),
+  relationValues: JSON.parse(JSON.stringify(deepToRaw(props.relationValues))),
   relationMetadata: {},
   relatedEntityData: {},
   uuid: props.uuid,

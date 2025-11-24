@@ -251,6 +251,9 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
+  if (refMetadata.value.inputField?.type === InputFieldTypes.Dropdown) {
+    console.log('updated to: ', newValue);
+  }
   if (
     refMetadata.value?.inputField &&
     refMetadata.value.inputField.type === InputFieldTypes.Date
