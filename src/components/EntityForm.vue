@@ -172,6 +172,14 @@ watch(useEditHelper, () => {
   if (!useEditHelper.isEdit) {
     const newForm = getForm(props.id);
     if (newForm) form.value = newForm;
+    console.log({
+      intialValues: structuredClone(deepToRaw(props.intialValues)),
+      relationValues: structuredClone(deepToRaw(props.relationValues)),
+    })
+    form.value.setValues({
+      intialValues: structuredClone(deepToRaw(props.intialValues)),
+      relationValues: structuredClone(deepToRaw(props.relationValues)),
+    });
   };
 });
 
