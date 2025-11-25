@@ -151,7 +151,13 @@ const metadataValue = computed<string | string[] | number | number[]>({
     }
   },
   set(newValue) {
-    const valueFromMetadata = getValueFromMetadata(newValue);
+    let valueFromMetadata = getValueFromMetadata(newValue);
+    if (typeof props.value === "object" && props.value?.formatter?.startsWith("pill")) {
+      valueFromMetadata = {
+        ...props.value,
+        label: valueFromMetadata as string,
+      };
+    }
     console.log("Emit newly selected item", valueFromMetadata);
     emit("update:value", valueFromMetadata);
   },
