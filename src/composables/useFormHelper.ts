@@ -11,6 +11,7 @@ import { ref, inject } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useInheritedRelations } from "./useInheritedRelations";
+import { de } from "date-fns/locale";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -59,8 +60,14 @@ const useFormHelper = () => {
       console.error(`Unable to discard, no form with key: ${key}`);
       return;
     }
+    const initialValues = JSON.parse(JSON.stringify(form.meta?.initialValues));
+    const isFormDeleted = deleteForm(key);
+    if (isFormDeleted) {
+      createForm(key, initialValues);
+      return;
+    }
     console.log("Form will be reset:", form?.meta?.initialValues);
-    form.resetForm({ values: form.meta?.initialValues }, { force: true });
+    form.resetForm();
     console.log("Form has been reset:", form);
   };
 
