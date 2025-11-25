@@ -60,7 +60,7 @@ const useFormHelper = () => {
       return;
     }
     console.log("Form will be reset:", form?.meta?.initialValues);
-    form.resetForm({ values: form.meta?.initialValues });
+    form.resetForm({ values: form.meta?.initialValues }, { force: true });
     console.log("Form has been reset:", form);
   };
 
