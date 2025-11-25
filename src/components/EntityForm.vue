@@ -52,7 +52,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: "mutatedEntityUpdated", mutatedEntity: Entity): void
+  (event: "mutatedEntityUpdated", mutatedEntity: Entity): void;
 }>();
 
 const config: any = inject("config");
@@ -66,7 +66,7 @@ const {
 } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const useEditHelper = useEditMode(props.id);
-const { createForm, parseFormValuesToFormInput } = useFormHelper();
+const { createForm, getForm, parseFormValuesToFormInput } = useFormHelper();
 const { displaySuccessNotification } = useBaseNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
@@ -79,18 +79,19 @@ const { mutate } = useMutation<
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
 
-const form = createForm(props.id, {
-  intialValues: structuredClone(deepToRaw(props.intialValues)),
-  relationValues: structuredClone(deepToRaw(props.relationValues)),
-  relationMetadata: {},
-  relatedEntityData: {},
-  uuid: props.uuid,
-});
+const form = ref(
+  createForm(props.id, {
+    intialValues: structuredClone(deepToRaw(props.intialValues)),
+    relationValues: structuredClone(deepToRaw(props.relationValues)),
+    relationMetadata: {},
+    relatedEntityData: {},
+    uuid: props.uuid,
+  }),
+);
 let mutatedEntity = ref<Entity | undefined>(undefined);
-const formContainsErrors = computed((): boolean => !form?.meta.value.valid);
+const formContainsErrors = computed((): boolean => !form?.value.meta.valid);
 
-const { setValues } = form;
-
+const { setValues } = form.value;
 const submit = useSubmitForm<EntityValues>(async () => {
   const collection =
     childRoutes.find(
@@ -104,7 +105,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     id: props.id,
     formInput: parseFormValuesToFormInput(
       props.id,
-      unref(form.values),
+      unref(form.value).values,
       false,
       props.locale,
       props.fields,
@@ -128,7 +129,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     t("notifications.success.entityUpdated.description"),
   );
 
-  form.resetForm({ values: form.values });
+  form.value.resetForm({ values: form.value.values });
   useEditHelper.disableEdit();
 });
 
@@ -167,6 +168,11 @@ watch(useEditHelper, () => {
   contextsToReset.forEach((context: BulkOperationsContextEnum) =>
     dequeueAllItemsForBulkProcessing(context),
   );
+
+  if (!useEditHelper.isEdit) {
+    const newForm = getForm(props.id);
+    if (newForm) form.value = newForm;
+  };
 });
 
 watch(
@@ -180,7 +186,7 @@ watch(
 );
 
 watch(
-  () => form.values,
+  () => form.value.values,
   async () => {
     await validateAndSetDisableState();
     if (!formContainsErrors.value && useEditHelper.buttonClicked)
@@ -197,12 +203,12 @@ watch(
 );
 
 const validateAndSetDisableState = async () => {
-  await form.validate();
+  await form.value.validate();
   useEditHelper.setDisableState(formContainsErrors.value);
 };
 
 onBeforeRouteLeave((to, from, next) => {
-  if (!useEditHelper.isEdit || !form.meta.value.dirty) return next();
+  if (!useEditHelper.isEdit || !form.value.meta.dirty) return next();
   if (pathToNavigate.value != undefined) {
     deletePathToNavigate();
     return next();
