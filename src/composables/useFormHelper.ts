@@ -7,11 +7,10 @@ import {
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { type FormContext, useForm } from "vee-validate";
-import { ref, inject } from "vue";
+import { ref, inject, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useInheritedRelations } from "./useInheritedRelations";
-import { de } from "date-fns/locale";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -54,21 +53,51 @@ const useFormHelper = () => {
     return form;
   };
 
-  const discardEditForForm = (key: string) => {
+  const discardEditForForm = async (key: string) => {
     const form = getForm(key);
     if (!form) {
       console.error(`Unable to discard, no form with key: ${key}`);
       return;
     }
-    const initialValues = JSON.parse(JSON.stringify(form.meta?.initialValues));
-    const isFormDeleted = deleteForm(key);
-    if (isFormDeleted) {
-      createForm(key, initialValues);
-      return;
-    }
-    console.log("Form will be reset:", form?.meta?.initialValues);
-    form.resetForm();
-    console.log("Form has been reset:", form);
+
+    const metaInitialValues = form.meta.value?.initialValues;
+
+    const currentAccess = form.values.intialValues?.access;
+    const initialAccess = metaInitialValues?.intialValues?.access;
+
+    const debugSnapshot = {
+      formId: key,
+      
+      typeCheck: {
+        currentType: typeof currentAccess,
+        initialType: typeof initialAccess,
+      },
+
+      values: {
+        current: JSON.parse(JSON.stringify(currentAccess || "undefined")),
+        initial: JSON.parse(JSON.stringify(initialAccess || "undefined")),
+      },
+
+      isDirty: form.meta.value?.dirty,
+    };
+
+    console.log("DEBUG RESET LOGS:", debugSnapshot);
+
+    const cleanInitialValues = JSON.parse(JSON.stringify(form.meta.value.initialValues));
+
+    console.log("Forcing reset to:", cleanInitialValues);
+
+    form.setValues(cleanInitialValues);
+
+    await nextTick();
+
+    form.resetForm({
+      values: cleanInitialValues,
+      touched: {},
+      errors: {}
+    }, { force: true });
+
+    console.log("Form has been forcefully reset.");
   };
 
   const addForm = (key: string, form: FormContext<any>) => {
