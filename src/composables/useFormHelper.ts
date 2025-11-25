@@ -60,7 +60,7 @@ const useFormHelper = () => {
       return;
     }
 
-    const metaInitialValues = form.meta.value?.initialValues;
+    const metaInitialValues = form.meta;
 
     const currentAccess = form.values.intialValues?.access;
     const initialAccess = metaInitialValues?.intialValues?.access;
@@ -78,12 +78,12 @@ const useFormHelper = () => {
         initial: JSON.parse(JSON.stringify(initialAccess || "undefined")),
       },
 
-      isDirty: form.meta.value?.dirty,
+      isDirty: form.meta?.dirty,
     };
 
     console.log("DEBUG RESET LOGS:", debugSnapshot);
 
-    const cleanInitialValues = JSON.parse(JSON.stringify(form.meta.value.initialValues));
+    const cleanInitialValues = JSON.parse(JSON.stringify(form.meta.initialValues));
 
     console.log("Forcing reset to:", cleanInitialValues);
 
