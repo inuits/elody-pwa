@@ -63,7 +63,7 @@ const useFormHelper = () => {
     const cleanInitialValues = JSON.parse(JSON.stringify(form.meta.initialValues));
 
     await nextTick();
-    // form.setValues(cleanInitialValues);
+
     form.resetForm({
       values: cleanInitialValues,
       touched: {},
