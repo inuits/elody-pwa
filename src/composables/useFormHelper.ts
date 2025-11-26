@@ -60,44 +60,15 @@ const useFormHelper = () => {
       return;
     }
 
-    const metaInitialValues = form.meta;
-
-    const currentAccess = form.values.intialValues?.access;
-    const initialAccess = metaInitialValues?.intialValues?.access;
-
-    const debugSnapshot = {
-      formId: key,
-      
-      typeCheck: {
-        currentType: typeof currentAccess,
-        initialType: typeof initialAccess,
-      },
-
-      values: {
-        current: JSON.parse(JSON.stringify(currentAccess || "undefined")),
-        initial: JSON.parse(JSON.stringify(initialAccess || "undefined")),
-      },
-
-      isDirty: form.meta?.dirty,
-    };
-
-    console.log("DEBUG RESET LOGS:", debugSnapshot);
-
     const cleanInitialValues = JSON.parse(JSON.stringify(form.meta.initialValues));
 
-    console.log("Forcing reset to:", cleanInitialValues);
-
-    form.setValues(cleanInitialValues);
-
     await nextTick();
-
+    // form.setValues(cleanInitialValues);
     form.resetForm({
       values: cleanInitialValues,
       touched: {},
       errors: {}
     }, { force: true });
-
-    console.log("Form has been forcefully reset.");
   };
 
   const addForm = (key: string, form: FormContext<any>) => {

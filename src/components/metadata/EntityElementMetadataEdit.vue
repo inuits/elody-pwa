@@ -158,7 +158,6 @@ const metadataValue = computed<string | string[] | number | number[]>({
         label: valueFromMetadata as string,
       };
     }
-    console.log("Emit newly selected item", valueFromMetadata);
     emit("update:value", valueFromMetadata);
   },
 });

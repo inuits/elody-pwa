@@ -66,7 +66,7 @@ const {
 } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const useEditHelper = useEditMode(props.id);
-const { createForm, getForm, parseFormValuesToFormInput } = useFormHelper();
+const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { displaySuccessNotification } = useBaseNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
@@ -168,19 +168,6 @@ watch(useEditHelper, () => {
   contextsToReset.forEach((context: BulkOperationsContextEnum) =>
     dequeueAllItemsForBulkProcessing(context),
   );
-
-  // if (!useEditHelper.isEdit) {
-  //   const newForm = getForm(props.id);
-  //   if (newForm) form.value = newForm;
-  //   console.log({
-  //     intialValues: structuredClone(deepToRaw(props.intialValues)),
-  //     relationValues: structuredClone(deepToRaw(props.relationValues)),
-  //   })
-  //   form.value.setValues({
-  //     intialValues: structuredClone(deepToRaw(props.intialValues)),
-  //     relationValues: structuredClone(deepToRaw(props.relationValues)),
-  //   });
-  // };
 });
 
 watch(

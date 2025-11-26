@@ -251,18 +251,12 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
-  if (refMetadata.value.inputField?.type === InputFieldTypes.Dropdown) {
-    console.log('updated to: ', newValue);
-  }
   if (
     refMetadata.value?.inputField &&
     refMetadata.value.inputField.type === InputFieldTypes.Date
   ) {
     const parsedDate = DateTime.fromISO(newValue);
     if (parsedDate.isValid) value.value = parsedDate.toFormat("yyyy-MM-dd");
-  } else if (refMetadata.value.value?.formatter === CustomFormatterTypes.Pill && typeof newValue === "string") {
-    console.log('isEdit: ', props.isEdit);
-    value.value = props.isEdit ? newValue : { ...refMetadata.value.value.formatter, label: newValue }
   } else {
     value.value = newValue;
   }

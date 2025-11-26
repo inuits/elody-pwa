@@ -181,7 +181,6 @@ const removeOptionFromListOfOptions = (option: any) => {
   selectedItem.value = selectedItem.value.filter(
     (selectedOption) => selectedOption !== option.value,
   );
-  console.log("Emitted from removeOptionFromListOfOptions");
   emit("update:modelValue", selectedItem.value);
 };
 
