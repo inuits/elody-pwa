@@ -143,6 +143,7 @@
           :is-edit="useEditHelper.isEdit"
           :linked-entity-id="intialValues?.id || itemId"
           :entity-type="entityTypename"
+          :highlight="isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile"
         />
         <metadata-wrapper
           v-else
@@ -311,6 +312,7 @@ const props = withDefaults(
     previewComponentCurrentActive: boolean;
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
+    isPrimaryMediafile?: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -336,6 +338,7 @@ const props = withDefaults(
     viewMode: "list",
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
+    isPrimaryMediafile: false,
   },
 );
 

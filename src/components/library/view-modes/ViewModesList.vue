@@ -88,6 +88,7 @@
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
             "
+            :is-primary-mediafile="primaryMediafileId === entity.id"
             @navigate-to="
               () => {
                 router.push(entity.forcedNavigationPath);
@@ -183,6 +184,7 @@ const props = withDefaults(
     configPerViewMode: object;
     showCurrentEntityFlow?: boolean;
     cropMediafileCoordinatesKey?: string;
+    primaryMediafileId?: string;
   }>(),
   {
     disablePreviews: false,
@@ -198,6 +200,7 @@ const props = withDefaults(
     showCurrentEntityFlow: true,
     cropMediafileCoordinatesKey: "",
     expandFilters: false,
+    primaryMediafileId: "",
   },
 );
 

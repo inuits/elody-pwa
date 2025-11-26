@@ -37,6 +37,7 @@
                 :base-library-mode="baseLibraryMode"
                 :custom-value="refMetadata.customValue"
                 :translation-key="refMetadata.valueTranslationKey"
+                :highlight="refMetadata.highlightIfPrimaryMediafile && highlight"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard
@@ -98,11 +99,13 @@ const props = withDefaults(
     formFlow?: "edit" | "create";
     showErrors?: boolean;
     entityType?: Entitytyping;
+    highlight: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     formFlow: "edit",
     showErrors: false,
+    highlight: false,
   },
 );
 

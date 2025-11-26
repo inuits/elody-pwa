@@ -208,6 +208,7 @@
             :show-current-entity-flow="showCurrentEntityFlow"
             @add-refetch-function-to-edit-state="addRefetchFunctionToEditState"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+            :primaryMediafileId="primaryMediafileId"
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
@@ -438,6 +439,10 @@ const additionalDefaultFiltersEnabled = computed(() => {
       BulkOperationsContextEnum.EntityElementListEntityPickerModal
   );
 });
+
+const primaryMediafileId = computed(() => {
+  return parentEntity?.value?.intialValues?.primary_mediafile_id;
+})
 
 const wrapperClasses = computed(() => {
   const classes: (string | Record<string, boolean>)[] = [];
