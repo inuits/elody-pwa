@@ -215,41 +215,46 @@ const bulkSelect = () => {
 };
 
 const exportCsv = async () => {
-  let fieldQueryParameter = "";
-  csvExportOptions.value.forEach((option) => {
-    if (option.isSelected)
-      fieldQueryParameter += `&field[]=${option.key.value}`;
-  });
+  const selectedFields = csvExportOptions.value
+    .filter((option) => option.isSelected)
+    .map((option) => option.key.value);
+
+  const ids = getEnqueuedItems(context.value).map((item) => item.id);
+
+  const payload: Record<string, any> = {
+    ids: ids,
+    field: selectedFields,
+  };
 
   const state = getStateForRoute(route);
-  let exportURL: string = `/api/export/csv?ids=${getEnqueuedItems(context.value)
-    .map((item) => item.id)
-    .join(",")}${fieldQueryParameter}\`;`;
-  if (state?.queryVariables)
-    exportURL = `/api/export/csv?order_by=${
-      state.queryVariables.searchValue.order_by
-    }&asc=${Number(
-      state.queryVariables.searchValue.isAsc,
-    )}&type=${entityType.value}&ids=${getEnqueuedItems(context.value)
-      .map((item) => item.id)
-      .join(",")}${fieldQueryParameter}`;
+  if (state?.queryVariables) {
+    payload.order_by = state.queryVariables.searchValue.order_by;
+    payload.asc = state.queryVariables.searchValue.isAsc;
+    payload.type = entityType.value;
+  }
 
-  await fetch(encodeURI(exportURL), {
-    method: "GET",
+  await fetch("/api/export/csv", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/csv",
+    },
+    body: JSON.stringify(payload),
   })
-    .then((response: Response) => {
+    .then(async (response) => {
       if (!response.ok) throw response;
       return response.text();
     })
-    .then((csv: string) => {
+    .then((csv) => {
       downloadCsv(`${entityType.value}.csv`, csv);
     })
-    .catch(async (response: Response) =>
+    .catch(async (response: Response) => {
       displayErrorNotification(
         t("bulk-operations.csv-export.error.title"),
         await response.text(),
-      ),
-    );
+      );
+    });
+
   dequeueAllItemsInBulk();
   closeModal(TypeModals.BulkOperations);
 };
@@ -283,6 +288,7 @@ const dequeueAllItemsInBulk = () => {
     BulkOperationsContextEnum.BulkOperationsCsvExport,
   );
   dequeueAllItemsForBulkProcessing(RouteNames.Mediafiles);
+  dequeueAllItemsForBulkProcessing(context.value);
 };
 
 const firstFetchMediafilesOfEntities = () => {
