@@ -21,6 +21,7 @@
           :radius="getBasicMapProperties(element.config).radius"
           :config="element.config"
           :entities="entity !== undefined ? [entity] : undefined"
+          @zoom-updated="handleZoomUpdate"
         />
       </div>
     </template>
@@ -37,11 +38,17 @@ import {
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { getValueForPanelMetadata } from "@/helpers";
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { useMapCenter } from "@/composables/useMapCenter";
 import WktMap from "@/components/maps/WktMap.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
 import { useMaps } from "@/composables/useMaps";
+import { useQuery } from "@vue/apollo-composable";
+import {
+  GetEntitiesDocument,
+  type GetEntitiesQuery,
+  type GetEntitiesQueryVariables,
+} from "@/generated-types/queries";
 
 const { getBasicMapProperties } = useMaps();
 
@@ -58,6 +65,21 @@ const shouldDisplayMap = computed(() => {
     center.value.some((value: number) => !isNaN(value))
   );
 });
+
+const currentZoom = ref(10);
+
+const { result: entitiesResult, loading: entitiesLoading } = useQuery(
+  GetEntitiesDocument,
+  () => ({
+    zoom: currentZoom.value,
+  }),
+  () => ({
+    fetchPolicy: "no-cache",
+  }),
+);
+const handleZoomUpdate = (newZoom) => {
+  currentZoom.value = newZoom;
+};
 
 const { center } = useMapCenter(props.element, props.entityId);
 

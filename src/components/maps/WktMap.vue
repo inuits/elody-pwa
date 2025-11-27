@@ -1,5 +1,9 @@
 <template>
-  <div>
+  <div class="relative">
+    <button @click="isNormal = !isNormal">
+      {{ isNormal ? "Satellite" : "Normal" }}
+    </button>
+
     <Map.OlMap
       style="width: 100%; height: 65vh"
       :projection="projection"
@@ -15,7 +19,9 @@
       />
 
       <Layers.OlTileLayer>
+        <Sources.OlSourceOsm v-if="isNormal" />
         <Sources.OlSourceXyz
+          v-else
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           :attributions="[
             'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
@@ -24,8 +30,7 @@
       </Layers.OlTileLayer>
 
       <Layers.OlVectorLayer>
-        <Sources.OlSourceVector :projection="projection" :features="features">
-        </Sources.OlSourceVector>
+        <Sources.OlSourceVector :projection="projection" :features="features" />
       </Layers.OlVectorLayer>
     </Map.OlMap>
   </div>

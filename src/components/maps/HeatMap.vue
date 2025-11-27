@@ -1,5 +1,8 @@
 <template>
   <div class="relative">
+    <button @click="isNormal = !isNormal">
+      {{ isNormal ? "Satellite" : "Normal" }}
+    </button>
     <OLMap.OlMap
       ref="mapRef"
       :loadTilesWhileAnimating="true"
@@ -54,8 +57,16 @@
           </div>
         </div>
       </OLMap.OlOverlay>
+
       <Layers.OlTileLayer>
-        <Sources.OlSourceOsm />
+        <Sources.OlSourceOsm v-if="isNormal" />
+        <Sources.OlSourceXyz
+          v-else
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          :attributions="[
+            'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+          ]"
+        />
       </Layers.OlTileLayer>
 
       <Layers.OlHeatmapLayer
@@ -203,12 +214,19 @@ const updateHeatmapFromGeoJson = (newEntities: Entity[]) => {
   safeAddFeatures(features);
 };
 
+const emit = defineEmits(["zoom-updated"]);
+
 const handleMoveBoundingBox = () => {
   if (!props.filtersBaseApi) return;
   const map = mapRef.value?.map;
   if (!map) return;
 
+  const currentZoom = Math.round(view.value?.getZoom() || 0);
+
+  emit("zoom-updated", currentZoom);
+
   const geojsonPolygon = getGeojsonPolygonFromMap(map);
+
   if (!geoFilters.value) return;
   activateNewGeoFilter(props.filtersBaseApi, geoFilters.value, geojsonPolygon);
 };
