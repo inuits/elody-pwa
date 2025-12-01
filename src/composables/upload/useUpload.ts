@@ -360,10 +360,27 @@ const useUpload = (config: any) => {
   };
 
   // TODO: this is temp handler for demo #139636
+  const __getXmlFile = (): DropzoneFile => {
+    return files.value.find(
+      (file: DropzoneFile) =>
+        file.type === "text/xml" || file.type === "application/xml",
+    );
+  };
+
+  const getXmlBlob = () => {
+    try {
+      const xmlFile = __getXmlFile();
+      return new Blob([xmlFile], { type: xmlFile.type });
+    } catch (e: any) {
+      throw Error(e);
+    }
+  };
+
   const __uploadXml = async (): Promise<string> => {
     const response = await fetch(`api/upload/xml`, {
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "text/xml" },
       method: "POST",
+      body: getXmlBlob(),
     });
 
     if (!response.ok) {
