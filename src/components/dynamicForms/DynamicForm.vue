@@ -542,13 +542,14 @@ const isFormValid = async () => {
 
 const uploadActionFunction = async () => {
   if (!enableUploadButton.value) return;
+  if (!(await isFormValid())) return;
   const hasFieldsForEntityTypeValue = hasFieldsForEntityType(
     Entitytyping.Mediafile,
   );
   const mediafilesEntity = hasFieldsForEntityTypeValue
     ? await createEntityFromFormInput(Entitytyping.Mediafile, undefined, true)
     : undefined;
-  await upload(isLinkedUpload.value, mediafilesEntity, config, t);
+  await upload(isLinkedUpload.value, mediafilesEntity, form?.value?.values.intialValues, config, t);
   if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,

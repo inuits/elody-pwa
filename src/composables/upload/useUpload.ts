@@ -8,6 +8,7 @@ import {
   ProgressStepType,
   TypeModals,
   UploadFlow,
+  type IntialValues
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -137,7 +138,7 @@ const useUpload = (config: any) => {
     }
   };
 
-  const upload = async (isLinkedUpload: boolean, entityInput: EntityInput) => {
+  const upload = async (isLinkedUpload: boolean, entityInput: EntityInput, intialValues: IntialValues) => {
     if (!validateFiles()) return;
     updateGlobalUploadProgress(
       ProgressStepType.Upload,
@@ -147,7 +148,7 @@ const useUpload = (config: any) => {
     setDeleteFileButtonVisibility("invisible");
 
     if (uploadFlow.value === UploadFlow.XmlMarc) {
-      await __uploadXml();
+      await __uploadXml(intialValues);
 
       [
         ProgressStepType.Prepare,
@@ -376,8 +377,9 @@ const useUpload = (config: any) => {
     }
   };
 
-  const __uploadXml = async (): Promise<string> => {
-    const response = await fetch(`api/upload/xml`, {
+  const __uploadXml = async (intialValues: IntialValues): Promise<string> => {
+    const upload_type = intialValues.upload_type;
+    const response = await fetch(`api/upload/xml?upload_type=${upload_type}`, {
       headers: { "Content-Type": "text/xml" },
       method: "POST",
       body: getXmlBlob(),
