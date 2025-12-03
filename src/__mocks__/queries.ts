@@ -1989,6 +1989,16 @@ export enum MapTypes {
   WktMap = 'wktMap'
 }
 
+export enum MapModes {
+  Default = 'default',
+  HeatMode = 'heatMode'
+}
+
+export enum MapViews {
+  Satellite = 'satellite',
+  Standard = 'standard'
+}
+
 export type MarkdownViewerElement = {
   __typename?: 'MarkdownViewerElement';
   isCollapsed: Scalars['Boolean'];
