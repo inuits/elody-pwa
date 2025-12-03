@@ -12,13 +12,15 @@
           v-if="element.type === MapTypes.WktMap && shouldDisplayMap"
           :wkt="mapData"
           :center="center"
+          :map-view="mapConfig.mapView"
+          :map-mode="mapConfig.mapMode"
         />
         <HeatMap
           v-if="element.type === MapTypes.HeatMap"
           :center="center"
-          :zoom="getBasicMapProperties(element.config).zoom"
-          :blur="getBasicMapProperties(element.config).blur"
-          :radius="getBasicMapProperties(element.config).radius"
+          :zoom="mapConfig.zoom"
+          :blur="mapConfig.blur"
+          :radius="mapConfig.radius"
           :config="element.config"
           :entities="entity !== undefined ? [entity] : undefined"
         />
@@ -34,6 +36,7 @@ import {
   type PanelMetaData,
   PanelType,
   MapTypes,
+  MapModes,
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { getValueForPanelMetadata } from "@/helpers";
@@ -52,6 +55,10 @@ const props = defineProps<{
 
 const entity: any = inject("ParentEntityProvider");
 
+const mapConfig = computed(() => {
+  return getBasicMapProperties(props.element?.config || []);
+});
+
 const shouldDisplayMap = computed(() => {
   return (
     mapData.value.length > 0 ||
@@ -61,20 +68,39 @@ const shouldDisplayMap = computed(() => {
 
 const { center } = useMapCenter(props.element, props.entityId);
 
+const getPanelMetadataValueByKey = (key: string) => {
+  return getValueForPanelMetadata(PanelType.Metadata, key, props.entityId, "");
+};
+
 const mapData = computed(() => {
-  const returnArray: string[] = [];
+  const returnArray: (
+    | string
+    | { coordinates: string; heatIntensity: number }
+  )[] = [];
   Object.values(props.element).forEach((value) => {
     if (typeof value === "object" && value.__typename === "PanelMetaData") {
-      returnArray.push(
-        getValueForPanelMetadata(
-          PanelType.Metadata,
-          (value as PanelMetaData).key,
-          props.entityId,
-          "",
-        ),
-      );
+      const wkt = getPanelMetadataValueByKey((value as PanelMetaData).key);
+
+      if (mapConfig.value.mapMode === MapModes.HeatMode) {
+        returnArray.push({
+          coordinates: wkt,
+          heatIntensity:
+            Number(
+              getPanelMetadataValueByKey(mapConfig.value.keyOfHeatValue),
+            ) || 0,
+        });
+      } else {
+        returnArray.push(wkt as string);
+      }
     }
   });
-  return returnArray.filter((item) => item);
+
+  return returnArray.filter((item) => {
+    if (typeof item === "string") {
+      return !!item;
+    }
+
+    return !!item.coordinates;
+  });
 });
 </script>

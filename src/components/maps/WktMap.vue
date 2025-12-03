@@ -15,7 +15,9 @@
       />
 
       <Layers.OlTileLayer>
+        <Sources.OlSourceOsm v-if="mapView === MapViews.Standard" />
         <Sources.OlSourceXyz
+          v-if="mapView === MapViews.Satellite"
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           :attributions="[
             'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
@@ -37,18 +39,24 @@ import { Map, Layers, Sources } from "vue3-openlayers";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
+import { MapModes, MapViews } from "@/generated-types/queries";
+import { HeatMapItem } from "@/composables/useMaps";
 
 const props = withDefaults(
   defineProps<{
-    wkt: string[];
+    wkt: string[] | HeatMapItem[];
     center?: number[];
+    mapView?: MapViews;
+    mapMode?: MapModes;
   }>(),
   {
     center: () => [],
+    mapView: MapViews.Satellite,
+    mapMode: MapModes.Default,
   },
 );
 
-const { getWktFeature, getMarkerFeature } = useMaps();
+const { getMarkerFeature, transformDataToWktFeatures } = useMaps();
 
 const viewRef = ref<{ view: View }>(null);
 const projection = ref<string>("EPSG:4326");
@@ -65,7 +73,11 @@ const point = computed(() => {
 
 const wkt = computed(() => {
   if ((!props.wkt || props.wkt.length === 0) && !point.value) return [];
-  return [...props.wkt].map(getWktFeature);
+
+  return transformDataToWktFeatures(
+    props.wkt,
+    props.mapMode === MapModes.HeatMode,
+  );
 });
 
 const features = computed(() => {
