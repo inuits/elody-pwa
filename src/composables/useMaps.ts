@@ -8,17 +8,31 @@ import {
 import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
-import { Style, Icon } from "ol/style";
+import { Style, Icon, Fill, Stroke } from "ol/style";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 import { ref } from "vue";
 import type { Map as OLMap } from "vue3-openlayers";
-import type { default as Map } from "ol/Map";
+import type { default as MapType } from "ol/Map";
 import GeoJSON, { type GeoJSONGeometry } from "ol/format/GeoJSON";
 import { fromExtent } from "ol/geom/Polygon";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import type VectorSource from "ol/source/Vector";
 import type { Geometry } from "geojson";
+export interface HeatMapItem {
+  coordinates: string;
+  heatIntensity: number;
+}
+
+export interface Bucket {
+  id: string;
+  x: number;
+  y: number;
+  count: number;
+  ids: string[];
+  weight: number;
+  averageValue: number;
+}
 
 export const useMaps = () => {
   const { setHoveredListItem } = useListItemHelper();
@@ -74,7 +88,46 @@ export const useMaps = () => {
     });
   };
 
-  const fetchGeoFilter = async (): AdvancedFilters => {
+  const getHeatStyle = (intensity: number): Style => {
+    let rgbColor;
+
+    if (intensity <= 40) {
+      rgbColor = "0, 255, 0"; // Green
+    } else if (intensity <= 60) {
+      rgbColor = "255, 165, 0"; // Orange
+    } else {
+      rgbColor = "255, 0, 0"; // Red
+    }
+
+    return new Style({
+      fill: new Fill({
+        color: `rgba(${rgbColor}, 0.5)`,
+      }),
+      stroke: new Stroke({
+        color: `rgba(${rgbColor}, 0.5)`,
+        width: 6,
+      }),
+    });
+  };
+
+  const transformDataToWktFeatures = (
+    data: (string | HeatMapItem)[],
+    isHeatMode: boolean,
+  ): Feature[] => {
+    if (!data || data.length === 0) return [];
+
+    if (isHeatMode) {
+      return (data as HeatMapItem[]).map((item) => {
+        const feature = getWktFeature(item.coordinates);
+        feature.setStyle(getHeatStyle(item.heatIntensity));
+        return feature;
+      });
+    }
+
+    return (data as string[]).map((wkt) => getWktFeature(wkt));
+  };
+
+  const fetchGeoFilter = async (): Promise<AdvancedFilters> => {
     const queries = await getQueryDocument();
     const result = await queryAsync(queries.GetGeoFilterForMapDocument);
     return result.data.GeoFilterForMap as AdvancedFilters;
@@ -91,7 +144,7 @@ export const useMaps = () => {
     filtersBaseApi.initializeAndActivateNewFilter(geoFilters, geojsonPolygon);
   };
 
-  const getGeojsonPolygonFromMap = (map: Map): GeoJSONGeometry => {
+  const getGeojsonPolygonFromMap = (map: MapType): GeoJSONGeometry => {
     const extent = map.getView().calculateExtent(map.getSize());
     const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
     const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
@@ -141,7 +194,10 @@ export const useMaps = () => {
     setHoveredListItem(hoveredFeature.value);
   };
 
-  const zoomToHotspot = (map: Map, src: VectorSource<Feature<Geometry>>) => {
+  const zoomToHotspot = (
+    map: MapType,
+    src: VectorSource<Feature<Geometry>>,
+  ) => {
     if (map && src && src.getFeatures().length > 0 && !hotspotZoomed.value) {
       const features = src.getFeatures();
       if (!features) return;
@@ -160,6 +216,66 @@ export const useMaps = () => {
     }
   };
 
+  const bucketEntities = (
+    entities: any[],
+    gridSize: number = 500,
+  ): Bucket[] => {
+    const bucketMap = new Map<
+      string,
+      Bucket & { totalAccumulatedWeight: number }
+    >();
+
+    entities.forEach((entity) => {
+      const coords =
+        entity.mapElement.geoJsonFeature.value.geometry.coordinates;
+      const rawX = coords[0];
+      const rawY = coords[1];
+      const entityId = entity.mapElement.geoJsonFeature.value.properties.id[0];
+
+      const itemWeight = Number(entity.mapElement.weight?.value || 0);
+
+      const gridX = Math.floor(rawX / gridSize) * gridSize;
+      const gridY = Math.floor(rawY / gridSize) * gridSize;
+      const key = `${gridX}_${gridY}`;
+
+      if (!bucketMap.has(key)) {
+        bucketMap.set(key, {
+          id: key,
+          x: gridX + gridSize / 2,
+          y: gridY + gridSize / 2,
+          count: 0,
+          ids: [],
+          weight: 0,
+          averageValue: 0,
+          totalAccumulatedWeight: 0,
+        });
+      }
+
+      const bucket = bucketMap.get(key)!;
+
+      bucket.count++;
+      bucket.ids.push(entityId);
+      bucket.totalAccumulatedWeight += itemWeight;
+    });
+
+    const buckets = Array.from(bucketMap.values());
+    if (buckets.length === 0) return [];
+
+    buckets.forEach((bucket) => {
+      bucket.averageValue =
+        bucket.count > 0 ? bucket.totalAccumulatedWeight / bucket.count : 0;
+    });
+
+    const maxAverage = Math.max(...buckets.map((b) => b.averageValue));
+    const safeMax = maxAverage === 0 ? 1 : maxAverage;
+
+    buckets.forEach((bucket) => {
+      bucket.weight = Number((bucket.averageValue / safeMax).toFixed(2));
+    });
+
+    return buckets;
+  };
+
   return {
     geoToMercator,
     getBasicMapProperties,
@@ -172,6 +288,8 @@ export const useMaps = () => {
     handlePointerMove,
     zoomToHotspot,
     getMapElementFromEntity,
+    transformDataToWktFeatures,
     hotspotZoomed,
+    bucketEntities,
   };
 };
