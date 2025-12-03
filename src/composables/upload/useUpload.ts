@@ -191,7 +191,7 @@ const useUpload = (config: any) => {
   };
 
   const __uploadExceptionHandler = (
-    errorDescription: string | undefined,
+    errorDescription: string | string[] | undefined,
     file: DropzoneFile,
   ) => {
     if (!errorDescription)
@@ -202,7 +202,7 @@ const useUpload = (config: any) => {
       file,
       ProgressStepType.Upload,
       ProgressStepStatus.Failed,
-      [errorDescription],
+      Array.isArray(errorDescription) ? errorDescription : [errorDescription],
     );
   };
 
@@ -386,8 +386,13 @@ const useUpload = (config: any) => {
     });
 
     if (!response.ok) {
-      const httpErrorMessage = handleHttpError(response);
-      return Promise.reject(httpErrorMessage);
+      //TODO: Should use handleHttpError() when error codes are implemented
+      const responseBody = await response.json();
+      const httpErrorMessages: string =
+        responseBody?.extensions?.response?.body?.message ||
+        responseBody?.extensions?.response?.body as string;
+      __uploadExceptionHandler(httpErrorMessages, __getXmlFile());
+      return Promise.reject(httpErrorMessages);
     }
     return JSON.parse(await response.text());
   };
