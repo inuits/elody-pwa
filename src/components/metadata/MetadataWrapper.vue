@@ -204,33 +204,36 @@ import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
+import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 
-const props = withDefaults(
-  defineProps<{
-    isEdit: boolean;
-    formId: string;
-    metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
-    linkedEntityId?: string;
-    baseLibraryMode?: BaseLibraryModes;
-    formFlow?: "edit" | "create";
-    showErrors?: boolean;
-    entityType?: Entitytyping;
-    listItemEntity?: BaseEntity;
-  }>(),
-  {
-    baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-    formFlow: "edit",
-    showErrors: false,
-  },
-);
+export type MetadataWrapperProps = {
+  isEdit: boolean;
+  formId: string;
+  metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
+  linkedEntityId?: string;
+  baseLibraryMode?: BaseLibraryModes;
+  formFlow?: "edit" | "create";
+  showErrors?: boolean;
+  entityType?: Entitytyping;
+  listItemEntity?: BaseEntity;
+};
+
+const props = withDefaults(defineProps<MetadataWrapperProps>(), {
+  baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+  formFlow: "edit",
+  showErrors: false,
+});
 
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
+console.log(props.metadata);
+
 const parentEntity: BaseEntity = inject("ParentEntityProvider");
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { getForm, getKeyBasedOnInputField } = useFormHelper();
+const { setNewFieldValue } = useMetadataWrapper(props);
 const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 const { t } = useI18n();
 
@@ -251,33 +254,10 @@ const setNewValue = (
     | BaseRelationValuesInput
     | BaseRelationValuesInput[],
 ) => {
-  if (
-    refMetadata.value?.inputField &&
-    refMetadata.value.inputField.type === InputFieldTypes.Date
-  ) {
-    const parsedDate = DateTime.fromISO(newValue);
-    if (parsedDate.isValid) value.value = parsedDate.toFormat("yyyy-MM-dd");
-  } else {
-    value.value = newValue;
-  }
-
-  const form = getForm(props.formId);
-  if (!form) return;
-
-  form.setFieldValue(veeValidateField.value, value.value);
-
   if (isMetadataOnRelation.value && props.isEdit && meta.dirty) {
     emit("addRefetchFunctionToEditState");
   }
 };
-
-defineExpose({
-  setNewValue,
-});
-
-const metadataValueToDisplayOnTooltip = computed(
-  () => refMetadata.value?.value?.label || value.value,
-);
 
 const isMetadataOnRelation = computed(
   () => refMetadata.value.__typename === "PanelRelationMetaData",
@@ -291,7 +271,6 @@ const fieldKeyWithId = computed(
       props.linkedEntityId ? "-" + props.linkedEntityId : ""
     }`,
 );
-const fieldIsValid = computed(() => meta.valid);
 
 const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
   const field = refMetadata.value.inputField;
@@ -357,6 +336,7 @@ const unescapeString = (str: string | undefined): string => {
   return str.replace(/\\\\/g, "\\");
 };
 
+// Todo: Move to useValidation.ts
 const getValidationRules = (metadata: PanelMetaData): string => {
   const validation = metadata?.inputField?.validation;
   if (!validation?.value) return "no_xss";
