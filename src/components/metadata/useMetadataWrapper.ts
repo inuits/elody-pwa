@@ -5,7 +5,7 @@ import {
   useField,
   useForm,
 } from "vee-validate";
-import { computed, inject, type Ref } from "vue";
+import { computed, inject, type Ref, watch, ComputedRef } from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -16,6 +16,10 @@ import {
 import { DateTime } from "luxon";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
+import { useFieldValidation } from "@/components/metadata/useFieldValidation";
+import { usePermissions } from "@/composables/usePermissions";
+import { getTranslatedMessage } from "@/helpers";
+
 export type FieldMetadata =
   | PanelMetaData
   | PanelRelationMetaData
@@ -54,6 +58,10 @@ export const useMetadataWrapper = (
 ): {
   getFieldKey: () => string;
   field: FieldContext;
+  fieldLabel: ComputedRef<string>;
+  isFieldValid: ComputedRef<boolean>;
+  fieldValidationRules: ComputedRef<string>;
+  fieldIsPermittedToBeSeenByUser: ComputedRef<boolean>;
   fieldValueProxy: Ref<any>;
   setNewFieldValue: (newValue: any) => void;
 } => {
@@ -68,16 +76,39 @@ export const useMetadataWrapper = (
     );
   };
 
+  const getFieldPermissions = (): boolean => {
+    const { fetchAdvancedPermission } = usePermissions();
+    const permissions = props.metadata.can;
+    const hasPermissionsToCheck = permissions && permissions?.length > 0;
+
+    if (!hasPermissionsToCheck) {
+      return true;
+    }
+    return fetchAdvancedPermission(permissions) as boolean;
+  };
+
+  const { getValidationRules } = useFieldValidation(props.metadata);
+  const { setExtraVariables } = usePermissions();
+
   const form: FormContext = useForm(props.formId);
   const field: FieldContext = useField<MetadataWrapperProps>(getFieldKey());
-  const fieldType = computed<InputFieldTypes | undefined>(
-    () => props.metadata.inputField?.type,
+  const fieldLabel = computed<string>(() =>
+    getTranslatedMessage(props.metadata.label as string | "metadata.no-label"),
   );
-  const fieldKind = computed<string>(() => props.metadata.__typename);
+  const fieldType = computed<InputFieldTypes | undefined>(
+    () => props.metadata.inputField?.type as InputFieldTypes,
+  );
+  const fieldKind = computed<string>(() => props.metadata.__typename as string);
   const fieldTooltipValue = computed<any>(() => fieldValueProxy.value);
   const isFieldValid = computed<boolean>(() => field.meta.valid);
   const isFieldRequired = computed<boolean>(() =>
     checkIfFieldIsRequired(props.metadata, props.formId),
+  );
+  const fieldValidationRules = computed<string>(() =>
+    getValidationRules(props.isEdit, isFieldRequired.value),
+  );
+  const fieldIsPermittedToBeSeenByUser = computed<boolean>(() =>
+    getFieldPermissions(),
   );
 
   const fieldValueProxy = computed({
@@ -99,5 +130,23 @@ export const useMetadataWrapper = (
     // form.setFieldValue(veeValidateField.value, value.value);
   };
 
-  return { getFieldKey, field, fieldValueProxy, setNewFieldValue };
+  watch(
+    () => props.formId,
+    () =>
+      setExtraVariables({
+        parentEntityId: props.formId,
+        childEntityId: "",
+      }),
+  );
+
+  return {
+    getFieldKey,
+    field,
+    fieldLabel,
+    isFieldValid,
+    fieldValidationRules,
+    fieldIsPermittedToBeSeenByUser,
+    fieldValueProxy,
+    setNewFieldValue,
+  };
 };

@@ -488,8 +488,7 @@ export const getEntityTitle = (entity: BaseEntity): string => {
     title = entity.intialValues.preferred_title;
   if (entity.intialValues?.original_headtitle)
     title = entity.intialValues.original_headtitle;
-  if (entity.intialValues?.description)
-    title = entity.intialValues.description;
+  if (entity.intialValues?.description) title = entity.intialValues.description;
   return title;
 };
 
@@ -853,4 +852,9 @@ export const sanitizeHtml = (content: any) => {
       "i",
     ],
   });
+};
+
+export const toArray = <T>(value: T | T[] | undefined): T[] => {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
 };

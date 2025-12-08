@@ -12,6 +12,10 @@ export const useVeeValidate = (): {
     linkedEntityId: string | undefined,
     isEdit: boolean | undefined,
   ) => string;
+  isValidationRulePresentOnField: (
+    metadata: FieldMetadata,
+    rule: ValidationRules | ValidationRules[],
+  ) => boolean;
 } => {
   const getKeyWithId = (key: string, id: string | undefined): string => {
     if (!id) return key;
@@ -86,5 +90,5 @@ export const useVeeValidate = (): {
     return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId}`;
   };
 
-  return { getVeeValidateKey };
+  return { getVeeValidateKey, isValidationRulePresentOnField };
 };

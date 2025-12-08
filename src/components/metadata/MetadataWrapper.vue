@@ -174,10 +174,6 @@ import {
   BaseLibraryModes,
   type PanelMetaData,
   InputFieldTypes,
-  ValidationRules,
-  ValidationFields,
-  CustomFormatterTypes,
-  type BaseRelationValuesInput,
   type PanelRelationMetaData,
   type PanelRelationRootData,
   type Entitytyping,
@@ -194,14 +190,9 @@ import {
   toRef,
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { useField } from "vee-validate";
-import { useConditionalValidation } from "@/composables/useConditionalValidation";
-import { useFormHelper } from "@/composables/useFormHelper";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
-import { DateTime } from "luxon";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
-import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
@@ -230,47 +221,11 @@ const emit = defineEmits<{
 
 console.log(props.metadata);
 
-const parentEntity: BaseEntity = inject("ParentEntityProvider");
-const mediafileViewerContext: any = inject("mediafileViewerContext");
-const { getForm, getKeyBasedOnInputField } = useFormHelper();
-const { setNewFieldValue } = useMetadataWrapper(props);
-const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
-const { t } = useI18n();
-
 const showTooltip = ref<boolean>(false);
-const isPermitted = ref<boolean>(false);
-const refMetadata = ref<
-  PanelMetaData | PanelRelationMetaData | PanelRelationRootData
->(props.metadata);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
 };
-
-const setNewValue = (
-  newValue:
-    | string
-    | string[]
-    | BaseRelationValuesInput
-    | BaseRelationValuesInput[],
-) => {
-  if (isMetadataOnRelation.value && props.isEdit && meta.dirty) {
-    emit("addRefetchFunctionToEditState");
-  }
-};
-
-const isMetadataOnRelation = computed(
-  () => refMetadata.value.__typename === "PanelRelationMetaData",
-);
-const isRootdataOnRelation = computed(
-  () => refMetadata.value.__typename === "PanelRelationRootData",
-);
-const fieldKeyWithId = computed(
-  () =>
-    `${refMetadata.value.key}${
-      props.linkedEntityId ? "-" + props.linkedEntityId : ""
-    }`,
-);
 
 const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
   const field = refMetadata.value.inputField;
@@ -285,178 +240,6 @@ const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
     ? field.advancedFilterInputForSearchingOptions?.item_types[0]
     : fieldKey;
 });
-
-const { conditionalFieldIsRequired } = useConditionalValidation();
-
-const isRequiredRelationField = computed(() => {
-  return !!refMetadata.value?.inputField?.validation?.value?.includes(
-    ValidationRules.HasRequiredRelation,
-  );
-});
-const isOneOfRequiredRelationField = computed(() => {
-  return !!refMetadata.value?.inputField?.validation?.value?.includes(
-    ValidationRules.HasOneOfRequiredRelations,
-  );
-});
-const isOneOfRequiredMetadataField = computed(() => {
-  return !!refMetadata.value?.inputField?.validation?.value?.includes(
-    ValidationRules.HasOneOfRequiredMetadata,
-  );
-});
-const isRegexField = computed(() => {
-  return !!refMetadata.value?.inputField?.validation?.value?.includes(
-    ValidationRules.Regex,
-  );
-});
-
-const isFieldRequired = computed(() => {
-  if (
-    refMetadata.value?.inputField?.validation?.value?.includes(
-      ValidationRules.Required,
-    ) ||
-    refMetadata.value?.inputField?.validation?.value?.includes(
-      ValidationRules.HasRequiredRelation,
-    ) ||
-    refMetadata.value?.inputField?.validation?.value?.includes(
-      ValidationRules.HasOneOfRequiredRelations,
-    )
-  )
-    return true;
-  if (refMetadata.value?.inputField?.validation?.required_if) {
-    return conditionalFieldIsRequired(
-      refMetadata.value?.inputField?.validation?.required_if,
-      props.formId,
-      mediafileViewerContext,
-    );
-  }
-  return false;
-});
-
-const unescapeString = (str: string | undefined): string => {
-  return str.replace(/\\\\/g, "\\");
-};
-
-// Todo: Move to useValidation.ts
-const getValidationRules = (metadata: PanelMetaData): string => {
-  const validation = metadata?.inputField?.validation;
-  if (!validation?.value) return "no_xss";
-
-  let rules: string;
-  if (validation.value === ValidationRules.CustomValue) {
-    rules = validation.customValue;
-  } else {
-    rules = (validation.value as string[]).join("|");
-  }
-
-  if (isRegexField.value) {
-    const rawRegex = validation.regex?.replace(/^\/|\/$/g, "") ?? "";
-    const cleanedRegex = unescapeString(rawRegex.replace(/\|/g, "?.")).replace(
-      /,/g,
-      "?.c",
-    );
-    return `${ValidationRules.Regex}:${cleanedRegex}|no_xss`;
-  }
-
-  if (
-    (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
-    !props.isEdit
-  ) {
-    return "required|no_xss";
-  }
-
-  if (isRequiredRelationField.value) {
-    const {
-      relationType,
-      amount,
-      exact = false,
-    } = validation.has_required_relation ?? {};
-    return `${rules}:${amount}:${relationType}:${exact}|no_xss`;
-  }
-
-  if (isOneOfRequiredRelationField.value) {
-    const { relationTypes = [], amount } =
-      validation.has_one_of_required_relations ?? {};
-    return `${rules}:${amount}:${relationTypes.join(":")}|no_xss`;
-  }
-
-  if (isOneOfRequiredMetadataField.value) {
-    const { includedMetadataFields = [], amount } =
-      validation.has_one_of_required_metadata ?? {};
-    return `${rules}:${amount}:${includedMetadataFields.join(":")}|no_xss`;
-  }
-
-  if (isFieldRequired.value) {
-    const withRequired = rules.includes(ValidationRules.Required)
-      ? rules
-      : `${rules}|required`;
-    return `${withRequired}|no_xss`;
-  }
-
-  return `${rules}|no_xss`;
-};
-
-const rules = computed(() => getValidationRules(refMetadata.value));
-const label = computed(() =>
-  refMetadata.value.label
-    ? t(refMetadata.value.label as string)
-    : t("metadata.no-label"),
-);
-
-const veeValidateField = computed(() => {
-  if (!refMetadata.value?.inputField && !props.linkedEntityId) {
-    const key = fieldKeyWithId.value || refMetadata.value.key;
-    return `${ValidationFields.IntialValues}.${key}`;
-  }
-  if (isRegexField.value) {
-    const key = fieldKeyWithId.value || refMetadata.value.key;
-    return `${ValidationFields.IntialValues}.${key}`;
-  }
-  if (isMetadataOnRelation.value)
-    return `${ValidationFields.RelationMetadata}.${fieldKeyWithId.value}`;
-  if (isRootdataOnRelation.value)
-    return `${ValidationFields.RelationRootdata}.${fieldKeyWithId.value}`;
-  else if (
-    (isRequiredRelationField.value || isOneOfRequiredRelationField.value) &&
-    !props.isEdit
-  ) {
-    return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
-      refMetadata.value,
-    )}`;
-  } else if (
-    isRequiredRelationField.value ||
-    isOneOfRequiredRelationField.value
-  ) {
-    return `${ValidationFields.RelationValues}.${refMetadata.value.inputField.relationType}`;
-  } else if (refMetadata.value.inputField)
-    return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(
-      refMetadata.value,
-    )}`;
-  else if (props.linkedEntityId === undefined)
-    return `${ValidationFields.RelationValues}.${refMetadata.value.key}`;
-  else return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId.value}`;
-});
-
-const { errorMessage, value, meta } = useField<
-  string | BaseRelationValuesInput[]
->(veeValidateField, rules, { label: label });
-
-const updatePermissionVariables = () => {
-  setExtraVariables({
-    parentEntityId: props.formId,
-    childEntityId: "",
-  });
-};
-
-const isPermittedToDisplay = async () => {
-  const permissions = refMetadata.value.can;
-  const hasPermissionsToCheck = permissions && permissions?.length > 0;
-
-  if (!hasPermissionsToCheck) {
-    isPermitted.value = true;
-    return;
-  }
-  isPermitted.value = await fetchAdvancedPermission(permissions);
-};
 
 const advancedFilterInputForRetrievingAllOptions = computed(() => {
   if (
@@ -525,26 +308,6 @@ if (typeof refMetadata.value.value !== "object") {
     },
   );
 }
-watch(
-  () => props.metadata,
-  (newValue) => {
-    refMetadata.value = newValue;
-  },
-);
-watch(
-  () => props.isEdit,
-  () => {
-    setNewValue(refMetadata.value.value);
-  },
-);
-watch(
-  () => props.formId,
-  () => {
-    updatePermissionVariables();
-  },
-  { immediate: true },
-);
-
 onMounted(async () => {
   await isPermittedToDisplay();
   if (refMetadata.value.hiddenField?.hidden) return;
