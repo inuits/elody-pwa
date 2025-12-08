@@ -91,9 +91,9 @@ export const useMaps = () => {
   const getHeatStyle = (intensity: number): Style => {
     let rgbColor;
 
-    if (intensity <= 40) {
+    if (intensity <= 4) {
       rgbColor = "0, 255, 0"; // Green
-    } else if (intensity <= 60) {
+    } else if (intensity <= 6) {
       rgbColor = "255, 165, 0"; // Orange
     } else {
       rgbColor = "255, 0, 0"; // Red
@@ -225,66 +225,6 @@ export const useMaps = () => {
     }
   };
 
-  const bucketEntities = (
-    entities: any[],
-    gridSize: number = 500,
-  ): Bucket[] => {
-    const bucketMap = new Map<
-      string,
-      Bucket & { totalAccumulatedWeight: number }
-    >();
-
-    entities.forEach((entity) => {
-      const coords =
-        entity.mapElement.geoJsonFeature.value.geometry.coordinates;
-      const rawX = coords[0];
-      const rawY = coords[1];
-      const entityId = entity.mapElement.geoJsonFeature.value.properties.id[0];
-
-      const itemWeight = Number(entity.mapElement.weight?.value || 0);
-
-      const gridX = Math.floor(rawX / gridSize) * gridSize;
-      const gridY = Math.floor(rawY / gridSize) * gridSize;
-      const key = `${gridX}_${gridY}`;
-
-      if (!bucketMap.has(key)) {
-        bucketMap.set(key, {
-          id: key,
-          x: gridX + gridSize / 2,
-          y: gridY + gridSize / 2,
-          count: 0,
-          ids: [],
-          weight: 0,
-          averageValue: 0,
-          totalAccumulatedWeight: 0,
-        });
-      }
-
-      const bucket = bucketMap.get(key)!;
-
-      bucket.count++;
-      bucket.ids.push(entityId);
-      bucket.totalAccumulatedWeight += itemWeight;
-    });
-
-    const buckets = Array.from(bucketMap.values());
-    if (buckets.length === 0) return [];
-
-    buckets.forEach((bucket) => {
-      bucket.averageValue =
-        bucket.count > 0 ? bucket.totalAccumulatedWeight / bucket.count : 0;
-    });
-
-    const maxAverage = Math.max(...buckets.map((b) => b.averageValue));
-    const safeMax = maxAverage === 0 ? 1 : maxAverage;
-
-    buckets.forEach((bucket) => {
-      bucket.weight = Number((bucket.averageValue / safeMax).toFixed(2));
-    });
-
-    return buckets;
-  };
-
   return {
     geoToMercator,
     getBasicMapProperties,
@@ -299,6 +239,5 @@ export const useMaps = () => {
     getMapElementFromEntity,
     transformDataToWktFeatures,
     hotspotZoomed,
-    bucketEntities,
   };
 };
