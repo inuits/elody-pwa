@@ -129,6 +129,7 @@ export const useFilterState = () => {
       distinct_by: filter.distinctBy,
       metadata_key_as_label: filter.metadataKeyAsLabel,
       facets: filter.facets,
+      bucket: filter.bucket,
       ...(filter.lookup ? { lookup: filter.lookup } : {}),
     };
   };

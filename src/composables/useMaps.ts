@@ -135,13 +135,22 @@ export const useMaps = () => {
 
   const activateNewGeoFilter = (
     filtersBaseApi: FiltersBaseAPI,
-    geoFilters: AdvancedFilters,
+    geoFilters: any,
     geojsonPolygon: GeoJSONGeometry,
+    bucket: number,
   ) => {
     Object.values(geoFilters)?.forEach((advancedFilter: AdvancedFilter) => {
       filtersBaseApi.removeFilterFromList(advancedFilter.key);
     });
-    filtersBaseApi.initializeAndActivateNewFilter(geoFilters, geojsonPolygon);
+
+    const filters = {
+      ...geoFilters,
+      advancedFilter: {
+        ...geoFilters.advancedFilter,
+        bucket: String(bucket),
+      },
+    };
+    filtersBaseApi.initializeAndActivateNewFilter(filters, geojsonPolygon);
   };
 
   const getGeojsonPolygonFromMap = (map: MapType): GeoJSONGeometry => {

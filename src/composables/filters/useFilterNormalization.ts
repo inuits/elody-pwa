@@ -26,6 +26,7 @@ export const useFilterNormalization = () => {
       metadata_key_as_label:
         filter.inputFromState?.metadata_key_as_label ?? undefined,
       aggregation: filter.advancedFilter.aggregation,
+      bucket: filter.advancedFilter.bucket ?? undefined,
       operator: filter.advancedFilter.operator ?? undefined,
       facets: ignoreFacets
         ? undefined
