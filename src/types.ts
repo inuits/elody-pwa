@@ -111,6 +111,7 @@ import {
   uniKeyboard,
   uniCropAlt,
   uniCancel,
+  uniBolt,
 } from "vue-unicons/dist/icons";
 
 export const Unicons: Record<DamsIcons, { name: string }> = {
@@ -226,4 +227,5 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   WindowMaximize: uniWindowMaximize,
   Copy: uniCopy,
   Keyboard: uniKeyboard,
+  Bolt: uniBolt,
 };
