@@ -28,6 +28,14 @@
       :bulk-operations-context="bulkOperationsContext"
       :refetch-entities="refetchEntities"
     />
+    <custom-action
+      v-if="element.__typename === 'ContextMenuCustomAction'"
+      :label="element.label"
+      :icon="element.icon"
+      :action="element.action"
+      :entity-id="parentEntityId"
+      :endpoint-url="element.endpointUrl"
+    />
   </div>
 </template>
 
@@ -36,6 +44,7 @@ import { type ContextMenuActions } from "@/generated-types/queries";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
+import CustomAction from "@/components/context-menu-actions/CustomAction.vue";
 import { Entitytyping } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 

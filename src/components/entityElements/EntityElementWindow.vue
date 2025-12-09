@@ -30,6 +30,14 @@
           :readmode-label="element.editMetadataButton.readmodeLabel"
           :editmode-label="element.editMetadataButton.editmodeLabel"
         />
+        <BaseContextMenuActions
+          v-if="
+            auth.isAuthenticated.value === true &&
+            element.contextMenuActions
+          "
+          :context-menu-actions="element.contextMenuActions"
+          :parent-entity-id="formId"
+        />
       </div>
       <div
         :class="[
@@ -84,6 +92,7 @@ import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import { auth } from "@/main";
+import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 
 const props = defineProps<{
   element: WindowElement;
