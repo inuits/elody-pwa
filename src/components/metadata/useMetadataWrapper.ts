@@ -58,6 +58,8 @@ export const useMetadataWrapper = (
 ): {
   getFieldKey: () => string;
   field: FieldContext;
+  fieldKey: ComputedRef<string>;
+  fieldKind: ComputedRef<string>;
   fieldLabel: ComputedRef<string>;
   isFieldValid: ComputedRef<boolean>;
   fieldValidationRules: ComputedRef<string>;
@@ -91,7 +93,8 @@ export const useMetadataWrapper = (
   const { setExtraVariables } = usePermissions();
 
   const form: FormContext = useForm(props.formId);
-  const field: FieldContext = useField<MetadataWrapperProps>(getFieldKey());
+  const fieldKey = computed(() => getFieldKey());
+  const field: FieldContext = useField<MetadataWrapperProps>(fieldKey.value);
   const fieldLabel = computed<string>(() =>
     getTranslatedMessage(props.metadata.label as string | "metadata.no-label"),
   );
@@ -142,6 +145,8 @@ export const useMetadataWrapper = (
   return {
     getFieldKey,
     field,
+    fieldKey,
+    fieldKind,
     fieldLabel,
     isFieldValid,
     fieldValidationRules,
