@@ -864,6 +864,7 @@ watch(
         enqueuePromise(advancedFiltersPromise);
         enqueuePromise(paginationLimitOptionsPromise);
         enqueuePromise(sortOptionsPromise);
+        resetPaginationAndView();
         const state = getStateForRoute(route, true);
         setSkip(state?.queryVariables?.skip || 1);
         await getEntities(route, newAbortController.signal);
@@ -875,6 +876,14 @@ watch(
     }
   },
 );
+
+const resetPaginationAndView = () => {
+  const limitFromState = getStateForRoute(route)?.queryVariables?.limit;
+  setPaginationLimit(limitFromState || 20);
+  displayMap.value = false;
+  displayGrid.value = false;
+  displayList.value = true;
+}
 
 watch(
   () => props.predefinedEntities,
