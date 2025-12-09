@@ -2,7 +2,6 @@
   <div>
     <Map.OlMap
       style="width: 100%; height: 65vh"
-      :projection="projection"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
     >
@@ -11,7 +10,7 @@
         :zoom="7"
         :maxZoom="17"
         :center="mapCenter"
-        :projection="projection"
+        :projection="activeProjection"
       />
 
       <Layers.OlTileLayer>
@@ -26,7 +25,7 @@
       </Layers.OlTileLayer>
 
       <Layers.OlVectorLayer>
-        <Sources.OlSourceVector :projection="projection" :features="features">
+        <Sources.OlSourceVector :projection="activeProjection" :features="features">
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>
     </Map.OlMap>
@@ -39,6 +38,7 @@ import { Map, Layers, Sources } from "vue3-openlayers";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
+import { fromLonLat } from "ol/proj"; // Import transformation helper
 import { MapModes, MapViews } from "@/generated-types/queries";
 import { HeatMapItem } from "@/composables/useMaps";
 
@@ -59,16 +59,19 @@ const props = withDefaults(
 const { getMarkerFeature, transformDataToWktFeatures } = useMaps();
 
 const viewRef = ref<{ view: View }>(null);
-const projection = ref<string>("EPSG:4326");
+
+const activeProjection = computed(() => {
+  return props.mapView === MapViews.Standard ? "EPSG:3857" : "EPSG:4326";
+});
 
 const mapCenter = computed(() => {
   const [lat = 0, long = 0] = props.center;
-  return [lat, long];
+  return [lat, long]; 
 });
 
 const point = computed(() => {
-  const [lat, long] = mapCenter.value;
-  return getMarkerFeature(lat, long);
+  const [lat, long] = props.center;
+  return getMarkerFeature(lat, long, activeProjection.value);
 });
 
 const wkt = computed(() => {
@@ -77,6 +80,7 @@ const wkt = computed(() => {
   return transformDataToWktFeatures(
     props.wkt,
     props.mapMode === MapModes.HeatMode,
+    activeProjection.value
   );
 });
 
@@ -94,10 +98,12 @@ const focusOnFeatures = async () => {
       return acc ? extend(acc, featureExtent) : featureExtent;
     }, null);
 
-    viewRef.value.view.fit(extent, {
-      padding: [50, 50, 50, 50],
-      duration: 1000,
-    });
+    if (extent) {
+      viewRef.value.view.fit(extent, {
+        padding: [50, 50, 50, 50],
+        duration: 1000,
+      });
+    }
   }
 };
 

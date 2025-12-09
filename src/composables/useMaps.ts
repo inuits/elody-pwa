@@ -64,10 +64,19 @@ export const useMaps = () => {
     return [x, y];
   };
 
-  const getMarkerFeature = (latitude: number, longitude: number) => {
-    const markerFeature = new Feature({
-      geometry: new Point([longitude, latitude]),
-    });
+  const getMarkerFeature = (
+    latitude: number,
+    longitude: number,
+    targetProjection = "EPSG:4326",
+  ) => {
+    const geometry = new Point([longitude, latitude]);
+
+    if (targetProjection === "EPSG:3857") {
+      geometry.transform("EPSG:4326", "EPSG:3857");
+    }
+
+    const markerFeature = new Feature({ geometry });
+
     markerFeature.setStyle(
       new Style({
         image: new Icon({
@@ -80,11 +89,11 @@ export const useMaps = () => {
     return markerFeature;
   };
 
-  const getWktFeature = (wkt: string) => {
+  const getWktFeature = (wkt: string, targetProjection = "EPSG:4326") => {
     const format = new WKT();
     return format.readFeature(wkt, {
       dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:4326",
+      featureProjection: targetProjection,
     });
   };
 
@@ -113,18 +122,21 @@ export const useMaps = () => {
   const transformDataToWktFeatures = (
     data: (string | HeatMapItem)[],
     isHeatMode: boolean,
+    targetProjection = "EPSG:4326",
   ): Feature[] => {
     if (!data || data.length === 0) return [];
 
     if (isHeatMode) {
       return (data as HeatMapItem[]).map((item) => {
-        const feature = getWktFeature(item.coordinates);
+        const feature = getWktFeature(item.coordinates, targetProjection);
         feature.setStyle(getHeatStyle(item.heatIntensity));
         return feature;
       });
     }
 
-    return (data as string[]).map((wkt) => getWktFeature(wkt));
+    return (data as string[]).map((wkt) =>
+      getWktFeature(wkt, targetProjection),
+    );
   };
 
   const fetchGeoFilter = async (): Promise<AdvancedFilters> => {
