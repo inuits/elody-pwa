@@ -568,7 +568,14 @@ watch(
 onMounted(async () => {
   await isPermittedToDisplay();
   if (refMetadata.value.hiddenField?.hidden) return;
-  setNewValue(refMetadata.value.value);
+
+  const newValue =
+    refMetadata.value?.value ??
+    (refMetadata.value?.inputField?.autoSelectable
+      ? refMetadata.value.inputField?.options[0]?.value
+      : refMetadata.value?.value);
+
+  setNewValue(newValue);
 });
 onBeforeMount(() => {
   if (
