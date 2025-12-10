@@ -11,8 +11,18 @@
     <metadata-title
       :metadata="metadata"
       :is-field-required="isFieldRequired"
-      :is-one-of-required-metadata-field="isOneOfRequiredMetadataField"
-      :is-one-of-required-relation-field="isOneOfRequiredRelationField"
+      :is-one-of-required-metadata-field="
+        isValidationRulePresentOnField(
+          metadata,
+          ValidationRules.HasOneOfRequiredMetadata,
+        )
+      "
+      :is-one-of-required-relation-field="
+        isValidationRulePresentOnField(
+          metadata,
+          ValidationRules.HasOneOfRequiredRelations,
+        )
+      "
     />
     <entity-element-metadata-edit
       v-if="isEdit && metadata.inputField && !metadata.nonEditableField"
@@ -25,8 +35,8 @@
       :formFlow="formFlow"
       :unit="metadata.unit"
       :link-text="metadata.linkText"
-      :isMetadataOnRelation="isMetadataOnRelation"
-      :isRootdataOnRelation="isRootdataOnRelation"
+      :isMetadataOnRelation="fieldKind === 'PanelRelationData'"
+      :isRootdataOnRelation="fieldKind === 'PanelRelationRootData'"
       :error="field.errorMessage"
       :relation-filter="metadata.inputField.relationFilter"
       :show-errors="
@@ -161,6 +171,7 @@ import {
   type PanelRelationRootData,
   type Entitytyping,
   type BaseEntity,
+  ValidationRules,
 } from "@/generated-types/queries";
 import { ref, onBeforeMount, computed } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
@@ -169,6 +180,7 @@ import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
+import { useVeeValidate } from "./useVeeValidate";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -197,6 +209,7 @@ const {
   fieldIsPermittedToBeSeenByUser,
   fieldLabel,
   fieldKey,
+  fieldKind,
   fieldType,
   fieldValueProxy,
   isFieldValid,
@@ -209,6 +222,7 @@ const {
   filtersForRetrievingOptions,
   filtersForRetrievingRelatedOptions,
 } = useMetadataWrapperDropdownOptions(props);
+const { isValidationRulePresentOnField } = useVeeValidate();
 
 const autoCompleteType = computed<
   "metadataAutocomplete" | "relationAutocomplete" | undefined
@@ -236,23 +250,9 @@ const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
 };
 
-// if (typeof refMetadata.value.value !== "object") {
-//   watch(
-//     () => refMetadata.value.value,
-//     () => {
-//       if (typeof refMetadata.value.value === "object") return;
-//       setNewValue(refMetadata.value.value);
-//     },
-//   );
-// }
-
-// onMounted(async () => {
-//   await isPermittedToDisplay();
-//   if (refMetadata.value.hiddenField?.hidden) return;
-//   setNewValue(refMetadata.value.value);
-// });
 onBeforeMount(() => {
   if (autoCompleteType.value === "relationAutocomplete") {
+    console.log(fieldKey.value, fieldLabel.value);
     initializeDropdownStates();
   }
 });

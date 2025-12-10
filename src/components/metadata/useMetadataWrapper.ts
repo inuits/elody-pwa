@@ -38,7 +38,8 @@ const checkIfFieldIsRequired = (
     ValidationRules.HasOneOfRequiredRelations,
   ];
 
-  if (!fieldMetadata.inputField || !fieldMetadata.inputField.validation) return false
+  if (!fieldMetadata.inputField || !fieldMetadata.inputField.validation)
+    return false;
 
   validationRulesToCheckAgainst.forEach((validationRule) => {
     if (String(fieldMetadata.inputField.validation).includes(validationRule))
@@ -96,7 +97,6 @@ export const useMetadataWrapper = (
   const { getValidationRules } = useFieldValidation(props.metadata);
   const { setExtraVariables } = usePermissions();
 
-  const form: FormContext = useForm(props.formId);
   const fieldKey = computed(() => getFieldKey());
   const field: FieldContext = useField<MetadataWrapperProps>(fieldKey.value);
   const fieldLabel = computed<string>(() =>

@@ -115,7 +115,7 @@ export const useMetadataWrapperDropdownOptions = (
       parent: toRef("fetchAll"),
       relationType: undefined,
       fromRelationType: undefined,
-      searchFilterInput: advancedFilterInputForSearchingOptions,
+      searchFilterInput: advancedFilterInputForSearchingOptions.value,
       advancedFilterInputForRetrievingOptions:
         filtersForRetrievingOptions.value,
       formId: fieldId.value,
@@ -129,11 +129,11 @@ export const useMetadataWrapperDropdownOptions = (
         props.listItemEntity !== undefined
           ? toRef(props.listItemEntity)
           : fieldId.value, // Id could be wrong here
-      relationType: relationType,
+      relationType: relationType.value,
       fromRelationType: props.metadata.inputField?.fromRelationType,
-      searchFilterInput: "",
+      searchFilterInput: advancedFilterInputForSearchingOptions.value,
       advancedFilterInputForRetrievingOptions:
-        advancedFilterInputForSearchingOptions,
+        filtersForRetrievingOptions.value,
       formId: fieldId.value,
       relationFilter: props.metadata.inputField?.relationFilter,
     },
@@ -150,6 +150,7 @@ export const useMetadataWrapperDropdownOptions = (
       );
 
     Object.keys(dropDownoptionsConfigMapping).forEach((key) => {
+      console.log(mapConfigToArgs(dropDownoptionsConfigMapping[key]));
       useGetDropdownOptions(
         ...mapConfigToArgs(dropDownoptionsConfigMapping[key]),
       );
