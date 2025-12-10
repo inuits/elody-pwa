@@ -5,7 +5,7 @@ import {
   useField,
   useForm,
 } from "vee-validate";
-import { computed, inject, type Ref, watch, ComputedRef } from "vue";
+import { computed, inject, type Ref, watch, type ComputedRef } from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -38,14 +38,16 @@ const checkIfFieldIsRequired = (
     ValidationRules.HasOneOfRequiredRelations,
   ];
 
+  if (!fieldMetadata.inputField || !fieldMetadata.inputField.validation) return false
+
   validationRulesToCheckAgainst.forEach((validationRule) => {
     if (String(fieldMetadata.inputField.validation).includes(validationRule))
       return true;
   });
 
-  if (fieldMetadata.inputField?.validation?.required_if)
+  if (fieldMetadata.inputField.validation.required_if)
     return conditionalFieldIsRequired(
-      fieldMetadata.inputField?.validation?.required_if,
+      fieldMetadata.inputField.validation.required_if,
       formId,
       mediafileViewerContext,
     );
@@ -60,11 +62,13 @@ export const useMetadataWrapper = (
   field: FieldContext;
   fieldKey: ComputedRef<string>;
   fieldKind: ComputedRef<string>;
+  fieldType: ComputedRef<InputFieldTypes | undefined>;
   fieldLabel: ComputedRef<string>;
   isFieldValid: ComputedRef<boolean>;
+  isFieldRequired: ComputedRef<boolean>;
   fieldValidationRules: ComputedRef<string>;
   fieldIsPermittedToBeSeenByUser: ComputedRef<boolean>;
-  fieldValueProxy: Ref<any>;
+  fieldValueProxy: ComputedRef<any>;
   setNewFieldValue: (newValue: any) => void;
 } => {
   // Todo: Need to have a look if I really need a proxy for props.metadata, to set the value again, I think only setting the vee-validate will do
@@ -147,8 +151,10 @@ export const useMetadataWrapper = (
     field,
     fieldKey,
     fieldKind,
+    fieldType,
     fieldLabel,
     isFieldValid,
+    isFieldRequired,
     fieldValidationRules,
     fieldIsPermittedToBeSeenByUser,
     fieldValueProxy,

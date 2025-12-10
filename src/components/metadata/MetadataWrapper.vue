@@ -2,47 +2,43 @@
   <div
     data-cy="metadata-wrapper"
     v-if="
-      (!refMetadata.showOnlyInEditMode ||
-        (refMetadata.showOnlyInEditMode && isEdit)) &&
-      isPermitted
+      (!metadata.showOnlyInEditMode ||
+        (metadata.showOnlyInEditMode && isEdit)) &&
+      fieldIsPermittedToBeSeenByUser
     "
-    :key="label"
+    :key="fieldLabel"
   >
     <metadata-title
-      :metadata="refMetadata"
+      :metadata="metadata"
       :is-field-required="isFieldRequired"
       :is-one-of-required-metadata-field="isOneOfRequiredMetadataField"
       :is-one-of-required-relation-field="isOneOfRequiredRelationField"
     />
     <entity-element-metadata-edit
-      v-if="isEdit && refMetadata.inputField && !refMetadata.nonEditableField"
-      :fieldKey="
-        isMetadataOnRelation || isRootdataOnRelation
-          ? `${fieldKeyWithId}`
-          : refMetadata.key
-      "
-      :label="refMetadata.label as string"
-      v-model:value="value"
-      :field="refMetadata.inputField"
-      :hidden-field="refMetadata.hiddenField"
+      v-if="isEdit && metadata.inputField && !metadata.nonEditableField"
+      :fieldKey="fieldKey"
+      :label="metadata.label as string"
+      v-model:value="fieldValueProxy"
+      :field="metadata.inputField"
+      :hidden-field="metadata.hiddenField"
       :formId="formId"
       :formFlow="formFlow"
-      :unit="refMetadata.unit"
-      :link-text="refMetadata.linkText"
+      :unit="metadata.unit"
+      :link-text="metadata.linkText"
       :isMetadataOnRelation="isMetadataOnRelation"
       :isRootdataOnRelation="isRootdataOnRelation"
-      :error="errorMessage"
-      :relation-filter="refMetadata.inputField.relationFilter"
+      :error="field.errorMessage"
+      :relation-filter="metadata.inputField.relationFilter"
       :show-errors="
         showErrors ||
-        (meta.dirty &&
-          !fieldIsValid &&
-          refMetadata.inputField?.validation?.fastValidationMessage)
+        (field.meta.dirty &&
+          !isFieldValid &&
+          metadata.inputField?.validation?.fastValidationMessage)
       "
-      :field-is-valid="fieldIsValid"
+      :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       @click.stop.prevent
-      @update:value="setNewValue"
+      @update:value="setNewFieldValue"
     />
     <div v-else class="flex gap-2">
       <base-tooltip
@@ -57,62 +53,49 @@
           >
             <MetadataTruncatedText
               @overflow-status="handleOverflowStatus"
-              :disabled="!linkedEntityId && !refMetadata.lineClamp"
-              :line-clamp="refMetadata.lineClamp || 1"
+              :disabled="!linkedEntityId && !metadata.lineClamp"
+              :line-clamp="metadata.lineClamp || 1"
             >
               <MetadataFormatter
-                v-if="refMetadata.value?.formatter"
-                v-bind="refMetadata.value"
-                :translation-key="refMetadata.valueTranslationKey"
+                v-if="metadata.value?.formatter"
+                v-bind="fieldValueProxy"
+                :translation-key="metadata.valueTranslationKey"
                 :entity="{ type: entityType }"
               />
               <ViewModesAutocompleteRelations
-                v-else-if="
-                  refMetadata.inputField?.type ===
-                    InputFieldTypes.DropdownMultiselectRelations ||
-                  refMetadata.inputField?.type ===
-                    InputFieldTypes.DropdownSingleselectRelations
-                "
-                v-model="refMetadata.value"
+                v-else-if="autoCompleteType === 'relationAutocomplete'"
+                v-model="fieldValueProxy"
                 :is-read-only="true"
-                :field-name="refMetadata.label"
+                :field-name="fieldLabel"
                 :formId="linkedEntityId || formId"
-                :metadata-key-to-get-options-for="
-                  metadataKeyToGetOptionsForRelationDropdown
-                "
+                :metadata-key-to-get-options-for="metadataKeyToGetOptions"
                 :advanced-filter-input-for-retrieving-options="
-                  refMetadata.inputField.advancedFilterInputForRetrievingOptions
+                  metadata.inputField.advancedFilterInputForRetrievingOptions
                 "
                 :advanced-filter-input-for-retrieving-related-options="
-                  refMetadata.inputField
+                  metadata.inputField
                     .advancedFilterInputForRetrievingRelatedOptions
                 "
                 :advanced-filter-input-for-retrieving-all-options="
-                  refMetadata.inputField
-                    .advancedFilterInputForRetrievingAllOptions
+                  metadata.inputField.advancedFilterInputForRetrievingAllOptions
                 "
                 :advanced-filter-input-for-searching-options="
-                  refMetadata.inputField.advancedFilterInputForSearchingOptions
+                  metadata.inputField.advancedFilterInputForSearchingOptions
                 "
-                :relation-filter="refMetadata.inputField.relationFilter"
-                :is-metadata-field="refMetadata.inputField?.isMetadataField"
-                :relation-type="refMetadata.inputField?.relationType"
-                :from-relation-type="refMetadata.inputField?.fromRelationType"
+                :relation-filter="metadata.inputField.relationFilter"
+                :is-metadata-field="metadata.inputField?.isMetadataField"
+                :relation-type="metadata.inputField?.relationType"
+                :from-relation-type="metadata.inputField?.fromRelationType"
                 :disabled="true"
                 @click.stop.prevent
               />
               <ViewModesAutocompleteMetadata
-                v-else-if="
-                  refMetadata.inputField?.type ===
-                    InputFieldTypes.DropdownMultiselectMetadata ||
-                  refMetadata.inputField?.type ===
-                    InputFieldTypes.DropdownSingleselectMetadata
-                "
-                v-model:model-value="value"
-                :metadata-dropdown-options="refMetadata.inputField.options"
+                v-else-if="autoCompleteType === 'metadataAutocomplete'"
+                v-model:model-value="fieldValueProxy"
+                :metadata-dropdown-options="metadata.inputField.options"
                 :formId="formId"
                 :select-type="
-                  refMetadata.inputField.type ===
+                  metadata.inputField.type ===
                   InputFieldTypes.DropdownSingleselectMetadata
                     ? 'single'
                     : 'multi'
@@ -123,20 +106,20 @@
               />
               <entity-element-metadata
                 v-else
-                :label="refMetadata.label as string"
-                v-model:value="value"
-                :link-text="refMetadata.linkText"
-                :link-icon="refMetadata.linkIcon"
-                :unit="refMetadata.unit"
+                :label="fieldLabel"
+                v-model:value="fieldValueProxy"
+                :link-text="metadata.linkText"
+                :link-icon="metadata.linkIcon"
+                :unit="metadata.unit"
                 :base-library-mode="baseLibraryMode"
-                :custom-value="refMetadata.customValue"
-                :translation-key="refMetadata.valueTranslationKey"
+                :custom-value="metadata.customValue"
+                :translation-key="metadata.valueTranslationKey"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard
-              v-if="refMetadata.copyToClipboard"
+              v-if="metadata.copyToClipboard"
               class="w-6 h-6"
-              :value="refMetadata.value"
+              :value="metadata.value"
               @click.stop.prevent
             />
           </div>
@@ -144,20 +127,20 @@
         <template #default>
           <entity-element-metadata
             class="text-text-placeholder"
-            :label="refMetadata.label as string"
+            :label="fieldLabel"
             v-model:value="metadataValueToDisplayOnTooltip"
-            :link-text="refMetadata.linkText"
-            :link-icon="refMetadata.linkIcon"
-            :unit="refMetadata.unit"
+            :link-text="metadata.linkText"
+            :link-icon="metadata.linkIcon"
+            :unit="metadata.unit"
             :base-library-mode="baseLibraryMode"
           />
         </template>
       </base-tooltip>
       <MetadataValueTooltip
         class="grow-0 shrink-0 basis-0 items-center"
-        v-if="refMetadata.valueTooltip?.type && refMetadata.value"
-        :value-tooltip="refMetadata.valueTooltip"
-        :entity="refMetadata.value?.entity"
+        v-if="metadata.valueTooltip?.type && metadata.value"
+        :value-tooltip="metadata.valueTooltip"
+        :entity="metadata.value?.entity"
       />
     </div>
   </div>
@@ -179,23 +162,13 @@ import {
   type Entitytyping,
   type BaseEntity,
 } from "@/generated-types/queries";
-import {
-  computed,
-  onMounted,
-  watch,
-  inject,
-  ref,
-  onBeforeMount,
-  onUnmounted,
-  toRef,
-} from "vue";
-import { useI18n } from "vue-i18n";
+import { ref, onBeforeMount, computed } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
-import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
+import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -219,7 +192,43 @@ const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
-console.log(props.metadata);
+const {
+  field,
+  fieldIsPermittedToBeSeenByUser,
+  fieldLabel,
+  fieldKey,
+  fieldType,
+  fieldValueProxy,
+  isFieldValid,
+  isFieldRequired,
+  setNewFieldValue,
+} = useMetadataWrapper(props);
+const {
+  initializeDropdownStates,
+  metadataKeyToGetOptions,
+  filtersForRetrievingOptions,
+  filtersForRetrievingRelatedOptions,
+} = useMetadataWrapperDropdownOptions(props);
+
+const autoCompleteType = computed<
+  "metadataAutocomplete" | "relationAutocomplete" | undefined
+>(() => {
+  const relationAutocompleteTypes = [
+    InputFieldTypes.DropdownMultiselectRelations,
+    InputFieldTypes.DropdownSingleselectRelations,
+  ];
+  const metadataAutocompleteTypes = [
+    InputFieldTypes.DropdownMultiselectMetadata,
+    InputFieldTypes.DropdownSingleselectMetadata,
+  ];
+
+  if (!fieldType.value) return undefined;
+  if (relationAutocompleteTypes.includes(fieldType.value as InputFieldTypes))
+    return "relationAutocomplete";
+  if (metadataAutocompleteTypes.includes(fieldType.value as InputFieldTypes))
+    return "metadataAutocomplete";
+  return undefined;
+});
 
 const showTooltip = ref<boolean>(false);
 
@@ -227,102 +236,24 @@ const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
 };
 
-const metadataKeyToGetOptionsForRelationDropdown = computed(() => {
-  const field = refMetadata.value.inputField;
-  if (field.entityType) return field.entityType;
+// if (typeof refMetadata.value.value !== "object") {
+//   watch(
+//     () => refMetadata.value.value,
+//     () => {
+//       if (typeof refMetadata.value.value === "object") return;
+//       setNewValue(refMetadata.value.value);
+//     },
+//   );
+// }
 
-  const fieldKey =
-    isMetadataOnRelation.value || isRootdataOnRelation.value
-      ? fieldKeyWithId.value
-      : refMetadata.value.key;
-
-  return field.advancedFilterInputForSearchingOptions?.item_types
-    ? field.advancedFilterInputForSearchingOptions?.item_types[0]
-    : fieldKey;
-});
-
-const advancedFilterInputForRetrievingAllOptions = computed(() => {
-  if (
-    refMetadata.value.inputField.advancedFilterInputForRetrievingAllOptions
-      .length > 0
-  )
-    return refMetadata.value.inputField
-      .advancedFilterInputForRetrievingAllOptions;
-  return refMetadata.value.inputField.advancedFilterInputForRetrievingOptions;
-});
-const advancedFilterInputForRetrievingRelatedOptions = computed(() => {
-  if (
-    refMetadata.value.inputField.advancedFilterInputForRetrievingRelatedOptions
-      .length > 0
-  )
-    return refMetadata.value.inputField
-      .advancedFilterInputForRetrievingRelatedOptions;
-  return refMetadata.value.inputField.advancedFilterInputForRetrievingOptions;
-});
-
-const initializeDropdownOptionStates = () => {
-  useGetDropdownOptions(
-    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
-    "get",
-    metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    toRef("fetchAll"),
-    undefined,
-    undefined,
-    refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
-    advancedFilterInputForRetrievingAllOptions.value,
-    props.linkedEntityId || props.formId,
-  );
-  useGetDropdownOptions(
-    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
-    "get",
-    metadataKeyToGetOptionsForRelationDropdown.value as Entitytyping,
-    props.listItemEntity !== undefined
-      ? toRef(props.listItemEntity)
-      : parentEntity,
-    refMetadata.value.inputField?.relationType,
-    refMetadata.value.inputField?.fromRelationType,
-    refMetadata.value.inputField.advancedFilterInputForSearchingOptions,
-    advancedFilterInputForRetrievingRelatedOptions.value,
-    props.linkedEntityId || props.formId,
-    refMetadata.value.inputField.relationFilter,
-  );
-};
-
-const deleteDropdownOptionStates = () => {
-  useGetDropdownOptions(
-    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchAll`,
-    "delete",
-  );
-  useGetDropdownOptions(
-    `${props.linkedEntityId || props.formId}-${refMetadata.value.inputField?.relationType}-fetchRelations`,
-    "delete",
-  );
-};
-
-if (typeof refMetadata.value.value !== "object") {
-  watch(
-    () => refMetadata.value.value,
-    () => {
-      if (typeof refMetadata.value.value === "object") return;
-      setNewValue(refMetadata.value.value);
-    },
-  );
-}
-onMounted(async () => {
-  await isPermittedToDisplay();
-  if (refMetadata.value.hiddenField?.hidden) return;
-  setNewValue(refMetadata.value.value);
-});
+// onMounted(async () => {
+//   await isPermittedToDisplay();
+//   if (refMetadata.value.hiddenField?.hidden) return;
+//   setNewValue(refMetadata.value.value);
+// });
 onBeforeMount(() => {
-  if (
-    refMetadata.value.inputField?.type ===
-      InputFieldTypes.DropdownMultiselectRelations ||
-    refMetadata.value.inputField?.type ===
-      InputFieldTypes.DropdownSingleselectRelations
-  )
-    initializeDropdownOptionStates();
-});
-onUnmounted(() => {
-  deleteDropdownOptionStates();
+  if (autoCompleteType.value === "relationAutocomplete") {
+    initializeDropdownStates();
+  }
 });
 </script>

@@ -1,6 +1,6 @@
-import { computed, ComputedRef, toRef } from "vue";
-import { MetadataWrapperProps } from "./MetadataWrapper.vue";
-import { AdvancedFilterInputType } from "@/generated-types/queries";
+import { computed, type ComputedRef, onUnmounted, toRef } from "vue";
+import { type MetadataWrapperProps } from "./MetadataWrapper.vue";
+import { type AdvancedFilterInputType } from "@/generated-types/queries";
 import { useMetadataWrapper } from "./useMetadataWrapper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 
@@ -8,8 +8,7 @@ export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
 ): {
   initializeDropdownStates: () => void;
-  deleteDropDownStates: () => void;
-  metadataKeyToGetOptions: ComputedRef<string>;
+  metadataKeyToGetOptions: ComputedRef<string | undefined>;
   filtersForRetrievingOptions: ComputedRef<
     AdvancedFilterInputType[] | undefined
   >;
@@ -17,49 +16,64 @@ export const useMetadataWrapperDropdownOptions = (
     AdvancedFilterInputType[] | undefined
   >;
 } => {
-  const getMetadataKeyToGetOptions = (): string => {
-    const field = props.metadata.inputField;
-    if (field.entityType) return field.entityType;
+  const getMetadataKeyToGetOptions = (): string | undefined => {
+    try {
+      const field = props.metadata.inputField;
+      if (field.entityType) return field.entityType;
 
-    const { fieldKey, fieldKind } = useMetadataWrapper(props);
+      const { fieldKey, fieldKind } = useMetadataWrapper(props);
 
-    const keyMapper: { [key: string]: string } = {
-      PanelrelationMetaData: fieldKey.value,
-      PanelRelationRootData: fieldKey.value,
-      fallback: props.metadata.key,
-    };
+      const keyMapper: { [key: string]: string } = {
+        PanelrelationMetaData: fieldKey.value,
+        PanelRelationRootData: fieldKey.value,
+        fallback: props.metadata.key,
+      };
 
-    let key = keyMapper["fallback"];
-    if (Object.keys(keyMapper).includes(fieldKind.value))
-      key = keyMapper[fieldKind.value];
+      let key = keyMapper["fallback"];
+      if (Object.keys(keyMapper).includes(fieldKind.value))
+        key = keyMapper[fieldKind.value];
 
-    if (!field.advancedFilterInputForSearchingOptions?.item_types) return key;
-    return field.advancedFilterInputForSearchingOptions.item_types[0] as string;
+      if (!field.advancedFilterInputForSearchingOptions?.item_types) return key;
+      return field.advancedFilterInputForSearchingOptions
+        .item_types[0] as string;
+    } catch {
+      return undefined;
+    }
   };
 
   const getFiltersForOptions = (): AdvancedFilterInputType[] | undefined => {
-    if (!props.metadata.inputField.advancedFilterInputForRetrievingAllOptions)
-      return (
-        props.metadata.inputField.advancedFilterInputForRetrievingOptions ||
-        undefined
-      );
+    try {
+      if (!props.metadata.inputField.advancedFilterInputForRetrievingAllOptions)
+        return (
+          props.metadata.inputField.advancedFilterInputForRetrievingOptions ||
+          undefined
+        );
 
-    return props.metadata.inputField.advancedFilterInputForRetrievingAllOptions;
+      return props.metadata.inputField
+        .advancedFilterInputForRetrievingAllOptions;
+    } catch {
+      return undefined;
+    }
   };
 
   const getFiltersForRelatedOptions = ():
     | AdvancedFilterInputType[]
     | undefined => {
-    if (
-      !props.metadata.inputField.advancedFilterInputForRetrievingRelatedOptions
-    )
-      return (
-        props.metadata.inputField.advancedFilterInputForRetrievingOptions ||
-        undefined
-      );
+    try {
+      if (
+        !props.metadata.inputField
+          .advancedFilterInputForRetrievingRelatedOptions
+      )
+        return (
+          props.metadata.inputField.advancedFilterInputForRetrievingOptions ||
+          undefined
+        );
 
-    return props.metadata.inputField
-      .advancedFilterInputForRetrievingRelatedOptions;
+      return props.metadata.inputField
+        .advancedFilterInputForRetrievingRelatedOptions;
+    } catch {
+      return undefined;
+    }
   };
 
   const metadataKeyToGetOptions = computed(() => getMetadataKeyToGetOptions());
@@ -112,14 +126,16 @@ export const useMetadataWrapperDropdownOptions = (
       mode: "get",
       entityType: metadataKeyToGetOptions.value,
       parent:
-        props.listItemEntity !== undefined ? toRef(props.listItemEntity) : id, // Id could be wrong here
+        props.listItemEntity !== undefined
+          ? toRef(props.listItemEntity)
+          : fieldId.value, // Id could be wrong here
       relationType: relationType,
-      fromRelationType: props.metadata.inputField.fromRelationType,
+      fromRelationType: props.metadata.inputField?.fromRelationType,
       searchFilterInput: "",
       advancedFilterInputForRetrievingOptions:
         advancedFilterInputForSearchingOptions,
       formId: fieldId.value,
-      relationFilter: props.metadata.inputField.relationFilter,
+      relationFilter: props.metadata.inputField?.relationFilter,
     },
   };
 
@@ -151,9 +167,12 @@ export const useMetadataWrapperDropdownOptions = (
     );
   };
 
+  onUnmounted(() => {
+    deleteDropDownStates();
+  });
+
   return {
     initializeDropdownStates,
-    deleteDropDownStates,
     metadataKeyToGetOptions,
     filtersForRetrievingOptions,
     filtersForRetrievingRelatedOptions,
