@@ -110,11 +110,11 @@ export const useMaps = () => {
 
     return new Style({
       fill: new Fill({
-        color: `rgba(${rgbColor}, 0.5)`,
+        color: `rgba(${rgbColor}, 1)`,
       }),
       stroke: new Stroke({
-        color: `rgba(${rgbColor}, 0.5)`,
-        width: 6,
+        color: `rgba(${rgbColor}, 1)`,
+        width: 12,
       }),
     });
   };
