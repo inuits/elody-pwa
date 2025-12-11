@@ -79,13 +79,11 @@ export const useVeeValidate = (): {
     if (requiredRelations)
       return `${ValidationFields.RelationValues}.${metadata.inputField.relationType}`;
 
-    if (linkedEntityId === undefined) {
-      return `${ValidationFields.RelationValues}.${metadata.key}`;
-    }
-
-    if (metadata.inputField) {
+    if (metadata.inputField)
       return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(metadata as PanelMetaData)}`;
-    }
+
+    if (linkedEntityId === undefined)
+      return `${ValidationFields.RelationValues}.${metadata.key}`;
 
     return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId}`;
   };

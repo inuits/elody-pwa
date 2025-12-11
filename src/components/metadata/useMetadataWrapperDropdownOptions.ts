@@ -128,7 +128,7 @@ export const useMetadataWrapperDropdownOptions = (
       parent:
         props.listItemEntity !== undefined
           ? toRef(props.listItemEntity)
-          : fieldId.value, // Id could be wrong here
+          : props.formId,
       relationType: relationType.value,
       fromRelationType: props.metadata.inputField?.fromRelationType,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,

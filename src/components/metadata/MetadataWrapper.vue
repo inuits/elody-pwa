@@ -48,7 +48,7 @@
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       @click.stop.prevent
-      @update:value="setNewFieldValue"
+      @update:value="(value) => (fieldValueProxy = value)"
     />
     <div v-else class="flex gap-2">
       <base-tooltip
@@ -67,8 +67,8 @@
               :line-clamp="metadata.lineClamp || 1"
             >
               <MetadataFormatter
-                v-if="metadata.formatter"
-                v-bind="fieldValueProxy"
+                v-if="metadata.value.formatter"
+                v-bind="metadata.value"
                 :translation-key="metadata.valueTranslationKey"
                 :entity="{ type: entityType }"
               />
@@ -128,7 +128,7 @@
             <BaseCopyToClipboard
               v-if="metadata.copyToClipboard"
               class="w-6 h-6"
-              :value="metadata.value"
+              :value="fieldValueProxy"
               @click.stop.prevent
             />
           </div>
@@ -137,7 +137,7 @@
           <entity-element-metadata
             class="text-text-placeholder"
             :label="fieldLabel"
-            v-model:value="metadataValueToDisplayOnTooltip"
+            v-model:value="fieldTooltipValue"
             :link-text="metadata.linkText"
             :link-icon="metadata.linkIcon"
             :unit="metadata.unit"
@@ -199,8 +199,6 @@ const props = withDefaults(defineProps<MetadataWrapperProps>(), {
   showErrors: false,
 });
 
-console.log(props.metadata);
-
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
@@ -215,7 +213,7 @@ const {
   fieldValueProxy,
   isFieldValid,
   isFieldRequired,
-  setNewFieldValue,
+  fieldTooltipValue,
 } = useMetadataWrapper(props);
 const {
   initializeDropdownStates,

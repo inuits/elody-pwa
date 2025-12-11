@@ -1,6 +1,6 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
 import { type FieldContext, useField } from "vee-validate";
-import { computed, inject, watch, type ComputedRef } from "vue";
+import { computed, inject, onMounted, watch, type ComputedRef } from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -65,7 +65,7 @@ export const useMetadataWrapper = (
   fieldValidationRules: ComputedRef<string>;
   fieldIsPermittedToBeSeenByUser: ComputedRef<boolean>;
   fieldValueProxy: ComputedRef<any>;
-  setNewFieldValue: (newValue: any) => void;
+  fieldTooltipValue: ComputedRef<any>;
 } => {
   // Todo: Need to have a look if I really need a proxy for props.metadata, to set the value again, I think only setting the vee-validate will do
 
@@ -93,44 +93,45 @@ export const useMetadataWrapper = (
   const { setExtraVariables } = usePermissions();
 
   const fieldKey = computed(() => getFieldKey());
-  const field: FieldContext = useField<MetadataWrapperProps>(fieldKey.value);
   const fieldLabel = computed<string>(() =>
     getTranslatedMessage(props.metadata.label as string | "metadata.no-label"),
   );
-  const fieldType = computed<InputFieldTypes | undefined>(
-    () => props.metadata.inputField?.type as InputFieldTypes,
-  );
-  const fieldKind = computed<string>(() => props.metadata.__typename as string);
-  const fieldTooltipValue = computed<any>(() => fieldValueProxy.value);
-  const isFieldValid = computed<boolean>(() => field.meta.valid);
   const isFieldRequired = computed<boolean>(() =>
     checkIfFieldIsRequired(props.metadata, props.formId),
   );
   const fieldValidationRules = computed<string>(() =>
     getValidationRules(props.isEdit, isFieldRequired.value),
   );
+  const field: FieldContext = useField<MetadataWrapperProps>(
+    fieldKey.value,
+    fieldValidationRules.value,
+    { label: fieldLabel.value },
+  );
+  const fieldType = computed<InputFieldTypes | undefined>(
+    () => props.metadata.inputField?.type as InputFieldTypes,
+  );
+  const fieldKind = computed<string>(() => props.metadata.__typename as string);
+  const fieldTooltipValue = computed<any>(
+    () => fieldValueProxy.value?.label || fieldValueProxy.value,
+  );
+  const isFieldValid = computed<boolean>(() => field.meta.valid);
   const fieldIsPermittedToBeSeenByUser = computed<boolean>(() =>
     getFieldPermissions(),
   );
 
-  const fieldValueProxy = computed({
-    get: () => field.value.value,
-    set: (val) => (field.value.value = val),
-  });
-
-  const setNewFieldValue = (newValue: any): void => {
+  const getNewFieldValue = (newValue: any): any => {
     if (fieldType.value === InputFieldTypes.Date) {
       const parsedDate = DateTime.fromISO(newValue);
-      if (parsedDate.isValid)
-        fieldValueProxy.value = parsedDate.toFormat("yyyy-MM-dd");
+      if (parsedDate.isValid) return parsedDate.toFormat("yyyy-MM-dd");
     } else {
-      fieldValueProxy.value = newValue;
+      return newValue;
     }
-    // Todo: Is it possible to just use the setter of fieldValueProxy instead of the form
-    // if (!form) return;
-    //
-    // form.setFieldValue(veeValidateField.value, value.value);
   };
+
+  const fieldValueProxy = computed({
+    get: () => field.value.value,
+    set: (val) => (field.value.value = getNewFieldValue(val)),
+  });
 
   watch(
     () => props.formId,
@@ -140,6 +141,8 @@ export const useMetadataWrapper = (
         childEntityId: "",
       }),
   );
+
+  onMounted(() => (fieldValueProxy.value = props.metadata.value));
 
   return {
     getFieldKey,
@@ -153,6 +156,6 @@ export const useMetadataWrapper = (
     fieldValidationRules,
     fieldIsPermittedToBeSeenByUser,
     fieldValueProxy,
-    setNewFieldValue,
+    fieldTooltipValue,
   };
 };

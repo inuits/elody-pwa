@@ -29,7 +29,7 @@ export const useFieldValidation = (
     isFieldRequired: boolean,
   ): string => {
     let defaultRules = "no_xss";
-    const validationOnField = field.inputField.validation || undefined;
+    const validationOnField = field.inputField?.validation || undefined;
 
     if (!validationOnField) return defaultRules;
 
