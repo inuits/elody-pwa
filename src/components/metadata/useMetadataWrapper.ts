@@ -1,11 +1,6 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import {
-  type FieldContext,
-  type FormContext,
-  useField,
-  useForm,
-} from "vee-validate";
-import { computed, inject, type Ref, watch, type ComputedRef } from "vue";
+import { type FieldContext, useField } from "vee-validate";
+import { computed, inject, watch, type ComputedRef } from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,

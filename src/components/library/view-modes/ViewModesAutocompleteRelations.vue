@@ -7,7 +7,11 @@
       isLoading
     "
     :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
-    :options="!disabled ? allEntitiesHelper.entityDropdownOptions : selectedDropdownOptions"
+    :options="
+      !disabled
+        ? allEntitiesHelper.entityDropdownOptions
+        : selectedDropdownOptions
+    "
     :relationType="relationType"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
@@ -52,7 +56,14 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import isEqual from "lodash.isequal";
 import debounce from "lodash.debounce";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  onBeforeMount,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { getEntityIdFromRoute } from "@/helpers";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
@@ -130,13 +141,16 @@ onBeforeMount(() => {
     `${props.formId}-${props.relationType}-fetchRelations`,
     "get",
   );
-})
+});
 
 onMounted(async () => {
   const dependentRelationValues = computed(() => {
     if (!props.dependsOn || props.disabled) return null;
 
-    const form = allEntitiesHelper.value.getFormWithRelationFieldCheck(props.formId, props.dependsOn);
+    const form = allEntitiesHelper.value.getFormWithRelationFieldCheck(
+      props.formId,
+      props.dependsOn,
+    );
     return form ? form.values.relationValues[props.dependsOn] : null;
   });
 
@@ -159,7 +173,7 @@ onMounted(async () => {
       handleSelect([]);
     },
     { deep: true },
-  );
+  ); // Something something modelvalue undefined
 
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
     if (props.isMetadataField) preSelect();
@@ -183,8 +197,7 @@ const initAutocompleteOption = async () => {
     ) {
       await relatedEntitiesHelper.value.initialize();
     }
-  }
-  else {
+  } else {
     await allEntitiesHelper.value.initialize();
   }
 
@@ -214,7 +227,8 @@ const mapDropdownOptionsToBulkProcessableItem = (
 };
 
 const populateSelectedOptions = (options: DropdownOption[]) => {
-  if (options.length === 0 && selectedDropdownOptions.value?.length === 0) return;
+  if (options.length === 0 && selectedDropdownOptions.value?.length === 0)
+    return;
   selectedDropdownOptions.value = options;
 };
 
@@ -302,6 +316,6 @@ watch(
   () => relatedEntitiesHelper.value?.entityDropdownOptions,
   (dropdownOptions: DropdownOption[]) => {
     populateSelectedOptions(dropdownOptions);
-  }
+  },
 );
 </script>

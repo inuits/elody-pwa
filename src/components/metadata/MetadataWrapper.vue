@@ -67,7 +67,7 @@
               :line-clamp="metadata.lineClamp || 1"
             >
               <MetadataFormatter
-                v-if="metadata.value?.formatter"
+                v-if="metadata.formatter"
                 v-bind="fieldValueProxy"
                 :translation-key="metadata.valueTranslationKey"
                 :entity="{ type: entityType }"
@@ -83,11 +83,10 @@
                   metadata.inputField.advancedFilterInputForRetrievingOptions
                 "
                 :advanced-filter-input-for-retrieving-related-options="
-                  metadata.inputField
-                    .advancedFilterInputForRetrievingRelatedOptions
+                  filtersForRetrievingRelatedOptions
                 "
                 :advanced-filter-input-for-retrieving-all-options="
-                  metadata.inputField.advancedFilterInputForRetrievingAllOptions
+                  filtersForRetrievingOptions
                 "
                 :advanced-filter-input-for-searching-options="
                   metadata.inputField.advancedFilterInputForSearchingOptions
@@ -200,6 +199,8 @@ const props = withDefaults(defineProps<MetadataWrapperProps>(), {
   showErrors: false,
 });
 
+console.log(props.metadata);
+
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
@@ -252,7 +253,6 @@ const handleOverflowStatus = (status: boolean) => {
 
 onBeforeMount(() => {
   if (autoCompleteType.value === "relationAutocomplete") {
-    console.log(fieldKey.value, fieldLabel.value);
     initializeDropdownStates();
   }
 });
