@@ -51,6 +51,9 @@
           { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
         ]"
       >
+        <div class="mr-2" v-if="typePillLabel">
+          <MetadataFormatter class="p-2" v-bind="typePillLabel" />
+        </div>
         {{ currentRouteTitle }}
       </div>
     </div>
@@ -126,6 +129,7 @@ import { TypeModals } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 
 const { t, locale } = useI18n();
 const config: any = inject("config");
@@ -143,18 +147,20 @@ const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
 
 const currentRouteTitle = ref<string>("");
+const typePillLabel = ref<any>(undefined);
 
 watch(
   () => [locale.value, rootRoute.value?.rootTitle],
   () => {
     const titleKey = rootRoute.value?.rootTitle as string;
+    typePillLabel.value = rootRoute.value?.typePillLabel;
     if (titleKey) {
       currentRouteTitle.value = t(titleKey);
     } else {
       currentRouteTitle.value = "";
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 router.beforeEach(() => {

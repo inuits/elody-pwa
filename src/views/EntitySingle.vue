@@ -262,6 +262,7 @@ const determineBreadcrumbs = async () => {
   setRootRoute(
     entityForBreadcrumb.value.id,
     getTitleOrNameFromEntity(entityForBreadcrumb.value),
+    entityForBreadcrumb.value.intialValues?.typePillLabel,
   );
   do {
     const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
