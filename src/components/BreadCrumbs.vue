@@ -150,7 +150,7 @@ const currentRouteTitle = ref<string>("");
 const typePillLabel = ref<any>(undefined);
 
 watch(
-  () => [locale.value, rootRoute.value?.rootTitle],
+  () => [locale.value, rootRoute.value?.rootTitle, rootRoute.value?.typePillLabel],
   () => {
     const titleKey = rootRoute.value?.rootTitle as string;
     typePillLabel.value = rootRoute.value?.typePillLabel;
