@@ -214,7 +214,7 @@ const {
   isFieldValid,
   isFieldRequired,
   fieldTooltipValue,
-} = useMetadataWrapper(props);
+} = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {
   initializeDropdownStates,
   metadataKeyToGetOptions,

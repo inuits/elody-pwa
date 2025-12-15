@@ -1,6 +1,13 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
 import { type FieldContext, useField } from "vee-validate";
-import { computed, inject, onMounted, watch, type ComputedRef } from "vue";
+import {
+  computed,
+  EmitFn,
+  inject,
+  onMounted,
+  watch,
+  type ComputedRef,
+} from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -53,6 +60,7 @@ const checkIfFieldIsRequired = (
 
 export const useMetadataWrapper = (
   props: MetadataWrapperProps,
+  emitAddRefetchFunction: () => EmitFn,
 ): {
   getFieldKey: () => string;
   field: FieldContext;
@@ -120,6 +128,13 @@ export const useMetadataWrapper = (
   );
 
   const getNewFieldValue = (newValue: any): any => {
+    if (
+      fieldKind.value === "PanelRelationMetaData" &&
+      field.meta.dirty &&
+      props.isEdit
+    )
+      emitAddRefetchFunction();
+
     if (fieldType.value === InputFieldTypes.Date) {
       const parsedDate = DateTime.fromISO(newValue);
       if (parsedDate.isValid) return parsedDate.toFormat("yyyy-MM-dd");
