@@ -19,34 +19,58 @@ const handleRequiredAuthentication = (router: Router) => {
     router.push("/unauthorized");
 };
 
-const handleTenantParameterInUrl = (
+const handleTenantParameterInUrl = async (
   to: RouteLocationNormalized,
   next: NavigationGuardNext,
   router: Router,
 ) => {
-  const { selectedTenant, getCodeById } = (useTenant as any)();
-  if (selectedTenant.value && to.params.tenant) {
-    const selectedCode =
-      getCodeById(selectedTenant.value) || selectedTenant.value;
-    const urlCode = Array.isArray(to.params.tenant)
-      ? String(to.params.tenant[0])
-      : String(to.params.tenant);
-    if (urlCode !== selectedCode && !to.path.includes("not-found")) {
-      router.replace({ name: "Home", params: { tenant: selectedCode } });
-      return;
+  const { 
+    selectedTenant, 
+    getCodeById, 
+    getIdFromCode, 
+    setTennant, 
+    getLabelById 
+  } = (useTenant as any)();
+
+  const urlParam = to.params.tenant;
+
+  if (urlParam) {
+    const urlCode = Array.isArray(urlParam) ? String(urlParam[0]) : String(urlParam);
+    const targetTenantId = getIdFromCode(urlCode);
+
+    if (targetTenantId) {
+      
+      if (selectedTenant.value !== targetTenantId) {
+        const label = getLabelById(targetTenantId);
+        
+        await setTennant(label || "", targetTenantId); 
+        
+      } 
+      
+      return next();
+    } else {
+      
+      if (selectedTenant.value) {
+        const selectedCode = getCodeById(selectedTenant.value) || selectedTenant.value;
+        if (urlCode !== selectedCode && !to.path.includes("not-found")) {
+          router.replace({ name: "Home", params: { tenant: selectedCode } });
+          return;
+        }
+      }
     }
   }
 
   if (
-    !to.params.tenant &&
+    !urlParam &&
     selectedTenant.value &&
     !to.path.includes("not-found")
   ) {
     const tenant = getCodeById(selectedTenant.value) || selectedTenant.value;
     router.replace({ path: `/${tenant}${to.path}`, query: to.query });
-  } else {
-    next();
-  }
+    return;
+  } 
+  
+  next();
 };
 
 const handleRequiresAuthFromOverviewPage = (
