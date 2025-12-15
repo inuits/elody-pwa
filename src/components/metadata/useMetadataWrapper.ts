@@ -2,7 +2,7 @@ import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper
 import { type FieldContext, useField } from "vee-validate";
 import {
   computed,
-  EmitFn,
+  type EmitFn,
   inject,
   onMounted,
   watch,
