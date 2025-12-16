@@ -825,7 +825,7 @@ const determineViewModes = (viewModes: any[]) => {
 };
 
 const setQueryVariablesForMapViewmode = (): void => {
-  setPaginationLimit(1000);
+  setPaginationLimit(-1);
   setSkip(1);
 };
 const unSetQueryVariablesForMapViewmode = (): void => {
