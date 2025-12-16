@@ -300,7 +300,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useMaps } from "@/composables/useMaps";
-import { computed, inject, onMounted, ref, watch } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
   breadcrumbPathFinished,
@@ -442,26 +442,24 @@ const additionalDefaultFiltersEnabled = computed(() => {
 
 const primaryMediafileId = computed(() => {
   return parentEntity?.value?.intialValues?.primary_mediafile_id;
-})
+});
 
 const wrapperClasses = computed(() => {
   const classes: (string | Record<string, boolean>)[] = [];
   const mode = props.baseLibraryMode;
 
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
-    classes.push(props.parentEntityIdentifiers.length > 0 ? 'px-3' : 'px-6');
+    classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
 
   classes.push({
-    '!bg-white grid-rows-[0vh_1fr]':
-      mode === BaseLibraryModes.BasicBaseLibrary,
-    'grid-rows-[5vh_1fr]':
-      mode === BaseLibraryModes.NormalBaseLibrary,
-    'grid-rows-[1vh_1fr]':
+    "!bg-white grid-rows-[0vh_1fr]": mode === BaseLibraryModes.BasicBaseLibrary,
+    "grid-rows-[5vh_1fr]": mode === BaseLibraryModes.NormalBaseLibrary,
+    "grid-rows-[1vh_1fr]":
       mode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
       (mode === BaseLibraryModes.PreviewBaseLibrary &&
         showCurrentEntityFlow.value),
-    'grid-rows-[1fr_0vh]': !showCurrentEntityFlow.value,
+    "grid-rows-[1fr_0vh]": !showCurrentEntityFlow.value,
   });
 
   return classes;
@@ -844,7 +842,16 @@ onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
   getDisplayPreferences();
+  window.addEventListener('beforeunload', resetMapPaginationLimit);
 });
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', resetMapPaginationLimit);
+});
+
+const resetMapPaginationLimit = () => {
+  if (displayMap.value) setPaginationLimit(0);
+};
 
 watch(
   () => route.path,
@@ -883,7 +890,7 @@ const resetPaginationAndView = () => {
   displayMap.value = false;
   displayGrid.value = false;
   displayList.value = true;
-}
+};
 
 watch(
   () => props.predefinedEntities,
