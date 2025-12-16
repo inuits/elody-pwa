@@ -177,14 +177,7 @@ contextMenuItems.value = [
 ];
 
 const calculatedGridSize = computed(() => {
-  const z = currentZoom.value;
-
-  if (z >= 18) return 5;
-  if (z >= 16) return 20;
-  if (z >= 14) return 100;
-  if (z >= 12) return 500;
-  if (z >= 10) return 1000;
-  return 5000;
+  return 35;
 });
 
 const clearAndAddFeatures = (features: Feature[]) => {
