@@ -14,6 +14,7 @@ import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getTranslatedMessage } from "@/helpers";
+import { th } from "date-fns/locale";
 
 export type FieldMetadata =
   | PanelMetaData
@@ -68,8 +69,6 @@ export const useMetadataWrapper = (
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
 } => {
-  // Todo: Need to have a look if I really need a proxy for props.metadata, to set the value again, I think only setting the vee-validate will do
-
   const getFieldKey = (): string => {
     const { getVeeValidateKey } = useVeeValidate();
     return getVeeValidateKey(
@@ -151,7 +150,17 @@ export const useMetadataWrapper = (
       }),
   );
 
-  onMounted(() => (fieldValueProxy.value = props.metadata.value));
+  onMounted(() => {
+    let newValue = props.metadata.value;
+    try {
+      if (props.metadata.inputField?.autoSelectable)
+        newValue = props.metadata.inputField.options[0]?.value;
+    } catch {
+      throw Error("Unable to auto select value, no options available");
+    }
+
+    fieldValueProxy.value = newValue;
+  });
 
   return {
     getFieldKey,
