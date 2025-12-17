@@ -26,6 +26,7 @@ export type VisitedRoute = {
 export type RootRoute = {
   rootId: string;
   rootTitle: string;
+  typePillLabel: any;
 };
 export type BreadcrumbRoute = {
   id: string;
@@ -126,9 +127,10 @@ const useBreadcrumbs = (config: any) => {
     clearBreadcrumbPath();
   };
 
-  const setRootRoute = (id: string, title: string): void => {
+  const setRootRoute = (id: string, title: string, typePillLabel: any = undefined): void => {
     rootRoute.value.rootId = id;
     rootRoute.value.rootTitle = title;
+    rootRoute.value.typePillLabel = typePillLabel;
   };
 
   const getRootRouteId = (): string => {

@@ -55,6 +55,7 @@ watch(
   () => tenant.value,
   async (newTenant?: string, oldTenant?: string) => {
     if (!oldTenant && newTenant) return;
+    if (tenant.value === selectedTenant.value) return;
     if (newTenant) await selectTenant(newTenant);
   },
 );
@@ -73,6 +74,16 @@ watch(
       selectedTenant.value;
   },
   { immediate: true },
+);
+
+watch(
+  () => selectedTenant,
+  (newTenant: any) => {
+    if (newTenant.value && newTenant !== tenant.value) {
+      tenant.value = newTenant.value;
+    }
+  },
+  { immediate: true, deep: true },
 );
 </script>
 
