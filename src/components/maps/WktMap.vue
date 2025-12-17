@@ -1,15 +1,17 @@
 <template>
   <div>
     <Map.OlMap
+      ref="mapRef"
       style="width: 100%; height: 65vh"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
+      @moveend="debouncedHandleMoveBoundingBox"
     >
       <Map.OlView
         ref="viewRef"
         :zoom="7"
         :maxZoom="17"
-        :center="mapCenter"
+        :center="localCenter"
         :projection="activeProjection"
       />
 
@@ -25,7 +27,10 @@
       </Layers.OlTileLayer>
 
       <Layers.OlVectorLayer>
-        <Sources.OlSourceVector :projection="activeProjection" :features="features">
+        <Sources.OlSourceVector
+          :projection="activeProjection"
+          :features="features"
+        >
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>
     </Map.OlMap>
@@ -33,14 +38,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onUpdated, nextTick } from "vue";
+import { computed, ref, watch, onUpdated, nextTick, onMounted, onUnmounted } from "vue";
 import { Map, Layers, Sources } from "vue3-openlayers";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
-import { fromLonLat } from "ol/proj"; // Import transformation helper
-import { MapModes, MapViews } from "@/generated-types/queries";
+import { MapModes, MapViews, AdvancedFilters } from "@/generated-types/queries";
 import { HeatMapItem } from "@/composables/useMaps";
+import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
+import debounce from "lodash.debounce";
 
 const props = withDefaults(
   defineProps<{
@@ -48,28 +54,36 @@ const props = withDefaults(
     center?: number[];
     mapView?: MapViews;
     mapMode?: MapModes;
+    filtersBaseApi?: FiltersBaseAPI;
+    useFilters: boolean;
+    geoFilters: AdvancedFilters | undefined;
   }>(),
   {
     center: () => [],
     mapView: MapViews.Satellite,
     mapMode: MapModes.Default,
+    useFilters: false,
   },
 );
 
-const { getMarkerFeature, transformDataToWktFeatures } = useMaps();
+const {
+  getMarkerFeature,
+  transformDataToWktFeatures,
+  activateNewGeoFilter,
+  getGeojsonPolygonFromMap,
+} = useMaps();
 
 const viewRef = ref<{ view: View }>(null);
-
+const mapRef = ref<InstanceType<typeof Map.OlMap> | undefined>(undefined);
+const localCenter = ref<number[]>([]);
 const activeProjection = computed(() => {
   return props.mapView === MapViews.Standard ? "EPSG:3857" : "EPSG:4326";
 });
 
-const mapCenter = computed(() => {
-  const [lat = 0, long = 0] = props.center;
-  return [lat, long]; 
-});
-
 const point = computed(() => {
+  if (props.mapView === MapViews.Standard) {
+    return null;
+  }
   const [lat, long] = props.center;
   return getMarkerFeature(lat, long, activeProjection.value);
 });
@@ -80,16 +94,16 @@ const wkt = computed(() => {
   return transformDataToWktFeatures(
     props.wkt,
     props.mapMode === MapModes.HeatMode,
-    activeProjection.value
+    activeProjection.value,
   );
 });
 
 const features = computed(() => {
-  return [...wkt.value, point.value];
+  return [...wkt.value, point.value].filter((feature) => !!feature);
 });
 
 const focusOnFeatures = async () => {
-  const existedFeatures = wkt.value.length ? wkt.value : [point.value];
+  const existedFeatures = wkt.value.length ? wkt.value : point.value ? [point.value] : [];
   if (existedFeatures.length > 0 && viewRef.value) {
     await nextTick();
     const extent: Extent = existedFeatures.reduce((acc, feature) => {
@@ -107,15 +121,24 @@ const focusOnFeatures = async () => {
   }
 };
 
-onUpdated(() => {
+const handleMoveBoundingBox = () => {
+  if (!props.filtersBaseApi) return;
+  const map = mapRef.value?.map;
+  if (!map) return;
+
+  const geojsonPolygon = getGeojsonPolygonFromMap(map);
+  if (!props.geoFilters) return;
+  activateNewGeoFilter(props.filtersBaseApi, props.geoFilters, geojsonPolygon);
+};
+
+const debouncedHandleMoveBoundingBox = debounce(() => {
+  if (!props.useFilters) return;
+  handleMoveBoundingBox();
+}, 1000);
+
+onMounted(async () => {
+  const [lat = 0, long = 0] = props.center;
+  localCenter.value = [lat, long];
   focusOnFeatures();
 });
-
-watch(
-  [features, viewRef],
-  () => {
-    focusOnFeatures();
-  },
-  { immediate: true, deep: true },
-);
 </script>

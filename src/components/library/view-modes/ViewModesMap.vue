@@ -5,17 +5,21 @@
     :entities="entities"
     :entities-loading="entitiesLoading"
     :center="center"
-    :zoom="getBasicMapProperties(config).zoom"
-    :blur="getBasicMapProperties(config).blur"
-    :radius="getBasicMapProperties(config).radius"
+    :zoom="mapProperties.zoom"
+    :blur="mapProperties.blur"
+    :radius="mapProperties.radius"
     :filters-base-api="filtersBaseApi"
+    :geo-filters="geoFilters"
   />
   <WktMap
-    v-if="getBasicMapProperties(config).mapType === MapTypes.WktMap"
+    v-if="refMapType === MapTypes.WktMap"
     :wkt="wktOfEntities"
     :center="center"
     :map-view="mapView"
     :map-mode="mapMode"
+    :filters-base-api="filtersBaseApi"
+    :use-filters="useFilters"
+    :geo-filters="geoFilters"
   />
 </template>
 
@@ -25,12 +29,15 @@ import {
   type Entity,
   MapTypes,
   MapModes,
+  AdvancedFilters,
+  AdvancedFilter,
+  AdvancedFilterInput,
 } from "@/generated-types/queries";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
 import WktMap from "@/components/maps/WktMap.vue";
 import { useMaps } from "@/composables/useMaps";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { fromLonLat } from "ol/proj";
 
 const props = withDefaults(
@@ -42,15 +49,20 @@ const props = withDefaults(
     filtersBaseApi?: FiltersBaseAPI;
     entityTypeAsCenterPoint: string;
     centerCoordinatesKey: string;
+    setPaginationLimit: (limit: number, forceFetch?: boolean) => void;
+    setAdvancedFilters: (filters: AdvancedFilterInput[]) => void;
   }>(),
   {
     filtersBaseApi: undefined,
+    setPaginationLimit: () => {},
+    setAdvancedFilters: () => {},
   },
 );
 
-const { getBasicMapProperties } = useMaps();
+const { getBasicMapProperties, fetchGeoFilter } = useMaps();
 
 const refMapType = ref<MapTypes | undefined>(undefined);
+const geoFilters = ref<AdvancedFilters | undefined>(undefined);
 
 const wktOfEntities = computed(() => {
   if (mapMode.value === MapModes.Default) {
@@ -90,12 +102,14 @@ const mapView = computed(() => {
 });
 
 const mapMode = computed(() => {
-  return mapProperties.value.mapMode;
+  return mapProperties.value.mapMode || MapModes.Default;
 });
 
-const mapProperties = computed(() => {
-  return getBasicMapProperties(props.config);
+const useFilters = computed(() => {
+  return mapProperties.value.useFilters;
 });
+
+const mapProperties = ref(getBasicMapProperties(props.config));
 
 const center = ref<number[]>();
 const calculateCenter = (entities: Entity[]) => {
@@ -120,11 +134,27 @@ const calculateCenter = (entities: Entity[]) => {
   }
 };
 
+const updateMapProperties = () => {
+  if (refMapType.value === MapTypes.HeatMap) {
+    props.setPaginationLimit(-1);
+  }
+
+  if (refMapType.value == MapTypes.WktMap) {
+    props.setPaginationLimit(1000);
+  }
+};
+
+const getGeoFilter = async (): Promise<AdvancedFilters | undefined> => {
+  if (!props.filtersBaseApi || !useFilters.value) return;
+  geoFilters.value = await fetchGeoFilter();
+};
+
 watch(
   () => props.mapType,
   () => {
     if (props.mapType !== undefined) {
       refMapType.value = props.mapType;
+      updateMapProperties();
     }
   },
   { immediate: true },
@@ -138,6 +168,19 @@ watch(
   },
   { immediate: true },
 );
+
+onUnmounted(() => {
+  if (!props.filtersBaseApi || !geoFilters.value) return;
+  Object.values(geoFilters.value)?.forEach((filter: AdvancedFilter) => {
+    props.filtersBaseApi?.removeFilterFromList(filter?.key);
+  });
+  props.setAdvancedFilters(props.filtersBaseApi?.getNormalizedFiltersForApi());
+  props.setPaginationLimit(20, true);
+});
+
+onMounted(async () => {
+  await getGeoFilter();
+});
 </script>
 
 <style scoped></style>
