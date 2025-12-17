@@ -97,6 +97,7 @@ const useDynamicForm = () => {
     return await apolloClient.query({
       query: queryDocument,
       variables,
+      fetchPolicy: "no-cache",
     });
   };
 
