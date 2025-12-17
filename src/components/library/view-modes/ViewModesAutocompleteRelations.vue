@@ -173,7 +173,7 @@ onMounted(async () => {
       handleSelect([]);
     },
     { deep: true },
-  ); // Something something modelvalue undefined
+  );
 
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
     if (props.isMetadataField) preSelect();
