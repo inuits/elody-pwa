@@ -1,11 +1,15 @@
 import { computed, type ComputedRef, onUnmounted, toRef } from "vue";
 import { type MetadataWrapperProps } from "./MetadataWrapper.vue";
-import { type AdvancedFilterInputType } from "@/generated-types/queries";
+import {
+  type BaseEntity,
+  type AdvancedFilterInputType,
+} from "@/generated-types/queries";
 import { useMetadataWrapper } from "./useMetadataWrapper";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 
 export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
+  parentEntity: BaseEntity,
 ): {
   initializeDropdownStates: () => void;
   metadataKeyToGetOptions: ComputedRef<string | undefined>;
@@ -43,7 +47,10 @@ export const useMetadataWrapperDropdownOptions = (
 
   const getFiltersForOptions = (): AdvancedFilterInputType[] | undefined => {
     try {
-      if (!props.metadata.inputField.advancedFilterInputForRetrievingAllOptions)
+      if (
+        !props.metadata.inputField.advancedFilterInputForRetrievingAllOptions
+          ?.length
+      )
         return (
           props.metadata.inputField.advancedFilterInputForRetrievingOptions ||
           undefined
@@ -62,7 +69,7 @@ export const useMetadataWrapperDropdownOptions = (
     try {
       if (
         !props.metadata.inputField
-          .advancedFilterInputForRetrievingRelatedOptions
+          .advancedFilterInputForRetrievingRelatedOptions?.length
       )
         return (
           props.metadata.inputField.advancedFilterInputForRetrievingOptions ||
@@ -102,7 +109,7 @@ export const useMetadataWrapperDropdownOptions = (
     c.relationType,
     c.fromRelationType,
     c.searchFilterInput,
-    c.advancedFilterInputForRetrievingOptions,
+    c.advancedFilterInputForRetrievingRelatedOptions,
     c.formId,
     c.relationFilter,
   ];
@@ -116,8 +123,8 @@ export const useMetadataWrapperDropdownOptions = (
       relationType: undefined,
       fromRelationType: undefined,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
-      advancedFilterInputForRetrievingOptions:
-        filtersForRetrievingOptions.value,
+      advancedFilterInputForRetrievingRelatedOptions:
+        filtersForRetrievingRelatedOptions.value,
       formId: fieldId.value,
       relationFilter: undefined,
     },
@@ -128,12 +135,12 @@ export const useMetadataWrapperDropdownOptions = (
       parent:
         props.listItemEntity !== undefined
           ? toRef(props.listItemEntity)
-          : props.formId,
+          : parentEntity,
       relationType: relationType.value,
       fromRelationType: props.metadata.inputField?.fromRelationType,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
-      advancedFilterInputForRetrievingOptions:
-        filtersForRetrievingOptions.value,
+      advancedFilterInputForRetrievingRelatedOptions:
+        filtersForRetrievingRelatedOptions.value,
       formId: fieldId.value,
       relationFilter: props.metadata.inputField?.relationFilter,
     },
@@ -150,7 +157,6 @@ export const useMetadataWrapperDropdownOptions = (
       );
 
     Object.keys(dropDownoptionsConfigMapping).forEach((key) => {
-      console.log(mapConfigToArgs(dropDownoptionsConfigMapping[key]));
       useGetDropdownOptions(
         ...mapConfigToArgs(dropDownoptionsConfigMapping[key]),
       );

@@ -217,7 +217,6 @@ export const useGetDropdownOptionsState = (
             : filterInput.value
           : filterInput.value;
       }
-
       return {
         type: filterInput.type,
         key: filterInput.key,

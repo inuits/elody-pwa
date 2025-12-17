@@ -172,7 +172,7 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed } from "vue";
+import { ref, onBeforeMount, computed, watch, inject } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
@@ -203,6 +203,8 @@ const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
+const parentEntity: BaseEntity = inject("ParentEntityProvider");
+
 const {
   field,
   fieldIsPermittedToBeSeenByUser,
@@ -220,7 +222,7 @@ const {
   metadataKeyToGetOptions,
   filtersForRetrievingOptions,
   filtersForRetrievingRelatedOptions,
-} = useMetadataWrapperDropdownOptions(props);
+} = useMetadataWrapperDropdownOptions(props, parentEntity);
 const { isValidationRulePresentOnField } = useVeeValidate();
 
 const autoCompleteType = computed<

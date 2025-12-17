@@ -1,13 +1,6 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
 import { type FieldContext, useField } from "vee-validate";
-import {
-  computed,
-  type EmitFn,
-  inject,
-  onMounted,
-  watch,
-  type ComputedRef,
-} from "vue";
+import { computed, inject, onMounted, watch, type ComputedRef } from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -60,7 +53,7 @@ const checkIfFieldIsRequired = (
 
 export const useMetadataWrapper = (
   props: MetadataWrapperProps,
-  emitAddRefetchFunction: () => EmitFn,
+  emitAddRefetchFunction?: () => void,
 ): {
   getFieldKey: () => string;
   field: FieldContext;
@@ -131,7 +124,8 @@ export const useMetadataWrapper = (
     if (
       fieldKind.value === "PanelRelationMetaData" &&
       field.meta.dirty &&
-      props.isEdit
+      props.isEdit &&
+      emitAddRefetchFunction
     )
       emitAddRefetchFunction();
 
