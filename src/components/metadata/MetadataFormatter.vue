@@ -43,12 +43,8 @@ const props = withDefaults(
 );
 
 const formatterType = computed(() => {
-  try {
-    const [type] = props.formatter.split("|");
-    return type;
-  } catch {
-    console.log(props);
-  }
+  const [type] = props.formatter.split("|");
+  return type;
 });
 
 const readableLabel = computed(() => {
