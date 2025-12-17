@@ -6,7 +6,22 @@ import type {
   BaseEntity,
 } from "@/generated-types/queries";
 
-const dropdownOptionsStates = ref<Record<string, ReturnType<typeof useGetDropdownOptionsState>>>({});
+const dropdownOptionsStates = ref<
+  Record<string, ReturnType<typeof useGetDropdownOptionsState>>
+>({});
+
+export type UseGetDropdownOptionsParams = {
+  dropdownOptionsStateName?: string;
+  mode?: "get" | "delete";
+  entityType?: Entitytyping;
+  parent?: Ref<BaseEntity | "fetchAll">;
+  relationType?: string;
+  fromRelationType?: string;
+  searchFilterInput?: AdvancedFilterInput;
+  advancedFilterInputForRetrievingOptions?: AdvancedFilterInput[];
+  formId?: string;
+  relationFilter?: AdvancedFilterInput;
+};
 
 export const useGetDropdownOptions = (
   dropdownOptionsStateName: string = "GlobalDropdownOptionsState",
@@ -20,7 +35,6 @@ export const useGetDropdownOptions = (
   formId?: string,
   relationFilter?: AdvancedFilterInput,
 ): ReturnType<typeof useGetDropdownOptionsState> => {
-
   const createNewDropdownOptionsState = () => {
     const newDropdownOptionsState = useGetDropdownOptionsState(
       entityType!,
@@ -40,8 +54,11 @@ export const useGetDropdownOptions = (
     return newDropdownOptionsState;
   };
 
-  const getDropdownOptionsState = (): ReturnType<typeof useGetDropdownOptionsState> => {
-    if (!dropdownOptionsStates.value[dropdownOptionsStateName]) return createNewDropdownOptionsState();
+  const getDropdownOptionsState = (): ReturnType<
+    typeof useGetDropdownOptionsState
+  > => {
+    if (!dropdownOptionsStates.value[dropdownOptionsStateName])
+      return createNewDropdownOptionsState();
     return dropdownOptionsStates.value[dropdownOptionsStateName];
   };
 

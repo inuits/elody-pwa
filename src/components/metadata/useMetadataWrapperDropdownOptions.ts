@@ -5,7 +5,11 @@ import {
   type AdvancedFilterInputType,
 } from "@/generated-types/queries";
 import { useMetadataWrapper } from "./useMetadataWrapper";
-import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
+import {
+  useGetDropdownOptions,
+  type UseGetDropdownOptionsParams,
+} from "@/composables/useGetDropdownOptions";
+import { Entitytyping } from "@/__mocks__/queries";
 
 export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
@@ -101,7 +105,7 @@ export const useMetadataWrapperDropdownOptions = (
       undefined,
   );
 
-  const mapConfigToArgs = (c: any) => [
+  const mapConfigToArgs = (c: UseGetDropdownOptionsParams) => [
     c.dropdownOptionsStateName,
     c.mode,
     c.entityType,
@@ -109,21 +113,23 @@ export const useMetadataWrapperDropdownOptions = (
     c.relationType,
     c.fromRelationType,
     c.searchFilterInput,
-    c.advancedFilterInputForRetrievingRelatedOptions,
+    c.advancedFilterInputForRetrievingOptions,
     c.formId,
     c.relationFilter,
   ];
 
-  const dropDownoptionsConfigMapping: { [key: string]: any } = {
+  const dropDownoptionsConfigMapping: {
+    [key: string]: UseGetDropdownOptionsParams;
+  } = {
     fetchAll: {
       dropdownOptionsStateName: `${fieldId.value}-${relationType.value}-fetchAll`,
       mode: "get",
-      entityType: metadataKeyToGetOptions.value,
+      entityType: metadataKeyToGetOptions.value as Entitytyping,
       parent: toRef("fetchAll"),
       relationType: undefined,
       fromRelationType: undefined,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
-      advancedFilterInputForRetrievingRelatedOptions:
+      advancedFilterInputForRetrievingOptions:
         filtersForRetrievingRelatedOptions.value,
       formId: fieldId.value,
       relationFilter: undefined,
@@ -139,7 +145,7 @@ export const useMetadataWrapperDropdownOptions = (
       relationType: relationType.value,
       fromRelationType: props.metadata.inputField?.fromRelationType,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
-      advancedFilterInputForRetrievingRelatedOptions:
+      advancedFilterInputForRetrievingOptions:
         filtersForRetrievingRelatedOptions.value,
       formId: fieldId.value,
       relationFilter: props.metadata.inputField?.relationFilter,
@@ -150,7 +156,7 @@ export const useMetadataWrapperDropdownOptions = (
     if (
       !fieldId.value ||
       !relationType.value ||
-      !advancedFilterInputForSearchingOptions
+      !advancedFilterInputForSearchingOptions.value
     )
       throw Error(
         "Unable to initialize dropdown states, id, relationType or advancedFilterInputForSearchingOptions undefined",
