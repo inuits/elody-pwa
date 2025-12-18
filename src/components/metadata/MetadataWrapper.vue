@@ -571,9 +571,13 @@ onMounted(async () => {
 
   const newValue =
     refMetadata.value?.value ??
-    (refMetadata.value?.inputField?.autoSelectable
-      ? refMetadata.value.inputField?.options[0]?.value
-      : refMetadata.value?.value);
+    (
+      refMetadata.value?.inputField?.autoSelectable
+        ? refMetadata.value.inputField?.options[0]?.value
+        : refMetadata.value?.inputField?.autoAllSelectable
+          ? refMetadata.value.inputField?.options.map(option => option.value)
+          : refMetadata.value?.value
+    );
 
   setNewValue(newValue);
 });
