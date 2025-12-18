@@ -1,4 +1,4 @@
-import { computed, type ComputedRef, onUnmounted, Ref, toRef } from "vue";
+import { computed, type ComputedRef, onUnmounted, type Ref, toRef } from "vue";
 import { type MetadataWrapperProps } from "./MetadataWrapper.vue";
 import {
   type BaseEntity,
