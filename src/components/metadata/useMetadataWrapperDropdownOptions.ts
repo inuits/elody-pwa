@@ -1,4 +1,4 @@
-import { computed, type ComputedRef, onUnmounted, toRef } from "vue";
+import { computed, type ComputedRef, onUnmounted, Ref, toRef } from "vue";
 import { type MetadataWrapperProps } from "./MetadataWrapper.vue";
 import {
   type BaseEntity,
@@ -13,7 +13,7 @@ import { Entitytyping } from "@/__mocks__/queries";
 
 export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
-  parentEntity: BaseEntity,
+  parentEntity: Ref<BaseEntity>,
 ): {
   initializeDropdownStates: () => void;
   metadataKeyToGetOptions: ComputedRef<string | undefined>;
@@ -125,7 +125,7 @@ export const useMetadataWrapperDropdownOptions = (
       dropdownOptionsStateName: `${fieldId.value}-${relationType.value}-fetchAll`,
       mode: "get",
       entityType: metadataKeyToGetOptions.value as Entitytyping,
-      parent: toRef("fetchAll"),
+      parent: toRef("fetchAll") as Ref<"fetchAll">,
       relationType: undefined,
       fromRelationType: undefined,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
@@ -137,18 +137,19 @@ export const useMetadataWrapperDropdownOptions = (
     fetchRelations: {
       dropdownOptionsStateName: `${fieldId.value}-${relationType.value}-fetchRelations`,
       mode: "get",
-      entityType: metadataKeyToGetOptions.value,
+      entityType: metadataKeyToGetOptions.value as Entitytyping,
       parent:
         props.listItemEntity !== undefined
-          ? toRef(props.listItemEntity)
-          : parentEntity,
+          ? (toRef(props.listItemEntity) as Ref<BaseEntity>)
+          : (parentEntity as Ref<BaseEntity>),
       relationType: relationType.value,
-      fromRelationType: props.metadata.inputField?.fromRelationType,
+      fromRelationType: props.metadata.inputField?.fromRelationType as string,
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
       advancedFilterInputForRetrievingOptions:
         filtersForRetrievingRelatedOptions.value,
       formId: fieldId.value,
-      relationFilter: props.metadata.inputField?.relationFilter,
+      relationFilter: props.metadata.inputField
+        ?.relationFilter as AdvancedFilterInputType,
     },
   };
 
