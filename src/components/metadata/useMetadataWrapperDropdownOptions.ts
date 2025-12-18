@@ -3,13 +3,13 @@ import { type MetadataWrapperProps } from "./MetadataWrapper.vue";
 import {
   type BaseEntity,
   type AdvancedFilterInputType,
+  Entitytyping,
 } from "@/generated-types/queries";
 import { useMetadataWrapper } from "./useMetadataWrapper";
 import {
   useGetDropdownOptions,
   type UseGetDropdownOptionsParams,
 } from "@/composables/useGetDropdownOptions";
-import { Entitytyping } from "@/__mocks__/queries";
 
 export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
