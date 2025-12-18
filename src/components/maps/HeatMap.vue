@@ -82,8 +82,6 @@ import {
   watch,
   shallowReactive,
   onMounted,
-  onBeforeUnmount,
-  nextTick,
   computed,
 } from "vue";
 import debounce from "lodash.debounce";
@@ -99,7 +97,6 @@ import View from "ol/View";
 import { Feature } from "ol";
 import {
   type AdvancedFilters,
-  type AdvancedFilter,
   type Entity,
   GetEntityByIdDocument,
   type GetEntityByIdQuery,
@@ -122,6 +119,7 @@ const props = withDefaults(
     blur: number;
     radius: number;
     filtersBaseApi?: FiltersBaseAPI;
+    geoFilters: AdvancedFilters | undefined;
   }>(),
   {
     center: undefined,
@@ -132,7 +130,6 @@ const props = withDefaults(
 const { t } = useI18n();
 const {
   activateNewGeoFilter,
-  fetchGeoFilter,
   getGeojsonPolygonFromMap,
   extractGeojsonFeaturesFromEntities,
   handlePointerMove,
@@ -145,7 +142,6 @@ const currentZoom = ref(props.zoom);
 const heatmapSource = shallowReactive(new VectorSource());
 const view = ref<View | undefined>(undefined);
 const contextMenuItems = ref<Item[]>([]);
-const geoFilters = ref<AdvancedFilters | undefined>(undefined);
 const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
   useHeatMapDetailPopUp();
 const getEntityQueryVariables = computed<GetEntityByIdQueryVariables>(() => {
@@ -216,8 +212,8 @@ const handleMoveBoundingBox = () => {
   currentZoom.value = map.getView().getZoom() ?? currentZoom.value;
 
   const geojsonPolygon = getGeojsonPolygonFromMap(map);
-  if (!geoFilters.value) return;
-  activateNewGeoFilter(props.filtersBaseApi, geoFilters.value, geojsonPolygon, calculatedGridSize.value);
+  if (!props.geoFilters) return;
+  activateNewGeoFilter(props.filtersBaseApi, props.geoFilters, geojsonPolygon, calculatedGridSize.value);
 };
 
 const debouncedHandleMoveBoundingBox = debounce(() => {
@@ -233,7 +229,6 @@ const addViewToMap = () => {
 };
 
 const initializeHeatmap = async () => {
-  geoFilters.value = await fetchGeoFilter();
   handleMoveBoundingBox();
 };
 
@@ -250,12 +245,6 @@ const handleMapClick = (event: any) => {
 
 onBeforeMount(async () => await initializeHeatmap());
 onMounted(() => addViewToMap());
-onBeforeUnmount(() => {
-  if (!props.filtersBaseApi) return;
-  Object.values(geoFilters.value)?.forEach((advancedFilter: AdvancedFilter) => {
-    props.filtersBaseApi.removeFilterFromList(advancedFilter.key);
-  });
-});
 
 watch(
   () => props.entities,

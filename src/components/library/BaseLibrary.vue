@@ -228,6 +228,8 @@
             :filters-base-api="filtersBaseAPI"
             :entityTypeAsCenterPoint="entityTypeAsCenterPoint"
             :centerCoordinatesKey="centerCoordinatesKey"
+            :setPaginationLimit="setPaginationLimit"
+            :setAdvancedFilters="setAdvancedFilters"
           />
         </div>
         <div
@@ -822,15 +824,6 @@ const determineViewModes = (viewModes: any[]) => {
   }
 };
 
-const setQueryVariablesForMapViewmode = (): void => {
-  setPaginationLimit(-1);
-  setSkip(1);
-};
-const unSetQueryVariablesForMapViewmode = (): void => {
-  setAdvancedFilters(filtersBaseAPI.value!.getNormalizedFiltersForApi());
-  setPaginationLimit(20, true);
-};
-
 const addRefetchFunctionToEditState = (): void => {
   const refetchFunctions = useEditHelper.refetchFns.value;
   const functionName = props.useOtherQuery?.name || "refetchEntities";
@@ -950,23 +943,6 @@ watch([displayGrid, expandFilters], () => {
     expandFilters: _expandFilters,
   });
 });
-
-watch(
-  () => displayMap.value,
-  () => {
-    if (!displayMap.value) entities.value = entities.value.splice(0, 20);
-  },
-  { flush: "pre" },
-);
-
-watch(
-  () => displayMap.value,
-  () => {
-    if (displayMap.value) setQueryVariablesForMapViewmode();
-    else unSetQueryVariablesForMapViewmode();
-  },
-  { flush: "post" },
-);
 
 watch(
   () => uploadStatus.value,

@@ -149,7 +149,7 @@ export const useMaps = () => {
     filtersBaseApi: FiltersBaseAPI,
     geoFilters: any,
     geojsonPolygon: GeoJSONGeometry,
-    bucket: number,
+    bucket?: number,
   ) => {
     Object.values(geoFilters)?.forEach((advancedFilter: AdvancedFilter) => {
       filtersBaseApi.removeFilterFromList(advancedFilter.key);
@@ -159,7 +159,7 @@ export const useMaps = () => {
       ...geoFilters,
       advancedFilter: {
         ...geoFilters.advancedFilter,
-        bucket: String(bucket),
+        bucket: bucket !== undefined ? String(bucket) : undefined,
       },
     };
     filtersBaseApi.initializeAndActivateNewFilter(filters, geojsonPolygon);
