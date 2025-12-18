@@ -14,7 +14,6 @@ import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getTranslatedMessage } from "@/helpers";
-import { th } from "date-fns/locale";
 
 export type FieldMetadata =
   | PanelMetaData
@@ -37,10 +36,16 @@ const checkIfFieldIsRequired = (
   if (!fieldMetadata.inputField || !fieldMetadata.inputField.validation)
     return false;
 
-  validationRulesToCheckAgainst.forEach((validationRule) => {
-    if (String(fieldMetadata.inputField.validation).includes(validationRule))
-      return true;
-  });
+  const rulesArray: ValidationRules[] =
+    (fieldMetadata.inputField.validation?.value as ValidationRules[]) || [];
+
+  if (
+    validationRulesToCheckAgainst.some((validationRule) =>
+      rulesArray.includes(validationRule),
+    )
+  ) {
+    return true;
+  }
 
   if (fieldMetadata.inputField.validation.required_if)
     return conditionalFieldIsRequired(
