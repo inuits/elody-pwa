@@ -6,7 +6,54 @@
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
       @moveend="debouncedHandleMoveBoundingBox"
+      @singleclick="handleMapClick"
     >
+      <Map.OlOverlay
+        v-if="detailPopUp.isVisible && popUpDetailConfiguration"
+        :position="detailPopUp.position"
+        :offset="[0, -15]"
+        positioning="bottom-center"
+        :autoPan="true"
+      >
+        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
+          <div
+            v-if="featureLoading"
+            class="h-full w-full flex items-center justify-center py-4"
+          >
+            <spinner-loader theme="accent" dimensions="10" />
+          </div>
+          <div v-else-if="featureResult">
+            <div class="flex justify-end items-center">
+              <button @click="detailPopUp.isVisible = false">
+                <unicon
+                  class="cursor-pointer"
+                  :name="Unicons.Close.name"
+                  :height="18"
+                />
+              </button>
+            </div>
+            <div>
+              <div
+                v-for="item of popUpDetailConfiguration"
+                :key="item.key"
+                class="pb-2"
+              >
+                <div>
+                  <p class="font-bold">{{ t(item.label) }}</p>
+                  <p>{{ featureResult.Entity.intialValues[item.key] || "-" }}</p>
+                </div>
+              </div>
+              <router-link
+                class="underline text-accent-accent"
+                :to="`/${featureResult.Entity.type}/${featureResult.Entity.id}`"
+                target="_blank"
+                >Open in other tab</router-link
+              >
+            </div>
+          </div>
+        </div>
+      </Map.OlOverlay>
+
       <Map.OlView
         ref="viewRef"
         :zoom="7"
@@ -38,19 +85,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onUpdated, nextTick, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, nextTick, onMounted } from "vue";
 import { Map, Layers, Sources } from "vue3-openlayers";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
-import { MapModes, MapViews, AdvancedFilters } from "@/generated-types/queries";
+import {
+  MapModes,
+  MapViews,
+  AdvancedFilters,
+  Entity,
+  GetEntityByIdDocument,
+  type GetEntityByIdQuery,
+  type GetEntityByIdQueryVariables,
+} from "@/generated-types/queries";
 import { HeatMapItem } from "@/composables/useMaps";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import debounce from "lodash.debounce";
+import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
+import { useQuery } from "@vue/apollo-composable";
+import { Unicons } from "@/types";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
     wkt: string[] | HeatMapItem[];
+    entities: Entity[];
     center?: number[];
     mapView?: MapViews;
     mapMode?: MapModes;
@@ -73,12 +134,34 @@ const {
   getGeojsonPolygonFromMap,
 } = useMaps();
 
+const { t } = useI18n();
+const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
+  useHeatMapDetailPopUp();
+
 const viewRef = ref<{ view: View }>(null);
 const mapRef = ref<InstanceType<typeof Map.OlMap> | undefined>(undefined);
 const localCenter = ref<number[]>([]);
 const activeProjection = computed(() => {
   return props.mapView === MapViews.Standard ? "EPSG:3857" : "EPSG:4326";
 });
+
+const getEntityQueryVariables = computed<GetEntityByIdQueryVariables>(() => {
+  return {
+    id: detailPopUp.entityId!,
+    type: "",
+  };
+});
+
+const { result: featureResult, loading: featureLoading } =
+  useQuery<GetEntityByIdQuery>(
+    GetEntityByIdDocument,
+    getEntityQueryVariables,
+    () => ({
+      notifyOnNetworkStatusChange: true,
+      fetchPolicy: "no-cache",
+      enabled: !!detailPopUp.entityId,
+    }),
+  );
 
 const point = computed(() => {
   if (props.mapView === MapViews.Standard) {
@@ -103,7 +186,11 @@ const features = computed(() => {
 });
 
 const focusOnFeatures = async () => {
-  const existedFeatures = wkt.value.length ? wkt.value : point.value ? [point.value] : [];
+  const existedFeatures = wkt.value.length
+    ? wkt.value
+    : point.value
+      ? [point.value]
+      : [];
   if (existedFeatures.length > 0 && viewRef.value) {
     await nextTick();
     const extent: Extent = existedFeatures.reduce((acc, feature) => {
@@ -136,9 +223,29 @@ const debouncedHandleMoveBoundingBox = debounce(() => {
   handleMoveBoundingBox();
 }, 1000);
 
+const handleMapClick = (event: any) => {
+  const map = mapRef.value?.map;
+  if (!map) return;
+
+  const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
+  if (!feature) return;
+  detailPopUp.position = feature.getGeometry()?.getCoordinates()?.[0][0];
+  detailPopUp.entityId = feature.id_;
+  if (detailPopUp.entityId) detailPopUp.isVisible = true;
+};
+
 onMounted(async () => {
   const [lat = 0, long = 0] = props.center;
   localCenter.value = [lat, long];
   focusOnFeatures();
 });
+
+watch(
+  () => props.entities,
+  async (newEntities) => {
+    if (!newEntities?.length) return;
+    setEntityDetailConfigurations(newEntities);
+  },
+  { immediate: true },
+);
 </script>

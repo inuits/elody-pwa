@@ -22,6 +22,7 @@ import type { Geometry } from "geojson";
 export interface HeatMapItem {
   coordinates: string;
   heatIntensity: number;
+  id: string;
 }
 
 export interface Bucket {
@@ -89,12 +90,20 @@ export const useMaps = () => {
     return markerFeature;
   };
 
-  const getWktFeature = (wkt: string, targetProjection = "EPSG:4326") => {
+  const getWktFeature = (
+    wkt: string,
+    targetProjection = "EPSG:4326",
+    id?: string,
+  ) => {
     const format = new WKT();
-    return format.readFeature(wkt, {
+    const feature = format.readFeature(wkt, {
       dataProjection: "EPSG:4326",
       featureProjection: targetProjection,
     });
+    if (id) {
+      feature.setId(id);
+    }
+    return feature;
   };
 
   const getHeatStyle = (intensity: number): Style => {
@@ -128,7 +137,11 @@ export const useMaps = () => {
 
     if (isHeatMode) {
       return (data as HeatMapItem[]).map((item) => {
-        const feature = getWktFeature(item.coordinates, targetProjection);
+        const feature = getWktFeature(
+          item.coordinates,
+          targetProjection,
+          item.id,
+        );
         feature.setStyle(getHeatStyle(item.heatIntensity));
         return feature;
       });

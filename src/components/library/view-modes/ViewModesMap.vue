@@ -14,6 +14,7 @@
   <WktMap
     v-if="refMapType === MapTypes.WktMap"
     :wkt="wktOfEntities"
+    :entities="entities"
     :center="center"
     :map-view="mapView"
     :map-mode="mapMode"
@@ -85,9 +86,10 @@ const getBasicWkts = () => {
 };
 
 const getHeatWkt = () => {
-  const wkts: { coordinates: string; heatIntensity?: number }[] =
+  const wkts: { coordinates: string; heatIntensity?: number, id: string }[] =
     props.entities.map((entity: Entity) => {
       return {
+        id: entity.id,
         coordinates: entity.intialValues?.map_location,
         heatIntensity:
           entity.intialValues?.[mapProperties.value.keyOfHeatValue || ""] || 0,
