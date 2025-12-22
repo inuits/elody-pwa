@@ -7,7 +7,7 @@
       <BaseButtonNew
         v-for="primaryOption in primaryOptions"
         :key="primaryOption"
-        class="pl-2 pr-6 my-1"
+        class="pl-4 pr-6 my-1"
         :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
         button-style="accentNormal"
         button-size="small"
