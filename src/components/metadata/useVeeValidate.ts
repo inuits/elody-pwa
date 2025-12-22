@@ -29,11 +29,11 @@ export const useVeeValidate = (): {
     try {
       if (Array.isArray(rule)) {
         const test = rule.map((item) =>
-          String(metadata.inputField.validation).includes(item),
+          String(metadata.inputField.validation?.value).includes(item),
         );
         return test.some((item) => item);
       }
-      return String(metadata.inputField.validation).includes(rule);
+      return String(metadata.inputField.validation?.value).includes(rule);
     } catch {
       return false;
     }
