@@ -246,7 +246,26 @@
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
             -
           </div>
-          <div v-else>{{ t("search.noresult") }}</div>
+          <div v-else>
+            {{ t("search.noresult") }}
+            <div
+              v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
+              class="flex justify-center my-2"
+            >
+              <ActionMenuGroup
+                v-if="
+                  bulkOperations !== undefined && auth.isAuthenticated.value
+                "
+                v-model="selectedBulkOperation"
+                @update:modelValue="handleSelectedBulkOperation"
+                :options="actionsOnResult.options"
+                :entity-type="entityType"
+                :parent-entity-id="id"
+                :sub-dropdown-options="subDropdownOptions"
+                :clear-sub-dropdown-options="clearSubDropdownOptions"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -256,6 +275,8 @@
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
 import {
+  ActionsOnResult,
+  ActionsOnResultTypes,
   type AdvancedFilterInput,
   type BaseEntity,
   BaseLibraryModes,
@@ -310,6 +331,13 @@ import {
   useBreadcrumbs,
 } from "@/composables/useBreadcrumbs";
 import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
+import { auth } from "@/main";
+import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import {
+  type BulkOperationsActionsBarEmits,
+  type BulkOperationsActionsBarProps,
+  useBulkOperationsActionsBar,
+} from "@/composables/useBulkOperationsActionsBar";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context;
@@ -351,6 +379,7 @@ export type BaseLibraryProps = {
   entityTypeAsCenterPoint?: string;
   centerCoordinatesKey?: string;
   cropMediafileCoordinatesKey?: string;
+  actionsOnResult?: ActionsOnResult;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -505,6 +534,17 @@ const {
   props.baseLibraryMode,
 );
 
+const {
+  bulkOperations,
+  selectedBulkOperation,
+  subDropdownOptions,
+  clearSubDropdownOptions,
+  handleSelectedBulkOperation,
+} = useBulkOperationsActionsBar(
+  props as BulkOperationsActionsBarProps,
+  emit as BulkOperationsActionsBarEmits,
+);
+
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
 let advancedFiltersPromise: (entityType: Entitytyping) => Promise<void>;
 let paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>;
@@ -527,6 +567,7 @@ const {
   setRefetchEntitiesFunction,
   setCropMode,
   setCropCoordinatesKey,
+  setActionsOnResult,
 } = useEntityPickerModal();
 
 const displayList = ref<boolean>(false);
@@ -770,6 +811,7 @@ const initializeEntityPickerComponent = (
   setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
   setCropMode(enableCropMode);
   setCropCoordinatesKey(keyToSaveCropCoordinates);
+  setActionsOnResult(props.actionsOnResult);
 };
 
 const configPerViewMode = computed(() => {

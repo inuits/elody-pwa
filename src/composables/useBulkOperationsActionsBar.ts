@@ -94,7 +94,7 @@ export const useBulkOperationsActionsBar = (
     resetAllProperties,
   } = useModalActions();
 
-  const { openModal, getModalInfo } = useBaseModal();
+  const { openModal, getModalInfo, closeAllModals } = useBaseModal();
 
   const subDropdownOptions = ref<DropdownOption[]>([]);
   const refetchEnabled = ref<boolean>(false);
@@ -300,6 +300,8 @@ export const useBulkOperationsActionsBar = (
     if (!bulkOperationModalConfig || !operationType) {
       return;
     }
+
+    closeAllModals();
 
     initializeGeneralProperties(
       getCurrentEntityId(),

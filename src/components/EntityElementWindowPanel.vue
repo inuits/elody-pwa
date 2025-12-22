@@ -96,6 +96,7 @@
               "
               :can="metadata.can"
               :fetch-deep-relations="metadata.fetchDeepRelations"
+              :actions-on-result="metadata.actionsOnResult"
             />
             <entity-element-w-y-s-i-w-y-g
               v-if="metadata.__typename === nonStandardFieldTypes[1]"

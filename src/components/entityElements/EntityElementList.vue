@@ -119,6 +119,7 @@
             :fetch-deep-relations="fetchDeepRelations"
             :filters-need-context="filtersNeedContext"
             :id="id"
+            :actions-on-result="actionsOnResult"
           />
         </div>
       </template>
@@ -128,6 +129,7 @@
 
 <script lang="ts" setup>
 import type {
+  ActionsOnResult,
   RelationActions,
   EntitySubelement,
 } from "@/generated-types/queries";
@@ -198,6 +200,7 @@ const props = withDefaults(
     id: string;
     previewLabel?: string;
     cropMediafileCoordinatesKey?: string;
+    actionsOnResult?: ActionsOnResult;
   }>(),
   {
     enableAdvancedFilters: false,

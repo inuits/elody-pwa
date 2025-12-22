@@ -22,6 +22,7 @@
       :ids-of-non-selectable-entities="
         enableNonSelectableEntities ? alreadySelectedEntityIdsFetched : []
       "
+      :actions-on-result="getActionsOnResult()"
       list-item-route-name="SingleEntity"
       @entities-updated="
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
@@ -54,14 +55,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import {
-  inject,
-  onBeforeMount,
-  onMounted,
-  provide,
-  ref,
-  unref,
-} from "vue";
+import { inject, onBeforeMount, onMounted, provide, ref, unref } from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
@@ -123,6 +117,7 @@ const {
   getEntityId,
   getRelationType,
   getRefetchEntitiesFunction,
+  getActionsOnResult,
   setCropMode,
   setCropCoordinatesKey,
 } = useEntityPickerModal();
@@ -248,7 +243,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
 });
 
 const refetchRelationsWithNoLimit = async (): string[] => {
-  alreadySelectedEntityIdsFetched.value = [props.entityUuid]
+  alreadySelectedEntityIdsFetched.value = [props.entityUuid];
 
   const refetchEntities = getRefetchEntitiesFunction();
   if (!refetchEntities) return;
@@ -257,10 +252,8 @@ const refetchRelationsWithNoLimit = async (): string[] => {
   if (relatedEntities?.results?.length <= 0) return;
   alreadySelectedEntityIdsFetched.value = [
     ...alreadySelectedEntityIdsFetched.value,
-    ...relatedEntities.results.map(
-      (entity: BaseEntity) => entity.id,
-    )
-  ]
+    ...relatedEntities.results.map((entity: BaseEntity) => entity.id),
+  ];
 };
 
 onMounted(async () => {

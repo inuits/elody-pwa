@@ -1,4 +1,4 @@
-import type { Entitytyping } from "@/generated-types/queries";
+import type { Entitytyping, ActionsOnResult } from "@/generated-types/queries";
 import { ref } from "vue";
 
 const acceptedTypes = ref<Entitytyping[]>([]);
@@ -11,6 +11,7 @@ const customGetEntitiesQuery = ref<string>("");
 const customGetEntitiesFiltersQuery = ref<string>("");
 const isCropModeEnabled = ref<boolean>(false);
 const cropCoordinatesKey = ref<string>("");
+const actionsOnResult = ref<ActionsOnResult | undefined>(undefined);
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -53,6 +54,10 @@ const useEntityPickerModal = () => {
     cropCoordinatesKey.value = value;
   };
 
+  const setActionsOnResult = (value: string) => {
+    actionsOnResult.value = value;
+  };
+
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
   const getEntityId = () => entityId.value;
@@ -64,6 +69,7 @@ const useEntityPickerModal = () => {
     customGetEntitiesFiltersQuery.value;
   const getIsCropModeEnabled = () => isCropModeEnabled.value;
   const getCropCoordinatesKey = () => cropCoordinatesKey.value;
+  const getActionsOnResult = () => actionsOnResult.value;
 
   return {
     getAcceptedTypes,
@@ -86,6 +92,8 @@ const useEntityPickerModal = () => {
     setCropMode,
     setCropCoordinatesKey,
     getCropCoordinatesKey,
+    setActionsOnResult,
+    getActionsOnResult,
   };
 };
 

@@ -1,27 +1,32 @@
 <template>
   <div
     class="flex flex-row justify-end items-center !m-0"
-    :class="[{ 'w-fit': primaryOption }]"
+    :class="[{ 'w-fit': primaryOptions }]"
   >
-    <BaseButtonNew
-      v-if="primaryOption"
-      class="pr-6"
-      :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
-      button-style="accentNormal"
-      button-size="small"
-      :disabled="isMainActionDisabled || !primaryOption.active"
-      :label="t(primaryOption.label, [entityTypeLabel])"
-      :tooltip-label="primaryOption.actionContext?.labelForTooltip"
-      :icon="primaryOption.icon"
-      @click.stop=" (event: MouseEvent) => {
-        handleEmit(primaryOption);
-        if (primaryOption.value === BulkOperationTypes.OpenDropdown)
-          contextMenuHandler.openContextMenu({
+    <div class="flex flex-col">
+      <BaseButtonNew
+        v-for="primaryOption in primaryOptions"
+        :key="primaryOption"
+        class="pl-2 pr-6 my-1"
+        :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
+        button-style="accentNormal"
+        button-size="small"
+        :disabled="isMainActionDisabled || !primaryOption.active"
+        :label="t(primaryOption.label, [entityTypeLabel])"
+        :tooltip-label="primaryOption.actionContext?.labelForTooltip"
+        :icon="primaryOption.icon"
+        @click.stop="
+          (event: MouseEvent) => {
+            handleEmit(primaryOption);
+            if (primaryOption.value === BulkOperationTypes.OpenDropdown)
+              contextMenuHandler.openContextMenu({
                 x: event.clientX,
                 y: event.clientY,
-          });
-      }"
-    />
+              });
+          }
+        "
+      />
+    </div>
     <BaseButtonNew
       v-if="hasSecondaryOptions"
       button-size="small"
@@ -129,21 +134,23 @@ const availableOptions = ref<DropdownOption[]>([]);
 const entityTypeLabel = computed(() =>
   t(`entity-translations.plural.${props.entityType}`),
 );
-const primaryOption = computed(() => {
-  let option = availableOptions.value.find(
+const primaryOptions = computed(() => {
+  let options = availableOptions.value.filter(
     (item: DropdownOption) => item.primary,
   );
-  if (option) {
-    option = {
-      ...option,
-      active: determineActiveState(
-        option,
-        props.parentEntityId,
-        props.itemsSelected,
-      ),
-    };
+  if (options) {
+    options = options.map((option) => {
+      return {
+        ...option,
+        active: determineActiveState(
+          option,
+          props.parentEntityId,
+          props.itemsSelected,
+        ),
+      };
+    });
   }
-  return option;
+  return options;
 });
 
 const secondaryOptions = computed(() => {
