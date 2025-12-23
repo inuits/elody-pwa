@@ -2,8 +2,12 @@
   <component
     :is="requiredAuthForThisEntity ? 'p' : 'a'"
     :class="[{ underline: !requiredAuthForThisEntity }, 'text-sm']"
-    :href="link"
-    :style="{ color: requiredAuthForThisEntity ? '#000' : 'var(--color-text-link)' }"
+    :href="requiredAuthForThisEntity ? undefined : link"
+    :target="shouldOpenInNewTab ? '_blank' : undefined"
+    :rel="shouldOpenInNewTab ? 'noopener noreferrer' : undefined"
+    :style="{
+      color: requiredAuthForThisEntity ? '#000' : 'var(--color-text-link)',
+    }"
     @click.stop
   >
     {{ label }}
@@ -18,6 +22,7 @@ const props = defineProps<{
   label: string;
   link: string;
   type: string;
+  openInNewTab: boolean;
 }>();
 
 const config: any = inject("config");
@@ -27,5 +32,9 @@ const requiredAuthForThisEntity = computed(() => {
     (route: any) => route.meta,
   );
   return requiresAuthForEntity(props.type, metaOfChildRoutes);
+});
+
+const shouldOpenInNewTab = computed(() => {
+  return !requiredAuthForThisEntity.value && props.openInNewTab;
 });
 </script>

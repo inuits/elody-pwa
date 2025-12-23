@@ -5,6 +5,7 @@
     :label="readableLabel"
     :link="link"
     :type="entity.type"
+    :open-in-new-tab="openInNewTab"
   />
   <MetadataFormatterPill
     v-if="formatterType === CustomFormatterTypes.Pill && label"
@@ -36,9 +37,11 @@ const props = withDefaults(
     link?: string;
     entity: any;
     translationKey?: string;
+    openInNewTab?: boolean;
   }>(),
   {
     link: "",
+    openInNewTab: false,
   },
 );
 
