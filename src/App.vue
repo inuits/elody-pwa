@@ -7,6 +7,9 @@
         group="serviceVersionManager"
         @click="refreshPage()"
       />
+      <div class="pt-2" v-if="config.features?.globalNotification">
+        <notifications class="pt-2" group="globalNotification" width="700" />
+      </div>
     </div>
     <the-navigation class="navbar" />
     <div>
@@ -56,11 +59,14 @@ import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
 import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
+import { useGlobalNotification } from "./composables/useGlobalNotification";
+import { inject, onMounted } from "vue";
 
 const route = useRoute();
 const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
 const { someModalIsOpened } = useBaseModal();
+const config: any = inject("config");
 
 useHead({
   meta: [
@@ -76,6 +82,9 @@ const refreshPage = (): void => {
 };
 
 useCrossTabAuthSync();
+onMounted(() => {
+  useGlobalNotification(config);
+});
 </script>
 
 <style>
