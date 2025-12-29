@@ -1,6 +1,6 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
 import { type FieldContext, useField } from "vee-validate";
-import { computed, inject, onMounted, watch, type ComputedRef } from "vue";
+import { computed, inject, onMounted, ref, watch, type ComputedRef, type Ref } from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -70,7 +70,7 @@ export const useMetadataWrapper = (
   isFieldValid: ComputedRef<boolean>;
   isFieldRequired: ComputedRef<boolean>;
   fieldValidationRules: ComputedRef<string>;
-  fieldIsPermittedToBeSeenByUser: ComputedRef<boolean>;
+  fieldIsPermittedToBeSeenByUser: Ref<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
 } => {
@@ -83,15 +83,17 @@ export const useMetadataWrapper = (
     );
   };
 
-  const getFieldPermissions = (): boolean => {
+  const determineFieldPermissions = async (): Promise<void> => {
     const { fetchAdvancedPermission } = usePermissions();
     const permissions = props.metadata.can;
     const hasPermissionsToCheck = permissions && permissions?.length > 0;
 
     if (!hasPermissionsToCheck) {
-      return true;
+      fieldIsPermittedToBeSeenByUser.value = true;
+      return;
     }
-    return fetchAdvancedPermission(permissions) as boolean;
+  
+    fieldIsPermittedToBeSeenByUser.value = await fetchAdvancedPermission(permissions) as boolean;
   };
 
   const { getValidationRules } = useFieldValidation(props.metadata);
@@ -120,9 +122,7 @@ export const useMetadataWrapper = (
     () => fieldValueProxy.value?.label || fieldValueProxy.value,
   );
   const isFieldValid = computed<boolean>(() => field.meta.valid);
-  const fieldIsPermittedToBeSeenByUser = computed<boolean>(() =>
-    getFieldPermissions(),
-  );
+  const fieldIsPermittedToBeSeenByUser = ref<boolean>(false);
 
   const getNewFieldValue = (newValue: any): any => {
     if (
@@ -165,6 +165,7 @@ export const useMetadataWrapper = (
     }
 
     fieldValueProxy.value = newValue;
+    determineFieldPermissions();
   });
 
   return {
