@@ -25,7 +25,7 @@
       "
     />
     <entity-element-metadata-edit
-      v-if="isEdit && metadata.inputField && !metadata.nonEditableField"
+      v-if="isEdit && metadata.inputField && !metadata.nonEditableField && fieldIsEditableByUser"
       :fieldKey="fieldKey"
       :label="metadata.label as string"
       v-model:value="fieldValueProxy"
@@ -172,7 +172,7 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, watch, inject } from "vue";
+import { ref, onBeforeMount, computed, inject } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
@@ -208,6 +208,7 @@ const parentEntity: BaseEntity = inject("ParentEntityProvider");
 const {
   field,
   fieldIsPermittedToBeSeenByUser,
+  fieldIsEditableByUser,
   fieldLabel,
   fieldKey,
   fieldKind,

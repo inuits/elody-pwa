@@ -345,6 +345,7 @@ export const getMetadataFields = (
         valueTranslationKey: (value as PanelMetaData).valueTranslationKey,
         onlyForEntityTypes: (value as PanelMetaData).onlyForEntityTypes,
         can: (value as PanelMetaData).can,
+        canEdit: (value as PanelMetaData).canEdit,
         copyToClipboard: (value as PanelMetaData).copyToClipboard,
         __typename: (value as PanelMetaData).__typename,
       };

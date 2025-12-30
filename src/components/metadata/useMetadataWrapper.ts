@@ -14,6 +14,7 @@ import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getTranslatedMessage } from "@/helpers";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export type FieldMetadata =
   | PanelMetaData
@@ -71,6 +72,7 @@ export const useMetadataWrapper = (
   isFieldRequired: ComputedRef<boolean>;
   fieldValidationRules: ComputedRef<string>;
   fieldIsPermittedToBeSeenByUser: Ref<boolean>;
+  fieldIsEditableByUser: Ref<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
 } => {
@@ -83,21 +85,57 @@ export const useMetadataWrapper = (
     );
   };
 
-  const determineFieldPermissions = async (): Promise<void> => {
-    const { fetchAdvancedPermission } = usePermissions();
-    const permissions = props.metadata.can;
-    const hasPermissionsToCheck = permissions && permissions?.length > 0;
+  const { setExtraVariables, fetchAdvancedPermissions } = usePermissions();
 
-    if (!hasPermissionsToCheck) {
+  const determineFieldPermissions = async (): Promise<void> => {
+    const {
+      can: viewPermissions = [],
+      canEdit: editPermissions = [],
+      key: fieldKey,
+    } = props.metadata;
+
+    const hasViewPermissions = viewPermissions.length > 0;
+    const hasEditPermissions = editPermissions.length > 0;
+
+    if (!hasViewPermissions && !hasEditPermissions) {
       fieldIsPermittedToBeSeenByUser.value = true;
+      fieldIsEditableByUser.value = true;
       return;
     }
-  
-    fieldIsPermittedToBeSeenByUser.value = await fetchAdvancedPermission(permissions) as boolean;
+
+    const requiredPermissions = [
+      ...new Set([...viewPermissions, ...editPermissions]),
+    ];
+
+    const permissionResults = await fetchAdvancedPermissions(requiredPermissions);
+
+    const isPermitted = (permissions: string[]): boolean =>
+      permissions.some(permission => permissionResults[permission]);
+
+    fieldIsPermittedToBeSeenByUser.value = !hasViewPermissions
+      ? true
+      : isPermitted(viewPermissions);
+
+    fieldIsEditableByUser.value = !hasEditPermissions
+      ? true
+      : isPermitted(editPermissions);
+
+    if (!fieldIsEditableByUser.value) {
+      removeFieldFromEditableList(fieldKey);
+    }
+  };
+
+  const removeFieldFromEditableList = (fieldKey: string): void => {
+    const { editableFields } = useFormHelper();
+    const formEditableFields = editableFields.value[props.formId] ?? [];
+
+    editableFields.value[props.formId] = formEditableFields.filter(
+      field => field !== fieldKey,
+    );
   };
 
   const { getValidationRules } = useFieldValidation(props.metadata);
-  const { setExtraVariables } = usePermissions();
+
 
   const fieldKey = computed(() => getFieldKey());
   const fieldLabel = computed<string>(() =>
@@ -123,6 +161,7 @@ export const useMetadataWrapper = (
   );
   const isFieldValid = computed<boolean>(() => field.meta.valid);
   const fieldIsPermittedToBeSeenByUser = ref<boolean>(false);
+  const fieldIsEditableByUser = ref<boolean>(false);
 
   const getNewFieldValue = (newValue: any): any => {
     if (
@@ -153,6 +192,7 @@ export const useMetadataWrapper = (
         parentEntityId: props.formId,
         childEntityId: "",
       }),
+    { immediate: true },
   );
 
   onMounted(() => {
@@ -179,6 +219,7 @@ export const useMetadataWrapper = (
     isFieldRequired,
     fieldValidationRules,
     fieldIsPermittedToBeSeenByUser,
+    fieldIsEditableByUser,
     fieldValueProxy,
     fieldTooltipValue,
   };
