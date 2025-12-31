@@ -143,7 +143,9 @@
           :is-edit="useEditHelper.isEdit"
           :linked-entity-id="intialValues?.id || itemId"
           :entity-type="entityTypename"
-          :highlight="isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile"
+          :highlight="
+            isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile
+          "
         />
         <metadata-wrapper
           v-else
@@ -153,6 +155,7 @@
           :linked-entity-id="intialValues?.id || itemId"
           :entity-type="entityTypename"
           :list-item-entity="listItemEntity"
+          :show-errors="useEditHelper.showErrors"
           @add-refetch-function-to-edit-state="
             () => emit('addRefetchFunctionToEditState')
           "
