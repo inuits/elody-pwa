@@ -95,10 +95,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  type Entitytyping,
-  DamsIcons,
-} from "@/generated-types/queries";
+import { type Entitytyping, DamsIcons } from "@/generated-types/queries";
 import {
   type Context,
   type InBulkProcessableItem,
@@ -115,6 +112,7 @@ import {
   type BulkOperationsActionsBarProps,
   type BulkOperationsActionsBarEmits,
 } from "@/composables/useBulkOperationsActionsBar";
+import { inject } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -175,6 +173,7 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const { getStateForRoute } = useStateManagement();
+const parentEntity: any = inject("ParentEntityProvider");
 
 const {
   bulkOperations,
@@ -193,6 +192,7 @@ const {
 } = useBulkOperationsActionsBar(
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
+  parentEntity,
 );
 </script>
 

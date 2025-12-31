@@ -22,6 +22,7 @@ const parentId = ref<string | undefined>(undefined);
 const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
 const callbackFunctions = ref<Function[] | undefined>(undefined);
+const parentIntialValuesMap = ref<Map<string, string> | undefined>(undefined);
 const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
 
 const downloadMediafilesInformation = ref<
@@ -221,6 +222,14 @@ export const useModalActions = () => {
     callbackFunctions.value = callback;
   };
 
+  const getParentIntialValuesMap = () => parentIntialValuesMap.value;
+
+  const setParentIntialValuesMap = (
+    intialValuesMap: Map<string, string> | undefined,
+  ) => {
+    parentIntialValuesMap.value = intialValuesMap;
+  };
+
   const resetAllProperties = () => {
     parentId.value = undefined;
     relationType.value = undefined;
@@ -247,8 +256,10 @@ export const useModalActions = () => {
     getInformationForDelete,
     getInformationForBulkDeleteEntities,
     setCallbackFunctions,
+    setParentIntialValuesMap,
     getRelationType,
     getCollection,
+    getParentIntialValuesMap,
     resetAllProperties,
   };
 };

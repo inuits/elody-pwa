@@ -72,6 +72,7 @@ export interface BulkOperationsActionsBarEmits {
 export const useBulkOperationsActionsBar = (
   props: BulkOperationsActionsBarProps,
   emit: BulkOperationsActionsBarEmits,
+  parentEntity: BaseEntity,
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
   const route = useRoute();
@@ -91,6 +92,7 @@ export const useBulkOperationsActionsBar = (
     initializePropertiesForBulkDeleteRelations,
     initializePropertiesForBulkDeleteEntities,
     setCallbackFunctions,
+    setParentIntialValuesMap,
     resetAllProperties,
   } = useModalActions();
 
@@ -127,7 +129,7 @@ export const useBulkOperationsActionsBar = (
   const fetchBulkOperations = async (): Promise<void> => {
     try {
       const variables = {
-        entityType: entityType.value
+        entityType: entityType.value,
       };
       const result = await apolloClient.query({
         query: await determineBulkOperationsQuery(),
@@ -137,7 +139,8 @@ export const useBulkOperationsActionsBar = (
       });
 
       if (!result.data || !("BulkOperations" in result.data)) return;
-      bulkOperations.value = result.data?.BulkOperations?.bulkOperationOptions?.options || [];
+      bulkOperations.value =
+        result.data?.BulkOperations?.bulkOperationOptions?.options || [];
     } catch {
       emit("setBulkOperationsAvailable", false);
     }
@@ -174,6 +177,8 @@ export const useBulkOperationsActionsBar = (
   const initializeAddRelationOperation = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
+    console.log("should be here??");
+
     emit(
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,
@@ -184,6 +189,19 @@ export const useBulkOperationsActionsBar = (
       BulkNavigationPages.DetailPage
     ) {
       setCallbackFunctions(undefined);
+    }
+
+    if (bulkOperationModalConfig.copyIntialValues) {
+      const intialValuesMap = new Map<string, string>();
+      for (const intialValue of bulkOperationModalConfig.copyIntialValues) {
+        intialValuesMap.set(
+          intialValue,
+          parentEntity.value.intialValues[intialValue],
+        );
+      }
+      console.log("intialValuesMap");
+      console.log(intialValuesMap);
+      setParentIntialValuesMap(intialValuesMap);
     }
   };
 
@@ -197,6 +215,11 @@ export const useBulkOperationsActionsBar = (
     ) {
       setCallbackFunctions(undefined);
     }
+
+    if (bulkOperationModalConfig.copyIntialValues) {
+
+    }
+
   };
 
   const initializeReorderEntitiesOperation = () => {
@@ -291,10 +314,16 @@ export const useBulkOperationsActionsBar = (
     const operationType = selectedBulkOperation.value.value;
 
     if (operationType === BulkOperationTypes.OpenDropdown) {
-      subDropdownOptions.value = selectedBulkOperation.value?.subOptions.map((dropdownOption) => {
-        dropdownOption.active = determineActiveState(dropdownOption, props.parentEntityId, itemsSelected.value);
-        return dropdownOption;
-      });
+      subDropdownOptions.value = selectedBulkOperation.value?.subOptions.map(
+        (dropdownOption) => {
+          dropdownOption.active = determineActiveState(
+            dropdownOption,
+            props.parentEntityId,
+            itemsSelected.value,
+          );
+          return dropdownOption;
+        },
+      );
     }
 
     if (!bulkOperationModalConfig || !operationType) {

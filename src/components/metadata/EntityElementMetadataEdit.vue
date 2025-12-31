@@ -73,6 +73,10 @@
       :type="field.type as any"
       input-style="defaultWithBorder"
       :disabled="fieldEditIsDisabled"
+      :copy-value-from-parent="
+        parentIntialValuesMap ? copyValueFromParent : undefined
+      "
+      @copy-value-from-parent-action="(key) => copyValueFromParentAction(key)"
     />
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
       <p>
@@ -86,6 +90,7 @@
 import {
   type AdvancedFilterInput,
   type Conditional,
+  type CopyValueFromParentIntialValues,
   type DropdownOption,
   EditStatus,
   Entitytyping,
@@ -127,6 +132,8 @@ const props = defineProps<{
   fieldIsValid: boolean;
   formFlow?: string;
   isFieldRequired: boolean;
+  copyValueFromParent: CopyValueFromParentIntialValues;
+  parentIntialValuesMap?: Map<string, string>;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -152,7 +159,10 @@ const metadataValue = computed<string | string[] | number | number[]>({
   },
   set(newValue) {
     let valueFromMetadata = getValueFromMetadata(newValue);
-    if (typeof props.value === "object" && props.value?.formatter?.startsWith("pill")) {
+    if (
+      typeof props.value === "object" &&
+      props.value?.formatter?.startsWith("pill")
+    ) {
       valueFromMetadata = {
         ...props.value,
         label: valueFromMetadata as string,
@@ -253,6 +263,13 @@ const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
     });
     return relations;
   }
+};
+
+const copyValueFromParentAction = (key: string) => {
+  if (!props.parentIntialValuesMap) return;
+  const newValue = props.parentIntialValuesMap.get(key);
+  if (!newValue) return;
+  metadataValue.value = newValue;
 };
 
 watch(

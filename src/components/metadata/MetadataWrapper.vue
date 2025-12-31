@@ -25,7 +25,12 @@
       "
     />
     <entity-element-metadata-edit
-      v-if="isEdit && metadata.inputField && !metadata.nonEditableField && fieldIsEditableByUser"
+      v-if="
+        isEdit &&
+        metadata.inputField &&
+        !metadata.nonEditableField &&
+        fieldIsEditableByUser
+      "
       :fieldKey="fieldKey"
       :label="metadata.label as string"
       v-model:value="fieldValueProxy"
@@ -45,6 +50,8 @@
           !isFieldValid &&
           metadata.inputField?.validation?.fastValidationMessage)
       "
+      :copy-value-from-parent="metadata.copyValueFromParent"
+      :parent-intial-values-map="parentIntialValuesMap"
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       @click.stop.prevent
@@ -191,6 +198,7 @@ export type MetadataWrapperProps = {
   showErrors?: boolean;
   entityType?: Entitytyping;
   listItemEntity?: BaseEntity;
+  parentIntialValuesMap?: Map<string, string>;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {

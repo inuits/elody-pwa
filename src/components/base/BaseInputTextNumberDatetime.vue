@@ -58,11 +58,21 @@
       `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
     ]"
   ></BaseResizableTextarea>
+  <base-button-new
+    v-if="copyValueFromParent"
+    :label="t(copyValueFromParent.label)"
+    button-style="accentAccent"
+    button-size="small"
+    @click="() => emit('copyValueFromParentAction', copyValueFromParent.key)"
+  />
 </template>
 
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import BaseResizableTextarea from "./BaseResizableTextarea.vue";
+import { type CopyValueFromParentIntialValues } from "@/generated-types/queries";
+import { useI18n } from "vue-i18n";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 type PseudoStyle = {
   textColor: string;
@@ -119,6 +129,7 @@ const inputStyles: Record<InputStyle, Input> = {
 const props = withDefaults(
   defineProps<{
     modelValue: string | number | undefined;
+    copyValueFromParent?: CopyValueFromParentIntialValues;
     inputStyle: InputStyle;
     type?: string;
     step?: number;
@@ -138,11 +149,13 @@ const props = withDefaults(
   },
 );
 
+const { t } = useI18n();
 const emit = defineEmits<{
   (
     event: "update:modelValue",
     modelValue: string | number | boolean | undefined,
   ): void;
+  (event: "copyValueFromParentAction", key: string): void;
 }>();
 
 const inputValue = computed<string | number | boolean | undefined>({
