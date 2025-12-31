@@ -118,7 +118,7 @@ const paginationLimitOptionsPromise = async () => {
       paginationLimitOptions.value =
         result.data?.PaginationLimitOptions.options || [];
 
-      const state = getStateForRoute(route);
+      const state = getStateForRoute(route, true);
       const limit =
         state?.queryVariables?.limit ||
         paginationLimitOptions.value?.[0].value ||
@@ -158,7 +158,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
         }, false);
       });
 
-      const state = getStateForRoute(route);
+      const state = getStateForRoute(route, true);
       const sortKey =
         state?.queryVariables?.searchValue.order_by ||
         sortOptions.value?.[0]?.value;
