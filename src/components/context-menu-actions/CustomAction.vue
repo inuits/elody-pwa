@@ -37,11 +37,10 @@ const doAction = async () => {
     );
 
 const response = await fetch(createUrl(), {
-      method: props.endpointMethod.toUpperCase() || "GET", // Good practice to ensure it's uppercase
+      method: props.endpointMethod.toUpperCase() || "GET",
       headers: {
         'Content-Type': 'application/json',
       },
-      // If it's a POST/PUT, you'd likely add: body: JSON.stringify(data)
     });
 
     if (!response.ok) {
