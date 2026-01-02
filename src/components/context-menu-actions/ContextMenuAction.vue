@@ -35,6 +35,7 @@
       :action="element.action"
       :entity-id="parentEntityId"
       :endpoint-url="element.endpointUrl"
+      :endpoint-method="element.endpointMethod"
     />
   </div>
 </template>

@@ -23,6 +23,7 @@ const props = defineProps<{
   action: ContextMenuGeneralActionEnum;
   entityId: string;
   endpointUrl: string;
+  endpointMethod: string;
 }>();
 const { t } = useI18n();
 const { displaySuccessNotification, displayErrorNotification } =
@@ -34,16 +35,29 @@ const doAction = async () => {
       t("notifications.success.action-started.title"),
       t("notifications.success.action-started.description"),
     );
-    await fetch(createUrl());
+
+const response = await fetch(createUrl(), {
+      method: props.endpointMethod.toUpperCase() || "GET", // Good practice to ensure it's uppercase
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // If it's a POST/PUT, you'd likely add: body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
     await refetchParentEntity();
+
     displaySuccessNotification(
       t("notifications.success.entityUpdated.title"),
       t("notifications.success.entityUpdated.description"),
     );
-  } catch {
+  } catch (error) {
     displayErrorNotification(
       t("notifications.errors.validation-error.title"),
-      t("notifications.errors.validation-error.title"),
+      "",
     );
   } finally {
     emit("toggleLoading");
