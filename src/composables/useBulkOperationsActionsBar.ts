@@ -213,11 +213,6 @@ export const useBulkOperationsActionsBar = (
     ) {
       setCallbackFunctions(undefined);
     }
-
-    if (bulkOperationModalConfig.copyIntialValues) {
-
-    }
-
   };
 
   const initializeReorderEntitiesOperation = () => {
