@@ -194,13 +194,12 @@ export const useBulkOperationsActionsBar = (
     if (bulkOperationModalConfig.copyIntialValues) {
       const intialValuesMap = new Map<string, string>();
       for (const intialValue of bulkOperationModalConfig.copyIntialValues) {
-        intialValuesMap.set(
-          intialValue,
-          parentEntity.value.intialValues[intialValue],
-        );
+        if (parentEntity.value.intialValues[intialValue])
+          intialValuesMap.set(
+            intialValue,
+            parentEntity.value.intialValues[intialValue],
+          );
       }
-      console.log("intialValuesMap");
-      console.log(intialValuesMap);
       setParentIntialValuesMap(intialValuesMap);
     }
   };
