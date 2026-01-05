@@ -55,6 +55,7 @@
     "luxon": "3.5.0",
     "mini-svg-data-uri": "^1.4.4",
     "mirador": "3.3.0",
+    "nanoid": "^5.1.6",
     "ol": "^10.2.1",
     "openseadragon": "^5.0.0",
     "openseadragon-select-plugin": "^1.0.20",

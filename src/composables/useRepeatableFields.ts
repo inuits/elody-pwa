@@ -1,10 +1,13 @@
 import { ref } from "vue";
+import { nanoid } from "nanoid";
 
-type RepeatableFieldConfig = {
+type BaseRepeatableFieldConfig = {
   repeatAmount: number;
 };
 
-const baseRepeatableFieldConfig: RepeatableFieldConfig = {
+type RepeatableFieldConfig = BaseRepeatableFieldConfig & { id: string };
+
+const baseRepeatableFieldConfig: BaseRepeatableFieldConfig = {
   repeatAmount: 1,
 };
 
@@ -22,8 +25,10 @@ export const useRepeatableFields = (fieldName: string): UseRepeatableFields => {
   const initializeRepeatableField = (): void => {
     if (repeatableFieldConfigurations.value[fieldName]) return;
     else
-      repeatableFieldConfigurations.value[fieldName] =
-        baseRepeatableFieldConfig;
+      repeatableFieldConfigurations.value[fieldName] = {
+        id: nanoid(),
+        ...baseRepeatableFieldConfig,
+      };
   };
 
   initializeRepeatableField();
@@ -37,7 +42,6 @@ export const useRepeatableFields = (fieldName: string): UseRepeatableFields => {
   };
 
   const decreaseFieldRepeatAmount = (): void => {
-    console.log("here");
     repeatableFieldConfigurations.value[fieldName].repeatAmount--;
   };
 

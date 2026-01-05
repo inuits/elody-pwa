@@ -27,7 +27,7 @@
 
     <transition>
       <div v-show="!isCollapsed">
-        <div v-for="idx in repetitionIndices" :key="idx" class="mb-4">
+        <div v-for="idx in repetitionIndices" :key="panelId" class="mb-4">
           <WindowPanelContent
             :repetition-index="idx"
             :panel-type="panelType"
@@ -71,6 +71,7 @@ import {
   DamsIcons,
   type PanelRelation,
 } from "@/generated-types/queries";
+import { nanoid } from "nanoid";
 
 const props = withDefaults(
   defineProps<{
@@ -91,8 +92,9 @@ const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
 const repeatablePanel = ref<boolean>(props.panel.repeatable ?? false);
+const panelId = ref<string>(nanoid());
 const useRepeatableFieldHelper = computed(() =>
-  repeatablePanel.value ? useRepeatableFields(props.panel.label!) : undefined,
+  repeatablePanel.value ? useRepeatableFields(panelId.value) : undefined,
 );
 
 const toggleIsCollapsed = () => {
