@@ -32,8 +32,7 @@
         />
         <BaseContextMenuActions
           v-if="
-            auth.isAuthenticated.value === true &&
-            element.contextMenuActions
+            auth.isAuthenticated.value === true && element.contextMenuActions
           "
           :context-menu-actions="element.contextMenuActions"
           :parent-entity-id="formId"
@@ -85,7 +84,7 @@ import {
   WindowElementLayout,
   type WindowElementPanel,
 } from "@/generated-types/queries";
-import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
+import EntityElementWindowPanel from "../windowPanel/EntityElementWindowPanel.vue";
 import { computed } from "vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
 import { useI18n } from "vue-i18n";

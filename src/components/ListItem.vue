@@ -268,7 +268,7 @@ import {
 import { stringIsUrl, asString } from "@/helpers";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import EntityElementWindowPanel from "@/components/EntityElementWindowPanel.vue";
+import EntityElementWindowPanel from "@/components/windowPanel/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
