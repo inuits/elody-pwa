@@ -68,7 +68,6 @@
           :show-errors="showErrors"
           :key="`${dynamicFormQuery}_field_${index}`"
           :is-used-in-modal="true"
-          :parent-intial-values-map="getParentIntialValuesMap()"
         />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
@@ -349,7 +348,6 @@ const {
   extractActionArguments,
   getCallbackFunctions,
   getParentId,
-  getParentIntialValuesMap,
 } = useModalActions();
 const route = useRoute();
 

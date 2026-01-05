@@ -173,7 +173,6 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const { getStateForRoute } = useStateManagement();
-const parentEntity: any = inject("ParentEntityProvider");
 
 const {
   bulkOperations,
@@ -192,7 +191,6 @@ const {
 } = useBulkOperationsActionsBar(
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
-  parentEntity,
 );
 </script>
 

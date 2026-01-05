@@ -51,7 +51,7 @@
           metadata.inputField?.validation?.fastValidationMessage)
       "
       :copy-value-from-parent="metadata.copyValueFromParent"
-      :parent-intial-values-map="parentIntialValuesMap"
+      :extract-value-from-parent="extractIntialValueFromParentByKey"
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       @click.stop.prevent
@@ -198,7 +198,6 @@ export type MetadataWrapperProps = {
   showErrors?: boolean;
   entityType?: Entitytyping;
   listItemEntity?: BaseEntity;
-  parentIntialValuesMap?: Map<string, string>;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {
@@ -225,6 +224,7 @@ const {
   isFieldValid,
   isFieldRequired,
   fieldTooltipValue,
+  extractIntialValueFromParentByKey,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {
   initializeDropdownStates,

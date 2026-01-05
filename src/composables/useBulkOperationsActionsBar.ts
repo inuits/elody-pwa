@@ -4,7 +4,6 @@ import { useRoute } from "vue-router";
 import type { Entitytyping } from "@/generated-types/queries";
 import {
   ActionContextEntitiesSelectionType,
-  type BaseEntity,
   BulkOperationTypes,
   type DropdownOption,
   ModalStyle,
@@ -73,7 +72,6 @@ export interface BulkOperationsActionsBarEmits {
 export const useBulkOperationsActionsBar = (
   props: BulkOperationsActionsBarProps,
   emit: BulkOperationsActionsBarEmits,
-  parentEntity: BaseEntity,
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
   const route = useRoute();
@@ -93,7 +91,6 @@ export const useBulkOperationsActionsBar = (
     initializePropertiesForBulkDeleteRelations,
     initializePropertiesForBulkDeleteEntities,
     setCallbackFunctions,
-    setParentIntialValuesMap,
     resetAllProperties,
   } = useModalActions();
 
@@ -188,18 +185,6 @@ export const useBulkOperationsActionsBar = (
       BulkNavigationPages.DetailPage
     ) {
       setCallbackFunctions(undefined);
-    }
-
-    if (bulkOperationModalConfig.copyIntialValues) {
-      const intialValuesMap = new Map<string, string>();
-      for (const intialValue of bulkOperationModalConfig.copyIntialValues) {
-        if (parentEntity?.value && parentEntity.value.intialValues[intialValue])
-          intialValuesMap.set(
-            intialValue,
-            parentEntity.value.intialValues[intialValue],
-          );
-      }
-      setParentIntialValuesMap(intialValuesMap);
     }
   };
 

@@ -1,6 +1,14 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import { type FieldContext, useField } from "vee-validate";
-import { computed, inject, onMounted, ref, watch, type ComputedRef, type Ref } from "vue";
+import { type FieldContext, type FormContext, useField } from "vee-validate";
+import {
+  computed,
+  inject,
+  onMounted,
+  ref,
+  watch,
+  type ComputedRef,
+  type Ref,
+} from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -13,7 +21,7 @@ import { useConditionalValidation } from "@/composables/useConditionalValidation
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
-import { getTranslatedMessage } from "@/helpers";
+import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 export type FieldMetadata =
@@ -75,6 +83,7 @@ export const useMetadataWrapper = (
   fieldIsEditableByUser: Ref<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
+  extractIntialValueFromParentByKey: (key: string) => string | undefined;
 } => {
   const getFieldKey = (): string => {
     const { getVeeValidateKey } = useVeeValidate();
@@ -110,7 +119,7 @@ export const useMetadataWrapper = (
     const permissionResults = await fetchAdvancedPermissions(requiredPermissions);
 
     const isPermitted = (permissions: string[]): boolean =>
-      permissions.some(permission => permissionResults[permission]);
+      permissions.some((permission) => permissionResults[permission]);
 
     fieldIsPermittedToBeSeenByUser.value = !hasViewPermissions
       ? true
@@ -130,12 +139,11 @@ export const useMetadataWrapper = (
     const formEditableFields = editableFields.value[props.formId] ?? [];
 
     editableFields.value[props.formId] = formEditableFields.filter(
-      field => field !== fieldKey,
+      (field) => field !== fieldKey,
     );
   };
 
   const { getValidationRules } = useFieldValidation(props.metadata);
-
 
   const fieldKey = computed(() => getFieldKey());
   const fieldLabel = computed<string>(() =>
@@ -185,6 +193,12 @@ export const useMetadataWrapper = (
     set: (val) => (field.value.value = getNewFieldValue(val)),
   });
 
+  const parentForm = ref<FormContext | undefined>(useFormHelper().getForm(getEntityIdFromRoute()));
+  const extractIntialValueFromParentByKey = (key: string): string | undefined => {
+    if (!parentForm.value || !key) return undefined;
+    return parentForm?.value.values.intialValues[key];
+  };
+
   watch(
     () => props.formId,
     () =>
@@ -222,5 +236,6 @@ export const useMetadataWrapper = (
     fieldIsEditableByUser,
     fieldValueProxy,
     fieldTooltipValue,
+    extractIntialValueFromParentByKey,
   };
 };

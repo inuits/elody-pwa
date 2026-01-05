@@ -66,16 +66,23 @@
       :show-menu-header="false"
       style-type="defaultWithBorder"
     />
-    <BaseInputTextNumberDatetime
-      v-else
-      :name="fieldKey"
-      v-model:model-value="metadataValue"
-      :type="field.type as any"
-      input-style="defaultWithBorder"
-      :disabled="fieldEditIsDisabled"
-      :copy-value-from-parent="enableCopyFromParent ? copyValueFromParent : undefined"
-      @copy-value-from-parent-action="(key) => copyValueFromParentAction(key)"
-    />
+    <div v-else :class="[{ 'grid grid-cols-[80%_20%]': enableCopyFromParent }]">
+      <BaseInputTextNumberDatetime
+        :name="fieldKey"
+        v-model:model-value="metadataValue"
+        :type="field.type as any"
+        input-style="defaultWithBorder"
+        :disabled="fieldEditIsDisabled"
+      />
+      <base-button-new
+        v-if="enableCopyFromParent"
+        class="ml-1"
+        :label="t(copyValueFromParent.label)"
+        button-style="accentAccent"
+        button-size="small"
+        @click="() => copyValueFromParentAction(copyValueFromParent.key)"
+      />
+    </div>
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
       <p>
         {{ computedError }}
@@ -109,6 +116,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -131,7 +139,7 @@ const props = defineProps<{
   formFlow?: string;
   isFieldRequired: boolean;
   copyValueFromParent: CopyValueFromParentIntialValues;
-  parentIntialValuesMap?: Map<string, string>;
+  extractValueFromParent: Function;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -188,9 +196,11 @@ const fieldEditIsDisabled = computed(() => {
     mediafileViewerContext,
   );
 });
+
 const enableCopyFromParent = computed(() => {
-  if (!props.parentIntialValuesMap || !props.copyValueFromParent) return false;
-  return props.parentIntialValuesMap.get(props.copyValueFromParent?.key);
+  if (!props.copyValueFromParent || !props.extractValueFromParent) return false;
+  const value = props.extractValueFromParent(props.copyValueFromParent?.key);
+  return !(!value || value == "");
 });
 
 onMounted(() => {
@@ -268,8 +278,7 @@ const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
 };
 
 const copyValueFromParentAction = (key: string) => {
-  if (!props.parentIntialValuesMap) return;
-  const newValue = props.parentIntialValuesMap.get(key);
+  const newValue = props.extractValueFromParent(key);
   if (!newValue) return;
   metadataValue.value = newValue;
 };

@@ -75,7 +75,8 @@ const useFormHelper = () => {
     forms.value[key] = form;
   };
 
-  const getForm = (key: string): FormContext<any> | undefined => {
+  const getForm = (key: string | undefined): FormContext<any> | undefined => {
+    if (!key) return undefined;
     const form = forms.value[key];
     if (!form) {
       return undefined;
