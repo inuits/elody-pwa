@@ -39,6 +39,9 @@
             :edit-state="editState"
             :identifiers="identifiers"
             :parent-is-list-item="parentIsListItem"
+            @decrease-repeated-field-amount="
+              useRepeatableFieldHelper?.decreaseFieldRepeatAmount()
+            "
           />
 
           <hr

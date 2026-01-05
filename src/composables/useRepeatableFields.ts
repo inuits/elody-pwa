@@ -37,6 +37,7 @@ export const useRepeatableFields = (fieldName: string): UseRepeatableFields => {
   };
 
   const decreaseFieldRepeatAmount = (): void => {
+    console.log("here");
     repeatableFieldConfigurations.value[fieldName].repeatAmount--;
   };
 
