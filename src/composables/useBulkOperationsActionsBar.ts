@@ -177,8 +177,6 @@ export const useBulkOperationsActionsBar = (
   const initializeAddRelationOperation = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
-    console.log("should be here??");
-
     emit(
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,

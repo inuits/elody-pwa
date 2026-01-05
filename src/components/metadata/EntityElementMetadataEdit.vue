@@ -73,9 +73,7 @@
       :type="field.type as any"
       input-style="defaultWithBorder"
       :disabled="fieldEditIsDisabled"
-      :copy-value-from-parent="
-        parentIntialValuesMap ? copyValueFromParent : undefined
-      "
+      :copy-value-from-parent="enableCopyFromParent ? copyValueFromParent : undefined"
       @copy-value-from-parent-action="(key) => copyValueFromParentAction(key)"
     />
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
@@ -189,6 +187,10 @@ const fieldEditIsDisabled = computed(() => {
     props.formId,
     mediafileViewerContext,
   );
+});
+const enableCopyFromParent = computed(() => {
+  if (!props.parentIntialValuesMap || !props.copyValueFromParent) return false;
+  return props.parentIntialValuesMap.get(props.copyValueFromParent?.key);
 });
 
 onMounted(() => {
