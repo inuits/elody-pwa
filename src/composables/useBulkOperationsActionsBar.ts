@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import type { Entitytyping } from "@/generated-types/queries";
 import {
   ActionContextEntitiesSelectionType,
+  type BaseEntity,
   BulkOperationTypes,
   type DropdownOption,
   ModalStyle,
@@ -12,7 +13,7 @@ import {
   BulkNavigationPages,
   type BulkOperationModal,
   ActionContextViewModeTypes,
-  PanelType
+  PanelType,
 } from "@/generated-types/queries";
 import {
   type Context,
@@ -192,7 +193,7 @@ export const useBulkOperationsActionsBar = (
     if (bulkOperationModalConfig.copyIntialValues) {
       const intialValuesMap = new Map<string, string>();
       for (const intialValue of bulkOperationModalConfig.copyIntialValues) {
-        if (parentEntity.value.intialValues[intialValue])
+        if (parentEntity?.value && parentEntity.value.intialValues[intialValue])
           intialValuesMap.set(
             intialValue,
             parentEntity.value.intialValues[intialValue],

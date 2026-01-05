@@ -543,6 +543,7 @@ const {
 } = useBulkOperationsActionsBar(
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
+  parentEntity,
 );
 
 let filterMatcherMappingPromise: (entityType: Entitytyping) => Promise<void>;
