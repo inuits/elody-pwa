@@ -1,6 +1,14 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
 import { type FieldContext, useField } from "vee-validate";
-import { computed, inject, onMounted, ref, watch, type ComputedRef, type Ref } from "vue";
+import {
+  computed,
+  inject,
+  onMounted,
+  ref,
+  watch,
+  type ComputedRef,
+  type Ref,
+} from "vue";
 import {
   InputFieldTypes,
   type PanelMetaData,
@@ -82,6 +90,7 @@ export const useMetadataWrapper = (
       props.metadata,
       props.linkedEntityId,
       props.isEdit,
+      props.repeatablePanelConfig,
     );
   };
 
@@ -107,10 +116,11 @@ export const useMetadataWrapper = (
       ...new Set([...viewPermissions, ...editPermissions]),
     ];
 
-    const permissionResults = await fetchAdvancedPermissions(requiredPermissions);
+    const permissionResults =
+      await fetchAdvancedPermissions(requiredPermissions);
 
     const isPermitted = (permissions: string[]): boolean =>
-      permissions.some(permission => permissionResults[permission]);
+      permissions.some((permission) => permissionResults[permission]);
 
     fieldIsPermittedToBeSeenByUser.value = !hasViewPermissions
       ? true
@@ -130,12 +140,11 @@ export const useMetadataWrapper = (
     const formEditableFields = editableFields.value[props.formId] ?? [];
 
     editableFields.value[props.formId] = formEditableFields.filter(
-      field => field !== fieldKey,
+      (field) => field !== fieldKey,
     );
   };
 
   const { getValidationRules } = useFieldValidation(props.metadata);
-
 
   const fieldKey = computed(() => getFieldKey());
   const fieldLabel = computed<string>(() =>

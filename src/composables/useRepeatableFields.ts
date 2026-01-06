@@ -1,6 +1,12 @@
 import { ref, computed, type ComputedRef } from "vue";
 import { nanoid } from "nanoid";
 
+export type RepeatablePanelConfig = {
+  mainPanelId: string;
+  repetitionId: string;
+  repeatable: boolean;
+};
+
 type RepeatableFieldConfig = {
   repetitionIds: string[];
 };

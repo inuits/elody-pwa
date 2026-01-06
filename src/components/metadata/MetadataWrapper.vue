@@ -25,7 +25,12 @@
       "
     />
     <entity-element-metadata-edit
-      v-if="isEdit && metadata.inputField && !metadata.nonEditableField && fieldIsEditableByUser"
+      v-if="
+        isEdit &&
+        metadata.inputField &&
+        !metadata.nonEditableField &&
+        fieldIsEditableByUser
+      "
       :fieldKey="fieldKey"
       :label="metadata.label as string"
       v-model:value="fieldValueProxy"
@@ -180,6 +185,7 @@ import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";
+import type { RepeatablePanelConfig } from "@/composables/useRepeatableFields";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -191,6 +197,7 @@ export type MetadataWrapperProps = {
   showErrors?: boolean;
   entityType?: Entitytyping;
   listItemEntity?: BaseEntity;
+  repeatablePanelConfig: RepeatablePanelConfig;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {

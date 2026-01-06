@@ -5,21 +5,32 @@ import {
   ValidationRules,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
+import type { RepeatablePanelConfig } from "@/composables/useRepeatableFields";
 
 export const useVeeValidate = (): {
   getVeeValidateKey: (
     metadata: FieldMetadata,
     linkedEntityId: string | undefined,
     isEdit: boolean | undefined,
+    repeatablePanelConfig: RepeatablePanelConfig,
   ) => string;
   isValidationRulePresentOnField: (
     metadata: FieldMetadata,
     rule: ValidationRules | ValidationRules[],
   ) => boolean;
 } => {
-  const getKeyWithId = (key: string, id: string | undefined): string => {
-    if (!id) return key;
-    return `${key}-${id}`;
+  const getBaseKey = (
+    key: string,
+    repeatablePanelConfig: RepeatablePanelConfig,
+    id: string | undefined,
+  ): string => {
+    let baseKey: string = key;
+    if (!id && !repeatablePanelConfig.repeatable) return key;
+    if (repeatablePanelConfig.repeatable)
+      baseKey = `panelRepetition-${repeatablePanelConfig.repetitionId}-${baseKey}`;
+    if (id) return `${baseKey}-${id}`;
+
+    return `${baseKey}`;
   };
 
   const isValidationRulePresentOnField = (
@@ -43,29 +54,34 @@ export const useVeeValidate = (): {
     metadata: FieldMetadata,
     linkedEntityId: string | undefined = undefined,
     isEdit: boolean | undefined = undefined,
+    repeatablePanelConfig: RepeatablePanelConfig,
   ): string => {
     const fieldKind:
       | "PanelMetaData"
       | "PanelRelationMetaData"
       | "PanelRelationRootData"
       | undefined = metadata.__typename;
-    const fieldKeyWithId = getKeyWithId(metadata.key, linkedEntityId);
+    const baseFieldKey = getBaseKey(
+      metadata.key,
+      repeatablePanelConfig,
+      linkedEntityId,
+    );
     const { getKeyBasedOnInputField } = useFormHelper();
 
     if (!metadata.inputField && !linkedEntityId)
-      return `${ValidationFields.IntialValues}.${fieldKeyWithId}`;
+      return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
     // Todo: Does this regex field really need 'special treatment'?
     if (isValidationRulePresentOnField(metadata, ValidationRules.Regex))
-      return `${ValidationFields.IntialValues}.${fieldKeyWithId}`;
+      return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
     // Needs to be saved as metadata on a relation
     if (fieldKind === "PanelRelationMetaData")
-      return `${ValidationFields.RelationMetadata}.${fieldKeyWithId}`;
+      return `${ValidationFields.RelationMetadata}.${baseFieldKey}`;
 
     // Needs to be saved as root data on a relation
     if (fieldKind === "PanelRelationRootData")
-      return `${ValidationFields.RelationRootdata}.${fieldKeyWithId}`;
+      return `${ValidationFields.RelationRootdata}.${baseFieldKey}`;
 
     const requiredRelations = isValidationRulePresentOnField(metadata, [
       ValidationRules.HasRequiredRelation,
@@ -85,7 +101,7 @@ export const useVeeValidate = (): {
     if (linkedEntityId === undefined)
       return `${ValidationFields.RelationValues}.${metadata.key}`;
 
-    return `${ValidationFields.RelatedEntityData}.${fieldKeyWithId}`;
+    return `${ValidationFields.RelatedEntityData}.${baseFieldKey}`;
   };
 
   return { getVeeValidateKey, isValidationRulePresentOnField };

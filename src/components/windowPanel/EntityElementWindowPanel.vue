@@ -7,7 +7,7 @@
     >
       <h2>{{ t(panel.label) }}</h2>
       <div class="flex justify-end gap-4">
-        <div v-if="repeatablePanel">
+        <div v-if="repeatablePanel && isEdit">
           <base-button-new
             :label="t('Add more')"
             :icon="DamsIcons.Plus"
