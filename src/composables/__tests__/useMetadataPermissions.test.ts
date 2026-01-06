@@ -2,10 +2,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useMetadataWrapper } from "../../components/metadata/useMetadataWrapper";
 import { ref, nextTick, defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
+import { getEntityIdFromRoute } from "@/helpers";
 
 const mockFetchAdvancedPermissions = vi.fn();
 const mockSetExtraVariables = vi.fn();
 const mockEditableFields = ref<Record<string, string[]>>({});
+
+const mocks = vi.hoisted(() => {
+  return {
+    getForm: vi.fn(),
+    getEntityIdFromRoute: vi.fn(),
+  };
+});
 
 vi.mock("@/composables/usePermissions", () => ({
   usePermissions: () => ({
@@ -17,6 +25,7 @@ vi.mock("@/composables/usePermissions", () => ({
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
     editableFields: mockEditableFields,
+    getForm: mocks.getForm,
   }),
 }));
 
@@ -34,6 +43,7 @@ vi.mock("@/components/metadata/useFieldValidation", () => ({
 
 vi.mock("@/helpers", () => ({
   getTranslatedMessage: vi.fn((key: string) => key),
+  getEntityIdFromRoute: mocks.getEntityIdFromRoute,
 }));
 
 vi.mock("vee-validate", () => ({
