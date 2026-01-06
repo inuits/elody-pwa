@@ -40,7 +40,7 @@
           :form-id="formId"
           :is-edit="isEdit"
           :repeatablePanelConfig="repetitionConfig"
-          v-model:metadata="metadatafields[index]"
+          :metadata="metadatafields[index]"
           :show-errors="editState.showErrors"
           :base-library-mode="metadata.baseLibraryMode"
         />

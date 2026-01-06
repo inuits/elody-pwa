@@ -197,7 +197,7 @@ export type MetadataWrapperProps = {
   showErrors?: boolean;
   entityType?: Entitytyping;
   listItemEntity?: BaseEntity;
-  repeatablePanelConfig: RepeatablePanelConfig;
+  repeatablePanelConfig?: RepeatablePanelConfig;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {

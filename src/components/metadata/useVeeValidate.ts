@@ -12,7 +12,7 @@ export const useVeeValidate = (): {
     metadata: FieldMetadata,
     linkedEntityId: string | undefined,
     isEdit: boolean | undefined,
-    repeatablePanelConfig: RepeatablePanelConfig,
+    repeatablePanelConfig: RepeatablePanelConfig | undefined,
   ) => string;
   isValidationRulePresentOnField: (
     metadata: FieldMetadata,
@@ -21,12 +21,12 @@ export const useVeeValidate = (): {
 } => {
   const getBaseKey = (
     key: string,
-    repeatablePanelConfig: RepeatablePanelConfig,
+    repeatablePanelConfig: RepeatablePanelConfig | undefined,
     id: string | undefined,
   ): string => {
     let baseKey: string = key;
-    if (!id && !repeatablePanelConfig.repeatable) return key;
-    if (repeatablePanelConfig.repeatable)
+    if (!id && !repeatablePanelConfig?.repeatable) return key;
+    if (repeatablePanelConfig?.repeatable)
       baseKey = `panelRepetition-${repeatablePanelConfig.repetitionId}-${baseKey}`;
     if (id) return `${baseKey}-${id}`;
 

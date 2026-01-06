@@ -150,7 +150,7 @@
         <metadata-wrapper
           v-else
           :form-id="formId"
-          v-model:metadata="metadataItem as MetadataField"
+          :metadata="metadataItem as MetadataField"
           :is-edit="useEditHelper.isEdit"
           :linked-entity-id="intialValues?.id || itemId"
           :entity-type="entityTypename"
