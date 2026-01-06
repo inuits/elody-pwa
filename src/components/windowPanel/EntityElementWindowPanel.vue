@@ -7,14 +7,19 @@
     >
       <h2>{{ t(panel.label) }}</h2>
       <div class="flex justify-end gap-4">
-        <div v-if="useRepeatableFieldHelper">
+        <div v-if="repeatablePanel">
           <base-button-new
             :label="t('Add more')"
             :icon="DamsIcons.Plus"
             button-size="small"
             button-style="accentAccent"
             @click.stop
-            @click="useRepeatableFieldHelper.increaseFieldRepeatAmount()"
+            @click="
+              () => {
+                increaseFieldRepeatAmount();
+                expandPanel();
+              }
+            "
           ></base-button-new>
         </div>
         <unicon
@@ -27,9 +32,8 @@
 
     <transition>
       <div v-show="!isCollapsed">
-        <div v-for="idx in repetitionIndices" :key="panelId" class="mb-4">
+        <div v-for="idx in panelIds" :key="idx" class="mb-4">
           <WindowPanelContent
-            :repetition-index="idx"
             :panel-type="panelType"
             :relation-array="relationArray"
             :metadatafields="baseMetadataFields"
@@ -39,14 +43,17 @@
             :edit-state="editState"
             :identifiers="identifiers"
             :parent-is-list-item="parentIsListItem"
-            @decrease-repeated-field-amount="
-              useRepeatableFieldHelper?.decreaseFieldRepeatAmount()
-            "
+            :repetitionConfig="{
+              mainPanelId,
+              repetitionId: idx,
+              repeatable: repeatablePanel,
+            }"
+            @decrease-repeated-field-amount="decreaseFieldRepeatAmount(idx)"
           />
 
           <hr
             v-if="
-              repetitionIndices.length > 1 && idx < repetitionIndices.length - 1
+              panelIds.length > 1 && panelIds.indexOf(idx) < panelIds.length - 1
             "
             class="my-4 border-neutral-30"
           />
@@ -92,9 +99,11 @@ const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
 const repeatablePanel = ref<boolean>(props.panel.repeatable ?? false);
-const panelId = ref<string>(nanoid());
-const useRepeatableFieldHelper = computed(() =>
-  repeatablePanel.value ? useRepeatableFields(panelId.value) : undefined,
+const mainPanelId = ref<string>(props.panel.label || nanoid());
+const { repetitionIds, decreaseFieldRepeatAmount, increaseFieldRepeatAmount } =
+  useRepeatableFields(mainPanelId.value);
+const panelIds = computed(() =>
+  repeatablePanel.value ? repetitionIds.value : [mainPanelId.value],
 );
 
 const toggleIsCollapsed = () => {
@@ -127,14 +136,9 @@ const baseMetadataFields = computed(() => {
   return getMetadataFields(props.panel, panelType.value, props.formId);
 });
 
-const repetitionIndices = computed(() => {
-  if (!useRepeatableFieldHelper.value) {
-    return [0];
-  }
-  const amount =
-    useRepeatableFieldHelper.value.getRepeatableFieldConfig().repeatAmount;
-  return Array.from({ length: amount }, (_, i) => i);
-});
+const expandPanel = () => {
+  isCollapsed.value = false;
+};
 </script>
 
 <style scoped>

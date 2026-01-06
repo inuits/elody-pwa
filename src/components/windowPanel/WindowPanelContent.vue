@@ -1,5 +1,5 @@
 <template>
-  <div :class="[{ flex: repetitionIndex >= 1 }]">
+  <div :class="[{ flex: repetitionConfig.repeatable }]">
     <div v-if="panelType === PanelType.Relation && relationArray.length">
       <div class="pl-2 rounded-sm bg-accent-light">
         <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
@@ -27,7 +27,7 @@
       <div
         v-for="(metadata, index) in metadatafields"
         v-show="itemMustBeShown(metadata.value)"
-        :key="`${repetitionIndex}-${metadata.key}-${index}`"
+        :key="`${repetitionConfig.repetitionId}-${metadata.key}`"
       >
         <metadata-wrapper
           class="py-2 px-2"
@@ -72,7 +72,7 @@
         />
       </div>
     </div>
-    <div v-if="repetitionIndex >= 1">
+    <div v-if="repetitionConfig.repeatable">
       <base-button-new
         :icon="DamsIcons.Trash"
         @click="emit('decreaseRepeatedFieldAmount')"
@@ -97,13 +97,18 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { useRepeatableFields } from "@/composables/useRepeatableFields";
 
 const props = defineProps<{
   panelType: PanelType;
   relationArray: PanelRelation[];
   metadatafields: MetadataField[];
   canBeMultipleColumns: boolean;
-  repetitionIndex: number;
+  repetitionConfig: {
+    mainPanelId: string;
+    repetitionId: string;
+    repeatable: boolean;
+  };
   formId: string;
   isEdit: boolean;
   editState: any;
@@ -116,6 +121,9 @@ const emit = defineEmits(["decreaseRepeatedFieldAmount"]);
 const { t } = useI18n();
 const config = inject("config") as any;
 const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
+const { repetitionIds } = useRepeatableFields(
+  props.repetitionConfig.mainPanelId,
+);
 
 const itemMustBeShown = (value: any): boolean => {
   if (config.customization.hideEmptyFields === true && !value) return false;
