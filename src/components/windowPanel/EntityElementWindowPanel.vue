@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
@@ -100,8 +100,12 @@ const canBeMultipleColumns = ref<boolean>(
 );
 const repeatablePanel = ref<boolean>(props.panel.repeatable ?? false);
 const mainPanelId = ref<string>(props.panel.label || nanoid());
-const { repetitionIds, decreaseFieldRepeatAmount, increaseFieldRepeatAmount } =
-  useRepeatableFields(mainPanelId.value);
+const {
+  repetitionIds,
+  decreaseFieldRepeatAmount,
+  increaseFieldRepeatAmount,
+  removeRepeatableFieldConfig,
+} = useRepeatableFields(mainPanelId.value);
 const panelIds = computed(() =>
   repeatablePanel.value ? repetitionIds.value : [mainPanelId.value],
 );
@@ -139,6 +143,8 @@ const baseMetadataFields = computed(() => {
 const expandPanel = () => {
   isCollapsed.value = false;
 };
+
+onUnmounted(() => removeRepeatableFieldConfig());
 </script>
 
 <style scoped>

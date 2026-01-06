@@ -1,5 +1,5 @@
 <template>
-  <div :class="[{ flex: repetitionConfig.repeatable }]">
+  <div :class="[{ flex: repetitionDeleteIsAvailable }]">
     <div v-if="panelType === PanelType.Relation && relationArray.length">
       <div class="pl-2 rounded-sm bg-accent-light">
         <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
@@ -72,7 +72,7 @@
         />
       </div>
     </div>
-    <div v-if="repetitionConfig.repeatable">
+    <div v-if="repetitionDeleteIsAvailable">
       <base-button-new
         :icon="DamsIcons.Trash"
         @click="emit('decreaseRepeatedFieldAmount')"
@@ -121,7 +121,7 @@ const emit = defineEmits(["decreaseRepeatedFieldAmount"]);
 const { t } = useI18n();
 const config = inject("config") as any;
 const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
-const { repetitionIds } = useRepeatableFields(
+const { repetitionIds, repetitionDeleteIsAvailable } = useRepeatableFields(
   props.repetitionConfig.mainPanelId,
 );
 

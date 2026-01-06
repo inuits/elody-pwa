@@ -1,4 +1,4 @@
-import { onUnmounted, ref, computed, type ComputedRef } from "vue";
+import { ref, computed, type ComputedRef } from "vue";
 import { nanoid } from "nanoid";
 
 type RepeatableFieldConfig = {
@@ -12,9 +12,11 @@ const repeatableFieldConfigurations = ref<{
 export type UseRepeatableFields = {
   repetitionIds: ComputedRef<string[]>;
   repeatAmount: ComputedRef<number>;
+  repetitionDeleteIsAvailable: ComputedRef<boolean>;
   getRepeatableFieldConfig: () => RepeatableFieldConfig;
   increaseFieldRepeatAmount: () => void;
   decreaseFieldRepeatAmount: (id: string) => void;
+  removeRepeatableFieldConfig: () => void;
 };
 
 export const useRepeatableFields = (fieldName: string): UseRepeatableFields => {
@@ -51,16 +53,21 @@ export const useRepeatableFields = (fieldName: string): UseRepeatableFields => {
 
   const repetitionIds = computed(() => config.repetitionIds);
   const repeatAmount = computed(() => config.repetitionIds.length);
+  const repetitionDeleteIsAvailable = computed(
+    () => config.repetitionIds.length > 1,
+  );
 
-  onUnmounted(() => {
+  const removeRepeatableFieldConfig = (): void => {
     delete repeatableFieldConfigurations.value[fieldName];
-  });
+  };
 
   return {
     repetitionIds,
     repeatAmount,
+    repetitionDeleteIsAvailable,
     getRepeatableFieldConfig,
     increaseFieldRepeatAmount,
     decreaseFieldRepeatAmount,
+    removeRepeatableFieldConfig,
   };
 };
