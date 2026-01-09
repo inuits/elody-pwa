@@ -139,7 +139,9 @@ const props = defineProps<{
   formFlow?: string;
   isFieldRequired: boolean;
   copyValueFromParent: CopyValueFromParentIntialValues;
-  extractValueFromParent: Function;
+  extractValueFromParent: (
+    key: string,
+  ) => string | string[] | number | number[] | undefined;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -147,6 +149,7 @@ const computedError = computed<string>(() => {
   const fastValidationMessage = props.field?.validation
     ?.fastValidationMessage as string;
   if (fastValidationMessage) return t(fastValidationMessage);
+  if (!props.error || !props.error?.value) return "";
   else return t(props.error as string);
 });
 

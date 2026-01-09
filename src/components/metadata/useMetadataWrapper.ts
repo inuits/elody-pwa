@@ -116,7 +116,8 @@ export const useMetadataWrapper = (
       ...new Set([...viewPermissions, ...editPermissions]),
     ];
 
-    const permissionResults = await fetchAdvancedPermissions(requiredPermissions);
+    const permissionResults =
+      await fetchAdvancedPermissions(requiredPermissions);
 
     const isPermitted = (permissions: string[]): boolean =>
       permissions.some((permission) => permissionResults[permission]);
@@ -156,9 +157,9 @@ export const useMetadataWrapper = (
     getValidationRules(props.isEdit, isFieldRequired.value),
   );
   const field: FieldContext = useField<MetadataWrapperProps>(
-    fieldKey.value,
-    fieldValidationRules.value,
-    { label: fieldLabel.value },
+    fieldKey,
+    fieldValidationRules,
+    { label: fieldLabel },
   );
   const fieldType = computed<InputFieldTypes | undefined>(
     () => props.metadata.inputField?.type as InputFieldTypes,
@@ -193,8 +194,12 @@ export const useMetadataWrapper = (
     set: (val) => (field.value.value = getNewFieldValue(val)),
   });
 
-  const parentForm = ref<FormContext | undefined>(useFormHelper().getForm(getEntityIdFromRoute()));
-  const extractIntialValueFromParentByKey = (key: string): string | undefined => {
+  const parentForm = ref<FormContext | undefined>(
+    useFormHelper().getForm(getEntityIdFromRoute()),
+  );
+  const extractIntialValueFromParentByKey = (
+    key: string,
+  ): string | undefined => {
     if (!parentForm.value || !key) return undefined;
     return parentForm?.value.values.intialValues[key];
   };
