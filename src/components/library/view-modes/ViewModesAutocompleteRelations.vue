@@ -189,13 +189,16 @@ onMounted(async () => {
 });
 
 const initAutocompleteOption = async () => {
-  if (props.isReadOnly) {
+  if (props.isReadOnly || !props.isMetadataField) {
     if (
       (props.formId || entityId) &&
       (props.relationType || props.fromRelationType) &&
       props.mode !== "create"
     ) {
-      await relatedEntitiesHelper.value.initialize();
+      await Promise.all([
+        relatedEntitiesHelper.value.initialize(),
+        allEntitiesHelper.value.initialize(),
+      ]);
     }
   } else {
     await allEntitiesHelper.value.initialize();

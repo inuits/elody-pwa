@@ -73,7 +73,7 @@
               :disabled="!linkedEntityId && !metadata.lineClamp"
               :line-clamp="metadata.lineClamp || 1"
             >
-              <MetadataFormatter
+            <MetadataFormatter
                 v-if="metadata.value?.formatter"
                 v-bind="metadata.value"
                 :translation-key="metadata.valueTranslationKey"
