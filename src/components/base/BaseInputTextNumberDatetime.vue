@@ -11,7 +11,8 @@
         type !== 'textarea' &&
         type !== 'checkbox' &&
         type !== 'resizableTextarea' &&
-        type !== 'datetime-local'
+        type !== 'datetime-local' &&
+        type !== 'date'
       "
       :class="[
         'border rounded-lg focus:ring-0',
