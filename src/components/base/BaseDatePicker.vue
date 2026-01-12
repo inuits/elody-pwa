@@ -46,9 +46,10 @@ const modelType = computed(() => {
 });
 
 const formats = computed(() => {
+  const format = props.type.includes("datetime") ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy";
   return {
-    preview: props.type.includes("datetime") ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy",
-    input: props.type.includes("datetime") ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy",
+    preview: format,
+    input: format,
   };
 });
 
