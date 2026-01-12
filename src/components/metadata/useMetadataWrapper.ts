@@ -181,12 +181,7 @@ export const useMetadataWrapper = (
     )
       emitAddRefetchFunction();
 
-    if (fieldType.value === InputFieldTypes.Date) {
-      const parsedDate = DateTime.fromISO(newValue);
-      if (parsedDate.isValid) return parsedDate.toFormat("yyyy-MM-dd");
-    } else {
-      return newValue;
-    }
+    return newValue;
   };
 
   const fieldValueProxy = computed({

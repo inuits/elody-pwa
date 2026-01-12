@@ -1,13 +1,18 @@
 <template>
   <div>
+    <BaseDatePicker
+      v-model="inputValue"
+      :type="type"
+      v-if="['date', 'datetime-local'].includes(type)"
+    />
     <input
       data-cy="base-input-text"
-      v-if="
+      v-else-if="
         type !== 'textarea' &&
         type !== 'checkbox' &&
-        type !== 'resizableTextarea'
+        type !== 'resizableTextarea' &&
+        type !== 'datetime-local'
       "
-      ref="baseInput"
       :class="[
         'border rounded-lg focus:ring-0',
         { 'w-full h-full': type !== 'color' },
@@ -67,6 +72,7 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import BaseResizableTextarea from "./BaseResizableTextarea.vue";
+import BaseDatePicker from "./BaseDatePicker.vue";
 
 type PseudoStyle = {
   textColor: string;
@@ -158,32 +164,6 @@ const inputValue = computed<string | number | boolean | undefined>({
     if (props.isValidPredicate(value)) emit("update:modelValue", value);
   },
 });
-
-const baseInput = ref<HTMLInputElement | null>(null);
-
-const openCalendar = (event: KeyboardEvent) => {
-  if (!["date", "datetime-local", "time"].includes(props.type)) {
-    event.preventDefault();
-    return;
-  }
-
-  if (baseInput.value.showPicker) {
-    baseInput.value.showPicker();
-  } else {
-    baseInput.value.focus();
-  }
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (props.type === "date") {
-    event.preventDefault();
-  }
-};
-
-const disableVirtualKeyboard = (event: FocusEvent) => {
-  if (props.type !== "date") return;
-  (event.target as HTMLInputElement).blur();
-};
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 </script>
