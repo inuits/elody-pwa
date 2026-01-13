@@ -7,6 +7,7 @@
         :label="t('navigation.tenant')"
         :clearable="false"
         :disable="isEdit"
+        :always-calcualte-width="true"
         label-position="inline"
         style-type="defaultWithLightBorder"
       />

@@ -106,6 +106,7 @@ const props = withDefaults(
     addIconToValue?: boolean;
     showMenuHeader?: boolean;
     styleType: DropdownStyle;
+    alwaysCalcualteWidth?: boolean;
   }>(),
   {
     selectFirstOptionByDefault: false,
@@ -118,6 +119,7 @@ const props = withDefaults(
     addIconToValue: false,
     showMenuHeader: true,
     styleType: "default",
+    alwaysCalcualteWidth: false,
   },
 );
 
@@ -188,6 +190,11 @@ const shouldCalculateWidth = ref(false);
 const calculatedWidth = ref(200);
 
 const checkIfCalculationNeeded = () => {
+  if (props.alwaysCalcualteWidth) {
+    shouldCalculateWidth.value = true;
+    return;
+  }
+
   shouldCalculateWidth.value =
     props.options.length > 0 && props.options.length <= 20;
 };
