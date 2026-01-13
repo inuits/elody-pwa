@@ -3,6 +3,7 @@
     class="base-date-picker"
     v-model="dateValue"
     :time-config="{ enableTimePicker: enableTimePicker }"
+    :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
     :model-type="modelType"
     :formats="formats"
     :placeholder="props.placeholder"
@@ -14,6 +15,7 @@
 import { VueDatePicker } from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { computed } from "vue";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -30,6 +32,8 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: string | undefined): void;
 }>();
+
+const { someModalIsOpened } = useBaseModal();
 
 const dateValue = computed<string | undefined>({
   get() {

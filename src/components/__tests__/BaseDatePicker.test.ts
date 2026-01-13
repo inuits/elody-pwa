@@ -5,6 +5,12 @@ import { VueDatePicker } from '@vuepic/vue-datepicker';
 
 vi.mock('@vuepic/vue-datepicker/dist/main.css', () => ({}));
 
+vi.mock("@/composables/useBaseModal", () => ({
+  useBaseModal: () => ({
+    someModalIsOpened: false,
+  }),
+}));
+
 process.env.TZ = 'UTC';
 
 describe('BaseDatePicker', () => {
