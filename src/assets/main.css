@@ -117,6 +117,7 @@
   --z-index-edit-modal: 39;
   --z-index-navigation: 40;
   --z-index-navigation-sub: 42;
+  --z-index-map: 43;
   --z-index-dropdown: 44;
   --z-index-overlay: 48;
   --z-index-backdrop: 49;
@@ -136,6 +137,7 @@
   --z-content-raised: var(--z-index-content-raised);
   --z-navigation: var(--z-index-navigation);
   --z-navigation-sub: var(--z-index-navigation-sub);
+  --z-map: var(--z-index-map);
   --z-dropdown: var(--z-index-dropdown);
   --z-popover: var(--z-index-popover);
   --z-sticky: var(--z-index-sticky);

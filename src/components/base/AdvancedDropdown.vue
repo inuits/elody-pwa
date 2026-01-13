@@ -298,7 +298,7 @@ div.menu-option:hover {
 }
 
 .vue-advanced-select .menu {
-  --vs-menu-z-index: var(--z-dropdown) !important;
+  --vs-menu-z-index: var(--z-header) !important;
 }
 
 .vue-advanced-select .vue-select,

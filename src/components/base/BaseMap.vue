@@ -2,6 +2,7 @@
   <div :class="['h-full w-full overflow-hidden']">
     <div v-if="parsedMapData.coordinates" class="h-[50vh] w-full">
       <l-map
+        class="z-map"
         :use-global-leaflet="false"
         ref="map"
         v-model:zoom="zoom"
