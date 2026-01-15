@@ -201,6 +201,16 @@ const initAutocompleteOption = async () => {
     await allEntitiesHelper.value.initialize();
   }
 
+  if (!props.isReadOnly && props.relationFilter) {
+    if (
+      (props.formId || entityId) &&
+      (props.relationType || props.fromRelationType) &&
+      props.mode !== "create"
+    ) {
+      await relatedEntitiesHelper.value.initialize();
+    }
+  }
+
   if (
     props.autoSelectable &&
     allEntitiesHelper.value.entityDropdownOptions.value.length === 1 &&
