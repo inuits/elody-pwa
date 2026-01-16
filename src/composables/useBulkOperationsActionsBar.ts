@@ -27,6 +27,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { apolloClient } from "@/main";
 import { getValueForPanelMetadata } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export interface BulkOperationsActionsBarProps {
   context: Context;
@@ -247,9 +248,11 @@ export const useBulkOperationsActionsBar = (
     }
 
     const query = await loadDocument(props.customBulkOperations);
+    const variables = getBulkOperationsVariablesFromParentIntialValues(query);
     return apolloClient
       .query({
         query: query,
+        variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
@@ -340,6 +343,27 @@ export const useBulkOperationsActionsBar = (
     } catch (error) {
       return await loadDocument("GetBulkOperations");
     }
+  };
+
+  const getBulkOperationsVariablesFromParentIntialValues = (query: any): object => {
+    const variableDefinitions = query?.definitions[0].variableDefinitions;
+    if (!variableDefinitions) return {};
+
+    const variables: any = {};
+    const form = useFormHelper().getForm(props.parentEntityId);
+
+    const variableKeys = query?.definitions[0].variableDefinitions.map(
+      (variableDef: any) => {
+        const variable = variableDef?.variable?.name?.value;
+        if (variable) return variable;
+      },
+    );
+
+    for (const variableKey of variableKeys) {
+      const variable = form?.values?.intialValues[variableKey];
+      if (variable) variables[variableKey] = variable;
+    }
+    return variables;
   };
 
   watch(
