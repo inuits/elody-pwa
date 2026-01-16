@@ -31,6 +31,7 @@ import { useDeleteEntities } from "@/composables/useDeleteEntities";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");
@@ -55,6 +56,7 @@ const { initializeGeneralProperties, initializePropertiesForDeletion } =
 const { initializeConfirmModal } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
+const { previousRoute } = useBreadcrumbs({});
 
 const deleteAvailable = ref<boolean>(
   useEditHelper.value.editMode === "edit-delete" ||
@@ -93,10 +95,15 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
 
     cleanupPreviousPageInfoById(id);
 
-    if (pageInfo.value.parentRouteName !== "SingleEntity") {
-      router.push({ name: pageInfo.value.parentRouteName });
-    } else {
+    const parent = pageInfo.value.parentRouteName;
+    if (!parent && previousRoute.value) {
+      router.push({ name: previousRoute.value.overviewPage });
+    } else if (parent === "SingleEntity") {
       router.push({ path: previousPageInfo.value.fullPath });
+    } else if (parent) {
+      router.push({ name: parent });
+    } else {
+      router.push({ path: "/" });
     }
 
     displaySuccessNotification(
