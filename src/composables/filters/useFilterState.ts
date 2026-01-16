@@ -156,6 +156,9 @@ export const useFilterState = () => {
   const resolveAllVariables = (rawValue: string) => {
     return rawValue.replace(/\$([\w.]+)/g, (match, path) => {
       const resolved = extractValueFromObject(variables.value, path);
+      if (Array.isArray(resolved)) {
+        return JSON.stringify(resolved);
+      }
       return resolved !== undefined ? String(resolved) : match;
     });
   };
