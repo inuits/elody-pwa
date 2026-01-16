@@ -5,6 +5,7 @@ type FilterVariables = {
   parentIds?: string[] | string;
   entityType?: Entitytyping | string;
   entity?: Entity;
+  dateToday?: string;
 };
 
 export const useFilterVariables = () => {

@@ -1,9 +1,9 @@
 import { useMinMaxAdvancedFilter } from "@/composables/useMinMaxAdvancedFilter";
 import { AdvancedFilterTypes } from "@/generated-types/queries";
-import { extractDate, extractTime } from "@/helpers";
 import type { FilterListItem } from "@/composables/useStateManagement";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
@@ -16,25 +16,26 @@ vi.mock("@/helpers", () => ({
   isDateTime: vi.fn(
     (value) => typeof value === "string" && value.includes("T"),
   ),
-  extractDate: vi.fn((value) => (value ? value.split("T")[0] : undefined)),
-  extractTime: vi.fn((value) => (value ? value.split("T")[1] : undefined)),
 }));
 
 describe("useMinMaxAdvancedFilter", () => {
-  const mockFilter: FilterListItem = {
-    advancedFilter: {
-      type: AdvancedFilterTypes.Date,
-      parentKey: "parentKey",
-      key: "key",
-      aggregation: "sum",
-      showTimeForDateFilter: true,
-    },
-    inputFromState: {
-      value: {
-        min: "2023-10-01T12:00:00",
-        max: "2023-10-02T14:00:00",
+  const getMockFilter = (values: any = {}): FilterListItem => {
+    return {
+      advancedFilter: {
+        type: AdvancedFilterTypes.Date,
+        parentKey: "parentKey",
+        key: "key",
+        aggregation: "sum",
+        showTimeForDateFilter: true,
       },
-    },
+      inputFromState: {
+        value: {
+          min: "2026-01-15T11:00:00",
+          max: "2026-01-16T22:00:00",
+          ...values,
+        },
+      },
+    };
   };
 
   const emitEvent = vi.fn();
@@ -43,191 +44,127 @@ describe("useMinMaxAdvancedFilter", () => {
     vi.clearAllMocks();
   });
 
-  it("initializes input values correctly", async () => {
-    const TestComponent = {
+  const createWrapper = (values: any = {}, filter = getMockFilter(values)) => {
+    return mount({
       template: "<div></div>",
       setup() {
-        return useMinMaxAdvancedFilter(mockFilter, emitEvent);
+        return useMinMaxAdvancedFilter(filter, emitEvent);
       },
-    };
+    });
+  };
 
-    const wrapper = mount(TestComponent);
+  it("initializes input values directly from state (no extraction needed)", async () => {
+    const wrapper = createWrapper();
+    await nextTick();
 
-    await wrapper.vm.$nextTick();
+    const { inputMin, inputMax } = wrapper.vm;
 
-    const { inputMin, inputMax, inputTimeMin, inputTimeMax } = wrapper.vm;
-
-    expect(extractDate).toHaveBeenCalledWith("2023-10-01T12:00:00");
-    expect(extractTime).toHaveBeenCalledWith("2023-10-01T12:00:00");
-    expect(extractDate).toHaveBeenCalledWith("2023-10-02T14:00:00");
-    expect(extractTime).toHaveBeenCalledWith("2023-10-02T14:00:00");
-
-    expect(inputMin).toBe("2023-10-01");
-    expect(inputTimeMin).toBe("12:00:00");
-    expect(inputMax).toBe("2023-10-02");
-    expect(inputTimeMax).toBe("14:00:00");
+    expect(inputMin).toBe("2026-01-15T11:00:00");
+    expect(inputMax).toBe("2026-01-16T22:00:00");
   });
 
-  it("computes determineInputType correctly", () => {
-    const { determineInputType } = useMinMaxAdvancedFilter(
-      mockFilter,
-      emitEvent,
-    );
+  it("initializes input values with timezone directly from state (no extraction needed)", async () => {
+    const min = "2026-05-20T10:00:00+00:00";
+    const max = "2026-05-21T11:00:00+00:00";
+    const wrapper = createWrapper({
+      min,
+      max,
+    });
+    await nextTick();
 
-    expect(determineInputType.value).toEqual(["date", "time"]);
+    const { inputMin, inputMax } = wrapper.vm;
+
+    console.log(inputMin, inputMax);
+
+    expect(inputMin).toBe(min);
+    expect(inputMax).toBe(max);
+  });
+
+  it("computes determineInputType correctly for various types", () => {
+    const datetimeWrapper = createWrapper();
+    expect(datetimeWrapper.vm.determineInputType).toBe("datetime-local");
+
+    const dateOnlyFilter = {
+      ...getMockFilter(),
+      advancedFilter: {
+        ...getMockFilter().advancedFilter,
+        showTimeForDateFilter: false,
+      },
+    };
+    const dateOnlyWrapper = createWrapper({}, dateOnlyFilter);
+    expect(dateOnlyWrapper.vm.determineInputType).toBe("date");
 
     const numberFilter = {
-      ...mockFilter,
+      ...getMockFilter(),
       advancedFilter: {
-        ...mockFilter.advancedFilter,
+        ...getMockFilter().advancedFilter,
         type: AdvancedFilterTypes.Number,
       },
     };
-    const { determineInputType: numberInputType } = useMinMaxAdvancedFilter(
-      numberFilter,
-      emitEvent,
-    );
-    expect(numberInputType.value).toBe("number");
+    const numberWrapper = createWrapper({}, numberFilter);
+    expect(numberWrapper.vm.determineInputType).toBe("number");
   });
 
-  it("computes determinePlaceholder correctly", () => {
-    const { determinePlaceholder } = useMinMaxAdvancedFilter(
-      mockFilter,
-      emitEvent,
-    );
+  it("emits correct payload when inputs change", async () => {
+    const wrapper = createWrapper();
 
-    expect(determinePlaceholder.value).toBe(
-      "filters.matcher-placeholders.date",
-    );
+    wrapper.vm.inputMin = "2026-05-20T10:00:00";
+    wrapper.vm.inputMax = "2026-05-21T11:00:00";
+
+    await nextTick();
+
+    expect(emitEvent).toHaveBeenCalledWith("updateValue", {
+      min: "2026-05-20T10:00:00+00:00",
+      max: "2026-05-21T11:00:00+00:00",
+      included: true,
+    });
+  });
+
+  it("emits undefined if both inputs are empty", async () => {
+    const wrapper = createWrapper();
+
+    wrapper.vm.inputMin = "";
+    wrapper.vm.inputMax = "";
+
+    await nextTick();
+
+    expect(emitEvent).toHaveBeenCalledWith("updateValue", undefined);
+  });
+
+  it("handles number type correctly without normalization", async () => {
+    const numberFilter = {
+      ...getMockFilter(),
+      advancedFilter: {
+        ...getMockFilter().advancedFilter,
+        type: AdvancedFilterTypes.Number,
+      },
+    };
+    const wrapper = createWrapper(numberFilter);
+
+    wrapper.vm.inputMin = 100;
+    wrapper.vm.inputMax = 200;
+
+    await nextTick();
+
+    expect(emitEvent).toHaveBeenCalledWith("updateValue", {
+      min: 100,
+      max: 200,
+      included: true,
+    });
+  });
+
+  it("identifies number type correctly", () => {
+    const wrapper = createWrapper();
+    expect(wrapper.vm.isNumberType).toBe(false);
 
     const numberFilter = {
-      ...mockFilter,
+      ...getMockFilter(),
       advancedFilter: {
-        ...mockFilter.advancedFilter,
+        ...getMockFilter().advancedFilter,
         type: AdvancedFilterTypes.Number,
       },
     };
-    const { determinePlaceholder: numberPlaceholder } = useMinMaxAdvancedFilter(
-      numberFilter,
-      emitEvent,
-    );
-    expect(numberPlaceholder.value).toBe("filters.matcher-placeholders.number");
-  });
-
-  it("emits correct payload for min and max values", async () => {
-    const { inputMin, inputMax, inputTimeMin, inputTimeMax } =
-      useMinMaxAdvancedFilter(mockFilter, emitEvent);
-
-    inputMin.value = "2023-10-03";
-    inputTimeMin.value = "15:00:00";
-    inputMax.value = "2023-10-04";
-    inputTimeMax.value = "16:00:00";
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(emitEvent).toHaveBeenCalledWith(
-      "newAdvancedFilterInput",
-      {
-        type: AdvancedFilterTypes.Date,
-        parent_key: "parentKey",
-        key: "key",
-        value: {
-          min: "2023-10-03T15:00:00+00:00",
-          max: "2023-10-04T16:00:00+00:00",
-          included: true,
-        },
-        aggregation: "sum",
-      },
-      false,
-    );
-  });
-
-  it("emits correct payload for only min value", async () => {
-    const { inputMin, inputTimeMin } = useMinMaxAdvancedFilter(
-      mockFilter,
-      emitEvent,
-    );
-
-    inputMin.value = "2023-10-03";
-    inputTimeMin.value = "15:00:00";
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(emitEvent).toHaveBeenCalledWith(
-      "newAdvancedFilterInput",
-      {
-        type: AdvancedFilterTypes.Date,
-        parent_key: "parentKey",
-        key: "key",
-        value: {
-          min: "2023-10-03T15:00:00+00:00",
-          included: true,
-        },
-        aggregation: "sum",
-      },
-      false,
-    );
-  });
-
-  it("emits correct payload for only max value", async () => {
-    const { inputMax, inputTimeMax } = useMinMaxAdvancedFilter(
-      mockFilter,
-      emitEvent,
-    );
-
-    inputMax.value = "2023-10-04";
-    inputTimeMax.value = "16:00:00";
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(emitEvent).toHaveBeenCalledWith(
-      "newAdvancedFilterInput",
-      {
-        type: AdvancedFilterTypes.Date,
-        parent_key: "parentKey",
-        key: "key",
-        value: {
-          max: "2023-10-04T16:00:00+00:00",
-          included: true,
-        },
-        aggregation: "sum",
-      },
-      false,
-    );
-  });
-
-  it("handles number type correctly", async () => {
-    const numberFilter = {
-      ...mockFilter,
-      advancedFilter: {
-        ...mockFilter.advancedFilter,
-        type: AdvancedFilterTypes.Number,
-      },
-    };
-    const { inputMin, inputMax } = useMinMaxAdvancedFilter(
-      numberFilter,
-      emitEvent,
-    );
-
-    inputMin.value = 100;
-    inputMax.value = 200;
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(emitEvent).toHaveBeenCalledWith(
-      "newAdvancedFilterInput",
-      {
-        type: AdvancedFilterTypes.Number,
-        parent_key: "parentKey",
-        key: "key",
-        value: {
-          min: 100,
-          max: 200,
-          included: true,
-        },
-        aggregation: "sum",
-      },
-      false,
-    );
+    const numberWrapper = createWrapper({}, numberFilter);
+    expect(numberWrapper.vm.isNumberType).toBe(true);
   });
 });

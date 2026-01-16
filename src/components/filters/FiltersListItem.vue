@@ -114,6 +114,10 @@ const getDefaultMatcher = (): string | undefined => {
     [AdvancedFilterTypes.Number]: Matchers.ExactMatcher,
   };
 
+  if (props.filter.advancedFilter.defaultMatcher) {
+    return props.filter.advancedFilter.defaultMatcher;
+  }
+
   const matcherName = defaultMatchers[props.filter.advancedFilter.type];
   return props.matchers.find((m) => m.value === matcherName)?.value;
 };

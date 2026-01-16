@@ -136,16 +136,42 @@ export const useFilterState = () => {
   };
 
   const getFilterValue = (filter: AdvancedFilter) => {
+
     let value = resolveVariableReferences(filter);
-    if (typeof value === "string" && value.startsWith("$")) {
-      const path = value.substring(1);
-      value =
-        extractValueFromObject(variables.value, path) ?? filter.defaultValue;
+
+    if (typeof value === "string" && value.includes("$")) {
+      value = resolveAllVariables(value);
     }
 
+    value = tryParseJson(value);
+
     const additionalFilterValues = getAdditionalFilterValues(filter);
-    if (additionalFilterValues && Array.isArray(value))
+    if (additionalFilterValues && Array.isArray(value)) {
       value = [...value, ...additionalFilterValues];
+    }
+
+    return value;
+  };
+
+  const resolveAllVariables = (rawValue: string) => {
+    return rawValue.replace(/\$([\w.]+)/g, (match, path) => {
+      const resolved = extractValueFromObject(variables.value, path);
+      return resolved !== undefined ? String(resolved) : match;
+    });
+  };
+
+  const tryParseJson = <T>(value: any): T | any => {
+    if (typeof value !== "string") return value;
+
+    try {
+      const sanitized = value.replace(/'/g, '"');
+      const parsed = JSON.parse(sanitized);
+      if (parsed && typeof parsed === "object") {
+        return parsed;
+      }
+    } catch {
+      // Parsing failed, it's a regular string
+    }
 
     return value;
   };

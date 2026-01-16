@@ -151,7 +151,7 @@ import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { apolloClient } from "@/main";
-import { computed, defineProps, onMounted, ref, watch, inject } from "vue";
+import { computed, onMounted, ref, watch, inject } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
@@ -164,6 +164,7 @@ import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useImport } from "@/composables/useImport";
+import { DateTime } from "luxon";
 
 export type FiltersBaseAPI = {
   initializeAndActivateNewFilter: (
@@ -521,6 +522,7 @@ const updateFilterVariables = () => {
     parentIds: props.parentEntityIdentifiers,
     entityType: props.entityType,
     entity: parentEntity?.value,
+    dateToday: DateTime.now().toISO(),
   });
 };
 
