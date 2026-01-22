@@ -47,6 +47,8 @@ const isSingleEntityPage = computed(() => {
 });
 
 const showDeleteButton = computed(() => {
+  const meta = getRouteMetadataInfoFromEntity(config, entityType.value);
+  if (meta?.hasDeleteButton === false) return false;
   return isSingleEntityPage.value && auth.isAuthenticated.value;
 });
 
