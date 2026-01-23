@@ -1,4 +1,5 @@
 <template>
+  <Teleport to="#header-actions" :disabled="!showInHeader">
   <div
     @click.stop.prevent="openContextMenu"
     class="flex items-center justify-center"
@@ -21,6 +22,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
@@ -79,6 +81,10 @@ const availableContextMenuActions = ref<ContextMenuActions | undefined>(
 const hasAvailableContextMenuActions = computed(() => {
   if (!availableContextMenuActions.value) return false;
   return Object.keys(availableContextMenuActions.value).length > 0;
+});
+
+const showInHeader = computed(() => {
+  return props.contextMenuActions?.displaySettings?.showInHeader || false;
 });
 
 const getAvailableContextMenuActions = () => {

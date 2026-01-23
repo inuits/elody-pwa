@@ -8,6 +8,7 @@
       v-if="showEditMetadataButton"
     />
     <DeleteButton v-if="showDeleteButton" />
+    <div class="ml-0" id="header-actions" />
     <LanguageSelect class="flex justify-end pr-2 ml-auto" />
     <tenant-switcher
       class="flex justify-end pr-2"

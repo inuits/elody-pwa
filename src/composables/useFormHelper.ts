@@ -134,9 +134,8 @@ const useFormHelper = () => {
   };
 
   const addEditableMetadataKeys = (keys: string[], formId: string): void => {
-    keys.forEach((key: string) => {
-      editableFields.value[formId]?.push(key);
-    });
+    const currentKeys = editableFields.value[formId] || [];
+    editableFields.value[formId] = [...currentKeys, ...keys];
   };
 
   const route = useRoute();

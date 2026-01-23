@@ -65,6 +65,7 @@ const enableTimePicker = computed<boolean>(() => {
 <style>
 .dp__theme_light {
   --dp-primary-color: var(--color-accent-accent);
+  --dp-text-color: var(--color-text-body);
 }
 
 .base-date-picker .dp__input {

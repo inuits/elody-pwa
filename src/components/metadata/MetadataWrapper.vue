@@ -179,7 +179,7 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, inject } from "vue";
+import { ref, onBeforeMount, computed, inject, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
@@ -187,6 +187,7 @@ import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -208,6 +209,7 @@ const props = withDefaults(defineProps<MetadataWrapperProps>(), {
 
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
+  (event: "update:metadata", mutatedField: PanelMetaData): void;
 }>();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider");
@@ -265,4 +267,12 @@ onBeforeMount(() => {
     initializeDropdownStates();
   }
 });
+
+watch(
+  () => fieldValueProxy,
+  () => {
+    emit("update:metadata", { ...props.metadata, value: fieldValueProxy.value } as PanelMetaData);
+  },
+  { deep: true },
+);
 </script>

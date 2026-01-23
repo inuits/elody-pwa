@@ -1,6 +1,6 @@
 <template>
   <base-context-menu-item
-    @clicked="doAction()"
+    @clicked="doAction"
     :label="$t(label, [entityTypeLabel])"
     :icon="Unicons[icon].name"
     :disable="isDisabled"
@@ -18,6 +18,7 @@ import {
   Entitytyping,
   Collection,
   TypeModals,
+  ModalStyle,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -43,6 +44,7 @@ const props = defineProps<{
   action: ContextMenuElodyActionEnum;
   entityType: Entitytyping;
   entityId: string;
+  formQuery?: string;
   relation?:
     | { idx: number; relation: object }
     | "no-relation-found"
@@ -55,17 +57,19 @@ const { deleteRelations, submit } = useDeleteRelations();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { initializeConfirmModal } = useConfirmModal();
 const { displaySuccessNotification } = useBaseNotification();
-const { closeModal } = useBaseModal();
+const { closeModal, openModal } = useBaseModal();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const entityFormData: {
   id: string;
   collection: Collection;
+  type: string;
 } = inject("entityFormData") as {
   id: string;
   collection: Collection;
+  type: string;
 };
-const useEditHelper = useEditMode(entityFormData.id);
+const useEditHelper = useEditMode(entityFormData?.id);
 const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
@@ -155,6 +159,27 @@ const doAction = () => {
       submit(entityFormData.id, entityFormData.collection),
     );
     deleteRelation();
+  }
+  if (props.action === ContextMenuElodyActionEnum.UpdateMetadata) {
+    openModal(
+      TypeModals.EntityEditModal,
+      ModalStyle.CenterWide,
+      props.formQuery,
+      undefined,
+      undefined,
+      undefined,
+      {
+        entityId: props.entityId || entityFormData.id,
+        entityType: props.entityType || entityFormData.type || Entitytyping.BaseEntity,
+        callback: () => {
+          if (refetchParentEntity) {
+            refetchParentEntity();
+          } else {
+            props.refetchEntities();
+          }
+        },
+      }
+    );
   }
   if (props.action === ContextMenuElodyActionEnum.DeleteEntity) {
     openDeleteEntityConfirmation();

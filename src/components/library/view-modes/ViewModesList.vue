@@ -255,6 +255,7 @@ const processedEntities = computed(() => {
     );
     const mediaFilename = getMediaFilenameFromEntity(entity);
     const thumbnail = getThumbnail(entity);
+    const contextMenu = getContextMenu(entity)
 
     const memoKey = [
       entity.intialValues,
@@ -275,9 +276,7 @@ const processedEntities = computed(() => {
       componentPath: linkSettings.path,
       forcedNavigationPath: forcedLinkSettings.path,
 
-      contextMenu: parentId
-        ? entity.teaserMetadata?.contextMenuActions
-        : undefined,
+      contextMenu,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
       intialValues: entity.intialValues,
@@ -299,6 +298,14 @@ const processedEntities = computed(() => {
     };
   });
 });
+
+const getContextMenu = (entity: Entity) => {
+  if (entity.teaserMetadata?.forceShowContextMenuActions) {
+    return entity.teaserMetadata?.contextMenuActions;
+  }
+  if (props.parentEntityIdentifiers.length > 0) return entity.teaserMetadata?.contextMenuActions;
+  return undefined;
+};
 
 watch(
   () => props.entities,

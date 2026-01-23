@@ -1,7 +1,6 @@
 <template>
-  <div data-cy="edit-toggle" class="ml-2 mr-6">
+  <div v-if="deleteAvailable" data-cy="edit-toggle" class="ml-2 mr-6">
     <BaseButtonNew
-      v-if="deleteAvailable"
       :label="t('bulk-operations.delete')"
       :icon="DamsIcons.Trash"
       button-style="redDefault"

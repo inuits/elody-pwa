@@ -31,6 +31,7 @@
       <!--      />-->
       <EntityDetailModal />
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
+      <EntityEditModal />
     </div>
   </div>
   <div
@@ -49,6 +50,7 @@ import ConfirmModalView from "./components/ConfirmModalView.vue";
 import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
 import SearchModal from "@/components/modals/SearchModal.vue";
 import SavedSearchesPickerModal from "@/components/modals/SavedSearchesPickerModal.vue";
+import EntityEditModal from "@/components/modals/EntityEditModal.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
