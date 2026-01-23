@@ -36,10 +36,11 @@ const doAction = async () => {
       t("notifications.success.action-started.description"),
     );
 
-const response = await fetch(createUrl(), {
-      method: props.endpointMethod.toUpperCase() || "GET",
+    let method = props.endpointMethod || "GET";
+    const response = await fetch(createUrl(), {
+      method: method.toUpperCase(),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
