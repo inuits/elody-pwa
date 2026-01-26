@@ -2,7 +2,6 @@
   <dialog
     ref="dialog"
     data-testid="modal-dialog"
-    class="overflow-visible"
     closedby="none"
     @close="hideModal"
     @cancel="handleCancel"
