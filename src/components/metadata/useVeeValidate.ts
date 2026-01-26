@@ -20,14 +20,15 @@ export const useVeeValidate = (): {
   ) => boolean;
 } => {
   const getBaseKey = (
-    key: string,
+    metadata: PanelMetaData,
     repeatablePanelConfig: RepeatablePanelConfig | undefined,
     id: string | undefined,
   ): string => {
-    let baseKey: string = key;
-    if (!id && !repeatablePanelConfig?.repeatable) return key;
+    const { getKeyBasedOnInputField } = useFormHelper();
+    let baseKey: string = getKeyBasedOnInputField(metadata);
+    if (!id && !repeatablePanelConfig?.repeatable) return baseKey;
     if (repeatablePanelConfig?.repeatable)
-      baseKey = `panelRepetition-${repeatablePanelConfig.repetitionId}-${baseKey}`;
+      baseKey = `${repeatablePanelConfig.mainPanelId}.${repeatablePanelConfig.repetitionId}.${baseKey}`;
     if (id) return `${baseKey}-${id}`;
 
     return `${baseKey}`;
@@ -54,7 +55,7 @@ export const useVeeValidate = (): {
     metadata: FieldMetadata,
     linkedEntityId: string | undefined = undefined,
     isEdit: boolean | undefined = undefined,
-    repeatablePanelConfig: RepeatablePanelConfig,
+    repeatablePanelConfig: RepeatablePanelConfig | undefined = undefined,
   ): string => {
     const fieldKind:
       | "PanelMetaData"
@@ -62,11 +63,10 @@ export const useVeeValidate = (): {
       | "PanelRelationRootData"
       | undefined = metadata.__typename;
     const baseFieldKey = getBaseKey(
-      metadata.key,
+      metadata as PanelMetaData,
       repeatablePanelConfig,
       linkedEntityId,
     );
-    const { getKeyBasedOnInputField } = useFormHelper();
 
     if (!metadata.inputField && !linkedEntityId)
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
@@ -90,16 +90,16 @@ export const useVeeValidate = (): {
 
     // Required relations and not edit mode
     if (requiredRelations && !isEdit)
-      return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(metadata as PanelMetaData)}`;
+      return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
     if (requiredRelations)
       return `${ValidationFields.RelationValues}.${metadata.inputField.relationType}`;
 
     if (metadata.inputField)
-      return `${ValidationFields.IntialValues}.${getKeyBasedOnInputField(metadata as PanelMetaData)}`;
+      return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
     if (linkedEntityId === undefined)
-      return `${ValidationFields.RelationValues}.${metadata.key}`;
+      return `${ValidationFields.RelationValues}.${baseFieldKey}`;
 
     return `${ValidationFields.RelatedEntityData}.${baseFieldKey}`;
   };

@@ -1,5 +1,13 @@
 <template>
-  <div :class="[{ 'flex items-end': repetitionDeleteIsAvailable }]">
+  <div
+    :class="[
+      {
+        'flex items-end':
+          repeatablePanelConfig?.repeatableFieldsHelper
+            .repetitionDeleteIsAvailable.value,
+      },
+    ]"
+  >
     <div v-if="panelType === PanelType.Relation && relationArray.length">
       <div class="pl-2 rounded-sm bg-accent-light">
         <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
@@ -27,7 +35,7 @@
       <div
         v-for="(metadata, index) in metadatafields"
         v-show="itemMustBeShown(metadata.value)"
-        :key="`${repetitionConfig.repetitionId}-${metadata.key}`"
+        :key="2"
       >
         <metadata-wrapper
           class="py-2 px-2"
@@ -39,7 +47,7 @@
           "
           :form-id="formId"
           :is-edit="isEdit"
-          :repeatablePanelConfig="repetitionConfig"
+          :repeatablePanelConfig="repeatablePanelConfig"
           :metadata="metadatafields[index]"
           :show-errors="editState.showErrors"
           :base-library-mode="metadata.baseLibraryMode"
@@ -73,7 +81,13 @@
         />
       </div>
     </div>
-    <div class="pb-2" v-if="repetitionDeleteIsAvailable">
+    <div
+      class="pb-2"
+      v-if="
+        repeatablePanelConfig?.repeatableFieldsHelper
+          .repetitionDeleteIsAvailable.value
+      "
+    >
       <base-button-new
         :icon="DamsIcons.Trash"
         @click="emit('decreaseRepeatedFieldAmount')"
@@ -98,33 +112,29 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import {
-  type RepeatablePanelConfig,
-  useRepeatableFields,
-} from "@/composables/useRepeatableFields";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
+import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
+
+const emit = defineEmits<{
+  (event: "decreaseRepeatedFieldAmount"): void;
+}>();
 
 const props = defineProps<{
   panelType: PanelType;
   relationArray: PanelRelation[];
   metadatafields: MetadataField[];
   canBeMultipleColumns: boolean;
-  repetitionConfig: RepeatablePanelConfig;
   formId: string;
   isEdit: boolean;
   editState: any;
   identifiers: string[];
   parentIsListItem: boolean;
+  repeatablePanelConfig?: PanelRepetitionProps;
 }>();
-
-const emit = defineEmits(["decreaseRepeatedFieldAmount"]);
 
 const { t } = useI18n();
 const config = inject("config") as any;
 const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
-const { repetitionDeleteIsAvailable } = useRepeatableFields(
-  props.repetitionConfig.mainPanelId,
-);
 
 const itemMustBeShown = (value: any): boolean => {
   if (config.customization.hideEmptyFields === true && !value) return false;

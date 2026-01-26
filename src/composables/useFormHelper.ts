@@ -60,15 +60,20 @@ const useFormHelper = () => {
       return;
     }
 
-    const cleanInitialValues = JSON.parse(JSON.stringify(form.meta.initialValues));
+    const cleanInitialValues = JSON.parse(
+      JSON.stringify(form.meta.initialValues),
+    );
 
     await nextTick();
 
-    form.resetForm({
-      values: cleanInitialValues,
-      touched: {},
-      errors: {}
-    }, { force: true });
+    form.resetForm(
+      {
+        values: cleanInitialValues,
+        touched: {},
+        errors: {},
+      },
+      { force: true },
+    );
   };
 
   const addForm = (key: string, form: FormContext<any>) => {
@@ -110,10 +115,9 @@ const useFormHelper = () => {
     return values.some(__isNotEmpty);
   };
 
-  const getKeyBasedOnInputField = (metadataItem: PanelMetaData) => {
-    if (metadataItem.inputField.fieldKeyToSave != undefined)
-      return metadataItem.inputField.fieldKeyToSave;
-    return metadataItem.key;
+  const getKeyBasedOnInputField = (metadataItem: PanelMetaData): string => {
+    if (!metadataItem.inputField?.fieldKeyToSave) return metadataItem.key;
+    return metadataItem.inputField.fieldKeyToSave;
   };
 
   const getEditableMetadataKeys = (

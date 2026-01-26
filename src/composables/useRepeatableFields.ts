@@ -1,79 +1,50 @@
-import { ref, computed, type ComputedRef } from "vue";
-import { nanoid } from "nanoid";
+import { computed, type ComputedRef, onMounted, type Ref } from "vue";
+import { type FieldEntry, useFieldArray } from "vee-validate";
 
-export type RepeatablePanelConfig = {
-  mainPanelId: string;
-  repetitionId: string;
-  repeatable: boolean;
+export type PanelRepetitionProps = {
+  isRepeatable: boolean;
+  index: number;
+  field: FieldEntry<unknown>;
+  repeatableFieldsHelper: UseRepeatableFields;
 };
-
-type RepeatableFieldConfig = {
-  repetitionIds: string[];
-};
-
-const repeatableFieldConfigurations = ref<{
-  [key: string]: RepeatableFieldConfig;
-}>({});
 
 export type UseRepeatableFields = {
-  repetitionIds: ComputedRef<string[]>;
+  fields: Ref<FieldEntry<unknown>[], FieldEntry<unknown>[]>;
+  repetitionIds: ComputedRef<(string | number)[]>;
   repeatAmount: ComputedRef<number>;
   repetitionDeleteIsAvailable: ComputedRef<boolean>;
-  getRepeatableFieldConfig: () => RepeatableFieldConfig;
-  increaseFieldRepeatAmount: () => void;
-  decreaseFieldRepeatAmount: (id: string) => void;
-  removeRepeatableFieldConfig: () => void;
+  increaseFieldRepeatAmount: (fieldValue: any) => void;
+  decreaseFieldRepeatAmount: (index: number) => void;
 };
 
-export const useRepeatableFields = (fieldName: string): UseRepeatableFields => {
-  const createBaseRepeatableFieldConfig = (): RepeatableFieldConfig => {
-    return { repetitionIds: [nanoid()] };
+export const useRepeatableFields = (
+  fieldKey: string,
+  value: any = undefined,
+): UseRepeatableFields => {
+  const { fields, push, remove } = useFieldArray(fieldKey);
+
+  const increaseFieldRepeatAmount = (fieldValue: any) => {
+    push(fieldValue);
   };
 
-  const initializeRepeatableField = (): void => {
-    if (repeatableFieldConfigurations.value[fieldName]) return;
-    else
-      repeatableFieldConfigurations.value[fieldName] =
-        createBaseRepeatableFieldConfig();
+  const decreaseFieldRepeatAmount = (index: number) => {
+    if (repetitionDeleteIsAvailable.value) {
+      remove(index);
+    }
   };
 
-  initializeRepeatableField();
+  const repetitionIds = computed(() => fields.value.map((field) => field.key));
+  const repeatAmount = computed(() => fields.value.length);
+  const repetitionDeleteIsAvailable = computed(() => fields.value.length > 1);
 
-  const config = repeatableFieldConfigurations.value[fieldName];
-
-  const getRepeatableFieldConfig = (): RepeatableFieldConfig => {
-    return repeatableFieldConfigurations.value[fieldName];
-  };
-
-  const increaseFieldRepeatAmount = (): void => {
-    repeatableFieldConfigurations.value[fieldName].repetitionIds.push(nanoid());
-  };
-
-  const decreaseFieldRepeatAmount = (id: string): void => {
-    if (!repeatableFieldConfigurations.value[fieldName]) return;
-    repeatableFieldConfigurations.value[fieldName].repetitionIds =
-      repeatableFieldConfigurations.value[fieldName].repetitionIds.filter(
-        (repetitionId) => repetitionId !== id,
-      );
-  };
-
-  const repetitionIds = computed(() => config.repetitionIds);
-  const repeatAmount = computed(() => config.repetitionIds.length);
-  const repetitionDeleteIsAvailable = computed(
-    () => config.repetitionIds.length > 1,
-  );
-
-  const removeRepeatableFieldConfig = (): void => {
-    delete repeatableFieldConfigurations.value[fieldName];
-  };
+  onMounted(() => increaseFieldRepeatAmount(value));
 
   return {
+    fields,
     repetitionIds,
     repeatAmount,
     repetitionDeleteIsAvailable,
-    getRepeatableFieldConfig,
     increaseFieldRepeatAmount,
     decreaseFieldRepeatAmount,
-    removeRepeatableFieldConfig,
   };
 };

@@ -1,5 +1,5 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import { type FieldContext, useField } from "vee-validate";
+import { type FieldContext, useField, useFieldArray } from "vee-validate";
 import {
   computed,
   inject,

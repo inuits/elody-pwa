@@ -185,7 +185,7 @@ import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";
-import type { RepeatablePanelConfig } from "@/composables/useRepeatableFields";
+import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -197,7 +197,7 @@ export type MetadataWrapperProps = {
   showErrors?: boolean;
   entityType?: Entitytyping;
   listItemEntity?: BaseEntity;
-  repeatablePanelConfig?: RepeatablePanelConfig;
+  repeatablePanelConfig?: PanelRepetitionProps;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {
