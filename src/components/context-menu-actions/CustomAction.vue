@@ -36,9 +36,8 @@ const doAction = async () => {
       t("notifications.success.action-started.description"),
     );
 
-    let method = props.endpointMethod || "GET";
     const response = await fetch(createUrl(), {
-      method: method.toUpperCase(),
+      method: props.endpointMethod?.toUpperCase() || "GET",
       headers: {
         "Content-Type": "application/json",
       },
