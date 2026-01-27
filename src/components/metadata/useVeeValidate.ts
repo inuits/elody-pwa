@@ -5,14 +5,14 @@ import {
   ValidationRules,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
-import type { RepeatablePanelConfig } from "@/composables/useRepeatableFields";
+import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 
 export const useVeeValidate = (): {
   getVeeValidateKey: (
     metadata: FieldMetadata,
     linkedEntityId: string | undefined,
     isEdit: boolean | undefined,
-    repeatablePanelConfig: RepeatablePanelConfig | undefined,
+    repeatablePanelConfig: PanelRepetitionProps | undefined,
   ) => string;
   isValidationRulePresentOnField: (
     metadata: FieldMetadata,
@@ -21,16 +21,16 @@ export const useVeeValidate = (): {
 } => {
   const getBaseKey = (
     metadata: PanelMetaData,
-    repeatablePanelConfig: RepeatablePanelConfig | undefined,
+    repeatablePanelConfig: PanelRepetitionProps | undefined,
     id: string | undefined,
   ): string => {
     const { getKeyBasedOnInputField } = useFormHelper();
-    let baseKey: string = getKeyBasedOnInputField(metadata);
-    if (!id && !repeatablePanelConfig?.repeatable) return baseKey;
-    if (repeatablePanelConfig?.repeatable)
-      baseKey = `${repeatablePanelConfig.mainPanelId}.${repeatablePanelConfig.repetitionId}.${baseKey}`;
+    const baseKey: string = getKeyBasedOnInputField(metadata);
+    if (!id && !repeatablePanelConfig?.isRepeatable) return baseKey;
+    if (repeatablePanelConfig?.isRepeatable) {
+      return `${repeatablePanelConfig.repeatableFieldsHelper.fieldKey}.${repeatablePanelConfig.index}.${baseKey}`;
+    }
     if (id) return `${baseKey}-${id}`;
-
     return `${baseKey}`;
   };
 

@@ -33,7 +33,7 @@
     <transition>
       <div v-show="!isCollapsed">
         <div
-          v-for="idx in panelRepetitions"
+          v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
         >
           <WindowPanelContent
@@ -56,6 +56,7 @@
               repeatableFieldsHelper.decreaseFieldRepeatAmount(idx - 1)
             "
           />
+          {{ idx - 1 }}
           <hr
             class="my-4 border-neutral-30"
             v-if="
@@ -70,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onUnmounted, ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
@@ -84,7 +85,6 @@ import {
   DamsIcons,
   type PanelRelation,
 } from "@/generated-types/queries";
-import { nanoid } from "nanoid";
 
 const props = withDefaults(
   defineProps<{
@@ -107,13 +107,8 @@ const canBeMultipleColumns = ref<boolean>(
 const repeatablePanel = ref<boolean>(
   props.panel.repetitionConfig?.repeatable ?? false,
 );
-const panelId = computed(
-  () => props.panel.repetitionConfig?.repetitionKey || nanoid(),
-);
-const repeatableFieldsHelper = useRepeatableFields(panelId.value);
-const panelRepetitions = computed(
-  () => repeatableFieldsHelper.repeatAmount.value,
-);
+const panelId = computed(() => props.panel.repetitionConfig?.repetitionKey);
+const repeatableFieldsHelper = useRepeatableFields(panelId.value!);
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
@@ -151,7 +146,6 @@ const expandPanel = () => {
 
 watchEffect(() => {
   if (repeatablePanel.value) {
-    console.log("Here :)");
     repeatableFieldsHelper.init();
   }
 });
