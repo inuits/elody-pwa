@@ -39,7 +39,7 @@
 }
 
 .multiselect-tag {
-  @apply bg-accent-accent text-white text-sm font-semibold py-0.5 pl-2 rounded-sm mr-1 mb-1 flex items-center whitespace-nowrap min-w-0 rtl:pl-0 rtl:pr-2 rtl:mr-0 rtl:ml-1;
+  @apply bg-accent-accent text-white text-sm font-semibold py-0.5 pl-2 rounded-sm mr-1 mb-1 flex items-center min-w-0 rtl:pl-0 rtl:pr-2 rtl:mr-0 rtl:ml-1;
 }
 .multiselect-tag.is-disabled {
   @apply pr-2 opacity-50 rtl:pl-2;

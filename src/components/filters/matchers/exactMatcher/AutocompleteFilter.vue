@@ -6,7 +6,9 @@
     :placeholder="placeholder"
     :no-options-text="noOptionsText"
     :loading="isLoading"
+    :can-create-option="true"
     @search-change="debouncedHandleSearchChange"
+    @add-option="(option) => handleAddOption(option)"
     :search-filter="
       function (option: any) {
         return option;
@@ -94,6 +96,11 @@ const applyInitialValue = (options: DropdownOption[]) => {
 
 const reset = () => {
   selectedOptions.value = [];
+};
+
+const handleAddOption = (option: DropdownOption[]) => {
+  selectedOptions.value.push(option);
+  emit("updateValue", selectedOptions.value.map((option) => option.value));
 };
 
 defineExpose({

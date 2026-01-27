@@ -50,6 +50,8 @@
           !isFieldValid &&
           metadata.inputField?.validation?.fastValidationMessage)
       "
+      :copy-value-from-parent="metadata.copyValueFromParent"
+      :extract-value-from-parent="extractIntialValueFromParentByKey"
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       @click.stop.prevent
@@ -177,7 +179,7 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, inject } from "vue";
+import { ref, onBeforeMount, computed, inject, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
@@ -208,6 +210,7 @@ const props = withDefaults(defineProps<MetadataWrapperProps>(), {
 
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
+  (event: "update:metadata", mutatedField: PanelMetaData): void;
 }>();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider");
@@ -224,6 +227,7 @@ const {
   isFieldValid,
   isFieldRequired,
   fieldTooltipValue,
+  extractIntialValueFromParentByKey,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {
   initializeDropdownStates,
@@ -264,4 +268,12 @@ onBeforeMount(() => {
     initializeDropdownStates();
   }
 });
+
+watch(
+  () => fieldValueProxy,
+  () => {
+    emit("update:metadata", { ...props.metadata, value: fieldValueProxy.value } as PanelMetaData);
+  },
+  { deep: true },
+);
 </script>

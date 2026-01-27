@@ -66,14 +66,23 @@
       :show-menu-header="false"
       style-type="defaultWithBorder"
     />
-    <BaseInputTextNumberDatetime
-      v-else
-      :name="fieldKey"
-      v-model:model-value="metadataValue"
-      :type="field.type as any"
-      input-style="defaultWithBorder"
-      :disabled="fieldEditIsDisabled"
-    />
+    <div v-else :class="[{ 'grid grid-cols-[80%_20%]': enableCopyFromParent }]">
+      <BaseInputTextNumberDatetime
+        :name="fieldKey"
+        v-model:model-value="metadataValue"
+        :type="field.type as any"
+        input-style="defaultWithBorder"
+        :disabled="fieldEditIsDisabled"
+      />
+      <base-button-new
+        v-if="enableCopyFromParent"
+        class="ml-1"
+        :label="t(copyValueFromParent.label)"
+        button-style="accentAccent"
+        button-size="small"
+        @click="() => copyValueFromParentAction(copyValueFromParent.key)"
+      />
+    </div>
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
       <p>
         {{ computedError }}
@@ -86,6 +95,7 @@
 import {
   type AdvancedFilterInput,
   type Conditional,
+  type CopyValueFromParentIntialValues,
   type DropdownOption,
   EditStatus,
   Entitytyping,
@@ -106,6 +116,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -127,6 +138,10 @@ const props = defineProps<{
   fieldIsValid: boolean;
   formFlow?: string;
   isFieldRequired: boolean;
+  copyValueFromParent: CopyValueFromParentIntialValues;
+  extractValueFromParent: (
+    key: string,
+  ) => string | string[] | number | number[] | undefined;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -134,7 +149,14 @@ const computedError = computed<string>(() => {
   const fastValidationMessage = props.field?.validation
     ?.fastValidationMessage as string;
   if (fastValidationMessage) return t(fastValidationMessage);
-  else return t(props.error as string);
+
+  let error = "";
+  if (props.error?.value) {
+    error = t(props.error?.value as string);
+  } else if (props.error && typeof props.error === "string") {
+    error = t(props.error as string);
+  }
+  return error;
 });
 
 const { addEditableMetadataKeys, addMappedRelations } = useFormHelper();
@@ -152,7 +174,10 @@ const metadataValue = computed<string | string[] | number | number[]>({
   },
   set(newValue) {
     let valueFromMetadata = getValueFromMetadata(newValue);
-    if (typeof props.value === "object" && props.value?.formatter?.startsWith("pill")) {
+    if (
+      typeof props.value === "object" &&
+      props.value?.formatter?.startsWith("pill")
+    ) {
       valueFromMetadata = {
         ...props.value,
         label: valueFromMetadata as string,
@@ -179,6 +204,12 @@ const fieldEditIsDisabled = computed(() => {
     props.formId,
     mediafileViewerContext,
   );
+});
+
+const enableCopyFromParent = computed(() => {
+  if (!props.copyValueFromParent || !props.extractValueFromParent) return false;
+  const value = props.extractValueFromParent(props.copyValueFromParent?.key);
+  return !(!value || value == "");
 });
 
 onMounted(() => {
@@ -253,6 +284,12 @@ const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
     });
     return relations;
   }
+};
+
+const copyValueFromParentAction = (key: string) => {
+  const newValue = props.extractValueFromParent(key);
+  if (!newValue) return;
+  metadataValue.value = newValue;
 };
 
 watch(

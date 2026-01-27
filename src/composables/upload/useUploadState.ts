@@ -39,6 +39,7 @@ export const useUploadState = () => {
     missingFileNames.value = [];
     extraMediafileType.value = undefined;
     optionalFileNames.value = [];
+    lastUploadedFileIndex.value = -1;
   };
 
   return {

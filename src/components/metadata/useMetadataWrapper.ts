@@ -1,5 +1,5 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import { type FieldContext, useField, useFieldArray } from "vee-validate";
+import { type FieldContext, type FormContext, useField, useFieldArray } from "vee-validate";
 import {
   computed,
   inject,
@@ -21,7 +21,7 @@ import { useConditionalValidation } from "@/composables/useConditionalValidation
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
-import { getTranslatedMessage } from "@/helpers";
+import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 export type FieldMetadata =
@@ -83,6 +83,7 @@ export const useMetadataWrapper = (
   fieldIsEditableByUser: Ref<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
+  extractIntialValueFromParentByKey: (key: string) => string | undefined;
 } => {
   const getFieldKey = (): string => {
     const { getVeeValidateKey } = useVeeValidate();
@@ -157,9 +158,9 @@ export const useMetadataWrapper = (
     getValidationRules(props.isEdit, isFieldRequired.value),
   );
   const field: FieldContext = useField<MetadataWrapperProps>(
-    fieldKey.value,
-    fieldValidationRules.value,
-    { label: fieldLabel.value },
+    fieldKey,
+    fieldValidationRules,
+    { label: fieldLabel },
   );
   const fieldType = computed<InputFieldTypes | undefined>(
     () => props.metadata.inputField?.type as InputFieldTypes,
@@ -181,18 +182,23 @@ export const useMetadataWrapper = (
     )
       emitAddRefetchFunction();
 
-    if (fieldType.value === InputFieldTypes.Date) {
-      const parsedDate = DateTime.fromISO(newValue);
-      if (parsedDate.isValid) return parsedDate.toFormat("yyyy-MM-dd");
-    } else {
-      return newValue;
-    }
+    return newValue;
   };
 
   const fieldValueProxy = computed({
     get: () => field.value.value,
     set: (val) => (field.value.value = getNewFieldValue(val)),
   });
+
+  const parentForm = ref<FormContext | undefined>(
+    useFormHelper().getForm(getEntityIdFromRoute()),
+  );
+  const extractIntialValueFromParentByKey = (
+    key: string,
+  ): string | undefined => {
+    if (!parentForm.value || !key) return undefined;
+    return parentForm?.value.values.intialValues[key];
+  };
 
   watch(
     () => props.formId,
@@ -231,5 +237,6 @@ export const useMetadataWrapper = (
     fieldIsEditableByUser,
     fieldValueProxy,
     fieldTooltipValue,
+    extractIntialValueFromParentByKey,
   };
 };

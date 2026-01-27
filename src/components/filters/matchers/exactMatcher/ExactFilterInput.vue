@@ -1,23 +1,6 @@
 <template>
   <div class="grow">
-    <div v-if="isDateTimeInput">
-      <BaseInputTextNumberDatetime
-        class="mb-2"
-        v-model="dateValue"
-        input-style="default"
-        type="date"
-        :placeholder="placeholder"
-      />
-      <BaseInputTextNumberDatetime
-        v-if="filter.advancedFilter.showTimeForDateFilter"
-        v-model="timeValue"
-        input-style="default"
-        type="time"
-        :placeholder="placeholder"
-      />
-    </div>
     <BaseInputTextNumberDatetime
-      v-else
       v-model="inputValue"
       input-style="default"
       :type="inputType"
@@ -30,7 +13,6 @@
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { AdvancedFilterTypes } from "@/generated-types/queries";
-import { extractDate, extractTime } from "@/helpers";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 
 const props = defineProps({
@@ -42,18 +24,20 @@ const emit = defineEmits(["updateValue"]);
 
 const { t } = useI18n();
 
-const inputValue = ref<string | number | undefined>();
-const dateValue = ref<string | undefined>();
-const timeValue = ref<string | undefined>();
+const inputValue = ref<string | number | undefined>(
+  props.lastTypedValue || props.filter.inputFromState?.value
+);
 
 const inputType = computed(() => {
-  return props.filter.advancedFilter.type === AdvancedFilterTypes.Number
-    ? "number"
-    : "text";
-});
-
-const isDateTimeInput = computed(() => {
-  return props.filter.advancedFilter.type === AdvancedFilterTypes.Date;
+  const filterType = props.filter.advancedFilter.type;
+  
+  if (filterType === AdvancedFilterTypes.Date) {
+    return props.filter.advancedFilter.showTimeForDateFilter 
+      ? "datetime-local" 
+      : "date";
+  }
+  
+  return filterType === AdvancedFilterTypes.Number ? "number" : "text";
 });
 
 const placeholder = computed(() => {
@@ -67,29 +51,11 @@ const placeholder = computed(() => {
   }
 });
 
-if (props.filter.advancedFilter.type === AdvancedFilterTypes.Date) {
-  dateValue.value = extractDate(props.filter.inputFromState?.value);
-  timeValue.value = extractTime(props.filter.inputFromState?.value);
-} else {
-  inputValue.value = props.lastTypedValue || props.filter.inputFromState?.value;
-}
-
-watch([inputValue, dateValue, timeValue], () => {
-  let value;
-  if (isDateTimeInput.value) {
-    value = timeValue.value
-      ? `${dateValue.value}T${timeValue.value}`
-      : dateValue.value;
-  } else {
-    value = inputValue.value;
-  }
-
-  emit("updateValue", value, Boolean(props.filter.inputFromState));
+watch(inputValue, (newValue) => {
+  emit("updateValue", newValue, Boolean(props.filter.inputFromState));
 });
 
 const reset = () => {
-  dateValue.value = "";
-  timeValue.value = "";
   inputValue.value = "";
 };
 

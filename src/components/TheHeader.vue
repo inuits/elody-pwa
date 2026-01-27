@@ -8,6 +8,7 @@
       v-if="showEditMetadataButton"
     />
     <DeleteButton v-if="showDeleteButton" />
+    <div class="ml-0" id="header-actions" />
     <LanguageSelect class="flex justify-end pr-2 ml-auto" />
     <tenant-switcher
       class="flex justify-end pr-2"
@@ -47,6 +48,8 @@ const isSingleEntityPage = computed(() => {
 });
 
 const showDeleteButton = computed(() => {
+  const meta = getRouteMetadataInfoFromEntity(config, entityType.value);
+  if (meta?.hasDeleteButton === false) return false;
   return isSingleEntityPage.value && auth.isAuthenticated.value;
 });
 

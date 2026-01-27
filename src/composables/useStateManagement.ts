@@ -3,6 +3,7 @@ import type {
   AdvancedFilter,
   AdvancedFilterInput,
   GetEntitiesQueryVariables,
+  Matchers,
 } from "@/generated-types/queries";
 import type { SavedSearchType } from "@/composables/useSaveSearchHepler";
 
@@ -12,6 +13,7 @@ export type FilterListItem = {
   advancedFilter: AdvancedFilter;
   inputFromState: AdvancedFilterInput | undefined;
   selectedMatcher: string | undefined;
+  defaultMatcher?: Matchers;
 };
 
 type BaseLibraryState = {

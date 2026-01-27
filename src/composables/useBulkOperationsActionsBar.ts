@@ -12,7 +12,7 @@ import {
   BulkNavigationPages,
   type BulkOperationModal,
   ActionContextViewModeTypes,
-  PanelType
+  PanelType,
 } from "@/generated-types/queries";
 import {
   type Context,
@@ -27,6 +27,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { apolloClient } from "@/main";
 import { getValueForPanelMetadata } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export interface BulkOperationsActionsBarProps {
   context: Context;
@@ -127,7 +128,7 @@ export const useBulkOperationsActionsBar = (
   const fetchBulkOperations = async (): Promise<void> => {
     try {
       const variables = {
-        entityType: entityType.value
+        entityType: entityType.value,
       };
       const result = await apolloClient.query({
         query: await determineBulkOperationsQuery(),
@@ -137,7 +138,8 @@ export const useBulkOperationsActionsBar = (
       });
 
       if (!result.data || !("BulkOperations" in result.data)) return;
-      bulkOperations.value = result.data?.BulkOperations?.bulkOperationOptions?.options || [];
+      bulkOperations.value =
+        result.data?.BulkOperations?.bulkOperationOptions?.options || [];
     } catch {
       emit("setBulkOperationsAvailable", false);
     }
@@ -246,9 +248,11 @@ export const useBulkOperationsActionsBar = (
     }
 
     const query = await loadDocument(props.customBulkOperations);
+    const variables = getBulkOperationsVariablesFromParentIntialValues(query);
     return apolloClient
       .query({
         query: query,
+        variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
@@ -291,10 +295,16 @@ export const useBulkOperationsActionsBar = (
     const operationType = selectedBulkOperation.value.value;
 
     if (operationType === BulkOperationTypes.OpenDropdown) {
-      subDropdownOptions.value = selectedBulkOperation.value?.subOptions.map((dropdownOption) => {
-        dropdownOption.active = determineActiveState(dropdownOption, props.parentEntityId, itemsSelected.value);
-        return dropdownOption;
-      });
+      subDropdownOptions.value = selectedBulkOperation.value?.subOptions.map(
+        (dropdownOption) => {
+          dropdownOption.active = determineActiveState(
+            dropdownOption,
+            props.parentEntityId,
+            itemsSelected.value,
+          );
+          return dropdownOption;
+        },
+      );
     }
 
     if (!bulkOperationModalConfig || !operationType) {
@@ -333,6 +343,27 @@ export const useBulkOperationsActionsBar = (
     } catch (error) {
       return await loadDocument("GetBulkOperations");
     }
+  };
+
+  const getBulkOperationsVariablesFromParentIntialValues = (query: any): object => {
+    const variableDefinitions = query?.definitions[0].variableDefinitions;
+    if (!variableDefinitions) return {};
+
+    const variables: any = {};
+    const form = useFormHelper().getForm(props.parentEntityId);
+
+    const variableKeys = query?.definitions[0].variableDefinitions.map(
+      (variableDef: any) => {
+        const variable = variableDef?.variable?.name?.value;
+        if (variable) return variable;
+      },
+    );
+
+    for (const variableKey of variableKeys) {
+      const variable = form?.values?.intialValues[variableKey];
+      if (variable) variables[variableKey] = variable;
+    }
+    return variables;
   };
 
   watch(

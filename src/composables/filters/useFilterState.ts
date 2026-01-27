@@ -10,6 +10,7 @@ import { useFilterVariables } from "./useFilterVariables";
 import { useFilterNormalization } from "./useFilterNormalization";
 import { type FilterListItem } from "@/composables/useStateManagement";
 import { extractValueFromObject } from "@/helpers";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export const useFilterState = () => {
   const { variables, setVariables } = useFilterVariables();
@@ -135,15 +136,67 @@ export const useFilterState = () => {
   };
 
   const getFilterValue = (filter: AdvancedFilter) => {
+
     let value = resolveVariableReferences(filter);
 
-    if (typeof value === "string" && value.startsWith("$")) {
-      const path = value.substring(1);
-      value =
-        extractValueFromObject(variables.value, path) ?? filter.defaultValue;
+    if (typeof value === "string" && value.includes("$")) {
+      value = resolveAllVariables(value);
+    }
+
+    value = tryParseJson(value);
+
+    const additionalFilterValues = getAdditionalFilterValues(filter);
+    if (additionalFilterValues && Array.isArray(value)) {
+      value = [...value, ...additionalFilterValues];
     }
 
     return value;
+  };
+
+  const resolveAllVariables = (rawValue: string) => {
+    return rawValue.replace(/\$([\w.]+)/g, (match, path) => {
+      const resolved = extractValueFromObject(variables.value, path);
+      if (Array.isArray(resolved)) {
+        return JSON.stringify(resolved);
+      }
+      return resolved !== undefined ? String(resolved) : match;
+    });
+  };
+
+  const tryParseJson = <T>(value: any): T | any => {
+    if (typeof value !== "string") return value;
+
+    try {
+      const sanitized = value.replace(/'/g, '"');
+      const parsed = JSON.parse(sanitized);
+      if (parsed && typeof parsed === "object") {
+        return parsed;
+      }
+    } catch {
+      // Parsing failed, it's a regular string
+    }
+
+    return value;
+  };
+
+  const getAdditionalFilterValues = (filter: AdvancedFilter) => {
+    let additionalValues = undefined;
+
+    if (
+      filter.includeDefaultValuesFromIntialValues &&
+      variables.value?.parentIds
+    ) {
+      const formValues = useFormHelper().getForm(
+        variables.value?.parentIds[0],
+      )?.values;
+      additionalValues = filter.includeDefaultValuesFromIntialValues.flatMap(
+        (intialValueKey) => {
+          const value = formValues.intialValues[intialValueKey];
+          return value ? value : [];
+        },
+      );
+    }
+    return additionalValues;
   };
 
   const resolveVariableReferences = (filter: AdvancedFilter) => {

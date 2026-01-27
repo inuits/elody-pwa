@@ -304,7 +304,8 @@ const {
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
 } = useFormHelper();
-const { displaySuccessNotification, displayWarningNotification } = useBaseNotification();
+const { displaySuccessNotification, displayWarningNotification } =
+  useBaseNotification();
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const {
@@ -343,8 +344,11 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
 } = useEntityPickerModal();
-const { extractActionArguments, getCallbackFunctions, getParentId } =
-  useModalActions();
+const {
+  extractActionArguments,
+  getCallbackFunctions,
+  getParentId,
+} = useModalActions();
 const route = useRoute();
 
 const { mutate } = useMutation<
@@ -549,7 +553,13 @@ const uploadActionFunction = async () => {
   const mediafilesEntity = hasFieldsForEntityTypeValue
     ? await createEntityFromFormInput(Entitytyping.Mediafile, undefined, true)
     : undefined;
-  await upload(isLinkedUpload.value, mediafilesEntity, form?.value?.values.intialValues, config, t);
+  await upload(
+    isLinkedUpload.value,
+    mediafilesEntity,
+    form?.value?.values.intialValues,
+    config,
+    t,
+  );
   if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,
@@ -612,7 +622,7 @@ const submitActionFunction = async (field: FormAction) => {
     setValues({
       relationValues: {
         ...form.value.values.relationValues,
-        ...relations
+        ...relations,
       },
     });
   }

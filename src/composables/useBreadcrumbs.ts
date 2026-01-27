@@ -17,22 +17,24 @@ import {
 } from "@/helpers";
 import { useI18n } from "vue-i18n";
 
-export type VisitedRoute = {
+export interface BaseRoute {
   id: string;
-  routeName: string;
+  overviewPage: string;
+}
+
+export interface VisitedRoute extends BaseRoute {
+  routeName: string; 
   icon?: DamsIcons;
   path?: string;
-};
+}
+export interface BreadcrumbRoute extends BaseRoute {
+  title: string;
+  type: string;
+}
 export type RootRoute = {
   rootId: string;
   rootTitle: string;
   typePillLabel: any;
-};
-export type BreadcrumbRoute = {
-  id: string;
-  title: string;
-  overviewPage: string;
-  type: string;
 };
 
 const rootRoute = ref<RootRoute>({});
@@ -41,7 +43,7 @@ const breadcrumbPathFinished = ref<boolean>(false);
 
 const useBreadcrumbs = (config: any) => {
   const homeRoutes = getChildrenOfHomeRoutes(config);
-  const previousRoute = computed<VisitedRoute | undefined>(
+  const previousRoute = computed<BreadcrumbRoute | undefined>(
     () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1],
   );
   const { locale } = useI18n();

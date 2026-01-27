@@ -1,4 +1,5 @@
 import { useImport } from "@/composables/useImport";
+import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import type {
   EntityInput,
@@ -16,6 +17,7 @@ type CreateEntityParams = {
 
 export const useManageEntities = () => {
   const { loadDocument } = useImport();
+  const { selectedTenant } = useTenant(undefined);
 
   const createEntityFromInput = (
     entityType: Entitytyping,
@@ -47,7 +49,7 @@ export const useManageEntities = () => {
   ): Promise<any> => {
     return await apolloClient.mutate({
       mutation: queryDocument,
-      variables: { entity },
+      variables: { entity, tenantId: selectedTenant.value },
     });
   };
 

@@ -80,7 +80,8 @@ const useFormHelper = () => {
     forms.value[key] = form;
   };
 
-  const getForm = (key: string): FormContext<any> | undefined => {
+  const getForm = (key: string | undefined): FormContext<any> | undefined => {
+    if (!key) return undefined;
     const form = forms.value[key];
     if (!form) {
       return undefined;
@@ -137,9 +138,8 @@ const useFormHelper = () => {
   };
 
   const addEditableMetadataKeys = (keys: string[], formId: string): void => {
-    keys.forEach((key: string) => {
-      editableFields.value[formId]?.push(key);
-    });
+    const currentKeys = editableFields.value[formId] || [];
+    editableFields.value[formId] = [...currentKeys, ...keys];
   };
 
   const route = useRoute();

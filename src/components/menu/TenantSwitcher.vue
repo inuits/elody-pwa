@@ -2,11 +2,13 @@
   <div data-cy="tenant-switcher" class="min-height-custom block">
     <div>
       <AdvancedDropdown
+        class="z-header!"
         v-model="computedValue"
         :options="tenantsAsDropdownOptions"
         :label="t('navigation.tenant')"
         :clearable="false"
         :disable="isEdit"
+        :always-calcualte-width="true"
         label-position="inline"
         style-type="defaultWithLightBorder"
       />

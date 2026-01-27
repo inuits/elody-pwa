@@ -173,10 +173,14 @@ const facetsFilters = computed(() => {
     : undefined;
 });
 
+const isEnableOldWayToFetch = computed(() => {
+  return props.filter.advancedFilter.useOldWayToFetchOptions || false;
+});
+
 const getSelectionOptions = async () => {
-  return props.filter.advancedFilter.useNewWayToFetchOptions
-    ? loadOptionsAndFacetsInParallel(facetsFilters.value)
-    : getOptions();
+  return isEnableOldWayToFetch.value
+    ? getOptions()
+    : loadOptionsAndFacetsInParallel(facetsFilters.value);
 };
 
 watch(
