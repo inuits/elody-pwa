@@ -35,16 +35,16 @@
       <div
         v-for="(metadata, index) in metadatafields"
         v-show="itemMustBeShown(metadata.value)"
-        :key="2"
+        :key="metadata.key"
       >
         <metadata-wrapper
-          class="py-2 px-2"
           v-if="
             (!nonStandardFieldTypes.includes(metadata.__typename) ||
               metadata.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) &&
             !parentIsListItem &&
             metadata.unit !== Unit.CoordinatesDefault
           "
+          class="py-2 px-2"
           :form-id="formId"
           :is-edit="isEdit"
           :repeatablePanelConfig="repeatablePanelConfig"

@@ -322,7 +322,7 @@ export const getMetadataFields = (
       value.__typename === "WysiwygElement"
     ) {
       fields.push(value);
-    } else {
+    } else if (value.__typename === "PanelMetaData") {
       const key: string = (value as PanelMetaData).key;
       const field = {
         key: key,

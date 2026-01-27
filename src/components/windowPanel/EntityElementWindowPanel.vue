@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onUnmounted, ref } from "vue";
+import { computed, onUnmounted, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
@@ -104,13 +104,15 @@ const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
-const repeatablePanel = ref<boolean>(props.panel.repeatable ?? false);
-const panelId = computed(() =>
-  props.panel.label ? `${t(props.panel.label)}-panel` : `${nanoid()}-panel`,
+const repeatablePanel = ref<boolean>(
+  props.panel.repetitionConfig?.repeatable ?? false,
+);
+const panelId = computed(
+  () => props.panel.repetitionConfig?.repetitionKey || nanoid(),
 );
 const repeatableFieldsHelper = useRepeatableFields(panelId.value);
-const panelRepetitions = computed(() =>
-  repeatablePanel.value ? repeatableFieldsHelper.repeatAmount.value : 1,
+const panelRepetitions = computed(
+  () => repeatableFieldsHelper.repeatAmount.value,
 );
 
 const toggleIsCollapsed = () => {
@@ -146,6 +148,13 @@ const baseMetadataFields = computed(() => {
 const expandPanel = () => {
   isCollapsed.value = false;
 };
+
+watchEffect(() => {
+  if (repeatablePanel.value) {
+    console.log("Here :)");
+    repeatableFieldsHelper.init();
+  }
+});
 </script>
 
 <style scoped>

@@ -1,16 +1,16 @@
-import { computed, type ComputedRef, onMounted, type Ref } from "vue";
+import { computed, type ComputedRef, onMounted, ref, type Ref } from "vue";
 import { type FieldEntry, useFieldArray } from "vee-validate";
 
 export type PanelRepetitionProps = {
   isRepeatable: boolean;
   index: number;
-  field: FieldEntry<unknown>;
+  field: FieldEntry<unknown> | undefined;
   repeatableFieldsHelper: UseRepeatableFields;
 };
 
 export type UseRepeatableFields = {
+  init: () => void;
   fields: Ref<FieldEntry<unknown>[], FieldEntry<unknown>[]>;
-  repetitionIds: ComputedRef<(string | number)[]>;
   repeatAmount: ComputedRef<number>;
   repetitionDeleteIsAvailable: ComputedRef<boolean>;
   increaseFieldRepeatAmount: (fieldValue: any) => void;
@@ -21,27 +21,36 @@ export const useRepeatableFields = (
   fieldKey: string,
   value: any = undefined,
 ): UseRepeatableFields => {
-  const { fields, push, remove } = useFieldArray(fieldKey);
+  const initialized = ref<boolean>(false);
+
+  let fieldArray: ReturnType<typeof useFieldArray> | null = null;
+
+  const init = () => {
+    if (initialized.value) return;
+    initialized.value = true;
+
+    fieldArray = useFieldArray(fieldKey);
+  };
 
   const increaseFieldRepeatAmount = (fieldValue: any) => {
-    push(fieldValue);
+    if (!fieldArray) return;
+    fieldArray.push(fieldValue);
   };
 
   const decreaseFieldRepeatAmount = (index: number) => {
-    if (repetitionDeleteIsAvailable.value) {
-      remove(index);
-    }
+    if (!repetitionDeleteIsAvailable.value || !fieldArray) return;
+    fieldArray.remove(index);
   };
 
-  const repetitionIds = computed(() => fields.value.map((field) => field.key));
-  const repeatAmount = computed(() => fields.value.length);
-  const repetitionDeleteIsAvailable = computed(() => fields.value.length > 1);
-
-  onMounted(() => increaseFieldRepeatAmount(value));
+  const fields = computed(() => fieldArray?.fields.value ?? []);
+  const repeatAmount = computed(() => fields.value.length || 1);
+  const repetitionDeleteIsAvailable = computed(
+    () => repeatAmount.value > 1 || false,
+  );
 
   return {
+    init,
     fields,
-    repetitionIds,
     repeatAmount,
     repetitionDeleteIsAvailable,
     increaseFieldRepeatAmount,
