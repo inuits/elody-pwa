@@ -1,11 +1,7 @@
 {
   "extends": "@vue/tsconfig/tsconfig.web.json",
   "include": ["env.d.ts", "./**/*.ts", "src/**/*.vue", "codegen.ts"],
-  "exclude": [
-    "src/**/__tests__/*",
-    "src/generated-types/*.ts", // <--- EXCLUDE THE GIANT FILE HERE
-    "node_modules"
-  ],
+  "exclude": ["src/**/__tests__/*", "src/generated-types/*.ts", "node_modules"],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
