@@ -34,7 +34,8 @@ const viteConfig = defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "openseadragon-select-plugin": "openseadragon-select-plugin/dist/index.umd.js"
+      "openseadragon-select-plugin":
+        "openseadragon-select-plugin/dist/index.umd.js",
     },
     dedupe: ["vue"],
     conditions: ["import", "module", "browser", "default"],
@@ -55,10 +56,13 @@ const viteConfig = defineConfig({
     minify: "esbuild",
     commonjsOptions: {
       transformMixedEsModules: true,
-      include: /node_modules|openseadragon-select-plugin/,
+      include: [/node_modules/, /openseadragon-select-plugin/],
     },
     rollupOptions: {
-      external: ["pdfjs-dist/types/src/display/api"],
+      external: [
+        "pdfjs-dist/types/src/display/api",
+        "pdfjs-dist/build/pdf.worker.min.js",
+      ],
       output: {
         manualChunks: {
           vue: ["vue", "vue-router"],
@@ -100,9 +104,7 @@ const viteConfig = defineConfig({
   },
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
-    include: [
-      "openseadragon-select-plugin",
-    ],
+    include: ["openseadragon-select-plugin"],
     esbuildOptions: {
       plugins: [],
     },
