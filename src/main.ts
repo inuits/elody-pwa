@@ -3,7 +3,10 @@ import {
   InMemoryCache,
   type NormalizedCacheObject,
   createHttpLink,
+  from
 } from "@apollo/client/core";
+import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
+import { sha256 } from 'crypto-hash';
 import "./assets/main.css";
 import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
@@ -97,13 +100,22 @@ const start = async (): Promise<void> => {
     handleGraphqlError(error);
   });
 
+  const apqLink = createPersistedQueryLink({ 
+    sha256,
+    useGETForHashedQueries: false 
+  });
+
+  const httpLink = createHttpLink({
+    uri: config.graphQlLink || "/api/graphql",
+    headers: { "Apollo-Require-Preflight": "true" },
+  });
+
   apolloClient = new ApolloClient({
-    link: graphqlErrorInterceptor.concat(
-      createHttpLink({
-        uri: config.graphQlLink || "/api/graphql",
-        headers: { "Apollo-Require-Preflight": "true" },
-      }),
-    ),
+    link: from([
+      graphqlErrorInterceptor, 
+      apqLink, 
+      httpLink
+    ]),
     cache: new InMemoryCache(),
   });
 
