@@ -220,7 +220,7 @@ const viewerContainsMultipleMediafiles = computed(
 
 const createDownloadButton = (): void => {
   const a = document.createElement("a");
-  a.href = `/api/mediafile/${props.mediafileId}`;
+  a.href = `/api/mediafile/${props.mediafileId}?original=true`;
   a.download = props.originalFilename?.replace(/\.[^/.]*$/, "") || "";
   a.target = "_blank";
   document.body.appendChild(a);
