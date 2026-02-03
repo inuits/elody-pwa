@@ -16,7 +16,7 @@
             @click.stop
             @click="
               () => {
-                repeatableFieldsHelper.increaseFieldRepeatAmount('hoi');
+                repeatableFieldsHelper.increaseFieldRepeatAmount({});
                 expandPanel();
               }
             "
@@ -56,7 +56,6 @@
               repeatableFieldsHelper.decreaseFieldRepeatAmount(idx - 1)
             "
           />
-          {{ idx - 1 }}
           <hr
             class="my-4 border-neutral-30"
             v-if="

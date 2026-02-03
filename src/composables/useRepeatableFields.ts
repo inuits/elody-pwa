@@ -27,7 +27,7 @@ export const useRepeatableFields = (fieldKey: string): UseRepeatableFields => {
     if (initialized.value) return;
     initialized.value = true;
 
-    fieldArray = useFieldArray(fieldKey);
+    fieldArray = useFieldArray(`intialValues.repeatable-panels.${fieldKey}`);
     fieldArray.push(undefined);
   };
 

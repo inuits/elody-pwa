@@ -21,6 +21,7 @@ export type EntityValues = {
   relationValues?: { [key: string]: any };
   relationMetadata?: IntialValues | {};
   relatedEntityData?: IntialValues | {};
+  relationRootdata?: IntialValues | {};
 };
 
 const useFormHelper = () => {
@@ -447,6 +448,55 @@ const useFormHelper = () => {
     return relations;
   };
 
+  const parseMetadatWithRepeatableValues = (
+    metadata: MetadataValuesInput[],
+    repeatableMetadataValues: any,
+  ): MetadataValuesInput[] => {
+    Object.keys(repeatableMetadataValues).forEach((panelKey: string) => {
+      const flattened = repeatableMetadataValues[panelKey].reduce(
+        (acc: { [key: string]: any }, item: { [key: string]: any }) => {
+          for (const [key, value] of Object.entries(item)) {
+            acc[key] ??= [];
+            acc[key].push(value);
+          }
+          return acc;
+        },
+        {},
+      );
+
+      Object.keys(flattened).forEach((key: string) => {
+        const metadataItemIndex: number = metadata.findIndex(
+          (metadataItem: MetadataValuesInput) => metadataItem.key === key,
+        );
+
+        if (metadataItemIndex < 0) {
+          console.error(
+            `Could not update value for key: ${key} to the repeatable value`,
+          );
+          return;
+        }
+        metadata[metadataItemIndex].value = flattened[key];
+      });
+    });
+
+    return metadata;
+  };
+
+  const extractMainValuesFromEntityValues = (
+    values: EntityValues,
+  ): EntityValues & { repeatableMetadataValues: any } => {
+    const { "repeatable-panels": repeatableMetadataValues, ...cleanedInitial } =
+      values.intialValues as Record<string, any>;
+
+    return {
+      intialValues: cleanedInitial as IntialValues,
+      relationValues: values.relationValues,
+      relationMetadata: values.relationMetadata,
+      relationRootdata: values.relationRootdata,
+      repeatableMetadataValues: repeatableMetadataValues,
+    };
+  };
+
   const parseFormValuesToFormInput = (
     uuid: string,
     values: EntityValues,
@@ -457,28 +507,42 @@ const useFormHelper = () => {
     let metadata: MetadataValuesInput[] = [];
     let relations: BaseRelationValuesInput[] = [];
 
-    if (values.intialValues)
+    const {
+      intialValues,
+      relationValues,
+      relationMetadata,
+      relationRootdata,
+      repeatableMetadataValues,
+    } = extractMainValuesFromEntityValues(values);
+
+    if (intialValues)
       metadata = parseIntialValuesForFormSubmit(
-        values.intialValues,
+        intialValues,
         uuid,
         locale,
         fields,
       );
 
-    if (values.relationValues)
-      relations = parseRelationValuesForFormSubmit(values.relationValues);
+    if (relationValues)
+      relations = parseRelationValuesForFormSubmit(relationValues);
 
-    if (values.relationMetadata && relations)
+    if (relationMetadata && relations)
       relations = parseRelationMetadataForFormSubmit(
-        values.relationMetadata,
+        relationMetadata,
         relations,
         uuid,
       );
-    if (values.relationRootdata && relations)
+    if (relationRootdata && relations)
       relations = parseRelationRootDataForFormSubmit(
-        values.relationRootdata,
+        relationRootdata,
         relations,
         uuid,
+      );
+
+    if (repeatableMetadataValues && metadata)
+      metadata = parseMetadatWithRepeatableValues(
+        metadata,
+        repeatableMetadataValues,
       );
 
     return { metadata, relations, updateOnlyRelations };
