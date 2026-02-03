@@ -2,7 +2,7 @@
   <Teleport to="#header-actions" :disabled="!showInHeader">
   <div
     @click.stop.prevent="openContextMenu"
-    class="flex items-center justify-center"
+    class="flex items-center justify-center pl-2"
   >
     <div v-if="hasAvailableContextMenuActions">
       <unicon :name="Unicons.EllipsisVThinline.name" />

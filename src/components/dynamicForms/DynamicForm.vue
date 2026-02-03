@@ -227,6 +227,7 @@ import {
   TypeModals,
   UploadFlow,
   Entitytyping,
+  FormFields,
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -403,6 +404,10 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   return normalizeFields(formTabObjects);
 });
 
+const normalizeModalFormFields = (formFields: FormFields) => {
+  return Object.values(formFields).filter((value) => typeof value === "object");
+};
+
 const fieldTypeMap = computed<Record<string, string[]>>(() => {
   if (!Array.isArray(getSortedFieldArray.value)) return;
 
@@ -418,7 +423,9 @@ const fieldTypeMap = computed<Record<string, string[]>>(() => {
 });
 
 const getFieldArray = computed(() => {
-  return modalFormFields ? modalFormFields : formFields.value || [];
+  return modalFormFields
+    ? normalizeModalFormFields(modalFormFields)
+    : formFields.value || [];
 });
 
 const getSortedFieldArray = computed(() => {
