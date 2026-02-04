@@ -170,7 +170,8 @@ const doAction = () => {
       undefined,
       {
         entityId: props.entityId || entityFormData.id,
-        entityType: props.entityType || entityFormData.type || Entitytyping.BaseEntity,
+        entityType:
+          props.entityType || entityFormData.type || Entitytyping.BaseEntity,
         callback: () => {
           if (refetchParentEntity) {
             refetchParentEntity();
@@ -178,7 +179,7 @@ const doAction = () => {
             props.refetchEntities();
           }
         },
-      }
+      },
     );
   }
   if (props.action === ContextMenuElodyActionEnum.DeleteEntity) {
@@ -186,6 +187,19 @@ const doAction = () => {
   }
   if (props.action === ContextMenuElodyActionEnum.Share) {
     createShareLink();
+  }
+
+  if (
+    props.action === ContextMenuElodyActionEnum.CreateEntityFromExternalSource
+  ) {
+    openModal(
+      TypeModals.DynamicForm,
+      ModalStyle.CenterWide,
+      props.formQuery,
+      undefined,
+      undefined,
+      undefined,
+    );
   }
 };
 </script>

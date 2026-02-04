@@ -207,7 +207,12 @@ const fieldEditIsDisabled = computed(() => {
 });
 
 const enableCopyFromParent = computed(() => {
-  if (!props.copyValueFromParent || !props.extractValueFromParent) return false;
+  if (
+    !props.copyValueFromParent ||
+    !props.extractValueFromParent ||
+    !props.copyValueFromParent.label
+  )
+    return false;
   const value = props.extractValueFromParent(props.copyValueFromParent?.key);
   return !(!value || value == "");
 });
@@ -215,6 +220,8 @@ const enableCopyFromParent = computed(() => {
 onMounted(() => {
   if (props.isMetadataOnRelation || props.isRootDataOnRelation)
     addEditableMetadataKeys([props.fieldKey], props.formId);
+  if (props.copyValueFromParent?.autoCopy)
+    copyValueFromParentAction(props.copyValueFromParent.key);
 });
 
 const getValueFromMetadata = (
