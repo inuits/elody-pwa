@@ -39,7 +39,9 @@
           <WindowPanelContent
             :panel-type="panelType"
             :relation-array="relationArray"
-            :metadatafields="baseMetadataFields"
+            :metadatafields="
+              getMetadataFields(panel, panelType, formId, idx - 1)
+            "
             :can-be-multiple-columns="canBeMultipleColumns"
             :form-id="formId"
             :is-edit="isEdit"
@@ -107,7 +109,10 @@ const repeatablePanel = ref<boolean>(
   props.panel.repetitionConfig?.repeatable ?? false,
 );
 const panelId = computed(() => props.panel.repetitionConfig?.repetitionKey);
-const repeatableFieldsHelper = useRepeatableFields(panelId.value!);
+const repeatableFieldsHelper = useRepeatableFields(
+  panelId.value!,
+  props.formId,
+);
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
@@ -133,10 +138,6 @@ const relationArray = computed((): PanelRelation[] => {
   });
 
   return returnArray;
-});
-
-const baseMetadataFields = computed(() => {
-  return getMetadataFields(props.panel, panelType.value, props.formId);
 });
 
 const expandPanel = () => {

@@ -1,5 +1,10 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import { type FieldContext, type FormContext, useField, useFieldArray } from "vee-validate";
+import {
+  type FieldContext,
+  type FormContext,
+  useField,
+  useFieldArray,
+} from "vee-validate";
 import {
   computed,
   inject,
@@ -23,6 +28,10 @@ import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
+import {
+  type PanelRepetitionProps,
+  useRepeatableFields,
+} from "@/composables/useRepeatableFields";
 
 export type FieldMetadata =
   | PanelMetaData
@@ -186,7 +195,17 @@ export const useMetadataWrapper = (
   };
 
   const fieldValueProxy = computed({
-    get: () => field.value.value,
+    get: () => {
+      const { repeatablePanelConfig } = props;
+      if (
+        repeatablePanelConfig?.isRepeatable &&
+        typeof field.value.value === "object"
+      )
+        return (field.value.value as { [key: string]: any })[
+          props.metadata.key
+        ];
+      return field.value.value;
+    },
     set: (val) => (field.value.value = getNewFieldValue(val)),
   });
 

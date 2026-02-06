@@ -453,30 +453,15 @@ const useFormHelper = () => {
     repeatableMetadataValues: any,
   ): MetadataValuesInput[] => {
     Object.keys(repeatableMetadataValues).forEach((panelKey: string) => {
-      const flattened = repeatableMetadataValues[panelKey].reduce(
-        (acc: { [key: string]: any }, item: { [key: string]: any }) => {
-          for (const [key, value] of Object.entries(item)) {
-            acc[key] ??= [];
-            acc[key].push(value);
-          }
-          return acc;
-        },
-        {},
+      const associatedMetadataItemIndex: number = metadata.findIndex(
+        (metadataItem: MetadataValuesInput) => metadataItem.key === panelKey,
       );
-
-      Object.keys(flattened).forEach((key: string) => {
-        const metadataItemIndex: number = metadata.findIndex(
-          (metadataItem: MetadataValuesInput) => metadataItem.key === key,
-        );
-
-        if (metadataItemIndex < 0) {
-          console.error(
-            `Could not update value for key: ${key} to the repeatable value`,
-          );
-          return;
-        }
-        metadata[metadataItemIndex].value = flattened[key];
-      });
+      if (associatedMetadataItemIndex === -1) {
+        metadata.push({ key: panelKey, value: "" });
+      }
+      metadata[associatedMetadataItemIndex].value = [
+        ...Object.values(repeatableMetadataValues[panelKey]),
+      ];
     });
 
     return metadata;

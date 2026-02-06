@@ -1,5 +1,13 @@
-import { computed, type ComputedRef, ref, type Ref } from "vue";
-import { type FieldEntry, useFieldArray } from "vee-validate";
+import {
+  computed,
+  type ComputedRef,
+  onMounted,
+  ref,
+  type Ref,
+  watch,
+} from "vue";
+import { type FieldEntry, useFieldArray, useForm } from "vee-validate";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 export type PanelRepetitionProps = {
   isRepeatable: boolean;
@@ -18,30 +26,52 @@ export type UseRepeatableFields = {
   fieldKey: string;
 };
 
-export const useRepeatableFields = (fieldKey: string): UseRepeatableFields => {
+export const useRepeatableFields = (
+  fieldKey: string,
+  formId: string,
+): UseRepeatableFields => {
   const initialized = ref<boolean>(false);
+  const initRepeatAmount = ref<number>(1);
 
-  let fieldArray: ReturnType<typeof useFieldArray> | null = null;
+  const fieldArray = ref<ReturnType<typeof useFieldArray> | undefined>(
+    undefined,
+  );
+
+  const setInitRepeatAmount = (): void => {
+    const { getForm } = useFormHelper();
+    const form = getForm(formId);
+
+    if (!form) throw new Error(`Form with id ${formId} not found`);
+
+    const formValues = form.values;
+    initRepeatAmount.value = formValues?.intialValues?.[fieldKey]?.length || 1;
+  };
 
   const init = () => {
     if (initialized.value) return;
     initialized.value = true;
+    setInitRepeatAmount();
 
-    fieldArray = useFieldArray(`intialValues.repeatable-panels.${fieldKey}`);
-    fieldArray.push(undefined);
+    fieldArray.value = useFieldArray(
+      `intialValues.repeatable-panels.${fieldKey}`,
+    );
+
+    for (let i = 0; i < initRepeatAmount.value; i++) {
+      fieldArray.value?.push(undefined);
+    }
   };
 
   const increaseFieldRepeatAmount = (fieldValue: any) => {
-    if (!fieldArray) return;
-    fieldArray.push(fieldValue);
+    if (!fieldArray.value) return;
+    fieldArray.value.push(fieldValue);
   };
 
   const decreaseFieldRepeatAmount = (index: number) => {
-    if (!repetitionDeleteIsAvailable.value || !fieldArray) return;
-    fieldArray.remove(index);
+    if (!repetitionDeleteIsAvailable.value || !fieldArray.value) return;
+    fieldArray.value.remove(index);
   };
 
-  const fields = computed(() => fieldArray?.fields.value ?? []);
+  const fields = computed(() => fieldArray.value?.fields ?? []);
   const repeatAmount = computed(() => fields.value.length || 1);
   const repetitionDeleteIsAvailable = computed(
     () => repeatAmount.value > 1 || false,

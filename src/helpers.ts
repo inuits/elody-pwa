@@ -18,6 +18,7 @@ import {
   RouteNames,
   type Unit,
   type WindowElementPanel,
+  type RepetitionConfig,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { i18n } from "@/main.ts";
@@ -276,15 +277,25 @@ export const convertSizeToTailwind = (size: string = "hundred"): string => {
 
 const { mediafileSelectionState } = useEntityMediafileSelector();
 
+// Fixfix
 export const getValueForPanelMetadata = (
   panelType: PanelType,
   metadataItemKey: string,
   entityId: string,
   mediafileViewerContext: string,
   typeOfInputField?: string,
+  repetitionConfig: RepetitionConfig | undefined = undefined,
+  repetitionIndex: number | undefined = undefined,
 ): string => {
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
+    if (repetitionConfig && repetitionIndex !== undefined) {
+      return (
+        form.values.intialValues[repetitionConfig.repetitionKey][
+          repetitionIndex
+        ] || ""
+      );
+    }
     if (typeOfInputField === InputFieldTypes.Checkbox)
       return Boolean(form.values.intialValues[metadataItemKey]);
     return form.values.intialValues[metadataItemKey];
@@ -303,6 +314,7 @@ export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
   panelType: PanelType,
   formId: string,
+  repetitionIndex: number | undefined = undefined,
 ): Array<PanelMetaData | EntityListElement> => {
   const fields: Array<PanelMetaData | EntityListElement> = [];
 
@@ -337,6 +349,8 @@ export const getMetadataFields = (
             formId,
             undefined,
             value.inputField?.type,
+            objectToGetMetadataFrom.repetitionConfig,
+            repetitionIndex,
           ),
         inputField: (value as PanelMetaData).inputField,
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
