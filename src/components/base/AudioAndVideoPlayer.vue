@@ -1,7 +1,23 @@
 <template>
   <div class="w-full h-full relative">
+    <div
+      class="w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10"
+    >
+      <button @click="downloadVideo">
+        <unicon
+          :name="Unicons.Download.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </button>
+    </div>
     <div class="h-full" v-if="mediaType === 'Video'">
-      <video class="w-full h-full bg-white" preload="auto" controls>
+      <video
+        class="w-full h-full bg-white"
+        preload="auto"
+        controls
+        controlsList="nodownload"
+      >
         <source :src="getFileUrl()" :type="mimetype" />
         Video not supported
       </video>
@@ -10,7 +26,7 @@
       <div class="flex justify-center items-end w-full bg-white">
         <unicon class="h-24 w-24 text-neutral-70" :name="Unicons.Music.name" />
       </div>
-      <audio class="w-full bg-white" controls>
+      <audio class="w-full bg-white" controls controlsList="nodownload">
         <source :src="getFileUrl()" :type="mimetype" />
         {{ $t("audio.no-support") }}
       </audio>
@@ -50,5 +66,15 @@ const getFileUrl = (): string => {
   }
 
   return `/api/mediafile/${fileLocation}`;
+};
+
+const downloadVideo = (): void => {
+  const a = document.createElement("a");
+  a.href = `/api/mediafile/${props.source.id}?original=true`;
+  a.download = props.source.intialValues.original_filename || "";
+  a.target = "_blank";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };
 </script>
