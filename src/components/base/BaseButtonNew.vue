@@ -22,7 +22,10 @@
     />
     <span
       v-if="label"
-      class="leading-4 text-ellipsis @max-xs/window:hidden @max-xl/wrapper-content:hidden"
+      class="leading-4 text-ellipsis"
+      :class="[
+        { '@max-xs/window:hidden @max-xl/wrapper-content:hidden': !forceShowLabel },
+      ]"
       >{{ label }}</span
     >
 
@@ -137,6 +140,7 @@ const props = withDefaults(
     iconHeight?: number;
     loading?: boolean;
     tooltipLabel?: string;
+    forceShowLabel?: boolean;
   }>(),
   {
     icon: DamsIcons.NoIcon,
@@ -145,6 +149,7 @@ const props = withDefaults(
     disabled: false,
     iconHeight: 18,
     loading: false,
+    forceShowLabel: false,
   },
 );
 
