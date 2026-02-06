@@ -137,12 +137,13 @@ const calculateCenter = (entities: Entity[]) => {
 };
 
 const updateMapProperties = () => {
+  const mapPaginationLimit = mapProperties.value.paginationLimit;
   if (refMapType.value === MapTypes.HeatMap) {
-    props.setPaginationLimit(-1);
+    props.setPaginationLimit(mapPaginationLimit || -1);
   }
 
   if (refMapType.value == MapTypes.WktMap) {
-    props.setPaginationLimit(1000);
+    props.setPaginationLimit(mapPaginationLimit || 1000);
   }
 };
 
