@@ -484,6 +484,7 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   if (entity.intialValues?.name) title = entity.intialValues.name;
   if (entity.intialValues?.email) title = entity.intialValues.email;
   if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
+  if (entity.intialValues?.code) title = entity.intialValues.code;
   if (entity.intialValues?.originalTitle)
     title = entity.intialValues.originalTitle;
   if (entity.intialValues?.preferred_title)
@@ -627,6 +628,7 @@ export const getTitleOrNameFromEntity = (entity: Entity): string => {
     entity.intialValues.preferred_title ||
     entity.intialValues.original_headtitle ||
     entity.intialValues.serial_number ||
+    entity.intialValues.code ||
     entity.id ||
     entity.uuid
   );
