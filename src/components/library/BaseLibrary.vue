@@ -97,7 +97,6 @@
             "
           >
             <LibraryBar
-              v-show="!displayMap"
               :route="route"
               :set-limit="setPaginationLimit"
               :selected-pagination-limit-option="selectedPaginationLimitOption"
