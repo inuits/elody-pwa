@@ -85,7 +85,7 @@
       class="pb-2"
       v-if="
         repeatablePanelConfig?.repeatableFieldsHelper
-          .repetitionDeleteIsAvailable.value
+          .repetitionDeleteIsAvailable.value && isEdit
       "
     >
       <base-button-new
