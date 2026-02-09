@@ -146,6 +146,7 @@
           :highlight="
             isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile
           "
+          :break-words="true"
         />
         <metadata-wrapper
           v-else
@@ -159,6 +160,7 @@
           @add-refetch-function-to-edit-state="
             () => emit('addRefetchFunctionToEditState')
           "
+          :break-words="true"
         />
       </div>
     </div>

@@ -38,6 +38,7 @@
                 :custom-value="refMetadata.customValue"
                 :translation-key="refMetadata.valueTranslationKey"
                 :highlight="refMetadata.highlightIfPrimaryMediafile && highlight"
+                :break-words="breakWords"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard
@@ -57,6 +58,7 @@
             :link-icon="refMetadata.linkIcon"
             :unit="refMetadata.unit"
             :base-library-mode="baseLibraryMode"
+            :break-words="breakWords"
           />
         </template>
       </base-tooltip>
@@ -100,12 +102,14 @@ const props = withDefaults(
     showErrors?: boolean;
     entityType?: Entitytyping;
     highlight: boolean;
+    breakWords?: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     formFlow: "edit",
     showErrors: false,
     highlight: false,
+    breakWords: false,
   },
 );
 

@@ -2,7 +2,7 @@
   <div
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
-    :class="[{ 'font-bold': highlight}, 'text-sm break-words']"
+    :class="[{ 'font-bold': highlight}, `text-sm ${breakWords ? 'break-words' : 'break-normal'}`]"
   >
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
@@ -77,11 +77,13 @@ const props = withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     translationKey?: string;
     highlight?: boolean;
+    breakWords?: boolean;
   }>(),
   {
     linkText: "",
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     highlight: false,
+    breakWords: false,
   },
 );
 
