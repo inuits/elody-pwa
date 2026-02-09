@@ -70,8 +70,9 @@ const getFileUrl = (): string => {
 
 const downloadVideo = (): void => {
   const a = document.createElement("a");
-  a.href = `/api/mediafile/${props.source.id}?original=true`;
-  a.download = props.source.intialValues.original_filename || "";
+  const originalFilename = props.source.intialValues.original_filename?.replace(/\.[^/.]*$/, "") || ""
+  a.href = `/api/mediafile/${props.source.id}?original=true&originalFilename=${originalFilename}`;
+  a.download = originalFilename;
   a.target = "_blank";
   document.body.appendChild(a);
   a.click();
