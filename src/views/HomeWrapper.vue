@@ -1,6 +1,6 @@
 <template>
-  <AssetLibrary v-if="!isSingleEntityPage" />
-  <Home v-if="isSingleEntityPage" />
+  <AssetLibrary v-if="pageName === 'Fallback'" />
+  <Home v-if="pageName === 'SingleEntity'" />
 </template>
 
 <script lang="ts" setup>
@@ -9,10 +9,15 @@ import Home from "@/views/Home.vue";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-const route = useRoute()
+const route = useRoute();
 
-const isSingleEntityPage = computed(() => {
-  return route.name === "SingleEntity" || route.name === "SingleMediafile"
-})
-
+const pageName = computed(() => {
+  const singleEntityNames = [
+    "SingleEntity",
+    "SingleMediafile",
+    "EmbeddedViewer",
+  ];
+  if (singleEntityNames.includes(route.name as string)) return "SingleEntity";
+  return "Fallback";
+});
 </script>

@@ -16,24 +16,31 @@
 <script lang="ts" setup>
 import type { DamsIcons } from "@/generated-types/queries";
 import BaseToggle from "@/components/base/BaseToggle.vue";
-import { onMounted, reactive, watch, type Ref } from "vue";
+import { onMounted, ref, watch, type Ref } from "vue";
 
 const props = defineProps<{
   toggles: { isOn: Ref<boolean>; iconOn: DamsIcons; iconOff: DamsIcons }[];
 }>();
 
-const toggles = reactive(props.toggles);
+const toggles = ref(props.toggles);
 
 const turnAllTogglesOff = () => {
-  for (const toggle of toggles) toggle.isOn = false;
+  for (const toggle of toggles.value) toggle.isOn = false;
 };
 
 const onlyHaveOneToggleTurnedOn = () => {
-  const togglesTurnedOn = toggles.filter((toggle) => toggle.isOn).length;
-  if (togglesTurnedOn === 0) toggles[0].isOn = true;
-  else if (togglesTurnedOn > 1) toggles[0].isOn = false;
+  const togglesTurnedOn = toggles.value.filter((toggle) => toggle.isOn).length;
+  if (togglesTurnedOn === 0) toggles.value[0].isOn = true;
+  else if (togglesTurnedOn > 1) toggles.value[0].isOn = false;
 };
 
 onMounted(() => onlyHaveOneToggleTurnedOn());
 watch(toggles, () => onlyHaveOneToggleTurnedOn());
+watch(
+  () => props.toggles, 
+  () => { 
+    toggles.value = props.toggles 
+  }, 
+  { deep: true }
+);
 </script>

@@ -97,7 +97,6 @@
             "
           >
             <LibraryBar
-              v-show="!displayMap"
               :route="route"
               :set-limit="setPaginationLimit"
               :selected-pagination-limit-option="selectedPaginationLimitOption"
@@ -169,6 +168,42 @@
           />
         </div>
         <div
+          v-if="entities?.length === 0 && !entitiesLoading"
+          :class="[
+            {
+              'text-center my-2':
+                baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
+            },
+            { 'col-span-1 pl-[1%]': expandFilters },
+            { 'col-span-2': !expandFilters },
+          ]"
+        >
+          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
+            -
+          </div>
+          <div v-else>
+            <div>{{ t("search.noresult") }}</div>
+            <div class="text-sm">{{ displayMap ? t("search.tipMap") : t("search.tip") }}</div>
+            <div
+              v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
+              class="flex justify-center my-2"
+            >
+              <ActionMenuGroup
+                v-if="
+                  bulkOperations !== undefined && auth.isAuthenticated.value
+                "
+                v-model="selectedBulkOperation"
+                @update:modelValue="handleSelectedBulkOperation"
+                :options="actionsOnResult.options"
+                :entity-type="entityType"
+                :parent-entity-id="id"
+                :sub-dropdown-options="subDropdownOptions"
+                :clear-sub-dropdown-options="clearSubDropdownOptions"
+              />
+            </div>
+          </div>
+        </div>
+        <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
           data-cy="base-library-grid-container"
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
@@ -231,41 +266,6 @@
             :setPaginationLimit="setPaginationLimit"
             :setAdvancedFilters="setAdvancedFilters"
           />
-        </div>
-        <div
-          v-if="entities?.length === 0 && !entitiesLoading"
-          :class="[
-            {
-              'text-center my-2':
-                baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
-            },
-            { 'col-span-1 pl-[1%]': expandFilters },
-            { 'col-span-2': !expandFilters },
-          ]"
-        >
-          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
-            -
-          </div>
-          <div v-else>
-            {{ t("search.noresult") }}
-            <div
-              v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
-              class="flex justify-center my-2"
-            >
-              <ActionMenuGroup
-                v-if="
-                  bulkOperations !== undefined && auth.isAuthenticated.value
-                "
-                v-model="selectedBulkOperation"
-                @update:modelValue="handleSelectedBulkOperation"
-                :options="actionsOnResult.options"
-                :entity-type="entityType"
-                :parent-entity-id="id"
-                :sub-dropdown-options="subDropdownOptions"
-                :clear-sub-dropdown-options="clearSubDropdownOptions"
-              />
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -576,7 +576,8 @@ const displayPreview = ref<boolean>(props.enablePreview);
 const displayMap = ref<boolean>(false);
 
 const expandFilters = ref<boolean>(false);
-let toggles: ViewModes.type[] = [];
+const lastProcessedEntityType = ref<Entitytyping | null>(null);
+let toggles = ref<ViewModes.type[]>([]);
 
 const entityType = computed(() =>
   props.entityType
@@ -837,26 +838,34 @@ const viewModesIncludeViewModesMedia = computed(() => {
 });
 
 const determineViewModes = (viewModes: any[]) => {
-  if (viewModes.includes(ViewModesList.__name))
-    toggles.unshift({
+  const newToggles = [];
+
+  if (viewModes.includes(ViewModesList.__name)) {
+    newToggles.push({
       isOn: displayList,
       iconOn: DamsIcons.ListUl,
       iconOff: DamsIcons.ListUl,
     });
-  if (viewModes.includes("ViewModesGrid"))
-    toggles.push({
+  }
+
+  if (viewModes.includes("ViewModesGrid")) {
+    newToggles.push({
       isOn: displayGrid,
       iconOn: DamsIcons.Apps,
       iconOff: DamsIcons.Apps,
     });
-  if (viewModes.includes(ViewModesMedia.__name))
-    toggles.push({
+  }
+
+  if (viewModes.includes(ViewModesMedia.__name)) {
+    newToggles.push({
       isOn: displayPreview,
       iconOn: DamsIcons.Image,
       iconOff: DamsIcons.Image,
     });
+  }
+
   if (viewModes.includes(ViewModesMap.__name)) {
-    toggles.push({
+    newToggles.push({
       isOn: displayMap,
       iconOn: DamsIcons.Map,
       iconOff: DamsIcons.Map,
@@ -864,6 +873,8 @@ const determineViewModes = (viewModes: any[]) => {
   } else {
     displayMap.value = false;
   }
+
+  toggles.value = newToggles;
 };
 
 const addRefetchFunctionToEditState = (): void => {
@@ -954,23 +965,29 @@ watch(
 
 watch(
   () => entities.value,
-  () => {
-    emit("entitiesUpdated", entities.value.length);
+  (newEntities) => {
+    emit("entitiesUpdated", newEntities.length);
     if (props.selectInputFieldType) {
       selectedDropdownOptions.value = getSelectedOptions();
     }
-    toggles = [];
-    if (
-      !entities.value ||
-      entities.value?.length === 0 ||
-      !entities.value[0]?.allowedViewModes
-    )
-      return;
-    const viewModes: any[] = entities.value[0].allowedViewModes.viewModes.map(
-      (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode,
-    );
-    determineViewModes(viewModes);
-    getDisplayPreferences();
+
+    const hasValidData = newEntities?.[0]?.allowedViewModes;
+    const typeChanged = entityType.value !== lastProcessedEntityType.value;
+
+    if (typeChanged && hasValidData) {
+      const viewModes = newEntities[0].allowedViewModes.viewModes.map(
+        (vm) => vm.viewMode,
+      );
+
+      determineViewModes(viewModes);
+      getDisplayPreferences();
+
+      lastProcessedEntityType.value = entityType.value;
+    }
+
+    if (typeChanged && !hasValidData) {
+      determineViewModes([]);
+    }
   },
 );
 

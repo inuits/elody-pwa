@@ -19,6 +19,10 @@ const routeComponentConfig: RouteComponentConfig[] = [
     routeComponent: () => import("@/views/SingleEntity.vue"),
   },
   {
+    routeName: "EmbeddedViewer",
+    routeComponent: () => import("@/views/EmbeddedViewer.vue"),
+  },
+  {
     routeName: "Manifest",
     routeComponent: () => import("@/components/ManifestViewer.vue"),
   },

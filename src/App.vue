@@ -1,5 +1,8 @@
 <template>
-  <div v-if="!showSplashScreen">
+  <div v-if="!showSplashScreen && route.name === 'EmbeddedViewer'">
+    <router-view />
+  </div>
+  <div v-else-if="!showSplashScreen">
     <notifications class="pt-2" />
     <div v-if="!someModalIsOpened">
       <notifications

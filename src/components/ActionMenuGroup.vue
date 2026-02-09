@@ -15,6 +15,7 @@
         :label="t(primaryOption.label, [entityTypeLabel])"
         :tooltip-label="primaryOption.actionContext?.labelForTooltip"
         :icon="primaryOption.icon"
+        :force-show-label="primaryOptions.length > 1"
         @click.stop="
           (event: MouseEvent) => {
             handleEmit(primaryOption);

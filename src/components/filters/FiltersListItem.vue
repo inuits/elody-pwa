@@ -84,7 +84,14 @@ const tooltipText = computed(() =>
 const headerIcon = computed(() =>
   isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
 );
-const filterMatchers = computed(() => props.matchers);
+const filterMatchers = computed(() => {
+  const allowedMatchers = props.filter.advancedFilter.allowedMatchers;
+  if (!allowedMatchers) return props.matchers;
+
+  return props.matchers.filter((matcher: DropdownOption) =>
+    allowedMatchers.includes(matcher.value),
+  );
+});
 const matcherDefaultLabel = computed(() =>
   t("filters.matcher-labels.select-filter-type"),
 );
