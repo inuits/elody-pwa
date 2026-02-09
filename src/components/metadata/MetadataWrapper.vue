@@ -130,6 +130,7 @@
                 :base-library-mode="baseLibraryMode"
                 :custom-value="metadata.customValue"
                 :translation-key="metadata.valueTranslationKey"
+                :breakWords="breakWords"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard
@@ -149,6 +150,7 @@
             :link-icon="metadata.linkIcon"
             :unit="metadata.unit"
             :base-library-mode="baseLibraryMode"
+            :breakWordst="breakWords"
           />
         </template>
       </base-tooltip>
@@ -199,12 +201,14 @@ export type MetadataWrapperProps = {
   showErrors?: boolean;
   entityType?: Entitytyping;
   listItemEntity?: BaseEntity;
+  breakWords?: boolean;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   formFlow: "edit",
   showErrors: false,
+  breakWords: false,
 });
 
 const emit = defineEmits<{
