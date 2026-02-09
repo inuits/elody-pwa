@@ -23,7 +23,7 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
-        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0`,
+        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0 !z-header`,
       }"
     >
       <template #option="{ option }">
@@ -295,10 +295,6 @@ div.menu-option:hover {
     outline: none !important;
     box-shadow: none;
   }
-}
-
-.vue-advanced-select .menu {
-  --vs-menu-z-index: var(--z-header) !important;
 }
 
 .vue-advanced-select .vue-select,
