@@ -104,6 +104,7 @@ const applyFilterToLibrary = () => {
       type: AdvancedFilterTypes.Text,
       operator: Operator.Or,
       match_exact: false,
+      match_all_words: true,
     });
   }
 
