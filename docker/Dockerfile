@@ -1,22 +1,23 @@
-### Build stage
-FROM node:18-alpine as build-stage
+### Base stage
+FROM node:18-alpine as base
+RUN npm install -g pnpm
+WORKDIR /app
 
-COPY ./ ./app/
+FROM base as deps
+COPY pnpm-lock.yaml package.json ./
 
-WORKDIR /app/
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 ### Test stage
-FROM build-stage as test-stage
-
-RUN npm install -g pnpm
+FROM deps as test-stage
 
 ARG NPM_CONFIG_ALWAYS_AUTH
 ARG NPM_CONFIG_REGISTRY
 ARG NPM_CONFIG__AUTH_TOKEN
 
-RUN mkdir -p /app/src/generated-types && \
-touch /app/src/generated-types/queries.ts
+COPY . .
 
-RUN pnpm install
+RUN mkdir -p /app/src/generated-types && \
+    touch /app/src/generated-types/queries.ts
 
 RUN pnpm run test:unit
