@@ -54,8 +54,9 @@
       :extract-value-from-parent="extractIntialValueFromParentByKey"
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
+      :repeatable-panel-config="repeatablePanelConfig"
       @click.stop.prevent
-      @update:value="(value) => (fieldValueProxy = value)"
+      @update:value="(value) => fieldValueProxy = value"
     />
     <div v-else class="flex gap-2">
       <base-tooltip

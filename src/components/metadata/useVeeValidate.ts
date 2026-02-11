@@ -28,7 +28,7 @@ export const useVeeValidate = (): {
     const baseKey: string = getKeyBasedOnInputField(metadata);
     if (!id && !repeatablePanelConfig?.isRepeatable) return baseKey;
     if (repeatablePanelConfig?.isRepeatable) {
-      return `repeatable-panels.${repeatablePanelConfig.repeatableFieldsHelper.fieldKey}.${repeatablePanelConfig.index}`;
+      return `repeatable-panels.${repeatablePanelConfig.repeatableFieldsHelper.fieldKey}.${repeatablePanelConfig.index}.${baseKey}`;
     }
     if (id) return `${baseKey}-${id}`;
     return `${baseKey}`;

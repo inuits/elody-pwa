@@ -3,7 +3,6 @@ import {
   type FieldContext,
   type FormContext,
   useField,
-  useFieldArray,
 } from "vee-validate";
 import {
   computed,
@@ -196,17 +195,12 @@ export const useMetadataWrapper = (
 
   const fieldValueProxy = computed({
     get: () => {
-      const { repeatablePanelConfig } = props;
-      if (
-        repeatablePanelConfig?.isRepeatable &&
-        typeof field.value.value === "object"
-      )
-        return (field.value.value as { [key: string]: any })[
-          props.metadata.key
-        ];
       return field.value.value;
     },
-    set: (val) => (field.value.value = getNewFieldValue(val)),
+    set: (val) => {
+      console.log(val, fieldKey.value);
+     field.value.value = getNewFieldValue(val);
+    },
   });
 
   const parentForm = ref<FormContext | undefined>(
@@ -234,6 +228,7 @@ export const useMetadataWrapper = (
     try {
       if (props.metadata.inputField?.autoSelectable)
         newValue = props.metadata.inputField.options[0]?.value;
+      if (props.repeatablePanelConfig?.isRepeatable) newValue = props.metadata.value[props.metadata.key];
     } catch {
       throw Error("Unable to auto select value, no options available");
     }

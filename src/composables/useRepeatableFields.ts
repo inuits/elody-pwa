@@ -37,8 +37,9 @@ export const useRepeatableFields = (
     undefined,
   );
 
+  const { getForm, addEditableMetadataKeys } = useFormHelper();
+
   const setInitRepeatAmount = (): void => {
-    const { getForm } = useFormHelper();
     const form = getForm(formId);
 
     if (!form) throw new Error(`Form with id ${formId} not found`);
@@ -51,6 +52,7 @@ export const useRepeatableFields = (
     if (initialized.value) return;
     initialized.value = true;
     setInitRepeatAmount();
+    addEditableMetadataKeys([fieldKey], formId)
 
     fieldArray.value = useFieldArray(
       `intialValues.repeatable-panels.${fieldKey}`,

@@ -117,6 +117,7 @@ import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -142,6 +143,7 @@ const props = defineProps<{
   extractValueFromParent: (
     key: string,
   ) => string | string[] | number | number[] | undefined;
+  repeatablePanelConfig?: PanelRepetitionProps;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
