@@ -87,7 +87,8 @@ const { displaySuccessNotification, displayErrorNotification } =
 const { dequeueAllItemsForBulkProcessing, getEnqueuedItems } =
   useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getInformationForBulkDeleteEntities } = useModalActions();
+const { getCallbackFunctions, getInformationForBulkDeleteEntities } =
+  useModalActions();
 const { deleteEntities, getDeletionForm, form } = useDeleteEntities();
 
 const modal = computed(() => {
@@ -159,14 +160,14 @@ const deleteSelectedItems = async () => {
     );
 
     isDeleting.value = false;
+    displaySuccessNotification(
+      t("notifications.success.entityDeleted.title"),
+      t("notifications.success.entityDeleted.description"),
+    );
+    closeModal(TypeModals.BulkOperationsDeleteEntities);
+    dequeueAllItemsForBulkProcessing(context);
 
     if (jobIdentifier && typeof jobIdentifier === "string") {
-      closeModal(TypeModals.BulkOperationsDeleteEntities);
-      dequeueAllItemsForBulkProcessing(context);
-      displaySuccessNotification(
-        t("notifications.success.entityDeleted.title"),
-        t("notifications.success.entityDeleted.description"),
-      );
       goToEntityPageById(
         jobIdentifier,
         { type: "job", __typename: "job" },
@@ -174,14 +175,17 @@ const deleteSelectedItems = async () => {
         router,
       );
     } else {
-      displayErrorNotification(
-        t("notifications.errors.entityDeleted.title"),
-        t("notifications.errors.entityDeleted.description"),
-      );
+      const callbacks = getCallbackFunctions();
+      if (callbacks && callbacks.length > 0)
+        for (const callback of callbacks) callback();
     }
   } catch (error) {
     isDeleting.value = false;
-    console.error("Error deleting selected items:", error);
+    closeModal(TypeModals.BulkOperationsDeleteEntities);
+    displayErrorNotification(
+      t("notifications.errors.entityDeleted.title"),
+      t("notifications.errors.entityDeleted.description"),
+    );
   }
 };
 

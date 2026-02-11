@@ -47,7 +47,7 @@
         ]"
       >
         <div
-          v-for="(panel, index) in panels"
+          v-for="(panel, index) in filteredPanels"
           :key="index"
           :class="[
             'w-full',
@@ -78,19 +78,20 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, onMounted, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import { auth } from "@/main";
+import { useEditMode } from "@/composables/useEdit";
+import { usePermissions } from "@/composables/usePermissions";
 import {
   Orientations,
-  type WindowElement,
   WindowElementLayout,
+  type WindowElement,
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import EntityElementWindowPanel from "../windowPanel/EntityElementWindowPanel.vue";
-import { computed } from "vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
-import { useI18n } from "vue-i18n";
-import { useEditMode } from "@/composables/useEdit";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
-import { auth } from "@/main";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 
 const props = defineProps<{
@@ -103,8 +104,14 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "resizeColumn", toggled: boolean): void;
 }>();
+
 const { t } = useI18n();
+const { fetchAdvancedPermissions } = usePermissions();
 const useEditHelper = useEditMode(props.formId);
+
+const permissionResults = ref<Record<string, boolean>>({});
+const isCheckingPermissions = ref(true);
+
 const computedIsEdit = computed(
   () => props.isEditOverwrite || useEditHelper.isEdit,
 );
@@ -113,17 +120,44 @@ const resizeColumn = (toggled: boolean) => {
   emit("resizeColumn", toggled);
 };
 
-const panels = computed<WindowElementPanel[]>(() => {
-  const returnArray: WindowElementPanel[] = [];
+const allPanels = computed<WindowElementPanel[]>(() => {
+  return Object.values(props.element).filter(
+    (value): value is WindowElementPanel =>
+      typeof value === "object" && value?.__typename === "WindowElementPanel",
+  );
+});
 
-  Object.values(props.element).forEach((value) => {
-    if (
-      typeof value === "object" &&
-      value?.__typename === "WindowElementPanel"
-    ) {
-      returnArray.push(value);
-    }
+const resolvePanelPermissions = async () => {
+  isCheckingPermissions.value = true;
+
+  const uniquePermissions = [
+    ...new Set(
+      allPanels.value
+        .flatMap((panel) => panel.can || [])
+        .filter((p): p is string => !!p),
+    ),
+  ];
+
+  if (uniquePermissions.length > 0) {
+    const results = await fetchAdvancedPermissions(uniquePermissions);
+    permissionResults.value = results;
+  }
+
+  isCheckingPermissions.value = false;
+};
+
+const filteredPanels = computed<WindowElementPanel[]>(() => {
+  if (isCheckingPermissions.value) return [];
+
+  return allPanels.value.filter((panel) => {
+    const requiredPerms = panel.can && [panel.can] || [];
+    if (requiredPerms.length === 0) return true;
+
+    return requiredPerms.some((p) => permissionResults.value[p]);
   });
-  return returnArray;
+});
+
+onMounted(() => {
+  resolvePanelPermissions();
 });
 </script>
