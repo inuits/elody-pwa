@@ -4,9 +4,9 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 FROM base as deps
-COPY package.json ./
+COPY package.json pnpm-lock.yaml* ./
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 
 ### Test stage
 FROM deps as test-stage
