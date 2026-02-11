@@ -1,12 +1,10 @@
 import {
   computed,
   type ComputedRef,
-  onMounted,
   ref,
   type Ref,
-  watch,
 } from "vue";
-import { type FieldEntry, useFieldArray, useForm } from "vee-validate";
+import { type FieldEntry, useFieldArray } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 export type PanelRepetitionProps = {
@@ -21,7 +19,7 @@ export type UseRepeatableFields = {
   fields: Ref<FieldEntry<unknown>[], FieldEntry<unknown>[]>;
   repeatAmount: ComputedRef<number>;
   repetitionDeleteIsAvailable: ComputedRef<boolean>;
-  increaseFieldRepeatAmount: (fieldValue: any) => void;
+  increaseFieldRepeatAmount: (fieldValue?: any) => void;
   decreaseFieldRepeatAmount: (index: number) => void;
   fieldKey: string;
 };
@@ -63,7 +61,7 @@ export const useRepeatableFields = (
     }
   };
 
-  const increaseFieldRepeatAmount = (fieldValue: any) => {
+  const increaseFieldRepeatAmount = (fieldValue: any  = {}) => {
     if (!fieldArray.value) return;
     fieldArray.value.push(fieldValue);
   };

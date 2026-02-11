@@ -16,7 +16,7 @@
             @click.stop
             @click="
               () => {
-                repeatableFieldsHelper.increaseFieldRepeatAmount({});
+                repeatableFieldsHelper.increaseFieldRepeatAmount();
                 expandPanel();
               }
             "
