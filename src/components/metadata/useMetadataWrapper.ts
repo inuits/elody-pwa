@@ -198,7 +198,6 @@ export const useMetadataWrapper = (
       return field.value.value;
     },
     set: (val) => {
-      console.log(val, fieldKey.value);
      field.value.value = getNewFieldValue(val);
     },
   });
