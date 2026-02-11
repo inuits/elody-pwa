@@ -5,7 +5,7 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 FROM base as deps
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* .npmrc* ./
 
 ARG NPM_CONFIG_ALWAYS_AUTH
 ARG NPM_CONFIG_REGISTRY
