@@ -4,7 +4,7 @@
       {
         'flex items-end':
           repeatablePanelConfig?.repeatableFieldsHelper
-            .repetitionDeleteIsAvailable.value,
+            .repetitionDeleteIsAvailable,
       },
     ]"
   >
