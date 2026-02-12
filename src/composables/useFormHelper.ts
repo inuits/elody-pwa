@@ -448,7 +448,7 @@ const useFormHelper = () => {
     return relations;
   };
 
-  const parseMetadatWithRepeatableValues = (
+  const parseMetadataWithRepeatableValues = (
     metadata: MetadataValuesInput[],
     repeatableMetadataValues: any,
   ): MetadataValuesInput[] => {
@@ -522,7 +522,7 @@ const useFormHelper = () => {
       );
 
     if (repeatableMetadataValues && metadata)
-      metadata = parseMetadatWithRepeatableValues(
+      metadata = parseMetadataWithRepeatableValues(
         metadata,
         repeatableMetadataValues,
       );
