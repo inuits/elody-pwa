@@ -106,7 +106,7 @@ const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
 const repeatablePanel = ref<boolean>(
-  props.panel.repetitionConfig?.repeatable ?? false,
+  !!props.panel.repetitionConfig,
 );
 const panelId = computed(() => props.panel.repetitionConfig?.repetitionKey);
 const repeatableFieldsHelper = useRepeatableFields(
