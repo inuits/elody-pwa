@@ -1,5 +1,6 @@
 <template>
   <base-modal
+    v-if="formFlow !== ContextMenuFormFlow.Removal"
     :modal-type="TypeModals.EntityEditModal"
     modal-color="bg-background-light"
     modalHeightStyle="max-h-[75vh] my-[12.5vh]"
@@ -22,7 +23,9 @@
             :form-id="activeFormId"
             form-flow="edit"
             :base-library-mode="BaseLibraryModes.BasicBaseLibrary"
-            @update:metadata="(val) => handleManualMetadataUpdate(val, activeFormId)"
+            @update:metadata="
+              (val) => handleManualMetadataUpdate(val, activeFormId)
+            "
           />
         </div>
 
@@ -49,7 +52,12 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { TypeModals, PanelType, BaseLibraryModes } from "@/generated-types/queries";
+import {
+  TypeModals,
+  PanelType,
+  BaseLibraryModes,
+  ContextMenuFormFlow,
+} from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEntityEditor } from "@/composables/useEntityEditor";
@@ -62,33 +70,65 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 const { t } = useI18n();
 const { closeModal, getModalInfo } = useBaseModal();
 const { deleteForm } = useFormHelper();
-const { 
-  entity, editableFields, isLoading, isSaving, form, 
-  initialize, save, handleManualMetadataUpdate 
+const {
+  entity,
+  editableFields,
+  isLoading,
+  isSaving,
+  form,
+  initialize,
+  save,
+  handleManualMetadataUpdate,
 } = useEntityEditor();
 
 const currentEntityId = ref<string | null>(null);
 const currentEntityType = ref<string | null>(null);
-const activeFormId = computed(() => currentEntityId.value ? `${currentEntityId.value}_editing` : "");
+const formFlow = ref<ContextMenuFormFlow | null>(null);
+const activeFormId = computed(() =>
+  currentEntityId.value ? `${currentEntityId.value}_editing` : "",
+);
 
 const isFormValid = computed(() => form.value?.meta?.valid ?? false);
 
-const metadataFields = computed(() => 
-  getMetadataFields(editableFields.value, PanelType.Metadata, activeFormId.value)
+const metadataFields = computed(() =>
+  getMetadataFields(
+    editableFields.value,
+    PanelType.Metadata,
+    activeFormId.value,
+  ),
 );
 
-const onSave = async () => {
+const onSave = async ({
+  saveEmptyMetadata = false,
+}: {
+  saveEmptyMetadata: boolean;
+}) => {
   if (!currentEntityId.value || !currentEntityType.value) return;
-  
+
   const modalInfo = getModalInfo(TypeModals.EntityEditModal);
-  const success = await save(currentEntityId.value, currentEntityType.value, modalInfo.callback);
-  
-  if (success) handleCloseModal();
+  try {
+    const success = await save(
+      currentEntityId.value,
+      currentEntityType.value,
+      modalInfo.callback,
+      saveEmptyMetadata,
+    );
+    if (success) handleCloseModal();
+  } finally {
+    handleCloseModal()
+  }
 };
 
 const handleCloseModal = () => {
   if (activeFormId.value) deleteForm(activeFormId.value);
+  resetData();
   closeModal(TypeModals.EntityEditModal);
+};
+
+const resetData = () => {
+  currentEntityId.value = null;
+  currentEntityType.value = null;
+  formFlow.value = null;
 };
 
 watch(
@@ -97,10 +137,20 @@ watch(
     if (isOpen) {
       const info = getModalInfo(TypeModals.EntityEditModal);
       currentEntityId.value = info.entityId;
-      currentEntityType.value = mapUrlToEntityType(info.entityType) || info.entityType;
-      
-      await initialize(currentEntityId.value!, currentEntityType.value!, info.formQuery);
+      currentEntityType.value =
+        mapUrlToEntityType(info.entityType) || info.entityType;
+      formFlow.value = info.flow;
+
+      await initialize(
+        currentEntityId.value!,
+        currentEntityType.value!,
+        info.formQuery,
+      );
+
+      if (formFlow.value === ContextMenuFormFlow.Removal) {
+        onSave({ saveEmptyMetadata: true });
+      }
     }
-  }
+  },
 );
 </script>
