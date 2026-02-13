@@ -94,6 +94,7 @@ const getAvailableContextMenuActions = () => {
   for (const key in availableOptions) {
     const action = availableOptions[key as keyof typeof menuActions];
     const permission = action?.can;
+    const hidden = action?.hidden || false;
 
     if (
       permission &&
@@ -104,7 +105,7 @@ const getAvailableContextMenuActions = () => {
           parentEntityId: props.parentEntityId,
           childEntityId: props.entityId,
         })
-      ]
+      ] || hidden
     ) {
       delete availableOptions[key as keyof typeof menuActions];
     }

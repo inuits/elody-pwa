@@ -28,6 +28,7 @@
       :bulk-operations-context="bulkOperationsContext"
       :refetch-entities="refetchEntities"
       :form-query="element.formQuery"
+      :form-flow="element.formFlow"
     />
     <custom-action
       v-if="element.__typename === 'ContextMenuCustomAction'"

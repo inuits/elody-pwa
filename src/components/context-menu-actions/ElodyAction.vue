@@ -19,6 +19,7 @@ import {
   Collection,
   TypeModals,
   ModalStyle,
+  ContextMenuFormFlow,
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
@@ -45,6 +46,7 @@ const props = defineProps<{
   entityType: Entitytyping;
   entityId: string;
   formQuery?: string;
+  formFlow?: ContextMenuFormFlow;
   relation?:
     | { idx: number; relation: object }
     | "no-relation-found"
@@ -172,6 +174,7 @@ const doAction = () => {
         entityId: props.entityId || entityFormData.id,
         entityType:
           props.entityType || entityFormData.type || Entitytyping.BaseEntity,
+        flow: props.formFlow,
         callback: () => {
           if (refetchParentEntity) {
             refetchParentEntity();

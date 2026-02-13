@@ -40,7 +40,7 @@ const dateValue = computed<string | undefined>({
     return props.modelValue;
   },
   set(newValue) {
-    const value = newValue?.replace('Z', '+00:00') || "";
+    const value = newValue?.replace("Z", "+00:00") || "";
     emit("update:modelValue", value);
   },
 });
@@ -50,7 +50,9 @@ const modelType = computed(() => {
 });
 
 const formats = computed(() => {
-  const format = props.type.includes("datetime") ? "dd/MM/yyyy HH:mm" : "dd/MM/yyyy";
+  const format = props.type.includes("datetime")
+    ? "dd/MM/yyyy HH:mm"
+    : "dd/MM/yyyy";
   return {
     preview: format,
     input: format,
@@ -81,5 +83,11 @@ const enableTimePicker = computed<boolean>(() => {
 
 .base-date-picker .dp__icon {
   color: var(--color-black);
+}
+
+.base-modal--opened .dp--menu-wrapper {
+  position: fixed !important;
+  top: unset !important;
+  left: unset !important;
 }
 </style>

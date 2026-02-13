@@ -13,18 +13,14 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
-import {
-  getChildrenOfHomeRoutes,
-  deepToRaw,
-} from "@/helpers";
+import { getChildrenOfHomeRoutes, deepToRaw } from "@/helpers";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 
 export function useEntityEditor() {
   const { t } = useI18n();
   const { createForm, parseFormValuesToFormInput, addEditableMetadataKeys } =
     useFormHelper();
-  const { displaySuccessNotification, displayErrorNotification } =
-    useBaseNotification();
+  const { displaySuccessNotification } = useBaseNotification();
   const { loadDocument } = useImport();
   const { getVeeValidateKey } = useVeeValidate();
   const config: any = inject("config");
@@ -73,8 +69,9 @@ export function useEntityEditor() {
       if (formQuery) {
         const document = await loadDocument(formQuery);
         const queryRes = await apolloClient.query({ query: document });
-        const rawFields =
-          Object.values(queryRes.data.GetDynamicForm?.formTab?.formFields || {}) as PanelMetaData[];
+        const rawFields = Object.values(
+          queryRes.data.GetDynamicForm?.formTab?.formFields || {},
+        ) as PanelMetaData[];
 
         editableFields.value = rawFields.filter(
           (f: any) => f.inputField && !f.nonEditableField,
@@ -85,7 +82,7 @@ export function useEntityEditor() {
         );
       }
     } catch (error) {
-      console.log('Error while initializing form:', error);
+      console.log("Error while initializing form:", error);
     } finally {
       isLoading.value = false;
     }
@@ -95,6 +92,7 @@ export function useEntityEditor() {
     entityId: string,
     entityType: string,
     callback?: () => void,
+    saveEmptyMetadata: boolean = false,
   ) => {
     if (!form.value) return;
 
@@ -108,16 +106,22 @@ export function useEntityEditor() {
         {},
       );
 
+      const formInput = parseFormValuesToFormInput(
+        entityId,
+        form.value.values,
+        false,
+        config.locale || "en",
+        metadataMap,
+      );
+
+      if (saveEmptyMetadata) {
+        formInput.metadata.forEach((item) => (item.value = ""));
+      }
+
       const result = await mutate({
         id: entityId,
         collection: determineCollection(entityType),
-        formInput: parseFormValuesToFormInput(
-          entityId,
-          form.value.values,
-          false,
-          config.locale || "en",
-          metadataMap,
-        ),
+        formInput,
       });
 
       if (result?.data?.mutateEntityValues) {
@@ -129,7 +133,7 @@ export function useEntityEditor() {
         return true;
       }
     } catch (error) {
-      console.log('Error while saving entity:', error);
+      console.log("Error while saving entity:", error);
     } finally {
       isSaving.value = false;
     }
