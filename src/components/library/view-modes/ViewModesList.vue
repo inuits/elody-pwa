@@ -117,6 +117,7 @@
           :entities-loading="entitiesLoading"
           :config-per-view-mode="configPerViewMode"
           :entity-id="previewForEntity"
+          :parent-ids="parentEntityIdentifiers"
           :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"

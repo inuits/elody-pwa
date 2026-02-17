@@ -77,7 +77,12 @@
       "
     />
   </div>
-  <div class="metadata-preview" v-if="metadataPreviewElement">
+  <div
+    class="metadata-preview"
+    v-if="
+      metadataPreviewElement && previewComponent.type !== PreviewTypes.History
+    "
+  >
     <entity-column
       :key="entityId"
       :entity="getEntitiesOrEntity()"
@@ -85,6 +90,23 @@
       :identifiers="[entityId]"
       :entity-type="entityType"
       :preview-label="getTitleFromEntity"
+      @close-preview-component="emit('closePreviewComponent')"
+    />
+  </div>
+  <div
+    class="metadata-preview"
+    v-if="
+      metadataPreviewElement && previewComponent.type === PreviewTypes.History
+    "
+  >
+    <HistoryDiffPreview
+      :key="entityId"
+      :entity="getEntitiesOrEntity()"
+      :column-list="metadataPreviewElement"
+      :entity-id="entityId"
+      :entities="entities"
+      :entity-type="entityType"
+      :parent-entity-id="parentIds[0]"
       @close-preview-component="emit('closePreviewComponent')"
     />
   </div>
@@ -112,6 +134,7 @@ import { getTitleOrNameFromEntity } from "@/helpers";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useMaps } from "@/composables/useMaps";
+import HistoryDiffPreview from "./HistoryDiffPreview.vue";
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
@@ -126,6 +149,7 @@ const props = withDefaults(
     entitiesLoading: boolean;
     configPerViewMode: object;
     entityId: string | undefined;
+    parentIds: string[];
     cropMediafileCoordinatesKey: string;
   }>(),
   {},

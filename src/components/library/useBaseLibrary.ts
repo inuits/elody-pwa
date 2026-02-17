@@ -252,7 +252,7 @@ export const useBaseLibrary = (
         },
       });
 
-      const fetchedEntities = result.data.Entities;
+      const fetchedEntities = result.data.Entities || result.data.EntitiesHistory;
       if (limitForEntityPicker) return fetchedEntities;
 
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {

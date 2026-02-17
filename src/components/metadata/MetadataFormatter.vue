@@ -24,11 +24,12 @@
 </template>
 
 <script lang="ts" setup>
-import { CustomFormatterTypes } from "@/generated-types/queries";
+import { CustomFormatterTypes, type Unit } from "@/generated-types/queries";
 import MetadataFormatterLink from "./MetadataFormatterLink.vue";
 import MetadataFormatterPill from "./MetadataFormatterPill.vue";
 import MetadataRegexpFormatter from "./MetadataRegexpFormatter.vue";
 import { computed } from "vue";
+import { convertUnitToReadbleFormat } from "@/helpers";
 
 const props = withDefaults(
   defineProps<{
@@ -38,10 +39,12 @@ const props = withDefaults(
     entity: any;
     translationKey?: string;
     openInNewTab?: boolean;
+    unit: string;
   }>(),
   {
     link: "",
     openInNewTab: false,
+    unit: "",
   },
 );
 
@@ -56,6 +59,8 @@ const readableLabel = computed(() => {
   if (isLabelArray) {
     return props.label.length > 0 ? props.label.join(", ") : "-";
   }
-  return props.label ? props.label : "-";
+  return props.label
+    ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
+    : "-";
 });
 </script>

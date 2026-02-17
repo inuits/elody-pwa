@@ -77,6 +77,7 @@
         :element="element"
         :form-id="formId"
         :identifiers="identifiers"
+        :preview-label="previewLabel"
         @resize-column="(toggled) => emit('resizeColumn', toggled)"
       />
       <entity-element-graph

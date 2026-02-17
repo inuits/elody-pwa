@@ -78,6 +78,7 @@
                 v-if="metadata.value?.formatter"
                 v-bind="metadata.value"
                 :translation-key="metadata.valueTranslationKey"
+                :unit="metadata.unit"
                 :entity="{ type: entityType }"
               />
               <ViewModesAutocompleteRelations

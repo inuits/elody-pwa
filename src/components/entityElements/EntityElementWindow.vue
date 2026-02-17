@@ -17,8 +17,8 @@
         <h1
           data-cy="entity-element-window-title"
           class="subtitle text-text-body p-2"
-        >
-          {{ t(element.label) }}
+        > 
+          {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
         <MetadataEditButton
           class="my-2"
@@ -99,6 +99,7 @@ const props = defineProps<{
   identifiers: string[];
   isEditOverwrite?: boolean;
   formId: string;
+  previewLabel?: string;
 }>();
 
 const emit = defineEmits<{
