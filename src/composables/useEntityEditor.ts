@@ -142,7 +142,7 @@ export function useEntityEditor() {
 
   const handleManualMetadataUpdate = (field: PanelMetaData, formId: string) => {
     if (!form.value) return;
-    const path = getVeeValidateKey(field, formId, true);
+    const path = getVeeValidateKey(field, undefined, true, undefined);
     form.value.setFieldValue(path, field.value);
   };
 
