@@ -141,7 +141,7 @@ const start = async (): Promise<void> => {
     .provide("config", config)
     .provide(DefaultApolloClient, apolloClient);
 
-  if (config.SENTRY_ENABLED) {
+  if (config.GLITCH_TIP_ENABLED) {
     Sentry.init({
       app,
       sendClientReports: false,
@@ -151,7 +151,7 @@ const start = async (): Promise<void> => {
           tracingOrigins: ["*"],
         }),
       ],
-      dsn: config.SENTRY_DSN_FRONTEND,
+      dsn: config.GLITCH_TIP_DSN_FRONTEND,
       environment: config.NOMAD_NAMESPACE,
     });
   }
