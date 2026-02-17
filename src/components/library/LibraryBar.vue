@@ -133,6 +133,8 @@ const paginationLimitOptionsPromise = async () => {
 };
 
 const sortOptionsPromise = async (entityType: Entitytyping) => {
+  console.log(`%c[SortOptions] 🚀 Starting promise for entity: ${entityType}`, "color: #3498db; font-weight: bold;");
+
   return apolloClient
     .query({
       query: await determineSortOptionsQuery(),
@@ -141,14 +143,18 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
-      const sortingOptionsResult =
-        result.data?.EntityTypeSortOptions.sortOptions;
+      console.group(`[SortOptions] Results for ${entityType}`);
+      
+      const sortingOptionsResult = result.data?.EntityTypeSortOptions.sortOptions;
+      console.log("1. Raw API Result:", sortingOptionsResult);
+
       sortOptions.value = sortingOptionsResult?.options || [];
 
+      // Filtering Logic
       sortOptions.value = sortOptions.value.filter((option) => {
         const availabilityArray = option.availableInPages;
         if (!availabilityArray) return true;
-        return availabilityArray.reduce((accumulator, currentValue) => {
+        const isAvailable = availabilityArray.reduce((accumulator, currentValue) => {
           if (
             route.fullPath.includes(currentValue.entityType) &&
             currentValue.routeName === route.name
@@ -156,45 +162,65 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
             return true;
           return accumulator;
         }, false);
+        return isAvailable;
+      });
+      console.log("2. Filtered Options List:", sortOptions.value);
+
+      // State Retrieval
+      const state = getStateForRoute(route, true);
+      console.log("3. State from getStateForRoute:", state);
+      console.log("4. Route used for lookup:", { name: route.name, path: route.fullPath });
+
+      // Sort KEY Logic
+      const stateSortKey = state?.queryVariables?.searchValue?.order_by;
+      const defaultSortKey = sortOptions.value?.[0]?.value;
+      const finalSortKey = stateSortKey || defaultSortKey;
+      
+      console.log("5. Sort Key Selection:", { 
+        fromState: stateSortKey, 
+        fallbackDefault: defaultSortKey, 
+        chosen: finalSortKey 
       });
 
-      const state = getStateForRoute(route, true);
-      const sortKey =
-        state?.queryVariables?.searchValue.order_by ||
-        sortOptions.value?.[0]?.value;
       selectedSortOption.value = sortOptions.value.find(
-        (option) => option.value === sortKey,
+        (option) => option.value === finalSortKey,
       )?.value;
-      props.setSortKey(sortKey);
-      // 1. Check what we are getting from the Global State Management
-      console.log("[Debug] Current State from getStateForRoute:", state);
       
-      // 2. Check what the API/Result says
-      console.log("[Debug] sortingOptionsResult isAsc:", sortingOptionsResult?.isAsc);
+      props.setSortKey(finalSortKey);
 
-      const isAscFromState =
-        state?.queryVariables?.searchValue.isAsc !== undefined
-          ? state?.queryVariables?.searchValue.isAsc
-          : sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
+      // Sort DIRECTION Logic
+      const stateIsAsc = state?.queryVariables?.searchValue?.isAsc;
+      const apiIsAsc = sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
+      
+      const isAscFromState = stateIsAsc !== undefined ? stateIsAsc : apiIsAsc;
 
-      console.log("[Debug] Determined isAscFromState:", isAscFromState);
+      console.log("6. Direction Selection:", { 
+        stateIsAsc, 
+        apiIsAsc, 
+        finalIsAsc: isAscFromState 
+      });
 
       const sortOrder = isAscFromState ? "asc" : "desc";
-      
-      // 3. Check if the UI options even match the derived value
       const matchedOption = sortDirectionOptions.value.find(
         (option) => option.value === sortOrder,
       );
       
-      console.log("[Debug] Matched UI Option:", matchedOption);
+      console.log("7. UI Mapping:", { 
+        targetOrder: sortOrder, 
+        foundInUIOptions: !!matchedOption 
+      });
 
       selectedSortDirection.value = matchedOption?.value;
 
-      // 4. Trace the setter call
-      console.log("[Debug] Calling setIsAsc with:", sortOrder);
+      console.log(`8. Final Output -> Calling setIsAsc("${sortOrder}")`);
       setIsAsc(sortOrder);
 
       sortOptionsPromiseIsResolved.value = true;
+      console.groupEnd();
+    })
+    .catch(err => {
+      console.error("[SortOptions] Error in promise:", err);
+      console.groupEnd();
     });
 };
 
