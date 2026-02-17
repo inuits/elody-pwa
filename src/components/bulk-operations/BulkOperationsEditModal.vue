@@ -64,11 +64,10 @@ import type {
   WindowElement,
 } from "@/generated-types/queries";
 import {
-  BulkAddRelationsDocument,
   DamsIcons,
-  GetBulkOperationsRelationFormDocument,
   TypeModals,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
@@ -113,7 +112,7 @@ const editRelations = ref<boolean>(true);
 const { mutate: mutateRelations } = useMutation<
   BulkAddRelationsMutation,
   BulkAddRelationsMutationVariables
->(BulkAddRelationsDocument);
+>(getDocument("BulkAddRelationsDocument"));
 
 const bulkAddRelations = () => {
   if (!relationEntityId.value) return;
@@ -126,7 +125,7 @@ const bulkAddRelations = () => {
 
 const { onResult: onRelationFormResult } =
   useQuery<GetBulkOperationsRelationFormQuery>(
-    GetBulkOperationsRelationFormDocument,
+    getDocument("GetBulkOperationsRelationFormDocument"),
   );
 
 onRelationFormResult((relationFormResult: any) => {

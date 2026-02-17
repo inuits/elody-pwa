@@ -8,13 +8,8 @@ import type {
   ContextMenuGeneralAction,
   ContextMenuLinkAction,
 } from "@/generated-types/queries";
-import {
-  GetPermissionMappingDocument,
-  GetPermissionMappingEntityDetailDocument,
-  GetAdvancedPermissionsDocument,
-  GetAdvancedPermissionDocument,
-  Entitytyping,
-} from "@/generated-types/queries";
+import { Entitytyping } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
 
@@ -59,14 +54,18 @@ type ContextMenuActionType =
   | ContextMenuLinkAction;
 
 const setPermissionsMappings = async () => {
+  const doc = getDocument("GetPermissionMappingDocument");
+  if (!doc) {
+    console.warn("GetPermissionMappingDocument not available, skipping permissions mapping.");
+    return;
+  }
   return await apolloClient
     .query({
-      query: GetPermissionMappingDocument,
+      query: doc,
       variables: {
         entities: Object.values(Entitytyping),
       },
       fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
     })
     .then((result) => {
       permissionsMappings.value = normalizePermissions(
@@ -154,7 +153,7 @@ const usePermissions = () => {
     try {
       return apolloClient
         .query({
-          query: GetAdvancedPermissionDocument,
+          query: getDocument("GetAdvancedPermissionDocument"),
           variables,
           fetchPolicy: "no-cache",
           notifyOnNetworkStatusChange: true,
@@ -183,7 +182,7 @@ const usePermissions = () => {
 
     try {
       const { data } = await apolloClient.query<AdvancedPermissionsResponse>({
-        query: GetAdvancedPermissionsDocument,
+        query: getDocument("GetAdvancedPermissionsDocument"),
         variables,
         fetchPolicy: "no-cache",
       });
@@ -281,7 +280,7 @@ const usePermissions = () => {
     try {
       return apolloClient
         .query<GetPermissionMappingEntityDetailQuery>({
-          query: GetPermissionMappingEntityDetailDocument,
+          query: getDocument("GetPermissionMappingEntityDetailDocument"),
           variables: reactive<GetPermissionMappingEntityDetailQueryVariables>({
             id: id,
             entityType: entityType,

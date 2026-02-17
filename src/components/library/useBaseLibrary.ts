@@ -7,10 +7,10 @@ import {
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
-  GetEntityByIdDocument,
   type GetEntityByIdQueryVariables,
   BaseLibraryModes,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useEditMode } from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { ref, shallowRef, watch, inject } from "vue";
@@ -208,7 +208,7 @@ export const useBaseLibrary = (
     try {
       const query = route!.meta!.queries!.getEntities;
       return await loadDocument(query);
-    } catch (error) {
+    } catch {
       return await loadDocument("GetEntities");
     }
   };
@@ -288,7 +288,7 @@ export const useBaseLibrary = (
     };
     await apolloClient
       .query({
-        query: GetEntityByIdDocument,
+        query: getDocument("GetEntityByIdDocument"),
         variables: variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,

@@ -30,10 +30,10 @@
 
 <script setup lang="ts">
 import {
-  GetEntityByIdDocument,
   type GetEntityByIdQuery,
   TypeModals,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { computed, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import BaseModal from "@/components/base/BaseModal.vue";
@@ -55,7 +55,7 @@ const queryVariables = computed(() => {
 });
 
 const { result, refetch } = useQuery<GetEntityByIdQuery>(
-  GetEntityByIdDocument,
+  getDocument("GetEntityByIdDocument"),
   queryVariables,
   () => ({
     notifyOnNetworkStatusChange: true,

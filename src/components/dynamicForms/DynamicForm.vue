@@ -221,7 +221,6 @@ import {
   BaseFieldType,
   EndpointResponseActions,
   EntityPickerMode,
-  MutateEntityValuesDocument,
   OcrType,
   RouteNames,
   TypeModals,
@@ -229,6 +228,7 @@ import {
   Entitytyping,
   FormFields,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { computed, inject, ref, watch, onUnmounted } from "vue";
@@ -355,7 +355,7 @@ const route = useRoute();
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
->(MutateEntityValuesDocument);
+>(getDocument("MutateEntityValuesDocument"));
 
 const dynamicForm = computed(() => {
   return props.tabName
@@ -429,7 +429,7 @@ const getFieldArray = computed(() => {
 });
 
 const getSortedFieldArray = computed(() => {
-  return getFieldArray.value?.sort((a) =>
+  return [...(getFieldArray.value || [])].sort((a) =>
     a.__typename === "FormAction" ? 1 : 0,
   );
 });

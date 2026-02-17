@@ -1,10 +1,10 @@
 import { useMutation } from "@vue/apollo-composable";
 import {
   Collection,
-  BulkDeleteEntitiesDocument,
   Entitytyping,
   type BulkDeleteEntitiesMutation,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { type InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
@@ -12,7 +12,7 @@ import { useImport } from "./useImport";
 
 export const useDeleteEntities = () => {
   const { mutate } = useMutation<BulkDeleteEntitiesMutation>(
-    BulkDeleteEntitiesDocument,
+    getDocument("BulkDeleteEntitiesDocument"),
   );
   const { loadDocument } = useImport();
 

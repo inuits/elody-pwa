@@ -34,13 +34,13 @@ import type {
   GetGraphDataQueryVariables,
   GraphElement,
 } from "@/generated-types/queries";
-import { GetGraphDataDocument } from "@/generated-types/queries";
+import { fetchDocuments } from "@/composables/useDocumentFetcher";
 import "chartjs-adapter-date-fns";
 import Chart from "chart.js/auto";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { Colors } from "chart.js";
-import { computed, inject, ref, watch } from "vue";
-import { useQuery } from "@vue/apollo-composable";
+import { computed, inject, ref, watch, onMounted } from "vue";
+import { apolloClient } from "@/main";
 
 const props = defineProps<{
   element: GraphElement;
@@ -75,16 +75,17 @@ const queryVariables: GetGraphDataQueryVariables = {
     convert_to: props.element.convert_to,
   },
 };
-const { onResult, refetch } = useQuery(
-  GetGraphDataDocument,
-  queryVariables,
-  () => ({
-    enabled: !props.element.isCollapsed,
-    notifyOnNetworkStatusChange: true,
+
+const fetchGraphData = async () => {
+  if (props.element.isCollapsed || canvasRef.value === null) return;
+
+  const documents = await fetchDocuments();
+  const result = await apolloClient.query({
+    query: documents.GetGraphDataDocument,
+    variables: queryVariables,
     fetchPolicy: "no-cache",
-  }),
-);
-onResult((result) => {
+  });
+
   if (canvasRef.value === null || !result?.data?.GraphData) return;
   Chart.register(Colors);
   chart?.destroy();
@@ -110,13 +111,15 @@ onResult((result) => {
   }
 
   loading.value = false;
-});
+};
+
+onMounted(() => fetchGraphData());
 
 watch(
   () => canvasRef.value,
   () => {
     loading.value = true;
-    if (canvasRef.value && !props.element.isCollapsed) refetch();
+    if (canvasRef.value && !props.element.isCollapsed) fetchGraphData();
   },
 );
 </script>

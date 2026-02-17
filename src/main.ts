@@ -37,6 +37,7 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
+import { fetchDocuments } from "@/composables/useDocumentFetcher";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -133,6 +134,7 @@ const start = async (): Promise<void> => {
   });
 
   setIgnorePermissions(config.IGNORE_PERMISSIONS);
+  await fetchDocuments();
   const [formattersSettingsResult] = await Promise.all([
     getFormattersSettings(),
   ]);

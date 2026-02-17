@@ -7,7 +7,6 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import type { Collection } from "@/generated-types/queries";
-import { MutateEntityValuesDocument } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
@@ -17,6 +16,7 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
+import { fetchDocuments } from "@/composables/useDocumentFetcher";
 
 type SelectedItem = { key: string } | InBulkProcessableItem;
 
@@ -72,8 +72,9 @@ export function useDeleteRelations() {
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
+    const documents = await fetchDocuments();
     const result = await apolloClient.mutate({
-      mutation: MutateEntityValuesDocument,
+      mutation: documents.MutateEntityValuesDocument,
       variables: {
         id: entityId,
         formInput: parseFormValuesToFormInput(entityId, form.values, true),

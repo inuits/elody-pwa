@@ -7,7 +7,6 @@ import {
   type Entity,
   type EntityListElement,
   Entitytyping,
-  GetCustomFormattersSettingsDocument,
   InputFieldTypes,
   type IntialValues,
   type Metadata,
@@ -20,6 +19,7 @@ import {
   type WindowElementPanel,
   type RepetitionConfig,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { createI18n } from "vue-i18n";
 import { i18n } from "@/main.ts";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -526,9 +526,14 @@ export const getApplicationDetails = () => {
 };
 
 export const getFormattersSettings = async () => {
+  const doc = getDocument("GetCustomFormattersSettingsDocument");
+  if (!doc) {
+    console.warn("GetCustomFormattersSettingsDocument not available, skipping formatters settings.");
+    return {};
+  }
   return await apolloClient
     .query({
-      query: GetCustomFormattersSettingsDocument,
+      query: doc,
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
     })

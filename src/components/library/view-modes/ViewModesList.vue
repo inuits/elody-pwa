@@ -137,13 +137,13 @@ import {
   type Entity,
   type EntityListElement,
   Entitytyping,
-  GetPreviewComponentsDocument,
   ListItemCoverageTypes,
   MediaTypeEntities,
   type Metadata,
   type PreviewComponent,
   RelationActions,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
@@ -375,7 +375,7 @@ const getPreviewItemsForEntity = async () => {
   previewForEntity.value = undefined;
   apolloClient
     .query({
-      query: GetPreviewComponentsDocument,
+      query: getDocument("GetPreviewComponentsDocument"),
       variables: { entityType: props.entityType },
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,

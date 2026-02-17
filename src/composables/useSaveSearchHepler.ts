@@ -1,11 +1,8 @@
 import { ref, toRaw } from "vue";
 import {
-  GetEntityByIdDocument,
-  DeleteDataDocument,
   Entitytyping,
   Collection,
   SearchInputType,
-  MutateEntityValuesDocument,
   type AdvancedFilterInput,
   type GetEntityByIdQueryVariables,
   type SavedSearch,
@@ -14,6 +11,7 @@ import {
   type MutateEntityValuesMutationVariables,
   type Entity,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import type { FilterListItem } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import type { ApolloClient } from "@apollo/client/core";
@@ -83,7 +81,7 @@ export const useSaveSearchHepler = () => {
 
     return await apolloClient
       .query({
-        query: GetEntityByIdDocument,
+        query: getDocument("GetEntityByIdDocument"),
         variables: queryVariables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
@@ -96,7 +94,7 @@ export const useSaveSearchHepler = () => {
 
   const deleteSavedSearch = async (id: string) => {
     provideApolloClient(apolloClient);
-    const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+    const { mutate } = useMutation<DeleteDataMutation>(getDocument("DeleteDataDocument"));
     const collection = Collection.Entities;
     return await mutate({ id, path: collection, deleteMediafiles: false });
   };
@@ -106,7 +104,7 @@ export const useSaveSearchHepler = () => {
     const { mutate } = useMutation<
       MutateEntityValuesMutation,
       MutateEntityValuesMutationVariables
-    >(MutateEntityValuesDocument);
+    >(getDocument("MutateEntityValuesDocument"));
 
     const initialValues = { ...entity.intialValues };
     initialValues.filters = newFilters;

@@ -52,9 +52,9 @@ import {
   DamsIcons,
   type DropdownOption,
   type Entitytyping,
-  GetPaginationLimitOptionsDocument,
   type GetPaginationLimitOptionsQuery,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { apolloClient } from "@/main";
 import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
@@ -112,7 +112,7 @@ const setIsAsc = (sortDirection: "asc" | "desc") => {
 const paginationLimitOptionsPromise = async () => {
   return apolloClient
     .query<GetPaginationLimitOptionsQuery>({
-      query: GetPaginationLimitOptionsDocument,
+      query: getDocument("GetPaginationLimitOptionsDocument"),
     })
     .then((result) => {
       paginationLimitOptions.value =
@@ -196,7 +196,7 @@ const determineSortOptionsQuery = async (): Promise<any> => {
   try {
     const query = route!.meta!.queries!.getSortOptions;
     return await loadDocument(query);
-  } catch (error) {
+  } catch {
     return await loadDocument("GetSortOptions");
   }
 };

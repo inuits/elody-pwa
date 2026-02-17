@@ -95,10 +95,10 @@ import {
   MapViews,
   AdvancedFilters,
   Entity,
-  GetEntityByIdDocument,
   type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { HeatMapItem } from "@/composables/useMaps";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import debounce from "lodash.debounce";
@@ -154,7 +154,7 @@ const getEntityQueryVariables = computed<GetEntityByIdQueryVariables>(() => {
 
 const { result: featureResult, loading: featureLoading } =
   useQuery<GetEntityByIdQuery>(
-    GetEntityByIdDocument,
+    getDocument("GetEntityByIdDocument"),
     getEntityQueryVariables,
     () => ({
       notifyOnNetworkStatusChange: true,

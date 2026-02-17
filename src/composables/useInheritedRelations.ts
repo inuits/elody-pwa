@@ -4,10 +4,8 @@ import type {
   BaseRelationValuesInput,
   BaseEntity,
 } from "@/generated-types/queries";
-import {
-  type GetEntityByIdQueryVariables,
-  GetEntityByIdDocument,
-} from "@/generated-types/queries";
+import { type GetEntityByIdQueryVariables } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { extractValueFromObject } from "@/helpers";
 
 export const useInheritedRelations = () => {
@@ -21,7 +19,7 @@ export const useInheritedRelations = () => {
     };
     return apolloClient
       .query({
-        query: GetEntityByIdDocument,
+        query: getDocument("GetEntityByIdDocument"),
         variables: variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,

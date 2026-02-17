@@ -1,10 +1,10 @@
 import type { ApolloClient } from "@apollo/client/core";
 import {
   DamsIcons,
-  GetTenantsDocument,
   type DropdownOption,
   type GetTenantsQuery,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { ref, computed } from "vue";
 import {
   setPermissionsMappings,
@@ -74,7 +74,7 @@ const useTenant = (
       try {
         await apolloClient
           .query<GetTenantsQuery>({
-            query: GetTenantsDocument,
+            query: getDocument("GetTenantsDocument"),
             fetchPolicy: "no-cache",
             notifyOnNetworkStatusChange: true,
           })

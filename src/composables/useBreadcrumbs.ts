@@ -3,10 +3,10 @@ import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
   type Entity,
-  GetEntitiesDocument,
   type GetEntitiesQueryVariables,
   SearchInputType,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { apolloClient } from "@/main";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -200,7 +200,7 @@ const useBreadcrumbs = (config: any) => {
     let entities: Entity[] = [];
     await apolloClient
       .query({
-        query: GetEntitiesDocument,
+        query: getDocument("GetEntitiesDocument"),
         variables: queryVariables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,

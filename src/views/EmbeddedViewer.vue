@@ -13,16 +13,14 @@
 <script setup lang="ts">
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import { useQuery } from "@vue/apollo-composable";
-import {
-  GetPrimaryMediafileFromEntityDocument,
-  type GetPrimaryMediafileFromEntityQuery,
-} from "@/queryLoader";
+import { type GetPrimaryMediafileFromEntityQuery } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useRoute } from "vue-router";
 import { computed } from "vue";
 
 const route = useRoute();
 const { result, error } = useQuery<GetPrimaryMediafileFromEntityQuery>(
-  GetPrimaryMediafileFromEntityDocument,
+  getDocument("GetPrimaryMediafileFromEntityDocument"),
   {
     entityId: route.params.id,
   },

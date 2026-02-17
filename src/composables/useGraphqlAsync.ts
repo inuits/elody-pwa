@@ -1,8 +1,9 @@
 import { apolloClient } from "@/main";
+import { fetchDocuments } from "@/composables/useDocumentFetcher";
 
 export const useGraphqlAsync = () => {
   const getQueryDocument = async () => {
-    return await import("@/generated-types/queries");
+    return await fetchDocuments();
   };
 
   const queryAsync = async (query: any, variables: any = undefined) => {
