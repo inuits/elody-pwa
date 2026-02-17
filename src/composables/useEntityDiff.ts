@@ -32,53 +32,53 @@ export function useEntityDiff(
   };
 
   const computeEntityDiff = (
-    oldEntity: Entity,
-    newEntity: Entity,
+    currentVersion: Entity,
+    previousVersion: Entity,
     fields: string[],
   ) => {
-    const cloneOld = structuredClone(toRaw(oldEntity)) as any;
-    const cloneNew = structuredClone(toRaw(newEntity)) as any;
+    const cloneCurrentVersion = structuredClone(toRaw(currentVersion)) as any;
+    const clonePreviousVersion = structuredClone(toRaw(previousVersion)) as any;
 
-    const oldValues = cloneOld?.intialValues || {};
-    const newValues = cloneNew?.intialValues || {};
+    const currentValues = cloneCurrentVersion?.intialValues || {};
+    const previousValues = clonePreviousVersion?.intialValues || {};
 
-    const processedOld: Record<string, any> = { __typename: "IntialValues" };
-    const processedNew: Record<string, any> = { __typename: "IntialValues" };
+    const processedCurrentValues: Record<string, any> = { __typename: "IntialValues" };
+    const processedPreviousValues: Record<string, any> = { __typename: "IntialValues" };
 
     fields.forEach((key) => {
-      const valOld = oldValues[key]?.formatter
-        ? oldValues[key].label
-        : oldValues[key];
-      const valNew = newValues[key]?.formatter
-        ? newValues[key].label
-        : newValues[key];
+      const currentValue = currentValues[key]?.formatter
+        ? currentValues[key].label
+        : currentValues[key];
+      const previousValue = previousValues[key]?.formatter
+        ? previousValues[key].label
+        : previousValues[key];
 
-      if (!isEqual(valOld, valNew)) {
-        processedOld[key] = {
+      if (!isEqual(currentValue, previousValue)) {
+        processedPreviousValues[key] = {
           formatter: "pill|modified",
-          label: formatDisplayValue(valOld),
+          label: formatDisplayValue(previousValue),
         };
-        processedNew[key] = {
+        processedCurrentValues[key] = {
           formatter: "pill|added",
-          label: formatDisplayValue(valNew),
+          label: formatDisplayValue(currentValue),
         };
       } else {
-        processedOld[key] = valOld;
-        processedNew[key] = valNew;
+        processedPreviousValues[key] = previousValue;
+        processedCurrentValues[key] = currentValue;
       }
     });
 
-    cloneOld.intialValues = processedOld;
-    cloneNew.intialValues = processedNew;
+    cloneCurrentVersion.intialValues = processedCurrentValues;
+    clonePreviousVersion.intialValues = processedPreviousValues;
 
     return {
-      oldResult: {
-        ...cloneOld,
-        id: `${oldEntity.id}_old_history_preview`,
+      previousVersion: {
+        ...clonePreviousVersion,
+        id: `${previousVersion.id}_old_history_preview`,
       },
-      newResult: {
-        ...cloneNew,
-        id: `${newEntity.id}_history_preview`,
+      currentVersion: {
+        ...cloneCurrentVersion,
+        id: `${currentVersion.id}_history_preview`,
       },
     };
   };
@@ -92,13 +92,8 @@ export function useEntityDiff(
 
     if (selectedEntityIndex === -1) return null;
 
-    const entityToCompare =
-      selectedEntityIndex > 0
-        ? props.entities[selectedEntityIndex - 1]
-        : parentEntity.value;
-
     return computeEntityDiff(
-      entityToCompare,
+      parentEntity.value,
       props.entity,
       keysToCompare.value,
     );

@@ -65,15 +65,15 @@ const panel = computed(() => {
 const { diffedResults } = useEntityDiff(props, injectedParent, panel);
 
 const columnConfigs = computed(() => ({
-  old: {
-    entity: diffedResults.value?.oldResult,
+  previousVersion: {
+    entity: diffedResults.value?.previousVersion,
     props: {
       identifiers: [props.entityId],
       previewLabel: "panel-labels.history-old-version",
     }
   },
-  new: {
-    entity: diffedResults.value?.newResult,
+  currentVersion: {
+    entity: diffedResults.value?.currentVersion,
     props: {
       identifiers: [props.parentEntityId],
       previewLabel: "panel-labels.history-new-version",
