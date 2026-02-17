@@ -166,15 +166,34 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
         (option) => option.value === sortKey,
       )?.value;
       props.setSortKey(sortKey);
+      // 1. Check what we are getting from the Global State Management
+      console.log("[Debug] Current State from getStateForRoute:", state);
+      
+      // 2. Check what the API/Result says
+      console.log("[Debug] sortingOptionsResult isAsc:", sortingOptionsResult?.isAsc);
+
       const isAscFromState =
         state?.queryVariables?.searchValue.isAsc !== undefined
           ? state?.queryVariables?.searchValue.isAsc
           : sortingOptionsResult?.isAsc?.toLowerCase() === "asc";
+
+      console.log("[Debug] Determined isAscFromState:", isAscFromState);
+
       const sortOrder = isAscFromState ? "asc" : "desc";
-      selectedSortDirection.value = sortDirectionOptions.value.find(
+      
+      // 3. Check if the UI options even match the derived value
+      const matchedOption = sortDirectionOptions.value.find(
         (option) => option.value === sortOrder,
-      )?.value;
+      );
+      
+      console.log("[Debug] Matched UI Option:", matchedOption);
+
+      selectedSortDirection.value = matchedOption?.value;
+
+      // 4. Trace the setter call
+      console.log("[Debug] Calling setIsAsc with:", sortOrder);
       setIsAsc(sortOrder);
+
       sortOptionsPromiseIsResolved.value = true;
     });
 };

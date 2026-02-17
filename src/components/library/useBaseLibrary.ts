@@ -170,6 +170,10 @@ export const useBaseLibrary = (
     forceFetch: boolean = false,
   ): Promise<void> => {
     queryVariables.searchValue.isAsc = isAsc;
+    
+    // LOG THIS: If _route is undefined here, state will NEVER persist on navigation
+    console.trace("[Composable] setSortOrder - current _route is:", _route?.name);
+
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
     if (forceFetch && _route !== undefined) await getEntities(_route);
   };
