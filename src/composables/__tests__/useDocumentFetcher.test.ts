@@ -37,11 +37,15 @@ describe("fetchDocuments", () => {
     });
     vi.stubGlobal("fetch", mockFetch);
 
-    await fetchDocuments();
-    const result = await fetchDocuments();
-
+    const first = await fetchDocuments();
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(result).toEqual(mockDocuments);
+
+    mockFetch.mockClear();
+    const second = await fetchDocuments();
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(second).toEqual(mockDocuments);
+    expect(second).toBe(first);
   });
 
   it("sets empty cache and returns {} on non-ok response", async () => {
