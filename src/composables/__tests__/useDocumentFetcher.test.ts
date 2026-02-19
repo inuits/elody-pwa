@@ -48,7 +48,7 @@ describe("fetchDocuments", () => {
     expect(second).toBe(first);
   });
 
-  it("sets empty cache and returns {} on non-ok response", async () => {
+  it("sets error state and returns {} on non-ok response", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: false,
@@ -62,7 +62,7 @@ describe("fetchDocuments", () => {
     expect(consoleError).toHaveBeenCalledWith("Failed to fetch documents: 500");
   });
 
-  it("sets empty cache and returns {} on network error", async () => {
+  it("sets error state and returns {} on network error", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
 
@@ -70,6 +70,22 @@ describe("fetchDocuments", () => {
 
     expect(result).toEqual({});
     expect(consoleError).toHaveBeenCalledWith("Failed to fetch documents: Network error");
+  });
+
+  it("does not retry after an error", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const mockFetch = vi.fn().mockRejectedValue(new Error("offline"));
+    vi.stubGlobal("fetch", mockFetch);
+
+    await fetchDocuments();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    mockFetch.mockClear();
+    const second = await fetchDocuments();
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(second).toEqual({});
+    consoleError.mockRestore();
   });
 
   it("logs the number of loaded document nodes on success", async () => {
@@ -98,7 +114,7 @@ describe("getDocument", () => {
     expect(doc).toEqual(mockDocuments.GetEntitiesDocument);
   });
 
-  it("returns undefined and warns when called before fetchDocuments", () => {
+  it("returns undefined and warns when state is idle (before fetchDocuments)", () => {
     const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const doc = getDocument("GetEntitiesDocument");
@@ -106,6 +122,20 @@ describe("getDocument", () => {
     expect(doc).toBeUndefined();
     expect(consoleWarn).toHaveBeenCalledWith(
       'getDocument("GetEntitiesDocument") called before documents were loaded. Call fetchDocuments() first.',
+    );
+  });
+
+  it("returns undefined and warns when state is error (after failed fetch)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    await fetchDocuments();
+
+    const doc = getDocument("GetEntitiesDocument");
+
+    expect(doc).toBeUndefined();
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'getDocument("GetEntitiesDocument") called but documents failed to load.',
     );
   });
 
@@ -122,20 +152,6 @@ describe("getDocument", () => {
     expect(doc).toBeUndefined();
     expect(consoleWarn).toHaveBeenCalledWith(
       'Document "NonExistentDocument" not found in cached documents.',
-    );
-  });
-
-  it("returns undefined without warning for missing doc after a failed fetch", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
-    await fetchDocuments();
-
-    const doc = getDocument("GetEntitiesDocument");
-
-    expect(doc).toBeUndefined();
-    expect(consoleWarn).toHaveBeenCalledWith(
-      'Document "GetEntitiesDocument" not found in cached documents.',
     );
   });
 });
