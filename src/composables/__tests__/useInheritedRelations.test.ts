@@ -12,6 +12,10 @@ vi.mock("@/main", () => ({
   },
 }));
 
+vi.mock("@/composables/useDocumentFetcher", () => ({
+  getDocument: vi.fn().mockReturnValue({ kind: "Document", definitions: [] }),
+}));
+
 describe("useInheritedRelations", () => {
   let composable: ReturnType<typeof useInheritedRelations>;
   const mockEntity = {

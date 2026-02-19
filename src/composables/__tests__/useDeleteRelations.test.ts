@@ -24,6 +24,13 @@ vi.mock("@/main", () => ({
   },
 }));
 
+vi.mock("@/composables/useDocumentFetcher", () => ({
+  getDocument: vi.fn().mockReturnValue({ kind: "Document", definitions: [] }),
+  fetchDocuments: vi.fn().mockResolvedValue({
+    MutateEntityValuesDocument: { kind: "Document", definitions: [] },
+  }),
+}));
+
 describe("useDeleteRelations", () => {
   let deleteRelations: ReturnType<typeof useDeleteRelations>["deleteRelations"];
   let submit: ReturnType<typeof useDeleteRelations>["submit"];
