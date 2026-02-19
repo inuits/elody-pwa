@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.unmock("@/composables/useDocumentFetcher");
+
 let fetchDocuments: typeof import("@/composables/useDocumentFetcher").fetchDocuments;
 let getDocument: typeof import("@/composables/useDocumentFetcher").getDocument;
 

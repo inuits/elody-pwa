@@ -23,9 +23,6 @@ vi.mock("@/main", () => ({
   },
 }));
 
-vi.mock("@/composables/useDocumentFetcher", () => ({
-  getDocument: vi.fn().mockReturnValue({ kind: "Document", definitions: [] }),
-}));
 
 describe("usePermissions", () => {
   const mockApolloQuery = vi.mocked(apolloClient.query);
