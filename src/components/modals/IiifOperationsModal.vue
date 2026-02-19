@@ -114,7 +114,7 @@ const scaledHeight = ref(originalHeight);
 
 const getImage = () => {
   window.open(
-    `/api/iiif/3/${props.fileName}/full/${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`,
+    `/api/iiif/3/${props.fileName}/full/!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`,
     "_blank",
   );
 };
