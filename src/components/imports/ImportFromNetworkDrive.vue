@@ -219,12 +219,22 @@ const doImportOfDirectories = async (folder) => {
           t(`notifications.success.import.title`),
           t(`notifications.success.import.description`),
         );
-        goToEntityTypeRoute(
-          Entitytyping.Job,
-          undefined,
-          getMenuDestinations(),
-          router,
-        );
+        const jobIdentifier = obj.data.postStartImport.job_id;
+        if (jobIdentifier) {
+          goToEntityPageById(
+            jobIdentifier,
+            { type: "job", __typename: "job" },
+            "SingleEntity",
+            router,
+          );
+        } else {
+          goToEntityTypeRoute(
+            Entitytyping.Job,
+            undefined,
+            getMenuDestinations(),
+            router,
+          );
+        }
         props.closeAndDeleteForm();
       }
     })
