@@ -3,7 +3,9 @@ import * as GeneratedQueries from "@/generated-types/queries";
 export * from "@/generated-types/queries";
 
 export const GetPrimaryMediafileFromEntityDocument =
-  (GeneratedQueries as any).GetPrimaryMediafileFromEntityDocument ?? null;
+  ('GetPrimaryMediafileFromEntityDocument' in GeneratedQueries)
+    ? (GeneratedQueries as any).GetPrimaryMediafileFromEntityDocument
+    : null;
 
 export type GetPrimaryMediafileFromEntityQuery =
   typeof GeneratedQueries extends { GetPrimaryMediafileFromEntityDocument: infer D }
@@ -11,4 +13,6 @@ export type GetPrimaryMediafileFromEntityQuery =
     : Record<string, any>;
 
 export const PostStartImportDocument =
-  (GeneratedQueries as any).PostStartImportDocument ?? null;
+  ('PostStartImportDocument' in GeneratedQueries)
+    ? (GeneratedQueries as any).PostStartImportDocument
+    : null;
