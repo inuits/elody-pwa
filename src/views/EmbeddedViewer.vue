@@ -16,7 +16,7 @@ import { useQuery } from "@vue/apollo-composable";
 import {
   GetPrimaryMediafileFromEntityDocument,
   type GetPrimaryMediafileFromEntityQuery,
-} from "@/generated-types/queries";
+} from "@/queryLoader";
 import { useRoute } from "vue-router";
 import { computed } from "vue";
 
