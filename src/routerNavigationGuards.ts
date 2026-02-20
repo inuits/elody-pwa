@@ -2,6 +2,7 @@ import type {
   Router,
   NavigationGuardNext,
   RouteLocationNormalized,
+  RouteLocationRaw,
 } from "vue-router";
 import { auth } from "@/main";
 import useTenant from "@/composables/useTenant";
@@ -11,109 +12,22 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
 import { usePermissions } from "@/composables/usePermissions";
 
-const handleRequiredAuthentication = (router: Router) => {
-  if (
-    router.currentRoute.value.meta.requiresAuth &&
-    !auth.isAuthenticated.value
-  )
-    router.push("/unauthorized");
-};
-
-const handleTenantParameterInUrl = async (
+const checkAlternativeRoutes = async (
   to: RouteLocationNormalized,
-  next: NavigationGuardNext,
-  router: Router,
-) => {
-  const { 
-    selectedTenant, 
-    getCodeById, 
-    getIdFromCode, 
-    setTennant, 
-    getLabelById 
-  } = (useTenant as any)();
-
-  const urlParam = to.params.tenant;
-
-  if (urlParam) {
-    const urlCode = Array.isArray(urlParam) ? String(urlParam[0]) : String(urlParam);
-    const targetTenantId = getIdFromCode(urlCode);
-
-    if (targetTenantId) {
-      
-      if (selectedTenant.value !== targetTenantId) {
-        const label = getLabelById(targetTenantId);
-        
-        await setTennant(label || "", targetTenantId); 
-        
-      } 
-      
-      return next();
-    } else {
-      
-      if (selectedTenant.value) {
-        const selectedCode = getCodeById(selectedTenant.value) || selectedTenant.value;
-        if (urlCode !== selectedCode && !to.path.includes("not-found")) {
-          router.replace({ name: "Home", params: { tenant: selectedCode } });
-          return;
-        }
-      }
-    }
-  }
-
-  if (
-    !urlParam &&
-    selectedTenant.value &&
-    !to.path.includes("not-found")
-  ) {
-    const tenant = getCodeById(selectedTenant.value) || selectedTenant.value;
-    router.replace({ path: `/${tenant}${to.path}`, query: to.query });
-    return;
-  } 
-  
-  next();
-};
-
-const handleRequiresAuthFromOverviewPage = (
-  to: RouteLocationNormalized,
-  config: any,
-  next: NavigationGuardNext,
-  router: Router,
-) => {
-  const metaOfChildRoutes = getChildrenOfHomeRoutes(config).map(
-    (route: any) => route.meta,
-  );
-  const type = to.params["type"] ? String(to.params["type"]) : undefined;
-  if (!type) return next();
-
-  if (requiresAuthForEntity(type, metaOfChildRoutes)) {
-    return router.push("/unauthorized");
-  } else {
-    return next();
-  }
-};
-
-const handleAlternativeRoutes = async (
-  to: RouteLocationNormalized,
-  next: NavigationGuardNext,
-) => {
+): Promise<RouteLocationRaw | null> => {
   const toData = to.matched[to.matched.length - 1];
   const toMeta = toData?.meta || {};
+  const permission = toMeta.can as string[] | undefined;
 
-  const permission: string[] | undefined = toMeta.can as string[] | undefined;
-
-  if (!permission) {
-    return next();
-  }
+  if (!permission) return null;
 
   const { fetchAdvancedPermission } = usePermissions();
   const isPermitted = await fetchAdvancedPermission(permission);
+  const alternativeRoutes = toMeta.alternativeRoutes as
+    | { [role: string]: string }
+    | undefined;
 
-  const alternativeRoutes: { [role: string]: string } | undefined =
-    toMeta.alternativeRoutes as { [role: string]: string } | undefined;
-
-  if (isPermitted || !alternativeRoutes) {
-    return next();
-  }
+  if (isPermitted || !alternativeRoutes) return null;
 
   const userRole = auth?.user?.role || "fallback";
   const alternativeRoute = alternativeRoutes[userRole];
@@ -122,10 +36,85 @@ const handleAlternativeRoutes = async (
     alternativeRoute === to.fullPath ||
     to.fullPath.includes(alternativeRoute)
   ) {
-    return next();
+    return null;
   }
 
-  return next(alternativeRoute);
+  return alternativeRoute;
+};
+
+const checkRequiresAuthFromOverview = (
+  to: RouteLocationNormalized,
+  config: any,
+): RouteLocationRaw | null => {
+  const metaOfChildRoutes = getChildrenOfHomeRoutes(config).map(
+    (route: any) => route.meta,
+  );
+  const type = to.params["type"] ? String(to.params["type"]) : undefined;
+
+  if (!type) return null;
+
+  if (requiresAuthForEntity(type, metaOfChildRoutes)) {
+    return "/unauthorized";
+  }
+
+  return null;
+};
+
+const checkTenantParameter = async (
+  to: RouteLocationNormalized,
+): Promise<RouteLocationRaw | null> => {
+  const {
+    selectedTenant,
+    getCodeById,
+    getIdFromCode,
+    setTennant,
+    getLabelById,
+  } = (useTenant as any)();
+
+  const isGeneric = ["Unauthorized", "AccessDenied", "NotFound"].includes(
+    to.name as string,
+  );
+  if (isGeneric) return null;
+
+  const urlParam = to.params.tenant;
+
+  if (urlParam) {
+    const urlCode = Array.isArray(urlParam)
+      ? String(urlParam[0])
+      : String(urlParam);
+    const targetTenantId = getIdFromCode(urlCode);
+
+    if (targetTenantId) {
+      if (selectedTenant.value !== targetTenantId) {
+        const label = getLabelById(targetTenantId);
+        await setTennant(label || "", targetTenantId);
+      }
+    } else {
+      if (selectedTenant.value) {
+        const selectedCode =
+          getCodeById(selectedTenant.value) || selectedTenant.value;
+        if (urlCode !== selectedCode && !to.path.includes("not-found")) {
+          return { name: "Home", params: { tenant: selectedCode } };
+        }
+      }
+    }
+  }
+
+  if (!urlParam && selectedTenant.value && !to.path.includes("not-found")) {
+    const tenant = getCodeById(selectedTenant.value) || selectedTenant.value;
+    return { path: `/${tenant}${to.path}`, query: to.query };
+  }
+
+  return null;
+};
+
+const handleRequiredAuthentication = (router: Router) => {
+  if (
+    router.currentRoute.value.meta.requiresAuth &&
+    !auth.isAuthenticated.value
+  ) {
+    router.push("/unauthorized");
+  }
 };
 
 const checkForNewVersion = async (): Promise<void> => {
@@ -145,8 +134,20 @@ export const addRouterNavigationGuards = (router: Router, config: any) => {
   });
 
   router.beforeEach(async (to, from, next) => {
-    await handleAlternativeRoutes(to, next);
-    await handleRequiresAuthFromOverviewPage(to, config, next, router);
-    handleTenantParameterInUrl(to, next, router);
+    try {
+      const alternativeRedirect = await checkAlternativeRoutes(to);
+      if (alternativeRedirect) return next(alternativeRedirect);
+
+      const authRedirect = checkRequiresAuthFromOverview(to, config);
+      if (authRedirect) return next(authRedirect);
+
+      const tenantRedirect = await checkTenantParameter(to);
+      if (tenantRedirect) return next(tenantRedirect);
+
+      next();
+    } catch (error) {
+      console.error("Router Guard Error:", error);
+      next();
+    }
   });
 };

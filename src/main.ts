@@ -32,6 +32,7 @@ import Notifications from "@kyvg/vue3-notification";
 import { type I18n } from "vue-i18n";
 
 import type { GraphQLError } from "graphql/error";
+import { setContext } from "@apollo/client/link/context";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
@@ -110,9 +111,21 @@ const start = async (): Promise<void> => {
     headers: { "Apollo-Require-Preflight": "true" },
   });
 
+  const authLink = setContext((_, { headers }) => {
+    const tenantId = sessionStorage.getItem('active_tenant_id');
+
+    return {
+      headers: {
+        ...headers,
+        "X-Tenant-ID": tenantId || "",
+      }
+    };
+  });
+
   apolloClient = new ApolloClient({
     link: from([
-      graphqlErrorInterceptor, 
+      graphqlErrorInterceptor,
+      authLink,
       apqLink, 
       httpLink
     ]),

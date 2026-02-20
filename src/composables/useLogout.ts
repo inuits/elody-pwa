@@ -10,7 +10,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 export const useLogout = () => {
   const route = useRoute();
   const { initApp } = useApp();
-  const { setTennantInSession } = useTenant();
+  const { setTenantInSessionStorage } = useTenant();
   const { clearStorage } = useStateManagement();
   const { closeAllModals } = useBaseModal();
 
@@ -22,7 +22,7 @@ export const useLogout = () => {
   const clearAppState = (): void => {
     resetAdvancedPermissions();
     clearStorage();
-    setTennantInSession("");
+    setTenantInSessionStorage("");
     closeAllModals();
   };
 

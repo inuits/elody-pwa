@@ -41,9 +41,9 @@ const useTenant = (
       await getTenants();
       if (routeParams?.tenant) {
         const tenantInUrl = getIdFromCode(routeParams?.tenant as string) || "";
-        if (tenantInUrl) await setTennantInSession(tenantInUrl);
+        if (tenantInUrl) await setTenantInSessionStorage(tenantInUrl);
       }
-      const tenantFromSession = await getTennantFromSession();
+      const tenantFromSession = await getTennantFromSessionStorage();
       if (
         tenants.value !== "no-tenants" &&
         tenantFromSession === "no-tenant-in-session"
@@ -128,48 +128,42 @@ const useTenant = (
     return options;
   });
 
-  const getTennantFromSession = async (): Promise<
+  const getTennantFromSessionStorage = async (): Promise<
     tenant | "no-tenant-in-session"
   > => {
-    return fetch(TENANTS_ENDPOINT).then(async (res) => {
-      const result = await res.json();
-      const filterResult =
-        Array.isArray(tenants.value) &&
-        tenants.value.filter((value) => {
-          return value.id === result;
-        });
+    const lastSelectedTenantId = sessionStorage.getItem("active_tenant_id");
+    if (!lastSelectedTenantId) return "no-tenant-in-session";
 
-      if (filterResult && filterResult.length === 1) {
-        return {
-          id: filterResult[0].id,
-          label: filterResult[0].label,
-          code: filterResult[0].code,
-        } as tenant;
-      } else {
-        return "no-tenant-in-session";
-      }
-    });
+    const filterResult =
+      Array.isArray(tenants.value) &&
+      tenants.value.filter((value) => {
+        return value.id === lastSelectedTenantId;
+      });
+
+    if (filterResult && filterResult.length === 1) {
+      return {
+        id: filterResult[0].id,
+        label: filterResult[0].label,
+        code: filterResult[0].code,
+      } as tenant;
+    } else {
+      return "no-tenant-in-session";
+    }
   };
 
   const setTennant = async (label: string, id: string) => {
-    await setTennantInSession(id);
+    setTenantInSessionStorage(id);
     selectedTenant.value = id;
     selectedTenantName.value = label;
   };
 
-  const setTennantInSession = async (tenantId: string) => {
-    await fetch(TENANTS_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ tenant: tenantId }),
-    });
+  const setTenantInSessionStorage = (tenantId: string) => {
+    sessionStorage.setItem("active_tenant_id", tenantId);
   };
 
   const selectTenant = async (selectedTenantValue: string) => {
     selectedTenant.value = selectedTenantValue;
-    if (selectedTenantValue) await setTennantInSession(selectedTenantValue);
+    if (selectedTenantValue) setTenantInSessionStorage(selectedTenantValue);
 
     const code = getCodeById(selectedTenantValue) || selectedTenantValue;
     const target = router.resolve({
@@ -212,11 +206,12 @@ const useTenant = (
     selectedTenantName,
     selectTenant,
     setTennant,
-    setTennantInSession,
+    setTenantInSessionStorage,
     tenants,
     tenantsAsDropdownOptions,
     tenantsLoaded,
     isAllTenantsLoaded,
+    hasTenantSelect,
   };
 };
 

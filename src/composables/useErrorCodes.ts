@@ -128,13 +128,13 @@ export const useErrorCodes = (): {
   };
 
   const handleUnauthorized = async () => {
-    const { setTennantInSession } = useTenant();
+    const { setTenantInSessionStorage } = useTenant();
     const { closeAllModals } = useBaseModal();
 
     await auth.logout();
     resetAdvancedPermissions();
     useStateManagement().clearStorage();
-    setTennantInSession("");
+    setTenantInSessionStorage("");
     closeAllModals();
     router.push("/unauthorized");
   };

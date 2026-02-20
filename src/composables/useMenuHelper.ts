@@ -10,6 +10,8 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import { usePermissions } from "@/composables/usePermissions";
+import useTenant from "./useTenant";
+
 const { openModal } = useBaseModal();
 const { extractMenuPermissions, fetchAdvancedPermissions } = usePermissions();
 
@@ -39,6 +41,13 @@ export const useMenuHelper = () => {
       selectedMenuItemPath.value = `/${destinations[0].destination}`;
   };
 
+  const getUrlForMenuItem = (destination: string) => {
+    const { selectedTenant, getCodeById } = useTenant();
+    if (!selectedTenant.value) return `/${destination}`;
+    const code = getCodeById(selectedTenant.value) || selectedTenant;
+    return `/${code}/${destination}`;
+  };
+
   const checkIfRouteOrModal = (_menuItem: MenuItem): MenuAction | undefined => {
     let action: MenuAction | undefined = undefined;
     if (_menuItem.typeLink && _menuItem.typeLink.modal) {
@@ -55,7 +64,7 @@ export const useMenuHelper = () => {
     } else if (_menuItem?.typeLink?.route && !_menuItem.subMenu) {
       action = {
         menuItemType: MenuItemType.link,
-        action: `/${_menuItem.typeLink.route.destination}`,
+        action: getUrlForMenuItem(_menuItem.typeLink.route.destination),
       };
     }
     return action;

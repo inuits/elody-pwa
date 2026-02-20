@@ -9,15 +9,18 @@ type ActionType = "login" | "logout" | (string & {});
 export const useCrossTabAuthSync = () => {
   const channel = new BroadcastChannel("auth");
   const { performLogout } = useLogout();
-  const config = inject("config");
+  const config: any = inject("config");
+  const enableCrossTabAuthSync = config?.features?.enableCrossTabAuthSync ?? true;
 
-  watch(
-    auth!.isAuthenticated,
-    (newValue) => {
-      channel.postMessage({ action: newValue ? "login" : "logout" });
-    },
-    { immediate: true },
-  );
+  if (enableCrossTabAuthSync) {
+    watch(
+      auth!.isAuthenticated,
+      (newValue) => {
+        channel.postMessage({ action: newValue ? "login" : "logout" });
+      },
+      { immediate: true },
+    );
+  }
 
   channel.onmessage = (e) => {
     const { action } = e.data as { action: ActionType };
