@@ -38,6 +38,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useImport } from "@/composables/useImport";
 
 const props = defineProps<{
   label: string;
@@ -45,6 +46,7 @@ const props = defineProps<{
   action: ContextMenuElodyActionEnum;
   entityType: Entitytyping;
   entityId: string;
+  parentEntityId: string;
   formQuery?: string;
   formFlow?: ContextMenuFormFlow;
   relation?:
@@ -62,6 +64,7 @@ const { displaySuccessNotification } = useBaseNotification();
 const { closeModal, openModal } = useBaseModal();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+const { loadDocument } = useImport();
 const entityFormData: {
   id: string;
   collection: Collection;
@@ -155,7 +158,35 @@ const openDeleteEntityConfirmation = async () => {
   });
 };
 
-const doAction = () => {
+const downloadQueryResult = async () => {
+  if (!props.formQuery) return;
+  const document = await loadDocument(props.formQuery);
+  const result = await (apolloClient as ApolloClient<any>).query({
+    query: document,
+    variables: { id: props.parentEntityId },
+    fetchPolicy: "no-cache",
+  });
+  const data = Object.values(result.data)[0];
+  downloadResponse(data);
+};
+
+const downloadResponse = (data: any) => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${props.formQuery}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const doAction = async () => {
+  if (props.action === ContextMenuElodyActionEnum.DownloadQueryResult) {
+    await downloadQueryResult();
+  }
+
   if (props.action === ContextMenuElodyActionEnum.DeleteRelation) {
     useEditHelper.setSubmitFunction(() =>
       submit(entityFormData.id, entityFormData.collection),

@@ -24,6 +24,7 @@
       :action="element.action"
       :entity-type="entityType"
       :entity-id="entityId"
+      :parent-entity-id="parentEntityId"
       :relation="relation"
       :bulk-operations-context="bulkOperationsContext"
       :refetch-entities="refetchEntities"
