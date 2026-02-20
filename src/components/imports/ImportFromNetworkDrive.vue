@@ -36,7 +36,7 @@ import {
   Entitytyping,
   PostStartImportDocument,
   TypeModals,
-} from "@/generated-types/queries";
+} from "@/queryLoader";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
