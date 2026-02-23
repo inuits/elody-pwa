@@ -52,6 +52,7 @@ const viteConfig = defineConfig({
   },
   cacheDir,
   build: {
+    assetsDir: "static-assets-pwa",
     sourcemap: false,
     minify: "esbuild",
     commonjsOptions: {
