@@ -43,33 +43,12 @@
               BulkOperationsContextEnum.EntityElementMedia
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-            :predefined-entities="
-              entityId ===
-                mediafileSelectionState[customQueryFilters].selectedMediafile
-                  ?.id ||
-              entityId ===
-                mediafileSelectionState[customQueryFilters].selectedMediafile
-                  ?.uuid
-                ? [
-                    mediafileSelectionState[customQueryFilters]
-                      .selectedMediafile,
-                  ]
-                : undefined
-            "
+            :predefined-entities="predefinedEntities"
             :enable-preview="true"
             :enable-advanced-filters="enableAdvancedFilters"
             :enable-bulk-operations="true"
             :enable-navigation="enableNavigation"
-            :parent-entity-identifiers="
-              entityId ===
-                mediafileSelectionState[customQueryFilters].selectedMediafile
-                  ?.id ||
-              entityId ===
-                mediafileSelectionState[customQueryFilters].selectedMediafile
-                  ?.uuid
-                ? undefined
-                : identifiers
-            "
+            :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="entityType"
             :filter-type="Entitytyping.Mediafile"
             list-item-route-name="SingleEntity"
@@ -276,4 +255,32 @@ const checkElementListPermission = async () => {
   const isPermitted: boolean = await fetchAdvancedPermission(props.can);
   showElementList.value = isPermitted;
 };
+
+const predefinedEntities = computed(() => {
+  const selectedFile =
+    mediafileSelectionState[props.customQueryFilters]?.selectedMediafile;
+
+  if (
+    selectedFile &&
+    (props.entityId === selectedFile.id || props.entityId === selectedFile.uuid)
+  ) {
+    return [selectedFile];
+  }
+
+  return undefined;
+});
+
+const parentEntityIdentifiers = computed(() => {
+  const selectedFile =
+    mediafileSelectionState[props.customQueryFilters]?.selectedMediafile;
+
+  if (
+    selectedFile &&
+    (props.entityId === selectedFile.id || props.entityId === selectedFile.uuid)
+  ) {
+    return undefined;
+  }
+
+  return props.identifiers;
+});
 </script>
