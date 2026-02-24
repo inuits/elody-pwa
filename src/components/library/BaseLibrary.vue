@@ -183,7 +183,9 @@
           </div>
           <div v-else>
             <div>{{ t("search.noresult") }}</div>
-            <div class="text-sm">{{ displayMap ? t("search.tipMap") : t("search.tip") }}</div>
+            <div class="text-sm">
+              {{ displayMap ? t("search.tipMap") : t("search.tip") }}
+            </div>
             <div
               v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
               class="flex justify-center my-2"
@@ -233,7 +235,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : (displayGrid ?? ViewModes.ViewModesGrid)
+                  : displayGrid ?? ViewModes.ViewModesGrid
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -783,11 +785,7 @@ const getDisplayPreferences = () => {
     displayGrid.value = displayPreferences.grid;
   }
 
-  if (
-    displayGrid.value === false &&
-    !displayMap.value &&
-    (!displayPreview.value || isPreviewElement)
-  ) {
+  if (displayGrid.value === false && !displayMap.value) {
     displayList.value = true;
   }
 };
