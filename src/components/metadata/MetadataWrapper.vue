@@ -7,8 +7,14 @@
       fieldIsPermittedToBeSeenByUser
     "
     :key="fieldLabel"
+    :class="{
+      'relative': fieldType === InputFieldTypes.InputFieldWithSubFields,
+    }"
   >
     <metadata-title
+      :class="{
+        'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
+      }"
       :metadata="metadata"
       :is-field-required="isFieldRequired && isEdit"
       :is-one-of-required="isOneOfRequired && isEdit"

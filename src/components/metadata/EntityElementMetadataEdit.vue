@@ -66,6 +66,12 @@
       :show-menu-header="false"
       style-type="defaultWithBorder"
     />
+    <TableMetadataListField
+      v-else-if="field.type === InputFieldTypes.InputFieldWithSubFields"
+      v-model:model-value="metadataValue"
+      :sub-fields="(field as any).subFields ?? []"
+      :disabled="fieldEditIsDisabled"
+    />
     <div v-else :class="[{ 'grid grid-cols-[80%_20%]': enableCopyFromParent }]">
       <BaseInputTextNumberDatetime
         :name="fieldKey"
@@ -101,6 +107,7 @@ import { useDefaultValue } from "@/components/metadata/useDefaultValue";
 import { useHiddenField } from "@/components/metadata/useHiddenField";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
+import TableMetadataListField from "@/components/base/TableMetadataListField.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import {
   InputFieldTypes,
@@ -156,7 +163,7 @@ const computedError = computed<string>(() => {
 });
 
 const { addEditableMetadataKeys } = useFormHelper();
-const metadataValue = computed<string | string[] | number | number[]>({
+const metadataValue = computed<string | string[] | number | number[] | object>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
       if (props.value?.formatter.startsWith("pill")) {

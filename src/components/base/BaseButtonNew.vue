@@ -12,6 +12,7 @@
       `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
       { 'text-base p-3': buttonSize === 'normal' },
       { 'text-[0.925rem] p-1.5': buttonSize === 'small' },
+      { 'text-[0.750rem] p-1': buttonSize === 'verySmall' },
     ]"
   >
     <unicon
@@ -24,7 +25,10 @@
       v-if="label"
       class="leading-4 text-ellipsis"
       :class="[
-        { '@max-xs/window:hidden @max-xl/wrapper-content:hidden': !forceShowLabel },
+        {
+          '@max-xs/window:hidden @max-xl/wrapper-content:hidden':
+            !forceShowLabel,
+        },
       ]"
       >{{ label }}</span
     >
@@ -128,7 +132,7 @@ const buttonStyles: Record<ButtonStyle, Button> = {
   redDefault: redDefaultButton,
 };
 
-export type ButtonSize = "normal" | "small";
+export type ButtonSize = "normal" | "small" | "verySmall";
 
 const props = withDefaults(
   defineProps<{
