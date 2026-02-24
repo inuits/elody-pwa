@@ -68,6 +68,7 @@
         <entity-element-list
           v-if="metadata.__typename === nonStandardFieldTypes[0]"
           :id="formId"
+          :types="metadata.entityTypes"
           :entity-id="formId"
           :entity-list="metadata.entityList ?? []"
           :identifiers="identifiers"
