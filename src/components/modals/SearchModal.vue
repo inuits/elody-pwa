@@ -1,10 +1,14 @@
 <template>
   <BaseModal
+    class="bg-background-normal"
     :modal-type="TypeModals.Search"
     :cancel-button-availabe="false"
     @hide-modal="closeModal(TypeModals.Search)"
   >
     <div class="bg-background-normal h-full">
+      <h1 class="title pb-4 text-center">
+        {{ t("search.simple-search") }}
+      </h1>
       <search-bar
         :input-enabled="true"
         @updateFilters="updateBaseLibraryFilters"
@@ -53,8 +57,10 @@ import {
   type AdvancedSearchFilters,
   useAdvancedSearch,
 } from "@/composables/useAdvancedSearch";
+import { useI18n } from "vue-i18n";
 
 const config: any = inject("config");
+const { t } = useI18n();
 const { closeModal } = useBaseModal();
 const { setFilters, getEntities, items } = useAdvancedSearch(config);
 const filters = ref<AdvancedFilterInput[]>([]);
