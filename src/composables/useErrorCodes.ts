@@ -2,12 +2,13 @@ import type { GraphQLError } from "graphql/error";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import useTenant from "@/composables/useTenant";
-import { auth, router } from "@/main";
-import { ErrorCodeType } from "@/generated-types/queries";
+import { auth } from "@/main";
+import { ErrorCodeType, PageStatus } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { getTranslatedMessage, isAbortError } from "@/helpers";
 import { resetAdvancedPermissions } from "@/composables/usePermissions";
+import { usePageStatus } from "@/composables/usePageStatus";
 
 export const useErrorCodes = (): {
   handleErrorByCode: (code: string) => void;
@@ -22,6 +23,7 @@ export const useErrorCodes = (): {
   ) => Promise<{ code: string; message: string }>;
 } => {
   const { displayErrorNotification } = useBaseNotification();
+  const { setPageStatus } = usePageStatus();
 
   const authHandlers: Record<string, (errorCodeType: ErrorCodeType) => void> = {
     "1001": () => handleUnauthorized(),
@@ -136,7 +138,7 @@ export const useErrorCodes = (): {
     useStateManagement().clearStorage();
     setTenantInSessionStorage("");
     closeAllModals();
-    router.push("/unauthorized");
+    setPageStatus(PageStatus.Unauthorized);
   };
 
   const handleAccessDenied = (
@@ -154,11 +156,11 @@ export const useErrorCodes = (): {
       return;
     }
     closeAllModals();
-    router.push("/accessDenied");
+    setPageStatus(PageStatus.Forbidden);
   };
 
   const handleNotFound = () => {
-    router.push("/notFound");
+    setPageStatus(PageStatus.NotFound);
   };
 
   const showNotification = (errorMessage: string) => {

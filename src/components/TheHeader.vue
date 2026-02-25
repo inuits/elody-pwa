@@ -33,10 +33,12 @@ import { inject, computed } from "vue";
 import { getRouteMetadataInfoFromEntity, mapUrlToEntityType } from "@/helpers";
 import DeleteButton from "@/components/DeleteButton.vue";
 import { auth } from "@/main";
+import { usePageStatus } from "@/composables/usePageStatus";
 
 const route = useRoute();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
+const { pageStatus } = usePageStatus();
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);

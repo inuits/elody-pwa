@@ -31,7 +31,7 @@ import {
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { apolloClient, auth, typeUrlMapping } from "@/main";
-import { isProxy, toRaw } from "vue";
+import { computed, isProxy, toRaw } from "vue";
 import DOMPurify from "dompurify";
 
 export const goToEntityPage = (
@@ -118,6 +118,8 @@ export const getTranslatedMessage = (
   key: string,
   variables: Record<string, string> | string[] | undefined = undefined,
 ) => i18n.global.t(key, variables);
+
+export const currentLocale = computed(() => i18n.global.locale);
 
 export const setSortConfigurationForRoute = (
   route: RouteLocationNormalizedLoaded,
