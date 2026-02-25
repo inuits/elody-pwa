@@ -73,8 +73,6 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import EditModal from "@/components/modals/EditModal.vue";
 import DeleteModal from "@/components/modals/DeleteModal.vue";
-import type { GraphQLError } from "graphql/error";
-import type { ApolloError } from "@apollo/client/core";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -132,7 +130,7 @@ watch(entityType, (value) => {
   queryVariables.type = value;
 });
 
-const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
+const { result, refetch } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   () => ({
