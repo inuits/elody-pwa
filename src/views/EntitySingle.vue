@@ -149,7 +149,7 @@ const entityForBreadcrumb = ref<Entity>();
 
 const setMutatedEntity = (mutatedEntity: Entity) => {
   entity.value = mutatedEntity;
-}
+};
 
 const addContextToState = (context: string): void => {
   mediafileViewerContexts.value.push(context);
