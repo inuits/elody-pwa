@@ -16,7 +16,7 @@
     :disabled="disabled"
     :noOptionsText="noOptionsText"
     :object="true"
-    :create-option="canCreateOption"
+    :create-option="createOptionConfig.canCreateOption"
     :search-filter="searchFilter"
     label="label"
     valueProp="value"
@@ -28,6 +28,17 @@
     "
     :on-create="handleTagCreate"
   >
+    <template
+      v-if="createOptionConfig.createPromptTranslationKey"
+      v-slot:option="{ option }"
+    >
+      <div v-if="!options?.some((o) => o.value === option.value)">
+        {{ t(createOptionConfig.createPromptTranslationKey, [option.label]) }}
+      </div>
+      <div v-else>
+        {{ option.label }}
+      </div>
+    </template>
     <template v-slot:tag="{ option, handleTagRemove, disabled }">
       <div
         class="cursor-default"
@@ -61,6 +72,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, onBeforeMount, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
+import { useI18n } from "vue-i18n";
 
 type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
 
@@ -76,7 +88,10 @@ const props = withDefaults(
     relation?: boolean;
     loading?: boolean;
     noOptionsText?: string;
-    canCreateOption?: boolean;
+    createOptionConfig?: {
+      canCreateOption: boolean;
+      createPromptTranslationKey?: string;
+    };
     searchFilter?: () => any;
   }>(),
   {
@@ -85,7 +100,7 @@ const props = withDefaults(
     disabled: false,
     relation: false,
     loading: false,
-    canCreateOption: false,
+    createOptionConfig: { canCreateOption: false },
     searchFilter: undefined,
   },
 );
@@ -99,6 +114,7 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
+const { t } = useI18n();
 const classes = ref();
 const searchValue = ref<string>();
 

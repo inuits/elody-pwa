@@ -29,7 +29,7 @@
         return option;
       }
     "
-    :can-create-option="canCreateOption"
+    :create-option-config="{ canCreateOption }"
     @add-option="handleCreatingFromTag"
     @handle-tag-click="handleTagClick"
   />

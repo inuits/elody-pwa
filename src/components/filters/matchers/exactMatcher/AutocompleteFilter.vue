@@ -6,7 +6,10 @@
     :placeholder="placeholder"
     :no-options-text="noOptionsText"
     :loading="isLoading"
-    :can-create-option="true"
+    :create-option-config="{
+      canCreateOption: true,
+      createPromptTranslationKey: 'filters.custom-search-term',
+    }"
     @search-change="debouncedHandleSearchChange"
     @add-option="(option) => handleAddOption(option)"
     :search-filter="
@@ -100,7 +103,10 @@ const reset = () => {
 
 const handleAddOption = (option: DropdownOption[]) => {
   selectedOptions.value.push(option);
-  emit("updateValue", selectedOptions.value.map((option) => option.value));
+  emit(
+    "updateValue",
+    selectedOptions.value.map((option) => option.value),
+  );
 };
 
 defineExpose({
