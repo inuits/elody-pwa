@@ -188,10 +188,7 @@ const isEnableOldWayToFetch = computed(() => {
 const getSelectionOptions = async (orderKey: string = "") => {
   return isEnableOldWayToFetch.value
     ? getOptions()
-    : loadOptionsAndFacetsInParallel(
-        facetsFilters.value,
-        "properties.title.value",
-      );
+    : loadOptionsAndFacetsInParallel(facetsFilters.value, orderKey);
 };
 
 watch(
