@@ -46,6 +46,7 @@ import type {
   AdvancedFilterInput,
   Entitytyping,
 } from "@/generated-types/queries";
+import { extractOrderKeyFromFilters } from "./helpers";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -127,13 +128,6 @@ const loadOptions = async () => {
   }
 };
 
-const extractOrderKeyFromFilters = (filters: AdvancedFilterInput[]): string => {
-  const textFilter = filters.filter(
-    (filter: AdvancedFilterInput) => filter.type === AdvancedFilterTypes.Text,
-  );
-  if (!textFilter) return "";
-  return textFilter[0].distinct_by || "";
-};
 
 const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
   if (!filters) return;
