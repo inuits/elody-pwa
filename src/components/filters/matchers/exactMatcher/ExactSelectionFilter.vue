@@ -127,11 +127,19 @@ const loadOptions = async () => {
   }
 };
 
+const extractOrderKeyFromFilters = (filters: AdvancedFilterInput[]): string => {
+  const textFilter = filters.filter(
+    (filter: AdvancedFilterInput) => filter.type === AdvancedFilterTypes.Text,
+  );
+  if (!textFilter) return "";
+  return textFilter[0].distinct_by || "";
+};
+
 const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
   if (!filters) return;
 
   await setFilters(filters);
-  await getSelectionOptions();
+  await getSelectionOptions(extractOrderKeyFromFilters(filters));
 };
 
 const handleSearchOptions = async (searchValue: string) => {
@@ -143,7 +151,7 @@ const handleSearchOptions = async (searchValue: string) => {
 
   try {
     await setFilters(normalizedFilters);
-    await getSelectionOptions();
+    await getSelectionOptions(extractOrderKeyFromFilters(newFilters));
   } catch (error) {
     console.error("Search failed:", error);
   }
@@ -177,10 +185,13 @@ const isEnableOldWayToFetch = computed(() => {
   return props.filter.advancedFilter.useOldWayToFetchOptions || false;
 });
 
-const getSelectionOptions = async () => {
+const getSelectionOptions = async (orderKey: string = "") => {
   return isEnableOldWayToFetch.value
     ? getOptions()
-    : loadOptionsAndFacetsInParallel(facetsFilters.value);
+    : loadOptionsAndFacetsInParallel(
+        facetsFilters.value,
+        "properties.title.value",
+      );
 };
 
 watch(

@@ -12,7 +12,11 @@ import {
 import { computed, ref } from "vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import type { ApolloClient } from "@apollo/client/core";
-import { getEntityTitle, extractValueFromObject, isAbortError } from "@/helpers";
+import {
+  getEntityTitle,
+  extractValueFromObject,
+  isAbortError,
+} from "@/helpers";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
@@ -89,6 +93,7 @@ export const useFilterOptions = () => {
 
   const loadOptionsAndFacetsInParallel = async (
     facetRequestFilters?: AdvancedFilterInput[],
+    optionsOrderByKey?: string,
   ) => {
     const requestId = ++currentRequestId.value;
     isLoading.value = true;
@@ -105,6 +110,10 @@ export const useFilterOptions = () => {
         entityTypeToSet || (entityType.value as Entitytyping),
       );
       optionsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
+      if (optionsOrderByKey) {
+        optionsLibrary.setSortOrder(true);
+        optionsLibrary.setSortKey(optionsOrderByKey);
+      }
 
       await optionsLibrary.getEntities(undefined);
 
@@ -247,10 +256,12 @@ export const useFilterOptions = () => {
     });
   };
 
-  const getReadableProp = (labelProp?: string | { label: string, formatter: string}) => {
+  const getReadableProp = (
+    labelProp?: string | { label: string; formatter: string },
+  ) => {
     if (!labelProp) return "";
-    return typeof labelProp === 'string' ? labelProp : labelProp.label;
-  }
+    return typeof labelProp === "string" ? labelProp : labelProp.label;
+  };
 
   const getOptionsForEntity = (entity: BaseEntity): DropdownOption[] => {
     const { label: labelPath = "", value: valuePath = "" } =
