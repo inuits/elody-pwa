@@ -96,7 +96,7 @@ import {
   type GetBulkOperationCsvExportKeysQueryVariables,
   RouteNames,
   TypeModals,
-} from "@/generated-types/queries";
+} from "@/queryLoader";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
