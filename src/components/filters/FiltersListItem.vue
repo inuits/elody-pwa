@@ -45,7 +45,7 @@ import {
 import { computed, markRaw, onBeforeMount, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import isEqual from "lodash.isequal";
+import { dequal as isEqual } from "dequal";
 import FiltersListItemPanel from "@/components/filters/FiltersListItemPanel.vue";
 import FiltersListItemHeader from "@/components/filters/FiltersListItemHeader.vue";
 

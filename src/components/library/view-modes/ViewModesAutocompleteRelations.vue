@@ -53,7 +53,7 @@ import type {
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import isEqual from "lodash.isequal";
+import { dequal as isEqual } from "dequal";
 import debounce from "lodash.debounce";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {

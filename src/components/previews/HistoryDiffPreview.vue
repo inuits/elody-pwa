@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-2 gap-x-6">
+  <div :class="[{ 'grid-cols-2': isMultipleColumn }, 'grid gap-x-6']">
     <div v-for="(config, side) in columnConfigs" :key="'history_column' + side">
       <entity-column
         v-if="config.entity"
@@ -14,8 +14,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, type Ref } from "vue";
-import type { ColumnList, Entity, Entitytyping } from "@/generated-types/queries";
+import { computed, ref } from "vue";
+import type {
+  ColumnList,
+  Entity,
+  Entitytyping,
+} from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import { useEntityDiff } from "@/composables/useEntityDiff";
 
@@ -28,7 +32,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     columnList: ColumnList;
   }>(),
-  {}
+  {},
 );
 
 const emit = defineEmits<{
@@ -36,7 +40,7 @@ const emit = defineEmits<{
   (event: "togglePreviewComponent", entityId: string): void;
 }>();
 
-const injectedParent = inject<Ref<Entity | null>>("ParentEntityProvider");
+const isMultipleColumn = ref<boolean>(true);
 
 const panel = computed(() => {
   const elements = props.columnList?.column?.elements;
@@ -51,7 +55,7 @@ const panel = computed(() => {
     }
 
     const nestedPanel = Object.values(el).find(
-      (val: any) => val?.__typename === "WindowElementPanel"
+      (val: any) => val?.__typename === "WindowElementPanel",
     );
 
     if (nestedPanel) {
@@ -62,22 +66,38 @@ const panel = computed(() => {
   return null;
 });
 
-const { diffedResults } = useEntityDiff(props, injectedParent, panel);
+const { diffedResults } = useEntityDiff(props, panel);
 
-const columnConfigs = computed(() => ({
-  previousVersion: {
-    entity: diffedResults.value?.previousVersion,
-    props: {
-      identifiers: [props.entityId],
-      previewLabel: "panel-labels.history-old-version",
-    }
-  },
-  currentVersion: {
-    entity: diffedResults.value?.currentVersion,
-    props: {
-      identifiers: [props.parentEntityId],
-      previewLabel: "panel-labels.history-new-version",
-    }
+const columnConfigs = computed(() => {
+  if (!diffedResults.value) return null;
+
+  const { previousVersion, selectedVersion } = diffedResults.value;
+
+  const hasPrevious =
+    previousVersion && Object.keys(previousVersion).length > 0;
+  const columns: { selected: any; previous?: any } = {
+    selected: {
+      entity: selectedVersion,
+      props: {
+        identifiers: [selectedVersion.id],
+        previewLabel: hasPrevious
+          ? "panel-labels.history-selected-version"
+          : "panel-labels.history-original-version",
+      },
+    },
+  };
+
+  if (hasPrevious) {
+    columns.previous = {
+      entity: previousVersion,
+      props: {
+        identifiers: [previousVersion.id],
+        previewLabel: "panel-labels.history-previous-version",
+      },
+    };
   }
-}));
+
+  isMultipleColumn.value = hasPrevious;
+  return columns;
+});
 </script>
