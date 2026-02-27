@@ -42,7 +42,7 @@
       :link-text="metadata.linkText"
       :isMetadataOnRelation="fieldKind === 'PanelRelationData'"
       :isRootdataOnRelation="fieldKind === 'PanelRelationRootData'"
-      :error="field.errorMessage"
+      :error="fieldErrorMessage"
       :relation-filter="metadata.inputField.relationFilter"
       :show-errors="
         showErrors ||
@@ -233,6 +233,7 @@ const {
   isFieldValid,
   isFieldRequired,
   fieldTooltipValue,
+  fieldErrorMessage,
   extractIntialValueFromParentByKey,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {

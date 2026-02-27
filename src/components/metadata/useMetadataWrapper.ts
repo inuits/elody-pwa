@@ -91,6 +91,7 @@ export const useMetadataWrapper = (
   fieldIsEditableByUser: Ref<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
+  fieldErrorMessage: ComputedRef<string | undefined>;
   extractIntialValueFromParentByKey: (key: string) => string | undefined;
 } => {
   const getFieldKey = (): string => {
@@ -178,6 +179,10 @@ export const useMetadataWrapper = (
     () => fieldValueProxy.value?.label || fieldValueProxy.value,
   );
   const isFieldValid = computed<boolean>(() => field.meta.valid);
+  const { forms } = useFormHelper();
+  const fieldErrorMessage = computed<string | undefined>(
+    () => forms.value[props.formId]?.errors?.[fieldKey.value],
+  );
   const fieldIsPermittedToBeSeenByUser = ref<boolean>(false);
   const fieldIsEditableByUser = ref<boolean>(false);
 
@@ -250,6 +255,7 @@ export const useMetadataWrapper = (
     fieldIsEditableByUser,
     fieldValueProxy,
     fieldTooltipValue,
+    fieldErrorMessage,
     extractIntialValueFromParentByKey,
   };
 };

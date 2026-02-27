@@ -152,13 +152,8 @@ const computedError = computed<string>(() => {
     ?.fastValidationMessage as string;
   if (fastValidationMessage) return t(fastValidationMessage);
 
-  let error = "";
-  if (props.error?.value) {
-    error = t(props.error?.value as string);
-  } else if (props.error && typeof props.error === "string") {
-    error = t(props.error as string);
-  }
-  return error;
+  if (props.error) return t(props.error);
+  return "";
 });
 
 const { addEditableMetadataKeys, addMappedRelations } = useFormHelper();
