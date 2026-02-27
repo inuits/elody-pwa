@@ -1,5 +1,8 @@
 <template>
-  <div v-if="subFields.length" class="relation-metadata-list-field flex flex-col gap-1">
+  <div
+    v-if="subFields.length"
+    class="relation-metadata-list-field flex flex-col gap-1"
+  >
     <!-- Add button – aligned with the field label in MetadataWrapper (absolute top-right) -->
     <div v-if="!disabled" class="absolute top-0 right-0">
       <BaseButtonNew
@@ -21,7 +24,8 @@
           :key="`header-${subField.key}`"
           class="flex items-center bg-background-normal px-2 py-1.5 text-xs font-medium text-text-body border-b border-[rgba(0,58,82,0.2)]"
           :class="{
-            'border-r border-r-[rgba(0,58,82,0.2)]': index < subFields.length - 1,
+            'border-r border-r-[rgba(0,58,82,0.2)]':
+              index < subFields.length - 1,
           }"
         >
           {{ t(subField.label) }}
@@ -51,6 +55,14 @@
               :disabled="disabled"
               @update:model-value="updateValue(rowIndex, subField.key, $event)"
             />
+            <BaseInputTextNumberDatetime
+              v-else-if="subField.type === InputFieldTypes.Checkbox"
+              :model-value="item[subField.key] as string"
+              input-style="defaultWithBorder"
+              type="checkbox"
+              :disabled="disabled"
+              @update:model-value="updateValue(rowIndex, subField.key, $event)"
+            />
             <AdvancedDropdown
               v-else-if="subField.type === InputFieldTypes.Dropdown"
               class="w-full"
@@ -60,13 +72,21 @@
               style-type="defaultWithBorder"
               @update:model-value="updateValue(rowIndex, subField.key, $event)"
             />
-            <BaseInputTextNumberDatetime
-              v-else-if="subField.type === InputFieldTypes.Checkbox"
-              :model-value="item[subField.key] as string"
-              input-style="defaultWithBorder"
-              type="checkbox"
-              :disabled="disabled"
-              @update:model-value="updateValue(rowIndex, subField.key, $event)"
+            <ViewModesAutocompleteMetadata
+              v-else-if="
+                subField.type === InputFieldTypes.DropdownMultiselectMetadata ||
+                subField.type === InputFieldTypes.DropdownSingleselectMetadata
+              "
+              v-model:model-value="item[subField.key] as string[]"
+              :metadata-dropdown-options="subField.options"
+              :canCreateOption="true"
+              :select-type="
+                subField.type === InputFieldTypes.DropdownSingleselectMetadata
+                  ? 'single'
+                  : 'multi'
+              "
+              :disabled="false"
+              mode="edit"
             />
           </div>
           <div
@@ -99,6 +119,7 @@ import {
   InputFieldTypes,
 } from "@/generated-types/queries";
 import { DamsIcons } from "@/generated-types/queries";
+import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 
 const props = defineProps<{
   modelValue: Record<string, any>[] | undefined;

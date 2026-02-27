@@ -36,7 +36,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: string[] | string | undefined;
     metadataDropdownOptions: any[];
-    formId: string;
+    formId?: string;
     selectType?: "multi" | "single";
     autoSelectable?: boolean;
     disabled?: boolean;
