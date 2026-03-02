@@ -187,7 +187,7 @@
       />
     </div>
     <div
-      v-if="previewComponentEnabled"
+      v-if="previewComponentEnabled && isEnableNavigation"
       class="flex flex-row"
       @click="() => emit('navigateTo')"
     >
