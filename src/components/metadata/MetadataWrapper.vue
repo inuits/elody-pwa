@@ -10,19 +10,8 @@
   >
     <metadata-title
       :metadata="metadata"
-      :is-field-required="isFieldRequired"
-      :is-one-of-required-metadata-field="
-        isValidationRulePresentOnField(
-          metadata,
-          ValidationRules.HasOneOfRequiredMetadata,
-        )
-      "
-      :is-one-of-required-relation-field="
-        isValidationRulePresentOnField(
-          metadata,
-          ValidationRules.HasOneOfRequiredRelations,
-        )
-      "
+      :is-field-required="isFieldRequired && isEdit"
+      :is-one-of-required="isOneOfRequired && isEdit"
     />
     <entity-element-metadata-edit
       v-if="
@@ -56,7 +45,7 @@
       :is-field-required="isFieldRequired"
       :repeatable-panel-config="repeatablePanelConfig"
       @click.stop.prevent
-      @update:value="(value) => fieldValueProxy = value"
+      @update:value="(value) => (fieldValueProxy = value)"
     />
     <div v-else class="flex gap-2">
       <base-tooltip
@@ -152,7 +141,7 @@
             :link-icon="metadata.linkIcon"
             :unit="metadata.unit"
             :base-library-mode="baseLibraryMode"
-            :breakWordst="breakWords"
+            :break-words="breakWords"
           />
         </template>
       </base-tooltip>
@@ -205,6 +194,7 @@ export type MetadataWrapperProps = {
   listItemEntity?: BaseEntity;
   breakWords?: boolean;
   repeatablePanelConfig?: PanelRepetitionProps;
+  isUsedInModal?: boolean;
 };
 
 const props = withDefaults(defineProps<MetadataWrapperProps>(), {
@@ -212,6 +202,7 @@ const props = withDefaults(defineProps<MetadataWrapperProps>(), {
   formFlow: "edit",
   showErrors: false,
   breakWords: false,
+  isUsedInModal: false,
 });
 
 const emit = defineEmits<{
@@ -270,6 +261,25 @@ const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
 };
 
+const isOneOfRequired = computed(
+  () =>
+    isOneOfRequiredMetadataField.value || isOneOfRequiredRelationField.value,
+);
+
+const isOneOfRequiredMetadataField = computed(() => {
+  return isValidationRulePresentOnField(
+    props.metadata,
+    ValidationRules.HasOneOfRequiredMetadata,
+  );
+});
+
+const isOneOfRequiredRelationField = computed(() => {
+  return isValidationRulePresentOnField(
+    props.metadata,
+    ValidationRules.HasOneOfRequiredRelations,
+  );
+});
+
 onBeforeMount(() => {
   if (autoCompleteType.value === "relationAutocomplete") {
     initializeDropdownStates();
@@ -279,7 +289,10 @@ onBeforeMount(() => {
 watch(
   () => fieldValueProxy,
   () => {
-    emit("update:metadata", { ...props.metadata, value: fieldValueProxy.value } as PanelMetaData);
+    emit("update:metadata", {
+      ...props.metadata,
+      value: fieldValueProxy.value,
+    } as PanelMetaData);
   },
   { deep: true },
 );
