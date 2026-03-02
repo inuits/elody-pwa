@@ -1,6 +1,7 @@
 import { PageStatus } from "@/generated-types/queries";
 import { computed, type ComputedRef, ref, watch } from "vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { useRouter } from "vue-router";
 
 const currentPageStatus = ref<PageStatus>(PageStatus.Success);
 
@@ -25,6 +26,9 @@ export const usePageStatus: () => {
 watch(
   () => currentPageStatus.value,
   () => {
+    const router = useRouter();
+    const isDetailPage = !!router.currentRoute.value.params["id"];
+    if (!isDetailPage) return;
     const { clearBreadcrumbPathAndAddOverviewPage } = useBreadcrumbs({});
     if (currentPageStatus.value !== PageStatus.Success)
       clearBreadcrumbPathAndAddOverviewPage(currentPageStatus.value);
