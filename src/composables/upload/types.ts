@@ -4,6 +4,8 @@ export type UploadSettings = {
   uploadType: UploadFieldType;
   uploadFlow: UploadFlow;
   extraMediafileType: string | undefined;
+  shouldIncludeTypeInUrl: boolean;
+  typeToIncludeInUrl: string;
 };
 
 export enum UploadStatus {

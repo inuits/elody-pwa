@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { UploadFlow } from "@/generated-types/queries";
 import { useOcrUpload } from "@/composables/upload/useOcrUpload";
 import { useCsvOnlyUpload } from "@/composables/upload/useCsvOnlyUpload";
+import { useExcelUpload } from "@/composables/upload/useExcelUpload";
 import { useXmlMarcUpload } from "@/composables/upload/useXmlMarcUpload";
 import { useMediafilesWithOptionalCsvUpload } from "@/composables/upload/useMediafilesWithOptionalCsvUpload";
 import { useMediafilesWithRequiredCsvUpload } from "@/composables/upload/useMediafilesWithRequiredCsvUpload";
@@ -42,6 +43,12 @@ export const useUploadFlowConfiguration = (): {
     [UploadFlow.CsvOnly]: {
       validateFiles: useCsvOnlyUpload().checkFileValidity,
       checkUploadValidity: useCsvOnlyUpload().checkUploadValidity,
+    },
+    [UploadFlow.Excel]: {
+      validateFiles: useExcelUpload().checkFileValidity,
+      getUploadUrl: async ({ file }) =>
+        useSharedUploadLogic().getUploadUrl(file),
+      checkUploadValidity: useExcelUpload().checkUploadValidity,
     },
     [UploadFlow.XmlMarc]: {
       validateFiles: useXmlMarcUpload().checkFileValidity,

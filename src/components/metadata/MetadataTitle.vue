@@ -4,16 +4,12 @@
       {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
     </p>
     <p
-      v-if="
-        metadata?.inputField &&
-        useEditHelper.isEdit &&
-        (isOneOfRequiredMetadataField || isOneOfRequiredRelationField)
-      "
+      v-if="isOneOfRequired"
       class="pl-1"
     >
       ( {{ t("metadata.labels.one-of-required") }} )
     </p>
-    <p v-else-if="isRequiredField" class="pl-1">
+    <p v-else-if="isFieldRequired" class="pl-1">
       *
     </p>
     <base-tooltip
@@ -46,31 +42,17 @@ import type {
   PanelRelationMetaData,
   PanelRelationRootData,
 } from "@/generated-types/queries";
-import { useEditMode } from "@/composables/useEdit";
-import { computed, inject } from "vue";
 
 const props = withDefaults(
   defineProps<{
     metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
     isFieldRequired: boolean;
-    isOneOfRequiredMetadataField?: boolean;
-    isOneOfRequiredRelationField?: boolean;
+    isOneOfRequired: boolean;
   }>(),
   {
-    isOneOfRequiredMetadataField: false,
-    isOneOfRequiredRelationField: false,
+    isOneOfRequired: false,
+    isFieldRequired: false,
   },
 );
-
-const entityFormData: any = inject("entityFormData", {});
-const useEditHelper = useEditMode(entityFormData?.id);
 const { t } = useI18n();
-
-const isRequiredField = computed(() => {
-  return (
-    props.metadata?.inputField && props.isFieldRequired && useEditHelper.isEdit
-  );
-});
 </script>
-
-<style scoped></style>

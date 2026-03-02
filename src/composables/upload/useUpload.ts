@@ -8,7 +8,8 @@ import {
   ProgressStepType,
   TypeModals,
   UploadFlow,
-  type IntialValues
+  type IntialValues,
+  type BaseEntity,
 } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
@@ -28,7 +29,11 @@ const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
     (file: DropzoneFile) =>
-      file.type !== "text/csv" && file.type !== "application/vnd.ms-excel",
+      ![
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "text/csv",
+        "application/vnd.ms-excel",
+      ].includes(file.type),
   ),
 );
 const csvFile = computed(() => {
@@ -39,7 +44,18 @@ const csvFile = computed(() => {
 });
 const containsCsv = computed(() => !!csvFile.value);
 const containsXml = computed(
-  () => !!files.value.find((file: DropzoneFile) => file.type === "text/xml"),
+  () =>
+    !!files.value.find((file: DropzoneFile) =>
+      ["text/xml"].includes(file.type),
+    ),
+);
+const containsExcel = computed(
+  () =>
+    !!files.value.find((file: DropzoneFile) =>
+      [
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ].includes(file.type),
+    ),
 );
 const uploadFlowConfiguration = computed<UploadFlowConfiguration | undefined>(
   () =>
@@ -71,15 +87,21 @@ const {
   jobIdentifier,
   prefetchedUploadUrls,
   extraMediafileType,
+  typeToIncludeInUrl,
+  shouldIncludeTypeInUrl,
   resetState: resetUploadState,
 } = useUploadState();
 
 const useUpload = (config: any) => {
-  const initializeUpload = (uploadSettings: UploadSettings): void => {
-    uploadFlow.value = uploadSettings.uploadFlow;
+  const initializeUpload = (settings: UploadSettings): void => {
+    uploadFlow.value = settings.uploadFlow;
+    const type = settings.typeToIncludeInUrl;
+    const shouldBeIncluded = settings.shouldIncludeTypeInUrl;
+    const mediafileType = settings.extraMediafileType;
 
-    if (uploadSettings.extraMediafileType)
-      extraMediafileType.value = uploadSettings.extraMediafileType;
+    if (type) typeToIncludeInUrl.value = type;
+    if (shouldBeIncluded) shouldIncludeTypeInUrl.value = shouldBeIncluded;
+    if (mediafileType) extraMediafileType.value = mediafileType;
   };
 
   const __uploadCsvWithoutMediafiles = async () => {
@@ -93,6 +115,24 @@ const useUpload = (config: any) => {
       csvOnlyUploadSFailed.value = false;
     } catch (error: Promise<string>) {
       csvOnlyUploadSFailed.value = true;
+      const message = await error;
+      updateGlobalUploadProgress(
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+      );
+      throw Error(message);
+    }
+  };
+
+  const __uploadExcelFile = async () => {
+    try {
+      const result = (await batchEntities(getExcelFile())) as {
+        entities: unknown[];
+      };
+      await __uploadMediafilesWithTicketUrl(false, undefined);
+
+      amountUploaded.value = result?.entities?.length || 0;
+    } catch (error: Promise<string>) {
       const message = await error;
       updateGlobalUploadProgress(
         ProgressStepType.Upload,
@@ -138,7 +178,11 @@ const useUpload = (config: any) => {
     }
   };
 
-  const upload = async (isLinkedUpload: boolean, entityInput: EntityInput, intialValues: IntialValues) => {
+  const upload = async (
+    isLinkedUpload: boolean,
+    entityInput: EntityInput,
+    intialValues: IntialValues,
+  ) => {
     if (!validateFiles()) return;
     updateGlobalUploadProgress(
       ProgressStepType.Upload,
@@ -159,6 +203,11 @@ const useUpload = (config: any) => {
       });
 
       toggleUploadStatus();
+      return;
+    }
+
+    if (uploadFlow.value == UploadFlow.Excel) {
+      await __uploadExcelFile();
       return;
     }
 
@@ -300,7 +349,8 @@ const useUpload = (config: any) => {
     );
     let dryRunResult;
     try {
-      dryRunResult = await batchEntities(getCsvBlob(), true);
+      const fileToDryRun = containsExcel.value ? getExcelFile() : getCsvBlob();
+      dryRunResult = await batchEntities(fileToDryRun, true);
       await handleDryRunResult(dryRunResult, file);
     } catch (error: Promise<string>) {
       const message = await error;
@@ -321,16 +371,41 @@ const useUpload = (config: any) => {
   const batchEntities = async (
     csv: Blob,
     isDryRun: boolean = false,
-  ): Promise<string[] | number> => {
-    const filename = __getCsvFile().name;
+  ): Promise<{ entities: BaseEntity[]; links: string[] } | number> => {
+    const filename = containsExcel.value
+      ? getExcelFile().name
+      : __getCsvFile().name;
+    const contentType = containsExcel.value
+      ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      : "text/csv";
+    const acceptHeader = "application/json";
+    const formData = new FormData();
+    const shouldContainType =
+      shouldIncludeTypeInUrl.value && typeToIncludeInUrl.value;
+    formData.append("file", csv);
+
+    const queryParams = new URLSearchParams({
+      filename,
+      ...(isDryRun && { dry_run: "true" }),
+      ...(extraMediafileType.value && {
+        extra_mediafile_type: extraMediafileType.value,
+      }),
+      ...(jobIdentifier.value && { main_job_id: jobIdentifier.value }),
+      ...(shouldContainType && { type: typeToIncludeInUrl.value }),
+    });
+
     const response = await fetch(
-      `/api/upload/batch?filename=${filename}${isDryRun ? "&dry_run=true" : ""}${extraMediafileType.value ? `&extra_mediafile_type=${extraMediafileType.value}` : ""}${jobIdentifier.value ? `&main_job_id=${jobIdentifier.value}` : ""}`,
+      `/api/upload/batch?${queryParams.toString()}`,
       {
-        headers: { "Content-Type": "text/csv" },
         method: "POST",
+        headers: {
+          "Content-Type": contentType,
+          Accept: acceptHeader,
+        },
         body: csv,
       },
     );
+
     let parsedResult;
     if (!response.ok) {
       if (!isDryRun) toggleUploadStatus();
@@ -343,11 +418,11 @@ const useUpload = (config: any) => {
       parsedResult = JSON.parse(await response.text());
     }
 
-    if (parsedResult?.parent_job_id)
-      jobIdentifier.value = parsedResult.parent_job_id;
+    if (parsedResult?.parent_job_id || parsedResult?.job_id)
+      jobIdentifier.value = parsedResult?.parent_job_id || parsedResult?.job_id;
 
     if (isDryRun) return parsedResult;
-    else return parsedResult?.links;
+    else return parsedResult;
   };
 
   const toggleUploadStatus = () => {
@@ -362,9 +437,16 @@ const useUpload = (config: any) => {
 
   // TODO: this is temp handler for demo #139636
   const __getXmlFile = (): DropzoneFile => {
-    return files.value.find(
-      (file: DropzoneFile) =>
-        file.type === "text/xml" || file.type === "application/xml",
+    return files.value.find((file: DropzoneFile) =>
+      ["text/xml", "application/xml"].includes(file.type),
+    );
+  };
+
+  const getExcelFile = (): DropzoneFile => {
+    return files.value.find((file: DropzoneFile) =>
+      [
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ].includes(file.type),
     );
   };
 
@@ -390,7 +472,7 @@ const useUpload = (config: any) => {
       const responseBody = await response.json();
       const httpErrorMessages: string =
         responseBody?.extensions?.response?.body?.message ||
-        responseBody?.extensions?.response?.body as string;
+        (responseBody?.extensions?.response?.body as string);
       __uploadExceptionHandler(httpErrorMessages, __getXmlFile());
       return Promise.reject(httpErrorMessages);
     }
@@ -681,6 +763,9 @@ const useUpload = (config: any) => {
     if (uploadFlow.value === UploadFlow.MediafilesWithOcr)
       requiredFileNames.push(...useOcrUpload().optionalFileNames.value);
 
+    const errorMessageEnding = containsExcel.value
+      ? "is not in Excel"
+      : "is not in CSV";
     mediafiles.value.forEach((file: DropzoneFile) => {
       if (!requiredFileNames.includes(file.name)) {
         areAllFilesPresent = false;
@@ -688,7 +773,7 @@ const useUpload = (config: any) => {
           file,
           ProgressStepType.Validate,
           ProgressStepStatus.Failed,
-          [`${file.name} is not in CSV`],
+          [`${file.name} ${errorMessageEnding}`],
         );
       }
     });
@@ -1027,8 +1112,10 @@ const useUpload = (config: any) => {
     __handleFileThumbnailError,
     containsCsv,
     containsXml,
+    containsExcel,
     batchEntities,
     getCsvBlob,
+    getExcelFile,
     sortFiles,
     prefetchedUploadUrls,
   };
