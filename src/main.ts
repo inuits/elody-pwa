@@ -1,12 +1,13 @@
 import {
   ApolloClient,
+  ApolloLink,
   InMemoryCache,
   type NormalizedCacheObject,
   createHttpLink,
-  from
+  from,
 } from "@apollo/client/core";
-import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
-import { sha256 } from 'crypto-hash';
+import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
+import { sha256 } from "crypto-hash";
 import "./assets/main.css";
 import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
@@ -37,6 +38,7 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
+import { useLogout } from "./composables/useLogout";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -101,9 +103,9 @@ const start = async (): Promise<void> => {
     handleGraphqlError(error);
   });
 
-  const apqLink = createPersistedQueryLink({ 
+  const apqLink = createPersistedQueryLink({
     sha256,
-    useGETForHashedQueries: false 
+    useGETForHashedQueries: false,
   });
 
   const httpLink = createHttpLink({
@@ -112,22 +114,35 @@ const start = async (): Promise<void> => {
   });
 
   const authLink = setContext((_, { headers }) => {
-    const tenantId = sessionStorage.getItem('active_tenant_id');
+    const tenantId = sessionStorage.getItem("active_tenant_id");
 
     return {
       headers: {
         ...headers,
         "X-Tenant-ID": tenantId || "",
-      }
+      },
     };
+  });
+
+  const authCheckLink = new ApolloLink((operation, forward) => {
+    return forward(operation).map((response) => {
+      const authStatus = response.extensions?.authStatus;
+      
+      if (authStatus === "UNAUTHENTICATED" && auth?.isAuthenticated.value) {
+        auth.resetAuthProperties();
+      }
+
+      return response;
+    });
   });
 
   apolloClient = new ApolloClient({
     link: from([
       graphqlErrorInterceptor,
+      authCheckLink,
       authLink,
-      apqLink, 
-      httpLink
+      apqLink,
+      httpLink,
     ]),
     cache: new InMemoryCache(),
   });
@@ -168,7 +183,7 @@ const start = async (): Promise<void> => {
       environment: config.NOMAD_NAMESPACE,
     });
   }
-  
+
   app.mount("#app");
 };
 start();
