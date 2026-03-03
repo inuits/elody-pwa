@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
+      class="@container bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
       :class="wrapperClasses"
     >
       <div
@@ -95,6 +95,7 @@
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
+            class="w-full"
           >
             <LibraryBar
               :route="route"
@@ -113,7 +114,7 @@
         </div>
       </div>
       <div
-        class="top-[5.5vh] mt-[0.5vh]"
+        class="top-[5.5vh] mt-[6vh] @md:mt-[0.5vh]"
         :class="[
           { 'col-span-1 pl-[1%]': expandFilters },
           { 'col-span-2': !expandFilters },
@@ -235,7 +236,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : displayGrid ?? ViewModes.ViewModesGrid
+                  : (displayGrid ?? ViewModes.ViewModesGrid)
               ]
             "
             :config-per-view-mode="configPerViewMode"

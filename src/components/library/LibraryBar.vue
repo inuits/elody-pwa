@@ -9,9 +9,12 @@
       { 'flex-nowrap': !filtersAvailableOnDetailPage },
     ]"
   >
-    <div class="flex justify-start gap-x-3">
-      <div v-if="paginationLimitOptions.length > 0">
+    <div
+      class="flex flex-col @md:flex-row justify-start gap-3 w-full @md:w-auto"
+    >
+      <div v-if="paginationLimitOptions.length > 0" class="w-full @md:w-auto">
         <AdvancedDropdown
+          class="w-full @md:w-auto"
           v-model="selectedPaginationLimitOption"
           :options="paginationLimitOptions"
           :label="t('library.items')"
@@ -20,8 +23,9 @@
           label-position="inline"
         />
       </div>
-      <div v-if="sortOptions.length > 0" class="w-auto">
+      <div v-if="sortOptions.length > 0" class="w-full @md:w-auto">
         <AdvancedDropdown
+          class="w-full @md:w-auto"
           data-cy="sort-options"
           v-model="selectedSortOption"
           :options="sortOptions"
@@ -31,8 +35,12 @@
           label-position="inline"
         />
       </div>
-      <div v-if="sortOptions.length > 0" class="flex items-center">
+      <div
+        v-if="sortOptions.length > 0"
+        class="flex items-center w-full @md:w-auto"
+      >
         <AdvancedDropdown
+          class="w-full @md:w-auto"
           data-cy="sort-toggle"
           v-model="selectedSortDirection"
           :options="sortDirectionOptions"
@@ -186,7 +194,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
 
       selectedSortDirection.value = matchedOption?.value;
       setIsAsc(sortOrder);
-      props.setSortOrder(isAsc.value, false)
+      props.setSortOrder(isAsc.value, false);
 
       sortOptionsPromiseIsResolved.value = true;
     });
@@ -229,6 +237,6 @@ watch(
   () => isAsc.value,
   async () => {
     await props.setSortOrder(isAsc.value, true);
-  }
+  },
 );
 </script>
