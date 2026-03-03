@@ -9,6 +9,12 @@ vi.mock("@/composables/useBreadcrumbs", () => ({
   }),
 }));
 
+vi.mock("vue-router", () => ({
+  useRouter: () => ({
+    currentRoute: { value: { params: { id: "test-id" } } },
+  }),
+}));
+
 describe("usePageStatus", () => {
   beforeEach(() => {
     const { resetPageStatus } = usePageStatus();
