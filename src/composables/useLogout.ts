@@ -44,4 +44,4 @@ export const useLogout = () => {
   return {
     performLogout,
   };
-}
+};
