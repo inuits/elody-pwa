@@ -64,7 +64,7 @@
       <div
         v-if="showCurrentEntityFlow"
         :class="[
-          'z-header right-0 pb-4',
+          'z-header right-0 pb-4 h-fit',
           {
             'top-0 bg-background-normal pt-4':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
@@ -114,7 +114,7 @@
         </div>
       </div>
       <div
-        class="top-[5.5vh] mt-[6vh] @md:mt-[0.5vh]"
+        class=""
         :class="[
           { 'col-span-1 pl-[1%]': expandFilters },
           { 'col-span-2': !expandFilters },
@@ -126,7 +126,7 @@
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
             showCurrentEntityFlow
           "
-          :class="[{ sticky: hasStickyBars }, 'top-[5vh] my-3 z-header']"
+          :class="[{ sticky: hasStickyBars }, 'pb-2 z-header']"
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
@@ -236,7 +236,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : (displayGrid ?? ViewModes.ViewModesGrid)
+                  : displayGrid ?? ViewModes.ViewModesGrid
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -485,16 +485,6 @@ const wrapperClasses = computed(() => {
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
-
-  classes.push({
-    "!bg-white grid-rows-[0vh_1fr]": mode === BaseLibraryModes.BasicBaseLibrary,
-    "grid-rows-[5vh_1fr]": mode === BaseLibraryModes.NormalBaseLibrary,
-    "grid-rows-[1vh_1fr]":
-      mode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-      (mode === BaseLibraryModes.PreviewBaseLibrary &&
-        showCurrentEntityFlow.value),
-    "grid-rows-[1fr_0vh]": !showCurrentEntityFlow.value,
-  });
 
   return classes;
 });
