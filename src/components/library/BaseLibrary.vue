@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full">
     <div v-if="selectInputFieldType">
       <base-input-autocomplete
         autocomplete-style="defaultWithBorder"
@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="@container bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
+      class="@container bg-background-normal grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
       :class="wrapperClasses"
     >
       <div
@@ -27,7 +27,7 @@
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !expandFilters },
-          { 'row-span-2 h-fit': expandFilters },
+          { 'row-span-2': expandFilters },
           { sticky: hasStickyBars },
         ]"
       >
@@ -114,8 +114,8 @@
         </div>
       </div>
       <div
-        class=""
         :class="[
+          'row-span-2 flex flex-col min-h-0',
           { 'col-span-1 pl-[1%]': expandFilters },
           { 'col-span-2': !expandFilters },
         ]"
@@ -208,6 +208,7 @@
         </div>
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
+          class="flex-1 min-h-0"
           data-cy="base-library-grid-container"
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
