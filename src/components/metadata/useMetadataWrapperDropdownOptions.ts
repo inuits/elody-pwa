@@ -24,12 +24,12 @@ export const useMetadataWrapperDropdownOptions = (
     AdvancedFilterInputType[] | undefined
   >;
 } => {
+  const { fieldKey, fieldKind } = useMetadataWrapper(props);
+
   const getMetadataKeyToGetOptions = (): string | undefined => {
     try {
       const field = props.metadata.inputField;
       if (field.entityType) return field.entityType;
-
-      const { fieldKey, fieldKind } = useMetadataWrapper(props);
 
       const keyMapper: { [key: string]: string } = {
         PanelrelationMetaData: fieldKey.value,
