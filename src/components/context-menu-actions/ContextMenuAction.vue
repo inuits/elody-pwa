@@ -60,7 +60,7 @@ defineProps<{
   entityType: Entitytyping;
   parentEntityId?: string;
   relation?: object;
-  bulkOperationsContext: Context;
+  bulkOperationsContext: Context | undefined;
   refetchEntities: () => any;
 }>();
 

@@ -286,7 +286,7 @@ import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
 
 const props = withDefaults(
   defineProps<{
-    bulkOperationsContext: Context;
+    bulkOperationsContext: Context | undefined;
     contextMenuActions?: ContextMenuActions;
     listItemEntity?: BaseEntity;
     itemId?: string;

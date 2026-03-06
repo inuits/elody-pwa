@@ -46,7 +46,7 @@ const props = withDefaults(
     entityType?: Entitytyping;
     parentEntityId?: string;
     relation?: object | string;
-    bulkOperationsContext: Context;
+    bulkOperationsContext: Context | undefined;
     refetchEntities?: () => Promise<void>;
   }>(),
   {

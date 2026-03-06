@@ -344,7 +344,7 @@ import {
 } from "@/composables/useBulkOperationsActionsBar";
 
 export type BaseLibraryProps = {
-  bulkOperationsContext: Context;
+  bulkOperationsContext: Context | undefined;
   listItemRouteName: string;
   predefinedEntities?: Entity[];
   searchInputTypeOnDrawer?: SearchInputType;

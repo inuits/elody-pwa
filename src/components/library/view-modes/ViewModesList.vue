@@ -167,7 +167,7 @@ const props = withDefaults(
     entities: Entity[];
     placeholderEntities: Entity[];
     entitiesLoading: boolean;
-    bulkOperationsContext: Context;
+    bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
     disablePreviews?: boolean;
     enableNavigation?: boolean;
