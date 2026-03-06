@@ -418,8 +418,25 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (event: "entitiesUpdated", numberOfEntities: number): void;
+  (event: "selectPage"): void;
+  (event: "selectAll"): void;
+  (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
+  (
+    event: "setBulkOperationsAvailable",
+    isBulkOperationsAvailable: boolean,
+  ): void;
+  (event: "refetch"): void;
+  (
+    event: "customBulkOperationsPromise",
+    bulkOperationsPromise: () => Promise<void>,
+  ): void;
+  (event: "applyCustomBulkOperations"): void;
+  (
+    event: "initializeEntityPickerComponent",
+    enableCropMode: boolean,
+    keyToSaveCropCoordinates: string,
+  ): void;
 }>();
 
 const config: any = inject("config");
@@ -440,7 +457,7 @@ const useEditHelper = useEditMode(getEntityUuid());
 const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
-const selectedPaginationLimitOption = ref<number>();
+const selectedPaginationLimitOption = ref<number>(NaN);
 const isInitialLoading = ref<boolean>(true);
 
 const showCurrentEntityFlow = computed(() => {

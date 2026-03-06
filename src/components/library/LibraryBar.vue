@@ -79,6 +79,7 @@ const props = withDefaults(
     filtersAvailableOnDetailPage?: boolean;
   }>(),
   {
+    selectedPaginationLimitOption: 20,
     filtersAvailableOnDetailPage: false,
   },
 );

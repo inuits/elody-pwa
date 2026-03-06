@@ -43,11 +43,11 @@ import type {
   PanelRelationRootData,
 } from "@/generated-types/queries";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
-    isFieldRequired: boolean;
-    isOneOfRequired: boolean;
+    isFieldRequired?: boolean;
+    isOneOfRequired?: boolean;
   }>(),
   {
     isOneOfRequired: false,

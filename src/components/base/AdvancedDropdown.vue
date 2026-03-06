@@ -105,7 +105,7 @@ const props = withDefaults(
     addLabelToValue?: boolean;
     addIconToValue?: boolean;
     showMenuHeader?: boolean;
-    styleType: DropdownStyle;
+    styleType?: DropdownStyle;
     alwaysCalcualteWidth?: boolean;
   }>(),
   {

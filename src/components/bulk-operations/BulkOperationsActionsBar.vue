@@ -112,7 +112,6 @@ import {
   type BulkOperationsActionsBarProps,
   type BulkOperationsActionsBarEmits,
 } from "@/composables/useBulkOperationsActionsBar";
-import { inject } from "vue";
 
 const props = withDefaults(
   defineProps<{
