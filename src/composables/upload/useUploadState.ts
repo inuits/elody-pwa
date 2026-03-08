@@ -29,6 +29,8 @@ const jobIdentifier = ref<string | undefined>(undefined);
 const prefetchedUploadUrls = ref<string[]>([]);
 const extraMediafileType = ref<string | undefined>(undefined);
 const optionalFileNames = ref<string[]>([]);
+const typeToIncludeInUrl = ref<string | undefined>(undefined);
+const shouldIncludeTypeInUrl = ref<boolean>(false);
 
 export const useUploadState = () => {
   const resetState = () => {
@@ -40,6 +42,8 @@ export const useUploadState = () => {
     extraMediafileType.value = undefined;
     optionalFileNames.value = [];
     lastUploadedFileIndex.value = -1;
+    typeToIncludeInUrl.value = undefined;
+    shouldIncludeTypeInUrl.value = false;
   };
 
   return {
@@ -65,6 +69,8 @@ export const useUploadState = () => {
     prefetchedUploadUrls,
     extraMediafileType,
     optionalFileNames,
+    typeToIncludeInUrl,
+    shouldIncludeTypeInUrl,
 
     // Actions
     resetState,

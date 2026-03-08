@@ -6,7 +6,7 @@
     :options="dropdownOptions"
     :select-type="selectType"
     :disabled="disabled"
-    :can-create-option="canCreateOption"
+    :create-option-config="{ canCreateOption }"
     @search-change="
       (value: string) => {
         filterAutocompleteOptions(value);
@@ -59,7 +59,10 @@ const inputValue = computed<DropdownOption[] | undefined>({
   set(value) {
     if (props.selectType === "single")
       return emit("update:modelValue", value[0]?.value || value[0] || "");
-    emit("update:modelValue", Array.isArray(value) ? value.map(value => value.value) : [value]);
+    emit(
+      "update:modelValue",
+      Array.isArray(value) ? value.map((value) => value.value) : [value],
+    );
   },
 });
 

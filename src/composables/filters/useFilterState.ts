@@ -1,5 +1,5 @@
 import { computed, ref } from "vue";
-import isEqual from "lodash.isequal";
+import { dequal as isEqual } from "dequal";
 import {
   type AdvancedFilter,
   type AdvancedFilterInput,
@@ -136,7 +136,6 @@ export const useFilterState = () => {
   };
 
   const getFilterValue = (filter: AdvancedFilter) => {
-
     let value = resolveVariableReferences(filter);
 
     if (typeof value === "string" && value.includes("$")) {

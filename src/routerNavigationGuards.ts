@@ -1,16 +1,17 @@
 import type {
   Router,
-  NavigationGuardNext,
   RouteLocationNormalized,
   RouteLocationRaw,
 } from "vue-router";
 import { auth } from "@/main";
 import useTenant from "@/composables/useTenant";
 import { getFromExpressEndpoint } from "@/helpers";
-import { ElodyServices } from "@/generated-types/queries";
+import { ElodyServices, RouteNames } from "@/generated-types/queries";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
 import { usePermissions } from "@/composables/usePermissions";
+import type { OpenIdConnectClient } from "session-vue-3-oidc-library";
+import { usePageStatus } from "@/composables/usePageStatus";
 
 const checkAlternativeRoutes = async (
   to: RouteLocationNormalized,
@@ -29,7 +30,8 @@ const checkAlternativeRoutes = async (
 
   if (isPermitted || !alternativeRoutes) return null;
 
-  const userRole = auth?.user?.role || "fallback";
+  const authManager = auth as unknown as OpenIdConnectClient;
+  const userRole = authManager.user?.role || "fallback";
   const alternativeRoute = alternativeRoutes[userRole];
 
   if (
@@ -109,12 +111,25 @@ const checkTenantParameter = async (
 };
 
 const handleRequiredAuthentication = (router: Router) => {
+  const authManager = auth as unknown as OpenIdConnectClient;
   if (
     router.currentRoute.value.meta.requiresAuth &&
-    !auth.isAuthenticated.value
+    !authManager.isAuthenticated.value
   ) {
     router.push("/unauthorized");
   }
+};
+
+const getRedirectUrl = (route: RouteLocationNormalized): string | undefined => {
+  if (route.meta.ignoreRedirect) {
+    if (route.name === RouteNames.NotFound) return window.location.origin + "/";
+  }
+  if (
+    route.name === RouteNames.AccessDenied ||
+    route.name === RouteNames.Unauthorized
+  )
+    return undefined;
+  return window.location.origin + window.location.pathname;
 };
 
 const checkForNewVersion = async (): Promise<void> => {
@@ -127,14 +142,19 @@ const checkForNewVersion = async (): Promise<void> => {
 export const addRouterNavigationGuards = (router: Router, config: any) => {
   router.afterEach(() => {
     handleRequiredAuthentication(router);
-    auth?.changeRedirectRoute?.(
-      window.location.origin + window.location.pathname,
-    );
+    const authManager = auth as unknown as OpenIdConnectClient;
+
+    const authRedirectUrl = getRedirectUrl(router.currentRoute.value);
+    if (authRedirectUrl) authManager.changeRedirectRoute(authRedirectUrl);
+
     checkForNewVersion();
   });
 
   router.beforeEach(async (to, from, next) => {
     try {
+      const { resetPageStatus } = usePageStatus();
+      resetPageStatus();
+
       const alternativeRedirect = await checkAlternativeRoutes(to);
       if (alternativeRedirect) return next(alternativeRedirect);
 

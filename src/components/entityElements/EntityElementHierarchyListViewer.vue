@@ -18,9 +18,11 @@
         <BaseLibrary
           v-if="!isLoading && hierachyList.length > 0"
           list-item-route-name="SingleEntity"
+          :id="entityId"
           :baseLibraryMode="BaseLibraryModes.NormalBaseLibrary"
           :enable-advanced-filters="false"
           :enable-bulk-operations="false"
+          :bulk-operations-context="undefined"
           :is-search-library="true"
           :predefinedEntities="hierachyList"
           :ignore-fetching-data="true"

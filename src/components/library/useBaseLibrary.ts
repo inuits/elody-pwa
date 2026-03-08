@@ -1,6 +1,6 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
-import isEqual from "lodash.isequal";
+import { dequal as isEqual } from "dequal";
 import type { SearchInputType } from "@/generated-types/queries";
 import {
   Entitytyping,
@@ -200,9 +200,12 @@ export const useBaseLibrary = (
   const fetchAllPromises = async () => {
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
-  }
+  };
 
-  const determineEntitiesQuery = async (route: RouteLocationNormalizedLoaded, manipulationQueryDocument: string | undefined): Promise<any> => {
+  const determineEntitiesQuery = async (
+    route: RouteLocationNormalizedLoaded,
+    manipulationQueryDocument: string | undefined,
+  ): Promise<any> => {
     if (manipulationQueryDocument) return manipulationQueryDocument;
     const { loadDocument } = useImport();
     try {
@@ -242,7 +245,10 @@ export const useBaseLibrary = (
 
     try {
       const result = await apolloClient.query({
-        query: await determineEntitiesQuery(_route, manipulationQuery.value?.document),
+        query: await determineEntitiesQuery(
+          _route,
+          manipulationQuery.value?.document,
+        ),
         variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
@@ -253,7 +259,8 @@ export const useBaseLibrary = (
         },
       });
 
-      const fetchedEntities = result.data.Entities || result.data.EntitiesHistory;
+      const fetchedEntities =
+        result.data.Entities || result.data.EntitiesHistory;
       if (limitForEntityPicker) return fetchedEntities;
 
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
@@ -316,7 +323,8 @@ export const useBaseLibrary = (
           if (entityCountOnPage !== undefined)
             placeholderAmount = entityCountOnPage;
         }
-        placeholderEntitiesAmount.value = placeholderAmount > 20 ? 20 : placeholderAmount;
+        placeholderEntitiesAmount.value =
+          placeholderAmount > 20 ? 20 : placeholderAmount;
       } else {
         placeholderEntitiesAmount.value = 1;
       }

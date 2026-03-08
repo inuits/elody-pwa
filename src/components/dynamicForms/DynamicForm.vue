@@ -117,6 +117,10 @@
                 :extra-mediafile-type="
                   (uploadContainerField as UploadField).extraMediafileType
                 "
+                :shouldIncludeTypeInUrl="
+                  (uploadContainerField as UploadField).addTypeToEndpoint
+                "
+                :typeToIncludeInUrl="typeToAddToUploadUrl"
               />
             </div>
             <div
@@ -458,6 +462,18 @@ const isLinkedUpload = computed<boolean>(() => {
     uploadContainer.uploadFlow === UploadFlow.MediafilesOnly ||
     uploadContainer.uploadFlow === UploadFlow.OptionalMediafiles
   );
+});
+
+const typeToAddToUploadUrl = computed<string | undefined>(() => {
+  const uploadContainer: UploadContainer | undefined = formFields.value?.find(
+    (formField: any) => formField.__typename === "UploadContainer",
+  ) as UploadContainer | undefined;
+  if (!uploadContainer) return false;
+  const uploadTypeField = Object.values(uploadContainer).find(item => item.__typename === 'UploadField');
+  const keyToExtract = uploadTypeField.extractTypeFromKey;
+  if (!keyToExtract) return undefined;
+  const initialValues = form.value?.values?.intialValues || {};
+  return initialValues[keyToExtract];
 });
 
 const createEntityFromFormInput = async (

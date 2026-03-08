@@ -53,7 +53,7 @@ const props = defineProps<{
     | { idx: number; relation: object }
     | "no-relation-found"
     | undefined;
-  bulkOperationsContext: Context;
+  bulkOperationsContext: Context | undefined;
   refetchEntities: () => any;
 }>();
 

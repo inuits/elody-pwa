@@ -15,7 +15,7 @@ import {
   getTitleOrNameFromEntity,
   extractValueFromObject,
 } from "@/helpers";
-import { useI18n } from "vue-i18n";
+import { currentLocale } from "@/helpers";
 
 export interface BaseRoute {
   id: string;
@@ -23,7 +23,7 @@ export interface BaseRoute {
 }
 
 export interface VisitedRoute extends BaseRoute {
-  routeName: string; 
+  routeName: string;
   icon?: DamsIcons;
   path?: string;
 }
@@ -46,7 +46,6 @@ const useBreadcrumbs = (config: any) => {
   const previousRoute = computed<BreadcrumbRoute | undefined>(
     () => breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1],
   );
-  const { locale } = useI18n();
 
   const getRouteBreadcrumbsOfEntity = (
     entitytype: Entitytyping | string,
@@ -129,7 +128,11 @@ const useBreadcrumbs = (config: any) => {
     clearBreadcrumbPath();
   };
 
-  const setRootRoute = (id: string, title: string, typePillLabel: any = undefined): void => {
+  const setRootRoute = (
+    id: string,
+    title: string,
+    typePillLabel: any = undefined,
+  ): void => {
     rootRoute.value.rootId = id;
     rootRoute.value.rootTitle = title;
     rootRoute.value.typePillLabel = typePillLabel;
@@ -188,7 +191,7 @@ const useBreadcrumbs = (config: any) => {
       advancedSearchValue: [],
       advancedFilterInputs: advancedFilters,
       preferredLanguage: config.features.supportsMultilingualMetadataEditing
-        ? locale.value
+        ? currentLocale.value
         : undefined,
     };
     return queryVariables;

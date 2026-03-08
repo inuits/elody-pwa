@@ -11,7 +11,7 @@
     }"
   >
     <VueSelect
-      class="!text-text-body !bg-background-light border-none !rounded-lg"
+      class="!text-text-body !bg-background-light border-none !rounded-lg flex-1 min-w-0"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
       :options="filterDropdownOptions"
@@ -105,7 +105,7 @@ const props = withDefaults(
     addLabelToValue?: boolean;
     addIconToValue?: boolean;
     showMenuHeader?: boolean;
-    styleType: DropdownStyle;
+    styleType?: DropdownStyle;
     alwaysCalcualteWidth?: boolean;
   }>(),
   {

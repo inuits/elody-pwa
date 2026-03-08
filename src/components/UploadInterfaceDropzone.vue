@@ -100,6 +100,8 @@ const props = withDefaults(
     templateCsvs?: string[] | undefined;
     infoLabelUrl?: string | undefined;
     extraMediafileType?: string;
+    shouldIncludeTypeInUrl?: boolean;
+    typeToIncludeInUrl?: string;
   }>(),
   {
     dropzoneSize: "normal",
@@ -108,6 +110,8 @@ const props = withDefaults(
     templateCsvs: undefined,
     infoLabelUrl: undefined,
     extraMediafileType: undefined,
+    shouldIncludeTypeInUrl: false,
+    typeToIncludeInUrl: undefined,
   },
 );
 const config: any = inject("config");
@@ -134,6 +138,8 @@ const setUseUploadVariables = () => {
     uploadType: props.uploadFieldType,
     uploadFlow: props.uploadFlow,
     extraMediafileType: props.extraMediafileType,
+    shouldIncludeTypeInUrl: props.shouldIncludeTypeInUrl,
+    typeToIncludeInUrl: props.typeToIncludeInUrl,
   });
   if (props.acceptedFileTypes)
     dropzone.dropzoneSettings.value.acceptedFiles = props.acceptedFileTypes
@@ -178,6 +184,8 @@ watch(
     props.maxFileSize,
     props.uploadFieldType,
     props.extraMediafileType,
+    props.shouldIncludeTypeInUrl,
+    props.typeToIncludeInUrl,
   ],
   () => {
     setUseUploadVariables();

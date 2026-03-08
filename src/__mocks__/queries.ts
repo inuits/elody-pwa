@@ -1,4 +1,4 @@
- 
+
 // THIS FILE IS GENERATED, DO NOT EDIT!
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -16,6 +16,13 @@ export type Scalars = {
   JSON: any;
   StringOrInt: any;
 };
+
+export enum PageStatus {
+  Forbidden = 'Forbidden',
+  NotFound = 'NotFound',
+  Success = 'Success',
+  Unauthorized = 'Unauthorized'
+}
 
 export enum Access {
   Closed = 'closed',

@@ -57,7 +57,6 @@
 import type { Ref } from "vue";
 import { nextTick, onUnmounted, ref, watch } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
-import "pdfjs-dist/build/pdf.worker";
 
 import PdfToolbar from "../PdfToolbar.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";

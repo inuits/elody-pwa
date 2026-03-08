@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import ManifestViewer from "@/components/ManifestViewer.vue";
+import { computed, defineAsyncComponent } from "vue";
 import { useI18n } from "vue-i18n";
 import { RouteNames } from "@/generated-types/queries";
 import type { ManifestViewerElement } from "@/generated-types/queries";
@@ -70,9 +70,12 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { computed } from "vue";
 import { useRouter } from "vue-router";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+
+const ManifestViewer = defineAsyncComponent(
+  () => import("@/components/ManifestViewer.vue"),
+);
 
 const props = defineProps<{
   element: ManifestViewerElement;

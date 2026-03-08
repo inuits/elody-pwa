@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full">
     <div v-if="selectInputFieldType">
       <base-input-autocomplete
         autocomplete-style="defaultWithBorder"
@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="bg-background-normal grid grid-cols-[30%_70%] gap-y-[0.5vh] w-full"
+      class="@container bg-background-normal grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
       :class="wrapperClasses"
     >
       <div
@@ -27,7 +27,7 @@
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !expandFilters },
-          { 'row-span-2 h-fit': expandFilters },
+          { 'row-span-2': expandFilters },
           { sticky: hasStickyBars },
         ]"
       >
@@ -64,7 +64,7 @@
       <div
         v-if="showCurrentEntityFlow"
         :class="[
-          'z-header right-0 pb-4',
+          'z-header right-0 pb-4 h-fit',
           {
             'top-0 bg-background-normal pt-4':
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
@@ -95,6 +95,7 @@
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
+            class="w-full"
           >
             <LibraryBar
               :route="route"
@@ -113,8 +114,8 @@
         </div>
       </div>
       <div
-        class="top-[5.5vh] mt-[0.5vh]"
         :class="[
+          'row-span-2 flex flex-col min-h-0',
           { 'col-span-1 pl-[1%]': expandFilters },
           { 'col-span-2': !expandFilters },
         ]"
@@ -125,7 +126,7 @@
             baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
             showCurrentEntityFlow
           "
-          :class="[{ sticky: hasStickyBars }, 'top-[5vh] my-3 z-header']"
+          :class="[{ sticky: hasStickyBars }, 'pb-2 z-header']"
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
@@ -207,6 +208,7 @@
         </div>
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
+          class="flex-1 min-h-0"
           data-cy="base-library-grid-container"
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
@@ -342,7 +344,7 @@ import {
 } from "@/composables/useBulkOperationsActionsBar";
 
 export type BaseLibraryProps = {
-  bulkOperationsContext: Context;
+  bulkOperationsContext: Context | undefined;
   listItemRouteName: string;
   predefinedEntities?: Entity[];
   searchInputTypeOnDrawer?: SearchInputType;
@@ -416,8 +418,25 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (event: "entitiesUpdated", numberOfEntities: number): void;
+  (event: "selectPage"): void;
+  (event: "selectAll"): void;
+  (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
+  (
+    event: "setBulkOperationsAvailable",
+    isBulkOperationsAvailable: boolean,
+  ): void;
+  (event: "refetch"): void;
+  (
+    event: "customBulkOperationsPromise",
+    bulkOperationsPromise: () => Promise<void>,
+  ): void;
+  (event: "applyCustomBulkOperations"): void;
+  (
+    event: "initializeEntityPickerComponent",
+    enableCropMode: boolean,
+    keyToSaveCropCoordinates: string,
+  ): void;
 }>();
 
 const config: any = inject("config");
@@ -438,7 +457,7 @@ const useEditHelper = useEditMode(getEntityUuid());
 const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
-const selectedPaginationLimitOption = ref<number>();
+const selectedPaginationLimitOption = ref<number>(NaN);
 const isInitialLoading = ref<boolean>(true);
 
 const showCurrentEntityFlow = computed(() => {
@@ -484,16 +503,6 @@ const wrapperClasses = computed(() => {
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
-
-  classes.push({
-    "!bg-white grid-rows-[0vh_1fr]": mode === BaseLibraryModes.BasicBaseLibrary,
-    "grid-rows-[5vh_1fr]": mode === BaseLibraryModes.NormalBaseLibrary,
-    "grid-rows-[1vh_1fr]":
-      mode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-      (mode === BaseLibraryModes.PreviewBaseLibrary &&
-        showCurrentEntityFlow.value),
-    "grid-rows-[1fr_0vh]": !showCurrentEntityFlow.value,
-  });
 
   return classes;
 });
@@ -579,7 +588,7 @@ const displayMap = ref<boolean>(false);
 
 const expandFilters = ref<boolean>(false);
 const lastProcessedEntityType = ref<Entitytyping | null>(null);
-let toggles = ref<ViewModes.type[]>([]);
+const toggles = ref<ViewModes.type[]>([]);
 
 const entityType = computed(() =>
   props.entityType

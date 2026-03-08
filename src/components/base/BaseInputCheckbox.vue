@@ -67,7 +67,7 @@ const props = withDefaults(
     modelValue: boolean;
     label?: string;
     item: InBulkProcessableItem;
-    bulkOperationsContext: Context;
+    bulkOperationsContext: Context | undefined;
     inputStyle: InputStyle;
     disabled?: boolean;
     ignoreBulkOperations?: boolean;

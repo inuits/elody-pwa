@@ -14,9 +14,10 @@ vi.mock("@/main", () => ({
 
 import { useMetadataWrapper } from "../useMetadataWrapper";
 import { useForm, defineRule } from "vee-validate";
-import { defineComponent, h, nextTick, type Ref } from "vue";
+import { defineComponent, h, nextTick, type Ref, type ComputedRef } from "vue";
 import { mount } from "@vue/test-utils";
 import { useMetadataWrapperDropdownOptions } from "@/components/metadata/useMetadataWrapperDropdownOptions";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const basicMetadataWrapperProps = {
   formId: "M-KYY3IE440Q",
@@ -201,5 +202,101 @@ describe("useMetadataWrapper", () => {
     expect(capturedFieldType!.value).toBe("dropdownMultiselectRelations");
     expect(capturedFiltersForRetrievingOptions!.value).toBeTruthy();
     expect(capturedFiltersForRetrievingRelatedOptions!.value).toBeTruthy();
+  });
+
+  it("should expose the form error message via fieldErrorMessage when validation fails", async () => {
+    const FORM_ID = "M-ERROR-TEST";
+    let capturedFieldErrorMessage: ComputedRef<string | undefined>;
+    let capturedForm: ReturnType<typeof useForm>;
+
+    const requiredFieldMetadataProps = {
+      formId: FORM_ID,
+      metadata: {
+        key: "requiredTitle",
+        label: "metadata.labels.required-title",
+        value: "",
+        inputField: {
+          type: "TextInput",
+          validation: {
+            value: ["required"],
+            customValue: null,
+            fastValidationMessage: null,
+            required_if: null,
+            available_if: null,
+            has_required_relation: null,
+            has_one_of_required_relations: null,
+            has_one_of_required_metadata: null,
+            regex: null,
+            __typename: "Validation",
+          },
+          options: [],
+          relationType: null,
+          fromRelationType: null,
+          canCreateEntityFromOption: false,
+          metadataKeyToCreateEntityFromOption: null,
+          advancedFilterInputForRetrievingOptions: [],
+          advancedFilterInputForRetrievingRelatedOptions: [],
+          advancedFilterInputForRetrievingAllOptions: [],
+          advancedFilterInputForSearchingOptions: null,
+          fileTypes: null,
+          maxFileSize: null,
+          maxAmountOfFiles: null,
+          uploadMultiple: null,
+          isMetadataField: false,
+          relationFilter: null,
+          dependsOn: "",
+          multiple: false,
+          lineClamp: null,
+          entityType: null,
+          hasVirtualKeyboard: false,
+          autoSelectable: false,
+          autoAllSelectable: null,
+          fieldKeyToSave: null,
+          disabled: false,
+          __typename: "InputField",
+        },
+        __typename: "PanelMetaData",
+      },
+      isEdit: true,
+      baseLibraryMode: "normalBaseLibrary",
+      formFlow: "edit",
+      showErrors: false,
+    };
+
+    const component = defineComponent({
+      setup() {
+        capturedForm = useForm({
+          initialValues: { intialValues: { requiredTitle: "" } },
+        });
+
+        const { addForm } = useFormHelper();
+        addForm(FORM_ID, capturedForm);
+
+        defineRule("no_xss", () => true);
+        defineRule("required", (value: any) => {
+          if (!value || value === "") return "This field is required";
+          return true;
+        });
+
+        const { fieldErrorMessage } = useMetadataWrapper(
+          requiredFieldMetadataProps as any,
+          () => undefined,
+        );
+        capturedFieldErrorMessage = fieldErrorMessage;
+
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldErrorMessage!.value).toBeFalsy();
+
+    await capturedForm!.validate();
+    await nextTick();
+
+    expect(capturedFieldErrorMessage!.value).toBeTruthy();
+    expect(capturedFieldErrorMessage!.value).toBe("This field is required");
   });
 });

@@ -60,45 +60,35 @@ const viteConfig = defineConfig({
       include: [/node_modules/, /openseadragon-select-plugin/],
     },
     rollupOptions: {
-      external: [
-        "pdfjs-dist/types/src/display/api",
-        "pdfjs-dist/build/pdf.worker.min.js",
-      ],
+      external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        manualChunks: {
-          vue: ["vue", "vue-router"],
-          apollo: ["@apollo/client", "@vue/apollo-composable"],
-          leaflet: ["leaflet", "@vue-leaflet/vue-leaflet"],
-          sentry: [
-            "@sentry/browser",
-            "@sentry/integrations",
-            "@sentry/tracing",
-            "@sentry/vue",
-          ],
-          openseadragon: ["openseadragon", "openseadragon-select-plugin"],
-          pdfjs: ["pdfjs-dist"],
-          ol: ["ol"],
-          chart: [
-            "chart.js",
-            "chartjs-adapter-date-fns",
-            "chartjs-plugin-datasource-prometheus",
-          ],
-          openlayers: ["vue3-openlayers"],
-          dropzone: ["dropzone"],
-          unicons: ["vue-unicons"],
-          tiptap: [
-            "@tiptap/vue-3",
-            "@tiptap/extension-color",
-            "@tiptap/extension-list-item",
-            "@tiptap/extension-text-style",
-            "@tiptap/starter-kit",
-            "@tiptap/core",
-            "@tiptap/extension-bold",
-            "@tiptap/extension-italic",
-            "@tiptap/extension-document",
-            "@tiptap/extension-paragraph",
-            "@tiptap/extension-text",
-          ],
+        manualChunks(id) {
+          // App: generated GraphQL types/queries
+          if (id.includes("/src/generated-types/")) return "generated-queries";
+
+          if (!id.includes("node_modules")) return;
+
+          // Vendor chunks
+          if (id.includes("/mirador/")) return "mirador";
+          if (id.includes("/tify/")) return "tify";
+          if (id.match(/\/node_modules\/(vue\/|vue-router\/)/)) return "vue";
+          if (
+            id.includes("/@apollo/") ||
+            id.includes("/@vue/apollo-composable")
+          )
+            return "apollo";
+          if (id.includes("/leaflet/") || id.includes("/@vue-leaflet/"))
+            return "leaflet";
+          if (id.includes("/@sentry/")) return "sentry";
+          if (id.includes("/openseadragon")) return "openseadragon";
+          if (id.includes("/pdfjs-dist/")) return "pdfjs";
+          if (id.match(/\/node_modules\/ol\//)) return "ol";
+          if (id.includes("/chart.js/") || id.includes("/chartjs"))
+            return "chart";
+          if (id.includes("/vue3-openlayers/")) return "openlayers";
+          if (id.includes("/dropzone/")) return "dropzone";
+          if (id.includes("/vue-unicons/")) return "unicons";
+          if (id.includes("/@tiptap/")) return "tiptap";
         },
       },
     },

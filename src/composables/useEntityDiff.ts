@@ -1,7 +1,13 @@
 import { computed, type Ref, toRaw } from "vue";
-import isEqual from "lodash.isequal";
+import { dequal as isEqual } from "dequal";
 import { getMetadataFields } from "@/helpers";
-import type { ColumnList, Entity } from "@/generated-types/queries";
+import type { Entity } from "@/generated-types/queries";
+
+interface DiffArgs {
+  previousVersion: Entity | null | undefined;
+  selectedVersion: Entity;
+  fields: string[];
+}
 
 export function useEntityDiff(
   props: {
@@ -9,7 +15,6 @@ export function useEntityDiff(
     entities: Entity[];
     entityId: string;
   },
-  parentEntity: Ref<Entity | null | undefined>,
   panel: Ref<any>,
 ) {
   const keysToCompare = computed(() => {
@@ -31,72 +36,84 @@ export function useEntityDiff(
     return val;
   };
 
-  const computeEntityDiff = (
-    currentVersion: Entity,
-    previousVersion: Entity,
-    fields: string[],
-  ) => {
-    const cloneCurrentVersion = structuredClone(toRaw(currentVersion)) as any;
-    const clonePreviousVersion = structuredClone(toRaw(previousVersion)) as any;
+  const computeEntityDiff = ({
+    previousVersion,
+    selectedVersion,
+    fields,
+  }: DiffArgs) => {
+    const cloneSelected = structuredClone(toRaw(selectedVersion)) as any;
+    const selectedValues = cloneSelected?.intialValues || {};
+    const processedSelected: Record<string, any> = {
+      __typename: "IntialValues",
+    };
 
-    const currentValues = cloneCurrentVersion?.intialValues || {};
-    const previousValues = clonePreviousVersion?.intialValues || {};
+    const clonePrevious = previousVersion
+      ? (structuredClone(toRaw(previousVersion)) as any)
+      : null;
+    const previousValues = clonePrevious?.intialValues || {};
+    const processedPrevious: Record<string, any> = {
+      __typename: "IntialValues",
+    };
 
-    const processedCurrentValues: Record<string, any> = { __typename: "IntialValues" };
-    const processedPreviousValues: Record<string, any> = { __typename: "IntialValues" };
+    const canDiff = !!clonePrevious;
 
     fields.forEach((key) => {
-      const currentValue = currentValues[key]?.formatter
-        ? currentValues[key].label
-        : currentValues[key];
-      const previousValue = previousValues[key]?.formatter
+      const currentVal = selectedValues[key]?.formatter
+        ? selectedValues[key].label
+        : selectedValues[key];
+      const prevVal = previousValues[key]?.formatter
         ? previousValues[key].label
         : previousValues[key];
 
-      if (!isEqual(currentValue, previousValue)) {
-        processedPreviousValues[key] = {
+      const hasChanged = canDiff && !isEqual(currentVal, prevVal);
+
+      if (hasChanged) {
+        processedPrevious[key] = {
           formatter: "pill|modified",
-          label: formatDisplayValue(previousValue),
+          label: formatDisplayValue(prevVal),
         };
-        processedCurrentValues[key] = {
+        processedSelected[key] = {
           formatter: "pill|added",
-          label: formatDisplayValue(currentValue),
+          label: formatDisplayValue(currentVal),
         };
       } else {
-        processedPreviousValues[key] = previousValue;
-        processedCurrentValues[key] = currentValue;
+        processedPrevious[key] = prevVal;
+        processedSelected[key] = currentVal;
       }
     });
 
-    cloneCurrentVersion.intialValues = processedCurrentValues;
-    clonePreviousVersion.intialValues = processedPreviousValues;
+    cloneSelected.intialValues = processedSelected;
+
+    if (clonePrevious) {
+      clonePrevious.intialValues = processedPrevious;
+    }
 
     return {
-      previousVersion: {
-        ...clonePreviousVersion,
-        id: `${previousVersion.id}_old_history_preview`,
-      },
-      currentVersion: {
-        ...cloneCurrentVersion,
-        id: `${currentVersion.id}_history_preview`,
+      previousVersion: clonePrevious
+        ? { ...clonePrevious, id: `${previousVersion!.id}_previous` }
+        : {},
+      selectedVersion: {
+        ...cloneSelected,
+        id: `${selectedVersion.id}_selected`,
       },
     };
   };
 
   const diffedResults = computed(() => {
-    if (!props.entity || !parentEntity.value) return null;
+    if (!props.entity || !props.entities) return null;
 
     const selectedEntityIndex = props.entities.findIndex(
       (e) => e.id === props.entity.id,
     );
 
     if (selectedEntityIndex === -1) return null;
+    const previousVersion = props.entities[selectedEntityIndex + 1];
 
-    return computeEntityDiff(
-      parentEntity.value,
-      props.entity,
-      keysToCompare.value,
-    );
+    return computeEntityDiff({
+      previousVersion: previousVersion,
+      selectedVersion: props.entity,
+      fields: keysToCompare.value,
+    });
   });
 
   return {

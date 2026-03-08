@@ -187,7 +187,7 @@
       />
     </div>
     <div
-      v-if="previewComponentEnabled"
+      v-if="previewComponentEnabled && isEnableNavigation"
       class="flex flex-row"
       @click="() => emit('navigateTo')"
     >
@@ -286,7 +286,7 @@ import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
 
 const props = withDefaults(
   defineProps<{
-    bulkOperationsContext: Context;
+    bulkOperationsContext: Context | undefined;
     contextMenuActions?: ContextMenuActions;
     listItemEntity?: BaseEntity;
     itemId?: string;

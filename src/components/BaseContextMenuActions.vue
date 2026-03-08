@@ -46,7 +46,7 @@ const props = withDefaults(
     entityType?: Entitytyping;
     parentEntityId?: string;
     relation?: object | string;
-    bulkOperationsContext: Context;
+    bulkOperationsContext: Context | undefined;
     refetchEntities?: () => Promise<void>;
   }>(),
   {
@@ -88,6 +88,7 @@ const showInHeader = computed(() => {
 });
 
 const getAvailableContextMenuActions = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { __typename, ...menuActions } = { ...props.contextMenuActions };
   const availableOptions: Partial<ContextMenuActions> = { ...menuActions };
 

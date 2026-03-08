@@ -20,17 +20,13 @@ import {
   type PanelRelationRootData,
   ValidationRules,
 } from "@/generated-types/queries";
-import { DateTime } from "luxon";
+
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
-import {
-  type PanelRepetitionProps,
-  useRepeatableFields,
-} from "@/composables/useRepeatableFields";
 
 export type FieldMetadata =
   | PanelMetaData
@@ -91,6 +87,7 @@ export const useMetadataWrapper = (
   fieldIsEditableByUser: Ref<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
+  fieldErrorMessage: ComputedRef<string | undefined>;
   extractIntialValueFromParentByKey: (key: string) => string | undefined;
 } => {
   const getFieldKey = (): string => {
@@ -178,6 +175,10 @@ export const useMetadataWrapper = (
     () => fieldValueProxy.value?.label || fieldValueProxy.value,
   );
   const isFieldValid = computed<boolean>(() => field.meta.valid);
+  const { forms } = useFormHelper();
+  const fieldErrorMessage = computed<string | undefined>(
+    () => forms.value[props.formId]?.errors?.[fieldKey.value],
+  );
   const fieldIsPermittedToBeSeenByUser = ref<boolean>(false);
   const fieldIsEditableByUser = ref<boolean>(false);
 
@@ -250,6 +251,7 @@ export const useMetadataWrapper = (
     fieldIsEditableByUser,
     fieldValueProxy,
     fieldTooltipValue,
+    fieldErrorMessage,
     extractIntialValueFromParentByKey,
   };
 };
