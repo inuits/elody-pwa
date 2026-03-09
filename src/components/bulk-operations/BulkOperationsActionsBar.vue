@@ -167,6 +167,8 @@ const emit = defineEmits<{
     event: "initializeEntityPickerComponent",
     enableCropMode: boolean,
     keyToSaveCropCoordinates: string,
+    customQueryEntityPickerList?: string,
+    customQueryEntityPickerListFilters?: string,
   ): void;
 }>();
 

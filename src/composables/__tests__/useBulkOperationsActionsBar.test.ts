@@ -270,6 +270,37 @@ describe("useBulkOperationsActionsBar", () => {
         "initializeEntityPickerComponent",
         true,
         "test-key",
+        undefined,
+        undefined,
+      );
+    });
+
+    it("should pass custom picker query overrides for add relation operation", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
+
+      const mockConfig = {
+        typeModal: "test" as any,
+        enableImageCrop: false,
+        keyToSaveCropCoordinates: "",
+        customQueryEntityPickerList: "GetGroeirubriekZizosInWork",
+        customQueryEntityPickerListFilters: "GetGroeirubriekZizoFilters",
+      };
+
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.AddRelation,
+        mockConfig,
+      );
+
+      expect(emit).toHaveBeenCalledWith(
+        "initializeEntityPickerComponent",
+        false,
+        "",
+        "GetGroeirubriekZizosInWork",
+        "GetGroeirubriekZizoFilters",
       );
     });
 

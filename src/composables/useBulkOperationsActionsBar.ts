@@ -67,6 +67,8 @@ export interface BulkOperationsActionsBarEmits {
     event: "initializeEntityPickerComponent",
     enableCropMode: boolean,
     keyToSaveCropCoordinates: string,
+    customQueryEntityPickerList?: string,
+    customQueryEntityPickerListFilters?: string,
   ): void;
 }
 
@@ -180,6 +182,8 @@ export const useBulkOperationsActionsBar = (
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,
       bulkOperationModalConfig.keyToSaveCropCoordinates || "",
+      bulkOperationModalConfig.customQueryEntityPickerList || undefined,
+      bulkOperationModalConfig.customQueryEntityPickerListFilters || undefined,
     );
     if (
       bulkOperationModalConfig.pageToNavigateToAfterCreation ===
@@ -340,7 +344,7 @@ export const useBulkOperationsActionsBar = (
     try {
       const query = route!.meta!.queries!.getBulkOperations;
       return await loadDocument(query);
-    } catch (error) {
+    } catch {
       return await loadDocument("GetBulkOperations");
     }
   };
