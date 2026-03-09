@@ -180,6 +180,8 @@ export const useBulkOperationsActionsBar = (
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,
       bulkOperationModalConfig.keyToSaveCropCoordinates || "",
+      bulkOperationModalConfig.customQueryEntityPickerList || "",
+      bulkOperationModalConfig.customQueryEntityPickerListFilters || "",
     );
     if (
       bulkOperationModalConfig.pageToNavigateToAfterCreation ===
@@ -340,7 +342,7 @@ export const useBulkOperationsActionsBar = (
     try {
       const query = route!.meta!.queries!.getBulkOperations;
       return await loadDocument(query);
-    } catch (error) {
+    } catch {
       return await loadDocument("GetBulkOperations");
     }
   };

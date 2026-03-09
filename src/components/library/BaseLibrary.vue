@@ -159,10 +159,17 @@
               async () => await applyCustomBulkOperations()
             "
             @initialize-entity-picker-component="
-              (cropState: boolean, keyToSaveCropCoordinates: string) =>
+              (
+                cropState: boolean,
+                keyToSaveCropCoordinates: string,
+                customQueryEntityPickerList: string,
+                customQueryEntityPickerListFilters: string,
+              ) =>
                 initializeEntityPickerComponent(
                   cropState,
                   keyToSaveCropCoordinates,
+                  customQueryEntityPickerList,
+                  customQueryEntityPickerListFilters,
                 )
             "
             @refetch="async () => await refetchEntities()"
@@ -436,6 +443,8 @@ const emit = defineEmits<{
     event: "initializeEntityPickerComponent",
     enableCropMode: boolean,
     keyToSaveCropCoordinates: string,
+    customQueryEntityPickerList: string,
+    customQueryEntityPickerListFilters: string,
   ): void;
 }>();
 
@@ -808,6 +817,8 @@ const applyCustomBulkOperations = async () => {
 const initializeEntityPickerComponent = (
   enableCropMode: boolean,
   keyToSaveCropCoordinates: string,
+  customQueryEntityPickerList?: string,
+  customQueryEntityPickerListFilters?: string,
 ) => {
   setAcceptedTypes([props.entityType] as Entitytyping[]);
   setEntityUuid(props.parentEntityIdentifiers[0]);
@@ -815,8 +826,13 @@ const initializeEntityPickerComponent = (
   setParentEntityType(props.parentEntityType || route.meta.entityType);
   setRefetchEntitiesFunction(refetchEntities);
   setRelationType(props.relationType);
-  setCustomGetEntitiesQuery(props.customQueryEntityPickerList);
-  setCustomGetEntitiesFiltersQuery(props.customQueryEntityPickerListFilters);
+  setCustomGetEntitiesQuery(
+    customQueryEntityPickerList || props.customQueryEntityPickerList,
+  );
+  setCustomGetEntitiesFiltersQuery(
+    customQueryEntityPickerListFilters ||
+      props.customQueryEntityPickerListFilters,
+  );
   setCropMode(enableCropMode);
   setCropCoordinatesKey(keyToSaveCropCoordinates);
   setActionsOnResult(props.actionsOnResult);
