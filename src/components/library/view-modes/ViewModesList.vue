@@ -23,7 +23,7 @@
             v-show="!disablePreviews"
             v-for="item in filteredRelations"
             :key="item.key"
-            :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
+            :class="[mode === 'list' ? 'list-item-list' : 'list-item-grid', { 'list-item-list-multi-line': mode === 'list' && multiLine }]"
             v-memo="[item.key, item.editStatus, mode, entitiesLoading]"
           >
             <ListItem
@@ -47,6 +47,8 @@
               :relation-type="relationType"
               :has-selection="enableSelection"
               :view-mode="mode"
+              :multi-line="multiLine"
+              :multi-line-columns="multiLineColumns"
             />
           </div>
         </div>
@@ -55,7 +57,7 @@
           :key="entity.id + '_list'"
           :is="entity.componentTag"
           :to="entity.componentPath"
-          :class="mode === 'list' ? 'list-item-list' : 'list-item-grid'"
+          :class="[mode === 'list' ? 'list-item-list' : 'list-item-grid', { 'list-item-list-multi-line': mode === 'list' && multiLine }]"
           @click="entityWrapperHandler(entity.originalEntity)"
           v-memo="entity.memoKey"
         >
@@ -90,6 +92,8 @@
               previewComponent?.listItemsCoverage
             "
             :is-primary-mediafile="primaryMediafileId === entity.id"
+            :multi-line="multiLine"
+            :multi-line-columns="multiLineColumns"
             @navigate-to="
               () => {
                 router.push(entity.forcedNavigationPath);
@@ -216,6 +220,13 @@ const previewForEntity = ref<string | undefined>(undefined);
 const refEntities = ref<Entity[]>(props.entities);
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
+const multiLine = computed(
+  () => props.config?.find((c) => c.key === "multiLine")?.value === true,
+);
+const multiLineColumns = computed(() => {
+  const val = props.config?.find((c) => c.key === "multiLineColumns")?.value;
+  return typeof val === "number" ? val : 5;
+});
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { queryVariables } = useLibraryBar();
 const { getThumbnail } = useThumbnailHelper();
@@ -526,6 +537,10 @@ const containerNameForPreview = computed(() => {
 .list-item-list {
   content-visibility: auto;
   contain-intrinsic-size: 62px;
+}
+
+.list-item-list-multi-line {
+  contain-intrinsic-size: 110px;
 }
 
 .list-item-grid {
