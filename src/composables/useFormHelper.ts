@@ -19,9 +19,9 @@ const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 export type EntityValues = {
   intialValues?: IntialValues;
   relationValues?: { [key: string]: any };
-  relationMetadata?: IntialValues | {};
-  relatedEntityData?: IntialValues | {};
-  relationRootdata?: IntialValues | {};
+  relationMetadata?: IntialValues | object;
+  relatedEntityData?: IntialValues | object;
+  relationRootdata?: IntialValues | object;
 };
 
 const useFormHelper = () => {
@@ -300,11 +300,18 @@ const useFormHelper = () => {
       .filter((key) => key !== "__typename")
       .forEach((key) => {
         if (!editableFields.value[entityId]?.includes(key)) return;
+        const rawValue = (intialValues as any)[key];
+        if (
+          config.features.useLegacyQueries &&
+          Array.isArray(rawValue) &&
+          rawValue.length === 0
+        )
+          return;
         const normalizedMetadata: {
           key: string;
           value: unknown;
           lang?: string;
-        } = { key, value: (intialValues as any)[key] };
+        } = { key, value: rawValue };
         const isEnabledMultilanguage =
           config.features.supportsMultilingualMetadataEditing;
         if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {
@@ -366,6 +373,7 @@ const useFormHelper = () => {
         return [];
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { inheritFrom, ...rest } = relation;
 
       return {
