@@ -104,7 +104,7 @@ export const useFilterState = () => {
     filterInput?: AdvancedFilterInput,
   ) => {
     filters.value.push({
-      isActive: filter.hidden || !!filter.defaultValue,
+      isActive: filter.hidden || filter.defaultValue !== undefined,
       isDisplayed: filter.isDisplayedByDefault ?? false,
       advancedFilter: filter,
       inputFromState: filterInput,
@@ -118,7 +118,7 @@ export const useFilterState = () => {
   };
 
   const createFilterInput = (filter: AdvancedFilter) => {
-    if (!filter.hidden && !filter.defaultValue) return undefined;
+    if (!filter.hidden && filter.defaultValue === undefined) return undefined;
 
     return {
       type: filter.type,
