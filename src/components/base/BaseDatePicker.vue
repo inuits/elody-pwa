@@ -8,6 +8,7 @@
     :formats="formats"
     :placeholder="props.placeholder"
     text-input
+    auto-apply
   />
 </template>
 
