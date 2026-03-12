@@ -1,4 +1,4 @@
-<template>
+<template>  
   <VueDatePicker
     class="base-date-picker"
     v-model="dateValue"
@@ -85,9 +85,7 @@ const enableTimePicker = computed<boolean>(() => {
   color: var(--color-black);
 }
 
-.base-modal--opened .dp--menu-wrapper {
-  position: fixed !important;
-  top: unset !important;
-  left: unset !important;
+.base-modal--opened:has(.base-date-picker) {
+  overflow: visible !important;
 }
 </style>
