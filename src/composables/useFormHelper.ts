@@ -7,7 +7,7 @@ import {
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { type FormContext, useForm } from "vee-validate";
-import { ref, inject, nextTick } from "vue";
+import { ref, inject, nextTick, getCurrentInstance } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useInheritedRelations } from "./useInheritedRelations";
@@ -25,7 +25,8 @@ export type EntityValues = {
 };
 
 const useFormHelper = () => {
-  const config = inject("config") as any;
+  const instance = getCurrentInstance();
+  const config = instance ? inject("config", null) as any : null;
 
   const createEntityValues = (
     intialValueFields: PanelMetaData[],
@@ -295,6 +296,9 @@ const useFormHelper = () => {
     locale?: string,
     fields?: Record<string, PanelMetaData>,
   ): MetadataValuesInput[] => {
+    if (!config) {
+      console.warn("useFormHelper: parseIntialValuesForFormSubmit called without config context.");
+    }
     const metadata: any[] = [];
     Object.keys(intialValues)
       .filter((key) => key !== "__typename")
@@ -306,7 +310,7 @@ const useFormHelper = () => {
           lang?: string;
         } = { key, value: (intialValues as any)[key] };
         const isEnabledMultilanguage =
-          config.features.supportsMultilingualMetadataEditing;
+          config?.features?.supportsMultilingualMetadataEditing;
         if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {
           normalizedMetadata.lang = locale;
         }
