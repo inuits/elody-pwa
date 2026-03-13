@@ -42,6 +42,14 @@
       :endpoint-url="element.endpointUrl"
       :endpoint-method="element.endpointMethod"
     />
+    <query-action
+      v-if="element.__typename === 'ContextMenuQueryAction'"
+      :label="element.label"
+      :icon="element.icon"
+      :query="element.query"
+      :refresh-after-action="element.refreshAfterAction"
+      :entity-id="parentEntityId"
+    />
   </div>
 </template>
 
@@ -51,6 +59,7 @@ import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 import CustomAction from "@/components/context-menu-actions/CustomAction.vue";
+import QueryAction from "@/components/context-menu-actions/QueryAction.vue";
 import { Entitytyping } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 
