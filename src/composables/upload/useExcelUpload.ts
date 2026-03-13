@@ -1,4 +1,5 @@
 import useUpload from "@/composables/upload/useUpload";
+import { watch } from "vue";
 import {
   type ActionProgressStep,
   ProgressStepStatus,
@@ -14,8 +15,9 @@ export const useExcelUpload = (): {
     uploadProgress,
     mediafiles,
     requiredMediafiles,
-    verifyAllNeededFilesArePresent,
-  } = useUpload({});
+    missingFileNames,
+    updateGlobalUploadProgress,
+  } = useUpload();
 
   const checkUploadValidity = (): boolean => {
     const noExtraUploadedFiles = mediafiles.value.every(
@@ -26,7 +28,6 @@ export const useExcelUpload = (): {
     return (
       containsExcel.value &&
       noExtraUploadedFiles &&
-      verifyAllNeededFilesArePresent() &&
       uploadProgress.value
         .filter(
           (progressStep: ActionProgressStep) =>
@@ -40,8 +41,23 @@ export const useExcelUpload = (): {
   };
 
   const checkFileValidity = (): boolean => {
-    return containsExcel.value;
+    return containsExcel.value && missingFileNames.value.length === 0;
   };
+
+  watch(
+    () => missingFileNames.value.length,
+    () => {
+      if (
+        missingFileNames.value.length > 0 &&
+        requiredMediafiles.value.length > 0
+      ) {
+        updateGlobalUploadProgress(
+          ProgressStepType.Prepare,
+          ProgressStepStatus.Failed,
+        );
+      }
+    },
+  );
 
   return { checkFileValidity, checkUploadValidity };
 };

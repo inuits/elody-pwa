@@ -25,6 +25,12 @@ import {
 import { useUploadState } from "./useUploadState";
 import { type UploadSettings, UploadStatus } from "./types";
 
+const mainFileTypes = [
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+];
+
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
@@ -36,12 +42,17 @@ const mediafiles = computed((): DropzoneFile[] =>
       ].includes(file.type),
   ),
 );
+const mainFile = computed((): DropzoneFile | undefined =>
+  files.value.find((file: DropzoneFile) => mainFileTypes.includes(file.type)),
+);
+
 const csvFile = computed(() => {
   return files.value.find(
     (file: DropzoneFile) =>
       file.type === "text/csv" || file.type === "application/vnd.ms-excel",
   );
 });
+
 const containsCsv = computed(() => !!csvFile.value);
 const containsXml = computed(
   () =>
@@ -92,7 +103,7 @@ const {
   resetState: resetUploadState,
 } = useUploadState();
 
-const useUpload = (config: any) => {
+const useUpload = (config: any = {}) => {
   const initializeUpload = (settings: UploadSettings): void => {
     uploadFlow.value = settings.uploadFlow;
     const type = settings.typeToIncludeInUrl;
@@ -126,13 +137,15 @@ const useUpload = (config: any) => {
 
   const __uploadExcelFile = async () => {
     try {
-      const result = (await batchEntities(getExcelFile())) as {
+      if (!mainFile.value) throw Error("No Excel file found for upload");
+
+      const result = (await batchEntities(__getMainFile())) as {
         entities: unknown[];
       };
       await __uploadMediafilesWithTicketUrl(false, undefined);
 
       amountUploaded.value = result?.entities?.length || 0;
-    } catch (error: Promise<string>) {
+    } catch (error: any) {
       const message = await error;
       updateGlobalUploadProgress(
         ProgressStepType.Upload,
@@ -349,10 +362,10 @@ const useUpload = (config: any) => {
     );
     let dryRunResult;
     try {
-      const fileToDryRun = containsExcel.value ? getExcelFile() : getCsvBlob();
-      dryRunResult = await batchEntities(fileToDryRun, true);
+      if (!mainFile.value) throw Error("No main file found for dry run");
+      dryRunResult = await batchEntities(__getMainFile(), true);
       await handleDryRunResult(dryRunResult, file);
-    } catch (error: Promise<string>) {
+    } catch (error: any) {
       const message = await error;
       dryRunErrors.value.push(message);
       updateGlobalUploadProgress(
@@ -372,9 +385,8 @@ const useUpload = (config: any) => {
     csv: Blob,
     isDryRun: boolean = false,
   ): Promise<{ entities: BaseEntity[]; links: string[] } | number> => {
-    const filename = containsExcel.value
-      ? getExcelFile().name
-      : __getCsvFile().name;
+    if (!mainFile.value) throw Error("No main file found for batch upload");
+    const filename = __getMainFile().name;
     const contentType = containsExcel.value
       ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       : "text/csv";
@@ -442,14 +454,6 @@ const useUpload = (config: any) => {
     );
   };
 
-  const getExcelFile = (): DropzoneFile => {
-    return files.value.find((file: DropzoneFile) =>
-      [
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ].includes(file.type),
-    );
-  };
-
   const getXmlBlob = () => {
     try {
       const xmlFile = __getXmlFile();
@@ -479,18 +483,15 @@ const useUpload = (config: any) => {
     return JSON.parse(await response.text());
   };
 
-  const __getCsvFile = (): DropzoneFile => {
-    return files.value.find(
-      (file: DropzoneFile) =>
-        file.type === "text/csv" || file.type === "application/vnd.ms-excel",
-    );
+  const __getMainFile = (): DropzoneFile => {
+    return mainFile.value as DropzoneFile;
   };
 
   const __getCsvString = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
       const fileText = ref<string | null>(null);
       const reader = new FileReader();
-      const csvFile = __getCsvFile();
+      const csvFile = __getMainFile();
       reader.onload = async (e) => {
         fileText.value = e.target?.result as string;
         resolve(fileText.value);
@@ -504,7 +505,7 @@ const useUpload = (config: any) => {
 
   const getCsvBlob = () => {
     try {
-      const csvFile = __getCsvFile();
+      const csvFile = __getMainFile();
       return new Blob([csvFile], { type: csvFile.type });
     } catch (e: any) {
       throw Error(e);
@@ -845,6 +846,10 @@ const useUpload = (config: any) => {
     }
   };
 
+  const isFileMainType = (file: DropzoneFile): boolean => {
+    return mainFileTypes.includes(file.type);
+  };
+
   const resetUploadProgress = (): void => {
     if (!uploadProgress.value) return;
     const newProgress = structuredClone(toRaw(uploadProgress.value));
@@ -924,8 +929,7 @@ const useUpload = (config: any) => {
   ): void => {
     const filePreview: HTMLElement = file.previewTemplate;
     if (
-      file.type !== "text/csv" &&
-      file.type !== "application/vnd.ms-excel" &&
+      isFileMainType(file) === false &&
       !failedUploads.value.includes(file.name)
     )
       failedUploads.value.push(file.name);
@@ -1115,7 +1119,6 @@ const useUpload = (config: any) => {
     containsExcel,
     batchEntities,
     getCsvBlob,
-    getExcelFile,
     sortFiles,
     prefetchedUploadUrls,
   };
@@ -1131,10 +1134,10 @@ const mapMissingFileNamesToErrors = (): string[] => {
 watch(
   () => [missingFileNames.value, dryRunErrors.value],
   () => {
-    if (!csvFile.value) return;
+    if (!mainFile.value) return;
 
     const errors = [...dryRunErrors.value, ...mapMissingFileNamesToErrors()];
-    useUpload().__handleFileThumbnailError(csvFile.value, errors);
+    useUpload().__handleFileThumbnailError(mainFile.value, errors);
   },
 );
 
