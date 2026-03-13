@@ -7,26 +7,6 @@ vi.mock("@/helpers", () => ({
   getTranslatedMessage: vi.fn((key, args) => `Missing ${args[0]}`),
 }));
 
-vi.mock(import("@/generated-types/queries"), async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    UploadFlow: { MediafilesWithRequiredCsv: "MediafilesWithRequiredCsv" },
-    ProgressStepType: {
-      Validate: "validate",
-      Upload: "upload",
-      Prepare: "prepare",
-    },
-    ProgressStepStatus: {
-      Loading: "loading",
-      Complete: "complete",
-      Failed: "failed",
-      Empty: "empty",
-    },
-    TypeModals: { DynamicForm: "DynamicForm" },
-  };
-});
-
 vi.mock("@/composables/useErrorCodes", () => ({
   useErrorCodes: () => ({
     handleHttpError: vi.fn(),
