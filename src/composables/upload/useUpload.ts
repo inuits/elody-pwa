@@ -512,6 +512,10 @@ const useUpload = (config: any = {}) => {
     }
   };
 
+  const getExcelFile = (): DropzoneFile => {
+    return __getMainFile() as DropzoneFile;
+  };
+
   const __getUploadUrl = async (
     file: DropzoneFile,
     entityId: string = "",
@@ -1119,6 +1123,7 @@ const useUpload = (config: any = {}) => {
     containsExcel,
     batchEntities,
     getCsvBlob,
+    getExcelFile,
     sortFiles,
     prefetchedUploadUrls,
   };
