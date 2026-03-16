@@ -39,6 +39,7 @@ import { useI18n } from "vue-i18n";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
+import { typeUrlMapping } from "@/main";
 
 const props = defineProps<{
   label: string;
@@ -95,6 +96,11 @@ const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
 );
 
+const mediaTypes = [
+  Entitytyping.Mediafile?.toLowerCase(),
+  Entitytyping.MediaFileEntity?.toLowerCase(),
+].filter((type) => type !== undefined);
+
 const deleteRelation = async () => {
   dequeueItemForBulkProcessing(
     props.bulkOperationsContext,
@@ -116,14 +122,13 @@ const deleteEntity = async () => {
     props.bulkOperationsContext,
     props.relation.relation?.key,
   );
-  let collection;
-  if (props.entityType.toLowerCase() === Entitytyping.Mediafile) {
-    collection = Collection.Mediafiles;
-  } else {
-    collection = childRoutes.find(
-      (route: any) => route.entityType === props.entityType,
-    ).type;
-  }
+
+  const mappedEntityType =
+    typeUrlMapping?.reverseMapping?.[props.entityType] ?? props.entityType;
+  const isMediaType = mediaTypes.includes(mappedEntityType.toLowerCase());
+  const collection = isMediaType
+    ? Collection.Mediafiles
+    : childRoutes.find((route) => route.entityType === props.entityType)?.type;
 
   try {
     await mutate({
