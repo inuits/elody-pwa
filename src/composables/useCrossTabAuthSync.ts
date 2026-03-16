@@ -15,8 +15,11 @@ export const useCrossTabAuthSync = () => {
   if (enableCrossTabAuthSync) {
     watch(
       auth!.isAuthenticated,
-      (newValue) => {
-        channel.postMessage({ action: newValue ? "login" : "logout" });
+      (isAuthenticated, wasAuthenticated) => {
+        channel.postMessage({ action: isAuthenticated ? "login" : "logout" });
+        if (!isAuthenticated && wasAuthenticated) {
+          performLogout();
+        }
       },
       { immediate: true },
     );
