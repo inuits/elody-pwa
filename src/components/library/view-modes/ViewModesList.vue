@@ -167,7 +167,11 @@ import {
 import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
-import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
+import {
+  enrichProcessorConfig,
+  formatTeaserMetadata,
+  getMappedSlug,
+} from "@/helpers";
 import { computed, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { router } from "@/main";
@@ -303,11 +307,31 @@ const processedEntities = computed(() => {
     );
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
-    const isDisabled = isEntityDisabled(entity);
     const isSeen = trackSeen.value === true && isItemSeen(entity.id);
+    const isDisabled =
+      isEntityDisabled(entity) || (trackSeen.value && isItemSeen(entity.id));
+
+    let enrichedTeaserMetadata = entity.teaserMetadata;
+    let enrichedIntialValues = entity.intialValues;
+
+    if ((entity as any).processorConfig?.panels) {
+      const relationObj =
+        relation !== "no-relation-found"
+          ? (relation as { relation: any }).relation
+          : null;
+      const result = enrichProcessorConfig(
+        entity.teaserMetadata,
+        entity.intialValues,
+        (entity as any).processorConfig,
+        relationObj,
+      );
+      enrichedTeaserMetadata = result.teaserMetadata;
+      enrichedIntialValues = result.intialValues;
+    }
+
     const formattedMetadata = formatTeaserMetadata(
-      entity.teaserMetadata,
-      entity.intialValues,
+      enrichedTeaserMetadata,
+      enrichedIntialValues,
       previewEnabled,
     );
     const mediaFilename = getMediaFilenameFromEntity(entity);
@@ -338,7 +362,7 @@ const processedEntities = computed(() => {
       contextMenu,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
-      intialValues: entity.intialValues,
+      intialValues: enrichedIntialValues,
       relationValues: entity.relationValues,
       media: mediaFilename,
       thumbIcon: thumbnail,
