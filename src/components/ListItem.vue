@@ -278,6 +278,7 @@ import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/windowPanel/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+
 import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, onUpdated, ref, watch } from "vue";
