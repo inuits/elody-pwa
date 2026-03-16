@@ -122,9 +122,11 @@
     <div
       :class="[
         'w-full',
-        { 'flex items-center': isListMode },
+        { 'flex items-center': isListMode && !props.multiLine },
+        { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
         { 'p-4': isGridMode },
       ]"
+      :style="multiLineGridStyle"
     >
       <div
         v-for="(metadataItem, idx) in onlyReadModeTeaserMetadata"
@@ -133,8 +135,11 @@
           teaserMetadataStyle,
           idx < 1 && teaserMetadata[0]?.value?.formatter
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
-            : 'w-full', // all others stay full width
+            : props.multiLine ? '' : 'w-full', // all others stay full width unless multiLine grid handles sizing
         ]"
+        :style="metadataItem.colSpan && props.multiLine
+          ? { gridColumn: `span ${metadataItem.colSpan}` }
+          : {}"
       >
         <ReadOnlyMetadataWrapper
           v-if="!useEditHelper.isEdit"
@@ -318,6 +323,8 @@ const props = withDefaults(
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
     isPrimaryMediafile?: boolean;
+    multiLine?: boolean;
+    multiLineColumns?: number;
   }>(),
   {
     contextMenuActions: undefined,
@@ -344,6 +351,8 @@ const props = withDefaults(
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
     isPrimaryMediafile: false,
+    multiLine: false,
+    multiLineColumns: 5,
   },
 );
 
@@ -367,8 +376,17 @@ const useEditHelper = useEditMode(
   getEntityUuid() || asString(router.currentRoute.value.params.id),
 );
 const imageSize = computed(() => (isGridMode.value ? 500 : 100));
+const multiLineGridStyle = computed(() =>
+  props.multiLine
+    ? {
+        gridTemplateColumns: `repeat(${props.multiLineColumns}, minmax(0, 1fr))`,
+      }
+    : {},
+);
 const teaserMetadataStyle = computed<string>(() => {
   if (isGridMode.value) return "w-full";
+  if (props.multiLine) return "flex justify-start flex-col break-words";
+
   const amountOfTeaserMetadataItems: string | number =
     props.teaserMetadata.length >= 4 ? "default" : props.teaserMetadata.length;
 

@@ -67,6 +67,8 @@ export interface BulkOperationsActionsBarEmits {
     event: "initializeEntityPickerComponent",
     enableCropMode: boolean,
     keyToSaveCropCoordinates: string,
+    customQueryEntityPickerList?: string,
+    customQueryEntityPickerListFilters?: string,
   ): void;
 }
 
@@ -180,8 +182,8 @@ export const useBulkOperationsActionsBar = (
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,
       bulkOperationModalConfig.keyToSaveCropCoordinates || "",
-      bulkOperationModalConfig.customQueryEntityPickerList || "",
-      bulkOperationModalConfig.customQueryEntityPickerListFilters || "",
+      bulkOperationModalConfig.customQueryEntityPickerList || undefined,
+      bulkOperationModalConfig.customQueryEntityPickerListFilters || undefined,
     );
     if (
       bulkOperationModalConfig.pageToNavigateToAfterCreation ===

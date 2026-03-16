@@ -68,12 +68,12 @@ export const useFilterNormalization = () => {
       };
 
       if (item.lookups) {
-        facet.lookups = {
-          from: item.lookup.from,
-          local_field: item.lookup.local_field,
-          foreign_field: item.lookup.foreign_field,
-          as: item.lookup.as,
-        };
+        facet.lookups = item.lookups.map((lookup: any) => ({
+          from: lookup.from,
+          local_field: lookup.local_field,
+          foreign_field: lookup.foreign_field,
+          as: lookup.as,
+        }));
       }
 
       return facet;

@@ -43,18 +43,21 @@ export const useFilterOptions = () => {
   const entityType = ref<string | Entitytyping>("");
   const facetCounts = ref<Map<string, number>>(new Map());
   const hasFacets = ref<boolean>(false);
+  const selectedOptions = ref<string[] | undefined>([]);
 
   const currentRequestId = ref(0);
 
   const init = async (
     entityTypeToSet: string | Entitytyping,
     filterOptionsMappingValue?: FilterOptionsMappingType,
+    filterSelectedOptions?: string[],
   ) => {
     query.value = await loadDocument("GetFilterOptions");
     entityType.value = entityTypeToSet;
     optionsFiltersManager.setVariables({ entityType: entityTypeToSet });
     facetsFiltersManager.setVariables({ entityType: entityTypeToSet });
     filterOptionsMapping.value = filterOptionsMappingValue;
+    selectedOptions.value = filterSelectedOptions;
   };
 
   const getBaseOptions = async () => {
@@ -223,9 +226,9 @@ export const useFilterOptions = () => {
       value: getReadableProp(valueValue) || entity.id,
     };
 
-    const count = counts.get(baseOption.value);
-    if (count !== undefined) {
-      baseOption.label = `${baseOption.label} (${count})`;
+    if (hasFacets.value) {
+      const count = counts.get(baseOption.value);
+      baseOption.label = `${baseOption.label} (${count ?? 0})`;
     }
 
     return baseOption;
@@ -248,12 +251,16 @@ export const useFilterOptions = () => {
         value: getReadableProp(item),
       };
 
-      const count = counts.get(baseOption.value);
-      if (count !== undefined) {
-        baseOption.label = `${baseOption.label} (${count})`;
+      if (hasFacets.value) {
+        const count = counts.get(baseOption.value);
+        baseOption.label = `${baseOption.label} (${count ?? 0})`;
       }
       return baseOption;
     });
+  };
+
+  const updateSelectedOptions = (options: string[]) => {
+    selectedOptions.value = options;
   };
 
   const getReadableProp = (
@@ -284,6 +291,8 @@ export const useFilterOptions = () => {
 
     if (hasFacets.value) {
       return opts.filter((option) => {
+        if (selectedOptions.value?.includes(option.value)) return true;
+
         const count = facetCounts.value.get(option.value);
         return typeof count === "number" && count > 0;
       });
@@ -306,6 +315,7 @@ export const useFilterOptions = () => {
     getOptions,
     getBaseOptions,
     loadOptionsAndFacetsInParallel,
+    updateSelectedOptions,
     entities: optionsLibrary.entities,
     entitiesLoading: optionsLibrary.entitiesLoading,
     options,

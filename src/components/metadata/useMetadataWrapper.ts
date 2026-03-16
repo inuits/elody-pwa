@@ -20,7 +20,6 @@ import {
   type PanelRelationRootData,
   ValidationRules,
 } from "@/generated-types/queries";
-
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
@@ -36,10 +35,9 @@ export type FieldMetadata =
 const checkIfFieldIsRequired = (
   fieldMetadata: FieldMetadata,
   formId: string,
+  mediafileViewerContext: any,
+  conditionalFieldIsRequired: any,
 ): boolean => {
-  const { conditionalFieldIsRequired } = useConditionalValidation();
-  const mediafileViewerContext: any = inject("mediafileViewerContext");
-
   const validationRulesToCheckAgainst = [
     ValidationRules.Required,
     ValidationRules.HasRequiredRelation,
@@ -90,6 +88,11 @@ export const useMetadataWrapper = (
   fieldErrorMessage: ComputedRef<string | undefined>;
   extractIntialValueFromParentByKey: (key: string) => string | undefined;
 } => {
+  const formHelper = useFormHelper();
+  const { forms, editableFields, getForm } = formHelper;
+  const { conditionalFieldIsRequired } = useConditionalValidation();
+
+  const mediafileViewerContext: any = inject("mediafileViewerContext");
   const getFieldKey = (): string => {
     const { getVeeValidateKey } = useVeeValidate();
     return getVeeValidateKey(
@@ -142,7 +145,6 @@ export const useMetadataWrapper = (
   };
 
   const removeFieldFromEditableList = (fieldKey: string): void => {
-    const { editableFields } = useFormHelper();
     const formEditableFields = editableFields.value[props.formId] ?? [];
 
     editableFields.value[props.formId] = formEditableFields.filter(
@@ -157,7 +159,7 @@ export const useMetadataWrapper = (
     getTranslatedMessage(props.metadata.label as string | "metadata.no-label"),
   );
   const isFieldRequired = computed<boolean>(() =>
-    checkIfFieldIsRequired(props.metadata, props.formId),
+    checkIfFieldIsRequired(props.metadata, props.formId, mediafileViewerContext, conditionalFieldIsRequired),
   );
   const fieldValidationRules = computed<string>(() =>
     getValidationRules(props.isEdit, isFieldRequired.value),
@@ -175,7 +177,6 @@ export const useMetadataWrapper = (
     () => fieldValueProxy.value?.label || fieldValueProxy.value,
   );
   const isFieldValid = computed<boolean>(() => field.meta.valid);
-  const { forms } = useFormHelper();
   const fieldErrorMessage = computed<string | undefined>(
     () => forms.value[props.formId]?.errors?.[fieldKey.value],
   );
@@ -204,7 +205,7 @@ export const useMetadataWrapper = (
   });
 
   const parentForm = ref<FormContext | undefined>(
-    useFormHelper().getForm(getEntityIdFromRoute()),
+    getForm(getEntityIdFromRoute())
   );
   const extractIntialValueFromParentByKey = (
     key: string,

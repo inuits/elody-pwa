@@ -133,4 +133,69 @@ describe("ViewModesList", () => {
       ).toBe(false);
     });
   });
+
+  describe("multiLine config", () => {
+    it("passes multiLine=true to ListItem when config contains multiLine key with value true", async () => {
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }],
+          config: [{ key: "multiLine", value: true }],
+        },
+      });
+      await flushPromises();
+
+      expect(wrapper.vm.multiLine).toBe(true);
+    });
+
+    it("passes multiLine=false to ListItem when config is empty", async () => {
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }],
+          config: [],
+        },
+      });
+      await flushPromises();
+
+      expect(wrapper.vm.multiLine).toBe(false);
+    });
+
+    it("passes multiLine=false when config does not contain multiLine key", async () => {
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }],
+          config: [{ key: "someOtherKey", value: true }],
+        },
+      });
+      await flushPromises();
+
+      expect(wrapper.vm.multiLine).toBe(false);
+    });
+
+    it("returns multiLineColumns from config when provided as number", async () => {
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }],
+          config: [
+            { key: "multiLine", value: true },
+            { key: "multiLineColumns", value: 3 },
+          ],
+        },
+      });
+      await flushPromises();
+
+      expect(wrapper.vm.multiLineColumns).toBe(3);
+    });
+
+    it("defaults multiLineColumns to 5 when not in config", async () => {
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }],
+          config: [{ key: "multiLine", value: true }],
+        },
+      });
+      await flushPromises();
+
+      expect(wrapper.vm.multiLineColumns).toBe(5);
+    });
+  });
 });

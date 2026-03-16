@@ -24,7 +24,7 @@
       @updateValue="$emit('updateValue', $event)"
     />
   </div>
-  <div v-if="!showFilters">
+  <div v-if="!showFilters && !isLoadingOptions">
     {{ t("filters.noOptionsAvailable") }}
   </div>
 </template>
@@ -64,6 +64,7 @@ const {
   getOptions,
   loadOptionsAndFacetsInParallel,
   init,
+  updateSelectedOptions,
   loading: isLoadingOptions,
 } = useFilterOptions();
 const route = useRoute();
@@ -91,6 +92,10 @@ const useAutocomplete = computed(() => {
   );
 });
 
+const selectedOptions = computed(() => {
+  return props.filter.inputFromState?.value || [];
+});
+
 const showFilters = computed(() => {
   return !isLoading.value && initialAmountOfOptions.value !== 0;
 });
@@ -103,6 +108,7 @@ const initialize = async () => {
       (props.filter.advancedFilter?.entityType ||
         route.meta.entityType) as Entitytyping,
       props.filter.advancedFilter.filterOptionsMapping,
+      selectedOptions.value,
     );
     isInitialized.value = true;
   } catch (error) {
@@ -218,4 +224,11 @@ const reset = () => {
 defineExpose({
   reset,
 });
+
+watch(
+  selectedOptions,
+  () => {
+    updateSelectedOptions(selectedOptions.value);
+  }
+)
 </script>
