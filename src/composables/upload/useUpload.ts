@@ -31,6 +31,9 @@ const mainFileTypes = [
   "application/vnd.ms-excel",
 ];
 
+// 10 mins
+const UPLOAD_TIMEOUT_MS = 10 * 60 * 1000;
+
 const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
@@ -243,6 +246,8 @@ const useUpload = (config: any = {}) => {
       headers: { "Content-Type": "text/csv" },
       method: "POST",
       body: getCsvBlob(),
+      // 10 mins timeout because reordering can take a long time if there are many entities
+      signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
     });
     if (!response.ok)
       throw new Error(
