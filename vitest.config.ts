@@ -12,6 +12,7 @@ export default defineConfig({
   },
   test: {
     setupFiles: "./vitestSetup.ts",
+    silent: "passed-only",
     environment: "jsdom",
     deps: {
       optimizer: {
