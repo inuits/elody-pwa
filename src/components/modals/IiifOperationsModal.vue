@@ -79,7 +79,7 @@
         <base-button-new
           :label="t('iiif-operations-modal.get-resized-image')"
           button-style="accentAccent"
-          @click="getImage"
+          @click="downLoadImage"
         />
       </div>
     </div>
@@ -97,6 +97,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 const props = defineProps<{
   fileName: string;
+  originalFilename: string;
   dimensions: { width: number; height: number } | undefined;
 }>();
 
@@ -112,11 +113,16 @@ const originalHeight = props.dimensions?.height || 1080;
 const scaledWidth = ref(originalWidth);
 const scaledHeight = ref(originalHeight);
 
-const getImage = () => {
-  window.open(
-    `/api/iiif/3/${props.fileName}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`,
-    "_blank",
-  );
+const downLoadImage = (): void => {
+  const a = document.createElement("a");
+  const originalFilename =
+    props.originalFilename?.replace(/\.[^/.]*$/, "") || "";
+  a.href = `/api/iiif/3/${props.fileName}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`;
+  a.download = `${originalFilename}_${scaledWidth.value}x${scaledHeight.value}.${currentFormat.value}`;
+  a.target = "_blank";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };
 
 const scaleDimensions = (scale: number): { width: number; height: number } => {

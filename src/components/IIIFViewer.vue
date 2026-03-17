@@ -20,7 +20,11 @@
 
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
 
-    <iiif-operations-modal :fileName="imageFilename" :dimensions="dimensions" />
+    <iiif-operations-modal
+      :fileName="imageFilename"
+      :original-filename="originalFilename"
+      :dimensions="dimensions"
+    />
   </div>
 </template>
 
