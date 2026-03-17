@@ -11,8 +11,8 @@ import { resetAdvancedPermissions } from "@/composables/usePermissions";
 import { usePageStatus } from "@/composables/usePageStatus";
 
 export const useErrorCodes = (): {
-  handleErrorByCode: (code: string) => void;
-  handleGraphqlError: (error: GraphQLError) => string;
+  handleErrorByCodeType: (code: string, message?: string) => void;
+  handleGraphqlError: (error: GraphQLError) => Promise<string>;
   handleHttpError: (httpResponse: Response) => Promise<string>;
   getMessageAndCodeFromApolloError: (apolloError: ApolloError) => Promise<{
     code: string;
@@ -53,7 +53,7 @@ export const useErrorCodes = (): {
     stringVariables: string[],
   ): Record<string, string> | undefined => {
     try {
-      const variablesObject: record<string, string> = {};
+      const variablesObject: Record<string, string> = {};
       stringVariables.forEach((variable) => {
         const colonIndex = variable.indexOf(":");
 
@@ -187,8 +187,7 @@ export const useErrorCodes = (): {
     readHandlers[code]();
   };
 
-  const handleErrorByCodeType = async (code: string): promise<void> => {
-    const message = await getTranslatedErrorMessageForCode(code);
+  const handleErrorByCodeType = async (code: string, message: string = ''): Promise<void> => {
     const genericCodePart: string = code.substring(1);
     const actionCodePart: string = Array.from(code)[0];
 
@@ -289,7 +288,7 @@ export const useErrorCodes = (): {
       return "";
     }
 
-    handleErrorByCodeType(code);
+    handleErrorByCodeType(code, message);
     return message as string;
   };
 
@@ -314,7 +313,7 @@ export const useErrorCodes = (): {
       return "";
     }
 
-    handleErrorByCodeType(code);
+    handleErrorByCodeType(code, message);
     return message as string;
   };
 
