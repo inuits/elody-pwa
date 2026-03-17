@@ -10,11 +10,12 @@
     :modalHeightStyle="'max-h-[90vh]'"
     @hide-modal="handleCloseModal"
   >
-    <div class="flex flex-col w-full h-full overflow-auto">
+    <div class="flex flex-col w-full max-h-[calc(90vh-34px)] overflow-auto">
       <template v-if="shouldRenderTabs">
         <baseTabs :tabs="tabsTitles">
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
+              class=""
               v-if="getModalInfo(TypeModals.DynamicForm).open"
               :key="getModalInfo(TypeModals.DynamicForm).formQuery"
               :dynamic-form-query="
