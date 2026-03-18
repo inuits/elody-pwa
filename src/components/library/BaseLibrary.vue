@@ -159,8 +159,12 @@
               async () => await applyCustomBulkOperations()
             "
             @initialize-entity-picker-component="
-              (cropState: boolean, keyToSaveCropCoordinates: string,
-               customQueryEntityPickerList?: string, customQueryEntityPickerListFilters?: string) =>
+              (
+                cropState: boolean,
+                keyToSaveCropCoordinates: string,
+                customQueryEntityPickerList?: string,
+                customQueryEntityPickerListFilters?: string,
+              ) =>
                 initializeEntityPickerComponent(
                   cropState,
                   keyToSaveCropCoordinates,
@@ -240,7 +244,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : displayGrid ?? ViewModes.ViewModesGrid
+                  : (displayGrid ?? ViewModes.ViewModesGrid)
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -543,6 +547,7 @@ const {
   setLocale,
   setSortKey,
   setSortOrder,
+  resetQueryVariablesForNewPath,
   totalEntityCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
@@ -822,8 +827,13 @@ const initializeEntityPickerComponent = (
   setParentEntityType(props.parentEntityType || route.meta.entityType);
   setRefetchEntitiesFunction(refetchEntities);
   setRelationType(props.relationType);
-  setCustomGetEntitiesQuery(customQueryEntityPickerListOverride || props.customQueryEntityPickerList);
-  setCustomGetEntitiesFiltersQuery(customQueryEntityPickerListFiltersOverride || props.customQueryEntityPickerListFilters);
+  setCustomGetEntitiesQuery(
+    customQueryEntityPickerListOverride || props.customQueryEntityPickerList,
+  );
+  setCustomGetEntitiesFiltersQuery(
+    customQueryEntityPickerListFiltersOverride ||
+      props.customQueryEntityPickerListFilters,
+  );
   setCropMode(enableCropMode);
   setCropCoordinatesKey(keyToSaveCropCoordinates);
   setActionsOnResult(props.actionsOnResult);
@@ -924,8 +934,8 @@ watch(
         if (abortController.value) abortController.value?.abort();
         const newAbortController = new AbortController();
         abortController.value = newAbortController;
-
         isInitialLoading.value = true;
+        resetQueryVariablesForNewPath();
         setsearchInputType(SearchInputType.AdvancedInputType);
         setEntityType(entityType.value);
         enqueuePromise(advancedFiltersPromise);

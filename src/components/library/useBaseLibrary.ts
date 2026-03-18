@@ -39,8 +39,9 @@ export const useBaseLibrary = (
   const totalEntityCount = ref<number>(0);
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
-  let queryVariables: GetEntitiesQueryVariables = {
-    type: entityType,
+
+  const getDefaultQueryVariables = (): GetEntitiesQueryVariables => ({
+    type: Entitytyping.BaseEntity,
     limit: 20,
     skip: 1,
     searchValue: {
@@ -52,11 +53,12 @@ export const useBaseLibrary = (
     advancedSearchValue: [],
     advancedFilterInputs: [],
     searchInputType: undefined,
-    userUuid: "", // refactor needed
+    userUuid: "", // TODO: refactor needed
     preferredLanguage: config.features.supportsMultilingualMetadataEditing
       ? locale.value
       : undefined,
-  };
+  });
+  let queryVariables: GetEntitiesQueryVariables = getDefaultQueryVariables();
 
   const setManipulationOfQuery = (
     manipulate: boolean,
@@ -331,6 +333,15 @@ export const useBaseLibrary = (
     },
   );
 
+  const resetQueryVariablesForNewPath = () => {
+    const state = getStateForRoute(_route, true);
+    const newVariables = Object.assign(
+      getDefaultQueryVariables(),
+      state?.queryVariables || {},
+    );
+    queryVariables = newVariables;
+  };
+
   return {
     enqueuePromise,
     entities,
@@ -354,6 +365,7 @@ export const useBaseLibrary = (
     setSortKey,
     setSortOrder,
     setLocale,
+    resetQueryVariablesForNewPath,
     totalEntityCount,
   };
 };
