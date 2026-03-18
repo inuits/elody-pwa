@@ -163,6 +163,8 @@ export const useBulkOperationsActionsBar = (
   };
 
   const determineModalStyle = (operationType: string) => {
+    if (operationType === BulkOperationTypes.CreateEntity)
+      return ModalStyle.Center;
     return operationType === BulkOperationTypes.DeleteEntities
       ? ModalStyle.Center
       : ModalStyle.CenterWide;
@@ -349,7 +351,9 @@ export const useBulkOperationsActionsBar = (
     }
   };
 
-  const getBulkOperationsVariablesFromParentIntialValues = (query: any): object => {
+  const getBulkOperationsVariablesFromParentIntialValues = (
+    query: any,
+  ): object => {
     const variableDefinitions = query?.definitions[0].variableDefinitions;
     if (!variableDefinitions) return {};
 
@@ -472,7 +476,11 @@ export type UseBulkOperationsActionsBar = ReturnType<
   typeof useBulkOperationsActionsBar
 >;
 
-export const determineActiveState = (item: DropdownOption, parentEntityId: string | undefined, itemsSelected: boolean) => {
+export const determineActiveState = (
+  item: DropdownOption,
+  parentEntityId: string | undefined,
+  itemsSelected: boolean,
+) => {
   const useEditHelper = useEditMode(parentEntityId);
 
   if (!item.actionContext) return true;
@@ -491,7 +499,8 @@ export const determineActiveState = (item: DropdownOption, parentEntityId: strin
     });
   }
 
-  let viewMode = true, numberOfEntities = true;
+  let viewMode = true,
+    numberOfEntities = true;
 
   const activeViewMode = item.actionContext.activeViewMode;
   if (activeViewMode)
@@ -502,8 +511,10 @@ export const determineActiveState = (item: DropdownOption, parentEntityId: strin
   const entitiesSelectionType = item.actionContext.entitiesSelectionType;
   if (entitiesSelectionType)
     numberOfEntities = itemsSelected
-      ? entitiesSelectionType === ActionContextEntitiesSelectionType.SomeSelected
-      : entitiesSelectionType === ActionContextEntitiesSelectionType.NoneSelected;
+      ? entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.SomeSelected
+      : entitiesSelectionType ===
+        ActionContextEntitiesSelectionType.NoneSelected;
 
   const isActive = viewMode && numberOfEntities;
   return isActive && metadataConditionAccepts;
