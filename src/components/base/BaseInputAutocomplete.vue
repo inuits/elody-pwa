@@ -4,7 +4,7 @@
     v-if="inputValue"
     v-model="inputValue"
     mode="tags"
-    :options="options"
+    :options="safeOptions"
     :searchable="searchable"
     :show-options="searchable"
     :close-on-select="true"
@@ -126,6 +126,8 @@ const inputValue = computed<DropdownOption[] | undefined>({
     emit("update:modelValue", value);
   },
 });
+
+const safeOptions = computed(() => props.options?.map((o) => ({ ...o })) ?? []);
 
 const searchable = computed<boolean>(() => {
   return (
