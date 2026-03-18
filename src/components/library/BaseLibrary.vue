@@ -190,9 +190,9 @@
             -
           </div>
           <div v-else>
-            <div>{{ t("search.noresult") }}</div>
+            <div>{{ noResultTranslations.noResult }}</div>
             <div class="text-sm">
-              {{ displayMap ? t("search.tipMap") : t("search.tip") }}
+              {{ noResultTranslations.searchTip }}
             </div>
             <div
               v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
@@ -597,6 +597,17 @@ const displayPreview = ref<boolean>(props.enablePreview);
 const displayMap = ref<boolean>(false);
 
 const expandFilters = ref<boolean>(false);
+
+const noResultTranslations = computed(() => ({
+  noResult: props.enableAdvancedFilters
+    ? t("search.noresult")
+    : t("search.noresult-nofilters"),
+  searchTip: props.enableAdvancedFilters
+    ? displayMap.value
+      ? t("search.tipMap")
+      : t("search.tip")
+    : "",
+}));
 const lastProcessedEntityType = ref<Entitytyping | null>(null);
 const toggles = ref<ViewModes.type[]>([]);
 
