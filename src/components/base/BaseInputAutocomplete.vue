@@ -62,6 +62,11 @@
         </span>
       </div>
     </template>
+    <template v-slot:afterlist>
+      <div v-if="shouldShowTypingHint" class="multiselect-typing-hint">
+        {{ t("autocomplete.find-more-options-placeholder") }}
+      </div>
+    </template>
   </Multiselect>
 </template>
 
@@ -136,6 +141,13 @@ const searchable = computed<boolean>(() => {
     props.selectType === "multi" ||
     (props.selectType === "single" && inputValue.value.length < 1)
   );
+});
+
+const shouldShowTypingHint = computed(() => {
+  const isReachedOptionsLimit = props.options && props.options.length >= 20;
+  const isSearchValueEmpty = !searchValue.value?.trim();
+  const hasSelectedValue = inputValue.value && inputValue.value.length > 0;
+  return isReachedOptionsLimit && isSearchValueEmpty && hasSelectedValue;
 });
 
 const setClasses = () => {

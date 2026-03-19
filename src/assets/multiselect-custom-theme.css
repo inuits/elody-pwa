@@ -62,6 +62,11 @@
 	padding: var(--ms-tag-remove-py, .25rem) var(--ms-tag-remove-px, .25rem)
 }
 
+.multiselect-typing-hint {
+  @apply px-3 py-2 text-xs text-gray-500 italic border-t border-gray-100 bg-gray-50/50;
+  text-align: center;
+}
+
 .multiselect-tag-remove:hover {
 	background: rgba(0, 0, 0, .063)
 }
