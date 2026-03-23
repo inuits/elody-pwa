@@ -21,7 +21,7 @@
 
 <script lang="ts" setup>
 import { type DropdownOption } from "@/generated-types/queries";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { mapModelValueToDropdownOptions } from "@/helpers";
@@ -52,15 +52,18 @@ const props = withDefaults(
   },
 );
 
-const translateOptions = (options: DropdownOption[]): DropdownOption[] =>
-  options.map((option) => ({ ...option, label: t(option.label) }));
+const filteredOptions = ref<DropdownOption[]>(props.metadataDropdownOptions || []);
 
-const dropdownOptions = ref<DropdownOption[]>(
-  translateOptions(props.metadataDropdownOptions || []),
+const dropdownOptions = computed<DropdownOption[]>(() =>
+  filteredOptions.value.map((option) => ({ ...option, label: t(option.label) })),
 );
+
 const inputValue = computed<DropdownOption[] | undefined>({
   get() {
-    return mapModelValueToDropdownOptions(props.modelValue);
+    return mapModelValueToDropdownOptions(props.modelValue).map((option) => {
+      const match = dropdownOptions.value.find((o) => o.value === option.value);
+      return match ? { ...option, label: match.label } : option;
+    });
   },
   set(value) {
     if (props.selectType === "single")
@@ -73,10 +76,8 @@ const inputValue = computed<DropdownOption[] | undefined>({
 });
 
 const filterAutocompleteOptions = (value: string): void => {
-  dropdownOptions.value = translateOptions(
-    props.metadataDropdownOptions.filter((option: DropdownOption) =>
-      option.value.includes(value),
-    ),
+  filteredOptions.value = props.metadataDropdownOptions.filter(
+    (option: DropdownOption) => option.value.includes(value),
   );
 };
 
