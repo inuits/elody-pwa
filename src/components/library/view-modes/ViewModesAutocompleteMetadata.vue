@@ -21,7 +21,7 @@
 
 <script lang="ts" setup>
 import { type DropdownOption } from "@/generated-types/queries";
-import { computed, ref } from "vue";
+import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { mapModelValueToDropdownOptions } from "@/helpers";

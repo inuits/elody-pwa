@@ -98,30 +98,30 @@
 </template>
 
 <script lang="ts" setup>
-import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
-import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
-import { useDefaultValue } from "@/components/metadata/useDefaultValue";
-import { useHiddenField } from "@/components/metadata/useHiddenField";
-import { useConditionalValidation } from "@/composables/useConditionalValidation";
-import { useFormHelper } from "@/composables/useFormHelper";
-import TableMetadataListField from "@/components/base/TableMetadataListField.vue";
-import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import {
-  InputFieldTypes,
   type AdvancedFilterInput,
-  type BaseRelationValuesInput,
   type Conditional,
   type CopyValueFromParentIntialValues,
   type DropdownOption,
   type HiddenField,
+  type BaseRelationValuesInput,
   type InputField as InputFieldType,
+  InputFieldTypes,
 } from "@/generated-types/queries";
+import { useDefaultValue } from "@/components/metadata/useDefaultValue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { computed, inject, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import TableMetadataListField from "@/components/base/TableMetadataListField.vue";
+import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
+import { useHiddenField } from "@/components/metadata/useHiddenField";
+import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -277,4 +277,5 @@ const copyValueFromParentAction = (key: string) => {
   if (!newValue) return;
   metadataValue.value = newValue;
 };
+
 </script>
