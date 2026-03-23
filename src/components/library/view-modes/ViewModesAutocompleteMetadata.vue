@@ -22,8 +22,11 @@
 <script lang="ts" setup>
 import { type DropdownOption } from "@/generated-types/queries";
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { mapModelValueToDropdownOptions } from "@/helpers";
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: number | number[]): void;
@@ -49,8 +52,11 @@ const props = withDefaults(
   },
 );
 
+const translateOptions = (options: DropdownOption[]): DropdownOption[] =>
+  options.map((option) => ({ ...option, label: t(option.label) }));
+
 const dropdownOptions = ref<DropdownOption[]>(
-  props.metadataDropdownOptions || [],
+  translateOptions(props.metadataDropdownOptions || []),
 );
 const inputValue = computed<DropdownOption[] | undefined>({
   get() {
@@ -67,8 +73,10 @@ const inputValue = computed<DropdownOption[] | undefined>({
 });
 
 const filterAutocompleteOptions = (value: string): void => {
-  dropdownOptions.value = props.metadataDropdownOptions.filter(
-    (option: DropdownOption) => option.value.includes(value),
+  dropdownOptions.value = translateOptions(
+    props.metadataDropdownOptions.filter((option: DropdownOption) =>
+      option.value.includes(value),
+    ),
   );
 };
 

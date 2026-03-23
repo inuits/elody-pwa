@@ -97,11 +97,8 @@ import {
   type Conditional,
   type CopyValueFromParentIntialValues,
   type DropdownOption,
-  EditStatus,
-  Entitytyping,
   type HiddenField,
 } from "@/generated-types/queries";
-import { auth } from "@/main";
 import {
   InputFieldTypes,
   type BaseRelationValuesInput,
@@ -110,7 +107,7 @@ import {
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
-import { onMounted, watch, computed, inject } from "vue";
+import { onMounted, computed, inject } from "vue";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
@@ -118,6 +115,7 @@ import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewM
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
+import { useHiddenField } from "@/components/metadata/useHiddenField";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -156,7 +154,7 @@ const computedError = computed<string>(() => {
   return "";
 });
 
-const { addEditableMetadataKeys, addMappedRelations } = useFormHelper();
+const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = computed<string | string[] | number | number[]>({
   get() {
     if (typeof props.value === "object" && props.value?.formatter) {
@@ -185,7 +183,15 @@ const metadataValue = computed<string | string[] | number | number[]>({
 });
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
-const isFieldHidden = computed(() => props.hiddenField?.hidden);
+const hiddenFieldRef = computed(() => props.hiddenField);
+const fieldRef = computed(() => props.field);
+useHiddenField(
+  hiddenFieldRef,
+  fieldRef,
+  computed(() => props.formId),
+  (newValue) => emit("update:value", newValue),
+);
+
 const fieldEditIsDisabled = computed(() => {
   if (
     props.field.type === InputFieldTypes.Dropdown &&
@@ -251,59 +257,10 @@ const metadataKeyToGetOptionsFor = computed(() => {
     : props.fieldKey;
 });
 
-const getIdForHiddenFieldFilter = (): any => {
-  if (
-    props.field.advancedFilterInputForSearchingOptions.item_types[0] ===
-      Entitytyping.User &&
-    props.hiddenField.searchValueForFilter === "email"
-  ) {
-    return auth.user.email;
-  }
-};
-
-const populateInheritedHiddenField = () => {
-  const relation: BaseRelationValuesInput = {
-    editStatus: EditStatus.New,
-    key: "",
-    type: props.field.relationType!,
-    value: "",
-    inheritFrom: {
-      entityType: props.hiddenField.entityType!,
-      relationKey: props.hiddenField.relationToExtractKey!,
-      valueKey: props.hiddenField.keyToExtractValue!,
-    },
-  };
-  addMappedRelations([relation], props.field.relationType!, props.formId);
-};
-
-const populateHiddenField = (): BaseRelationValuesInput[] | undefined => {
-  const relations: BaseRelationValuesInput[] = [];
-
-  if (props.field.type === InputFieldTypes.DropdownMultiselectRelations) {
-    relations.push({
-      editStatus: EditStatus.New,
-      key: getIdForHiddenFieldFilter(),
-      type: props.field.relationType,
-      value: getIdForHiddenFieldFilter(),
-    });
-    return relations;
-  }
-};
-
 const copyValueFromParentAction = (key: string) => {
   const newValue = props.extractValueFromParent(key);
   if (!newValue) return;
   metadataValue.value = newValue;
 };
 
-watch(
-  () => isFieldHidden.value,
-  () => {
-    if (!isFieldHidden.value) return;
-    if (props.hiddenField?.inherited) return populateInheritedHiddenField();
-    const newValue = populateHiddenField();
-    emit("update:value", newValue);
-  },
-  { immediate: true },
-);
 </script>
