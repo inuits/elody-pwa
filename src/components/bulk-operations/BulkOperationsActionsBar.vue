@@ -53,15 +53,7 @@
     </div>
     <div v-if="!excludePagination && showPagination" class="flex">
       <BasePaginationSkeleton v-if="isLoading" />
-      <BasePaginationNew
-        v-else
-        v-model:skip="selectedSkip"
-        :limit="selectedPaginationLimitOption ?? NaN"
-        :total-items="
-          totalItemsCount ?? (getStateForRoute(route)?.totalEntityCount || 1)
-        "
-        @update:skip="setSkip"
-      />
+      <BasePaginationNew v-else />
     </div>
     <div
       v-if="showButton && useExtendedBulkOperations"
@@ -95,23 +87,21 @@
 </template>
 
 <script lang="ts" setup>
-import { type Entitytyping, DamsIcons } from "@/generated-types/queries";
+import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BasePaginationNew from "@/components/base/BasePagination.vue";
+import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
 import {
   type Context,
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
-import { auth } from "@/main";
-import BasePaginationNew from "@/components/base/BasePagination.vue";
-import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
-import { useRoute } from "vue-router";
-import { useStateManagement } from "@/composables/useStateManagement";
 import {
   useBulkOperationsActionsBar,
-  type BulkOperationsActionsBarProps,
   type BulkOperationsActionsBarEmits,
+  type BulkOperationsActionsBarProps,
 } from "@/composables/useBulkOperationsActionsBar";
+import { DamsIcons, type Entitytyping } from "@/generated-types/queries";
+import { auth } from "@/main";
 
 const props = withDefaults(
   defineProps<{
@@ -129,7 +119,6 @@ const props = withDefaults(
     skipItemsWithRelationDuringBulkDelete?: string[];
     selectedPaginationLimitOption: number;
     excludePagination?: boolean;
-    setSkip?: (skip: number) => void;
     showPagination?: boolean;
     isLoading?: boolean;
   }>(),
@@ -141,7 +130,6 @@ const props = withDefaults(
     enableSelection: true,
     parentEntityId: undefined,
     skipItemsWithRelationDuringBulkDelete: undefined,
-    setSkip: undefined,
     excludePagination: false,
     showPagination: true,
     isLoading: false,
@@ -172,20 +160,15 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const route = useRoute();
-const { getStateForRoute } = useStateManagement();
-
 const {
   bulkOperations,
   selectedBulkOperation,
   bulkOperationsPromiseIsResolved,
-  selectedSkip,
   hasBulkOperationsWithItemsSelection,
   itemsSelected,
   subDropdownOptions,
   clearSubDropdownOptions,
   handleSelectedBulkOperation,
-  setSkip,
   getEnqueuedItemCount,
   getEnqueuedItems,
   dequeueAllItemsForBulkProcessing,

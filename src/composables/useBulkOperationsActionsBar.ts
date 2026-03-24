@@ -1,37 +1,37 @@
 import { computed, inject, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import type { Entitytyping } from "@/generated-types/queries";
-import {
-  ActionContextEntitiesSelectionType,
-  BulkOperationTypes,
-  type DropdownOption,
-  ModalStyle,
-  RouteNames,
-  TypeModals,
-  BulkNavigationPages,
-  type BulkOperationModal,
-  ActionContextViewModeTypes,
-  PanelType,
-} from "@/generated-types/queries";
+import { type PaginationStore, PaginationStoreKey } from "@/components/library/usePaginationStore";
+import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type Context,
   type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { useModalActions } from "@/composables/useModalActions";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useImport } from "@/composables/useImport";
-import { useStateManagement } from "@/composables/useStateManagement";
-import useEntitySingle from "@/composables/useEntitySingle";
-import { apolloClient } from "@/main";
-import { getValueForPanelMetadata } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useImport } from "@/composables/useImport";
+import { useModalActions } from "@/composables/useModalActions";
+import { useStateManagement } from "@/composables/useStateManagement";
+import type { Entitytyping } from "@/generated-types/queries";
+import {
+  ActionContextEntitiesSelectionType,
+  ActionContextViewModeTypes,
+  BulkNavigationPages,
+  type BulkOperationModal,
+  BulkOperationTypes,
+  type DropdownOption,
+  ModalStyle,
+  PanelType,
+  RouteNames,
+  TypeModals,
+} from "@/generated-types/queries";
+import { getValueForPanelMetadata } from "@/helpers";
+import { apolloClient } from "@/main";
 
 export interface BulkOperationsActionsBarProps {
   context: Context;
-  totalItemsCount: number;
   useExtendedBulkOperations: boolean;
   showButton?: boolean;
   confirmSelectionButton?: boolean;
@@ -42,9 +42,7 @@ export interface BulkOperationsActionsBarProps {
   parentEntityId?: string | undefined;
   relationType: string;
   skipItemsWithRelationDuringBulkDelete?: string[];
-  selectedPaginationLimitOption: number;
   excludePagination: boolean;
-  setSkip?: (skip: number, forceFetch?: boolean) => void;
   showPagination?: boolean;
   isLoading?: boolean;
 }
@@ -77,6 +75,7 @@ export const useBulkOperationsActionsBar = (
   emit: BulkOperationsActionsBarEmits,
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
+  const paginationStore: PaginationStore = inject(PaginationStoreKey);
   const route = useRoute();
   const { getStateForRoute } = useStateManagement();
   const { loadDocument } = useImport();
@@ -106,8 +105,6 @@ export const useBulkOperationsActionsBar = (
   const bulkOperationsPromiseIsResolved = ref<boolean>(
     !props.customBulkOperations,
   );
-  const selectedSkip = ref<number>(1);
-
   const entityType = computed(() => props.entityType || route.meta.entityType);
 
   const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
@@ -270,21 +267,10 @@ export const useBulkOperationsActionsBar = (
       });
   };
 
-  const setSelectedSkipFromState = ({
-    updateSkipGlobally = true,
-  }: { updateSkipGlobally?: boolean } = {}) => {
+  const setSelectedSkipFromState = () => {
     const state = getStateForRoute(route, true);
     const skip = state?.queryVariables?.skip || 1;
-    selectedSkip.value = skip;
-    if (updateSkipGlobally && props.setSkip) {
-      props.setSkip(skip);
-    }
-  };
-
-  const setSkip = async (newSkip: number) => {
-    if (props.setSkip) {
-      await props.setSkip(newSkip, true);
-    }
+    paginationStore?.setPage(skip);
   };
 
   const clearSubDropdownOptions = () => {
@@ -434,7 +420,7 @@ export const useBulkOperationsActionsBar = (
     () => props.isLoading,
     (currentState: boolean | undefined) => {
       if (currentState) return;
-      setSelectedSkipFromState({ updateSkipGlobally: false });
+      setSelectedSkipFromState();
     },
   );
 
@@ -453,14 +439,12 @@ export const useBulkOperationsActionsBar = (
     bulkOperations,
     selectedBulkOperation,
     bulkOperationsPromiseIsResolved,
-    selectedSkip,
     entityType,
     hasBulkOperationsWithItemsSelection,
     itemsSelected,
     subDropdownOptions,
     clearSubDropdownOptions,
     handleSelectedBulkOperation,
-    setSkip,
     getEnqueuedItemCount,
     getEnqueuedItems,
     dequeueAllItemsForBulkProcessing,

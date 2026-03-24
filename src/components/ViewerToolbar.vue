@@ -191,8 +191,11 @@ const cropRef = ref<HTMLDivElement>();
 const cancelRef = ref<HTMLDivElement>();
 const downloadImageLoadingRef = ref(false);
 
-const { selectNextMediafile, selectPreviousMediafile } =
-  useEntityMediafileSelector();
+const {
+  mediafileSelectionState,
+  selectNextMediafile,
+  selectPreviousMediafile,
+} = useEntityMediafileSelector();
 const mediafileViewerContext: any = inject("mediafileViewerContext");
 const { openModal } = useBaseModal();
 
@@ -200,8 +203,8 @@ const { isSelectable } = useMediafileCrop();
 const canCrop = computed(() =>
   Boolean(
     props.mediafileId &&
-      isSelectable(props.mediafileId) &&
-      props.enableSelection,
+    isSelectable(props.mediafileId) &&
+    props.enableSelection,
   ),
 );
 
@@ -214,13 +217,16 @@ onMounted(() => {
   emit("update:cancel", cancelRef.value);
 });
 
-const viewerContainsMultipleMediafiles = computed(
-  () => mediafileViewerContext && mediafileViewerContext.mediafiles?.length > 1,
-);
+const viewerContainsMultipleMediafiles = computed(() => {
+  const mediafiles =
+    mediafileSelectionState.value?.[mediafileViewerContext]?.mediafiles || [];
+  return mediafiles.length > 1;
+});
 
 const createDownloadButton = (): void => {
   const a = document.createElement("a");
-  const originalFilename = props.originalFilename?.replace(/\.[^/.]*$/, "") || ""
+  const originalFilename =
+    props.originalFilename?.replace(/\.[^/.]*$/, "") || "";
   a.href = `/api/mediafile/${props.mediafileId}?original=true&originalFilename=${originalFilename}`;
   a.download = originalFilename;
   a.target = "_blank";

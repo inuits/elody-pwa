@@ -1,8 +1,9 @@
+import { PaginationStoreKey } from "@/components/library/usePaginationStore";
 import {
   KeyValueSource,
   type MediaFileEntity,
 } from "@/generated-types/queries";
-import { reactive, type Reactive, ref } from "vue";
+import { inject, reactive, type Reactive, ref } from "vue";
 
 type MediaFileRootKeys = "id" | "uuid";
 
@@ -37,6 +38,7 @@ export const useEntityMediafileSelector = () => {
           selectedMediafile: undefined,
         });
   };
+  const paginationStore = inject(PaginationStoreKey);
 
   const getValueOfMediafile = (
     context: string,
@@ -76,9 +78,11 @@ export const useEntityMediafileSelector = () => {
 
     let previousIndex = 0;
     if (currentIndex > 0) previousIndex = currentIndex - 1;
-    else
+    else {
+      paginationStore.previous();
       previousIndex =
         mediafileSelectionState.value[context].mediafiles.length - 1;
+    }
     if (currentIndex === previousIndex) return undefined;
 
     return setSelectedMediafileByIndex(context, previousIndex);
@@ -94,7 +98,10 @@ export const useEntityMediafileSelector = () => {
       mediafileSelectionState.value[context].mediafiles.length - 1
     )
       nextIndex = currentIndex + 1;
-    else nextIndex = 0;
+    else {
+      paginationStore.next();
+      nextIndex = 0;
+    }
     if (currentIndex === nextIndex) return undefined;
 
     return setSelectedMediafileByIndex(context, nextIndex);

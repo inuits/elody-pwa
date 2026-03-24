@@ -100,7 +100,7 @@
             <LibraryBar
               :route="route"
               :set-limit="setPaginationLimit"
-              :selected-pagination-limit-option="selectedPaginationLimitOption"
+              :selected-pagination-limit-option="paginationStore.limit.value"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
               @pagination-limit-options-promise="
@@ -140,9 +140,8 @@
             :refetch-entities="refetchEntities"
             :enable-selection="enableSelection"
             :parent-entity-id="props.parentEntityIdentifiers[0]"
-            :selected-pagination-limit-option="selectedPaginationLimitOption"
+            :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :set-skip="setSkip"
             :show-pagination="!displayMap"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
@@ -284,7 +283,43 @@
 </template>
 
 <script lang="ts" setup>
-import type { ApolloClient } from "@apollo/client/core";
+import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
+import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
+import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
+import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
+import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
+import FiltersBase from "@/components/filters/FiltersBase.vue";
+import LibraryBar from "@/components/library/LibraryBar.vue";
+import { useBaseLibrary } from "@/components/library/useBaseLibrary";
+import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
+import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
+import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
+import { UploadStatus } from "@/composables/upload/types";
+import useUpload from "@/composables/upload/useUpload";
+import { useBaseModal } from "@/composables/useBaseModal";
+import {
+  breadcrumbPathFinished,
+  breadcrumbRoutes,
+  useBreadcrumbs,
+} from "@/composables/useBreadcrumbs";
+import {
+  BulkOperationsContextEnum,
+  type Context,
+  type InBulkProcessableItem,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
+import {
+  type BulkOperationsActionsBarEmits,
+  type BulkOperationsActionsBarProps,
+  useBulkOperationsActionsBar,
+} from "@/composables/useBulkOperationsActionsBar";
+import { useEditMode } from "@/composables/useEdit";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useMaps } from "@/composables/useMaps";
+import { useStateManagement } from "@/composables/useStateManagement";
 import {
   ActionsOnResult,
   ActionsOnResultTypes,
@@ -306,49 +341,14 @@ import {
   ViewModes,
   type ViewModesWithConfig,
 } from "@/generated-types/queries";
-import {
-  BulkOperationsContextEnum,
-  type Context,
-  type InBulkProcessableItem,
-  useBulkOperations,
-} from "@/composables/useBulkOperations";
-import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
-import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
-import FiltersBase from "@/components/filters/FiltersBase.vue";
-import LibraryBar from "@/components/library/LibraryBar.vue";
-import useUpload from "@/composables/upload/useUpload";
-import { UploadStatus } from "@/composables/upload/types";
-import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
-import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
-import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
-import { DefaultApolloClient } from "@vue/apollo-composable";
 import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
-import { useBaseLibrary } from "@/components/library/useBaseLibrary";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { useEditMode } from "@/composables/useEdit";
-import useEntitySingle from "@/composables/useEntitySingle";
+import { auth } from "@/main";
+import type { ApolloClient } from "@apollo/client/core";
+import { DefaultApolloClient } from "@vue/apollo-composable";
+import { computed, inject, onMounted, onUnmounted, provide, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
-import { useStateManagement } from "@/composables/useStateManagement";
-import { useMaps } from "@/composables/useMaps";
-import { computed, inject, onMounted, onUnmounted, ref, watch } from "vue";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
-import {
-  breadcrumbPathFinished,
-  breadcrumbRoutes,
-  useBreadcrumbs,
-} from "@/composables/useBreadcrumbs";
-import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
-import { auth } from "@/main";
-import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
-import {
-  type BulkOperationsActionsBarEmits,
-  type BulkOperationsActionsBarProps,
-  useBulkOperationsActionsBar,
-} from "@/composables/useBulkOperationsActionsBar";
+import { createPaginationStore, PaginationStoreKey } from './usePaginationStore';
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context | undefined;
@@ -466,7 +466,6 @@ const useEditHelper = useEditMode(getEntityUuid());
 const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
-const selectedPaginationLimitOption = ref<number>(NaN);
 const isInitialLoading = ref<boolean>(true);
 
 const showCurrentEntityFlow = computed(() => {
@@ -521,7 +520,7 @@ const handleRegisterAPI = (api: FiltersBaseAPI) => {
 };
 
 const setPaginationLimit = (limit: number, forceFetch: boolean = false) => {
-  selectedPaginationLimitOption.value = limit;
+  paginationStore.setLimit(limit);
   setLimit(limit, forceFetch);
 };
 
@@ -554,6 +553,9 @@ const {
   props.shouldUseStateForRoute,
   props.baseLibraryMode,
 );
+
+const paginationStore = createPaginationStore();
+provide(PaginationStoreKey, paginationStore);
 
 const {
   bulkOperations,
@@ -967,7 +969,7 @@ watch(
 
 const resetPaginationAndView = () => {
   const limitFromState = getStateForRoute(route)?.queryVariables?.limit;
-  setPaginationLimit(limitFromState || 20);
+  paginationStore.setLimit(limitFromState || 20);
   displayMap.value = false;
   displayGrid.value = false;
   displayList.value = true;
@@ -1002,6 +1004,7 @@ watch(
   () => entities.value,
   (newEntities) => {
     emit("entitiesUpdated", newEntities.length);
+    paginationStore.updateTotalAmount(totalEntityCount.value);
     if (props.selectInputFieldType) {
       selectedDropdownOptions.value = getSelectedOptions();
     }
@@ -1061,5 +1064,20 @@ watch(
     setLocale(newValue);
     refetchEntities();
   },
+);
+
+watch(
+  () => paginationStore.skip.value,
+  (newVal) => {
+    setSkip(newVal, true);
+  },
+);
+
+watch(
+  () => paginationStore.limit.value,
+  (newVal) => {
+    setLimit(newVal, true);
+  },
+  { deep: true }
 );
 </script>

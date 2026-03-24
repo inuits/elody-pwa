@@ -146,7 +146,6 @@ const deselectItem = () => {
 const handleUpdateItem = (value: any) => {
   if (!value && !props.clearable)
     selectedItem.value = selectedItem.value || props.options[0].value;
-  console.log("Emit newly selected item", selectedItem.value);
   emit("update:modelValue", selectedItem.value);
 };
 

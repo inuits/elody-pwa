@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-
 import { useBulkOperationsActionsBar } from "../useBulkOperationsActionsBar";
 import type {
   BulkOperationsActionsBarProps,
@@ -93,7 +92,6 @@ describe("useBulkOperationsActionsBar", () => {
     overrides?: Partial<BulkOperationsActionsBarProps>,
   ): BulkOperationsActionsBarProps => ({
     context: "test-context" as any,
-    totalItemsCount: 100,
     useExtendedBulkOperations: true,
     showButton: true,
     confirmSelectionButton: false,
@@ -104,9 +102,7 @@ describe("useBulkOperationsActionsBar", () => {
     parentEntityId: undefined,
     relationType: "test-relation",
     skipItemsWithRelationDuringBulkDelete: [],
-    selectedPaginationLimitOption: 20,
     excludePagination: false,
-    setSkip: vi.fn(),
     showPagination: true,
     isLoading: false,
     ...overrides,
@@ -127,14 +123,12 @@ describe("useBulkOperationsActionsBar", () => {
         bulkOperations,
         selectedBulkOperation,
         bulkOperationsPromiseIsResolved,
-        selectedSkip,
         itemsSelected,
       } = useBulkOperationsActionsBar(props, emit);
 
       expect(bulkOperations.value).toEqual([]);
       expect(selectedBulkOperation.value).toBeUndefined();
       expect(bulkOperationsPromiseIsResolved.value).toBe(true);
-      expect(selectedSkip.value).toBe(1);
       expect(itemsSelected.value).toBe(true);
     });
 
@@ -562,29 +556,6 @@ describe("useBulkOperationsActionsBar", () => {
         true,
         props.context,
       );
-    });
-  });
-
-  describe("Pagination Handling", () => {
-    it("should set skip correctly", async () => {
-      const mockSetSkip = vi.fn();
-      const props = createMockProps({ setSkip: mockSetSkip });
-      const emit = createMockEmit();
-
-      const { setSkip } = useBulkOperationsActionsBar(props, emit);
-
-      await setSkip(25);
-
-      expect(mockSetSkip).toHaveBeenCalledWith(25, true);
-    });
-
-    it("should handle missing setSkip function gracefully", async () => {
-      const props = createMockProps({ setSkip: undefined });
-      const emit = createMockEmit();
-
-      const { setSkip } = useBulkOperationsActionsBar(props, emit);
-
-      await expect(setSkip(25)).resolves.toBeUndefined();
     });
   });
 
