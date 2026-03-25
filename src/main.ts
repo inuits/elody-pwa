@@ -22,23 +22,20 @@ import {
   getApplicationDetails,
   getFormattersSettings,
   setupI18n,
+  graphqlErrorInterceptor,
 } from "@/helpers";
-import { onError } from "@apollo/client/link/error";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
 import { Unicons } from "./types";
-import { useErrorCodes } from "@/composables/useErrorCodes";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
 import Notifications from "@kyvg/vue3-notification";
 import { type I18n } from "vue-i18n";
 
-import type { GraphQLError } from "graphql/error";
 import { setContext } from "@apollo/client/link/context";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
-import { useLogout } from "./composables/useLogout";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -98,11 +95,6 @@ const start = async (): Promise<void> => {
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
-  const graphqlErrorInterceptor = onError((error: GraphQLError) => {
-    const { handleGraphqlError } = useErrorCodes();
-    handleGraphqlError(error);
-  });
-
   const apqLink = createPersistedQueryLink({
     sha256,
     useGETForHashedQueries: false,
@@ -127,7 +119,7 @@ const start = async (): Promise<void> => {
   const authCheckLink = new ApolloLink((operation, forward) => {
     return forward(operation).map((response) => {
       const authStatus = response.extensions?.authStatus;
-      
+
       if (authStatus === "UNAUTHENTICATED" && auth?.isAuthenticated.value) {
         auth.logout();
       }

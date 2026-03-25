@@ -308,6 +308,40 @@ describe("useErrorCodes", () => {
       },
     );
 
+    it.each([
+      ["W1003", ErrorCodeType.Write],
+      ["W1004", ErrorCodeType.Write],
+      ["W1008", ErrorCodeType.Write],
+      ["R1003", ErrorCodeType.Read],
+      ["R1004", ErrorCodeType.Read],
+      ["R1008", ErrorCodeType.Read],
+    ])(
+      "should not trigger any further handlers when skipping for code %s",
+      async (code) => {
+        const error = createMockGraphQLError(code);
+
+        const errorMessage = await errorCodes.handleGraphqlError(error, true);
+
+        expect(sharedMocks.displayErrorNotification).not.toHaveBeenCalled();
+        expect(sharedMocks.setPageStatus).not.toHaveBeenCalled();
+        expect(errorMessage).not.toBe("");
+      },
+    );
+
+    it.each([["1001", ErrorCodeType.Read]])(
+      "should trigger auth handler even if skipping is provided for code %s",
+      async (code) => {
+        const error = createMockGraphQLError(code, 401);
+
+        await errorCodes.handleGraphqlError(error, true);
+
+        expect(sharedMocks.logout).toHaveBeenCalled();
+        expect(sharedMocks.setPageStatus).toHaveBeenCalledWith(
+          PageStatus.Unauthorized,
+        );
+      },
+    );
+
     it("should fallback to 401 handler (Unauthorized)", async () => {
       const error = createMockHttpResponse("/", 401, "", "Unauthorized");
       await errorCodes.handleHttpError(error);

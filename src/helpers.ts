@@ -30,9 +30,12 @@ import {
   useRoute,
 } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useErrorCodes } from "@/composables/useErrorCodes";
 import { apolloClient, auth, typeUrlMapping } from "@/main";
 import { computed, isProxy, toRaw } from "vue";
 import DOMPurify from "dompurify";
+import { onError } from "@apollo/client/link/error";
+import type { GraphQLError } from "graphql/error";
 
 export const goToEntityPage = (
   entity: Entity,
@@ -878,3 +881,37 @@ export const toArray = <T>(value: T | T[] | undefined): T[] => {
   if (value == null) return [];
   return Array.isArray(value) ? value : [value];
 };
+
+export const graphqlErrorInterceptor = onError(
+  ({ graphQLErrors, operation }): any => {
+    const { handleGraphqlError } = useErrorCodes();
+    const context = operation.getContext() as {
+      skipGlobalErrorHandling?: boolean;
+    };
+
+    if (graphQLErrors) {
+      for (const error of graphQLErrors) {
+        const status = Number(
+          error.extensions?.response?.status || error.extensions?.statusCode,
+        );
+
+        if (status === 401 || status >= 500) {
+          handleGraphqlError(
+            { response: { errors: [error] } } as unknown as GraphQLError,
+            false,
+          );
+          return;
+        }
+
+        if (context.skipGlobalErrorHandling) {
+          continue;
+        }
+
+        handleGraphqlError(
+          { response: { errors: [error] } } as unknown as GraphQLError,
+          false,
+        );
+      }
+    }
+  },
+);

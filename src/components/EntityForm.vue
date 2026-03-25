@@ -39,6 +39,8 @@ import { useMutation } from "@vue/apollo-composable";
 import { onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
 import { getChildrenOfHomeRoutes, deepToRaw } from "@/helpers";
+import { useErrorCodes } from "@/composables/useErrorCodes";
+import { type GraphQLError } from "graphql/error";
 
 const props = defineProps<{
   intialValues: IntialValues;
@@ -67,7 +69,8 @@ const {
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const useEditHelper = useEditMode(props.id);
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
-const { displaySuccessNotification } = useBaseNotification();
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
 const childRoutes = getChildrenOfHomeRoutes(config).map(
@@ -88,7 +91,7 @@ const form = ref(
     uuid: props.uuid,
   }),
 );
-let mutatedEntity = ref<Entity | undefined>(undefined);
+const mutatedEntity = ref<Entity | undefined>(undefined);
 const formContainsErrors = computed((): boolean => !form?.value.meta.valid);
 
 const { setValues } = form.value;
@@ -101,22 +104,38 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   if (!collection) throw Error("Could not determine collection for submit");
 
-  const result = await mutate({
-    id: props.id,
-    formInput: parseFormValuesToFormInput(
-      props.id,
-      unref(form.value).values,
-      false,
-      props.locale,
-      props.fields,
-    ),
-    collection,
-    preferredLanguage: config.features.supportsMultilingualMetadataEditing
-      ? props.locale
-      : undefined,
-  });
+  const result = await mutate(
+    {
+      id: props.id,
+      formInput: parseFormValuesToFormInput(
+        props.id,
+        unref(form.value).values,
+        false,
+        props.locale,
+        props.fields,
+      ),
+      collection,
+      preferredLanguage: config.features.supportsMultilingualMetadataEditing
+        ? props.locale
+        : undefined,
+    },
+    {
+      context: {
+        skipGlobalErrorHandling: true,
+      },
+      errorPolicy: "all",
+    },
+  );
 
-  if (!result?.data?.mutateEntityValues) return;
+  if (result?.errors) {
+    const errorMessage = await useErrorCodes().handleGraphqlError(
+      { response: result } as unknown as GraphQLError,
+      true,
+    );
+    displayErrorNotification("Error", errorMessage);
+    return;
+  }
+
   await useEditHelper.performRefetchFunctions();
   mutatedEntity.value = result.data.mutateEntityValues as Entity;
   emit("mutatedEntityUpdated", mutatedEntity.value);

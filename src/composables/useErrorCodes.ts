@@ -12,7 +12,10 @@ import { usePageStatus } from "@/composables/usePageStatus";
 
 export const useErrorCodes = (): {
   handleErrorByCodeType: (code: string, message?: string) => void;
-  handleGraphqlError: (error: GraphQLError) => Promise<string>;
+  handleGraphqlError: (
+    error: GraphQLError,
+    skipErrorHandling?: boolean,
+  ) => Promise<string>;
   handleHttpError: (httpResponse: Response) => Promise<string>;
   getMessageAndCodeFromApolloError: (apolloError: ApolloError) => Promise<{
     code: string;
@@ -187,7 +190,10 @@ export const useErrorCodes = (): {
     readHandlers[code]();
   };
 
-  const handleErrorByCodeType = async (code: string, message: string = ''): Promise<void> => {
+  const handleErrorByCodeType = async (
+    code: string,
+    message: string = "",
+  ): Promise<void> => {
     const genericCodePart: string = code.substring(1);
     const actionCodePart: string = Array.from(code)[0];
 
@@ -261,7 +267,10 @@ export const useErrorCodes = (): {
     return { statusCode, message };
   };
 
-  const handleGraphqlError = async (error: GraphQLError): Promise<string> => {
+  const handleGraphqlError = async (
+    error: GraphQLError,
+    skipErrorHandling: boolean = false,
+  ): Promise<string> => {
     const isAborted = isAbortError(error);
 
     if (isAborted) {
@@ -286,6 +295,10 @@ export const useErrorCodes = (): {
         graphqlErrorMessage,
       );
       return "";
+    }
+
+    if (skipErrorHandling) {
+      return message as string;
     }
 
     handleErrorByCodeType(code, message);
