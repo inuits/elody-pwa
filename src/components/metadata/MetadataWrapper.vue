@@ -97,7 +97,12 @@
                 @click.stop.prevent
               />
               <ViewModesAutocompleteMetadata
-                v-else-if="autoCompleteType === 'metadataAutocomplete'"
+                v-else-if="
+                  autoCompleteType === 'metadataAutocomplete' &&
+                  (metadata.unit !== Unit.Image ||
+                    imageLoadError ||
+                    !fieldValueProxy)
+                "
                 v-model:model-value="fieldValueProxy"
                 :metadata-dropdown-options="metadata.inputField.options"
                 :formId="formId"
@@ -110,6 +115,18 @@
                 :disabled="true"
                 mode="view"
                 @click.stop.prevent
+              />
+              <img
+                v-else-if="
+                  metadata.unit === Unit.Image &&
+                  fieldValueProxy &&
+                  !imageLoadError
+                "
+                :src="`/${fieldValueProxy}`"
+                class="max-h-12 py-2"
+                alt=""
+                data-testid="unit-image"
+                @error="imageLoadError = true"
               />
               <entity-element-metadata
                 v-else
@@ -166,6 +183,7 @@ import {
   BaseLibraryModes,
   type PanelMetaData,
   InputFieldTypes,
+  Unit,
   type PanelRelationMetaData,
   type PanelRelationRootData,
   type Entitytyping,
@@ -256,6 +274,7 @@ const autoCompleteType = computed<
 });
 
 const showTooltip = ref<boolean>(false);
+const imageLoadError = ref<boolean>(false);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
@@ -289,6 +308,7 @@ onBeforeMount(() => {
 watch(
   () => fieldValueProxy,
   () => {
+    imageLoadError.value = false;
     emit("update:metadata", {
       ...props.metadata,
       value: fieldValueProxy.value,
