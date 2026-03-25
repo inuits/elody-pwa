@@ -75,17 +75,7 @@ const columnConfigs = computed(() => {
 
   const hasPrevious =
     previousVersion && Object.keys(previousVersion).length > 0;
-  const columns: { selected: any; previous?: any } = {
-    selected: {
-      entity: selectedVersion,
-      props: {
-        identifiers: [selectedVersion.id],
-        previewLabel: hasPrevious
-          ? "panel-labels.history-selected-version"
-          : "panel-labels.history-original-version",
-      },
-    },
-  };
+  const columns: { previous?: any; selected?: any  } = {}
 
   if (hasPrevious) {
     columns.previous = {
@@ -96,6 +86,15 @@ const columnConfigs = computed(() => {
       },
     };
   }
+  columns.selected = {
+    entity: selectedVersion,
+    props: {
+      identifiers: [selectedVersion.id],
+      previewLabel: hasPrevious
+        ? "panel-labels.history-selected-version"
+        : "panel-labels.history-original-version",
+    },
+  };
 
   isMultipleColumn.value = hasPrevious;
   return columns;
