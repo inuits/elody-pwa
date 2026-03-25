@@ -129,7 +129,7 @@ const start = async (): Promise<void> => {
       const authStatus = response.extensions?.authStatus;
       
       if (authStatus === "UNAUTHENTICATED" && auth?.isAuthenticated.value) {
-        auth.resetAuthProperties();
+        auth.logout();
       }
 
       return response;

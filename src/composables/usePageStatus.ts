@@ -27,6 +27,7 @@ watch(
   () => currentPageStatus.value,
   () => {
     const router = useRouter();
+    if (!router) return;
     const isDetailPage = !!router.currentRoute.value.params["id"];
     if (!isDetailPage) return;
     const { clearBreadcrumbPathAndAddOverviewPage } = useBreadcrumbs({});
