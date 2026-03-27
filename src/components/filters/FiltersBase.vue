@@ -99,7 +99,11 @@
           v-for="filter in displayedFilters"
           :key="filter.advancedFilter.key || ''"
           :filter="filter"
-          :matchers="getMatchers(filter.advancedFilter.type)"
+          :matchers="
+            getMatchers(
+              filter.advancedFilter.matchersType || filter.advancedFilter.type,
+            )
+          "
           :getNormalizedActiveFilters="getNormalizedFiltersForApi"
           :clear-all-active-filters="clearAllActiveFilters"
           :refetch-filter-options="fetchEntities"
@@ -133,11 +137,11 @@ import {
   type AdvancedFilterInput,
   type AdvancedFilters,
   type DropdownOption,
-  type FilterMatcherMap,
+  type Matchers,
   type GetFilterMatcherMappingQuery,
-  type AdvancedFilterTypes,
   type AdvancedFilter,
   ContextMenuGeneralActionEnum,
+  FilterMatchers,
 } from "@/generated-types/queries";
 import {
   DamsIcons,
@@ -173,6 +177,21 @@ export type FiltersBaseAPI = {
   ) => void;
   removeFilterFromList: (key: string) => void;
   getNormalizedFiltersForApi: () => AdvancedFilterInput[];
+};
+
+export type StandardMatcherCategory =
+  | "text"
+  | "date"
+  | "number"
+  | "selection"
+  | "boolean"
+  | "geo"
+  | "type";
+
+export type FilterMatcherMap = {
+  [K in StandardMatcherCategory]?: Matchers[];
+} & {
+  [key: string]: Matchers[];
 };
 
 const props = withDefaults(
@@ -225,16 +244,13 @@ const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
 const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
 const matchers = ref<DropdownOption[]>([]);
-// TODO: id & metadata_on_relation need to be removed
 const filterMatcherMapping = ref<FilterMatcherMap>({
-  id: [],
   text: [],
   date: [],
   number: [],
   selection: [],
   boolean: [],
   type: [],
-  metadata_on_relation: [],
 });
 const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
@@ -294,13 +310,24 @@ const filterMatcherMappingPromise = async () => {
       fetchPolicy: "no-cache",
     })
     .then((result) => {
-      filterMatcherMapping.value = result.data
-        .FilterMatcherMapping as FilterMatcherMap;
+      filterMatcherMapping.value = normalizeMatchersForType(
+        result.data.FilterMatcherMapping as FilterMatchers[],
+      );
       handleFilterMatcherMapping(filterMatcherMapping.value);
     });
 };
 
-const getMatchers = (type: AdvancedFilterTypes) => {
+const normalizeMatchersForType = (
+  filterMatchers: FilterMatchers[],
+): FilterMatcherMap => {
+  return filterMatchers.reduce((acc: FilterMatcherMap, current) => {
+    const { key, matchers } = current;
+    acc[key] = matchers as Matchers[];
+    return acc;
+  }, {});
+};
+
+const getMatchers = (type: keyof FilterMatcherMap) => {
   return matchers.value.filter((option) =>
     filterMatcherMapping.value[type].includes(option.value),
   );
