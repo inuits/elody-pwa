@@ -366,6 +366,8 @@ export const getMetadataFields = (
         can: (value as PanelMetaData).can,
         canEdit: (value as PanelMetaData).canEdit,
         copyToClipboard: (value as PanelMetaData).copyToClipboard,
+        defaultValue: (value as PanelMetaData).defaultValue,
+        disabled: (value as PanelMetaData).disabled,
         __typename: (value as PanelMetaData).__typename,
       };
 

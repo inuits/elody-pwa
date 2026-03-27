@@ -12,7 +12,9 @@
       v-if="!editModeHelper.isEdit"
       :button-size="buttonSize"
       :label="
-        readmodeLabel ? readmodeLabel : t('metadata.labels.edit-metadata')
+        readmodeLabel
+          ? translatedLabels.readmodeLabel
+          : t('metadata.labels.edit-metadata')
       "
       :icon="DamsIcons.Edit"
       button-style="accentNormal"
@@ -22,7 +24,9 @@
       v-else
       :button-size="buttonSize"
       :label="
-        editmodeLabel ? editmodeLabel : t('metadata.labels.editing-metadata')
+        editmodeLabel
+          ? translatedLabels.editmodeLabel
+          : t('metadata.labels.editing-metadata')
       "
       :disabled="true"
     />
@@ -41,7 +45,7 @@ import { DamsIcons } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 import type { useEditState } from "@/composables/useEditState";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     buttonSize?: ButtonSize;
     readmodeLabel?: string;
@@ -49,8 +53,8 @@ withDefaults(
   }>(),
   {
     buttonSize: "small",
-    readmodeLabel: undefined,
-    editmodeLabel: undefined,
+    readmodeLabel: "",
+    editmodeLabel: "",
   },
 );
 
@@ -70,6 +74,11 @@ watch(
   },
   { immediate: true },
 );
+
+const translatedLabels = computed(() => ({
+  readmodeLabel: t(props.readmodeLabel),
+  editmodeLabel: t(props.editmodeLabel),
+}));
 </script>
 
 <style scoped></style>

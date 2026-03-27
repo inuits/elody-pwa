@@ -3,6 +3,7 @@
     <BaseDatePicker
       v-model="inputValue"
       :type="type"
+      :disabled="disabled"
       v-if="['date', 'datetime-local'].includes(type)"
     />
     <input
@@ -71,9 +72,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
-import BaseResizableTextarea from "./BaseResizableTextarea.vue";
+import { computed } from "vue";
 import BaseDatePicker from "./BaseDatePicker.vue";
+import BaseResizableTextarea from "./BaseResizableTextarea.vue";
 
 type PseudoStyle = {
   textColor: string;

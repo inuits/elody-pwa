@@ -12,7 +12,7 @@
       </div>
 
       <div v-else-if="entity && metadataFields.length > 0">
-        <h2 class="title m-0 pb-4">{{ t("modals.entityEdit.title") }}</h2>
+        <h2 class="title m-0 pb-4">{{ t(formTitle) || t("modals.entityEdit.title") }}</h2>
 
         <div class="space-y-2 mb-6">
           <metadata-wrapper
@@ -31,7 +31,7 @@
 
         <div class="flex gap-2">
           <BaseButtonNew
-            label="Update"
+            label="Save"
             icon="Save"
             :loading="isSaving"
             :disabled="!isFormValid || isSaving"
@@ -84,6 +84,7 @@ const {
 const currentEntityId = ref<string | null>(null);
 const currentEntityType = ref<string | null>(null);
 const formFlow = ref<ContextMenuFormFlow | null>(null);
+const formTitle = ref<string>("");
 const activeFormId = computed(() =>
   currentEntityId.value ? `${currentEntityId.value}_editing` : "",
 );
@@ -129,6 +130,7 @@ const resetData = () => {
   currentEntityId.value = null;
   currentEntityType.value = null;
   formFlow.value = null;
+  formTitle.value = "";
 };
 
 watch(
@@ -140,6 +142,7 @@ watch(
       currentEntityType.value =
         mapUrlToEntityType(info.entityType) || info.entityType;
       formFlow.value = info.flow;
+      formTitle.value = info.title;
 
       await initialize(
         currentEntityId.value!,

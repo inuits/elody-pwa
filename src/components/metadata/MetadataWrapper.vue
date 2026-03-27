@@ -44,6 +44,8 @@
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       :repeatable-panel-config="repeatablePanelConfig"
+      :disabled="metadata.disabled"
+      :default-value="metadata.defaultValue"
       @click.stop.prevent
       @update:value="(value) => (fieldValueProxy = value)"
     />

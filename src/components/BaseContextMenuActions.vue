@@ -1,15 +1,29 @@
 <template>
   <Teleport to="#header-actions" :disabled="!showInHeader">
-  <div
-    @click.stop.prevent="openContextMenu"
-    class="flex items-center justify-center pl-2"
-  >
-    <div v-if="hasAvailableContextMenuActions">
-      <unicon :name="Unicons.EllipsisVThinline.name" />
-      <div>
+    <div class="flex items-center justify-center pl-2 gap-2">
+      <div v-if="hasPromotedActions" class="flex items-center gap-1 pr-2" @click.stop>
+        <context-menu-action
+          :context-menu-actions="promotedActions"
+          :parent-entity-id="parentEntityId"
+          :entity-id="entityId"
+          :entity-type="entityType"
+          :relation="relation"
+          :bulk-operations-context="bulkOperationsContext"
+          :refetch-entities="refetchEntities"
+          class="is-promoted-button"
+          @toggle-loading="handleEmit"
+          :as-button="true"
+        />
+      </div>
+
+      <div v-if="hasAvailableContextMenuActions">
+        <div @click.stop.prevent="openContextMenu" class="cursor-pointer">
+          <unicon :name="Unicons.EllipsisVThinline.name" />
+        </div>
+
         <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
           <context-menu-action
-            :context-menu-actions="availableContextMenuActions"
+            :context-menu-actions="overflowActions"
             :parent-entity-id="parentEntityId"
             :entity-id="entityId"
             :entity-type="entityType"
@@ -21,7 +35,6 @@
         </base-context-menu>
       </div>
     </div>
-  </div>
   </Teleport>
 </template>
 
@@ -74,45 +87,58 @@ const {
   createPermissionCacheKey,
 } = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
-const availableContextMenuActions = ref<ContextMenuActions | undefined>(
-  undefined,
-);
-
-const hasAvailableContextMenuActions = computed(() => {
-  if (!availableContextMenuActions.value) return false;
-  return Object.keys(availableContextMenuActions.value).length > 0;
-});
 
 const showInHeader = computed(() => {
   return props.contextMenuActions?.displaySettings?.showInHeader || false;
 });
 
+const promotedActions = ref<Partial<ContextMenuActions>>({});
+const overflowActions = ref<Partial<ContextMenuActions>>({});
+
 const getAvailableContextMenuActions = () => {
   const { __typename, ...menuActions } = { ...props.contextMenuActions };
-  const availableOptions: Partial<ContextMenuActions> = { ...menuActions };
+  const { displaySettings, ...restMenuActions } = menuActions;
 
-  for (const key in availableOptions) {
-    const action = availableOptions[key as keyof typeof menuActions];
-    const permission = action?.can;
-    const hidden = action?.hidden || false;
+  const promoted: Partial<ContextMenuActions> = {};
+  const overflow: Partial<ContextMenuActions> = {};
 
-    if (
-      permission &&
-      permission.length > 0 &&
-      !advancedPermissions[
+  for (const key in restMenuActions) {
+    const action = menuActions[key as keyof typeof menuActions];
+    if (!action) continue;
+    const permission = "can" in action ? action.can : undefined;
+    const hidden = "hidden" in action ? action.hidden : false;
+
+    const hasPermission =
+      !permission ||
+      permission.length === 0 ||
+      advancedPermissions[
         createPermissionCacheKey({
           permission: permission[0] as string,
           parentEntityId: props.parentEntityId,
           childEntityId: props.entityId,
         })
-      ] || hidden
-    ) {
-      delete availableOptions[key as keyof typeof menuActions];
+      ];
+
+    if (hasPermission && !hidden) {
+      if ("showAsButton" in action) {
+        promoted[key as keyof ContextMenuActions] = action as any;
+      } else {
+        overflow[key as keyof ContextMenuActions] = action as any;
+      }
     }
   }
 
-  availableContextMenuActions.value = availableOptions;
+  promotedActions.value = promoted;
+  overflowActions.value = overflow;
 };
+
+const hasAvailableContextMenuActions = computed(() => {
+  return Object.keys(overflowActions.value).length > 0;
+});
+
+const hasPromotedActions = computed(() => {
+  return Object.keys(promotedActions.value).length > 0;
+});
 
 onMounted(async () => {
   await initializeMenuActions();

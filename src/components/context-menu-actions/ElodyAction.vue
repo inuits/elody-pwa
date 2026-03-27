@@ -7,6 +7,8 @@
     :tooltipLabel="
       isDisabled ? 'tooltip.bulkOperationsActionBar.readmode' : undefined
     "
+    :as-button="asButton"
+    @click.prevent
   />
 </template>
 
@@ -50,12 +52,14 @@ const props = defineProps<{
   parentEntityId: string;
   formQuery?: string;
   formFlow?: ContextMenuFormFlow;
+  formTitle?: string;
   relation?:
     | { idx: number; relation: object }
     | "no-relation-found"
     | undefined;
   bulkOperationsContext: Context | undefined;
   refetchEntities: () => any;
+  asButton?: boolean;
 }>();
 
 const { deleteRelations, submit } = useDeleteRelations();
@@ -211,6 +215,7 @@ const doAction = async () => {
         entityType:
           props.entityType || entityFormData.type || Entitytyping.BaseEntity,
         flow: props.formFlow,
+        title: props.formTitle,
         callback: () => {
           if (refetchParentEntity) {
             refetchParentEntity();

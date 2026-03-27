@@ -1,4 +1,4 @@
-<template>  
+<template>
   <VueDatePicker
     class="base-date-picker"
     v-model="dateValue"
@@ -6,6 +6,7 @@
     :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
     :model-type="modelType"
     :formats="formats"
+    :disabled="disabled"
     :placeholder="props.placeholder"
     text-input
     auto-apply
@@ -23,10 +24,12 @@ const props = withDefaults(
     type: string;
     modelValue: string | undefined;
     placeholder?: string;
+    disabled?: boolean;
   }>(),
   {
     placeholder: "Select date",
     type: "datetime",
+    disabled: false,
   },
 );
 

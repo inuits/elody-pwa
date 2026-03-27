@@ -1,21 +1,34 @@
 <template>
   <div class="flex justify-between items-center">
-    <a
+    <component
+      :is="asButton ? BaseButtonNew : 'a'"
+      :label="label"
       @click="clicked()"
-      :class="
-        (disable
-          ? 'opacity-40 cursor-default'
-          : 'hover:bg-neutral-50 cursor-pointer') +
-        (highlight ? 'text-neutral-900 bg-blue-50' : '')
-      "
-      class="text-gray-700 block px-4 py-2 text-sm flex items-center gap-2 w-full"
-      role="menuitem"
-      tabindex="-1"
+      :class="[
+        !asButton
+          ? 'text-gray-700 block px-4 py-2 text-sm flex items-center gap-2 w-full hover:bg-neutral-50 cursor-pointer'
+          : '',
+        disable ? 'opacity-40 cursor-default' : '',
+        highlight ? 'text-neutral-900 bg-blue-50' : '',
+      ]"
       id="menu-item-add"
+      v-bind="
+        asButton
+          ? {
+              buttonStyle: 'accentNormal',
+              buttonSize: 'small',
+              disabled: disable,
+            }
+          : {
+              href: '#',
+              role: 'menuitem',
+              tabindex: -1,
+            }
+      "
     >
       <BaseIcon v-if="icon" class="w-6 h-6 cursor-pointer" :name="icon" />
       {{ label }}
-    </a>
+    </component>
 
     <div v-if="disable && tooltipLabel" class="mr-3">
       <base-tooltip position="top-right" :tooltip-offset="8">
@@ -38,6 +51,7 @@
 
 <script lang="ts" setup>
 import BaseIcon from "@/components/base/BaseIcon.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
@@ -52,6 +66,7 @@ const props = withDefaults(
     tooltipLabel?: string;
     disable?: boolean;
     highlight?: boolean;
+    asButton?: boolean;
   }>(),
   {
     icon: () => {
@@ -66,7 +81,7 @@ const props = withDefaults(
     disable: () => {
       return false;
     },
-  }
+  },
 );
 
 const clicked = () => {

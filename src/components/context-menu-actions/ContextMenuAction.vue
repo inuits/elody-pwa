@@ -30,6 +30,8 @@
       :refetch-entities="refetchEntities"
       :form-query="element.formQuery"
       :form-flow="element.formFlow"
+      :form-title="element.formTitle"
+      :as-button="asButton"
     />
     <custom-action
       v-if="element.__typename === 'ContextMenuCustomAction'"
@@ -62,6 +64,7 @@ defineProps<{
   relation?: object;
   bulkOperationsContext: Context | undefined;
   refetchEntities: () => any;
+  asButton?: boolean;
 }>();
 
 const handleEmit = () => {

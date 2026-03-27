@@ -92,30 +92,29 @@
 </template>
 
 <script lang="ts" setup>
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
+import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
+import { useDefaultValue } from "@/components/metadata/useDefaultValue";
+import { useHiddenField } from "@/components/metadata/useHiddenField";
+import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import { useFormHelper } from "@/composables/useFormHelper";
+import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import {
+  InputFieldTypes,
   type AdvancedFilterInput,
+  type BaseRelationValuesInput,
   type Conditional,
   type CopyValueFromParentIntialValues,
   type DropdownOption,
   type HiddenField,
-} from "@/generated-types/queries";
-import {
-  InputFieldTypes,
-  type BaseRelationValuesInput,
   type InputField as InputFieldType,
 } from "@/generated-types/queries";
-import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
-import { onMounted, computed, inject } from "vue";
-import { useConditionalValidation } from "@/composables/useConditionalValidation";
-import { useFormHelper } from "@/composables/useFormHelper";
+import { computed, inject, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
-import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
-import { useHiddenField } from "@/components/metadata/useHiddenField";
 
 const emit = defineEmits(["update:value"]);
 const { t } = useI18n();
@@ -142,6 +141,8 @@ const props = defineProps<{
     key: string,
   ) => string | string[] | number | number[] | undefined;
   repeatablePanelConfig?: PanelRepetitionProps;
+  disabled?: boolean;
+  defaultValue?: string;
 }>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext");
@@ -183,14 +184,19 @@ const metadataValue = computed<string | string[] | number | number[]>({
 });
 const { conditionalFieldIsAvailable } = useConditionalValidation();
 
+const onUpdate = (newValue?: BaseRelationValuesInput[] | string) =>
+  emit("update:value", newValue);
+
 const hiddenFieldRef = computed(() => props.hiddenField);
 const fieldRef = computed(() => props.field);
 useHiddenField(
   hiddenFieldRef,
   fieldRef,
   computed(() => props.formId),
-  (newValue) => emit("update:value", newValue),
+  onUpdate,
 );
+
+useDefaultValue({ defaultValue: props.defaultValue, onUpdate });
 
 const fieldEditIsDisabled = computed(() => {
   if (
@@ -198,6 +204,8 @@ const fieldEditIsDisabled = computed(() => {
     !props.field.options?.length
   )
     return true;
+
+  if (props.disabled) return true;
 
   if (!props.field.validation || !props.field.validation.available_if)
     return false;
@@ -262,5 +270,4 @@ const copyValueFromParentAction = (key: string) => {
   if (!newValue) return;
   metadataValue.value = newValue;
 };
-
 </script>

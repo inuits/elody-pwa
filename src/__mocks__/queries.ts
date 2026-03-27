@@ -954,12 +954,14 @@ export type EditMetadataButton = {
   __typename?: 'EditMetadataButton';
   editmodeLabel?: Maybe<Scalars['String']>;
   hasButton: Scalars['Boolean'];
+  hideIfMetadataNotPresent?: Maybe<Scalars['String']>;
   readmodeLabel?: Maybe<Scalars['String']>;
 };
 
 export type EditMetadataButtonInput = {
   editmodeLabel?: InputMaybe<Scalars['String']>;
   hasButton: Scalars['Boolean'];
+  hideIfMetadataNotPresent?: InputMaybe<Scalars['String']>;
   readmodeLabel?: InputMaybe<Scalars['String']>;
 };
 
@@ -4035,7 +4037,7 @@ export type BulkOperationModalFragment = { __typename?: 'BulkOperationModal', ty
 
 export type ViewModesFragment = { __typename?: 'ViewModesWithConfig', viewMode?: ViewModes | null, config?: Array<{ __typename?: 'ConfigItem', key: string, value: any } | null> | null };
 
-export type EditMetadataButtonFragment = { __typename?: 'EditMetadataButton', hasButton: boolean, readmodeLabel?: string | null, editmodeLabel?: string | null };
+export type EditMetadataButtonFragment = { __typename?: 'EditMetadataButton', hasButton: boolean, readmodeLabel?: string | null, editmodeLabel?: string | null, hideIfMetadataNotPresent?: string | null };
 
 export type HiddenFieldFragment = { __typename?: 'HiddenField', hidden?: boolean | null, searchValueForFilter?: string | null, inherited?: boolean | null, entityType?: Entitytyping | null, relationToExtractKey?: string | null, keyToExtractValue?: string | null };
 

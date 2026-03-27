@@ -17,26 +17,32 @@
         <h1
           data-cy="entity-element-window-title"
           class="subtitle text-text-body p-2"
-        > 
+        >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
         <MetadataEditButton
           class="my-2"
           v-if="
             auth.isAuthenticated.value === true &&
-            element.editMetadataButton?.hasButton
+            element.editMetadataButton?.hasButton &&
+            showEditMetadataButton
           "
           button-size="small"
           :readmode-label="element.editMetadataButton.readmodeLabel"
           :editmode-label="element.editMetadataButton.editmodeLabel"
         />
-        <BaseContextMenuActions
+        <div
+          class="flex align-center"
+          :class="{ 'ml-auto': !showEditMetadataButton }"
           v-if="
             auth.isAuthenticated.value === true && element.contextMenuActions
           "
-          :context-menu-actions="element.contextMenuActions"
-          :parent-entity-id="formId"
-        />
+        >
+          <BaseContextMenuActions
+            :context-menu-actions="element.contextMenuActions"
+            :parent-entity-id="formId"
+          />
+        </div>
       </div>
       <div
         :class="[
@@ -82,6 +88,7 @@ import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
+import { useFormHelper } from "@/composables/useFormHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import {
   Orientations,
@@ -108,6 +115,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { fetchAdvancedPermissions } = usePermissions();
+const { getForm } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
 
 const permissionResults = ref<Record<string, boolean>>({});
@@ -116,6 +124,15 @@ const isCheckingPermissions = ref(true);
 const computedIsEdit = computed(
   () => props.isEditOverwrite || useEditHelper.isEdit,
 );
+
+const showEditMetadataButton = computed(() => {
+  const key = props.element.editMetadataButton?.hideIfMetadataNotPresent;
+  if (!key) return true;
+  const form = getForm(props.formId);
+  if (!form) return true;
+  const value = form.values.intialValues?.[key];
+  return value !== undefined && value !== null && value !== "";
+});
 
 const resizeColumn = (toggled: boolean) => {
   emit("resizeColumn", toggled);
@@ -151,7 +168,7 @@ const filteredPanels = computed<WindowElementPanel[]>(() => {
   if (isCheckingPermissions.value) return [];
 
   return allPanels.value.filter((panel) => {
-    const requiredPerms = panel.can && [panel.can] || [];
+    const requiredPerms = (panel.can && [panel.can]) || [];
     if (requiredPerms.length === 0) return true;
 
     return requiredPerms.some((p) => permissionResults.value[p]);
