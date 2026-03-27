@@ -460,6 +460,7 @@ const useFormHelper = () => {
       const associatedMetadataItemIndex: number = metadata.findIndex(
         (metadataItem: MetadataValuesInput) => metadataItem.key === panelKey,
       );
+      if (!associatedMetadataItemIndex || associatedMetadataItemIndex === -1) return;
       metadata[associatedMetadataItemIndex].value = [
         ...Object.values(repeatableMetadataValues[panelKey]),
       ];
