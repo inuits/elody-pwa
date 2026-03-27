@@ -86,11 +86,9 @@ describe("BaseContextMenuActions", () => {
 
     await flushPromises();
 
-    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
-    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(2);
-    expect(wrapper.vm.availableContextMenuActions).toStrictEqual(
-      contextMenuActions,
-    );
+    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
+    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(2);
+    expect(wrapper.vm.overflowActions).toStrictEqual(contextMenuActions);
   });
 
   it("has only basic option if permission is not granted", async () => {
@@ -107,9 +105,9 @@ describe("BaseContextMenuActions", () => {
 
     await flushPromises();
 
-    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
-    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(1);
-    expect(wrapper.vm.availableContextMenuActions).toStrictEqual({
+    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
+    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(1);
+    expect(wrapper.vm.overflowActions).toStrictEqual({
       doLinkAction: contextMenuActions.doLinkAction,
     });
   });
@@ -138,11 +136,46 @@ describe("BaseContextMenuActions", () => {
 
     await flushPromises();
 
-    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
-    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(2);
-    expect(wrapper.vm.availableContextMenuActions).toStrictEqual(
-      basicContextMenuActions,
-    );
+    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
+    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(2);
+    expect(wrapper.vm.overflowActions).toStrictEqual(basicContextMenuActions);
+  });
+
+  it("contains regular and promoted context menus", async () => {
+    const basicContextMenuActions = {
+      doLinkAction: {
+        label: "contextMenu.contextMenuLinkAction.followLink",
+        icon: "AngleRight",
+      },
+      doElodyAction: {
+        label: "contextMenu.contextMenuElodyAction.delete-relation",
+        action: "DeleteRelation",
+        showAsButton: true,
+        icon: "Trash",
+      },
+    };
+
+    const wrapper = shallowMount(BaseContextMenuActions, {
+      props: {
+        contextMenuActions: basicContextMenuActions as unknown as ContextMenuActions,
+        entityId: "24",
+        entityType: "BaseType" as Entitytyping,
+        bulkOperationsContext: BulkOperationsContextEnum.Home,
+      },
+    });
+
+    await flushPromises();
+
+    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
+    expect(wrapper.vm.hasPromotedActions).toBeTruthy();
+    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(1);
+    expect(Object.keys(wrapper.vm.promotedActions!).length).toBe(1);
+    expect(wrapper.vm.overflowActions).toStrictEqual({
+      doLinkAction: basicContextMenuActions.doLinkAction,
+    });
+    expect(wrapper.vm.promotedActions).toStrictEqual({
+      doElodyAction: basicContextMenuActions.doElodyAction,
+    });
   });
 
   it("contains the option to render if options were provided with delay", async () => {
@@ -159,7 +192,7 @@ describe("BaseContextMenuActions", () => {
 
     await flushPromises();
 
-    expect(wrapper.vm.availableContextMenuActions).toBeUndefined();
+    expect(wrapper.vm.hasAvailableContextMenuActions).toBeFalsy();
 
     await wrapper.setProps({
       contextMenuActions,
@@ -167,9 +200,9 @@ describe("BaseContextMenuActions", () => {
 
     await flushPromises();
 
-    expect(wrapper.vm.availableContextMenuActions).toBeDefined();
-    expect(Object.keys(wrapper.vm.availableContextMenuActions!).length).toBe(2);
-    expect(Object.keys(wrapper.vm.availableContextMenuActions!)).toStrictEqual(
+    expect(wrapper.vm.overflowActions).toBeDefined();
+    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(2);
+    expect(Object.keys(wrapper.vm.overflowActions!)).toStrictEqual(
       Object.keys(contextMenuActions),
     );
   });
