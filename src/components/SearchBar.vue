@@ -35,10 +35,6 @@ import {
 import { computed, inject, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import {
-  type AdvancedSearchFilters,
-  useAdvancedSearch,
-} from "@/composables/useAdvancedSearch";
 import { usePermissions } from "@/composables/usePermissions";
 
 withDefaults(
@@ -56,16 +52,10 @@ const emit = defineEmits<{
     filters: AdvancedFilterInput[],
     isOpenModal: boolean,
   ): void;
-  (
-    event: "updateAdvancedSearchFilters",
-    filters: AdvancedSearchFilters[],
-    isOpenModal: boolean,
-  ): void;
 }>();
 
 const config = inject("config") as any;
 const { openModal, getModalInfo } = useBaseModal();
-const { getFiltersForAdvancedSearch } = useAdvancedSearch(config);
 const { can } = usePermissions();
 const inputValue = ref<string>("");
 const entityTypeFilters = computed(() =>
@@ -108,11 +98,6 @@ const applyFilterToLibrary = () => {
   }
 
   emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
-  emit(
-    "updateAdvancedSearchFilters",
-    getFiltersForAdvancedSearch(inputValue.value),
-    getModalInfo(TypeModals.Search).open,
-  );
 };
 
 const openSearchModal = () => {

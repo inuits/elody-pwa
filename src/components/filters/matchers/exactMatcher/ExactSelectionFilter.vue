@@ -96,8 +96,17 @@ const selectedOptions = computed(() => {
   return props.filter.inputFromState?.value || [];
 });
 
+const hasWildcardTextFilter = computed(() => {
+  const filters =
+    props.filter.advancedFilter.advancedFilterInputForRetrievingOptions;
+  return filters?.some(
+    (f: AdvancedFilterInput) =>
+      f.type === AdvancedFilterTypes.Text && f.value === "*",
+  );
+});
+
 const showFilters = computed(() => {
-  return !isLoading.value && initialAmountOfOptions.value !== 0;
+  return !isLoading.value && (initialAmountOfOptions.value !== 0 || hasWildcardTextFilter.value);
 });
 
 const initialize = async () => {
@@ -119,6 +128,13 @@ const initialize = async () => {
 const loadOptions = async () => {
   if (!isInitialized.value) {
     await initialize();
+  }
+
+  if (hasWildcardTextFilter.value) {
+    initialAmountOfOptions.value = 0;
+    hasFetchedOptions.value = true;
+    isLoading.value = false;
+    return;
   }
 
   try {
@@ -143,6 +159,11 @@ const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
 };
 
 const handleSearchOptions = async (searchValue: string) => {
+  if (!searchValue && useAutocomplete.value) {
+    options.value = [];
+    return;
+  }
+
   const newFilters =
     props.filter.advancedFilter.advancedFilterInputForRetrievingOptions;
   const normalizedFilters = newFilters?.map(buildFilterForSearch(searchValue));
