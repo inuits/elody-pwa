@@ -67,10 +67,13 @@
       :show-menu-header="false"
       style-type="defaultWithBorder"
     />
-    <TableMetadataListField
+    <TableListField
       v-else-if="field.type === InputFieldTypes.InputFieldWithSubFields"
       v-model:model-value="metadataValue"
+      :is-flow-relation-values="!field.isMetadataField && field.relationType"
       :sub-fields="(field as any).subFields ?? []"
+      :form-id="formId"
+      :parent-field-key="fieldKey"
       :disabled="fieldEditIsDisabled"
     />
     <div v-else :class="[{ 'grid grid-cols-[80%_20%]': enableCopyFromParent }]">
@@ -118,7 +121,7 @@ import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import TableMetadataListField from "@/components/base/TableMetadataListField.vue";
+import TableListField from "@/components/base/TableListField.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { useHiddenField } from "@/components/metadata/useHiddenField";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
