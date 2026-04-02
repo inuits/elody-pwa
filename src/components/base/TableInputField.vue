@@ -41,9 +41,8 @@
           :sub-fields="subFields"
           :form-id="formId"
           :parent-field-key="parentFieldKey"
-          :relation-type="isFlowRelationValues || undefined"
+          :relation-type="relationType || undefined"
           :disabled="disabled"
-          @update-value="handleUpdateValue"
           @remove-row="removeRow"
           @update-relation="handleUpdateRelation"
         />
@@ -71,10 +70,11 @@ const { getForm } = useFormHelper();
 
 const props = defineProps<{
   modelValue?: Record<string, any>[];
-  isFlowRelationValues?: string | boolean;
+  isFlowRelationValues?: boolean;
   subFields: SubField[];
   formId: string;
   parentFieldKey: string;
+  relationType?: string;
   disabled?: boolean;
 }>();
 
@@ -105,7 +105,7 @@ const syncRelationsToForm = () => {
     (rel): rel is BaseRelationValuesInput => rel !== null,
   );
   getForm(props.formId)?.setFieldValue(
-    `relationValues.${props.isFlowRelationValues}`,
+    `relationValues.${props.relationType}`,
     validRelations,
   );
 };

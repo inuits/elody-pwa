@@ -10,7 +10,6 @@
       input-style="defaultWithBorder"
       :type="inputField.type === InputFieldTypes.Checkbox ? 'checkbox' : 'text'"
       :disabled="disabled"
-      @update:model-value="handleUpdate"
     />
     <AdvancedDropdown
       v-else-if="inputField.type === InputFieldTypes.Dropdown"
@@ -19,7 +18,6 @@
       :options="(inputField.options as DropdownOption[]) ?? []"
       :disable="disabled"
       style-type="defaultWithBorder"
-      @update:model-value="handleUpdate"
     />
     <AutocompleteRelationCell
       v-else-if="isFieldRelationDropdown"
@@ -27,7 +25,6 @@
       :input-field="inputField"
       :form-id="formId"
       :disabled="disabled"
-      @update:model-value="handleUpdate"
     />
     <ViewModesAutocompleteMetadata
       v-else-if="isFieldMetadataDropdown"
@@ -41,7 +38,6 @@
       "
       :disabled="false"
       mode="edit"
-      @update:model-value="handleUpdate"
     />
     <p
       v-if="errorMessage"
@@ -75,10 +71,6 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: "update:modelValue", value: any): void;
-}>();
-
 const { getValidationRules } = useFieldValidation(() => props.inputField.validation);
 const validationRules = computed(() => getValidationRules(true, false));
 const { value, errorMessage } = useField<any>(props.fieldKey, validationRules);
@@ -93,11 +85,6 @@ const isFieldMetadataDropdown = computed(
     props.inputField?.type === InputFieldTypes.DropdownMultiselectMetadata ||
     props.inputField?.type === InputFieldTypes.DropdownSingleselectMetadata,
 );
-
-const handleUpdate = (newVal: any) => {
-  value.value = newVal;
-  emit("update:modelValue", newVal);
-};
 
 watch(
   () => props.modelValue,

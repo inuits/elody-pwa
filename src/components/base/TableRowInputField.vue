@@ -13,7 +13,6 @@
       :field-key="`${parentFieldKey}[${rowIndex}].${subField.key}`"
       :form-id="formId"
       :disabled="disabled"
-      @update:model-value="emit('update-value', rowIndex, subField.key, $event)"
     />
   </div>
   <div
@@ -53,13 +52,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update-value", rowIndex: number, key: string, value: any): void;
   (e: "remove-row", index: number): void;
   (e: "update-relation", rowIndex: number, relation: BaseRelationValuesInput | null): void;
 }>();
 
-// Identifies the sub-field that provides the relation key (entity ID).
-// It is the sub-field whose inputField.isMetadataField === false.
 const relationKeySubField = computed(() =>
   props.subFields.find((sf) => sf.inputField?.isMetadataField === false),
 );

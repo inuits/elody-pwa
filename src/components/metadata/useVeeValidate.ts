@@ -111,7 +111,17 @@ export const useVeeValidate = (): {
       return `${ValidationFields.IntialValues}.${baseFieldKey}.label`;
 
     if (metadata.inputField)
+    {
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
+      // if (!metadata.inputField?.isMetadataField && metadata.inputField?.relationType) {
+      //   console.log("Returning intialValues for :", baseFieldKey)
+      //   return `${ValidationFields.RelationValues}.${baseFieldKey}`;
+      // }
+      // else {
+      //   console.log("Returning IntialValues for :", baseFieldKey)
+      //   return `${ValidationFields.IntialValues}.${baseFieldKey}`;
+      // }
+    }
 
     if (linkedEntityId === undefined)
       return `${ValidationFields.RelationValues}.${baseFieldKey}`;

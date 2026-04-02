@@ -70,10 +70,11 @@
     <TableInputField
       v-else-if="field.type === InputFieldTypes.InputFieldWithSubFields"
       v-model:model-value="metadataValue"
-      :is-flow-relation-values="!field.isMetadataField && field.relationType"
+      :is-flow-relation-values="!field.isMetadataField && field.relationType !== undefined"
       :sub-fields="(field as any).subFields ?? []"
       :form-id="formId"
       :parent-field-key="fieldKey"
+      :relation-type="field.relationType"
       :disabled="fieldEditIsDisabled"
     />
     <div v-else :class="[{ 'grid grid-cols-[80%_20%]': enableCopyFromParent }]">
