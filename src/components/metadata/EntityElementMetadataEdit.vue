@@ -67,7 +67,7 @@
       :show-menu-header="false"
       style-type="defaultWithBorder"
     />
-    <TableListField
+    <TableInputField
       v-else-if="field.type === InputFieldTypes.InputFieldWithSubFields"
       v-model:model-value="metadataValue"
       :is-flow-relation-values="!field.isMetadataField && field.relationType"
@@ -121,7 +121,7 @@ import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import TableListField from "@/components/base/TableListField.vue";
+import TableInputField from "@/components/base/TableInputField.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { useHiddenField } from "@/components/metadata/useHiddenField";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";

@@ -217,7 +217,6 @@ import type {
   PanelMetaData,
   UploadContainer,
   UploadField,
-  RelationFieldInput,
 } from "@/generated-types/queries";
 import {
   ActionProgressIndicatorType,
@@ -492,7 +491,7 @@ const createEntityFromFormInput = async (
   } else {
     entity.relations = (await buildEntityRelations(
       relations,
-    )) as RelationFieldInput[];
+    )) as BaseRelationValuesInput[];
   }
   return entity;
 };

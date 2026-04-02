@@ -6,13 +6,13 @@ import type {
   BaseEntity,
   Entitytyping,
   MetadataInput,
-  RelationFieldInput,
+  BaseRelationValuesInput,
 } from "@/generated-types/queries";
 
 type CreateEntityParams = {
   entityType: Entitytyping;
   metadata?: MetadataInput[];
-  relations?: RelationFieldInput[];
+  relations?: BaseRelationValuesInput[];
 };
 
 export const useManageEntities = () => {
@@ -22,7 +22,7 @@ export const useManageEntities = () => {
   const createEntityFromInput = (
     entityType: Entitytyping,
     metadata: MetadataInput[],
-    relations: RelationFieldInput[] = []
+    relations: BaseRelationValuesInput[] = []
   ): EntityInput => {
     const entity: EntityInput = { type: entityType };
     entity.metadata = metadata;
