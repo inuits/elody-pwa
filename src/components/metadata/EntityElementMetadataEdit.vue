@@ -122,7 +122,7 @@ import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import TableInputField from "@/components/base/TableInputField.vue";
+import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { useHiddenField } from "@/components/metadata/useHiddenField";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";

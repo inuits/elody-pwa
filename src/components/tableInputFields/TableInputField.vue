@@ -44,7 +44,6 @@
           :relation-type="relationType || undefined"
           :disabled="disabled"
           @remove-row="removeRow"
-          @update-relation="handleUpdateRelation"
         />
       </div>
     </div>
@@ -52,21 +51,19 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useFieldArray } from "vee-validate";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   type SubField,
-  type BaseRelationValuesInput,
   InputFieldTypes,
+  EditStatus,
 } from "@/generated-types/queries";
 import { DamsIcons } from "@/generated-types/queries";
-import { useFormHelper } from "@/composables/useFormHelper";
-import TableRowInputField from "@/components/base/TableRowInputField.vue";
+import TableRowInputField from "@/components/tableInputFields/TableRowInputField.vue";
 
 const { t } = useI18n();
-const { getForm } = useFormHelper();
 
 const props = defineProps<{
   modelValue?: Record<string, any>[];
@@ -78,7 +75,6 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const serializedRelations = ref<(BaseRelationValuesInput | null)[]>([]);
 const { fields, push, remove } = useFieldArray<Record<string, any>>(`${props.parentFieldKey}`);
 
 const gridStyle = computed(() => {
@@ -91,60 +87,36 @@ const gridStyle = computed(() => {
   return { gridTemplateColumns: cols.join(" ") };
 });
 
-const handleUpdateRelation = (
-  rowIndex: number,
-  relation: BaseRelationValuesInput | null,
-) => {
-  serializedRelations.value[rowIndex] = relation;
-  syncRelationsToForm();
-};
-
-const syncRelationsToForm = () => {
-  if (!props.isFlowRelationValues) return;
-  const validRelations = serializedRelations.value.filter(
-    (rel): rel is BaseRelationValuesInput => rel !== null,
-  );
-  getForm(props.formId)?.setFieldValue(
-    `relationValues.${props.relationType}`,
-    validRelations,
-  );
-};
-
 const addRow = () => {
-  const emptyItem: Record<string, any> = {};
-  for (const subField of props.subFields) {
-    emptyItem[subField.key] =
-      subField.inputField?.type === InputFieldTypes.Checkbox ? false : "";
-  }
-  push(emptyItem);
-  if (props.isFlowRelationValues) {
-    serializedRelations.value.push(null);
-    syncRelationsToForm();
+  if (props.relationType) {
+    const metadata = props.subFields
+      .filter((sf) => sf.inputField?.isMetadataField === true)
+      .map((sf) => ({
+        key: sf.key,
+        value: sf.inputField?.type === InputFieldTypes.Checkbox ? false : "",
+      }));
+    push({ key: "", type: props.relationType, editStatus: EditStatus.New, metadata });
+  } else {
+    const emptyItem: Record<string, any> = {};
+    for (const sf of props.subFields) {
+      emptyItem[sf.key] = sf.inputField?.type === InputFieldTypes.Checkbox ? false : "";
+    }
+    push(emptyItem);
   }
 };
+
 const removeRow = (index: number) => {
   remove(index);
-  if (props.isFlowRelationValues) {
-    serializedRelations.value.splice(index, 1);
-    syncRelationsToForm();
-  }
-};
-
-// Pre-populate from modelValue on mount (e.g. copyValueFromParent with auto:true
-// sets the form value before this component mounts; if it arrives after mount we
-// watch for it below).
-const syncRelationsFromFields = () => {
-  serializedRelations.value = new Array(fields.value.length).fill(null);
 };
 
 watch(
   () => props.modelValue,
   (newVal) => {
     if (!Array.isArray(newVal) || newVal.length === 0) return;
-    // Only sync when the FieldArray is still empty to avoid clobbering user edits.
+    // Only pre-populate when the FieldArray is still empty to avoid clobbering
+    // user edits (e.g. copyValueFromParent arriving after mount).
     if (fields.value.length === 0) {
       newVal.forEach((item) => push(item));
-      if (props.isFlowRelationValues) syncRelationsFromFields();
     }
   },
   { immediate: true },

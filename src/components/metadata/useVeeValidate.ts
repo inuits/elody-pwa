@@ -106,21 +106,13 @@ export const useVeeValidate = (): {
     if (requiredRelations)
       return `${ValidationFields.RelationValues}.${metadata.inputField.relationType}`;
 
-    // If the field has a formatter, we want to validate a label and only in edit mode
-    if (metadata.inputField && metadata.value?.formatter && isEdit)
-      return `${ValidationFields.IntialValues}.${baseFieldKey}.label`;
-
-    if (metadata.inputField)
-    {
+    if (metadata.inputField) {
+      if (metadata.inputField?.subFields?.length > 0 && !metadata.inputField?.isMetadataField && metadata.inputField?.relationType)
+        return `${ValidationFields.RelationValues}.${baseFieldKey}`;
+      // If the field has a formatter, we want to validate a label and only in edit mode
+      if (metadata.value?.formatter && isEdit)
+        return `${ValidationFields.IntialValues}.${baseFieldKey}.label`;
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
-      // if (!metadata.inputField?.isMetadataField && metadata.inputField?.relationType) {
-      //   console.log("Returning intialValues for :", baseFieldKey)
-      //   return `${ValidationFields.RelationValues}.${baseFieldKey}`;
-      // }
-      // else {
-      //   console.log("Returning IntialValues for :", baseFieldKey)
-      //   return `${ValidationFields.IntialValues}.${baseFieldKey}`;
-      // }
     }
 
     if (linkedEntityId === undefined)

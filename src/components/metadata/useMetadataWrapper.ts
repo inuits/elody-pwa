@@ -161,7 +161,7 @@ export const useMetadataWrapper = (
     );
   };
 
-  const { getValidationRules } = useFieldValidation(props.metadata);
+  const { getValidationRules } = useFieldValidation(() => props.metadata.inputField?.validation);
 
   const fieldKey = computed(() => getFieldKey());
   const fieldLabel = computed<string>(() =>

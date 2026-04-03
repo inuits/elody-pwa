@@ -1,9 +1,5 @@
-import type { FieldMetadata } from "@/components/metadata/useMetadataWrapper";
-import { useVeeValidate } from "./useVeeValidate";
-import { ValidationRules } from "@/generated-types/queries";
+import { ValidationRules, type Validation } from "@/generated-types/queries";
 import { toArray } from "@/helpers";
-
-const { isValidationRulePresentOnField } = useVeeValidate();
 
 const unescapeString = (str: string | undefined): string => {
   if (!str) return "";
@@ -19,8 +15,23 @@ const cleanRegexValue = (regex: string): string => {
   return cleanedRegex;
 };
 
+const isRulePresent = (
+  validation: Validation | null | undefined,
+  rule: ValidationRules | ValidationRules[],
+): boolean => {
+  try {
+    const value = String(validation?.value);
+    if (Array.isArray(rule)) {
+      return rule.some((r) => value.includes(r));
+    }
+    return value.includes(rule);
+  } catch {
+    return false;
+  }
+};
+
 export const useFieldValidation = (
-  field: FieldMetadata,
+  getValidation: () => Validation | null | undefined,
 ): {
   getValidationRules: (isEdit: boolean, isFieldRequired: boolean) => string;
 } => {
@@ -29,7 +40,7 @@ export const useFieldValidation = (
     isFieldRequired: boolean,
   ): string => {
     let defaultRules = "no_xss";
-    const validationOnField = field.inputField?.validation || undefined;
+    const validationOnField = getValidation() ?? undefined;
 
     if (!validationOnField) return defaultRules;
 
@@ -45,34 +56,21 @@ export const useFieldValidation = (
       } else defaultRules += `|${validationValue.join("|")}`;
     }
 
-    if (
-      isValidationRulePresentOnField({
-        metadata: field,
-        rule: ValidationRules.Regex,
-      })
-    ) {
+    if (isRulePresent(validationOnField, ValidationRules.Regex)) {
       const cleanedRegex = cleanRegexValue(validationOnField.regex || "");
       return `${defaultRules}|${ValidationRules.Regex}:${cleanedRegex}`;
     }
 
     if (
-      isValidationRulePresentOnField({
-        metadata: field,
-        rule: [
-          ValidationRules.HasRequiredRelation,
-          ValidationRules.HasOneOfRequiredRelations,
-        ],
-      }) &&
+      isRulePresent(validationOnField, [
+        ValidationRules.HasRequiredRelation,
+        ValidationRules.HasOneOfRequiredRelations,
+      ]) &&
       !isEdit
     )
       return `${defaultRules}|required`;
 
-    if (
-      isValidationRulePresentOnField({
-        metadata: field,
-        rule: ValidationRules.HasRequiredRelation,
-      })
-    ) {
+    if (isRulePresent(validationOnField, ValidationRules.HasRequiredRelation)) {
       const {
         relationType,
         amount,
@@ -82,10 +80,7 @@ export const useFieldValidation = (
     }
 
     if (
-      isValidationRulePresentOnField({
-        metadata: field,
-        rule: ValidationRules.HasOneOfRequiredRelations,
-      })
+      isRulePresent(validationOnField, ValidationRules.HasOneOfRequiredRelations)
     ) {
       const { relationTypes = [], amount } =
         validationOnField.has_one_of_required_relations ?? {};
@@ -93,10 +88,7 @@ export const useFieldValidation = (
     }
 
     if (
-      isValidationRulePresentOnField({
-        metadata: field,
-        rule: ValidationRules.HasOneOfRequiredMetadata,
-      })
+      isRulePresent(validationOnField, ValidationRules.HasOneOfRequiredMetadata)
     ) {
       const { includedMetadataFields = [], amount } =
         validationOnField.has_one_of_required_metadata ?? {};
