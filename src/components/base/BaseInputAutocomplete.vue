@@ -105,7 +105,7 @@ const props = withDefaults(
     disabled: false,
     relation: false,
     loading: false,
-    createOptionConfig: { canCreateOption: false },
+    createOptionConfig: () => ({ canCreateOption: false }),
     searchFilter: undefined,
   },
 );

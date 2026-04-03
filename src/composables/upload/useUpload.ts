@@ -103,7 +103,6 @@ const {
   extraMediafileType,
   typeToIncludeInUrl,
   shouldIncludeTypeInUrl,
-  resetState: resetUploadState,
 } = useUploadState();
 
 const useUpload = (config: any = {}) => {

@@ -96,6 +96,7 @@ const promotedActions = ref<Partial<ContextMenuActions>>({});
 const overflowActions = ref<Partial<ContextMenuActions>>({});
 
 const getAvailableContextMenuActions = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { __typename, ...menuActions } = { ...props.contextMenuActions };
   const { displaySettings, ...restMenuActions } = menuActions;
 

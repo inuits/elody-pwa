@@ -34,7 +34,7 @@ import type {
   GetGraphDataQueryVariables,
   GraphElement,
 } from "@/generated-types/queries";
-import { GetGraphDataDocument } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import "chartjs-adapter-date-fns";
 import Chart from "chart.js/auto";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
@@ -76,7 +76,7 @@ const queryVariables: GetGraphDataQueryVariables = {
   },
 };
 const { onResult, refetch } = useQuery(
-  GetGraphDataDocument,
+  getDocument("GetGraphDataDocument"),
   queryVariables,
   () => ({
     enabled: !props.element.isCollapsed,

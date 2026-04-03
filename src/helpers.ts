@@ -7,7 +7,6 @@ import {
   type Entity,
   type EntityListElement,
   Entitytyping,
-  GetCustomFormattersSettingsDocument,
   InputFieldTypes,
   type IntialValues,
   type Metadata,
@@ -20,6 +19,7 @@ import {
   type WindowElementPanel,
   type RepetitionConfig,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { createI18n } from "vue-i18n";
 import { i18n } from "@/main.ts";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
@@ -533,9 +533,14 @@ export const getApplicationDetails = () => {
 };
 
 export const getFormattersSettings = async () => {
+  const doc = getDocument("GetCustomFormattersSettingsDocument");
+  if (!doc) {
+    console.warn("GetCustomFormattersSettingsDocument not available, skipping formatters settings.");
+    return {};
+  }
   return await apolloClient
     .query({
-      query: GetCustomFormattersSettingsDocument,
+      query: doc,
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
     })
@@ -917,3 +922,67 @@ export const graphqlErrorInterceptor = onError(
     }
   },
 );
+
+const PROCESSOR_FIELD_TYPE_MAP: Record<string, string> = {
+  baseTextField: "text",
+  baseNumberField: "number",
+  baseCheckbox: "checkbox",
+  baseSelectField: "dropdown",
+};
+
+function mapProcessorFieldType(inputFieldType: string): string {
+  return PROCESSOR_FIELD_TYPE_MAP[inputFieldType] ?? inputFieldType;
+}
+
+function buildDropdownOptions(
+  inValues: string[],
+): Array<{ icon: string; label: string; value: string; __typename: string }> {
+  return inValues.map((v) => ({
+    icon: "NoIcon",
+    label: v,
+    value: v,
+    __typename: "DropdownOption",
+  }));
+}
+
+export function enrichProcessorConfig(
+  teaserMetadata: Record<string, any>,
+  intialValues: Record<string, any>,
+  processorConfig: { panels: Array<{ fields: Array<any> }> },
+  relation: any | null,
+): { teaserMetadata: Record<string, any>; intialValues: Record<string, any> } {
+  const newTeaserMetadata = { ...teaserMetadata };
+  const newIntialValues = { ...intialValues };
+
+  for (const panel of processorConfig.panels) {
+    for (const field of panel.fields) {
+      const mappedType = mapProcessorFieldType(field.inputFieldType);
+      const isDropdown = mappedType === "dropdown";
+
+      newTeaserMetadata[field.key] = {
+        key: field.key,
+        label: field.label,
+        __typename: "PanelRelationMetaData",
+        inputField: {
+          type: mappedType,
+          __typename: "InputField",
+          validation: field.isRequired
+            ? { value: ["required"], __typename: "Validation" }
+            : null,
+          ...(isDropdown
+            ? { options: buildDropdownOptions(field.inValues || []) }
+            : {}),
+        },
+        unit: null,
+        linkText: null,
+        showOnlyInEditMode: null,
+      };
+
+      const value =
+        relation?.metadata?.find((m: any) => m.key === field.key)?.value ?? "";
+      newIntialValues[field.key] = value;
+    }
+  }
+
+  return { teaserMetadata: newTeaserMetadata, intialValues: newIntialValues };
+}

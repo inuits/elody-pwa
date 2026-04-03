@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { nextTick, ref } from "vue";
-import { flushPromises } from "@vue/test-utils";
+import { ref } from "vue";
 import useUpload from "../useUpload";
 
 vi.mock("@/helpers", () => ({
@@ -80,7 +79,7 @@ vi.mock("../useUploadState", async () => {
 });
 
 describe("useUpload - Missing Mediafiles validation", () => {
-  let mockBatchEntitiesResponse = {
+  const mockBatchEntitiesResponse = {
     errors: {},
     mediafiles: [{ filename: "missing-image.jpg" }],
   };
@@ -113,11 +112,7 @@ describe("useUpload - Missing Mediafiles validation", () => {
     return { name, type, previewTemplate, status: "added" } as any;
   };
 
-  const settleReactivity = async () => {
-    await flushPromises();
-    await nextTick();
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  };
+
 
   it("calls the error handler and updates DOM for missing mediafiles in a CSV file", async () => {
     const csvFile = createFakeFile("data.csv", "text/csv");

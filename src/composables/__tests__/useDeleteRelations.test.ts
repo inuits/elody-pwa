@@ -24,6 +24,7 @@ vi.mock("@/main", () => ({
   },
 }));
 
+
 describe("useDeleteRelations", () => {
   let deleteRelations: ReturnType<typeof useDeleteRelations>["deleteRelations"];
   let submit: ReturnType<typeof useDeleteRelations>["submit"];

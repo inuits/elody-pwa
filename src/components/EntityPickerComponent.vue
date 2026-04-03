@@ -42,12 +42,12 @@ import {
   Collection,
   EntityPickerMode,
   Entitytyping,
-  MutateEntityValuesDocument,
   type MutateEntityValuesMutation,
   type MutateEntityValuesMutationVariables,
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -134,7 +134,7 @@ const childRoutes = getChildrenOfHomeRoutes(config).map(
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
->(MutateEntityValuesDocument);
+>(getDocument("MutateEntityValuesDocument"));
 
 const form = getForm(getEntityId());
 const ignoreCustomQuery = ref<boolean>(false);
@@ -181,6 +181,7 @@ const getContext = () => {
   return props.context;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getAlreadySelectedEntityIds = (): string[] => {
   if (!form) return [];
   const relationValues = form?.values.relationValues;

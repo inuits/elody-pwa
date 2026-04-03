@@ -143,10 +143,8 @@ import {
   ContextMenuGeneralActionEnum,
   FilterMatchers,
 } from "@/generated-types/queries";
-import {
-  DamsIcons,
-  GetFilterMatcherMappingDocument,
-} from "@/generated-types/queries";
+import { DamsIcons } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
@@ -306,7 +304,7 @@ const filterMatcherMappingPromise = async () => {
 
   return apolloClient
     .query<GetFilterMatcherMappingQuery>({
-      query: GetFilterMatcherMappingDocument,
+      query: getDocument("GetFilterMatcherMappingDocument"),
       fetchPolicy: "no-cache",
     })
     .then((result) => {
@@ -369,7 +367,7 @@ const determineFilterQuery = async (queryDocument: string): Promise<any> => {
   try {
     const query = props.route!.meta!.queries!.getFilters;
     return await loadDocument(query);
-  } catch (error) {
+  } catch {
     return await loadDocument("GetAdvancedFilters");
   }
 };

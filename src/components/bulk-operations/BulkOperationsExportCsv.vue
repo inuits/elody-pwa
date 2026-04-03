@@ -88,15 +88,14 @@ import {
   DamsIcons,
   type DropdownOption,
   Entitytyping,
-  FetchMediafilesOfEntityDocument,
   type FetchMediafilesOfEntityQuery,
   type FetchMediafilesOfEntityQueryVariables,
-  GetBulkOperationCsvExportKeysDocument,
   type GetBulkOperationCsvExportKeysQuery,
   type GetBulkOperationCsvExportKeysQueryVariables,
   RouteNames,
   TypeModals,
-} from "@/queryLoader";
+} from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
@@ -183,7 +182,7 @@ const queryVariablesForExportKeys: GetBulkOperationCsvExportKeysQueryVariables =
     entityType: entityType.value,
   };
 const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
-  GetBulkOperationCsvExportKeysDocument,
+  getDocument("GetBulkOperationCsvExportKeysDocument"),
   queryVariablesForExportKeys,
   () => ({ enabled: ref<boolean>(!!entityType.value && refetchEnabled.value) }),
 );
@@ -198,7 +197,7 @@ const queryVariablesForMediafiles: FetchMediafilesOfEntityQueryVariables = {
 };
 const { refetch: refetchMediafiles, onResult: mediafilesResult } =
   useQuery<FetchMediafilesOfEntityQuery>(
-    FetchMediafilesOfEntityDocument,
+    getDocument("FetchMediafilesOfEntityDocument"),
     queryVariablesForMediafiles,
     () => ({ enabled: isFetchMediafilesOfAssetFlow.value }),
   );

@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import type {
   ColumnList,
   Entity,
@@ -96,7 +96,12 @@ const columnConfigs = computed(() => {
     },
   };
 
-  isMultipleColumn.value = hasPrevious;
   return columns;
 });
+
+watch(columnConfigs, (configs) => {
+  if (!configs) return;
+  const hasPrevious = !!configs.previous;
+  isMultipleColumn.value = hasPrevious;
+}, { immediate: true });
 </script>

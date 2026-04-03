@@ -12,6 +12,7 @@ vi.mock("@/main", () => ({
   },
 }));
 
+
 describe("useInheritedRelations", () => {
   let composable: ReturnType<typeof useInheritedRelations>;
   const mockEntity = {

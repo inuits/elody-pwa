@@ -3,9 +3,9 @@ import {
   type MenuItem,
   type GetMenuQueryVariables,
   type GetMenuQuery,
-  GetMenuDocument,
   ModalStyle,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -76,7 +76,7 @@ export const useMenuHelper = () => {
   };
 
   const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
-  const { onResult } = useQuery<GetMenuQuery>(GetMenuDocument, queryVariables);
+  const { onResult } = useQuery<GetMenuQuery>(getDocument("GetMenuDocument"), queryVariables);
   const getMenuEntities = () => {
     onResult(async (value) => {
       if (value.loading || value.partial) {

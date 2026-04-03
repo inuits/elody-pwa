@@ -98,10 +98,10 @@ import { Feature } from "ol";
 import {
   type AdvancedFilters,
   type Entity,
-  GetEntityByIdDocument,
   type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import { useMaps } from "@/composables/useMaps";
 import GeoJSON from "ol/format/GeoJSON";
@@ -153,7 +153,7 @@ const getEntityQueryVariables = computed<GetEntityByIdQueryVariables>(() => {
 
 const { result: featureResult, loading: featureLoading } =
   useQuery<GetEntityByIdQuery>(
-    GetEntityByIdDocument,
+    getDocument("GetEntityByIdDocument"),
     getEntityQueryVariables,
     () => ({
       notifyOnNetworkStatusChange: true,

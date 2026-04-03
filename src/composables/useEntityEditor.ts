@@ -1,15 +1,13 @@
 import { ref, inject } from "vue";
 import { useI18n } from "vue-i18n";
-import { ApolloError } from "@apollo/client/core";
 import { useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main";
 import {
-  GetEntityByIdDocument,
-  MutateEntityValuesDocument,
   Collection,
   type Entity,
   type PanelMetaData,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
@@ -31,7 +29,7 @@ export function useEntityEditor() {
   const isSaving = ref(false);
   const form = ref<any>(null);
 
-  const { mutate } = useMutation(MutateEntityValuesDocument);
+  const { mutate } = useMutation(getDocument("MutateEntityValuesDocument"));
 
   const determineCollection = (entityType: string | null): Collection => {
     if (!entityType) return Collection.Entities;
@@ -51,7 +49,7 @@ export function useEntityEditor() {
     isLoading.value = true;
     try {
       const { data } = await apolloClient.query({
-        query: GetEntityByIdDocument,
+        query: getDocument("GetEntityByIdDocument"),
         variables: { id: entityId, type: entityType },
         fetchPolicy: "no-cache",
       });

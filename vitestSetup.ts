@@ -58,6 +58,13 @@ vi.mock("@/generated-types/queries", async () => {
   return await import("@/__mocks__/queries");
 });
 
+vi.mock("@/composables/useDocumentFetcher", () => ({
+  getDocument: vi.fn().mockReturnValue({ kind: "Document", definitions: [] }),
+  fetchDocuments: vi.fn().mockResolvedValue({
+    MutateEntityValuesDocument: { kind: "Document", definitions: [] },
+  }),
+}));
+
 vi.mock("openseadragon", () => ({
   default: vi.fn().mockImplementation(() => ({
     addHandler: vi.fn(),

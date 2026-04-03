@@ -32,7 +32,6 @@
 
 <script lang="ts" setup>
 import {
-  GetEntityByIdDocument,
   Permission,
   type ColumnList,
   type GetEntityByIdQueryVariables,
@@ -44,6 +43,7 @@ import {
   type SingleMediaFileElement,
   type Entity,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import EntityColumn from "@/components/EntityColumn.vue";
 import {
   asString,
@@ -133,7 +133,7 @@ watch(entityType, (value) => {
 });
 
 const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
-  GetEntityByIdDocument,
+  getDocument("GetEntityByIdDocument"),
   queryVariables,
   () => ({
     notifyOnNetworkStatusChange: true,

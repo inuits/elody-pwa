@@ -16,13 +16,13 @@
 import {
   ContextMenuElodyActionEnum,
   type DeleteDataMutation,
-  DeleteDataDocument,
   Entitytyping,
   Collection,
   TypeModals,
   ModalStyle,
   ContextMenuFormFlow,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -68,7 +68,7 @@ const { initializeConfirmModal } = useConfirmModal();
 const { displaySuccessNotification } = useBaseNotification();
 const { closeModal, openModal } = useBaseModal();
 const { t } = useI18n();
-const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
+const { mutate } = useMutation<DeleteDataMutation>(getDocument("DeleteDataDocument"));
 const { loadDocument } = useImport();
 const entityFormData: {
   id: string;

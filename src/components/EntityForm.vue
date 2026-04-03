@@ -4,7 +4,6 @@
 
 <script lang="ts" setup>
 import {
-  MutateEntityValuesDocument,
   TypeModals,
   type Entity,
   type IntialValues,
@@ -15,6 +14,7 @@ import {
   Collection,
   ModalStyle,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
@@ -80,7 +80,7 @@ const childRoutes = getChildrenOfHomeRoutes(config).map(
 const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
->(MutateEntityValuesDocument);
+>(getDocument("MutateEntityValuesDocument"));
 
 const form = ref(
   createForm(props.id, {

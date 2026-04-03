@@ -34,9 +34,9 @@
 import {
   BaseFieldType,
   Entitytyping,
-  PostStartImportDocument,
   TypeModals,
-} from "@/queryLoader";
+} from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -187,7 +187,7 @@ const doMetsImport = async (folder) => {
   props.closeAndDeleteForm();
 };
 
-const { mutate: startImport } = useMutation(PostStartImportDocument);
+const { mutate: startImport } = useMutation(getDocument("PostStartImportDocument"));
 const doImportOfDirectories = async (folder) => {
   if (!folder) {
     displayErrorNotification(

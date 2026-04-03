@@ -5,13 +5,13 @@ import {
   AdvancedFilterTypes,
   type BaseEntity,
   Entitytyping,
-  GetEntitiesDocument,
   type GetEntitiesQueryVariables,
   ModalStyle,
   SearchInputType,
   type TaggableEntityConfiguration,
   TypeModals,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { type Editor } from "@tiptap/vue-3";
 import {
   BulkOperationsContextEnum,
@@ -357,17 +357,15 @@ export const createGlobalCommandsExtension = Extension.create({
       untagSelectedText:
         () =>
         async ({
-          editor,
           state,
           commands,
           view,
         }: {
-          editor: Editor;
           state: EditorState;
           commands: any;
           view: EditorView;
         }) => {
-          const { selection, schema } = state;
+          const { selection } = state;
           const { from, to } = selection;
 
           if (selection.empty) {
@@ -506,7 +504,7 @@ const getConfigurationEntities = async (
   );
   if (!extensionConfigurationsByEntity.value.length) return;
 
-  const query = GetEntitiesDocument;
+  const query = getDocument("GetEntitiesDocument");
 
   const configurationItemEntitiesMappingPromises: Promise<{
     configurationItem: TaggableEntityConfiguration;

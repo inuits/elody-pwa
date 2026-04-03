@@ -23,6 +23,7 @@ vi.mock("@/main", () => ({
   },
 }));
 
+
 describe("usePermissions", () => {
   const mockApolloQuery = vi.mocked(apolloClient.query);
 

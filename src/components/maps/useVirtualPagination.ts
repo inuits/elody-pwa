@@ -1,9 +1,9 @@
 import {
-  GetEntitiesDocument,
   type GetEntitiesQueryVariables,
   type Entity,
   type GetEntitiesQuery,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { ref } from "vue";
 import type { ApolloClient } from "@apollo/client/core";
 
@@ -26,12 +26,11 @@ export const useVirtualPagination = (apolloClient: ApolloClient<any>) => {
     internalLoading.value = true;
     internalEntities.value = [];
     let offset = 0;
-    let allRows: Entity[] = [];
+    const allRows: Entity[] = [];
 
     abortController = new AbortController();
 
     const fetchPage = async () => {
-      const previousItemAmount = allRows.length;
       if (abortController?.signal.aborted) return;
 
       const queryVariables = {
@@ -42,7 +41,7 @@ export const useVirtualPagination = (apolloClient: ApolloClient<any>) => {
       if (offset > 0) variables.skip = offset;
 
       const { data } = await apolloClient.query<GetEntitiesQuery>({
-        query: GetEntitiesDocument,
+        query: getDocument("GetEntitiesDocument"),
         variables: queryVariables,
         fetchPolicy: "network-only",
       });

@@ -19,9 +19,9 @@ const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 export type EntityValues = {
   intialValues?: IntialValues;
   relationValues?: { [key: string]: any };
-  relationMetadata?: IntialValues | {};
-  relatedEntityData?: IntialValues | {};
-  relationRootdata?: IntialValues | {};
+  relationMetadata?: IntialValues | object;
+  relatedEntityData?: IntialValues | object;
+  relationRootdata?: IntialValues | object;
 };
 
 const useFormHelper = () => {
@@ -370,6 +370,7 @@ const useFormHelper = () => {
         return [];
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { inheritFrom, ...rest } = relation;
 
       return {

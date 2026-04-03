@@ -1,24 +1,22 @@
-export const useImport = () => {
-  const getQueries = async () => {
-    return await import(`/src/generated-types/queries.ts`);
-  };
+import { fetchDocuments } from "@/composables/useDocumentFetcher";
 
+export const useImport = () => {
   const loadDocument = async (queryName: string) => {
     try {
-      const queries = await getQueries();
-      return queries[`${queryName}Document`];
+      const documents = await fetchDocuments();
+      return documents[`${queryName}Document`];
     } catch {}
   };
   const loadQuery = async (queryName: string) => {
     try {
-      const queries = await getQueries();
-      return queries[`${queryName}Query`];
+      console.warn(`loadQuery("${queryName}") is deprecated`);
+      return undefined;
     } catch {}
   };
   const loadQueryVariables = async (queryName: string) => {
     try {
-      const queries = await getQueries();
-      return queries[`${queryName}QueryVariables`];
+      console.warn(`loadQueryVariables("${queryName}") is deprecated`);
+      return undefined;
     } catch {}
   };
 

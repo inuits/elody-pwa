@@ -39,8 +39,8 @@ import {
   type BaseEntity,
   Entitytyping,
   type GetEntityByIdQueryVariables,
-  GetEntityByIdDocument,
 } from "@/generated-types/queries";
+import { getDocument } from "@/composables/useDocumentFetcher";
 import { computed, ref } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
@@ -84,7 +84,7 @@ const getEntityById = async (
   entitiesLoading.value = true;
   apolloClient
     .query({
-      query: GetEntityByIdDocument,
+      query: getDocument("GetEntityByIdDocument"),
       variables: variables,
       fetchPolicy: "no-cache",
       notifyOnNetworkStatusChange: true,
