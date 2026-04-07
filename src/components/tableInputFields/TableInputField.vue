@@ -60,7 +60,7 @@ import {
   InputFieldTypes,
   EditStatus,
 } from "@/generated-types/queries";
-import { DamsIcons } from "@/generated-types/queries";
+import { DamsIcons, MetadataInput } from "@/generated-types/queries";
 import TableRowInputField from "@/components/tableInputFields/TableRowInputField.vue";
 
 const { t } = useI18n();
@@ -75,7 +75,7 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const { fields, push, remove } = useFieldArray<Record<string, any>>(`${props.parentFieldKey}`);
+const { fields, push, remove, replace } = useFieldArray<Record<string, any>>(`${props.parentFieldKey}`);
 
 const gridStyle = computed(() => {
   const cols = props.subFields.map((sf) =>
@@ -109,14 +109,47 @@ const removeRow = (index: number) => {
   remove(index);
 };
 
+const relationKeySubField = computed(() =>
+  props.subFields.find((sf) => sf.inputField?.isMetadataField === false),
+);
+
+const serializeRelationRow = (item: Record<string, any>): Record<string, any> => {
+  const keyField = relationKeySubField.value;
+  if (!props.relationType || !keyField) return null;
+
+  const relationKey = item[keyField.key];
+  const metadata: MetadataInput[] = props.subFields
+    .filter((sf) => sf.inputField?.isMetadataField === true)
+    .map((sf) => ({ key: sf.key, value: item[sf.key] }));
+  return {
+    key: relationKey || "",
+    type: props.relationType,
+    editStatus: EditStatus.New,
+    metadata,
+  };
+};
 watch(
   () => props.modelValue,
   (newVal) => {
     if (!Array.isArray(newVal) || newVal.length === 0) return;
-    // Only pre-populate when the FieldArray is still empty to avoid clobbering
-    // user edits (e.g. copyValueFromParent arriving after mount).
+
+    if (!props.relationType) {
+      if (fields.value.length === 0) newVal.forEach((item) => push(item));
+      return;
+    }
+
+    const needsConversion = newVal.some((item) => item?.type !== props.relationType);
+    if (!needsConversion) return;
+
+    const serialized = newVal
+      .map((item) =>
+        item?.type === props.relationType ? item : serializeRelationRow(item),
+      )
+
     if (fields.value.length === 0) {
-      newVal.forEach((item) => push(item));
+      serialized.forEach((item) => push(item));
+    } else {
+      replace(serialized);
     }
   },
   { immediate: true },

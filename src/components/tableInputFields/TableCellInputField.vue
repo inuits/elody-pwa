@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { useField } from "vee-validate";
 import {
   type DropdownOption,
@@ -89,13 +89,5 @@ const isFieldMetadataDropdown = computed(
   () =>
     props.subField.inputField?.type === InputFieldTypes.DropdownMultiselectMetadata ||
     props.subField.inputField?.type === InputFieldTypes.DropdownSingleselectMetadata,
-);
-
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    value.value = newVal;
-  },
-  { immediate: true },
 );
 </script>

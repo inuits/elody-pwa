@@ -218,7 +218,7 @@ const previewComponent = ref<PreviewComponent | undefined>(undefined);
 const previewComponentEnabled = ref<boolean>(false);
 const previewForEntity = ref<string | undefined>(undefined);
 const refEntities = ref<Entity[]>(props.entities);
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const multiLine = computed(
   () => props.config?.find((c) => c.key === "multiLine")?.value === true,

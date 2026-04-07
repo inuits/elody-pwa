@@ -96,7 +96,7 @@ export const useMetadataWrapper = (
   const { forms, editableFields, getForm } = formHelper;
   const { conditionalFieldIsRequired } = useConditionalValidation();
 
-  const mediafileViewerContext: any = inject("mediafileViewerContext");
+  const mediafileViewerContext: any = inject("mediafileViewerContext", "");
   const metadataKey = props.metadata.key || props.metadata.metadataKey || "";
   const multilingual = inject<MultilingualFieldProvide>(
     getMultilingualProvideKey(metadataKey),

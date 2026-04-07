@@ -47,7 +47,7 @@ const props = defineProps<{
 
 const { getValueOfMediafile } = useEntityMediafileSelector();
 
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 
 const mimetype = ref<string>(
   getValueOfMediafile(mediafileViewerContext, "mimetype") || "no-type",

@@ -119,7 +119,7 @@ const { setAcceptedTypes, setRelationType } = useEntityPickerModal();
 const { openModal } = useBaseModal();
 const { isEdit } = useEditMode();
 
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 
 const componentMetadata = computed(() => {
   const returnArray: MetadataAndRelation[] = [];

@@ -280,7 +280,7 @@ const {
 } = useFiltersBaseNew();
 
 const config = inject("config") as any;
-const parentEntity: any = inject("ParentEntityProvider");
+const parentEntity: any = inject("ParentEntityProvider", undefined);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const hasSavedSearch = config.features.hasSavedSearch || false;
 

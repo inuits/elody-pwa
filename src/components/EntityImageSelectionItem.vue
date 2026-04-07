@@ -84,7 +84,7 @@ const props = defineProps<{
 const { getThumbnail } = useThumbnailHelper();
 const imageSrcError = ref<boolean>(false);
 
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const entityFormData: any = inject("entityFormData");
 
 const toBeDeleted = computed(() => useEditMode(entityFormData.id).toBeDeleted);

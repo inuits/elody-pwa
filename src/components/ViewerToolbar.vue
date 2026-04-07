@@ -196,7 +196,7 @@ const {
   selectNextMediafile,
   selectPreviousMediafile,
 } = useEntityMediafileSelector();
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const { openModal } = useBaseModal();
 
 const { isSelectable } = useMediafileCrop();

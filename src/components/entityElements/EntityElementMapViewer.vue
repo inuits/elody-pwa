@@ -53,7 +53,7 @@ const props = defineProps<{
   entityId: string;
 }>();
 
-const entity: any = inject("ParentEntityProvider");
+const entity: any = inject("ParentEntityProvider", undefined);
 
 const mapConfig = computed(() => {
   return getBasicMapProperties(props.element?.config || []);

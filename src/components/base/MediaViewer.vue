@@ -88,7 +88,7 @@ const props = defineProps<{
   loading?: boolean;
 }>();
 
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const { mediafiles } = toRefs(props);
 const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();

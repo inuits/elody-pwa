@@ -63,7 +63,7 @@ const props = defineProps({
   can: { type: Array, required: false },
 });
 
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 
 const useEditHelper = ref(useEditMode(props.entityUuid));
 const decimalPointStep = 0.000001;

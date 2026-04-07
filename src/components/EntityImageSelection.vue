@@ -57,7 +57,7 @@ defineProps<{
 }>();
 
 const { mediafileSelectionState } = useEntityMediafileSelector();
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 
 const isCollapsed = ref<boolean>(false);
 

@@ -19,6 +19,7 @@ const mockPush = vi.fn((item: Record<string, any>) => {
 const mockRemove = vi.fn((i: number) => {
   mockFields.value = mockFields.value.filter((_, idx) => idx !== i);
 });
+const mockReplace = vi.fn();
 
 vi.mock("vee-validate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("vee-validate")>();
@@ -28,6 +29,7 @@ vi.mock("vee-validate", async (importOriginal) => {
       fields: mockFields,
       push: mockPush,
       remove: mockRemove,
+      replace: mockReplace,
     })),
     useField: vi.fn(() => ({
       value: ref(""),
@@ -83,9 +85,9 @@ vi.mock("@/composables/useManageEntities", () => ({
 
 // ─── Lazy component imports (must come after vi.mock() calls) ─────────────────
 
-const { default: TableInputField } = await import("@/components/base/TableInputField.vue");
+const { default: TableInputField } = await import("@/components/tableInputFields/TableInputField.vue");
 const { default: AutocompleteRelationCell } = await import(
-  "@/components/base/AutocompleteRelationCell.vue"
+  "@/components/tableInputFields/AutocompleteRelationCell.vue"
 );
 const { default: BaseButtonNew } = await import("@/components/base/BaseButtonNew.vue");
 const { default: BaseInputAutocomplete } = await import(
@@ -138,6 +140,26 @@ const mainAuthorSubField = makeSubField(
 );
 
 const relationSubFields = [relationKeySubField, functionSubField, mainAuthorSubField];
+
+// Flat item as it arrives from copyValueFromParent / vee-validate initFields pre-seeding
+const flatAuthor = {
+  name: "RUEB, M",
+  function_indication: "aut",
+  main_author: true,
+  key: "__vue_devtool_undefined__",
+  metadata: [{ value: "__vue_devtool_undefined__" }, { value: "__vue_devtool_undefined__" }],
+};
+
+// Correctly serialized BaseRelationValuesInput shape
+const serializedAuthor = {
+  key: "RUEB, M",
+  type: "ref_work_authors",
+  editStatus: EditStatus.New,
+  metadata: [
+    { key: "function_indication", value: "aut" },
+    { key: "main_author", value: true },
+  ],
+};
 
 // ─── TableInputField ──────────────────────────────────────────────────────────
 
@@ -305,6 +327,95 @@ describe("TableInputField", () => {
     });
   });
 
+  // ── initial seeding from modelValue ──────────────────────────────────────────
+  //
+  // These tests cover the copyValueFromParent use case:
+  // - modelValue arrives as flat objects (name, function_indication, main_author, ...)
+  // - TableInputField must convert them to BaseRelationValuesInput shape before storing
+  //
+  // Two scenarios:
+  //   A) fields is empty when the watcher fires (normal path)
+  //   B) fields is already pre-populated with flat items by vee-validate's initFields()
+  //      (flush:'sync' beats our flush:'pre' watcher — the actual bug)
+
+  describe("initial seeding from modelValue", () => {
+    it("pushes serialized BaseRelationValuesInput when fields is empty and modelValue has flat items", () => {
+      mockFields.value = [];
+
+      shallowMount(TableInputField, {
+        props: {
+          modelValue: [flatAuthor],
+          subFields: relationSubFields,
+          formId: "form-1",
+          parentFieldKey: "relationValues.ref_work_authors",
+          relationType: "ref_work_authors",
+        },
+      });
+
+      expect(mockPush).toHaveBeenCalledWith(serializedAuthor);
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
+    it("calls replace with serialized items when fields is already pre-populated with flat items", () => {
+      // Simulate vee-validate's initFields() having pre-seeded fields with flat items
+      // before our Vue watcher ran (the actual bug scenario)
+      mockFields.value = [{ key: "0", value: { ...flatAuthor } }];
+
+      shallowMount(TableInputField, {
+        props: {
+          modelValue: [flatAuthor],
+          subFields: relationSubFields,
+          formId: "form-1",
+          parentFieldKey: "relationValues.ref_work_authors",
+          relationType: "ref_work_authors",
+        },
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith([serializedAuthor]);
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("does not push or replace when modelValue is already in BaseRelationValuesInput shape", () => {
+      mockFields.value = [{ key: "0", value: { ...serializedAuthor } }];
+
+      shallowMount(TableInputField, {
+        props: {
+          modelValue: [serializedAuthor],
+          subFields: relationSubFields,
+          formId: "form-1",
+          parentFieldKey: "relationValues.ref_work_authors",
+          relationType: "ref_work_authors",
+        },
+      });
+
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+
+    it("does not push or replace again when modelValue changes to already-serialized data", async () => {
+      mockFields.value = [];
+
+      const wrapper = shallowMount(TableInputField, {
+        props: {
+          modelValue: [flatAuthor],
+          subFields: relationSubFields,
+          formId: "form-1",
+          parentFieldKey: "relationValues.ref_work_authors",
+          relationType: "ref_work_authors",
+        },
+      });
+
+      // First seeding happened at mount (push called once)
+      expect(mockPush).toHaveBeenCalledTimes(1);
+
+      // Simulate modelValue changing (e.g. reactive feedback from replace())
+      await wrapper.setProps({ modelValue: [serializedAuthor] });
+
+      // Should NOT push or replace again
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
+  });
 });
 
 

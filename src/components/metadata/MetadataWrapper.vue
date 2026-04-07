@@ -241,7 +241,7 @@ const emit = defineEmits<{
   (event: "update:metadata", mutatedField: PanelMetaData): void;
 }>();
 
-const parentEntity: BaseEntity = inject("ParentEntityProvider");
+const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
 
 const {
   field,

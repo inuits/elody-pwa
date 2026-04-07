@@ -134,7 +134,7 @@ const { t } = useI18n();
 const props = defineProps<{
   fieldKey: string;
   label: string;
-  value: string;
+  value: any;
   hiddenField?: HiddenField;
   field: InputFieldType;
   formId: string;
@@ -148,7 +148,7 @@ const props = defineProps<{
   fieldIsValid: boolean;
   formFlow?: string;
   isFieldRequired: boolean;
-  copyValueFromParent: CopyValueFromParentIntialValues;
+  copyValueFromParent?: CopyValueFromParentIntialValues;
   extractValueFromParent: (
     key: string,
   ) => string | string[] | number | number[] | undefined;
@@ -157,7 +157,7 @@ const props = defineProps<{
   defaultValue?: string;
 }>();
 
-const mediafileViewerContext: any = inject("mediafileViewerContext");
+const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const computedError = computed<string>(() => {
   const fastValidationMessage = props.field?.validation
     ?.fastValidationMessage as string;
