@@ -38,6 +38,7 @@
         field.metadataKeyToCreateEntityFromOption
       "
       :depends-on="field.dependsOn"
+      :metadataOnRelationConfig="field?.metadataOnRelationFieldConfig"
     />
     <ViewModesAutocompleteMetadata
       v-else-if="

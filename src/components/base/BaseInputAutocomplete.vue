@@ -53,6 +53,21 @@
         @click.stop="() => emit('handleTagClick', option)"
       >
         {{ option.label }}
+        <div
+          v-if="displayInputForTag"
+          @click.stop
+          @mousedown.stop
+          @keydown.stop
+        >
+          <BaseInputTextNumberDatetime
+            class="w-[115px] h-[26px] ml-2 py-[2px]"
+            :model-value="getTagInputValue(option.value)"
+            @update:model-value="setTagInputValue(option.value, $event as string)"
+            input-style="default"
+            type="text"
+            :disabled="disabled"
+          />
+        </div>
         <span
           v-if="!disabled"
           class="multiselect-tag-remove !cursor-pointer"
@@ -74,6 +89,7 @@
 import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import useEntitySingle from "@/composables/useEntitySingle";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
@@ -98,6 +114,8 @@ const props = withDefaults(
       createPromptTranslationKey?: string;
     };
     searchFilter?: () => any;
+    displayInputForTag?: boolean;
+    initialTagInputValues?: Map<string | number, string>;
   }>(),
   {
     selectType: "multi",
@@ -107,6 +125,8 @@ const props = withDefaults(
     loading: false,
     createOptionConfig: { canCreateOption: false },
     searchFilter: undefined,
+    displayInputForTag: false,
+    initialTagInputValues: undefined,
   },
 );
 
@@ -115,6 +135,10 @@ const emit = defineEmits<{
   (event: "handleTagClick", option: DropdownOption[]): void;
   (event: "searchChange", value: string): void;
   (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
+  (
+    event: "update:tagInputValues",
+    values: Map<string | number, string>,
+  ): void;
 }>();
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
@@ -122,6 +146,25 @@ const { someModalIsOpened } = useBaseModal();
 const { t } = useI18n();
 const classes = ref();
 const searchValue = ref<string>();
+const tagInputValues = ref<Map<string | number, string>>(new Map());
+
+const getTagInputValue = (optionValue: string | number): string => {
+  return tagInputValues.value.get(optionValue) ?? "";
+};
+
+const setTagInputValue = (optionValue: string | number, value: string) => {
+  tagInputValues.value.set(optionValue, value);
+  emit("update:tagInputValues", new Map(tagInputValues.value));
+};
+
+watch(
+  () => props.initialTagInputValues,
+  (initial) => {
+    if (!initial) return;
+    tagInputValues.value = new Map(initial);
+  },
+  { immediate: true },
+);
 
 const inputValue = computed<DropdownOption[] | undefined>({
   get() {
@@ -184,6 +227,24 @@ onBeforeMount(() => setClasses());
 watch(
   () => [inputValue.value, props.options],
   () => setClasses(),
+);
+
+watch(
+  () => inputValue.value,
+  (newOptions) => {
+    if (!newOptions || !props.displayInputForTag) return;
+    const currentValues = new Set(newOptions.map((o) => o.value));
+    let didDelete = false;
+    for (const key of tagInputValues.value.keys()) {
+      if (!currentValues.has(key)) {
+        tagInputValues.value.delete(key);
+        didDelete = true;
+      }
+    }
+    if (didDelete) {
+      emit("update:tagInputValues", new Map(tagInputValues.value));
+    }
+  },
 );
 
 const handleTagCreate = async (option: any) => {

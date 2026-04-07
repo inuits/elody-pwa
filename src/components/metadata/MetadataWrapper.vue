@@ -104,6 +104,7 @@
                 :is-metadata-field="metadata.inputField?.isMetadataField"
                 :relation-type="metadata.inputField?.relationType"
                 :from-relation-type="metadata.inputField?.fromRelationType"
+                :metadataOnRelationConfig="metadata.inputField?.metadataOnRelationFieldConfig"
                 :disabled="true"
                 @click.stop.prevent
               />

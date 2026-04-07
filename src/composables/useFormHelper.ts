@@ -245,6 +245,7 @@ const useFormHelper = () => {
         type: relationType,
         editStatus: EditStatus.New,
         value: item.value,
+        metadata: item.metadata ? item.metadata : undefined,
       });
     });
 
@@ -488,7 +489,7 @@ const useFormHelper = () => {
   ): EntityValues & { repeatableMetadataValues: any } => {
     const { "repeatable-panels": repeatableMetadataValues, ...cleanedInitial } =
       values.intialValues as Record<string, any>;
-
+    
     return {
       intialValues: cleanedInitial as IntialValues,
       relationValues: values.relationValues,

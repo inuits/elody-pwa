@@ -30,6 +30,9 @@
       }
     "
     :create-option-config="{ canCreateOption }"
+    :displayInputForTag="metadataOnRelationConfig?.enabled"
+    :initial-tag-input-values="tagInputValues"
+    @update:tag-input-values="(values: Map<string | number, string>) => tagInputValues = values"
     @add-option="handleCreatingFromTag"
     @handle-tag-click="handleTagClick"
   />
@@ -50,9 +53,14 @@ import type {
   AdvancedFilterInput,
   DropdownOption,
   Entitytyping,
+  MetadataOnRelationFieldConfig,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
+import {
+  extractTagInputValuesFromRelations,
+  mapDropdownOptionsToBulkProcessableItem,
+} from "./mapDropdownOptionsToBulkProcessableItem";
 import { dequal as isEqual } from "dequal";
 import debounce from "lodash.debounce";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -94,6 +102,7 @@ const props = withDefaults(
     metadataKeyToCreateEntityFromOption?: string;
     isReadOnly?: boolean;
     isMetadataField?: boolean;
+    metadataOnRelationConfig?: MetadataOnRelationFieldConfig | null;
   }>(),
   {
     selectType: "multi",
@@ -112,16 +121,25 @@ const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
 const router = useRouter();
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
+const tagInputValues = ref<Map<string | number, string>>(new Map());
 const { createEntity } = useManageEntities();
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
-const { replaceRelationsFromSameType, addRelations } = useFormHelper();
+const { replaceRelationsFromSameType, addRelations, getRelationsBasedOnType } =
+  useFormHelper();
 
 const debouncedGetAutocompleteOptions = debounce((value: string) => {
   allEntitiesHelper.value.getAutocompleteOptions(value);
 }, 250);
 
+const debouncedUpdateRelationsWithMetadata = debounce(() => {
+  if (selectedDropdownOptions.value.length > 0) {
+    handleSelect(selectedDropdownOptions.value);
+  }
+}, 250);
+
 onBeforeUnmount(() => {
   debouncedGetAutocompleteOptions.cancel();
+  debouncedUpdateRelationsWithMetadata.cancel();
 });
 
 const isLoading = computed(() => {
@@ -221,19 +239,32 @@ const initAutocompleteOption = async () => {
   } else {
     populateSelectedOptions(relatedEntitiesHelper.value.entityDropdownOptions);
   }
+  populateTagInputValuesFromForm();
 };
 
-const mapDropdownOptionsToBulkProcessableItem = (
+const toBulkProcessableItems = (
   dropdownOptions: DropdownOption[],
-): InBulkProcessableItem[] => {
-  const inBulkProcessableItems: InBulkProcessableItem[] = [];
-  dropdownOptions.forEach((dropdownOption: DropdownOption) => {
-    inBulkProcessableItems.push({
-      id: dropdownOption.value,
-      value: dropdownOption.label,
-    });
-  });
-  return inBulkProcessableItems;
+): InBulkProcessableItem[] =>
+  mapDropdownOptionsToBulkProcessableItem(
+    dropdownOptions,
+    props.metadataOnRelationConfig,
+    tagInputValues.value,
+  );
+
+const populateTagInputValuesFromForm = () => {
+  if (!props.metadataOnRelationConfig?.enabled || !props.formId) return;
+  const relations = getRelationsBasedOnType(
+    props.formId,
+    props.relationType,
+  );
+  if (!relations) return;
+  const map = extractTagInputValuesFromRelations(
+    relations,
+    props.metadataOnRelationConfig.key,
+  );
+  if (map.size > 0) {
+    tagInputValues.value = map;
+  }
 };
 
 const populateSelectedOptions = (options: DropdownOption[]) => {
@@ -248,7 +279,7 @@ const handleSelect = (
 ) => {
   if (options === undefined) return;
   const bulkProcessableItems: InBulkProcessableItem[] =
-    mapDropdownOptionsToBulkProcessableItem([...options]);
+    toBulkProcessableItems([...options]);
 
   if (props.mode === "create") {
     addRelations(bulkProcessableItems, props.relationType, props.formId);
@@ -327,5 +358,15 @@ watch(
   (dropdownOptions: DropdownOption[]) => {
     populateSelectedOptions(dropdownOptions);
   },
+);
+
+watch(
+  tagInputValues,
+  () => {
+    if (props.metadataOnRelationConfig?.enabled) {
+      debouncedUpdateRelationsWithMetadata();
+    }
+  },
+  { deep: true },
 );
 </script>
