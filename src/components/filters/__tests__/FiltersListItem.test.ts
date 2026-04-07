@@ -21,6 +21,14 @@ vi.mock("@/composables/useBulkOperations", () => ({
   BulkOperationsContextEnum: { FilterOptions: "FilterOptions" },
 }));
 
+vi.mock("@/main", () => ({
+  apolloClient: {
+    query: vi.fn(),
+    mutate: vi.fn(),
+    watchQuery: vi.fn(),
+  },
+}));
+
 describe("FiltersListItem Matcher Restriction", () => {
   it("correctly filters matchers based on allowedMatchers", async () => {
     const filter = {

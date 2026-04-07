@@ -1,6 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 import { useFilterOptions } from "../useFilterOptions";
 
+vi.mock("@/main", () => ({
+  apolloClient: {
+    query: vi.fn(),
+    mutate: vi.fn(),
+    watchQuery: vi.fn(),
+  },
+}));
+
 vi.mock(import("@/helpers"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
