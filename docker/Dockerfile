@@ -1,5 +1,5 @@
 ### Base stage
-FROM node:18-bookworm-slim as base
+FROM node:22-bookworm-slim as base
 
 RUN npm install -g pnpm
 WORKDIR /app
