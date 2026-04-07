@@ -19,7 +19,9 @@ const mockKeyboardInstance = {
 };
 
 vi.mock("simple-keyboard", () => ({
-  default: vi.fn(() => mockKeyboardInstance),
+  default: vi.fn(function () {
+    return mockKeyboardInstance;
+  }),
 }));
 
 beforeEach(() => {
