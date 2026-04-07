@@ -37,49 +37,61 @@
         v-show="itemMustBeShown(metadata.value)"
         :key="metadata.key"
       >
-        <metadata-wrapper
-          v-if="
-            (!nonStandardFieldTypes.includes(metadata.__typename) ||
-              metadata.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary) &&
-            !parentIsListItem &&
-            metadata.unit !== Unit.CoordinatesDefault
-          "
-          class="py-2 px-2"
-          :form-id="formId"
-          :is-edit="isEdit"
-          :repeatablePanelConfig="repeatablePanelConfig"
+        <MultilingualWrapper
           :metadata="metadatafields[index]"
-          :show-errors="editState.showErrors"
-          :base-library-mode="metadata.baseLibraryMode"
-        />
-
-        <entity-element-coordinate-edit
-          v-if="
-            metadata.inputField && metadata.unit === Unit.CoordinatesDefault
-          "
-          :fieldKey="metadata.key"
-          :label="metadata.label"
-          v-model:value="metadata.value"
-          :input-field="metadata.inputField"
-          :entity-uuid="formId"
-          :can="metadata.can"
-        />
-
-        <entity-element-list
-          v-if="metadata.__typename === nonStandardFieldTypes[0]"
-          :id="formId"
-          :types="metadata.entityTypes"
-          :entity-id="formId"
-          :entity-list="metadata.entityList ?? []"
-          :identifiers="identifiers"
-          v-bind="metadata"
-        />
-        <entity-element-w-y-s-i-w-y-g
-          v-if="metadata.__typename === nonStandardFieldTypes[1]"
           :form-id="formId"
-          :element="metadata"
-          :display-inline="true"
-        />
+          @update:metadata="
+            (updatedMetadata) => (metadatafields[index] = updatedMetadata)
+          "
+        >
+          <template #default="{ localizedMetadata }">
+            <metadata-wrapper
+              v-if="
+                (!nonStandardFieldTypes.includes(metadata.__typename) ||
+                  metadata.baseLibraryMode ===
+                    BaseLibraryModes.BasicBaseLibrary) &&
+                !parentIsListItem &&
+                metadata.unit !== Unit.CoordinatesDefault
+              "
+              class="py-2 px-2"
+              :form-id="formId"
+              :is-edit="isEdit"
+              :repeatablePanelConfig="repeatablePanelConfig"
+              :metadata="localizedMetadata || metadatafields[index]"
+              :show-errors="editState.showErrors"
+              :base-library-mode="metadata.baseLibraryMode"
+            />
+
+            <entity-element-coordinate-edit
+              v-if="
+                metadata.inputField &&
+                metadata.unit === Unit.CoordinatesDefault
+              "
+              :fieldKey="metadata.key"
+              :label="metadata.label"
+              v-model:value="metadata.value"
+              :input-field="metadata.inputField"
+              :entity-uuid="formId"
+              :can="metadata.can"
+            />
+
+            <entity-element-list
+              v-if="metadata.__typename === nonStandardFieldTypes[0]"
+              :id="formId"
+              :types="metadata.entityTypes"
+              :entity-id="formId"
+              :entity-list="metadata.entityList ?? []"
+              :identifiers="identifiers"
+              v-bind="metadata"
+            />
+            <entity-element-w-y-s-i-w-y-g
+              v-if="metadata.__typename === nonStandardFieldTypes[1]"
+              :form-id="formId"
+              :element="localizedMetadata || metadata"
+              :display-inline="true"
+            />
+          </template>
+        </MultilingualWrapper>
       </div>
     </div>
     <div
@@ -114,6 +126,7 @@ import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdi
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
+import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 
 const emit = defineEmits<{

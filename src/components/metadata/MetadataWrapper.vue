@@ -11,14 +11,17 @@
       'relative': fieldType === InputFieldTypes.InputFieldWithSubFields,
     }"
   >
-    <metadata-title
-      :class="{
-        'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
-      }"
-      :metadata="metadata"
-      :is-field-required="isFieldRequired && isEdit"
-      :is-one-of-required="isOneOfRequired && isEdit"
-    />
+    <div class="flex items-center gap-2">
+        <metadata-title
+        :class="{
+          'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
+        }"
+        :metadata="metadata"
+        :is-field-required="isFieldRequired && isEdit"
+        :is-one-of-required="isOneOfRequired && isEdit"
+      />
+      <MultilingualLocaleSelector :field-key="metadata.key" />
+    </div>
     <entity-element-metadata-edit
       v-if="
         isEdit &&
@@ -203,6 +206,7 @@ import ViewModesAutocompleteRelations from "@/components/library/view-modes/View
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";

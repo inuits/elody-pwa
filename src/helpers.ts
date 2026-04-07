@@ -19,6 +19,7 @@ import {
   type Unit,
   type WindowElementPanel,
   type RepetitionConfig,
+  type WysiwygElement,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
 import { i18n } from "@/main.ts";
@@ -368,6 +369,7 @@ export const getMetadataFields = (
         copyToClipboard: (value as PanelMetaData).copyToClipboard,
         defaultValue: (value as PanelMetaData).defaultValue,
         disabled: (value as PanelMetaData).disabled,
+        isMultilingual: (value as PanelMetaData).isMultilingual,
         __typename: (value as PanelMetaData).__typename,
       };
 
@@ -498,6 +500,27 @@ export const findPanelMetadata = (
 
   return results;
 };
+
+export const findWysiwygElement = (
+  obj: any,
+): WysiwygElement[] => {
+  const results: WysiwygElement[] = [];
+
+  if (obj && obj.__typename === "WysiwygElement") {
+    results.push(obj);
+  }
+
+  if (typeof obj === "object") {
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const nestedResults = findWysiwygElement(obj[key]);
+        results.push(...nestedResults);
+      }
+    }
+  }
+
+  return results;
+}
 
 export const getEntityTitle = (entity: BaseEntity): string => {
   let title: string = entity.id;

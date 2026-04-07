@@ -26,6 +26,10 @@ import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
+import {
+  getMultilingualProvideKey,
+  type MultilingualFieldProvide,
+} from "@/composables/useMultilingualField";
 
 export type FieldMetadata =
   | PanelMetaData
@@ -93,6 +97,11 @@ export const useMetadataWrapper = (
   const { conditionalFieldIsRequired } = useConditionalValidation();
 
   const mediafileViewerContext: any = inject("mediafileViewerContext");
+  const metadataKey = props.metadata.key || props.metadata.metadataKey || "";
+  const multilingual = inject<MultilingualFieldProvide>(
+    getMultilingualProvideKey(metadataKey),
+    undefined,
+  );
   const getFieldKey = (): string => {
     const { getVeeValidateKey } = useVeeValidate();
     return getVeeValidateKey(
@@ -197,10 +206,16 @@ export const useMetadataWrapper = (
 
   const fieldValueProxy = computed({
     get: () => {
+      if (multilingual?.isEnabled?.value) {
+        return multilingual.currentValue.value;
+      }
       return field.value.value;
     },
     set: (val) => {
-     field.value.value = getNewFieldValue(val);
+      if (multilingual?.isEnabled?.value) {
+        multilingual.updateValue(val);
+      }
+      field.value.value = getNewFieldValue(val);
     },
   });
 

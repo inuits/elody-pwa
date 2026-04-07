@@ -15,6 +15,9 @@ import { useInheritedRelations } from "./useInheritedRelations";
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
 const teaserMetadataSaved = ref<{ [key: string]: object }>({});
+const multilingualTranslations = ref<{
+  [formId: string]: { [fieldKey: string]: { key: string; value: unknown; lang: string }[] };
+}>({});
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -312,6 +315,17 @@ const useFormHelper = () => {
         const isEnabledMultilanguage =
           config?.features?.supportsMultilingualMetadataEditing;
         if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {
+          const storedTranslations = getMultilingualTranslations(entityId, key);
+          if (storedTranslations?.length) {
+            for (const translation of storedTranslations) {
+              metadata.push({
+                key: translation.key,
+                value: translation.value,
+                lang: translation.lang,
+              });
+            }
+            return;
+          }
           normalizedMetadata.lang = locale;
         }
         metadata.push(normalizedMetadata);
@@ -535,6 +549,24 @@ const useFormHelper = () => {
     return { metadata, relations, updateOnlyRelations };
   };
 
+  const setMultilingualTranslations = (
+    formId: string,
+    fieldKey: string,
+    translations: { key: string; value: unknown; lang: string }[],
+  ) => {
+    if (!multilingualTranslations.value[formId]) {
+      multilingualTranslations.value[formId] = {};
+    }
+    multilingualTranslations.value[formId][fieldKey] = translations;
+  };
+
+  const getMultilingualTranslations = (
+    formId: string,
+    fieldKey: string,
+  ): { key: string; value: unknown; lang: string }[] | undefined => {
+    return multilingualTranslations.value[formId]?.[fieldKey];
+  };
+
   return {
     createForm,
     addForm,
@@ -562,6 +594,8 @@ const useFormHelper = () => {
     parseRelationValuesForFormSubmit,
     parseRelationMetadataForFormSubmit,
     parseInheritedRelationValuesFromFormSubmit,
+    setMultilingualTranslations,
+    getMultilingualTranslations,
   };
 };
 

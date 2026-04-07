@@ -62,6 +62,7 @@ import {
   type BaseEntity,
   type PanelMetaData,
   type WindowElementPanel,
+  type WysiwygElement,
   ColumnSizes
 } from "@/generated-types/queries";
 import EntityElement from "./entityElements/EntityElement.vue";
@@ -69,6 +70,7 @@ import {
   convertSizeToTailwind,
   determineDefaultIntialValues,
   findPanelMetadata,
+  findWysiwygElement,
 } from "@/helpers";
 import {
   useColumnResizeHelper,
@@ -132,26 +134,28 @@ const columns = computed<Column[]>(() => {
   return returnArray;
 });
 
-const panelsFields = computed<Record<string, PanelMetaData>>(() => {
-  const panelMetadataArray = getPanelMetadataFromViewData(columns.value);
-  const metadataMap: Record<string, PanelMetaData> = {};
+const panelsFields = computed<Record<string, PanelMetaData | WysiwygElement>>(() => {
+  const fieldArray = getFieldsFromViewData(columns.value);
+  const metadataMap: Record<string, PanelMetaData | WysiwygElement> = {};
 
-  panelMetadataArray.forEach((panel) => {
-    if (panel.key) {
-      metadataMap[panel.key] = panel;
+  fieldArray.forEach((field) => {
+    if (field.key || field.metadataKey) {
+      metadataMap[field.key || field.metadataKey] = field;
     }
   });
 
   return metadataMap;
 });
 
-const getPanelMetadataFromViewData = (viewData: any[]): PanelMetaData[] => {
+const getFieldsFromViewData = (viewData: any[]): (PanelMetaData | WysiwygElement)[] => {
   return viewData.flatMap((column) => {
     const windowElementPanels = getWindowElementPanels(column.elements || {});
 
     return [
       ...windowElementPanels.flatMap((panel) => findPanelMetadata(panel)),
-      ...findPanelMetadata(column),
+      ...windowElementPanels.flatMap((panel) => findWysiwygElement(panel)),
+      ...findPanelMetadata(column) || [],
+      ...findWysiwygElement(column) || [],
     ];
   });
 };

@@ -14,7 +14,7 @@
         {{ t(element.label) }}
       </h1>
     </div>
-    <div v-else class="pl-2 py-2 flex gap-2">
+    <div v-else class="pl-2 py-2 flex gap-2 items-center">
       <metadata-title :metadata="element" />
       <WYSIGYGVirtualKeyboard
         v-if="
@@ -25,6 +25,7 @@
         :keyboardClass="element.metadataKey"
         :extra-layouts="wysiwygElementConfiguration.virtualKeyboardLayouts"
       />
+      <MultilingualLocaleSelector :field-key="element.metadataKey" />
     </div>
     <div
       v-if="editor"
@@ -68,7 +69,7 @@
 
 <script setup lang="ts">
 import { Editor, EditorContent } from "@tiptap/vue-3";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch, inject } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import {
@@ -86,10 +87,15 @@ import {
   openDetailModal,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
 import type { HTMLContent } from "@tiptap/core";
+import {
+  getMultilingualProvideKey,
+  type MultilingualFieldProvide,
+} from "@/composables/useMultilingualField";
 
 const props = withDefaults(
   defineProps<{
@@ -122,6 +128,12 @@ const wysiwygElementConfiguration = ref<
   WysiwygElementConfiguration | undefined
 >(props.element.wysiwygElementConfiguration || undefined);
 
+const multilingual = inject<MultilingualFieldProvide>(
+  getMultilingualProvideKey(props.element.metadataKey),
+  undefined,
+);
+const isSwappingLocale = ref(false);
+
 const resetContent = () => {
   const content = editor.value?.options?.content;
   if (!content && content !== "") return;
@@ -131,7 +143,9 @@ const resetContent = () => {
 onMounted(async () => {
   document.addEventListener("discardEdit", resetContent);
   initialValue.value =
-    form.value?.values.intialValues[props.element.metadataKey];
+    multilingual?.isEnabled?.value
+      ? multilingual.currentValue.value
+      : form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
 
   const customExtensions = [WysiwygExtensions.ElodyTaggingExtension];
@@ -175,8 +189,13 @@ onMounted(async () => {
     editable: useEditHelper.isEdit,
     content: initialValue.value,
     onUpdate({ editor }) {
+      if (isSwappingLocale.value) return;
       const htmlContent = editor.getHTML() as HTMLContent;
       paragraphAmount.value = countLinesOfContent(htmlContent);
+      if (multilingual?.isEnabled?.value) {
+        multilingual.updateValue(htmlContent);
+        return;
+      }
       if (!form.value) return;
       form.value.setFieldValue(
         `${ValidationFields.IntialValues}.${props.element.metadataKey}`,
@@ -208,13 +227,26 @@ watch(
   () => form.value?.values.intialValues[props.element.metadataKey],
   () => {
     if (editor.value && !useEditHelper.isEdit) {
-      initialValue.value =
-        form.value?.values.intialValues[props.element.metadataKey];
-      editor.value.commands.setContent(initialValue.value);
+      const neValue = multilingual?.isEnabled?.value
+        ? multilingual.currentValue.value
+        : form.value?.values.intialValues[props.element.metadataKey];
+      initialValue.value = neValue;
+      editor.value.commands.setContent(neValue);
     }
   },
   { immediate: true },
 );
+
+if (multilingual) {
+  watch(multilingual.selectedLocale, () => {
+    if (!editor.value) return;
+    isSwappingLocale.value = true;
+    const newContent = multilingual.currentValue.value || "";
+    editor.value.commands.setContent(newContent);
+    paragraphAmount.value = countLinesOfContent(newContent);
+    isSwappingLocale.value = false;
+  });
+}
 </script>
 
 <style>

@@ -41,15 +41,23 @@
           :key="`${formId}_${metadataItem.key || 'no-key'}`"
           class="w-1/1"
         >
-          <metadata-wrapper
-            ref="orderMetadataChild"
+          <MultilingualWrapper
+            :metadata="metadataItem"
             :form-id="formId"
-            v-model:metadata="metadataItem as MetadataField"
-            :is-edit="useEditHelper.isEdit"
-            :linked-entity-id="intialValues?.id || itemId"
-            :should-hide="true"
-            :entity-type="entityTypename"
-          />
+            :hide-selector="true"
+          >
+            <template #default="{ localizedMetadata }">
+              <metadata-wrapper
+                ref="orderMetadataChild"
+                :form-id="formId"
+                :metadata="(localizedMetadata || metadataItem) as MetadataField"
+                :is-edit="useEditHelper.isEdit"
+                :linked-entity-id="intialValues?.id || itemId"
+                :should-hide="true"
+                :entity-type="entityTypename"
+              />
+            </template>
+          </MultilingualWrapper>
         </div>
       </div>
     </div>
@@ -141,32 +149,40 @@
           ? { gridColumn: `span ${metadataItem.colSpan}` }
           : {}"
       >
-        <ReadOnlyMetadataWrapper
-          v-if="!useEditHelper.isEdit"
+        <MultilingualWrapper
+          :metadata="metadataItem"
           :form-id="formId || 'listview'"
-          :metadata="metadataItem as MetadataField"
-          :is-edit="useEditHelper.isEdit"
-          :linked-entity-id="intialValues?.id || itemId"
-          :entity-type="entityTypename"
-          :highlight="
-            isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile
-          "
-          :break-words="true"
-        />
-        <metadata-wrapper
-          v-else
-          :form-id="formId"
-          :metadata="metadataItem as MetadataField"
-          :is-edit="useEditHelper.isEdit"
-          :linked-entity-id="intialValues?.id || itemId"
-          :entity-type="entityTypename"
-          :list-item-entity="listItemEntity"
-          :show-errors="useEditHelper.showErrors"
-          @add-refetch-function-to-edit-state="
-            () => emit('addRefetchFunctionToEditState')
-          "
-          :break-words="true"
-        />
+          :hide-selector="true"
+        >
+          <template #default="{ localizedMetadata }">
+            <ReadOnlyMetadataWrapper
+              v-if="!useEditHelper.isEdit"
+              :form-id="formId || 'listview'"
+              :metadata="(localizedMetadata || metadataItem) as MetadataField"
+              :is-edit="useEditHelper.isEdit"
+              :linked-entity-id="intialValues?.id || itemId"
+              :entity-type="entityTypename"
+              :highlight="
+                isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile
+              "
+              :break-words="true"
+            />
+            <metadata-wrapper
+              v-else
+              :form-id="formId"
+              :metadata="(localizedMetadata || metadataItem) as MetadataField"
+              :is-edit="useEditHelper.isEdit"
+              :linked-entity-id="intialValues?.id || itemId"
+              :entity-type="entityTypename"
+              :list-item-entity="listItemEntity"
+              :show-errors="useEditHelper.showErrors"
+              @add-refetch-function-to-edit-state="
+                () => emit('addRefetchFunctionToEditState')
+              "
+              :break-words="true"
+            />
+          </template>
+        </MultilingualWrapper>
       </div>
     </div>
 
@@ -278,6 +294,7 @@ import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/windowPanel/EntityElementWindowPanel.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, onUpdated, ref, watch } from "vue";
