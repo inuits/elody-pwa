@@ -299,17 +299,17 @@ const isOneOfRequired = computed(
 );
 
 const isOneOfRequiredMetadataField = computed(() => {
-  return isValidationRulePresentOnField(
-    props.metadata,
-    ValidationRules.HasOneOfRequiredMetadata,
-  );
+  return isValidationRulePresentOnField({
+    metadata: props.metadata,
+    rule: ValidationRules.HasOneOfRequiredMetadata,
+  });
 });
 
 const isOneOfRequiredRelationField = computed(() => {
-  return isValidationRulePresentOnField(
-    props.metadata,
-    ValidationRules.HasOneOfRequiredRelations,
-  );
+  return isValidationRulePresentOnField({
+    metadata: props.metadata,
+    rule: ValidationRules.HasOneOfRequiredRelations,
+  });
 });
 
 onBeforeMount(() => {

@@ -7,16 +7,22 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 
+export type GetVeeValidateKeyParams = {
+  metadata: FieldMetadata;
+  linkedEntityId?: string;
+  isEdit?: boolean;
+  repeatablePanelConfig?: PanelRepetitionProps;
+};
+
+export type IsValidationRulePresentOnFieldParams = {
+  metadata: FieldMetadata;
+  rule: ValidationRules | ValidationRules[];
+};
+
 export const useVeeValidate = (): {
-  getVeeValidateKey: (
-    metadata: FieldMetadata,
-    linkedEntityId: string | undefined,
-    isEdit: boolean | undefined,
-    repeatablePanelConfig: PanelRepetitionProps | undefined,
-  ) => string;
+  getVeeValidateKey: (params: GetVeeValidateKeyParams) => string;
   isValidationRulePresentOnField: (
-    metadata: FieldMetadata,
-    rule: ValidationRules | ValidationRules[],
+    params: IsValidationRulePresentOnFieldParams,
   ) => boolean;
 } => {
   const getBaseKey = (
@@ -34,10 +40,10 @@ export const useVeeValidate = (): {
     return `${baseKey}`;
   };
 
-  const isValidationRulePresentOnField = (
-    metadata: FieldMetadata,
-    rule: ValidationRules | ValidationRules[],
-  ): boolean => {
+  const isValidationRulePresentOnField = ({
+    metadata,
+    rule,
+  }: IsValidationRulePresentOnFieldParams): boolean => {
     try {
       if (Array.isArray(rule)) {
         const test = rule.map((item) =>
@@ -51,12 +57,12 @@ export const useVeeValidate = (): {
     }
   };
 
-  const getVeeValidateKey = (
-    metadata: FieldMetadata,
-    linkedEntityId: string | undefined = undefined,
-    isEdit: boolean | undefined = undefined,
-    repeatablePanelConfig: RepeatablePanelConfig | undefined = undefined,
-  ): string => {
+  const getVeeValidateKey = ({
+    metadata,
+    linkedEntityId,
+    isEdit,
+    repeatablePanelConfig,
+  }: GetVeeValidateKeyParams): string => {
     const fieldKind:
       | "PanelMetaData"
       | "PanelRelationMetaData"
@@ -72,7 +78,9 @@ export const useVeeValidate = (): {
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
     // Todo: Does this regex field really need 'special treatment'?
-    if (isValidationRulePresentOnField(metadata, ValidationRules.Regex))
+    if (
+      isValidationRulePresentOnField({ metadata, rule: ValidationRules.Regex })
+    )
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
     // Needs to be saved as metadata on a relation
@@ -83,10 +91,13 @@ export const useVeeValidate = (): {
     if (fieldKind === "PanelRelationRootData")
       return `${ValidationFields.RelationRootdata}.${baseFieldKey}`;
 
-    const requiredRelations = isValidationRulePresentOnField(metadata, [
-      ValidationRules.HasRequiredRelation,
-      ValidationRules.HasOneOfRequiredRelations,
-    ]);
+    const requiredRelations = isValidationRulePresentOnField({
+      metadata,
+      rule: [
+        ValidationRules.HasRequiredRelation,
+        ValidationRules.HasOneOfRequiredRelations,
+      ],
+    });
 
     // Required relations and not edit mode
     if (requiredRelations && !isEdit)
@@ -94,6 +105,10 @@ export const useVeeValidate = (): {
 
     if (requiredRelations)
       return `${ValidationFields.RelationValues}.${metadata.inputField.relationType}`;
+
+    // If the field has a formatter, we want to validate a label and only in edit mode
+    if (metadata.inputField && metadata.value?.formatter && isEdit)
+      return `${ValidationFields.IntialValues}.${baseFieldKey}.label`;
 
     if (metadata.inputField)
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;

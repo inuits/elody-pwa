@@ -104,12 +104,12 @@ export const useMetadataWrapper = (
   );
   const getFieldKey = (): string => {
     const { getVeeValidateKey } = useVeeValidate();
-    return getVeeValidateKey(
-      props.metadata,
-      props.linkedEntityId,
-      props.isEdit,
-      props.repeatablePanelConfig,
-    );
+    return getVeeValidateKey({
+      metadata: props.metadata,
+      linkedEntityId: props.linkedEntityId,
+      isEdit: props.isEdit,
+      repeatablePanelConfig: props.repeatablePanelConfig,
+    });
   };
 
   const { setExtraVariables, fetchAdvancedPermissions } = usePermissions();

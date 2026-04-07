@@ -45,22 +45,33 @@ export const useFieldValidation = (
       } else defaultRules += `|${validationValue.join("|")}`;
     }
 
-    if (isValidationRulePresentOnField(field, ValidationRules.Regex)) {
+    if (
+      isValidationRulePresentOnField({
+        metadata: field,
+        rule: ValidationRules.Regex,
+      })
+    ) {
       const cleanedRegex = cleanRegexValue(validationOnField.regex || "");
       return `${defaultRules}|${ValidationRules.Regex}:${cleanedRegex}`;
     }
 
     if (
-      isValidationRulePresentOnField(field, [
-        ValidationRules.HasRequiredRelation,
-        ValidationRules.HasOneOfRequiredRelations,
-      ]) &&
+      isValidationRulePresentOnField({
+        metadata: field,
+        rule: [
+          ValidationRules.HasRequiredRelation,
+          ValidationRules.HasOneOfRequiredRelations,
+        ],
+      }) &&
       !isEdit
     )
       return `${defaultRules}|required`;
 
     if (
-      isValidationRulePresentOnField(field, ValidationRules.HasRequiredRelation)
+      isValidationRulePresentOnField({
+        metadata: field,
+        rule: ValidationRules.HasRequiredRelation,
+      })
     ) {
       const {
         relationType,
@@ -71,10 +82,10 @@ export const useFieldValidation = (
     }
 
     if (
-      isValidationRulePresentOnField(
-        field,
-        ValidationRules.HasOneOfRequiredRelations,
-      )
+      isValidationRulePresentOnField({
+        metadata: field,
+        rule: ValidationRules.HasOneOfRequiredRelations,
+      })
     ) {
       const { relationTypes = [], amount } =
         validationOnField.has_one_of_required_relations ?? {};
@@ -82,10 +93,10 @@ export const useFieldValidation = (
     }
 
     if (
-      isValidationRulePresentOnField(
-        field,
-        ValidationRules.HasOneOfRequiredMetadata,
-      )
+      isValidationRulePresentOnField({
+        metadata: field,
+        rule: ValidationRules.HasOneOfRequiredMetadata,
+      })
     ) {
       const { includedMetadataFields = [], amount } =
         validationOnField.has_one_of_required_metadata ?? {};
