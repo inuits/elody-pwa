@@ -1,9 +1,10 @@
 /**
- * Tests for TableInputField, TableRowInputField, and AutocompleteRelationCell
+ * Tests for TableInputField, TableCellInputField, and AutocompleteRelationCell
  */
 import { shallowMount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
+import { useField } from "vee-validate";
 import { EditStatus, InputFieldTypes } from "@/generated-types/queries";
 import type { SubField, InputField } from "@/generated-types/queries";
 
@@ -83,9 +84,16 @@ vi.mock("@/composables/useManageEntities", () => ({
   })),
 }));
 
+// ─── helpers mock (getTranslatedMessage uses i18n.global which is unavailable in tests) ───
+
+vi.mock("@/helpers", () => ({
+  getTranslatedMessage: vi.fn((key: string) => key),
+}));
+
 // ─── Lazy component imports (must come after vi.mock() calls) ─────────────────
 
 const { default: TableInputField } = await import("@/components/tableInputFields/TableInputField.vue");
+const { default: TableCellInputField } = await import("@/components/tableInputFields/TableCellInputField.vue");
 const { default: AutocompleteRelationCell } = await import(
   "@/components/tableInputFields/AutocompleteRelationCell.vue"
 );
@@ -416,6 +424,19 @@ describe("TableInputField", () => {
       expect(mockReplace).not.toHaveBeenCalled();
     });
   });
+
+  // ── row deletion ──────────────────────────────────────────────────────────────
+  //
+  // Regression tests for: deleting the middle row of 3 pre-loaded rows also
+  // removing the last row from the UI.
+  //
+  // Root cause: TableCellInputField calls useField(props.fieldKey) with a plain
+  // string — the path is fixed at mount time. When remove(1) shifts row 2 → index 1,
+  // the cell's useField is still bound to authors[2].name which vee-validate no
+  // longer has, so the cell reads undefined and appears blank/deleted.
+  //
+  // Fix: pass a getter () => props.fieldKey so the binding is reactive.
+
 });
 
 
@@ -466,4 +487,68 @@ describe("AutocompleteRelationCell", () => {
     expect(mockSetFieldValue).not.toHaveBeenCalled();
   });
 
+});
+
+// ─── TableCellInputField ──────────────────────────────────────────────────────
+//
+// The key regression: TableCellInputField must pass a getter (() => props.fieldKey)
+// to useField instead of a plain string. Without it, when rowIndex shifts after a
+// deletion (e.g. row 2 becomes row 1), the cell keeps reading from the now-stale
+// authors[2].name path which vee-validate has already cleared, causing the last row
+// to appear as if it was deleted too.
+
+describe("TableCellInputField", () => {
+  beforeEach(() => {
+    vi.mocked(useField).mockClear();
+  });
+
+  it("passes a getter function — not a plain string — to useField", () => {
+    shallowMount(TableCellInputField, {
+      props: {
+        modelValue: "Alice",
+        subField: textSubField,
+        fieldKey: "authors[2].name",
+        formId: "form-1",
+      },
+    });
+
+    expect(vi.mocked(useField)).toHaveBeenCalledOnce();
+    const firstArg = vi.mocked(useField).mock.calls[0][0];
+    expect(typeof firstArg).toBe("function");
+  });
+
+  it("the getter returns the current fieldKey at mount time", () => {
+    shallowMount(TableCellInputField, {
+      props: {
+        modelValue: "Alice",
+        subField: textSubField,
+        fieldKey: "authors[2].name",
+        formId: "form-1",
+      },
+    });
+
+    const getter = vi.mocked(useField).mock.calls[0][0] as () => string;
+    expect(getter()).toBe("authors[2].name");
+  });
+
+  it("the getter reflects the updated fieldKey after a rowIndex shift (regression for middle-row deletion bug)", async () => {
+    const wrapper = shallowMount(TableCellInputField, {
+      props: {
+        modelValue: "Charlie",
+        subField: textSubField,
+        fieldKey: "authors[2].name",
+        formId: "form-1",
+      },
+    });
+
+    // Grab the getter that was passed to useField at mount
+    const getter = vi.mocked(useField).mock.calls[0][0] as () => string;
+    expect(getter()).toBe("authors[2].name");
+
+    // Simulate the rowIndex shifting from 2 → 1 after the middle row is deleted
+    await wrapper.setProps({ fieldKey: "authors[1].name" });
+
+    // The getter must now return the new path so vee-validate reads the correct value
+    expect(getter()).toBe("authors[1].name");
+  });
 });

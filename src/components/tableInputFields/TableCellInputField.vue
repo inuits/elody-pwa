@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useField } from "vee-validate";
 import {
   type DropdownOption,
@@ -78,7 +78,7 @@ const fieldLabel = computed<string>(() =>
 
 const { getValidationRules } = useFieldValidation(() => props.subField.inputField.validation);
 const validationRules = computed(() => getValidationRules(true, false));
-const { value, errorMessage } = useField<any>(props.fieldKey, validationRules, { label: fieldLabel.value });
+const { value, validate, errorMessage } = useField<any>(() => props.fieldKey, validationRules, { label: fieldLabel.value });
 
 const isFieldRelationDropdown = computed(
   () =>
@@ -89,5 +89,10 @@ const isFieldMetadataDropdown = computed(
   () =>
     props.subField.inputField?.type === InputFieldTypes.DropdownMultiselectMetadata ||
     props.subField.inputField?.type === InputFieldTypes.DropdownSingleselectMetadata,
+);
+
+watch(
+  () => props.fieldKey,
+  async () => await validate()
 );
 </script>
