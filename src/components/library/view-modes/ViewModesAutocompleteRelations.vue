@@ -194,7 +194,7 @@ onMounted(async () => {
   );
 
   if (props.advancedFilterInputForRetrievingOptions && props.isReadOnly) {
-    if (props.isMetadataField) preSelect();
+    if (props.isMetadataField) preSelectMetadata();
     else {
       await initAutocompleteOption();
     }
@@ -202,7 +202,7 @@ onMounted(async () => {
     const preSelectValue = props.modelValue;
     await initAutocompleteOption();
     if (props.advancedFilterInputForRetrievingOptions)
-      if (props.isMetadataField) preSelect(preSelectValue);
+      if (props.isMetadataField) preSelectMetadata(preSelectValue);
   }
 });
 
@@ -231,11 +231,13 @@ const initAutocompleteOption = async () => {
 
   if (
     props.autoSelectable &&
-    allEntitiesHelper.value.entityDropdownOptions.value.length === 1 &&
-    relatedEntitiesHelper.value.entityDropdownOptions.value.length === 0
+    allEntitiesHelper.value.entityDropdownOptions.value?.length === 1 &&
+    relatedEntitiesHelper.value.entityDropdownOptions.value?.length === 0
   ) {
     populateSelectedOptions(allEntitiesHelper.value.entityDropdownOptions);
     handleSelect(allEntitiesHelper.value.entityDropdownOptions);
+  } else if (props.autoSelectable && props.modelValue) {
+    await preSelectRelations();
   } else {
     populateSelectedOptions(relatedEntitiesHelper.value.entityDropdownOptions);
   }
@@ -323,7 +325,7 @@ const handleCreatingFromTag = async (option: any) => {
   }
 };
 
-const preSelect = (
+const preSelectMetadata = (
   preSelectValue: DropdownOption | DropdownOption[] | undefined,
 ) => {
   let selection: DropdownOption[] = [];
@@ -341,6 +343,30 @@ const preSelect = (
   }
   handleSelect(selection, true);
 };
+
+const preSelectRelations = async () => {
+  const selection: DropdownOption[] = [];
+
+  if (Array.isArray(props.modelValue)) {
+    for (const value of props.modelValue) {
+      const found = await findAutocompleteOption(value);
+      if (found) selection.push(found);
+      else selection.push({ label: props.modelValue, value: props.modelValue })
+    }
+  } else if (props.modelValue) {
+    const found = await findAutocompleteOption(props.modelValue);
+    if (found) selection.push(found);
+    else selection.push({ label: props.modelValue, value: props.modelValue })
+  }
+
+  allEntitiesHelper.value.getAutocompleteOptions();
+  handleSelect(selection, true);
+};
+
+const findAutocompleteOption = async (value: string): Promise<DropdownOption | undefined> => {
+  await allEntitiesHelper.value.getAutocompleteOptions(value);
+  return allEntitiesHelper.value.entityDropdownOptions[0]
+}
 
 const handleTagClick = async (tag: DropdownOption) => {
   if (isEdit) return;
