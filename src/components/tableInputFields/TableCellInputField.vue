@@ -3,7 +3,8 @@
     <BaseInputTextNumberDatetime
       v-if="
         subField.inputField.type === InputFieldTypes.Text ||
-        subField.inputField.type === InputFieldTypes.Checkbox
+        subField.inputField.type === InputFieldTypes.Checkbox ||
+        subField.inputField.type === InputFieldTypes.Number
       "
       class="w-full"
       v-model:model-value="value as string"
@@ -30,13 +31,13 @@
       v-else-if="isFieldMetadataDropdown"
       v-model:model-value="value as string"
       :metadata-dropdown-options="subField.inputField.options"
-      :canCreateOption="true"
       :select-type="
         subField.inputField.type === InputFieldTypes.DropdownSingleselectMetadata
           ? 'single'
           : 'multi'
       "
-      :disabled="false"
+      :canCreateOption="subField.inputField.canCreateEntityFromOption"
+      :disabled="subField.inputField.disabled"
       mode="edit"
     />
     <p
