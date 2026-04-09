@@ -120,7 +120,7 @@ const serializeRelationRow = (item: Record<string, any>): Record<string, any> =>
   const relationKey = item[keyField.key];
   const metadata: MetadataInput[] = props.subFields
     .filter((sf) => sf.inputField?.isMetadataField === true)
-    .map((sf) => ({ key: sf.key, value: item[sf.key] }));
+    .map((sf) => ({ key: sf.key, value: mapMetadataToCorrectFormat(sf, item) }));
   return {
     key: relationKey || "",
     type: props.relationType,
@@ -128,6 +128,16 @@ const serializeRelationRow = (item: Record<string, any>): Record<string, any> =>
     metadata,
   };
 };
+
+const mapMetadataToCorrectFormat = (subfield: SubField, item: Record<string, any>) => {
+  if (subfield.inputField?.type === InputFieldTypes.Checkbox) {
+    const value = item[subfield.key];
+    if (!value) return false;
+    return value;
+  }
+  return item[subfield.key] || "";
+}
+
 watch(
   () => props.modelValue,
   (newVal) => {
