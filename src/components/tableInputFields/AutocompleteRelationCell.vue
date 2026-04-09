@@ -45,6 +45,64 @@ const stateKey = computed(
   () => `${props.formId}-${props.inputField.relationType}-fetchAll`,
 );
 
+const handleSelect = (options: DropdownOption[] | DropdownOption | undefined) => {
+  if (!options) {
+    selectedOptions.value = [];
+    emit("update:modelValue", undefined);
+    return;
+  }
+  const arr = Array.isArray(options) ? options : [options];
+  selectedOptions.value = arr;
+  emit("update:modelValue", arr[0]?.value as string | undefined);
+};
+
+const syncSelectedFromModelValue = async () => {
+  const selection: DropdownOption[] = [];
+
+  if (Array.isArray(props.modelValue)) {
+    for (const value of props.modelValue) {
+      const found = await findAutocompleteOption(value);
+      if (found) selection.push(found);
+      else selection.push({ label: props.modelValue, value: props.modelValue })
+    }
+  } else if (props.modelValue) {
+    const found = await findAutocompleteOption(props.modelValue);
+    if (found) selection.push(found);
+    else selection.push({ label: props.modelValue, value: props.modelValue })
+  }
+
+  allEntitiesHelper.value.getAutocompleteOptions();
+  handleSelect(selection);
+};
+
+const findAutocompleteOption = async (value: string): Promise<DropdownOption | undefined> => {
+  await allEntitiesHelper.value.getAutocompleteOptions(value);
+  return allEntitiesHelper.value.entityDropdownOptions[0]
+}
+
+const debouncedSearch = debounce((query: string) => {
+  allEntitiesHelper.value?.getAutocompleteOptions(query);
+}, 250);
+
+const handleCreateFromTag = async (option: DropdownOption) => {
+  if (!props.inputField.canCreateEntityFromOption) return;
+  isCreatingEntity.value = true;
+  try {
+    const newEntity = await createEntity({
+      entityType: props.inputField.entityType as any,
+      metadata: props.inputField.metadataKeyToCreateEntityFromOption
+        ? [{ key: props.inputField.metadataKeyToCreateEntityFromOption, value: option.label }]
+        : [],
+    });
+    const newOption: DropdownOption = { value: newEntity.uuid, label: option.label, icon: undefined };
+    selectedOptions.value = [newOption];
+    emit("update:modelValue", newEntity.uuid);
+  } finally {
+    isCreatingEntity.value = false;
+  }
+};
+
+
 onBeforeMount(() => {
   allEntitiesHelper.value = useGetDropdownOptions(
     stateKey.value,
@@ -70,54 +128,9 @@ onBeforeUnmount(() => {
   debouncedSearch.cancel();
 });
 
-const syncSelectedFromModelValue = () => {
-  if (!props.modelValue) {
-    selectedOptions.value = [];
-    return;
-  }
-  const options = allEntitiesHelper.value?.entityDropdownOptions.value ?? [];
-  const found = options.find((o) => o.value === props.modelValue);
-  selectedOptions.value = found
-    ? [found]
-    : [{ value: props.modelValue, label: props.modelValue, icon: undefined }];
-};
-
 watch(() => props.modelValue, syncSelectedFromModelValue);
 watch(
   () => allEntitiesHelper.value?.entityDropdownOptions.value,
   () => syncSelectedFromModelValue(),
 );
-
-const debouncedSearch = debounce((query: string) => {
-  allEntitiesHelper.value?.getAutocompleteOptions(query);
-}, 250);
-
-const handleSelect = (options: DropdownOption[] | DropdownOption | undefined) => {
-  if (!options) {
-    selectedOptions.value = [];
-    emit("update:modelValue", undefined);
-    return;
-  }
-  const arr = Array.isArray(options) ? options : [options];
-  selectedOptions.value = arr;
-  emit("update:modelValue", arr[0]?.value as string | undefined);
-};
-
-const handleCreateFromTag = async (option: DropdownOption) => {
-  if (!props.inputField.canCreateEntityFromOption) return;
-  isCreatingEntity.value = true;
-  try {
-    const newEntity = await createEntity({
-      entityType: props.inputField.entityType as any,
-      metadata: props.inputField.metadataKeyToCreateEntityFromOption
-        ? [{ key: props.inputField.metadataKeyToCreateEntityFromOption, value: option.label }]
-        : [],
-    });
-    const newOption: DropdownOption = { value: newEntity.uuid, label: option.label, icon: undefined };
-    selectedOptions.value = [newOption];
-    emit("update:modelValue", newEntity.uuid);
-  } finally {
-    isCreatingEntity.value = false;
-  }
-};
 </script>
