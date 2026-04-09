@@ -38,12 +38,6 @@
           @resize-column="resizeColumn"
         >
         </entity-element>
-        <ProcessorMetadataPanel
-          v-if="index === currentColumnConfig[entity.id]?.length - 1 && processorConfig"
-          :processor-config="processorConfig"
-          :is-editing="useEditHelper.isEdit"
-          @save="handleProcessorMetadataSave"
-        />
       </div>
     </div>
   </entity-form>
@@ -71,7 +65,6 @@ import {
   ColumnSizes
 } from "@/generated-types/queries";
 import EntityElement from "./entityElements/EntityElement.vue";
-import ProcessorMetadataPanel from "@/components/ProcessorMetadataPanel.vue";
 import {
   convertSizeToTailwind,
   determineDefaultIntialValues,
@@ -178,17 +171,6 @@ const getWindowElementPanels = (
   });
 
   return panels;
-};
-
-const processorConfig = computed(() => {
-  return (props.entity as any).processorConfig ?? null;
-});
-
-const handleProcessorMetadataSave = (values: Record<string, string>) => {
-  emit("mutatedEntityUpdated", {
-    ...props.entity,
-    metadata: Object.entries(values).map(([key, value]) => ({ key, value })),
-  } as any);
 };
 
 const resizeColumn = (toggled: boolean) => {

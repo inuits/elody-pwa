@@ -153,7 +153,6 @@ import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
-  enrichProcessorConfig,
   formatTeaserMetadata,
   getEntityPageRoute,
   getMappedSlug,
@@ -263,27 +262,9 @@ const processedEntities = computed(() => {
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity);
 
-    let enrichedTeaserMetadata = entity.teaserMetadata;
-    let enrichedIntialValues = entity.intialValues;
-
-    if ((entity as any).processorConfig?.panels) {
-      const relationObj =
-        relation !== "no-relation-found"
-          ? (relation as { relation: any }).relation
-          : null;
-      const result = enrichProcessorConfig(
-        entity.teaserMetadata,
-        entity.intialValues,
-        (entity as any).processorConfig,
-        relationObj,
-      );
-      enrichedTeaserMetadata = result.teaserMetadata;
-      enrichedIntialValues = result.intialValues;
-    }
-
     const formattedMetadata = formatTeaserMetadata(
-      enrichedTeaserMetadata,
-      enrichedIntialValues,
+      entity.teaserMetadata,
+      entity.intialValues,
       previewEnabled,
     );
     const mediaFilename = getMediaFilenameFromEntity(entity);
@@ -312,7 +293,7 @@ const processedEntities = computed(() => {
       contextMenu,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
-      intialValues: enrichedIntialValues,
+      intialValues: entity.intialValues,
       relationValues: entity.relationValues,
       media: mediaFilename,
       thumbIcon: thumbnail,
