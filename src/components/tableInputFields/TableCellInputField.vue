@@ -7,32 +7,37 @@
         subField.inputField.type === InputFieldTypes.Number
       "
       class="w-full"
-      v-model:model-value="value as string"
+      v-model:model-value="value"
       input-style="defaultWithBorder"
-      :type="subField.inputField.type === InputFieldTypes.Checkbox ? 'checkbox' : 'text'"
+      :type="
+        subField.inputField.type === InputFieldTypes.Checkbox
+          ? 'checkbox'
+          : 'text'
+      "
       :disabled="disabled"
     />
     <AdvancedDropdown
       v-else-if="subField.inputField.type === InputFieldTypes.Dropdown"
       class="w-full"
-      v-model:model-value="value as string"
+      v-model:model-value="values"
       :options="(subField.inputField.options as DropdownOption[]) ?? []"
       :disable="disabled"
       style-type="defaultWithBorder"
     />
     <AutocompleteRelationCell
       v-else-if="isFieldRelationDropdown"
-      v-model:model-value="value as string"
+      v-model:model-value="value"
       :input-field="subField.inputField"
       :form-id="formId"
       :disabled="disabled"
     />
     <ViewModesAutocompleteMetadata
       v-else-if="isFieldMetadataDropdown"
-      v-model:model-value="value as string"
+      v-model:model-value="value"
       :metadata-dropdown-options="subField.inputField.options"
       :select-type="
-        subField.inputField.type === InputFieldTypes.DropdownSingleselectMetadata
+        subField.inputField.type ===
+        InputFieldTypes.DropdownSingleselectMetadata
           ? 'single'
           : 'multi'
       "
@@ -77,23 +82,33 @@ const fieldLabel = computed<string>(() =>
   getTranslatedMessage(props.subField.label as string | "metadata.no-label"),
 );
 
-const { getValidationRules } = useFieldValidation(() => props.subField.inputField.validation);
+const { getValidationRules } = useFieldValidation(
+  () => props.subField.inputField.validation,
+);
 const validationRules = computed(() => getValidationRules(true, false));
-const { value, validate, errorMessage } = useField<any>(() => props.fieldKey, validationRules, { label: fieldLabel.value });
+const { value, validate, errorMessage } = useField<any>(
+  () => props.fieldKey,
+  validationRules,
+  { label: fieldLabel.value },
+);
 
 const isFieldRelationDropdown = computed(
   () =>
-    props.subField.inputField?.type === InputFieldTypes.DropdownMultiselectRelations ||
-    props.subField.inputField?.type === InputFieldTypes.DropdownSingleselectRelations,
+    props.subField.inputField?.type ===
+      InputFieldTypes.DropdownMultiselectRelations ||
+    props.subField.inputField?.type ===
+      InputFieldTypes.DropdownSingleselectRelations,
 );
 const isFieldMetadataDropdown = computed(
   () =>
-    props.subField.inputField?.type === InputFieldTypes.DropdownMultiselectMetadata ||
-    props.subField.inputField?.type === InputFieldTypes.DropdownSingleselectMetadata,
+    props.subField.inputField?.type ===
+      InputFieldTypes.DropdownMultiselectMetadata ||
+    props.subField.inputField?.type ===
+      InputFieldTypes.DropdownSingleselectMetadata,
 );
 
 watch(
   () => props.fieldKey,
-  async () => await validate()
+  async () => await validate(),
 );
 </script>
