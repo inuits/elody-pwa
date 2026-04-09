@@ -34,6 +34,7 @@ vi.mock("vee-validate", async (importOriginal) => {
     })),
     useField: vi.fn(() => ({
       value: ref(""),
+      validate: () => {},
       errorMessage: ref(""),
     })),
   };
