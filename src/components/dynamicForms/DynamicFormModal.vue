@@ -21,6 +21,8 @@
               :dynamic-form-query="
                 getModalInfo(TypeModals.DynamicForm).formQuery
               "
+              :form-key="formTab.formKey"
+              :all-form-keys="formTabArray.map(ft => ft.formKey)"
               :router="useRouter()"
               :modal-form-fields="formTab.formFields"
               :tab-name="tabsTitles[tabIndex]"

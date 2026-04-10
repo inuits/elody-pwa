@@ -51,6 +51,10 @@ export const useModalActions = () => {
     return callbackFunctions.value;
   };
 
+  const getArgumentsForSubmitAllFormTabs = (): SubmitArguments => {
+    return callbackFunctions.value;
+  };
+
   const getArgumentsForDownload = (): {
     relations: BaseRelationValuesInput[];
     entities: [];
@@ -124,6 +128,9 @@ export const useModalActions = () => {
     } = {
       [ActionType.Submit]: {
         extractActionArguments: () => getArgumentsForSubmit(),
+      },
+      [ActionType.SubmitAllFormTabs]: {
+        extractActionArguments: () => getArgumentsForSubmitAllFormTabs(),
       },
       [ActionType.SubmitWithUpload]: {
         extractActionArguments: () => getArgumentsForSubmit(),

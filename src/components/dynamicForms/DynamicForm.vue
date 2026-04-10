@@ -38,7 +38,7 @@
             field.inputField?.type ===
               BaseFieldType.BaseMagazineWithCsvImportField
           "
-          :form-id="dynamicFormQuery"
+          :form-id="formId"
           :input-field-type="field.inputField?.type"
           :close-and-delete-form="closeAndDeleteForm"
           @set-show-errors="(value) => setShowErrors(value)"
@@ -61,7 +61,7 @@
             !nonStandardFieldTypes.includes(field.inputField.type)
           "
           v-show="!field.hiddenField?.hidden"
-          :form-id="dynamicFormQuery"
+          :form-id="formId"
           :metadata="field as PanelMetaData"
           :is-edit="true"
           form-flow="create"
@@ -128,7 +128,7 @@
               class="pb-4"
             >
               <metadata-wrapper
-                :form-id="dynamicFormQuery"
+                :form-id="formId"
                 :metadata="uploadContainerField"
                 :is-edit="true"
                 form-flow="create"
@@ -274,6 +274,8 @@ import { useUploadState } from "@/composables/upload/useUploadState";
 const props = withDefaults(
   defineProps<{
     dynamicFormQuery: string;
+    formKey?: string;
+    allFormKeys?: string[];
     router: Router;
     modalFormFields?: object;
     tabName?: string;
@@ -281,6 +283,7 @@ const props = withDefaults(
     prefilledFormValues?: object;
   }>(),
   {
+    formKey: undefined,
     modalFormFields: undefined,
     showFormTitle: true,
   },
@@ -298,9 +301,11 @@ const nonStandardFieldTypes: BaseFieldType[] = [
 
 const modalFormFields = props.modalFormFields;
 const config: any = inject("config");
+const tabs: any = inject("TabsProvider");
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const { currentTenant } = useApp();
 const {
+  getForm,
   createForm,
   deleteForm,
   parseRelationValuesForFormSubmit,
@@ -407,6 +412,11 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   return normalizeFields(formTabObjects);
 });
 
+const formId = computed<string>(() => {
+  if (props.formKey) return props.formKey;
+  return props.dynamicFormQuery;
+});
+
 const normalizeModalFormFields = (formFields: FormFields) => {
   return Object.values(formFields).filter((value) => typeof value === "object");
 };
@@ -438,7 +448,7 @@ const getSortedFieldArray = computed(() => {
 });
 
 const form = ref<FormContext<any>>();
-const formContainsErrors = computed((): boolean => !form.value?.meta.valid);
+const formContainsErrors = computed((): boolean => Object.keys(form.value?.errors ?? {}).length > 0);
 const showErrors = ref<boolean>(false);
 const isButtonDisabled = computed((): boolean =>
   showErrors.value ? formContainsErrors.value : false,
@@ -479,11 +489,12 @@ const createEntityFromFormInput = async (
   entityType: Entitytyping,
   relations: BaseRelationValuesInput[] | undefined = undefined,
   onlyAllowedFields: boolean = false,
+  formContext?: FormContext,
 ): Promise<EntityInput> => {
+  const currentForm: FormContext = formContext ? formContext : form.value;
   const entity: EntityInput = { type: entityType };
-
-  const initialValues = form.value?.values?.intialValues || {};
-  const keysToInclude = getMetadataKeysToInclude(entityType, onlyAllowedFields);
+  const initialValues = currentForm.values?.intialValues || {};
+  const keysToInclude = getMetadataKeysToInclude(entityType, onlyAllowedFields, currentForm);
 
   entity.metadata = extractMetadataFromValues(initialValues, keysToInclude);
   if (onlyAllowedFields) {
@@ -491,6 +502,7 @@ const createEntityFromFormInput = async (
   } else {
     entity.relations = (await buildEntityRelations(
       relations,
+      currentForm
     )) as BaseRelationValuesInput[];
   }
   return entity;
@@ -499,8 +511,10 @@ const createEntityFromFormInput = async (
 const getMetadataKeysToInclude = (
   entityType: Entitytyping,
   onlyAllowedFields: boolean,
+  formContext?: FormContext,
 ): string[] => {
-  const initialValues = form.value?.values?.intialValues || {};
+  const currentForm: FormContext = formContext ? formContext : form.value;
+  const initialValues = currentForm?.values?.intialValues || {};
   const allKeys = Object.keys(initialValues);
 
   const map = fieldTypeMap.value;
@@ -535,12 +549,14 @@ const extractMetadataFromValues = (
 
 const buildEntityRelations = async (
   baseRelations?: BaseRelationValuesInput[],
+  formContext?: FormContext,
 ) => {
+  const currentForm: FormContext = formContext ? formContext : form.value;
   const fromForm = parseRelationValuesForFormSubmit(
-    form.value?.values?.relationValues,
+    currentForm?.values?.relationValues,
   );
   const inherited = await parseInheritedRelationValuesFromFormSubmit(
-    form.value?.values?.relationValues,
+    currentForm?.values?.relationValues,
   );
   return baseRelations && baseRelations.length > 0
     ? [...baseRelations, ...fromForm, ...inherited]
@@ -561,9 +577,9 @@ const getQuery = async (queryName: string) => {
 };
 
 const isFormValid = async () => {
-  await form.value.validate();
-  if (!formContainsErrors.value) formClosing.value = true;
-  return !formContainsErrors.value;
+  const result = await form.value.validate();
+  if (result.valid) formClosing.value = true;
+  return result.valid;
 };
 
 const uploadActionFunction = async () => {
@@ -684,6 +700,67 @@ const submitActionFunction = async (field: FormAction) => {
   }
 };
 
+const submitAllFormTabsActionFunction = async (field: FormAction) => {
+  const useEditHelper = useEditMode(getParentId());
+  if (useEditHelper?.isEdit) {
+    useEditHelper.clickButton();
+    await useEditHelper.save();
+    if (useEditHelper.isDisabled) {
+      closeModal(TypeModals.DynamicForm);
+      displayWarningNotification(
+        "notifications.warning.entity-not-updated.title",
+        "notifications.warning.entity-not-updated.description",
+      );
+      return;
+    }
+  }
+  if (!(await isFormValid())) return;
+  const entities: Entity[] = [];
+
+  // HERE CODE TO FETCH ALL TABS AND LOOP OVER
+  const document = await getQuery(field.actionQuery as string);
+  for (const formKey of props.allFormKeys) {
+    const form = getForm(formKey);
+    const entityInput = await createEntityFromFormInput(field.creationType, undefined, undefined, form);
+    let entity: Entity;
+    try {
+      entity = (await performSubmitAction(document, entityInput)).data
+        .CreateEntity;
+      showErrors.value = false;
+      entities.push(entity);
+    } catch (e: ApolloError) {
+      console.error(e);
+      const errorObject = await getMessageAndCodeFromApolloError(e);
+      isPerformingAction.value = false;
+      submitErrors.value = errorObject.message;
+    }
+  }
+
+  await getTenants();
+  const callbackFunctions: [() => void] | undefined = extractActionArguments(
+    field.actionType,
+  );
+  if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
+    for (const callback of callbackFunctions) {
+      if (callback) await callback();
+    }
+  } else {
+    if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
+      entities.forEach((entity: Entity) => tagNewlyCreatedEntity(entity))
+    }
+    else
+      setTimeout(
+        () => goToEntityPage(entities[0], "SingleEntity", props.router),
+        1,
+      );
+  }
+  closeAndDeleteForm();
+  displaySuccessNotification(
+    t("notifications.success.entityCreated.title"),
+    t("notifications.success.entityCreated.description"),
+  );
+};
+
 const submitWithUploadActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   const document = await getQuery(field.actionQuery as string);
@@ -749,6 +826,16 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   );
   await getTenants();
   closeAndDeleteForm();
+};
+
+const validateAndGoToNextFormTabActionFunction = async (field: FormAction) => {
+  const valid = await isFormValid();
+  if (!valid) return;
+  tabs.selectedIndex++;
+};
+
+const goToPreviousFormTabActionFunction = async (field: FormAction) => {
+  tabs.selectedIndex--;
 };
 
 const downloadActionFunction = async (field: FormAction) => {
@@ -905,6 +992,9 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     endpoint: () => callEndpointActionFunction(field),
     uploadCsvForReordening: () => reorderEntitiesActionFunction(field),
     submitWithExtraMetadata: () => submitWithExtraMetadataActionFunction(field),
+    submitAllFormTabs: () => submitAllFormTabsActionFunction(field),
+    nextFormTab: () => validateAndGoToNextFormTabActionFunction(field),
+    previousFormTab: () => goToPreviousFormTabActionFunction(field),
   };
   if (!field.actionType || !actionFunctions[field.actionType])
     throw Error(
@@ -979,7 +1069,7 @@ const setShowErrors = (show: boolean) => {
 };
 
 watch(
-  () => props.dynamicFormQuery,
+  () => formId.value,
   async (newValue, oldValue) => {
     resetDynamicForm();
     reinitializeDynamicFormFunc.value = () =>
@@ -1015,7 +1105,9 @@ watch(
 watch(
   () => form.value?.values,
   async () => {
-    await form.value?.validate();
+    if (showErrors.value) {
+      await form.value?.validate();
+    }
   },
   { deep: true },
 );
@@ -1026,7 +1118,7 @@ watch(
     if (dynamicFormLoaded.value && props.prefilledFormValues) {
       // Todo: This timeout is ugly, form creation from metadatafields should be awaited
       setTimeout(() => {
-        form.value.setValues(props.prefilledFormValues);
+        form.value.setValues(props.prefilledFormValues, false);
       }, 100);
     }
   },
