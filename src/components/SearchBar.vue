@@ -35,10 +35,6 @@ import {
 import { computed, inject, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import {
-  type AdvancedSearchFilters,
-  useAdvancedSearch,
-} from "@/composables/useAdvancedSearch";
 import { usePermissions } from "@/composables/usePermissions";
 
 withDefaults(
@@ -56,31 +52,26 @@ const emit = defineEmits<{
     filters: AdvancedFilterInput[],
     isOpenModal: boolean,
   ): void;
-  (
-    event: "updateAdvancedSearchFilters",
-    filters: AdvancedSearchFilters[],
-    isOpenModal: boolean,
-  ): void;
 }>();
 
 const config = inject("config") as any;
 const { openModal, getModalInfo } = useBaseModal();
-const { getFiltersForAdvancedSearch } = useAdvancedSearch(config);
 const { can } = usePermissions();
 const inputValue = ref<string>("");
-const entityTypeFilters = computed(() =>
-  config.features.simpleSearch.itemTypes
-    ?.filter((type: string) => {
-      return !!can(Permission.Canread, type as Entitytyping);
-    })
-    .map((type: string) => {
-      return {
-        match_exact: true,
-        type: AdvancedFilterTypes.Type,
-        value: type,
-      };
-    }),
-);
+const entityTypeFilters = computed(() => {
+  const allowedTypes = config.features.simpleSearch.itemTypes?.filter(
+    (type: string) => !!can(Permission.Canread, type as Entitytyping),
+  );
+  if (!allowedTypes || allowedTypes.length === 0) return [];
+  return [
+    {
+      match_exact: true,
+      type: AdvancedFilterTypes.Selection,
+      key: "type",
+      value: allowedTypes,
+    },
+  ];
+});
 
 const createKeyBasedOnFormat = (metadataKey: string): string[] => {
   const clientKeyFormat = config.features.simpleSearch.clientKeyFormat;
@@ -108,11 +99,6 @@ const applyFilterToLibrary = () => {
   }
 
   emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
-  emit(
-    "updateAdvancedSearchFilters",
-    getFiltersForAdvancedSearch(inputValue.value),
-    getModalInfo(TypeModals.Search).open,
-  );
 };
 
 const openSearchModal = () => {
