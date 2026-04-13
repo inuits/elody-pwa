@@ -5,12 +5,13 @@
         v-for="(tab, index) in tabs"
         :key="index"
         @click="selectTab(index)"
-        class="text-center cursor-pointer p-3"
-        :class="
+        class="text-center p-3"
+        :class="[
           index === state.selectedIndex
             ? 'text-text-body font-bold border-b-2'
-            : 'text-text-light'
-        "
+            : 'text-text-light',
+            tabNavigationDisabled ? '' : 'cursor-pointer',
+        ]"
       >
         {{ tab }}
       </div>
@@ -25,8 +26,12 @@ import { reactive, provide } from "vue";
 const props = withDefaults(
   defineProps<{
     tabs: string[];
+    tabNavigationDisabled: boolean;
   }>(),
-  { tabs: () => [] },
+  {
+    tabs: () => [],
+    tabNavigationDisabled: false,
+  },
 );
 
 const state = reactive({
@@ -38,6 +43,7 @@ const state = reactive({
 provide("TabsProvider", state);
 
 const selectTab = (i: number) => {
+  if (props.tabNavigationDisabled) return;
   state.selectedIndex = i;
 };
 </script>

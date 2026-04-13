@@ -12,7 +12,7 @@
   >
     <div class="flex flex-col w-full max-h-[calc(90vh-34px)] overflow-auto">
       <template v-if="shouldRenderTabs">
-        <baseTabs :tabs="tabsTitles">
+        <baseTabs :tabs="tabsTitles" :tab-navigation-disabled="true">
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
               class=""
