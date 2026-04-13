@@ -6,7 +6,7 @@
       mode === 'create' ||
       isLoading
     "
-    :autocomplete-style="!disabled ? 'defaultWithBorder' : 'readOnly'"
+    :autocomplete-style="autocompleteStyle"
     :options="
       !disabled
         ? allEntitiesHelper.entityDropdownOptions
@@ -103,6 +103,7 @@ const props = withDefaults(
     isReadOnly?: boolean;
     isMetadataField?: boolean;
     metadataOnRelationConfig?: MetadataOnRelationFieldConfig | null;
+    readOnlyValueAsPlainText?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -126,6 +127,12 @@ const { createEntity } = useManageEntities();
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { replaceRelationsFromSameType, addRelations, getRelationsBasedOnType } =
   useFormHelper();
+
+const autocompleteStyle = computed(() => {
+  if (props.disabled && props.readOnlyValueAsPlainText) return "readOnlyAsPlainText";
+  if (props.disabled) return "readOnly";
+  return "defaultWithBorder";
+});
 
 const debouncedGetAutocompleteOptions = debounce((value: string) => {
   allEntitiesHelper.value.getAutocompleteOptions(value);

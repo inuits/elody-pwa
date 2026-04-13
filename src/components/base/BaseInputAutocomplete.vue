@@ -47,7 +47,7 @@
           { 'pr-2': !isEdit },
           {
             'hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
-              !isEdit && relationType,
+              !isEdit && relationType && props.autocompleteStyle !== 'readOnlyAsPlainText',
           },
         ]"
         @click.stop="() => emit('handleTagClick', option)"
@@ -60,13 +60,17 @@
           @keydown.stop
         >
           <BaseInputTextNumberDatetime
+            v-if="!isPlainText"
             class="w-[115px] h-[26px] ml-2 py-[2px]"
             :model-value="getTagInputValue(option.value)"
             @update:model-value="setTagInputValue(option.value, $event as string)"
-            input-style="default"
+            :input-style="isPlainText ? 'plainText' : 'default'"
             type="text"
             :disabled="disabled"
           />
+          <div v-else class="pl-0 text-sm !text-[#000000] w-max">
+            {{  getReadOnlyInputValue(option) }}
+          </div>
         </div>
         <span
           v-if="!disabled"
@@ -95,7 +99,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 
-type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly";
+type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly" | "readOnlyAsPlainText";
 
 const props = withDefaults(
   defineProps<{
@@ -146,6 +150,9 @@ const { someModalIsOpened } = useBaseModal();
 const { t } = useI18n();
 const classes = ref();
 const searchValue = ref<string>();
+const isPlainText = computed(
+  () => props.disabled && props.autocompleteStyle === "readOnlyAsPlainText",
+);
 const tagInputValues = ref<Map<string | number, string>>(new Map());
 
 const getTagInputValue = (optionValue: string | number): string => {
@@ -156,6 +163,14 @@ const setTagInputValue = (optionValue: string | number, value: string) => {
   tagInputValues.value.set(optionValue, value);
   emit("update:tagInputValues", new Map(tagInputValues.value));
 };
+
+const getReadOnlyInputValue = (option: DropdownOption) => {
+  if (!inputValue.value) return "";
+  const tagInputValue = getTagInputValue(option.value)
+  const isLastOption = inputValue.value.findIndex((opt) => opt.value === option.value) === inputValue.value.length - 1;
+  const separator = props.displayInputForTag && !isLastOption ? ", " : "";
+  return !isLastOption ? `${tagInputValue}${separator}` : tagInputValue;
+}
 
 watch(
   () => props.initialTagInputValues,
@@ -219,6 +234,15 @@ const setClasses = () => {
     classes.value["container"] = "multiselect border-none !bg-white";
     classes.value["tags"] =
       "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+  }
+
+  if (props.autocompleteStyle === "readOnlyAsPlainText") {
+    classes.value["container"] = "multiselect border-none !bg-transparent";
+    classes.value["tag"] =
+      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
+    classes.value["tags"] =
+      "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+    classes.value["tagsSearchWrapper"] = "!hidden";
   }
 };
 

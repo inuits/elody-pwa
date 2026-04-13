@@ -106,6 +106,7 @@
                 :from-relation-type="metadata.inputField?.fromRelationType"
                 :metadataOnRelationConfig="metadata.inputField?.metadataOnRelationFieldConfig"
                 :disabled="true"
+                :readOnlyValueAsPlainText="metadata.inputField?.readOnlyValueAsPlainText"
                 @click.stop.prevent
               />
               <ViewModesAutocompleteMetadata
