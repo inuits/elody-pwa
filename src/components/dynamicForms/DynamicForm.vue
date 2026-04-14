@@ -281,11 +281,13 @@ const props = withDefaults(
     tabName?: string;
     showFormTitle?: boolean;
     prefilledFormValues?: object;
+    allFormRelationTypes?: string[];
   }>(),
   {
     formKey: undefined,
     modalFormFields: undefined,
     showFormTitle: true,
+    allFormRelationTypes: undefined,
   },
 );
 
@@ -357,6 +359,7 @@ const {
   extractActionArguments,
   getCallbackFunctions,
   getParentId,
+  setArgumentForSubmitAllFormTabs
 } = useModalActions();
 const route = useRoute();
 
@@ -715,50 +718,62 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
     }
   }
   if (!(await isFormValid())) return;
+
   const entities: Entity[] = [];
+  try {
+    const document = await getQuery(field.actionQuery as string);
+    for (const formKeyIndex in props.allFormKeys) {
+      const form = getForm(props.allFormKeys[formKeyIndex]);
 
-  // HERE CODE TO FETCH ALL TABS AND LOOP OVER
-  const document = await getQuery(field.actionQuery as string);
-  for (const formKey of props.allFormKeys) {
-    const form = getForm(formKey);
-    const entityInput = await createEntityFromFormInput(field.creationType, undefined, undefined, form);
-    let entity: Entity;
-    try {
-      entity = (await performSubmitAction(document, entityInput)).data
-        .CreateEntity;
-      showErrors.value = false;
-      entities.push(entity);
-    } catch (e: ApolloError) {
-      console.error(e);
-      const errorObject = await getMessageAndCodeFromApolloError(e);
-      isPerformingAction.value = false;
-      submitErrors.value = errorObject.message;
-    }
-  }
+      const relations = extractActionArguments(field.actionType);
+      if (!Array.isArray(relations)) {
+        const { setValues } = form;
+        setValues({
+          relationValues: {
+            ...form.values.relationValues,
+            ...relations,
+          },
+        });
+      }
 
-  await getTenants();
-  const callbackFunctions: [() => void] | undefined = extractActionArguments(
-    field.actionType,
-  );
-  if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
-    for (const callback of callbackFunctions) {
-      if (callback) await callback();
+      const entityInput = await createEntityFromFormInput(field.creationType, undefined, undefined, form);
+      let entity: Entity;
+        entity = (await performSubmitAction(document, entityInput)).data
+          .CreateEntity;
+        setArgumentForSubmitAllFormTabs(entity["id"], props.allFormRelationTypes[formKeyIndex]);
+        showErrors.value = false;
+        entities.push(entity);
     }
-  } else {
-    if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
-      entities.forEach((entity: Entity) => tagNewlyCreatedEntity(entity))
+
+    await getTenants();
+    const callbackFunctions: [() => void] | undefined = extractActionArguments(
+      field.actionType,
+    );
+    if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
+      for (const callback of callbackFunctions) {
+        if (callback) await callback();
+      }
+    } else {
+      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
+        entities.forEach((entity: Entity) => tagNewlyCreatedEntity(entity))
+      }
+      else
+        setTimeout(
+          () => goToEntityPage(entities[0], "SingleEntity", props.router),
+          1,
+        );
     }
-    else
-      setTimeout(
-        () => goToEntityPage(entities[0], "SingleEntity", props.router),
-        1,
-      );
+    closeAndDeleteForm();
+    displaySuccessNotification(
+      t("notifications.success.entityCreated.title"),
+      t("notifications.success.entityCreated.description"),
+    );
+  } catch (e: ApolloError) {
+    console.error(e);
+    const errorObject = await getMessageAndCodeFromApolloError(e);
+    isPerformingAction.value = false;
+    submitErrors.value = errorObject.message;
   }
-  closeAndDeleteForm();
-  displaySuccessNotification(
-    t("notifications.success.entityCreated.title"),
-    t("notifications.success.entityCreated.description"),
-  );
 };
 
 const submitWithUploadActionFunction = async (field: FormAction) => {

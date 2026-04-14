@@ -258,6 +258,7 @@ const {
   fieldTooltipValue,
   fieldErrorMessage,
   extractIntialValueFromParentByKey,
+  fieldValidationRules
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {
   initializeDropdownStates,

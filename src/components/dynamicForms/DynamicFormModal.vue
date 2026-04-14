@@ -26,6 +26,7 @@
               :router="useRouter()"
               :modal-form-fields="formTab.formFields"
               :tab-name="tabsTitles[tabIndex]"
+              :all-form-relation-types="formTabArray.filter(ft => ft.relationType !== undefined).map(ft => ft.relationType)"
             />
           </baseTab>
         </baseTabs>

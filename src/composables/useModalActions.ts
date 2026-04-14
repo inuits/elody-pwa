@@ -23,7 +23,7 @@ const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
 const callbackFunctions = ref<Function[] | undefined>(undefined);
 const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
-
+const previousEntityId = ref<string | undefined>(undefined);
 const downloadMediafilesInformation = ref<
   DownloadMediafilesInformation | undefined
 >(undefined)
@@ -52,8 +52,27 @@ export const useModalActions = () => {
   };
 
   const getArgumentsForSubmitAllFormTabs = (): SubmitArguments => {
+    const relation: { [key: string]: BaseRelationValuesInput[] } = {};
+    if (previousEntityId.value && relationType.value) {
+      relation[relationType.value] = [
+        {
+          key: previousEntityId.value,
+          type: relationType.value,
+          editStatus: EditStatus.New,
+        }
+      ]
+      previousEntityId.value = undefined;
+      relationType.value = undefined;
+      return relation;
+    }
+
     return callbackFunctions.value;
   };
+
+  const setArgumentForSubmitAllFormTabs = (entityId: string, relation: string): undefined => {
+    previousEntityId.value = entityId;
+    relationType.value = relation;
+  }
 
   const getArgumentsForDownload = (): {
     relations: BaseRelationValuesInput[];
@@ -256,6 +275,7 @@ export const useModalActions = () => {
     setCallbackFunctions,
     getRelationType,
     getCollection,
+    setArgumentForSubmitAllFormTabs,
     resetAllProperties,
   };
 };
