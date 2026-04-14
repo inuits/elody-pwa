@@ -4,7 +4,7 @@
     v-if="!refMetadata.showOnlyInEditMode && isPermitted"
     :key="label"
   >
-    <metadata-title :metadata="refMetadata" :is-field-required="false" />
+    <metadata-title v-if="!hideLabel" :metadata="refMetadata" :is-field-required="false" />
     <div class="flex gap-2">
       <base-tooltip
         class="w-full basis-[fit-content]"
@@ -103,6 +103,7 @@ const props = withDefaults(
     entityType?: Entitytyping;
     highlight: boolean;
     breakWords?: boolean;
+    hideLabel?: boolean;
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -110,6 +111,7 @@ const props = withDefaults(
     showErrors: false,
     highlight: false,
     breakWords: false,
+    hideLabel: false,
   },
 );
 

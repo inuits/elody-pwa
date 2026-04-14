@@ -255,6 +255,25 @@
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
             :primaryMediafileId="primaryMediafileId"
           />
+          <ViewModesTable
+            v-show="displayTable && !entitiesLoading"
+            :entities="entities as Entity[]"
+            :entities-loading="entitiesLoading"
+            :bulk-operations-context="bulkOperationsContext"
+            :list-item-route-name="listItemRouteName"
+            :enable-navigation="enableNavigation"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+            :relation-type="relationType"
+            :enable-selection="enableSelection"
+            :base-library-mode="baseLibraryMode"
+            :allowed-actions-on-relations="allowedActionsOnRelations"
+            :entity-type="entityType"
+            :show-current-entity-flow="showCurrentEntityFlow"
+            :config-per-view-mode="configPerViewMode"
+            :refetch-entities="refetchEntities"
+            :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+          />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
             :entities="entities as Entity[]"
@@ -295,6 +314,7 @@ import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
+import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
 import { UploadStatus } from "@/composables/upload/types";
 import useUpload from "@/composables/upload/useUpload";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -473,6 +493,7 @@ const showCurrentEntityFlow = computed(() => {
   return showCurrentPreviewFlow !== undefined ? showCurrentPreviewFlow : true;
 });
 const showViewModesList = computed(() => {
+  if (displayTable.value) return false;
   return (
     displayList.value ||
     displayGrid.value ||
@@ -595,6 +616,7 @@ const {
 
 const displayList = ref<boolean>(false);
 const displayGrid = ref<boolean>(false);
+const displayTable = ref<boolean>(false);
 const displayPreview = ref<boolean>(props.enablePreview);
 const displayMap = ref<boolean>(false);
 
@@ -810,14 +832,19 @@ const getDisplayPreferences = () => {
     const keys = Object.keys(configPerViewMode.value);
     displayList.value = keys.includes(ViewModes.ViewModesList);
     displayGrid.value = keys.includes(ViewModes.ViewModesGrid);
+    displayTable.value = keys.includes(ViewModes.Table);
     return;
+  }
+
+  if (!displayPreview.value && displayPreferences.table) {
+    displayTable.value = displayPreferences.table;
   }
 
   if (!displayPreview.value && displayPreferences.grid) {
     displayGrid.value = displayPreferences.grid;
   }
 
-  if (displayGrid.value === false && !displayMap.value) {
+  if (displayGrid.value === false && !displayMap.value && !displayTable.value) {
     displayList.value = true;
   }
 };
@@ -891,6 +918,25 @@ const determineViewModes = (viewModes: any[]) => {
       iconOn: DamsIcons.Apps,
       iconOff: DamsIcons.Apps,
     });
+  }
+
+  if (viewModes.includes(ViewModes.Table)) {
+    const distinctTypes = new Set(entities.value.map((e) => e.type));
+    if (distinctTypes.size > 1) {
+      console.error(
+        `[BaseLibrary] Table view requires all entities to share the same type. ` +
+          `Found: ${[...distinctTypes].join(", ")}. Table view will not be shown.`,
+      );
+      displayTable.value = false;
+    } else {
+      newToggles.push({
+        isOn: displayTable,
+        iconOn: DamsIcons.Table,
+        iconOff: DamsIcons.Table,
+      });
+    }
+  } else {
+    displayTable.value = false;
   }
 
   if (viewModes.includes(ViewModesMedia.__name)) {
@@ -972,6 +1018,7 @@ const resetPaginationAndView = () => {
   paginationStore.setLimit(limitFromState || 20);
   displayMap.value = false;
   displayGrid.value = false;
+  displayTable.value = false;
   displayList.value = true;
 };
 
@@ -1029,14 +1076,15 @@ watch(
   },
 );
 
-watch([displayGrid, expandFilters], () => {
+watch([displayGrid, displayTable, expandFilters], () => {
   let _expandFilters = expandFilters.value;
   if (route.name === "SingleEntity")
     _expandFilters = getGlobalState("_displayPreferences").expandFilters;
 
-  displayList.value = !displayGrid.value && !displayMap.value;
+  displayList.value = !displayGrid.value && !displayMap.value && !displayTable.value;
   updateGlobalState("_displayPreferences", {
     grid: displayPreview.value ? false : displayGrid.value,
+    table: displayTable.value,
     expandFilters: _expandFilters,
   });
 });

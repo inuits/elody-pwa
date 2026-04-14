@@ -4,7 +4,7 @@
     :class="isPreviewElement ? 'preview-container' : 'parent-container'"
   >
     <div
-      :key="mode + '-' + previewComponentEnabled"
+      :key="'table-' + previewComponentEnabled"
       class="h-full"
       :class="
         previewComponentEnabled ? 'grid responsive-grid gap-x-2 mr-2' : ''
@@ -12,65 +12,42 @@
     >
       <div
         v-if="showCurrentEntityFlow"
-        data-cy="view-modes-list"
-        :class="[
-          'h-full overflow-y-auto',
-          {
-            'grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-2 justify-items-center max-w-full':
-              mode === 'grid',
-          },
-        ]"
+        data-cy="view-modes-table"
+        class="h-full overflow-y-auto"
       >
-        <div v-if="Array.isArray(relations)">
-          <div
-            v-show="!disablePreviews"
-            v-for="item in filteredRelations"
-            :key="item.key"
-            :class="[
-              mode === 'list' ? 'list-item-list' : 'list-item-grid',
-              { 'list-item-list-multi-line': mode === 'list' && multiLine },
-            ]"
-            v-memo="[item.key, item.editStatus, mode, entitiesLoading]"
-          >
-            <ListItem
-              :key="item.key + '_preview'"
-              :item-id="item.key"
-              :bulk-operations-context="bulkOperationsContext"
-              :teaser-metadata="
-                getTeaserMetadataInState(item.key) as Metadata[]
-              "
-              :thumb-icon="entitiesLoading ? undefined : getThumbnail(item)"
-              :small="listItemRouteName === 'SingleMediafile'"
-              :is-preview="true"
-              :is-markable-as-to-be-deleted="parentEntityIdentifiers.length > 0"
-              :relation="
-                findRelation(
-                  item.key,
-                  relationType,
-                  props.parentEntityIdentifiers[0],
-                )
-              "
-              :relation-type="relationType"
-              :has-selection="enableSelection"
-              :view-mode="mode"
-              :multi-line="multiLine"
-              :multi-line-columns="multiLineColumns"
-            />
+        <div
+          v-if="headerColumns.length > 0"
+          class="sticky top-0 z-10 bg-background-light flex items-center gap-2 px-1.5 py-3 border-b-2 border-accent-highlight font-semibold text-sm text-text-body"
+        >
+          <div class="w-10 shrink-0" />
+
+          <div v-if="anyEntityHasThumbnail" class="w-10 shrink-0" />
+
+          <div class="flex-1 flex items-center">
+            <div
+              v-for="(col, idx) in headerColumns"
+              :key="'header-' + idx"
+              :class="headerColumnStyle"
+            >
+              {{ col.label ? t(col.label) : "" }}
+            </div>
           </div>
+
+          <div class="w-8 shrink-0" />
+
+          <div class="w-8 shrink-0" />
         </div>
+
         <component
           v-for="entity in processedEntities"
-          :key="entity.id + '_list'"
+          :key="entity.id + '_table'"
           :is="entity.componentTag"
           :to="entity.componentPath"
-          :class="[
-            mode === 'list' ? 'list-item-list' : 'list-item-grid',
-            { 'list-item-list-multi-line': mode === 'list' && multiLine },
-          ]"
+          class="list-item-table"
           @click="entityWrapperHandler(entity.originalEntity)"
           v-memo="entity.memoKey"
         >
-          <ListItem
+          <TableViewRow
             :item-id="entity.id"
             :item-type="entity.type"
             :bulk-operations-context="bulkOperationsContext"
@@ -82,17 +59,14 @@
             :media="entity.media"
             :thumb-icon="entity.thumbIcon"
             :is-media-type="entity.isMediaType"
-            :small="listItemRouteName === 'SingleMediafile'"
             :loading="entitiesLoading"
-            :is-markable-as-to-be-deleted="entity.isMarkable"
             :is-disabled="entity.isDisabled"
             :relation="entity.relation"
+            :parent-entity-id="parentEntityIdentifiers[0]"
             :relation-type="relationType"
             :has-selection="enableSelection"
             :base-library-mode="baseLibraryMode"
-            :is-enable-navigation="enableNavigation"
-            :entity-list-elements="entityListElements"
-            :view-mode="mode"
+            :has-thumbnail="anyEntityHasThumbnail"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
             :preview-component-current-active="entity.isPreviewActive"
@@ -100,23 +74,13 @@
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
             "
-            :is-primary-mediafile="primaryMediafileId === entity.id"
-            :multi-line="multiLine"
-            :multi-line-columns="multiLineColumns"
-            @navigate-to="
-              () => {
-                router.push(entity.forcedNavigationPath);
-              }
-            "
             @toggle-preview-component="
               (previewForEntityId) => togglePreviewComponent(previewForEntityId)
-            "
-            @add-refetch-function-to-edit-state="
-              () => emit('addRefetchFunctionToEditState')
             "
           />
         </component>
       </div>
+
       <div
         v-if="
           previewComponentEnabled &&
@@ -145,74 +109,59 @@
 import type { Context } from "@/composables/useBulkOperations";
 import {
   BaseLibraryModes,
-  type BaseRelationValuesInput,
-  type ConfigItem,
-  EditStatus,
   type Entity,
-  type EntityListElement,
   Entitytyping,
   MediaTypeEntities,
   type Metadata,
   RelationActions,
 } from "@/generated-types/queries";
-import ListItem from "@/components/ListItem.vue";
+import TableViewRow from "@/components/library/view-modes/TableViewRow.vue";
+import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
 import { computed, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { router } from "@/main";
-import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
+import { useI18n } from "vue-i18n";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
 
 const props = withDefaults(
   defineProps<{
     entities: Entity[];
-    placeholderEntities: Entity[];
     entitiesLoading: boolean;
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
-    disablePreviews?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
     relationType?: string;
     enableSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
-    entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
-    mode: "list" | "grid";
-    config?: ConfigItem[];
-    refetchEntities?: () => Promise<void>;
-    expandFilters?: boolean;
     entityType: Entitytyping;
     configPerViewMode: object;
     showCurrentEntityFlow?: boolean;
+    refetchEntities?: () => Promise<void>;
     cropMediafileCoordinatesKey?: string;
-    primaryMediafileId?: string;
   }>(),
   {
-    disablePreviews: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-    entityListElements: undefined,
     allowedActionsOnRelations: () => [],
-    mode: "list",
-    refetchEntities: undefined,
     showCurrentEntityFlow: true,
+    refetchEntities: undefined,
     cropMediafileCoordinatesKey: "",
-    expandFilters: false,
-    primaryMediafileId: "",
   },
 );
 
-const emit = defineEmits<{
-  (event: "addRefetchFunctionToEditState"): void;
-}>();
+const { t } = useI18n();
+const { getMediaFilenameFromEntity } = useListItemHelper();
+const { getThumbnail } = useThumbnailHelper();
+const { findRelation } = useFormHelper();
 
 const refEntities = ref<Entity[]>(props.entities);
 watch(
@@ -245,32 +194,48 @@ const {
   togglePreviewComponent,
 );
 
-const multiLine = computed(
-  () => props.config?.find((c) => c.key === "multiLine")?.value === true,
-);
-const multiLineColumns = computed(() => {
-  const val = props.config?.find((c) => c.key === "multiLineColumns")?.value;
-  return typeof val === "number" ? val : 5;
-});
-const { getMediaFilenameFromEntity } = useListItemHelper();
-const { getThumbnail } = useThumbnailHelper();
-const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();
-const relations = computed<BaseRelationValuesInput[]>(
-  () => getForm(props.parentEntityIdentifiers[0])?.values?.relationValues,
+// Whether any entity has a thumbnail — drives both header spacer and TableRow thumbnail cell
+const anyEntityHasThumbnail = computed(() =>
+  processedEntities.value.some((e) => e.media || e.isMediaType),
 );
 
-const filteredRelations = computed(() => {
-  return (
-    relations.value?.filter(
-      (relation) =>
-        relation.editStatus === EditStatus.New &&
-        relation.type === props.relationType,
-    ) || []
+// Header column definitions from first entity's metadata
+const headerColumns = computed(() => {
+  const first = refEntities.value[0];
+  if (!first?.teaserMetadata) return [];
+
+  const metadata = formatTeaserMetadata(
+    first.teaserMetadata,
+    first.intialValues,
+    false,
   );
+  if (!Array.isArray(metadata)) return [];
+
+  const visibleMetadata = (metadata as Metadata[]).filter(
+    (m) => m.label && !m.showOnlyInEditMode,
+  );
+
+  const targetMetadata = previewComponentEnabled.value
+    ? visibleMetadata.slice(0, 1)
+    : visibleMetadata;
+
+  return targetMetadata.map(({ key, label }) => ({ key, label }));
+});
+
+// Same percentage-width logic as ListItem's teaserMetadataStyle
+const headerColumnStyle = computed<string>(() => {
+  const count = headerColumns.value.length;
+  const amount: string | number = count >= 4 ? "default" : count;
+  const widths: Record<string | number, string> = {
+    1: "w-full",
+    2: "w-1/3",
+    3: "w-1/2",
+    default: "w-1/4",
+  };
+  return `flex justify-start flex-col mx-2 break-words ${widths[amount]}`;
 });
 
 const processedEntities = computed(() => {
-  const currentMode = props.mode;
   const previewEnabled = previewComponentEnabled.value;
   const parentId = props.parentEntityIdentifiers[0];
   const rType = props.relationType;
@@ -301,7 +266,6 @@ const processedEntities = computed(() => {
       relation,
       isPreviewActive,
       isDisabled,
-      currentMode,
       previewEnabled,
     ];
 
@@ -312,7 +276,6 @@ const processedEntities = computed(() => {
       componentTag: linkSettings.tag,
       componentPath: linkSettings.path,
       forcedNavigationPath: forcedLinkSettings.path,
-
       contextMenu,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
@@ -327,11 +290,10 @@ const processedEntities = computed(() => {
         props.allowedActionsOnRelations.includes(
           RelationActions.RemoveRelation,
         ) && props.parentEntityIdentifiers.length > 0,
-      isDisabled: isDisabled,
-      relation: relation,
-      isPreviewActive: isPreviewActive,
-
-      memoKey: memoKey,
+      isDisabled,
+      relation,
+      isPreviewActive,
+      memoKey,
     };
   });
 });
@@ -349,68 +311,51 @@ const processedEntities = computed(() => {
   container-name: v-bind(containerNameForPreview);
 }
 
-/* Parent container queries */
 @container parent (min-width: 500px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }
 }
-
 @container parent (min-width: 630px) {
   .responsive-grid {
     grid-template-columns: 35% 65%;
   }
 }
-
 @container parent (min-width: 830px) {
   .responsive-grid {
     grid-template-columns: 30% 70%;
   }
 }
-
 @container parent (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
   }
 }
 
-/* Preview container queries */
 @container preview (min-width: 450px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }
 }
-
 @container preview (min-width: 550px) {
   .responsive-grid {
     grid-template-columns: 35% 65%;
   }
 }
-
 @container preview (min-width: 755px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
   }
 }
 
-/* Preview container queries without showing current entity flow */
 @container preview-without-current-entity-flow (min-width: 10px) {
   .responsive-grid {
     grid-template-columns: 100%;
   }
 }
 
-.list-item-list {
+.list-item-table {
   content-visibility: auto;
-  contain-intrinsic-size: 62px;
-}
-
-.list-item-list-multi-line {
-  contain-intrinsic-size: 110px;
-}
-
-.list-item-grid {
-  content-visibility: auto;
-  contain-intrinsic-size: 300px;
+  contain-intrinsic-size: 46px;
 }
 </style>
