@@ -130,7 +130,7 @@ const loadOptions = async () => {
     await initialize();
   }
 
-  if (hasWildcardTextFilter.value) {
+  if (props.filter.advancedFilter.selectionOption === AutocompleteSelectionOptions.Autocomplete && hasWildcardTextFilter.value) {
     initialAmountOfOptions.value = 0;
     hasFetchedOptions.value = true;
     isLoading.value = false;
