@@ -176,13 +176,24 @@ const determineContextsForMediafileViewer = () => {
     .filter((column: Column) => !!column);
   const elements = getElementsFromColumns(columns);
   Object.values(elements).forEach(
-    (element: EntityListElement | SingleMediaFileElement) => {
+    (element: EntityListElement | SingleMediaFileElement | any) => {
       if (element?.__typename === "SingleMediaFileElement") {
         addContextToState("SingleMediaFileElement");
         setEntityMediafiles("SingleMediaFileElement", [entity.value]);
       }
       if (element?.__typename === "EntityListElement") {
         addContextToState(element.customQueryFilters);
+      }
+      if (element?.__typename === "WindowElement") {
+        Object.values(element).forEach((panel: any) => {
+          if (
+            typeof panel !== "string" &&
+            panel?.__typename === "WindowElementPanel" &&
+            panel?.entityListElement
+          ) {
+            addContextToState(panel.entityListElement.customQueryFilters);
+          }
+        });
       }
     },
   );
