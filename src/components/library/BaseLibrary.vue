@@ -904,58 +904,51 @@ const viewModesIncludeViewModesMedia = computed(() => {
 const determineViewModes = (viewModes: any[]) => {
   const newToggles = [];
 
-  if (viewModes.includes(ViewModesList.__name)) {
-    newToggles.push({
-      isOn: displayList,
-      iconOn: DamsIcons.ListUl,
-      iconOff: DamsIcons.ListUl,
-    });
-  }
-
-  if (viewModes.includes("ViewModesGrid")) {
-    newToggles.push({
-      isOn: displayGrid,
-      iconOn: DamsIcons.Apps,
-      iconOff: DamsIcons.Apps,
-    });
-  }
-
-  if (viewModes.includes(ViewModes.Table)) {
-    const distinctTypes = new Set(entities.value.map((e) => e.type));
-    if (distinctTypes.size > 1) {
-      console.error(
-        `[BaseLibrary] Table view requires all entities to share the same type. ` +
-          `Found: ${[...distinctTypes].join(", ")}. Table view will not be shown.`,
-      );
-      displayTable.value = false;
-    } else {
+  for (const viewMode of viewModes) {
+    if (viewMode === ViewModesList.__name) {
       newToggles.push({
-        isOn: displayTable,
-        iconOn: DamsIcons.Table,
-        iconOff: DamsIcons.Table,
+        isOn: displayList,
+        iconOn: DamsIcons.ListUl,
+        iconOff: DamsIcons.ListUl,
+      });
+    } else if (viewMode === "ViewModesGrid") {
+      newToggles.push({
+        isOn: displayGrid,
+        iconOn: DamsIcons.Apps,
+        iconOff: DamsIcons.Apps,
+      });
+    } else if (viewMode === ViewModes.Table) {
+      const distinctTypes = new Set(entities.value.map((e) => e.type));
+      if (distinctTypes.size > 1) {
+        console.error(
+          `[BaseLibrary] Table view requires all entities to share the same type. ` +
+            `Found: ${[...distinctTypes].join(", ")}. Table view will not be shown.`,
+        );
+        displayTable.value = false;
+      } else {
+        newToggles.push({
+          isOn: displayTable,
+          iconOn: DamsIcons.Table,
+          iconOff: DamsIcons.Table,
+        });
+      }
+    } else if (viewMode === ViewModesMedia.__name) {
+      newToggles.push({
+        isOn: displayPreview,
+        iconOn: DamsIcons.Image,
+        iconOff: DamsIcons.Image,
+      });
+    } else if (viewMode === ViewModesMap.__name) {
+      newToggles.push({
+        isOn: displayMap,
+        iconOn: DamsIcons.Map,
+        iconOff: DamsIcons.Map,
       });
     }
-  } else {
-    displayTable.value = false;
   }
 
-  if (viewModes.includes(ViewModesMedia.__name)) {
-    newToggles.push({
-      isOn: displayPreview,
-      iconOn: DamsIcons.Image,
-      iconOff: DamsIcons.Image,
-    });
-  }
-
-  if (viewModes.includes(ViewModesMap.__name)) {
-    newToggles.push({
-      isOn: displayMap,
-      iconOn: DamsIcons.Map,
-      iconOff: DamsIcons.Map,
-    });
-  } else {
-    displayMap.value = false;
-  }
+  if (!viewModes.includes(ViewModes.Table)) displayTable.value = false;
+  if (!viewModes.includes(ViewModesMap.__name)) displayMap.value = false;
 
   toggles.value = newToggles;
 };
