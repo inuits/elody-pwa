@@ -16,7 +16,7 @@
         :class="[
           'h-full overflow-y-auto',
           {
-            'grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-2 justify-items-center max-w-full':
+            'grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] gap-2 justify-items-start items-start max-w-full':
               mode === 'grid',
           },
         ]"
