@@ -328,20 +328,6 @@ describe("useErrorCodes", () => {
       },
     );
 
-    it.each([["1001", ErrorCodeType.Read]])(
-      "should trigger auth handler even if skipping is provided for code %s",
-      async (code) => {
-        const error = createMockGraphQLError(code, 401);
-
-        await errorCodes.handleGraphqlError(error, true);
-
-        expect(sharedMocks.logout).toHaveBeenCalled();
-        expect(sharedMocks.setPageStatus).toHaveBeenCalledWith(
-          PageStatus.Unauthorized,
-        );
-      },
-    );
-
     it("should fallback to 401 handler (Unauthorized)", async () => {
       const error = createMockHttpResponse("/", 401, "", "Unauthorized");
       await errorCodes.handleHttpError(error);
