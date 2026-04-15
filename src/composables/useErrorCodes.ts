@@ -284,7 +284,7 @@ export const useErrorCodes = (): {
     const { code, message } =
       await extractErrorComponentsFromErrorResponse(graphqlErrorMessage);
 
-    if (!code) {
+    if (!code && !skipErrorHandling) {
       const { statusCode } = __extractStatusCodeAndMessageFromResponse(
         "graphql",
         error,
