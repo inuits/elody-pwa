@@ -794,6 +794,7 @@ export enum DamsIcons {
   SquareFull = 'SquareFull',
   Swatchbook = 'Swatchbook',
   Tag = 'Tag',
+  Table = 'Table',
   Text = 'Text',
   Trash = 'Trash',
   Update = 'Update',
@@ -3768,6 +3769,7 @@ export type Verzameling = Entity & {
 };
 
 export enum ViewModes {
+  Table = 'Table',
   ViewModesGrid = 'ViewModesGrid',
   ViewModesList = 'ViewModesList',
   ViewModesMap = 'ViewModesMap',

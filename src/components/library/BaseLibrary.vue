@@ -243,7 +243,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : (displayGrid ?? ViewModes.ViewModesGrid)
+                  : displayGrid ?? ViewModes.ViewModesGrid
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -340,6 +340,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useMaps } from "@/composables/useMaps";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useViewModes } from "@/composables/useViewModes";
 import {
   ActionsOnResult,
   ActionsOnResultTypes,
@@ -365,10 +366,21 @@ import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { auth } from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
 import { DefaultApolloClient } from "@vue/apollo-composable";
-import { computed, inject, onMounted, onUnmounted, provide, ref, watch } from "vue";
+import {
+  computed,
+  inject,
+  onMounted,
+  onUnmounted,
+  provide,
+  ref,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
-import { createPaginationStore, PaginationStoreKey } from './usePaginationStore';
+import {
+  createPaginationStore,
+  PaginationStoreKey,
+} from "./usePaginationStore";
 
 export type BaseLibraryProps = {
   bulkOperationsContext: Context | undefined;
@@ -477,8 +489,7 @@ const { getEntityUuid } = useEntitySingle();
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
-const { getGlobalState, updateGlobalState, getStateForRoute } =
-  useStateManagement();
+const { getStateForRoute } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
 const useEditHelper = useEditMode(getEntityUuid());
@@ -491,17 +502,6 @@ const isInitialLoading = ref<boolean>(true);
 const showCurrentEntityFlow = computed(() => {
   if (!isPreviewElement) return true;
   return showCurrentPreviewFlow !== undefined ? showCurrentPreviewFlow : true;
-});
-const showViewModesList = computed(() => {
-  if (displayTable.value) return false;
-  return (
-    displayList.value ||
-    displayGrid.value ||
-    (entitiesLoading.value &&
-      !displayMap.value &&
-      (route?.name !== "SingleEntity" ||
-        props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
-  );
 });
 const enableSelection = computed<boolean>(() => {
   return (
@@ -614,13 +614,28 @@ const {
   setActionsOnResult,
 } = useEntityPickerModal();
 
-const displayList = ref<boolean>(false);
-const displayGrid = ref<boolean>(false);
-const displayTable = ref<boolean>(false);
-const displayPreview = ref<boolean>(props.enablePreview);
-const displayMap = ref<boolean>(false);
-
-const expandFilters = ref<boolean>(false);
+const {
+  displayList,
+  displayGrid,
+  displayTable,
+  displayPreview,
+  displayMap,
+  expandFilters,
+  toggles,
+  configPerViewMode,
+  viewModesIncludeViewModesMedia,
+  showViewModesList,
+  determineViewModes,
+  getUserPreferredViewModeConfiguration,
+  resetToListView,
+} = useViewModes({
+  entities,
+  enablePreview: props.enablePreview,
+  enableAdvancedFilters: props.enableAdvancedFilters,
+  entitiesLoading,
+  route,
+  baseLibraryMode: props.baseLibraryMode,
+});
 
 const noResultTranslations = computed(() => ({
   noResult: props.enableAdvancedFilters
@@ -633,7 +648,6 @@ const noResultTranslations = computed(() => ({
     : "",
 }));
 const lastProcessedEntityType = ref<Entitytyping | null>(null);
-const toggles = ref<ViewModes.type[]>([]);
 
 const entityType = computed(() =>
   props.entityType
@@ -816,39 +830,6 @@ const initializeDeepRelations = async () => {
   isInitialLoading.value = false;
 };
 
-const getDisplayPreferences = () => {
-  const displayPreferences = getGlobalState("_displayPreferences");
-  if (!displayPreferences) return;
-
-  expandFilters.value = !props.enableAdvancedFilters
-    ? false
-    : displayPreferences.expandFilters;
-
-  if (
-    !displayPreview.value &&
-    !displayMap.value &&
-    Object.keys(configPerViewMode.value).length === 1
-  ) {
-    const keys = Object.keys(configPerViewMode.value);
-    displayList.value = keys.includes(ViewModes.ViewModesList);
-    displayGrid.value = keys.includes(ViewModes.ViewModesGrid);
-    displayTable.value = keys.includes(ViewModes.Table);
-    return;
-  }
-
-  if (!displayPreview.value && displayPreferences.table) {
-    displayTable.value = displayPreferences.table;
-  }
-
-  if (!displayPreview.value && displayPreferences.grid) {
-    displayGrid.value = displayPreferences.grid;
-  }
-
-  if (displayGrid.value === false && !displayMap.value && !displayTable.value) {
-    displayList.value = true;
-  }
-};
-
 const applyCustomBulkOperations = async () => {
   if (!props.customBulkOperations) return;
   enqueuePromise(customBulkOperationsPromise);
@@ -879,80 +860,6 @@ const initializeEntityPickerComponent = (
   setActionsOnResult(props.actionsOnResult);
 };
 
-const configPerViewMode = computed(() => {
-  if (entities.value.length <= 0) return [];
-  return (
-    entities.value[0].allowedViewModes?.viewModes?.reduce(
-      (resultObject: any, viewModeWithConfig: ViewModesWithConfig) => {
-        resultObject[viewModeWithConfig.viewMode] = viewModeWithConfig.config;
-        return resultObject;
-      },
-      {},
-    ) || {}
-  );
-});
-
-const viewModesIncludeViewModesMedia = computed(() => {
-  if (entities.value.length <= 0) return false;
-  return entities.value[0].allowedViewModes?.viewModes
-    ?.map(
-      (viewModeWithConfig: ViewModesWithConfig) => viewModeWithConfig.viewMode,
-    )
-    .includes(ViewModesMedia.__name);
-});
-
-const determineViewModes = (viewModes: any[]) => {
-  const newToggles = [];
-
-  for (const viewMode of viewModes) {
-    if (viewMode === ViewModesList.__name) {
-      newToggles.push({
-        isOn: displayList,
-        iconOn: DamsIcons.ListUl,
-        iconOff: DamsIcons.ListUl,
-      });
-    } else if (viewMode === "ViewModesGrid") {
-      newToggles.push({
-        isOn: displayGrid,
-        iconOn: DamsIcons.Apps,
-        iconOff: DamsIcons.Apps,
-      });
-    } else if (viewMode === ViewModes.Table) {
-      const distinctTypes = new Set(entities.value.map((e) => e.type));
-      if (distinctTypes.size > 1) {
-        console.error(
-          `[BaseLibrary] Table view requires all entities to share the same type. ` +
-            `Found: ${[...distinctTypes].join(", ")}. Table view will not be shown.`,
-        );
-        displayTable.value = false;
-      } else {
-        newToggles.push({
-          isOn: displayTable,
-          iconOn: DamsIcons.Table,
-          iconOff: DamsIcons.Table,
-        });
-      }
-    } else if (viewMode === ViewModesMedia.__name) {
-      newToggles.push({
-        isOn: displayPreview,
-        iconOn: DamsIcons.Image,
-        iconOff: DamsIcons.Image,
-      });
-    } else if (viewMode === ViewModesMap.__name) {
-      newToggles.push({
-        isOn: displayMap,
-        iconOn: DamsIcons.Map,
-        iconOff: DamsIcons.Map,
-      });
-    }
-  }
-
-  if (!viewModes.includes(ViewModes.Table)) displayTable.value = false;
-  if (!viewModes.includes(ViewModesMap.__name)) displayMap.value = false;
-
-  toggles.value = newToggles;
-};
-
 const addRefetchFunctionToEditState = (): void => {
   const refetchFunctions = useEditHelper.refetchFns.value;
   const functionName = props.useOtherQuery?.name || "refetchEntities";
@@ -963,7 +870,7 @@ const addRefetchFunctionToEditState = (): void => {
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
-  getDisplayPreferences();
+  getUserPreferredViewModeConfiguration();
   window.addEventListener("beforeunload", resetMapPaginationLimit);
 });
 
@@ -1009,10 +916,7 @@ watch(
 const resetPaginationAndView = () => {
   const limitFromState = getStateForRoute(route)?.queryVariables?.limit;
   paginationStore.setLimit(limitFromState || 20);
-  displayMap.value = false;
-  displayGrid.value = false;
-  displayTable.value = false;
-  displayList.value = true;
+  resetToListView();
 };
 
 watch(
@@ -1058,7 +962,7 @@ watch(
       );
 
       determineViewModes(viewModes);
-      getDisplayPreferences();
+      getUserPreferredViewModeConfiguration();
 
       lastProcessedEntityType.value = entityType.value;
     }
@@ -1068,19 +972,6 @@ watch(
     }
   },
 );
-
-watch([displayGrid, displayTable, expandFilters], () => {
-  let _expandFilters = expandFilters.value;
-  if (route.name === "SingleEntity")
-    _expandFilters = getGlobalState("_displayPreferences").expandFilters;
-
-  displayList.value = !displayGrid.value && !displayMap.value && !displayTable.value;
-  updateGlobalState("_displayPreferences", {
-    grid: displayPreview.value ? false : displayGrid.value,
-    table: displayTable.value,
-    expandFilters: _expandFilters,
-  });
-});
 
 watch(
   () => uploadStatus.value,
@@ -1119,6 +1010,6 @@ watch(
   (newVal) => {
     setLimit(newVal, true);
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
