@@ -82,6 +82,7 @@
               :entity-id="formId"
               :entity-list="metadata.entityList ?? []"
               :identifiers="identifiers"
+              :enable-navigation="true"
               v-bind="metadata"
             />
             <entity-element-w-y-s-i-w-y-g
