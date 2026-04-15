@@ -47,11 +47,7 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (
-    event: "updateFilters",
-    filters: AdvancedFilterInput[],
-    isOpenModal: boolean,
-  ): void;
+  (event: "updateFilters", filters: AdvancedFilterInput[]): void;
 }>();
 
 const config = inject("config") as any;
@@ -82,7 +78,7 @@ const createKeyBasedOnFormat = (metadataKey: string | object): string[] => {
     return [`elody:1|metadata.${metadataKey}.value`];
   }
   return clientKeyFormat.map((format: string) =>
-    format.replace(/\$metadata_key/g, metadataKey)
+    format.replace(/\$metadata_key/g, metadataKey),
   );
 };
 
@@ -101,7 +97,7 @@ const applyFilterToLibrary = () => {
     });
   }
 
-  emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
+  emit("updateFilters", filters);
 };
 
 const openSearchModal = () => {
