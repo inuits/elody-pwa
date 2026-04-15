@@ -73,7 +73,10 @@ const entityTypeFilters = computed(() => {
   ];
 });
 
-const createKeyBasedOnFormat = (metadataKey: string): string[] => {
+const createKeyBasedOnFormat = (metadataKey: string | object): string[] => {
+  if (typeof metadataKey === "object" && metadataKey?.preConfigured) {
+    return metadataKey.key;
+  }
   const clientKeyFormat = config.features.simpleSearch.clientKeyFormat;
   if (!clientKeyFormat || clientKeyFormat.length === 0) {
     return [`elody:1|metadata.${metadataKey}.value`];
