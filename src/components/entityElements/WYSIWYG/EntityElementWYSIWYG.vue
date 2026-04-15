@@ -142,10 +142,9 @@ const resetContent = () => {
 
 onMounted(async () => {
   document.addEventListener("discardEdit", resetContent);
-  initialValue.value =
-    multilingual?.isEnabled?.value
-      ? multilingual.currentValue.value
-      : form.value?.values.intialValues[props.element.metadataKey];
+  initialValue.value = multilingual?.isEnabled?.value
+    ? multilingual.currentValue.value
+    : form.value?.values.intialValues[props.element.metadataKey];
   addEditableMetadataKeys([props.element.metadataKey], props.formId);
 
   const customExtensions = [WysiwygExtensions.ElodyTaggingExtension];
@@ -177,7 +176,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2 whitespace-nowrap! overflow-x-auto! ${wysiwygElementConfiguration.value?.styleConfiguration?.displayTextItalic ? "italic" : ""}`,
+        class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2  ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
       },
       handleClickOn: (view, pos, node) => {
         if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
