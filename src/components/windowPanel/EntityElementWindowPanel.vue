@@ -1,11 +1,11 @@
 <template>
   <div :class="[{ 'pl-10 py-0': parentIsListItem }, ' p-2 w-full']">
     <div
-      v-if="panel.label"
+      v-if="panel.panelHeaderContent?.label"
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
-      <h2>{{ t(panel.label) }}</h2>
+      <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
       <div class="flex justify-end gap-4">
         <div v-if="repeatablePanel && isEdit">
           <base-button-new
