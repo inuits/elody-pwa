@@ -144,7 +144,9 @@ const useFormHelper = () => {
 
   const addEditableMetadataKeys = (keys: string[], formId: string): void => {
     const currentKeys = editableFields.value[formId] || [];
-    editableFields.value[formId] = [...currentKeys, ...keys];
+    const newKeys = keys.filter((k) => !currentKeys.includes(k));
+    if (newKeys.length === 0) return;
+    editableFields.value[formId] = [...currentKeys, ...newKeys];
   };
 
   const route = useRoute();
@@ -313,7 +315,7 @@ const useFormHelper = () => {
           key: string;
           value: unknown;
           lang?: string;
-        } = { key, value: (intialValues as any)[key] };
+        } = { key, value: (intialValues as any)[key] ?? "" };
         const isEnabledMultilanguage =
           config?.features?.supportsMultilingualMetadataEditing;
         if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {

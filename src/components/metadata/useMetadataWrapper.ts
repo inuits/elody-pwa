@@ -165,7 +165,7 @@ export const useMetadataWrapper = (
 
   const fieldKey = computed(() => getFieldKey());
   const fieldLabel = computed<string>(() =>
-    getTranslatedMessage(props.metadata.label as string | "metadata.no-label"),
+    props.metadata.label ? getTranslatedMessage(props.metadata.label as string) : '',
   );
   const isFieldRequired = computed<boolean>(() =>
     checkIfFieldIsRequired(props.metadata, props.formId, mediafileViewerContext, conditionalFieldIsRequired),
@@ -248,6 +248,9 @@ export const useMetadataWrapper = (
     } catch {
       throw Error("Unable to auto select value, no options available");
     }
+
+    if (newValue && typeof newValue === "object" && "formatter" in newValue)
+      newValue = (newValue as { label: string }).label;
 
     fieldValueProxy.value = newValue;
     determineFieldPermissions();

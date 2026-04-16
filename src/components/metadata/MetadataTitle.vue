@@ -1,7 +1,7 @@
 <template>
-  <div class="text-text-light text-sm flex">
+  <div v-if="metadata.label" class="text-text-light text-sm flex">
     <p data-cy="metadata-label">
-      {{ metadata.label ? t(metadata.label) : t("metadata.no-label") }}
+      {{ t(metadata.label) }}
     </p>
     <p
       v-if="isOneOfRequired"

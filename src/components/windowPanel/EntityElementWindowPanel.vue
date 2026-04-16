@@ -5,7 +5,16 @@
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
-      <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
+      <div class="flex gap-4 w-1/4 items-center">
+        <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
+        <MetadataWrapper
+          class="w-full max-w-[50%]"
+          v-if="panel.panelHeaderContent.panelStatus"
+          :metadata="getStatusMetadata()"
+          :form-id="formId"
+          :isEdit="isEdit"
+        />
+      </div>
       <div class="flex justify-end gap-4">
         <div v-if="repeatablePanel && isEdit">
           <base-button-new
@@ -85,7 +94,10 @@ import {
   type PanelType,
   DamsIcons,
   type PanelRelation,
+  type PanelMetaData,
 } from "@/generated-types/queries";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import { usePanelStatus } from "@/composables/usePanelStatus";
 
 const props = withDefaults(
   defineProps<{
@@ -105,12 +117,14 @@ const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
-const repeatablePanel = ref<boolean>(
-  !!props.panel.repetitionConfig,
-);
+const repeatablePanel = ref<boolean>(!!props.panel.repetitionConfig);
 const panelId = computed(() => props.panel.repetitionConfig?.repetitionKey);
 const repeatableFieldsHelper = useRepeatableFields(
   panelId.value!,
+  props.formId,
+);
+const { getStatusMetadata, registerEditableKey } = usePanelStatus(
+  computed(() => props.panel.panelHeaderContent?.panelStatus),
   props.formId,
 );
 
@@ -148,6 +162,7 @@ watchEffect(() => {
   if (repeatablePanel.value) {
     repeatableFieldsHelper.init();
   }
+  registerEditableKey();
 });
 </script>
 
