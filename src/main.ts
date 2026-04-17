@@ -122,6 +122,7 @@ const start = async (): Promise<void> => {
 
       if (authStatus === "UNAUTHENTICATED" && auth?.isAuthenticated.value) {
         auth.logout();
+        if (!config.allowAnonymousUsers) auth.redirectToLogin();
       }
 
       return response;
