@@ -13,7 +13,10 @@
         :input-enabled="true"
         @updateFilters="updateBaseLibraryFilters"
       />
-      <div class="overflow-y-scroll h-full">
+      <div
+        v-if="isModalOpened && filters.length"
+        class="overflow-y-scroll h-full"
+      >
         <base-library
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
           list-item-route-name="SingleEntity"
@@ -45,12 +48,13 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const { closeModal } = useBaseModal();
+const isModalOpened = ref<boolean>(false);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const updateBaseLibraryFilters = (
@@ -58,5 +62,6 @@ const updateBaseLibraryFilters = (
   isOpenModal: boolean,
 ) => {
   filters.value = updatedFilters;
+  isModalOpened.value = isOpenModal;
 };
 </script>

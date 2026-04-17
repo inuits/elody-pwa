@@ -47,7 +47,11 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "updateFilters", filters: AdvancedFilterInput[]): void;
+  (
+    event: "updateFilters",
+    filters: AdvancedFilterInput[],
+    isOpenModal: boolean,
+  ): void;
 }>();
 
 const config = inject("config") as any;
@@ -97,7 +101,7 @@ const applyFilterToLibrary = () => {
     });
   }
 
-  emit("updateFilters", filters);
+  emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
 };
 
 const openSearchModal = () => {
