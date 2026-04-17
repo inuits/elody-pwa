@@ -112,13 +112,13 @@
   --z-index-content: 1;
   --z-index-content-raised: 5;
   --z-index-popover: 25;
+  --z-index-map: 30;
   --z-index-sticky: 35;
   --z-index-header: 38;
   --z-index-edit-modal: 39;
   --z-index-navigation: 40;
   --z-index-navigation-sub: 42;
-  --z-index-map: 43;
-  --z-index-dropdown: 44;
+  --z-index-dropdown: 48;
   --z-index-overlay: 48;
   --z-index-backdrop: 49;
   --z-index-modal: 50;
