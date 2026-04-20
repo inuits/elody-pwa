@@ -12,7 +12,10 @@ const uploadStatus = ref<UploadStatus>(UploadStatus.NoUpload);
 const uploadProgress = ref<ActionProgressStep[]>([]);
 const amountUploaded = ref<number>(0);
 const dryRunComplete = ref<boolean>(false);
-const dryRunErrors = ref<string[]>([]);
+const dryRunFeedback = ref<{ errors: string[]; warnings: string[] }>({
+  errors: [],
+  warnings: [],
+});
 const files = ref<DropzoneFile[]>([]);
 const lastUploadedFileIndex = ref<number>(-1);
 const currentUploadAbortController = ref<AbortController | undefined>(undefined);
@@ -37,7 +40,7 @@ export const useUploadState = () => {
     uploadFlow.value = UploadFlow.MediafilesOnly;
     uploadStatus.value = UploadStatus.NoUpload;
     files.value = [];
-    dryRunErrors.value = [];
+    dryRunFeedback.value = { errors: [], warnings: [] };
     missingFileNames.value = [];
     extraMediafileType.value = undefined;
     optionalFileNames.value = [];
@@ -52,7 +55,7 @@ export const useUploadState = () => {
     uploadProgress,
     amountUploaded,
     dryRunComplete,
-    dryRunErrors,
+    dryRunFeedback,
     files,
     lastUploadedFileIndex,
     currentUploadAbortController,

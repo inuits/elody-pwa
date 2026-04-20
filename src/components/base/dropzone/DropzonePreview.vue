@@ -33,6 +33,9 @@
         </div>
       </div>
       <div
+        class="warning-message-container hidden bg-orange-light/30 text-orange-default px-5 py-1"
+      ></div>
+      <div
         class="error-message-container hidden bg-red-light text-red-default px-5 py-1"
       ></div>
     </div>

@@ -24,7 +24,7 @@ export const useOcrUpload = (): {
     files,
     containsCsv,
     updateGlobalUploadProgress,
-    dryRunErrors,
+    dryRunFeedback,
     uploadProgress,
     uploadFlow,
   } = useUpload({});
@@ -90,15 +90,19 @@ export const useOcrUpload = (): {
     () => {
       if (uploadFlow.value === UploadFlow.MediafilesWithOcr) {
         if (!containsOptionalFile.value) {
-          if (!dryRunErrors.value.includes(optionalFilesMissingMessage.value))
-            dryRunErrors.value.push(optionalFilesMissingMessage.value);
+          if (
+            !dryRunFeedback.value.errors.includes(
+              optionalFilesMissingMessage.value,
+            )
+          )
+            dryRunFeedback.value.errors.push(optionalFilesMissingMessage.value);
 
           updateGlobalUploadProgress(
             ProgressStepType.Prepare,
             ProgressStepStatus.Incomplete,
           );
         } else {
-          dryRunErrors.value = dryRunErrors.value.filter(
+          dryRunFeedback.value.errors = dryRunFeedback.value.errors.filter(
             (error: string) => error !== optionalFilesMissingMessage.value,
           );
         }

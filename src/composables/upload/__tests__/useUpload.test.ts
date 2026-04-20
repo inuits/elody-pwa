@@ -36,7 +36,7 @@ vi.mock("@/components/dynamicForms/useDynamicForm", async () => {
 vi.mock("../useUploadState", async () => {
   const files = ref([]);
   const missingFileNames = ref([]);
-  const dryRunErrors = ref([]);
+  const dryRunFeedback = ref({ errors: [], warnings: [] });
   const failedUploads = ref([]);
   const uploadFlow = ref("MediafilesWithRequiredCsv");
   const uploadProgress = ref([]);
@@ -57,7 +57,7 @@ vi.mock("../useUploadState", async () => {
     useUploadState: () => ({
       files,
       missingFileNames,
-      dryRunErrors,
+      dryRunFeedback,
       failedUploads,
       uploadFlow,
       uploadProgress,
@@ -98,6 +98,10 @@ describe("useUpload - Missing Mediafiles validation", () => {
 
   const createFakeFile = (name: string, type: string) => {
     const previewTemplate = document.createElement("div");
+
+    const warningContainer = document.createElement("div");
+    warningContainer.classList.add("warning-message-container", "hidden");
+
     const errorContainer = document.createElement("div");
     errorContainer.classList.add("error-message-container", "hidden");
 
@@ -107,6 +111,7 @@ describe("useUpload - Missing Mediafiles validation", () => {
     validateLoading.classList.add("file-validate-loading");
     validateContainer.appendChild(validateLoading);
 
+    previewTemplate.appendChild(warningContainer);
     previewTemplate.appendChild(errorContainer);
     previewTemplate.appendChild(validateContainer);
 
@@ -206,5 +211,157 @@ describe("useUpload - Missing Mediafiles validation", () => {
     ).toBe(false);
     expect(errorContainer?.classList.contains("hidden")).toBe(true);
     expect(errorContainer?.innerHTML).toContain("");
+  });
+});
+
+describe("useUpload - Warnings from dry run", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const createFakeFile = (name: string, type: string) => {
+    const previewTemplate = document.createElement("div");
+
+    const warningContainer = document.createElement("div");
+    warningContainer.classList.add("warning-message-container", "hidden");
+
+    const errorContainer = document.createElement("div");
+    errorContainer.classList.add("error-message-container", "hidden");
+
+    const validateContainer = document.createElement("div");
+    validateContainer.classList.add("file-validate-container");
+    const validateLoading = document.createElement("div");
+    validateLoading.classList.add("file-validate-loading");
+    validateContainer.appendChild(validateLoading);
+
+    previewTemplate.appendChild(warningContainer);
+    previewTemplate.appendChild(errorContainer);
+    previewTemplate.appendChild(validateContainer);
+
+    return { name, type, previewTemplate, status: "added" } as any;
+  };
+
+  it("shows warnings in warning container and does not set red border", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        text: () =>
+          Promise.resolve(
+            JSON.stringify({
+              errors: {},
+              warnings: { row_1: ["W0001 duplicate key"] },
+              mediafiles: [],
+            }),
+          ),
+      } as Response),
+    );
+
+    const csvFile = createFakeFile("data.csv", "text/csv");
+    const { addFileToUpload, resetUpload } = useUpload({});
+
+    resetUpload();
+    await addFileToUpload(csvFile, true);
+
+    const warningContainer = csvFile.previewTemplate.querySelector(
+      ".warning-message-container",
+    );
+    const errorContainer = csvFile.previewTemplate.querySelector(
+      ".error-message-container",
+    );
+
+    expect(warningContainer?.classList.contains("hidden")).toBe(false);
+    expect(warningContainer?.innerHTML).toContain("Error");
+    expect(
+      csvFile.previewTemplate.classList.contains("border-red-default"),
+    ).toBe(false);
+    expect(errorContainer?.classList.contains("hidden")).toBe(true);
+  });
+
+  it("shows both warnings and errors when backend returns both", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        text: () =>
+          Promise.resolve(
+            JSON.stringify({
+              errors: { row_1: ["E0001 invalid value"] },
+              warnings: { row_2: ["W0001 duplicate key"] },
+              mediafiles: [],
+            }),
+          ),
+      } as Response),
+    );
+
+    const csvFile = createFakeFile("data.csv", "text/csv");
+    const { addFileToUpload, resetUpload } = useUpload({});
+
+    resetUpload();
+    await addFileToUpload(csvFile, true);
+
+    const warningContainer = csvFile.previewTemplate.querySelector(
+      ".warning-message-container",
+    );
+    const errorContainer = csvFile.previewTemplate.querySelector(
+      ".error-message-container",
+    );
+
+    expect(warningContainer?.classList.contains("hidden")).toBe(false);
+    expect(errorContainer?.classList.contains("hidden")).toBe(false);
+    expect(
+      csvFile.previewTemplate.classList.contains("border-red-default"),
+    ).toBe(true);
+  });
+
+  it("hides warning container when no warnings present", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        text: () =>
+          Promise.resolve(
+            JSON.stringify({
+              errors: {},
+              warnings: {},
+              mediafiles: [],
+            }),
+          ),
+      } as Response),
+    );
+
+    const csvFile = createFakeFile("data.csv", "text/csv");
+    const { addFileToUpload, resetUpload } = useUpload({});
+
+    resetUpload();
+    await addFileToUpload(csvFile, true);
+
+    const warningContainer = csvFile.previewTemplate.querySelector(
+      ".warning-message-container",
+    );
+
+    expect(warningContainer?.classList.contains("hidden")).toBe(true);
+  });
+
+  it("sets dryRunFeedback errors empty and warnings populated when only warnings returned", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        text: () =>
+          Promise.resolve(
+            JSON.stringify({
+              errors: {},
+              warnings: { row_1: ["W0001 duplicate key"] },
+              mediafiles: [],
+            }),
+          ),
+      } as Response),
+    );
+
+    const csvFile = createFakeFile("data.csv", "text/csv");
+    const { addFileToUpload, resetUpload, dryRunFeedback } = useUpload({});
+
+    resetUpload();
+    await addFileToUpload(csvFile, true);
+
+    expect(dryRunFeedback.value.errors).toHaveLength(0);
+    expect(dryRunFeedback.value.warnings.length).toBeGreaterThan(0);
   });
 });

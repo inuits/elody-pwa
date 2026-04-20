@@ -85,7 +85,7 @@ const {
   uploadProgress,
   amountUploaded,
   dryRunComplete,
-  dryRunErrors,
+  dryRunFeedback,
   files,
   lastUploadedFileIndex,
   currentUploadAbortController,
@@ -273,29 +273,40 @@ const useUpload = (config: any = {}) => {
     );
   };
 
-  const getDryRunErrors = async (dryRunResult: any): Promise<string[]> => {
-    const errors: string[] = [];
-    const errorKeys = Object.keys(dryRunResult.errors);
-    const errorPromises = errorKeys.map(async (key: string): Promise<void> => {
-      const errorList = await Promise.all(
-        dryRunResult.errors[key].map(async (errorMessage: string) => {
-          try {
-            const errorObject =
-              await getMessageAndCodeFromErrorString(errorMessage);
-            return errorObject.message;
-          } catch (error) {
-            console.error(`Error processing message: ${errorMessage}`, error);
-            return null;
-          }
-        }),
-      );
-      if (errorList.length) {
-        errors.push(...errorList);
-      }
-    });
+  const __processMessageObject = async (messageObj: any): Promise<string[]> => {
+    if (!messageObj) return [];
+    const messages: string[] = [];
+    const keys = Object.keys(messageObj);
+    await Promise.all(
+      keys.map(async (key: string): Promise<void> => {
+        const messageList = await Promise.all(
+          messageObj[key].map(async (message: string) => {
+            try {
+              const errorObject =
+                await getMessageAndCodeFromErrorString(message);
+              return errorObject.message;
+            } catch (error) {
+              console.error(`Error processing message: ${message}`, error);
+              return null;
+            }
+          }),
+        );
+        if (messageList.length) {
+          messages.push(...messageList);
+        }
+      }),
+    );
+    return messages;
+  };
 
-    await Promise.all(errorPromises);
-    return errors;
+  const getDryRunFeedback = async (
+    dryRunResult: any,
+  ): Promise<{ errors: string[]; warnings: string[] }> => {
+    const [errors, warnings] = await Promise.all([
+      __processMessageObject(dryRunResult.errors),
+      __processMessageObject(dryRunResult.warnings),
+    ]);
+    return { errors, warnings };
   };
 
   const handleDryRunResult = async (
@@ -303,7 +314,7 @@ const useUpload = (config: any = {}) => {
     file: DropzoneFile,
   ): Promise<void> => {
     try {
-      const errors = await getDryRunErrors(dryRunResult);
+      const feedback = await getDryRunFeedback(dryRunResult);
       const mediafilesInDryRun: any[] = dryRunResult.mediafiles || [];
 
       if (uploadFlow.value === UploadFlow.MediafilesWithOcr) {
@@ -313,10 +324,11 @@ const useUpload = (config: any = {}) => {
           (mediafile: any) => mediafile.filename,
         );
       }
-      dryRunErrors.value = errors;
+      dryRunFeedback.value = feedback;
       dryRunComplete.value = true;
 
-      const dryRunStatus: ProgressStepStatus = dryRunErrors.value.length
+      const dryRunStatus: ProgressStepStatus = dryRunFeedback.value.errors
+        .length
         ? ProgressStepStatus.Failed
         : ProgressStepStatus.Complete;
 
@@ -325,8 +337,9 @@ const useUpload = (config: any = {}) => {
         file,
         ProgressStepType.Validate,
         dryRunStatus,
-        dryRunErrors.value || [],
+        dryRunFeedback.value.errors,
       );
+      __handleFileThumbnailWarning(file, dryRunFeedback.value.warnings);
       if (
         dryRunStatus === ProgressStepStatus.Complete &&
         mediafiles?.value &&
@@ -342,7 +355,7 @@ const useUpload = (config: any = {}) => {
       verifyAllNeededFilesArePresent();
     } catch (e) {
       console.error(e);
-      dryRunErrors.value.push("upload-fields.errors.dry-run-failed");
+      dryRunFeedback.value.errors.push("upload-fields.errors.dry-run-failed");
       updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
@@ -372,7 +385,7 @@ const useUpload = (config: any = {}) => {
       await handleDryRunResult(dryRunResult, file);
     } catch (error: any) {
       const message = await error;
-      dryRunErrors.value.push(message);
+      dryRunFeedback.value.errors.push(message);
       updateGlobalUploadProgress(
         ProgressStepType.Validate,
         ProgressStepStatus.Failed,
@@ -758,7 +771,7 @@ const useUpload = (config: any = {}) => {
     }
     prefetchedUploadUrls.value = [];
     lastUploadedFileIndex.value = -1;
-    dryRunErrors.value = [];
+    dryRunFeedback.value = { errors: [], warnings: [] };
     dryRunComplete.value = false;
     missingFileNames.value = [];
     requiredMediafiles.value = [];
@@ -973,6 +986,33 @@ const useUpload = (config: any = {}) => {
     errorContainer.classList.remove("hidden");
   };
 
+  const __handleFileThumbnailWarning = (
+    file: DropzoneFile,
+    warnings: string[],
+  ): void => {
+    const filePreview: HTMLElement = file.previewTemplate;
+    const warningContainer: Element | null = filePreview
+      .getElementsByClassName("warning-message-container")
+      .item(0);
+    if (!warningContainer) return;
+
+    warningContainer.innerHTML = "";
+    if (!warnings || warnings.length <= 0) {
+      warningContainer.classList.add("hidden");
+      return;
+    }
+
+    const warningList = document.createElement("ul");
+    warningList.classList.add("list-disc");
+    warnings.forEach((warning: string) => {
+      const warningNode = document.createElement("li");
+      warningNode.innerHTML = warning;
+      warningList.appendChild(warningNode);
+    });
+    warningContainer.appendChild(warningList);
+    warningContainer.classList.remove("hidden");
+  };
+
   const extractStringBeforeLink = (input: string): string | undefined => {
     const regex = /(.*?)\$LINK\(/;
     const match = input.match(regex);
@@ -1093,7 +1133,7 @@ const useUpload = (config: any = {}) => {
     addFileToUpload,
     removeFileToUpload,
     dryRunCsv,
-    dryRunErrors,
+    dryRunFeedback,
     upload,
     validateFiles,
     toggleUploadStatus,
@@ -1123,6 +1163,7 @@ const useUpload = (config: any = {}) => {
     __getCsvString,
     extraMediafileType,
     __handleFileThumbnailError,
+    __handleFileThumbnailWarning,
     containsCsv,
     containsXml,
     containsExcel,
@@ -1142,12 +1183,19 @@ const mapMissingFileNamesToErrors = (): string[] => {
 };
 
 watch(
-  () => [missingFileNames.value, dryRunErrors.value],
+  () => [missingFileNames.value, dryRunFeedback.value],
   () => {
     if (!mainFile.value) return;
 
-    const errors = [...dryRunErrors.value, ...mapMissingFileNamesToErrors()];
+    const errors = [
+      ...dryRunFeedback.value.errors,
+      ...mapMissingFileNamesToErrors(),
+    ];
     useUpload().__handleFileThumbnailError(mainFile.value, errors);
+    useUpload().__handleFileThumbnailWarning(
+      mainFile.value,
+      dryRunFeedback.value.warnings,
+    );
   },
 );
 
