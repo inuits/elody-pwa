@@ -12,7 +12,7 @@
           v-if="panel.panelHeaderContent.panelStatus"
           :metadata="getStatusMetadata()"
           :form-id="formId"
-          :isEdit="false"
+          :isEdit="isEdit"
         />
       </div>
       <div class="flex justify-end gap-4">

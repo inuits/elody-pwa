@@ -19,6 +19,7 @@ import type {
   ColumnList,
   Entity,
   Entitytyping,
+  WindowElementPanel,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
 import { useEntityDiff } from "@/composables/useEntityDiff";
@@ -42,7 +43,8 @@ const emit = defineEmits<{
 
 const isMultipleColumn = ref<boolean>(true);
 
-const panel = computed(() => {
+const panels = computed(() => {
+  const panels: WindowElementPanel[] = [];
   const elements = props.columnList?.column?.elements;
   if (!elements) return null;
 
@@ -51,22 +53,22 @@ const panel = computed(() => {
     if (!el) continue;
 
     if (el.__typename === "WindowElementPanel") {
-      return el;
+      panels.push(el);
     }
 
-    const nestedPanel = Object.values(el).find(
+    const nestedPanels = Object.values(el).filter(
       (val: any) => val?.__typename === "WindowElementPanel",
     );
 
-    if (nestedPanel) {
-      return nestedPanel;
+    if (nestedPanels) {
+      panels.push(...nestedPanels);
     }
   }
 
-  return null;
+  return panels;
 });
 
-const { diffedResults } = useEntityDiff(props, panel);
+const { diffedResults } = useEntityDiff(props, panels);
 
 const columnConfigs = computed(() => {
   if (!diffedResults.value) return null;
@@ -75,7 +77,7 @@ const columnConfigs = computed(() => {
 
   const hasPrevious =
     previousVersion && Object.keys(previousVersion).length > 0;
-  const columns: { previous?: any; selected?: any  } = {}
+  const columns: { previous?: any; selected?: any } = {};
 
   if (hasPrevious) {
     columns.previous = {

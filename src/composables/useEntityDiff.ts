@@ -1,7 +1,7 @@
 import { computed, type Ref, toRaw } from "vue";
 import { dequal as isEqual } from "dequal";
 import { getMetadataFields } from "@/helpers";
-import type { Entity } from "@/generated-types/queries";
+import type { Entity, WindowElementPanel } from "@/generated-types/queries";
 
 interface DiffArgs {
   previousVersion: Entity | null | undefined;
@@ -15,16 +15,16 @@ export function useEntityDiff(
     entities: Entity[];
     entityId: string;
   },
-  panel: Ref<any>,
+  panels: Ref<any>,
 ) {
   const keysToCompare = computed(() => {
-    if (!props.entity || !panel.value) return [];
+    if (!props.entity || !panels.value) return [];
 
-    const fields = getMetadataFields(
-      panel.value,
-      panel.value.panelType,
-      props.entityId,
-    );
+    const fields = panels.value
+      .map((panel: WindowElementPanel) =>
+        getMetadataFields(panel, panel.panelType, props.entityId),
+      )
+      .flat();
 
     return fields.map((field: any) => field.key);
   });
