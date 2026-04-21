@@ -2045,6 +2045,7 @@ export type MatchMetadataValueInput = {
 export enum Matchers {
   AnyMatcher = 'AnyMatcher',
   ContainsMatcher = 'ContainsMatcher',
+  ContainsNotMatcher = 'ContainsNotMatcher',
   ExactMatcher = 'ExactMatcher',
   InBetweenMatcher = 'InBetweenMatcher',
   MaxIncludedMatcher = 'MaxIncludedMatcher',

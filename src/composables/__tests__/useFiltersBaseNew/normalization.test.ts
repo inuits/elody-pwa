@@ -1221,6 +1221,38 @@ describe("useFilterNormalization - normalizeFilterValue", () => {
     });
   });
 
+  describe("ContainsNotMatcher", () => {
+    it("normalizes string value to string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        "test string",
+        Matchers.ContainsNotMatcher,
+      );
+      expect(result).toBe("test string");
+    });
+
+    it("converts non-string value to string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        123,
+        Matchers.ContainsNotMatcher,
+      );
+      expect(result).toBe("123");
+    });
+
+    it("converts boolean to string", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(
+        filter,
+        true,
+        Matchers.ContainsNotMatcher,
+      );
+      expect(result).toBe("true");
+    });
+  });
+
   describe("MinIncludedMatcher", () => {
     it("normalizes range value with min only", () => {
       const filter = createTestFilter(AdvancedFilterTypes.Number);
@@ -1355,5 +1387,29 @@ describe("useFilterNormalization - normalizeFilterValue", () => {
       const result = normalizeFilterValue(filter, "test value");
       expect(result).toBe("test value");
     });
+  });
+});
+
+describe("useFilterNormalization - shouldMatchNot", () => {
+  const { shouldMatchNot } = useFilterNormalization();
+
+  it("returns true for ContainsNotMatcher", () => {
+    expect(shouldMatchNot(Matchers.ContainsNotMatcher)).toBe(true);
+  });
+
+  it("returns false for ContainsMatcher", () => {
+    expect(shouldMatchNot(Matchers.ContainsMatcher)).toBe(false);
+  });
+
+  it("returns false for ExactMatcher", () => {
+    expect(shouldMatchNot(Matchers.ExactMatcher)).toBe(false);
+  });
+
+  it("returns false for AnyMatcher", () => {
+    expect(shouldMatchNot(Matchers.AnyMatcher)).toBe(false);
+  });
+
+  it("returns false when matcher is undefined", () => {
+    expect(shouldMatchNot(undefined)).toBe(false);
   });
 });

@@ -14,7 +14,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 
 export const useFilterState = () => {
   const { variables, setVariables } = useFilterVariables();
-  const { normalizeFilterValue, shouldMatchExact } = useFilterNormalization();
+  const { normalizeFilterValue, shouldMatchExact, shouldMatchNot } = useFilterNormalization();
   const filters = ref<FilterListItem[]>([]);
 
   const activeFilterCount = computed(
@@ -71,6 +71,7 @@ export const useFilterState = () => {
       parent_key: filter.advancedFilter.parentKey,
       value: normalizeFilterValue(filter, value, matcher),
       match_exact: shouldMatchExact(matcher),
+      match_not: shouldMatchNot(matcher),
       aggregation: filter.advancedFilter.aggregation,
       distinct_by: filter.advancedFilter.distinctBy,
       ...(filter.advancedFilter.lookup

@@ -21,6 +21,7 @@ export const useFilterNormalization = () => {
       match_exact: ignoreFacets
         ? (filter.inputFromState?.match_exact ?? undefined)
         : undefined,
+      match_not: filter.inputFromState?.match_not || undefined,
       item_types: filter.inputFromState?.item_types ?? undefined,
       distinct_by: filter.advancedFilter.distinctBy ?? undefined,
       metadata_key_as_label:
@@ -93,6 +94,10 @@ export const useFilterNormalization = () => {
     );
   };
 
+  const shouldMatchNot = (matcher?: string): boolean => {
+    return matcher === Matchers.ContainsNotMatcher;
+  };
+
   const normalizeFilterValue = (
     filter: { advancedFilter: AdvancedFilter },
     value: any,
@@ -105,6 +110,7 @@ export const useFilterNormalization = () => {
       case Matchers.ExactMatcher:
         return normalizeExactValue(filter, value);
       case Matchers.ContainsMatcher:
+      case Matchers.ContainsNotMatcher:
         return normalizeContainsValue(value);
       case Matchers.MinIncludedMatcher:
         return normalizeMinValue(value);
@@ -157,5 +163,6 @@ export const useFilterNormalization = () => {
     getNormalizedFiltersForApi,
     normalizeFilterValue,
     shouldMatchExact,
+    shouldMatchNot,
   };
 };

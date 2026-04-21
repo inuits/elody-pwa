@@ -108,6 +108,55 @@ describe("useFiltersBaseNew - State Management", () => {
     expect(filter.selectedMatcher).toEqual(matcher);
   });
 
+  it("sets match_not true when activating a filter with ContainsNotMatcher", () => {
+    const { filters, activateFilter } = useFiltersBaseNew();
+
+    filters.value = [
+      {
+        isDisplayed: true,
+        advancedFilter: {
+          type: "text",
+          key: "test.key",
+          label: "Test",
+          isDisplayedByDefault: true,
+        },
+        isActive: false,
+      },
+    ];
+
+    activateFilter("test.key", "exclude term", "ContainsNotMatcher");
+
+    const filter = filters.value[0];
+    expect(filter.isActive).toBe(true);
+    expect(filter.inputFromState?.match_not).toBe(true);
+    expect(filter.inputFromState?.match_exact).toBe(false);
+    expect(filter.inputFromState?.value).toBe("exclude term");
+  });
+
+  it("sets match_not false when activating a filter with ContainsMatcher", () => {
+    const { filters, activateFilter } = useFiltersBaseNew();
+
+    filters.value = [
+      {
+        isDisplayed: true,
+        advancedFilter: {
+          type: "text",
+          key: "test.key",
+          label: "Test",
+          isDisplayedByDefault: true,
+        },
+        isActive: false,
+      },
+    ];
+
+    activateFilter("test.key", "include term", "ContainsMatcher");
+
+    const filter = filters.value[0];
+    expect(filter.isActive).toBe(true);
+    expect(filter.inputFromState?.match_not).toBe(false);
+    expect(filter.inputFromState?.value).toBe("include term");
+  });
+
   it("deactivates a filter", () => {
     const { filters, deactivateFilter } = useFiltersBaseNew();
 
