@@ -1,9 +1,5 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import {
-  type FieldContext,
-  type FormContext,
-  useField,
-} from "vee-validate";
+import { type FieldContext, type FormContext, useField } from "vee-validate";
 import {
   computed,
   inject,
@@ -161,14 +157,23 @@ export const useMetadataWrapper = (
     );
   };
 
-  const { getValidationRules } = useFieldValidation(() => props.metadata.inputField?.validation);
+  const { getValidationRules } = useFieldValidation(
+    () => props.metadata.inputField?.validation,
+  );
 
   const fieldKey = computed(() => getFieldKey());
   const fieldLabel = computed<string>(() =>
-    props.metadata.label ? getTranslatedMessage(props.metadata.label as string) : '',
+    getTranslatedMessage(
+      (props.metadata?.label as string) || "metadata.no-label",
+    ),
   );
   const isFieldRequired = computed<boolean>(() =>
-    checkIfFieldIsRequired(props.metadata, props.formId, mediafileViewerContext, conditionalFieldIsRequired),
+    checkIfFieldIsRequired(
+      props.metadata,
+      props.formId,
+      mediafileViewerContext,
+      conditionalFieldIsRequired,
+    ),
   );
   const fieldValidationRules = computed<string>(() =>
     getValidationRules(props.isEdit, isFieldRequired.value),
@@ -220,7 +225,7 @@ export const useMetadataWrapper = (
   });
 
   const parentForm = ref<FormContext | undefined>(
-    getForm(getEntityIdFromRoute())
+    getForm(getEntityIdFromRoute()),
   );
   const extractIntialValueFromParentByKey = (
     key: string,
@@ -244,13 +249,11 @@ export const useMetadataWrapper = (
     try {
       if (props.metadata.inputField?.autoSelectable)
         newValue = props.metadata.inputField.options[0]?.value;
-      if (props.repeatablePanelConfig?.isRepeatable) newValue = props.metadata.value[props.metadata.key];
+      if (props.repeatablePanelConfig?.isRepeatable)
+        newValue = props.metadata.value[props.metadata.key];
     } catch {
       throw Error("Unable to auto select value, no options available");
     }
-
-    if (newValue && typeof newValue === "object" && "formatter" in newValue)
-      newValue = (newValue as { label: string }).label;
 
     fieldValueProxy.value = newValue;
     determineFieldPermissions();

@@ -8,11 +8,11 @@
     "
     :key="fieldLabel"
     :class="{
-      'relative': fieldType === InputFieldTypes.InputFieldWithSubFields,
+      relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
     }"
   >
     <div class="flex items-center gap-2">
-        <metadata-title
+      <metadata-title
         :class="{
           'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
         }"
@@ -30,7 +30,6 @@
         fieldIsEditableByUser
       "
       :fieldKey="fieldKey"
-      :label="metadata.label as string"
       v-model:value="fieldValueProxy"
       :field="metadata.inputField"
       :hidden-field="metadata.hiddenField"
@@ -104,9 +103,13 @@
                 :is-metadata-field="metadata.inputField?.isMetadataField"
                 :relation-type="metadata.inputField?.relationType"
                 :from-relation-type="metadata.inputField?.fromRelationType"
-                :metadataOnRelationConfig="metadata.inputField?.metadataOnRelationFieldConfig"
+                :metadataOnRelationConfig="
+                  metadata.inputField?.metadataOnRelationFieldConfig
+                "
                 :disabled="true"
-                :readOnlyValueAsPlainText="metadata.inputField?.readOnlyValueAsPlainText"
+                :readOnlyValueAsPlainText="
+                  metadata.inputField?.readOnlyValueAsPlainText
+                "
                 @click.stop.prevent
               />
               <ViewModesAutocompleteMetadata
@@ -258,7 +261,7 @@ const {
   fieldTooltipValue,
   fieldErrorMessage,
   extractIntialValueFromParentByKey,
-  fieldValidationRules
+  fieldValidationRules,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {
   initializeDropdownStates,

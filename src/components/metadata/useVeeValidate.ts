@@ -107,7 +107,11 @@ export const useVeeValidate = (): {
       return `${ValidationFields.RelationValues}.${metadata.inputField.relationType}`;
 
     if (metadata.inputField) {
-      if (metadata.inputField?.subFields?.length > 0 && !metadata.inputField?.isMetadataField && metadata.inputField?.relationType)
+      if (
+        metadata.inputField?.subFields?.length > 0 &&
+        !metadata.inputField?.isMetadataField &&
+        metadata.inputField?.relationType
+      )
         return `${ValidationFields.RelationValues}.${baseFieldKey}`;
       // If the field has a formatter, we want to validate a label and only in edit mode
       if (metadata.value?.formatter && isEdit)

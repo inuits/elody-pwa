@@ -70,7 +70,9 @@
     <TableInputField
       v-else-if="field.type === InputFieldTypes.InputFieldWithSubFields"
       v-model:model-value="metadataValue"
-      :is-flow-relation-values="!field.isMetadataField && field.relationType !== undefined"
+      :is-flow-relation-values="
+        !field.isMetadataField && field.relationType !== undefined
+      "
       :sub-fields="(field as any).subFields ?? []"
       :form-id="formId"
       :parent-field-key="fieldKey"
@@ -133,7 +135,6 @@ const { t } = useI18n();
 
 const props = defineProps<{
   fieldKey: string;
-  label: string;
   value: any;
   hiddenField?: HiddenField;
   field: InputFieldType;
@@ -282,5 +283,4 @@ const copyValueFromParentAction = (key: string) => {
   if (!newValue) return;
   metadataValue.value = newValue;
 };
-
 </script>

@@ -12,7 +12,7 @@
           v-if="panel.panelHeaderContent.panelStatus"
           :metadata="getStatusMetadata()"
           :form-id="formId"
-          :isEdit="isEdit"
+          :isEdit="false"
         />
       </div>
       <div class="flex justify-end gap-4">
@@ -126,6 +126,7 @@ const repeatableFieldsHelper = useRepeatableFields(
 const { getStatusMetadata, registerEditableKey } = usePanelStatus(
   computed(() => props.panel.panelHeaderContent?.panelStatus),
   props.formId,
+  computed(() => props.isEdit),
 );
 
 const toggleIsCollapsed = () => {
