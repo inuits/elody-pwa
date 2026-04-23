@@ -15,7 +15,7 @@
       ]"
     >
       <entity-element-list
-        v-if="element.__typename === 'EntityListElement'"
+        v-if="element.__typename === 'EntityListElement' && isElementVisible(element)"
         :label="element.label as string"
         :type="element.type"
         :isCollapsed="element.isCollapsed"
@@ -132,6 +132,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
 
 import type {
+  DisplayCondition,
   Entity,
   EntityListElement,
   Entitytyping,
@@ -169,9 +170,11 @@ const props = withDefaults(
     id: string;
     entityType: Entitytyping;
     previewLabel?: string;
+    entityMetadata?: Record<string, any>;
   }>(),
   {
     previewLabel: undefined,
+    entityMetadata: undefined,
   },
 );
 const emit = defineEmits<{
@@ -205,6 +208,13 @@ const elements = computed<Elements[]>(() => {
   graphArray.forEach((graph) => returnArray.push(graph));
   return returnArray;
 });
+
+const isElementVisible = (element: Elements): boolean => {
+  if (element.__typename !== 'EntityListElement') return true;
+  const condition = (element as EntityListElement).displayCondition as DisplayCondition | undefined;
+  if (!condition?.key) return true;
+  return String(props.entityMetadata?.[condition.key]) === String(condition.value);
+};
 
 const getCollapsedStateForElement = (element: object): boolean => {
   if (!element.entityTypes) return;

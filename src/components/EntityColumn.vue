@@ -33,6 +33,7 @@
           :id="entity.id"
           :entity-type="entityType"
           :preview-label="previewLabel"
+          :entity-metadata="entity.intialValues"
           @close-preview-component="emit('closePreviewComponent')"
           @toggle-element-collapse="(entityId, elementLabel) => toggleElementCollapse(entityId, elementLabel, undefined, isPreviewElement)"
           @resize-column="resizeColumn"
