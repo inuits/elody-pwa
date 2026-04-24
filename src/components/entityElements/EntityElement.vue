@@ -171,6 +171,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     previewLabel?: string;
     entityMetadata?: Record<string, any>;
+    entityRelations?: Record<string, any>;
   }>(),
   {
     previewLabel: undefined,
@@ -213,7 +214,8 @@ const isElementVisible = (element: Elements): boolean => {
   if (element.__typename !== 'EntityListElement') return true;
   const condition = (element as EntityListElement).displayCondition as DisplayCondition | undefined;
   if (!condition?.key) return true;
-  return String(props.entityMetadata?.[condition.key]) === String(condition.value);
+  if (condition.value) return String(props.entityMetadata?.[condition.key]) === String(condition.value)
+  return props.entityRelations?.[condition.key] !== undefined;
 };
 
 const getCollapsedStateForElement = (element: object): boolean => {
