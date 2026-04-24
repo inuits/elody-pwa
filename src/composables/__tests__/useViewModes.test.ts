@@ -22,11 +22,16 @@ vi.mock("@/composables/useStateManagement", () => ({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const makeEntity = (type: string, viewModeNames: string[] = []): Entity =>
+const makeEntity = (
+  type: string,
+  viewModeNames: string[] = [],
+  teaserMetadata: Record<string, unknown> = {},
+): Entity =>
   ({
     id: "test-id",
     uuid: "test-uuid",
     type,
+    teaserMetadata,
     allowedViewModes: {
       viewModes: viewModeNames.map((viewMode) => ({ viewMode, config: null })),
     },
@@ -122,10 +127,10 @@ describe("useViewModes", () => {
       expect(displayMap.value).toBe(true);
     });
 
-    it("excludes Table and sets displayTable false when entities have mixed types", () => {
+    it("excludes Table and sets displayTable false when entities have different teaserMetadata columns", () => {
       const entities = ref<Entity[]>([
-        makeEntity("production"),
-        makeEntity("mediafile"),
+        makeEntity("production", [], { title: {} }),
+        makeEntity("mediafile", [], { filename: {} }),
       ]);
       const consoleSpy = vi
         .spyOn(console, "error")
@@ -140,8 +145,22 @@ describe("useViewModes", () => {
       expect(toggles.value).toHaveLength(0);
       expect(displayTable.value).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Table view requires all entities"),
+        expect.stringContaining("teaserMetadata columns"),
       );
+    });
+
+    it("includes Table when entities have mixed types but same teaserMetadata columns", () => {
+      const sharedMeta = { title: {}, date: {} };
+      const entities = ref<Entity[]>([
+        makeEntity("production", [], sharedMeta),
+        makeEntity("mediafile", [], sharedMeta),
+      ]);
+      const { determineViewModes, toggles } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.Table]);
+
+      expect(toggles.value).toHaveLength(1);
+      expect(toggles.value[0].iconOn).toBe(DamsIcons.Table);
     });
 
     it("includes all 5 view modes in correct order", () => {

@@ -60,9 +60,9 @@ export const useViewModes = (options: UseViewModesOptions) => {
     if (rawEntities.length <= 0) return false;
     const firstEntity = toRaw(rawEntities[0]);
     return (
-      firstEntity.allowedViewModes?.viewModes
-        ?.map((vm: ViewModesWithConfig) => vm.viewMode)
-        .includes(ViewModes.ViewModesMedia) ?? false
+      firstEntity.allowedViewModes?.viewModes?.some(
+        (vm: ViewModesWithConfig) => vm.viewMode === ViewModes.ViewModesMedia,
+      ) ?? false
     );
   });
 
@@ -101,13 +101,19 @@ export const useViewModes = (options: UseViewModesOptions) => {
           iconOff: DamsIcons.Apps,
         });
       } else if (viewMode === ViewModes.Table) {
-        const distinctTypes = new Set(
-          options.entities.value.map((e: Entity) => e.type),
+        const teaserKeys = (e: Entity): string =>
+          Object.keys((e.teaserMetadata as Record<string, unknown>) ?? {})
+            .filter((k) => k !== "__typename")
+            .sort()
+            .join(",");
+        const entities = options.entities.value;
+        const firstKeys = entities.length > 0 ? teaserKeys(entities[0]) : "";
+        const hasMixedTeaserMetadata = entities.some(
+          (e) => teaserKeys(e) !== firstKeys,
         );
-        if (distinctTypes.size > 1) {
+        if (hasMixedTeaserMetadata) {
           console.error(
-            `[BaseLibrary] Table view requires all entities to share the same type. ` +
-              `Found: ${[...distinctTypes].join(", ")}. Table view will not be shown.`,
+            `[BaseLibrary] Table view requires all entities to share the same teaserMetadata columns. Table view will not be shown.`,
           );
           displayTable.value = false;
         } else {
