@@ -211,18 +211,19 @@ export const useErrorCodes = (): {
   };
 
   const fallbackOnRequestStatusCode = (
-    statusCode: string,
+    statusCode: string | number | undefined,
     errorCodeType: ErrorCodeType,
     errorMessage: string,
   ): void => {
-    if (!Object.keys(statusCodeHandlers).includes(statusCode.toString())) {
+    const code = statusCode?.toString();
+    if (!code || !Object.keys(statusCodeHandlers).includes(code)) {
       statusCodeHandlers["default"](errorCodeType, errorMessage);
       console.info(
-        `An error with status code ${statusCode} was handled by the default handler, add it to the statusCodeHandlers mapper to implement custom behaviour`,
+        `An error with status code ${code} was handled by the default handler, add it to the statusCodeHandlers mapper to implement custom behaviour`,
       );
       return;
     }
-    statusCodeHandlers[statusCode](errorCodeType);
+    statusCodeHandlers[code](errorCodeType);
   };
 
   const getMessageAndCodeFromErrorString = async (
