@@ -289,7 +289,7 @@ describe("useViewModes", () => {
       const { getUserPreferredViewModeConfiguration, displayGrid } =
         useViewModes({ entities });
 
-      getUserPreferredViewModeConfiguration();
+      getUserPreferredViewModeConfiguration([ViewModes.Table, ViewModes.ViewModesList, ViewModes.ViewModesGrid, ViewModes.Map]);
 
       expect(displayGrid.value).toBe(true);
     });
@@ -306,7 +306,7 @@ describe("useViewModes", () => {
       const { getUserPreferredViewModeConfiguration, displayTable } =
         useViewModes({ entities });
 
-      getUserPreferredViewModeConfiguration();
+      getUserPreferredViewModeConfiguration([ViewModes.Table, ViewModes.ViewModesList, ViewModes.ViewModesGrid, ViewModes.Map]);
 
       expect(displayTable.value).toBe(true);
     });
@@ -323,7 +323,7 @@ describe("useViewModes", () => {
       const { getUserPreferredViewModeConfiguration, displayList } =
         useViewModes({ entities });
 
-      getUserPreferredViewModeConfiguration();
+      getUserPreferredViewModeConfiguration([ViewModes.Table, ViewModes.ViewModesList, ViewModes.ViewModesGrid, ViewModes.Map]);
 
       expect(displayList.value).toBe(true);
     });
@@ -435,7 +435,7 @@ describe("useViewModes", () => {
       });
       displayMap.value = true;
 
-      getUserPreferredViewModeConfiguration();
+      getUserPreferredViewModeConfiguration([ViewModes.Table, ViewModes.ViewModesList, ViewModes.ViewModesGrid, ViewModes.Map]);
 
       // displayMap only affects the single-mode early-return path, not the general preference restoration
       expect(displayGrid.value).toBe(true);
