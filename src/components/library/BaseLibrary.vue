@@ -960,10 +960,8 @@ watch(
       const viewModes = newEntities[0].allowedViewModes.viewModes.map(
         (vm) => vm.viewMode,
       );
-
       determineViewModes(viewModes);
-      getUserPreferredViewModeConfiguration();
-
+      getUserPreferredViewModeConfiguration(viewModes);
       lastProcessedEntityType.value = entityType.value;
     }
 

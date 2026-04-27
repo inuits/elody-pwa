@@ -148,7 +148,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
    * Restore the user's preferred view mode configuration from localStorage.
    * Formerly named `getDisplayPreferences` in BaseLibrary.vue.
    */
-  const getUserPreferredViewModeConfiguration = (): void => {
+  const getUserPreferredViewModeConfiguration = (viewModes: string[] = []): void => {
     const displayPreferences = getGlobalState("_displayPreferences");
     if (!displayPreferences) return;
 
@@ -168,11 +168,11 @@ export const useViewModes = (options: UseViewModesOptions) => {
       return;
     }
 
-    if (!displayPreview.value && displayPreferences.table) {
+    if (!displayPreview.value && displayPreferences.table && viewModes.includes(ViewModes.Table)) {
       displayTable.value = displayPreferences.table;
     }
 
-    if (!displayPreview.value && displayPreferences.grid) {
+    if (!displayPreview.value && displayPreferences.grid && viewModes.includes(ViewModes.ViewModesGrid)) {
       displayGrid.value = displayPreferences.grid;
     }
 
