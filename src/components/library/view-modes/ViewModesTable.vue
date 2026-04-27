@@ -27,7 +27,7 @@
             <div
               v-for="(col, idx) in headerColumns"
               :key="'header-' + idx"
-              :class="headerColumnStyle"
+              :class="headerColumnClass(idx)"
             >
               {{ col.label ? t(col.label) : "" }}
             </div>
@@ -67,6 +67,7 @@
             :has-selection="enableSelection"
             :base-library-mode="baseLibraryMode"
             :has-thumbnail="anyEntityHasThumbnail"
+            :col-min-widths="colMinWidths"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
             :preview-component-current-active="entity.isPreviewActive"
@@ -164,12 +165,7 @@ const { getThumbnail } = useThumbnailHelper();
 const { findRelation } = useFormHelper();
 
 const refEntities = ref<Entity[]>(props.entities);
-watch(
-  () => props.entities,
-  (newValue) => {
-    refEntities.value = newValue;
-  },
-);
+const colMinWidths = ref<string[]>([]);
 
 const {
   previewComponent,
@@ -219,11 +215,32 @@ const headerColumns = computed(() => {
     ? visibleMetadata.slice(0, 1)
     : visibleMetadata;
 
-  return targetMetadata.map(({ key, label }) => ({ key, label }));
+  return targetMetadata.map(({ key, label, value }) => ({
+    key,
+    label,
+    hasFormatter: !!(value as any)?.formatter,
+  }));
 });
 
-// Same percentage-width logic as ListItem's teaserMetadataStyle
-const headerColumnStyle = computed<string>(() => {
+const measureColWidths = () => {
+  const docStyle = getComputedStyle(document.documentElement);
+  const fontSizePx = Math.round(parseFloat(docStyle.fontSize) * 0.875);
+  const font = `600 ${fontSizePx}px ${docStyle.fontFamily}`;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  colMinWidths.value = headerColumns.value.map((col) => {
+    if (!ctx || !col.label) return "";
+    ctx.font = font;
+    return `${Math.ceil(ctx.measureText(t(col.label)).width)}px`;
+  });
+};
+
+const headerColumnClass = (idx: number): string => {
+  const base = "flex justify-start flex-col mx-2 break-words";
+  if (headerColumns.value[0]?.hasFormatter) {
+    if (idx === 0) return `${base} flex-shrink-0 whitespace-nowrap`;
+    return `${base} flex-1 min-w-0`;
+  }
   const count = headerColumns.value.length;
   const amount: string | number = count >= 4 ? "default" : count;
   const widths: Record<string | number, string> = {
@@ -232,8 +249,8 @@ const headerColumnStyle = computed<string>(() => {
     3: "w-1/2",
     default: "w-1/4",
   };
-  return `flex justify-start flex-col mx-2 break-words ${widths[amount]}`;
-});
+  return `${base} ${widths[amount]}`;
+};
 
 const processedEntities = computed(() => {
   const previewEnabled = previewComponentEnabled.value;
@@ -297,6 +314,14 @@ const processedEntities = computed(() => {
     };
   });
 });
+
+watch(headerColumns, measureColWidths, { immediate: true });
+watch(
+  () => props.entities,
+  (newValue) => {
+    refEntities.value = newValue;
+  },
+);
 </script>
 
 <style scoped>

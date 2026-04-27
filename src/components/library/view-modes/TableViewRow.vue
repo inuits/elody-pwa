@@ -48,7 +48,8 @@
       <div
         v-for="(metadataItem, idx) in visibleMetadata"
         :key="`${itemId}_${metadataItem?.key || idx}`"
-        :class="columnStyle"
+        :class="columnClass(idx)"
+        :style="props.colMinWidths?.[idx] ? { minWidth: props.colMinWidths[idx] } : {}"
       >
         <ReadOnlyMetadataWrapper
           :form-id="itemId || 'tableview'"
@@ -165,6 +166,7 @@ const props = withDefaults(
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes;
     loading?: boolean;
+    colMinWidths?: string[];
   }>(),
   {
     itemType: undefined,
@@ -182,6 +184,7 @@ const props = withDefaults(
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
     loading: false,
+    colMinWidths: () => [],
   },
 );
 
@@ -207,7 +210,12 @@ const visibleMetadata = computed(() =>
   (props.teaserMetadata ?? []).filter((m) => !m.showOnlyInEditMode),
 );
 
-const columnStyle = computed<string>(() => {
+const columnClass = (idx: number): string => {
+  const base = "flex justify-start flex-col mx-2 break-words";
+  if (visibleMetadata.value[0]?.value?.formatter) {
+    if (idx === 0) return `${base} flex-shrink-0 whitespace-nowrap`;
+    return `${base} flex-1 min-w-0`;
+  }
   const count = visibleMetadata.value.length;
   const amount: string | number = count >= 4 ? "default" : count;
   const widths: Record<string | number, string> = {
@@ -216,8 +224,8 @@ const columnStyle = computed<string>(() => {
     3: "w-1/2",
     default: "w-1/4",
   };
-  return `flex justify-start flex-col mx-2 break-words ${widths[amount]}`;
-});
+  return `${base} ${widths[amount]}`;
+};
 
 const isActiveListItem = computed<boolean>(() => {
   if (
