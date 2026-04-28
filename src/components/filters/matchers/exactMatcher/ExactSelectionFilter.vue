@@ -30,7 +30,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   AutocompleteSelectionOptions,
@@ -55,6 +55,8 @@ const props = defineProps<{
   getNormalizedActiveFilters: () => any;
   refetchFilterOptions: boolean;
 }>();
+
+const parentEntity: any = inject("ParentEntityProvider", undefined);
 
 defineEmits(["updateValue", "filterOptions"]);
 
@@ -118,6 +120,7 @@ const initialize = async () => {
         route.meta.entityType) as Entitytyping,
       props.filter.advancedFilter.filterOptionsMapping,
       selectedOptions.value,
+      parentEntity,
     );
     isInitialized.value = true;
   } catch (error) {

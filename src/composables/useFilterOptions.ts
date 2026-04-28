@@ -1,4 +1,5 @@
 import type {
+  Entity,
   Entitytyping,
   AdvancedFilterInput,
   BaseEntity,
@@ -51,10 +52,12 @@ export const useFilterOptions = () => {
     entityTypeToSet: string | Entitytyping,
     filterOptionsMappingValue?: FilterOptionsMappingType,
     filterSelectedOptions?: string[],
+    parentEntity?: Entity | undefined,
   ) => {
     query.value = await loadDocument("GetFilterOptions");
     entityType.value = entityTypeToSet;
     optionsFiltersManager.setVariables({ entityType: entityTypeToSet });
+    optionsFiltersManager.setVariables({ entity: parentEntity });
     facetsFiltersManager.setVariables({ entityType: entityTypeToSet });
     filterOptionsMapping.value = filterOptionsMappingValue;
     selectedOptions.value = filterSelectedOptions;
