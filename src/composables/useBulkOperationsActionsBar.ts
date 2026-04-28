@@ -26,6 +26,7 @@ import {
   PanelType,
   RouteNames,
   TypeModals,
+  type Entity,
 } from "@/generated-types/queries";
 import { getValueForPanelMetadata } from "@/helpers";
 import { apolloClient } from "@/main";
@@ -73,6 +74,7 @@ export interface BulkOperationsActionsBarEmits {
 export const useBulkOperationsActionsBar = (
   props: BulkOperationsActionsBarProps,
   emit: BulkOperationsActionsBarEmits,
+  parentEntity: Entity | undefined
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
   const paginationStore: PaginationStore = inject(PaginationStoreKey);
@@ -325,6 +327,7 @@ export const useBulkOperationsActionsBar = (
       undefined,
       bulkOperationModalConfig.askForCloseConfirmation || undefined,
       getModalContextForOperation(operationType),
+      { parentEntity: parentEntity}
     );
   };
 

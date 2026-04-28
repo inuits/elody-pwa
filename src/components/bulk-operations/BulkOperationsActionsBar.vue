@@ -87,6 +87,7 @@
 </template>
 
 <script lang="ts" setup>
+import { inject } from "vue";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
@@ -137,6 +138,8 @@ const props = withDefaults(
   },
 );
 
+const parentEntity: Entity = inject("ParentEntityProvider", undefined);
+
 const emit = defineEmits<{
   (event: "selectPage"): void;
   (event: "selectAll"): void;
@@ -175,6 +178,7 @@ const {
 } = useBulkOperationsActionsBar(
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
+  parentEntity,
 );
 </script>
 

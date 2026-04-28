@@ -100,17 +100,9 @@ const props = withDefaults(
   },
 );
 
-provide(
-  "mediafileViewerContext",
-  props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
-);
-addMediafileSelectionStateContext(
-  props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
-);
-
 const { t, locale } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
-const { closeModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const {
@@ -126,6 +118,17 @@ const { parseFormValuesToFormInput, getForm } = useFormHelper();
 const { getCallbackFunctions } = useModalActions();
 const { displayWarningNotification, displaySuccessNotification } =
   useBaseNotification();
+
+provide("ParentEntityProvider", getModalInfo(TypeModals.DynamicForm).parentEntity);
+
+provide(
+  "mediafileViewerContext",
+  props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
+);
+addMediafileSelectionStateContext(
+  props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
+);
+
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,

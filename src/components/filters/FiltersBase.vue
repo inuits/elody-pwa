@@ -548,7 +548,7 @@ const updateFilterVariables = () => {
   setVariables({
     parentIds: props.parentEntityIdentifiers,
     entityType: props.entityType,
-    entity: parentEntity?.value,
+    entity: parentEntity?.value || parentEntity,
     dateToday: DateTime.now().toISO(),
   });
 };
