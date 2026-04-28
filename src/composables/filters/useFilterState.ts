@@ -5,6 +5,7 @@ import {
   type AdvancedFilterInput,
   type AdvancedFilters,
   AdvancedFilterTypes,
+  type ValueMapping,
 } from "@/generated-types/queries";
 import { useFilterVariables } from "./useFilterVariables";
 import { useFilterNormalization } from "./useFilterNormalization";
@@ -140,7 +141,7 @@ export const useFilterState = () => {
     let value = resolveVariableReferences(filter);
 
     if (typeof value === "string" && value.includes("$")) {
-      value = resolveAllVariables(value);
+      value = resolveAllVariables(value, filter.defaultValueMapping);
     }
 
     value = tryParseJson(value);
@@ -153,9 +154,17 @@ export const useFilterState = () => {
     return value;
   };
 
-  const resolveAllVariables = (rawValue: string) => {
+  const resolveAllVariables = (rawValue: string, defaultValueMapping: ValueMapping[] = undefined) => {
     return rawValue.replace(/\$([\w.]+)/g, (match, path) => {
       const resolved = extractValueFromObject(variables.value, path);
+      if (defaultValueMapping && resolved !== undefined) {
+        const resolvedValue = Array.isArray(resolved) ? JSON.stringify(resolved) : String(resolved);
+        for (const valueMapping of defaultValueMapping) {
+          const stringValue = Array.isArray(valueMapping.value) ? JSON.stringify(valueMapping.value) : String(valueMapping.value);
+          if (stringValue == resolvedValue) return valueMapping.mapping
+        }
+        return defaultValueMapping[0].mapping;
+      }
       if (Array.isArray(resolved)) {
         return JSON.stringify(resolved);
       }

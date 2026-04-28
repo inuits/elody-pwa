@@ -25,6 +25,7 @@ export const useFilterBasic = () => {
       key: input.key,
       isDisplayedByDefault: true,
       defaultValue: input.value,
+      defaultValueMapping: input.defaultValueMapping,
       itemTypes: input.item_types,
       matchExact: input.match_exact,
       distinctBy: input.distinct_by,
