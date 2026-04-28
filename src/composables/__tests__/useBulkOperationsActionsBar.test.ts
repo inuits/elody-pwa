@@ -555,6 +555,7 @@ describe("useBulkOperationsActionsBar", () => {
         undefined,
         true,
         props.context,
+        { "parentEntity": undefined }
       );
     });
   });
