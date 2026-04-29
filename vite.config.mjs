@@ -1,4 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { defineConfig } from "vite";
 
 import viteCompression from "vite-plugin-compression";
@@ -6,6 +8,28 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 import tailwindSvgPlugin from "./plugin/vite-plugin-tailwind-svg.js";
+
+const canopyCleanUrlsPlugin = () => ({
+  name: "canopy-clean-urls",
+  configureServer(server) {
+    const canopyDir = join(server.config.publicDir, "canopy");
+    server.middlewares.use((req, _res, next) => {
+      if (!req.url || !req.url.startsWith("/canopy/")) return next();
+      const [pathname, query = ""] = req.url.split("?");
+      const rel = pathname.replace(/^\/canopy\//, "");
+      const fsPath = join(canopyDir, rel);
+      const candidates = pathname.endsWith("/")
+        ? [join(fsPath, "index.html")]
+        : [fsPath, fsPath + ".html", join(fsPath, "index.html")];
+      const hit = candidates.find((p) => existsSync(p));
+      if (hit) {
+        const rewritten = "/canopy/" + hit.slice(canopyDir.length + 1).replaceAll("\\", "/");
+        req.url = query ? `${rewritten}?${query}` : rewritten;
+      }
+      next();
+    });
+  },
+});
 
 const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
@@ -19,6 +43,7 @@ const cacheDir =
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
   plugins: [
+    canopyCleanUrlsPlugin(),
     vue(),
     viteCompression(),
     vueDevTools(),
