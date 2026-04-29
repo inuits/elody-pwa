@@ -13,7 +13,7 @@ const canopyCleanUrlsPlugin = () => ({
   name: "canopy-clean-urls",
   configureServer(server) {
     const canopyDir = join(server.config.publicDir, "canopy");
-    server.middlewares.use((req, _res, next) => {
+    server.middlewares.use((req, res, next) => {
       if (!req.url || !req.url.startsWith("/canopy/")) return next();
       const [pathname, query = ""] = req.url.split("?");
       const rel = pathname.replace(/^\/canopy\//, "");
@@ -25,8 +25,13 @@ const canopyCleanUrlsPlugin = () => ({
       if (hit) {
         const rewritten = "/canopy/" + hit.slice(canopyDir.length + 1).replaceAll("\\", "/");
         req.url = query ? `${rewritten}?${query}` : rewritten;
+        return next();
       }
-      next();
+      // No file under /canopy/ matches — return 404 instead of falling
+      // through to Vite's SPA index.html (which would serve the Vue app).
+      res.statusCode = 404;
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.end("Not Found");
     });
   },
 });
