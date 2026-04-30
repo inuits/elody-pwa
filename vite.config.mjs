@@ -1,6 +1,4 @@
 import { fileURLToPath, URL } from "node:url";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { defineConfig } from "vite";
 
 import viteCompression from "vite-plugin-compression";
@@ -8,33 +6,6 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import tailwindcss from "@tailwindcss/vite";
 import tailwindSvgPlugin from "./plugin/vite-plugin-tailwind-svg.js";
-
-const canopyCleanUrlsPlugin = () => ({
-  name: "canopy-clean-urls",
-  configureServer(server) {
-    const canopyDir = join(server.config.publicDir, "canopy");
-    server.middlewares.use((req, res, next) => {
-      if (!req.url || !req.url.startsWith("/canopy/")) return next();
-      const [pathname, query = ""] = req.url.split("?");
-      const rel = pathname.replace(/^\/canopy\//, "");
-      const fsPath = join(canopyDir, rel);
-      const candidates = pathname.endsWith("/")
-        ? [join(fsPath, "index.html")]
-        : [fsPath, fsPath + ".html", join(fsPath, "index.html")];
-      const hit = candidates.find((p) => existsSync(p));
-      if (hit) {
-        const rewritten = "/canopy/" + hit.slice(canopyDir.length + 1).replaceAll("\\", "/");
-        req.url = query ? `${rewritten}?${query}` : rewritten;
-        return next();
-      }
-      // No file under /canopy/ matches — return 404 instead of falling
-      // through to Vite's SPA index.html (which would serve the Vue app).
-      res.statusCode = 404;
-      res.setHeader("Content-Type", "text/plain; charset=utf-8");
-      res.end("Not Found");
-    });
-  },
-});
 
 const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
@@ -48,7 +19,6 @@ const cacheDir =
 // https://vitejs.dev/config/
 const viteConfig = defineConfig({
   plugins: [
-    canopyCleanUrlsPlugin(),
     vue(),
     viteCompression(),
     vueDevTools(),
