@@ -47,7 +47,9 @@
           { 'pr-2': !isEdit },
           {
             'hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
-              !isEdit && relationType && props.autocompleteStyle !== 'readOnlyAsPlainText',
+              !isEdit &&
+              relationType &&
+              props.autocompleteStyle !== 'readOnlyAsPlainText',
           },
         ]"
         @click.stop="() => emit('handleTagClick', option)"
@@ -61,15 +63,18 @@
         >
           <BaseInputTextNumberDatetime
             v-if="!isPlainText"
-            class="w-[115px] h-[26px] ml-2 py-[2px]"
+            class="h-[26px] ml-2 py-[2px]"
+            :style="{ width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch` }"
             :model-value="getTagInputValue(option.value)"
-            @update:model-value="setTagInputValue(option.value, $event as string)"
+            @update:model-value="
+              setTagInputValue(option.value, $event as string)
+            "
             :input-style="isPlainText ? 'plainText' : 'default'"
             type="text"
             :disabled="disabled"
           />
           <div v-else class="pl-0 text-sm !text-[#000000] w-max">
-            {{  getReadOnlyInputValue(option) }}
+            {{ getReadOnlyInputValue(option) }}
           </div>
         </div>
         <span
@@ -100,7 +105,11 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 
-type AutocompleteStyle = "default" | "defaultWithBorder" | "readOnly" | "readOnlyAsPlainText";
+type AutocompleteStyle =
+  | "default"
+  | "defaultWithBorder"
+  | "readOnly"
+  | "readOnlyAsPlainText";
 
 const props = withDefaults(
   defineProps<{
@@ -140,10 +149,7 @@ const emit = defineEmits<{
   (event: "handleTagClick", option: DropdownOption[]): void;
   (event: "searchChange", value: string): void;
   (event: "update:modelValue", modelValue: DropdownOption[] | undefined): void;
-  (
-    event: "update:tagInputValues",
-    values: Map<string | number, string>,
-  ): void;
+  (event: "update:tagInputValues", values: Map<string | number, string>): void;
 }>();
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
@@ -166,11 +172,13 @@ const setTagInputValue = (optionValue: string | number, value: string) => {
 
 const getReadOnlyInputValue = (option: DropdownOption) => {
   if (!inputValue.value) return "";
-  const tagInputValue = getTagInputValue(option.value)
-  const isLastOption = inputValue.value.findIndex((opt) => opt.value === option.value) === inputValue.value.length - 1;
+  const tagInputValue = getTagInputValue(option.value);
+  const isLastOption =
+    inputValue.value.findIndex((opt) => opt.value === option.value) ===
+    inputValue.value.length - 1;
   const separator = props.displayInputForTag && !isLastOption ? ", " : "";
   return !isLastOption ? `${tagInputValue}${separator}` : tagInputValue;
-}
+};
 
 watch(
   () => props.initialTagInputValues,
@@ -225,17 +233,20 @@ const classes = computed(() => {
   };
 
   if (props.autocompleteStyle === "defaultWithBorder") {
-    result["container"] = `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
+    result["container"] =
+      `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
   }
 
   if (props.autocompleteStyle === "readOnly") {
     result["container"] = "multiselect border-none !bg-white";
-    result["tags"] = "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+    result["tags"] =
+      "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
 
   if (props.autocompleteStyle === "readOnlyAsPlainText") {
     result["container"] = "multiselect border-none !bg-transparent";
-    result["tag"] = "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
+    result["tag"] =
+      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
     result["tags"] = "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
     result["tagsSearchWrapper"] = "!hidden";
   }
