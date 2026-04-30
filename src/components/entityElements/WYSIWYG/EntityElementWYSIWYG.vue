@@ -47,7 +47,7 @@
           class="mt-[3px]"
         >
           <div
-            class="text-xl mt-3"
+            class="text-lg"
             v-for="n in paragraphAmount"
             :key="`${element.label}-paragraph-${n}`"
           >
