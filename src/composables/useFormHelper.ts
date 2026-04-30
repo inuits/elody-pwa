@@ -297,6 +297,12 @@ const useFormHelper = () => {
     return form.values.relationValues[type];
   };
 
+  const extractMetadataValue = (value: unknown): unknown => {
+    if (value && typeof value === "object" && (value as any).formatter)
+      return (value as any).label ?? "";
+    return value;
+  };
+
   const parseIntialValuesForFormSubmit = (
     intialValues: IntialValues,
     entityId: string,
@@ -315,7 +321,7 @@ const useFormHelper = () => {
           key: string;
           value: unknown;
           lang?: string;
-        } = { key, value: (intialValues as any)[key] ?? "" };
+        } = { key, value: extractMetadataValue((intialValues as any)[key] ?? "") };
         const isEnabledMultilanguage =
           config?.features?.supportsMultilingualMetadataEditing;
         if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {

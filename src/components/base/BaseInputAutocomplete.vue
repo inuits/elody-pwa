@@ -75,6 +75,7 @@
         <span
           v-if="!disabled"
           class="multiselect-tag-remove !cursor-pointer"
+          @mousedown.stop
           @click.prevent.stop="handleTagRemove(option, $event)"
         >
           <span class="multiselect-tag-remove-icon"></span>
@@ -94,7 +95,7 @@ import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import useEntitySingle from "@/composables/useEntitySingle";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { computed, onBeforeMount, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
@@ -148,7 +149,6 @@ const emit = defineEmits<{
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
 const { t } = useI18n();
-const classes = ref();
 const searchValue = ref<string>();
 const isPlainText = computed(
   () => props.disabled && props.autocompleteStyle === "readOnlyAsPlainText",
@@ -208,50 +208,40 @@ const shouldShowTypingHint = computed(() => {
   return isReachedOptionsLimit && isSearchValueEmpty && hasSelectedValue;
 });
 
-const setClasses = () => {
-  classes.value =
+const classes = computed(() => {
+  const isEmpty =
     !inputValue.value ||
     inputValue.value.length <= 0 ||
-    inputValue.value[0]?.value === ""
-      ? { tags: "multiselect-tags multiselect-tags-margin" }
-      : {};
+    inputValue.value[0]?.value === "";
 
   const defaultContainerStyles = "multiselect rounded-lg items-stretch";
-  classes.value["container"] = `${defaultContainerStyles} border-none`;
-  classes.value["containerActive"] =
-    "outline-1 outline-accent-normal outline-offset-0";
-  classes.value["tagsSearch"] =
-    "multiselect-tags-search !border-none focus:ring-0 p-0";
-  classes.value["tag"] = "multiselect-tag !bg-accent-accent !opacity-100";
-  classes.value["dropdown"] = "multiselect-dropdown -bottom-px";
+  const result: Record<string, string> = {
+    container: `${defaultContainerStyles} border-none`,
+    containerActive: "outline-1 outline-accent-normal outline-offset-0",
+    tagsSearch: "multiselect-tags-search !border-none focus:ring-0 p-0",
+    tag: "multiselect-tag !bg-accent-accent !opacity-100",
+    dropdown: "multiselect-dropdown -bottom-px",
+    ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
+  };
 
   if (props.autocompleteStyle === "defaultWithBorder") {
-    classes.value["container"] =
-      `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
+    result["container"] = `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
   }
 
   if (props.autocompleteStyle === "readOnly") {
-    classes.value["container"] = "multiselect border-none !bg-white";
-    classes.value["tags"] =
-      "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+    result["container"] = "multiselect border-none !bg-white";
+    result["tags"] = "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }
 
   if (props.autocompleteStyle === "readOnlyAsPlainText") {
-    classes.value["container"] = "multiselect border-none !bg-transparent";
-    classes.value["tag"] =
-      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
-    classes.value["tags"] =
-      "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
-    classes.value["tagsSearchWrapper"] = "!hidden";
+    result["container"] = "multiselect border-none !bg-transparent";
+    result["tag"] = "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
+    result["tags"] = "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+    result["tagsSearchWrapper"] = "!hidden";
   }
-};
 
-onBeforeMount(() => setClasses());
-
-watch(
-  () => [inputValue.value, props.options],
-  () => setClasses(),
-);
+  return result;
+});
 
 watch(
   () => inputValue.value,

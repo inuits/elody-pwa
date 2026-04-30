@@ -12,6 +12,11 @@ const {
   parseInheritedRelationValuesFromFormSubmit,
 } = useFormHelper();
 
+const {
+  parseIntialValuesForFormSubmit,
+  addEditableMetadataKeys,
+} = useFormHelper();
+
 vi.mock("@/main", () => ({
   apolloClient: {
     query: vi.fn(),
@@ -187,6 +192,40 @@ describe("useFormHelper", () => {
   //     ...initialValues,
   //   });
   // });
+});
+
+describe("useFormHelper - extractMetadataValue", () => {
+  const entityId = "extract-metadata-value-entity";
+
+  const setup = (key: string, value: unknown) => {
+    addEditableMetadataKeys([key], entityId);
+    return parseIntialValuesForFormSubmit({ [key]: value } as any, entityId);
+  };
+
+  it("returns plain string as-is", () => {
+    const result = setup("title", "plain string");
+    expect(result).toEqual([{ key: "title", value: "plain string" }]);
+  });
+
+  it("extracts label from formatter object", () => {
+    const result = setup("color", { label: "red", formatter: "pill|auto" });
+    expect(result).toEqual([{ key: "color", value: "red" }]);
+  });
+
+  it("returns empty string when formatter object has no label", () => {
+    const result = setup("status", { formatter: "pill|danger" });
+    expect(result).toEqual([{ key: "status", value: "" }]);
+  });
+
+  it("returns plain object without formatter as-is", () => {
+    const result = setup("data", { someKey: "someValue" });
+    expect(result).toEqual([{ key: "data", value: { someKey: "someValue" } }]);
+  });
+
+  it("returns empty string for null value", () => {
+    const result = setup("empty", null);
+    expect(result).toEqual([{ key: "empty", value: "" }]);
+  });
 });
 
 describe("useFormHelper - parse relation values", () => {
