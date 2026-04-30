@@ -502,6 +502,13 @@ watch(
 );
 
 watch(
+  () => props.loading,
+  (val) => {
+    loading.value = val;
+  },
+);
+
+watch(
   () => props.viewMode,
   () => {
     setNoImage(false);
