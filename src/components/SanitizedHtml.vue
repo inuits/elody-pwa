@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { sanitizeHtml } from "@/helpers";
 import { SanitizeMode } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
@@ -34,9 +34,23 @@ const props = withDefaults(
   },
 );
 
+const emit = defineEmits<{
+  (e: "content-sanitized"): void;
+}>();
+
 const { t } = useI18n();
 
 const cleanContent = computed<string>(() => sanitizeHtml(props.content));
+
+watch(
+  cleanContent,
+  (clean) => {
+    if (clean !== props.content) {
+      emit("content-sanitized");
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped></style>
