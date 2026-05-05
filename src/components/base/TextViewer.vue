@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full h-full relative flex-col">
+  <div class="flex w-full h-full relative flex-col select-text">
     <div
       v-if="showSanitizedWarning"
       class="flex items-center justify-between bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 text-sm"
