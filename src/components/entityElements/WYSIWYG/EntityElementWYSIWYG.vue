@@ -181,6 +181,12 @@ onMounted(async () => {
       handleClickOn: (view, pos, node) => {
         if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
       },
+      transformPastedText(text: string) {
+        return text.replace(/\n(?!\n)/g, "\n\n");
+      },
+      transformPastedHTML(html: string) {
+        return html.replace(/<br\s*\/?>/gi, "</p><p>");
+      },
     },
     parseOptions: {
       preserveWhitespace: true,
@@ -262,6 +268,6 @@ if (multilingual) {
 }
 
 .tiptap p {
-  @apply inline m-0;
+  @apply block m-0;
 }
 </style>
