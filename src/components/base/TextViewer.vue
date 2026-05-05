@@ -21,12 +21,10 @@ interface Source {
 const props = defineProps<{ source: Source }>();
 
 const fileContent = ref<string>("");
-const { getMediafile, getMediafilePath } = useGetMediafile();
+const { getMediafile } = useGetMediafile();
 
 const getText = async () => {
-  const response = await getMediafile(
-    `/api/mediafile/${getMediafilePath(props.source.intialValues.original_file_location)}`,
-  );
+  const response = await getMediafile(`/api/mediafile/${props.source.id}`);
   const text = await response.text();
   fileContent.value = text.split(/\r\n|\n/).join("<br/>");
 };
