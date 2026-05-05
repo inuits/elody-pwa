@@ -33,6 +33,7 @@
       @focus="disableVirtualKeyboard"
       @change.stop
       @click="openCalendar"
+      @input="handleBadNumberInput"
     />
     <input
       data-cy="base-input-checkbox"
@@ -168,6 +169,14 @@ const inputValue = computed<string | number | boolean | undefined>({
 });
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
+
+const handleBadNumberInput = (event: Event) => {
+  if (props.type !== "number") return;
+  const target = event.target as HTMLInputElement;
+  if (target.validity.badInput) {
+    emit("update:modelValue", NaN);
+  }
+};
 </script>
 
 <style scoped>

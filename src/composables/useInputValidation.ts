@@ -71,21 +71,26 @@ export const useInputValidation = () => {
     value: BaseRelationValuesInput[],
     parameters: string[],
   ): boolean => {
-    if (!Array.isArray(value)) {
+    try {
+      if (!Array.isArray(value)) {
+        return false;
+      }
+      const relations = value.filter(
+        (relation: BaseRelationValuesInput) =>
+          relation.editStatus !== EditStatus.Deleted,
+      );
+      const [amount = 1, relationType, exact = false] =
+        parameters[0].split(":");
+      const specificRelationsLength =
+        relations.filter(
+          (relation: BaseRelationValuesInput) => relation.type === relationType,
+        )?.length || 0;
+
+      if (exact == "true") return specificRelationsLength == Number(amount);
+      else return specificRelationsLength >= Number(amount);
+    } catch {
       return false;
     }
-    const relations = value.filter(
-      (relation: BaseRelationValuesInput) =>
-        relation.editStatus !== EditStatus.Deleted,
-    );
-    const [amount = 1, relationType, exact = false] = parameters[0].split(":");
-    const specificRelationsLength =
-      relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type === relationType,
-      )?.length || 0;
-
-    if (exact == "true") return specificRelationsLength == Number(amount);
-    else return specificRelationsLength >= Number(amount);
   };
 
   const _getHasOneOfSpecificRelationsRule = (
@@ -144,8 +149,11 @@ export const useInputValidation = () => {
 
   const _urlValidator = (value: string): boolean | string => {
     if (!value) return true;
-    try { new URL(value) }
-    catch (e) { return "notifications.errors.no-url-error.title" }
+    try {
+      new URL(value);
+    } catch (e) {
+      return "notifications.errors.no-url-error.title";
+    }
     return true;
   };
 

@@ -80,7 +80,10 @@ export const useFieldValidation = (
     }
 
     if (
-      isRulePresent(validationOnField, ValidationRules.HasOneOfRequiredRelations)
+      isRulePresent(
+        validationOnField,
+        ValidationRules.HasOneOfRequiredRelations,
+      )
     ) {
       const { relationTypes = [], amount } =
         validationOnField.has_one_of_required_relations ?? {};
