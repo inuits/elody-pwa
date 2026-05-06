@@ -50,6 +50,15 @@
       :refresh-after-action="element.refreshAfterAction"
       :entity-id="parentEntityId"
     />
+    <download-zip-of-related-mediafiles-action
+      v-if="element.__typename === 'ContextMenuDownloadZipOfRelatedMediafilesAction'"
+      :label="element.label"
+      :icon="element.icon"
+      :endpoint-url="element.endpointUrl"
+      :endpoint-method="element.endpointMethod"
+      :filename="element.filename"
+      :entity-id="parentEntityId"
+    />
   </div>
 </template>
 
@@ -60,6 +69,7 @@ import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 import CustomAction from "@/components/context-menu-actions/CustomAction.vue";
 import QueryAction from "@/components/context-menu-actions/QueryAction.vue";
+import DownloadZipOfRelatedMediafilesAction from "@/components/context-menu-actions/DownloadZipOfRelatedMediafilesAction.vue";
 import { Entitytyping } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 
