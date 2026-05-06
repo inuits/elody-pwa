@@ -17,6 +17,8 @@
       @changePage="onChangePage"
       :pageNum="pageNum"
       :pageCount="numPages"
+      :mediafileId="props.source?.id"
+      :originalFilename="props.source?.original_filename"
     />
 
     <div

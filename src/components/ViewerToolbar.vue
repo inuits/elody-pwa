@@ -160,6 +160,7 @@ import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMediafileCrop } from "@/composables/useMediafileCrop";
+import { useMediafileDownload } from "@/composables/useMediafileDownload";
 
 const props = defineProps<{
   zoomIn?: HTMLDivElement | string | null;
@@ -189,7 +190,6 @@ const fullPageRef = ref<HTMLDivElement>();
 const homeRef = ref<HTMLDivElement>();
 const cropRef = ref<HTMLDivElement>();
 const cancelRef = ref<HTMLDivElement>();
-const downloadImageLoadingRef = ref(false);
 
 const {
   mediafileSelectionState,
@@ -208,6 +208,8 @@ const canCrop = computed(() =>
   ),
 );
 
+const { downloadMediafile, downloadLoading: downloadImageLoadingRef } = useMediafileDownload();
+
 onMounted(() => {
   emit("update:zoomIn", zoomInRef.value);
   emit("update:zoomOut", zoomOutRef.value);
@@ -223,22 +225,8 @@ const viewerContainsMultipleMediafiles = computed(() => {
   return mediafiles.length > 1;
 });
 
-const createDownloadButton = (): void => {
-  const a = document.createElement("a");
-  const originalFilename =
-    props.originalFilename?.replace(/\.[^/.]*$/, "") || "";
-  a.href = `/api/mediafile/${props.mediafileId}?original=true&originalFilename=${originalFilename}`;
-  a.download = originalFilename;
-  a.target = "_blank";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-};
-
-const downloadImage = async () => {
-  downloadImageLoadingRef.value = true;
-  createDownloadButton();
-  downloadImageLoadingRef.value = false;
+const downloadImage = () => {
+  downloadMediafile(props.mediafileId!, props.originalFilename);
 };
 
 const togglePreviewComponent = (id: string): void => {

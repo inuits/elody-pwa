@@ -2,7 +2,7 @@
   <div
     class="absolute w-full bg-background-light z-20 p-2 shadow-sm flex justify-between h-10"
   >
-    <div class="select-none">
+    <div class="select-none flex items-center">
       <a ref="zoomInRef" class="mr-1">
         <unicon
           :onclick="() => $emit('zoomIn', {})"
@@ -18,6 +18,23 @@
           class="text-neutral-700 cursor-pointer"
         />
       </a>
+      <button
+        v-if="mediafileId && !downloadLoading"
+        @click="downloadPdf"
+        class="ml-2"
+      >
+        <unicon
+          :name="Unicons.Download.name"
+          height="20"
+          class="text-neutral-700 cursor-pointer"
+        />
+      </button>
+      <spinner-loader
+        v-else-if="downloadLoading"
+        class="ml-2"
+        theme="accent"
+        :dimensions="5"
+      />
     </div>
     <div class="flex select-none">
       <div class="flex items-center mr-2 pb-0.5">
@@ -58,14 +75,17 @@
 import { defineComponent, ref } from "vue";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useMediafileDownload } from "@/composables/useMediafileDownload";
 export default defineComponent({
   name: "PdfToolbar",
-  components: {},
-  props: ["pageNum", "pageCount"],
+  components: { SpinnerLoader },
+  props: ["pageNum", "pageCount", "mediafileId", "originalFilename"],
   emits: ["zoomIn", "zoomOut", "changePage"],
   setup: (props, { emit }) => {
     const input = ref<HTMLInputElement | undefined>(undefined);
     const { t } = useI18n();
+    const { downloadMediafile, downloadLoading } = useMediafileDownload();
 
     const changePageWrapper = (page: string): void => {
       let num = parseInt(page);
@@ -80,10 +100,16 @@ export default defineComponent({
       }
     };
 
+    const downloadPdf = (): void => {
+      downloadMediafile(props.mediafileId, props.originalFilename);
+    };
+
     return {
       Unicons,
       props,
       changePageWrapper,
+      downloadPdf,
+      downloadLoading,
       input,
       t,
     };
