@@ -81,7 +81,18 @@
         class="pb-4"
         :name="Unicons.DesktopSlash.name"
       />
-      <p>{{ t("media-viewer.unsupported-mimetype", { mimetype }) }}</p>
+      <p v-if="mimetype">
+        {{ t("media-viewer.unsupported-mimetype", { mimetype }) }}
+      </p>
+      <p v-else>{{ t("media-viewer.no-viewer") }}</p>
+      <button
+        v-if="mediafileId"
+        class="mt-4 flex items-center gap-2 px-4 py-2 rounded-md bg-accent-normal text-white hover:bg-accent-dark transition cursor-pointer"
+        @click="downloadMediafile(mediafileId!, originalFilename)"
+      >
+        <unicon height="18" width="18" :name="Unicons.Download.name" />
+        {{ t("media-viewer.download") }}
+      </button>
     </div>
     <div v-else class="h-full w-full flex justify-center items-center">
       <spinner-loader theme="accent" />
@@ -105,6 +116,7 @@ import { useI18n } from "vue-i18n";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMediafileCrop } from "@/composables/useMediafileCrop";
 import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
+import { useMediafileDownload } from "@/composables/useMediafileDownload";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
@@ -141,6 +153,23 @@ const { cropSizes, addMediafileCropCoordinates, isCropModeEnabled } =
     currentMediafile: props.currentMediafile,
     cropMediafileCoordinatesKey: props.cropMediafileCoordinatesKey,
   });
+const { downloadMediafile } = useMediafileDownload();
+
+const mediafileId = computed<string | undefined>(() =>
+  getValueOfMediafile(
+    mediafileViewerContext,
+    "id",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+    KeyValueSource.Root,
+  ),
+);
+const originalFilename = computed<string | undefined>(() =>
+  getValueOfMediafile(
+    mediafileViewerContext,
+    "original_filename",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+  ),
+);
 
 const getMediaDimensions = ():
   | { width: number; height: number }
