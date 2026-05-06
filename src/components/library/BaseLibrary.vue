@@ -517,7 +517,9 @@ const additionalDefaultFiltersEnabled = computed(() => {
     props.enableAdvancedFilters &&
     manipulationQuery.value?.filtersDocument &&
     props.bulkOperationsContext !==
-      BulkOperationsContextEnum.EntityElementListEntityPickerModal
+      BulkOperationsContextEnum.EntityElementListEntityPickerModal &&
+    props.bulkOperationsContext !==
+      BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
 });
 
