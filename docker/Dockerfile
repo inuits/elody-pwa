@@ -1,7 +1,7 @@
 ### Base stage
 FROM node:22-bookworm-slim as base
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.33.4
 WORKDIR /app
 
 FROM base as deps
