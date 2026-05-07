@@ -76,7 +76,7 @@
               <MetadataFormatter
                 v-if="metadata.value?.formatter"
                 v-bind="metadata.value"
-                :translation-key="metadata.valueTranslationKey"
+                :translation-key="pillTranslationKey"
                 :unit="metadata.unit"
                 :entity="{ type: entityType }"
               />
@@ -289,6 +289,15 @@ const autoCompleteType = computed<
   if (metadataAutocompleteTypes.includes(fieldType.value as InputFieldTypes))
     return "metadataAutocomplete";
   return undefined;
+});
+
+const pillTranslationKey = computed<string | undefined>(() => {
+  if (props.metadata.valueTranslationKey) return props.metadata.valueTranslationKey;
+  const value = (props.metadata.value as any)?.label;
+  const options = (props.metadata.inputField as any)?.options;
+  if (!value || !options?.length) return undefined;
+  const match = options.find((opt: any) => opt.value === value);
+  return match?.label;
 });
 
 const showTooltip = ref<boolean>(false);
