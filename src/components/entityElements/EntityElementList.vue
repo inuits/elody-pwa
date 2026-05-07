@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div :class="[{ 'px-2': headerStyle === 'none' }]">
+    <metadata-title v-if="headerStyle === 'none'" :metadata="{ label }" />
     <entity-element-wrapper
       data-test="entity-element-wrapper"
       v-if="showElementList"
@@ -14,9 +15,11 @@
       ]"
       :entity-id="entityId"
       :label="label"
+      :style="style"
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
+      :header-style="headerStyle"
       @close-preview-component="emit('closePreviewComponent')"
       @toggle-element-collapse="
         (entityId, elementLabel) =>
@@ -135,6 +138,7 @@ import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory
 import useUpload from "@/composables/upload/useUpload";
 import { UploadStatus } from "@/composables/upload/types";
 import { usePermissions } from "@/composables/usePermissions";
+import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
 const config: any = inject("config");
 const { createCustomContext } = useBulkOperations();
@@ -180,6 +184,7 @@ const props = withDefaults(
     previewLabel?: string;
     cropMediafileCoordinatesKey?: string;
     actionsOnResult?: ActionsOnResult;
+    headerStyle?: "normal" | "none";
   }>(),
   {
     enableAdvancedFilters: false,
@@ -191,6 +196,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     filtersNeedContext: undefined,
     previewLabel: undefined,
+    headerStyle: "normal",
   },
 );
 

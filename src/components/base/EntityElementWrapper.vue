@@ -1,13 +1,21 @@
 <template>
   <div
     data-cy="entity-element-wrapper"
-    :class="['bg-accent-normal rounded-t-lg', { 'rounded-lg': isCollapsed }]"
+    :class="[
+      'bg-accent-normal rounded-t-lg',
+      { 'rounded-lg': isCollapsed },
+      {
+        'border-t-4 border-accent-normal rounded-t-none':
+          headerStyle === 'none',
+      },
+    ]"
   >
     <div
       v-if="
-        baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-        baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-        baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+        (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+          baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+          baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary) &&
+        headerStyle !== 'none'
       "
       :class="[
         'flex items-center justify-between relative',
@@ -93,17 +101,23 @@ withDefaults(
     baseLibraryMode?: BaseLibraryModes;
     useVshowInsteadOfVif?: boolean;
     previewLabel?: string;
+    headerStyle?: "normal" | "none";
   }>(),
   {
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     useVshowInsteadOfVif: false,
     previewLabel: undefined,
+    headerStyle: "normal",
   },
 );
 
 const emit = defineEmits<{
   (event: "closePreviewComponent"): void;
-  (event: "toggleElementCollapse", entityId: string, elementLabel: string): void;
+  (
+    event: "toggleElementCollapse",
+    entityId: string,
+    elementLabel: string,
+  ): void;
 }>();
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
