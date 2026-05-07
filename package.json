@@ -137,5 +137,15 @@
   },
   "publishConfig": {
     "registry": "https://nexus.inuits.io/repository/npm-private"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "core-js",
+      "esbuild",
+      "tify",
+      "ttf2woff2",
+      "vue-demi"
+    ]
   }
 }
