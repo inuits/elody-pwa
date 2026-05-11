@@ -79,7 +79,10 @@
           { sticky: hasStickyBars },
         ]"
       >
-        <div class="h-fit flex flex-row items-center gap-y-4">
+        <div
+          v-if="!disableLibraryBar"
+          class="h-fit flex flex-row items-center gap-y-4"
+        >
           <div
             v-if="
               toggles.length > 1 &&
@@ -91,7 +94,6 @@
           </div>
           <div
             v-if="
-              !disableLibraryBar &&
               !predefinedEntities &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
