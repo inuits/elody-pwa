@@ -91,6 +91,7 @@
           </div>
           <div
             v-if="
+              !disableLibraryBar &&
               !predefinedEntities &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
@@ -407,6 +408,7 @@ export type BaseLibraryProps = {
   selectInputFieldType?: "multi" | "single";
   selectInputFieldValue?: string[];
   baseLibraryMode?: BaseLibraryModes;
+  disableLibraryBar?: boolean;
   entityListElements?: EntityListElement[];
   allowedActionsOnRelations?: RelationActions[];
   customBulkOperations?: string | undefined;
@@ -445,6 +447,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   useOtherQuery: undefined,
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+  disableLibraryBar: false,
   entityListElements: undefined,
   allowedActionsOnRelations: () => [],
   customBulkOperations: undefined,

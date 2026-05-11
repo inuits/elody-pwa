@@ -39,6 +39,7 @@
           getObjectsBasedOnTypename(element, 'EntityListElement')
         "
         :base-library-mode="element.baseLibraryMode"
+        :disable-library-bar="element.disableLibraryBar"
         :allowed-actions-on-relations="element.allowedActionsOnRelations"
         :fetch-deep-relations="element.fetchDeepRelations"
         :entity-type="entityType"

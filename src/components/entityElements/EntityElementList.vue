@@ -59,6 +59,7 @@
             :relation-type="relationType"
             :use-other-query="newQuery"
             :base-library-mode="baseLibraryMode"
+            :disable-library-bar="disableLibraryBar"
             :has-sticky-bars="false"
             :entity-list-elements="entityListElements"
             :allowed-actions-on-relations="allowedActionsOnRelations"
@@ -91,6 +92,7 @@
             :has-sticky-bars="false"
             :use-other-query="newQuery"
             :base-library-mode="baseLibraryMode"
+            :disable-library-bar="disableLibraryBar"
             :entity-list-elements="entityListElements"
             :allowed-actions-on-relations="allowedActionsOnRelations"
             :custom-bulk-operations="customBulkOperations"
@@ -173,6 +175,7 @@ const props = withDefaults(
     viewMode?: EntityListViewMode;
     enableNavigation?: boolean;
     baseLibraryMode?: BaseLibraryModes;
+    disableLibraryBar?: boolean;
     entityId: string;
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
@@ -192,6 +195,7 @@ const props = withDefaults(
     customBulkOperations: undefined,
     viewMode: EntityListViewMode.Library,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    disableLibraryBar: false,
     entityListElements: undefined,
     allowedActionsOnRelations: () => [],
     filtersNeedContext: undefined,
