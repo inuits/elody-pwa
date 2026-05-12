@@ -147,6 +147,7 @@ const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
 provide("RefetchParentEntity", refetch);
+useEntitySingle().setRefetch(refetch);
 const entityForBreadcrumb = ref<Entity>();
 
 const setMutatedEntity = (mutatedEntity: Entity) => {

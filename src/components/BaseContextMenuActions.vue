@@ -1,6 +1,5 @@
 <template>
-  <Teleport to="#header-actions" :disabled="!showInHeader">
-    <div class="flex items-center justify-center pl-2 gap-2">
+  <div class="flex items-center justify-center pl-2 gap-2">
       <div v-if="hasPromotedActions" class="flex items-center gap-1 pr-2" @click.stop>
         <context-menu-action
           :context-menu-actions="promotedActions"
@@ -34,8 +33,7 @@
           />
         </base-context-menu>
       </div>
-    </div>
-  </Teleport>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -88,22 +86,17 @@ const {
 } = usePermissions();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 
-const showInHeader = computed(() => {
-  return props.contextMenuActions?.displaySettings?.showInHeader || false;
-});
-
 const promotedActions = ref<Partial<ContextMenuActions>>({});
 const overflowActions = ref<Partial<ContextMenuActions>>({});
 
 const getAvailableContextMenuActions = () => {
-  const { __typename, ...menuActions } = { ...props.contextMenuActions };
-  const { displaySettings, ...restMenuActions } = menuActions;
+  const { __typename, ...restMenuActions } = { ...props.contextMenuActions };
 
   const promoted: Partial<ContextMenuActions> = {};
   const overflow: Partial<ContextMenuActions> = {};
 
   for (const key in restMenuActions) {
-    const action = menuActions[key as keyof typeof menuActions];
+    const action = restMenuActions[key as keyof typeof restMenuActions];
     if (!action) continue;
     const permission = "can" in action ? action.can : undefined;
     const hidden = "hidden" in action ? action.hidden : false;
