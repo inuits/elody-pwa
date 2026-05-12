@@ -217,13 +217,15 @@ export const useGetDropdownOptionsState = (
             : filterInput.value
           : filterInput.value;
       }
-      return {
+      const result = {
         type: filterInput.type,
         key: filterInput.key,
         value: _value,
         match_exact: filterInput.match_exact,
         item_types: filterInput.item_types || [],
-      };
+      }
+      if (filterInput.operator) result["operator"] = filterInput.operator;
+      return result;
     });
   };
 
