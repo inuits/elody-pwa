@@ -41,10 +41,6 @@ vi.mock("@/composables/useEntitySingle", () => ({
   }),
 }));
 
-vi.mock("@/generated-types/queries", async (importOriginal) => {
-  const actual = await importOriginal();
-  return { ...(actual as object), DamsIcons: {} };
-});
 
 const mockApolloClient = { mutate: mockMutate };
 
