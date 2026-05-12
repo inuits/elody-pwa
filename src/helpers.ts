@@ -525,17 +525,17 @@ export const findWysiwygElement = (
 export const getEntityTitle = (entity: BaseEntity): string => {
   let title: string = entity.id;
   if (entity.intialValues?.title) title = entity.intialValues.title;
-  if (entity.intialValues?.name) title = entity.intialValues.name;
-  if (entity.intialValues?.email) title = entity.intialValues.email;
-  if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
-  if (entity.intialValues?.code) title = entity.intialValues.code;
-  if (entity.intialValues?.originalTitle)
+  else if (entity.intialValues?.name) title = entity.intialValues.name;
+  else if (entity.intialValues?.email) title = entity.intialValues.email;
+  else if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
+  else if (entity.intialValues?.code) title = entity.intialValues.code;
+  else if (entity.intialValues?.originalTitle)
     title = entity.intialValues.originalTitle;
-  if (entity.intialValues?.preferred_title)
+  else if (entity.intialValues?.preferred_title)
     title = entity.intialValues.preferred_title;
-  if (entity.intialValues?.original_headtitle)
+  else if (entity.intialValues?.original_headtitle)
     title = entity.intialValues.original_headtitle;
-  if (entity.intialValues?.description) title = entity.intialValues.description;
+  else if (entity.intialValues?.description) title = entity.intialValues.description;
   return title;
 };
 
