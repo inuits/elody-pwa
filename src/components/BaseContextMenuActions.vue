@@ -1,49 +1,43 @@
 <template>
-  <div class="flex items-center justify-center pl-2 gap-2">
-      <div v-if="hasPromotedActions" class="flex items-center gap-1 pr-2" @click.stop>
-        <context-menu-action
-          :context-menu-actions="promotedActions"
-          :parent-entity-id="parentEntityId"
-          :entity-id="entityId"
-          :entity-type="entityType"
-          :relation="relation"
-          :bulk-operations-context="bulkOperationsContext"
-          :refetch-entities="refetchEntities"
-          class="is-promoted-button"
-          @toggle-loading="handleEmit"
-          :as-button="true"
-        />
-      </div>
-
-      <div v-if="hasAvailableContextMenuActions">
-        <div @click.stop.prevent="openContextMenu" class="cursor-pointer">
-          <unicon :name="Unicons.EllipsisVThinline.name" />
-        </div>
-
-        <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
-          <context-menu-action
-            :context-menu-actions="overflowActions"
-            :parent-entity-id="parentEntityId"
-            :entity-id="entityId"
-            :entity-type="entityType"
-            :relation="relation"
-            :bulk-operations-context="bulkOperationsContext"
-            :refetch-entities="refetchEntities"
-            @toggle-loading="handleEmit"
-          />
-        </base-context-menu>
-      </div>
-  </div>
+  <context-menu-actions-shell
+    :has-promoted-actions="hasPromotedActions"
+    :has-overflow-actions="hasAvailableContextMenuActions"
+  >
+    <template #promoted>
+      <context-menu-action
+        :context-menu-actions="promotedActions"
+        :parent-entity-id="parentEntityId"
+        :entity-id="entityId"
+        :entity-type="entityType"
+        :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
+        :refetch-entities="refetchEntities"
+        class="is-promoted-button"
+        @toggle-loading="handleEmit"
+        :as-button="true"
+      />
+    </template>
+    <template #overflow>
+      <context-menu-action
+        :context-menu-actions="overflowActions"
+        :parent-entity-id="parentEntityId"
+        :entity-id="entityId"
+        :entity-type="entityType"
+        :relation="relation"
+        :bulk-operations-context="bulkOperationsContext"
+        :refetch-entities="refetchEntities"
+        @toggle-loading="handleEmit"
+      />
+    </template>
+  </context-menu-actions-shell>
 </template>
 
 <script lang="ts" setup>
 import type { Entitytyping } from "@/generated-types/queries";
 import { type ContextMenuActions } from "@/generated-types/queries";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
+import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import { ref, computed, onMounted, watch } from "vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
-import { Unicons } from "@/types";
 import {
   usePermissions,
   advancedPermissions,
@@ -72,19 +66,11 @@ const handleEmit = () => {
   emit("toggleLoading");
 };
 
-const openContextMenu = (event: Event) => {
-  contextMenuHandler.value.openContextMenu({
-    x: event?.clientX,
-    y: event?.clientY,
-  });
-};
-
 const {
   fetchPermissionsOfContextMenu,
   setExtraVariables,
   createPermissionCacheKey,
 } = usePermissions();
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 
 const promotedActions = ref<Partial<ContextMenuActions>>({});
 const overflowActions = ref<Partial<ContextMenuActions>>({});
