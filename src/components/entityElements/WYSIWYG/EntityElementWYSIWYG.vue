@@ -25,6 +25,16 @@
         :keyboardClass="element.metadataKey"
         :extra-layouts="wysiwygElementConfiguration.virtualKeyboardLayouts"
       />
+      <WYSIWYGTransliterationToggle
+        v-if="
+          !useEditHelper.isEdit &&
+          wysiwygElementConfiguration?.transliterationConfig
+        "
+        :editor="editor"
+        :transliteration-config="
+          wysiwygElementConfiguration?.transliterationConfig
+        "
+      />
       <MultilingualLocaleSelector :field-key="element.metadataKey" />
     </div>
     <div
@@ -40,7 +50,8 @@
           :editor="editor"
           :extensions="element.extensions"
           :displayInline="displayInline"
-      /></Transition>
+        />
+      </Transition>
       <div class="flex">
         <div
           v-if="wysiwygElementConfiguration.showLineNumbers"
@@ -91,6 +102,7 @@ import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocale
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
+import WYSIWYGTransliterationToggle from "@/components/entityElements/WYSIWYG/WYSIWYGTransliterationToggle.vue";
 import type { HTMLContent } from "@tiptap/core";
 import {
   getMultilingualProvideKey,
@@ -215,9 +227,7 @@ onUnmounted(() => {
 watch(
   () => useEditHelper.isEdit,
   (isEdit: boolean) => {
-    if (editor.value) {
-      editor.value.setEditable(isEdit);
-    }
+    if (editor.value) editor.value.setEditable(isEdit);
   },
   { immediate: true },
 );
