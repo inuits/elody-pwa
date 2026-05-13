@@ -1,4 +1,4 @@
-import { computed, ref, type Ref, type ComputedRef } from "vue";
+import { computed, ref, type Ref, type ComputedRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 export type TranslationEntry = {
@@ -69,6 +69,10 @@ export const useMultilingualField = (
         });
       }
     },
+  });
+
+  watch(locale, (newLocale) => {
+    selectedLocale.value = newLocale;
   });
 
   return {

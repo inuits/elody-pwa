@@ -1,4 +1,5 @@
 import type { DamsIcons, Entitytyping } from "@/generated-types/queries";
+import type { TranslationEntry } from "@/composables/useMultilingualField";
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
@@ -28,12 +29,12 @@ export interface VisitedRoute extends BaseRoute {
   path?: string;
 }
 export interface BreadcrumbRoute extends BaseRoute {
-  title: string;
+  title: string | TranslationEntry[];
   type: string;
 }
 export type RootRoute = {
   rootId: string;
-  rootTitle: string;
+  rootTitle: string | TranslationEntry[];
   typePillLabel: any;
 };
 

@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { shallowMount } from "@vue/test-utils";
 import {
   breadcrumbRoutes,
   rootRoute,
@@ -10,6 +11,44 @@ import {
   RouteNames,
   SearchInputType,
 } from "@/generated-types/queries";
+import BreadCrumbs from "@/components/BreadCrumbs.vue";
+import type { TranslationEntry } from "@/composables/useMultilingualField";
+
+const mocks = vi.hoisted(() => ({
+  locale: { value: "en" },
+}));
+
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t: (key: string) => key,
+    locale: mocks.locale,
+  }),
+}));
+
+vi.mock("vue-router", () => ({
+  useRouter: () => ({
+    beforeEach: vi.fn(),
+    afterEach: vi.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+  }),
+}));
+
+vi.mock("@/composables/useEdit", () => ({
+  useEditMode: () => ({ isEdit: false, discard: vi.fn(), save: vi.fn() }),
+}));
+
+vi.mock("@/composables/useFormHelper", () => ({
+  useFormHelper: () => ({ discardEditForForm: vi.fn() }),
+}));
+
+vi.mock("@/composables/useBaseModal", () => ({
+  useBaseModal: () => ({ closeModal: vi.fn() }),
+}));
+
+vi.mock("@/composables/useConfirmModal", () => ({
+  useConfirmModal: () => ({ initializeConfirmModal: vi.fn() }),
+}));
 
 const config = {
   features: {
@@ -133,6 +172,17 @@ describe("useBreadcrumbs", () => {
     ]);
   });
 
+  it("Should store a TranslationEntry array as rootTitle via setRootRoute", () => {
+    const translations: TranslationEntry[] = [
+      { key: "title", value: "English title", lang: "en" },
+      { key: "title", value: "Nederlandse titel", lang: "nl" },
+    ];
+
+    useBreadcrumbs(config).setRootRoute("root-id", translations as any);
+
+    expect(rootRoute.value.rootTitle).toEqual(translations);
+  });
+
   it("Should get correct breadcrumbs based on config", async () => {
     const config = {
       routerConfig: [
@@ -250,5 +300,87 @@ describe("useBreadcrumbs", () => {
         overviewPage: "Documents",
       },
     ]);
+  });
+});
+
+describe("BreadCrumbs multilingual title resolution", () => {
+  const mountBreadCrumbs = () =>
+    shallowMount(BreadCrumbs, {
+      global: {
+        provide: {
+          config: { features: { supportsMultilingualMetadataEditing: false } },
+        },
+        stubs: { unicon: true },
+      },
+    });
+
+  beforeEach(() => {
+    mocks.locale.value = "en";
+    rootRoute.value = {} as any;
+    breadcrumbRoutes.value = [];
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows the value for the current locale when rootTitle is a TranslationEntry array", () => {
+    rootRoute.value.rootTitle = [
+      { key: "title", value: "English title", lang: "en" },
+      { key: "title", value: "Nederlandse titel", lang: "nl" },
+    ] as TranslationEntry[];
+    const wrapper = mountBreadCrumbs();
+    expect(wrapper.text()).toContain("English title");
+    expect(wrapper.text()).not.toContain("Nederlandse titel");
+  });
+
+  it("shows the value for the nl locale when locale is nl and rootTitle is a TranslationEntry array", () => {
+    mocks.locale.value = "nl";
+    rootRoute.value.rootTitle = [
+      { key: "title", value: "English title", lang: "en" },
+      { key: "title", value: "Nederlandse titel", lang: "nl" },
+    ] as TranslationEntry[];
+    const wrapper = mountBreadCrumbs();
+    expect(wrapper.text()).toContain("Nederlandse titel");
+    expect(wrapper.text()).not.toContain("English title");
+  });
+
+  it("falls back to the first entry when no translation matches the current locale", () => {
+    mocks.locale.value = "fr";
+    rootRoute.value.rootTitle = [
+      { key: "title", value: "English title", lang: "en" },
+      { key: "title", value: "Nederlandse titel", lang: "nl" },
+    ] as TranslationEntry[];
+    const wrapper = mountBreadCrumbs();
+    expect(wrapper.text()).toContain("English title");
+  });
+
+  it("passes a string rootTitle through t()", () => {
+    rootRoute.value.rootTitle = "navigation.home";
+    const wrapper = mountBreadCrumbs();
+    expect(wrapper.text()).toContain("navigation.home");
+  });
+
+  it("shows empty string when rootTitle is undefined", () => {
+    const wrapper = mountBreadCrumbs();
+    expect(wrapper.text()).toBe("");
+  });
+
+  it("shows the previousRoute title for the matching locale when it is a TranslationEntry array", () => {
+    mocks.locale.value = "nl";
+    breadcrumbRoutes.value = [
+      {
+        id: "123",
+        type: "entity",
+        overviewPage: "Home",
+        title: [
+          { key: "title", value: "Previous English", lang: "en" },
+          { key: "title", value: "Vorig Nederlands", lang: "nl" },
+        ] as TranslationEntry[],
+      },
+    ];
+    const wrapper = mountBreadCrumbs();
+    expect(wrapper.text()).toContain("Vorig Nederlands");
+    expect(wrapper.text()).not.toContain("Previous English");
   });
 });

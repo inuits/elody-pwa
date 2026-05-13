@@ -16,6 +16,8 @@ import type { ApolloClient } from "@apollo/client/core";
 import { extractValueFromObject, getEntityTitle } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { omitDeep } from "@apollo/client/utilities";
+import { useI18n } from "vue-i18n";
+import type { TranslationEntry } from "@/composables/useMultilingualField";
 
 export const useGetDropdownOptionsState = (
   entityType: Entitytyping,
@@ -27,6 +29,7 @@ export const useGetDropdownOptionsState = (
   formId?: string,
   relationFilter?: AdvancedFilterInput,
 ) => {
+  const { locale } = useI18n();
   const apolloClient = inject(DefaultApolloClient);
   const abortController = ref<AbortController | null>(null);
   const currentRequestId = ref(0);
@@ -186,12 +189,26 @@ export const useGetDropdownOptionsState = (
     return { ...filterProps, value };
   };
 
+  const resolveLabel = (value: string | TranslationEntry[]): string => {
+    if (Array.isArray(value)) {
+      return (
+        value.find((entry) => entry.lang === locale.value)?.value ??
+        value[0]?.value ??
+        ""
+      );
+    }
+    return value;
+  };
+
   const entityDropdownOptions = computed<DropdownOption[]>(
     () =>
       entities.value.map((entity: BaseEntity) => {
+        const rawLabel = getEntityTitle(entity) as unknown as
+          | string
+          | TranslationEntry[];
         return {
           icon: DamsIcons.NoIcon,
-          label: getEntityTitle(entity),
+          label: resolveLabel(rawLabel),
           value: entity.id,
         };
       }) || [],

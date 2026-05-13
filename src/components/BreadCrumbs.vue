@@ -30,12 +30,12 @@
             { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="
-            truncatePreviousRouteName = t(previousRoute.title).includes(' ')
+            truncatePreviousRouteName = resolveTitle(previousRoute.title).includes(' ')
           "
           @mouseleave="truncatePreviousRouteName = true"
           @click="checkNavigationAvailable(previousRoute)"
         >
-          {{ t(previousRoute?.title) }}
+          {{ resolveTitle(previousRoute?.title) }}
         </p>
       </div>
       <div
@@ -98,7 +98,7 @@
                   color="text-body"
                 />
               </div>
-              <p>{{ t(breadcrumbRoute.title) }}</p>
+              <p>{{ resolveTitle(breadcrumbRoute.title) }}</p>
             </div>
           </div>
         </li>
@@ -130,9 +130,22 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
+import type { TranslationEntry } from "@/composables/useMultilingualField";
 
 const { t, locale } = useI18n();
 const config: any = inject("config");
+
+const resolveTitle = (value: string | TranslationEntry[] | undefined): string => {
+  if (!value) return "";
+  if (Array.isArray(value)) {
+    return (
+      value.find((entry) => entry.lang === locale.value)?.value ??
+      value[0]?.value ??
+      ""
+    );
+  }
+  return t(value);
+};
 
 const showHistory = ref<boolean>(false);
 const truncatePreviousRouteName = ref<boolean>(true);
@@ -152,13 +165,8 @@ const typePillLabel = ref<any>(undefined);
 watch(
   () => [locale.value, rootRoute.value?.rootTitle, rootRoute.value?.typePillLabel],
   () => {
-    const titleKey = rootRoute.value?.rootTitle as string;
     typePillLabel.value = rootRoute.value?.typePillLabel;
-    if (titleKey) {
-      currentRouteTitle.value = t(titleKey);
-    } else {
-      currentRouteTitle.value = "";
-    }
+    currentRouteTitle.value = resolveTitle(rootRoute.value?.rootTitle);
   },
   { immediate: true },
 );
