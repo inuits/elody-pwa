@@ -165,6 +165,8 @@ import { router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenItems } from "@/composables/useSeenItems";
 
 const props = withDefaults(
   defineProps<{
@@ -245,6 +247,9 @@ const {
   togglePreviewComponent,
 );
 
+const { trackSeen } = useEntityPageConfig();
+const { isItemSeen } = useSeenItems();
+
 const multiLine = computed(
   () => props.config?.find((c) => c.key === "multiLine")?.value === true,
 );
@@ -284,7 +289,8 @@ const processedEntities = computed(() => {
     );
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
-    const isDisabled = isEntityDisabled(entity);
+    const isDisabled =
+      isEntityDisabled(entity) || (trackSeen.value && isItemSeen(entity.id));
     const formattedMetadata = formatTeaserMetadata(
       entity.teaserMetadata,
       entity.intialValues,

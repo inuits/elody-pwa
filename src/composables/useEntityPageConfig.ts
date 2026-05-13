@@ -14,7 +14,8 @@ export const useEntityPageConfig = () => {
     const config = route.meta.entityPageConfig;
     if (!config) return undefined;
     const slug = String(route.params["type"] ?? "");
-    const entityType = mapUrlToEntityType(slug) || slug;
+    const entityType =
+      mapUrlToEntityType(slug) || slug || String(route.meta.entityType ?? "");
     if (!entityType) return undefined;
     return config[entityType];
   });
@@ -31,5 +32,9 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.deleteButton,
   );
 
-  return { actions, hasEditMetadataButton, deleteButton };
+  const trackSeen = computed<boolean>(
+    () => entityConfig.value?.trackSeen === true,
+  );
+
+  return { actions, hasEditMetadataButton, deleteButton, trackSeen };
 };

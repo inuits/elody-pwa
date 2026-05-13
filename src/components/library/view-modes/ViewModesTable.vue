@@ -126,6 +126,8 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenItems } from "@/composables/useSeenItems";
 
 const props = withDefaults(
   defineProps<{
@@ -189,6 +191,9 @@ const {
   previewComponentEnabled,
   togglePreviewComponent,
 );
+
+const { trackSeen } = useEntityPageConfig();
+const { isItemSeen } = useSeenItems();
 
 // Whether any entity has a thumbnail — drives both header spacer and TableRow thumbnail cell
 const anyEntityHasThumbnail = computed(() =>
@@ -266,7 +271,7 @@ const processedEntities = computed(() => {
     );
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
-    const isDisabled = isEntityDisabled(entity);
+    const isDisabled = isEntityDisabled(entity) || (trackSeen.value && isItemSeen(entity.id));
     const formattedMetadata = formatTeaserMetadata(
       entity.teaserMetadata,
       entity.intialValues,

@@ -70,6 +70,8 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenItems } from "@/composables/useSeenItems";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import EditModal from "@/components/modals/EditModal.vue";
 import DeleteModal from "@/components/modals/DeleteModal.vue";
@@ -79,6 +81,8 @@ import type { ApolloError } from "@apollo/client/core";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
+const { trackSeen } = useEntityPageConfig();
+const { markAsSeen } = useSeenItems();
 
 const { locale } = useI18n();
 const { fetchUpdateAndDeletePermission } = usePermissions();
@@ -216,6 +220,7 @@ watch(
   () => {
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value || !entity.value.intialValues) return;
+    if (trackSeen.value && entity.value.id) markAsSeen(entity.value.id);
     useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     useEntitySingle().setEntityType(entityType.value);
