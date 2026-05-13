@@ -445,9 +445,9 @@ const getFieldArray = computed(() => {
 });
 
 const getSortedFieldArray = computed(() => {
-  return getFieldArray.value?.sort((a) =>
-    a.__typename === "FormAction" ? 1 : 0,
-  );
+  return getFieldArray.value?.toSorted((a, b) => {
+    return (a.__typename === "FormAction" ? 1 : 0) - (b.__typename === "FormAction" ? 1 : 0);
+  });
 });
 
 const form = ref<FormContext<any>>();
