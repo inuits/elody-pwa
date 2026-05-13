@@ -269,6 +269,7 @@ const processedEntities = computed(() => {
       props.listItemRouteName,
       true,
     );
+
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity) || (trackSeen.value && isItemSeen(entity.id));

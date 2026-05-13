@@ -7,7 +7,7 @@ import {
 } from "@/generated-types/queries";
 import { findPanelMetadata } from "@/helpers";
 import { type FormContext, useForm } from "vee-validate";
-import { ref, inject, nextTick, getCurrentInstance } from "vue";
+import { ref, inject, nextTick, getCurrentInstance, unref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useInheritedRelations } from "./useInheritedRelations";
@@ -16,7 +16,9 @@ const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
 const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 const multilingualTranslations = ref<{
-  [formId: string]: { [fieldKey: string]: { key: string; value: unknown; lang: string }[] };
+  [formId: string]: {
+    [fieldKey: string]: { key: string; value: unknown; lang: string }[];
+  };
 }>({});
 
 export type EntityValues = {
@@ -29,7 +31,7 @@ export type EntityValues = {
 
 const useFormHelper = () => {
   const instance = getCurrentInstance();
-  const config = instance ? inject("config", null) as any : null;
+  const config = instance ? (inject("config", null) as any) : null;
 
   const createEntityValues = (
     intialValueFields: PanelMetaData[],
@@ -272,9 +274,12 @@ const useFormHelper = () => {
     | { idx: number; relation: BaseRelationValuesInput }
     | "no-relation-found" => {
     const form = getForm(parentEntityId);
-    if (!form || !form.values.relationValues) return "no-relation-found";
+    const relations = form?.values?.relationValues;
+
+    if (!relations) return "no-relation-found";
+
     let idx: number | "no-idx" = "no-idx";
-    const relationsWithSameType = form.values.relationValues[type];
+    const relationsWithSameType = relations[type];
     if (!Array.isArray(relationsWithSameType)) return "no-relation-found";
     const relation = relationsWithSameType?.find(
       (relation: BaseRelationValuesInput, index: number) => {
@@ -310,7 +315,9 @@ const useFormHelper = () => {
     fields?: Record<string, PanelMetaData>,
   ): MetadataValuesInput[] => {
     if (!config) {
-      console.warn("useFormHelper: parseIntialValuesForFormSubmit called without config context.");
+      console.warn(
+        "useFormHelper: parseIntialValuesForFormSubmit called without config context.",
+      );
     }
     const metadata: any[] = [];
     Object.keys(intialValues)
@@ -321,7 +328,10 @@ const useFormHelper = () => {
           key: string;
           value: unknown;
           lang?: string;
-        } = { key, value: extractMetadataValue((intialValues as any)[key] ?? "") };
+        } = {
+          key,
+          value: extractMetadataValue((intialValues as any)[key] ?? ""),
+        };
         const isEnabledMultilanguage =
           config?.features?.supportsMultilingualMetadataEditing;
         if (isEnabledMultilanguage && fields?.[key]?.isMultilingual) {
@@ -484,7 +494,8 @@ const useFormHelper = () => {
       const associatedMetadataItemIndex: number = metadata.findIndex(
         (metadataItem: MetadataValuesInput) => metadataItem.key === panelKey,
       );
-      if (!associatedMetadataItemIndex || associatedMetadataItemIndex === -1) return;
+      if (!associatedMetadataItemIndex || associatedMetadataItemIndex === -1)
+        return;
       metadata[associatedMetadataItemIndex].value = [
         ...Object.values(repeatableMetadataValues[panelKey]),
       ];
@@ -498,7 +509,7 @@ const useFormHelper = () => {
   ): EntityValues & { repeatableMetadataValues: any } => {
     const { "repeatable-panels": repeatableMetadataValues, ...cleanedInitial } =
       values.intialValues as Record<string, any>;
-    
+
     return {
       intialValues: cleanedInitial as IntialValues,
       relationValues: values.relationValues,

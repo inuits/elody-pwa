@@ -18,6 +18,7 @@ import {
   type DeleteDataMutation,
   DeleteDataDocument,
   Entitytyping,
+  type Entity,
   Collection,
   TypeModals,
   ModalStyle,
@@ -26,7 +27,7 @@ import {
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useEditMode } from "@/composables/useEdit";
-import { inject, computed } from "vue";
+import { inject, computed, type Ref } from "vue";
 import { useShareLink } from "@/composables/useShareLink";
 import { DefaultApolloClient, useMutation } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
@@ -84,6 +85,23 @@ const apolloClient = inject(DefaultApolloClient);
 const { createShareLink } = useShareLink(apolloClient as ApolloClient<any>);
 const config: any = inject("config");
 const refetchParentEntity: any = inject("RefetchParentEntity");
+const libraryEntities = inject<Ref<Entity[]>>("libraryEntities");
+
+const resolvedRelationType = computed<string | undefined>(() => {
+  if (props.relation && props.relation !== "no-relation-found")
+    return (props.relation.relation as any).type;
+  const libraryEntity = libraryEntities?.value?.find(
+    (e) => e.id === props.entityId,
+  );
+  if (!libraryEntity) return undefined;
+  const relationValues = (libraryEntity.relationValues ?? {}) as Record<
+    string,
+    any[]
+  >;
+  return Object.keys(relationValues).find((type) =>
+    relationValues[type]?.some((r: any) => r.key === entityFormData?.id),
+  );
+});
 
 const entityTypeLabel = computed(() =>
   t(`entity-translations.singular.${props.entityType}`),
@@ -106,16 +124,27 @@ const mediaTypes = [
 ].filter((type) => type !== undefined);
 
 const deleteRelation = async () => {
-  dequeueItemForBulkProcessing(
-    props.bulkOperationsContext,
-    props.relation.relation.key,
-  );
+  if (!resolvedRelationType.value) await props.refetchEntities();
+  if (!resolvedRelationType.value) return;
+
+  const hasRelation = props.relation && props.relation !== "no-relation-found";
+
+  if (hasRelation) {
+    dequeueItemForBulkProcessing(
+      props.bulkOperationsContext,
+      (props.relation as { idx: number; relation: any }).relation.key,
+    );
+  }
 
   await deleteRelations(
     entityFormData.id,
-    props.relation?.relation?.type,
-    [props.relation.relation],
+    resolvedRelationType.value,
+    hasRelation
+      ? [(props.relation as { idx: number; relation: any }).relation]
+      : [{ key: props.entityId }],
     props.bulkOperationsContext,
+    true,
+    props.entityId,
   );
   await refetchParentEntity();
   await props.refetchEntities();

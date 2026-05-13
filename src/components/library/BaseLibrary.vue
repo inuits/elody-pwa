@@ -584,6 +584,7 @@ const {
 
 const paginationStore = createPaginationStore();
 provide(PaginationStoreKey, paginationStore);
+provide("libraryEntities", entities);
 
 const {
   bulkOperations,
