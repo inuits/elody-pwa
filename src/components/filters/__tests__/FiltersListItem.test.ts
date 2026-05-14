@@ -116,6 +116,8 @@ describe("FiltersListItem Matcher Restriction", () => {
 describe("FiltersListItem - defaultMatcher Logic", () => {
   const mockMatchersProps = [
     { label: "Exact", value: Matchers.ExactMatcher },
+    { label: "Is exactly", value: Matchers.ExactInputMatcher },
+    { label: "Is any of", value: Matchers.ExactAutoCompleteMatcher },
     { label: "Contains", value: Matchers.ContainsMatcher },
   ];
 
@@ -159,7 +161,7 @@ describe("FiltersListItem - defaultMatcher Logic", () => {
     expect((wrapper.vm as any).selectedMatcher).toBe(Matchers.ContainsMatcher);
   });
 
-  it("sets the selectedMatcher to ExactMatcher for Boolean types by default", () => {
+  it("sets the selectedMatcher to ExactInputMatcher for Boolean types by default", () => {
     const filter = {
       isActive: false,
       advancedFilter: {
@@ -172,7 +174,7 @@ describe("FiltersListItem - defaultMatcher Logic", () => {
       props: { ...defaultProps, filter },
     });
 
-    expect((wrapper.vm as any).selectedMatcher).toBe(Matchers.ExactMatcher);
+    expect((wrapper.vm as any).selectedMatcher).toBe(Matchers.ExactInputMatcher);
   });
 
   it("prioritizes existing selectedMatcher from state over the default", () => {

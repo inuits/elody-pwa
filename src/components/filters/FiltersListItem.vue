@@ -114,11 +114,11 @@ const loadMatcher = async () => {
 
 const getDefaultMatcher = (): string | undefined => {
   const defaultMatchers: { [type: string]: string } = {
-    [AdvancedFilterTypes.Selection]: Matchers.ExactMatcher,
+    [AdvancedFilterTypes.Selection]: Matchers.ExactAutoCompleteMatcher,
     [AdvancedFilterTypes.Text]: Matchers.ContainsMatcher,
-    [AdvancedFilterTypes.Boolean]: Matchers.ExactMatcher,
-    [AdvancedFilterTypes.Date]: Matchers.ExactMatcher,
-    [AdvancedFilterTypes.Number]: Matchers.ExactMatcher,
+    [AdvancedFilterTypes.Boolean]: Matchers.ExactInputMatcher,
+    [AdvancedFilterTypes.Date]: Matchers.ExactInputMatcher,
+    [AdvancedFilterTypes.Number]: Matchers.ExactInputMatcher,
   };
 
   if (props.filter.advancedFilter.defaultMatcher) {

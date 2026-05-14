@@ -220,6 +220,18 @@ export type AdvancedFilterInputType = {
   value: Scalars['JSON'];
 };
 
+export enum AdvancedFilterMatchersType {
+  Boolean = 'boolean',
+  Date = 'date',
+  Geo = 'geo',
+  Number = 'number',
+  Selection = 'selection',
+  SelectionForMetadata = 'selectionForMetadata',
+  SelectionForRelation = 'selectionForRelation',
+  Text = 'text',
+  Type = 'type'
+}
+
 export enum AdvancedFilterTypes {
   Boolean = 'boolean',
   Date = 'date',
@@ -2046,11 +2058,15 @@ export enum Matchers {
   AnyMatcher = 'AnyMatcher',
   ContainsMatcher = 'ContainsMatcher',
   ContainsNotMatcher = 'ContainsNotMatcher',
+  ExactAutoCompleteMatcher = 'ExactAutoCompleteMatcher',
+  ExactInputMatcher = 'ExactInputMatcher',
   ExactMatcher = 'ExactMatcher',
+  GeoMatcher = 'GeoMatcher',
   InBetweenMatcher = 'InBetweenMatcher',
   MaxIncludedMatcher = 'MaxIncludedMatcher',
   MinIncludedMatcher = 'MinIncludedMatcher',
-  NoneMatcher = 'NoneMatcher'
+  NoneMatcher = 'NoneMatcher',
+  RegexMatcher = 'RegexMatcher'
 }
 
 export type Media = Entity & {

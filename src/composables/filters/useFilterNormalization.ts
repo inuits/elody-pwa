@@ -88,6 +88,8 @@ export const useFilterNormalization = () => {
       !!matcher &&
       [
         Matchers.ExactMatcher,
+        Matchers.ExactInputMatcher,
+        Matchers.ExactAutoCompleteMatcher,
         Matchers.MinIncludedMatcher,
         Matchers.MaxIncludedMatcher,
       ].includes(matcher)
@@ -108,6 +110,8 @@ export const useFilterNormalization = () => {
 
     switch (matcherType) {
       case Matchers.ExactMatcher:
+      case Matchers.ExactInputMatcher:
+      case Matchers.ExactAutoCompleteMatcher:
         return normalizeExactValue(filter, value);
       case Matchers.ContainsMatcher:
       case Matchers.ContainsNotMatcher:

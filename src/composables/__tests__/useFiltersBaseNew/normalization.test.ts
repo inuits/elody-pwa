@@ -1189,6 +1189,50 @@ describe("useFilterNormalization - normalizeFilterValue", () => {
     });
   });
 
+  describe("ExactInputMatcher", () => {
+    it("normalizes text filter value the same as ExactMatcher", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Text);
+      const result = normalizeFilterValue(filter, "test text", Matchers.ExactInputMatcher);
+      expect(result).toBe("test text");
+    });
+
+    it("normalizes boolean filter value with array", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Boolean);
+      const result = normalizeFilterValue(filter, [true], Matchers.ExactInputMatcher);
+      expect(result).toBe(true);
+    });
+
+    it("normalizes number filter value", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Number);
+      const result = normalizeFilterValue(filter, 42, Matchers.ExactInputMatcher);
+      expect(result).toBe(42);
+    });
+  });
+
+  describe("ExactAutoCompleteMatcher", () => {
+    it("normalizes selection filter value with array of objects", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const selectionArray = [
+        { value: "option1", label: "Option 1" },
+        { value: "option2", label: "Option 2" },
+      ];
+      const result = normalizeFilterValue(filter, selectionArray, Matchers.ExactAutoCompleteMatcher);
+      expect(result).toEqual(["option1", "option2"]);
+    });
+
+    it("normalizes selection filter value with array of strings", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const result = normalizeFilterValue(filter, ["option1", "option2"], Matchers.ExactAutoCompleteMatcher);
+      expect(result).toEqual(["option1", "option2"]);
+    });
+
+    it("normalizes selection filter value with single object", () => {
+      const filter = createTestFilter(AdvancedFilterTypes.Selection);
+      const result = normalizeFilterValue(filter, { value: "option1", label: "Option 1" }, Matchers.ExactAutoCompleteMatcher);
+      expect(result).toBe("option1");
+    });
+  });
+
   describe("ContainsMatcher", () => {
     it("normalizes string value to string", () => {
       const filter = createTestFilter(AdvancedFilterTypes.Text);
@@ -1411,5 +1455,37 @@ describe("useFilterNormalization - shouldMatchNot", () => {
 
   it("returns false when matcher is undefined", () => {
     expect(shouldMatchNot(undefined)).toBe(false);
+  });
+});
+
+describe("useFilterNormalization - shouldMatchExact", () => {
+  const { shouldMatchExact } = useFilterNormalization();
+
+  it("returns true for ExactMatcher", () => {
+    expect(shouldMatchExact(Matchers.ExactMatcher)).toBe(true);
+  });
+
+  it("returns true for ExactInputMatcher", () => {
+    expect(shouldMatchExact(Matchers.ExactInputMatcher)).toBe(true);
+  });
+
+  it("returns true for ExactAutoCompleteMatcher", () => {
+    expect(shouldMatchExact(Matchers.ExactAutoCompleteMatcher)).toBe(true);
+  });
+
+  it("returns true for MinIncludedMatcher", () => {
+    expect(shouldMatchExact(Matchers.MinIncludedMatcher)).toBe(true);
+  });
+
+  it("returns true for MaxIncludedMatcher", () => {
+    expect(shouldMatchExact(Matchers.MaxIncludedMatcher)).toBe(true);
+  });
+
+  it("returns false for ContainsMatcher", () => {
+    expect(shouldMatchExact(Matchers.ContainsMatcher)).toBe(false);
+  });
+
+  it("returns false when matcher is undefined", () => {
+    expect(shouldMatchExact(undefined)).toBe(false);
   });
 });
