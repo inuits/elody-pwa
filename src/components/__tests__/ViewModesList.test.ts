@@ -19,6 +19,15 @@ vi.mock("@/helpers", () => {
   };
 });
 
+vi.mock("@/composables/useEntityPageConfig", () => ({
+  useEntityPageConfig: () => ({
+    actions: [],
+    hasEditMetadataButton: undefined,
+    deleteButton: undefined,
+    trackSeen: false,
+  }),
+}));
+
 vi.mock("@/main", () => {
   const actualModule = vi.importActual("@/main");
 
