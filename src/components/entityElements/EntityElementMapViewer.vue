@@ -14,7 +14,21 @@
           :center="center"
           :map-view="mapConfig.mapView"
           :map-mode="mapConfig.mapMode"
-        />
+          :overlay-wkt="showOverlay ? overlayWkts : []"
+        >
+          <template v-if="hasOverlay" #controls>
+            <BaseButton
+              button-size="small"
+              :label="
+                showOverlay && overlayConfig!.hideLabel
+                  ? t(overlayConfig!.hideLabel)
+                  : t(overlayConfig!.label)
+              "
+              :loading="overlayLoading"
+              @click="toggleOverlay"
+            />
+          </template>
+        </WktMap>
         <HeatMap
           v-if="element.type === MapTypes.HeatMap"
           :center="center"
@@ -39,14 +53,18 @@ import {
   MapModes,
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
+import BaseButton from "@/components/base/BaseButtonNew.vue";
 import { getValueForPanelMetadata } from "@/helpers";
 import { computed, inject } from "vue";
 import { useMapCenter } from "@/composables/useMapCenter";
 import WktMap from "@/components/maps/WktMap.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
 import { useMaps } from "@/composables/useMaps";
+import { useMapOverlay } from "@/composables/useMapOverlay";
+import { useI18n } from "vue-i18n";
 
 const { getBasicMapProperties } = useMaps();
+const { t } = useI18n();
 
 const props = defineProps<{
   element: MapElement;
@@ -103,4 +121,13 @@ const mapData = computed(() => {
     return !!item.coordinates;
   });
 });
+
+const {
+  overlayConfig,
+  hasOverlay,
+  showOverlay,
+  overlayWkts,
+  overlayLoading,
+  toggleOverlay,
+} = useMapOverlay(props.entityId, mapConfig);
 </script>

@@ -2,7 +2,7 @@
   <button
     data-cy="base-button-new"
     type="button"
-    :disabled="disabled"
+    :disabled="disabled || loading"
     class="flex justify-center items-center whitespace-nowrap w-full rounded-md outline-none transition-colors duration-300 cursor-pointer disabled:cursor-auto"
     :class="[
       label ? `pl-1.5` : ``,
@@ -15,8 +15,14 @@
       { 'text-[0.750rem] p-1': buttonSize === 'verySmall' },
     ]"
   >
+    <spinner-loader
+      v-if="loading"
+      theme="accent"
+      class="mr-2"
+      :dimensions="5"
+    />
     <unicon
-      v-if="props.icon !== DamsIcons.NoIcon"
+      v-else-if="props.icon !== DamsIcons.NoIcon"
       :class="[{ '-ml-1 ': label }]"
       :name="Unicons[props.icon].name"
       :height="iconHeight"
@@ -58,6 +64,7 @@ import { Unicons } from "@/types";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseTooltip from "./BaseTooltip.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 type PseudoStyle = {
   textColor: string;

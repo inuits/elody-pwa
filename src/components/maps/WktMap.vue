@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div class="relative">
+    <div class="absolute top-2 right-2 z-[1000] pointer-events-auto">
+      <slot name="controls" />
+    </div>
     <Map.OlMap
       ref="mapRef"
       style="width: 100%; height: 65vh"
@@ -80,6 +83,13 @@
         >
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>
+
+      <Layers.OlVectorLayer v-if="overlayFeatures.length">
+        <Sources.OlSourceVector
+          :projection="activeProjection"
+          :features="overlayFeatures"
+        />
+      </Layers.OlVectorLayer>
     </Map.OlMap>
   </div>
 </template>
@@ -87,6 +97,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, onMounted } from "vue";
 import { Map, Layers, Sources } from "vue3-openlayers";
+import { Style, Stroke, Fill } from "ol/style";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
@@ -118,12 +129,14 @@ const props = withDefaults(
     filtersBaseApi?: FiltersBaseAPI;
     useFilters: boolean;
     geoFilters: AdvancedFilters | undefined;
+    overlayWkt?: string[];
   }>(),
   {
     center: () => [],
     mapView: MapViews.Satellite,
     mapMode: MapModes.Default,
     useFilters: false,
+    overlayWkt: () => [],
   },
 );
 
@@ -183,6 +196,21 @@ const wkt = computed(() => {
 
 const features = computed(() => {
   return [...wkt.value, point.value].filter((feature) => !!feature);
+});
+
+const overlayStyle = new Style({
+  stroke: new Stroke({ color: "#f97316", width: 2 }),
+  fill: new Fill({ color: "rgba(249, 115, 22, 0.15)" }),
+});
+
+const overlayFeatures = computed(() => {
+  const features = transformDataToWktFeatures(
+    props.overlayWkt,
+    false,
+    activeProjection.value,
+  );
+  features.forEach((f) => f.setStyle(overlayStyle));
+  return features;
 });
 
 const focusOnFeatures = async () => {
