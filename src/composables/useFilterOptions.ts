@@ -287,10 +287,18 @@ export const useFilterOptions = () => {
   };
 
   const options = computed<DropdownOption[]>(() => {
+    const seen = new Set<string>();
     const opts =
       dropdownOptions.value?.length > 0
         ? dropdownOptions.value
-        : optionsLibrary.entities.value?.flatMap(getOptionsForEntity) || [];
+        : optionsLibrary.entities.value
+          ?.flatMap(getOptionsForEntity)
+          .filter((opt) => {
+            if (seen.has(opt.value)) return false;
+            seen.add(opt.value);
+            return true;
+          })
+      || [];
 
     if (hasFacets.value) {
       return opts.filter((option) => {
