@@ -12,6 +12,7 @@ import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useImport } from "@/composables/useImport";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useStateManagement } from "@/composables/useStateManagement";
 import type { Entitytyping } from "@/generated-types/queries";
@@ -225,6 +226,39 @@ export const useBulkOperationsActionsBar = (
     initializePropertiesForBulkDeleteRelations(props.relationType);
   };
 
+  const initializeBulkMutationOperation = (
+    bulkOperationModalConfig: BulkOperationModal,
+  ) => {
+    const { initializeConfirmModal } = useConfirmModal();
+    initializeConfirmModal({
+      translationKey: "bulk-mutation",
+      confirmButton: {
+        buttonCallback: async () => {
+          if (!bulkOperationModalConfig.formQuery) return;
+          const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(
+            props.context,
+          );
+          const document = await loadDocument(bulkOperationModalConfig.formQuery);
+          await Promise.all(
+            selectedItems.map((item) =>
+              apolloClient.mutate({
+                mutation: document,
+                variables: { id: item.id },
+              }),
+            ),
+          );
+          dequeueAllItemsForBulkProcessing(props.context);
+          closeAllModals();
+          for (const cb of getRefetchCallbacks()) cb?.();
+        },
+      },
+      declineButton: {
+        buttonCallback: () => closeAllModals(),
+      },
+    });
+    setCallbackFunctions(getRefetchCallbacks());
+  };
+
   const executeOperationSpecificInitialization = (
     operationType: string,
     bulkOperationModalConfig: BulkOperationModal,
@@ -244,6 +278,8 @@ export const useBulkOperationsActionsBar = (
     const initializerFunction = operationInitializers[operationType];
     if (initializerFunction) {
       initializerFunction();
+    } else if (bulkOperationModalConfig.formQuery) {
+      initializeBulkMutationOperation(bulkOperationModalConfig);
     }
   };
 

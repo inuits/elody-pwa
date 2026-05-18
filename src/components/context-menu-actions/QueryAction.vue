@@ -34,11 +34,21 @@ const refetchParentEntity: any = inject("RefetchParentEntity");
 const doAction = async () => {
   try {
     const document = await loadDocument(props.query);
-    await (apolloClient as ApolloClient<any>).query({
-      query: document,
-      variables: { id: props.entityId },
-      fetchPolicy: "no-cache",
-    });
+    const isMutation =
+      document.definitions[0]?.kind === "OperationDefinition" &&
+      (document.definitions[0] as any).operation === "mutation";
+    if (isMutation) {
+      await (apolloClient as ApolloClient<any>).mutate({
+        mutation: document,
+        variables: { id: props.entityId },
+      });
+    } else {
+      await (apolloClient as ApolloClient<any>).query({
+        query: document,
+        variables: { id: props.entityId },
+        fetchPolicy: "no-cache",
+      });
+    }
 
     if (props.refreshAfterAction) {
       await refetchParentEntity();
