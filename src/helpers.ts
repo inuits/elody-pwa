@@ -833,6 +833,17 @@ export const extractTitleKeyFromMetadataFilter = (metadataFilter: string) => {
 export const extractValueFromObject = (object: any, path: string): unknown => {
   if (!path) return null;
 
+  if (path.includes("|")) {
+    const parts = path.split("|");
+    for (const part of parts) {
+      const result = extractValueFromObject(object, part);
+
+      if (result !== undefined && result !== null && result !== "") {
+        return result;
+      }
+    }
+  }
+
   const segments = path.split(".");
   let current = object;
 
