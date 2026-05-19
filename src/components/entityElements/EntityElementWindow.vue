@@ -20,6 +20,21 @@
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
+
+        <div
+          v-if="element.windowElementStatus"
+          class="flex gap-4 w-1/4 items-center"
+        >
+          <h2 v-if="element.windowElementStatus.label">{{ t(element.windowElementStatus.label) }}</h2>
+          <MetadataWrapper
+            class="w-full"
+            :metadata="getStatusMetadata()"
+            :form-id="formId"
+            :isEdit="computedIsEdit"
+          />
+        </div>
+
+
         <MetadataEditButton
           class="my-2"
           v-if="
@@ -87,6 +102,8 @@ import {
 import EntityElementWindowPanel from "../windowPanel/EntityElementWindowPanel.vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 const props = defineProps<{
   element: WindowElement;
   identifiers: string[];
@@ -161,7 +178,16 @@ const filteredPanels = computed<WindowElementPanel[]>(() => {
   });
 });
 
+console.log("Props element:", props.element);
+
+const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
+  computed(() => props.element.windowElementStatus),
+  props.formId,
+  computed(() => props.isEdit),
+);
+
 onMounted(() => {
   resolvePanelPermissions();
+  registerEditableKey();
 });
 </script>

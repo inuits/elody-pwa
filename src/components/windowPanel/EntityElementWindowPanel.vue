@@ -97,7 +97,7 @@ import {
   type PanelMetaData,
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
-import { usePanelStatus } from "@/composables/usePanelStatus";
+import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 
 const props = withDefaults(
   defineProps<{
@@ -123,7 +123,7 @@ const repeatableFieldsHelper = useRepeatableFields(
   panelId.value!,
   props.formId,
 );
-const { getStatusMetadata, registerEditableKey } = usePanelStatus(
+const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
   computed(() => props.panel.panelHeaderContent?.panelStatus),
   props.formId,
   computed(() => props.isEdit),

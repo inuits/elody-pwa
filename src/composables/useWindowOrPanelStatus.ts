@@ -2,19 +2,20 @@ import { computed, unref, type MaybeRef, type ComputedRef } from "vue";
 import {
   type PanelMetaData,
   type PanelStatus,
+  type windowElementStatus,
   CustomFormatterTypes,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 
-export const usePanelStatus = (
-  panelStatus: MaybeRef<PanelStatus | null | undefined>,
+export const useWindowOrPanelStatus = (
+  windowOrPanelStatus: MaybeRef<PanelStatus | windowElementStatus | null | undefined>,
   formId: MaybeRef<string>,
   isEdit: MaybeRef<boolean> = false,
 ) => {
   const { getForm, addEditableMetadataKeys } = useFormHelper();
 
   const statusValue = computed(() => {
-    const status = unref(panelStatus);
+    const status = unref(windowOrPanelStatus);
     if (!status) return undefined;
     return getForm(unref(formId))?.values.intialValues?.[
       status.statusMetadataKey
@@ -22,7 +23,7 @@ export const usePanelStatus = (
   });
 
   const statusMetadata: ComputedRef<PanelMetaData> = computed(() => {
-    const status = unref(panelStatus)!;
+    const status = unref(windowOrPanelStatus)!;
     const raw = statusValue.value;
 
     const matchingOption = raw.label
@@ -42,7 +43,7 @@ export const usePanelStatus = (
   const getStatusMetadata = (): PanelMetaData => statusMetadata.value;
 
   const registerEditableKey = (): void => {
-    const status = unref(panelStatus);
+    const status = unref(windowOrPanelStatus);
     if (!status) return;
     addEditableMetadataKeys([status.statusMetadataKey], unref(formId));
   };
