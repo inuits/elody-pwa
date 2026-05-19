@@ -15,6 +15,7 @@ const {
 const {
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
+  getEditableMetadataKeys,
 } = useFormHelper();
 
 vi.mock("@/main", () => ({
@@ -192,6 +193,32 @@ describe("useFormHelper", () => {
   //     ...initialValues,
   //   });
   // });
+});
+
+describe("useFormHelper - getEditableMetadataKeys", () => {
+  const makePanelMetaData = (key: string, relationType?: string, isMetadataField?: boolean) => ({
+    __typename: "PanelMetaData" as const,
+    key,
+    inputField: { relationType: relationType ?? null, isMetadataField: isMetadataField ?? null },
+  });
+
+  it("excludes relation fields from editable metadata keys", () => {
+    const columnList = {
+      title: makePanelMetaData("title"),
+      ref_companies: makePanelMetaData("ref_companies", "refCompanies", false),
+    };
+    const keys = getEditableMetadataKeys(columnList, "test-exclude-relations");
+    expect(keys).toContain("title");
+    expect(keys).not.toContain("ref_companies");
+  });
+
+  it("includes relation field when isMetadataField is true", () => {
+    const columnList = {
+      ref_booking_agency: makePanelMetaData("ref_booking_agency", "refBookingAgency", true),
+    };
+    const keys = getEditableMetadataKeys(columnList, "test-include-metadata-relation");
+    expect(keys).toContain("ref_booking_agency");
+  });
 });
 
 describe("useFormHelper - extractMetadataValue", () => {

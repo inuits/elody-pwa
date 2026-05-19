@@ -138,6 +138,11 @@ const useFormHelper = () => {
     panelMetadataItems.forEach((metadataItem: PanelMetaData) => {
       if (!metadataItem.inputField || keyArray.includes(metadataItem.key))
         return;
+      if (
+        metadataItem.inputField.relationType &&
+        !metadataItem.inputField.isMetadataField
+      )
+        return;
       keyArray.push(getKeyBasedOnInputField(metadataItem));
     });
     editableFields.value[formId] = keyArray;
