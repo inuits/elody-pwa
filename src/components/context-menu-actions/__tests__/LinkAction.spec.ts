@@ -6,7 +6,7 @@ import LinkAction from "../LinkAction.vue";
 const mockResolve = vi.fn();
 
 const mocks = vi.hoisted(() => ({
-  typeUrlMapping: { reverseMapping: {} as Record<string, string> },
+  typeUrlMapping: { mapping: {} as Record<string, string> },
 }));
 
 vi.mock("@/main", () => ({
@@ -52,7 +52,7 @@ describe("LinkAction", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.typeUrlMapping.reverseMapping = {};
+    mocks.typeUrlMapping.mapping = {};
     mockResolve.mockReturnValue({ href: "/mediafiles/M-12345" });
     windowOpenSpy = vi.spyOn(window, "open").mockImplementation(() => null);
   });
@@ -129,7 +129,7 @@ describe("LinkAction", () => {
     });
 
     it("uses typeUrlMapping to resolve URL type when a mapping exists", async () => {
-      mocks.typeUrlMapping.reverseMapping = { mediafile: "mediafiles" };
+      mocks.typeUrlMapping.mapping = { mediafile: "mediafiles" };
       const wrapper = getWrapper();
       await wrapper
         .findComponent({ name: "BaseContextMenuItem" })
@@ -140,7 +140,7 @@ describe("LinkAction", () => {
     });
 
     it("falls back to entityType in URL when no typeUrlMapping entry exists", async () => {
-      mocks.typeUrlMapping.reverseMapping = {};
+      mocks.typeUrlMapping.mapping = {};
       const wrapper = getWrapper();
       await wrapper
         .findComponent({ name: "BaseContextMenuItem" })
