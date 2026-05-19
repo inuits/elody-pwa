@@ -56,8 +56,10 @@ export const useFilterOptions = () => {
   ) => {
     query.value = await loadDocument("GetFilterOptions");
     entityType.value = entityTypeToSet;
-    optionsFiltersManager.setVariables({ entityType: entityTypeToSet });
-    optionsFiltersManager.setVariables({ entity: parentEntity });
+    optionsFiltersManager.setVariables({
+      entityType: entityTypeToSet,
+      entity: parentEntity,
+    });
     facetsFiltersManager.setVariables({ entityType: entityTypeToSet });
     filterOptionsMapping.value = filterOptionsMappingValue;
     selectedOptions.value = filterSelectedOptions;
@@ -292,13 +294,12 @@ export const useFilterOptions = () => {
       dropdownOptions.value?.length > 0
         ? dropdownOptions.value
         : optionsLibrary.entities.value
-          ?.flatMap(getOptionsForEntity)
-          .filter((opt) => {
-            if (seen.has(opt.value)) return false;
-            seen.add(opt.value);
-            return true;
-          })
-      || [];
+            ?.flatMap(getOptionsForEntity)
+            .filter((opt) => {
+              if (seen.has(opt.value)) return false;
+              seen.add(opt.value);
+              return true;
+            }) || [];
 
     if (hasFacets.value) {
       return opts.filter((option) => {

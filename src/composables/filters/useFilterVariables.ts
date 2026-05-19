@@ -12,7 +12,7 @@ export const useFilterVariables = () => {
   const variables = ref<FilterVariables>({});
 
   const setVariables = (newVariables: FilterVariables) => {
-    variables.value = newVariables;
+    variables.value = { ...variables.value, ...newVariables };
   };
 
   return {
