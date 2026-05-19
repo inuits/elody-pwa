@@ -1,11 +1,9 @@
 <template>
-  <router-link
-    :to="{ params: { id: entityId, type: typeUrlMapping?.mapping[entityType] || entityType } }"
-    target="_blank"
-    @click.stop
-  >
-    <base-context-menu-item :label="$t(label, [entityTypeLabel])" :icon="Unicons[icon].name" />
-  </router-link>
+  <base-context-menu-item
+    :label="$t(label, [entityTypeLabel])"
+    :icon="Unicons[icon].name"
+    @clicked="openLink"
+  />
 </template>
 
 <script setup lang="ts">
@@ -15,8 +13,10 @@ import { typeUrlMapping } from "@/main";
 import { Unicons } from "@/types";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 const { t } = useI18n();
+const router = useRouter();
 
 const props = defineProps<{
   label: string;
@@ -25,6 +25,17 @@ const props = defineProps<{
   entityType: Entitytyping;
 }>();
 
-const entityTypeLabel = computed(() => t(`entity-translations.singular.${props.entityType}`));
+const entityTypeLabel = computed(() =>
+  t(`entity-translations.singular.${props.entityType}`),
+);
+const urlType = computed(
+  () => typeUrlMapping?.reverseMapping?.[props.entityType] || props.entityType,
+);
 
+const openLink = () => {
+  const resolved = router.resolve({
+    params: { id: props.entityId, type: urlType.value },
+  });
+  window.open(resolved.href, "_blank");
+};
 </script>
