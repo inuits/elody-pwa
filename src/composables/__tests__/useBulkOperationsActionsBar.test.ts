@@ -49,11 +49,11 @@ vi.mock("@/composables/useModalActions", () => ({
   useModalActions: () => mockModalActions,
 }));
 
-const mockBaseModal = {
+const mockBaseModal = vi.hoisted(() => ({
   openModal: vi.fn(),
   getModalInfo: vi.fn(() => ({ open: false })),
   closeAllModals: vi.fn(),
-};
+}));
 
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => mockBaseModal,
