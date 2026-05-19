@@ -178,8 +178,6 @@ const filteredPanels = computed<WindowElementPanel[]>(() => {
   });
 });
 
-console.log("Props element:", props.element);
-
 const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
   computed(() => props.element.windowElementStatus),
   props.formId,
