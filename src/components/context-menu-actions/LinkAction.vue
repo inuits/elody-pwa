@@ -29,7 +29,7 @@ const entityTypeLabel = computed(() =>
   t(`entity-translations.singular.${props.entityType}`),
 );
 const urlType = computed(
-  () => typeUrlMapping?.reverseMapping?.[props.entityType] || props.entityType,
+  () => typeUrlMapping?.mapping?.[props.entityType] || props.entityType,
 );
 
 const openLink = () => {
