@@ -4,10 +4,13 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import QueryAction from "../QueryAction.vue";
 
 const mockQuery = vi.fn().mockResolvedValue({ data: {} });
+const mockMutate = vi.fn().mockResolvedValue({ data: {} });
 const mockRefetchParentEntity = vi.fn().mockResolvedValue(undefined);
 const mockDisplaySuccessNotification = vi.fn();
 const mockDisplayErrorNotification = vi.fn();
-const mockLoadDocument = vi.fn().mockResolvedValue("mocked-document");
+const mockDocument = { definitions: [{ kind: "OperationDefinition", operation: "query" }] };
+const mockMutationDocument = { definitions: [{ kind: "OperationDefinition", operation: "mutation" }] };
+const mockLoadDocument = vi.fn().mockResolvedValue(mockDocument);
 
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({
@@ -51,7 +54,7 @@ const mountComponent = (props = {}) => {
     },
     global: {
       provide: {
-        [DefaultApolloClient as symbol]: { query: mockQuery },
+        [DefaultApolloClient as symbol]: { query: mockQuery, mutate: mockMutate },
         RefetchParentEntity: mockRefetchParentEntity,
       },
       mocks: {
@@ -65,7 +68,8 @@ describe("QueryAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockQuery.mockResolvedValue({ data: {} });
-    mockLoadDocument.mockResolvedValue("mocked-document");
+    mockMutate.mockResolvedValue({ data: {} });
+    mockLoadDocument.mockResolvedValue(mockDocument);
     mockRefetchParentEntity.mockResolvedValue(undefined);
   });
 
@@ -76,7 +80,7 @@ describe("QueryAction", () => {
 
     expect(mockLoadDocument).toHaveBeenCalledWith("GetCreateLabelForManifestation");
     expect(mockQuery).toHaveBeenCalledWith({
-      query: "mocked-document",
+      query: mockDocument,
       variables: { id: "M-12345" },
       fetchPolicy: "no-cache",
     });
@@ -111,6 +115,51 @@ describe("QueryAction", () => {
 
   it("shows error notification on failure", async () => {
     mockQuery.mockRejectedValue(new Error("query failed"));
+
+    const wrapper = mountComponent();
+    await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
+    await flush();
+
+    expect(mockDisplayErrorNotification).toHaveBeenCalledWith(
+      "notifications.errors.validation-error.title",
+      "",
+    );
+  });
+});
+
+describe("QueryAction - mutation flow", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockMutate.mockResolvedValue({ data: {} });
+    mockLoadDocument.mockResolvedValue(mockMutationDocument);
+    mockRefetchParentEntity.mockResolvedValue(undefined);
+  });
+
+  it("executes mutate with entity id for mutation documents", async () => {
+    const wrapper = mountComponent();
+    await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
+    await flush();
+
+    expect(mockMutate).toHaveBeenCalledWith({
+      mutation: mockMutationDocument,
+      variables: { id: "M-12345" },
+    });
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
+
+  it("shows success notification after mutation", async () => {
+    const wrapper = mountComponent();
+    await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
+    await flush();
+
+    expect(mockDisplaySuccessNotification).toHaveBeenCalledWith(
+      "notifications.success.entityUpdated.title",
+      "notifications.success.entityUpdated.description",
+    );
+  });
+
+  it("shows error notification when mutation fails", async () => {
+    mockMutate.mockRejectedValue(new Error("mutation failed"));
 
     const wrapper = mountComponent();
     await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
