@@ -22,6 +22,17 @@
     :use-filters="useFilters"
     :geo-filters="geoFilters"
   />
+  <PointMap
+    v-if="refMapType === MapTypes.PointsMap"
+    :points="pointsData"
+    :entities="entities"
+    :center="center"
+    :map-view="mapView"
+    :filters-base-api="filtersBaseApi"
+    :use-filters="useFilters"
+    :geo-filters="geoFilters"
+    :clustering="mapProperties.pointsConfig?.clustering ?? false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -37,6 +48,7 @@ import {
 import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
 import WktMap from "@/components/maps/WktMap.vue";
+import PointMap from "@/components/maps/PointMap.vue";
 import { useMaps } from "@/composables/useMaps";
 import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { fromLonLat } from "ol/proj";
@@ -78,11 +90,11 @@ const wktOfEntities = computed(() => {
 });
 
 const getBasicWkts = () => {
-  const wkts: string[] = props.entities.map((entity: Entity) => {
-    return entity.intialValues?.map_location;
+  const wkts: { wkt: string; id?: string }[] = props.entities.map((entity: Entity) => {
+    return { wkt: entity.intialValues?.map_location, id: entity.id };
   });
 
-  return wkts.filter((item: string) => !!item);
+  return wkts.filter((item: { wkt: string; id?: string }) => !!item.wkt);
 };
 
 const getHeatWkt = () => {
@@ -109,6 +121,18 @@ const mapMode = computed(() => {
 
 const useFilters = computed(() => {
   return mapProperties.value.useFilters;
+});
+
+const pointsData = computed(() => {
+  const coordinatesKey = mapProperties.value.pointsConfig?.keyToExtractCoordinates;
+  if (!coordinatesKey) return [];
+  return props.entities
+    .map((entity: Entity) => ({
+      id: entity.id,
+      lat: entity.intialValues?.[coordinatesKey]?.latitude,
+      lon: entity.intialValues?.[coordinatesKey]?.longitude,
+    }))
+    .filter((p) => p.lat != null && p.lon != null);
 });
 
 const mapProperties = ref(getBasicMapProperties(props.config));
@@ -143,6 +167,10 @@ const updateMapProperties = () => {
   }
 
   if (refMapType.value == MapTypes.WktMap) {
+    props.setPaginationLimit(mapPaginationLimit || 1000);
+  }
+
+  if (refMapType.value == MapTypes.PointsMap) {
     props.setPaginationLimit(mapPaginationLimit || 1000);
   }
 };

@@ -92,7 +92,7 @@ const getPanelMetadataValueByKey = (key: string) => {
 
 const mapData = computed(() => {
   const returnArray: (
-    | string
+    | { wkt: string; id?: string }
     | { coordinates: string; heatIntensity: number }
   )[] = [];
   Object.values(props.element).forEach((value) => {
@@ -108,14 +108,14 @@ const mapData = computed(() => {
             ) || 0,
         });
       } else {
-        returnArray.push(wkt as string);
+        returnArray.push({ wkt: wkt as string });
       }
     }
   });
 
   return returnArray.filter((item) => {
-    if (typeof item === "string") {
-      return !!item;
+    if ('wkt' in item) {
+      return !!item.wkt;
     }
 
     return !!item.coordinates;

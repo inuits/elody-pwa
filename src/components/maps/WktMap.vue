@@ -43,7 +43,9 @@
               >
                 <div>
                   <p class="font-bold">{{ t(item.label) }}</p>
-                  <p>{{ featureResult.Entity.intialValues[item.key] || "-" }}</p>
+                  <p>
+                    {{ featureResult.Entity.intialValues[item.key] || "-" }}
+                  </p>
                 </div>
               </div>
               <router-link
@@ -121,7 +123,7 @@ import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
-    wkt: string[] | HeatMapItem[];
+    wkt: { wkt: string, id: string }[] | HeatMapItem[];
     entities: Entity[];
     center?: number[];
     mapView?: MapViews;
@@ -129,7 +131,7 @@ const props = withDefaults(
     filtersBaseApi?: FiltersBaseAPI;
     useFilters: boolean;
     geoFilters: AdvancedFilters | undefined;
-    overlayWkt?: string[];
+    overlayWkt?: { wkt: string, id: string }[];
   }>(),
   {
     center: () => [],
@@ -243,7 +245,7 @@ const handleMoveBoundingBox = () => {
 
   const geojsonPolygon = getGeojsonPolygonFromMap(map);
   if (!props.geoFilters) return;
-  activateNewGeoFilter(props.filtersBaseApi, props.geoFilters, geojsonPolygon);
+  activateNewGeoFilter(props.filtersBaseApi, props.geoFilters, geojsonPolygon, 35);
 };
 
 const debouncedHandleMoveBoundingBox = debounce(() => {
@@ -257,7 +259,7 @@ const handleMapClick = (event: any) => {
 
   const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
   if (!feature) return;
-  detailPopUp.position = feature.getGeometry()?.getCoordinates()?.[0][0];
+  detailPopUp.position = event.coordinate;
   detailPopUp.entityId = feature.id_;
   if (detailPopUp.entityId) detailPopUp.isVisible = true;
 };

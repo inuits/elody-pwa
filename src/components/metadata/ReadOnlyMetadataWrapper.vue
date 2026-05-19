@@ -101,7 +101,7 @@ const props = withDefaults(
     formFlow?: "edit" | "create";
     showErrors?: boolean;
     entityType?: Entitytyping;
-    highlight: boolean;
+    highlight?: boolean;
     breakWords?: boolean;
     hideLabel?: boolean;
   }>(),

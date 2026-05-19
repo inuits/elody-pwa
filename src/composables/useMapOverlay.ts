@@ -26,7 +26,7 @@ export const useMapOverlay = (
 
   const hasOverlay = computed(() => !!overlayConfig.value?.query);
   const showOverlay = ref(false);
-  const overlayWkts = ref<string[]>([]);
+  const overlayWkts = ref<{ wkt: string, id: string }[]>([]);
   const overlayLoading = ref(false);
   const overlayFetched = ref(false);
 
@@ -71,8 +71,8 @@ export const useMapOverlay = (
       });
 
       overlayWkts.value = (result.data?.Entities?.results ?? [])
-        .map((e: any) => e.intialValues?.[cfg.wktKey])
-        .filter(Boolean);
+        .map((e: any) => { return { wkt: e.intialValues?.[cfg.wktKey], id: e.id }; })
+        .filter((e: any) => !!e.wkt);
       overlayFetched.value = true;
     } finally {
       overlayLoading.value = false;

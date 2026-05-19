@@ -25,6 +25,11 @@ export interface HeatMapItem {
   id: string;
 }
 
+export interface WktItem { 
+  wkt: string;
+  id: string;
+}
+
 export interface Bucket {
   id: string;
   x: number;
@@ -90,6 +95,21 @@ export const useMaps = () => {
     return markerFeature;
   };
 
+  const createPointFeature = (
+    latitude: number,
+    longitude: number,
+    id: string,
+    targetProjection = "EPSG:4326",
+  ) => {
+    const geometry = new Point([longitude, latitude]);
+    if (targetProjection === "EPSG:3857") {
+      geometry.transform("EPSG:4326", "EPSG:3857");
+    }
+    const feature = new Feature({ geometry });
+    feature.setId(id);
+    return feature;
+  };
+
   const getWktFeature = (
     wkt: string,
     targetProjection = "EPSG:4326",
@@ -129,7 +149,7 @@ export const useMaps = () => {
   };
 
   const transformDataToWktFeatures = (
-    data: (string | HeatMapItem)[],
+    data: ({wkt: string, id: string} | HeatMapItem)[],
     isHeatMode: boolean,
     targetProjection = "EPSG:4326",
   ): Feature[] => {
@@ -147,8 +167,8 @@ export const useMaps = () => {
       });
     }
 
-    return (data as string[]).map((wkt) =>
-      getWktFeature(wkt, targetProjection),
+    return (data as WktItem[]).map((item) =>
+      getWktFeature(item.wkt, targetProjection, item.id),
     );
   };
 
@@ -178,19 +198,21 @@ export const useMaps = () => {
     filtersBaseApi.initializeAndActivateNewFilter(filters, geojsonPolygon);
   };
 
-  const getGeojsonPolygonFromMap = (map: MapType): GeoJSONGeometry => {
+  const getGeojsonPolygonFromMap = (map: MapType, projection?: string): GeoJSONGeometry => {
     const extent = map.getView().calculateExtent(map.getSize());
-    const polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
-    const polygon4326 = polygon.clone().transform("EPSG:3857", "EPSG:4326");
+    let polygon = fromExtent(extent); // extent: [minX, minY, maxX, maxY]
+    if (projection && projection === "EPSG:3857") {
+      polygon = polygon.clone().transform("EPSG:3857", "EPSG:4326");
+    }
     const geojsonFormat = new GeoJSON();
-    return geojsonFormat.writeGeometryObject(polygon4326);
+    return geojsonFormat.writeGeometryObject(polygon);
   };
 
   // Todo: This function should be adjusted so that the map element can be resolved from each available column, the current implementation only allows it to be in the first column (it should also allow multiple heatmaps in one column)
   const getMapElementFromEntity = (entity: Entity): MapElement | undefined => {
     return (
       (entity.mapElement as MapElement) ??
-      (entity.entityView.column.elements.mapElement as MapElement)
+      (entity.entityView?.column?.elements?.mapElement as MapElement)
     );
   };
 
@@ -253,6 +275,7 @@ export const useMaps = () => {
   return {
     geoToMercator,
     getBasicMapProperties,
+    createPointFeature,
     getMarkerFeature,
     getWktFeature,
     fetchGeoFilter,

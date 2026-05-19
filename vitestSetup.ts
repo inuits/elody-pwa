@@ -43,14 +43,21 @@ vi.mock("vue3-openlayers", () => ({
   Map: {
     OlMap: vi.fn(),
     OlView: vi.fn(),
+    OlOverlay: vi.fn(),
   },
   Layers: {
     OlTileLayer: vi.fn(),
     OlVectorLayer: vi.fn(),
   },
   Sources: {
+    OlSourceOsm: vi.fn(),
     OlSourceXyz: vi.fn(),
     OlSourceVector: vi.fn(),
+    OlSourceCluster: vi.fn(),
+  },
+  MapControls: {
+    OlFullscreenControl: vi.fn(),
+    OlContextMenuControl: vi.fn(),
   },
 }));
 

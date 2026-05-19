@@ -2008,12 +2008,14 @@ export type MapMetadataValueArgs = {
 
 export enum MapTypes {
   HeatMap = 'heatMap',
-  WktMap = 'wktMap'
+  WktMap = 'wktMap',
+  PointsMap = 'pointsMap'
 }
 
 export enum MapModes {
   Default = 'default',
-  HeatMode = 'heatMode'
+  HeatMode = 'heatMode',
+  Points = 'points'
 }
 
 export enum MapViews {
