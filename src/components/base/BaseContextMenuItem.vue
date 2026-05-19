@@ -20,7 +20,6 @@
               disabled: disable,
             }
           : {
-              href: '#',
               role: 'menuitem',
               tabindex: -1,
             }
