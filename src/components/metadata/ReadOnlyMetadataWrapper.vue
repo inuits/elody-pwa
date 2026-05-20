@@ -24,7 +24,7 @@
               <MetadataFormatter
                 v-if="refMetadata.value?.formatter"
                 v-bind="refMetadata.value"
-                :translation-key="refMetadata.valueTranslationKey"
+                :translation-key="pillTranslationKey"
                 :entity="{ type: entityType }"
               />
               <entity-element-metadata
@@ -36,7 +36,7 @@
                 :unit="refMetadata.unit"
                 :base-library-mode="baseLibraryMode"
                 :custom-value="refMetadata.customValue"
-                :translation-key="refMetadata.valueTranslationKey"
+                :translation-key="pillTranslationKey"
                 :highlight="refMetadata.highlightIfPrimaryMediafile && highlight"
                 :break-words="breakWords"
               />
@@ -131,6 +131,15 @@ const handleOverflowStatus = (status: boolean) => {
 const metadataValueToDisplayOnTooltip = computed(
   () => refMetadata.value?.value?.label || refMetadata.value?.value,
 );
+
+const pillTranslationKey = computed<string | undefined>(() => {
+  if (refMetadata.value.valueTranslationKey) return refMetadata.value.valueTranslationKey;
+  const value = (refMetadata.value as any).value?.label;
+  const options = (refMetadata.value as any).inputField?.options;
+  if (!value || !options?.length) return undefined;
+  const match = options.find((opt: any) => opt.value === value);
+  return match?.label;
+});
 
 const label = computed(() =>
   refMetadata.value.label
