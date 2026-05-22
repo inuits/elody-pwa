@@ -361,7 +361,7 @@ const {
   extractActionArguments,
   getCallbackFunctions,
   getParentId,
-  setArgumentForSubmitAllFormTabs
+  setArgumentForSubmitAllFormTabs,
 } = useModalActions();
 const route = useRoute();
 
@@ -448,12 +448,17 @@ const getFieldArray = computed(() => {
 
 const getSortedFieldArray = computed(() => {
   return getFieldArray.value?.toSorted((a, b) => {
-    return (a.__typename === "FormAction" ? 1 : 0) - (b.__typename === "FormAction" ? 1 : 0);
+    return (
+      (a.__typename === "FormAction" ? 1 : 0) -
+      (b.__typename === "FormAction" ? 1 : 0)
+    );
   });
 });
 
 const form = ref<FormContext<any>>();
-const formContainsErrors = computed((): boolean => Object.keys(form.value?.errors ?? {}).length > 0);
+const formContainsErrors = computed(
+  (): boolean => Object.keys(form.value?.errors ?? {}).length > 0,
+);
 const showErrors = ref<boolean>(false);
 const isButtonDisabled = computed((): boolean =>
   showErrors.value ? formContainsErrors.value : false,
@@ -483,7 +488,9 @@ const typeToAddToUploadUrl = computed<string | undefined>(() => {
     (formField: any) => formField.__typename === "UploadContainer",
   ) as UploadContainer | undefined;
   if (!uploadContainer) return false;
-  const uploadTypeField = Object.values(uploadContainer).find(item => item.__typename === 'UploadField');
+  const uploadTypeField = Object.values(uploadContainer).find(
+    (item) => item.__typename === "UploadField",
+  );
   const keyToExtract = uploadTypeField.extractTypeFromKey;
   if (!keyToExtract) return undefined;
   const initialValues = form.value?.values?.intialValues || {};
@@ -499,7 +506,11 @@ const createEntityFromFormInput = async (
   const currentForm: FormContext = formContext ? formContext : form.value;
   const entity: EntityInput = { type: entityType };
   const initialValues = currentForm.values?.intialValues || {};
-  const keysToInclude = getMetadataKeysToInclude(entityType, onlyAllowedFields, currentForm);
+  const keysToInclude = getMetadataKeysToInclude(
+    entityType,
+    onlyAllowedFields,
+    currentForm,
+  );
 
   entity.metadata = extractMetadataFromValues(initialValues, keysToInclude);
   if (onlyAllowedFields) {
@@ -507,7 +518,7 @@ const createEntityFromFormInput = async (
   } else {
     entity.relations = (await buildEntityRelations(
       relations,
-      currentForm
+      currentForm,
     )) as BaseRelationValuesInput[];
   }
   return entity;
@@ -738,13 +749,21 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
         });
       }
 
-      const entityInput = await createEntityFromFormInput(field.creationType, undefined, undefined, form);
+      const entityInput = await createEntityFromFormInput(
+        field.creationType,
+        undefined,
+        undefined,
+        form,
+      );
       let entity: Entity;
-        entity = (await performSubmitAction(document, entityInput)).data
-          .CreateEntity;
-        setArgumentForSubmitAllFormTabs(entity["id"], props.allFormRelationTypes[formKeyIndex]);
-        showErrors.value = false;
-        entities.push(entity);
+      entity = (await performSubmitAction(document, entityInput)).data
+        .CreateEntity;
+      setArgumentForSubmitAllFormTabs(
+        entity["id"],
+        props.allFormRelationTypes[formKeyIndex],
+      );
+      showErrors.value = false;
+      entities.push(entity);
     }
 
     await getTenants();
@@ -757,9 +776,8 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
       }
     } else {
       if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
-        entities.forEach((entity: Entity) => tagNewlyCreatedEntity(entity))
-      }
-      else
+        entities.forEach((entity: Entity) => tagNewlyCreatedEntity(entity));
+      } else
         setTimeout(
           () => goToEntityPage(entities[0], "SingleEntity", props.router),
           1,
@@ -1154,8 +1172,9 @@ watch(
       setRelationMetadataFromFormFields(
         inputField.relationMetadataFromFormFields,
       );
-    // Use the first tab's formKey as the metadata source form (role is entered in a preceding tab)
-    const sourceFormId = props.allFormKeys?.find((k) => k && k !== formId.value) ?? formId.value;
+
+    const sourceFormId =
+      props.allFormKeys?.find((k) => k && k !== formId.value) ?? formId.value;
     setDynamicFormId(sourceFormId);
   },
   { immediate: true },
