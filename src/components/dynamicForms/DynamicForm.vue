@@ -354,6 +354,8 @@ const {
   getEntityUuid,
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
+  setRelationMetadataFromFormFields,
+  setDynamicFormId,
 } = useEntityPickerModal();
 const {
   extractActionArguments,
@@ -1137,6 +1139,26 @@ watch(
       }, 100);
     }
   },
+);
+
+watch(
+  () => getSortedFieldArray.value,
+  (fields) => {
+    if (!fields) return;
+    const entityPickerField = fields.find(
+      (f: any) => f.inputField?.type === BaseFieldType.BaseEntityPickerField,
+    );
+    if (!entityPickerField?.inputField) return;
+    const inputField = entityPickerField.inputField;
+    if (inputField.relationMetadataFromFormFields)
+      setRelationMetadataFromFormFields(
+        inputField.relationMetadataFromFormFields,
+      );
+    // Use the first tab's formKey as the metadata source form (role is entered in a preceding tab)
+    const sourceFormId = props.allFormKeys?.find((k) => k && k !== formId.value) ?? formId.value;
+    setDynamicFormId(sourceFormId);
+  },
+  { immediate: true },
 );
 
 onUnmounted(() => {

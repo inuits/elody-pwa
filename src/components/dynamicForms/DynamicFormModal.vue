@@ -122,7 +122,9 @@ const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
     Object.entries(value)
       .filter(([, nestedValue]) => nestedValue.__typename === "FormTab")
-      .map(([nestedKey]) => t("entity." + nestedKey)),
+      .map(([nestedKey, nestedValue]) =>
+        (nestedValue as any).label ? t((nestedValue as any).label) : t("entity." + nestedKey),
+      ),
   );
 });
 

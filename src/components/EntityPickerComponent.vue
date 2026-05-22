@@ -68,6 +68,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
 import { useModalActions } from "@/composables/useModalActions";
+import { buildItemsWithRelationMetadata } from "@/composables/entityPickerRelationMetadata";
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -112,6 +113,8 @@ const {
   getActionsOnResult,
   setCropMode,
   setCropCoordinatesKey,
+  getRelationMetadataFromFormFields,
+  getDynamicFormId,
 } = useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
 const { parseFormValuesToFormInput, getForm } = useFormHelper();
@@ -150,6 +153,30 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
   emit("entitiesUpdated", numberOfEntities);
 };
 
+const injectRelationMetadataFromForm = (
+  items: InBulkProcessableItem[],
+): InBulkProcessableItem[] => {
+  const metadataFields = getRelationMetadataFromFormFields();
+  if (metadataFields.length === 0) return items;
+
+  const dynamicForm = getForm(getDynamicFormId());
+  if (!dynamicForm) return items;
+
+  const enriched = buildItemsWithRelationMetadata(
+    items,
+    metadataFields,
+    dynamicForm.values.intialValues ?? {},
+  );
+
+  if (enriched !== items) {
+    metadataFields.forEach(({ formMetadataKey }) => {
+      dynamicForm.setFieldValue(`intialValues.${formMetadataKey}`, undefined);
+    });
+  }
+
+  return enriched;
+};
+
 const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) return;
 
@@ -166,7 +193,8 @@ const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
     }
   }
 
-  addRelations(selectedItems, getRelationType(), getEntityId(), true);
+  const enrichedItems = injectRelationMetadataFromForm(selectedItems);
+  addRelations(enrichedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
   useEditHelper.setSubmitFunction(submit);
   await useEditHelper.save(true);
