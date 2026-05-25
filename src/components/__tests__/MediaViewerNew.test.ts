@@ -40,6 +40,9 @@ const mocks = vi.hoisted(() => {
     },
     Unicons: {
       DesktopSlash: { name: "desktop-slash" },
+      ArrowCircleLeft: { name: "arrow-circle-left" },
+      ArrowCircleRight: { name: "arrow-circle-right" },
+      Download: { name: "download" },
     },
   };
 });
@@ -71,6 +74,8 @@ vi.mock("openseadragon-select-plugin", () => ({}));
 describe("MediaViewerNew.vue - Cropping Functionality", () => {
   const mockAddMediafileCropCoordinates = vi.fn();
   const mockGetValueOfMediafile = vi.fn();
+  const mockSelectNextMediafile = vi.fn();
+  const mockSelectPreviousMediafile = vi.fn();
   const mockMediafileSelectionState = ref({
     default: {
       selectedMediafile: null as Entity | null,
@@ -91,7 +96,11 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
     mocks.useEntityMediafileSelector.mockReturnValue({
       mediafileSelectionState: mockMediafileSelectionState,
       getValueOfMediafile: mockGetValueOfMediafile,
+      selectNextMediafile: mockSelectNextMediafile,
+      selectPreviousMediafile: mockSelectPreviousMediafile,
     });
+
+    mockMediafileSelectionState.value.default.mediafiles = [];
 
     mockGetValueOfMediafile.mockImplementation((context, field) => {
       if (field === "mimetype") return "image/jpeg";
@@ -310,6 +319,130 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
 
       const iiifViewer = wrapper.findComponent(mocks.IIIFViewer);
       expect(iiifViewer.props("dimensions")).toBeUndefined();
+    });
+  });
+
+  describe("Navigation", () => {
+    it("should not show navigation buttons when only one mediafile", async () => {
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(
+        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
+      ).toBe(false);
+      expect(
+        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
+      ).toBe(false);
+    });
+
+    it("should show navigation buttons when multiple mediafiles exist", async () => {
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+        { id: "media2", mimetype: "image/png" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(
+        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
+      ).toBe(true);
+      expect(
+        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
+      ).toBe(true);
+    });
+
+    it("should call selectNextMediafile and emit togglePreviewComponent when next clicked", async () => {
+      mockSelectNextMediafile.mockReturnValue("media2");
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+        { id: "media2", mimetype: "image/png" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      await wrapper.find('[data-testid="nav-next-mediafile"]').trigger("click");
+
+      expect(mockSelectNextMediafile).toHaveBeenCalledWith("default");
+      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["media2"]);
+    });
+
+    it("should call selectPreviousMediafile and emit togglePreviewComponent when prev clicked", async () => {
+      mockSelectPreviousMediafile.mockReturnValue("media1");
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+        { id: "media2", mimetype: "image/png" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      await wrapper.find('[data-testid="nav-prev-mediafile"]').trigger("click");
+
+      expect(mockSelectPreviousMediafile).toHaveBeenCalledWith("default");
+      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["media1"]);
+    });
+
+    it("should not emit togglePreviewComponent when selectNextMediafile returns undefined", async () => {
+      mockSelectNextMediafile.mockReturnValue(undefined);
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1" } as MediaFileEntity,
+        { id: "media2" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      await wrapper.find('[data-testid="nav-next-mediafile"]').trigger("click");
+
+      expect(wrapper.emitted("togglePreviewComponent")).toBeUndefined();
+    });
+
+    it("should show navigation when image is processing and multiple mediafiles exist", async () => {
+      mockGetValueOfMediafile.mockImplementation(
+        (_ctx: string, field: string) => {
+          if (field === "mimetype") return "image/jpeg";
+          if (field === "display_filename") return null;
+          if (field === "id") return "test-mediafile-123";
+          return null;
+        },
+      );
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+        { id: "media2", mimetype: "image/png" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(
+        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
+      ).toBe(true);
+      expect(
+        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
+      ).toBe(true);
+    });
+
+    it("should show navigation for PDF viewer with multiple mediafiles", async () => {
+      mockGetValueOfMediafile.mockImplementation(
+        (_ctx: string, field: string) => {
+          if (field === "mimetype") return "application/pdf";
+          if (field === "id") return "test-mediafile-123";
+          return null;
+        },
+      );
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1" } as MediaFileEntity,
+        { id: "media2" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(
+        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
+      ).toBe(true);
+      expect(
+        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
+      ).toBe(true);
     });
   });
 

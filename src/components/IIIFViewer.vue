@@ -15,7 +15,6 @@
       :enable-selection="enableSelection"
       @toggle-selection="toggleSelection"
       @cancel-selection="undoLastSelection"
-      @toggle-preview-component:entity-id="(id) => togglePreviewComponent(id)"
     />
 
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
@@ -53,7 +52,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "togglePreviewComponent:entityId", id: string): void;
   (e: "selectArea", size: CropAreaCoordinates, mediafileId: string): void;
 }>();
 
@@ -178,8 +176,6 @@ onMounted(() => {
   }
 });
 
-const togglePreviewComponent = (id: string) =>
-  emit("togglePreviewComponent:entityId", id);
 </script>
 
 <style>

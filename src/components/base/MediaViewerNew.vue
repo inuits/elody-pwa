@@ -6,8 +6,35 @@
         mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
         viewerType
       "
-      class="w-full"
+      class="relative w-full"
     >
+      <div
+        v-if="viewerContainsMultipleMediafiles"
+        class="absolute top-0 left-1/2 -translate-x-1/2 z-30 h-10 flex items-center gap-2 pointer-events-none"
+      >
+        <button
+          class="pointer-events-auto"
+          data-testid="nav-prev-mediafile"
+          @click="selectPreviousMediafileHandler"
+        >
+          <unicon
+            :name="Unicons.ArrowCircleLeft.name"
+            height="20"
+            class="text-neutral-700 cursor-pointer"
+          />
+        </button>
+        <button
+          class="pointer-events-auto"
+          data-testid="nav-next-mediafile"
+          @click="selectNextMediafileHandler"
+        >
+          <unicon
+            :name="Unicons.ArrowCircleRight.name"
+            height="20"
+            class="text-neutral-700 cursor-pointer"
+          />
+        </button>
+      </div>
       <IIIFViewer
         v-if="viewerType === ElodyViewers.Iiif && !displayProcessingImage"
         :imageFilename="
@@ -25,9 +52,6 @@
           )
         "
         :dimensions="dimensions"
-        @toggle-preview-component:entity-id="
-          (id: string) => emit('togglePreviewComponent', id)
-        "
         @select-area="addMediafileCropCoordinates"
         :enable-selection="isCropModeEnabled"
         :crop-sizes="cropSizes"
@@ -135,8 +159,12 @@ const emit = defineEmits<{
 
 const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const { mediafiles } = toRefs(props);
-const { mediafileSelectionState, getValueOfMediafile } =
-  useEntityMediafileSelector();
+const {
+  mediafileSelectionState,
+  getValueOfMediafile,
+  selectNextMediafile,
+  selectPreviousMediafile,
+} = useEntityMediafileSelector();
 const mimetype = computed<string>(() => {
   return getValueOfMediafile(
     mediafileViewerContext,
@@ -219,6 +247,26 @@ const viewerType = computed<ElodyViewers | undefined>(() => {
 
   return undefined;
 });
+
+const togglePreviewComponent = (id: string): void => {
+  emit("togglePreviewComponent", id);
+};
+
+const viewerContainsMultipleMediafiles = computed((): boolean => {
+  const mediafiles =
+    mediafileSelectionState.value?.[mediafileViewerContext]?.mediafiles || [];
+  return mediafiles.length > 1;
+});
+
+const selectNextMediafileHandler = (): void => {
+  const id = selectNextMediafile(mediafileViewerContext);
+  if (id) togglePreviewComponent(id);
+};
+
+const selectPreviousMediafileHandler = (): void => {
+  const id = selectPreviousMediafile(mediafileViewerContext);
+  if (id) togglePreviewComponent(id);
+};
 
 watch(
   [() => props.loading, mediafiles],

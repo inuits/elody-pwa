@@ -94,36 +94,6 @@
         :dimensions="5"
       />
     </div>
-    <div v-if="viewerContainsMultipleMediafiles">
-      <button
-        @click="
-          () => {
-            const id = selectPreviousMediafile(mediafileViewerContext);
-            if (id) togglePreviewComponent(id);
-          }
-        "
-      >
-        <unicon
-          :name="Unicons.ArrowCircleLeft.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
-      </button>
-      <button
-        @click="
-          () => {
-            const id = selectNextMediafile(mediafileViewerContext);
-            if (id) togglePreviewComponent(id);
-          }
-        "
-      >
-        <unicon
-          :name="Unicons.ArrowCircleRight.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
-      </button>
-    </div>
     <div class="flex">
       <BaseTooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on }">
@@ -152,9 +122,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Unicons } from "../types";
-import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
@@ -179,7 +148,6 @@ const emit = defineEmits<{
   (event: "update:home", value: HTMLDivElement | undefined): void;
   (event: "update:crop", value: HTMLDivElement | undefined): void;
   (event: "update:cancel", value: HTMLDivElement | undefined): void;
-  (event: "togglePreviewComponent:entityId", id: string): void;
   (event: "toggle-selection"): void;
   (event: "cancel-selection"): void;
 }>();
@@ -191,12 +159,6 @@ const homeRef = ref<HTMLDivElement>();
 const cropRef = ref<HTMLDivElement>();
 const cancelRef = ref<HTMLDivElement>();
 
-const {
-  mediafileSelectionState,
-  selectNextMediafile,
-  selectPreviousMediafile,
-} = useEntityMediafileSelector();
-const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const { openModal } = useBaseModal();
 
 const { isSelectable } = useMediafileCrop();
@@ -219,18 +181,8 @@ onMounted(() => {
   emit("update:cancel", cancelRef.value);
 });
 
-const viewerContainsMultipleMediafiles = computed(() => {
-  const mediafiles =
-    mediafileSelectionState.value?.[mediafileViewerContext]?.mediafiles || [];
-  return mediafiles.length > 1;
-});
-
 const downloadImage = () => {
   downloadMediafile(props.mediafileId!, props.originalFilename);
-};
-
-const togglePreviewComponent = (id: string): void => {
-  emit("togglePreviewComponent:entityId", id);
 };
 
 const openIiifOperationsModal = () => {
