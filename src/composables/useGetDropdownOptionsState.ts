@@ -95,7 +95,8 @@ export const useGetDropdownOptionsState = (
       filters =
         parent.value !== "fetchAll" && (relationType || fromRelationType)
           ? [
-              ...filters,
+              // to get selected options we only need a type from the filters to retrieve all options
+              ...filters.filter((filter) => filter.type === AdvancedFilterTypes.Type),
               getRelationFilter(formId, fromRelationType, relationFilter),
             ]
           : filters;
