@@ -62,7 +62,7 @@ export const useMapOverlay = (
           },
           advancedFilterInputs,
           skip: 1,
-          limit: 500,
+          limit: 1000,
           advancedSearchValue: [],
           type: cfg.entityType,
           searchInputType: SearchInputType.AdvancedInputType,
