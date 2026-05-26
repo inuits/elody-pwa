@@ -69,6 +69,7 @@ import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
 import { useModalActions } from "@/composables/useModalActions";
 import { buildItemsWithRelationMetadata } from "@/composables/entityPickerRelationMetadata";
+import { dequal } from "dequal";
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -168,7 +169,7 @@ const injectRelationMetadataFromForm = (
     dynamicForm.values.intialValues ?? {},
   );
 
-  if (enriched !== items) {
+  if (!dequal(enriched, items)) {
     metadataFields.forEach(({ formMetadataKey }) => {
       dynamicForm.setFieldValue(`intialValues.${formMetadataKey}`, undefined);
     });
