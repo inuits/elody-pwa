@@ -43,7 +43,9 @@ export function useDeleteRelations() {
     )?.[relationType] ?? []) as BaseRelationValuesInput[];
 
     const updated = currentRelations.map((r) =>
-      r.key === itemKey ? { ...r, editStatus: EditStatus.Deleted } : r,
+      r.key === itemKey
+        ? { ...r, editStatus: EditStatus.Deleted }
+        : { ...r, editStatus: EditStatus.Unchanged },
     );
 
     await apolloClient.mutate({
