@@ -15,12 +15,14 @@ import { inject } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 const props = defineProps<{
   label: string;
   icon: string;
   query: string;
   refreshAfterAction?: boolean;
+  navigateToCreatedEntity?: boolean;
   entityId: string;
 }>();
 
@@ -30,6 +32,7 @@ const { displaySuccessNotification, displayErrorNotification } =
   useBaseNotification();
 const apolloClient = inject(DefaultApolloClient);
 const refetchParentEntity: any = inject("RefetchParentEntity");
+const router = useRouter();
 
 const doAction = async () => {
   try {
@@ -37,13 +40,14 @@ const doAction = async () => {
     const isMutation =
       document.definitions[0]?.kind === "OperationDefinition" &&
       (document.definitions[0] as any).operation === "mutation";
+    let result;
     if (isMutation) {
-      await (apolloClient as ApolloClient<any>).mutate({
+      result = await (apolloClient as ApolloClient<any>).mutate({
         mutation: document,
         variables: { id: props.entityId },
       });
     } else {
-      await (apolloClient as ApolloClient<any>).query({
+      result = await (apolloClient as ApolloClient<any>).query({
         query: document,
         variables: { id: props.entityId },
         fetchPolicy: "no-cache",
@@ -52,6 +56,19 @@ const doAction = async () => {
 
     if (props.refreshAfterAction) {
       await refetchParentEntity();
+    }
+
+    if (props.navigateToCreatedEntity) {
+      const createdEntity = result?.data
+        ? (Object.values(result.data)[0] as any)
+        : undefined;
+      if (createdEntity?.uuid) {
+        router.push({
+          name: "SingleEntity",
+          params: { id: createdEntity.uuid, type: createdEntity.type },
+        });
+        return;
+      }
     }
 
     displaySuccessNotification(

@@ -11,6 +11,7 @@ const mockDisplayErrorNotification = vi.fn();
 const mockDocument = { definitions: [{ kind: "OperationDefinition", operation: "query" }] };
 const mockMutationDocument = { definitions: [{ kind: "OperationDefinition", operation: "mutation" }] };
 const mockLoadDocument = vi.fn().mockResolvedValue(mockDocument);
+const mockRouterPush = vi.fn();
 
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({
@@ -34,6 +35,12 @@ vi.mock("@/types", () => ({
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string) => key,
+  }),
+}));
+
+vi.mock("vue-router", () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
   }),
 }));
 
@@ -169,5 +176,30 @@ describe("QueryAction - mutation flow", () => {
       "notifications.errors.validation-error.title",
       "",
     );
+  });
+
+  it("navigates to created entity when navigateToCreatedEntity is true", async () => {
+    mockMutate.mockResolvedValue({
+      data: { CreateEntity: { uuid: "DL-abc123", type: "download" } },
+    });
+
+    const wrapper = mountComponent({ navigateToCreatedEntity: true });
+    await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
+    await flush();
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      name: "SingleEntity",
+      params: { id: "DL-abc123", type: "download" },
+    });
+    expect(mockDisplaySuccessNotification).not.toHaveBeenCalled();
+  });
+
+  it("shows success notification when navigateToCreatedEntity is false", async () => {
+    const wrapper = mountComponent({ navigateToCreatedEntity: false });
+    await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
+    await flush();
+
+    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockDisplaySuccessNotification).toHaveBeenCalled();
   });
 });

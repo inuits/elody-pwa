@@ -55,6 +55,7 @@
           :icon="action.icon"
           :query="action.query"
           :refresh-after-action="action.refreshAfterAction"
+          :navigate-to-created-entity="action.navigateToCreatedEntity"
           :entity-id="entityId"
         />
         <link-action
