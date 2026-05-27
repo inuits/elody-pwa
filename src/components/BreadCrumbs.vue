@@ -55,6 +55,15 @@
           <MetadataFormatter class="p-2" v-bind="typePillLabel" />
         </div>
         {{ currentRouteTitle }}
+        <div
+          v-if="currentRouteTitle == 'Boekenbank'"
+          class="mx-4"
+        >
+          <MetadataFormatterPill
+            formatter="pill|auto"
+            label="Brondata"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -131,6 +140,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
+import MetadataFormatterPill from "@/components/metadata/MetadataFormatterPill.vue";
 
 const { t, locale } = useI18n();
 const config: any = inject("config");
