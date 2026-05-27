@@ -4,7 +4,7 @@
     :formatter="formatter"
     :label="readableLabel"
     :link="link"
-    :type="entity.type"
+    :type="entity?.type"
     :open-in-new-tab="openInNewTab"
   />
   <MetadataFormatterPill
@@ -36,10 +36,10 @@ const props = withDefaults(
     formatter: string;
     label: string | string[];
     link?: string;
-    entity: any;
+    entity?: any;
     translationKey?: string;
     openInNewTab?: boolean;
-    unit: string;
+    unit?: string;
   }>(),
   {
     link: "",

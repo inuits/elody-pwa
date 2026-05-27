@@ -58,7 +58,7 @@ const props = defineProps<{
 
 const parentEntity: any = inject("ParentEntityProvider", undefined);
 
-defineEmits(["updateValue", "filterOptions"]);
+defineEmits(["updateValue", "filterOptions", "newInputValue"]);
 
 const {
   options,

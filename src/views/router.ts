@@ -1,4 +1,3 @@
-import { defineAsyncComponent } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
 export type urlParams = "id";
@@ -53,7 +52,7 @@ const getComponentForRoute = (route: RouteRecordRaw): any => {
       `Could not find config item for route with name ${routeName?.toString()}`,
     );
   }
-  return defineAsyncComponent(config.routeComponent);
+  return config.routeComponent;
 };
 
 export const addComponentToRoutes = (

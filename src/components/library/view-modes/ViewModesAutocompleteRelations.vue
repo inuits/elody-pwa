@@ -81,6 +81,8 @@ import { useRouter } from "vue-router";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 
+defineOptions({ inheritAttrs: false });
+
 const props = withDefaults(
   defineProps<{
     modelValue: string[] | string | undefined;
@@ -93,7 +95,7 @@ const props = withDefaults(
     relationFilter: AdvancedFilterInput;
     relationType: string;
     fromRelationType: string;
-    dependsOn: string;
+    dependsOn?: string;
     mode: "edit" | "create";
     formId: string;
     autoSelectable: boolean;

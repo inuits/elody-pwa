@@ -15,7 +15,7 @@
       ]"
       :entity-id="entityId"
       :label="label"
-      :style="style"
+
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"

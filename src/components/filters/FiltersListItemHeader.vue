@@ -31,7 +31,7 @@ import { Unicons } from "@/types";
 defineProps({
   isActive: { type: Boolean, required: true },
   label: { type: String, required: true },
-  tooltip: { type: String, default: undefined },
+  tooltip: { type: [String, Boolean], default: undefined },
   tooltipText: { type: String, default: "" },
   icon: { type: String, required: true },
 });
