@@ -37,6 +37,7 @@ vi.mock("@vueform/multiselect", () => ({
     setup(_, { emit, expose }) {
       expose({
         open: mockOpen,
+        close: () => {},
         get search() {
           return mockSearchRef.value;
         },
