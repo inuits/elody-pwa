@@ -1,19 +1,19 @@
 import { computed, ref, type Ref } from "vue";
 
 const createCallbackRegistry = <T extends () => Promise<void> | void>() => {
-  const fns = ref<Record<string, T>>({}) as Ref<Record<string, T>>;
-  const add = (name: string, fn: T, replace = true): void => {
-    if (!replace && fns.value[name]) return;
-    fns.value[name] = fn;
+  const callbacks = ref<Record<string, T>>({}) as Ref<Record<string, T>>;
+  const add = (name: string, callback: T, replace = true): void => {
+    if (!replace && callbacks.value[name]) return;
+    callbacks.value[name] = callback;
   };
   const perform = async (): Promise<void> => {
-    for (const fn of Object.values(fns.value)) await fn();
-    fns.value = {};
+    for (const callback of Object.values(callbacks.value)) await callback();
+    callbacks.value = {};
   };
   const clear = (): void => {
-    fns.value = {};
+    callbacks.value = {};
   };
-  return { fns, add, perform, clear };
+  return { fns: callbacks, add, perform, clear };
 };
 import { usePermissions } from "@/composables/usePermissions";
 import { type Entitytyping, Permission } from "@/generated-types/queries";

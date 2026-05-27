@@ -42,9 +42,9 @@ export function useDeleteRelations() {
     relationType: string,
     itemKey: string,
   ) => {
-    await mutateEntityRelations(entity, relationType, (r) => ({
-      ...r,
-      editStatus: r.key === itemKey ? EditStatus.Deleted : EditStatus.Unchanged,
+    await mutateEntityRelations(entity, relationType, (relation) => ({
+      ...relation,
+      editStatus: relation.key === itemKey ? EditStatus.Deleted : EditStatus.Unchanged,
     }));
   };
 
@@ -71,7 +71,7 @@ export function useDeleteRelations() {
       const relation = findRelation(itemKey, relationType, entityId);
 
       const relatedEntity = libraryEntities?.value.find(
-        (e) => e.id === (libraryEntityId ?? itemKey),
+        (entity) => entity.id === (libraryEntityId ?? itemKey),
       );
       if (relatedEntity) {
         const inverseRelationType = findInverseRelationType(relatedEntity, entityId);

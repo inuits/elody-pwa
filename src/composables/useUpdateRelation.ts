@@ -11,29 +11,30 @@ export const updateRelationDirect = async (
   relationKey: string,
   metadataUpdates: Record<string, any>,
 ): Promise<void> => {
-  await mutateEntityRelations(entity, relationType, (r) => {
-    if (r.key !== relationKey) return { ...r, editStatus: EditStatus.Unchanged };
+  await mutateEntityRelations(entity, relationType, (relation) => {
+    if (relation.key !== relationKey)
+      return { ...relation, editStatus: EditStatus.Unchanged };
 
     const existingMetadata: Array<{ key: string; value: any }> =
-      (r as any).metadata ?? [];
+      (relation as any).metadata ?? [];
 
-    const patchedMetadata = existingMetadata.map((entry) => {
-      if (!(entry.key in metadataUpdates)) return entry;
-      const newVal = metadataUpdates[entry.key];
+    const patchedMetadata = existingMetadata.map((metadataEntry) => {
+      if (!(metadataEntry.key in metadataUpdates)) return metadataEntry;
+      const newValue = metadataUpdates[metadataEntry.key];
       const value =
-        Array.isArray(entry.value) && !Array.isArray(newVal)
-          ? [newVal]
-          : newVal;
-      return { ...entry, value };
+        Array.isArray(metadataEntry.value) && !Array.isArray(newValue)
+          ? [newValue]
+          : newValue;
+      return { ...metadataEntry, value };
     });
 
-    for (const [key, newVal] of Object.entries(metadataUpdates)) {
-      if (!patchedMetadata.some((e) => e.key === key)) {
-        patchedMetadata.push({ key, value: newVal });
+    for (const [key, newValue] of Object.entries(metadataUpdates)) {
+      if (!patchedMetadata.some((metadataEntry) => metadataEntry.key === key)) {
+        patchedMetadata.push({ key, value: newValue });
       }
     }
 
-    return { ...r, metadata: patchedMetadata, editStatus: EditStatus.Changed };
+    return { ...relation, metadata: patchedMetadata, editStatus: EditStatus.Changed };
   });
 };
 
@@ -67,7 +68,9 @@ export const saveRelatedEntityData = async (
   }
 
   for (const [linkedEntityId, updates] of Object.entries(updatesByEntityId)) {
-    const relatedEntity = relatedEntities.find((e) => e.id === linkedEntityId);
+    const relatedEntity = relatedEntities.find(
+      (entity) => entity.id === linkedEntityId,
+    );
     if (!relatedEntity) continue;
     const inverseRelationType = findInverseRelationType(relatedEntity, entityId);
     if (!inverseRelationType) continue;
