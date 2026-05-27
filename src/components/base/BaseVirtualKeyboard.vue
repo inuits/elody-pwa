@@ -72,7 +72,7 @@ watch(
 .hg-theme-default {
   position: fixed;
   align-content: center;
-  bottom: 100px;
+  bottom: 30px;
   z-index: var(--z-virtual-keyboard);
   max-width: 50%;
   left: 50%;

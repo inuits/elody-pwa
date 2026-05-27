@@ -56,6 +56,8 @@ export const useVirtualKeyboard = (
     "{close}": "&#x2715;",
   };
 
+  const RTL_LANGUAGES = new Set(["Arabic", "Hebrew"]);
+
   let processedFinalLayouts: KeyboardLayouts = {};
   const currentKeyboardDisplay: Record<string, string> = { ...defaultDisplay };
   let firstRowButtonsPrefix: string = "";
@@ -144,6 +146,7 @@ export const useVirtualKeyboard = (
       layout: currentKeyboardLayout,
       display: currentKeyboardDisplay,
       buttonTheme: buttonThemes,
+      rtl: RTL_LANGUAGES.has(initialLangCode),
     });
 
     keyboard.value.setInput(props.input);
@@ -193,6 +196,7 @@ export const useVirtualKeyboard = (
       keyboard.value?.setOptions({
         layout: processedFinalLayouts[langCode],
         layoutName: "default",
+        rtl: RTL_LANGUAGES.has(langCode),
       });
     }
   };

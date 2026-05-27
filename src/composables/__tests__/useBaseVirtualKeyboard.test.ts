@@ -151,6 +151,7 @@ describe("useVirtualKeyboard", () => {
         shift: expect.arrayContaining(customLayouts.fr.shift),
       }),
       layoutName: "default",
+      rtl: false,
     });
   });
 

@@ -1,5 +1,6 @@
 <template>
   <Multiselect
+    ref="multiselectRef"
     data-cy="multiselect"
     v-if="inputValue"
     v-model="inputValue"
@@ -20,12 +21,7 @@
     :search-filter="searchFilter"
     label="label"
     valueProp="value"
-    @search-change="
-      (value: string) => {
-        searchValue = value;
-        emit('searchChange', value);
-      }
-    "
+    @search-change="handleSearchChange"
     :on-create="handleTagCreate"
   >
     <template
@@ -100,10 +96,11 @@ import type { DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
 import useEntitySingle from "@/composables/useEntitySingle";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { computed, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
+import type { VirtualKeyboardContext } from "@/composables/useMetadataVirtualKeyboard";
 
 type AutocompleteStyle =
   | "default"
@@ -156,6 +153,27 @@ const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
 const { t } = useI18n();
 const searchValue = ref<string>();
+const multiselectRef = ref();
+const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKeyboardContext", null);
+
+watch(
+  () => virtualKeyboardContext?.isOpen.value,
+  (open) => {
+    if (open) return multiselectRef.value?.open();
+    multiselectRef.value?.close();
+  },
+);
+
+watch(
+  () => virtualKeyboardContext?.searchQuery.value,
+  (query) => {
+    if (query === undefined || query === null) return;
+    if (multiselectRef.value && multiselectRef.value.search !== query) {
+      multiselectRef.value.search = query;
+    }
+  },
+);
+
 const isPlainText = computed(
   () => props.disabled && props.autocompleteStyle === "readOnlyAsPlainText",
 );
@@ -275,6 +293,14 @@ watch(
 const handleTagCreate = async (option: any) => {
   emit("addOption", option);
   return false;
+};
+
+const handleSearchChange = (value: string) => {
+  searchValue.value = value;
+  if (virtualKeyboardContext && virtualKeyboardContext.searchQuery.value !== value) {
+    virtualKeyboardContext.searchQuery.value = value;
+  }
+  emit("searchChange", value);
 };
 </script>
 

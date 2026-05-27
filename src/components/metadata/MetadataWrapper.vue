@@ -21,6 +21,14 @@
         :is-one-of-required="isOneOfRequired && isEdit"
       />
       <MultilingualLocaleSelector :field-key="metadata.key" />
+      <BaseVirtualKeyboard
+        v-if="isEdit && virtualKeyboardLayouts"
+        :input="keyboardInput"
+        :layouts="virtualKeyboardLayouts"
+        :keyboard-class="safeKeyboardClass"
+        @on-change="handleKeyboardChange"
+        @is-open="handleKeyboardOpenState"
+      />
     </div>
     <entity-element-metadata-edit
       v-if="
@@ -206,13 +214,15 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, inject, watch } from "vue";
+import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
+import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
+import { useMetadataVirtualKeyboard } from "@/composables/useMetadataVirtualKeyboard";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
@@ -270,6 +280,30 @@ const {
   filtersForRetrievingRelatedOptions,
 } = useMetadataWrapperDropdownOptions(props, parentEntity);
 const { isValidationRulePresentOnField } = useVeeValidate();
+
+const virtualKeyboardConfigLayouts = computed(
+  () => (props.metadata.inputField as any)?.virtualKeyboardConfig?.layouts ?? null,
+);
+
+const {
+  keyboardSearchQuery,
+  isKeyboardOpen,
+  virtualKeyboardLayouts,
+  keyboardInput,
+  handleKeyboardChange,
+  handleKeyboardOpenState,
+} = useMetadataVirtualKeyboard(fieldType, fieldValueProxy, virtualKeyboardConfigLayouts);
+
+provide("virtualKeyboardContext", {
+  searchQuery: keyboardSearchQuery,
+  isOpen: isKeyboardOpen,
+});
+
+// simple-keyboard uses the class as a CSS selector, so any character that is
+// not a valid CSS identifier (colons, dots, slashes, spaces, …) must be replaced.
+const safeKeyboardClass = computed(() =>
+  `virtual-keyboard-${fieldKey.value.replace(/[^a-zA-Z0-9-]/g, "_")}`,
+);
 
 const autoCompleteType = computed<
   "metadataAutocomplete" | "relationAutocomplete" | undefined
