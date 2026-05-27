@@ -166,12 +166,15 @@ const injectRelationMetadataFromForm = (
   const enriched = buildItemsWithRelationMetadata(
     items,
     metadataFields,
-    dynamicForm.values.intialValues ?? {},
+    (dynamicForm.values.relatedEntityData?.relations as Record<string, any>) ?? {},
   );
 
   if (!dequal(enriched, items)) {
     metadataFields.forEach(({ formMetadataKey }) => {
-      dynamicForm.setFieldValue(`intialValues.${formMetadataKey}`, undefined);
+      dynamicForm.setFieldValue(
+        `relatedEntityData.relations.${formMetadataKey}`,
+        undefined,
+      );
     });
   }
 

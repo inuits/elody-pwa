@@ -254,7 +254,7 @@
             :refetch-entities="refetchEntities"
             :entity-type="entityType"
             :show-current-entity-flow="showCurrentEntityFlow"
-            @add-refetch-function-to-edit-state="addRefetchFunctionToEditState"
+            @add-refetch-function-to-edit-state="syncEditStateCallbacks"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
             :primaryMediafileId="primaryMediafileId"
           />
@@ -341,6 +341,7 @@ import { useEditMode } from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { saveRelatedEntityData } from "@/composables/useUpdateRelation";
 import { useMaps } from "@/composables/useMaps";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useViewModes } from "@/composables/useViewModes";
@@ -868,19 +869,31 @@ const initializeEntityPickerComponent = (
   setActionsOnResult(props.actionsOnResult);
 };
 
-const addRefetchFunctionToEditState = (): void => {
-  const refetchFunctions = useEditHelper.refetchFns.value;
-  const functionName = props.useOtherQuery?.name || "refetchEntities";
-  if (refetchFunctions?.[functionName]) return;
+const syncEditStateCallbacks = (): void => {
+  const functionName = props.useOtherQuery?.name ?? "refetchEntities";
   useEditHelper.addRefetchFunction(functionName, refetchEntities);
+  const entityId = getEntityUuid();
+  if (!entityId) return;
+  const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}`;
+  useEditHelper.addMutationCallback(callbackName, () =>
+    saveRelatedEntityData(entityId, entities.value ?? []),
+  );
 };
 
 onMounted(async () => {
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
   getUserPreferredViewModeConfiguration();
+  syncEditStateCallbacks();
   window.addEventListener("beforeunload", resetMapPaginationLimit);
 });
+
+watch(
+  () => useEditHelper.isEdit,
+  (isEdit) => {
+    if (isEdit) syncEditStateCallbacks();
+  },
+);
 
 onUnmounted(() => {
   window.removeEventListener("beforeunload", resetMapPaginationLimit);

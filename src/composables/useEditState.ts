@@ -1,4 +1,20 @@
-import { computed, ref } from "vue";
+import { computed, ref, type Ref } from "vue";
+
+const createCallbackRegistry = <T extends () => Promise<void> | void>() => {
+  const fns = ref<Record<string, T>>({}) as Ref<Record<string, T>>;
+  const add = (name: string, fn: T, replace = true): void => {
+    if (!replace && fns.value[name]) return;
+    fns.value[name] = fn;
+  };
+  const perform = async (): Promise<void> => {
+    for (const fn of Object.values(fns.value)) await fn();
+    fns.value = {};
+  };
+  const clear = (): void => {
+    fns.value = {};
+  };
+  return { fns, add, perform, clear };
+};
 import { usePermissions } from "@/composables/usePermissions";
 import { type Entitytyping, Permission } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -12,7 +28,10 @@ export const useEditState = (editStateName: string) => {
   const isDisabled = ref(false);
   const editMode = ref<EditModes>("no-edit");
   const submitFn = ref<Callback | undefined>();
-  const refetchFns = ref<{ [key: string]: () => void }>({});
+  const refetchRegistry = createCallbackRegistry<() => void>();
+  const mutationRegistry = createCallbackRegistry<() => Promise<void>>();
+  const refetchFns = refetchRegistry.fns;
+  const mutationCallbackFns = mutationRegistry.fns;
 
   const toBeDeleted = ref<string[]>([]);
   const isSaved = ref(false);
@@ -37,27 +56,17 @@ export const useEditState = (editStateName: string) => {
     submitFn.value = editSubmitFn;
   };
 
-  const addRefetchFunction = (
-    functionName: string,
-    refetch: () => any,
-  ): void => {
-    if (refetchFns.value[functionName]) return;
-    refetchFns.value[functionName] = refetch;
-  };
+  const addRefetchFunction = (name: string, fn: () => void): void =>
+    refetchRegistry.add(name, fn, false);
 
-  const performRefetchFunctions = async () => {
-    const refetchFunctions: (() => void)[] = Object.values(refetchFns.value);
-    if (refetchFunctions && refetchFunctions.length > 0) {
-      for (const refetch of refetchFunctions) {
-        if (refetch) refetch();
-      }
-    }
-    clearRefetchFunctions();
-  };
+  const performRefetchFunctions = (): Promise<void> => refetchRegistry.perform();
+  const clearRefetchFunctions = (): void => refetchRegistry.clear();
 
-  const clearRefetchFunctions = () => {
-    refetchFns.value = {};
-  };
+  const addMutationCallback = (name: string, fn: () => Promise<void>): void =>
+    mutationRegistry.add(name, fn);
+
+  const performMutationCallbacks = (): Promise<void> => mutationRegistry.perform();
+  const clearMutationCallbacks = (): void => mutationRegistry.clear();
 
   const hideEditButton = () => setEditMode("no-edit");
 
@@ -125,6 +134,7 @@ export const useEditState = (editStateName: string) => {
     editMode,
     submitFn,
     refetchFns,
+    mutationCallbackFns,
     toBeDeleted,
     isSaved,
     isSaving,
@@ -142,5 +152,8 @@ export const useEditState = (editStateName: string) => {
     clickButton,
     resetButtonClicked,
     performRefetchFunctions,
+    addMutationCallback,
+    performMutationCallbacks,
+    clearMutationCallbacks,
   };
 };

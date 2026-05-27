@@ -1,10 +1,10 @@
 import {
-  Collection,
   EditStatus,
   TypeModals,
   type BaseRelationValuesInput,
   type Entity,
   MutateEntityValuesDocument,
+  Collection,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
@@ -18,6 +18,10 @@ import {
 } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
 import { inject, type Ref } from "vue";
+import {
+  mutateEntityRelations,
+  findInverseRelationType,
+} from "@/composables/useRelationMutation";
 
 type SelectedItem = { key: string } | InBulkProcessableItem;
 
@@ -38,24 +42,10 @@ export function useDeleteRelations() {
     relationType: string,
     itemKey: string,
   ) => {
-    const currentRelations: BaseRelationValuesInput[] = ((
-      entity.relationValues as Record<string, any>
-    )?.[relationType] ?? []) as BaseRelationValuesInput[];
-
-    const updated = currentRelations.map((r) =>
-      r.key === itemKey
-        ? { ...r, editStatus: EditStatus.Deleted }
-        : { ...r, editStatus: EditStatus.Unchanged },
-    );
-
-    await apolloClient.mutate({
-      mutation: MutateEntityValuesDocument,
-      variables: {
-        id: entity.id,
-        formInput: { metadata: [], relations: updated },
-        collection: Collection.Entities,
-      },
-    });
+    await mutateEntityRelations(entity, relationType, (r) => ({
+      ...r,
+      editStatus: r.key === itemKey ? EditStatus.Deleted : EditStatus.Unchanged,
+    }));
   };
 
   const deleteRelations = async (
@@ -84,10 +74,7 @@ export function useDeleteRelations() {
         (e) => e.id === (libraryEntityId ?? itemKey),
       );
       if (relatedEntity) {
-        const relationValues = (relatedEntity.relationValues ?? {}) as Record<string, any[]>;
-        const inverseRelationType = Object.keys(relationValues).find((type) =>
-          relationValues[type]?.some((r: any) => r.key === entityId),
-        );
+        const inverseRelationType = findInverseRelationType(relatedEntity, entityId);
         if (inverseRelationType) {
           directDeletions.push(
             deleteRelationDirect(relatedEntity, inverseRelationType, entityId),

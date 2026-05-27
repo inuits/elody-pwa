@@ -25,7 +25,10 @@ export type EntityValues = {
   intialValues?: IntialValues;
   relationValues?: { [key: string]: any };
   relationMetadata?: IntialValues | {};
-  relatedEntityData?: IntialValues | {};
+  relatedEntityData?: {
+    metadata?: IntialValues | {};
+    relations?: IntialValues | {};
+  };
   relationRootdata?: IntialValues | {};
 };
 
@@ -45,7 +48,7 @@ const useFormHelper = () => {
       intialValues: intialValues,
       relationValues: {},
       relationMetadata: {},
-      relatedEntityData: {},
+      relatedEntityData: { metadata: {}, relations: {} },
     };
   };
 

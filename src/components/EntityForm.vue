@@ -87,7 +87,7 @@ const form = ref(
     intialValues: structuredClone(deepToRaw(props.intialValues)),
     relationValues: structuredClone(deepToRaw(props.relationValues)),
     relationMetadata: {},
-    relatedEntityData: {},
+    relatedEntityData: { metadata: {}, relations: {} },
     uuid: props.uuid,
   }),
 );
@@ -136,6 +136,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
     return;
   }
 
+  await useEditHelper.performMutationCallbacks();
   await useEditHelper.performRefetchFunctions();
   mutatedEntity.value = result.data.mutateEntityValues as Entity;
   emit("mutatedEntityUpdated", mutatedEntity.value);
