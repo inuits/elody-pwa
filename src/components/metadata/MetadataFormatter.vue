@@ -30,6 +30,7 @@ import MetadataFormatterPill from "./MetadataFormatterPill.vue";
 import MetadataRegexpFormatter from "./MetadataRegexpFormatter.vue";
 import { computed } from "vue";
 import { convertUnitToReadbleFormat } from "@/helpers";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -48,16 +49,29 @@ const props = withDefaults(
   },
 );
 
+const { t } = useI18n();
+
 const formatterType = computed(() => {
   const [type] = props.formatter.split("|");
   return type;
 });
 
+const translateArrayValuesAndJoin = (values: string[], translationKey: string): string =>
+  values
+    .map((item) => {
+      const key = translationKey.replace("$value", item);
+      const translated = t(key);
+      return translated !== key ? translated : item;
+    })
+    .join(", ");
+
 const readableLabel = computed(() => {
   const isLabelArray = Array.isArray(props.label);
 
   if (isLabelArray) {
-    return props.label.length > 0 ? props.label.join(", ") : "-";
+    if (props.label.length === 0) return "-";
+    if (props.translationKey) return translateArrayValuesAndJoin(props.label, props.translationKey);
+    return props.label.join(", ");
   }
   return props.label
     ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
