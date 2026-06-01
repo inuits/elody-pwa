@@ -870,8 +870,9 @@ const initializeEntityPickerComponent = (
 };
 
 const syncEditStateCallbacks = (): void => {
+  if (props.predefinedEntities) return;
   const functionName = props.useOtherQuery?.name ?? "refetchEntities";
-  useEditHelper.addRefetchFunction(functionName, refetchEntities);
+  useEditHelper.addRefetchFunction(functionName + '_' + props.entityType, refetchEntities);
   const entityId = getEntityUuid();
   if (!entityId) return;
   const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}`;
