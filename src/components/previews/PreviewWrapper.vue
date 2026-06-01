@@ -1,16 +1,20 @@
 <template>
   <div
     class="flex items-center justify-between"
-    :class="[{ 'my-2': previewComponent.type !== PreviewTypes.ColumnList }]"
+    :class="[{ 'my-2': showHeaderCloseButton }]"
   >
     <base-tooltip
-      v-if="previewComponent.type !== PreviewTypes.ColumnList"
+      v-if="showHeaderCloseButton"
       position="top-right"
       :tooltip-offset="8"
       @click="emit('closePreviewComponent')"
     >
       <template #activator="{ on }">
-        <div class="flex items-center" v-on="on">
+        <div
+          class="flex items-center"
+          data-cy="close-preview-component"
+          v-on="on"
+        >
           <unicon
             class="cursor-pointer mr-4 ml-2 flex justify-center items-center"
             :name="Unicons.Cross.name"
@@ -40,7 +44,26 @@
     >
       {{ getTitleFromEntity }}
     </h1>
-    <div><!-- Only here to center the title :) --></div>
+    <div
+      v-if="displayOpenDetailPageButton"
+      data-cy="open-detail-page-button"
+      class="px-2"
+    >
+      <base-button-new
+        button-size="small"
+        button-style="accentNormal"
+        :label="t('metadata.labels.open-detail-page')"
+        @click="openDetailPage"
+      />
+    </div>
+    <div v-else><!-- Only here to center the title :) --></div>
+  </div>
+  <div
+    v-if="previewLoading"
+    data-cy="preview-loading"
+    class="flex justify-center items-center py-8"
+  >
+    <spinner-loader theme="accent" :dimensions="10" />
   </div>
   <div class="primary-preview">
     <entity-column
@@ -127,13 +150,15 @@ import MediaViewerPreview from "@/components/previews/MediaViewerPreview.vue";
 import { useI18n } from "vue-i18n";
 import { computed, onMounted, provide, ref, watch } from "vue";
 import { useImport } from "@/composables/useImport";
-import { apolloClient } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import EntityColumn from "@/components/EntityColumn.vue";
-import { getTitleOrNameFromEntity } from "@/helpers";
+import { getTitleOrNameFromEntity, goToEntityPage } from "@/helpers";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
+import { apolloClient, router } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
 
 const { t } = useI18n();
@@ -166,29 +191,34 @@ provide(
 );
 const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
 const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
+const previewLoading = ref<boolean>(false);
 
 const fetchPreviewQuery = async () => {
-  const document = await loadDocument(props.previewComponent.previewQuery!);
-  apolloClient
-    .query({
-      query: document,
-    })
-    .then((result) => {
-      primaryPreviewElement.value = result.data.PreviewElement;
-    });
+  const queryName = props.previewComponent.previewQuery!;
+  const document = await loadDocument(queryName);
+  if (!document) {
+    console.error(
+      `PreviewWrapper: could not load preview query document "${queryName}". ` +
+        `Make sure previewQuery references an existing query name (not a fragment).`,
+    );
+    return;
+  }
+  const result = await apolloClient.query({ query: document });
+  primaryPreviewElement.value = result.data.PreviewElement;
 };
 
 const fetchMetadataPreviewQuery = async () => {
-  const document = await loadDocument(
-    props.previewComponent.metadataPreviewQuery!,
-  );
-  apolloClient
-    .query({
-      query: document,
-    })
-    .then((result) => {
-      metadataPreviewElement.value = result.data.PreviewElement;
-    });
+  const queryName = props.previewComponent.metadataPreviewQuery!;
+  const document = await loadDocument(queryName);
+  if (!document) {
+    console.error(
+      `PreviewWrapper: could not load metadata preview query document "${queryName}". ` +
+        `Make sure metadataPreviewQuery references an existing query name (not a fragment).`,
+    );
+    return;
+  }
+  const result = await apolloClient.query({ query: document });
+  metadataPreviewElement.value = result.data.PreviewElement;
 };
 
 const getEntitiesOrEntity = (): Entity[] | Entity => {
@@ -215,10 +245,46 @@ const getTitleFromEntity = computed(() => {
   else return getTitleOrNameFromEntity(entity);
 });
 
+// A primary ColumnList preview renders its own close button deeper down
+// (inside the entity list's EntityElementWrapper). Every other case —
+// MediaViewer, Map, History, and metadata-only previews — relies on this
+// header button instead.
+const isPrimaryColumnListPreview = computed<boolean>(
+  () =>
+    props.previewComponent.type === PreviewTypes.ColumnList &&
+    !!primaryPreviewElement.value,
+);
+
+const showHeaderCloseButton = computed<boolean>(
+  () => !isPrimaryColumnListPreview.value,
+);
+
+const displayOpenDetailPageButton = computed<boolean>(
+  () =>
+    props.previewComponent.previewConfiguration?.displayOpenDetailPageButton ===
+    true,
+);
+
+const openDetailPage = (): void => {
+  const entity = props.entities.find((item) => item.id === props.entityId);
+  if (!entity) return;
+  goToEntityPage(entity, "SingleEntity", router);
+};
+
 onMounted(async () => {
-  if (props.previewComponent.previewQuery) await fetchPreviewQuery();
-  if (props.previewComponent.metadataPreviewQuery)
-    await fetchMetadataPreviewQuery();
+  const hasPreviewQuery =
+    props.previewComponent.previewQuery ||
+    props.previewComponent.metadataPreviewQuery;
+  if (!hasPreviewQuery) return;
+
+  previewLoading.value = true;
+  try {
+    if (props.previewComponent.previewQuery) await fetchPreviewQuery();
+    if (props.previewComponent.metadataPreviewQuery)
+      await fetchMetadataPreviewQuery();
+  } finally {
+    previewLoading.value = false;
+  }
 });
 
 watch(

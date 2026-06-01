@@ -31,7 +31,11 @@
           @click="emit('closePreviewComponent')"
         >
           <template #activator="{ on }">
-            <div class="flex items-center" v-on="on">
+            <div
+              class="flex items-center"
+              data-cy="close-preview-component"
+              v-on="on"
+            >
               <unicon
                 class="cursor-pointer mr-4 flex justify-center items-center"
                 :name="Unicons.Cross.name"

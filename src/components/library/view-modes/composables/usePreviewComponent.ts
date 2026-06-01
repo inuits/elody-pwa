@@ -22,6 +22,7 @@ export const usePreviewComponent = (
   const previewComponent = ref<PreviewComponent | undefined>(undefined);
   const previewComponentEnabled = ref<boolean>(false);
   const previewForEntity = ref<string | undefined>(undefined);
+  const lastPreviewedEntityId = ref<string | undefined>(undefined);
 
   const getPreviewItemsForEntity = async () => {
     previewComponent.value = undefined;
@@ -52,6 +53,7 @@ export const usePreviewComponent = (
         previewComponentEnabled.value && previewForEntity.value === entityId
       );
     previewForEntity.value = entityId;
+    if (previewComponentEnabled.value) lastPreviewedEntityId.value = entityId;
   };
 
   const closePreviewComponent = () => {
@@ -60,16 +62,23 @@ export const usePreviewComponent = (
   };
 
   const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
-    if (!previewComponentEnabled.value) return false;
+    if (previewComponentEnabled.value) {
+      if (
+        previewComponent.value?.listItemsCoverage ===
+        ListItemCoverageTypes.AllListItems
+      )
+        return true;
+      if (
+        previewComponent.value?.listItemsCoverage ===
+          ListItemCoverageTypes.OneListItem &&
+        previewForEntity.value === entityId
+      )
+        return true;
+    }
     if (
-      previewComponent.value?.listItemsCoverage ===
-      ListItemCoverageTypes.AllListItems
-    )
-      return true;
-    if (
-      previewComponent.value?.listItemsCoverage ===
-        ListItemCoverageTypes.OneListItem &&
-      previewForEntity.value === entityId
+      previewComponent.value?.previewConfiguration
+        ?.keepLastActiveItemHighlighted &&
+      lastPreviewedEntityId.value === entityId
     )
       return true;
     return false;
