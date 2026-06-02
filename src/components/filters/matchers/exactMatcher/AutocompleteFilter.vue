@@ -57,7 +57,7 @@ const minDropdownSearchCharacters = computed(
 const placeholder = computed(() => t("filters.matcher-placeholders.keyword"));
 const noOptionsText = computed(() =>
   searchQuery.value.length <= minDropdownSearchCharacters.value
-    ? t("filters.minDropdownSearchCharacters")
+    ? t("filters.minDropdownSearchCharacters", { count: minDropdownSearchCharacters.value }, minDropdownSearchCharacters.value)
     : undefined,
 );
 
