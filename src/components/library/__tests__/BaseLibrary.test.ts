@@ -169,14 +169,9 @@ vi.mock("@/main", () => ({
   auth: { isAuthenticated: ref(true) },
 }));
 
-// Keep the real generated enums/types; the SFC template references several
-// enum members (e.g. ActionsOnResultTypes) that must resolve at render time.
-vi.mock("@/generated-types/queries", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@/generated-types/queries")>();
-  return { ...actual };
-});
-
+// Note: @/generated-types/queries is intentionally NOT mocked. The SFC
+// templates reference real enum members (e.g. DamsIcons, ActionsOnResultTypes)
+// that must resolve at render time, so the real module is used directly.
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key, locale: ref("en") }),
 }));

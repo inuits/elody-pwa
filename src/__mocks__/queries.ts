@@ -124,6 +124,10 @@ export enum Actions {
   Ocr = 'ocr'
 }
 
+export enum ActionsOnResultTypes {
+  NoResult = 'NoResult'
+}
+
 export type AdvancedFilter = {
   __typename?: 'AdvancedFilter';
   advancedFilterInputForRetrievingOptions?: Maybe<Array<AdvancedFilterInputType>>;
