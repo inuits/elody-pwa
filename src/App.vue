@@ -35,6 +35,7 @@
       <EntityDetailModal />
       <ConfirmModal><ConfirmModalView /></ConfirmModal>
       <EntityEditModal />
+      <InfoPanelHost />
     </div>
   </div>
   <div
@@ -62,6 +63,7 @@ import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
 import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
+import InfoPanelHost from "@/components/base/InfoPanelHost.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";

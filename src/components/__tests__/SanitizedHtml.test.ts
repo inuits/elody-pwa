@@ -78,6 +78,38 @@ describe("Display a link or show html content", () => {
   });
 });
 
+describe("Allowed formatting tags", () => {
+  it("preserves <em> emphasis", async () => {
+    const wrapper = mount(SanitizedHtml, {
+      props: { content: "<p>This is <em>italic</em></p>", mode: SanitizeMode.Html },
+    });
+    await nextTick();
+    expect(wrapper.find("[data-cy='sanitized-value']").html()).toContain(
+      "<em>italic</em>",
+    );
+  });
+
+  it("preserves <code> for editorial signs", async () => {
+    const wrapper = mount(SanitizedHtml, {
+      props: { content: "<p><code>{ }</code></p>", mode: SanitizeMode.Html },
+    });
+    await nextTick();
+    expect(wrapper.find("[data-cy='sanitized-value']").html()).toContain(
+      "<code>{ }</code>",
+    );
+  });
+
+  it("preserves <sup> superscript", async () => {
+    const wrapper = mount(SanitizedHtml, {
+      props: { content: "<p>s<sup>1</sup></p>", mode: SanitizeMode.Html },
+    });
+    await nextTick();
+    expect(wrapper.find("[data-cy='sanitized-value']").html()).toContain(
+      "<sup>1</sup>",
+    );
+  });
+});
+
 describe("XSS Security", () => {
   describe("Link Sanitization (v-html on links)", () => {
     it("should sanitize XSS in the text of a URL value", async () => {
