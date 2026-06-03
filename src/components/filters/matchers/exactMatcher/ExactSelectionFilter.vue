@@ -67,6 +67,7 @@ const {
   loadOptionsAndFacetsInParallel,
   init,
   updateSelectedOptions,
+  setPredefinedOptions,
   loading: isLoadingOptions,
 } = useFilterOptions();
 const route = useRoute();
@@ -108,7 +109,10 @@ const hasWildcardTextFilter = computed(() => {
 });
 
 const showFilters = computed(() => {
-  return !isLoading.value && (initialAmountOfOptions.value !== 0 || hasWildcardTextFilter.value);
+  return (
+    !isLoading.value &&
+    (initialAmountOfOptions.value !== 0 || hasWildcardTextFilter.value)
+  );
 });
 
 const initialize = async () => {
@@ -133,7 +137,20 @@ const loadOptions = async () => {
     await initialize();
   }
 
-  if (props.filter.advancedFilter.selectionOption === AutocompleteSelectionOptions.Autocomplete && hasWildcardTextFilter.value) {
+  const predefinedOptions = props.filter.advancedFilter.options;
+  if (predefinedOptions?.length) {
+    setPredefinedOptions(predefinedOptions);
+    initialAmountOfOptions.value = predefinedOptions.length;
+    hasFetchedOptions.value = true;
+    isLoading.value = false;
+    return;
+  }
+
+  if (
+    props.filter.advancedFilter.selectionOption ===
+      AutocompleteSelectionOptions.Autocomplete &&
+    hasWildcardTextFilter.value
+  ) {
     initialAmountOfOptions.value = 0;
     hasFetchedOptions.value = true;
     isLoading.value = false;
@@ -152,7 +169,6 @@ const loadOptions = async () => {
     isLoading.value = false;
   }
 };
-
 
 const fetchSelectionOptions = async (filters?: AdvancedFilterInput[]) => {
   if (!filters) return;
@@ -249,10 +265,7 @@ defineExpose({
   reset,
 });
 
-watch(
-  selectedOptions,
-  () => {
-    updateSelectedOptions(selectedOptions.value);
-  }
-)
+watch(selectedOptions, () => {
+  updateSelectedOptions(selectedOptions.value);
+});
 </script>

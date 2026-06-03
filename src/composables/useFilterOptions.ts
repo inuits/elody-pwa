@@ -21,6 +21,7 @@ import {
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
+import { useI18n } from "vue-i18n";
 
 type FilterOptionsMappingType = {
   label?: string;
@@ -29,6 +30,7 @@ type FilterOptionsMappingType = {
 
 export const useFilterOptions = () => {
   const { loadDocument } = useImport();
+  const { t } = useI18n();
   const optionsLibrary = useBaseLibrary(apolloClient as ApolloClient<any>);
   const facetsLibrary = useBaseLibrary(apolloClient as ApolloClient<any>);
 
@@ -268,6 +270,13 @@ export const useFilterOptions = () => {
     selectedOptions.value = options;
   };
 
+  const setPredefinedOptions = (predefinedOptions: DropdownOption[]) => {
+    dropdownOptions.value = predefinedOptions.map((option) => ({
+      ...option,
+      label: t(option.label),
+    }));
+  };
+
   const getReadableProp = (
     labelProp?: string | { label: string; formatter: string },
   ) => {
@@ -328,6 +337,7 @@ export const useFilterOptions = () => {
     getBaseOptions,
     loadOptionsAndFacetsInParallel,
     updateSelectedOptions,
+    setPredefinedOptions,
     entities: optionsLibrary.entities,
     entitiesLoading: optionsLibrary.entitiesLoading,
     options,

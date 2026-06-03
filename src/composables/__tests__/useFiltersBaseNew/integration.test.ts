@@ -1,4 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/main", () => ({
+  apolloClient: { query: vi.fn() },
+  auth: { user: undefined, isAuthenticated: { value: false } },
+  i18n: { global: { t: (key: string) => key, locale: "en" } },
+  typeUrlMapping: { mapping: {}, reverseMapping: {} },
+}));
+
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { sortFilters } from "./test-utils";
 

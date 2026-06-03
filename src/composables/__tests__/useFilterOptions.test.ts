@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { useFilterOptions } from "../useFilterOptions";
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({ t: (key: string) => `t:${key}` }),
+}));
+
 vi.mock("@/main", () => ({
   apolloClient: {
     query: vi.fn(),
@@ -113,17 +117,45 @@ describe("useFilterOptions - data mapping", () => {
     const { options, entities, init } = useFilterOptions();
 
     const mockEntities = [
-      { id: "1", name: "Entity 1", title: { label: 'title1', formatter: 'pill' } },
-      { id: "2", name: "Entity 2", title: { label: 'title2', formatter: 'pill' } },
+      {
+        id: "1",
+        name: "Entity 1",
+        title: { label: "title1", formatter: "pill" },
+      },
+      {
+        id: "2",
+        name: "Entity 2",
+        title: { label: "title2", formatter: "pill" },
+      },
     ];
 
     await init("TEST_ENTITY", { value: "title", label: "title" });
-    
+
     entities.value = mockEntities;
 
     expect(options.value).toEqual([
       { icon: expect.anything(), label: "title1", value: "title1" },
       { icon: expect.anything(), label: "title2", value: "title2" },
     ]);
+  });
+});
+
+describe("useFilterOptions.setPredefinedOptions", () => {
+  it("translates each option label via t() and exposes them as options", () => {
+    const { setPredefinedOptions, options } = useFilterOptions();
+    setPredefinedOptions([
+      { icon: "NoIcon", label: "metadata.labels.role", value: "admin" } as any,
+    ]);
+    expect(options.value).toEqual([
+      { icon: "NoIcon", label: "t:metadata.labels.role", value: "admin" },
+    ]);
+  });
+
+  it("does not fetch entities when predefined options are set", () => {
+    const { setPredefinedOptions, entities } = useFilterOptions();
+    setPredefinedOptions([
+      { icon: "NoIcon", label: "metadata.labels.role", value: "admin" } as any,
+    ]);
+    expect(entities.value).toEqual([]);
   });
 });
