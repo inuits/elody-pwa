@@ -73,6 +73,7 @@ import { dequal } from "dequal";
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
+  (event: "entitiesSelected", items: InBulkProcessableItem[]): void;
 }>();
 const config: any = inject("config");
 
@@ -182,7 +183,10 @@ const injectRelationMetadataFromForm = (
 };
 
 const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
-  if (props.entityPickerMode === EntityPickerMode.Emit) return;
+  if (props.entityPickerMode === EntityPickerMode.Emit) {
+    emit("entitiesSelected", selectedItems);
+    return;
+  }
 
   if (useEditHelper?.isEdit) {
     useEditHelper.clickButton();

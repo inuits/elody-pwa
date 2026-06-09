@@ -19,7 +19,10 @@ const omnibusConfig = (): RepetitiveFormConfig => ({
     {
       key: "work",
       entityType: Entitytyping.Work,
-      createForm: "basicCreateWorkFields",
+      createForm: "GetWorkCreationForm",
+      acceptedTypes: [Entitytyping.Work],
+      pickerQuery: "GetWorksForPicker",
+      pickerFiltersQuery: "GetWorksForPickerFilters",
     },
     {
       key: "expression",
@@ -256,6 +259,13 @@ describe("useRepetitiveForm", () => {
       { key: "expr-1", type: "refExpressions", editStatus: "new" },
       { key: "expr-2", type: "refExpressions", editStatus: "new" },
     ]);
+  });
+
+  it("a step carries its picker query config", () => {
+    const { initFlow, activeStep } = useRepetitiveForm();
+    initFlow(omnibusConfig());
+    expect(activeStep()?.pickerQuery).toBe("GetWorksForPicker");
+    expect(activeStep()?.acceptedTypes).toEqual([Entitytyping.Work]);
   });
 
   it("finalize creates the container entity with the collected relations", async () => {

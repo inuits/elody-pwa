@@ -29,6 +29,9 @@ export type RepetitiveStepConfig = {
   scopeToRelationOf?: StepScopeConfig;
   skipSearchIfPriorIsNew?: boolean;
   relations?: StepRelationConfig[];
+  acceptedTypes?: Entitytyping[]; // picker accepted types; defaults to [entityType]
+  pickerQuery?: string; // GraphQL query name the picker uses to fetch candidates
+  pickerFiltersQuery?: string; // optional filters query for the picker
 };
 
 export type FinalizeRelationConfig = {
