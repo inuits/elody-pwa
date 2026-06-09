@@ -94,6 +94,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import {
+  DisplayCondition,
   Orientations,
   WindowElementLayout,
   type WindowElement,
@@ -104,12 +105,15 @@ import BaseExpandButton from "../base/BaseExpandButton.vue";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
+
 const props = defineProps<{
   element: WindowElement;
   identifiers: string[];
   isEditOverwrite?: boolean;
   formId: string;
   previewLabel?: string;
+  entityMetadata?: Record<string, any>;
+  entityRelations?: Record<string, any>;
 }>();
 
 const emit = defineEmits<{
@@ -167,10 +171,21 @@ const resolvePanelPermissions = async () => {
   isCheckingPermissions.value = false;
 };
 
+const getPanelsAllowedToDisplay = (): WindowElementPanel[] => {
+  return allPanels.value.filter((panel) => {
+    if (panel.__typename !== 'WindowElementPanel') return true;
+    const condition = (panel as WindowElementPanel).displayCondition as DisplayCondition | undefined;
+    if (!condition?.key) return true;
+    if (condition.value) return String(props.entityMetadata?.[condition.key]) === String(condition.value)
+    return props.entityRelations?.[condition.key] !== undefined;
+  })
+};
+
 const filteredPanels = computed<WindowElementPanel[]>(() => {
   if (isCheckingPermissions.value) return [];
 
-  return allPanels.value.filter((panel) => {
+  const allowedDisplayPanels = getPanelsAllowedToDisplay();
+  return allowedDisplayPanels.filter((panel) => {
     const requiredPerms = (panel.can && [panel.can]) || [];
     if (requiredPerms.length === 0) return true;
 
