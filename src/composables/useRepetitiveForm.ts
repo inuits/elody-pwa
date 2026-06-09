@@ -172,6 +172,33 @@ export const useRepetitiveForm = () => {
         ];
       });
 
+  const recordCreated = (entity: {
+    id?: string;
+    uuid?: string;
+    label?: string;
+  }) => {
+    const step = activeStep();
+    if (!step) return;
+    recordEntity({
+      key: step.key,
+      id: entity.id ?? entity.uuid ?? "",
+      type: step.entityType,
+      label: entity.label,
+      isNew: true,
+    });
+  };
+
+  const buildCreatePrefill = (
+    step: RepetitiveStepConfig,
+  ): { relationValues: Record<string, BaseRelationValuesInput[]> } => {
+    const relationValues: Record<string, BaseRelationValuesInput[]> = {};
+    buildCreateRelations(step).forEach((relation) => {
+      const type = relation.type as string;
+      (relationValues[type] ??= []).push(relation);
+    });
+    return { relationValues };
+  };
+
   const createForStep = async (
     step: RepetitiveStepConfig,
     metadata: MetadataInput[],
@@ -233,9 +260,11 @@ export const useRepetitiveForm = () => {
     completeStep,
     recordEntity,
     pickExisting,
+    recordCreated,
     buildScopeFilter,
     shouldSkipSearch,
     buildCreateRelations,
+    buildCreatePrefill,
     createForStep,
     collectedFor,
     buildFinalizeRelations,

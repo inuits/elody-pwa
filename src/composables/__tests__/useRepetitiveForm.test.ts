@@ -282,4 +282,47 @@ describe("useRepetitiveForm", () => {
     });
     expect(result.id).toBe("manif-1");
   });
+
+  it("recordCreated records a created entity under the active step with isNew true", () => {
+    const { initFlow, pickExisting, completeStep, recordCreated, currentBranch } =
+      useRepetitiveForm();
+    initFlow(omnibusConfig());
+    pickExisting({ id: "work-1" });
+    completeStep(); // expression step
+    recordCreated({ id: "expr-1", label: "Chamber of Secrets" });
+    expect(currentBranch.value.entities.expression).toEqual({
+      key: "expression",
+      id: "expr-1",
+      type: Entitytyping.Expression,
+      label: "Chamber of Secrets",
+      isNew: true,
+    });
+  });
+
+  it("recordCreated falls back to uuid when id is absent", () => {
+    const { initFlow, recordCreated, currentBranch } = useRepetitiveForm();
+    initFlow(omnibusConfig());
+    recordCreated({ uuid: "work-9" });
+    expect(currentBranch.value.entities.work.id).toBe("work-9");
+    expect(currentBranch.value.entities.work.isNew).toBe(true);
+  });
+
+  it("buildCreatePrefill groups onCreate relations into relationValues", () => {
+    const { initFlow, pickExisting, completeStep, activeStep, buildCreatePrefill } =
+      useRepetitiveForm();
+    initFlow(omnibusConfig());
+    pickExisting({ id: "work-1" });
+    completeStep(); // expression step
+    expect(buildCreatePrefill(activeStep()!)).toEqual({
+      relationValues: {
+        refWork: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+      },
+    });
+  });
+
+  it("buildCreatePrefill returns empty relationValues for a step with no relations", () => {
+    const { initFlow, activeStep, buildCreatePrefill } = useRepetitiveForm();
+    initFlow(omnibusConfig());
+    expect(buildCreatePrefill(activeStep()!)).toEqual({ relationValues: {} });
+  });
 });
