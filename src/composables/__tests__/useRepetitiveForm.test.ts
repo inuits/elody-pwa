@@ -325,4 +325,22 @@ describe("useRepetitiveForm", () => {
     initFlow(omnibusConfig());
     expect(buildCreatePrefill(activeStep()!)).toEqual({ relationValues: {} });
   });
+
+  it("buildFinalizePrefill groups finalize relations into relationValues", () => {
+    const { buildFinalizePrefill } = buildTwoBranches();
+    expect(buildFinalizePrefill()).toEqual({
+      relationValues: {
+        refExpressions: [
+          { key: "expr-1", type: "refExpressions", editStatus: "new" },
+          { key: "expr-2", type: "refExpressions", editStatus: "new" },
+        ],
+      },
+    });
+  });
+
+  it("buildFinalizePrefill returns empty relationValues when nothing is collected", () => {
+    const { initFlow, buildFinalizePrefill } = useRepetitiveForm();
+    initFlow(omnibusConfig());
+    expect(buildFinalizePrefill()).toEqual({ relationValues: {} });
+  });
 });

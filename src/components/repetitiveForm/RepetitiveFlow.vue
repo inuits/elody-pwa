@@ -23,23 +23,28 @@
         @created="onCreated"
       />
 
-      <div v-else-if="view === 'branchDone'" data-testid="repetitive-flow-branch-done">
-        <p>{{ branches.length }}</p>
-        <button
-          type="button"
-          data-testid="repetitive-flow-add-another"
-          @click="addAnother"
-        >
-          {{ $t("repetitiveForm.add-another") }}
-        </button>
-        <!-- overview list + finish: Plan 3b -->
-      </div>
+      <RepetitiveOverview
+        v-else-if="view === 'overview'"
+        :branches="branches"
+        :steps="flowConfig?.steps ?? []"
+        @add-another="addAnother"
+        @finish="onFinish"
+      />
+
+      <DynamicForm
+        v-else-if="view === 'finalize'"
+        :dynamic-form-query="finalizeForm"
+        :router="router"
+        :prefilled-form-values="finalizePrefill"
+        @entity-created="onFinalized"
+      />
     </div>
   </RepetitiveStepModal>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import type { AdvancedFilterInput } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
@@ -48,17 +53,23 @@ import {
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
+import RepetitiveOverview from "@/components/repetitiveForm/RepetitiveOverview.vue";
+import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const FLOW_ID = "repetitive-flow";
 
 const props = defineProps<{ open: boolean; config: RepetitiveFormConfig }>();
-const emit = defineEmits<{ (e: "close"): void }>();
+const emit = defineEmits<{
+  (e: "close"): void;
+  (e: "finished", entity: { id?: string; uuid?: string }): void;
+}>();
 
 const store = useRepetitiveForm();
 const { flowConfig, currentStepIndex, currentBranch, branches } = store;
 const { setEntityId, setDynamicFormId } = useEntityPickerModal();
+const router = useRouter();
 
-const view = ref<"step" | "branchDone">("step");
+const view = ref<"step" | "overview" | "finalize">("step");
 
 const activeStep = computed(() => store.activeStep());
 const stepTitles = computed(() => flowConfig.value?.steps.map((s) => s.key) ?? []);
@@ -77,6 +88,9 @@ const pickerParentUuid = computed(() => {
   return (scopeStep && currentBranch.value.entities[scopeStep]?.id) || "";
 });
 
+const finalizeForm = computed(() => flowConfig.value?.finalize?.createForm ?? "");
+const finalizePrefill = computed(() => store.buildFinalizePrefill());
+
 const start = () => {
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
@@ -87,7 +101,7 @@ const start = () => {
 const advance = () => {
   const wasLast = store.isLastStep();
   store.completeStep();
-  if (wasLast) view.value = "branchDone";
+  if (wasLast) view.value = "overview";
 };
 
 const onSelected = (entity: { id: string; label?: string }) => {
@@ -103,6 +117,14 @@ const onCreated = (entity: { id?: string; uuid?: string; label?: string }) => {
 const addAnother = () => {
   store.startNewBranch();
   view.value = "step";
+};
+
+const onFinish = () => {
+  view.value = "finalize";
+};
+
+const onFinalized = (entity: { id?: string; uuid?: string }) => {
+  emit("finished", entity);
 };
 
 watch(() => props.open, (isOpen) => { if (isOpen) start(); }, { immediate: true });

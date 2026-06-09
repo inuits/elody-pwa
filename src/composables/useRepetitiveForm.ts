@@ -235,6 +235,17 @@ export const useRepetitiveForm = () => {
     );
   };
 
+  const buildFinalizePrefill = (): {
+    relationValues: Record<string, BaseRelationValuesInput[]>;
+  } => {
+    const relationValues: Record<string, BaseRelationValuesInput[]> = {};
+    buildFinalizeRelations().forEach((relation) => {
+      const type = relation.type as string;
+      (relationValues[type] ??= []).push(relation);
+    });
+    return { relationValues };
+  };
+
   const finalize = async (metadata: MetadataInput[]) => {
     const config = flowConfig.value?.finalize;
     if (!config) throw new Error("No finalize config for this flow");
@@ -268,6 +279,7 @@ export const useRepetitiveForm = () => {
     createForStep,
     collectedFor,
     buildFinalizeRelations,
+    buildFinalizePrefill,
     finalize,
   };
 };
