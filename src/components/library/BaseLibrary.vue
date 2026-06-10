@@ -870,7 +870,7 @@ const initializeEntityPickerComponent = (
 };
 
 const syncEditStateCallbacks = (): void => {
-  if (props.predefinedEntities) return;
+  if (props.predefinedEntities || props.fetchDeepRelations) return;
   const functionName = props.useOtherQuery?.name ?? "refetchEntities";
   useEditHelper.addRefetchFunction(functionName + '_' + props.entityType, refetchEntities);
   const entityId = getEntityUuid();
