@@ -243,7 +243,6 @@ const fetchEntities = ref<boolean>(false);
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
 const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
-const matchers = ref<DropdownOption[]>([]);
 const filterMatcherMapping = ref<FilterMatcherMap>({
   text: [],
   date: [],
@@ -256,6 +255,26 @@ const { getStateForRoute, updateStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
 const { isSaved } = useEditMode();
 const { t } = useI18n();
+
+// Derived from the matcher mapping so the labels re-translate reactively when
+// the UI language changes (otherwise they stay in the language they were first
+// resolved in, e.g. Dutch labels lingering after switching to English).
+const matchers = computed<DropdownOption[]>(() => {
+  const matcherSet = new Set<string>();
+  Object.values(filterMatcherMapping.value).forEach((matcherArray) => {
+    if (typeof matcherArray !== "string") {
+      for (const matcher of matcherArray) {
+        matcherSet.add(matcher);
+      }
+    }
+  });
+
+  return Array.from(matcherSet).map((matcher) => ({
+    icon: DamsIcons.NoIcon,
+    label: t(`filters.matcher-labels.${matcher}`),
+    value: matcher,
+  }));
+});
 const {
   setActiveFilter: setActiveSavedFilter,
   getActiveFilter,
@@ -313,7 +332,6 @@ const filterMatcherMappingPromise = async () => {
       filterMatcherMapping.value = normalizeMatchersForType(
         result.data.FilterMatcherMapping as FilterMatchers[],
       );
-      handleFilterMatcherMapping(filterMatcherMapping.value);
     });
 };
 
@@ -369,7 +387,7 @@ const determineFilterQuery = async (queryDocument: string): Promise<any> => {
   try {
     const query = props.route!.meta!.queries!.getFilters;
     return await loadDocument(query);
-  } catch (error) {
+  } catch {
     return await loadDocument("GetAdvancedFilters");
   }
 };
@@ -401,25 +419,6 @@ const buildFilterVariables = (entityType: Entitytyping) => {
   }
 
   return variables;
-};
-
-const handleFilterMatcherMapping = (filterMatcherMapping: FilterMatcherMap) => {
-  const matcherSet = new Set<string>();
-  Object.values(filterMatcherMapping).forEach((matcherArray) => {
-    if (typeof matcherArray !== "string") {
-      for (const matcher of matcherArray) {
-        matcherSet.add(matcher);
-      }
-    }
-  });
-
-  matchers.value = Array.from(matcherSet).map((matcher) => {
-    return {
-      icon: DamsIcons.NoIcon,
-      label: t(`filters.matcher-labels.${matcher}`),
-      value: matcher,
-    };
-  });
 };
 
 const getContextValues = () => {
