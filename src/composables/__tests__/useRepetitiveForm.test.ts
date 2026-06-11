@@ -144,6 +144,23 @@ describe("useRepetitiveForm", () => {
     });
   });
 
+  it("buildScopeFilter uses the configured filterKey when provided", () => {
+    const { initFlow, pickExisting, completeStep, activeStep, buildScopeFilter } =
+      useRepetitiveForm();
+    const config = omnibusConfig();
+    config.steps[1].scopeToRelationOf!.filterKey =
+      "vlacc:1|properties.ref_work.value";
+    initFlow(config);
+    pickExisting({ id: "work-1" });
+    completeStep(); // now on expression step
+    expect(buildScopeFilter(activeStep()!)).toEqual({
+      type: "selection",
+      key: ["vlacc:1|properties.ref_work.value"],
+      value: ["work-1"],
+      match_exact: true,
+    });
+  });
+
   it("shouldSkipSearch is true when the scoped prior entity was newly created", () => {
     const { initFlow, recordEntity, completeStep, activeStep, shouldSkipSearch } =
       useRepetitiveForm();
@@ -335,12 +352,30 @@ describe("useRepetitiveForm", () => {
           { key: "expr-2", type: "refExpressions", editStatus: "new" },
         ],
       },
+      intialValues: {},
     });
   });
 
   it("buildFinalizePrefill returns empty relationValues when nothing is collected", () => {
     const { initFlow, buildFinalizePrefill } = useRepetitiveForm();
     initFlow(omnibusConfig());
-    expect(buildFinalizePrefill()).toEqual({ relationValues: {} });
+    expect(buildFinalizePrefill()).toEqual({
+      relationValues: {},
+      intialValues: {},
+    });
+  });
+
+  it("buildFinalizePrefill seeds intialValues from finalize prefillMetadata", () => {
+    const { initFlow, buildFinalizePrefill } = useRepetitiveForm();
+    const config = omnibusConfig();
+    config.finalize!.prefillMetadata = [
+      { key: "is_omnibus", value: true },
+      { key: "material_type", value: "boek" },
+    ];
+    initFlow(config);
+    expect(buildFinalizePrefill()).toEqual({
+      relationValues: {},
+      intialValues: { is_omnibus: true, material_type: "boek" },
+    });
   });
 });

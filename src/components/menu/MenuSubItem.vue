@@ -85,10 +85,6 @@ const checkPermissions = async () => {
       ) || false;
   }
 
-  if (props.subMenuItem.typeLink?.modal?.typeModal?.includes("GuidedFlow")) {
-    canDoAction = true;
-  }
-
   isPermitted.value = canDoAction;
 };
 </script>

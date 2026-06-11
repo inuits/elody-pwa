@@ -282,12 +282,14 @@ const props = withDefaults(
     showFormTitle?: boolean;
     prefilledFormValues?: object;
     allFormRelationTypes?: string[];
+    emitEntityCreated?: boolean;
   }>(),
   {
     formKey: undefined,
     modalFormFields: undefined,
     showFormTitle: true,
     allFormRelationTypes: undefined,
+    emitEntityCreated: false,
   },
 );
 
@@ -690,7 +692,10 @@ const submitActionFunction = async (field: FormAction) => {
     const callbackFunctions: [() => void] | undefined = extractActionArguments(
       field.actionType,
     );
-    if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
+    if (props.emitEntityCreated) {
+      // the host (e.g. a guided flow) handles what happens with the entity
+      emit("entityCreated", entity);
+    } else if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
       for (const callback of callbackFunctions) {
         if (callback) await callback();
       }

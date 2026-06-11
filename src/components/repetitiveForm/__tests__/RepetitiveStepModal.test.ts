@@ -8,16 +8,24 @@ beforeEach(() => {
   HTMLDialogElement.prototype.close = vi.fn();
 });
 
-const getWrapper = (open = false) =>
+const getWrapper = (open = false, title = "") =>
   mount(RepetitiveStepModal, {
-    props: { open },
+    props: { open, title },
     slots: { default: "<p data-testid='slot-content'>hi</p>" },
+    global: { stubs: { unicon: true } },
   });
 
 describe("RepetitiveStepModal", () => {
   it("renders slot content when open", () => {
     const wrapper = getWrapper(true);
     expect(wrapper.find("[data-testid='slot-content']").exists()).toBe(true);
+  });
+
+  it("renders the title in the modal header", () => {
+    const wrapper = getWrapper(true, "Compose omnibus");
+    expect(
+      wrapper.find("[data-testid='repetitive-step-modal-title']").text(),
+    ).toBe("Compose omnibus");
   });
 
   it("does not render slot content when closed", () => {

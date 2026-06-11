@@ -20,10 +20,14 @@ export type StepRelationConfig = {
 export type StepScopeConfig = {
   step: string; // prior step key whose selected entity scopes this search
   relationType: string;
+  // optional override for the advanced-filter key; defaults to the
+  // elody-dialect relation key built from relationType
+  filterKey?: string;
 };
 
 export type RepetitiveStepConfig = {
   key: string;
+  label?: string; // display label (translation key) for the step
   entityType: Entitytyping;
   createForm: string;
   scopeToRelationOf?: StepScopeConfig;
@@ -41,13 +45,21 @@ export type FinalizeRelationConfig = {
   createWhen: "onFinalize";
 };
 
+export type MetadataPrefillConfig = {
+  key: string;
+  value: unknown;
+};
+
 export type RepetitiveFinalizeConfig = {
+  label?: string; // display label (translation key) for the finalize view
   entityType: Entitytyping;
   createForm: string;
   relations: FinalizeRelationConfig[];
+  prefillMetadata?: MetadataPrefillConfig[];
 };
 
 export type RepetitiveFormConfig = {
+  label?: string; // display label (translation key) for the whole flow
   repeatable: boolean;
   steps: RepetitiveStepConfig[];
   finalize?: RepetitiveFinalizeConfig;
@@ -101,8 +113,7 @@ export const useRepetitiveForm = () => {
 
   const finishBranch = () => {
     branches.value.push(currentBranch.value);
-    currentBranch.value = { entities: {} };
-    currentStepIndex.value = 0;
+    startNewBranch();
   };
 
   const startNewBranch = () => {
@@ -141,9 +152,12 @@ export const useRepetitiveForm = () => {
     if (!step.scopeToRelationOf) return null;
     const prior = currentBranch.value.entities[step.scopeToRelationOf.step];
     if (!prior) return null;
+    const filterKey =
+      step.scopeToRelationOf.filterKey ??
+      `elody:1|relations.${step.scopeToRelationOf.relationType}.key`;
     return {
       type: AdvancedFilterTypes.Selection,
-      key: [`elody:1|relations.${step.scopeToRelationOf.relationType}.key`],
+      key: [filterKey],
       value: [prior.id],
       match_exact: true,
     };
@@ -237,13 +251,18 @@ export const useRepetitiveForm = () => {
 
   const buildFinalizePrefill = (): {
     relationValues: Record<string, BaseRelationValuesInput[]>;
+    intialValues: Record<string, unknown>;
   } => {
     const relationValues: Record<string, BaseRelationValuesInput[]> = {};
     buildFinalizeRelations().forEach((relation) => {
       const type = relation.type as string;
       (relationValues[type] ??= []).push(relation);
     });
-    return { relationValues };
+    const intialValues: Record<string, unknown> = {};
+    (flowConfig.value?.finalize?.prefillMetadata ?? []).forEach((metadata) => {
+      intialValues[metadata.key] = metadata.value;
+    });
+    return { relationValues, intialValues };
   };
 
   const finalize = async (metadata: MetadataInput[]) => {

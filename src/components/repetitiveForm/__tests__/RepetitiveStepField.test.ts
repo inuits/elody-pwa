@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import { Entitytyping, EntityPickerMode } from "@/generated-types/queries";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
-import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
@@ -16,6 +15,9 @@ vi.mock("vue-router", () => ({
     params: {},
     query: {},
   }),
+}));
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({ t: (key: string) => key }),
 }));
 
 const expressionStep = () => ({
@@ -47,23 +49,24 @@ const getWrapper = (props = getDefaultProps()) =>
     global: { mocks: { $t: (k: string) => k }, renderStubDefaultSlot: true },
   });
 
-const modals = (wrapper: ReturnType<typeof getWrapper>) =>
-  wrapper.findAllComponents(RepetitiveStepModal);
+const pickerView = (wrapper: ReturnType<typeof getWrapper>) =>
+  wrapper.find("[data-testid='repetitive-step-picker']");
+const createView = (wrapper: ReturnType<typeof getWrapper>) =>
+  wrapper.find("[data-testid='repetitive-step-create']");
 
 describe("RepetitiveStepField", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("opens the picker modal on trigger click when search is not skipped", async () => {
+  it("shows the picker view immediately when search is not skipped", () => {
     const wrapper = getWrapper();
-    await wrapper.find("[data-testid='repetitive-step-trigger']").trigger("click");
-    expect(modals(wrapper)[0].props("open")).toBe(true);
-    expect(modals(wrapper)[1].props("open")).toBe(false);
+    expect(pickerView(wrapper).exists()).toBe(true);
+    expect(createView(wrapper).exists()).toBe(false);
   });
 
-  it("opens the create modal directly when skipSearch is true", async () => {
+  it("shows the create view immediately when skipSearch is true", () => {
     const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
-    await wrapper.find("[data-testid='repetitive-step-trigger']").trigger("click");
-    expect(modals(wrapper)[1].props("open")).toBe(true);
+    expect(createView(wrapper).exists()).toBe(true);
+    expect(pickerView(wrapper).exists()).toBe(false);
   });
 
   it("passes derived picker props to EntityPickerComponent", () => {
@@ -73,44 +76,78 @@ describe("RepetitiveStepField", () => {
     expect(picker.props("customQuery")).toBe("GetExpressionsForPicker");
     expect(picker.props("computedFilters")).toEqual([scopeFilter]);
     expect(picker.props("entityPickerMode")).toBe(EntityPickerMode.Emit);
+    // a picker in a modal must not inherit the route's saved filter state
+    expect(picker.props("shouldUseStateForRoute")).toBe(false);
   });
 
-  it("emits selected and closes the picker when the picker emits entitiesSelected", async () => {
+  it("emits selected when the picker emits entitiesSelected", async () => {
     const wrapper = getWrapper();
-    await wrapper.find("[data-testid='repetitive-step-trigger']").trigger("click");
     wrapper
       .findComponent(EntityPickerComponent)
-      .vm.$emit("entitiesSelected", [{ id: "expr-1", value: "Chamber of Secrets" }]);
+      .vm.$emit("entitiesSelected", [
+        { id: "expr-1", value: "Chamber of Secrets" },
+      ]);
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("selected")?.[0]).toEqual([
       { id: "expr-1", label: "Chamber of Secrets" },
     ]);
-    expect(modals(wrapper)[0].props("open")).toBe(false);
   });
 
   it("switches from picker to create when the create-new button is clicked", async () => {
     const wrapper = getWrapper();
-    await wrapper.find("[data-testid='repetitive-step-trigger']").trigger("click");
-    await wrapper.find("[data-testid='repetitive-step-create-new']").trigger("click");
-    expect(modals(wrapper)[0].props("open")).toBe(false);
-    expect(modals(wrapper)[1].props("open")).toBe(true);
+    await wrapper
+      .find("[data-testid='repetitive-step-create-new']")
+      .trigger("click");
+    expect(pickerView(wrapper).exists()).toBe(false);
+    expect(createView(wrapper).exists()).toBe(true);
   });
 
-  it("passes the create form query and prefill to DynamicForm", () => {
+  it("returns from create to the picker via the back-to-search button", async () => {
     const wrapper = getWrapper();
+    await wrapper
+      .find("[data-testid='repetitive-step-create-new']")
+      .trigger("click");
+    await wrapper
+      .find("[data-testid='repetitive-step-back-to-search']")
+      .trigger("click");
+    expect(pickerView(wrapper).exists()).toBe(true);
+  });
+
+  it("hides the back-to-search button when search is skipped", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
+    expect(
+      wrapper.find("[data-testid='repetitive-step-back-to-search']").exists(),
+    ).toBe(false);
+  });
+
+  it("passes the create form query, prefill and emit flag to DynamicForm", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
     const form = wrapper.findComponent(DynamicForm);
     expect(form.props("dynamicFormQuery")).toBe("GetExpressionCreationForm");
     expect(form.props("prefilledFormValues")).toEqual({
       relationValues: { refWork: [{ key: "work-1" }] },
     });
+    // the flow must receive the created entity instead of navigating away
+    expect(form.props("emitEntityCreated")).toBe(true);
   });
 
-  it("emits created and closes the create modal when DynamicForm emits entityCreated", async () => {
+  it("emits created when DynamicForm emits entityCreated", async () => {
     const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
-    await wrapper.find("[data-testid='repetitive-step-trigger']").trigger("click");
     wrapper.findComponent(DynamicForm).vm.$emit("entityCreated", { id: "expr-9" });
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("created")?.[0]).toEqual([{ id: "expr-9" }]);
-    expect(modals(wrapper)[1].props("open")).toBe(false);
+  });
+
+  it("resets the view to the picker when the step changes", async () => {
+    const wrapper = getWrapper();
+    await wrapper
+      .find("[data-testid='repetitive-step-create-new']")
+      .trigger("click");
+    expect(createView(wrapper).exists()).toBe(true);
+    await wrapper.setProps({
+      step: { ...expressionStep(), key: "another-step" },
+    });
+    await wrapper.vm.$nextTick();
+    expect(pickerView(wrapper).exists()).toBe(true);
   });
 });

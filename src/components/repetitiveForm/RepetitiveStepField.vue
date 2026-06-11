@@ -1,58 +1,71 @@
 <template>
   <div class="w-full" data-testid="repetitive-step-field">
-    <button
-      type="button"
-      data-testid="repetitive-step-trigger"
-      class="w-full text-left border rounded px-3 py-2"
-      @click="activate"
-    >
-      {{ selectedEntity ? selectedEntity.label || selectedEntity.id : placeholder }}
-    </button>
-
-    <RepetitiveStepModal :open="pickerOpen" @close="pickerOpen = false">
+    <!-- The picker and the create form render as views INSIDE the flow's
+         single modal. Nested <dialog> elements would steal the app-wide
+         '.base-modal--opened' teleport target used by tooltips/dropdowns. -->
+    <div v-if="view === 'pick'" data-testid="repetitive-step-picker">
+      <!-- keyed per step: the picker loads its custom query on mount only -->
       <EntityPickerComponent
+        :key="step.key"
         :entity-uuid="pickerParentUuid"
         :accepted-types="acceptedTypes"
         :custom-query="step.pickerQuery ?? ''"
         :custom-filters-query="step.pickerFiltersQuery"
         :computed-filters="computedFilters"
-        :show-button="false"
-        :enable-bulk-operations="false"
+        :show-button="true"
+        :enable-bulk-operations="true"
         :enable-advanced-filters="true"
         :entity-picker-mode="EntityPickerMode.Emit"
+        :should-use-state-for-route="false"
+        base-library-height="h-[55vh]"
         @entities-selected="onPicked"
       />
-      <button
-        type="button"
-        data-testid="repetitive-step-create-new"
-        class="mt-2 underline"
-        @click="openCreate"
-      >
-        {{ $t("repetitiveForm.create-new") }}
-      </button>
-    </RepetitiveStepModal>
+      <div class="w-fit mt-4">
+        <BaseButtonNew
+          data-testid="repetitive-step-create-new"
+          :label="$t('repetitiveForm.create-new')"
+          :icon="DamsIcons.Plus"
+          button-style="accentAccent"
+          button-size="small"
+          @click="openCreate"
+        />
+      </div>
+    </div>
 
-    <RepetitiveStepModal :open="createOpen" @close="createOpen = false">
+    <div v-else data-testid="repetitive-step-create">
+      <div v-if="!skipSearch" class="w-fit mb-4">
+        <BaseButtonNew
+          data-testid="repetitive-step-back-to-search"
+          :label="$t('repetitiveForm.back-to-search')"
+          :icon="DamsIcons.AngleLeft"
+          button-style="default"
+          button-size="small"
+          class="border border-neutral-50"
+          @click="view = 'pick'"
+        />
+      </div>
       <DynamicForm
         :dynamic-form-query="step.createForm"
         :router="router"
         :prefilled-form-values="createPrefill"
+        :emit-entity-created="true"
         @entity-created="onCreated"
       />
-    </RepetitiveStepModal>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
+  DamsIcons,
   EntityPickerMode,
   type AdvancedFilterInput,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import type { RepetitiveStepConfig } from "@/composables/useRepetitiveForm";
-import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
@@ -65,14 +78,12 @@ const props = withDefaults(
     skipSearch?: boolean;
     createPrefill?: object;
     pickerParentUuid?: string;
-    placeholder?: string;
   }>(),
   {
     scopeFilter: null,
     skipSearch: false,
     createPrefill: undefined,
     pickerParentUuid: "",
-    placeholder: "",
   },
 );
 
@@ -82,9 +93,9 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const pickerOpen = ref(false);
-const createOpen = ref(false);
-const selectedEntity = ref<SelectedEntity | null>(null);
+
+const initialView = () => (props.skipSearch ? "create" : "pick");
+const view = ref<"pick" | "create">(initialView());
 
 const acceptedTypes = computed<string[]>(
   () => props.step.acceptedTypes ?? [props.step.entityType],
@@ -94,28 +105,25 @@ const computedFilters = computed<AdvancedFilterInput[] | undefined>(() =>
   props.scopeFilter ? [props.scopeFilter] : undefined,
 );
 
-const activate = () => {
-  if (props.skipSearch) createOpen.value = true;
-  else pickerOpen.value = true;
+const openCreate = () => {
+  view.value = "create";
 };
 
-const openCreate = () => {
-  pickerOpen.value = false;
-  createOpen.value = true;
-};
+// the field stays mounted across steps; reset the view when the step changes
+watch(
+  () => props.step.key,
+  () => {
+    view.value = initialView();
+  },
+);
 
 const onPicked = (items: InBulkProcessableItem[]) => {
   const item = items?.[0];
   if (!item) return;
-  const entity: SelectedEntity = { id: item.id, label: (item as any).value };
-  selectedEntity.value = entity;
-  emit("selected", entity);
-  pickerOpen.value = false;
+  emit("selected", { id: item.id, label: (item as any).value });
 };
 
 const onCreated = (entity: any) => {
-  selectedEntity.value = { id: entity.id ?? entity.uuid };
   emit("created", entity);
-  createOpen.value = false;
 };
 </script>

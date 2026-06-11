@@ -335,6 +335,18 @@ const getMatchers = (type: keyof FilterMatcherMap) => {
 
 const advancedFiltersPromise = async (entityType: Entitytyping) => {
   if (props.predefinedFilters && props.predefinedFilters.length > 0) {
+    // predefined filters narrow a custom query's own (hidden) filters,
+    // they do not replace them — fetch those too so both apply
+    if (props.manipulationQuery?.filtersDocument) {
+      try {
+        rawFilters.value = await fetchEntityFilters({
+          queryDocument: props.manipulationQuery.filtersDocument,
+          entityType,
+        });
+      } catch (error) {
+        console.error("Failed to fetch advanced filters:", error);
+      }
+    }
     await handlePredefinedAdvancedFilters();
     return;
   }
@@ -458,9 +470,10 @@ const handleAdvancedFilters = () => {
 };
 
 const handlePredefinedAdvancedFilters = async () => {
-  const advancedFilters = transformFilterInputIntoAdvancedFilters(
-    props.predefinedFilters,
-  );
+  const advancedFilters = {
+    ...(rawFilters.value ?? {}),
+    ...transformFilterInputIntoAdvancedFilters(props.predefinedFilters),
+  };
 
   await initializeFilters({
     advancedFilters,

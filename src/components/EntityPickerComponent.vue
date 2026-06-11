@@ -185,6 +185,7 @@ const injectRelationMetadataFromForm = (
 const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) {
     emit("entitiesSelected", selectedItems);
+    dequeueAllItemsForBulkProcessing(getContext());
     return;
   }
 

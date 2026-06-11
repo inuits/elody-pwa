@@ -1,38 +1,45 @@
 import { describe, it, expect } from "vitest";
 import { toRepetitiveFormConfig } from "@/composables/useRepetitiveFlowConfig";
-import { Entitytyping } from "@/generated-types/queries";
-import type { RepetitiveFormConfig } from "@/composables/useRepetitiveForm";
 
-// Raw object shaped like the omnibus config but sprinkled with __typename at
-// every level: top-level, inside a step, inside scopeToRelationOf, inside a
-// relation, and inside finalize.
-const rawWithTypenames = {
-  __typename: "RepetitiveFormConfig",
+// Raw object shaped like the real GetRepetitiveFormForOmnibus response:
+// the self-describing query aliases each `steps` field (work / expression),
+// so steps arrive as separate single-element arrays in query-field order,
+// sprinkled with __typename at every level. Optional inputs that were not
+// provided in the query come back as "" from the echo resolvers.
+const rawOmnibusResponse = {
+  __typename: "RepetitiveForm",
   repeatable: true,
-  steps: [
+  work: [
     {
-      __typename: "RepetitiveStepConfig",
+      __typename: "RepetitiveStep",
       key: "work",
-      entityType: Entitytyping.Work,
-      createForm: "GetWorkCreationForm",
-      acceptedTypes: [Entitytyping.Work],
-      pickerQuery: "GetWorksForPicker",
-      pickerFiltersQuery: "GetWorksForPickerFilters",
+      entityType: "work",
+      createForm: "GetFullWorkWordCreateForm",
+      pickerQuery: "GetRelatedWorks",
+      pickerFiltersQuery: "GetGuidedFlowWorksFilters",
+      acceptedTypes: ["work"],
+      skipSearchIfPriorIsNew: false,
     },
+  ],
+  expression: [
     {
-      __typename: "RepetitiveStepConfig",
+      __typename: "RepetitiveStep",
       key: "expression",
-      entityType: Entitytyping.Expression,
-      createForm: "basicCreateExpressionFields",
+      entityType: "expression",
+      createForm: "GetFullReadingCreateForm",
+      pickerQuery: "GetExpressionsBlockingRelations",
+      pickerFiltersQuery: "GetGuidedFlowExpressionsFilters",
+      acceptedTypes: ["expression"],
+      skipSearchIfPriorIsNew: false,
       scopeToRelationOf: {
-        __typename: "StepScopeConfig",
+        __typename: "RepetitiveStepScope",
         step: "work",
         relationType: "refWork",
+        filterKey: "vlacc:1|properties.ref_work.value",
       },
-      skipSearchIfPriorIsNew: true,
       relations: [
         {
-          __typename: "StepRelationConfig",
+          __typename: "RepetitiveStepRelation",
           to: "work",
           relationType: "refWork",
           createWhen: "onCreate",
@@ -41,110 +48,146 @@ const rawWithTypenames = {
     },
   ],
   finalize: {
-    __typename: "RepetitiveFinalizeConfig",
-    entityType: Entitytyping.Manifestation,
-    createForm: "basicCreateManifestationFields",
+    __typename: "RepetitiveFinalize",
+    entityType: "manifestation",
+    createForm: "GetFullManifestationWordCreateForm",
     relations: [
       {
-        __typename: "FinalizeRelationConfig",
+        __typename: "RepetitiveFinalizeRelation",
         toAllOf: "expression",
-        relationType: "refExpressions",
+        relationType: "refOmnibus",
         createWhen: "onFinalize",
       },
     ],
-  },
-};
-
-const expectedClean: RepetitiveFormConfig = {
-  repeatable: true,
-  steps: [
-    {
-      key: "work",
-      entityType: Entitytyping.Work,
-      createForm: "GetWorkCreationForm",
-      acceptedTypes: [Entitytyping.Work],
-      pickerQuery: "GetWorksForPicker",
-      pickerFiltersQuery: "GetWorksForPickerFilters",
-    },
-    {
-      key: "expression",
-      entityType: Entitytyping.Expression,
-      createForm: "basicCreateExpressionFields",
-      scopeToRelationOf: {
-        step: "work",
-        relationType: "refWork",
-      },
-      skipSearchIfPriorIsNew: true,
-      relations: [
-        {
-          to: "work",
-          relationType: "refWork",
-          createWhen: "onCreate",
-        },
-      ],
-    },
-  ],
-  finalize: {
-    entityType: Entitytyping.Manifestation,
-    createForm: "basicCreateManifestationFields",
-    relations: [
+    prefillMetadata: [
       {
-        toAllOf: "expression",
-        relationType: "refExpressions",
-        createWhen: "onFinalize",
+        __typename: "RepetitiveMetadataPrefill",
+        key: "is_omnibus",
+        value: true,
       },
     ],
   },
 };
 
 describe("toRepetitiveFormConfig", () => {
-  it("removes __typename from the top-level object", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    expect(result).not.toHaveProperty("__typename");
+  it("flattens aliased step arrays into an ordered steps list", () => {
+    const result = toRepetitiveFormConfig(rawOmnibusResponse);
+    expect(result.steps.map((s) => s.key)).toEqual(["work", "expression"]);
   });
 
-  it("removes __typename from each step", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    result.steps.forEach((step) => {
-      expect(step).not.toHaveProperty("__typename");
+  it("does not keep the alias keys on the config", () => {
+    const result = toRepetitiveFormConfig(rawOmnibusResponse);
+    expect(result).not.toHaveProperty("work");
+    expect(result).not.toHaveProperty("expression");
+  });
+
+  it("removes __typename at every level", () => {
+    const result = toRepetitiveFormConfig(rawOmnibusResponse);
+    expect(JSON.stringify(result)).not.toContain("__typename");
+  });
+
+  it("keeps step fields, scope and relations intact", () => {
+    const result = toRepetitiveFormConfig(rawOmnibusResponse);
+    expect(result.steps[1]).toEqual({
+      key: "expression",
+      entityType: "expression",
+      createForm: "GetFullReadingCreateForm",
+      pickerQuery: "GetExpressionsBlockingRelations",
+      pickerFiltersQuery: "GetGuidedFlowExpressionsFilters",
+      acceptedTypes: ["expression"],
+      skipSearchIfPriorIsNew: false,
+      scopeToRelationOf: {
+        step: "work",
+        relationType: "refWork",
+        filterKey: "vlacc:1|properties.ref_work.value",
+      },
+      relations: [
+        { to: "work", relationType: "refWork", createWhen: "onCreate" },
+      ],
     });
   });
 
-  it("removes __typename from scopeToRelationOf inside a step", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    const stepWithScope = result.steps.find((s) => s.scopeToRelationOf);
-    expect(stepWithScope?.scopeToRelationOf).not.toHaveProperty("__typename");
-  });
-
-  it("removes __typename from relations inside a step", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    const stepWithRelations = result.steps.find(
-      (s) => s.relations && s.relations.length > 0,
-    );
-    stepWithRelations?.relations?.forEach((rel) => {
-      expect(rel).not.toHaveProperty("__typename");
+  it("keeps repeatable and the finalize config including prefillMetadata", () => {
+    const result = toRepetitiveFormConfig(rawOmnibusResponse);
+    expect(result.repeatable).toBe(true);
+    expect(result.finalize).toEqual({
+      entityType: "manifestation",
+      createForm: "GetFullManifestationWordCreateForm",
+      relations: [
+        {
+          toAllOf: "expression",
+          relationType: "refOmnibus",
+          createWhen: "onFinalize",
+        },
+      ],
+      prefillMetadata: [{ key: "is_omnibus", value: true }],
     });
   });
 
-  it("removes __typename from the finalize config", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    expect(result.finalize).not.toHaveProperty("__typename");
-  });
-
-  it("removes __typename from relations inside finalize", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    result.finalize?.relations.forEach((rel) => {
-      expect(rel).not.toHaveProperty("__typename");
+  it("drops optional inputs the echo resolvers return as empty strings", () => {
+    const result = toRepetitiveFormConfig({
+      repeatable: false,
+      work: [
+        {
+          key: "work",
+          entityType: "work",
+          createForm: "GetWorkForm",
+          pickerQuery: "",
+          pickerFiltersQuery: "",
+          scopeToRelationOf: {
+            step: "prior",
+            relationType: "refPrior",
+            filterKey: "",
+          },
+        },
+      ],
     });
+    const step = result.steps[0];
+    expect(step.pickerQuery).toBeUndefined();
+    expect(step.pickerFiltersQuery).toBeUndefined();
+    expect(step.scopeToRelationOf?.filterKey).toBeUndefined();
+    expect(step.scopeToRelationOf?.relationType).toBe("refPrior");
   });
 
-  it("deep-equals the expected clean config after stripping", () => {
-    const result = toRepetitiveFormConfig(rawWithTypenames);
-    expect(result).toEqual(expectedClean);
+  it("keeps configured labels and drops empty ones", () => {
+    const result = toRepetitiveFormConfig({
+      label: "repetitiveForm.omnibus-title",
+      repeatable: true,
+      work: [
+        {
+          key: "work",
+          label: "repetitiveForm.step-work",
+          entityType: "work",
+          createForm: "GetWorkForm",
+        },
+        { key: "expression", label: "", entityType: "expression", createForm: "GetExprForm" },
+      ],
+      finalize: {
+        label: "repetitiveForm.finalize-omnibus",
+        entityType: "manifestation",
+        createForm: "GetManifForm",
+        relations: [],
+      },
+    });
+    expect(result.label).toBe("repetitiveForm.omnibus-title");
+    expect(result.steps[0].label).toBe("repetitiveForm.step-work");
+    expect(result.steps[1].label).toBeUndefined();
+    expect(result.finalize?.label).toBe("repetitiveForm.finalize-omnibus");
   });
 
-  it("leaves a config without __typename fields unchanged", () => {
-    const result = toRepetitiveFormConfig(expectedClean);
-    expect(result).toEqual(expectedClean);
+  it("supports a flow without finalize", () => {
+    const result = toRepetitiveFormConfig({
+      repeatable: false,
+      work: [{ key: "work", entityType: "work", createForm: "GetWorkForm" }],
+    });
+    expect(result.finalize).toBeUndefined();
+    expect(result.steps).toHaveLength(1);
+  });
+
+  it("returns a safe empty config for a null result", () => {
+    expect(toRepetitiveFormConfig(null)).toEqual({
+      repeatable: false,
+      steps: [],
+    });
   });
 });

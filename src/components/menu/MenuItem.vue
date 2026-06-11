@@ -185,12 +185,8 @@ onMounted(async () => {
           permittedEntitiesToCreate.value.push(entityType);
         }
       });
-    } else if (item.entityType) {
+    } else if (item.entityType)
       allowed = allowed || can(Permission.Canread, item.entityType);
-      if (item.entityType.includes('boeke')) {
-        allowed = true;
-      }
-    }
 
     if (item.can && item.can?.length > 0) {
       allowed = await fetchAdvancedPermission(item.can);
