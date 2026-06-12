@@ -175,6 +175,60 @@ describe("toRepetitiveFormConfig", () => {
     expect(result.finalize?.label).toBe("repetitiveForm.finalize-omnibus");
   });
 
+  it("keeps configured overviewFields and drops the empty echo default", () => {
+    const result = toRepetitiveFormConfig({
+      repeatable: true,
+      work: [
+        {
+          key: "work",
+          entityType: "work",
+          createForm: "GetWorkForm",
+          overviewFields: [
+            { key: "original_headtitle", label: "metadata.labels.headtitle" },
+            { key: "refLanguages", label: "metadata.labels.original-language" },
+          ],
+        },
+      ],
+      expression: [
+        {
+          key: "expression",
+          entityType: "expression",
+          createForm: "GetExprForm",
+          overviewFields: [],
+        },
+      ],
+    });
+    expect(result.steps[0].overviewFields).toEqual([
+      { key: "original_headtitle", label: "metadata.labels.headtitle" },
+      { key: "refLanguages", label: "metadata.labels.original-language" },
+    ]);
+    expect(result.steps[1].overviewFields).toBeUndefined();
+  });
+
+  it("keeps a positive maxSelection and drops the no-limit value 0", () => {
+    const result = toRepetitiveFormConfig({
+      repeatable: true,
+      work: [
+        {
+          key: "work",
+          entityType: "work",
+          createForm: "GetWorkForm",
+          maxSelection: 1,
+        },
+      ],
+      expression: [
+        {
+          key: "expression",
+          entityType: "expression",
+          createForm: "GetExprForm",
+          maxSelection: 0,
+        },
+      ],
+    });
+    expect(result.steps[0].maxSelection).toBe(1);
+    expect(result.steps[1].maxSelection).toBeUndefined();
+  });
+
   it("supports a flow without finalize", () => {
     const result = toRepetitiveFormConfig({
       repeatable: false,

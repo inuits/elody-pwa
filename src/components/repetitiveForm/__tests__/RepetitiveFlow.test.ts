@@ -30,14 +30,14 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
     name: "RepetitiveStepField",
     props: ["step", "scopeFilter", "skipSearch", "createPrefill", "pickerParentUuid"],
     emits: ["selected", "created"],
-    template: "<div data-testid='step-field' />",
+    template: "<div data-testid='step-field'><slot name='actions' /></div>",
   },
 }));
 vi.mock("@/components/repetitiveForm/RepetitiveOverview.vue", () => ({
   default: {
     name: "RepetitiveOverview",
     props: ["branches", "steps", "repeatable"],
-    emits: ["add-another", "finish"],
+    emits: ["add-another", "finish", "remove"],
     template: "<div data-testid='overview-stub' />",
   },
 }));
@@ -167,12 +167,12 @@ describe("RepetitiveFlow", () => {
     });
   });
 
-  it("records a created entity with a derived label and advances", async () => {
+  it("records a created entity with a derived label and details, then advances", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
     field(wrapper).vm.$emit("created", {
       id: "work-9",
-      intialValues: { title: "Mooi werk" },
+      intialValues: { title: "Mooi werk", record_type: "tekst" },
     });
     await wrapper.vm.$nextTick();
     expect(useRepetitiveForm().currentBranch.value.entities.work).toEqual({
@@ -180,6 +180,7 @@ describe("RepetitiveFlow", () => {
       id: "work-9",
       type: Entitytyping.Work,
       label: "Mooi werk",
+      details: [{ label: "record_type", value: "tekst" }],
       isNew: true,
     });
     expect(useRepetitiveForm().currentStepIndex.value).toBe(1);
@@ -219,6 +220,53 @@ describe("RepetitiveFlow", () => {
     expect(
       wrapper.find("[data-testid='repetitive-flow-finalize-heading']").text(),
     ).toBe("repetitiveForm.finalize-omnibus");
+  });
+
+  it("goes back from the second step to the first via the back button", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    await wrapper.vm.$nextTick();
+    expect(field(wrapper).props("step").key).toBe("expression");
+    await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
+    expect(field(wrapper).props("step").key).toBe("work");
+    expect(overview(wrapper).exists()).toBe(false);
+  });
+
+  it("goes back from the first step to the overview, discarding the branch in progress", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", { id: "work-2" });
+    await wrapper.vm.$nextTick();
+    await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
+    await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
+    expect(overview(wrapper).exists()).toBe(true);
+    // the half-finished branch is discarded; the completed one remains
+    expect(useRepetitiveForm().branches.value).toHaveLength(1);
+    expect(useRepetitiveForm().currentBranch.value.entities).toEqual({});
+  });
+
+  it("removes a staged branch when the overview emits remove", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    overview(wrapper).vm.$emit("remove", 0);
+    await wrapper.vm.$nextTick();
+    expect(useRepetitiveForm().branches.value).toHaveLength(0);
+    expect(overview(wrapper).props("branches")).toHaveLength(0);
+  });
+
+  it("returns to the overview from the finalize view via the back button", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    overview(wrapper).vm.$emit("finish");
+    await wrapper.vm.$nextTick();
+    expect(form(wrapper).exists()).toBe(true);
+    await wrapper
+      .find("[data-testid='repetitive-flow-back-to-overview']")
+      .trigger("click");
+    expect(form(wrapper).exists()).toBe(false);
+    expect(overview(wrapper).exists()).toBe(true);
   });
 
   it("emits finished when the finalize form creates the manifestation", async () => {

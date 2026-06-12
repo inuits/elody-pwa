@@ -7,6 +7,7 @@ Purpose: let a new developer or an LLM work on a feature without re-exploring th
 ## Features
 
 - [Dynamic Forms](./dynamicForm.md) — runtime GraphQL-defined forms (`DynamicForm.vue` + `useDynamicForm`); renders fields/uploads/pickers/actions from a named query and dispatches create/upload/OCR/CSV/download actions.
+- [Guided Multi-Entity Creation Flow](./repetitiveForm.md) — config-driven wizard modal (`repetitiveForm/` + `useRepetitiveForm`); repeats pick-or-create steps with scoped pickers and auto-relations, then finalizes a container entity (e.g. omnibus manifestation).
 
 ## Conventions
 

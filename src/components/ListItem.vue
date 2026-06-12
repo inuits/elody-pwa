@@ -13,7 +13,7 @@
         "
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
-        :item="{ id: itemId, teaserMetadata, type: itemType }"
+        :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
       />
@@ -75,6 +75,7 @@
         :item="{
           id: itemId,
           teaserMetadata,
+          intialValues,
           relationValues,
           type: itemType,
         }"

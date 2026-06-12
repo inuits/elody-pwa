@@ -20,7 +20,14 @@ const steps = [
 const branches = [
   {
     entities: {
-      work: { key: "work", id: "work-1", type: Entitytyping.Work, label: "Harry Potter", isNew: false },
+      work: {
+        key: "work",
+        id: "work-1",
+        type: Entitytyping.Work,
+        label: "Harry Potter",
+        isNew: false,
+        details: [{ label: "metadata.labels.author", value: "Rowling" }],
+      },
       expression: { key: "expression", id: "expr-1", type: Entitytyping.Expression, label: undefined, isNew: true },
     },
   },
@@ -44,6 +51,70 @@ describe("RepetitiveOverview", () => {
     expect(row).toContain("expression"); // step key fallback
     expect(row).toContain("Harry Potter"); // picked work → label
     expect(row).toContain("expr-1"); // created expression → no label → id
+  });
+
+  it("shows each staged entity's details in its row", () => {
+    const row = getWrapper().find("[data-testid='repetitive-overview-row']").text();
+    expect(row).toContain("metadata.labels.author");
+    expect(row).toContain("Rowling");
+  });
+
+  it("renders configured overviewFields from the entity values instead of the derived details", () => {
+    const wrapper = getWrapper({
+      branches: [
+        {
+          entities: {
+            work: {
+              key: "work",
+              id: "work-1",
+              type: Entitytyping.Work,
+              label: "Harry Potter",
+              isNew: false,
+              details: [{ label: "derived", value: "should not show" }],
+              values: {
+                original_headtitle: "Harry Potter", // equals label → skipped
+                original_subtitle: "De gevangene",
+                literary_type: "Fictie",
+                refLanguages: ["Nederlands", "Engels"],
+                work_type: "work_word", // not configured → not shown
+              },
+            },
+          },
+        },
+      ],
+      steps: [
+        {
+          key: "work",
+          label: "repetitiveForm.step-work",
+          entityType: Entitytyping.Work,
+          createForm: "x",
+          overviewFields: [
+            { key: "original_headtitle", label: "metadata.labels.headtitle" },
+            { key: "original_subtitle", label: "metadata.labels.subtitle" },
+            { key: "literary_type", label: "metadata.labels.literary-type" },
+            { key: "refLanguages", label: "metadata.labels.original-language" },
+          ],
+        },
+      ],
+      repeatable: true,
+    });
+    const row = wrapper.find("[data-testid='repetitive-overview-row']").text();
+    expect(row).toContain("metadata.labels.subtitle");
+    expect(row).toContain("De gevangene");
+    expect(row).toContain("Fictie");
+    expect(row).toContain("Nederlands, Engels");
+    // the configured field equal to the displayed label is not repeated
+    expect(row).not.toContain("metadata.labels.headtitle");
+    expect(row).not.toContain("work_type");
+    expect(row).not.toContain("should not show");
+  });
+
+  it("emits remove with the row index when the row's delete button is clicked", async () => {
+    const wrapper = getWrapper();
+    await wrapper
+      .find("[data-testid='repetitive-overview-remove']")
+      .trigger("click");
+    expect(wrapper.emitted("remove")?.[0]).toEqual([0]);
   });
 
   it("shows an empty-state message instead of the list when nothing is staged", () => {

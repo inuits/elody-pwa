@@ -21,6 +21,7 @@ export type InBulkProcessableItem = {
   value?: string;
   type?: string;
   metadata?: { key: string; value: unknown }[];
+  intialValues?: Record<string, unknown>;
 };
 
 const items = ref<{ [key: string]: InBulkProcessableItem[] }>({});

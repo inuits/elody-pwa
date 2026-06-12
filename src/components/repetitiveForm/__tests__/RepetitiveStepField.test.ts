@@ -80,6 +80,16 @@ describe("RepetitiveStepField", () => {
     expect(picker.props("shouldUseStateForRoute")).toBe(false);
   });
 
+  it("passes the step's maxSelection to the picker as its selection limit", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: { ...expressionStep(), maxSelection: 1 },
+    });
+    expect(
+      wrapper.findComponent(EntityPickerComponent).props("selectionLimit"),
+    ).toBe(1);
+  });
+
   it("emits selected when the picker emits entitiesSelected", async () => {
     const wrapper = getWrapper();
     wrapper
@@ -89,8 +99,68 @@ describe("RepetitiveStepField", () => {
       ]);
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("selected")?.[0]).toEqual([
-      { id: "expr-1", label: "Chamber of Secrets" },
+      { id: "expr-1", label: "Chamber of Secrets", details: [] },
     ]);
+  });
+
+  it("derives a label and details from the picked item's teaser metadata", async () => {
+    const wrapper = getWrapper();
+    wrapper.findComponent(EntityPickerComponent).vm.$emit("entitiesSelected", [
+      {
+        id: "expr-1",
+        teaserMetadata: [
+          { label: "metadata.labels.title", key: "computed_title" },
+          { label: "metadata.labels.record-type", key: "record_type" },
+        ],
+        intialValues: { computed_title: "Kamer", record_type: "tekst" },
+      },
+    ]);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("selected")?.[0]).toEqual([
+      {
+        id: "expr-1",
+        label: "Kamer",
+        details: [{ label: "metadata.labels.record-type", value: "tekst" }],
+        values: { computed_title: "Kamer", record_type: "tekst" },
+      },
+    ]);
+  });
+
+  it("renders the create-new button above the picker, mirroring back-to-search", () => {
+    const html = pickerView(getWrapper()).html();
+    const buttonIndex = html.indexOf("repetitive-step-create-new");
+    const pickerIndex = html.indexOf("entity-picker");
+    expect(buttonIndex).toBeGreaterThan(-1);
+    expect(pickerIndex).toBeGreaterThan(-1);
+    expect(buttonIndex).toBeLessThan(pickerIndex);
+  });
+
+  it("renders the actions slot on the same row as its own buttons in both views", async () => {
+    const wrapper = shallowMount(RepetitiveStepField, {
+      props: getDefaultProps(),
+      slots: { actions: "<button data-testid='external-back' />" },
+      global: { mocks: { $t: (k: string) => k }, renderStubDefaultSlot: true },
+    });
+    const pickRow = wrapper.find("[data-testid='repetitive-step-actions']");
+    expect(pickRow.find("[data-testid='external-back']").exists()).toBe(true);
+    expect(pickRow.find("[data-testid='repetitive-step-create-new']").exists()).toBe(true);
+
+    await wrapper.find("[data-testid='repetitive-step-create-new']").trigger("click");
+    const createRow = wrapper.find("[data-testid='repetitive-step-actions']");
+    expect(createRow.find("[data-testid='external-back']").exists()).toBe(true);
+    expect(createRow.find("[data-testid='repetitive-step-back-to-search']").exists()).toBe(true);
+  });
+
+  it("includes the picked item's intialValues in the selected payload", async () => {
+    const wrapper = getWrapper();
+    wrapper.findComponent(EntityPickerComponent).vm.$emit("entitiesSelected", [
+      { id: "expr-1", intialValues: { record_type: "tekst" } },
+    ]);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("selected")?.[0]?.[0]).toMatchObject({
+      id: "expr-1",
+      values: { record_type: "tekst" },
+    });
   });
 
   it("switches from picker to create when the create-new button is clicked", async () => {
@@ -129,6 +199,11 @@ describe("RepetitiveStepField", () => {
     });
     // the flow must receive the created entity instead of navigating away
     expect(form.props("emitEntityCreated")).toBe(true);
+  });
+
+  it("remounts DynamicForm per step so a reused create view gets fresh form state", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
+    expect(wrapper.findComponent(DynamicForm).vm.$.vnode.key).toBe("expression");
   });
 
   it("emits created when DynamicForm emits entityCreated", async () => {

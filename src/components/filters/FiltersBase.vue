@@ -301,9 +301,10 @@ const selectedSavedFilter = computed(() => {
   return getActiveFilter();
 });
 
+// fetched even when predefined filters are present: those only narrow the
+// custom query's own filters, which stay user-editable and need matchers to
+// be displayed at all
 const filterMatcherMappingPromise = async () => {
-  if (props.predefinedFilters && props.predefinedFilters.length > 0) return;
-
   return apolloClient
     .query<GetFilterMatcherMappingQuery>({
       query: GetFilterMatcherMappingDocument,

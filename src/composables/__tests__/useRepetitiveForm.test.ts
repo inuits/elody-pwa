@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Entitytyping } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
+  describePickedItem,
+  describeCreatedEntity,
   type RepetitiveFormConfig,
 } from "@/composables/useRepetitiveForm";
 
@@ -238,6 +240,19 @@ describe("useRepetitiveForm", () => {
     expect(currentBranch.value.entities).toEqual({});
   });
 
+  it("pickExisting stores the provided details", () => {
+    const { initFlow, pickExisting, currentBranch } = useRepetitiveForm();
+    initFlow(omnibusConfig());
+    pickExisting({
+      id: "work-1",
+      label: "Harry Potter",
+      details: [{ label: "metadata.labels.author", value: "Rowling" }],
+    });
+    expect(currentBranch.value.entities.work.details).toEqual([
+      { label: "metadata.labels.author", value: "Rowling" },
+    ]);
+  });
+
   it("startNewBranch resets the current branch and step index", () => {
     const { initFlow, pickExisting, startNewBranch, currentBranch, currentStepIndex } =
       useRepetitiveForm();
@@ -268,6 +283,26 @@ describe("useRepetitiveForm", () => {
       "expr-1",
       "expr-2",
     ]);
+  });
+
+  it("goToPreviousStep moves one step back and clamps at the first step", () => {
+    const { initFlow, pickExisting, completeStep, goToPreviousStep, currentStepIndex } =
+      useRepetitiveForm();
+    initFlow(omnibusConfig());
+    pickExisting({ id: "work-1" });
+    completeStep(); // expression step
+    expect(currentStepIndex.value).toBe(1);
+    goToPreviousStep();
+    expect(currentStepIndex.value).toBe(0);
+    goToPreviousStep();
+    expect(currentStepIndex.value).toBe(0);
+  });
+
+  it("removeBranch removes only the branch at the given index", () => {
+    const { removeBranch, branches } = buildTwoBranches();
+    removeBranch(0);
+    expect(branches.value).toHaveLength(1);
+    expect(branches.value[0].entities.work.id).toBe("work-2");
   });
 
   it("buildFinalizeRelations links the container to all collected expressions", () => {
@@ -376,6 +411,105 @@ describe("useRepetitiveForm", () => {
     expect(buildFinalizePrefill()).toEqual({
       relationValues: {},
       intialValues: { is_omnibus: true, material_type: "boek" },
+    });
+  });
+});
+
+// teaserMetadata entries carry { label, key }; the matching display values
+// live under the same key in the item's intialValues
+describe("describePickedItem", () => {
+  const item = {
+    id: "expr-1",
+    type: "reading",
+    teaserMetadata: [
+      { label: "metadata.labels.title", key: "computed_title" },
+      { label: "metadata.labels.record-type", key: "record_type" },
+      { label: "metadata.labels.language", key: "refLanguages" },
+      { key: "thumbnail" }, // no label → not displayable
+      null,
+    ],
+    intialValues: {
+      computed_title: "Harry Potter",
+      record_type: "tekst",
+      refLanguages: ["Nederlands", "Engels"],
+      thumbnail: "x.jpg",
+    },
+  };
+
+  it("uses the title-ish teaser value as label and the rest as details", () => {
+    expect(describePickedItem(item)).toEqual({
+      label: "Harry Potter",
+      details: [
+        { label: "metadata.labels.record-type", value: "tekst" },
+        { label: "metadata.labels.language", value: "Nederlands, Engels" },
+      ],
+    });
+  });
+
+  it("falls back to the item's own value when teaser data is absent", () => {
+    expect(describePickedItem({ id: "x", value: "Some label" })).toEqual({
+      label: "Some label",
+      details: [],
+    });
+  });
+
+  it("skips teaser entries whose value is missing from intialValues", () => {
+    expect(
+      describePickedItem({
+        id: "x",
+        teaserMetadata: [{ label: "metadata.labels.author", key: "refAuthors" }],
+        intialValues: {},
+      }),
+    ).toEqual({ label: undefined, details: [] });
+  });
+
+  it("promotes the first entry to label when no entry is title-ish", () => {
+    expect(
+      describePickedItem({
+        id: "x",
+        teaserMetadata: [
+          { label: "metadata.labels.name", key: "name" },
+          { label: "metadata.labels.record-type", key: "record_type" },
+        ],
+        intialValues: { name: "Rowling", record_type: "persoon" },
+      }),
+    ).toEqual({
+      label: "Rowling",
+      details: [{ label: "metadata.labels.record-type", value: "persoon" }],
+    });
+  });
+});
+
+describe("describeCreatedEntity", () => {
+  it("derives the label from a title-ish intial value and details from the rest", () => {
+    expect(
+      describeCreatedEntity({
+        id: "expr-1",
+        intialValues: {
+          id: "expr-1",
+          typePillLabel: "Lezen",
+          expression_title: "Kamer der geheimen",
+          record_type: "tekst",
+          refLanguages: ["Nederlands"],
+          created_at: "2026-06-12T10:05:24.647072+00:00",
+          created_by: "developers@inuits.eu",
+          updated_at: "",
+          updated_by: "",
+        },
+      }),
+    ).toEqual({
+      label: "Kamer der geheimen",
+      details: [
+        { label: "record_type", value: "tekst" },
+        { label: "refLanguages", value: "Nederlands" },
+      ],
+    });
+  });
+
+  it("returns no label or details for an entity without intialValues", () => {
+    expect(describeCreatedEntity({ id: "x" })).toEqual({
+      label: undefined,
+      details: [],
     });
   });
 });

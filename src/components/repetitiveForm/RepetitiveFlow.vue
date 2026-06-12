@@ -47,24 +47,50 @@
         :repeatable="flowConfig?.repeatable ?? false"
         @add-another="addAnother"
         @finish="onFinish"
+        @remove="onRemoveBranch"
       />
 
-      <RepetitiveStepField
-        v-else-if="view === 'step' && activeStep"
-        :step="activeStep"
-        :scope-filter="scopeFilter"
-        :skip-search="skipSearch"
-        :create-prefill="createPrefill"
-        :picker-parent-uuid="pickerParentUuid"
-        @selected="onSelected"
-        @created="onCreated"
-      />
+      <template v-else-if="view === 'step' && activeStep">
+        <div class="w-fit mb-4">
+          <BaseButtonNew
+            data-testid="repetitive-flow-back"
+            :label="
+              currentStepIndex > 0
+                ? $t('repetitiveForm.back-to-previous-step')
+                : $t('repetitiveForm.back-to-overview')
+            "
+            :icon="DamsIcons.AngleLeft"
+            button-style="accentAccent"
+            button-size="small"
+            @click="goBack"
+          />
+        </div>
+        <RepetitiveStepField
+          :step="activeStep"
+          :scope-filter="scopeFilter"
+          :skip-search="skipSearch"
+          :create-prefill="createPrefill"
+          :picker-parent-uuid="pickerParentUuid"
+          @selected="onSelected"
+          @created="onCreated"
+        />
+      </template>
 
       <template v-else-if="view === 'finalize'">
+        <div class="w-fit mb-4">
+          <BaseButtonNew
+            data-testid="repetitive-flow-back-to-overview"
+            :label="$t('repetitiveForm.back-to-overview')"
+            :icon="DamsIcons.AngleLeft"
+            button-style="accentAccent"
+            button-size="small"
+            @click="view = 'overview'"
+          />
+        </div>
         <h2
           v-if="finalizeLabel"
           data-testid="repetitive-flow-finalize-heading"
-          class="text-base font-bold mb-4"
+          class="title pb-4"
         >
           {{ $t(finalizeLabel) }}
         </h2>
@@ -84,12 +110,14 @@
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import type { AdvancedFilterInput } from "@/generated-types/queries";
+import { DamsIcons, type AdvancedFilterInput } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
+  describeCreatedEntity,
   type RepetitiveFormConfig,
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
 import RepetitiveOverview from "@/components/repetitiveForm/RepetitiveOverview.vue";
@@ -164,18 +192,29 @@ const onSelected = (entity: { id: string; label?: string }) => {
   advance();
 };
 
-// best-effort display label for a freshly created entity
-const deriveLabel = (entity: any): string | undefined =>
-  entity?.intialValues?.title || entity?.intialValues?.label || undefined;
-
 const onCreated = (entity: { id?: string; uuid?: string }) => {
-  store.recordCreated({ ...entity, label: deriveLabel(entity) });
+  const { label, details } = describeCreatedEntity(entity);
+  store.recordCreated({ ...entity, label, details });
   advance();
 };
 
 const addAnother = () => {
   store.startNewBranch();
   view.value = "step";
+};
+
+const onRemoveBranch = (index: number) => {
+  store.removeBranch(index);
+};
+
+const goBack = () => {
+  if (currentStepIndex.value > 0) {
+    store.goToPreviousStep();
+    return;
+  }
+  // leaving from the first step abandons the branch in progress
+  store.startNewBranch();
+  view.value = "overview";
 };
 
 const onFinish = () => {

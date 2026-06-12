@@ -694,21 +694,26 @@ const submitActionFunction = async (field: FormAction) => {
     );
     if (props.emitEntityCreated) {
       // the host (e.g. a guided flow) handles what happens with the entity
+      // and swaps in the next form itself. closeAndDeleteForm's upload reset
+      // would re-fetch THIS form's definition into the shared dynamicForm
+      // state and overwrite the next form's fields, so only drop the form.
+      deleteForm(props.dynamicFormQuery);
       emit("entityCreated", entity);
-    } else if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
-      for (const callback of callbackFunctions) {
-        if (callback) await callback();
-      }
     } else {
-      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open)
+      if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
+        for (const callback of callbackFunctions) {
+          if (callback) await callback();
+        }
+      } else if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
         tagNewlyCreatedEntity(entity);
-      else
+      } else {
         setTimeout(
           () => goToEntityPage(entity, "SingleEntity", props.router),
           1,
         );
+      }
+      closeAndDeleteForm();
     }
-    closeAndDeleteForm();
     displaySuccessNotification(
       t("notifications.success.entityCreated.title"),
       t("notifications.success.entityCreated.description"),

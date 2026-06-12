@@ -55,7 +55,15 @@ import {
 } from "@/composables/useBulkOperations";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { inject, onBeforeMount, onMounted, provide, ref, unref } from "vue";
+import {
+  inject,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  provide,
+  ref,
+  unref,
+} from "vue";
 import { useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useCustomQuery } from "@/composables/useCustomQuery";
@@ -93,6 +101,7 @@ const props = withDefaults(
     baseLibraryHeight?: string;
     enableNonSelectableEntities?: boolean;
     shouldUseStateForRoute?: boolean;
+    selectionLimit?: number; // max selectable entities (0/absent = unlimited)
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -100,6 +109,7 @@ const props = withDefaults(
     enableNonSelectableEntities: true,
     context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
     shouldUseStateForRoute: true,
+    selectionLimit: 0,
   },
 );
 
@@ -107,7 +117,8 @@ const { t, locale } = useI18n();
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations } = useFormHelper();
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
+const { dequeueAllItemsForBulkProcessing, setBulkSelectionLimit } =
+  useBulkOperations();
 const {
   getEntityId,
   getRelationType,
@@ -297,8 +308,16 @@ const refetchRelationsWithNoLimit = async (): string[] => {
 };
 
 onMounted(async () => {
+  if (props.selectionLimit)
+    setBulkSelectionLimit(getContext(), props.selectionLimit);
   if (props.customQuery && props.customFiltersQuery) await getCustomQuery();
   else ignoreCustomQuery.value = true;
+});
+
+onUnmounted(() => {
+  // the bulk-operations context is shared module state: lift the limit so
+  // other pickers using the same context are not constrained by it
+  if (props.selectionLimit) setBulkSelectionLimit(getContext(), 0);
 });
 
 onBeforeMount(async () => {

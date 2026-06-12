@@ -36,6 +36,15 @@ export type RepetitiveStepConfig = {
   acceptedTypes?: Entitytyping[]; // picker accepted types; defaults to [entityType]
   pickerQuery?: string; // GraphQL query name the picker uses to fetch candidates
   pickerFiltersQuery?: string; // optional filters query for the picker
+  maxSelection?: number; // max entities selectable in the picker (0/absent = unlimited)
+  // which entity values the overview shows for this step, with label
+  // translation keys; absent = derive from teaser metadata / created values
+  overviewFields?: OverviewFieldConfig[];
+};
+
+export type OverviewFieldConfig = {
+  key: string; // intialValues key
+  label: string; // translation key
 };
 
 export type FinalizeRelationConfig = {
@@ -65,12 +74,88 @@ export type RepetitiveFormConfig = {
   finalize?: RepetitiveFinalizeConfig;
 };
 
+export type StagedEntityDetail = {
+  label: string; // translation key (or raw metadata key as fallback)
+  value: string;
+};
+
 export type StagedEntity = {
   key: string; // step key
   id: string; // real entity id
   type: Entitytyping;
   label?: string;
+  details?: StagedEntityDetail[]; // extra display info for the overview
+  values?: Record<string, unknown>; // intialValues snapshot for overviewFields
   isNew: boolean;
+};
+
+export const toDisplayValue = (value: unknown): string => {
+  if (Array.isArray(value))
+    return value
+      .filter((entry) => typeof entry === "string" || typeof entry === "number")
+      .join(", ");
+  if (typeof value === "string" || typeof value === "number")
+    return String(value);
+  return "";
+};
+
+// Picker items carry teaserMetadata entries of { label, key }; the matching
+// display values live under the same key in the item's intialValues.
+export const describePickedItem = (item: {
+  id: string;
+  value?: string;
+  teaserMetadata?: unknown;
+  intialValues?: Record<string, unknown>;
+}): { label?: string; details: StagedEntityDetail[] } => {
+  const values = item.intialValues ?? {};
+  const entries = (Array.isArray(item.teaserMetadata) ? item.teaserMetadata : [])
+    .filter(
+      (entry): entry is { label: string; key: string } =>
+        Boolean(entry && typeof entry === "object" && entry.label && entry.key),
+    )
+    .map((entry) => ({
+      key: entry.key,
+      label: entry.label,
+      value: toDisplayValue(values[entry.key]),
+    }))
+    .filter((entry) => entry.value);
+
+  const labelEntry =
+    entries.find((entry) => /title/i.test(entry.key)) ?? entries[0];
+  return {
+    label: item.value || labelEntry?.value || undefined,
+    details: entries
+      .filter((entry) => entry !== labelEntry)
+      .map(({ label, value }) => ({ label, value }))
+      .slice(0, 3),
+  };
+};
+
+// A freshly created entity only has intialValues (no teaser labels): use a
+// title-ish key for the label and the remaining displayable values as details.
+export const describeCreatedEntity = (
+  entity: any,
+): { label?: string; details: StagedEntityDetail[] } => {
+  const values: Record<string, unknown> = entity?.intialValues ?? {};
+  const isDisplayable = (key: string) =>
+    !/^(id|uuid|__typename)$/.test(key) &&
+    !/^(created|updated)_(at|by)$/.test(key) &&
+    !/pill/i.test(key) &&
+    Boolean(toDisplayValue(values[key]));
+
+  const labelKey =
+    ["title", "label"].find(
+      (key) => typeof values[key] === "string" && values[key],
+    ) ??
+    Object.keys(values).find((key) => /title/i.test(key) && isDisplayable(key));
+
+  return {
+    label: labelKey ? toDisplayValue(values[labelKey]) : undefined,
+    details: Object.keys(values)
+      .filter((key) => key !== labelKey && isDisplayable(key))
+      .map((key) => ({ label: key, value: toDisplayValue(values[key]) }))
+      .slice(0, 3),
+  };
 };
 
 export type RepetitiveBranch = {
@@ -134,7 +219,12 @@ export const useRepetitiveForm = () => {
     currentBranch.value.entities[entity.key] = entity;
   };
 
-  const pickExisting = (entity: { id: string; label?: string }) => {
+  const pickExisting = (entity: {
+    id: string;
+    label?: string;
+    details?: StagedEntityDetail[];
+    values?: Record<string, unknown>;
+  }) => {
     const step = activeStep();
     if (!step) return;
     recordEntity({
@@ -142,8 +232,18 @@ export const useRepetitiveForm = () => {
       id: entity.id,
       type: step.entityType,
       label: entity.label,
+      details: entity.details,
+      values: entity.values,
       isNew: false,
     });
+  };
+
+  const removeBranch = (index: number) => {
+    branches.value.splice(index, 1);
+  };
+
+  const goToPreviousStep = () => {
+    if (currentStepIndex.value > 0) currentStepIndex.value--;
   };
 
   const buildScopeFilter = (
@@ -190,6 +290,8 @@ export const useRepetitiveForm = () => {
     id?: string;
     uuid?: string;
     label?: string;
+    details?: StagedEntityDetail[];
+    values?: Record<string, unknown>;
   }) => {
     const step = activeStep();
     if (!step) return;
@@ -198,6 +300,8 @@ export const useRepetitiveForm = () => {
       id: entity.id ?? entity.uuid ?? "",
       type: step.entityType,
       label: entity.label,
+      details: entity.details,
+      values: entity.values,
       isNew: true,
     });
   };
@@ -287,6 +391,8 @@ export const useRepetitiveForm = () => {
     canCompleteStep,
     finishBranch,
     startNewBranch,
+    removeBranch,
+    goToPreviousStep,
     completeStep,
     recordEntity,
     pickExisting,

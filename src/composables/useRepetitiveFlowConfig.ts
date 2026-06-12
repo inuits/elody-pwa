@@ -21,6 +21,9 @@ const normalizeStep = (step: any): RepetitiveStepConfig => {
     "pickerQuery",
     "pickerFiltersQuery",
   ]);
+  // 0 is the echo resolver's "not configured" value and means "no limit"
+  if (!normalized.maxSelection) delete normalized.maxSelection;
+  if (!normalized.overviewFields?.length) delete normalized.overviewFields;
   if (normalized.scopeToRelationOf)
     normalized.scopeToRelationOf = dropEmpty(normalized.scopeToRelationOf, [
       "filterKey",
