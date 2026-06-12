@@ -127,6 +127,7 @@ const props = withDefaults(
     searchFilter?: () => any;
     displayInputForTag?: boolean;
     initialTagInputValues?: Map<string | number, string>;
+    disableVirtualKeyboardContext?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -138,6 +139,7 @@ const props = withDefaults(
     searchFilter: undefined,
     displayInputForTag: false,
     initialTagInputValues: undefined,
+    disableVirtualKeyboardContext: false,
   },
 );
 
@@ -159,6 +161,7 @@ const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKey
 watch(
   () => virtualKeyboardContext?.isOpen.value,
   (open) => {
+    if (props.disableVirtualKeyboardContext) return;
     if (open) return multiselectRef.value?.open();
     multiselectRef.value?.close();
   },
@@ -167,6 +170,7 @@ watch(
 watch(
   () => virtualKeyboardContext?.searchQuery.value,
   (query) => {
+    if (props.disableVirtualKeyboardContext) return;
     if (query === undefined || query === null) return;
     if (multiselectRef.value && multiselectRef.value.search !== query) {
       multiselectRef.value.search = query;
@@ -297,7 +301,8 @@ const handleTagCreate = async (option: any) => {
 
 const handleSearchChange = (value: string) => {
   searchValue.value = value;
-  if (virtualKeyboardContext && virtualKeyboardContext.searchQuery.value !== value) {
+  if (!props.disableVirtualKeyboardContext && virtualKeyboardContext && virtualKeyboardContext.searchQuery.value !== value) {
+    // Should refactor keyboard to support multiple fields in 1 metadatawrapper parent
     virtualKeyboardContext.searchQuery.value = value;
   }
   emit("searchChange", value);
