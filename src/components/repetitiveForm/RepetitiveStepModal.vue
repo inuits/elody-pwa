@@ -8,6 +8,7 @@
       // (see BaseTooltip/AdvancedDropdown '.base-modal--opened')
       { 'base-modal--opened': open },
     ]"
+    @cancel.prevent="emit('close')"
   >
     <div
       class="flex items-center justify-between px-6 py-4 border-b border-neutral-50 sticky top-0 bg-neutral-white z-10"

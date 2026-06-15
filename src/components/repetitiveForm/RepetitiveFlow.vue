@@ -1,5 +1,5 @@
 <template>
-  <RepetitiveStepModal :open="open" :title="modalTitle" @close="emit('close')">
+  <RepetitiveStepModal :open="open" :title="modalTitle" @close="requestClose">
     <div data-testid="repetitive-flow">
       <ol
         v-if="view === 'step'"
@@ -51,20 +51,6 @@
       />
 
       <template v-else-if="view === 'step' && activeStep">
-        <div class="w-fit mb-4">
-          <BaseButtonNew
-            data-testid="repetitive-flow-back"
-            :label="
-              currentStepIndex > 0
-                ? $t('repetitiveForm.back-to-previous-step')
-                : $t('repetitiveForm.back-to-overview')
-            "
-            :icon="DamsIcons.AngleLeft"
-            button-style="accentAccent"
-            button-size="small"
-            @click="goBack"
-          />
-        </div>
         <RepetitiveStepField
           :step="activeStep"
           :scope-filter="scopeFilter"
@@ -73,7 +59,24 @@
           :picker-parent-uuid="pickerParentUuid"
           @selected="onSelected"
           @created="onCreated"
-        />
+        >
+          <template #actions>
+            <div class="w-fit">
+              <BaseButtonNew
+                data-testid="repetitive-flow-back"
+                :label="
+                  currentStepIndex > 0
+                    ? $t('repetitiveForm.back-to-previous-step')
+                    : $t('repetitiveForm.back-to-overview')
+                "
+                :icon="DamsIcons.AngleLeft"
+                button-style="accentAccent"
+                button-size="small"
+                @click="goBack"
+              />
+            </div>
+          </template>
+        </RepetitiveStepField>
       </template>
 
       <template v-else-if="view === 'finalize'">
@@ -110,13 +113,19 @@
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { DamsIcons, type AdvancedFilterInput } from "@/generated-types/queries";
+import {
+  DamsIcons,
+  TypeModals,
+  type AdvancedFilterInput,
+  type RepetitiveForm,
+} from "@/generated-types/queries";
 import {
   useRepetitiveForm,
   describeCreatedEntity,
-  type RepetitiveFormConfig,
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBaseModal } from "@/composables/useBaseModal";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
@@ -125,7 +134,7 @@ import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const FLOW_ID = "repetitive-flow";
 
-const props = defineProps<{ open: boolean; config: RepetitiveFormConfig }>();
+const props = defineProps<{ open: boolean; config: RepetitiveForm }>();
 const emit = defineEmits<{
   (e: "close"): void;
   (e: "finished", entity: { id?: string; uuid?: string; type?: string }): void;
@@ -134,6 +143,8 @@ const emit = defineEmits<{
 const store = useRepetitiveForm();
 const { flowConfig, currentStepIndex, currentBranch, branches } = store;
 const { setEntityId, setDynamicFormId } = useEntityPickerModal();
+const { initializeConfirmModal } = useConfirmModal();
+const { closeModal } = useBaseModal();
 const router = useRouter();
 const { t } = useI18n();
 
@@ -192,9 +203,14 @@ const onSelected = (entity: { id: string; label?: string }) => {
   advance();
 };
 
-const onCreated = (entity: { id?: string; uuid?: string }) => {
+const onCreated = (entity: {
+  id?: string;
+  uuid?: string;
+  intialValues?: Record<string, unknown>;
+}) => {
   const { label, details } = describeCreatedEntity(entity);
-  store.recordCreated({ ...entity, label, details });
+  // the created entity's intialValues feed the overview's configured fields
+  store.recordCreated({ ...entity, label, details, values: entity.intialValues });
   advance();
 };
 
@@ -223,6 +239,25 @@ const onFinish = () => {
 
 const onFinalized = (entity: { id?: string; uuid?: string; type?: string }) => {
   emit("finished", entity);
+};
+
+const hasStagedProgress = (): boolean =>
+  branches.value.length > 0 ||
+  Object.keys(currentBranch.value.entities).length > 0;
+
+// Closing mid-flow abandons the staging (already-created entities are kept,
+// but the flow won't be finalized), so confirm first when there is progress.
+const requestClose = () => {
+  if (!hasStagedProgress()) {
+    emit("close");
+    return;
+  }
+  initializeConfirmModal({
+    confirmButton: { buttonCallback: () => emit("close") },
+    declineButton: { buttonCallback: () => closeModal(TypeModals.Confirm) },
+    translationKey: "close-guided-flow",
+    openImmediately: true,
+  });
 };
 
 watch(() => props.open, (isOpen) => { if (isOpen) start(); }, { immediate: true });

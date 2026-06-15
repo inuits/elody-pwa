@@ -6,73 +6,10 @@ import {
   type BaseRelationValuesInput,
   type Entitytyping,
   type MetadataInput,
+  type RepetitiveForm,
+  type RepetitiveStep,
 } from "@/generated-types/queries";
 import { useManageEntities } from "@/composables/useManageEntities";
-
-export type RelationCreateWhen = "onCreate" | "onFinalize";
-
-export type StepRelationConfig = {
-  to: string; // prior step key
-  relationType: string;
-  createWhen: RelationCreateWhen;
-};
-
-export type StepScopeConfig = {
-  step: string; // prior step key whose selected entity scopes this search
-  relationType: string;
-  // optional override for the advanced-filter key; defaults to the
-  // elody-dialect relation key built from relationType
-  filterKey?: string;
-};
-
-export type RepetitiveStepConfig = {
-  key: string;
-  label?: string; // display label (translation key) for the step
-  entityType: Entitytyping;
-  createForm: string;
-  scopeToRelationOf?: StepScopeConfig;
-  skipSearchIfPriorIsNew?: boolean;
-  relations?: StepRelationConfig[];
-  acceptedTypes?: Entitytyping[]; // picker accepted types; defaults to [entityType]
-  pickerQuery?: string; // GraphQL query name the picker uses to fetch candidates
-  pickerFiltersQuery?: string; // optional filters query for the picker
-  maxSelection?: number; // max entities selectable in the picker (0/absent = unlimited)
-  // which entity values the overview shows for this step, with label
-  // translation keys; absent = derive from teaser metadata / created values
-  overviewFields?: OverviewFieldConfig[];
-};
-
-export type OverviewFieldConfig = {
-  key: string; // intialValues key
-  label: string; // translation key
-};
-
-export type FinalizeRelationConfig = {
-  toAllOf: string; // step key whose collected entities are linked
-  relationType: string;
-  // pinned: finalize relations are only ever created at finalize time
-  createWhen: "onFinalize";
-};
-
-export type MetadataPrefillConfig = {
-  key: string;
-  value: unknown;
-};
-
-export type RepetitiveFinalizeConfig = {
-  label?: string; // display label (translation key) for the finalize view
-  entityType: Entitytyping;
-  createForm: string;
-  relations: FinalizeRelationConfig[];
-  prefillMetadata?: MetadataPrefillConfig[];
-};
-
-export type RepetitiveFormConfig = {
-  label?: string; // display label (translation key) for the whole flow
-  repeatable: boolean;
-  steps: RepetitiveStepConfig[];
-  finalize?: RepetitiveFinalizeConfig;
-};
 
 export type StagedEntityDetail = {
   label: string; // translation key (or raw metadata key as fallback)
@@ -162,7 +99,7 @@ export type RepetitiveBranch = {
   entities: Record<string, StagedEntity>;
 };
 
-const flowConfig = ref<RepetitiveFormConfig | null>(null);
+const flowConfig = ref<RepetitiveForm | null>(null);
 const currentStepIndex = ref<number>(0);
 const currentBranch = ref<RepetitiveBranch>({ entities: {} });
 const branches = ref<RepetitiveBranch[]>([]);
@@ -177,12 +114,12 @@ export const useRepetitiveForm = () => {
     branches.value = [];
   };
 
-  const initFlow = (config: RepetitiveFormConfig) => {
+  const initFlow = (config: RepetitiveForm) => {
     resetFlow();
     flowConfig.value = config;
   };
 
-  const activeStep = (): RepetitiveStepConfig | null =>
+  const activeStep = (): RepetitiveStep | null =>
     flowConfig.value?.steps[currentStepIndex.value] ?? null;
 
   const isLastStep = (): boolean => {
@@ -230,7 +167,7 @@ export const useRepetitiveForm = () => {
     recordEntity({
       key: step.key,
       id: entity.id,
-      type: step.entityType,
+      type: step.entityType as Entitytyping,
       label: entity.label,
       details: entity.details,
       values: entity.values,
@@ -247,7 +184,7 @@ export const useRepetitiveForm = () => {
   };
 
   const buildScopeFilter = (
-    step: RepetitiveStepConfig,
+    step: RepetitiveStep,
   ): AdvancedFilterInput | null => {
     if (!step.scopeToRelationOf) return null;
     const prior = currentBranch.value.entities[step.scopeToRelationOf.step];
@@ -263,14 +200,14 @@ export const useRepetitiveForm = () => {
     };
   };
 
-  const shouldSkipSearch = (step: RepetitiveStepConfig): boolean => {
+  const shouldSkipSearch = (step: RepetitiveStep): boolean => {
     if (!step.skipSearchIfPriorIsNew || !step.scopeToRelationOf) return false;
     const prior = currentBranch.value.entities[step.scopeToRelationOf.step];
     return Boolean(prior?.isNew);
   };
 
   const buildCreateRelations = (
-    step: RepetitiveStepConfig,
+    step: RepetitiveStep,
   ): BaseRelationValuesInput[] =>
     (step.relations ?? [])
       .filter((relation) => relation.createWhen === "onCreate")
@@ -298,7 +235,7 @@ export const useRepetitiveForm = () => {
     recordEntity({
       key: step.key,
       id: entity.id ?? entity.uuid ?? "",
-      type: step.entityType,
+      type: step.entityType as Entitytyping,
       label: entity.label,
       details: entity.details,
       values: entity.values,
@@ -307,7 +244,7 @@ export const useRepetitiveForm = () => {
   };
 
   const buildCreatePrefill = (
-    step: RepetitiveStepConfig,
+    step: RepetitiveStep,
   ): { relationValues: Record<string, BaseRelationValuesInput[]> } => {
     const relationValues: Record<string, BaseRelationValuesInput[]> = {};
     buildCreateRelations(step).forEach((relation) => {
@@ -318,18 +255,18 @@ export const useRepetitiveForm = () => {
   };
 
   const createForStep = async (
-    step: RepetitiveStepConfig,
+    step: RepetitiveStep,
     metadata: MetadataInput[],
   ) => {
     const created = await createEntity({
-      entityType: step.entityType,
+      entityType: step.entityType as Entitytyping,
       metadata,
       relations: buildCreateRelations(step),
     });
     recordEntity({
       key: step.key,
       id: created.id ?? created.uuid,
-      type: step.entityType,
+      type: step.entityType as Entitytyping,
       label: undefined,
       isNew: true,
     });
@@ -373,7 +310,7 @@ export const useRepetitiveForm = () => {
     const config = flowConfig.value?.finalize;
     if (!config) throw new Error("No finalize config for this flow");
     return await createEntity({
-      entityType: config.entityType,
+      entityType: config.entityType as Entitytyping,
       metadata,
       relations: buildFinalizeRelations(),
     });

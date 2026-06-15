@@ -10,15 +10,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { TypeModals } from "@/generated-types/queries";
+import { TypeModals, type RepetitiveForm } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useImport } from "@/composables/useImport";
 import { toRepetitiveFormConfig } from "@/composables/useRepetitiveFlowConfig";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
-import type { RepetitiveFormConfig } from "@/composables/useRepetitiveForm";
 
-const emptyConfig = (): RepetitiveFormConfig => ({
+const emptyConfig = (): RepetitiveForm => ({
   repeatable: false,
   steps: [],
 });
@@ -27,7 +26,7 @@ const { loadDocument } = useImport();
 const { getModalInfo, closeModal } = useBaseModal();
 const router = useRouter();
 
-const config = ref<RepetitiveFormConfig>(emptyConfig());
+const config = ref<RepetitiveForm>(emptyConfig());
 const isOpen = computed(() => getModalInfo(TypeModals.GuidedFlow).open);
 
 // The modal's formQuery carries the name of the self-describing query that

@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { Entitytyping } from "@/generated-types/queries";
+import { Entitytyping, type RepetitiveForm } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
   describePickedItem,
   describeCreatedEntity,
-  type RepetitiveFormConfig,
 } from "@/composables/useRepetitiveForm";
 
 const mocks = vi.hoisted(() => ({
@@ -15,7 +14,7 @@ vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({ createEntity: mocks.createEntity }),
 }));
 
-const omnibusConfig = (): RepetitiveFormConfig => ({
+const omnibusConfig = (): RepetitiveForm => ({
   repeatable: true,
   steps: [
     {

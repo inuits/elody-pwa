@@ -24,14 +24,14 @@
         :entity-uuid="pickerParentUuid"
         :accepted-types="acceptedTypes"
         :custom-query="step.pickerQuery ?? ''"
-        :custom-filters-query="step.pickerFiltersQuery"
+        :custom-filters-query="step.pickerFiltersQuery ?? undefined"
         :computed-filters="computedFilters"
         :show-button="true"
         :enable-bulk-operations="true"
         :enable-advanced-filters="true"
         :entity-picker-mode="EntityPickerMode.Emit"
         :should-use-state-for-route="false"
-        :selection-limit="step.maxSelection"
+        :selection-limit="step.maxSelection ?? undefined"
         base-library-height="h-[55vh]"
         @entities-selected="onPicked"
       />
@@ -72,11 +72,11 @@ import {
   DamsIcons,
   EntityPickerMode,
   type AdvancedFilterInput,
+  type RepetitiveStep,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import {
   describePickedItem,
-  type RepetitiveStepConfig,
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -92,7 +92,7 @@ type SelectedEntity = {
 
 const props = withDefaults(
   defineProps<{
-    step: RepetitiveStepConfig;
+    step: RepetitiveStep;
     scopeFilter?: AdvancedFilterInput | null;
     skipSearch?: boolean;
     createPrefill?: object;

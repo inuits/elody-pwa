@@ -1,8 +1,8 @@
 import { omitDeep } from "@apollo/client/utilities";
 import type {
-  RepetitiveFormConfig,
-  RepetitiveStepConfig,
-} from "@/composables/useRepetitiveForm";
+  RepetitiveForm,
+  RepetitiveStep,
+} from "@/generated-types/queries";
 
 const dropEmpty = <T extends Record<string, any>>(
   obj: T,
@@ -15,7 +15,7 @@ const dropEmpty = <T extends Record<string, any>>(
   return copy as T;
 };
 
-const normalizeStep = (step: any): RepetitiveStepConfig => {
+const normalizeStep = (step: any): RepetitiveStep => {
   const normalized = dropEmpty(step, [
     "label",
     "pickerQuery",
@@ -32,7 +32,7 @@ const normalizeStep = (step: any): RepetitiveStepConfig => {
 };
 
 /**
- * Maps a raw `GetRepetitiveForm` query result onto a `RepetitiveFormConfig`.
+ * Maps a raw `GetRepetitiveForm` query result onto a `RepetitiveForm` config.
  *
  * The flow config comes from a self-describing query in which every step is
  * an aliased `steps` field (e.g. `work: steps { ... }`), each resolving to a
@@ -42,7 +42,7 @@ const normalizeStep = (step: any): RepetitiveStepConfig => {
  *
  * This is a pure function — no Vue reactivity, fully unit-testable.
  */
-export const toRepetitiveFormConfig = (raw: any): RepetitiveFormConfig => {
+export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
   if (!raw) return { repeatable: false, steps: [] };
   const cleaned = omitDeep(raw, "__typename") as Record<string, any>;
   const { label, repeatable, finalize, ...rest } = cleaned;
@@ -50,7 +50,7 @@ export const toRepetitiveFormConfig = (raw: any): RepetitiveFormConfig => {
     .filter(Array.isArray)
     .flat()
     .map(normalizeStep);
-  const config: RepetitiveFormConfig = {
+  const config: RepetitiveForm = {
     repeatable: Boolean(repeatable),
     steps,
   };

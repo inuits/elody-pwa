@@ -26,18 +26,18 @@
           :key="step.key"
           class="flex flex-col min-w-0 flex-1 px-2"
         >
-          <span class="text-sm text-text-light">
+          <span class="text-base font-semibold text-text-light">
             {{ $t(step.label ?? step.key) }}
           </span>
           <span class="font-medium truncate">
             {{ entityLabel(branch, step.key) || "—" }}
           </span>
           <span
-            v-for="detail in entityDetails(branch, step.key)"
-            :key="detail.label"
-            class="text-sm text-text-light truncate"
+            v-for="entry in overviewEntries(branch, step)"
+            :key="entry.label"
+            class="text-text-light text-sm truncate"
           >
-            {{ $t(detail.label) }}: {{ detail.value }}
+            {{ $t(entry.label) }}: {{ entry.value }}
           </span>
         </div>
         <div class="w-fit ml-auto shrink-0">
@@ -79,17 +79,17 @@
 </template>
 
 <script setup lang="ts">
-import { DamsIcons } from "@/generated-types/queries";
+import { DamsIcons, type RepetitiveStep } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import type {
-  RepetitiveBranch,
-  RepetitiveStepConfig,
-  StagedEntityDetail,
+import {
+  toDisplayValue,
+  type RepetitiveBranch,
+  type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
 
 const props = defineProps<{
   branches: RepetitiveBranch[];
-  steps: RepetitiveStepConfig[];
+  steps: RepetitiveStep[];
   repeatable: boolean;
 }>();
 const emit = defineEmits<{
@@ -104,8 +104,25 @@ const entityLabel = (branch: RepetitiveBranch, stepKey: string): string => {
   return entity.label || entity.id;
 };
 
-const entityDetails = (
+// When a step configures overviewFields, the overview shows those exact entity
+// values (with translated labels); otherwise it falls back to the details
+// derived from the picked/created entity. Empty values and the field that
+// duplicates the row's main label are skipped so the row stays compact.
+const overviewEntries = (
   branch: RepetitiveBranch,
-  stepKey: string,
-): StagedEntityDetail[] => branch.entities[stepKey]?.details ?? [];
+  step: RepetitiveStep,
+): StagedEntityDetail[] => {
+  const entity = branch.entities[step.key];
+  if (!entity) return [];
+  if (step.overviewFields?.length) {
+    const label = entityLabel(branch, step.key);
+    return step.overviewFields
+      .map((field) => ({
+        label: field.label,
+        value: toDisplayValue(entity.values?.[field.key]),
+      }))
+      .filter((entry) => entry.value && entry.value !== label);
+  }
+  return entity.details ?? [];
+};
 </script>

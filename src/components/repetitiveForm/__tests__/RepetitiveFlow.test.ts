@@ -17,6 +17,18 @@ vi.mock("@/composables/useManageEntities", () => ({
 vi.mock("@/composables/useEntityPickerModal", () => ({
   default: () => ({ setEntityId: vi.fn(), setDynamicFormId: vi.fn() }),
 }));
+const confirmMocks = vi.hoisted(() => ({
+  initializeConfirmModal: vi.fn(),
+  closeModal: vi.fn(),
+}));
+vi.mock("@/composables/useConfirmModal", () => ({
+  useConfirmModal: () => ({
+    initializeConfirmModal: confirmMocks.initializeConfirmModal,
+  }),
+}));
+vi.mock("@/composables/useBaseModal", () => ({
+  useBaseModal: () => ({ closeModal: confirmMocks.closeModal }),
+}));
 vi.mock("@/components/repetitiveForm/RepetitiveStepModal.vue", () => ({
   default: {
     name: "RepetitiveStepModal",
@@ -85,6 +97,9 @@ const getWrapper = () =>
     global: {
       mocks: { $t: (k: string) => k },
       renderStubDefaultSlot: true,
+      // render the mocked step field for real so its named `actions` slot
+      // (which now hosts the flow's back button) is part of the DOM
+      stubs: { RepetitiveStepField: false },
     },
   });
 
@@ -109,6 +124,8 @@ const completeOneBranch = async (w: ReturnType<typeof getWrapper>) => {
 describe("RepetitiveFlow", () => {
   beforeEach(() => {
     useRepetitiveForm().resetFlow();
+    confirmMocks.initializeConfirmModal.mockReset();
+    confirmMocks.closeModal.mockReset();
   });
 
   it("initialises the flow and starts on the (empty) overview", () => {
@@ -181,6 +198,7 @@ describe("RepetitiveFlow", () => {
       type: Entitytyping.Work,
       label: "Mooi werk",
       details: [{ label: "record_type", value: "tekst" }],
+      values: { title: "Mooi werk", record_type: "tekst" },
       isNew: true,
     });
     expect(useRepetitiveForm().currentStepIndex.value).toBe(1);
@@ -267,6 +285,29 @@ describe("RepetitiveFlow", () => {
       .trigger("click");
     expect(form(wrapper).exists()).toBe(false);
     expect(overview(wrapper).exists()).toBe(true);
+  });
+
+  it("asks for confirmation before closing once a branch has been staged", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    modal(wrapper).vm.$emit("close");
+    await wrapper.vm.$nextTick();
+    // a confirm modal is requested; the flow is not closed yet
+    expect(confirmMocks.initializeConfirmModal).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted("close")).toBeFalsy();
+    // confirming actually closes the flow
+    const config = confirmMocks.initializeConfirmModal.mock.calls[0][0];
+    expect(config.translationKey).toBe("close-guided-flow");
+    config.confirmButton.buttonCallback();
+    expect(wrapper.emitted("close")).toBeTruthy();
+  });
+
+  it("closes immediately without confirmation when nothing is staged", async () => {
+    const wrapper = getWrapper();
+    modal(wrapper).vm.$emit("close");
+    await wrapper.vm.$nextTick();
+    expect(confirmMocks.initializeConfirmModal).not.toHaveBeenCalled();
+    expect(wrapper.emitted("close")).toBeTruthy();
   });
 
   it("emits finished when the finalize form creates the manifestation", async () => {
