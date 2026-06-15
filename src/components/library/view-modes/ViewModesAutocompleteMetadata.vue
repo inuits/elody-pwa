@@ -7,6 +7,7 @@
     :select-type="selectType"
     :disabled="disabled"
     :create-option-config="{ canCreateOption }"
+    :disable-virtual-keyboard-context="disableVirtualKeyboardContext"
     @search-change="
       (value: string) => {
         filterAutocompleteOptions(value);
@@ -42,6 +43,7 @@ const props = withDefaults(
     disabled?: boolean;
     canCreateOption?: boolean;
     mode: "view" | "edit";
+    disableVirtualKeyboardContext?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -49,6 +51,7 @@ const props = withDefaults(
     disabled: false,
     canCreateOption: false,
     mode: "view",
+    disableVirtualKeyboardContext: false,
   },
 );
 

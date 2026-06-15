@@ -43,6 +43,7 @@
       "
       :canCreateOption="subField.inputField.canCreateEntityFromOption"
       :disabled="subField.inputField.disabled"
+      :disable-virtual-keyboard-context="true"
       mode="edit"
     />
     <p
