@@ -98,11 +98,19 @@
           {{ $t(finalizeLabel) }}
         </h2>
         <DynamicForm
-          :dynamic-form-query="finalizeForm"
+          v-if="selectedFinalizeType"
+          :key="selectedFinalizeType.entityType"
+          :dynamic-form-query="selectedFinalizeType.createForm"
           :router="router"
           :prefilled-form-values="finalizePrefill"
           :emit-entity-created="true"
           @entity-created="onFinalized"
+        />
+        <!-- more than one creatable manifestation type: pick which to create -->
+        <RepetitiveCreateButton
+          v-else
+          :types="finalizeOptions"
+          @select="(type) => (selectedFinalizeType = type)"
         />
       </template>
     </div>
@@ -118,6 +126,7 @@ import {
   TypeModals,
   type AdvancedFilterInput,
   type RepetitiveForm,
+  type RepetitiveCreatableType,
 } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
@@ -130,6 +139,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
 import RepetitiveOverview from "@/components/repetitiveForm/RepetitiveOverview.vue";
+import RepetitiveCreateButton from "@/components/repetitiveForm/RepetitiveCreateButton.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const FLOW_ID = "repetitive-flow";
@@ -179,9 +189,25 @@ const pickerParentUuid = computed(() => {
   return (scopeStep && currentBranch.value.entities[scopeStep]?.id) || "";
 });
 
-const finalizeForm = computed(() => flowConfig.value?.finalize?.createForm ?? "");
 const finalizeLabel = computed(() => flowConfig.value?.finalize?.label ?? "");
 const finalizePrefill = computed(() => store.buildFinalizePrefill());
+
+// the subtypes in the finalize screen can create, or a single
+// fallback derived from the finalize createForm
+const finalizeOptions = computed<RepetitiveCreatableType[]>(() => {
+  const finalize = flowConfig.value?.finalize;
+  if (!finalize) return [];
+  return finalize.creatableTypes?.length
+    ? finalize.creatableTypes
+    : [
+        {
+          label: "repetitiveForm.create-new",
+          entityType: finalize.entityType,
+          createForm: finalize.createForm,
+        },
+      ];
+});
+const selectedFinalizeType = ref<RepetitiveCreatableType | null>(null);
 
 const start = () => {
   store.initFlow(props.config);
@@ -203,14 +229,24 @@ const onSelected = (entity: { id: string; label?: string }) => {
   advance();
 };
 
-const onCreated = (entity: {
-  id?: string;
-  uuid?: string;
-  intialValues?: Record<string, unknown>;
-}) => {
+const onCreated = (
+  entity: {
+    id?: string;
+    uuid?: string;
+    intialValues?: Record<string, unknown>;
+  },
+  entityType?: string,
+) => {
   const { label, details } = describeCreatedEntity(entity);
-  // the created entity's intialValues feed the overview's configured fields
-  store.recordCreated({ ...entity, label, details, values: entity.intialValues });
+  // the created entity's intialValues feed the overview's configured fields;
+  // entityType is the concrete subtype the user picked on the create screen
+  store.recordCreated({
+    ...entity,
+    type: entityType,
+    label,
+    details,
+    values: entity.intialValues,
+  });
   advance();
 };
 
@@ -234,6 +270,9 @@ const goBack = () => {
 };
 
 const onFinish = () => {
+  // preselect when there is only one creatable type; otherwise show the chooser
+  selectedFinalizeType.value =
+    finalizeOptions.value.length === 1 ? finalizeOptions.value[0] : null;
   view.value = "finalize";
 };
 

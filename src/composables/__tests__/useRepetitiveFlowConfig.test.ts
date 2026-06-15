@@ -205,6 +205,71 @@ describe("toRepetitiveFormConfig", () => {
     expect(result.steps[1].overviewFields).toBeUndefined();
   });
 
+  it("keeps configured creatableTypes on steps and finalize, drops empty ones", () => {
+    const result = toRepetitiveFormConfig({
+      repeatable: true,
+      work: [
+        {
+          key: "work",
+          entityType: "work",
+          createForm: "GetWorkForm",
+          creatableTypes: [
+            {
+              label: "entity-translations.singular.work_word",
+              entityType: "work_word",
+              createForm: "GetFullWorkWordCreateForm",
+            },
+            {
+              label: "entity-translations.singular.work_serial",
+              entityType: "work_serial",
+              createForm: "GetFullWorkSerialCreateForm",
+            },
+          ],
+        },
+      ],
+      expression: [
+        {
+          key: "expression",
+          entityType: "expression",
+          createForm: "GetExprForm",
+          creatableTypes: [],
+        },
+      ],
+      finalize: {
+        entityType: "manifestation",
+        createForm: "GetManifForm",
+        relations: [],
+        creatableTypes: [
+          {
+            label: "entity-translations.singular.manifestation_word",
+            entityType: "manifestation_word",
+            createForm: "GetBasicManifestationWordCreateForm",
+          },
+        ],
+      },
+    });
+    expect(result.steps[0].creatableTypes).toEqual([
+      {
+        label: "entity-translations.singular.work_word",
+        entityType: "work_word",
+        createForm: "GetFullWorkWordCreateForm",
+      },
+      {
+        label: "entity-translations.singular.work_serial",
+        entityType: "work_serial",
+        createForm: "GetFullWorkSerialCreateForm",
+      },
+    ]);
+    expect(result.steps[1].creatableTypes).toBeUndefined();
+    expect(result.finalize?.creatableTypes).toEqual([
+      {
+        label: "entity-translations.singular.manifestation_word",
+        entityType: "manifestation_word",
+        createForm: "GetBasicManifestationWordCreateForm",
+      },
+    ]);
+  });
+
   it("keeps a positive maxSelection and drops the no-limit value 0", () => {
     const result = toRepetitiveFormConfig({
       repeatable: true,

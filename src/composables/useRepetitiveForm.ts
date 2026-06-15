@@ -226,6 +226,7 @@ export const useRepetitiveForm = () => {
   const recordCreated = (entity: {
     id?: string;
     uuid?: string;
+    type?: string; // concrete subtype chosen on the create screen
     label?: string;
     details?: StagedEntityDetail[];
     values?: Record<string, unknown>;
@@ -235,7 +236,7 @@ export const useRepetitiveForm = () => {
     recordEntity({
       key: step.key,
       id: entity.id ?? entity.uuid ?? "",
-      type: step.entityType as Entitytyping,
+      type: (entity.type ?? step.entityType) as Entitytyping,
       label: entity.label,
       details: entity.details,
       values: entity.values,

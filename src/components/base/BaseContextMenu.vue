@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="someModalIsOpened ? '.base-modal--opened' : 'body'">
     <Transition class="base-context-menu-container">
       <div
         @click.prevent
@@ -16,6 +16,9 @@
 <script lang="ts" setup>
 import { type ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
 import { ContextMenuDirection } from "@/generated-types/queries";
+import { useBaseModal } from "@/composables/useBaseModal";
+
+const { someModalIsOpened } = useBaseModal();
 
 const props = withDefaults(
   defineProps<{

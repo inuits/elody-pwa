@@ -4,6 +4,7 @@ import { Entitytyping, EntityPickerMode } from "@/generated-types/queries";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
+import RepetitiveCreateButton from "@/components/repetitiveForm/RepetitiveCreateButton.vue";
 
 vi.mock("vue-router", () => ({
   useRouter: () => ({}),
@@ -53,6 +54,20 @@ const pickerView = (wrapper: ReturnType<typeof getWrapper>) =>
   wrapper.find("[data-testid='repetitive-step-picker']");
 const createView = (wrapper: ReturnType<typeof getWrapper>) =>
   wrapper.find("[data-testid='repetitive-step-create']");
+
+// the create-new button now lives in RepetitiveCreateButton; choosing a type
+// (emit "select") switches the field into the create view
+const chooseCreateType = async (
+  wrapper: ReturnType<typeof getWrapper>,
+  type: any = {
+    label: "x",
+    entityType: Entitytyping.Expression,
+    createForm: "GetExpressionCreationForm",
+  },
+) => {
+  wrapper.findComponent(RepetitiveCreateButton).vm.$emit("select", type);
+  await wrapper.vm.$nextTick();
+};
 
 describe("RepetitiveStepField", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -127,12 +142,11 @@ describe("RepetitiveStepField", () => {
   });
 
   it("renders the create-new button above the picker, mirroring back-to-search", () => {
-    const html = pickerView(getWrapper()).html();
-    const buttonIndex = html.indexOf("repetitive-step-create-new");
-    const pickerIndex = html.indexOf("entity-picker");
-    expect(buttonIndex).toBeGreaterThan(-1);
-    expect(pickerIndex).toBeGreaterThan(-1);
-    expect(buttonIndex).toBeLessThan(pickerIndex);
+    const wrapper = getWrapper();
+    const row = wrapper.find("[data-testid='repetitive-step-actions']");
+    // the create button lives in the actions row, before the picker
+    expect(row.findComponent(RepetitiveCreateButton).exists()).toBe(true);
+    expect(pickerView(wrapper).findComponent(EntityPickerComponent).exists()).toBe(true);
   });
 
   it("renders the actions slot on the same row as its own buttons in both views", async () => {
@@ -143,9 +157,9 @@ describe("RepetitiveStepField", () => {
     });
     const pickRow = wrapper.find("[data-testid='repetitive-step-actions']");
     expect(pickRow.find("[data-testid='external-back']").exists()).toBe(true);
-    expect(pickRow.find("[data-testid='repetitive-step-create-new']").exists()).toBe(true);
+    expect(pickRow.findComponent(RepetitiveCreateButton).exists()).toBe(true);
 
-    await wrapper.find("[data-testid='repetitive-step-create-new']").trigger("click");
+    await chooseCreateType(wrapper);
     const createRow = wrapper.find("[data-testid='repetitive-step-actions']");
     expect(createRow.find("[data-testid='external-back']").exists()).toBe(true);
     expect(createRow.find("[data-testid='repetitive-step-back-to-search']").exists()).toBe(true);
@@ -163,24 +177,64 @@ describe("RepetitiveStepField", () => {
     });
   });
 
-  it("switches from picker to create when the create-new button is clicked", async () => {
+  it("switches from picker to create when a type is chosen", async () => {
     const wrapper = getWrapper();
-    await wrapper
-      .find("[data-testid='repetitive-step-create-new']")
-      .trigger("click");
+    await chooseCreateType(wrapper);
     expect(pickerView(wrapper).exists()).toBe(false);
     expect(createView(wrapper).exists()).toBe(true);
   });
 
   it("returns from create to the picker via the back-to-search button", async () => {
     const wrapper = getWrapper();
-    await wrapper
-      .find("[data-testid='repetitive-step-create-new']")
-      .trigger("click");
+    await chooseCreateType(wrapper);
     await wrapper
       .find("[data-testid='repetitive-step-back-to-search']")
       .trigger("click");
     expect(pickerView(wrapper).exists()).toBe(true);
+  });
+
+  it("passes the step's creatableTypes to the create button", () => {
+    const creatableTypes = [
+      { label: "a", entityType: Entitytyping.Reading, createForm: "GetReadingForm" },
+      { label: "b", entityType: Entitytyping.Watching, createForm: "GetWatchingForm" },
+    ];
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: { ...expressionStep(), creatableTypes },
+    });
+    expect(
+      wrapper.findComponent(RepetitiveCreateButton).props("types"),
+    ).toEqual(creatableTypes);
+  });
+
+  it("renders the chosen type's create form", async () => {
+    const wrapper = getWrapper();
+    await chooseCreateType(wrapper, {
+      label: "Watching",
+      entityType: Entitytyping.Watching,
+      createForm: "GetWatchingCreationForm",
+    });
+    expect(wrapper.findComponent(DynamicForm).props("dynamicFormQuery")).toBe(
+      "GetWatchingCreationForm",
+    );
+  });
+
+  it("shows the type chooser in the create view when search is skipped and there are multiple types", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      skipSearch: true,
+      step: {
+        ...expressionStep(),
+        creatableTypes: [
+          { label: "a", entityType: Entitytyping.Reading, createForm: "GetReadingForm" },
+          { label: "b", entityType: Entitytyping.Watching, createForm: "GetWatchingForm" },
+        ],
+      },
+    });
+    // no type chosen yet → the chooser is shown instead of a form
+    expect(createView(wrapper).exists()).toBe(true);
+    expect(wrapper.findComponent(DynamicForm).exists()).toBe(false);
+    expect(wrapper.findComponent(RepetitiveCreateButton).exists()).toBe(true);
   });
 
   it("hides the back-to-search button when search is skipped", () => {
@@ -201,23 +255,48 @@ describe("RepetitiveStepField", () => {
     expect(form.props("emitEntityCreated")).toBe(true);
   });
 
-  it("remounts DynamicForm per step so a reused create view gets fresh form state", () => {
-    const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
-    expect(wrapper.findComponent(DynamicForm).vm.$.vnode.key).toBe("expression");
+  it("remounts DynamicForm per chosen type so a reused create view gets fresh form state", () => {
+    // string literal entity type: the test env's mocked Entitytyping enum
+    // omits these members, so a literal keeps the key assertion meaningful
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      skipSearch: true,
+      step: { ...expressionStep(), entityType: "reading" },
+    });
+    // single fallback type → keyed by step key and the entity type
+    expect(wrapper.findComponent(DynamicForm).vm.$.vnode.key).toBe(
+      "expression:reading",
+    );
   });
 
-  it("emits created when DynamicForm emits entityCreated", async () => {
-    const wrapper = getWrapper({ ...getDefaultProps(), skipSearch: true });
+  it("emits created with the chosen entity type when DynamicForm emits entityCreated", async () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      skipSearch: true,
+      step: {
+        ...expressionStep(),
+        creatableTypes: [
+          { label: "Watching", entityType: "watching", createForm: "GetWatchingForm" },
+          { label: "Reading", entityType: "reading", createForm: "GetReadingForm" },
+        ],
+      },
+    });
+    await chooseCreateType(wrapper, {
+      label: "Watching",
+      entityType: "watching",
+      createForm: "GetWatchingForm",
+    });
     wrapper.findComponent(DynamicForm).vm.$emit("entityCreated", { id: "expr-9" });
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted("created")?.[0]).toEqual([{ id: "expr-9" }]);
+    expect(wrapper.emitted("created")?.[0]).toEqual([
+      { id: "expr-9" },
+      "watching",
+    ]);
   });
 
   it("resets the view to the picker when the step changes", async () => {
     const wrapper = getWrapper();
-    await wrapper
-      .find("[data-testid='repetitive-step-create-new']")
-      .trigger("click");
+    await chooseCreateType(wrapper);
     expect(createView(wrapper).exists()).toBe(true);
     await wrapper.setProps({
       step: { ...expressionStep(), key: "another-step" },
