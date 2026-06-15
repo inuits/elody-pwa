@@ -1,8 +1,17 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useFilterOptions } from "../useFilterOptions";
 
+const i18nMocks = vi.hoisted(() => ({ locale: "en" }));
+
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => `t:${key}` }),
+  useI18n: () => ({
+    t: (key: string) => `t:${key}`,
+    locale: {
+      get value() {
+        return i18nMocks.locale;
+      },
+    },
+  }),
 }));
 
 vi.mock("@/main", () => ({
@@ -136,6 +145,121 @@ describe("useFilterOptions - data mapping", () => {
     expect(options.value).toEqual([
       { icon: expect.anything(), label: "title1", value: "title1" },
       { icon: expect.anything(), label: "title2", value: "title2" },
+    ]);
+  });
+});
+
+describe("useFilterOptions - multilingual (translation) values", () => {
+  beforeEach(() => {
+    i18nMocks.locale = "en";
+  });
+
+  const buildEntities = () => [
+    {
+      id: "SC-M9VG4EYHR",
+      intialValues: {
+        name: [
+          { key: "name", value: "AAAtest123", lang: "en" },
+          { key: "name", value: "arabic", lang: "ar" },
+        ],
+      },
+    },
+  ];
+
+  it("resolves the current locale value when label/value paths share a translation array", async () => {
+    const { options, entities, init } = useFilterOptions();
+
+    await init("TEST_ENTITY", {
+      label: "intialValues.name",
+      value: "intialValues.name",
+    });
+
+    entities.value = buildEntities();
+
+    expect(options.value).toEqual([
+      {
+        icon: expect.anything(),
+        label: "AAAtest123",
+        value: "AAAtest123",
+      },
+    ]);
+  });
+
+  it("produces a single option (not one per language) for a translation array", () => {
+    const { options, entities, init } = useFilterOptions();
+
+    init("TEST_ENTITY", {
+      label: "intialValues.name",
+      value: "intialValues.name",
+    });
+
+    entities.value = buildEntities();
+
+    expect(options.value).toHaveLength(1);
+  });
+
+  it("falls back to the first translation entry when the locale has no match", async () => {
+    i18nMocks.locale = "fr";
+    const { options, entities, init } = useFilterOptions();
+
+    await init("TEST_ENTITY", {
+      label: "intialValues.name",
+      value: "intialValues.name",
+    });
+
+    entities.value = buildEntities();
+
+    expect(options.value).toEqual([
+      {
+        icon: expect.anything(),
+        label: "AAAtest123",
+        value: "AAAtest123",
+      },
+    ]);
+  });
+
+  it("resolves the matching locale value for a non-default language", async () => {
+    i18nMocks.locale = "ar";
+    const { options, entities, init } = useFilterOptions();
+
+    await init("TEST_ENTITY", {
+      label: "intialValues.name",
+      value: "intialValues.name",
+    });
+
+    entities.value = buildEntities();
+
+    expect(options.value).toEqual([
+      { icon: expect.anything(), label: "arabic", value: "arabic" },
+    ]);
+  });
+
+  it("resolves translation arrays when label and value paths differ", async () => {
+    const { options, entities, init } = useFilterOptions();
+
+    await init("TEST_ENTITY", {
+      label: "intialValues.title",
+      value: "intialValues.name",
+    });
+
+    entities.value = [
+      {
+        id: "SC-1",
+        intialValues: {
+          name: [
+            { key: "name", value: "name-en", lang: "en" },
+            { key: "name", value: "name-ar", lang: "ar" },
+          ],
+          title: [
+            { key: "name", value: "title-en", lang: "en" },
+            { key: "name", value: "title-ar", lang: "ar" },
+          ],
+        },
+      },
+    ];
+
+    expect(options.value).toEqual([
+      { icon: expect.anything(), label: "title-en", value: "name-en" },
     ]);
   });
 });

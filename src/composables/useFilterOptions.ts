@@ -19,6 +19,7 @@ import {
   isAbortError,
 } from "@/helpers";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
+import type { TranslationEntry } from "@/composables/useMultilingualField";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
 import { useI18n } from "vue-i18n";
@@ -30,7 +31,7 @@ type FilterOptionsMappingType = {
 
 export const useFilterOptions = () => {
   const { loadDocument } = useImport();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const optionsLibrary = useBaseLibrary(apolloClient as ApolloClient<any>);
   const facetsLibrary = useBaseLibrary(apolloClient as ApolloClient<any>);
 
@@ -213,6 +214,26 @@ export const useFilterOptions = () => {
     return result.data.FilterOptions;
   };
 
+  const isTranslationEntry = (
+    item: unknown,
+  ): item is { key?: string; value: string; lang: string } =>
+    !!item && typeof item === "object" && "lang" in item && "value" in item;
+
+  const isTranslationArray = (value: unknown): value is TranslationEntry[] =>
+    Array.isArray(value) && value.some(isTranslationEntry);
+
+  const resolveTranslatableValue = (value: unknown): unknown => {
+    if (isTranslationEntry(value)) return value.value;
+
+    if (isTranslationArray(value)) {
+      const entries = value.filter(isTranslationEntry);
+      const match = entries.find((entry) => entry.lang === locale.value);
+      return (match ?? entries[0])?.value;
+    }
+
+    return value;
+  };
+
   const getOptionFromEntity = (
     entity: BaseEntity,
     counts: Map<string, number>,
@@ -220,12 +241,12 @@ export const useFilterOptions = () => {
     const { label: labelPath = "", value: valuePath = "" } =
       filterOptionsMapping.value || {};
 
-    const labelValue = extractValueFromObject(entity, labelPath) as
-      | string
-      | undefined;
-    const valueValue = extractValueFromObject(entity, valuePath) as
-      | string
-      | undefined;
+    const labelValue = resolveTranslatableValue(
+      extractValueFromObject(entity, labelPath),
+    ) as string | undefined;
+    const valueValue = resolveTranslatableValue(
+      extractValueFromObject(entity, valuePath),
+    ) as string | undefined;
 
     const baseOption = {
       icon: DamsIcons.NoIcon,
@@ -291,6 +312,12 @@ export const useFilterOptions = () => {
     const counts = facetCounts.value;
 
     if (labelPath === valuePath && labelPath) {
+      const rawValue = extractValueFromObject(entity, labelPath);
+      // A translation array is a single multilingual value, not a list of
+      // distinct options — resolve it to one option for the active locale.
+      if (isTranslationArray(rawValue)) {
+        return [getOptionFromEntity(entity, counts)];
+      }
       return getOptionsFromArrayValue(entity, labelPath, counts);
     }
 
