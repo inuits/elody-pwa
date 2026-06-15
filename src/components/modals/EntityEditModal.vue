@@ -11,7 +11,34 @@
         <spinner-loader theme="accent" />
       </div>
 
-      <div v-else-if="(entity || relationConfig) && metadataFields.length > 0">
+      <div v-else-if="relationConfig && relationFormFields">
+        <h2 class="title m-0 pb-4">
+          {{ t(formTitle) || t("modals.entityEdit.title") }}
+        </h2>
+
+        <dynamic-form
+          :dynamic-form-query="'ProcessorRelationConfig'"
+          :form-key="activeFormId"
+          :modal-form-fields="relationFormFields"
+          :prefilled-form-values="relationPrefill"
+          :router="router"
+          :show-form-title="false"
+        />
+
+        <div class="flex gap-2 pt-2">
+          <BaseButtonNew
+            label="Save"
+            icon="Save"
+            :loading="isSaving"
+            :disabled="isSaving"
+            button-style="accentAccent"
+            button-size="small"
+            @click="onSave"
+          />
+        </div>
+      </div>
+
+      <div v-else-if="entity && metadataFields.length > 0">
         <h2 class="title m-0 pb-4">{{ t(formTitle) || t("modals.entityEdit.title") }}</h2>
 
         <div class="space-y-2 mb-6">
@@ -60,6 +87,7 @@ import {
   BaseLibraryModes,
   ContextMenuFormFlow,
 } from "@/generated-types/queries";
+import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEntityEditor } from "@/composables/useEntityEditor";
@@ -68,10 +96,12 @@ import BaseModal from "@/components/base/BaseModal.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const { t } = useI18n();
+const router = useRouter();
 const { closeModal, getModalInfo } = useBaseModal();
-const { deleteForm } = useFormHelper();
+const { deleteForm, getForm } = useFormHelper();
 const {
   entity,
   editableFields,
@@ -79,7 +109,6 @@ const {
   isSaving,
   form,
   initialize,
-  initializeWithFields,
   save,
   saveRelationConfig,
   handleManualMetadataUpdate,
@@ -93,6 +122,9 @@ const relationConfig = ref<{
   relationKey: string;
   relationType: string;
 } | null>(null);
+// fields object (modalFormFields) + prefilled values rendered by DynamicForm
+const relationFormFields = ref<Record<string, any> | null>(null);
+const relationPrefill = ref<Record<string, any>>({});
 
 const ProcessorConfigFormDocument = gql`
   query ProcessorConfigForm($id: String!) {
@@ -126,19 +158,23 @@ const initializeRelationConfig = async (info: any) => {
       variables: { id: info.entityId },
       fetchPolicy: "no-cache",
     });
-    const fields = Object.values(data?.ProcessorConfigForm || {}).filter(
+    const formFields = data?.ProcessorConfigForm || {};
+    // field array drives the save (its keys); the object drives DynamicForm
+    editableFields.value = Object.values(formFields).filter(
       (f: any) => f?.inputField,
     ) as any[];
-    const prefill: Record<string, any> = {};
+    const intialValues: Record<string, any> = {};
     (info.relationMetadata || []).forEach((m: any) => {
-      prefill[m.key] = m.value;
+      intialValues[m.key] = m.value;
     });
+    relationFormFields.value = formFields;
+    // DynamicForm sets these onto the form; fields bind to intialValues.<key>
+    relationPrefill.value = { intialValues };
     relationConfig.value = {
       targetEntityId: info.parentEntityId,
       relationKey: info.relationKey || info.entityId,
       relationType: info.relationType,
     };
-    initializeWithFields(activeFormId.value, fields, prefill);
   } catch (error) {
     console.log("Error while initializing relation config:", error);
   } finally {
@@ -155,10 +191,13 @@ const onSave = async ({
 
   if (relationConfig.value) {
     try {
+      const formValues =
+        getForm(activeFormId.value)?.values?.intialValues || {};
       const success = await saveRelationConfig(
         relationConfig.value.targetEntityId,
         relationConfig.value.relationKey,
         relationConfig.value.relationType,
+        formValues,
         modalInfo.callback,
       );
       if (success) handleCloseModal();
@@ -195,6 +234,8 @@ const resetData = () => {
   formFlow.value = null;
   formTitle.value = "";
   relationConfig.value = null;
+  relationFormFields.value = null;
+  relationPrefill.value = {};
 };
 
 watch(

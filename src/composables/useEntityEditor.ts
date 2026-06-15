@@ -164,18 +164,14 @@ export function useEntityEditor() {
     targetEntityId: string,
     relationKey: string,
     relationType: string,
+    formValues: Record<string, any>,
     callback?: () => void,
   ) => {
-    if (!form.value) return false;
     isSaving.value = true;
     try {
-      const { valid } = await form.value.validate();
-      if (!valid) return false;
-
-      const values = form.value.values?.intialValues || {};
       const metadata = editableFields.value.map((f) => ({
         key: f.key,
-        value: values[f.key] ?? "",
+        value: formValues?.[f.key] ?? "",
       }));
 
       const result = await mutate({
