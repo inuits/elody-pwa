@@ -1667,8 +1667,10 @@ const initializeForm = async (
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
   if (modalFormFields) {
     dynamicFormLoaded.value = true;
-    if (props.prefilledFormValues && form.value) {
-      form.value.setValues(props.prefilledFormValues, false);
+    if (props.prefilledFormValues) {
+      setTimeout(() => {
+        if (form.value) form.value.setValues(props.prefilledFormValues, false);
+      }, 150);
     }
     await seedFormValues();
     return;
