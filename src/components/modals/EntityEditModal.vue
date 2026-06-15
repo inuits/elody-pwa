@@ -11,7 +11,7 @@
         <spinner-loader theme="accent" />
       </div>
 
-      <div v-else-if="entity && metadataFields.length > 0">
+      <div v-else-if="(entity || relationConfig) && metadataFields.length > 0">
         <h2 class="title m-0 pb-4">{{ t(formTitle) || t("modals.entityEdit.title") }}</h2>
 
         <div class="space-y-2 mb-6">
@@ -52,6 +52,8 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { gql } from "@apollo/client/core";
+import { apolloClient } from "@/main";
 import {
   TypeModals,
   PanelType,
@@ -77,9 +79,26 @@ const {
   isSaving,
   form,
   initialize,
+  initializeWithFields,
   save,
+  saveRelationConfig,
   handleManualMetadataUpdate,
 } = useEntityEditor();
+
+// Relation-config mode: edit metadata ON a relation (e.g. SHACL-derived
+// processor config on a pipeline's hasProcessor relation) using a dynamic
+// field set fetched from the related entity, instead of a static form query.
+const relationConfig = ref<{
+  targetEntityId: string;
+  relationKey: string;
+  relationType: string;
+} | null>(null);
+
+const ProcessorConfigFormDocument = gql`
+  query ProcessorConfigForm($id: String!) {
+    ProcessorConfigForm(id: $id)
+  }
+`;
 
 const currentEntityId = ref<string | null>(null);
 const currentEntityType = ref<string | null>(null);
@@ -99,14 +118,58 @@ const metadataFields = computed(() =>
   ),
 );
 
+const initializeRelationConfig = async (info: any) => {
+  isLoading.value = true;
+  try {
+    const { data } = await apolloClient.query({
+      query: ProcessorConfigFormDocument,
+      variables: { id: info.entityId },
+      fetchPolicy: "no-cache",
+    });
+    const fields = Object.values(data?.ProcessorConfigForm || {}).filter(
+      (f: any) => f?.inputField,
+    ) as any[];
+    const prefill: Record<string, any> = {};
+    (info.relationMetadata || []).forEach((m: any) => {
+      prefill[m.key] = m.value;
+    });
+    relationConfig.value = {
+      targetEntityId: info.parentEntityId,
+      relationKey: info.relationKey || info.entityId,
+      relationType: info.relationType,
+    };
+    initializeWithFields(activeFormId.value, fields, prefill);
+  } catch (error) {
+    console.log("Error while initializing relation config:", error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const onSave = async ({
   saveEmptyMetadata = false,
 }: {
   saveEmptyMetadata: boolean;
 }) => {
+  const modalInfo = getModalInfo(TypeModals.EntityEditModal);
+
+  if (relationConfig.value) {
+    try {
+      const success = await saveRelationConfig(
+        relationConfig.value.targetEntityId,
+        relationConfig.value.relationKey,
+        relationConfig.value.relationType,
+        modalInfo.callback,
+      );
+      if (success) handleCloseModal();
+    } finally {
+      handleCloseModal();
+    }
+    return;
+  }
+
   if (!currentEntityId.value || !currentEntityType.value) return;
 
-  const modalInfo = getModalInfo(TypeModals.EntityEditModal);
   try {
     const success = await save(
       currentEntityId.value,
@@ -131,6 +194,7 @@ const resetData = () => {
   currentEntityType.value = null;
   formFlow.value = null;
   formTitle.value = "";
+  relationConfig.value = null;
 };
 
 watch(
@@ -144,6 +208,12 @@ watch(
       formFlow.value = info.flow;
       formTitle.value = info.title;
 
+      if (info.relationType && info.parentEntityId) {
+        await initializeRelationConfig(info);
+        return;
+      }
+
+      relationConfig.value = null;
       await initialize(
         currentEntityId.value!,
         currentEntityType.value!,

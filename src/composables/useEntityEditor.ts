@@ -1,12 +1,12 @@
 import { ref, inject } from "vue";
 import { useI18n } from "vue-i18n";
-import { ApolloError } from "@apollo/client/core";
 import { useMutation } from "@vue/apollo-composable";
 import { apolloClient } from "@/main";
 import {
   GetEntityByIdDocument,
   MutateEntityValuesDocument,
   Collection,
+  EditStatus,
   type Entity,
   type PanelMetaData,
 } from "@/generated-types/queries";
@@ -140,7 +140,81 @@ export function useEntityEditor() {
     return false;
   };
 
-  const handleManualMetadataUpdate = (field: PanelMetaData, formId: string) => {
+  // Initialize the editor with a pre-built (dynamic) set of fields and
+  // prefilled values, without fetching an entity or a form query. Used for
+  // editing relation metadata (e.g. SHACL-derived processor config).
+  const initializeWithFields = (
+    formKey: string,
+    fields: PanelMetaData[],
+    prefillValues: Record<string, any> = {},
+  ) => {
+    editableFields.value = fields;
+    form.value = createForm(formKey, {
+      intialValues: structuredClone(deepToRaw(prefillValues)),
+    });
+    addEditableMetadataKeys(
+      fields.map((f) => f.key),
+      formKey,
+    );
+  };
+
+  // Save the edited field values as metadata ON a relation of the target
+  // entity (updateOnlyRelations), rather than on the entity itself.
+  const saveRelationConfig = async (
+    targetEntityId: string,
+    relationKey: string,
+    relationType: string,
+    callback?: () => void,
+  ) => {
+    if (!form.value) return false;
+    isSaving.value = true;
+    try {
+      const { valid } = await form.value.validate();
+      if (!valid) return false;
+
+      const values = form.value.values?.intialValues || {};
+      const metadata = editableFields.value.map((f) => ({
+        key: f.key,
+        value: values[f.key] ?? "",
+      }));
+
+      const result = await mutate({
+        id: targetEntityId,
+        collection: Collection.Entities,
+        formInput: {
+          metadata: [],
+          updateOnlyRelations: true,
+          relations: [
+            {
+              key: relationKey,
+              type: relationType,
+              metadata,
+              editStatus: EditStatus.Changed,
+            },
+          ],
+        },
+      });
+
+      if (result?.data?.mutateEntityValues) {
+        displaySuccessNotification(
+          t("notifications.success.entityUpdated.title"),
+          t("notifications.success.entityUpdated.description"),
+        );
+        if (callback) callback();
+        return true;
+      }
+    } catch (error) {
+      console.log("Error while saving relation config:", error);
+    } finally {
+      isSaving.value = false;
+    }
+    return false;
+  };
+
+  const handleManualMetadataUpdate = (
+    field: PanelMetaData,
+    _formId: string,
+  ) => {
     if (!form.value) return;
     const path = getVeeValidateKey({ metadata: field, isEdit: true });
     form.value.setFieldValue(path, field.value);
@@ -153,7 +227,9 @@ export function useEntityEditor() {
     isSaving,
     form,
     initialize,
+    initializeWithFields,
     save,
+    saveRelationConfig,
     handleManualMetadataUpdate,
   };
 }

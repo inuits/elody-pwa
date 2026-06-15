@@ -244,6 +244,15 @@ const doAction = async () => {
           props.entityType || entityFormData.type || Entitytyping.BaseEntity,
         flow: props.formFlow,
         title: props.formTitle,
+        // relation context: lets the modal edit metadata ON the relation
+        // (e.g. dynamic processor config) instead of the entity itself
+        parentEntityId: props.parentEntityId,
+        relationType: resolvedRelationType.value,
+        relationKey: props.entityId,
+        relationMetadata:
+          props.relation && props.relation !== "no-relation-found"
+            ? (props.relation.relation as any).metadata
+            : undefined,
         callback: () => {
           if (refetchParentEntity) {
             refetchParentEntity();
