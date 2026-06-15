@@ -1091,6 +1091,16 @@ const initializeForm = async (
   oldQueryName: string | undefined,
 ) => {
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
+  // Fields supplied directly (e.g. SHACL processor config) — no query to fetch.
+  // Apply prefilled values straight away (the dynamicFormLoaded watch is a
+  // shared singleton that may already be true, so it can't be relied on).
+  if (modalFormFields) {
+    dynamicFormLoaded.value = true;
+    if (props.prefilledFormValues && form.value) {
+      form.value.setValues(props.prefilledFormValues, false);
+    }
+    return;
+  }
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document, props.tabName);
