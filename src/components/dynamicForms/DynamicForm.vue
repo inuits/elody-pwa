@@ -86,8 +86,17 @@
             undefined
           "
         />
-        <metadata-wrapper
+        <ShaclDetailsField
           v-if="
+            field.__typename === 'PanelMetaData' &&
+            field.inputField?.isDetailsEditor
+          "
+          :field="field"
+          :form-id="formId"
+          :show-errors="showErrors"
+        />
+        <metadata-wrapper
+          v-else-if="
             field.__typename === 'PanelMetaData' &&
             !nonStandardFieldTypes.includes(field.inputField.type)
           "
@@ -307,6 +316,7 @@ import {
   onUnmounted,
 } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import ShaclDetailsField from "@/components/dynamicForms/ShaclDetailsField.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/upload/useUpload";
@@ -1078,9 +1088,8 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
         undefined,
         form,
       );
-      let entity: Entity;
-      entity = (await performSubmitAction(document, entityInput)).data
-        .CreateEntity;
+      const entity: Entity = (await performSubmitAction(document, entityInput))
+        .data.CreateEntity;
       setArgumentForSubmitAllFormTabs(
         entity["id"],
         props.allFormRelationTypes[formKeyIndex],
@@ -1186,13 +1195,13 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   closeAndDeleteForm();
 };
 
-const validateAndGoToNextFormTabActionFunction = async (field: FormAction) => {
+const validateAndGoToNextFormTabActionFunction = async () => {
   const valid = await isFormValid();
   if (!valid) return;
   tabs.selectedIndex++;
 };
 
-const goToPreviousFormTabActionFunction = async (field: FormAction) => {
+const goToPreviousFormTabActionFunction = async () => {
   tabs.selectedIndex--;
 };
 
@@ -1601,8 +1610,8 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     uploadCsvForReordening: () => reorderEntitiesActionFunction(field),
     submitWithExtraMetadata: () => submitWithExtraMetadataActionFunction(field),
     submitAllFormTabs: () => submitAllFormTabsActionFunction(field),
-    nextFormTab: () => validateAndGoToNextFormTabActionFunction(field),
-    previousFormTab: () => goToPreviousFormTabActionFunction(field),
+    nextFormTab: () => validateAndGoToNextFormTabActionFunction(),
+    previousFormTab: () => goToPreviousFormTabActionFunction(),
     bulkUpdateMetadata: () => bulkUpdateMetadataActionFunction(field),
   };
   if (!field.actionType || !actionFunctions[field.actionType])
