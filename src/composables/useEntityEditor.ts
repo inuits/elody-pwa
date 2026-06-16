@@ -169,10 +169,25 @@ export function useEntityEditor() {
   ) => {
     isSaving.value = true;
     try {
-      const metadata = editableFields.value.map((f) => ({
-        key: f.key,
-        value: formValues?.[f.key] ?? "",
-      }));
+      // Flatten nested form values (shui:DetailsEditor sub-forms) into flat
+      // dotted-key relation metadata, e.g. { options: { auth: { type } } } ->
+      // [{ key: "options.auth.type", value }]. Leaf scalars are emitted as-is.
+      const flatten = (
+        obj: Record<string, any>,
+        prefix = "",
+      ): { key: string; value: any }[] => {
+        const out: { key: string; value: any }[] = [];
+        for (const [k, v] of Object.entries(obj ?? {})) {
+          const path = prefix ? `${prefix}.${k}` : k;
+          if (v !== null && typeof v === "object" && !Array.isArray(v)) {
+            out.push(...flatten(v, path));
+          } else {
+            out.push({ key: path, value: v ?? "" });
+          }
+        }
+        return out;
+      };
+      const metadata = flatten(formValues);
 
       const result = await mutate({
         id: targetEntityId,
@@ -207,10 +222,7 @@ export function useEntityEditor() {
     return false;
   };
 
-  const handleManualMetadataUpdate = (
-    field: PanelMetaData,
-    _formId: string,
-  ) => {
+  const handleManualMetadataUpdate = (field: PanelMetaData) => {
     if (!form.value) return;
     const path = getVeeValidateKey({ metadata: field, isEdit: true });
     form.value.setFieldValue(path, field.value);

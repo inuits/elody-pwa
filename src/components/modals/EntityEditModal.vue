@@ -50,9 +50,7 @@
             :form-id="activeFormId"
             form-flow="edit"
             :base-library-mode="BaseLibraryModes.BasicBaseLibrary"
-            @update:metadata="
-              (val) => handleManualMetadataUpdate(val, activeFormId)
-            "
+            @update:metadata="(val) => handleManualMetadataUpdate(val)"
           />
         </div>
 
@@ -163,9 +161,20 @@ const initializeRelationConfig = async (info: any) => {
     editableFields.value = Object.values(formFields).filter(
       (f: any) => f?.inputField,
     ) as any[];
+    // Relation metadata keys may be dotted (e.g. "options.auth.type") for
+    // nested shui:DetailsEditor fields; rebuild a nested object so the form's
+    // nested fields (bound to intialValues.options.auth.type) prefill.
     const intialValues: Record<string, any> = {};
+    const setNested = (obj: Record<string, any>, path: string, val: any) => {
+      const parts = path.split(".");
+      let cur = obj;
+      parts.forEach((p, i) => {
+        if (i === parts.length - 1) cur[p] = val;
+        else cur = cur[p] ?? (cur[p] = {});
+      });
+    };
     (info.relationMetadata || []).forEach((m: any) => {
-      intialValues[m.key] = m.value;
+      setNested(intialValues, m.key, m.value);
     });
     relationFormFields.value = formFields;
     // DynamicForm sets these onto the form; fields bind to intialValues.<key>
