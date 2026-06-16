@@ -17,7 +17,7 @@ export const useEntityPageConfig = () => {
     const entityType =
       mapUrlToEntityType(slug) || slug || String(route.meta.entityType ?? "");
     if (!entityType) return undefined;
-    return config[entityType];
+    return config[entityType] ?? config[entityType.toLowerCase()];
   });
 
   const actions = computed<ContextMenuActionRouteConfig[]>(
@@ -36,5 +36,10 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.trackSeen === true,
   );
 
-  return { actions, hasEditMetadataButton, deleteButton, trackSeen };
+  return {
+    actions,
+    hasEditMetadataButton,
+    deleteButton,
+    trackSeen,
+  };
 };

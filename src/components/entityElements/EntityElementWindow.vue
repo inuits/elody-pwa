@@ -46,6 +46,18 @@
           :readmode-label="element.editMetadataButton.readmodeLabel"
           :editmode-label="element.editMetadataButton.editmodeLabel"
         />
+        <div
+          class="flex align-center"
+          :class="{ 'ml-auto': !showEditMetadataButton }"
+          v-if="
+            auth.isAuthenticated.value === true && element.contextMenuActions
+          "
+        >
+          <BaseContextMenuActions
+            :context-menu-actions="element.contextMenuActions"
+            :parent-entity-id="formId"
+          />
+        </div>
       </div>
       <div
         :class="[
@@ -105,6 +117,7 @@ import BaseExpandButton from "../base/BaseExpandButton.vue";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
+import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 
 const props = defineProps<{
   element: WindowElement;

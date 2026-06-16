@@ -125,4 +125,51 @@ describe('EntityElementWindow Permission Logic', () => {
     const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
     expect(panels.length).toBe(3);
   });
+
+  // Used in dams (and other clients) for things like the refresh-metadata action
+  // on the window header. Tests exist to make sure that doesn't happen again
+  describe('window header context menu', () => {
+    const contextMenuActions = [
+      { type: 'elody', action: 'RefreshMetadata', label: 'header.refresh', icon: 'Refresh' }
+    ];
+
+    const baseContextMenuStub = {
+      name: 'BaseContextMenuActions',
+      props: ['contextMenuActions', 'parentEntityId'],
+      template: '<div />'
+    };
+
+    it('renders BaseContextMenuActions when element.contextMenuActions is provided', async () => {
+      mockFetchAdvancedPermissions.mockResolvedValue({});
+
+      const wrapper = mount(EntityElementWindow, {
+        props: {
+          element: { label: 'Test Window', contextMenuActions },
+          identifiers: [],
+          formId: '1'
+        },
+        global: { stubs: { BaseContextMenuActions: baseContextMenuStub } }
+      });
+
+      await flushPromises();
+
+      const menu = wrapper.findComponent({ name: 'BaseContextMenuActions' });
+      expect(menu.exists()).toBe(true);
+      expect(menu.props('contextMenuActions')).toEqual(contextMenuActions);
+      expect(menu.props('parentEntityId')).toBe('1');
+    });
+
+    it('does not render BaseContextMenuActions when element.contextMenuActions is missing', async () => {
+      mockFetchAdvancedPermissions.mockResolvedValue({});
+
+      const wrapper = mount(EntityElementWindow, {
+        props: { element: { label: 'Test Window' }, identifiers: [], formId: '1' },
+        global: { stubs: { BaseContextMenuActions: baseContextMenuStub } }
+      });
+
+      await flushPromises();
+
+      expect(wrapper.findComponent({ name: 'BaseContextMenuActions' }).exists()).toBe(false);
+    });
+  });
 });
