@@ -183,15 +183,15 @@ describe("useVeeValidate", () => {
       );
     });
 
-    it("returns intialValues key with .label suffix when field has formatter in edit mode", () => {
+    it("returns a stable intialValues `.label` key for a formatter field in edit and view", () => {
       const metadata = makeMetadata({
         inputField: { validation: { value: "" }, relationType: "" },
         value: { formatter: "someFormatter" },
       });
-      const result = getVeeValidateKey({ metadata, isEdit: true });
-      expect(result).toBe(
-        `${ValidationFields.IntialValues}.testField.label`,
-      );
+      const editKey = getVeeValidateKey({ metadata, isEdit: true });
+      const viewKey = getVeeValidateKey({ metadata, isEdit: false });
+      expect(editKey).toBe(`${ValidationFields.IntialValues}.testField.label`);
+      expect(viewKey).toBe(editKey);
     });
 
     it("returns relatedEntityData.relations key when field has formatter and linkedEntityId (linkedEntityId wins)", () => {
@@ -209,14 +209,6 @@ describe("useVeeValidate", () => {
       );
     });
 
-    it("returns intialValues key without .label when field has formatter but not in edit mode", () => {
-      const metadata = makeMetadata({
-        inputField: { validation: { value: "" }, relationType: "" },
-        value: { formatter: "someFormatter" },
-      });
-      const result = getVeeValidateKey({ metadata, isEdit: false });
-      expect(result).toBe(`${ValidationFields.IntialValues}.testField`);
-    });
 
     it("returns intialValues key without .label when field has no formatter in edit mode", () => {
       const metadata = makeMetadata({

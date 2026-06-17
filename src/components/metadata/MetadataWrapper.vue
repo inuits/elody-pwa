@@ -263,6 +263,7 @@ const {
   fieldIsEditableByUser,
   fieldLabel,
   fieldKey,
+  isFormatterField,
   fieldKind,
   fieldType,
   fieldValueProxy,
@@ -370,9 +371,12 @@ watch(
   () => fieldValueProxy,
   () => {
     imageLoadError.value = false;
+    const value = isFormatterField.value
+      ? { ...(props.metadata.value as object), label: fieldValueProxy.value }
+      : fieldValueProxy.value;
     emit("update:metadata", {
       ...props.metadata,
-      value: fieldValueProxy.value,
+      value,
     } as PanelMetaData);
   },
   { deep: true },

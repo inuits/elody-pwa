@@ -116,8 +116,7 @@ export const useVeeValidate = (): {
         return `${ValidationFields.RelationValues}.${baseFieldKey}`;
       if (linkedEntityId)
         return `${ValidationFields.RelatedEntityData}.relations.${baseFieldKey}`;
-      // If the field has a formatter, we want to validate a label and only in edit mode
-      if (metadata.value?.formatter && isEdit)
+      if (metadata.value?.formatter)
         return `${ValidationFields.IntialValues}.${baseFieldKey}.label`;
       // Field is part of entity-picker relation metadata (e.g. roles set before picking an entity)
       const { getKeyBasedOnInputField } = useFormHelper();

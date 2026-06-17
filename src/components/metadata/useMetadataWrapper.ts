@@ -75,6 +75,7 @@ export const useMetadataWrapper = (
   getFieldKey: () => string;
   field: FieldContext;
   fieldKey: ComputedRef<string>;
+  isFormatterField: ComputedRef<boolean>;
   fieldKind: ComputedRef<string>;
   fieldType: ComputedRef<InputFieldTypes | undefined>;
   fieldLabel: ComputedRef<string>;
@@ -162,6 +163,7 @@ export const useMetadataWrapper = (
   );
 
   const fieldKey = computed(() => getFieldKey());
+  const isFormatterField = computed(() => fieldKey.value.endsWith(".label"));
   const fieldLabel = computed<string>(() =>
     getTranslatedMessage(
       (props.metadata?.label as string) || "metadata.no-label",
@@ -205,6 +207,15 @@ export const useMetadataWrapper = (
       emitAddRefetchFunction
     )
       emitAddRefetchFunction();
+
+    if (
+      isFormatterField.value &&
+      newValue &&
+      typeof newValue === "object" &&
+      !Array.isArray(newValue) &&
+      "label" in newValue
+    )
+      return (newValue as { label: unknown }).label;
 
     return newValue;
   };
@@ -272,6 +283,7 @@ export const useMetadataWrapper = (
     getFieldKey,
     field,
     fieldKey,
+    isFormatterField,
     fieldKind,
     fieldType,
     fieldLabel,
