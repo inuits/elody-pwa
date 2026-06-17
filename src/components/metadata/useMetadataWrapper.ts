@@ -244,6 +244,11 @@ export const useMetadataWrapper = (
     { immediate: true },
   );
 
+  const multiSelectTypes = [
+    InputFieldTypes.DropdownMultiselectMetadata,
+    InputFieldTypes.DropdownMultiselectRelations,
+  ];
+
   onMounted(() => {
     let newValue = props.metadata.value;
     try {
@@ -253,6 +258,10 @@ export const useMetadataWrapper = (
         newValue = props.metadata.value[props.metadata.key];
     } catch {
       throw Error("Unable to auto select value, no options available");
+    }
+
+    if (multiSelectTypes.includes(fieldType.value) && newValue === "") {
+      newValue = [];
     }
 
     fieldValueProxy.value = newValue;

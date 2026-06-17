@@ -73,7 +73,7 @@ const inputValue = computed<DropdownOption[] | undefined>({
       return emit("update:modelValue", value[0]?.value || value[0] || "");
     emit(
       "update:modelValue",
-      Array.isArray(value) ? value.map((value) => value.value) : [value],
+      Array.isArray(value) ? value.map((v) => v.value) : [],
     );
   },
 });

@@ -18,6 +18,7 @@ import { defineComponent, h, nextTick, type Ref, type ComputedRef } from "vue";
 import { mount } from "@vue/test-utils";
 import { useMetadataWrapperDropdownOptions } from "@/components/metadata/useMetadataWrapperDropdownOptions";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { InputFieldTypes } from "@/generated-types/queries";
 
 const basicMetadataWrapperProps = {
   formId: "M-KYY3IE440Q",
@@ -298,5 +299,140 @@ describe("useMetadataWrapper", () => {
 
     expect(capturedFieldErrorMessage!.value).toBeTruthy();
     expect(capturedFieldErrorMessage!.value).toBe("This field is required");
+  });
+});
+
+const makeMultiSelectProps = (type: InputFieldTypes, value: any) => ({
+  formId: "M-MULTISELECT-TEST",
+  metadata: {
+    key: "tags",
+    label: "metadata.labels.tags",
+    value,
+    inputField: {
+      type,
+      options: [],
+      relationType: null,
+      fromRelationType: null,
+      canCreateEntityFromOption: false,
+      metadataKeyToCreateEntityFromOption: null,
+      advancedFilterInputForRetrievingOptions: [],
+      advancedFilterInputForRetrievingRelatedOptions: [],
+      advancedFilterInputForRetrievingAllOptions: [],
+      advancedFilterInputForSearchingOptions: null,
+      fileTypes: null,
+      maxFileSize: null,
+      maxAmountOfFiles: null,
+      uploadMultiple: null,
+      isMetadataField: false,
+      relationFilter: null,
+      dependsOn: "",
+      multiple: false,
+      lineClamp: null,
+      entityType: null,
+      hasVirtualKeyboard: false,
+      autoSelectable: false,
+      autoAllSelectable: null,
+      __typename: "InputField",
+      validation: null,
+    },
+    __typename: "PanelMetaData",
+  },
+  isEdit: true,
+  baseLibraryMode: "normalBaseLibrary",
+  formFlow: "edit",
+  showErrors: false,
+});
+
+describe("useMetadataWrapper — multi-select empty string initialization", () => {
+  it("initializes DropdownMultiselectMetadata empty string value as []", async () => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeMultiSelectProps(InputFieldTypes.DropdownMultiselectMetadata, "") as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldValueProxy!.value).toEqual([]);
+  });
+
+  it("initializes DropdownMultiselectRelations empty string value as []", async () => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeMultiSelectProps(InputFieldTypes.DropdownMultiselectRelations, "") as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldValueProxy!.value).toEqual([]);
+  });
+
+  it("preserves non-empty array value for DropdownMultiselectMetadata", async () => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeMultiSelectProps(InputFieldTypes.DropdownMultiselectMetadata, ["venue_admin"]) as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldValueProxy!.value).toEqual(["venue_admin"]);
+  });
+
+  it("preserves empty string for DropdownSingleselectMetadata", async () => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeMultiSelectProps(InputFieldTypes.DropdownSingleselectMetadata, "") as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldValueProxy!.value).toBe("");
   });
 });
