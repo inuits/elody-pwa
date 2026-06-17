@@ -69,6 +69,7 @@
           <BaseButtonNew
             v-if="
               hasSavedSearch &&
+              canUseSavedSearches &&
               enableSaveSearchFilters &&
               auth.isAuthenticated.value === true
             "
@@ -147,6 +148,7 @@ import {
   DamsIcons,
   GetFilterMatcherMappingDocument,
 } from "@/generated-types/queries";
+import { usePermissions } from "@/composables/usePermissions";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
@@ -282,7 +284,10 @@ const {
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider", undefined);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-const hasSavedSearch = config.features.hasSavedSearch || false;
+const savedSearchConfig = config.features.savedSearch ?? {};
+const hasSavedSearch = savedSearchConfig.enabled ?? false;
+const canUseSavedSearches = ref(false);
+const { fetchAdvancedPermission } = usePermissions();
 
 const addFilterOptions = computed(() =>
   filters.value
@@ -544,7 +549,7 @@ const initializeAndActivateNewFilter = (
   applyFilters(false);
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (props.onRegisterApi) {
     props.onRegisterApi({
       initializeAndActivateNewFilter: initializeAndActivateNewFilter,
@@ -556,6 +561,12 @@ onMounted(() => {
   emit("advancedFiltersPromise", advancedFiltersPromise);
   lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
   updateFilterVariables();
+  if (hasSavedSearch) {
+    const permissionKeys: string[] = savedSearchConfig.permission ?? [];
+    canUseSavedSearches.value = permissionKeys.length
+      ? await fetchAdvancedPermission(permissionKeys)
+      : true;
+  }
 });
 
 const updateFilterVariables = () => {
