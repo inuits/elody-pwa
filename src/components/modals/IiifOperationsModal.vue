@@ -79,6 +79,7 @@
         <base-button-new
           :label="t('iiif-operations-modal.get-resized-image')"
           button-style="accentAccent"
+          :loading="isDownloading"
           @click="downLoadImage"
         />
       </div>
@@ -91,45 +92,70 @@ import BaseModal from "@/components/base/BaseModal.vue";
 import { TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
-const props = defineProps<{
-  fileName: string;
-  originalFilename: string;
-  dimensions: { width: number; height: number } | undefined;
-}>();
-
-const { closeModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
+
+const modalInfo = computed(() => getModalInfo(TypeModals.IiifOperationsModal));
+const fileName = computed<string>(() => modalInfo.value.fileName || "");
+const originalFilename = computed<string>(
+  () => modalInfo.value.originalFilename || "",
+);
+const dimensions = computed<{ width: number; height: number } | undefined>(
+  () => modalInfo.value.dimensions,
+);
 
 const availableScales = [0.25, 0.5, 1.0];
 const availableFormats = ["png", "jpg", "tif"];
 const currentScale = ref(1.0);
 const currentFormat = ref("jpg");
-const originalWidth = props.dimensions?.width || 1920;
-const originalHeight = props.dimensions?.height || 1080;
-const scaledWidth = ref(originalWidth);
-const scaledHeight = ref(originalHeight);
+const isDownloading = ref(false);
 
-const downLoadImage = (): void => {
-  const a = document.createElement("a");
-  const originalFilename =
-    props.originalFilename?.replace(/\.[^/.]*$/, "") || "";
-  a.href = `/api/iiif/3/${props.fileName}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`;
-  a.download = `${originalFilename}_${scaledWidth.value}x${scaledHeight.value}.${currentFormat.value}`;
-  a.target = "_blank";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+const originalWidth = computed<number>(() => dimensions.value?.width || 1920);
+const originalHeight = computed<number>(() => dimensions.value?.height || 1080);
+
+const scaledWidth = ref(originalWidth.value);
+const scaledHeight = ref(originalHeight.value);
+
+const downLoadImage = async (): Promise<void> => {
+  if (isDownloading.value) return;
+  isDownloading.value = true;
+
+  const filenameWithoutExtension =
+    originalFilename.value?.replace(/\.[^/.]*$/, "") || "";
+  const url = `/api/iiif/3/${fileName.value}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`;
+  const downloadName = `${filenameWithoutExtension}_${scaledWidth.value}x${scaledHeight.value}.${currentFormat.value}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok)
+      throw new Error(`Image generation failed (${response.status})`);
+
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = downloadName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch (error) {
+    console.error("Failed to download resized image", error);
+  } finally {
+    isDownloading.value = false;
+  }
 };
 
 const scaleDimensions = (scale: number): { width: number; height: number } => {
-  if (!originalWidth || !originalHeight) return { width: 0, height: 0 };
+  if (!originalWidth.value || !originalHeight.value)
+    return { width: 0, height: 0 };
   return {
-    width: Math.floor(originalWidth * scale),
-    height: Math.floor(originalHeight * scale),
+    width: Math.floor(originalWidth.value * scale),
+    height: Math.floor(originalHeight.value * scale),
   };
 };
 
@@ -139,6 +165,17 @@ watch(
     const scaledDimensions = scaleDimensions(newValue);
     scaledWidth.value = scaledDimensions.width;
     scaledHeight.value = scaledDimensions.height;
+  },
+);
+
+watch(
+  () => modalInfo.value.open,
+  (isOpen: boolean) => {
+    if (!isOpen) return;
+    currentScale.value = 1.0;
+    currentFormat.value = "jpg";
+    scaledWidth.value = originalWidth.value;
+    scaledHeight.value = originalHeight.value;
   },
 );
 </script>

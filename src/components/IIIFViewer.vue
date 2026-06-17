@@ -12,18 +12,14 @@
       v-model:home="homeDiv"
       :originalFilename="originalFilename"
       :mediafileId="mediafileId"
+      :image-filename="imageFilename"
+      :dimensions="dimensions"
       :enable-selection="enableSelection"
       @toggle-selection="toggleSelection"
       @cancel-selection="undoLastSelection"
     />
 
     <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
-
-    <iiif-operations-modal
-      :fileName="imageFilename"
-      :original-filename="originalFilename"
-      :dimensions="dimensions"
-    />
   </div>
 </template>
 
@@ -32,7 +28,6 @@ import { ref, onMounted, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 import { ShapeNames } from "openseadragon-select-plugin";
 import ViewerToolbar from "./ViewerToolbar.vue";
-import IiifOperationsModal from "@/components/modals/IiifOperationsModal.vue";
 import { CropAreaCoordinates } from "@/composables/useMediafileCrop";
 
 interface Selection {
@@ -175,7 +170,6 @@ onMounted(() => {
     );
   }
 });
-
 </script>
 
 <style>

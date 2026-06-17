@@ -22,21 +22,7 @@
           <router-view />
         </div>
       </div>
-      <DynamicFormModal></DynamicFormModal>
-      <SavedSearchesPickerModal />
-      <CreateSavedSearchModal />
-      <BulkoperationsModal v-if="route.name !== undefined" />
-      <search-modal />
-      <search-modal-ai />
-      <!--      <BulkOperationsEditModal-->
-      <!--        v-if="route.name !== undefined"-->
-      <!--        :context="route.name as Context"-->
-      <!--      />-->
-      <EntityDetailModal />
-      <ConfirmModal><ConfirmModalView /></ConfirmModal>
-      <EntityEditModal />
-      <InfoPanelHost />
-      <GuidedFlowModalHost />
+      <AppModals />
     </div>
   </div>
   <div
@@ -48,24 +34,13 @@
 </template>
 
 <script setup lang="ts">
-//import BulkOperationsEditModal from "@/components/bulk-operations/BulkOperationsEditModal.vue";
-import BulkoperationsModal from "@/components/bulk-operations/BulkOperationsModal.vue";
-import ConfirmModal from "./components/base/ConfirmModal.vue";
-import ConfirmModalView from "./components/ConfirmModalView.vue";
-import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
-import SearchModal from "@/components/modals/SearchModal.vue";
-import SavedSearchesPickerModal from "@/components/modals/SavedSearchesPickerModal.vue";
-import EntityEditModal from "@/components/modals/EntityEditModal.vue";
+import AppModals from "@/components/AppModals.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
-import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
-import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
-import InfoPanelHost from "@/components/base/InfoPanelHost.vue";
-import GuidedFlowModalHost from "@/components/repetitiveForm/GuidedFlowModalHost.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";

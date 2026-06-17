@@ -98,7 +98,11 @@
       <BaseTooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on }">
           <div v-on="on">
-            <button class="mr-2 pt-[10px]" @click="openIiifOperationsModal">
+            <button
+              class="mr-2 pt-[10px]"
+              data-testid="open-iiif-operations-modal"
+              @click="openIiifOperationsModal"
+            >
               <unicon
                 :name="Unicons.ImageResizeLandscape.name"
                 height="20"
@@ -138,6 +142,8 @@ const props = defineProps<{
   home?: HTMLDivElement | string | null;
   originalFilename?: string;
   mediafileId?: string;
+  imageFilename?: string;
+  dimensions?: Record<string, any>;
   enableSelection?: boolean;
 }>();
 
@@ -170,7 +176,8 @@ const canCrop = computed(() =>
   ),
 );
 
-const { downloadMediafile, downloadLoading: downloadImageLoadingRef } = useMediafileDownload();
+const { downloadMediafile, downloadLoading: downloadImageLoadingRef } =
+  useMediafileDownload();
 
 onMounted(() => {
   emit("update:zoomIn", zoomInRef.value);
@@ -186,6 +193,18 @@ const downloadImage = () => {
 };
 
 const openIiifOperationsModal = () => {
-  openModal(TypeModals.IiifOperationsModal, ModalStyle.Center);
+  openModal(
+    TypeModals.IiifOperationsModal,
+    ModalStyle.Center,
+    undefined,
+    undefined,
+    false,
+    undefined,
+    {
+      fileName: props.imageFilename,
+      originalFilename: props.originalFilename,
+      dimensions: props.dimensions,
+    },
+  );
 };
 </script>
