@@ -1196,6 +1196,11 @@ export enum EntityPickerMode {
   Save = 'save'
 }
 
+export enum EntityPickerSearchMode {
+  Search = 'Search',
+  Filters = 'Filters'
+}
+
 export enum EntitySubelement {
   IntialValues = 'intialValues',
   RelationValues = 'relationValues'
@@ -1724,6 +1729,8 @@ export type InputField = {
   options?: Maybe<Array<Maybe<DropdownOption>>>;
   relationFilter?: Maybe<AdvancedFilterInputType>;
   relationType?: Maybe<Scalars['String']>;
+  searchMetadataKeys?: Maybe<Array<Maybe<Scalars['String']>>>;
+  searchMode?: Maybe<EntityPickerSearchMode>;
   type: Scalars['String'];
   uploadMultiple?: Maybe<Scalars['Boolean']>;
   validation?: Maybe<Validation>;

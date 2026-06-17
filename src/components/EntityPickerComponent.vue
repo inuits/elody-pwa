@@ -1,17 +1,25 @@
 <template>
-  <div class="flex flex-col w-full overflow-hidden">
+  <div
+    class="flex flex-col w-full overflow-hidden"
+    :class="searchMode === EntityPickerSearchMode.Search ? baseLibraryHeight : undefined"
+  >
+    <SearchBar
+      v-if="searchMode === EntityPickerSearchMode.Search"
+      :input-enabled="true"
+      @search="onSearch"
+    />
     <BaseLibrary
       class="overflow-auto"
-      :class="baseLibraryHeight"
+      :class="searchMode === EntityPickerSearchMode.Search ? 'flex-1 min-h-0' : baseLibraryHeight"
       v-if="queryLoaded || ignoreCustomQuery"
       :bulk-operations-context="getContext()"
       :entity-type="acceptedTypes?.[0]"
       :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
-      :filters="computedFilters || undefined"
+      :filters="allFilters"
       :show-button="showButton"
       :confirm-selection-button="true"
       :enable-navigation="false"
-      :enable-advanced-filters="enableAdvancedFilters"
+      :enable-advanced-filters="searchMode !== EntityPickerSearchMode.Search && enableAdvancedFilters"
       :enable-bulk-operations="enableBulkOperations"
       :selectionEnabled="true"
       :disable-new-entity-previews="true"
@@ -41,6 +49,7 @@ import {
   type BaseRelationValuesInput,
   Collection,
   EntityPickerMode,
+  EntityPickerSearchMode,
   Entitytyping,
   MutateEntityValuesDocument,
   type MutateEntityValuesMutation,
@@ -48,6 +57,8 @@ import {
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
+import { buildEntityPickerSearchFilters } from "@/composables/useEntityPickerSearch";
+import SearchBar from "@/components/SearchBar.vue";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import {
   BulkOperationsContextEnum,
@@ -56,6 +67,7 @@ import {
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import {
+  computed,
   inject,
   onBeforeMount,
   onMounted,
@@ -102,6 +114,8 @@ const props = withDefaults(
     enableNonSelectableEntities?: boolean;
     shouldUseStateForRoute?: boolean;
     selectionLimit?: number; // max selectable entities (0/absent = unlimited)
+    searchMode?: EntityPickerSearchMode;
+    searchMetadataKeys?: string[];
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -110,10 +124,25 @@ const props = withDefaults(
     context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
     shouldUseStateForRoute: true,
     selectionLimit: 0,
+    searchMode: EntityPickerSearchMode.Filters,
+    searchMetadataKeys: () => [],
   },
 );
 
 const { t, locale } = useI18n();
+
+const searchTerm = ref<string>("");
+const onSearch = (term: string) => { searchTerm.value = term; };
+const searchModeFilters = computed<AdvancedFilterInput[]>(() =>
+  props.searchMode === EntityPickerSearchMode.Search
+    ? buildEntityPickerSearchFilters(searchTerm.value, props.searchMetadataKeys ?? [])
+    : [],
+);
+const allFilters = computed<AdvancedFilterInput[] | undefined>(() => {
+  const filters = [...(props.computedFilters ?? []), ...searchModeFilters.value];
+  return filters.length ? filters : undefined;
+});
+
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal, getModalInfo } = useBaseModal();
 const { addRelations } = useFormHelper();

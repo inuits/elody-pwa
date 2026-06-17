@@ -11,7 +11,7 @@
       </h1>
       <search-bar
         :input-enabled="true"
-        @updateFilters="updateBaseLibraryFilters"
+        @search="handleSearch"
       />
       <div
         v-if="isModalOpened && filters.length"
@@ -48,20 +48,29 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useSimpleSearch } from "@/composables/useSimpleSearch";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
-const { closeModal } = useBaseModal();
+const { closeModal, getModalInfo } = useBaseModal();
+const { buildFilters } = useSimpleSearch();
 const isModalOpened = ref<boolean>(false);
 const filters = ref<AdvancedFilterInput[]>([]);
 
-const updateBaseLibraryFilters = (
-  updatedFilters: AdvancedFilterInput[],
-  isOpenModal: boolean,
-) => {
-  filters.value = updatedFilters;
-  isModalOpened.value = isOpenModal;
+const handleSearch = (term: string) => {
+  filters.value = buildFilters(term);
+  isModalOpened.value = true;
 };
+
+watch(
+  () => getModalInfo(TypeModals.Search).open,
+  (modalIsOpen: boolean | undefined) => {
+    if (!modalIsOpen) {
+      filters.value = [];
+      isModalOpened.value = false;
+    }
+  },
+);
 </script>

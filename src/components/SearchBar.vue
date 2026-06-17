@@ -6,7 +6,8 @@
         type="text"
         class="w-full rounded-lg border-0"
         v-model="inputValue"
-        @keydown.enter="applyFilterToLibrary"
+        :placeholder="t('search.search-placeholder')"
+        @keydown.enter="submitSearch"
       />
     </div>
     <button
@@ -15,7 +16,7 @@
         'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg',
         { 'ml-2': inputEnabled },
       ]"
-      @click="!inputEnabled ? openSearchModal() : applyFilterToLibrary()"
+      @click="!inputEnabled ? openSearchModal() : submitSearch()"
     >
       <unicon :name="Unicons.SearchGlass.name"></unicon>
     </button>
@@ -23,19 +24,11 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  type AdvancedFilterInput,
-  AdvancedFilterTypes,
-  Entitytyping,
-  ModalStyle,
-  Permission,
-  TypeModals,
-  Operator,
-} from "@/generated-types/queries";
-import { computed, inject, ref, watch } from "vue";
+import { ModalStyle, TypeModals } from "@/generated-types/queries";
+import { ref } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { usePermissions } from "@/composables/usePermissions";
+import { useI18n } from "vue-i18n";
 
 withDefaults(
   defineProps<{
@@ -47,74 +40,18 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (
-    event: "updateFilters",
-    filters: AdvancedFilterInput[],
-    isOpenModal: boolean,
-  ): void;
+  (event: "search", term: string): void;
 }>();
 
-const config = inject("config") as any;
-const { openModal, getModalInfo } = useBaseModal();
-const { can } = usePermissions();
+const { t } = useI18n();
+const { openModal } = useBaseModal();
 const inputValue = ref<string>("");
-const entityTypeFilters = computed(() => {
-  const allowedTypes = config.features.simpleSearch.itemTypes?.filter(
-    (type: string) => !!can(Permission.Canread, type as Entitytyping),
-  );
-  if (!allowedTypes || allowedTypes.length === 0) return [];
-  return [
-    {
-      match_exact: true,
-      type: AdvancedFilterTypes.Selection,
-      key: "type",
-      value: allowedTypes,
-    },
-  ];
-});
 
-const createKeyBasedOnFormat = (metadataKey: string | object): string[] => {
-  if (typeof metadataKey === "object" && metadataKey?.preConfigured) {
-    return metadataKey.key;
-  }
-  const clientKeyFormat = config.features.simpleSearch.clientKeyFormat;
-  if (!clientKeyFormat || clientKeyFormat.length === 0) {
-    return [`elody:1|metadata.${metadataKey}.value`];
-  }
-  return clientKeyFormat.map((format: string) =>
-    format.replace(/\$metadata_key/g, metadataKey),
-  );
-};
-
-const applyFilterToLibrary = () => {
-  let filters: Array<AdvancedFilterInput> = [];
-  if (entityTypeFilters.value !== undefined)
-    filters = [...entityTypeFilters.value];
-  const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
-  for (const index in metadataKeys) {
-    filters.push({
-      key: createKeyBasedOnFormat(metadataKeys[index]),
-      value: inputValue.value,
-      type: AdvancedFilterTypes.Text,
-      operator: Operator.Or,
-      match_exact: false,
-    });
-  }
-
-  emit("updateFilters", filters, getModalInfo(TypeModals.Search).open);
+const submitSearch = () => {
+  emit("search", inputValue.value);
 };
 
 const openSearchModal = () => {
   openModal(TypeModals.Search, ModalStyle.CenterWide);
 };
-
-watch(
-  () => getModalInfo(TypeModals.Search).open,
-  (modalIsOpen: boolean | undefined) => {
-    if (!modalIsOpen) {
-      inputValue.value = "";
-      emit("updateFilters", [], modalIsOpen);
-    }
-  },
-);
 </script>

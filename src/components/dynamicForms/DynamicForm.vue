@@ -54,6 +54,8 @@
           :entity-picker-mode="EntityPickerMode.Save"
           :show-button="true"
           :enable-advanced-filters="true"
+          :search-mode="field.inputField?.searchMode ?? undefined"
+          :search-metadata-keys="field.inputField?.searchMetadataKeys ?? undefined"
         />
         <metadata-wrapper
           v-if="
