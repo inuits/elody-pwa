@@ -18,14 +18,22 @@
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, toRef, watch } from "vue";
 import debounce from "lodash.debounce";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
-import type { DropdownOption, InputField } from "@/generated-types/queries";
+import {
+  type DropdownOption,
+  type Entitytyping,
+  type InputField,
+  GetEntityByIdDocument,
+} from "@/generated-types/queries";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useManageEntities } from "@/composables/useManageEntities";
+import { apolloClient } from "@/main";
+import { getEntityTitle } from "@/helpers";
 
 const props = defineProps<{
   modelValue: string | undefined;
   inputField: InputField;
   formId: string;
+  cellKey?: string;
   disabled?: boolean;
 }>();
 
@@ -43,7 +51,8 @@ const isLoading = computed(
 );
 
 const stateKey = computed(
-  () => `${props.formId}-${props.inputField.relationType}-fetchAll`,
+  () =>
+    `${props.formId}-${props.inputField.relationType}-${props.cellKey ?? ""}-fetchAll`,
 );
 
 const handleSelect = (options: DropdownOption[] | DropdownOption | undefined) => {
@@ -58,28 +67,39 @@ const handleSelect = (options: DropdownOption[] | DropdownOption | undefined) =>
 };
 
 const syncSelectedFromModelValue = async () => {
-  const selection: DropdownOption[] = [];
-
-  if (Array.isArray(props.modelValue)) {
-    for (const value of props.modelValue) {
-      const found = await findAutocompleteOption(value);
-      if (found) selection.push(found);
-      else selection.push({ label: props.modelValue, value: props.modelValue })
-    }
-  } else if (props.modelValue) {
-    const found = await findAutocompleteOption(props.modelValue);
-    if (found) selection.push(found);
-    else selection.push({ label: props.modelValue, value: props.modelValue })
+  const key = Array.isArray(props.modelValue)
+    ? props.modelValue[0]
+    : props.modelValue;
+  if (!key) {
+    selectedOptions.value = [];
+    return;
   }
+  if (
+    selectedOptions.value[0]?.value === key &&
+    selectedOptions.value[0]?.label &&
+    selectedOptions.value[0]?.label !== key
+  )
+    return;
 
-  allEntitiesHelper.value.getAutocompleteOptions();
-  handleSelect(selection);
+  const label = await resolveEntityLabel(key);
+  selectedOptions.value = [{ label, value: key }];
 };
 
-const findAutocompleteOption = async (value: string): Promise<DropdownOption | undefined> => {
-  await allEntitiesHelper.value.getAutocompleteOptions(value);
-  return allEntitiesHelper.value.entityDropdownOptions[0]
-}
+const resolveEntityLabel = async (key: string): Promise<string> => {
+  const entityType = props.inputField.entityType as Entitytyping | undefined;
+  if (!entityType) return key;
+  try {
+    const result = await apolloClient.query({
+      query: GetEntityByIdDocument,
+      variables: { id: key, type: entityType },
+      fetchPolicy: "no-cache",
+    });
+    const entity = result.data?.Entity;
+    return entity ? getEntityTitle(entity) : key;
+  } catch {
+    return key;
+  }
+};
 
 const debouncedSearch = debounce((query: string) => {
   allEntitiesHelper.value?.getAutocompleteOptions(query);
@@ -121,7 +141,7 @@ onBeforeMount(() => {
 });
 
 onMounted(async () => {
-  await allEntitiesHelper.value?.initialize();
+  if (!props.disabled) await allEntitiesHelper.value?.initialize();
   syncSelectedFromModelValue();
 });
 
@@ -130,8 +150,4 @@ onBeforeUnmount(() => {
 });
 
 watch(() => props.modelValue, syncSelectedFromModelValue);
-watch(
-  () => allEntitiesHelper.value?.entityDropdownOptions.value,
-  () => syncSelectedFromModelValue(),
-);
 </script>

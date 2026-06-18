@@ -88,6 +88,19 @@
                 :unit="metadata.unit"
                 :entity="{ type: entityType }"
               />
+              <TableInputField
+                v-else-if="fieldType === InputFieldTypes.InputFieldWithSubFields"
+                v-model:model-value="fieldValueProxy"
+                :is-flow-relation-values="
+                  !metadata.inputField?.isMetadataField &&
+                  metadata.inputField?.relationType !== undefined
+                "
+                :sub-fields="(metadata.inputField as any)?.subFields ?? []"
+                :form-id="formId"
+                :parent-field-key="fieldKey"
+                :relation-type="metadata.inputField?.relationType"
+                :disabled="true"
+              />
               <ViewModesAutocompleteRelations
                 v-else-if="autoCompleteType === 'relationAutocomplete'"
                 v-model="fieldValueProxy"
@@ -217,6 +230,7 @@ import {
 import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
+import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
@@ -272,7 +286,6 @@ const {
   fieldTooltipValue,
   fieldErrorMessage,
   extractIntialValueFromParentByKey,
-  fieldValidationRules,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 const {
   initializeDropdownStates,

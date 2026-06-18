@@ -29,6 +29,7 @@
       v-model:model-value="value"
       :input-field="subField.inputField"
       :form-id="formId"
+      :cell-key="fieldKey"
       :disabled="disabled"
     />
     <ViewModesAutocompleteMetadata
@@ -42,9 +43,9 @@
           : 'multi'
       "
       :canCreateOption="subField.inputField.canCreateEntityFromOption"
-      :disabled="subField.inputField.disabled"
+      :disabled="disabled || subField.inputField.disabled"
       :disable-virtual-keyboard-context="true"
-      mode="edit"
+      :mode="disabled ? 'view' : 'edit'"
     />
     <p
       v-if="errorMessage"

@@ -4,6 +4,7 @@ import { Entitytyping } from "@/generated-types/queries";
 import LinkAction from "../LinkAction.vue";
 
 const mockResolve = vi.fn();
+const mockPush = vi.fn();
 
 const mocks = vi.hoisted(() => ({
   typeUrlMapping: { mapping: {} as Record<string, string> },
@@ -29,6 +30,7 @@ vi.mock("vue-i18n", () => ({
 vi.mock("vue-router", () => ({
   useRouter: () => ({
     resolve: mockResolve,
+    push: mockPush,
   }),
 }));
 
@@ -148,6 +150,52 @@ describe("LinkAction", () => {
       expect(mockResolve).toHaveBeenCalledWith({
         params: { id: "M-12345", type: "mediafile" },
       });
+    });
+  });
+
+  describe("named-route navigation", () => {
+    it("pushes to the named route in the same tab when routeName is set", async () => {
+      const wrapper = getWrapper({
+        ...getDefaultProps(),
+        routeName: "WemOverview",
+        openInNewTab: false,
+      } as any);
+      await wrapper
+        .findComponent({ name: "BaseContextMenuItem" })
+        .vm.$emit("clicked");
+      expect(mockPush).toHaveBeenCalledWith({
+        name: "WemOverview",
+        params: { id: "M-12345" },
+      });
+      expect(windowOpenSpy).not.toHaveBeenCalled();
+    });
+
+    it("opens the named route in a new tab when openInNewTab is true", async () => {
+      mockResolve.mockReturnValue({ href: "/wem/M-12345" });
+      const wrapper = getWrapper({
+        ...getDefaultProps(),
+        routeName: "WemOverview",
+        openInNewTab: true,
+      } as any);
+      await wrapper
+        .findComponent({ name: "BaseContextMenuItem" })
+        .vm.$emit("clicked");
+      expect(mockResolve).toHaveBeenCalledWith({
+        name: "WemOverview",
+        params: { id: "M-12345" },
+      });
+      expect(windowOpenSpy).toHaveBeenCalledWith("/wem/M-12345", "_blank");
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("falls back to opening the entity detail page when no routeName is set", async () => {
+      mockResolve.mockReturnValue({ href: "/mediafiles/M-12345" });
+      const wrapper = getWrapper();
+      await wrapper
+        .findComponent({ name: "BaseContextMenuItem" })
+        .vm.$emit("clicked");
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(windowOpenSpy).toHaveBeenCalledWith("/mediafiles/M-12345", "_blank");
     });
   });
 });

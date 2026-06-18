@@ -17,7 +17,11 @@ const pageName = computed(() => {
     "SingleMediafile",
     "EmbeddedViewer",
   ];
-  if (singleEntityNames.includes(route.name as string)) return "SingleEntity";
+  if (
+    singleEntityNames.includes(route.name as string) ||
+    (route.meta as any)?.multiEntityLayout
+  )
+    return "SingleEntity";
   return "Fallback";
 });
 </script>

@@ -18,6 +18,10 @@ const routeComponentConfig: RouteComponentConfig[] = [
     routeComponent: () => import("@/views/SingleEntity.vue"),
   },
   {
+    routeName: "MultiEntityView",
+    routeComponent: () => import("@/views/MultiEntityView.vue"),
+  },
+  {
     routeName: "EmbeddedViewer",
     routeComponent: () => import("@/views/EmbeddedViewer.vue"),
   },

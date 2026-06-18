@@ -275,7 +275,12 @@ export const useMetadataWrapper = (
       newValue = [];
     }
 
-    fieldValueProxy.value = newValue;
+    const inputField = props.metadata.inputField;
+    const isRelationTable =
+      inputField?.type === InputFieldTypes.InputFieldWithSubFields &&
+      !inputField?.isMetadataField &&
+      !!inputField?.relationType;
+    if (!isRelationTable) fieldValueProxy.value = newValue;
     determineFieldPermissions();
   });
 

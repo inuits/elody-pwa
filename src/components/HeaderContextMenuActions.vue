@@ -21,6 +21,16 @@
           :refetch-entities="noOp"
           :as-button="true"
         />
+        <link-action
+          v-else-if="action.type === 'link'"
+          :label="action.label"
+          :icon="action.icon"
+          :entity-id="entityId"
+          :entity-type="entityType"
+          :route-name="action.routeName"
+          :open-in-new-tab="action.openInNewTab"
+          :as-button="true"
+        />
       </template>
     </template>
     <template #overflow>
@@ -64,6 +74,8 @@
           :icon="action.icon"
           :entity-id="entityId"
           :entity-type="entityType"
+          :route-name="action.routeName"
+          :open-in-new-tab="action.openInNewTab"
         />
         <general-action
           v-else-if="action.type === 'general'"

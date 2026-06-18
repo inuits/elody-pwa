@@ -113,6 +113,43 @@ const relationKeySubField = computed(() =>
   props.subFields.find((sf) => sf.inputField?.isMetadataField === false),
 );
 
+const metadataSubFields = computed(() =>
+  props.subFields.filter((sf) => sf.inputField?.isMetadataField === true),
+);
+
+const normalizeRelationRow = (
+  item: Record<string, any>,
+): Record<string, any> => {
+  const existing: Record<string, any>[] = Array.isArray(item.metadata)
+    ? item.metadata
+    : [];
+  const subFieldKeys = metadataSubFields.value.map((sf) => sf.key);
+  const metadata = metadataSubFields.value.map((sf) => {
+    const match = existing.find((entry) => entry?.key === sf.key);
+    if (match?.key) return match;
+    return {
+      key: sf.key,
+      value: sf.inputField?.type === InputFieldTypes.Checkbox ? false : "",
+    };
+  });
+  const extras = existing.filter(
+    (entry) => entry?.key && !subFieldKeys.includes(entry.key),
+  );
+  return { ...item, metadata: [...metadata, ...extras] };
+};
+
+const isRelationRowNormalized = (item: Record<string, any>): boolean => {
+  if (item?.type !== props.relationType) return false;
+  const md: Record<string, any>[] = Array.isArray(item.metadata)
+    ? item.metadata
+    : [];
+  const aligned = metadataSubFields.value.every(
+    (sf, index) => md[index]?.key === sf.key,
+  );
+  const noKeyless = md.every((entry) => !!entry?.key);
+  return aligned && noKeyless;
+};
+
 const serializeRelationRow = (item: Record<string, any>): Record<string, any> => {
   const keyField = relationKeySubField.value;
   if (!props.relationType || !keyField) return null;
@@ -148,18 +185,24 @@ watch(
       return;
     }
 
-    const needsConversion = newVal.some((item) => item?.type !== props.relationType);
-    if (!needsConversion) return;
-
     const serialized = newVal
       .map((item) =>
-        item?.type === props.relationType ? item : serializeRelationRow(item),
+        item?.type === props.relationType
+          ? normalizeRelationRow(item)
+          : serializeRelationRow(item),
       )
+      .filter(Boolean);
 
     if (fields.value.length === 0) {
       serialized.forEach((item) => push(item));
     } else {
-      replace(serialized);
+      const needsConversion = newVal.some(
+        (item) => item?.type !== props.relationType,
+      );
+      const needsNormalization =
+        !!props.relationType &&
+        newVal.some((item) => !isRelationRowNormalized(item));
+      if (needsConversion || needsNormalization) replace(serialized);
     }
   },
   { immediate: true },

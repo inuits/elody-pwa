@@ -401,6 +401,71 @@ describe("TableInputField", () => {
       expect(mockReplace).not.toHaveBeenCalled();
     });
 
+    it("re-syncs pre-seeded rows whose metadata is misaligned/keyless via replace", () => {
+      // EntityForm seeds relationValues directly, so the field array can already
+      // hold a relation whose metadata omits main_author. The watcher must
+      // normalize it (replace) rather than leave a keyless slot that submits {}.
+      const seeded = {
+        key: "PERS-1",
+        type: "ref_work_authors",
+        editStatus: EditStatus.Unchanged,
+        metadata: [{ key: "function_indication", value: ["aut"] }],
+      };
+      mockFields.value = [{ key: "0", value: { ...seeded } }];
+
+      shallowMount(TableInputField, {
+        props: {
+          modelValue: [seeded],
+          subFields: relationSubFields,
+          formId: "form-1",
+          parentFieldKey: "relationValues.ref_work_authors",
+          relationType: "ref_work_authors",
+        },
+      });
+
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      const replaced = mockReplace.mock.calls[0][0];
+      expect(replaced[0].metadata).toEqual([
+        { key: "function_indication", value: ["aut"] },
+        { key: "main_author", value: false },
+      ]);
+    });
+
+    it("normalizes an existing relation whose metadata omits a sub-field, filling a keyed default", () => {
+      // Relation from the backend that never had a main_author entry. Without
+      // normalization the checkbox cell writes into a keyless {} slot and the
+      // mutation rejects it ("Field key of required type String! not provided").
+      mockFields.value = [];
+      const relationMissingMainAuthor = {
+        key: "PERS-1",
+        type: "ref_work_authors",
+        editStatus: EditStatus.Unchanged,
+        metadata: [{ key: "function_indication", value: ["aut"] }],
+      };
+
+      shallowMount(TableInputField, {
+        props: {
+          modelValue: [relationMissingMainAuthor],
+          subFields: relationSubFields,
+          formId: "form-1",
+          parentFieldKey: "relationValues.ref_work_authors",
+          relationType: "ref_work_authors",
+        },
+      });
+
+      const pushed = mockPush.mock.calls[0][0];
+      expect(pushed.key).toBe("PERS-1");
+      expect(pushed.editStatus).toBe(EditStatus.Unchanged);
+      expect(pushed.metadata).toEqual([
+        { key: "function_indication", value: ["aut"] },
+        { key: "main_author", value: false },
+      ]);
+      // No keyless metadata entries may survive.
+      expect(
+        pushed.metadata.every((m: any) => typeof m.key === "string" && m.key),
+      ).toBe(true);
+    });
+
     it("does not push or replace again when modelValue changes to already-serialized data", async () => {
       mockFields.value = [];
 

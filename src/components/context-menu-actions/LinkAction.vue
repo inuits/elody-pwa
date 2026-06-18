@@ -2,6 +2,7 @@
   <base-context-menu-item
     :label="$t(label, [entityTypeLabel])"
     :icon="Unicons[icon].name"
+    :as-button="asButton"
     @clicked="openLink"
   />
 </template>
@@ -23,6 +24,9 @@ const props = defineProps<{
   icon: string;
   entityId: string;
   entityType: Entitytyping;
+  asButton?: boolean;
+  routeName?: string;
+  openInNewTab?: boolean;
 }>();
 
 const entityTypeLabel = computed(() =>
@@ -33,6 +37,15 @@ const urlType = computed(
 );
 
 const openLink = () => {
+  if (props.routeName) {
+    const target = { name: props.routeName, params: { id: props.entityId } };
+    if (props.openInNewTab) {
+      window.open(router.resolve(target).href, "_blank");
+    } else {
+      router.push(target);
+    }
+    return;
+  }
   const resolved = router.resolve({
     params: { id: props.entityId, type: urlType.value },
   });

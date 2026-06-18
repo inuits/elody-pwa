@@ -1,10 +1,13 @@
 <template>
   <div
-    class="text-sm"
-    :class="{
-      'rounded-md bg-slate-800 py-0.25 px-1 mt-1 border border-transparent':
-        pillSettings,
-    }"
+    :class="[
+      size === 'lg' ? 'text-lg' : 'text-sm',
+      {
+        'rounded-md bg-slate-800 border border-transparent': pillSettings,
+        'py-0.25 px-1 mt-1': pillSettings && size !== 'lg',
+        'py-1 px-3': pillSettings && size === 'lg',
+      },
+    ]"
     :style="{
       background: pillSettings?.background,
       color: pillSettings?.text,
@@ -19,11 +22,18 @@ import { computed } from "vue";
 import { formattersSettings } from "@/main";
 import { useI18n } from "vue-i18n";
 
-const props = defineProps<{
-  formatter: string;
-  label: string;
-  translationKey?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    formatter: string;
+    label: string;
+    translationKey?: string;
+    size?: "sm" | "lg";
+  }>(),
+  {
+    translationKey: undefined,
+    size: "sm",
+  },
+);
 
 const { t } = useI18n();
 
