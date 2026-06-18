@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col h-full bg-neutral-0 rounded-lg overflow-hidden">
     <div
-      class="relative flex items-center px-4 py-3 border-b border-neutral-100 bg-neutral-10"
+      class="flex items-center gap-2 px-4 py-3 border-b border-neutral-100 bg-neutral-10"
     >
-      <div class="flex-1 flex justify-center">
+      <div class="flex w-1/2 min-w-0">
         <metadata-formatter-pill
           v-if="pillLabel"
           formatter="pill"
@@ -14,7 +14,7 @@
           {{ columnLabel }}
         </span>
       </div>
-      <div class="absolute right-4 flex items-center gap-2">
+      <div class="flex w-1/2 shrink-0 items-center justify-center gap-2">
         <base-button-new
           v-if="
             !editHelper.isEdit &&
@@ -46,7 +46,7 @@
         </template>
       </div>
     </div>
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 min-h-0 overflow-y-auto">
       <entity-column
         :entity="entity"
         :column-list="entity.entityView"

@@ -15,8 +15,8 @@
     </div>
 
     <!-- Table -->
-    <div class="overflow-hidden rounded-lg border border-[rgba(0,58,82,0.2)]">
-      <div class="grid" :style="gridStyle">
+    <div class="overflow-x-auto rounded-lg border border-[rgba(0,58,82,0.2)]">
+      <div class="grid w-max min-w-full" :style="gridStyle">
         <!-- Header row -->
         <div
           v-for="(subField, index) in subFields"
