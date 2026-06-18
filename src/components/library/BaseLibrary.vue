@@ -754,6 +754,7 @@ const bulkSelect = (items = entities.value) => {
 const refetchEntities = async (
   limitForEntityPicker = undefined,
 ): Promise<Entity[] | void> => {
+  if (props.predefinedEntities) return;
   return await getEntities(
     route,
     new AbortController().signal,
@@ -996,7 +997,10 @@ watch(
 watch(
   () => uploadStatus.value,
   async () => {
-    if (uploadStatus.value === UploadStatus.Finished) await refetchEntities();
+    if (uploadStatus.value === UploadStatus.Finished) {
+      console.log("Upload finished, refetching entities...", props);
+      await refetchEntities();
+    }
   },
 );
 
