@@ -25,24 +25,25 @@
     >
       <div class="mb-3 flex flex-row whitespace-nowrap">
         <base-tooltip
-          v-if="!isExpanded"
+          v-if="!isExpanded && elodyUser"
           class="hover:text-accent-accent cursor-pointer"
           position="top-right"
           :tooltip-offset="8"
         >
           <template #activator="{ on }">
-            <div v-on="on">
-              <unicon
-                :name="Unicons.UserCircle.name"
-                height="20"
-                class="mt-1 ml-5"
-              />
-            </div>
+            <router-link :to="`/user/${elodyUser.id}`"
+              ><div v-on="on">
+                <unicon
+                  :name="Unicons.UserCircle.name"
+                  height="20"
+                  class="mt-1 ml-5"
+                /></div
+            ></router-link>
           </template>
           <template #default>
             <span class="w-max hover:text-accent-accent">
               <div>
-                {{ getUserName(auth) }}
+                {{ getUserName() }}
               </div>
             </span>
           </template>
@@ -54,7 +55,7 @@
           class="mt-1 ml-5"
         />
         <span v-if="isExpanded" class="overflow-hidden px-4 font-bold">
-          {{ getUserName(auth) }}
+          {{ getUserName() }}
         </span>
       </div>
       <div
@@ -68,7 +69,7 @@
           <template #activator="{ on }">
             <div v-on="on">
               <unicon
-                @click="() => openConfirmationModal()"
+                @click="openConfirmationModal"
                 :name="Unicons.SignOut.name"
                 height="20"
                 class="mt-1 ml-5"
@@ -85,14 +86,14 @@
         </base-tooltip>
         <unicon
           v-if="isExpanded"
-          @click="() => openConfirmationModal()"
+          @click="openConfirmationModal"
           :name="Unicons.SignOut.name"
           height="20"
           class="mt-1 ml-5"
         />
         <span
           v-if="isExpanded"
-          @click="() => openConfirmationModal()"
+          @click="openConfirmationModal"
           class="overflow-hidden px-4 font-bold"
         >
           {{ t("navigation.log-out") }}
@@ -109,9 +110,8 @@ import { auth } from "@/main";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
-import { getUserName } from "../helpers";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { useLogout } from "@/composables/useLogout";
+import { useAuth } from "@/composables/useAuth";
 
 defineProps({
   isExpanded: Boolean,
@@ -120,18 +120,12 @@ defineProps({
 const { t } = useI18n();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
-const { performLogout } = useLogout();
-
-const handleLogout = async () => {
-  await performLogout();
-};
+const { performLogout, getUserName, elodyUser } = useAuth();
 
 const openConfirmationModal = () => {
   initializeConfirmModal({
     confirmButton: {
-      buttonCallback: async () => {
-        await handleLogout();
-      },
+      buttonCallback: performLogout,
     },
     declineButton: {
       buttonCallback: () => {
@@ -144,4 +138,3 @@ const openConfirmationModal = () => {
 };
 </script>
 
-<style></style>

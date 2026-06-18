@@ -1,6 +1,6 @@
 import { watch, onUnmounted, inject } from "vue";
 import { auth, apolloClient } from "@/main";
-import { useLogout } from "./useLogout";
+import { useAuth } from "./useAuth";
 import { resetAdvancedPermissions } from "./usePermissions";
 import { useApp } from "@/composables/useApp";
 
@@ -8,7 +8,7 @@ type ActionType = "login" | "logout" | (string & {});
 
 export const useCrossTabAuthSync = () => {
   const channel = new BroadcastChannel("auth");
-  const { performLogout } = useLogout();
+  const { performLogout } = useAuth();
   const config: any = inject("config");
   const enableCrossTabAuthSync = config?.features?.enableCrossTabAuthSync ?? true;
 
