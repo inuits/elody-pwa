@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildEntityPickerSearchFilters } from "@/composables/useEntityPickerSearch";
+import { buildEntityPickerSearchFilters, buildEntityPickerTypeFilter } from "@/composables/useEntityPickerSearch";
 import { AdvancedFilterTypes, Operator } from "@/generated-types/queries";
 
 describe("buildEntityPickerSearchFilters", () => {
@@ -44,5 +44,35 @@ describe("buildEntityPickerSearchFilters", () => {
     expect(result[0].key).toEqual([keys[0]]);
     expect(result[1].key).toEqual([keys[1]]);
     result.forEach((f) => expect(f.value).toBe("test"));
+  });
+});
+
+describe("buildEntityPickerTypeFilter", () => {
+  it("returns empty array when only one accepted type", () => {
+    const result = buildEntityPickerTypeFilter(["person"]);
+    expect(result).toEqual([]);
+  });
+
+  it("returns empty array when accepted types is empty", () => {
+    const result = buildEntityPickerTypeFilter([]);
+    expect(result).toEqual([]);
+  });
+
+  it("returns type filter when multiple accepted types", () => {
+    const result = buildEntityPickerTypeFilter(["person", "corporation"]);
+    expect(result).toHaveLength(1);
+  });
+
+  it("sets key to 'type', type to Selection, match_exact to true", () => {
+    const result = buildEntityPickerTypeFilter(["person", "corporation"]);
+    expect(result[0].key).toBe("type");
+    expect(result[0].type).toBe(AdvancedFilterTypes.Selection);
+    expect(result[0].match_exact).toBe(true);
+  });
+
+  it("sets value to the accepted types array", () => {
+    const types = ["person", "corporation"];
+    const result = buildEntityPickerTypeFilter(types);
+    expect(result[0].value).toEqual(types);
   });
 });

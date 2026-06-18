@@ -4,10 +4,10 @@ import {
   Operator,
 } from "@/generated-types/queries";
 
-export function buildEntityPickerSearchFilters(
+export const buildEntityPickerSearchFilters = (
   searchTerm: string,
   metadataKeys: string[],
-): AdvancedFilterInput[] {
+): AdvancedFilterInput[] => {
   if (!searchTerm || metadataKeys.length === 0) return [];
   return metadataKeys.map((key) => ({
     key: [key],
@@ -16,4 +16,16 @@ export function buildEntityPickerSearchFilters(
     operator: Operator.Or,
     match_exact: false,
   }));
-}
+};
+
+export const buildEntityPickerTypeFilter = (
+  searchAcceptedTypes: string[],
+): AdvancedFilterInput[] => {
+  if (searchAcceptedTypes.length <= 1) return [];
+  return [{
+    key: "type",
+    value: searchAcceptedTypes,
+    type: AdvancedFilterTypes.Selection,
+    match_exact: true,
+  }];
+};

@@ -57,7 +57,7 @@ import {
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
-import { buildEntityPickerSearchFilters } from "@/composables/useEntityPickerSearch";
+import { buildEntityPickerSearchFilters, buildEntityPickerTypeFilter } from "@/composables/useEntityPickerSearch";
 import SearchBar from "@/components/SearchBar.vue";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import {
@@ -116,6 +116,7 @@ const props = withDefaults(
     selectionLimit?: number; // max selectable entities (0/absent = unlimited)
     searchMode?: EntityPickerSearchMode;
     searchMetadataKeys?: string[];
+    searchAcceptedTypes?: string[];
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -126,6 +127,7 @@ const props = withDefaults(
     selectionLimit: 0,
     searchMode: EntityPickerSearchMode.Filters,
     searchMetadataKeys: () => [],
+    searchAcceptedTypes: () => [],
   },
 );
 
@@ -133,13 +135,25 @@ const { t, locale } = useI18n();
 
 const searchTerm = ref<string>("");
 const onSearch = (term: string) => { searchTerm.value = term; };
+const isSearchMode = computed<boolean>(
+  () => props.searchMode === EntityPickerSearchMode.Search,
+);
 const searchModeFilters = computed<AdvancedFilterInput[]>(() =>
-  props.searchMode === EntityPickerSearchMode.Search
+  isSearchMode.value
     ? buildEntityPickerSearchFilters(searchTerm.value, props.searchMetadataKeys ?? [])
     : [],
 );
+const searchModeTypeFilter = computed<AdvancedFilterInput[]>(() =>
+  isSearchMode.value
+    ? buildEntityPickerTypeFilter(props.searchAcceptedTypes ?? [])
+    : [],
+);
 const allFilters = computed<AdvancedFilterInput[] | undefined>(() => {
-  const filters = [...(props.computedFilters ?? []), ...searchModeFilters.value];
+  const filters = [
+    ...(props.computedFilters ?? []),
+    ...searchModeTypeFilter.value,
+    ...searchModeFilters.value,
+  ];
   return filters.length ? filters : undefined;
 });
 
