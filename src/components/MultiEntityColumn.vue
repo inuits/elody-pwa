@@ -95,6 +95,7 @@ const { fetchUpdateAndDeletePermission } = usePermissions();
 const { initializeConfirmModal } = useConfirmModal();
 const { closeModal } = useBaseModal();
 
+useEditMode(props.entity.id);
 const editHelper = useEditMode(props.entity.id);
 const entityRef = computed(() => props.entity);
 const identifiers = computed<string[]>(
