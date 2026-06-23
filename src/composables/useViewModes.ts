@@ -116,6 +116,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
             `[BaseLibrary] Table view requires all entities to share the same teaserMetadata columns. Table view will not be shown.`,
           );
           displayTable.value = false;
+          displayList.value = true;
         } else {
           newToggles.push({
             isOn: displayTable,
