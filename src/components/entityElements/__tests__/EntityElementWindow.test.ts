@@ -1,15 +1,32 @@
 import { mount, flushPromises } from '@vue/test-utils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import EntityElementWindow from '../EntityElementWindow.vue';
+import { Permission } from '@/generated-types/queries';
 
-const { mockFetchAdvancedPermissions } = vi.hoisted(() => ({
-  mockFetchAdvancedPermissions: vi.fn()
+const {
+  mockFetchAdvancedPermissions,
+  mockFetchUpdateAndDeletePermission,
+  mockGetEntityUuid,
+  mockGetEntityType,
+} = vi.hoisted(() => ({
+  mockFetchAdvancedPermissions: vi.fn(),
+  mockFetchUpdateAndDeletePermission: vi.fn(),
+  mockGetEntityUuid: vi.fn(),
+  mockGetEntityType: vi.fn(),
 }));
 
 vi.mock('@/composables/usePermissions', () => ({
   usePermissions: () => ({
-    fetchAdvancedPermissions: mockFetchAdvancedPermissions
+    fetchAdvancedPermissions: mockFetchAdvancedPermissions,
+    fetchUpdateAndDeletePermission: mockFetchUpdateAndDeletePermission,
   })
+}));
+
+vi.mock('@/composables/useEntitySingle', () => ({
+  default: () => ({
+    getEntityUuid: mockGetEntityUuid,
+    getEntityType: mockGetEntityType,
+  }),
 }));
 
 vi.mock('@/composables/useEdit', () => ({ useEditMode: () => ({ isEdit: false }) }));
@@ -27,6 +44,11 @@ describe('EntityElementWindow Permission Logic', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetchUpdateAndDeletePermission.mockReturnValue(
+      Promise.resolve(new Map()),
+    );
+    mockGetEntityUuid.mockReturnValue(undefined);
+    mockGetEntityType.mockReturnValue(undefined);
   });
 
   it('should initially render zero panels while permissions are loading', async () => {
@@ -124,6 +146,121 @@ describe('EntityElementWindow Permission Logic', () => {
 
     const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
     expect(panels.length).toBe(3);
+  });
+
+  describe('per-entity permission fallback', () => {
+    const elementWithUpdate = {
+      label: 'User Detail',
+      info: { __typename: 'WindowElementPanel', label: 'User Info', can: null },
+      settings: {
+        __typename: 'WindowElementPanel',
+        label: 'Notification Settings',
+        can: 'update:user',
+      },
+    };
+
+    it('shows panel when advanced denies but per-entity Canupdate is true', async () => {
+      mockGetEntityUuid.mockReturnValue('US-9A381RJZF');
+      mockGetEntityType.mockReturnValue('user');
+      mockFetchAdvancedPermissions.mockResolvedValue({ 'update:user': false });
+      mockFetchUpdateAndDeletePermission.mockReturnValue(
+        Promise.resolve(new Map([[Permission.Canupdate, true]])),
+      );
+
+      const wrapper = mount(EntityElementWindow, {
+        props: { element: elementWithUpdate, identifiers: [], formId: '1' },
+      });
+
+      await flushPromises();
+
+      const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
+      expect(panels.length).toBe(2);
+      expect(panels[1].props('panel').label).toBe('Notification Settings');
+    });
+
+    it('hides panel when advanced denies and per-entity Canupdate is false', async () => {
+      mockGetEntityUuid.mockReturnValue('US-9A381RJZF');
+      mockGetEntityType.mockReturnValue('user');
+      mockFetchAdvancedPermissions.mockResolvedValue({ 'update:user': false });
+      mockFetchUpdateAndDeletePermission.mockReturnValue(
+        Promise.resolve(new Map([[Permission.Canupdate, false]])),
+      );
+
+      const wrapper = mount(EntityElementWindow, {
+        props: { element: elementWithUpdate, identifiers: [], formId: '1' },
+      });
+
+      await flushPromises();
+
+      const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
+      expect(panels.length).toBe(1);
+      expect(panels[0].props('panel').label).toBe('User Info');
+    });
+
+    it('does not fall back when can target type mismatches current entity type', async () => {
+      mockGetEntityUuid.mockReturnValue('PR-1');
+      mockGetEntityType.mockReturnValue('production');
+      mockFetchAdvancedPermissions.mockResolvedValue({ 'update:user': false });
+      mockFetchUpdateAndDeletePermission.mockReturnValue(
+        Promise.resolve(new Map([[Permission.Canupdate, true]])),
+      );
+
+      const wrapper = mount(EntityElementWindow, {
+        props: { element: elementWithUpdate, identifiers: [], formId: '1' },
+      });
+
+      await flushPromises();
+
+      const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
+      expect(panels.length).toBe(1);
+      expect(panels[0].props('panel').label).toBe('User Info');
+    });
+
+    it('shows panel when advanced grants even without per-entity fallback', async () => {
+      mockGetEntityUuid.mockReturnValue('US-9A381RJZF');
+      mockGetEntityType.mockReturnValue('user');
+      mockFetchAdvancedPermissions.mockResolvedValue({ 'update:user': true });
+      mockFetchUpdateAndDeletePermission.mockReturnValue(
+        Promise.resolve(new Map([[Permission.Canupdate, false]])),
+      );
+
+      const wrapper = mount(EntityElementWindow, {
+        props: { element: elementWithUpdate, identifiers: [], formId: '1' },
+      });
+
+      await flushPromises();
+
+      const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
+      expect(panels.length).toBe(2);
+    });
+
+    it('falls back to Candelete for delete action', async () => {
+      const deletePanelElement = {
+        info: { __typename: 'WindowElementPanel', label: 'Info', can: null },
+        danger: {
+          __typename: 'WindowElementPanel',
+          label: 'Delete Zone',
+          can: 'delete:user',
+        },
+      };
+
+      mockGetEntityUuid.mockReturnValue('US-9A381RJZF');
+      mockGetEntityType.mockReturnValue('user');
+      mockFetchAdvancedPermissions.mockResolvedValue({ 'delete:user': false });
+      mockFetchUpdateAndDeletePermission.mockReturnValue(
+        Promise.resolve(new Map([[Permission.Candelete, true]])),
+      );
+
+      const wrapper = mount(EntityElementWindow, {
+        props: { element: deletePanelElement, identifiers: [], formId: '1' },
+      });
+
+      await flushPromises();
+
+      const panels = wrapper.findAllComponents({ name: 'EntityElementWindowPanel' });
+      expect(panels.length).toBe(2);
+      expect(panels[1].props('panel').label).toBe('Delete Zone');
+    });
   });
 
   // Used in dams (and other clients) for things like the refresh-metadata action

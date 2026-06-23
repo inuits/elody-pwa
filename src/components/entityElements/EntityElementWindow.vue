@@ -105,9 +105,11 @@ import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { usePermissions } from "@/composables/usePermissions";
+import useEntitySingle from "@/composables/useEntitySingle";
 import {
   DisplayCondition,
   Orientations,
+  Permission,
   WindowElementLayout,
   type WindowElement,
   type WindowElementPanel,
@@ -134,11 +136,13 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { fetchAdvancedPermissions } = usePermissions();
+const { fetchAdvancedPermissions, fetchUpdateAndDeletePermission } =
+  usePermissions();
 const { getForm } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
 
 const permissionResults = ref<Record<string, boolean>>({});
+const entityDetailPermissions = ref<Map<Permission, boolean> | null>(null);
 const isCheckingPermissions = ref(true);
 
 const computedIsEdit = computed(
@@ -176,12 +180,42 @@ const resolvePanelPermissions = async () => {
     ),
   ];
 
-  if (uniquePermissions.length > 0) {
-    const results = await fetchAdvancedPermissions(uniquePermissions);
-    permissionResults.value = results;
-  }
+  const entityId = useEntitySingle().getEntityUuid();
+  const entityType = useEntitySingle().getEntityType();
+
+  const advancedPromise =
+    uniquePermissions.length > 0
+      ? fetchAdvancedPermissions(uniquePermissions)
+      : Promise.resolve<Record<string, boolean>>({});
+  const detailPromise =
+    entityId && entityType
+      ? fetchUpdateAndDeletePermission(entityId, entityType) ??
+        Promise.resolve(null)
+      : Promise.resolve(null);
+
+  const [advancedResults, detailResults] = await Promise.all([
+    advancedPromise,
+    detailPromise,
+  ]);
+  permissionResults.value = advancedResults;
+  entityDetailPermissions.value = detailResults ?? null;
 
   isCheckingPermissions.value = false;
+};
+
+const isPanelPermitted = (panelCan: string): boolean => {
+  if (permissionResults.value[panelCan]) return true;
+
+  const [action, targetEntityType] = panelCan.split(":");
+  const currentEntityType = useEntitySingle().getEntityType();
+  if (!targetEntityType || targetEntityType !== currentEntityType) return false;
+
+  const detail = entityDetailPermissions.value;
+  if (!detail) return false;
+  if (action === "update") return !!detail.get(Permission.Canupdate);
+  if (action === "delete") return !!detail.get(Permission.Candelete);
+  if (action === "read") return !!detail.get(Permission.Canread);
+  return false;
 };
 
 const getPanelsAllowedToDisplay = (): WindowElementPanel[] => {
@@ -202,7 +236,7 @@ const filteredPanels = computed<WindowElementPanel[]>(() => {
     const requiredPerms = (panel.can && [panel.can]) || [];
     if (requiredPerms.length === 0) return true;
 
-    return requiredPerms.some((p) => permissionResults.value[p]);
+    return requiredPerms.some((p) => isPanelPermitted(p));
   });
 });
 
