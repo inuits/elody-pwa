@@ -1,54 +1,80 @@
-# dams
+# inuits-dams-pwa
 
-This template should help get you started developing with Vue 3 in Vite.
+Vue 3 PWA frontend for the Elody DAMS platform. The UI is **schema-driven** — forms, views, and field types are not hardcoded but fetched from the GraphQL API at runtime and rendered dynamically.
 
-## Recommended IDE Setup
+## Stack
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+- **Vue 3** + TypeScript + Composition API
+- **Vite** (dev server + build)
+- **Apollo Client** — all data via GraphQL
+- **TailwindCSS v4**
+- **Vitest** — unit tests
 
-## Type Support for `.vue` Imports in TS
+## Getting started
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
+All commands are run from the monorepo root via the Taskfile:
 
 ```sh
-npm install
+task start-client   # start the full stack for a client (prompts to pick one)
+task stop-client    # stop the client stack
+task build-client   # rebuild after dependency changes
+task generate       # regenerate GraphQL types after schema changes
 ```
 
-### Compile and Hot-Reload for Development
+For unit tests and linting, run the package scripts directly from this directory — these don't require the full stack to be running.
+
+## Project structure
+
+```
+src/
+  components/        # UI components, grouped by concern
+    metadata/        # field renderers (MetadataWrapper, MetadataFormatterPill, …)
+    dynamicForms/    # schema-driven form rendering
+    entityElements/  # list/relation/element panels
+    bulk-operations/ # multi-select action bar
+    modals/          # modal shells and pickers
+  composables/       # all business logic (useEdit, useEntitySingle, useBulkOperations, …)
+  views/             # route-level pages (EntitySingle, MultiEntityView, Home, …)
+  generated-types/   # auto-generated from GraphQL schema — do not edit by hand
+  helpers.ts         # shared utilities
+  main.ts            # app bootstrap (Apollo, auth, i18n, formatters)
+```
+
+Path alias: `@` → `src/`.
+
+## How the schema-driven UI works
+
+`baseGraphql` defines all available configuration options and shared types in its GraphQL schema (`Form → FormTab → FormFields → InputFieldTypes`). The actual UI — which forms exist, what fields they contain, how entities relate — is configured in the **client's own GraphQL service** (`clients/<client>/client-frontend/inuits-dams-graphql-service/`). That is where queries, translations, input field definitions, and formatter configs live.
+
+The PWA fetches this configuration at runtime and renders it generically. Everything below is defined in the client GraphQL service, not in this repo:
+
+- **Entity list views** — which columns are shown, their formatters, bulk operations
+- **Entity detail pages** — panel layout, which metadata fields appear per panel, related entity list elements
+- **Forms** — tabs, field order, input types, validation rules (`DynamicForm.vue`)
+- **Filters** — advanced filters per entity type, which fields are filterable and how options are fetched
+- **Sort options** — available sort fields per entity type
+- **Bulk operations** — which actions appear on multi-select per entity type
+
+Field types (text, date, dropdown, fileUpload, entityPicker, …) map to concrete wrapper components in `src/components/metadata/`. The PWA itself has no knowledge of client-specific entity types or configuration.
+
+## Formatters
+
+Fields can carry a `formatter` hint from the GraphQL response (e.g. `"pill"`, `"pill|concept"`, `"link"`). `MetadataFormatter.vue` dispatches to the right renderer. Pill colors are configured per-client in `podiumnetFormattersConfig.ts` (or equivalent).
+
+## GraphQL codegen
+
+Types are generated from the schema using `graphql-code-generator` (`codegen.ts`). Re-run `pnpm run generate` whenever the schema or any `.graphql` / query file changes.
+
+## Testing
+
+Unit tests live alongside their subject in `src/**/__tests__/` or `src/**/tests/`. Run with:
 
 ```sh
-npm run dev
+pnpm run test:unit
 ```
 
-### Type-Check, Compile and Minify for Production
+Coverage output lands in `coverage/` and is browsable at `http://dashboard.dams.localhost:8300/coverage/index.html` when the stack is running.
 
-```sh
-npm run build
-```
+## Feature docs
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-Unit tests are implemented in the folder `tests`, please keep fake data seperate in the file `fakeData.ts` or seperate files to keep the written test readable. In the root the folder `coverage` is available and will generate new files each time you re-run test so you can easiliy view results in your terminal but also in your browser `http://dashboard.dams.localhost:8300/coverage/index.html`.
-
-```sh
-npm run test:unit
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+`.claude/features/` holds structured docs for non-obvious features (Dynamic Forms, Repetitive Form wizard, …). Check there before exploring a feature from scratch.
