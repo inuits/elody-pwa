@@ -238,10 +238,20 @@ export const useMetadataWrapper = (
   const parentForm = ref<FormContext | undefined>(
     getForm(getEntityIdFromRoute()),
   );
+
   const extractIntialValueFromParentByKey = (
     key: string,
   ): string | undefined => {
     if (!parentForm.value || !key) return undefined;
+    const fromRelationType = (props.metadata as any).copyValueFromParent?.fromRelationType;
+    if (fromRelationType) {
+      const relations = parentForm.value.values.relationValues?.[fromRelationType];
+      const relatedId = Array.isArray(relations)
+        ? relations[0]?.key
+        : undefined;
+      const relatedForm = relatedId ? getForm(relatedId) : undefined;
+      return relatedForm?.values.intialValues?.[key];
+    }
     return parentForm?.value.values.intialValues[key];
   };
 

@@ -104,6 +104,7 @@
             :filters-need-context="filtersNeedContext"
             :id="id"
             :actions-on-result="actionsOnResult"
+            :add-entities-to-forms="addEntitiesToForms"
           />
         </div>
       </template>
@@ -187,6 +188,7 @@ const props = withDefaults(
     previewLabel?: string;
     cropMediafileCoordinatesKey?: string;
     actionsOnResult?: ActionsOnResult;
+    addEntitiesToForms?: boolean;
     headerStyle?: "normal" | "none";
   }>(),
   {
@@ -200,6 +202,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     filtersNeedContext: undefined,
     previewLabel: undefined,
+    addEntitiesToForms: false,
     headerStyle: "normal",
   },
 );

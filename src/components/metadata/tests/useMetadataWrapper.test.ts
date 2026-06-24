@@ -12,6 +12,19 @@ vi.mock("@/main", () => ({
   },
 }));
 
+// Lets each test control which entity id `getEntityIdFromRoute()` resolves to,
+// so `parentForm` (the form of the entity whose detail page we're on) points at
+// a form we registered in the test. Must be prefixed with `mock` for Vitest's
+// hoisted factory to reference it.
+let mockRouteEntityId: string | undefined = undefined;
+vi.mock("@/helpers", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/helpers")>();
+  return {
+    ...actual,
+    getEntityIdFromRoute: () => mockRouteEntityId,
+  };
+});
+
 import { useMetadataWrapper } from "../useMetadataWrapper";
 import { useForm, defineRule } from "vee-validate";
 import { defineComponent, h, nextTick, type Ref, type ComputedRef } from "vue";
@@ -434,5 +447,128 @@ describe("useMetadataWrapper — multi-select empty string initialization", () =
     await nextTick();
 
     expect(capturedFieldValueProxy!.value).toBe("");
+  });
+});
+
+const mountWithExtract = (
+  routeEntityId: string,
+  metadata: Record<string, any>,
+  registerForms: (formHelper: ReturnType<typeof useFormHelper>) => void,
+): Promise<(key: string) => string | undefined> => {
+  mockRouteEntityId = routeEntityId;
+  let extract: (key: string) => string | undefined;
+
+  const component = defineComponent({
+    setup() {
+      const formHelper = useFormHelper();
+      registerForms(formHelper);
+
+      useForm();
+      defineRule("no_xss", () => true);
+
+      const { extractIntialValueFromParentByKey } = useMetadataWrapper(
+        {
+          formId: "M-NEW",
+          metadata: { __typename: "PanelMetaData", ...metadata },
+          isEdit: false,
+          baseLibraryMode: "normalBaseLibrary",
+          formFlow: "edit",
+          showErrors: false,
+        } as any,
+        () => undefined,
+      );
+      extract = extractIntialValueFromParentByKey;
+      return () => h("div");
+    },
+  });
+
+  mount(component);
+  return nextTick().then(() => extract!);
+};
+
+describe("useMetadataWrapper — extractIntialValueFromParentByKey", () => {
+  it("reads from the parent's own intialValues when no fromRelationType is set", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-1",
+      { key: "subtitle" },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-1", {
+          intialValues: { subtitle: "parent subtitle" },
+          relationValues: {},
+        });
+      },
+    );
+
+    expect(extract("subtitle")).toBe("parent subtitle");
+  });
+
+  it("traverses fromRelationType to read from the related entity's form", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-2",
+      {
+        key: "title",
+        copyValueFromParent: {
+          key: "original_headtitle",
+          label: "bulk-operations.copy-title-from-work",
+          fromRelationType: "refWork",
+        },
+      },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-2", {
+          intialValues: {},
+          relationValues: { refWork: [{ key: "W-REL-2", type: "refWork" }] },
+        });
+        formHelper.createForm("W-REL-2", {
+          intialValues: { original_headtitle: "Work Head Title" },
+          relationValues: {},
+        });
+      },
+    );
+
+    expect(extract("original_headtitle")).toBe("Work Head Title");
+  });
+
+  it("returns undefined when the related entity's form is not registered", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-3",
+      {
+        key: "title",
+        copyValueFromParent: {
+          key: "original_headtitle",
+          label: "bulk-operations.copy-title-from-work",
+          fromRelationType: "refWork",
+        },
+      },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-3", {
+          intialValues: {},
+          relationValues: { refWork: [{ key: "W-MISSING", type: "refWork" }] },
+        });
+      },
+    );
+
+    expect(extract("original_headtitle")).toBeUndefined();
+  });
+
+  it("returns undefined when the parent has no relation of the configured type", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-4",
+      {
+        key: "title",
+        copyValueFromParent: {
+          key: "original_headtitle",
+          label: "bulk-operations.copy-title-from-work",
+          fromRelationType: "refWork",
+        },
+      },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-4", {
+          intialValues: {},
+          relationValues: {},
+        });
+      },
+    );
+
+    expect(extract("original_headtitle")).toBeUndefined();
   });
 });

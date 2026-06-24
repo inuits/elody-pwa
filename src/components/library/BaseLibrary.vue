@@ -366,7 +366,7 @@ import {
   ViewModes,
   type ViewModesWithConfig,
 } from "@/generated-types/queries";
-import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
+import { deepToRaw, formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { auth } from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
 import { DefaultApolloClient } from "@vue/apollo-composable";
@@ -428,6 +428,7 @@ export type BaseLibraryProps = {
   centerCoordinatesKey?: string;
   cropMediafileCoordinatesKey?: string;
   actionsOnResult?: ActionsOnResult;
+  addEntitiesToForms?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -460,6 +461,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   ignoreFetchingData: false,
   centerCoordinatesKey: "",
   cropMediafileCoordinatesKey: "",
+  addEntitiesToForms: false,
 });
 
 const emit = defineEmits<{
@@ -607,7 +609,7 @@ let customBulkOperationsPromise: () => Promise<void>;
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
-const { replaceRelationsFromSameType, getForm } = useFormHelper();
+const { replaceRelationsFromSameType, getForm, createForm, deleteForm } =  useFormHelper();
 const { uploadStatus } = useUpload(config);
 const {
   setAcceptedTypes,
@@ -657,6 +659,7 @@ const noResultTranslations = computed(() => ({
     : "",
 }));
 const lastProcessedEntityType = ref<Entitytyping | null>(null);
+const formIdsAddedToState = new Set<string>();
 
 const entityType = computed(() =>
   props.entityType
@@ -899,6 +902,8 @@ watch(
 
 onUnmounted(() => {
   window.removeEventListener("beforeunload", resetMapPaginationLimit);
+  formIdsAddedToState.forEach((id) => deleteForm(id));
+  formIdsAddedToState.clear();
 });
 
 const resetMapPaginationLimit = () => {
@@ -990,6 +995,18 @@ watch(
 
     if (typeChanged && !hasValidData) {
       determineViewModes([]);
+    }
+    if (props.addEntitiesToForms) {
+      for (const entity of newEntities) {
+        if (!getForm(entity.id)) formIdsAddedToState.add(entity.id);
+        createForm(entity.id, {
+          intialValues: structuredClone(deepToRaw(entity.intialValues)),
+          relationValues: structuredClone(deepToRaw(entity.relationValues)),
+          relationMetadata: {},
+          relatedEntityData: { metadata: {}, relations: {} },
+          uuid: entity.uuid,
+        });
+      }
     }
   },
 );

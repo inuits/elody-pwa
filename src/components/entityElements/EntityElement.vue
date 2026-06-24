@@ -48,6 +48,7 @@
         :preview-label="previewLabel"
         :cropMediafileCoordinatesKey="element.cropMediafileCoordinatesKey"
         :actions-on-result="element.actionsOnResult"
+        :add-entities-to-forms="element.addEntitiesToForms"
         @close-preview-component="emit('closePreviewComponent')"
         @toggle-element-collapse="
           (entityId, elementLabel) =>
