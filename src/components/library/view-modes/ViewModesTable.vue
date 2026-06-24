@@ -242,9 +242,10 @@ const measureColWidths = () => {
 
 const headerColumnClass = (idx: number): string => {
   const base = "flex justify-start flex-col mx-2 break-words";
+  const pos = idx === 0 ? "col-primary" : "col-secondary";
   if (headerColumns.value[0]?.hasFormatter) {
-    if (idx === 0) return `${base} flex-shrink-0 whitespace-nowrap`;
-    return `${base} flex-1 min-w-0`;
+    if (idx === 0) return `${base} ${pos} flex-shrink-0 whitespace-nowrap`;
+    return `${base} ${pos} flex-1 min-w-0`;
   }
   const count = headerColumns.value.length;
   const amount: string | number = count >= 4 ? "default" : count;
@@ -254,7 +255,7 @@ const headerColumnClass = (idx: number): string => {
     3: "w-1/2",
     default: "w-1/4",
   };
-  return `${base} ${widths[amount]}`;
+  return `${base} ${pos} ${widths[amount]}`;
 };
 
 const processedEntities = computed(() => {
@@ -388,5 +389,27 @@ watch(
 .list-item-table {
   content-visibility: auto;
   contain-intrinsic-size: 46px;
+}
+
+@container parent (max-width: 640px) {
+  .col-primary,
+  .col-secondary {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+  .col-secondary:last-child {
+    display: none;
+  }
+}
+@container parent (max-width: 520px) {
+  .col-secondary:nth-last-child(-n+2) {
+    display: none;
+  }
+}
+@container parent (max-width: 400px) {
+  .col-secondary {
+    display: none;
+  }
 }
 </style>
