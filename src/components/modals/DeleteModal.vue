@@ -84,7 +84,13 @@
             base-library-height="h-fit"
           />
         </div>
-        <ConfirmModalView :only-buttons="true" class="h-max"></ConfirmModalView>
+        <InlineConfirmButtons
+          class="h-max"
+          :confirm-label="deleteConfirmLabel"
+          :cancel-label="deleteCancelLabel"
+          @confirm="deleteButtonClicked"
+          @cancel="closeModal(TypeModals.Delete)"
+        />
       </div>
     </div>
   </BaseModal>
@@ -93,7 +99,7 @@
 <script setup lang="ts">
 import type { ApolloClient } from "@apollo/client/core";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
-import ConfirmModalView from "@/components/ConfirmModalView.vue";
+import InlineConfirmButtons from "@/components/base/InlineConfirmButtons.vue";
 import { useI18n } from "vue-i18n";
 import { ref, watch, inject, computed } from "vue";
 import {
@@ -103,7 +109,6 @@ import {
 } from "@/generated-types/queries";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useConfirmModal } from "@/composables/useConfirmModal";
 import {
   BulkOperationsContextEnum,
   type InBulkProcessableItem,
@@ -121,7 +126,6 @@ import { useDeleteEntities } from "@/composables/useDeleteEntities";
 const { t } = useI18n();
 const config: any = inject("config");
 const { closeModal, getModalInfo } = useBaseModal();
-const { initializeConfirmModal } = useConfirmModal();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
 const { getParentId, getCallbackFunctions, getInformationForDelete } =
@@ -143,6 +147,16 @@ const parentEntityTitle = ref<string | undefined>(undefined);
 const translatedDeleteEntityLabel = ref<string | undefined>(undefined);
 const translatedDeleteRelationsLabel = ref<string | undefined>(undefined);
 const translatedBlockingRelationsLabel = ref<string | undefined>(undefined);
+
+const deleteTranslationKey = computed(
+  () => getModalInfo(TypeModals.Delete).translationKey || "delete-entity",
+);
+const deleteConfirmLabel = computed(() =>
+  t(`confirm.${deleteTranslationKey.value}.confirm`, [translatedDeleteEntityLabel.value ?? ""]),
+);
+const deleteCancelLabel = computed(() =>
+  t(`confirm.${deleteTranslationKey.value}.cancel`),
+);
 
 const useEditHelper = useEditMode(parentId.value);
 
@@ -237,20 +251,6 @@ watch(
       ? t(deleteQueryOptions.value?.blockingRelationsLabel)
       : undefined;
 
-    initializeConfirmModal({
-      confirmButton: { buttonCallback: deleteButtonClicked },
-      declineButton: {
-        buttonCallback: () => {
-          closeModal(TypeModals.Delete);
-        },
-      },
-      translationKey:
-        getModalInfo(TypeModals.Delete).translationKey || "delete-entity",
-      openImmediately: false,
-      titleLabelVariable: translatedDeleteEntityLabel.value,
-      messageLabelVariable: `${translatedDeleteEntityLabel.value} '${getInformationForDelete()?.title}'`,
-      confirmLabelVariable: translatedDeleteEntityLabel.value,
-    });
   },
   { immediate: true },
 );

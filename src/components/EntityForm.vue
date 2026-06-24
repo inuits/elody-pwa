@@ -5,7 +5,6 @@
 <script lang="ts" setup>
 import {
   MutateEntityValuesDocument,
-  TypeModals,
   type Entity,
   type IntialValues,
   type MutateEntityValuesMutation,
@@ -13,7 +12,6 @@ import {
   type DeleteQueryOptions,
   type PanelMetaData,
   Collection,
-  ModalStyle,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -59,19 +57,13 @@ const emit = defineEmits<{
 
 const config: any = inject("config");
 const isPreviewElement: any = inject("IsPreviewElement", false);
-const {
-  initializeConfirmModal,
-  performRoute,
-  setPathToNavigate,
-  deletePathToNavigate,
-  pathToNavigate,
-} = useConfirmModal();
+const { confirm } = useConfirmModal();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const useEditHelper = useEditMode(props.id);
 const { createForm, parseFormValuesToFormInput } = useFormHelper();
 const { displaySuccessNotification, displayErrorNotification } =
   useBaseNotification();
-const { closeModal, openModal, updateDeleteQueryOptions } = useBaseModal();
+const { updateDeleteQueryOptions } = useBaseModal();
 const { t } = useI18n();
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -222,42 +214,22 @@ const validateAndSetDisableState = async () => {
   useEditHelper.setDisableState(formContainsErrors.value);
 };
 
-onBeforeRouteLeave((to, from, next) => {
-  if (!useEditHelper.isEdit || !form.value.meta.dirty) return next();
-  if (pathToNavigate.value != undefined) {
-    deletePathToNavigate();
-    return next();
-  }
-  openNavigationModal();
-  setPathToNavigate(to.path);
-  return false;
-});
+onBeforeRouteLeave(async () => {
+  if (!useEditHelper.isEdit || !form.value.meta.dirty) return true;
 
-const openNavigationModal = () => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: () => {
-        performRoute();
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    secondaryConfirmButton: {
-      buttonCallback: async () => {
-        await useEditHelper.save();
-        performRoute();
-        deletePathToNavigate();
-        closeModal(TypeModals.Confirm);
-      },
-      buttonStyle: "accentAccent",
-    },
-    declineButton: {
-      buttonCallback: () => {
-        deletePathToNavigate();
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "discard-edit",
+  const choice = await confirm({
+    title: t("confirm.discard-edit.title"),
+    message: t("confirm.discard-edit.message"),
+    confirmLabel: t("confirm.discard-edit.confirm"),
+    cancelLabel: t("confirm.discard-edit.cancel"),
+    secondaryLabel: t("confirm.discard-edit.secondary-confirm"),
+    secondaryButtonStyle: "accentAccent",
   });
-  openModal(TypeModals.Confirm, ModalStyle.Center);
-};
+
+  if (choice === "secondary") {
+    await useEditHelper.save();
+    return true;
+  }
+  return choice === "confirm";
+});
 </script>

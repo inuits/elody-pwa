@@ -125,9 +125,7 @@ import {
 } from "@/composables/useBreadcrumbs";
 import { useEditMode } from "@/composables/useEdit";
 import { asString } from "@/helpers";
-import { TypeModals } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
@@ -156,8 +154,7 @@ const router = useRouter();
 const { clearBreadcrumbPathAndAddOverviewPage, previousRoute } =
   useBreadcrumbs(config);
 const { discardEditForForm } = useFormHelper();
-const { initializeConfirmModal } = useConfirmModal();
-const { closeModal } = useBaseModal();
+const { confirm } = useConfirmModal();
 
 const currentRouteTitle = ref<string>("");
 const typePillLabel = ref<any>(undefined);
@@ -182,34 +179,27 @@ const toggleList = () => {
   showHistory.value = !showHistory.value;
 };
 
-const openDiscardModal = (route: any) => {
+const openDiscardModal = async (route: any) => {
   const id = asString(route.id);
   const useEditHelper = useEditMode(id);
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: () => {
-        useEditHelper.discard();
-        discardEditForForm(id);
-        closeModal(TypeModals.Confirm);
-        navigateToEntity(route);
-      },
-    },
-    secondaryConfirmButton: {
-      buttonCallback: async () => {
-        await useEditHelper.save();
-        closeModal(TypeModals.Confirm);
-        navigateToEntity(route);
-      },
-      buttonStyle: "accentAccent",
-    },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "discard-edit",
-    openImmediately: true,
+  const choice = await confirm({
+    title: t("confirm.discard-edit.title"),
+    message: t("confirm.discard-edit.message"),
+    confirmLabel: t("confirm.discard-edit.confirm"),
+    cancelLabel: t("confirm.discard-edit.cancel"),
+    secondaryLabel: t("confirm.discard-edit.secondary-confirm"),
+    secondaryButtonStyle: "accentAccent",
   });
+  if (choice === "secondary") {
+    await useEditHelper.save();
+    navigateToEntity(route);
+    return;
+  }
+  if (choice === "confirm") {
+    useEditHelper.discard();
+    discardEditForForm(id);
+    navigateToEntity(route);
+  }
 };
 
 const checkNavigationAvailable = (route: any) => {

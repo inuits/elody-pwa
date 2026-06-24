@@ -51,7 +51,7 @@ import { type Form, type FormTab, TypeModals } from "@/generated-types/queries";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { onMounted, computed, ref, watch, watchEffect, inject } from "vue";
+import { computed, ref, watch, watchEffect, inject } from "vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import BaseTab from "@/components/BaseTab.vue";
@@ -62,7 +62,7 @@ import useEntityPickerModal from "@/composables/useEntityPickerModal";
 const formTabs = ref<Form | null>(null);
 const config: any = inject("config");
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
-const { initializeConfirmModal } = useConfirmModal();
+const { confirm } = useConfirmModal();
 const { t } = useI18n();
 const { getDynamicFormTabs } = useDynamicForm();
 const { resetUpload } = useUpload(config);
@@ -90,33 +90,6 @@ watch(
   },
 );
 
-watch(
-  () => formTabs.value,
-  () => {
-    if (formTabs.value) initializeModal();
-  },
-);
-
-onMounted(() => {
-  initializeModal();
-});
-
-const initializeModal = () => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: () => {
-        changeCloseConfirmation(TypeModals.DynamicForm, false);
-        closeModal(TypeModals.DynamicForm);
-        clearFormTabs();
-        resetUpload();
-      },
-    },
-    declineButton: {
-      buttonCallback: () => closeModal(TypeModals.Confirm),
-    },
-    translationKey: "discard-modal",
-  });
-};
 
 const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
@@ -158,10 +131,18 @@ const formTabArray = computed(() => {
   return formTabs.value ? extractFormTabs(formTabs.value) : [];
 });
 
-const handleCloseModal = () => {
+const handleCloseModal = async () => {
+  if (getModalInfo(TypeModals.DynamicForm).closeConfirmation) {
+    const choice = await confirm({
+      title: t("confirm.discard-modal.title"),
+      message: t("confirm.discard-modal.message"),
+      confirmLabel: t("confirm.discard-modal.confirm"),
+      cancelLabel: t("confirm.discard-modal.cancel"),
+    });
+    if (choice !== "confirm") return;
+    changeCloseConfirmation(TypeModals.DynamicForm, false);
+  }
   closeModal(TypeModals.DynamicForm);
-
-  if (getModalInfo(TypeModals.DynamicForm).closeConfirmation) return;
   clearFormTabs();
   resetUpload();
   setCropMode(false);

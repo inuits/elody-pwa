@@ -13,6 +13,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useImport } from "@/composables/useImport";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useI18n } from "vue-i18n";
 import { useModalActions } from "@/composables/useModalActions";
 import { useStateManagement } from "@/composables/useStateManagement";
 import type { Entitytyping } from "@/generated-types/queries";
@@ -100,6 +101,8 @@ export const useBulkOperationsActionsBar = (
   } = useModalActions();
 
   const { openModal, getModalInfo, closeAllModals } = useBaseModal();
+  const { confirm } = useConfirmModal();
+  const { t } = useI18n();
 
   const subDropdownOptions = ref<DropdownOption[]>([]);
   const refetchEnabled = ref<boolean>(false);
@@ -229,32 +232,29 @@ export const useBulkOperationsActionsBar = (
   const initializeBulkMutationOperation = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
-    const { initializeConfirmModal } = useConfirmModal();
-    initializeConfirmModal({
-      translationKey: "bulk-mutation",
-      confirmButton: {
-        buttonCallback: async () => {
-          if (!bulkOperationModalConfig.formQuery) return;
-          const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(
-            props.context,
-          );
-          const document = await loadDocument(bulkOperationModalConfig.formQuery);
-          await Promise.all(
-            selectedItems.map((item) =>
-              apolloClient.mutate({
-                mutation: document,
-                variables: { id: item.id },
-              }),
-            ),
-          );
-          dequeueAllItemsForBulkProcessing(props.context);
-          closeAllModals();
-          for (const cb of getRefetchCallbacks()) cb?.();
-        },
-      },
-      declineButton: {
-        buttonCallback: () => closeAllModals(),
-      },
+    void confirm({
+      title: t("confirm.bulk-mutation.title"),
+      message: t("confirm.bulk-mutation.message"),
+      confirmLabel: t("confirm.bulk-mutation.confirm"),
+      cancelLabel: t("confirm.bulk-mutation.cancel"),
+    }).then(async (choice) => {
+      if (choice !== "confirm") return;
+      if (!bulkOperationModalConfig.formQuery) return;
+      const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(
+        props.context,
+      );
+      const document = await loadDocument(bulkOperationModalConfig.formQuery);
+      await Promise.all(
+        selectedItems.map((item) =>
+          apolloClient.mutate({
+            mutation: document,
+            variables: { id: item.id },
+          }),
+        ),
+      );
+      dequeueAllItemsForBulkProcessing(props.context);
+      closeAllModals();
+      for (const cb of getRefetchCallbacks()) cb?.();
     });
     setCallbackFunctions(getRefetchCallbacks());
   };

@@ -25,15 +25,15 @@
 
 <script lang="ts" setup>
 import type { ApolloClient } from "@apollo/client/core";
-import { DamsIcons, TypeModals } from "@/generated-types/queries";
+import { DamsIcons } from "@/generated-types/queries";
 import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { inject } from "vue";
-import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -43,28 +43,21 @@ const props = withDefaults(
 );
 
 const editModeHelper = useEditMode(props.entityId);
-const { initializeConfirmModal } = useConfirmModal();
-const { closeModal } = useBaseModal();
+const { confirm } = useConfirmModal();
 const { discardEditForForm } = useFormHelper();
+const { t } = useI18n();
 const config: any = inject("config");
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 
-const openDiscardModal = () => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: () => {
-        editModeHelper.discard();
-        discardEditForForm(props.entityId);
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "discard-edit",
-    openImmediately: true,
+const openDiscardModal = async () => {
+  const choice = await confirm({
+    title: t("confirm.discard-edit.title"),
+    message: t("confirm.discard-edit.message"),
+    confirmLabel: t("confirm.discard-edit.confirm"),
+    cancelLabel: t("confirm.discard-edit.cancel"),
   });
+  if (choice !== "confirm") return;
+  editModeHelper.discard();
+  discardEditForForm(props.entityId);
 };
 </script>

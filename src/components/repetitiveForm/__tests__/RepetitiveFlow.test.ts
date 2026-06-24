@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { shallowMount } from "@vue/test-utils";
+import { shallowMount, flushPromises } from "@vue/test-utils";
 import { Entitytyping } from "@/generated-types/queries";
 import { useRepetitiveForm } from "@/composables/useRepetitiveForm";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
@@ -18,16 +18,15 @@ vi.mock("@/composables/useEntityPickerModal", () => ({
   default: () => ({ setEntityId: vi.fn(), setDynamicFormId: vi.fn() }),
 }));
 const confirmMocks = vi.hoisted(() => ({
-  initializeConfirmModal: vi.fn(),
-  closeModal: vi.fn(),
+  confirm: vi.fn(),
 }));
 vi.mock("@/composables/useConfirmModal", () => ({
   useConfirmModal: () => ({
-    initializeConfirmModal: confirmMocks.initializeConfirmModal,
+    confirm: confirmMocks.confirm,
   }),
 }));
 vi.mock("@/composables/useBaseModal", () => ({
-  useBaseModal: () => ({ closeModal: confirmMocks.closeModal }),
+  useBaseModal: () => ({}),
 }));
 vi.mock("@/components/repetitiveForm/RepetitiveStepModal.vue", () => ({
   default: {
@@ -124,8 +123,7 @@ const completeOneBranch = async (w: ReturnType<typeof getWrapper>) => {
 describe("RepetitiveFlow", () => {
   beforeEach(() => {
     useRepetitiveForm().resetFlow();
-    confirmMocks.initializeConfirmModal.mockReset();
-    confirmMocks.closeModal.mockReset();
+    confirmMocks.confirm.mockReset();
   });
 
   it("initialises the flow and starts on the (empty) overview", () => {
@@ -288,25 +286,33 @@ describe("RepetitiveFlow", () => {
   });
 
   it("asks for confirmation before closing once a branch has been staged", async () => {
+    confirmMocks.confirm.mockResolvedValue("confirm");
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     modal(wrapper).vm.$emit("close");
-    await wrapper.vm.$nextTick();
-    // a confirm modal is requested; the flow is not closed yet
-    expect(confirmMocks.initializeConfirmModal).toHaveBeenCalledTimes(1);
-    expect(wrapper.emitted("close")).toBeFalsy();
-    // confirming actually closes the flow
-    const config = confirmMocks.initializeConfirmModal.mock.calls[0][0];
-    expect(config.translationKey).toBe("close-guided-flow");
-    config.confirmButton.buttonCallback();
+    await flushPromises();
+    expect(confirmMocks.confirm).toHaveBeenCalledTimes(1);
+    expect(confirmMocks.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "confirm.close-guided-flow.title" }),
+    );
     expect(wrapper.emitted("close")).toBeTruthy();
+  });
+
+  it("does not close when user cancels the confirmation", async () => {
+    confirmMocks.confirm.mockResolvedValue("cancel");
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    modal(wrapper).vm.$emit("close");
+    await flushPromises();
+    expect(confirmMocks.confirm).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted("close")).toBeFalsy();
   });
 
   it("closes immediately without confirmation when nothing is staged", async () => {
     const wrapper = getWrapper();
     modal(wrapper).vm.$emit("close");
     await wrapper.vm.$nextTick();
-    expect(confirmMocks.initializeConfirmModal).not.toHaveBeenCalled();
+    expect(confirmMocks.confirm).not.toHaveBeenCalled();
     expect(wrapper.emitted("close")).toBeTruthy();
   });
 

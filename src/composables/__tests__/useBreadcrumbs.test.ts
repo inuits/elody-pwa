@@ -47,7 +47,7 @@ vi.mock("@/composables/useBaseModal", () => ({
 }));
 
 vi.mock("@/composables/useConfirmModal", () => ({
-  useConfirmModal: () => ({ initializeConfirmModal: vi.fn() }),
+  useConfirmModal: () => ({ confirm: vi.fn().mockResolvedValue("cancel") }),
 }));
 
 const config = {

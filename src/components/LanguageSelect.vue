@@ -18,20 +18,17 @@ import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import {
   DamsIcons,
-  TypeModals,
   type DropdownOption,
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useEditMode } from "@/composables/useEdit";
-import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import { setLocale } from "@vee-validate/i18n";
 
-const { closeModal } = useBaseModal();
 const { availableLocales, locale, t } = useI18n();
 const { updateGlobalState, getGlobalState } = useStateManagement();
-const { initializeConfirmModal } = useConfirmModal();
+const { confirm } = useConfirmModal();
 const selectedLanguageOption = ref<string | undefined>();
 const config = inject("config") as any;
 const route = useRoute();
@@ -99,25 +96,18 @@ const setLanguage = (option: string) => {
   selectedLanguageOption.value = option;
 };
 
-const openChangeLocaleConfirmationModal = (
+const openChangeLocaleConfirmationModal = async (
   option: DropdownOption | DropdownOption[],
 ) => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: () => {
-        selectedLanguageOption.value = Array.isArray(option)
-          ? option[0].value
-          : option.value;
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "discard-edit-change-locale",
-    openImmediately: true,
+  const choice = await confirm({
+    title: t("confirm.discard-edit-change-locale.title"),
+    message: t("confirm.discard-edit-change-locale.message"),
+    confirmLabel: t("confirm.discard-edit-change-locale.confirm"),
+    cancelLabel: t("confirm.discard-edit-change-locale.cancel"),
   });
+  if (choice !== "confirm") return;
+  selectedLanguageOption.value = Array.isArray(option)
+    ? option[0].value
+    : option.value;
 };
 </script>

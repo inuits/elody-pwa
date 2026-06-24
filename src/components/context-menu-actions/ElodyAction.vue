@@ -65,9 +65,9 @@ const props = defineProps<{
 
 const { deleteRelations, submit } = useDeleteRelations();
 const { dequeueItemForBulkProcessing } = useBulkOperations();
-const { initializeConfirmModal } = useConfirmModal();
+const { confirm } = useConfirmModal();
 const { displaySuccessNotification } = useBaseNotification();
-const { closeModal, openModal } = useBaseModal();
+const { openModal } = useBaseModal();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { loadDocument } = useImport();
@@ -184,16 +184,14 @@ const deleteEntity = async () => {
 };
 
 const openDeleteEntityConfirmation = async () => {
-  initializeConfirmModal({
-    confirmButton: { buttonCallback: deleteEntity },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "delete-entity",
-    openImmediately: true,
+  const choice = await confirm({
+    title: t("confirm.delete-entity.title"),
+    message: t("confirm.delete-entity.message"),
+    confirmLabel: t("confirm.delete-entity.confirm"),
+    cancelLabel: t("confirm.delete-entity.cancel"),
   });
+  if (choice !== "confirm") return;
+  await deleteEntity();
 };
 
 const downloadQueryResult = async () => {

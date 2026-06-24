@@ -1,5 +1,4 @@
 import { ref } from "vue";
-import { type RouteLocationRaw, useRouter } from "vue-router";
 import type {
   ButtonSize,
   ButtonStyle,
@@ -7,58 +6,47 @@ import type {
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
-const { openModal } = useBaseModal();
+const { openModal, closeModal } = useBaseModal();
 
-const confirmModalConfiguration = ref<ConfirmModalConfiguration | undefined>(
-  undefined,
-);
-const pathToNavigate = ref<string | undefined>(undefined);
+export type ConfirmChoice = "confirm" | "secondary" | "cancel";
 
-type ButtonConfiguration = {
-  buttonCallback: () => any;
-  buttonStyle?: ButtonStyle;
-  buttonSize?: ButtonSize;
+export type ConfirmOptions = {
+  title: string;
+  message?: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  secondaryLabel?: string;
+  confirmButtonStyle?: ButtonStyle;
+  confirmButtonSize?: ButtonSize;
+  secondaryButtonStyle?: ButtonStyle;
+  secondaryButtonSize?: ButtonSize;
+  cancelButtonStyle?: ButtonStyle;
+  cancelButtonSize?: ButtonSize;
 };
 
-export type ConfirmModalConfiguration = {
-  confirmButton: ButtonConfiguration;
-  secondaryConfirmButton?: ButtonConfiguration;
-  declineButton: ButtonConfiguration;
-  translationKey: string;
-  openImmediately?: boolean;
-  titleLabelVariable?: string;
-  messageLabelVariable?: string;
-  confirmLabelVariable?: string;
-};
+const pendingConfirm = ref<{
+  options: ConfirmOptions;
+  resolve: (choice: ConfirmChoice) => void;
+} | null>(null);
 
 export const useConfirmModal = () => {
-  const router = useRouter();
-
-  const initializeConfirmModal = (configuration: ConfirmModalConfiguration) => {
-    confirmModalConfiguration.value = configuration;
-    if (configuration.openImmediately)
-      openModal(TypeModals.Confirm, ModalStyle.Center);
+  const confirm = (options: ConfirmOptions): Promise<ConfirmChoice> => {
+    if (pendingConfirm.value) {
+      pendingConfirm.value.resolve("cancel");
+    }
+    openModal(TypeModals.Confirm, ModalStyle.Center);
+    return new Promise<ConfirmChoice>((resolve) => {
+      pendingConfirm.value = { options, resolve };
+    });
   };
 
-  const setPathToNavigate = (choice: string): void => {
-    pathToNavigate.value = choice;
+  const resolveConfirm = (choice: ConfirmChoice): void => {
+    if (!pendingConfirm.value) return;
+    const resolve = pendingConfirm.value.resolve;
+    pendingConfirm.value = null;
+    closeModal(TypeModals.Confirm);
+    resolve(choice);
   };
 
-  const deletePathToNavigate = (): void => {
-    return (pathToNavigate.value = undefined);
-  };
-
-  const performRoute = (): void => {
-    if (pathToNavigate.value)
-      router.push(pathToNavigate.value as RouteLocationRaw);
-  };
-
-  return {
-    initializeConfirmModal,
-    confirmModalConfiguration,
-    setPathToNavigate,
-    deletePathToNavigate,
-    pathToNavigate,
-    performRoute,
-  };
+  return { confirm, pendingConfirm, resolveConfirm };
 };

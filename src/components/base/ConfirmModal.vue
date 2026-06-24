@@ -3,7 +3,7 @@
     :modal-type="TypeModals.Confirm"
     :cancel-button-availabe="true"
     modal-height-style="my-[37.5vh]"
-    @hide-modal="closeModal(TypeModals.Confirm)"
+    @hide-modal="resolveConfirm('cancel')"
   >
     <slot />
   </BaseModal>
@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import BaseModal from "@/components/base/BaseModal.vue";
 import { TypeModals } from "@/generated-types/queries";
-import { useBaseModal } from "@/composables/useBaseModal";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 
-const { closeModal } = useBaseModal();
+const { resolveConfirm } = useConfirmModal();
 </script>

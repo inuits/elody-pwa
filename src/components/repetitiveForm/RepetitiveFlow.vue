@@ -123,7 +123,6 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
   DamsIcons,
-  TypeModals,
   type AdvancedFilterInput,
   type RepetitiveForm,
   type RepetitiveCreatableType,
@@ -134,7 +133,6 @@ import {
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { useBaseModal } from "@/composables/useBaseModal";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
@@ -153,8 +151,7 @@ const emit = defineEmits<{
 const store = useRepetitiveForm();
 const { flowConfig, currentStepIndex, currentBranch, branches } = store;
 const { setEntityId, setDynamicFormId } = useEntityPickerModal();
-const { initializeConfirmModal } = useConfirmModal();
-const { closeModal } = useBaseModal();
+const { confirm } = useConfirmModal();
 const router = useRouter();
 const { t } = useI18n();
 
@@ -286,17 +283,19 @@ const hasStagedProgress = (): boolean =>
 
 // Closing mid-flow abandons the staging (already-created entities are kept,
 // but the flow won't be finalized), so confirm first when there is progress.
-const requestClose = () => {
+const requestClose = async () => {
   if (!hasStagedProgress()) {
     emit("close");
     return;
   }
-  initializeConfirmModal({
-    confirmButton: { buttonCallback: () => emit("close") },
-    declineButton: { buttonCallback: () => closeModal(TypeModals.Confirm) },
-    translationKey: "close-guided-flow",
-    openImmediately: true,
+  const choice = await confirm({
+    title: t("confirm.close-guided-flow.title"),
+    message: t("confirm.close-guided-flow.message"),
+    confirmLabel: t("confirm.close-guided-flow.confirm"),
+    cancelLabel: t("confirm.close-guided-flow.cancel"),
   });
+  if (choice !== "confirm") return;
+  emit("close");
 };
 
 watch(() => props.open, (isOpen) => { if (isOpen) start(); }, { immediate: true });

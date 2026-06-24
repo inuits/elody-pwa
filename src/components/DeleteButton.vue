@@ -52,7 +52,7 @@ const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { closeModal, openModal, deleteQueryOptions } = useBaseModal();
 const { initializeGeneralProperties, initializePropertiesForDeletion } =
   useModalActions();
-const { initializeConfirmModal } = useConfirmModal();
+const { confirm } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 const { previousRoute } = useBreadcrumbs({});
@@ -112,7 +112,7 @@ const deleteEntity = async (deleteMediafiles: boolean = false) => {
   }
 };
 
-const openDeleteModal = () => {
+const openDeleteModal = async () => {
   const form = getForm(entityId.value);
   const title = getTitleOrNameFromEntity(form.values);
 
@@ -132,19 +132,14 @@ const openDeleteModal = () => {
       deleteQueryOptions,
     );
   } else {
-    initializeConfirmModal({
-      confirmButton: { buttonCallback: deleteEntity },
-      declineButton: {
-        buttonCallback: () => {
-          closeModal(TypeModals.Confirm);
-        },
-      },
-      translationKey: "delete-entity",
-      openImmediately: true,
-      titleLabelVariable: entityType.value,
-      messageLabelVariable: `${entityType.value} '${title}'`,
-      confirmLabelVariable: entityType.value,
+    const choice = await confirm({
+      title: t("confirm.delete-entity.title", [entityType.value]),
+      message: t("confirm.delete-entity.message", [`${entityType.value} '${title}'`]),
+      confirmLabel: t("confirm.delete-entity.confirm", [entityType.value]),
+      cancelLabel: t("confirm.delete-entity.cancel"),
     });
+    if (choice !== "confirm") return;
+    await deleteEntity();
   }
 };
 </script>

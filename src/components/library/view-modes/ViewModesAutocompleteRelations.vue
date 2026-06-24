@@ -29,10 +29,15 @@
         return option;
       }
     "
-    :create-option-config="{ canCreateOption }"
+    :create-option-config="{
+      canCreateOption,
+      createPromptTranslationKey: 'actions.labels.create-entity-from-dropdown',
+    }"
     :displayInputForTag="metadataOnRelationConfig?.enabled"
     :initial-tag-input-values="tagInputValues"
-    @update:tag-input-values="(values: Map<string | number, string>) => tagInputValues = values"
+    @update:tag-input-values="
+      (values: Map<string | number, string>) => (tagInputValues = values)
+    "
     @add-option="handleCreatingFromTag"
     @handle-tag-click="handleTagClick"
   />
@@ -80,6 +85,8 @@ import { useManageEntities } from "@/composables/useManageEntities";
 import { useRouter } from "vue-router";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useI18n } from "vue-i18n";
 
 defineOptions({ inheritAttrs: false });
 
@@ -123,6 +130,8 @@ const relatedEntitiesHelper = ref<typeof useGetDropdownOptionsState>();
 const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
 const router = useRouter();
+const { confirm } = useConfirmModal();
+const { t } = useI18n();
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const tagInputValues = ref<Map<string | number, string>>(new Map());
 const { createEntity } = useManageEntities();
@@ -131,7 +140,8 @@ const { replaceRelationsFromSameType, addRelations, getRelationsBasedOnType } =
   useFormHelper();
 
 const autocompleteStyle = computed(() => {
-  if (props.disabled && props.readOnlyValueAsPlainText) return "readOnlyAsPlainText";
+  if (props.disabled && props.readOnlyValueAsPlainText)
+    return "readOnlyAsPlainText";
   if (props.disabled) return "readOnly";
   return "defaultWithBorder";
 });
@@ -264,10 +274,7 @@ const toBulkProcessableItems = (
 
 const populateTagInputValuesFromForm = () => {
   if (!props.metadataOnRelationConfig?.enabled || !props.formId) return;
-  const relations = getRelationsBasedOnType(
-    props.formId,
-    props.relationType,
-  );
+  const relations = getRelationsBasedOnType(props.formId, props.relationType);
   if (!relations) return;
   const map = extractTagInputValuesFromRelations(
     relations,
@@ -289,8 +296,9 @@ const handleSelect = (
   isPreSelect = false,
 ) => {
   if (options === undefined) return;
-  const bulkProcessableItems: InBulkProcessableItem[] =
-    toBulkProcessableItems([...options]);
+  const bulkProcessableItems: InBulkProcessableItem[] = toBulkProcessableItems([
+    ...options,
+  ]);
 
   if (props.mode === "create") {
     addRelations(bulkProcessableItems, props.relationType, props.formId);
@@ -309,6 +317,15 @@ const handleSelect = (
 
 const handleCreatingFromTag = async (option: any) => {
   if (!props.canCreateOption) return;
+
+  const choice = await confirm({
+    title: t("confirm.create-entity-from-dropdown.title", [option.label]),
+    message: t("confirm.create-entity-from-dropdown.message", [option.label]),
+    confirmLabel: t("confirm.create-entity-from-dropdown.confirm"),
+    cancelLabel: t("confirm.create-entity-from-dropdown.cancel"),
+    confirmButtonStyle: "accentAccent",
+  });
+  if (choice !== "confirm") return;
 
   if (props.metadataKeyToCreateEntityFromOption) {
     isCreatingEntity.value = true;
@@ -360,22 +377,24 @@ const preSelectRelations = async () => {
     for (const value of props.modelValue) {
       const found = await findAutocompleteOption(value);
       if (found) selection.push(found);
-      else selection.push({ label: props.modelValue, value: props.modelValue })
+      else selection.push({ label: props.modelValue, value: props.modelValue });
     }
   } else if (props.modelValue) {
     const found = await findAutocompleteOption(props.modelValue);
     if (found) selection.push(found);
-    else selection.push({ label: props.modelValue, value: props.modelValue })
+    else selection.push({ label: props.modelValue, value: props.modelValue });
   }
 
   allEntitiesHelper.value.getAutocompleteOptions();
   handleSelect(selection, true);
 };
 
-const findAutocompleteOption = async (value: string): Promise<DropdownOption | undefined> => {
+const findAutocompleteOption = async (
+  value: string,
+): Promise<DropdownOption | undefined> => {
   await allEntitiesHelper.value.getAutocompleteOptions(value);
-  return allEntitiesHelper.value.entityDropdownOptions[0]
-}
+  return allEntitiesHelper.value.entityDropdownOptions[0];
+};
 
 const handleTagClick = async (tag: DropdownOption) => {
   if (isEdit) return;

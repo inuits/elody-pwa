@@ -64,7 +64,6 @@ import { computed, onMounted, provide, watch } from "vue";
 import {
   DamsIcons,
   Permission,
-  TypeModals,
   type BaseEntity,
   type Entity,
 } from "@/generated-types/queries";
@@ -76,7 +75,6 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 
@@ -92,8 +90,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const { getEditableMetadataKeys, discardEditForForm } = useFormHelper();
 const { fetchUpdateAndDeletePermission } = usePermissions();
-const { initializeConfirmModal } = useConfirmModal();
-const { closeModal } = useBaseModal();
+const { confirm } = useConfirmModal();
 
 useEditMode(props.entity.id);
 const editHelper = useEditMode(props.entity.id);
@@ -149,22 +146,17 @@ const saveEdit = async () => {
   await editHelper.save();
 };
 
-const openDiscardModal = () => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: () => {
-        focusThisEntity();
-        editHelper.discard();
-        discardEditForForm(props.entity.id);
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    declineButton: {
-      buttonCallback: () => closeModal(TypeModals.Confirm),
-    },
-    translationKey: "discard-edit",
-    openImmediately: true,
+const openDiscardModal = async () => {
+  const choice = await confirm({
+    title: t("confirm.discard-edit.title"),
+    message: t("confirm.discard-edit.message"),
+    confirmLabel: t("confirm.discard-edit.confirm"),
+    cancelLabel: t("confirm.discard-edit.cancel"),
   });
+  if (choice !== "confirm") return;
+  focusThisEntity();
+  editHelper.discard();
+  discardEditForForm(props.entity.id);
 };
 
 const onMutatedEntityUpdated = (mutatedEntity: Entity) => {

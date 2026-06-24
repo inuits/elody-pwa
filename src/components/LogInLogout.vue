@@ -107,7 +107,6 @@
 import { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
-import { useBaseModal } from "@/composables/useBaseModal";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
@@ -118,23 +117,18 @@ defineProps({
 });
 
 const { t } = useI18n();
-const { initializeConfirmModal } = useConfirmModal();
-const { closeModal } = useBaseModal();
+const { confirm } = useConfirmModal();
 const { performLogout, getUserName, elodyUser } = useAuth();
 
-const openConfirmationModal = () => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: performLogout,
-    },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "logout-modal",
-    openImmediately: true,
+const openConfirmationModal = async () => {
+  const choice = await confirm({
+    title: t("confirm.logout-modal.title"),
+    message: t("confirm.logout-modal.message"),
+    confirmLabel: t("confirm.logout-modal.confirm"),
+    cancelLabel: t("confirm.logout-modal.cancel"),
   });
+  if (choice !== "confirm") return;
+  performLogout();
 };
 </script>
 

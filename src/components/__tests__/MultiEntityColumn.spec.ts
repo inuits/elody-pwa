@@ -51,7 +51,7 @@ vi.mock("@/composables/useEntitySingle", () => ({
 }));
 
 vi.mock("@/composables/useConfirmModal", () => ({
-  useConfirmModal: () => ({ initializeConfirmModal: vi.fn() }),
+  useConfirmModal: () => ({ confirm: vi.fn().mockResolvedValue("cancel") }),
 }));
 
 vi.mock("@/composables/useBaseModal", () => ({

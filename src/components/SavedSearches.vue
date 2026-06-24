@@ -96,8 +96,8 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const { displaySuccessNotification } = useBaseNotification();
-const { openModal, closeModal } = useBaseModal();
-const { initializeConfirmModal } = useConfirmModal();
+const { openModal } = useBaseModal();
+const { confirm } = useConfirmModal();
 const { initializePropertiesForSavedSearch } = useModalActions();
 const {
   setActiveFilter,
@@ -191,19 +191,15 @@ const selectFilter = async (filter: any) => {
   setActiveFilter(getDeepCopy(filter));
 };
 
-const openDeleteModal = () => {
-  initializeConfirmModal({
-    confirmButton: {
-      buttonCallback: deleteFilter,
-    },
-    declineButton: {
-      buttonCallback: () => {
-        closeModal(TypeModals.Confirm);
-      },
-    },
-    translationKey: "delete-entity",
-    openImmediately: true,
+const openDeleteModal = async () => {
+  const choice = await confirm({
+    title: t("confirm.delete-entity.title"),
+    message: t("confirm.delete-entity.message"),
+    confirmLabel: t("confirm.delete-entity.confirm"),
+    cancelLabel: t("confirm.delete-entity.cancel"),
   });
+  if (choice !== "confirm") return;
+  deleteFilter();
 };
 
 const lastUsedFilters = computed(() => getLastUsedFiltersForRoute(props.route));
