@@ -210,6 +210,7 @@ export const useBaseLibrary = (
   ): Promise<any> => {
     if (manipulationQueryDocument) return manipulationQueryDocument;
     const { loadDocument } = useImport();
+    if (isSearchLibrary.value) return await loadDocument("GetEntities");
     try {
       const query = route!.meta!.queries!.getEntities;
       return await loadDocument(query);

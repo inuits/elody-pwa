@@ -891,6 +891,7 @@ onMounted(async () => {
   getUserPreferredViewModeConfiguration();
   syncEditStateCallbacks();
   window.addEventListener("beforeunload", resetMapPaginationLimit);
+  if (props.isSearchLibrary) paginationStore.setPage(1)
 });
 
 watch(
