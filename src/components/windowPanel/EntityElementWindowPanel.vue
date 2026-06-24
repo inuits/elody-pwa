@@ -5,7 +5,7 @@
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
-      <div class="flex gap-4 w-1/4 items-center">
+      <div class="flex gap-4 w-2/3 items-center">
         <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
         <MetadataWrapper
           class="w-full max-w-[50%]"
