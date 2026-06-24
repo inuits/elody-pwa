@@ -12,13 +12,9 @@
     </div>
     <button
       type="button"
-      :disabled="inputEnabled && !inputValue.trim()"
       :class="[
-        'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg',
+        'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg cursor-pointer',
         { 'ml-2': inputEnabled },
-        inputEnabled && !inputValue.trim()
-          ? 'opacity-50 cursor-not-allowed'
-          : 'cursor-pointer',
       ]"
       @click="!inputEnabled ? openSearchModal() : submitSearch()"
     >
@@ -52,7 +48,6 @@ const { openModal } = useBaseModal();
 const inputValue = ref<string>("");
 
 const submitSearch = () => {
-  if (!inputValue.value.trim()) return;
   emit("search", inputValue.value);
 };
 
