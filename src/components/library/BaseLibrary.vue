@@ -968,8 +968,11 @@ watch(
 watch(
   () => props.filters,
   async () => {
+    if (abortController.value) abortController.value.abort();
+    const newAbortController = new AbortController();
+    abortController.value = newAbortController;
     setAdvancedFilters(props.filters);
-    await getEntities(route);
+    await getEntities(route, newAbortController.signal);
   },
 );
 
