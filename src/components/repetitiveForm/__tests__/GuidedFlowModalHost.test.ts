@@ -136,11 +136,26 @@ describe("GuidedFlowModalHost", () => {
     expect(flow(wrapper).props("open")).toBe(true);
   });
 
+  it("clears the config when the modal closes so the next open starts clean", async () => {
+    const wrapper = getWrapper();
+    await openModal();
+    expect(flow(wrapper).props("config").steps.length).toBeGreaterThan(0);
+    // close the modal
+    modalInfo.open = false;
+    await flushPromises();
+    expect(flow(wrapper).props("open")).toBe(false);
+    expect(flow(wrapper).props("config")).toEqual({
+      repeatable: false,
+      steps: [],
+    });
+  });
+
   it("maps the aliased query result into a flow config without __typename fields", async () => {
     const wrapper = getWrapper();
     await openModal();
     expect(flow(wrapper).props("config")).toEqual({
       repeatable: true,
+      linear: false,
       steps: [
         { key: "work", entityType: "work", createForm: "GetWorkCreationForm" },
       ],

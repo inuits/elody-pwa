@@ -994,6 +994,13 @@ export enum ElodyServices {
   Pwa = 'pwa'
 }
 
+export enum RepetitiveRelationTrigger {
+  Always = 'always',
+  OnCreate = 'onCreate',
+  OnFinalize = 'onFinalize',
+  OnSelect = 'onSelect'
+}
+
 export enum ElodyViewers {
   Audio = 'audio',
   Iiif = 'iiif',

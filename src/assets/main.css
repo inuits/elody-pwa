@@ -115,6 +115,7 @@
   --z-index-map: 30;
   --z-index-sticky: 35;
   --z-index-header: 38;
+  --z-index-guided-flow-header: 39;
   --z-index-edit-modal: 39;
   --z-index-navigation: 40;
   --z-index-navigation-sub: 42;
@@ -153,6 +154,7 @@
   --z-context-menu: var(--z-index-context-menu);
   --z-system: var(--z-index-system);
   --z-entity-single-spinner: var(--z-index-entity-single-spinner);
+  --z-guided-flow-header: var(--z-index-guided-flow-header);
 
   /* Legacy variables - to be removed after migration */
   --z-index-1: 1;

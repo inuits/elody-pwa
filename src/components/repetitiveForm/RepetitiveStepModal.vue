@@ -11,7 +11,7 @@
     @cancel.prevent="emit('close')"
   >
     <div
-      class="flex items-center justify-between px-6 py-4 border-b border-neutral-50 sticky top-0 bg-neutral-white z-10"
+      class="flex items-center justify-between px-6 py-4 border-b border-neutral-50 sticky top-0 bg-neutral-white z-guided-flow-header"
     >
       <h1 data-testid="repetitive-step-modal-title" class="text-lg font-bold">
         {{ title }}

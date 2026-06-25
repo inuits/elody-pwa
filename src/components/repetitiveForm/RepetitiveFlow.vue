@@ -60,7 +60,7 @@
           @selected="onSelected"
           @created="onCreated"
         >
-          <template #actions>
+          <template #actions v-if="(currentStepIndex > 0 && flowConfig?.linear) || !flowConfig?.linear">
             <div class="w-fit">
               <BaseButtonNew
                 data-testid="repetitive-flow-back"
@@ -176,7 +176,10 @@ const scopeFilter = computed<AdvancedFilterInput | null>(() =>
   activeStep.value ? store.buildScopeFilter(activeStep.value) : null,
 );
 const skipSearch = computed(() =>
-  activeStep.value ? store.shouldSkipSearch(activeStep.value) : false,
+  activeStep.value
+    ? // a step with no pickerQuery has nothing to search → create-only
+      store.shouldSkipSearch(activeStep.value) || !activeStep.value.pickerQuery
+    : false,
 );
 const createPrefill = computed(() =>
   activeStep.value ? store.buildCreatePrefill(activeStep.value) : undefined,
@@ -210,23 +213,33 @@ const start = () => {
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
   setDynamicFormId(FLOW_ID);
-  // the flow opens on the overview so the user sees what has been staged,
-  // can add a (first) branch, or finish
-  view.value = "overview";
+  // linear flows skip the overview and run a single pass straight from step 1;
+  // other flows open on the overview so staged branches are visible
+  view.value = store.isLinear() ? "step" : "overview";
 };
 
 const advance = () => {
   const wasLast = store.isLastStep();
+  // a linear flow has no overview/finalize: completing the last step ends the
+  // flow and routes to the configured step's entity
+  if (wasLast && store.isLinear()) {
+    const target = store.routeTarget();
+    if (target) emit("finished", { id: target.id, type: target.type });
+    return;
+  }
   store.completeStep();
   if (wasLast) view.value = "overview";
 };
 
-const onSelected = (entity: { id: string; label?: string }) => {
+const onSelected = async (entity: { id: string; label?: string }) => {
   store.pickExisting(entity);
+  // persist the link to the prior step before advancing (link-on-select)
+  const step = activeStep.value;
+  if (step) await store.linkOnSelect(step);
   advance();
 };
 
-const onCreated = (
+const onCreated = async (
   entity: {
     id?: string;
     uuid?: string;
@@ -244,6 +257,10 @@ const onCreated = (
     details,
     values: entity.intialValues,
   });
+  // link the just-created entity to the prior step the same reliable way a
+  // picked entity is linked (config-driven), before advancing
+  const step = activeStep.value;
+  if (step) await store.linkAfterCreate(step);
   advance();
 };
 
@@ -267,6 +284,12 @@ const goBack = () => {
 };
 
 const onFinish = () => {
+  // no finalize → nothing to assemble; entities were persisted per-step, so
+  // finishing just closes the flow
+  if (!flowConfig.value?.finalize) {
+    emit("close");
+    return;
+  }
   // preselect when there is only one creatable type; otherwise show the chooser
   selectedFinalizeType.value =
     finalizeOptions.value.length === 1 ? finalizeOptions.value[0] : null;
@@ -298,5 +321,18 @@ const requestClose = async () => {
   emit("close");
 };
 
-watch(() => props.open, (isOpen) => { if (isOpen) start(); }, { immediate: true });
+// Clear the module-scoped store and this component's view state so a closed
+// flow restarts clean next time (linear flows never push a branch, so their
+// currentBranch would otherwise linger and trip the close-confirm on reopen).
+const reset = () => {
+  store.resetFlow();
+  selectedFinalizeType.value = null;
+  view.value = "overview";
+};
+
+watch(
+  () => props.open,
+  (isOpen) => (isOpen ? start() : reset()),
+  { immediate: true },
+);
 </script>

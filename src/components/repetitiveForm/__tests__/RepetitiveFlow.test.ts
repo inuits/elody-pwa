@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import { Entitytyping } from "@/generated-types/queries";
+import {
+  Entitytyping,
+  RepetitiveRelationTrigger,
+} from "@/generated-types/queries";
 import { useRepetitiveForm } from "@/composables/useRepetitiveForm";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
 
@@ -11,8 +14,15 @@ vi.mock("vue-i18n", () => ({
       params ? `${key}|${params.current}/${params.total}|${params.label}` : key,
   }),
 }));
+const manageMocks = vi.hoisted(() => ({
+  createEntity: vi.fn(),
+  addRelations: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock("@/composables/useManageEntities", () => ({
-  useManageEntities: () => ({ createEntity: vi.fn() }),
+  useManageEntities: () => ({
+    createEntity: manageMocks.createEntity,
+    addRelations: manageMocks.addRelations,
+  }),
 }));
 vi.mock("@/composables/useEntityPickerModal", () => ({
   default: () => ({ setEntityId: vi.fn(), setDynamicFormId: vi.fn() }),
@@ -77,7 +87,7 @@ const omnibusConfig = () => ({
       createForm: "GetExpressionCreationForm",
       scopeToRelationOf: { step: "work", relationType: "refWork" },
       skipSearchIfPriorIsNew: true,
-      relations: [{ to: "work", relationType: "refWork", createWhen: "onCreate" }],
+      relations: [{ to: "work", relationType: "refWork", createWhen: RepetitiveRelationTrigger.OnCreate }],
     },
   ],
   finalize: {
@@ -85,7 +95,7 @@ const omnibusConfig = () => ({
     entityType: Entitytyping.Manifestation,
     createForm: "GetManifestationCreationForm",
     relations: [
-      { toAllOf: "expression", relationType: "refExpressions", createWhen: "onFinalize" },
+      { toAllOf: "expression", relationType: "refExpressions", createWhen: RepetitiveRelationTrigger.OnFinalize },
     ],
   },
 });
@@ -115,9 +125,9 @@ const startBranch = async (w: ReturnType<typeof getWrapper>) => {
 const completeOneBranch = async (w: ReturnType<typeof getWrapper>) => {
   await startBranch(w);
   field(w).vm.$emit("selected", { id: "work-1" });
-  await w.vm.$nextTick();
+  await flushPromises();
   field(w).vm.$emit("selected", { id: "expr-1" });
-  await w.vm.$nextTick();
+  await flushPromises();
 };
 
 describe("RepetitiveFlow", () => {
@@ -171,7 +181,7 @@ describe("RepetitiveFlow", () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
     field(wrapper).vm.$emit("selected", { id: "work-1", label: "HP" });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(useRepetitiveForm().currentStepIndex.value).toBe(1);
     expect(field(wrapper).props("step").key).toBe("expression");
     expect(field(wrapper).props("scopeFilter")).toEqual({
@@ -242,7 +252,7 @@ describe("RepetitiveFlow", () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
     field(wrapper).vm.$emit("selected", { id: "work-1" });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(field(wrapper).props("step").key).toBe("expression");
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
     expect(field(wrapper).props("step").key).toBe("work");
@@ -254,7 +264,7 @@ describe("RepetitiveFlow", () => {
     await completeOneBranch(wrapper);
     await startBranch(wrapper);
     field(wrapper).vm.$emit("selected", { id: "work-2" });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
     expect(overview(wrapper).exists()).toBe(true);
@@ -324,5 +334,172 @@ describe("RepetitiveFlow", () => {
     form(wrapper).vm.$emit("entityCreated", { id: "manif-1" });
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("finished")?.[0]).toEqual([{ id: "manif-1" }]);
+  });
+});
+
+const linearConfig = () => ({
+  label: "repetitiveForm.linear-title",
+  repeatable: false,
+  linear: true,
+  routeToStep: "work",
+  steps: [
+    { key: "work", label: "repetitiveForm.step-work", entityType: Entitytyping.Work, createForm: "GetWorkForm" },
+    {
+      key: "expression",
+      label: "repetitiveForm.step-expression",
+      entityType: Entitytyping.Expression,
+      createForm: "GetExpressionForm",
+      relations: [{ to: "work", relationType: "refWork", createWhen: RepetitiveRelationTrigger.Always }],
+    },
+    {
+      key: "manifestation",
+      label: "repetitiveForm.step-manifestation",
+      entityType: Entitytyping.Manifestation,
+      createForm: "GetManifestationForm",
+      relations: [{ to: "expression", relationType: "refExpressions", createWhen: RepetitiveRelationTrigger.Always }],
+    },
+  ],
+});
+
+const getLinearWrapper = () =>
+  shallowMount(RepetitiveFlow, {
+    props: { open: true, config: linearConfig() },
+    global: {
+      mocks: { $t: (k: string) => k },
+      renderStubDefaultSlot: true,
+      stubs: { RepetitiveStepField: false },
+    },
+  });
+
+describe("RepetitiveFlow — linear mode", () => {
+  beforeEach(() => {
+    useRepetitiveForm().resetFlow();
+  });
+
+  it("opens directly on the first step (no overview) when linear", () => {
+    const wrapper = getLinearWrapper();
+    expect(overview(wrapper).exists()).toBe(false);
+    expect(field(wrapper).exists()).toBe(true);
+    expect(field(wrapper).props("step").key).toBe("work");
+  });
+
+  it("advances through the three steps and emits finished with the route target (work)", async () => {
+    const wrapper = getLinearWrapper();
+    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    await flushPromises();
+    expect(field(wrapper).props("step").key).toBe("expression");
+    field(wrapper).vm.$emit("selected", { id: "expr-1" });
+    await flushPromises();
+    expect(field(wrapper).props("step").key).toBe("manifestation");
+    field(wrapper).vm.$emit("selected", { id: "manif-1" });
+    await flushPromises();
+    expect(wrapper.emitted("finished")?.[0]?.[0]).toMatchObject({
+      id: "work-1",
+      type: Entitytyping.Work,
+    });
+    expect(overview(wrapper).exists()).toBe(false);
+  });
+
+  it("creating the entity at the last step also finishes and routes to the target", async () => {
+    const wrapper = getLinearWrapper();
+    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    await flushPromises();
+    field(wrapper).vm.$emit("selected", { id: "expr-1" });
+    await flushPromises();
+    expect(field(wrapper).props("step").key).toBe("manifestation");
+    // create (rather than select) the final manifestation
+    field(wrapper).vm.$emit("created", { id: "manif-9", intialValues: { title: "New" } });
+    await flushPromises();
+    expect(wrapper.emitted("finished")?.[0]?.[0]).toMatchObject({
+      id: "work-1",
+      type: Entitytyping.Work,
+    });
+  });
+
+  it("links a created entity to the prior step (same as a picked one)", async () => {
+    manageMocks.addRelations.mockClear();
+    const wrapper = getLinearWrapper();
+    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    await flushPromises();
+    // create the expression → it must be linked to the work via addRelations
+    field(wrapper).vm.$emit("created", { id: "expr-9", intialValues: { title: "E" } });
+    await flushPromises();
+    expect(manageMocks.addRelations).toHaveBeenCalledWith({
+      entityId: "expr-9",
+      relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+    });
+  });
+
+  it("resets the store and local state when the modal closes", async () => {
+    const wrapper = getLinearWrapper();
+    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    await flushPromises();
+    expect(useRepetitiveForm().currentBranch.value.entities.work).toBeTruthy();
+
+    await wrapper.setProps({ open: false });
+    await flushPromises();
+
+    expect(useRepetitiveForm().flowConfig.value).toBeNull();
+    expect(useRepetitiveForm().currentBranch.value.entities).toEqual({});
+    expect(useRepetitiveForm().currentStepIndex.value).toBe(0);
+    expect(useRepetitiveForm().branches.value).toEqual([]);
+  });
+});
+
+const bulkConfig = () => ({
+  label: "repetitiveForm.bulk-works-title",
+  repeatable: true,
+  steps: [
+    {
+      key: "work",
+      label: "repetitiveForm.step-work",
+      entityType: Entitytyping.Work,
+      createForm: "GetWorkForm",
+      // no pickerQuery → create-only (nothing to search)
+      creatableTypes: [
+        { label: "x", entityType: Entitytyping.Work, createForm: "GetWorkForm" },
+      ],
+    },
+  ],
+  // no finalize
+});
+
+const getBulkWrapper = () =>
+  shallowMount(RepetitiveFlow, {
+    props: { open: true, config: bulkConfig() },
+    global: {
+      mocks: { $t: (k: string) => k },
+      renderStubDefaultSlot: true,
+      stubs: { RepetitiveStepField: false },
+    },
+  });
+
+describe("RepetitiveFlow — create-only / no finalize", () => {
+  beforeEach(() => {
+    useRepetitiveForm().resetFlow();
+  });
+
+  it("treats a step without a pickerQuery as create-only (skipSearch)", async () => {
+    const wrapper = getBulkWrapper();
+    overview(wrapper).vm.$emit("add-another");
+    await wrapper.vm.$nextTick();
+    expect(field(wrapper).props("step").key).toBe("work");
+    expect(field(wrapper).props("skipSearch")).toBe(true);
+  });
+
+  it("closes the flow on finish when there is no finalize config", async () => {
+    const wrapper = getBulkWrapper();
+    overview(wrapper).vm.$emit("add-another");
+    await wrapper.vm.$nextTick();
+    // create the entity (persisted per-step) → branch pushed, back to overview
+    field(wrapper).vm.$emit("created", { id: "work-1", intialValues: { title: "W1" } });
+    await flushPromises();
+    expect(overview(wrapper).exists()).toBe(true);
+    expect(useRepetitiveForm().branches.value).toHaveLength(1);
+    // finishing a flow with no finalize just closes (entities already exist)
+    overview(wrapper).vm.$emit("finish");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("close")).toBeTruthy();
+    expect(form(wrapper).exists()).toBe(false);
   });
 });

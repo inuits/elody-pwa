@@ -23,7 +23,7 @@
         :entity-picker-mode="EntityPickerMode.Emit"
         :should-use-state-for-route="false"
         :selection-limit="step.maxSelection ?? undefined"
-        base-library-height="h-[55vh]"
+        base-library-height="max-h-[55vh]"
         @entities-selected="onPicked"
       />
     </div>

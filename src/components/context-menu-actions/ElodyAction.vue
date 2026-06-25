@@ -52,6 +52,7 @@ const props = defineProps<{
   entityId: string;
   parentEntityId: string;
   formQuery?: string;
+  typeModal?: TypeModals;
   formFlow?: ContextMenuFormFlow;
   formTitle?: string;
   relation?:
@@ -263,14 +264,24 @@ const doAction = async () => {
   if (
     props.action === ContextMenuElodyActionEnum.CreateEntityFromExternalSource
   ) {
-    openModal(
-      TypeModals.DynamicForm,
-      ModalStyle.CenterWide,
-      props.formQuery,
-      undefined,
-      undefined,
-      undefined,
-    );
+    if (props.typeModal === TypeModals.GuidedFlow) {
+      openModal(
+        TypeModals.GuidedFlow,
+        ModalStyle.CenterWide,
+        props.formQuery,
+        undefined,
+        true,
+      );
+    } else {
+      openModal(
+        TypeModals.DynamicForm,
+        ModalStyle.CenterWide,
+        props.formQuery,
+        undefined,
+        undefined,
+        undefined,
+      );
+    }
   }
 };
 </script>

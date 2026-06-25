@@ -48,6 +48,10 @@ watch(
   isOpen,
   (open) => {
     if (open) fetchFlowConfig();
+    // clear the config on close so a stale previous-flow config can't briefly
+    // drive `props.open`/`start()` on the next open (which showed the prior
+    // flow's last step); the next open refetches the correct config
+    else config.value = emptyConfig();
   },
   { immediate: true },
 );

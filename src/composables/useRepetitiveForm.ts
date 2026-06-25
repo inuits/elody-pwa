@@ -2,6 +2,7 @@ import { ref } from "vue";
 import {
   AdvancedFilterTypes,
   EditStatus,
+  RepetitiveRelationTrigger,
   type AdvancedFilterInput,
   type BaseRelationValuesInput,
   type Entitytyping,
@@ -105,7 +106,7 @@ const currentBranch = ref<RepetitiveBranch>({ entities: {} });
 const branches = ref<RepetitiveBranch[]>([]);
 
 export const useRepetitiveForm = () => {
-  const { createEntity } = useManageEntities();
+  const { createEntity, addRelations } = useManageEntities();
 
   const resetFlow = () => {
     flowConfig.value = null;
@@ -210,7 +211,11 @@ export const useRepetitiveForm = () => {
     step: RepetitiveStep,
   ): BaseRelationValuesInput[] =>
     (step.relations ?? [])
-      .filter((relation) => relation.createWhen === "onCreate")
+      .filter(
+        (relation) =>
+          relation.createWhen === RepetitiveRelationTrigger.OnCreate ||
+          relation.createWhen === RepetitiveRelationTrigger.Always,
+      )
       .flatMap((relation) => {
         const target = currentBranch.value.entities[relation.to];
         if (!target) return [];
@@ -253,6 +258,62 @@ export const useRepetitiveForm = () => {
       (relationValues[type] ??= []).push(relation);
     });
     return { relationValues };
+  };
+
+  // Persist the step's relations to the prior step(s) after its entity is
+  // staged. The step's entity (picked OR created) holds the relation pointing
+  // to the prior step; collection-api creates the inverse. Runs the same
+  // reliable path for both flows — only the trigger set differs.
+  const applyStepRelations = async (
+    step: RepetitiveStep,
+    triggers: RepetitiveRelationTrigger[],
+  ): Promise<void> => {
+    const entity = currentBranch.value.entities[step.key];
+    if (!entity) return;
+    for (const relation of step.relations ?? []) {
+      if (!triggers.includes(relation.createWhen)) continue;
+      const prior = currentBranch.value.entities[relation.to];
+      if (!prior) continue;
+      await addRelations({
+        entityId: entity.id,
+        relations: [
+          {
+            key: prior.id,
+            type: relation.relationType,
+            editStatus: EditStatus.New,
+          },
+        ],
+      });
+    }
+  };
+
+  // an existing entity was picked → apply onSelect/always relations
+  const linkOnSelect = (step: RepetitiveStep): Promise<void> =>
+    applyStepRelations(step, [
+      RepetitiveRelationTrigger.OnSelect,
+      RepetitiveRelationTrigger.Always,
+    ]);
+
+  // a new entity was created → apply onCreate/always relations
+  const linkAfterCreate = (step: RepetitiveStep): Promise<void> =>
+    applyStepRelations(step, [
+      RepetitiveRelationTrigger.OnCreate,
+      RepetitiveRelationTrigger.Always,
+    ]);
+
+  const isLinear = (): boolean => Boolean(flowConfig.value?.linear);
+
+  const routeTarget = (): StagedEntity | null => {
+    const entities = currentBranch.value.entities;
+    const routeKey = flowConfig.value?.routeToStep;
+    if (routeKey) return entities[routeKey] ?? null;
+    // no explicit target: route to the furthest staged step's entity
+    const steps = flowConfig.value?.steps ?? [];
+    for (let i = steps.length - 1; i >= 0; i--) {
+      const entity = entities[steps[i].key];
+      if (entity) return entity;
+    }
+    return null;
   };
 
   const createForStep = async (
@@ -339,6 +400,10 @@ export const useRepetitiveForm = () => {
     shouldSkipSearch,
     buildCreateRelations,
     buildCreatePrefill,
+    linkOnSelect,
+    linkAfterCreate,
+    isLinear,
+    routeTarget,
     createForStep,
     collectedFor,
     buildFinalizeRelations,

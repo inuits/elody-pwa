@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { Entitytyping, type RepetitiveForm } from "@/generated-types/queries";
+import {
+  Entitytyping,
+  RepetitiveRelationTrigger,
+  type RepetitiveForm,
+} from "@/generated-types/queries";
 import {
   useRepetitiveForm,
   describePickedItem,
@@ -8,10 +12,14 @@ import {
 
 const mocks = vi.hoisted(() => ({
   createEntity: vi.fn(),
+  addRelations: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/composables/useManageEntities", () => ({
-  useManageEntities: () => ({ createEntity: mocks.createEntity }),
+  useManageEntities: () => ({
+    createEntity: mocks.createEntity,
+    addRelations: mocks.addRelations,
+  }),
 }));
 
 const omnibusConfig = (): RepetitiveForm => ({
@@ -31,14 +39,14 @@ const omnibusConfig = (): RepetitiveForm => ({
       createForm: "basicCreateExpressionFields",
       scopeToRelationOf: { step: "work", relationType: "refWork" },
       skipSearchIfPriorIsNew: true,
-      relations: [{ to: "work", relationType: "refWork", createWhen: "onCreate" }],
+      relations: [{ to: "work", relationType: "refWork", createWhen: RepetitiveRelationTrigger.OnCreate }],
     },
   ],
   finalize: {
     entityType: Entitytyping.Manifestation,
     createForm: "basicCreateManifestationFields",
     relations: [
-      { toAllOf: "expression", relationType: "refExpressions", createWhen: "onFinalize" },
+      { toAllOf: "expression", relationType: "refExpressions", createWhen: RepetitiveRelationTrigger.OnFinalize },
     ],
   },
 });
@@ -47,6 +55,7 @@ describe("useRepetitiveForm", () => {
   beforeEach(() => {
     useRepetitiveForm().resetFlow();
     mocks.createEntity.mockReset();
+    mocks.addRelations.mockClear();
   });
 
   it("has empty state before a flow is initialised", () => {
@@ -411,6 +420,121 @@ describe("useRepetitiveForm", () => {
       relationValues: {},
       intialValues: { is_omnibus: true, material_type: "boek" },
     });
+  });
+
+  const linearConfig = (): RepetitiveForm => ({
+    repeatable: false,
+    linear: true,
+    routeToStep: "work",
+    steps: [
+      {
+        key: "work",
+        entityType: Entitytyping.Work,
+        createForm: "GetWorkForm",
+        pickerQuery: "GetWorks",
+      },
+      {
+        key: "expression",
+        entityType: Entitytyping.Expression,
+        createForm: "GetExpressionForm",
+        pickerQuery: "GetExpressions",
+        relations: [
+          { to: "work", relationType: "refWork", createWhen: RepetitiveRelationTrigger.Always },
+        ],
+      },
+      {
+        key: "manifestation",
+        entityType: Entitytyping.Manifestation,
+        createForm: "GetManifestationForm",
+        pickerQuery: "GetManifestations",
+        relations: [
+          { to: "expression", relationType: "refExpressions", createWhen: RepetitiveRelationTrigger.Always },
+        ],
+      },
+    ],
+  });
+
+  it("isLinear reflects the config flag", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    expect(store.isLinear()).toBe(true);
+    store.initFlow(omnibusConfig());
+    expect(store.isLinear()).toBe(false);
+  });
+
+  it("buildCreateRelations includes 'always' relations", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.pickExisting({ id: "work-1" });
+    store.completeStep(); // expression step
+    expect(store.buildCreateRelations(store.activeStep()!)).toEqual([
+      { key: "work-1", type: "refWork", editStatus: "new" },
+    ]);
+  });
+
+  it("linkOnSelect patches the picked entity's relation to the prior step", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.pickExisting({ id: "work-1" });
+    store.completeStep(); // expression step
+    store.pickExisting({ id: "expr-7" }); // existing expression picked at this step
+    await store.linkOnSelect(store.activeStep()!);
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "expr-7",
+      relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+    });
+  });
+
+  it("linkOnSelect is a no-op for a step without onSelect/always relations", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.pickExisting({ id: "work-1" }); // work step has no relations
+    await store.linkOnSelect(store.activeStep()!);
+    expect(mocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("linkOnSelect is a no-op when the prior entity is missing", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.currentStepIndex.value = 1; // expression step, but no work staged
+    store.pickExisting({ id: "expr-7" });
+    await store.linkOnSelect(store.activeStep()!);
+    expect(mocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("linkAfterCreate links a created entity's onCreate/always relations to the prior step", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.pickExisting({ id: "work-1" });
+    store.completeStep(); // expression step
+    store.recordCreated({ id: "expr-9" }); // newly created expression
+    await store.linkAfterCreate(store.activeStep()!);
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "expr-9",
+      relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+    });
+  });
+
+  it("routeTarget returns the configured step's staged entity", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.pickExisting({ id: "work-1" });
+    store.completeStep();
+    store.pickExisting({ id: "expr-1" });
+    store.completeStep();
+    store.pickExisting({ id: "manif-1" });
+    expect(store.routeTarget()).toMatchObject({ id: "work-1", type: Entitytyping.Work });
+  });
+
+  it("routeTarget falls back to the last staged step when routeToStep is unset", () => {
+    const store = useRepetitiveForm();
+    const config = linearConfig();
+    delete config.routeToStep;
+    store.initFlow(config);
+    store.pickExisting({ id: "work-1" });
+    store.completeStep();
+    store.pickExisting({ id: "expr-1" });
+    expect(store.routeTarget()).toMatchObject({ id: "expr-1" });
   });
 });
 

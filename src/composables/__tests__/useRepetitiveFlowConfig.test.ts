@@ -309,4 +309,28 @@ describe("toRepetitiveFormConfig", () => {
       steps: [],
     });
   });
+
+  it("carries linear and routeToStep from the raw response", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: false,
+      linear: true,
+      routeToStep: "work",
+      work: [{ __typename: "RepetitiveStep", key: "work", entityType: "work", createForm: "GetWorkForm" }],
+    });
+    expect(config.linear).toBe(true);
+    expect(config.routeToStep).toBe("work");
+  });
+
+  it("defaults linear to false and drops an empty routeToStep echo", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: false,
+      linear: false,
+      routeToStep: "",
+      work: [{ __typename: "RepetitiveStep", key: "work", entityType: "work", createForm: "GetWorkForm" }],
+    });
+    expect(config.linear).toBe(false);
+    expect(config.routeToStep).toBeUndefined();
+  });
 });

@@ -8,8 +8,13 @@
       button-size="small"
       @click.stop="onClick"
     />
+    <!-- Mounted only after this component is mounted so the Teleport target
+         (`.base-modal--opened`, the flow dialog) already exists in the DOM.
+         When the flow opens directly on a step (linear mode), the button and
+         the dialog mount in the same pass; mounting the menu immediately would
+         resolve the teleport target to null and the dropdown would never show. -->
     <BaseContextMenu
-      v-if="types.length > 1"
+      v-if="types.length > 1 && isMounted"
       :context-menu="contextMenuHandler.getContextMenu()"
       :direction="ContextMenuDirection.Left"
     >
@@ -25,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import {
   ContextMenuDirection,
   DamsIcons,
@@ -41,7 +46,10 @@ const props = withDefaults(
     types: RepetitiveCreatableType[];
     label?: string;
   }>(),
-  { label: "repetitiveForm.create-new" },
+  {
+    label: "repetitiveForm.create-new",
+    types: () => [],
+  },
 );
 
 const emit = defineEmits<{
@@ -49,6 +57,10 @@ const emit = defineEmits<{
 }>();
 
 const contextMenuHandler = ref(new ContextMenuHandler());
+
+// the dropdown's Teleport target only exists once the dialog is in the DOM
+const isMounted = ref(false);
+onMounted(() => (isMounted.value = true));
 
 // a single creatable type needs no menu — pick it straight away; multiple
 // types open a dropdown of buttons (one per type) at the click position

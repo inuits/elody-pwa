@@ -34,7 +34,7 @@ const normalizeStep = (step: any): RepetitiveStep => {
 export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
   if (!raw) return { repeatable: false, steps: [] };
   const cleaned = omitDeep(raw, "__typename") as Record<string, any>;
-  const { label, repeatable, finalize, ...rest } = cleaned;
+  const { label, repeatable, linear, routeToStep, finalize, ...rest } = cleaned;
   const steps = Object.values(rest)
     .filter(Array.isArray)
     .flat()
@@ -44,6 +44,8 @@ export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
     steps,
   };
   if (label) config.label = label;
+  config.linear = Boolean(linear);
+  if (routeToStep) config.routeToStep = routeToStep;
   if (finalize) {
     const normalizedFinalize = dropEmpty(finalize, ["label"]);
     if (!normalizedFinalize.creatableTypes?.length)
