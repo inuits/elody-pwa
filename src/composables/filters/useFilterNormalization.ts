@@ -40,6 +40,7 @@ export const useFilterNormalization = () => {
         local_field: filter.advancedFilter.lookup.local_field,
         foreign_field: filter.advancedFilter.lookup.foreign_field,
         as: filter.advancedFilter.lookup.as,
+        resolve_to_source_ids: filter.advancedFilter.lookup.resolve_to_source_ids,
       };
     }
 
@@ -74,6 +75,7 @@ export const useFilterNormalization = () => {
           local_field: lookup.local_field,
           foreign_field: lookup.foreign_field,
           as: lookup.as,
+          resolve_to_source_ids: lookup.resolve_to_source_ids,
         }));
       }
 
