@@ -158,7 +158,7 @@ const allFilters = computed<AdvancedFilterInput[] | undefined>(() => {
 });
 
 const { loadDocument, getDocument } = useCustomQuery();
-const { closeModal, getModalInfo } = useBaseModal();
+const { closeModal, openModal, getModalInfo } = useBaseModal();
 const { addRelations } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing, setBulkSelectionLimit } =
   useBulkOperations();
@@ -303,6 +303,11 @@ const submit = useSubmitForm<EntityValues>(async () => {
         props.parentEntityType.toLowerCase(),
     )?.type || Collection.Entities;
   if (!collection) throw Error("Could not determine collection for submit");
+
+  const savedModalInfo = getModalInfo(TypeModals.DynamicForm);
+  const callbackFunctions = getCallbackFunctions();
+  closeModal(TypeModals.DynamicForm);
+
   const result = await mutate({
     id: props.entityUuid,
     formInput: parseFormValuesToFormInput(
@@ -316,7 +321,18 @@ const submit = useSubmitForm<EntityValues>(async () => {
       : undefined,
   });
 
-  if (!result?.data?.mutateEntityValues) return;
+  if (!result?.data?.mutateEntityValues) {
+    openModal(
+      TypeModals.DynamicForm,
+      savedModalInfo.modalStyle,
+      savedModalInfo.formQuery,
+      savedModalInfo.deleteQueryOptions,
+      savedModalInfo.closeConfirmation,
+      savedModalInfo.context,
+    );
+    return;
+  }
+
   const mutatedEntity: Entity = result.data.mutateEntityValues as Entity;
   setValues({
     intialValues: mutatedEntity.intialValues,
@@ -327,13 +343,11 @@ const submit = useSubmitForm<EntityValues>(async () => {
     t("notifications.success.entityUpdated.description"),
   );
   if (form) form.resetForm({ values: form.values });
-  const callbackFunctions = getCallbackFunctions();
   for (const callback of callbackFunctions) {
     if (callback) await callback();
   }
   setCropMode(false);
   setCropCoordinatesKey("");
-  closeModal(TypeModals.DynamicForm);
 });
 
 const refetchRelationsWithNoLimit = async (): string[] => {
