@@ -54,10 +54,10 @@
           :entity-picker-mode="EntityPickerMode.Save"
           :show-button="true"
           :enable-advanced-filters="true"
-          :search-mode="field.inputField?.searchMode ?? undefined"
-          :search-metadata-keys="field.inputField?.searchMetadataKeys ?? undefined"
-          :search-accepted-types="field.inputField?.searchAcceptedTypes ?? undefined"
-          :search-static-filters="field.inputField?.searchStaticFilters ?? undefined"
+          :search-mode="field.inputField?.entityPickerSearchConfig?.mode ?? undefined"
+          :search-metadata-keys="field.inputField?.entityPickerSearchConfig?.metadataKeys ?? undefined"
+          :search-accepted-types="field.inputField?.entityPickerSearchConfig?.acceptedTypes ?? undefined"
+          :search-static-filters="field.inputField?.entityPickerSearchConfig?.staticFilters ?? undefined"
         />
         <metadata-wrapper
           v-if="
