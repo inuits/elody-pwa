@@ -10,6 +10,11 @@ const mocks = vi.hoisted(() => ({
   addMutationCallback: undefined as unknown as ReturnType<typeof vi.fn>,
 }));
 
+// Module-level refs shared with the useBaseLibrary mock — cannot go in
+// vi.hoisted() because ref() is not available before imports are resolved.
+const libEntities = ref<any[]>([]);
+const libTotalEntityCount = ref(0);
+
 // --- Edit composable (the behavioral seam under test) ------------------------
 vi.mock("@/composables/useEdit", () => ({
   useEditMode: () => ({
@@ -35,7 +40,7 @@ vi.mock("@/composables/useEntitySingle", () => ({
 vi.mock("@/components/library/useBaseLibrary", () => ({
   useBaseLibrary: () => ({
     enqueuePromise: vi.fn(),
-    entities: ref([]),
+    entities: libEntities,
     placeholderEntities: ref([]),
     placeholderEntitiesAmount: ref(0),
     entitiesLoading: ref(false),
@@ -56,7 +61,7 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     setSortKey: vi.fn(),
     setSortOrder: vi.fn(),
     resetQueryVariablesForNewPath: vi.fn(),
-    totalEntityCount: ref(0),
+    totalEntityCount: libTotalEntityCount,
   }),
 }));
 
@@ -266,5 +271,67 @@ describe("BaseLibrary.vue syncEditStateCallbacks", () => {
 
     expect(mocks.addRefetchFunction).toHaveBeenCalled();
     expect(mocks.addMutationCallback).not.toHaveBeenCalled();
+  });
+});
+
+describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
+  const makeEntity = (id: string) => ({ id, uuid: id, allowedViewModes: { viewModes: [] } });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+  });
+
+  it("adjusts totalEntityCount when entities are removed optimistically", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    libTotalEntityCount.value = 10;
+    getWrapper();
+    await flushPromises();
+
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(9);
+  });
+
+  it("adjusts totalEntityCount when entities are added optimistically", async () => {
+    libEntities.value = [makeEntity("a")];
+    libTotalEntityCount.value = 5;
+    getWrapper();
+    await flushPromises();
+
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(7);
+  });
+
+  it("does not double-adjust when server updates both entities and totalEntityCount", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    libTotalEntityCount.value = 20;
+    getWrapper();
+    await flushPromises();
+
+    libEntities.value = [makeEntity("c"), makeEntity("d"), makeEntity("e")];
+    libTotalEntityCount.value = 30;
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(30);
+  });
+
+  it("never sets totalEntityCount below zero", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    libTotalEntityCount.value = 1;
+    getWrapper();
+    await flushPromises();
+
+    libEntities.value = [];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(0);
   });
 });

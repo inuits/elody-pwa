@@ -222,14 +222,14 @@
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ListItemSkeleton
-            v-show="entitiesLoading && !displayMap"
+            v-show="entitiesLoadingWithoutData && !displayMap"
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
-            v-show="showViewModesList && !entitiesLoading"
+            v-show="showViewModesList && (!entitiesLoading || !!entities?.length)"
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
-            :entities-loading="entitiesLoading"
+            :entities-loading="entitiesLoadingWithoutData"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
             :disable-previews="disableNewEntityPreviews"
@@ -259,9 +259,9 @@
             :primaryMediafileId="primaryMediafileId"
           />
           <ViewModesTable
-            v-show="displayTable && !entitiesLoading"
+            v-show="displayTable && (!entitiesLoading || !!entities?.length)"
             :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
+            :entities-loading="entitiesLoadingWithoutData"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
             :enable-navigation="enableNavigation"
@@ -530,6 +530,19 @@ const additionalDefaultFiltersEnabled = computed(() => {
       BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
   );
 });
+
+const entitiesLoadingWithoutData = computed(() => entitiesLoading.value && !entities.value?.length);
+
+const syncTotalCountWithOptimisticChange = (
+  newEntities: Entity[],
+  oldEntities: Entity[],
+  newCount: number,
+  oldCount: number,
+) => {
+  const entityDelta = newEntities.length - (oldEntities?.length ?? 0);
+  const isOptimisticChange = newCount === oldCount && entityDelta !== 0;
+  if (isOptimisticChange) totalEntityCount.value = Math.max(0, newCount + entityDelta);
+};
 
 const primaryMediafileId = computed(() => {
   return parentEntity?.value?.intialValues?.primary_mediafile_id;
@@ -977,9 +990,10 @@ watch(
 );
 
 watch(
-  () => entities.value,
-  (newEntities) => {
-    emit("entitiesUpdated", newEntities.length);
+  [() => entities.value, totalEntityCount],
+  ([newEntities, newCount], [oldEntities, oldCount]) => {
+    syncTotalCountWithOptimisticChange(newEntities as Entity[], oldEntities as Entity[], newCount as number, oldCount as number);
+    emit("entitiesUpdated", (newEntities as Entity[]).length);
     paginationStore.updateTotalAmount(totalEntityCount.value);
     if (props.selectInputFieldType) {
       selectedDropdownOptions.value = getSelectedOptions();
@@ -1057,4 +1071,6 @@ watch(
   },
   { deep: true },
 );
+
+defineExpose({ entities });
 </script>

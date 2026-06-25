@@ -6,13 +6,13 @@ import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useBulkOperations } from "@/composables/useBulkOperations";
+import { useModalActions } from "@/composables/useModalActions";
 import type { Collection, Entity } from "@/generated-types/queries";
 import { EditStatus, TypeModals } from "@/generated-types/queries";
 import type { FormContext } from "vee-validate";
 import type { Context } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
 import { ref } from "vue";
-import * as vue from "vue";
 
 vi.mock("@/composables/useFormHelper");
 vi.mock("@/composables/useEdit");
@@ -20,6 +20,7 @@ vi.mock("vue-i18n");
 vi.mock("@/composables/useBaseModal");
 vi.mock("@/composables/useBaseNotification");
 vi.mock("@/composables/useBulkOperations");
+vi.mock("@/composables/useModalActions");
 vi.mock("@/main", () => ({
   apolloClient: {
     mutate: vi.fn(),
@@ -48,6 +49,8 @@ describe("useDeleteRelations", () => {
   let mockSelectedItems: { key: string }[];
   let mockFindRelation: ReturnType<typeof vi.fn>;
   let mockGetForm: ReturnType<typeof vi.fn>;
+  let mockCloseModal: ReturnType<typeof vi.fn>;
+  let mockGetLibraryEntities: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -67,10 +70,11 @@ describe("useDeleteRelations", () => {
       resetForm: vi.fn(),
     });
     const mockSave = vi.fn().mockResolvedValue(undefined);
-    const mockCloseModal = vi.fn();
+    mockCloseModal = vi.fn();
     const mockDisplaySuccessNotification = vi.fn();
     const mockT = vi.fn().mockReturnValue("translated text");
     const mockDequeueItemForBulkProcessing = vi.fn();
+    mockGetLibraryEntities = vi.fn().mockReturnValue(undefined);
 
     (apolloClient.mutate as any).mockResolvedValue({
       data: {
@@ -104,8 +108,9 @@ describe("useDeleteRelations", () => {
     (useBulkOperations as any).mockReturnValue({
       dequeueItemForBulkProcessing: mockDequeueItemForBulkProcessing,
     });
-
-    vi.spyOn(vue, "inject").mockReturnValue(undefined);
+    (useModalActions as any).mockReturnValue({
+      getLibraryEntities: mockGetLibraryEntities,
+    });
 
     const { deleteRelations: deleteRelationsFn, submit: submitFn } =
       useDeleteRelations();
@@ -154,6 +159,45 @@ describe("useDeleteRelations", () => {
       expect(useEditMode().save).not.toHaveBeenCalled();
     });
 
+    describe("optimistic removal from libraryEntities", () => {
+      it("removes selected items from libraryEntities immediately", async () => {
+        const libraryEntities = ref<Entity[]>([
+          { id: "item-1", uuid: "item-1" } as Entity,
+          { id: "item-2", uuid: "item-2" } as Entity,
+          { id: "item-3", uuid: "item-3" } as Entity,
+        ]);
+        mockGetLibraryEntities.mockReturnValue(libraryEntities);
+
+        const { deleteRelations: dr } = useDeleteRelations();
+        await dr("entity-1", "relation-type", mockSelectedItems, mockContext);
+
+        expect(libraryEntities.value).toHaveLength(1);
+        expect(libraryEntities.value[0].id).toBe("item-3");
+      });
+
+      it("does nothing to libraryEntities when getLibraryEntities returns undefined", async () => {
+        mockGetLibraryEntities.mockReturnValue(undefined);
+
+        const { deleteRelations: dr } = useDeleteRelations();
+        await expect(
+          dr("entity-1", "relation-type", mockSelectedItems, mockContext),
+        ).resolves.not.toThrow();
+      });
+
+      it("removes all selected items leaving remaining ones intact", async () => {
+        const libraryEntities = ref<Entity[]>([
+          { id: "item-1", uuid: "item-1" } as Entity,
+          { id: "item-2", uuid: "item-2" } as Entity,
+        ]);
+        mockGetLibraryEntities.mockReturnValue(libraryEntities);
+
+        const { deleteRelations: dr } = useDeleteRelations();
+        await dr("entity-1", "relation-type", mockSelectedItems, mockContext);
+
+        expect(libraryEntities.value).toHaveLength(0);
+      });
+    });
+
     describe("inverse relation deletion via libraryEntities", () => {
       const entityId = "production-1";
       const mediafileId = "mediafile-1";
@@ -161,7 +205,7 @@ describe("useDeleteRelations", () => {
 
       it("should call deleteRelationDirect when findRelation returns no-relation-found and library entity has inverse relation", async () => {
         mockFindRelation.mockReturnValue("no-relation-found");
-        vi.spyOn(vue, "inject").mockReturnValue(
+        mockGetLibraryEntities.mockReturnValue(
           ref([makeLibraryEntity(mediafileId, inverseRelationType, entityId)]),
         );
 
@@ -189,7 +233,7 @@ describe("useDeleteRelations", () => {
         mockFindRelation.mockReturnValue({
           relation: { key: mediafileId, type: "refMediafiles", editStatus: EditStatus.New },
         });
-        vi.spyOn(vue, "inject").mockReturnValue(
+        mockGetLibraryEntities.mockReturnValue(
           ref([makeLibraryEntity(mediafileId, inverseRelationType, entityId)]),
         );
 
@@ -207,7 +251,7 @@ describe("useDeleteRelations", () => {
 
       it("should use libraryEntityId param to look up library entity instead of itemKey", async () => {
         mockFindRelation.mockReturnValue("no-relation-found");
-        vi.spyOn(vue, "inject").mockReturnValue(
+        mockGetLibraryEntities.mockReturnValue(
           ref([makeLibraryEntity(mediafileId, inverseRelationType, entityId)]),
         );
 
@@ -236,7 +280,7 @@ describe("useDeleteRelations", () => {
           type: "MediaFile",
           relationValues: { refProductions: [{ key: "other-entity", type: "refProductions" }] },
         } as unknown as Entity;
-        vi.spyOn(vue, "inject").mockReturnValue(ref([entityWithoutInverse]));
+        mockGetLibraryEntities.mockReturnValue(ref([entityWithoutInverse]));
 
         const { deleteRelations: dr } = useDeleteRelations();
         await dr(entityId, "refMediafiles", [{ key: mediafileId }], mockContext);
@@ -246,7 +290,7 @@ describe("useDeleteRelations", () => {
 
       it("should not call deleteRelationDirect when entity is not in libraryEntities", async () => {
         mockFindRelation.mockReturnValue("no-relation-found");
-        vi.spyOn(vue, "inject").mockReturnValue(ref([]));
+        mockGetLibraryEntities.mockReturnValue(ref([]));
 
         const { deleteRelations: dr } = useDeleteRelations();
         await dr(entityId, "refMediafiles", [{ key: mediafileId }], mockContext);
@@ -257,6 +301,21 @@ describe("useDeleteRelations", () => {
   });
 
   describe("submit", () => {
+    it("closes the modal before firing the mutation", async () => {
+      const callOrder: string[] = [];
+      mockCloseModal.mockImplementation(() => callOrder.push("closeModal"));
+      (apolloClient.mutate as any).mockImplementation(() => {
+        callOrder.push("mutate");
+        return Promise.resolve({
+          data: { mutateEntityValues: { id: "entity-1", intialValues: {}, relationValues: {} } },
+        });
+      });
+
+      await submit("entity-1", "entity" as Collection, TypeModals.BulkOperationsDeleteRelations);
+
+      expect(callOrder).toEqual(["closeModal", "mutate"]);
+    });
+
     it("should submit the form and reset it on success", async () => {
       await submit(
         "entity-1",

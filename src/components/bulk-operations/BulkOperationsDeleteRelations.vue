@@ -78,7 +78,7 @@ const deleteSelectedRelations = async () => {
       TypeModals.BulkOperationsDeleteRelations,
     ),
   );
-  deleteRelations(
+  await deleteRelations(
     getParentId() as string,
     getRelationType() as string,
     getSelectedItems(),

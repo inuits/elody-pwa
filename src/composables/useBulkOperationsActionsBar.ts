@@ -1,4 +1,4 @@
-import { computed, inject, onMounted, ref, watch } from "vue";
+import { computed, inject, onMounted, ref, type Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { type PaginationStore, PaginationStoreKey } from "@/components/library/usePaginationStore";
@@ -79,6 +79,7 @@ export const useBulkOperationsActionsBar = (
   parentEntity: Entity | undefined
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
+  const libraryEntities = inject<Ref<Entity[]>>("libraryEntities");
   const paginationStore: PaginationStore = inject(PaginationStoreKey);
   const route = useRoute();
   const { getStateForRoute } = useStateManagement();
@@ -97,6 +98,7 @@ export const useBulkOperationsActionsBar = (
     initializePropertiesForBulkDeleteRelations,
     initializePropertiesForBulkDeleteEntities,
     setCallbackFunctions,
+    setLibraryEntities,
     resetAllProperties,
   } = useModalActions();
 
@@ -183,6 +185,7 @@ export const useBulkOperationsActionsBar = (
   const initializeAddRelationOperation = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
+    setLibraryEntities(libraryEntities);
     emit(
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,
@@ -227,6 +230,7 @@ export const useBulkOperationsActionsBar = (
 
   const initializeDeleteRelationsOperation = () => {
     initializePropertiesForBulkDeleteRelations(props.relationType);
+    setLibraryEntities(libraryEntities);
   };
 
   const initializeBulkMutationOperation = (

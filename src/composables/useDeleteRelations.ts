@@ -16,8 +16,8 @@ import {
   type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { useModalActions } from "@/composables/useModalActions";
 import { apolloClient } from "@/main";
-import { inject, type Ref } from "vue";
 import {
   mutateEntityRelations,
   findInverseRelationType,
@@ -35,7 +35,7 @@ export function useDeleteRelations() {
   const { closeModal } = useBaseModal();
   const { displaySuccessNotification } = useBaseNotification();
   const { dequeueItemForBulkProcessing } = useBulkOperations();
-  const libraryEntities = inject<Ref<Entity[]>>("libraryEntities");
+  const { getLibraryEntities } = useModalActions();
 
   const deleteRelationDirect = async (
     entity: Entity,
@@ -60,6 +60,7 @@ export function useDeleteRelations() {
     const form = getForm(entityId) as FormContext;
     if (!form) return;
 
+    const libraryEntities = getLibraryEntities();
     let relations: BaseRelationValuesInput[] = getRelationsBasedOnType(
       entityId,
       relationType,
@@ -92,6 +93,11 @@ export function useDeleteRelations() {
       dequeueItemForBulkProcessing(context, itemKey);
     });
 
+    if (libraryEntities?.value) {
+      const deletedKeys = new Set(selectedItems.map((item) => ("key" in item ? item.key : item.id)));
+      libraryEntities.value = libraryEntities.value.filter((e) => !deletedKeys.has(e.id));
+    }
+
     form.setFieldValue(`relationValues.${relationType}`, relations);
     if (saveImmediately) await save(true);
     await Promise.all(directDeletions);
@@ -105,6 +111,8 @@ export function useDeleteRelations() {
     const { disableEdit } = useEditMode(entityId);
     const form = getForm(entityId) as FormContext;
     if (!form) return;
+
+    if (modalType) closeModal(TypeModals.BulkOperationsDeleteRelations);
 
     const result = await apolloClient.mutate({
       mutation: MutateEntityValuesDocument,
@@ -131,8 +139,6 @@ export function useDeleteRelations() {
         relationValues: updatedRelationValues,
       },
     });
-
-    if (modalType) closeModal(TypeModals.BulkOperationsDeleteRelations);
 
     displaySuccessNotification(
       "notifications.success.entityUpdated.title",

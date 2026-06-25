@@ -9,6 +9,7 @@
       @search="onSearch"
     />
     <BaseLibrary
+      ref="pickerLibrary"
       class="overflow-auto"
       :class="searchMode === EntityPickerSearchMode.Search ? 'flex-1 min-h-0' : baseLibraryHeight"
       v-if="queryLoaded || ignoreCustomQuery"
@@ -174,7 +175,9 @@ const {
 } = useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
 const { parseFormValuesToFormInput, getForm } = useFormHelper();
-const { getCallbackFunctions } = useModalActions();
+const { getCallbackFunctions, getLibraryEntities } = useModalActions();
+const pickerLibrary = ref<InstanceType<typeof BaseLibrary> | null>(null);
+const pendingEntities = ref<Entity[]>([]);
 const { displayWarningNotification, displaySuccessNotification } =
   useBaseNotification();
 
@@ -256,6 +259,8 @@ const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
     }
   }
 
+  const selectedIds = new Set(selectedItems.map((item) => item.id));
+  pendingEntities.value = pickerLibrary.value?.entities?.filter((e: Entity) => selectedIds.has(e.id)) ?? [];
   const enrichedItems = injectRelationMetadataFromForm(selectedItems);
   addRelations(enrichedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
@@ -307,6 +312,12 @@ const submit = useSubmitForm<EntityValues>(async () => {
   const savedModalInfo = getModalInfo(TypeModals.DynamicForm);
   const callbackFunctions = getCallbackFunctions();
   closeModal(TypeModals.DynamicForm);
+
+  const libraryEntities = getLibraryEntities();
+  if (libraryEntities?.value && pendingEntities.value.length) {
+    libraryEntities.value = [...libraryEntities.value, ...pendingEntities.value];
+    pendingEntities.value = [];
+  }
 
   const result = await mutate({
     id: props.entityUuid,

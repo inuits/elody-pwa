@@ -1,11 +1,11 @@
-import type { BulkOperationTypes, Collection } from "@/generated-types/queries";
+import type { BulkOperationTypes, Collection, Entity } from "@/generated-types/queries";
 import {
   ActionType,
   type BaseRelationValuesInput,
   EditStatus,
   RouteNames,
 } from "@/generated-types/queries";
-import { ref } from "vue";
+import { ref, type Ref } from "vue";
 import {
   BulkOperationsContextEnum,
   type InBulkProcessableItem,
@@ -32,6 +32,7 @@ const deletionInformation = ref<{ title: string } | undefined>(undefined);
 const skipItemsWithRelationDuringBulkDelete = ref<string[] | undefined>(
   undefined,
 );
+let libraryEntitiesRef: Ref<Entity[]> | undefined = undefined;
 
 export const useModalActions = () => {
   const getArgumentsForSubmit = (): SubmitArguments => {
@@ -247,6 +248,12 @@ export const useModalActions = () => {
     callbackFunctions.value = callback;
   };
 
+  const setLibraryEntities = (entities: Ref<Entity[]> | undefined) => {
+    libraryEntitiesRef = entities;
+  };
+
+  const getLibraryEntities = () => libraryEntitiesRef;
+
   const resetAllProperties = () => {
     parentId.value = undefined;
     relationType.value = undefined;
@@ -273,6 +280,8 @@ export const useModalActions = () => {
     getInformationForDelete,
     getInformationForBulkDeleteEntities,
     setCallbackFunctions,
+    setLibraryEntities,
+    getLibraryEntities,
     getRelationType,
     getCollection,
     setArgumentForSubmitAllFormTabs,
