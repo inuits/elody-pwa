@@ -57,6 +57,7 @@
           :search-mode="field.inputField?.searchMode ?? undefined"
           :search-metadata-keys="field.inputField?.searchMetadataKeys ?? undefined"
           :search-accepted-types="field.inputField?.searchAcceptedTypes ?? undefined"
+          :search-static-filters="field.inputField?.searchStaticFilters ?? undefined"
         />
         <metadata-wrapper
           v-if="

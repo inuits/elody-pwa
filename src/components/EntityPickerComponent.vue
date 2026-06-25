@@ -118,6 +118,7 @@ const props = withDefaults(
     searchMode?: EntityPickerSearchMode;
     searchMetadataKeys?: string[];
     searchAcceptedTypes?: string[];
+    searchStaticFilters?: AdvancedFilterInput[];
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -129,6 +130,7 @@ const props = withDefaults(
     searchMode: EntityPickerSearchMode.Filters,
     searchMetadataKeys: () => [],
     searchAcceptedTypes: () => [],
+    searchStaticFilters: () => [],
   },
 );
 
@@ -152,6 +154,7 @@ const searchModeTypeFilter = computed<AdvancedFilterInput[]>(() =>
 const allFilters = computed<AdvancedFilterInput[] | undefined>(() => {
   const filters = [
     ...(props.computedFilters ?? []),
+    ...(isSearchMode.value ? (props.searchStaticFilters ?? []) : []),
     ...searchModeTypeFilter.value,
     ...searchModeFilters.value,
   ];
