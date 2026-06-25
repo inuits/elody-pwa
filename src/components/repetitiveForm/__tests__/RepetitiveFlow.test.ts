@@ -158,6 +158,44 @@ describe("RepetitiveFlow", () => {
     expect(field(wrapper).props("scopeFilter")).toBeNull();
   });
 
+  it("shows the back button by default (no showBackButton on the step)", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(true);
+  });
+
+  it("hides the back button when the step sets showBackButton: false", async () => {
+    const config = {
+      label: "repetitiveForm.omnibus-title",
+      repeatable: true,
+      steps: [
+        {
+          key: "work",
+          label: "repetitiveForm.step-work",
+          entityType: Entitytyping.Work,
+          createForm: "GetWorkCreationForm",
+          showBackButton: false,
+        },
+        {
+          key: "expression",
+          entityType: Entitytyping.Expression,
+          createForm: "GetExpressionCreationForm",
+        },
+      ],
+    };
+    const wrapper = shallowMount(RepetitiveFlow, {
+      props: { open: true, config },
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { RepetitiveStepField: false },
+      },
+    });
+    await startBranch(wrapper);
+    expect(field(wrapper).props("step").key).toBe("work");
+    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(false);
+  });
+
   it("titles the modal with the step counter while in a step", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);

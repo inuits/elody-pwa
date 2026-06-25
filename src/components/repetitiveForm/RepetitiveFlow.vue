@@ -60,7 +60,14 @@
           @selected="onSelected"
           @created="onCreated"
         >
-          <template #actions v-if="(currentStepIndex > 0 && flowConfig?.linear) || !flowConfig?.linear">
+          <template
+            #actions
+            v-if="
+              ((currentStepIndex > 0 && flowConfig?.linear) ||
+                !flowConfig?.linear) &&
+              activeStep?.showBackButton !== false
+            "
+          >
             <div class="w-fit">
               <BaseButtonNew
                 data-testid="repetitive-flow-back"
