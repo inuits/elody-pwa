@@ -20,6 +20,12 @@ vi.mock("vue-router", () => ({
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
+const { mockGetForm } = vi.hoisted(() => ({
+  mockGetForm: vi.fn(() => undefined as any),
+}));
+vi.mock("@/composables/useFormHelper", () => ({
+  useFormHelper: () => ({ getForm: mockGetForm }),
+}));
 
 const expressionStep = () => ({
   key: "expression",
@@ -70,7 +76,10 @@ const chooseCreateType = async (
 };
 
 describe("RepetitiveStepField", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetForm.mockReturnValue(undefined as any);
+  });
 
   it("shows the picker view immediately when search is not skipped", () => {
     const wrapper = getWrapper();
@@ -201,6 +210,55 @@ describe("RepetitiveStepField", () => {
     const wrapper = getWrapper({
       ...getDefaultProps(),
       step: { ...expressionStep(), creatableTypes },
+    });
+    expect(
+      wrapper.findComponent(RepetitiveCreateButton).props("types"),
+    ).toEqual(creatableTypes);
+  });
+
+  it("auto-picks the creatable type from the parent value (no chooser)", () => {
+    // the parent (e.g. boekenbank) decides the subtype via expression_type
+    mockGetForm.mockReturnValue({
+      values: { intialValues: { expression_type: "listening" } },
+    } as any);
+    const listening = {
+      label: "b",
+      entityType: "listening",
+      createForm: "GetListeningForm",
+    };
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: {
+        ...expressionStep(),
+        creatableTypeFromParentKey: "expression_type",
+        creatableTypes: [
+          { label: "a", entityType: "reading", createForm: "GetReadingForm" },
+          listening,
+          { label: "c", entityType: "easy_reading", createForm: "GetEasyReadingForm" },
+        ],
+      } as any,
+    });
+    // only the parent-decided type is offered → the button shows no dropdown
+    expect(
+      wrapper.findComponent(RepetitiveCreateButton).props("types"),
+    ).toEqual([listening]);
+  });
+
+  it("keeps all creatable types when the parent value matches none", () => {
+    mockGetForm.mockReturnValue({
+      values: { intialValues: { expression_type: "nope" } },
+    } as any);
+    const creatableTypes = [
+      { label: "a", entityType: "reading", createForm: "GetReadingForm" },
+      { label: "b", entityType: "listening", createForm: "GetListeningForm" },
+    ];
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: {
+        ...expressionStep(),
+        creatableTypeFromParentKey: "expression_type",
+        creatableTypes,
+      } as any,
     });
     expect(
       wrapper.findComponent(RepetitiveCreateButton).props("types"),

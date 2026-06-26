@@ -79,6 +79,8 @@ import {
   describePickedItem,
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
+import { getEntityIdFromRoute } from "@/helpers";
+import { useFormHelper } from "@/composables/useFormHelper";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
@@ -113,10 +115,15 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const { getForm } = useFormHelper();
+
+// the entity whose detail page hosts the flow (e.g. the boekenbank); parent
+// values are read from its form the same way copyValueFromParent does
+const parentEntityId = getEntityIdFromRoute();
 
 // the configured subtypes, or a single fallback derived from the step's own
 // createForm so steps that don't configure creatableTypes keep working
-const creatableOptions = computed<RepetitiveCreatableType[]>(() =>
+const allCreatableOptions = computed<RepetitiveCreatableType[]>(() =>
   props.step.creatableTypes?.length
     ? props.step.creatableTypes
     : [
@@ -127,6 +134,35 @@ const creatableOptions = computed<RepetitiveCreatableType[]>(() =>
         },
       ],
 );
+
+const normalizeTypeValue = (raw: unknown): string | undefined => {
+  let value: unknown = Array.isArray(raw) ? raw[0] : raw;
+  if (value && typeof value === "object")
+    value = (value as any).value ?? (value as any).key;
+  return typeof value === "string" && value ? value : undefined;
+};
+
+// when the step's subtype is already decided by a parent value
+// (creatableTypeFromParentKey, e.g. the boekenbank's "expression_type"), read
+// it from the parent entity and match it to one of the creatable types
+const parentDerivedType = (): RepetitiveCreatableType | null => {
+  const key = props.step.creatableTypeFromParentKey;
+  if (!key) return null;
+  const value = normalizeTypeValue(
+    getForm(parentEntityId)?.values?.intialValues?.[key],
+  );
+  if (!value) return null;
+  return (
+    allCreatableOptions.value.find((type) => type.entityType === value) ?? null
+  );
+};
+
+// a parent-decided subtype collapses the options to that one type, so no
+// chooser is shown; otherwise the full configured list is offered
+const creatableOptions = computed<RepetitiveCreatableType[]>(() => {
+  const derived = parentDerivedType();
+  return derived ? [derived] : allCreatableOptions.value;
+});
 
 // a single option needs no chooser; multiple options stay unselected until
 // the user picks one from the dropdown
