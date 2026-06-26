@@ -42,6 +42,7 @@ const mockModalActions = {
   initializePropertiesForBulkDeleteRelations: vi.fn(),
   initializePropertiesForBulkDeleteEntities: vi.fn(),
   setCallbackFunctions: vi.fn(),
+  setLibraryEntities: vi.fn(),
   resetAllProperties: vi.fn(),
 };
 
