@@ -261,7 +261,7 @@
           <ViewModesTable
             v-show="displayTable && (!entitiesLoading || !!entities?.length)"
             :entities="entities as Entity[]"
-            :entities-loading="entitiesLoadingWithoutData"
+            :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
             :enable-navigation="enableNavigation"

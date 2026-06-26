@@ -14,6 +14,7 @@
         v-if="showCurrentEntityFlow"
         data-cy="view-modes-table"
         class="h-full overflow-y-auto"
+        :class="{ 'animate-pulse pointer-events-none': isRefetching }"
       >
         <div
           v-if="headerColumns.length > 0"
@@ -194,6 +195,10 @@ const {
 
 const { trackSeen } = useEntityPageConfig();
 const { isItemSeen } = useSeenItems();
+
+const isRefetching = computed(
+  () => props.entitiesLoading && refEntities.value.length > 0,
+);
 
 // Whether any entity has a thumbnail — drives both header spacer and TableRow thumbnail cell
 const anyEntityHasThumbnail = computed(() =>
