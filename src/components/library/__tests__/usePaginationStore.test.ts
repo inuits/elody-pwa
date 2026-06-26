@@ -135,4 +135,28 @@ describe("createPaginationStore", () => {
       expect(() => store.canUpdateSkipAgain()).not.toThrow();
     });
   });
+
+  describe("Capped count (LISTING_COUNT_CAP)", () => {
+    // collection-api caps the count at 1000 and returns 1001 as a sentinel.
+    it("flags the count as capped only past the cap", () => {
+      store.updateTotalAmount(1000);
+      expect(store.countIsCapped.value).toBe(false);
+
+      store.updateTotalAmount(1001);
+      expect(store.countIsCapped.value).toBe(true);
+    });
+
+    it("bounds navigation to the cap instead of the raw sentinel (no empty 51st page)", () => {
+      store.updateTotalAmount(1001);
+      // ceil(1000 / 20) = 50, NOT ceil(1001 / 20) = 51
+      expect(store.getLastPage()).toBe(50);
+      expect(store.totalPages.value).toBe(50);
+    });
+
+    it("does not affect uncapped totals", () => {
+      store.updateTotalAmount(640);
+      expect(store.countIsCapped.value).toBe(false);
+      expect(store.getLastPage()).toBe(32);
+    });
+  });
 });

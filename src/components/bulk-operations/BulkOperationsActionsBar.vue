@@ -15,11 +15,25 @@
         <span>
           <span v-if="itemsSelected" class="font-bold"
             >{{ getEnqueuedItemCount(context) }}/</span
-          >{{ totalItemsCount }}
+          ><span>{{ formatResultCount(totalItemsCount, locale) }} </span>
           {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
       </div>
+      <BaseTooltip
+        v-if="isCountCapped(totalItemsCount)"
+        position="top-end"
+        :tooltip-offset="8"
+      >
+        <template #activator="{ on }">
+          <div v-on="on" class="flex items-center ml-1">
+            <Unicon :name="Unicons.QuestionCircle.name" height="20" />
+          </div>
+        </template>
+        <span class="text-sm text-text-placeholder">
+          {{ $t("bulk-operations.capped-items-tooltip") }}
+        </span>
+      </BaseTooltip>
       <div v-if="itemsSelected">
         <span
           class="select-actions"
@@ -88,6 +102,8 @@
 
 <script lang="ts" setup>
 import { inject } from "vue";
+import { useI18n } from "vue-i18n";
+import { formatResultCount, isCountCapped } from "@/composables/useResultCount";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
@@ -103,6 +119,8 @@ import {
 } from "@/composables/useBulkOperationsActionsBar";
 import { DamsIcons, type Entitytyping } from "@/generated-types/queries";
 import { auth } from "@/main";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -137,6 +155,8 @@ const props = withDefaults(
     relationType: "",
   },
 );
+
+const { locale } = useI18n();
 
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 

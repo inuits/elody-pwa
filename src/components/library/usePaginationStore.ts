@@ -1,11 +1,24 @@
 import { computed, readonly, ref, watch } from "vue";
+import { isCountCapped, getListingCountCap } from "@/composables/useResultCount";
 
 export const createPaginationStore = () => {
   const skip = ref(1);
   const currentPage = ref(1);
   const limit = ref(20);
   const totalAmount = ref(0);
-  const totalPages = computed(() => Math.ceil(totalAmount.value / limit.value));
+
+  // When collection-api caps the count it returns `cap + 1` as a sentinel. The
+  // exact total is unknown, so we bound navigation to the cap and flag the last
+  // page as an estimate ("50+") instead of letting `ceil((cap + 1) / limit)`
+  // produce a misleading extra, empty page.
+  const countIsCapped = computed(() => isCountCapped(totalAmount.value));
+  const navigableAmount = computed(() =>
+    countIsCapped.value ? getListingCountCap() : totalAmount.value,
+  );
+
+  const totalPages = computed(() =>
+    Math.ceil(navigableAmount.value / limit.value),
+  );
   const hasNextPage = computed(() => currentPage.value < totalPages.value);
   const canUpdateSkip = ref<boolean>(true);
 
@@ -47,8 +60,8 @@ export const createPaginationStore = () => {
   };
 
   const getLastPage = () => {
-    if (totalAmount.value > 0)
-      return Math.ceil(totalAmount.value / limit.value) || 1;
+    if (navigableAmount.value > 0)
+      return Math.ceil(navigableAmount.value / limit.value) || 1;
     else return 1;
   };
 
@@ -75,6 +88,7 @@ export const createPaginationStore = () => {
     limit,
     hasNextPage,
     totalPages,
+    countIsCapped,
   };
 };
 

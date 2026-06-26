@@ -26,6 +26,7 @@ import {
 } from "@/helpers";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { setIgnorePermissions } from "./composables/usePermissions";
+import { setListingCountCap } from "@/composables/useResultCount";
 import { Unicons } from "./types";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
 import Notifications from "@kyvg/vue3-notification";
@@ -94,6 +95,10 @@ const start = async (): Promise<void> => {
   }
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
+
+  // Keep the frontend cap in sync with collection-api's LISTING_COUNT_CAP so
+  // capped totals render as "<cap>+" instead of the raw `cap + 1` sentinel.
+  setListingCountCap(config.listingCountCap);
 
   const apqLink = createPersistedQueryLink({
     sha256,
