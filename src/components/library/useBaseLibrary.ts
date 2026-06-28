@@ -180,12 +180,10 @@ export const useBaseLibrary = (
   const enqueuePromise = (
     promise: (entityType: Entitytyping) => Promise<void>,
   ) => {
-    if (
-      promise &&
-      !promiseQueue.value.find(
-        (queuedPromise) => queuedPromise.name === promise.name,
-      )
-    )
+    // Dedupe by reference identity, not by `promise.name`: minification mangles
+    // function names and can collapse distinct promises (e.g. advancedFilters)
+    // onto the same short name, which made them get wrongly skipped here.
+    if (promise && !promiseQueue.value.includes(promise))
       promiseQueue.value.push(promise);
   };
 
@@ -214,7 +212,7 @@ export const useBaseLibrary = (
     try {
       const query = route!.meta!.queries!.getEntities;
       return await loadDocument(query);
-    } catch (error) {
+    } catch {
       return await loadDocument("GetEntities");
     }
   };
