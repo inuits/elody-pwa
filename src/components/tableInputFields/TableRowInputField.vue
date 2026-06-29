@@ -1,10 +1,11 @@
 <template>
   <div
-    v-for="(subField, colIndex) in subFields"
+    v-for="(subField, colIndex) in visibleSubFields"
     :key="subField.key"
     class="flex items-center px-2 py-1 border-b border-[rgba(0,58,82,0.08)]"
     :class="{
-      'border-r border-r-[rgba(0,58,82,0.15)]': colIndex < subFields.length - 1,
+      'border-r border-r-[rgba(0,58,82,0.15)]':
+        colIndex < visibleSubFields.length - 1,
     }"
   >
     <TableCellInputField
@@ -48,6 +49,13 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "remove-row", index: number): void;
 }>();
+
+// Hidden sub-fields are kept in metadataSubFields (so the metadata index used to
+// build the field key stays aligned with the serialized metadata array) but are
+// never rendered as a cell.
+const visibleSubFields = computed(() =>
+  props.subFields.filter((sf) => !sf.hidden),
+);
 
 const metadataSubFields = computed(() =>
   props.subFields.filter((sf) => sf.inputField?.isMetadataField === true),

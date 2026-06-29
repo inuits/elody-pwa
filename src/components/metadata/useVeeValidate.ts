@@ -114,6 +114,15 @@ export const useVeeValidate = (): {
         metadata.inputField?.relationType
       )
         return `${ValidationFields.RelationValues}.${baseFieldKey}`;
+      // A plain relation dropdown (no subFields, not a metadata field) must save to
+      // relationValues as well — otherwise its value is submitted as an (invalid)
+      // metadata property. Tables hit the branch above; required relations were
+      // already handled earlier.
+      if (
+        metadata.inputField?.relationType &&
+        !metadata.inputField?.isMetadataField
+      )
+        return `${ValidationFields.RelationValues}.${metadata.inputField.relationType}`;
       if (linkedEntityId)
         return `${ValidationFields.RelatedEntityData}.relations.${baseFieldKey}`;
       if (metadata.value?.formatter)

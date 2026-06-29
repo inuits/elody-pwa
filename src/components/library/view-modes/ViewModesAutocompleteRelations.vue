@@ -255,7 +255,15 @@ const initAutocompleteOption = async () => {
   ) {
     populateSelectedOptions(allEntitiesHelper.value.entityDropdownOptions);
     handleSelect(allEntitiesHelper.value.entityDropdownOptions);
-  } else if (props.autoSelectable && props.modelValue) {
+  } else if (
+    !props.isReadOnly &&
+    props.modelValue &&
+    !relatedEntitiesHelper.value.entityDropdownOptions.value?.length
+  ) {
+    // Pre-fill from the incoming modelValue (e.g. copyValueFromParent in a guided
+    // flow) whenever there are no existing related entities — i.e. a create
+    // context. Scoped to !isReadOnly so read-mode displays (detail pages) keep
+    // using their resolved relations and never trigger an extra entity fetch.
     await preSelectRelations();
   } else {
     populateSelectedOptions(relatedEntitiesHelper.value.entityDropdownOptions);

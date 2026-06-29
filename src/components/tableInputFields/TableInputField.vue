@@ -19,11 +19,12 @@
       <div class="grid w-max min-w-full" :style="gridStyle">
         <!-- Header row -->
         <div
-          v-for="(subField, index) in subFields"
+          v-for="(subField, index) in visibleSubFields"
           :key="`header-${subField.key}`"
           class="flex items-center bg-background-normal px-2 py-1.5 text-xs font-medium text-text-body border-b border-[rgba(0,58,82,0.2)]"
           :class="{
-            'border-r border-r-[rgba(0,58,82,0.2)]': index < subFields.length - 1,
+            'border-r border-r-[rgba(0,58,82,0.2)]':
+              index < visibleSubFields.length - 1,
           }"
         >
           {{ t(subField.label) }}
@@ -77,8 +78,14 @@ const props = defineProps<{
 
 const { fields, push, remove, replace } = useFieldArray<Record<string, any>>(`${props.parentFieldKey}`);
 
+// Hidden sub-fields (e.g. a creation hint like entity_type) still travel as
+// relation metadata on submit, but are never rendered as a column.
+const visibleSubFields = computed(() =>
+  props.subFields.filter((sf) => !sf.hidden),
+);
+
 const gridStyle = computed(() => {
-  const cols = props.subFields.map((sf) =>
+  const cols = visibleSubFields.value.map((sf) =>
     sf.inputField?.type === InputFieldTypes.Checkbox
       ? "max-content"
       : "minmax(max-content, 1fr)",

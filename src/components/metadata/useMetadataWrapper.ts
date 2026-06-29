@@ -250,7 +250,13 @@ export const useMetadataWrapper = (
         ? relations[0]?.key
         : undefined;
       const relatedForm = relatedId ? getForm(relatedId) : undefined;
-      return relatedForm?.values.intialValues?.[key];
+      const relatedValue = relatedForm?.values.intialValues?.[key];
+      if (relatedValue !== undefined && relatedValue !== "") return relatedValue;
+      // Fall back to the host parent (e.g. the muziekweb entity hosting a guided
+      // flow) when the related entity isn't staged or has no value for this key —
+      // otherwise fromRelationType fields (like the manifestation title copied
+      // from the work) never pre-fill in the flow.
+      return parentForm.value.values.intialValues?.[key];
     }
     return parentForm?.value.values.intialValues[key];
   };

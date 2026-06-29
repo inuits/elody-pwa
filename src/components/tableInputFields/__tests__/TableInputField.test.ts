@@ -111,10 +111,12 @@ function makeSubField(
   type: InputFieldTypes,
   isMetadataField = true,
   options: any[] = [],
+  hidden = false,
 ): SubField {
   return {
     key,
     label,
+    hidden,
     inputField: {
       type,
       isMetadataField,
@@ -149,6 +151,24 @@ const mainAuthorSubField = makeSubField(
 );
 
 const relationSubFields = [relationKeySubField, functionSubField, mainAuthorSubField];
+
+// Hidden creation-hint metadata sub-field (e.g. entity_type for person/corporation).
+// It must never render as a column but must still travel as relation metadata.
+const hiddenEntityTypeSubField = makeSubField(
+  "entity_type",
+  "metadata.labels.entity-type",
+  InputFieldTypes.Text,
+  true,
+  [],
+  true, // hidden
+);
+
+const relationSubFieldsWithHidden = [
+  relationKeySubField,
+  functionSubField,
+  mainAuthorSubField,
+  hiddenEntityTypeSubField,
+];
 
 // Flat item as it arrives from copyValueFromParent / vee-validate initFields pre-seeding
 const flatAuthor = {
@@ -194,6 +214,99 @@ describe("TableInputField", () => {
         props: { subFields: [textSubField], formId: "form-1", parentFieldKey: "authors" },
       });
       expect(wrapper.find(".relation-metadata-list-field").exists()).toBe(true);
+    });
+  });
+
+  // ── hidden sub-fields ─────────────────────────────────────────────────────────
+  //
+  // A hidden sub-field (e.g. the entity_type person/corporation creation hint
+  // pre-filled from an external source) must never render as a column, but must
+  // still be carried as relation metadata so the backend can act on it.
+
+  describe("hidden sub-fields", () => {
+    it("does not render a column header for a hidden sub-field", () => {
+      const wrapper = shallowMount(TableInputField, {
+        props: {
+          subFields: relationSubFieldsWithHidden,
+          formId: "form-1",
+          parentFieldKey: "relationValues.refAuthors",
+          relationType: "refAuthors",
+          disabled: true,
+        },
+      });
+      const headers = wrapper.findAll(".font-medium").map((h) => h.text());
+      expect(headers).not.toContain("metadata.labels.entity-type");
+      // the three visible sub-fields still render
+      expect(headers).toHaveLength(3);
+    });
+
+    it("excludes the hidden sub-field from the grid columns", () => {
+      const visible = shallowMount(TableInputField, {
+        props: {
+          subFields: relationSubFields,
+          formId: "f",
+          parentFieldKey: "k",
+          relationType: "refAuthors",
+          disabled: true,
+        },
+      });
+      const withHidden = shallowMount(TableInputField, {
+        props: {
+          subFields: relationSubFieldsWithHidden,
+          formId: "f",
+          parentFieldKey: "k",
+          relationType: "refAuthors",
+          disabled: true,
+        },
+      });
+      const cols = (w: any) =>
+        ((w.find(".grid").attributes("style") ?? "") as string)
+          .split(" ")
+          .filter((s: string) => s.includes("content") || s.includes("minmax"))
+          .length;
+      // adding a hidden sub-field must not add a grid column
+      expect(cols(withHidden)).toBe(cols(visible));
+    });
+
+    it("still includes the hidden sub-field as relation metadata on addRow", async () => {
+      const wrapper = shallowMount(TableInputField, {
+        props: {
+          subFields: relationSubFieldsWithHidden,
+          formId: "form-1",
+          parentFieldKey: "relationValues.refAuthors",
+          relationType: "refAuthors",
+        },
+      });
+      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      const pushed = mockPush.mock.calls[0][0];
+      expect(pushed.metadata).toContainEqual({ key: "entity_type", value: "" });
+    });
+
+    it("carries a pre-filled hidden entity_type through serialization", () => {
+      mockFields.value = [];
+      const corporationAuthor = {
+        name: "The Beatles",
+        function_indication: "prf",
+        main_author: true,
+        entity_type: "corporation",
+      };
+
+      shallowMount(TableInputField, {
+        props: {
+          modelValue: [corporationAuthor],
+          subFields: relationSubFieldsWithHidden,
+          formId: "form-1",
+          parentFieldKey: "relationValues.refAuthors",
+          relationType: "refAuthors",
+        },
+      });
+
+      const pushed = mockPush.mock.calls[0][0];
+      expect(pushed.key).toBe("The Beatles");
+      expect(pushed.metadata).toContainEqual({
+        key: "entity_type",
+        value: "corporation",
+      });
     });
   });
 
