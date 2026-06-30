@@ -186,10 +186,6 @@ export const useViewModes = (options: UseViewModesOptions) => {
     }
   };
 
-  /**
-   * Reset all view modes to the default list view.
-   * Call this on route change or pagination reset.
-   */
   const resetToListView = (): void => {
     displayMap.value = false;
     displayGrid.value = false;

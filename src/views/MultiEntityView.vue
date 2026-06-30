@@ -18,7 +18,7 @@
     >
       <multi-entity-column
         v-for="entity in entities"
-        :key="entity.id"
+        :key="`${entity.id}:${renderVersions[entity.id] ?? 0}`"
         :entity="entity"
         :refetch="loadEntities"
         class="flex-1 min-w-0"
@@ -54,6 +54,7 @@ const {
 
 const entities = ref<BaseEntity[]>([]);
 const loading = ref<boolean>(true);
+const renderVersions = ref<Record<string, number>>({});
 
 const id = computed(() => asString(route.params["id"]));
 const queryName = computed<string | undefined>(
@@ -150,7 +151,11 @@ const onMutatedEntityUpdated = async (mutatedEntity: Entity) => {
     const refreshed = await fetchEntities();
     const updated = refreshed.find((e) => e.id === mutatedEntity.id);
     const index = entities.value.findIndex((e) => e.id === mutatedEntity.id);
-    if (updated && index !== -1) entities.value[index] = updated;
+    if (updated && index !== -1) {
+      entities.value[index] = updated;
+      renderVersions.value[mutatedEntity.id] =
+        (renderVersions.value[mutatedEntity.id] ?? 0) + 1;
+    }
   } catch (error) {
     console.error("Failed to refresh entity after save:", error);
   }

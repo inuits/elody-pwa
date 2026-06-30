@@ -144,6 +144,49 @@ describe("MultiEntityView", () => {
     wrapper.unmount();
   });
 
+  it("remounts only the edited column after a save so the refreshed entity is shown", async () => {
+    mocks.queryResult.data.WemOverview = [
+      { id: "W-1", type: "work_word" },
+      { id: "E-1", type: "reading" },
+    ];
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    const editedColumnBefore = wrapper.findAllComponents({
+      name: "MultiEntityColumn",
+    })[0];
+    const otherColumnBefore = wrapper.findAllComponents({
+      name: "MultiEntityColumn",
+    })[1];
+    const editedKeyBefore = editedColumnBefore.vm.$.vnode.key;
+    const otherKeyBefore = otherColumnBefore.vm.$.vnode.key;
+
+    // The refetch triggered by the save returns updated data for W-1.
+    mocks.query.mockClear();
+    mocks.queryResult.data.WemOverview = [
+      { id: "W-1", type: "work_word", intialValues: { title: "updated" } },
+      { id: "E-1", type: "reading" },
+    ];
+
+    editedColumnBefore.vm.$emit("mutatedEntityUpdated", { id: "W-1" });
+    await flushPromises();
+
+    // The view refetched the WEM overview.
+    expect(mocks.query).toHaveBeenCalledTimes(1);
+
+    const editedKeyAfter = wrapper.findAllComponents({
+      name: "MultiEntityColumn",
+    })[0].vm.$.vnode.key;
+    const otherKeyAfter = wrapper.findAllComponents({
+      name: "MultiEntityColumn",
+    })[1].vm.$.vnode.key;
+
+    // Only the edited column remounts; the untouched column keeps its key.
+    expect(editedKeyAfter).not.toBe(editedKeyBefore);
+    expect(otherKeyAfter).toBe(otherKeyBefore);
+    wrapper.unmount();
+  });
+
   it("renders nothing and does not query when no query name is configured", async () => {
     mocks.route.meta = { queries: {} };
     const wrapper = getWrapper();
