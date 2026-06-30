@@ -14,6 +14,10 @@ const mocks = vi.hoisted(() => ({
 // vi.hoisted() because ref() is not available before imports are resolved.
 const libEntities = ref<any[]>([]);
 const libTotalEntityCount = ref(0);
+const libGetEntities = vi.fn().mockResolvedValue([]);
+const libEntitiesLoading = ref(false);
+const libDetermineViewModes = vi.fn();
+const libGetUserPreferredViewModeConfiguration = vi.fn();
 
 // Reactive route object — allows triggering the route watcher in BaseLibrary
 const mockRoute = reactive({
@@ -51,10 +55,10 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     entities: libEntities,
     placeholderEntities: ref([]),
     placeholderEntitiesAmount: ref(0),
-    entitiesLoading: ref(false),
+    entitiesLoading: libEntitiesLoading,
     getCustomBulkOperations: vi.fn(),
     fetchAllPromises: vi.fn().mockResolvedValue(undefined),
-    getEntities: vi.fn().mockResolvedValue([]),
+    getEntities: libGetEntities,
     getEntityById: vi.fn().mockResolvedValue(undefined),
     manipulationQuery: ref(undefined),
     setAdvancedFilters: vi.fn(),
@@ -163,8 +167,8 @@ vi.mock("@/composables/useViewModes", () => ({
     configPerViewMode: ref({}),
     viewModesIncludeViewModesMedia: ref(false),
     showViewModesList: ref(false),
-    determineViewModes: vi.fn(),
-    getUserPreferredViewModeConfiguration: vi.fn(),
+    determineViewModes: libDetermineViewModes,
+    getUserPreferredViewModeConfiguration: libGetUserPreferredViewModeConfiguration,
     resetToListView: vi.fn(),
   }),
 }));
@@ -237,6 +241,8 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
   });
 
 describe("BaseLibrary.vue syncEditStateCallbacks", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockRoute.path = "/test";
@@ -245,8 +251,13 @@ describe("BaseLibrary.vue syncEditStateCallbacks", () => {
     mocks.addMutationCallback = vi.fn();
   });
 
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
   it("does not register edit-state callbacks when predefinedEntities is provided", async () => {
-    getWrapper({ predefinedEntities: [predefinedEntityFixture()] });
+    wrapper = getWrapper({ predefinedEntities: [predefinedEntityFixture()] });
     await flushPromises();
 
     expect(mocks.addRefetchFunction).not.toHaveBeenCalled();
@@ -254,7 +265,7 @@ describe("BaseLibrary.vue syncEditStateCallbacks", () => {
   });
 
   it("registers the refetch callback when predefinedEntities is not provided", async () => {
-    getWrapper();
+    wrapper = getWrapper();
     await flushPromises();
 
     expect(mocks.addRefetchFunction).toHaveBeenCalled();
@@ -262,7 +273,7 @@ describe("BaseLibrary.vue syncEditStateCallbacks", () => {
 
   it("registers the mutation callback when an entity id is present and predefinedEntities is not provided", async () => {
     mocks.entityUuid = "entity-123";
-    getWrapper();
+    wrapper = getWrapper();
     await flushPromises();
 
     expect(mocks.addMutationCallback).toHaveBeenCalled();
@@ -270,7 +281,7 @@ describe("BaseLibrary.vue syncEditStateCallbacks", () => {
 
   it("does not register the mutation callback when there is no entity id", async () => {
     mocks.entityUuid = undefined;
-    getWrapper();
+    wrapper = getWrapper();
     await flushPromises();
 
     expect(mocks.addRefetchFunction).toHaveBeenCalled();
@@ -279,69 +290,6 @@ describe("BaseLibrary.vue syncEditStateCallbacks", () => {
 });
 
 describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
-  const makeEntity = (id: string) => ({ id, uuid: id, allowedViewModes: { viewModes: [] } });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockRoute.path = "/test";
-    mocks.entityUuid = "entity-123";
-    mocks.addRefetchFunction = vi.fn();
-    mocks.addMutationCallback = vi.fn();
-    libEntities.value = [];
-    libTotalEntityCount.value = 0;
-  });
-
-  it("adjusts totalEntityCount when entities are removed optimistically", async () => {
-    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
-    libTotalEntityCount.value = 10;
-    getWrapper();
-    await flushPromises();
-
-    libEntities.value = [makeEntity("a"), makeEntity("b")];
-    await flushPromises();
-
-    expect(libTotalEntityCount.value).toBe(9);
-  });
-
-  it("adjusts totalEntityCount when entities are added optimistically", async () => {
-    libEntities.value = [makeEntity("a")];
-    libTotalEntityCount.value = 5;
-    getWrapper();
-    await flushPromises();
-
-    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
-    await flushPromises();
-
-    expect(libTotalEntityCount.value).toBe(7);
-  });
-
-  it("does not double-adjust when server updates both entities and totalEntityCount", async () => {
-    libEntities.value = [makeEntity("a"), makeEntity("b")];
-    libTotalEntityCount.value = 20;
-    getWrapper();
-    await flushPromises();
-
-    libEntities.value = [makeEntity("c"), makeEntity("d"), makeEntity("e")];
-    libTotalEntityCount.value = 30;
-    await flushPromises();
-
-    expect(libTotalEntityCount.value).toBe(30);
-  });
-
-  it("never sets totalEntityCount below zero", async () => {
-    libEntities.value = [makeEntity("a"), makeEntity("b")];
-    libTotalEntityCount.value = 1;
-    getWrapper();
-    await flushPromises();
-
-    libEntities.value = [];
-    await flushPromises();
-
-    expect(libTotalEntityCount.value).toBe(0);
-  });
-});
-
-describe("BaseLibrary.vue route navigation clears entities for skeleton", () => {
   const makeEntity = (id: string) => ({ id, uuid: id, allowedViewModes: { viewModes: [] } });
   let wrapper: ReturnType<typeof getWrapper> | null = null;
 
@@ -360,17 +308,151 @@ describe("BaseLibrary.vue route navigation clears entities for skeleton", () => 
     wrapper = null;
   });
 
-  it("clears entities when navigating to a new route so the skeleton can show", async () => {
+  it("adjusts totalEntityCount when entities are removed optimistically", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    libTotalEntityCount.value = 10;
+    wrapper = getWrapper();
+    await flushPromises();
+
     libEntities.value = [makeEntity("a"), makeEntity("b")];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(9);
+  });
+
+  it("adjusts totalEntityCount when entities are added optimistically", async () => {
+    libEntities.value = [makeEntity("a")];
     libTotalEntityCount.value = 5;
     wrapper = getWrapper();
     await flushPromises();
 
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(7);
+  });
+
+  it("does not double-adjust when server updates both entities and totalEntityCount", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    libTotalEntityCount.value = 20;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    libEntities.value = [makeEntity("c"), makeEntity("d"), makeEntity("e")];
+    libTotalEntityCount.value = 30;
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(30);
+  });
+
+  it("never sets totalEntityCount below zero", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    libTotalEntityCount.value = 1;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    libEntities.value = [];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(0);
+  });
+});
+
+describe("BaseLibrary.vue route navigation triggers refetch", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    libGetEntities.mockResolvedValue([]);
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("calls getEntities again when the route path changes", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    const callsAfterMount = libGetEntities.mock.calls.length;
+
     mockRoute.path = "/other";
     await flushPromises();
 
-    expect(libEntities.value).toHaveLength(0);
-    expect(libTotalEntityCount.value).toBe(0);
+    expect(libGetEntities.mock.calls.length).toBeGreaterThan(callsAfterMount);
   });
 
+  it("does not re-fetch when predefinedEntities is provided", async () => {
+    const predefined = [{ id: "e1", uuid: "e1", allowedViewModes: { viewModes: [] } }];
+    wrapper = getWrapper({ predefinedEntities: predefined });
+    await flushPromises();
+    const callsAfterMount = libGetEntities.mock.calls.length;
+
+    mockRoute.path = "/other";
+    await flushPromises();
+
+    expect(libGetEntities.mock.calls.length).toBe(callsAfterMount);
+  });
+});
+
+describe("BaseLibrary.vue optimistic entity add does not re-initialize view modes", () => {
+  const makePickerEntity = (id: string) => ({
+    id,
+    uuid: id,
+    allowedViewModes: {
+      viewModes: [{ viewMode: "ViewModesList" }, { viewMode: "ViewModesTable" }],
+    },
+  });
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("does not re-initialize view modes when an optimistic entity is added to an empty library", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    libDetermineViewModes.mockClear();
+    libGetUserPreferredViewModeConfiguration.mockClear();
+
+    libEntities.value = [makePickerEntity("e1")];
+    await flushPromises();
+
+    expect(libDetermineViewModes).not.toHaveBeenCalled();
+    expect(libGetUserPreferredViewModeConfiguration).not.toHaveBeenCalled();
+  });
+
+  it("initializes view modes from server data when entitiesLoading transitions to false", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    libDetermineViewModes.mockClear();
+    libGetUserPreferredViewModeConfiguration.mockClear();
+
+    libEntitiesLoading.value = true;
+    await flushPromises();
+    libEntities.value = [makePickerEntity("e1")];
+    libEntitiesLoading.value = false;
+    await flushPromises();
+
+    expect(libDetermineViewModes).toHaveBeenCalled();
+    expect(libGetUserPreferredViewModeConfiguration).toHaveBeenCalled();
+  });
 });

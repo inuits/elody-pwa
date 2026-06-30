@@ -226,7 +226,7 @@
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
-            v-show="showViewModesList && (!entitiesLoading || !!entities?.length)"
+            v-show="showViewModesList && !isInitialLoading && (!entitiesLoading || !!entities?.length)"
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
             :entities-loading="entitiesLoadingWithoutData"
@@ -259,7 +259,7 @@
             :primaryMediafileId="primaryMediafileId"
           />
           <ViewModesTable
-            v-show="displayTable && (!entitiesLoading || !!entities?.length)"
+            v-show="displayTable && !isInitialLoading && (!entitiesLoading || !!entities?.length)"
             :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
@@ -532,7 +532,7 @@ const additionalDefaultFiltersEnabled = computed(() => {
   );
 });
 
-const entitiesLoadingWithoutData = computed(() => entitiesLoading.value && !entities.value?.length);
+const entitiesLoadingWithoutData = computed(() => entitiesLoading.value && (isInitialLoading.value || !entities.value?.length));
 
 const syncTotalCountWithOptimisticChange = (
   newEntities: Entity[],
@@ -901,6 +901,7 @@ const syncEditStateCallbacks = (): void => {
 };
 
 onMounted(async () => {
+  lastProcessedEntityType.value = entityType.value;
   if (props.fetchDeepRelations) await initializeDeepRelations();
   else await initializeBaseLibrary();
   getUserPreferredViewModeConfiguration();
@@ -938,8 +939,6 @@ watch(
         const newAbortController = new AbortController();
         abortController.value = newAbortController;
         isInitialLoading.value = true;
-        entities.value = [];
-        totalEntityCount.value = 0;
         resetQueryVariablesForNewPath();
         setsearchInputType(SearchInputType.AdvancedInputType);
         setEntityType(entityType.value);
@@ -1017,6 +1016,7 @@ watch(
 
     if (typeChanged && !hasValidData) {
       determineViewModes([]);
+      lastProcessedEntityType.value = entityType.value;
     }
     if (props.addEntitiesToForms) {
       for (const entity of newEntities) {
@@ -1032,6 +1032,18 @@ watch(
     }
   },
 );
+
+watch(entitiesLoading, (loading, wasLoading) => {
+  if (loading || !wasLoading) return;
+  const firstEntity = (entities.value as Entity[])?.[0];
+  const viewModes: string[] =
+    firstEntity?.allowedViewModes?.viewModes?.map(
+      (vm: ViewModesWithConfig) => vm.viewMode,
+    ) ?? [];
+  determineViewModes(viewModes);
+  getUserPreferredViewModeConfiguration(viewModes);
+  lastProcessedEntityType.value = entityType.value;
+});
 
 watch(
   () => uploadStatus.value,
