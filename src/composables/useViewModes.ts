@@ -22,6 +22,7 @@ export type UseViewModesOptions = {
   entitiesLoading?: Ref<boolean>;
   route?: RouteLocationNormalizedLoaded;
   baseLibraryMode?: BaseLibraryModes;
+  persistPreferences?: boolean;
 };
 
 export const useViewModes = (options: UseViewModesOptions) => {
@@ -204,11 +205,13 @@ export const useViewModes = (options: UseViewModesOptions) => {
     displayList.value =
       !displayGrid.value && !displayMap.value && !displayTable.value;
 
-    updateGlobalState("_displayPreferences", {
-      grid: displayPreview.value ? false : displayGrid.value,
-      table: displayTable.value,
-      expandFilters: _expandFilters,
-    });
+    if (options.persistPreferences !== false) {
+      updateGlobalState("_displayPreferences", {
+        grid: displayPreview.value ? false : displayGrid.value,
+        table: displayTable.value,
+        expandFilters: _expandFilters,
+      });
+    }
   });
 
   // ── Public API ────────────────────────────────────────────────────────────

@@ -429,6 +429,7 @@ export type BaseLibraryProps = {
   cropMediafileCoordinatesKey?: string;
   actionsOnResult?: ActionsOnResult;
   addEntitiesToForms?: boolean;
+  saveViewPreferences?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -659,6 +660,7 @@ const {
   entitiesLoading,
   route,
   baseLibraryMode: props.baseLibraryMode,
+  persistPreferences: props.saveViewPreferences !== false,
 });
 
 const noResultTranslations = computed(() => ({
@@ -936,6 +938,8 @@ watch(
         const newAbortController = new AbortController();
         abortController.value = newAbortController;
         isInitialLoading.value = true;
+        entities.value = [];
+        totalEntityCount.value = 0;
         resetQueryVariablesForNewPath();
         setsearchInputType(SearchInputType.AdvancedInputType);
         setEntityType(entityType.value);

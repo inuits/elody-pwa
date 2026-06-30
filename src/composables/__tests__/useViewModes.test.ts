@@ -718,5 +718,38 @@ describe("useViewModes", () => {
         expect.objectContaining({ expandFilters: true }),
       );
     });
+
+    it("does not call updateGlobalState when persistPreferences is false and displayTable changes", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayTable } = useViewModes({ entities, persistPreferences: false });
+
+      displayTable.value = true;
+      await nextTick();
+
+      expect(mockUpdateGlobalState).not.toHaveBeenCalled();
+    });
+
+    it("does not call updateGlobalState when persistPreferences is false and displayGrid changes", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayGrid } = useViewModes({ entities, persistPreferences: false });
+
+      displayGrid.value = true;
+      await nextTick();
+
+      expect(mockUpdateGlobalState).not.toHaveBeenCalled();
+    });
+
+    it("still calls updateGlobalState when persistPreferences is true", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayTable } = useViewModes({ entities, persistPreferences: true });
+
+      displayTable.value = true;
+      await nextTick();
+
+      expect(mockUpdateGlobalState).toHaveBeenCalledWith(
+        "_displayPreferences",
+        expect.objectContaining({ table: true }),
+      );
+    });
   });
 });

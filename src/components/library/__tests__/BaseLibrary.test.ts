@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 
 // --- Hoisted mutable state (changes between tests) ---------------------------
@@ -14,6 +14,14 @@ const mocks = vi.hoisted(() => ({
 // vi.hoisted() because ref() is not available before imports are resolved.
 const libEntities = ref<any[]>([]);
 const libTotalEntityCount = ref(0);
+
+// Reactive route object — allows triggering the route watcher in BaseLibrary
+const mockRoute = reactive({
+  name: "TestRoute",
+  path: "/test",
+  fullPath: "/test",
+  meta: { entityType: "BaseEntity" },
+});
 
 // --- Edit composable (the behavioral seam under test) ------------------------
 vi.mock("@/composables/useEdit", () => ({
@@ -182,12 +190,7 @@ vi.mock("vue-i18n", () => ({
 }));
 
 vi.mock("vue-router", () => ({
-  useRoute: () => ({
-    name: "TestRoute",
-    path: "/test",
-    fullPath: "/test",
-    meta: { entityType: "BaseEntity" },
-  }),
+  useRoute: () => mockRoute,
   useRouter: () => ({
     currentRoute: ref({ name: "TestRoute" }),
   }),
@@ -236,6 +239,7 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
 describe("BaseLibrary.vue syncEditStateCallbacks", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRoute.path = "/test";
     mocks.entityUuid = "entity-123";
     mocks.addRefetchFunction = vi.fn();
     mocks.addMutationCallback = vi.fn();
@@ -279,6 +283,7 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRoute.path = "/test";
     mocks.entityUuid = "entity-123";
     mocks.addRefetchFunction = vi.fn();
     mocks.addMutationCallback = vi.fn();
@@ -334,4 +339,38 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
 
     expect(libTotalEntityCount.value).toBe(0);
   });
+});
+
+describe("BaseLibrary.vue route navigation clears entities for skeleton", () => {
+  const makeEntity = (id: string) => ({ id, uuid: id, allowedViewModes: { viewModes: [] } });
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("clears entities when navigating to a new route so the skeleton can show", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    libTotalEntityCount.value = 5;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    mockRoute.path = "/other";
+    await flushPromises();
+
+    expect(libEntities.value).toHaveLength(0);
+    expect(libTotalEntityCount.value).toBe(0);
+  });
+
 });

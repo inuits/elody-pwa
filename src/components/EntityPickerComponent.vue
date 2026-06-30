@@ -37,6 +37,7 @@
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
       "
       :should-use-state-for-route="shouldUseStateForRoute"
+      :save-view-preferences="false"
       @confirm-selection="saveRelations"
     />
   </div>
