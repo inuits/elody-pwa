@@ -82,6 +82,8 @@ const getQuery = async () => {
 };
 
 const fetchAllHierarchy = async () => {
+  if (!showHierarchyList.value) return;
+
   const hierarchyList = props.element
     .hierarchyRelationList as HierarchyRelationListOutput[];
 
@@ -138,8 +140,8 @@ const fetchEntity = async (id: string, type: Entitytyping) => {
 };
 
 onMounted(async () => {
-  fetchAllHierarchy();
   await checkHierarchyListPermission();
+  fetchAllHierarchy();
 });
 
 const updatePermissionVariables = () => {

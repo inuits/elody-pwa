@@ -32,7 +32,7 @@
         },
       ]"
     >
-      <div
+      <template
         v-for="(metadata, index) in metadatafields"
         v-show="itemMustBeShown(metadata.value)"
         :key="metadata.key"
@@ -94,7 +94,7 @@
             />
           </template>
         </MultilingualWrapper>
-      </div>
+      </template>
     </div>
     <div
       class="pb-2"
