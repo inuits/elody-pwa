@@ -7,6 +7,7 @@ import {
   determineDefaultIntialValues,
   getTranslatedMessage,
   extractValueFromObject,
+  looksLikeEntityId,
 } from "@/helpers";
 import {
   type Entity,
@@ -62,6 +63,29 @@ vi.mock("@/main", () => ({
     },
   },
 }));
+
+describe("looksLikeEntityId", () => {
+  it("recognizes prefixed entity ids", () => {
+    for (const id of ["PERS-AbC12", "CORP-XyZ9", "MW-JK174138", "BB-9789012345678", "W-123", "T-abc_def"]) {
+      expect(looksLikeEntityId(id)).toBe(true);
+    }
+  });
+
+  it("recognizes uuids", () => {
+    expect(looksLikeEntityId("a1b2c3d4-e5f6-7890-abcd-ef1234567890")).toBe(true);
+  });
+
+  it("treats plain names as non-ids", () => {
+    for (const name of ["Wolfgang Amadeus Mozart", "Madonna", "Bach", "Jean-Paul Sartre", ""]) {
+      expect(looksLikeEntityId(name)).toBe(false);
+    }
+  });
+
+  it("handles null/undefined", () => {
+    expect(looksLikeEntityId(undefined)).toBe(false);
+    expect(looksLikeEntityId(null)).toBe(false);
+  });
+});
 
 describe("Entity Mapping Functions", () => {
   describe("getMappedSlug", () => {

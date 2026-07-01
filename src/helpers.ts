@@ -529,6 +529,7 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   else if (entity.intialValues?.computed_title) title = entity.intialValues.computed_title;
   else if (entity.intialValues?.email) title = entity.intialValues.email;
   else if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
+  else if (entity.intialValues?.wording) title = entity.intialValues.wording;
   else if (entity.intialValues?.code) title = entity.intialValues.code;
   else if (entity.intialValues?.originalTitle)
     title = entity.intialValues.originalTitle;
@@ -912,6 +913,14 @@ export const sanitizeHtml = (content: any) => {
 export const toArray = <T>(value: T | T[] | undefined): T[] => {
   if (value == null) return [];
   return Array.isArray(value) ? value : [value];
+};
+
+export const looksLikeEntityId = (value: string | undefined | null): boolean => {
+  if (!value || /\s/.test(value)) return false;
+  const isPrefixedId = /^[A-Z0-9]{1,12}-[A-Za-z0-9_-]+$/.test(value);
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  return isPrefixedId || isUuid;
 };
 
 export const graphqlErrorInterceptor = onError(

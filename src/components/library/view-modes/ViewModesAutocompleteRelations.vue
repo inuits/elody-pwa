@@ -385,7 +385,10 @@ const preSelectRelations = async () => {
     for (const value of props.modelValue) {
       const found = await findAutocompleteOption(value);
       if (found) selection.push(found);
-      else selection.push({ label: props.modelValue, value: props.modelValue });
+      // No existing entity matches this value: keep it as a label-only chip (e.g. a
+      // new genre pre-filled from an external record). It is submitted as a relation
+      // whose key is the label; the backend find-or-creates the entity on save.
+      else selection.push({ label: value, value });
     }
   } else if (props.modelValue) {
     const found = await findAutocompleteOption(props.modelValue);

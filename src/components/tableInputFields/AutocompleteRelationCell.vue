@@ -27,7 +27,7 @@ import {
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { apolloClient } from "@/main";
-import { getEntityTitle } from "@/helpers";
+import { getEntityTitle, looksLikeEntityId } from "@/helpers";
 
 const props = defineProps<{
   modelValue: string | undefined;
@@ -88,6 +88,7 @@ const syncSelectedFromModelValue = async () => {
 const resolveEntityLabel = async (key: string): Promise<string> => {
   const entityType = props.inputField.entityType as Entitytyping | undefined;
   if (!entityType) return key;
+  if (!looksLikeEntityId(key)) return key;
   try {
     const result = await apolloClient.query({
       query: GetEntityByIdDocument,

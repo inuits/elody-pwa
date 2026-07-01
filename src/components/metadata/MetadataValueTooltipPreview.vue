@@ -44,7 +44,7 @@ import {
 import { computed, ref } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
-import { formatTeaserMetadata, stringIsUrl } from "@/helpers";
+import { formatTeaserMetadata, stringIsUrl, looksLikeEntityId } from "@/helpers";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { apolloClient } from "@/main";
 
@@ -77,6 +77,13 @@ const getEntityById = async (
   entityType: Entitytyping,
   id: string,
 ): Promise<void> => {
+  // A relation value that is not an entity id is a plain name (a target the
+  // backend will find-or-create on save); there is no entity to preview, so
+  // skip the lookup rather than 404 (which would trip the global error handler).
+  if (!looksLikeEntityId(id)) {
+    entityData.value = null;
+    return;
+  }
   const variables: GetEntityByIdQueryVariables = {
     id: id,
     type: entityType,
