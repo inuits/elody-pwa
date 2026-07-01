@@ -2,8 +2,22 @@ export const transliterateText = (
   text: string,
   map: Record<string, string>,
 ): string => {
-  return [...text].map((char) => map[char] ?? char).join("");
-}
+  const keys = Object.keys(map).sort((a, b) => b.length - a.length);
+  let result = "";
+  let index = 0;
+  while (index < text.length) {
+    const matchedKey = keys.find((key) => key && text.startsWith(key, index));
+    if (matchedKey) {
+      result += map[matchedKey];
+      index += matchedKey.length;
+    } else {
+      const char = String.fromCodePoint(text.codePointAt(index)!);
+      result += char;
+      index += char.length;
+    }
+  }
+  return result;
+};
 
 // Regex covers TipTap-generated HTML only: attribute values never contain raw > chars.
 export const transliterateHtml = (

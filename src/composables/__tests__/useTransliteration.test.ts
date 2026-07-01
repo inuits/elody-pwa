@@ -13,6 +13,9 @@ const LATIN_TO_ARABIC: Record<string, string> = {
   ḏ: "ذ",
   r: "ر",
   z: "ز",
+  "s¹": "س",
+  "s²": "ش",
+  "s³": "س",
   s: "س",
   š: "ش",
   ṣ: "ص",
@@ -45,8 +48,8 @@ const ARABIC_TO_LATIN: Record<string, string> = {
   ذ: "ḏ",
   ر: "r",
   ز: "z",
-  س: "s",
-  ش: "š",
+  س: "s¹",
+  ش: "s²",
   ص: "ṣ",
   ض: "ḍ",
   ط: "ṭ",
@@ -86,12 +89,54 @@ describe("useTransliteration", () => {
       expect(transliterateText("ب", ARABIC_TO_LATIN)).toBe("b");
     });
 
-    it("transliterates 'ش' to 'š'", () => {
-      expect(transliterateText("ش", ARABIC_TO_LATIN)).toBe("š");
+    it("transliterates 'ش' to the multi-character 's²'", () => {
+      expect(transliterateText("ش", ARABIC_TO_LATIN)).toBe("s²");
+    });
+
+    it("transliterates 'س' to the multi-character 's¹'", () => {
+      expect(transliterateText("س", ARABIC_TO_LATIN)).toBe("s¹");
     });
 
     it("transliterates 'ث' to 'ṯ'", () => {
       expect(transliterateText("ث", ARABIC_TO_LATIN)).toBe("ṯ");
+    });
+
+    it("emits multi-character values for a full word (شمس -> s²s¹s¹... )", () => {
+      // ش -> s², م -> m, س -> s¹
+      expect(transliterateText("شمس", ARABIC_TO_LATIN)).toBe("s²ms¹");
+    });
+  });
+
+  describe("transliterateText with multi-character keys", () => {
+    it("transliterates 's¹' to 'س' (not 'س¹')", () => {
+      expect(transliterateText("s¹", LATIN_TO_ARABIC)).toBe("س");
+    });
+
+    it("transliterates 's²' to 'ش' (not 'س²')", () => {
+      expect(transliterateText("s²", LATIN_TO_ARABIC)).toBe("ش");
+    });
+
+    it("transliterates 's³' to 'س' (not 'س³')", () => {
+      expect(transliterateText("s³", LATIN_TO_ARABIC)).toBe("س");
+    });
+
+    it("still transliterates a bare 's' to 'س'", () => {
+      expect(transliterateText("s", LATIN_TO_ARABIC)).toBe("س");
+    });
+
+    it("prefers the multi-character key over its single-character prefix", () => {
+      // s² m s¹ -> ش م س = شمس
+      expect(transliterateText("s²ms¹", LATIN_TO_ARABIC)).toBe("شمس");
+    });
+
+    it("passes a superscript through unchanged when not preceded by 's'", () => {
+      expect(transliterateText("¹", LATIN_TO_ARABIC)).toBe("¹");
+    });
+
+    it("handles multi-character keys inside HTML", () => {
+      expect(transliterateHtml("<p>s²ms¹</p>", LATIN_TO_ARABIC)).toBe(
+        "<p>شمس</p>",
+      );
     });
   });
 
