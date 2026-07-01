@@ -24,11 +24,7 @@ import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, ref } from "vue";
 import { apolloClient } from "@/main";
-import type { EditorView } from "prosemirror-view";
-import {
-  DOMSerializer,
-  DOMParser as ProseMirrorDOMParser,
-} from "prosemirror-model";
+import { DOMSerializer } from "prosemirror-model";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
@@ -174,7 +170,6 @@ export const createTipTapNodeExtension = (
     inline: true,
     selectable: false,
     atom: true,
-    content: "inline*",
     addAttributes() {
       const attributes: { [key: string]: any } = {
         entityId: {
@@ -204,6 +199,11 @@ export const createTipTapNodeExtension = (
               "data-label": attributes.label,
             };
           },
+        },
+        taggedText: {
+          default: "",
+          parseHTML: (element: HTMLElement) => element.textContent || "",
+          renderHTML: () => ({}),
         },
       };
 
@@ -238,6 +238,7 @@ export const createTipTapNodeExtension = (
             const attributes: { [key: string]: any } = {
               entityId: element.getAttribute("data-entity-id"),
               label: element.getAttribute("data-label"),
+              taggedText: element.textContent || "",
             };
 
             if (additionalAttributes) {
@@ -253,14 +254,14 @@ export const createTipTapNodeExtension = (
         },
       ];
     },
-    renderHTML({ HTMLAttributes }) {
+    renderHTML({ HTMLAttributes, node }) {
       return [
         "elody-" + extensionConfiguration.tag,
         {
           ...HTMLAttributes,
           contenteditable: "false",
         },
-        0,
+        node.attrs.taggedText || "",
       ];
     },
   });
@@ -290,11 +291,9 @@ export const createGlobalCommandsExtension = Extension.create({
         async ({
           commands,
           state,
-          view,
         }: {
           commands: any;
           state: EditorState;
-          view: EditorView;
         }) => {
           const configurationItem:
             | TaggableEntityConfigurationFromEntity
@@ -324,34 +323,24 @@ export const createGlobalCommandsExtension = Extension.create({
             });
           }
 
-          const { selection, schema } = state;
+          const { selection } = state;
           const { from, to } = selection;
-          const selectedHTML = getSelectionHTML(state);
-
-          const dom = new window.DOMParser().parseFromString(
-            selectedHTML,
-            "text/html",
-          ).body;
-          const parsed = ProseMirrorDOMParser.fromSchema(schema).parse(dom);
-
-          const inlineContent =
-            parsed.content.firstChild?.content ?? parsed.content;
+          const taggedText = state.doc.textBetween(from, to);
 
           const newNodeContent = {
             type: configurationItem.extensionName,
             attrs: {
               entityId: entity.id,
+              taggedText,
               ...additionalAttributes,
             },
-            content: inlineContent.toJSON(),
           };
 
           Object.assign(newNodeContent.attrs, additionalAttributes);
           commands.deleteRange({ from, to });
           commands.insertContentAt(from, newNodeContent);
-          commands.selectNodeForward();
+          commands.setTextSelection(from + 1);
 
-          view.dom.ownerDocument.defaultView?.getSelection()?.collapseToEnd();
           useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
         },
       untagSelectedText:
@@ -360,43 +349,45 @@ export const createGlobalCommandsExtension = Extension.create({
           editor,
           state,
           commands,
-          view,
         }: {
           editor: Editor;
           state: EditorState;
           commands: any;
-          view: EditorView;
         }) => {
-          const { selection, schema } = state;
+          const { selection } = state;
           const { from, to } = selection;
 
           if (selection.empty) {
             throw new Error("No node selected to untag");
           }
 
-          const node = state.doc.nodeAt(from);
+          let taggedNode: any = null;
+          let taggedPos: number | null = null;
 
-          if (!node) {
-            throw new Error("No node found at selection");
+          state.doc.nodesBetween(from, to, (node, pos) => {
+            if (customExtensionNames.value.includes(node.type.name)) {
+              taggedNode = node;
+              taggedPos = pos;
+              return false;
+            }
+          });
+
+          if (!taggedNode || taggedPos === null) {
+            throw new Error("No tagged node found in selection");
           }
 
-          if (!customExtensionNames.value.includes(node.type.name)) {
-            throw new Error("Selected node is not a tagged entity node");
-          }
+          const taggedText = taggedNode.attrs.taggedText || "";
+          const entityId = taggedNode.attrs.entityId;
+          const nodeEnd = taggedPos + taggedNode.nodeSize;
 
-          const inlineContent = node.content;
-          const entityId = node.attrs.entityId;
-
-          commands.deleteRange({ from, to });
-          commands.insertContentAt(from, inlineContent.toJSON());
-          commands.setTextSelection(from + inlineContent.size);
-
-          view.dom.ownerDocument.defaultView?.getSelection()?.collapseToEnd();
+          commands.deleteRange({ from: taggedPos, to: nodeEnd });
+          commands.insertContentAt(taggedPos, { type: "text", text: taggedText });
+          commands.setTextSelection(taggedPos + taggedText.length);
 
           const entityExtensionConfiguration =
             extensionConfiguration.value.find(
               (mappingItem: TaggableEntityConfiguration) =>
-                mappingItem.extensionName === node.type.name,
+                mappingItem.extensionName === taggedNode.type.name,
             );
 
           if (entityExtensionConfiguration) {
@@ -626,14 +617,19 @@ export const getExtensionConfigurationForEntity = (
 
 export const hasSelectionBeenTagged = (editor: Editor) => {
   const { state } = editor;
-  const { $from } = state.selection;
+  const { selection } = state;
 
-  const nodeBefore = $from.nodeBefore;
-  const nodeAfter = $from.nodeAfter;
+  if (selection.empty) return false;
 
-  const isTagged =
-    (nodeBefore && customExtensionNames.value.includes(nodeBefore.type.name)) ||
-    (nodeAfter && customExtensionNames.value.includes(nodeAfter.type.name));
+  const { from, to } = selection;
+  let isTagged = false;
+
+  state.doc.nodesBetween(from, to, (node) => {
+    if (customExtensionNames.value.includes(node.type.name)) {
+      isTagged = true;
+      return false;
+    }
+  });
 
   return isTagged;
 };
@@ -644,7 +640,6 @@ export const tagEntity = (
   parentEntityId: string,
   context: Context,
 ) => {
-  console.log(entityToTag, relationType, parentEntityId, context);
   addRelations([entityToTag], relationType, parentEntityId, true);
   dequeueAllItemsForBulkProcessing(context);
 };
