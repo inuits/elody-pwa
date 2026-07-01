@@ -993,9 +993,10 @@ watch(
 );
 
 watch(
-  [() => entities.value, totalEntityCount],
-  ([newEntities, newCount], [oldEntities, oldCount]) => {
-    syncTotalCountWithOptimisticChange(newEntities as Entity[], oldEntities as Entity[], newCount as number, oldCount as number);
+  [() => entities.value, totalEntityCount, entitiesLoading],
+  ([newEntities, newCount, newLoading], [oldEntities, oldCount, oldLoading]) => {
+    const wasFetch = !newLoading && !!oldLoading;
+    if (!wasFetch) syncTotalCountWithOptimisticChange(newEntities as Entity[], oldEntities as Entity[], newCount as number, oldCount as number);
     emit("entitiesUpdated", (newEntities as Entity[]).length);
     paginationStore.updateTotalAmount(totalEntityCount.value);
     if (props.selectInputFieldType) {

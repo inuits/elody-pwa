@@ -356,6 +356,22 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
 
     expect(libTotalEntityCount.value).toBe(0);
   });
+
+  it("does not adjust totalEntityCount when entities change due to a page fetch", async () => {
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    libTotalEntityCount.value = 45;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    libEntitiesLoading.value = true;
+    await flushPromises();
+    libEntities.value = [makeEntity("d"), makeEntity("e")];
+    libTotalEntityCount.value = 45;
+    libEntitiesLoading.value = false;
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(45);
+  });
 });
 
 describe("BaseLibrary.vue route navigation triggers refetch", () => {
