@@ -8,7 +8,7 @@
       <div v-for="item in readableValue" :key="item">
         <p data-cy="metadata-value" v-if="!stringIsUrl(item)">{{ item }}</p>
         <a v-else class="underline" target="_blank" :href="item">{{
-          t(linkText) || item
+          (linkText && t(linkText)) || item
         }}</a>
       </div>
       <div v-if="readableValue.length == 0">-</div>
@@ -32,7 +32,10 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <SanitizedHtml :content="processedDisplayValue" :link-text="t(linkText)"></SanitizedHtml>
+        <SanitizedHtml
+          :content="processedDisplayValue"
+          :link-text="linkText ? t(linkText) : ''"
+        ></SanitizedHtml>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)">
