@@ -161,7 +161,11 @@ const serializeRelationRow = (item: Record<string, any>): Record<string, any> =>
   const keyField = relationKeySubField.value;
   if (!props.relationType || !keyField) return null;
 
-  const relationKey = item[keyField.key];
+  // A pre-filled value may be a plain label string (e.g. muziekweb genres arrive as
+  // `["Jazz", ...]`); treat the string itself as the relation key so it shows as a
+  // suggested row the user can resolve via the picker.
+  const relationKey =
+    typeof item === "string" ? item : item[keyField.key];
   const metadata: MetadataInput[] = props.subFields
     .filter((sf) => sf.inputField?.isMetadataField === true)
     .map((sf) => ({ key: sf.key, value: mapMetadataToCorrectFormat(sf, item) }));
