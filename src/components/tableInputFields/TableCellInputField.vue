@@ -48,7 +48,7 @@
       :mode="disabled ? 'view' : 'edit'"
     />
     <p
-      v-if="errorMessage"
+      v-if="errorMessage && !disabled"
       data-testid="inputfield-error"
       class="mt-0.5 text-xs text-red-default"
     >
@@ -87,7 +87,11 @@ const fieldLabel = computed<string>(() =>
 const { getValidationRules } = useFieldValidation(
   () => props.subField.inputField.validation,
 );
-const validationRules = computed(() => getValidationRules(true, false));
+// Read-only cells (e.g. a detail view) must not validate: a disabled screen should
+// never surface "required" errors for empty values.
+const validationRules = computed(() =>
+  props.disabled ? undefined : getValidationRules(true, false),
+);
 const { value, validate, errorMessage } = useField<any>(
   () => props.fieldKey,
   validationRules,

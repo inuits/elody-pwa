@@ -60,8 +60,10 @@ import type {
   Entitytyping,
   MetadataOnRelationFieldConfig,
 } from "@/generated-types/queries";
+import { GetEntityByIdDocument } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
+import { apolloClient } from "@/main";
 import {
   extractTagInputValuesFromRelations,
   mapDropdownOptionsToBulkProcessableItem,
@@ -77,7 +79,7 @@ import {
   ref,
   watch,
 } from "vue";
-import { getEntityIdFromRoute } from "@/helpers";
+import { getEntityIdFromRoute, getEntityTitle, looksLikeEntityId } from "@/helpers";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -403,6 +405,24 @@ const preSelectRelations = async () => {
 const findAutocompleteOption = async (
   value: string,
 ): Promise<DropdownOption | undefined> => {
+  // A pre-filled value that is already an entity id is resolved by id: searching by
+  // text can match the wrong entity for vocabularies whose identity needs more than a
+  // label (e.g. a code_wording is unique per code + type, so resolving by code alone
+  // picks the wrong one). Fall back to the text search for label-only values.
+  const entityType = props.metadataKeyToGetOptionsFor;
+  if (looksLikeEntityId(value) && entityType && entityType !== "no-key") {
+    try {
+      const result = await apolloClient.query({
+        query: GetEntityByIdDocument,
+        variables: { id: value, type: entityType as Entitytyping },
+        fetchPolicy: "no-cache",
+      });
+      const entity = result.data?.Entity;
+      if (entity) return { label: getEntityTitle(entity), value };
+    } catch {
+      // fall through to the text search below
+    }
+  }
   await allEntitiesHelper.value.getAutocompleteOptions(value);
   return allEntitiesHelper.value.entityDropdownOptions[0];
 };
