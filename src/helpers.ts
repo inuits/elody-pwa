@@ -973,7 +973,9 @@ function buildDropdownOptions(
 export function enrichProcessorConfig(
   teaserMetadata: Record<string, any>,
   intialValues: Record<string, any>,
-  processorConfig: { panels: Array<{ fields: Array<any> }> },
+  processorConfig: {
+    panels: Array<{ fields: Array<any>; isEditable?: boolean }>;
+  },
   relation: any | null,
 ): { teaserMetadata: Record<string, any>; intialValues: Record<string, any> } {
   const newTeaserMetadata = { ...teaserMetadata };
@@ -988,6 +990,9 @@ export function enrichProcessorConfig(
         key: field.key,
         label: field.label,
         __typename: "PanelRelationMetaData",
+        // panels marked non-editable stay read-only in the entity edit mode;
+        // their config is edited through the Configure modal instead
+        nonEditableField: panel.isEditable === false,
         inputField: {
           type: mappedType,
           __typename: "InputField",
