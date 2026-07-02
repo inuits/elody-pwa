@@ -1,6 +1,7 @@
 import ViewModesMap from "../library/view-modes/ViewModesMap.vue";
 import WktMap from "../maps/WktMap.vue";
 import PointMap from "../maps/PointMap.vue";
+import SpinnerLoader from "../SpinnerLoader.vue";
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import { MapTypes } from "@/generated-types/queries";
@@ -265,5 +266,44 @@ describe("ViewModesMap Points mode routing", () => {
       },
     });
     expect(wrapper.vm.pointsData).toHaveLength(0);
+  });
+});
+
+describe("ViewModesMap loading overlay", () => {
+  const getWrapper = (entitiesLoading: boolean) =>
+    mount(ViewModesMap, {
+      props: {
+        mapType: MapTypes.WktMap,
+        config: [{ key: "mapType", value: MapTypes.WktMap }],
+        entities: [],
+        entitiesLoading,
+        entityTypeAsCenterPoint: "type1",
+        centerCoordinatesKey: "gps_coordinates",
+      },
+    });
+
+  it("shows the loading overlay when entitiesLoading is true", () => {
+    const wrapper = getWrapper(true);
+    expect(wrapper.find('[data-testid="map-loading-overlay"]').exists()).toBe(true);
+  });
+
+  it("hides the loading overlay when entitiesLoading is false", () => {
+    const wrapper = getWrapper(false);
+    expect(wrapper.find('[data-testid="map-loading-overlay"]').exists()).toBe(false);
+  });
+
+  it("toggles the loading overlay when entitiesLoading changes", async () => {
+    const wrapper = getWrapper(false);
+    expect(wrapper.find('[data-testid="map-loading-overlay"]').exists()).toBe(false);
+
+    await wrapper.setProps({ entitiesLoading: true });
+    expect(wrapper.find('[data-testid="map-loading-overlay"]').exists()).toBe(true);
+  });
+
+  it("renders a resolved SpinnerLoader inside the loading overlay", () => {
+    const wrapper = getWrapper(true);
+    const spinner = wrapper.findComponent(SpinnerLoader);
+    expect(spinner.exists()).toBe(true);
+    expect(wrapper.find('[data-testid="map-loading-overlay"]').findComponent(SpinnerLoader).exists()).toBe(true);
   });
 });

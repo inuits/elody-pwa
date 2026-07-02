@@ -1,38 +1,47 @@
 <template>
-  <HeatMap
-    v-if="refMapType === MapTypes.HeatMap"
-    :config="config"
-    :entities="entities"
-    :entities-loading="entitiesLoading"
-    :center="center"
-    :zoom="mapProperties.zoom"
-    :blur="mapProperties.blur"
-    :radius="mapProperties.radius"
-    :filters-base-api="filtersBaseApi"
-    :geo-filters="geoFilters"
-  />
-  <WktMap
-    v-if="refMapType === MapTypes.WktMap"
-    :wkt="wktOfEntities"
-    :entities="entities"
-    :center="center"
-    :map-view="mapView"
-    :map-mode="mapMode"
-    :filters-base-api="filtersBaseApi"
-    :use-filters="useFilters"
-    :geo-filters="geoFilters"
-  />
-  <PointMap
-    v-if="refMapType === MapTypes.PointsMap"
-    :points="pointsData"
-    :entities="entities"
-    :center="center"
-    :map-view="mapView"
-    :filters-base-api="filtersBaseApi"
-    :use-filters="useFilters"
-    :geo-filters="geoFilters"
-    :clustering="mapProperties.pointsConfig?.clustering ?? false"
-  />
+  <div class="relative">
+    <div
+      v-if="entitiesLoading"
+      data-testid="map-loading-overlay"
+      class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
+    >
+      <spinner-loader theme="accent" />
+    </div>
+    <HeatMap
+      v-if="refMapType === MapTypes.HeatMap"
+      :config="config"
+      :entities="entities"
+      :entities-loading="entitiesLoading"
+      :center="center"
+      :zoom="mapProperties.zoom"
+      :blur="mapProperties.blur"
+      :radius="mapProperties.radius"
+      :filters-base-api="filtersBaseApi"
+      :geo-filters="geoFilters"
+    />
+    <WktMap
+      v-if="refMapType === MapTypes.WktMap"
+      :wkt="wktOfEntities"
+      :entities="entities"
+      :center="center"
+      :map-view="mapView"
+      :map-mode="mapMode"
+      :filters-base-api="filtersBaseApi"
+      :use-filters="useFilters"
+      :geo-filters="geoFilters"
+    />
+    <PointMap
+      v-if="refMapType === MapTypes.PointsMap"
+      :points="pointsData"
+      :entities="entities"
+      :center="center"
+      :map-view="mapView"
+      :filters-base-api="filtersBaseApi"
+      :use-filters="useFilters"
+      :geo-filters="geoFilters"
+      :clustering="mapProperties.pointsConfig?.clustering ?? false"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -49,6 +58,7 @@ import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import HeatMap from "@/components/maps/HeatMap.vue";
 import WktMap from "@/components/maps/WktMap.vue";
 import PointMap from "@/components/maps/PointMap.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { fromLonLat } from "ol/proj";
