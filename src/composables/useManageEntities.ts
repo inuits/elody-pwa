@@ -59,19 +59,17 @@ export const useManageEntities = () => {
     });
   };
 
-  // Persist relations on an existing entity the standard way: MutateEntityValues
-  // with updateOnlyRelations so metadata is left untouched. Relations carry
-  // editStatus (New = add); collection-api creates the inverse relation.
   const addRelations = async ({
     entityId,
     relations,
   }: AddRelationsParams): Promise<void> => {
-    const mutation = await loadDocument("MutateEntityValues");
+    if (relations.length === 0) return;
+    const mutation = await loadDocument("AddEntityRelations");
     await apolloClient.mutate({
       mutation,
       variables: {
         id: entityId,
-        formInput: { metadata: [], relations, updateOnlyRelations: true },
+        relations,
         collection: Collection.Entities,
       },
     });

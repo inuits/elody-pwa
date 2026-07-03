@@ -454,18 +454,21 @@ describe("RepetitiveFlow — linear mode", () => {
     });
   });
 
-  it("links a created entity to the prior step (same as a picked one)", async () => {
+  it("does not add relations after create — the relation rides on the create prefill", async () => {
     manageMocks.addRelations.mockClear();
     const wrapper = getLinearWrapper();
     field(wrapper).vm.$emit("selected", { id: "work-1" });
     await flushPromises();
-    // create the expression → it must be linked to the work via addRelations
+    // the expression create form is prefilled with the refWork relation, so the
+    // single create call links it; no extra (replacing) relation call is made
+    expect(field(wrapper).props("createPrefill")).toEqual({
+      relationValues: {
+        refWork: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+      },
+    });
     field(wrapper).vm.$emit("created", { id: "expr-9", intialValues: { title: "E" } });
     await flushPromises();
-    expect(manageMocks.addRelations).toHaveBeenCalledWith({
-      entityId: "expr-9",
-      relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
-    });
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
   });
 
   it("resets the store and local state when the modal closes", async () => {

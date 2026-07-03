@@ -264,10 +264,6 @@ const onCreated = async (
     details,
     values: entity.intialValues,
   });
-  // link the just-created entity to the prior step the same reliable way a
-  // picked entity is linked (config-driven), before advancing
-  const step = activeStep.value;
-  if (step) await store.linkAfterCreate(step);
   advance();
 };
 

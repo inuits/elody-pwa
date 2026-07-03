@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Collection, EditStatus } from "@/generated-types/queries";
 
 const { mockMutate, mockLoadDocument } = vi.hoisted(() => ({
-  mockMutate: vi.fn().mockResolvedValue({ data: { mutateEntityValues: {} } }),
-  mockLoadDocument: vi.fn().mockResolvedValue("MUTATE_ENTITY_VALUES_DOC"),
+  mockMutate: vi.fn().mockResolvedValue({ data: { addEntityRelations: "" } }),
+  mockLoadDocument: vi.fn().mockResolvedValue("ADD_ENTITY_RELATIONS_DOC"),
 }));
 
 vi.mock("@/main", () => ({ apolloClient: { mutate: mockMutate } }));
@@ -22,24 +22,27 @@ describe("useManageEntities.addRelations", () => {
     mockLoadDocument.mockClear();
   });
 
-  it("adds relations via MutateEntityValues with updateOnlyRelations on the entity", async () => {
+  it("adds relations via AddEntityRelations (merge) on the entity", async () => {
     const { addRelations } = useManageEntities();
     await addRelations({
       entityId: "expr-1",
       relations: [{ key: "work-1", type: "refWork", editStatus: EditStatus.New }],
     });
-    expect(mockLoadDocument).toHaveBeenCalledWith("MutateEntityValues");
+    expect(mockLoadDocument).toHaveBeenCalledWith("AddEntityRelations");
     expect(mockMutate).toHaveBeenCalledWith({
-      mutation: "MUTATE_ENTITY_VALUES_DOC",
+      mutation: "ADD_ENTITY_RELATIONS_DOC",
       variables: {
         id: "expr-1",
-        formInput: {
-          metadata: [],
-          relations: [{ key: "work-1", type: "refWork", editStatus: EditStatus.New }],
-          updateOnlyRelations: true,
-        },
+        relations: [{ key: "work-1", type: "refWork", editStatus: EditStatus.New }],
         collection: Collection.Entities,
       },
     });
+  });
+
+  it("is a no-op when there are no relations", async () => {
+    const { addRelations } = useManageEntities();
+    await addRelations({ entityId: "expr-1", relations: [] });
+    expect(mockLoadDocument).not.toHaveBeenCalled();
+    expect(mockMutate).not.toHaveBeenCalled();
   });
 });
