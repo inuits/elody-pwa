@@ -384,12 +384,9 @@ const advancedFiltersPromise = async (entityType: Entitytyping) => {
 
 const determineFilterQuery = async (queryDocument: string): Promise<any> => {
   if (queryDocument) return queryDocument;
-  try {
-    const query = props.route!.meta!.queries!.getFilters;
-    return await loadDocument(query);
-  } catch (error) {
-    return await loadDocument("GetAdvancedFilters");
-  }
+  const queryName = (props.route?.meta?.queries as any)?.getFilters;
+  const document = queryName ? await loadDocument(queryName) : undefined;
+  return document ?? (await loadDocument("GetAdvancedFilters"));
 };
 
 const fetchEntityFilters = async ({

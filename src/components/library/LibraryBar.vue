@@ -202,12 +202,9 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
 };
 
 const determineSortOptionsQuery = async (): Promise<any> => {
-  try {
-    const query = route!.meta!.queries!.getSortOptions;
-    return await loadDocument(query);
-  } catch (error) {
-    return await loadDocument("GetSortOptions");
-  }
+  const queryName = (route?.meta?.queries as any)?.getSortOptions;
+  const document = queryName ? await loadDocument(queryName) : undefined;
+  return document ?? (await loadDocument("GetSortOptions"));
 };
 
 onMounted(() => {
