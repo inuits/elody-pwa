@@ -108,6 +108,11 @@ const debouncedSearch = debounce((query: string) => {
 
 const handleCreateFromTag = async (option: DropdownOption) => {
   if (!props.inputField.canCreateEntityFromOption) return;
+  if (props.inputField.deferEntityCreation) {
+    selectedOptions.value = [{ value: option.label, label: option.label }];
+    emit("update:modelValue", option.label);
+    return;
+  }
   isCreatingEntity.value = true;
   try {
     const newEntity = await createEntity({
