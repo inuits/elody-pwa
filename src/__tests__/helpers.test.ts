@@ -5,6 +5,7 @@ import {
   mapUrlToEntityType,
   extractObjectsByTypename,
   determineDefaultIntialValues,
+  normalizeEmptyInitialValuesByFieldType,
   getTranslatedMessage,
   extractValueFromObject,
   looksLikeEntityId,
@@ -208,6 +209,38 @@ describe("determineDefaultIntialValues", () => {
     expect(result.field1).toEqual("notEmpty");
   });
 
+  it("should replace empty string with false for checkbox fields", () => {
+    const initialData = {
+      is_venue: true,
+      is_booker: "",
+      is_company: true,
+    };
+
+    const columns: ColumnList = {
+      column: {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.Checkbox },
+        key: "is_venue",
+      },
+      column2: {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.Checkbox },
+        key: "is_booker",
+      },
+      column3: {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.Checkbox },
+        key: "is_company",
+      },
+    };
+
+    const result = determineDefaultIntialValues(initialData, columns);
+
+    expect(result.is_venue).toEqual(true);
+    expect(result.is_booker).toEqual(false);
+    expect(result.is_company).toEqual(true);
+  });
+
   it("should not modify fields not of specified type", () => {
     const initialData = {
       field1: "",
@@ -224,6 +257,47 @@ describe("determineDefaultIntialValues", () => {
     const result = determineDefaultIntialValues(initialData, columns);
 
     expect(result.field1).toEqual("");
+  });
+});
+
+describe("normalizeEmptyInitialValuesByFieldType", () => {
+  it("normalizes empty checkbox and multiselect fields from a PanelMetaData list", () => {
+    const initialData = {
+      display_italics: "",
+      tags: "",
+      title: "keep me",
+      is_venue: true,
+    };
+
+    const fields = [
+      {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.Checkbox },
+        key: "display_italics",
+      },
+      {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.DropdownMultiselectMetadata },
+        key: "tags",
+      },
+      {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.Text },
+        key: "title",
+      },
+      {
+        __typename: "PanelMetaData",
+        inputField: { type: InputFieldTypes.Checkbox },
+        key: "is_venue",
+      },
+    ] as any;
+
+    const result = normalizeEmptyInitialValuesByFieldType(initialData, fields);
+
+    expect(result.display_italics).toEqual(false);
+    expect(result.tags).toEqual([]);
+    expect(result.title).toEqual("keep me");
+    expect(result.is_venue).toEqual(true);
   });
 });
 

@@ -89,7 +89,9 @@
                 :entity="{ type: entityType }"
               />
               <TableInputField
-                v-else-if="fieldType === InputFieldTypes.InputFieldWithSubFields"
+                v-else-if="
+                  fieldType === InputFieldTypes.InputFieldWithSubFields
+                "
                 v-model:model-value="fieldValueProxy"
                 :is-flow-relation-values="
                   !metadata.inputField?.isMetadataField &&
@@ -165,6 +167,27 @@
                 data-testid="unit-image"
                 @error="imageLoadError = true"
               />
+              <span
+                v-else-if="fieldType === InputFieldTypes.Checkbox"
+                data-cy="metadata-checkbox-value"
+                class="flex items-center gap-1 text-sm"
+              >
+                <unicon
+                  :name="
+                    fieldValueProxy ? Unicons.Check.name : Unicons.Cross.name
+                  "
+                  class="-mx-1"
+                  :class="
+                    fieldValueProxy ? 'text-green-600' : 'text-gray-600'
+                  "
+                  height="18"
+                />
+                {{
+                  fieldValueProxy
+                    ? t("metadata.labels.yes")
+                    : t("metadata.labels.no")
+                }}
+              </span>
               <entity-element-metadata
                 v-else
                 :label="fieldLabel"
@@ -240,6 +263,8 @@ import { useMetadataVirtualKeyboard } from "@/composables/useMetadataVirtualKeyb
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
+import { Unicons } from "@/types";
+import { useI18n } from "vue-i18n";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -269,6 +294,8 @@ const emit = defineEmits<{
   (event: "update:metadata", mutatedField: PanelMetaData): void;
 }>();
 
+const { t } = useI18n();
+
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
 
 const {
@@ -296,7 +323,8 @@ const {
 const { isValidationRulePresentOnField } = useVeeValidate();
 
 const virtualKeyboardConfigLayouts = computed(
-  () => (props.metadata.inputField as any)?.virtualKeyboardConfig?.layouts ?? null,
+  () =>
+    (props.metadata.inputField as any)?.virtualKeyboardConfig?.layouts ?? null,
 );
 
 const {
@@ -306,7 +334,11 @@ const {
   keyboardInput,
   handleKeyboardChange,
   handleKeyboardOpenState,
-} = useMetadataVirtualKeyboard(fieldType, fieldValueProxy, virtualKeyboardConfigLayouts);
+} = useMetadataVirtualKeyboard(
+  fieldType,
+  fieldValueProxy,
+  virtualKeyboardConfigLayouts,
+);
 
 provide("virtualKeyboardContext", {
   searchQuery: keyboardSearchQuery,
@@ -315,8 +347,8 @@ provide("virtualKeyboardContext", {
 
 // simple-keyboard uses the class as a CSS selector, so any character that is
 // not a valid CSS identifier (colons, dots, slashes, spaces, …) must be replaced.
-const safeKeyboardClass = computed(() =>
-  `virtual-keyboard-${fieldKey.value.replace(/[^a-zA-Z0-9-]/g, "_")}`,
+const safeKeyboardClass = computed(
+  () => `virtual-keyboard-${fieldKey.value.replace(/[^a-zA-Z0-9-]/g, "_")}`,
 );
 
 const autoCompleteType = computed<
@@ -340,7 +372,8 @@ const autoCompleteType = computed<
 });
 
 const pillTranslationKey = computed<string | undefined>(() => {
-  if (props.metadata.valueTranslationKey) return props.metadata.valueTranslationKey;
+  if (props.metadata.valueTranslationKey)
+    return props.metadata.valueTranslationKey;
   const value = (props.metadata.value as any)?.label;
   const options = (props.metadata.inputField as any)?.options;
   if (!value || !options?.length) return undefined;

@@ -723,30 +723,42 @@ export const extractObjectsByTypename = (
   return result;
 };
 
-export const determineDefaultIntialValues = (
+export const normalizeEmptyInitialValuesByFieldType = (
   initialData: any,
-  columns: ColumnList,
+  metadataFields: PanelMetaData[],
 ) => {
-  const metadataFields = extractObjectsByTypename(columns, "PanelMetaData");
-
   const newInitialData = { ...initialData };
   const arrayMetadataFields = [
     InputFieldTypes.DropdownMultiselectMetadata,
     InputFieldTypes.DropdownMultiselectRelations,
   ];
 
-  (metadataFields as PanelMetaData[]).forEach((field: PanelMetaData) => {
-    const isMetadataCanBeAnArray = arrayMetadataFields.includes(
-      field.inputField?.type as InputFieldTypes,
-    );
+  metadataFields.forEach((field: PanelMetaData) => {
+    if (!field?.key) return;
+    const fieldType = field.inputField?.type as InputFieldTypes;
     const isMetadataEmpty = newInitialData[field.key] === "";
+    if (!isMetadataEmpty) return;
 
-    if (isMetadataCanBeAnArray && isMetadataEmpty) {
+    if (arrayMetadataFields.includes(fieldType)) {
       newInitialData[field.key] = [];
+    } else if (fieldType === InputFieldTypes.Checkbox) {
+      newInitialData[field.key] = false;
     }
   });
 
   return newInitialData;
+};
+
+export const determineDefaultIntialValues = (
+  initialData: any,
+  columns: ColumnList,
+) => {
+  const metadataFields = extractObjectsByTypename(
+    columns,
+    "PanelMetaData",
+  ) as PanelMetaData[];
+
+  return normalizeEmptyInitialValuesByFieldType(initialData, metadataFields);
 };
 
 export const deepToRaw = <T>(obj: T): T => {

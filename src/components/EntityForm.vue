@@ -36,7 +36,11 @@ import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
-import { getChildrenOfHomeRoutes, deepToRaw } from "@/helpers";
+import {
+  getChildrenOfHomeRoutes,
+  deepToRaw,
+  normalizeEmptyInitialValuesByFieldType,
+} from "@/helpers";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { type GraphQLError } from "graphql/error";
 
@@ -133,7 +137,10 @@ const submit = useSubmitForm<EntityValues>(async () => {
   mutatedEntity.value = result.data.mutateEntityValues as Entity;
   emit("mutatedEntityUpdated", mutatedEntity.value);
   setValues({
-    intialValues: mutatedEntity.value.intialValues,
+    intialValues: normalizeEmptyInitialValuesByFieldType(
+      mutatedEntity.value.intialValues,
+      Object.values(props.fields),
+    ),
     relationValues: mutatedEntity.value.relationValues,
   });
   displaySuccessNotification(
