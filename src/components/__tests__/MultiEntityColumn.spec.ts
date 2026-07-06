@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { reactive } from "vue";
-import { flushPromises, mount } from "@vue/test-utils";
+import { flushPromises, mount, RouterLinkStub } from "@vue/test-utils";
 import MultiEntityColumn from "../MultiEntityColumn.vue";
 
 const mocks = vi.hoisted(() => ({
@@ -11,6 +11,14 @@ const mocks = vi.hoisted(() => ({
   setEntityUuid: vi.fn(),
   setEntityType: vi.fn(),
   isAuthenticated: { value: true },
+  getEntityPageRoute: vi.fn(() => ({
+    name: "SingleEntity",
+    params: { id: "W-1", type: "work_word" },
+  })),
+}));
+
+vi.mock("@/helpers", () => ({
+  getEntityPageRoute: mocks.getEntityPageRoute,
 }));
 
 vi.mock("@/components/EntityColumn.vue", () => ({
@@ -78,7 +86,10 @@ const entity = {
 const getWrapper = () =>
   mount(MultiEntityColumn, {
     props: { entity, refetch: vi.fn() },
-    global: { mocks: { $t: (key: string) => key } },
+    global: {
+      mocks: { $t: (key: string) => key },
+      stubs: { RouterLink: RouterLinkStub },
+    },
   });
 
 describe("MultiEntityColumn", () => {
@@ -133,6 +144,30 @@ describe("MultiEntityColumn", () => {
     expect(mocks.setEntityUuid).toHaveBeenCalledWith("W-1");
     expect(mocks.setEntityType).toHaveBeenCalledWith("work_word");
     expect(mocks.editHelper.enableEdit).toHaveBeenCalled();
+  });
+
+  it("renders the header as a link to the entity detail page", async () => {
+    const wrapper = getWrapper();
+    await flushPromises();
+    const link = wrapper.findComponent(RouterLinkStub);
+    expect(link.exists()).toBe(true);
+    expect(mocks.getEntityPageRoute).toHaveBeenCalledWith(
+      entity,
+      "SingleEntity",
+    );
+    expect(link.props("to")).toEqual({
+      name: "SingleEntity",
+      params: { id: "W-1", type: "work_word" },
+    });
+  });
+
+  it("does not render the header link while editing, but keeps the label", async () => {
+    const wrapper = getWrapper();
+    await flushPromises();
+    // enter edit mode
+    await wrapper.find("button").trigger("click");
+    expect(wrapper.findComponent(RouterLinkStub).exists()).toBe(false);
+    expect(wrapper.text()).toContain("entity-translations.singular.work_word");
   });
 
   it("saves through its own edit state", async () => {

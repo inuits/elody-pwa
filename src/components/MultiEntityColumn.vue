@@ -4,15 +4,36 @@
       class="flex items-center gap-2 px-4 py-3 border-b border-neutral-100 bg-neutral-10"
     >
       <div class="flex w-1/2 min-w-0">
-        <metadata-formatter-pill
-          v-if="pillLabel"
-          formatter="pill"
-          size="lg"
-          :label="pillLabel"
-        />
-        <span v-else class="text-lg font-bold text-text-light truncate">
-          {{ columnLabel }}
-        </span>
+        <router-link
+          v-if="!editHelper.isEdit"
+          :to="entityPageRoute"
+          data-cy="multi-entity-column-header-link"
+          class="flex min-w-0 cursor-pointer hover:opacity-80"
+        >
+          <metadata-formatter-pill
+            v-if="pillLabel"
+            formatter="pill"
+            size="lg"
+            :label="pillLabel"
+          />
+          <span
+            v-else
+            class="text-lg font-bold text-text-light truncate hover:underline"
+          >
+            {{ columnLabel }}
+          </span>
+        </router-link>
+        <template v-else>
+          <metadata-formatter-pill
+            v-if="pillLabel"
+            formatter="pill"
+            size="lg"
+            :label="pillLabel"
+          />
+          <span v-else class="text-lg font-bold text-text-light truncate">
+            {{ columnLabel }}
+          </span>
+        </template>
       </div>
       <div class="flex w-1/2 shrink-0 items-center justify-center gap-2">
         <base-button-new
@@ -77,6 +98,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
+import { getEntityPageRoute } from "@/helpers";
 
 const props = defineProps<{
   entity: BaseEntity;
@@ -111,6 +133,9 @@ const pillLabel = computed<string | undefined>(() => {
 });
 const columnLabel = computed<string>(() =>
   t(`entity-translations.singular.${props.entity.type}`),
+);
+const entityPageRoute = computed(() =>
+  getEntityPageRoute(props.entity, "SingleEntity"),
 );
 
 const focusThisEntity = () => {
