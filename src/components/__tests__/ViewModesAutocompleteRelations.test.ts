@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   extractTagInputValuesFromRelations,
   mapDropdownOptionsToBulkProcessableItem,
+  toPreselectId,
 } from "@/components/library/view-modes/mapDropdownOptionsToBulkProcessableItem";
 import type {
   BaseRelationValuesInput,
@@ -238,5 +239,26 @@ describe("extractTagInputValuesFromRelations", () => {
     const result = extractTagInputValuesFromRelations(relations, "count");
 
     expect(result.get("id-1")).toBe("42");
+  });
+});
+
+describe("toPreselectId", () => {
+  it("returns a string value unchanged", () => {
+    expect(toPreselectId("id-1")).toBe("id-1");
+  });
+
+  it("returns the key of a relation object", () => {
+    expect(
+      toPreselectId({ key: "DG-34QL78W90", type: "refTargetAudiences" }),
+    ).toBe("DG-34QL78W90");
+  });
+
+  it("returns undefined for null and undefined", () => {
+    expect(toPreselectId(null)).toBeUndefined();
+    expect(toPreselectId(undefined)).toBeUndefined();
+  });
+
+  it("returns undefined for an object without a key", () => {
+    expect(toPreselectId({ type: "refTargetAudiences" })).toBeUndefined();
   });
 });

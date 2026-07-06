@@ -192,11 +192,13 @@ const useFormHelper = () => {
 
     const relationsToSet: BaseRelationValuesInput[] = [];
     if (keepExisted) {
-      const currentRelations =
-        form.values.relationValues[relationType]?.filter(
-          (relation: BaseRelationValuesInput) =>
-            !relation.editStatus || relation.editStatus !== EditStatus.New,
-        ) || [];
+      const existingRelations = form.values.relationValues[relationType];
+      const currentRelations = Array.isArray(existingRelations)
+        ? existingRelations.filter(
+            (relation: BaseRelationValuesInput) =>
+              !relation.editStatus || relation.editStatus !== EditStatus.New,
+          )
+        : [];
       relationsToSet.push(...currentRelations);
     }
     selectedItems.forEach((item) => {
@@ -243,12 +245,15 @@ const useFormHelper = () => {
       JSON.stringify(form.values.relationValues),
     );
 
-    const relationsToDelete: BaseRelationValuesInput[] = relationValues[
-      relationType
-    ]?.filter(
-      (relation: BaseRelationValuesInput) =>
-        !relationIds.includes(relation.key),
-    );
+    const existingRelations = relationValues[relationType];
+    const relationsToDelete: BaseRelationValuesInput[] = Array.isArray(
+      existingRelations,
+    )
+      ? existingRelations.filter(
+          (relation: BaseRelationValuesInput) =>
+            !relationIds.includes(relation.key),
+        )
+      : [];
 
     const relationsToSet: BaseRelationValuesInput[] = [];
     selectedItems.forEach((item) => {

@@ -36,6 +36,15 @@ export const mapDropdownOptionsToBulkProcessableItem = (
   });
 };
 
+// A pre-select value may be a plain id/label string or a full relation object
+// ({ key, type, ... }) when the field is bound to relationValues — only the key
+// may be used to resolve the entity, never the object itself.
+export const toPreselectId = (value: unknown): string | undefined => {
+  if (value == null) return undefined;
+  if (typeof value === "object") return (value as { key?: string }).key;
+  return value as string;
+};
+
 export const extractTagInputValuesFromRelations = (
   relations: BaseRelationValuesInput[],
   metadataKey: string,

@@ -14,6 +14,7 @@ import {
   type PanelMetaData,
   type PanelRelationMetaData,
   type PanelRelationRootData,
+  ValidationFields,
   ValidationRules,
 } from "@/generated-types/queries";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
@@ -291,12 +292,14 @@ export const useMetadataWrapper = (
       newValue = [];
     }
 
-    const inputField = props.metadata.inputField;
-    const isRelationTable =
-      inputField?.type === InputFieldTypes.InputFieldWithSubFields &&
-      !inputField?.isMetadataField &&
-      !!inputField?.relationType;
-    if (!isRelationTable) fieldValueProxy.value = newValue;
+    // Fields bound to relationValues (relation tables and relation dropdowns)
+    // hold the form's actual relations, seeded from the entity at form creation.
+    // Overwriting them with the panel's display value ("", label strings, ...)
+    // would wipe existing relations and later crash the relation helpers.
+    const isRelationValuesBound = fieldKey.value.startsWith(
+      `${ValidationFields.RelationValues}.`,
+    );
+    if (!isRelationValuesBound) fieldValueProxy.value = newValue;
     determineFieldPermissions();
   });
 

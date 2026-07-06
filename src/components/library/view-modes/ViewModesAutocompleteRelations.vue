@@ -67,6 +67,7 @@ import { apolloClient } from "@/main";
 import {
   extractTagInputValuesFromRelations,
   mapDropdownOptionsToBulkProcessableItem,
+  toPreselectId,
 } from "./mapDropdownOptionsToBulkProcessableItem";
 import { dequal as isEqual } from "dequal";
 import debounce from "lodash.debounce";
@@ -258,14 +259,15 @@ const initAutocompleteOption = async () => {
     populateSelectedOptions(allEntitiesHelper.value.entityDropdownOptions);
     handleSelect(allEntitiesHelper.value.entityDropdownOptions);
   } else if (
+    props.mode === "create" &&
     !props.isReadOnly &&
     props.modelValue &&
     !relatedEntitiesHelper.value.entityDropdownOptions.value?.length
   ) {
     // Pre-fill from the incoming modelValue (e.g. copyValueFromParent in a guided
-    // flow) whenever there are no existing related entities — i.e. a create
-    // context. Scoped to !isReadOnly so read-mode displays (detail pages) keep
-    // using their resolved relations and never trigger an extra entity fetch.
+    // flow) whenever there are no existing related entities. Scoped to create mode:
+    // on detail-page edit the modelValue holds the existing relations, which must be
+    // displayed via the resolved related entities instead of re-resolved one by one.
     await preSelectRelations();
   } else {
     populateSelectedOptions(relatedEntitiesHelper.value.entityDropdownOptions);
@@ -383,19 +385,20 @@ const preSelectMetadata = (
 const preSelectRelations = async () => {
   const selection: DropdownOption[] = [];
 
-  if (Array.isArray(props.modelValue)) {
-    for (const value of props.modelValue) {
-      const found = await findAutocompleteOption(value);
-      if (found) selection.push(found);
-      // No existing entity matches this value: keep it as a label-only chip (e.g. a
-      // new genre pre-filled from an external record). It is submitted as a relation
-      // whose key is the label; the backend find-or-creates the entity on save.
-      else selection.push({ label: value, value });
-    }
-  } else if (props.modelValue) {
-    const found = await findAutocompleteOption(props.modelValue);
+  const values = Array.isArray(props.modelValue)
+    ? props.modelValue
+    : [props.modelValue];
+  for (const rawValue of values) {
+    // Entries may be relation objects ({ key, type }) when the field is bound to
+    // relationValues — resolve those by their key, never by the object itself.
+    const value = toPreselectId(rawValue);
+    if (!value) continue;
+    const found = await findAutocompleteOption(value);
     if (found) selection.push(found);
-    else selection.push({ label: props.modelValue, value: props.modelValue });
+    // No existing entity matches this value: keep it as a label-only chip (e.g. a
+    // new genre pre-filled from an external record). It is submitted as a relation
+    // whose key is the label; the backend find-or-creates the entity on save.
+    else selection.push({ label: value, value });
   }
 
   allEntitiesHelper.value.getAutocompleteOptions();
@@ -424,7 +427,7 @@ const findAutocompleteOption = async (
     }
   }
   await allEntitiesHelper.value.getAutocompleteOptions(value);
-  return allEntitiesHelper.value.entityDropdownOptions[0];
+  return allEntitiesHelper.value.entityDropdownOptions.value?.[0];
 };
 
 const handleTagClick = async (tag: DropdownOption) => {

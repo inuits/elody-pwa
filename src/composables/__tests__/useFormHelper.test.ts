@@ -10,6 +10,7 @@ const {
   getForm,
   parseRelationValuesForFormSubmit,
   parseInheritedRelationValuesFromFormSubmit,
+  replaceRelationsFromSameType,
 } = useFormHelper();
 
 const {
@@ -163,6 +164,40 @@ describe("useFormHelper", () => {
         ...relationsToBeAdded.map((relation) => relation.id),
       ].sort(),
     );
+  });
+
+  it("replaces relations when the current value is not an array", () => {
+    // A form can end up with a non-array in relationValues (e.g. a display
+    // string seeded by a panel value) — replacing must not throw on it.
+    const formId = "form-string-value";
+    createForm(formId, {
+      intialValues: {} as any,
+      relationValues: { hasRelation: "Some label" } as any,
+    });
+
+    replaceRelationsFromSameType(
+      [{ id: "id-1", value: "Option A" }],
+      "hasRelation",
+      formId,
+    );
+
+    expect(
+      getRelationIds(getForm(formId) as FormContext, "hasRelation"),
+    ).toEqual(["id-1"]);
+  });
+
+  it("adds relations with keepExisted when the current value is not an array", () => {
+    const formId = "form-string-value-add";
+    createForm(formId, {
+      intialValues: {} as any,
+      relationValues: { hasRelation: "Some label" } as any,
+    });
+
+    addRelations([{ id: "id-1" }], "hasRelation", formId, true);
+
+    expect(
+      getRelationIds(getForm(formId) as FormContext, "hasRelation"),
+    ).toEqual(["id-1"]);
   });
 
   it("gets form if exists or undefined", () => {
