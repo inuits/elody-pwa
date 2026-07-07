@@ -135,6 +135,35 @@ describe("WYSIWYGTransliterationToggle", () => {
       expect(editor.commands.setContent).toHaveBeenCalledWith("<p>بس</p>");
     });
 
+    it("inserts spaces between characters when the config item has insertSpaces enabled", async () => {
+      const editor = makeEditor("<p>bs</p>");
+      const config = {
+        arabic: {
+          label: "Arabic",
+          mapping: LATIN_TO_ARABIC,
+          insertSpaces: true,
+        },
+      };
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: config },
+      });
+      const [arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      expect(editor.commands.setContent).toHaveBeenCalledWith("<p>ب س</p>");
+    });
+
+    it("does not insert spaces when insertSpaces is absent on the config item", async () => {
+      const editor = makeEditor("<p>bs</p>");
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: makeConfig() },
+      });
+      const [, arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      expect(editor.commands.setContent).toHaveBeenCalledWith("<p>بس</p>");
+    });
+
     it("always applies the mapping to the original captured content, not the current editor state", async () => {
       const editor = makeEditor("<p>bs</p>");
       const wrapper = mount(WYSIWYGTransliterationToggle, {

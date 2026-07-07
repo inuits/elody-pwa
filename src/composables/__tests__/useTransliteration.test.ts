@@ -107,6 +107,51 @@ describe("useTransliteration", () => {
     });
   });
 
+  describe("transliterateText with insertSpaces enabled", () => {
+    it("inserts a space between every mapped character", () => {
+      expect(transliterateText("btr", LATIN_TO_ARABIC, true)).toBe("ب ت ر");
+    });
+
+    it("does not add a trailing or leading space for a single character", () => {
+      expect(transliterateText("b", LATIN_TO_ARABIC, true)).toBe("ب");
+    });
+
+    it("maps first, then spaces multi-character keys as single units", () => {
+      // s² m s¹ -> ش م س, spaced -> "ش م س"
+      expect(transliterateText("s²ms¹", LATIN_TO_ARABIC, true)).toBe("ش م س");
+    });
+
+    it("spaces passthrough characters too", () => {
+      expect(transliterateText("b.r", LATIN_TO_ARABIC, true)).toBe("ب . ر");
+    });
+
+    it("returns empty string for empty input", () => {
+      expect(transliterateText("", LATIN_TO_ARABIC, true)).toBe("");
+    });
+
+    it("does not insert spaces when the flag is omitted (default off)", () => {
+      expect(transliterateText("btr", LATIN_TO_ARABIC)).toBe("بتر");
+    });
+
+    it("does not insert spaces when the flag is false", () => {
+      expect(transliterateText("btr", LATIN_TO_ARABIC, false)).toBe("بتر");
+    });
+  });
+
+  describe("transliterateHtml with insertSpaces enabled", () => {
+    it("inserts spaces inside text nodes while preserving tags", () => {
+      expect(transliterateHtml("<p>btr</p>", LATIN_TO_ARABIC, true)).toBe(
+        "<p>ب ت ر</p>",
+      );
+    });
+
+    it("does not insert spaces when the flag is omitted", () => {
+      expect(transliterateHtml("<p>btr</p>", LATIN_TO_ARABIC)).toBe(
+        "<p>بتر</p>",
+      );
+    });
+  });
+
   describe("transliterateText with multi-character keys", () => {
     it("transliterates 's¹' to 'س' (not 'س¹')", () => {
       expect(transliterateText("s¹", LATIN_TO_ARABIC)).toBe("س");

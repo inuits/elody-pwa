@@ -29,11 +29,17 @@ const { transliterateHtml } = useTransliteration();
 const activeKey = ref<string | null>(null);
 const originalContent = ref<string>("");
 
+type TransliterationItem = {
+  label: string;
+  mapping: Record<string, string> | null;
+  insertSpaces?: boolean | null;
+};
+
 const transliterationItems = computed(() => {
-  if (!props.transliterationConfig) return {} as Record<string, { label: string; mapping: Record<string, string> | null }>;
+  if (!props.transliterationConfig) return {} as Record<string, TransliterationItem>;
   return Object.fromEntries(
     Object.entries(props.transliterationConfig).filter(([key]) => key !== "__typename"),
-  ) as Record<string, { label: string; mapping: Record<string, string> | null }>;
+  ) as Record<string, TransliterationItem>;
 });
 
 onMounted(() => {
@@ -52,7 +58,9 @@ watch(activeKey, (key) => {
   if (!props.editor || !originalContent.value) return;
   const item = key ? transliterationItems.value[key] : null;
   if (item?.mapping) {
-    props.editor.commands.setContent(transliterateHtml(originalContent.value, item.mapping));
+    props.editor.commands.setContent(
+      transliterateHtml(originalContent.value, item.mapping, item.insertSpaces ?? false),
+    );
   } else {
     props.editor.commands.setContent(originalContent.value);
   }
