@@ -45,13 +45,22 @@
           "
         >
           <template #default="{ localizedMetadata }">
+            <entity-element-list
+              v-if="metadata.__typename === nonStandardFieldTypes[0]"
+              :id="formId"
+              :types="metadata.entityTypes"
+              :entity-id="formId"
+              :entity-list="metadata.entityList ?? []"
+              :identifiers="identifiers"
+              :disable-library-bar="metadata.disableLibraryBar"
+              :enable-navigation="true"
+              headerStyle="none"
+              v-bind="metadata"
+            />
             <metadata-wrapper
-              v-if="
-                (!nonStandardFieldTypes.includes(metadata.__typename) ||
-                  metadata.baseLibraryMode ===
-                    BaseLibraryModes.BasicBaseLibrary) &&
-                !parentIsListItem &&
-                metadata.unit !== Unit.CoordinatesDefault
+              v-else-if="
+                !nonStandardFieldTypes.includes(metadata.__typename) ||
+                (!parentIsListItem && metadata.unit !== Unit.CoordinatesDefault)
               "
               class="py-2 px-2"
               :form-id="formId"
@@ -72,19 +81,6 @@
               :input-field="metadata.inputField"
               :entity-uuid="formId"
               :can="metadata.can"
-            />
-
-            <entity-element-list
-              v-if="metadata.__typename === nonStandardFieldTypes[0]"
-              :id="formId"
-              :types="metadata.entityTypes"
-              :entity-id="formId"
-              :entity-list="metadata.entityList ?? []"
-              :identifiers="identifiers"
-              :disable-library-bar="metadata.disableLibraryBar"
-              :enable-navigation="true"
-              headerStyle="none"
-              v-bind="metadata"
             />
             <entity-element-w-y-s-i-w-y-g
               v-if="metadata.__typename === nonStandardFieldTypes[1]"
