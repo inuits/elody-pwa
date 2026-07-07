@@ -106,6 +106,24 @@ const generateExtensionNameFromConfiguration = (
   return extensionName;
 };
 
+// When the browser resolves a click after a contenteditable=false atom (tag), it may
+// land at the atom's own start position instead of the position after it. This helper
+// advances `from` past such a leading tag so adjacent-tag selections work correctly.
+export const getAdjustedSelectionFrom = (state: EditorState): number => {
+  const { from, to } = state.selection;
+  let adjusted = from;
+  state.doc.nodesBetween(from, from + 1, (node, pos) => {
+    if (
+      customExtensionNames.value.includes(node.type.name) &&
+      pos === from &&
+      from + node.nodeSize < to
+    ) {
+      adjusted = from + node.nodeSize;
+    }
+  });
+  return adjusted;
+};
+
 const getNodeFromSelection = (
   state: EditorState,
 ): false | { node: Node; pos: number } => {
@@ -130,7 +148,8 @@ const getNodeFromSelection = (
 };
 
 const getSelectionHTML = (state: EditorState): string => {
-  const { from, to } = state.selection;
+  const from = getAdjustedSelectionFrom(state);
+  const { to } = state.selection;
 
   if (from === to) {
     return "";
@@ -324,7 +343,8 @@ export const createGlobalCommandsExtension = Extension.create({
           }
 
           const { selection } = state;
-          const { from, to } = selection;
+          const { to } = selection;
+          const from = getAdjustedSelectionFrom(state);
           const taggedText = state.doc.textBetween(from, to);
 
           const newNodeContent = {
@@ -557,14 +577,13 @@ const applyColorStylingFromConfigurationToEditor = (
       #wysiwyg-container elody-${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"] {
         background-color: ${configurationItem.tagColor};
         color: #fff;
-        border-radius: 0.375rem;
-        padding-left: 0.25rem;
-        padding-right: 0.25rem;
+        border-radius: 0.25rem;
+        padding: 0.125rem 0;
+        margin: 0;
         cursor: pointer;
-      }
-      
-      #wysiwyg-container elody-${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"]::after {
-      content: "\\200B";
+        user-select: none;
+        -webkit-user-select: none;
+        caret-color: transparent;
       }
       `;
     },
@@ -621,7 +640,8 @@ export const hasSelectionBeenTagged = (editor: Editor) => {
 
   if (selection.empty) return false;
 
-  const { from, to } = selection;
+  const from = getAdjustedSelectionFrom(state);
+  const { to } = selection;
   let isTagged = false;
 
   state.doc.nodesBetween(from, to, (node) => {

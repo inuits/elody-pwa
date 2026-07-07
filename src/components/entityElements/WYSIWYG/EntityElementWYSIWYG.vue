@@ -75,6 +75,19 @@
       :element="element"
       :editor="editor"
     />
+    <div
+      v-if="tagContextMenu"
+      data-tag-context-menu
+      class="fixed z-[9999] bg-white border border-neutral-30 rounded shadow-lg py-1"
+      :style="{ left: tagContextMenu.x + 'px', top: tagContextMenu.y + 'px' }"
+    >
+      <button
+        class="block w-full text-left px-3 py-1 hover:bg-neutral-20"
+        @click="untagFromContextMenu"
+      >
+        {{ t("tagging.untag") }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -146,6 +159,36 @@ const multilingual = inject<MultilingualFieldProvide>(
 );
 const isSwappingLocale = ref(false);
 
+const tagContextMenu = ref<{
+  x: number;
+  y: number;
+  pos: number;
+  nodeSize: number;
+} | null>(null);
+
+const closeTagContextMenu = () => {
+  tagContextMenu.value = null;
+};
+
+const untagFromContextMenu = () => {
+  if (!tagContextMenu.value || !editor.value) return;
+  const { pos, nodeSize } = tagContextMenu.value;
+  editor.value
+    .chain()
+    .focus()
+    .setTextSelection({ from: pos, to: pos + nodeSize })
+    .untagSelectedText()
+    .run();
+  closeTagContextMenu();
+};
+
+const handleDocumentClick = (event: MouseEvent) => {
+  if (!tagContextMenu.value) return;
+  const target = event.target as HTMLElement | null;
+  if (target?.closest("[data-tag-context-menu]")) return;
+  closeTagContextMenu();
+};
+
 const resetContent = () => {
   const content = editor.value?.options?.content;
   if (!content && content !== "") return;
@@ -154,6 +197,7 @@ const resetContent = () => {
 
 onMounted(async () => {
   document.addEventListener("discardEdit", resetContent);
+  document.addEventListener("mousedown", handleDocumentClick);
   initialValue.value = multilingual?.isEnabled?.value
     ? multilingual.currentValue.value
     : form.value?.values.intialValues[props.element.metadataKey];
@@ -190,8 +234,19 @@ onMounted(async () => {
       attributes: {
         class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2  ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
       },
-      handleClickOn: (view, pos, node) => {
-        if (node.attrs.entityId && !useEditHelper.isEdit) openDetailModal(node);
+      handleClickOn: (_view, _pos, node, nodePos, event) => {
+        if (!node.attrs.entityId) return false;
+        if (!useEditHelper.isEdit) {
+          openDetailModal(node);
+          return false;
+        }
+        tagContextMenu.value = {
+          x: (event as MouseEvent).clientX,
+          y: (event as MouseEvent).clientY,
+          pos: nodePos,
+          nodeSize: node.nodeSize,
+        };
+        return true;
       },
     },
     parseOptions: {
@@ -220,6 +275,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener("discardEdit", resetContent);
+  document.removeEventListener("mousedown", handleDocumentClick);
   editor.value?.destroy();
   editorLoaded.value = false;
 });

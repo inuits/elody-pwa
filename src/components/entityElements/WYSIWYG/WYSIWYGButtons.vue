@@ -157,15 +157,6 @@
           >
             Tag
           </button>
-          <button
-            v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
-            :class="[{ 'opacity-30': untagButtonDisabled }]"
-            :disabled="buttonsDisabled || untagButtonDisabled"
-            @click="editor.commands.untagSelectedText()"
-            title="Untag"
-          >
-            Untag
-          </button>
         </div>
       </template>
       <template #default>
@@ -222,11 +213,6 @@ const tagButtonDisabled = computed(() => {
   if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
     return true;
   return !isNonTaggedTextSelected.value;
-});
-const untagButtonDisabled = computed(() => {
-  if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
-    return true;
-  return isNonTaggedTextSelected.value;
 });
 const neededConfigurationEntityTypes = computed<string>(() => {
   if (!extensionConfigurationsByEntity.value) return "";
