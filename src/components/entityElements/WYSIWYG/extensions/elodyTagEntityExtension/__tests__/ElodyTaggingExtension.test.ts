@@ -1,10 +1,32 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import type { EditorState } from "prosemirror-state";
-import {
+
+// Short-circuit the app-wide import chain (main.ts → App.vue → …) that the
+// extension pulls in via useBaseModal / useBulkOperations. CI tears the env
+// down before async imports resolve, causing false failures.
+vi.mock("@/main", () => ({ apolloClient: {} }));
+vi.mock("@/composables/useBaseModal", () => ({
+  useBaseModal: () => ({ openModal: vi.fn(), closeModal: vi.fn() }),
+}));
+vi.mock("@/composables/useBulkOperations", () => ({
+  useBulkOperations: () => ({ dequeueAllItemsForBulkProcessing: vi.fn() }),
+  BulkOperationsContextEnum: {},
+}));
+vi.mock("@/composables/useFormHelper", () => ({
+  useFormHelper: () => ({ addRelations: vi.fn() }),
+}));
+vi.mock("@/composables/useDeleteRelations", () => ({
+  useDeleteRelations: () => ({ deleteRelations: vi.fn() }),
+}));
+vi.mock("@/composables/useEntitySingle", () => ({
+  default: () => ({ getEntityUuid: () => "" }),
+}));
+
+const {
   getAdjustedSelectionFrom,
   hasSelectionBeenTagged,
   customExtensionNames,
-} from "../ElodyTaggingExtension";
+} = await import("../ElodyTaggingExtension");
 
 const TAG_TYPE = "word-testconfig";
 const OTHER_TYPE = "paragraph";
