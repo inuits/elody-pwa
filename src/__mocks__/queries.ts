@@ -1741,6 +1741,20 @@ export type InputField = {
   type: Scalars['String'];
   uploadMultiple?: Maybe<Scalars['Boolean']>;
   validation?: Maybe<Validation>;
+  visibleIf?: Maybe<VisibleIf>;
+};
+
+
+export type VisibleIf = {
+  __typename?: 'VisibleIf';
+  dependsOn: Scalars['String'];
+  values: Array<Scalars['String']>;
+};
+
+
+export type VisibleIfInput = {
+  dependsOn: Scalars['String'];
+  values: Array<Scalars['String']>;
 };
 
 

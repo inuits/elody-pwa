@@ -1,5 +1,9 @@
 import { getValueForPanelMetadata } from "@/helpers";
-import { type Conditional, PanelType } from "@/generated-types/queries";
+import {
+  type Conditional,
+  PanelType,
+  type VisibleIf,
+} from "@/generated-types/queries";
 
 const useConditionalValidation = () => {
   const conditionalFieldIsAvailable = (
@@ -54,7 +58,39 @@ const useConditionalValidation = () => {
     return isValid;
   };
 
-  return { conditionalFieldIsAvailable, conditionalFieldIsRequired };
+  // Returns true when the field configured with `visibleIf` should be shown.
+  // The field is visible iff the initialValues entry named by `visibleIf.dependsOn`
+  // currently holds one of the allowed `visibleIf.values`. When `visibleIf` is
+  // absent, the field is always visible (backward-compatible default).
+  const fieldIsVisibleByCondition = (
+    visibleIf: VisibleIf | null | undefined,
+    formId: string,
+    mediafileViewerContext: string,
+  ): boolean => {
+    if (!visibleIf) return true;
+    if (!formId || !visibleIf.dependsOn) return true;
+
+    let currentValue: unknown;
+    try {
+      currentValue = getValueForPanelMetadata(
+        PanelType.Metadata,
+        visibleIf.dependsOn,
+        formId,
+        mediafileViewerContext,
+      );
+    } catch {
+      return false;
+    }
+
+    if (currentValue === undefined || currentValue === null) return false;
+    return (visibleIf.values ?? []).includes(String(currentValue));
+  };
+
+  return {
+    conditionalFieldIsAvailable,
+    conditionalFieldIsRequired,
+    fieldIsVisibleByCondition,
+  };
 };
 
 export { useConditionalValidation };

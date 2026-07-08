@@ -4,7 +4,8 @@
     v-if="
       (!metadata.showOnlyInEditMode ||
         (metadata.showOnlyInEditMode && isEdit)) &&
-      fieldIsPermittedToBeSeenByUser
+      fieldIsPermittedToBeSeenByUser &&
+      fieldIsConditionallyVisible
     "
     :key="fieldLabel"
     :class="{
@@ -258,6 +259,7 @@ import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
+import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useMetadataVirtualKeyboard } from "@/composables/useMetadataVirtualKeyboard";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
@@ -297,6 +299,16 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
+const mediafileViewerContext = inject<string>("mediafileViewerContext", "");
+const { fieldIsVisibleByCondition } = useConditionalValidation();
+
+const fieldIsConditionallyVisible = computed(() =>
+  fieldIsVisibleByCondition(
+    (props.metadata.inputField as any)?.visibleIf,
+    props.formId,
+    mediafileViewerContext,
+  ),
+);
 
 const {
   field,
