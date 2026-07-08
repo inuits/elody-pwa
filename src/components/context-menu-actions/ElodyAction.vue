@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import {
+  BulkOperationTypes,
   ContextMenuElodyActionEnum,
   type DeleteDataMutation,
   DeleteDataDocument,
@@ -24,6 +25,7 @@ import {
   ModalStyle,
   ContextMenuFormFlow,
 } from "@/generated-types/queries";
+import { useModalActions } from "@/composables/useModalActions";
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -55,6 +57,7 @@ const props = defineProps<{
   typeModal?: TypeModals;
   formFlow?: ContextMenuFormFlow;
   formTitle?: string;
+  formRelationType?: string;
   relation?:
     | { idx: number; relation: object }
     | "no-relation-found"
@@ -69,6 +72,7 @@ const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { confirm } = useConfirmModal();
 const { displaySuccessNotification } = useBaseNotification();
 const { openModal } = useBaseModal();
+const { initializeGeneralProperties } = useModalActions();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { loadDocument } = useImport();
@@ -264,6 +268,18 @@ const doAction = async () => {
   if (
     props.action === ContextMenuElodyActionEnum.CreateEntityFromExternalSource
   ) {
+    const parentIdForRelation = entityFormData?.id || props.entityId;
+    const collectionForRelation =
+      entityFormData?.collection || (Collection.Entities as any);
+    if (props.formRelationType && parentIdForRelation) {
+      initializeGeneralProperties(
+        parentIdForRelation,
+        props.formRelationType,
+        collectionForRelation,
+        [],
+        BulkOperationTypes.CreateEntity,
+      );
+    }
     if (props.typeModal === TypeModals.GuidedFlow) {
       openModal(
         TypeModals.GuidedFlow,

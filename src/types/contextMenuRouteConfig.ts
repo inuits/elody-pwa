@@ -4,6 +4,7 @@ import type {
   ContextMenuGeneralActionEnum,
   EntityButtonStyle,
   EntityButtonConfig,
+  TypeModals,
 } from "@/generated-types/queries";
 
 export type { EntityButtonStyle, EntityButtonConfig };
@@ -27,6 +28,8 @@ export type ElodyActionConfig = BaseAction & {
   formQuery?: string;
   formFlow?: ContextMenuFormFlow;
   formTitle?: string;
+  formRelationType?: string;
+  typeModal?: TypeModals;
   hidden?: boolean;
   showAsButton?: boolean;
 };
