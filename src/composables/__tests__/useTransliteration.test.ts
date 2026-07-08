@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { useTransliteration } from "@/composables/useTransliteration";
+import {
+  isTransliterationEnabledValue,
+  useTransliteration,
+} from "@/composables/useTransliteration";
 
 const LATIN_TO_ARABIC: Record<string, string> = {
   ʾ: "ا",
@@ -235,5 +238,32 @@ describe("useTransliteration", () => {
         "<p>b hello</p>",
       );
     });
+  });
+});
+
+describe("isTransliterationEnabledValue", () => {
+  it("returns true for the boolean true", () => {
+    expect(isTransliterationEnabledValue(true)).toBe(true);
+  });
+
+  it("returns true for truthy strings (case/whitespace insensitive)", () => {
+    expect(isTransliterationEnabledValue("true")).toBe(true);
+    expect(isTransliterationEnabledValue(" Yes ")).toBe(true);
+    expect(isTransliterationEnabledValue("1")).toBe(true);
+  });
+
+  it("returns false for the boolean false", () => {
+    expect(isTransliterationEnabledValue(false)).toBe(false);
+  });
+
+  it("returns false for falsy / negative strings", () => {
+    expect(isTransliterationEnabledValue("false")).toBe(false);
+    expect(isTransliterationEnabledValue("No")).toBe(false);
+    expect(isTransliterationEnabledValue("")).toBe(false);
+  });
+
+  it("returns false for null and undefined", () => {
+    expect(isTransliterationEnabledValue(null)).toBe(false);
+    expect(isTransliterationEnabledValue(undefined)).toBe(false);
   });
 });

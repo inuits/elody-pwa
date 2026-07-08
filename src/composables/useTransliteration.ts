@@ -35,6 +35,14 @@ export const transliterateHtml = (
   });
 };
 
+export const isTransliterationEnabledValue = (value: unknown): boolean => {
+  if (value === true) return true;
+  if (typeof value === "string") {
+    return ["true", "yes", "1"].includes(value.trim().toLowerCase());
+  }
+  return false;
+};
+
 export type UseTransliterationReturn = {
   transliterateText: (
     text: string,

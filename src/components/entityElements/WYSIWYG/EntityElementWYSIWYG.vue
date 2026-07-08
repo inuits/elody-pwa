@@ -26,10 +26,7 @@
         :extra-layouts="wysiwygElementConfiguration.virtualKeyboardLayouts"
       />
       <WYSIWYGTransliterationToggle
-        v-if="
-          !useEditHelper.isEdit &&
-          wysiwygElementConfiguration?.transliterationConfig
-        "
+        v-if="!useEditHelper.isEdit && showTransliterationToggle"
         :editor="editor"
         :transliteration-config="
           wysiwygElementConfiguration?.transliterationConfig
@@ -121,6 +118,7 @@ import {
   getMultilingualProvideKey,
   type MultilingualFieldProvide,
 } from "@/composables/useMultilingualField";
+import { isTransliterationEnabledValue } from "@/composables/useTransliteration";
 
 const props = withDefaults(
   defineProps<{
@@ -152,6 +150,16 @@ const paragraphAmount = ref<number>(0);
 const wysiwygElementConfiguration = ref<
   WysiwygElementConfiguration | undefined
 >(props.element.wysiwygElementConfiguration || undefined);
+
+const showTransliterationToggle = computed(() => {
+  const config = wysiwygElementConfiguration.value?.transliterationConfig;
+  if (!config) return false;
+  const gatingKey = config.enabledByProperty;
+  if (!gatingKey) return true;
+  return isTransliterationEnabledValue(
+    form.value?.values?.intialValues?.[gatingKey],
+  );
+});
 
 const multilingual = inject<MultilingualFieldProvide>(
   getMultilingualProvideKey(props.element.metadataKey),

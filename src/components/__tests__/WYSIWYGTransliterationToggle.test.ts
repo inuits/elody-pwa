@@ -43,6 +43,23 @@ describe("WYSIWYGTransliterationToggle", () => {
       expect(wrapper.findAll("button")).toHaveLength(2);
     });
 
+    it("ignores non-item config fields (e.g. enabledByProperty string) and renders only mapping items", () => {
+      const configWithControlField = {
+        ...makeConfig(),
+        __typename: "WysiwygTransliterationConfig",
+        enabledByProperty: "enableTransliteration",
+      };
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: {
+          editor: makeEditor(),
+          transliterationConfig: configWithControlField,
+        },
+      });
+      const buttons = wrapper.findAll("button");
+      expect(buttons).toHaveLength(2);
+      expect(buttons.map((b) => b.text())).toEqual(["Latin", "Arabic"]);
+    });
+
     it("filters out __typename and renders only data items", () => {
       const configWithTypename = {
         ...makeConfig(),

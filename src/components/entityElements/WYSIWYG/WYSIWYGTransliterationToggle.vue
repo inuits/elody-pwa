@@ -37,8 +37,13 @@ type TransliterationItem = {
 
 const transliterationItems = computed(() => {
   if (!props.transliterationConfig) return {} as Record<string, TransliterationItem>;
+  // Keep only the mapping items (objects); skip __typename and scalar control
+  // fields such as `enabledByProperty`.
   return Object.fromEntries(
-    Object.entries(props.transliterationConfig).filter(([key]) => key !== "__typename"),
+    Object.entries(props.transliterationConfig).filter(
+      ([key, value]) =>
+        key !== "__typename" && value !== null && typeof value === "object",
+    ),
   ) as Record<string, TransliterationItem>;
 });
 
