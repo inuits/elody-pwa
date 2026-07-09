@@ -529,8 +529,8 @@ export const getEntityTitle = (entity: BaseEntity): string => {
   else if (entity.intialValues?.computed_title) title = entity.intialValues.computed_title;
   else if (entity.intialValues?.email) title = entity.intialValues.email;
   else if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
-  else if (entity.intialValues?.wording) title = entity.intialValues.wording;
   else if (entity.intialValues?.code) title = entity.intialValues.code;
+  else if (entity.intialValues?.wording) title = entity.intialValues.wording;
   else if (entity.intialValues?.originalTitle)
     title = entity.intialValues.originalTitle;
   else if (entity.intialValues?.preferred_title)
