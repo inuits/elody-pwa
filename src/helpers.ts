@@ -935,6 +935,17 @@ export const looksLikeEntityId = (value: string | undefined | null): boolean => 
   return isPrefixedId || isUuid;
 };
 
+export const stripEmbeddedViewerSuffix = (url: string): string => {
+  const suffix = /\/embed\/viewer\/?$/;
+  try {
+    const parsed = new URL(url);
+    parsed.pathname = parsed.pathname.replace(suffix, "");
+    return parsed.toString();
+  } catch {
+    return url.replace(suffix, "");
+  }
+};
+
 export const graphqlErrorInterceptor = onError(
   ({ graphQLErrors, operation }): any => {
     const { handleGraphqlError } = useErrorCodes();

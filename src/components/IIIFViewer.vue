@@ -15,6 +15,7 @@
       :image-filename="imageFilename"
       :dimensions="dimensions"
       :enable-selection="enableSelection"
+      :logo="logo"
       @toggle-selection="toggleSelection"
       @cancel-selection="undoLastSelection"
     />
@@ -44,6 +45,7 @@ const props = defineProps<{
   dimensions?: Record<string, any>;
   enableSelection?: boolean;
   cropSizes?: CropAreaCoordinates;
+  logo?: { src: string; href: string; alt?: string };
 }>();
 
 const emit = defineEmits<{

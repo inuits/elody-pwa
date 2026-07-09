@@ -3,6 +3,16 @@
     class="absolute w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10"
   >
     <div class="pt-[10px] flex flex-row">
+      <a
+        v-if="logo"
+        :href="logo.href"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mr-2 ml-2 flex items-center"
+        data-testid="viewer-toolbar-logo"
+      >
+        <img :src="logo.src" :alt="logo.alt ?? ''" class="h-5" />
+      </a>
       <button ref="fullPageRef" class="a1 mr-2 ml-2">
         <unicon
           :name="Unicons.Desktop.name"
@@ -145,6 +155,7 @@ const props = defineProps<{
   imageFilename?: string;
   dimensions?: Record<string, any>;
   enableSelection?: boolean;
+  logo?: { src: string; href: string; alt?: string };
 }>();
 
 const emit = defineEmits<{

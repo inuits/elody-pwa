@@ -9,6 +9,7 @@ import {
   getTranslatedMessage,
   extractValueFromObject,
   looksLikeEntityId,
+  stripEmbeddedViewerSuffix,
 } from "@/helpers";
 import {
   type Entity,
@@ -85,6 +86,46 @@ describe("looksLikeEntityId", () => {
   it("handles null/undefined", () => {
     expect(looksLikeEntityId(undefined)).toBe(false);
     expect(looksLikeEntityId(null)).toBe(false);
+  });
+});
+
+describe("stripEmbeddedViewerSuffix", () => {
+  it("strips the /embed/viewer suffix from an asset url", () => {
+    expect(
+      stripEmbeddedViewerSuffix(
+        "https://dams.antwerpen.be/assets/813ef4f8/embed/viewer",
+      ),
+    ).toBe("https://dams.antwerpen.be/assets/813ef4f8");
+  });
+
+  it("strips the suffix regardless of the path segment before it", () => {
+    expect(
+      stripEmbeddedViewerSuffix(
+        "https://dams1.antwerpen.be/asset/bGPQS9tp/embed/viewer",
+      ),
+    ).toBe("https://dams1.antwerpen.be/asset/bGPQS9tp");
+  });
+
+  it("handles a trailing slash after the suffix", () => {
+    expect(
+      stripEmbeddedViewerSuffix(
+        "https://dams.antwerpen.be/assets/813ef4f8/embed/viewer/",
+      ),
+    ).toBe("https://dams.antwerpen.be/assets/813ef4f8");
+  });
+
+  it("preserves query string and hash", () => {
+    expect(
+      stripEmbeddedViewerSuffix(
+        "https://dams.antwerpen.be/assets/813ef4f8/embed/viewer?lang=nl#top",
+      ),
+    ).toBe("https://dams.antwerpen.be/assets/813ef4f8?lang=nl#top");
+  });
+
+  it("returns the url unchanged when the suffix is absent", () => {
+    expect(
+      stripEmbeddedViewerSuffix("https://dams.antwerpen.be/assets/813ef4f8"),
+    ).toBe("https://dams.antwerpen.be/assets/813ef4f8");
   });
 });
 
