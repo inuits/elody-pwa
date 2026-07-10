@@ -34,7 +34,11 @@ const mainFileTypes = [
 // 10 mins
 const UPLOAD_TIMEOUT_MS = 10 * 60 * 1000;
 
-const { handleHttpError, getMessageAndCodeFromErrorString } = useErrorCodes();
+const {
+  handleHttpError,
+  getMessageAndCodeFromErrorString,
+  getSeverityFromErrorString,
+} = useErrorCodes();
 const mediafiles = computed((): DropzoneFile[] =>
   files.value.filter(
     (file: DropzoneFile) =>
@@ -171,7 +175,7 @@ const useUpload = (config: any = {}) => {
     const errors = [];
 
     for await (const upload of generator) {
-      if (!upload?.response.ok) {
+      if (!upload?.response.ok && !upload?.warning) {
         __uploadExceptionHandler(upload?.response.text(), upload.file);
         errors.push(upload?.response.text());
         continue;
@@ -608,16 +612,35 @@ const useUpload = (config: any = {}) => {
     });
 
     if (!response.ok) {
-      const httpErrorMessage = (
-        await getMessageAndCodeFromErrorString(await response.text())
-      ).message;
+      const { message, severity } = await getSeverityFromErrorString(
+        await response.text(),
+      );
+
+      // Alert-level responses (e.g. an empty OCR .txt) are non-blocking: show a
+      // yellow warning on the file, mark the upload step complete and let the
+      // flow continue instead of failing the file.
+      if (severity === "warning") {
+        updateFileThumbnails(
+          file,
+          ProgressStepType.Upload,
+          ProgressStepStatus.Complete,
+        );
+        __handleFileThumbnailWarning(file, [message]);
+        file.status = "uploaded";
+        return {
+          response,
+          file,
+          warning: message,
+        };
+      }
+
       updateFileThumbnails(
         file,
         ProgressStepType.Upload,
         ProgressStepStatus.Failed,
-        [httpErrorMessage],
+        [message],
       );
-      return Promise.reject(httpErrorMessage);
+      return Promise.reject(message);
     }
 
     file.status = "uploaded";
