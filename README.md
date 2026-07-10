@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://elody.eu"><img src="https://elody.eu/images/logo.svg" alt="Elody" width="96" /></a>
+</p>
+
+<p align="center">Part of <a href="https://elody.eu">Elody</a> — the open semantic data platform.</p>
+
 # inuits-dams-pwa
 
 Vue 3 PWA frontend for the Elody DAMS platform. The UI is **schema-driven** — forms, views, and field types are not hardcoded but fetched from the GraphQL API at runtime and rendered dynamically.
