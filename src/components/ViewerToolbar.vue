@@ -8,10 +8,10 @@
         :href="logo.href"
         target="_blank"
         rel="noopener noreferrer"
-        class="mr-2 ml-2 flex items-center"
+        class="mr-2 ml-2 flex"
         data-testid="viewer-toolbar-logo"
       >
-        <img :src="logo.src" :alt="logo.alt ?? ''" class="h-5" />
+        <img :src="logo.src" :alt="logo.alt ?? ''" class="h-6" />
       </a>
       <button ref="fullPageRef" class="a1 mr-2 ml-2">
         <unicon
