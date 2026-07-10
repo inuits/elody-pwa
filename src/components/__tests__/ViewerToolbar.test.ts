@@ -77,3 +77,51 @@ describe("ViewerToolbar - open IIIF operations modal", () => {
     });
   });
 });
+
+describe("ViewerToolbar - logo", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const logo = {
+    src: "/a-logo.svg",
+    href: "https://dams.antwerpen.be/assets/813ef4f8",
+    alt: "Stad Antwerpen",
+  };
+
+  it("does not render a logo link when no logo is provided", () => {
+    const wrapper = getWrapper();
+    expect(wrapper.find('[data-testid="viewer-toolbar-logo"]').exists()).toBe(
+      false,
+    );
+  });
+
+  it("renders the logo image and link when a logo is provided", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), logo });
+
+    const link = wrapper.find('[data-testid="viewer-toolbar-logo"]');
+    expect(link.exists()).toBe(true);
+    expect(link.attributes("href")).toBe(logo.href);
+    expect(link.find("img").attributes("src")).toBe(logo.src);
+    expect(link.find("img").attributes("alt")).toBe(logo.alt);
+  });
+
+  it("opens the logo link in a new tab safely", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), logo });
+
+    const link = wrapper.find('[data-testid="viewer-toolbar-logo"]');
+    expect(link.attributes("target")).toBe("_blank");
+    expect(link.attributes("rel")).toBe("noopener noreferrer");
+  });
+
+  it("renders the logo as the first button in the left toolbar group", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), logo });
+
+    const firstControl = wrapper
+      .findAll("button, a[data-testid='viewer-toolbar-logo']")
+      .at(0);
+    expect(firstControl?.attributes("data-testid")).toBe(
+      "viewer-toolbar-logo",
+    );
+  });
+});
