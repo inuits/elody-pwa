@@ -61,6 +61,8 @@ vi.mock("@/helpers", () => ({
         "error-codes.W5014": "No metadata available for item with id {id}",
         "error-codes.W5001":
           "{prefix}Property {property} can only have one of the following values: {values}",
+        "error-codes.A9999": "File {filename} is empty.",
+        "error-codes.A4011": "Ignoring empty file {filename}",
         "notifications.graphql-errors.forbidden.title": "Forbidden",
         "notifications.graphql-errors.forbidden.description":
           "You do not have permission.",
@@ -399,6 +401,72 @@ describe("useErrorCodes", () => {
         expect(result.message).toBe(
           "No metadata available for item with id 999",
         );
+      });
+    });
+
+    describe("getSeverityFromErrorString", () => {
+      it("parses and translates the backend alert format (code + variables) like a regular error code", async () => {
+        const result = await errorCodes.getSeverityFromErrorString(
+          "A4011 | filename:output-onlinefiletools.txt - Mediafile with filename output-onlinefiletools.txt is empty",
+        );
+
+        expect(result.severity).toBe("warning");
+        expect(result.code).toBe("A4011");
+        expect(result.message).toBe(
+          "Ignoring empty file output-onlinefiletools.txt",
+        );
+      });
+
+      it("translates an alert (A) code with variables when a translation exists", async () => {
+        const result = await errorCodes.getSeverityFromErrorString(
+          "A9999 |filename:report.txt| - File is empty.",
+        );
+
+        expect(result.severity).toBe("warning");
+        expect(result.code).toBe("A9999");
+        expect(result.message).toBe("File report.txt is empty.");
+      });
+
+      it("falls back to the human-readable text after ' - ' when no translation exists", async () => {
+        const result = await errorCodes.getSeverityFromErrorString(
+          "A5555 | filename:some-file.txt - This file has an issue",
+        );
+
+        expect(result.severity).toBe("warning");
+        expect(result.code).toBe("A5555");
+        expect(result.message).toBe("This file has an issue");
+      });
+
+      it("falls back to plain free text (code stripped) when there is no separator", async () => {
+        const result = await errorCodes.getSeverityFromErrorString(
+          "A5555 File output-onlinefiletools.txt is empty.",
+        );
+
+        expect(result.severity).toBe("warning");
+        expect(result.code).toBe("A5555");
+        expect(result.message).toBe(
+          "File output-onlinefiletools.txt is empty.",
+        );
+      });
+
+      it("classifies read/write (R/W) codes as errors and delegates translation", async () => {
+        const result =
+          await errorCodes.getSeverityFromErrorString("W5014 | id:999");
+
+        expect(result.severity).toBe("error");
+        expect(result.code).toBe("W5014");
+        expect(result.message).toBe(
+          "No metadata available for item with id 999",
+        );
+      });
+
+      it("classifies an uncoded message as an error", async () => {
+        const result =
+          await errorCodes.getSeverityFromErrorString("Something broke");
+
+        expect(result.severity).toBe("error");
+        expect(result.code).toBeUndefined();
+        expect(result.message).toBe("Something broke");
       });
     });
   });

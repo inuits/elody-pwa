@@ -10,6 +10,8 @@ import { getTranslatedMessage, isAbortError } from "@/helpers";
 import { resetAdvancedPermissions } from "@/composables/usePermissions";
 import { usePageStatus } from "@/composables/usePageStatus";
 
+export type MessageSeverity = "error" | "warning";
+
 export const useErrorCodes = (): {
   handleErrorByCodeType: (code: string, message?: string) => void;
   handleGraphqlError: (
@@ -24,6 +26,11 @@ export const useErrorCodes = (): {
   getMessageAndCodeFromErrorString: (
     error: string,
   ) => Promise<{ code: string; message: string }>;
+  getSeverityFromErrorString: (error: string) => Promise<{
+    code: string | undefined;
+    message: string;
+    severity: MessageSeverity;
+  }>;
 } => {
   const { displayErrorNotification } = useBaseNotification();
   const { setPageStatus } = usePageStatus();
@@ -244,6 +251,47 @@ export const useErrorCodes = (): {
     return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
+  // Alert codes (prefix "A") are non-blocking warnings, as opposed to the
+  // blocking read (R) / write (W) error codes. The backend marks them with
+  // get_alert(), e.g. "A4011 File output-onlinefiletools.txt is empty.".
+  const getSeverityFromErrorString = async (
+    error: string,
+  ): Promise<{
+    code: string | undefined;
+    message: string;
+    severity: MessageSeverity;
+  }> => {
+    const alertCodeMatch = error.match(/\bA\d{4,5}\b/);
+    if (!alertCodeMatch) {
+      const { code, message } = await getMessageAndCodeFromErrorString(error);
+      return { code, message, severity: "error" };
+    }
+
+    const code = alertCodeMatch[0];
+    const stringVariables = __getStringVariablesFromErrorMessage(error);
+    const variableObjects = __parseVariableStringToVariableObject(
+      stringVariables,
+    );
+    const translationKey = `error-codes.${code}`;
+    const translated = getTranslatedMessage(
+      translationKey,
+      variableObjects,
+    ) as string;
+    // Fall back to the backend's free text when no translation exists yet: drop
+    // the code token and any "|var:value|" block, keeping the human-readable
+    // part after the " - " separator (or the plain text if there is none).
+    const withoutCode = error.replace(code, "").trim();
+    const separatorIndex = withoutCode.indexOf(" - ");
+    const fallbackMessage =
+      separatorIndex !== -1
+        ? withoutCode.slice(separatorIndex + 3).trim()
+        : withoutCode;
+    const message =
+      translated !== translationKey ? translated : fallbackMessage;
+
+    return { code, message, severity: "warning" };
+  };
+
   const __extractStatusCodeAndMessageFromResponse = (
     responseType: "graphql" | "http",
     error: GraphQLError | Response,
@@ -338,5 +386,6 @@ export const useErrorCodes = (): {
     handleHttpError,
     getMessageAndCodeFromApolloError,
     getMessageAndCodeFromErrorString,
+    getSeverityFromErrorString,
   };
 };

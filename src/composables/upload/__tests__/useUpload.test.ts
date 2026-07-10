@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { nextTick, ref } from "vue";
 import { flushPromises } from "@vue/test-utils";
 import useUpload from "../useUpload";
+import { UploadFlow } from "@/generated-types/queries";
+import { UploadStatus } from "../types";
 
 vi.mock("@/helpers", () => ({
   getTranslatedMessage: vi.fn((key, args) => `Missing ${args[0]}`),
@@ -13,6 +15,15 @@ vi.mock("@/composables/useErrorCodes", () => ({
     getMessageAndCodeFromErrorString: vi
       .fn()
       .mockResolvedValue({ message: "Error" }),
+    getSeverityFromErrorString: vi.fn(async (raw: string) =>
+      raw.includes("A4011")
+        ? {
+            code: "A4011",
+            message: "File empty.txt is empty.",
+            severity: "warning",
+          }
+        : { code: "W0001", message: "Error", severity: "error" },
+    ),
   }),
 }));
 
@@ -21,6 +32,7 @@ vi.mock("@/composables/upload/useUploadFlowConfiguration", () => ({
     getUploadFlowConfiguration: vi.fn().mockReturnValue({
       checkUploadValidity: () => true,
       validateFiles: () => true,
+      getUploadUrl: async () => "http://storage.test/upload/ticket?x=1",
     }),
   }),
 }));
@@ -52,6 +64,9 @@ vi.mock("../useUploadState", async () => {
   const typeToIncludeInUrl = ref("");
   const shouldIncludeTypeInUrl = ref(false);
   const lastUploadedFileIndex = ref(-1);
+  const currentUploadAbortController = ref(undefined);
+  const uploadProgressPercentage = ref(0);
+  const uploadType = ref("");
 
   return {
     useUploadState: () => ({
@@ -73,6 +88,9 @@ vi.mock("../useUploadState", async () => {
       typeToIncludeInUrl,
       shouldIncludeTypeInUrl,
       lastUploadedFileIndex,
+      currentUploadAbortController,
+      uploadProgressPercentage,
+      uploadType,
       reinitializeDynamicFormFunc: ref(() => {}),
       resetState: vi.fn(),
     }),
@@ -363,5 +381,72 @@ describe("useUpload - Warnings from dry run", () => {
 
     expect(dryRunFeedback.value.errors).toHaveLength(0);
     expect(dryRunFeedback.value.warnings.length).toBeGreaterThan(0);
+  });
+});
+
+describe("useUpload - Warnings from mediafile upload", () => {
+  const createFakeMediafile = (name: string, type: string) => {
+    const previewTemplate = document.createElement("div");
+
+    const warningContainer = document.createElement("div");
+    warningContainer.classList.add("warning-message-container", "hidden");
+
+    const errorContainer = document.createElement("div");
+    errorContainer.classList.add("error-message-container", "hidden");
+
+    previewTemplate.appendChild(warningContainer);
+    previewTemplate.appendChild(errorContainer);
+
+    return { name, type, previewTemplate, status: "added" } as any;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows a yellow warning (not a red error) when the upload returns an alert (A) code and does not mark the file as failed", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        text: () =>
+          Promise.resolve("A4011 File empty.txt is empty."),
+      } as unknown as Response),
+    );
+
+    const {
+      upload,
+      resetUpload,
+      files,
+      failedUploads,
+      amountUploaded,
+      uploadFlow,
+      uploadStatus,
+    } = useUpload({ api: { storageApiUrl: "http://storage.test" } });
+
+    resetUpload();
+    uploadFlow.value = UploadFlow.MediafilesOnly;
+    uploadStatus.value = UploadStatus.NoUpload;
+
+    const mediafile = createFakeMediafile("empty.txt", "text/plain");
+    files.value = [mediafile];
+
+    await upload(false, {} as any, {} as any);
+    await flushPromises();
+
+    const warningContainer = mediafile.previewTemplate.querySelector(
+      ".warning-message-container",
+    );
+    const errorContainer = mediafile.previewTemplate.querySelector(
+      ".error-message-container",
+    );
+
+    expect(warningContainer?.classList.contains("hidden")).toBe(false);
+    expect(warningContainer?.innerHTML).toContain("File empty.txt is empty.");
+    expect(errorContainer?.classList.contains("hidden")).toBe(true);
+    expect(
+      mediafile.previewTemplate.classList.contains("border-red-default"),
+    ).toBe(false);
+    expect(failedUploads.value).not.toContain("empty.txt");
+    expect(amountUploaded.value).toBeGreaterThan(0);
   });
 });
