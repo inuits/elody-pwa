@@ -251,9 +251,6 @@ export const useErrorCodes = (): {
     return await getMessageAndCodeFromErrorString(apolloMessage);
   };
 
-  // Alert codes (prefix "A") are non-blocking warnings, as opposed to the
-  // blocking read (R) / write (W) error codes. The backend marks them with
-  // get_alert(), e.g. "A4011 File output-onlinefiletools.txt is empty.".
   const getSeverityFromErrorString = async (
     error: string,
   ): Promise<{
@@ -277,9 +274,6 @@ export const useErrorCodes = (): {
       translationKey,
       variableObjects,
     ) as string;
-    // Fall back to the backend's free text when no translation exists yet: drop
-    // the code token and any "|var:value|" block, keeping the human-readable
-    // part after the " - " separator (or the plain text if there is none).
     const withoutCode = error.replace(code, "").trim();
     const separatorIndex = withoutCode.indexOf(" - ");
     const fallbackMessage =

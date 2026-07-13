@@ -616,9 +616,6 @@ const useUpload = (config: any = {}) => {
         await response.text(),
       );
 
-      // Alert-level responses (e.g. an empty OCR .txt) are non-blocking: show a
-      // yellow warning on the file, mark the upload step complete and let the
-      // flow continue instead of failing the file.
       if (severity === "warning") {
         updateFileThumbnails(
           file,
