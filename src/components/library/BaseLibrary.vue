@@ -229,7 +229,7 @@
             v-show="showViewModesList && !isInitialLoading && (!entitiesLoading || !!entities?.length)"
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
-            :entities-loading="entitiesLoadingWithoutData"
+            :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
             :disable-previews="disableNewEntityPreviews"
