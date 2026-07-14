@@ -23,13 +23,21 @@ describe("useResultCount", () => {
       expect(getListingCountCap()).toBe(500);
     });
 
-    it("ignores undefined, null, zero and negative values", () => {
+    it("ignores undefined, null, and negative values", () => {
+      setListingCountCap(750);
+      setListingCountCap(undefined);
+      setListingCountCap(null as unknown as number);
+      setListingCountCap(-10);
+      expect(getListingCountCap()).toBe(750);
+    });
+
+    it("accepts zero for disabling count capping", () => {
       setListingCountCap(750);
       setListingCountCap(undefined);
       setListingCountCap(null as unknown as number);
       setListingCountCap(0);
       setListingCountCap(-10);
-      expect(getListingCountCap()).toBe(750);
+      expect(getListingCountCap()).toBe(0);
     });
   });
 
