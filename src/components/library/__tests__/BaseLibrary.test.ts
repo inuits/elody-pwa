@@ -417,6 +417,81 @@ describe("BaseLibrary.vue route navigation triggers refetch", () => {
   });
 });
 
+describe("BaseLibrary.vue predefinedEntities initialization", () => {
+  const makePredefined = (id: string) => ({
+    id,
+    uuid: id,
+    allowedViewModes: { viewModes: [] },
+  });
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("sets isInitialLoading to false when predefinedEntities are provided", async () => {
+    wrapper = getWrapper({ predefinedEntities: [makePredefined("e1")] });
+    await flushPromises();
+
+    expect((wrapper.vm as any).isInitialLoading).toBe(false);
+  });
+
+  it("keeps isInitialLoading false even while entities are loading when predefinedEntities are provided", async () => {
+    libEntitiesLoading.value = true;
+    wrapper = getWrapper({ predefinedEntities: [makePredefined("e1")] });
+    await flushPromises();
+
+    expect((wrapper.vm as any).isInitialLoading).toBe(false);
+  });
+
+  it("copies predefinedEntities into entities", async () => {
+    const predefined = [makePredefined("e1"), makePredefined("e2")];
+    wrapper = getWrapper({ predefinedEntities: predefined });
+    await flushPromises();
+
+    expect((wrapper.vm as any).entities).toHaveLength(2);
+    expect((wrapper.vm as any).entities.map((e: any) => e.uuid)).toEqual([
+      "e1",
+      "e2",
+    ]);
+  });
+
+  it("copies predefinedEntities into a new array rather than reusing the prop reference", async () => {
+    const predefined = [makePredefined("e1")];
+    wrapper = getWrapper({ predefinedEntities: predefined });
+    await flushPromises();
+
+    expect((wrapper.vm as any).entities).not.toBe(predefined);
+    expect((wrapper.vm as any).entities).toEqual(predefined);
+  });
+
+  it("reflects predefinedEntities in entities when they are provided after mount", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    const predefined = [makePredefined("late-1")];
+    await wrapper.setProps({ predefinedEntities: predefined });
+    await flushPromises();
+
+    expect((wrapper.vm as any).entities.map((e: any) => e.uuid)).toEqual([
+      "late-1",
+    ]);
+    expect((wrapper.vm as any).isInitialLoading).toBe(false);
+  });
+});
+
 describe("BaseLibrary.vue optimistic entity add does not re-initialize view modes", () => {
   const makePickerEntity = (id: string) => ({
     id,

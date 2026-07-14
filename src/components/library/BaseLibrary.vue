@@ -976,6 +976,7 @@ watch(
             viewModeWithConfig.viewMode,
         );
       determineViewModes(viewModes);
+      isInitialLoading.value = false;
     }
   },
   { immediate: true },
@@ -1089,5 +1090,5 @@ watch(
   { deep: true },
 );
 
-defineExpose({ entities });
+defineExpose({ entities, isInitialLoading });
 </script>
