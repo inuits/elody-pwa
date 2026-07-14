@@ -120,6 +120,7 @@ const props = withDefaults(
     searchMetadataKeys?: string[];
     searchAcceptedTypes?: string[];
     searchStaticFilters?: AdvancedFilterInput[];
+    filterParentEntity?: any;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -132,6 +133,7 @@ const props = withDefaults(
     searchMetadataKeys: () => [],
     searchAcceptedTypes: () => [],
     searchStaticFilters: () => [],
+    filterParentEntity: undefined,
   },
 );
 
@@ -185,7 +187,10 @@ const pendingEntities = ref<Entity[]>([]);
 const { displayWarningNotification, displaySuccessNotification } =
   useBaseNotification();
 
-provide("ParentEntityProvider", getModalInfo(TypeModals.DynamicForm).parentEntity);
+provide(
+  "ParentEntityProvider",
+  props.filterParentEntity ?? getModalInfo(TypeModals.DynamicForm).parentEntity,
+);
 
 provide(
   "mediafileViewerContext",

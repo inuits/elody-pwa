@@ -13,6 +13,7 @@
       <EntityPickerComponent
         :key="step.key"
         :entity-uuid="pickerParentUuid"
+        :filter-parent-entity="getForm(parentEntityId)?.values"
         :accepted-types="acceptedTypes"
         :custom-query="step.pickerQuery ?? ''"
         :custom-filters-query="step.pickerFiltersQuery ?? undefined"
