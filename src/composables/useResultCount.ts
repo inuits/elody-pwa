@@ -14,7 +14,7 @@
  * (see `setListingCountCap` in `main.ts`), mirroring `bulkSelectAllSizeLimit`.
  */
 
-export const DEFAULT_LISTING_COUNT_CAP = 0;
+export const DEFAULT_LISTING_COUNT_CAP = 1000;
 
 let listingCountCap = DEFAULT_LISTING_COUNT_CAP;
 
@@ -23,7 +23,7 @@ let listingCountCap = DEFAULT_LISTING_COUNT_CAP;
  * Non-positive / nullish values are ignored so a missing config key keeps the default.
  */
 export const setListingCountCap = (cap?: number | null): void => {
-  if (typeof cap === "number" && Number.isFinite(cap) && cap > 0) {
+  if (typeof cap === "number" && Number.isFinite(cap)) {
     listingCountCap = cap;
   }
 };

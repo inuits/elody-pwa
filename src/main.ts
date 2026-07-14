@@ -98,7 +98,7 @@ const start = async (): Promise<void> => {
 
   // Keep the frontend cap in sync with collection-api's LISTING_COUNT_CAP so
   // capped totals render as "<cap>+" instead of the raw `cap + 1` sentinel.
-  setListingCountCap(config.listingCountCap);
+  setListingCountCap(config.listingCountCap || 0);
 
   const apqLink = createPersistedQueryLink({
     sha256,
