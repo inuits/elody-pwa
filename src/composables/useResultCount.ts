@@ -14,7 +14,7 @@
  * (see `setListingCountCap` in `main.ts`), mirroring `bulkSelectAllSizeLimit`.
  */
 
-export const DEFAULT_LISTING_COUNT_CAP = 1000;
+export const DEFAULT_LISTING_COUNT_CAP = 0;
 
 let listingCountCap = DEFAULT_LISTING_COUNT_CAP;
 
@@ -32,7 +32,7 @@ export const getListingCountCap = (): number => listingCountCap;
 
 /** True when the backend capped the count, i.e. the real total is unknown and larger than the cap. */
 export const isCountCapped = (count?: number | null): boolean =>
-  typeof count === "number" && count > listingCountCap;
+  typeof count === "number" && listingCountCap > 0 && count > listingCountCap;
 
 /**
  * Human-friendly total: an exact, locale-grouped number, or "<cap>+" when capped.
