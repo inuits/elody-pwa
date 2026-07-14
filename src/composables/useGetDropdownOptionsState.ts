@@ -84,6 +84,8 @@ export const useGetDropdownOptionsState = (
     currentRequestId.value++;
     const requestId = currentRequestId.value;
 
+    const parentValue = parent?.value ?? "fetchAll";
+
     let filters;
     let entityTypeToSet = entityType;
     isLoading.value = true;
@@ -93,10 +95,12 @@ export const useGetDropdownOptionsState = (
     ) {
       filters = mapOptionsFilterInput(advancedFilterInputForRetrievingOptions);
       filters =
-        parent.value !== "fetchAll" && (relationType || fromRelationType)
+        parentValue !== "fetchAll" && (relationType || fromRelationType)
           ? [
               // to get selected options we only need a type from the filters to retrieve all options
-              ...filters.filter((filter) => filter.type === AdvancedFilterTypes.Type),
+              ...filters.filter(
+                (filter) => filter.type === AdvancedFilterTypes.Type,
+              ),
               getRelationFilter(formId, fromRelationType, relationFilter),
             ]
           : filters;
@@ -106,7 +110,7 @@ export const useGetDropdownOptionsState = (
         )?.value || entityType;
     } else {
       filters =
-        parent.value === "fetchAll" || !fromRelationType
+        parentValue === "fetchAll" || !fromRelationType
           ? [baseTypeFilter]
           : [getRelationFilter(formId, fromRelationType, relationFilter)];
     }
@@ -241,8 +245,12 @@ export const useGetDropdownOptionsState = (
         value: _value,
         match_exact: filterInput.match_exact,
         item_types: filterInput.item_types || [],
-      }
+      };
       if (filterInput.operator) result["operator"] = filterInput.operator;
+      if (filterInput.lookup) {
+        const { from, local_field, foreign_field, as } = filterInput.lookup;
+        result["lookup"] = { from, local_field, foreign_field, as };
+      }
       return result;
     });
   };

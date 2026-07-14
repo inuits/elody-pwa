@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
+import { effectScope, nextTick, shallowRef, watch } from "vue";
 import { useGetDropdownOptionsState } from "../useGetDropdownOptionsState";
+import { useGetDropdownOptions } from "../useGetDropdownOptions";
 import { EditStatus, type Entitytyping } from "@/generated-types/queries";
 import { type FormContext } from "vee-validate";
 
@@ -9,9 +11,24 @@ const mocks = vi.hoisted(() => {
   };
 });
 
+// Real Vue shallowRef so mutations to `entities.value` propagate through the
+// computed the state helper builds on top of it — matches production wiring.
+const entitiesRef = shallowRef<any[]>([]);
+
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
     getForm: mocks.getForm,
+  }),
+}));
+
+vi.mock("@/components/library/useBaseLibrary", () => ({
+  useBaseLibrary: () => ({
+    entities: entitiesRef,
+    getEntities: vi.fn(),
+    setAdvancedFilters: vi.fn(),
+    setEntityType: vi.fn(),
+    setIsSearchLibrary: vi.fn(),
+    setsearchInputType: vi.fn(),
   }),
 }));
 
@@ -209,3 +226,56 @@ describe("findNewRelationValue", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("useGetDropdownOptions reactivity via the cache", () => {
+  // Regression: helpers stored in `ref({})` get reactive-proxied on read.
+  // The proxy auto-unwraps nested ComputedRefs — so reading
+  // `entityDropdownOptions.value.length` through the cache returns undefined
+  // and any `watch` on it never fires. `markRaw` on the stored helper
+  // prevents the reactive wrap.
+  it("keeps entityDropdownOptions as a ComputedRef when accessed through the cache", () => {
+    entitiesRef.value = [
+      { id: "ORG-1", metadata: [{ key: "title", value: "Only Match" }] },
+    ];
+    const stateName = `test-cache-shape-${Date.now()}`;
+
+    // First call — populates the cache.
+    useGetDropdownOptions(stateName, "get");
+    // Second call — retrieves through the cache (this is the failing path
+    // in production when a component re-mounts with the same key).
+    const cached = useGetDropdownOptions(stateName, "get");
+
+    // Must NOT be an already-unwrapped array; must expose `.value`.
+    expect(Array.isArray(cached.entityDropdownOptions)).toBe(false);
+    expect(cached.entityDropdownOptions.value?.length).toBe(1);
+  });
+
+  it("re-fires a watcher on entityDropdownOptions.value.length via the cache", async () => {
+    entitiesRef.value = [];
+    const stateName = `test-cache-watcher-${Date.now()}`;
+
+    useGetDropdownOptions(stateName, "get");
+    const cached = useGetDropdownOptions(stateName, "get");
+
+    const observed: (number | undefined)[] = [];
+    const scope = effectScope();
+    scope.run(() => {
+      watch(
+        () => cached.entityDropdownOptions?.value?.length,
+        (len) => {
+          observed.push(len);
+        },
+        { immediate: true },
+      );
+    });
+
+    entitiesRef.value = [
+      { id: "ORG-1", metadata: [{ key: "title", value: "Only Match" }] },
+    ];
+    await nextTick();
+    scope.stop();
+
+    expect(observed).toContain(1);
+  });
+});
+

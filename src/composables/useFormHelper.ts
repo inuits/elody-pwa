@@ -316,7 +316,7 @@ const useFormHelper = () => {
   };
 
   const extractMetadataValue = (value: unknown): unknown => {
-    if (typeof value === 'boolean') return value;
+    if (typeof value === "boolean") return value;
     if (value && typeof value === "object" && (value as any).formatter)
       return (value as any).label ?? "";
     return value;

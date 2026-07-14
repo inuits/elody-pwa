@@ -78,9 +78,14 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
+  shallowRef,
   watch,
 } from "vue";
-import { getEntityIdFromRoute, getEntityTitle, looksLikeEntityId } from "@/helpers";
+import {
+  getEntityIdFromRoute,
+  getEntityTitle,
+  looksLikeEntityId,
+} from "@/helpers";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -128,8 +133,12 @@ const props = withDefaults(
   },
 );
 
-const allEntitiesHelper = ref<typeof useGetDropdownOptionsState>();
-const relatedEntitiesHelper = ref<typeof useGetDropdownOptionsState>();
+const allEntitiesHelper = shallowRef<
+  ReturnType<typeof useGetDropdownOptionsState> | undefined
+>();
+const relatedEntitiesHelper = shallowRef<
+  ReturnType<typeof useGetDropdownOptionsState> | undefined
+>();
 const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
 const router = useRouter();
@@ -237,8 +246,13 @@ const initAutocompleteOption = async () => {
     ) {
       await relatedEntitiesHelper.value.initialize();
     }
-  } else {
+  } else if (props.autoSelectable) {
     await allEntitiesHelper.value.initialize();
+    const options = allEntitiesHelper.value.entityDropdownOptions;
+    if (!options.length || options.length > 1) return;
+    handleSelect(options);
+    populateSelectedOptions(options);
+    return;
   }
 
   if (!props.isReadOnly && props.relationFilter) {
@@ -252,13 +266,6 @@ const initAutocompleteOption = async () => {
   }
 
   if (
-    props.autoSelectable &&
-    allEntitiesHelper.value.entityDropdownOptions.value?.length === 1 &&
-    relatedEntitiesHelper.value.entityDropdownOptions.value?.length === 0
-  ) {
-    populateSelectedOptions(allEntitiesHelper.value.entityDropdownOptions);
-    handleSelect(allEntitiesHelper.value.entityDropdownOptions);
-  } else if (
     props.mode === "create" &&
     !props.isReadOnly &&
     props.modelValue &&

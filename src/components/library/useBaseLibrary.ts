@@ -1,7 +1,7 @@
 import type { ApolloClient } from "@apollo/client/core";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { dequal as isEqual } from "dequal";
-import type { SearchInputType } from "@/generated-types/queries";
+import { SearchInputType } from "@/generated-types/queries";
 import {
   Entitytyping,
   type AdvancedFilterInput,
@@ -52,7 +52,7 @@ export const useBaseLibrary = (
     },
     advancedSearchValue: [],
     advancedFilterInputs: [],
-    searchInputType: undefined,
+    searchInputType: SearchInputType.AdvancedInputType,
     userUuid: "", // TODO: refactor needed
     preferredLanguage: config.features.supportsMultilingualMetadataEditing
       ? locale.value
