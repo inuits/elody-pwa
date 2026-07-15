@@ -929,7 +929,7 @@ export const toArray = <T>(value: T | T[] | undefined): T[] => {
 
 export const looksLikeEntityId = (value: string | undefined | null): boolean => {
   if (!value || /\s/.test(value)) return false;
-  const isPrefixedId = /^[A-Z0-9]{1,12}-[A-Za-z0-9_-]+$/.test(value);
+  const isPrefixedId = /^[A-Z0-9]{1,12}-[A-Za-z0-9_-]{3,}$/.test(value);
   const isUuid =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
   return isPrefixedId || isUuid;
