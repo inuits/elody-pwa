@@ -9,10 +9,7 @@
     />
     <EntityHeaderButton
       v-if="isSingleEntityPage && customDeleteButton"
-      :label="customDeleteButton.label"
-      :icon="customDeleteButton.icon"
-      :mutation="customDeleteButton.mutation"
-      :custom-style="customDeleteButton.style"
+      :config="customDeleteButton"
     />
     <DeleteButton v-else-if="showDeleteButton" />
     <HeaderContextMenuActions
@@ -49,7 +46,7 @@ import HeaderContextMenuActions from "@/components/HeaderContextMenuActions.vue"
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { auth } from "@/main";
 import { usePageStatus } from "@/composables/usePageStatus";
-import type { EntityButtonConfig } from "@/types/contextMenuRouteConfig";
+import type { EntityButtonConfig, ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
 
 const route = useRoute();
 const config: any = inject("config");
@@ -72,7 +69,7 @@ const isSingleEntityPage = computed(() => {
   return route.name === "SingleEntity" || route.name === "SingleMediafile";
 });
 
-const customDeleteButton = computed<EntityButtonConfig | false>(() => {
+const customDeleteButton = computed<EntityButtonConfig | ToggleEntityButtonConfig | false>(() => {
   if (!isSingleEntityPage.value || !auth.isAuthenticated.value) return false;
   const btn = configDeleteButton.value;
   if (btn === false) return false;

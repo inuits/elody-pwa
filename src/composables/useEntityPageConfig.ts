@@ -5,6 +5,7 @@ import type {
   ContextMenuActionRouteConfig,
   EntityButtonConfig,
   EntityConfig,
+  ToggleEntityButtonConfig,
 } from "@/types/contextMenuRouteConfig";
 
 export const useEntityPageConfig = () => {
@@ -28,7 +29,7 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.hasEditMetadataButton,
   );
 
-  const deleteButton = computed<EntityButtonConfig | false | undefined>(
+  const deleteButton = computed<EntityButtonConfig | ToggleEntityButtonConfig | false | undefined>(
     () => entityConfig.value?.deleteButton,
   );
 

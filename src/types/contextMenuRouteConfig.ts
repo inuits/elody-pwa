@@ -64,10 +64,21 @@ export type ContextMenuActionRouteConfig =
   | GeneralActionConfig
   | CustomActionConfig;
 
+export type ToggleEntityButtonConfig = {
+  toggle: true;
+  metadataKey: string;
+  whenTrue: EntityButtonConfig;
+  whenFalse: EntityButtonConfig;
+};
+
+export const isToggleButton = (
+  btn: EntityButtonConfig | ToggleEntityButtonConfig,
+): btn is ToggleEntityButtonConfig => "toggle" in btn && btn.toggle === true;
+
 export type EntityConfig = {
   actions?: ContextMenuActionRouteConfig[];
   hasEditMetadataButton?: boolean;
-  deleteButton?: EntityButtonConfig | false;
+  deleteButton?: EntityButtonConfig | ToggleEntityButtonConfig | false;
 };
 
 export type EntityPageConfig = Record<string, EntityConfig>;

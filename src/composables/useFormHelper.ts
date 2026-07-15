@@ -606,6 +606,7 @@ const useFormHelper = () => {
     createForm,
     addForm,
     getForm,
+    getFormByRouteId,
     getForms,
     deleteForm,
     deleteForms,
