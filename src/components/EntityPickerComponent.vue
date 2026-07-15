@@ -22,7 +22,7 @@
       :enable-navigation="false"
       :enable-advanced-filters="searchMode !== EntityPickerSearchMode.Search && enableAdvancedFilters"
       :enable-bulk-operations="enableBulkOperations"
-      :selectionEnabled="true"
+      :selectionEnabled="selectionEnabled"
       :disable-new-entity-previews="true"
       :use-other-query="newQuery"
       :parent-entity-identifiers="
@@ -115,6 +115,7 @@ const props = withDefaults(
     baseLibraryHeight?: string;
     enableNonSelectableEntities?: boolean;
     shouldUseStateForRoute?: boolean;
+    selectionEnabled?: boolean;
     selectionLimit?: number; // max selectable entities (0/absent = unlimited)
     searchMode?: EntityPickerSearchMode;
     searchMetadataKeys?: string[];
@@ -128,6 +129,7 @@ const props = withDefaults(
     enableNonSelectableEntities: true,
     context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
     shouldUseStateForRoute: true,
+    selectionEnabled: true,
     selectionLimit: 0,
     searchMode: EntityPickerSearchMode.Filters,
     searchMetadataKeys: () => [],

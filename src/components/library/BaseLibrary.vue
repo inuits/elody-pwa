@@ -438,7 +438,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   enablePreview: false,
   enableAdvancedFilters: true,
   enableBulkOperations: true,
-  selectionEnabled: false,
+  selectionEnabled: true,
   filterType: undefined,
   parentEntityIdentifiers: () => [],
   showButton: true,
@@ -517,7 +517,7 @@ const enableSelection = computed<boolean>(() => {
     (config.features.hasBulkSelect &&
       hasBulkOperations.value &&
       props.enableBulkOperations &&
-      !props.isSearchLibrary) ||
+      !props.isSearchLibrary) &&
     props.selectionEnabled
   );
 });

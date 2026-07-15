@@ -19,6 +19,7 @@
         :custom-filters-query="step.pickerFiltersQuery ?? undefined"
         :computed-filters="computedFilters"
         :show-button="true"
+        :selection-enabled="step.maxSelection === -1 ? true : step.maxSelection >= 1"
         :enable-bulk-operations="true"
         :enable-advanced-filters="true"
         :entity-picker-mode="EntityPickerMode.Emit"
