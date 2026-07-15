@@ -6,6 +6,7 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import { flushPromises } from "@vue/test-utils";
 import { isToggleButton } from "@/types/contextMenuRouteConfig";
 import type { ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
+import * as EditComposable from "@/composables/useEdit";
 
 const mockMutate = vi.fn();
 const mockLoadDocument = vi.fn().mockResolvedValue({ kind: "Document" });
@@ -48,6 +49,7 @@ let mockGetRefetch: () => (() => void) | undefined = () => undefined;
 vi.mock("@/composables/useEntitySingle", () => ({
   default: () => ({
     getRefetch: () => mockGetRefetch(),
+    getEntityUuid: () => mockRoute.value.params.id,
   }),
 }));
 
@@ -62,7 +64,10 @@ const toggleConfig: ToggleEntityButtonConfig = {
   whenFalse: { label: "header.enable-user", mutation: "EnableUser" },
 };
 
-const mountButton = (config: typeof plainConfig | ToggleEntityButtonConfig, refetch?: () => void) => {
+const mountButton = (
+  config: typeof plainConfig | ToggleEntityButtonConfig,
+  refetch?: () => void,
+) => {
   mockGetRefetch = () => refetch;
   return shallowMount(EntityHeaderButton, {
     props: { config },
@@ -82,6 +87,11 @@ const mountButton = (config: typeof plainConfig | ToggleEntityButtonConfig, refe
 describe("EntityHeaderButton", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    vi.spyOn(EditComposable, "useEditMode").mockReturnValue({
+      editMode: "edit-delete",
+    });
+
     mockRoute.value = { params: { id: "entity-123" } };
     mockMutate.mockResolvedValue({});
     mockFormValues = {};
