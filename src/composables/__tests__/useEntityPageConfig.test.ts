@@ -165,5 +165,22 @@ describe("useEntityPageConfig", () => {
 
       expect(deleteButton.value).toEqual(archiveConfig);
     });
+
+    it("returns toggle config when a toggle button is configured", () => {
+      const toggleConfig = {
+        toggle: true as const,
+        metadataKey: "intialValues.enabled",
+        whenTrue: { label: "header.disable-user", mutation: "DisableUser" },
+        whenFalse: { label: "header.enable-user", mutation: "EnableUser" },
+      };
+      const config: EntityPageConfig = {
+        production: { deleteButton: toggleConfig },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { deleteButton } = useEntityPageConfig();
+
+      expect(deleteButton.value).toEqual(toggleConfig);
+    });
   });
 });
