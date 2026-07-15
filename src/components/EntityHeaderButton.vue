@@ -1,6 +1,7 @@
 <template>
   <div class="ml-2 mr-6">
     <BaseButtonNew
+      v-if="deleteAvailable"
       :label="t(activeConfig.label)"
       :icon="activeConfig.icon ? DamsIcons[activeConfig.icon] : undefined"
       button-style="default"
@@ -30,11 +31,19 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { isToggleButton } from "@/types/contextMenuRouteConfig";
 import type { ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
+import { useEditMode } from "@/composables/useEdit";
 
 const props = defineProps<{
   config: EntityButtonConfig | ToggleEntityButtonConfig;
 }>();
 
+const entityFormData: any = inject("entityFormData");
+const entityId = computed<string>(
+  () =>
+    entityFormData?.id ||
+    useEntitySingle().getEntityUuid() ||
+    route.params["id"],
+);
 const { t } = useI18n();
 const route = useRoute();
 const { loadDocument } = useImport();
@@ -43,6 +52,13 @@ const { displaySuccessNotification, displayErrorNotification } =
 const apolloClient = inject(DefaultApolloClient) as ApolloClient<any>;
 const { getRefetch } = useEntitySingle();
 const { getFormByRouteId } = useFormHelper();
+const useEditHelper = computed(() => useEditMode(entityId.value));
+
+const deleteAvailable = computed<boolean>(
+  () =>
+    useEditHelper.value.editMode === "edit-delete" ||
+    useEditHelper.value.editMode === "delete",
+);
 
 const isLoading = ref(false);
 

@@ -57,18 +57,10 @@ const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 const { previousRoute } = useBreadcrumbs({});
 
-const deleteAvailable = ref<boolean>(
-  useEditHelper.value.editMode === "edit-delete" ||
+const deleteAvailable = computed<boolean>(
+  () =>
+    useEditHelper.value.editMode === "edit-delete" ||
     useEditHelper.value.editMode === "delete",
-);
-watch(
-  () => useEditHelper.value,
-  () => {
-    deleteAvailable.value =
-      useEditHelper.value.editMode === "edit-delete" ||
-      useEditHelper.value.editMode === "delete";
-  },
-  { deep: true },
 );
 
 const entityType = computed(() => {
@@ -134,7 +126,9 @@ const openDeleteModal = async () => {
   } else {
     const choice = await confirm({
       title: t("confirm.delete-entity.title", [entityType.value]),
-      message: t("confirm.delete-entity.message", [`${entityType.value} '${title}'`]),
+      message: t("confirm.delete-entity.message", [
+        `${entityType.value} '${title}'`,
+      ]),
       confirmLabel: t("confirm.delete-entity.confirm", [entityType.value]),
       cancelLabel: t("confirm.delete-entity.cancel"),
     });
