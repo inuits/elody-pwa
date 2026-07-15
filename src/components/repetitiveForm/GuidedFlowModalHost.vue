@@ -61,11 +61,12 @@ const onFinished = (entity: { id?: string; uuid?: string; type?: string }) => {
 
   const entityId = entity.id ?? entity.uuid;
   const entityType = entity.type ?? config.value.finalize?.entityType;
-  if (entityId && entityType) {
-    router.push({
-      name: "SingleEntity",
-      params: { id: entityId, type: entityType },
-    });
-  }
+  const routeName = config.value.routeToRoute ?? "SingleEntity";
+  const params =
+    routeName === "SingleEntity"
+      ? { id: entityId, type: entityType }
+      : { id: entityId };
+
+  if (entityId) router.push({ name: routeName, params });
 };
 </script>
