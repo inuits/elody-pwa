@@ -248,6 +248,14 @@ const initAutocompleteOption = async () => {
     }
   } else if (props.autoSelectable) {
     await allEntitiesHelper.value.initialize();
+    if (
+      props.mode === "create" &&
+      !props.isReadOnly &&
+      props.modelValue &&
+      !relatedEntitiesHelper.value.entityDropdownOptions.value?.length
+    ) {
+      await preSelectRelations();
+    }
     const options = allEntitiesHelper.value.entityDropdownOptions;
     if (!options.length || options.length > 1) return;
     handleSelect(options);
@@ -266,17 +274,11 @@ const initAutocompleteOption = async () => {
   }
 
   if (
-    props.mode === "create" &&
-    !props.isReadOnly &&
-    props.modelValue &&
-    !relatedEntitiesHelper.value.entityDropdownOptions.value?.length
+    props.mode !== "create" &&
+    props.isReadOnly &&
+    !props.modelValue &&
+    relatedEntitiesHelper.value.entityDropdownOptions.value?.length
   ) {
-    // Pre-fill from the incoming modelValue (e.g. copyValueFromParent in a guided
-    // flow) whenever there are no existing related entities. Scoped to create mode:
-    // on detail-page edit the modelValue holds the existing relations, which must be
-    // displayed via the resolved related entities instead of re-resolved one by one.
-    await preSelectRelations();
-  } else {
     populateSelectedOptions(relatedEntitiesHelper.value.entityDropdownOptions);
   }
   populateTagInputValuesFromForm();
