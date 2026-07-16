@@ -41,12 +41,12 @@ const makeFilter = (overrides: any = {}) => ({
   inputFromState: { value: [] },
 });
 
-const getWrapper = (filter: any) =>
+const getWrapper = (filter: any, isOpen = true) =>
   shallowMount(ExactSelectionFilter, {
     props: {
       filter,
       lastTypedValue: "",
-      isOpen: true,
+      isOpen,
       getNormalizedActiveFilters: () => [],
       refetchFilterOptions: false,
     },
@@ -92,5 +92,97 @@ describe("ExactSelectionFilter with inline options", () => {
 
     expect(mocks.setPredefinedOptions).not.toHaveBeenCalled();
     expect(mocks.loadOptionsAndFacetsInParallel).toHaveBeenCalled();
+  });
+});
+
+describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.options.value = [];
+  });
+
+  const makeAutocompleteFilter = (resolveDefaultValueToOptionIds: boolean) =>
+    makeFilter({
+      selectionOption: AutocompleteSelectionOptions.Autocomplete,
+      options: [],
+      advancedFilterInputForRetrievingOptions: [
+        {
+          type: AdvancedFilterTypes.Text,
+          key: ["vlacc:1|properties.name.value"],
+          value: "$entity.intialValues.primary_author_name",
+          match_exact: false,
+          resolveDefaultValueToOptionIds,
+        },
+        {
+          type: AdvancedFilterTypes.Selection,
+          key: "type",
+          value: ["person", "corporation"],
+        },
+      ],
+    });
+
+  it("auto-fills the parent filter with all fetched option ids when flagged", async () => {
+    mocks.options.value = [
+      { label: "Jef Geeraerts", value: "entities/1" },
+      { label: "Jef Geeraerts", value: "entities/2" },
+    ];
+    const wrapper = getWrapper(makeAutocompleteFilter(true));
+    await flushPromises();
+
+    const emitted = wrapper.emitted("updateValue");
+    expect(emitted).toBeTruthy();
+    expect(emitted![0]).toEqual([["entities/1", "entities/2"]]);
+  });
+
+  it("auto-fills even when the filter panel is not opened", async () => {
+    mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
+    const wrapper = getWrapper(makeAutocompleteFilter(true), false);
+    await flushPromises();
+
+    expect(mocks.loadOptionsAndFacetsInParallel).toHaveBeenCalled();
+    expect(wrapper.emitted("updateValue")![0]).toEqual([["entities/1"]]);
+  });
+
+  it("does not fetch on mount for an unflagged closed filter", async () => {
+    mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
+    const wrapper = getWrapper(makeAutocompleteFilter(false), false);
+    await flushPromises();
+
+    expect(mocks.loadOptionsAndFacetsInParallel).not.toHaveBeenCalled();
+    expect(wrapper.emitted("updateValue")).toBeFalsy();
+  });
+
+  it("does not auto-fill when the flag is absent", async () => {
+    mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
+    const wrapper = getWrapper(makeAutocompleteFilter(false));
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")).toBeFalsy();
+  });
+
+  it("does not emit when flagged but no options are returned", async () => {
+    mocks.options.value = [];
+    const wrapper = getWrapper(makeAutocompleteFilter(true));
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")).toBeFalsy();
+  });
+
+  it("auto-fills only once and not again on a subsequent option load", async () => {
+    mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
+    const filter = makeAutocompleteFilter(true);
+    // Facets make the refetch watcher trigger a second loadOptions.
+    filter.advancedFilter.facets = [{ key: "type", type: "type", value: "x" }];
+    const wrapper = getWrapper(filter);
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")!.length).toBe(1);
+
+    // Simulate a re-fetch (e.g. a facet refetch) returning different options.
+    mocks.options.value = [{ label: "Someone Else", value: "entities/9" }];
+    await wrapper.setProps({ refetchFilterOptions: true });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")!.length).toBe(1);
   });
 });

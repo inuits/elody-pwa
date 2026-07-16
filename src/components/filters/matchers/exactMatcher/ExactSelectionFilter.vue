@@ -58,7 +58,7 @@ const props = defineProps<{
 
 const parentEntity: any = inject("ParentEntityProvider", undefined);
 
-defineEmits(["updateValue", "filterOptions", "newInputValue"]);
+const emit = defineEmits(["updateValue", "filterOptions", "newInputValue"]);
 
 const {
   options,
@@ -76,8 +76,23 @@ const isLoading = ref(true);
 const initialAmountOfOptions = ref(0);
 const hasFetchedOptions = ref(false);
 const isInitialized = ref(false);
+const hasResolvedOptionIds = ref(false);
 const filterComponentRef = ref();
 const { t } = useI18n();
+
+const shouldResolveOptionIds = computed(() =>
+  props.filter.advancedFilter.advancedFilterInputForRetrievingOptions?.some(
+    (input) => input.resolveDefaultValueToOptionIds,
+  ),
+);
+
+const autoFillParentWithOptionIds = () => {
+  if (hasResolvedOptionIds.value || !shouldResolveOptionIds.value) return;
+  hasResolvedOptionIds.value = true;
+
+  const optionIds = options.value.map((option) => option.value);
+  if (optionIds.length) emit("updateValue", optionIds);
+};
 
 const useAutocomplete = computed(() => {
   if (
@@ -161,6 +176,7 @@ const loadOptions = async () => {
     await fetchSelectionOptions(
       props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
     );
+    autoFillParentWithOptionIds();
     initialAmountOfOptions.value = options.value.length;
     hasFetchedOptions.value = true;
     isLoading.value = false;
@@ -234,7 +250,7 @@ const getSelectionOptions = async (orderKey: string = "") => {
 watch(
   () => props.isOpen,
   async (isOpen) => {
-    if (isOpen && !hasFetchedOptions.value) {
+    if ((isOpen || shouldResolveOptionIds.value) && !hasFetchedOptions.value) {
       await loadOptions();
     }
   },

@@ -108,7 +108,7 @@
           :getNormalizedActiveFilters="getNormalizedFiltersForApi"
           :clear-all-active-filters="clearAllActiveFilters"
           :refetch-filter-options="fetchEntities"
-          @activate-filter="activateFilter"
+          @activate-filter="handleActivateFilter"
           @deactivate-filter="
             (key, forceApply = false) => {
               deactivateFilter(key);
@@ -280,6 +280,22 @@ const {
   removeFilterFromList,
   resetFilters,
 } = useFiltersBaseNew();
+
+const isResolveOptionIdsFilter = (key: string | string[]) =>
+  filters.value
+    .find((filter) => JSON.stringify(filter.advancedFilter.key) === JSON.stringify(key))
+    ?.advancedFilter.advancedFilterInputForRetrievingOptions?.some(
+      (input) => input.resolveDefaultValueToOptionIds,
+    );
+
+const handleActivateFilter = (
+  key: string | string[],
+  input: any,
+  matcher?: DropdownOption,
+) => {
+  activateFilter(key, input, matcher);
+  if (isResolveOptionIdsFilter(key)) applyFilters(true);
+};
 
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider", undefined);

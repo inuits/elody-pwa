@@ -185,6 +185,13 @@ watch(selectedMatcher, async (newVal, oldVal) => {
   }
 });
 
+watch(
+  () => props.filter.isActive,
+  (isActive) => {
+    if (isActive) isOpen.value = true;
+  },
+)
+
 const updateFilterValue = (value: unknown) => {
   if (typeof value === "string") updateLastTypedValue(value);
   if (isEqual(value, props.filter.inputFromState?.value)) return;
