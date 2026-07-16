@@ -47,9 +47,7 @@
           <template #default="{ localizedMetadata }">
             <metadata-wrapper
               v-if="
-                (!nonStandardFieldTypes.includes(metadata.__typename) ||
-                  metadata.baseLibraryMode ===
-                    BaseLibraryModes.BasicBaseLibrary) &&
+                !nonStandardFieldTypes.includes(metadata.__typename)  &&
                 !parentIsListItem &&
                 metadata.unit !== Unit.CoordinatesDefault
               "
