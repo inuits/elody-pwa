@@ -56,13 +56,20 @@ export type CustomActionConfig = BaseAction & {
   endpointMethod: string;
 };
 
+export type ExportCsvRelatedActionConfig = BaseAction & {
+  type: "exportCsvRelated";
+  entityType: string;
+  parentRelation: string;
+};
+
 export type ContextMenuActionRouteConfig =
   | DownloadZipActionConfig
   | ElodyActionConfig
   | QueryActionConfig
   | LinkActionConfig
   | GeneralActionConfig
-  | CustomActionConfig;
+  | CustomActionConfig
+  | ExportCsvRelatedActionConfig;
 
 export type ToggleEntityButtonConfig = {
   toggle: true;

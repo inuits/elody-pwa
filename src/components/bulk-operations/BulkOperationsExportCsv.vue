@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-wrap p-8 h-[90%]">
     <div class="flex basis-full gap-8 h-full">
-      <div class="h-full basis-[56%]">
+      <div v-if="!isRelatedExport" class="h-full basis-[56%]">
         <div class="h-[40px] mb-6">
           <LibraryBar
             v-model:limit="limit"
@@ -63,6 +63,7 @@
         tooltip-label="export-csv"
         :button-icon="DamsIcons.DocumentInfo"
         :disabled="
+          !isRelatedExport &&
           getEnqueuedItemCount(
             BulkOperationsContextEnum.BulkOperationsCsvExport,
           ) === 0
@@ -147,7 +148,9 @@ const {
   triggerBulkSelectionEvent,
 } = useBulkOperations();
 
-const { getBulkOperationType } = useModalActions();
+const { getBulkOperationType, getParentId, getRelationType } = useModalActions();
+
+const isRelatedExport = computed(() => !!(modal as any).relatedExportEntityType && !!getRelationType());
 
 const config = inject("config") as any;
 const { t } = useI18n();
@@ -162,11 +165,11 @@ const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
 
 const isFetchMediafilesOfAssetFlow = ref<boolean>(false);
-const entityType = computed(() =>
-  isFetchMediafilesOfAssetFlow.value
-    ? Entitytyping.Mediafile
-    : getEntityTypeByContext(context.value),
-);
+const entityType = computed(() => {
+  if (isFetchMediafilesOfAssetFlow.value) return Entitytyping.Mediafile;
+  if (isRelatedExport.value) return (modal as any).relatedExportEntityType;
+  return getEntityTypeByContext(context.value);
+});
 
 const context: Context = computed(
   () => getModalInfo(TypeModals.BulkOperations).context,
@@ -219,18 +222,19 @@ const exportCsv = async () => {
     .filter((option) => option.isSelected)
     .map((option) => option.key.value);
 
-  const ids = getEnqueuedItems(context.value).map((item) => item.id);
+  const payload: Record<string, any> = { field: selectedFields, type: entityType.value };
 
-  const payload: Record<string, any> = {
-    ids: ids,
-    field: selectedFields,
-  };
-
-  const state = getStateForRoute(route);
-  if (state?.queryVariables) {
-    payload.order_by = state.queryVariables.searchValue.order_by;
-    payload.asc = state.queryVariables.searchValue.isAsc;
-    payload.type = entityType.value;
+  if (isRelatedExport.value) {
+    payload.parentId = getParentId();
+    payload.relation = getRelationType();
+    payload.ids = [];
+  } else {
+    payload.ids = getEnqueuedItems(context.value).map((item) => item.id);
+    const state = getStateForRoute(route);
+    if (state?.queryVariables) {
+      payload.order_by = state.queryVariables.searchValue.order_by;
+      payload.asc = state.queryVariables.searchValue.isAsc;
+    }
   }
 
   await fetch("/api/export/csv", {
@@ -307,7 +311,7 @@ const executeNormalFlow = () => {
 };
 
 const determineFlow = () => {
-  if (!context.value || !modal?.open) return;
+  if ((!context.value && !isRelatedExport.value) || !modal?.open) return;
   const bulkOperationType = getBulkOperationType();
   isFetchMediafilesOfAssetFlow.value =
     bulkOperationType &&

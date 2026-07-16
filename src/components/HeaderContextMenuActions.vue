@@ -98,6 +98,14 @@
           :endpoint-url="action.endpointUrl"
           :endpoint-method="action.endpointMethod"
         />
+        <export-csv-related-action
+          v-else-if="action.type === 'exportCsvRelated'"
+          :label="action.label"
+          :icon="action.icon"
+          :entity-id="entityId"
+          :entity-type="action.entityType"
+          :parent-relation="action.parentRelation"
+        />
       </template>
     </template>
   </context-menu-actions-shell>
@@ -114,6 +122,7 @@ import QueryAction from "@/components/context-menu-actions/QueryAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import CustomAction from "@/components/context-menu-actions/CustomAction.vue";
+import ExportCsvRelatedAction from "@/components/context-menu-actions/ExportCsvRelatedAction.vue";
 import {
   usePermissions,
   advancedPermissions,
