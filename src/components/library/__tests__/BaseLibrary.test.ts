@@ -82,6 +82,7 @@ vi.mock("../usePaginationStore", () => ({
   PaginationStoreKey: Symbol("PaginationStoreKey"),
   createPaginationStore: () => ({
     setLimit: vi.fn(),
+    setPage: vi.fn(),
     updateTotalAmount: vi.fn(),
     skip: ref(1),
     limit: ref(20),
@@ -201,6 +202,7 @@ vi.mock("vue-router", () => ({
 }));
 
 import BaseLibrary from "../BaseLibrary.vue";
+import ViewModesList from "../view-modes/ViewModesList.vue";
 
 // --- Props / wrapper factories ------------------------------------------------
 const getDefaultProps = () => ({
@@ -239,6 +241,41 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
       },
     },
   });
+
+describe("BaseLibrary.vue enableSelection", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const enableSelectionOf = (wrapper: ReturnType<typeof getWrapper>) =>
+    wrapper.findComponent(ViewModesList).props("enableSelection");
+
+  it("is enabled for pickers that opt out of the bulk toolbar but still want single-item selection (e.g. tagging)", () => {
+    wrapper = getWrapper({ enableBulkOperations: false });
+    expect(enableSelectionOf(wrapper)).toBe(true);
+  });
+
+  it("stays disabled for informational pickers that explicitly opt out of selection", () => {
+    wrapper = getWrapper({ enableBulkOperations: false, selectionEnabled: false });
+    expect(enableSelectionOf(wrapper)).toBe(false);
+  });
+
+  it("stays disabled for search libraries regardless of selectionEnabled", () => {
+    wrapper = getWrapper({ enableBulkOperations: false, isSearchLibrary: true });
+    expect(enableSelectionOf(wrapper)).toBe(false);
+  });
+});
 
 describe("BaseLibrary.vue syncEditStateCallbacks", () => {
   let wrapper: ReturnType<typeof getWrapper> | null = null;

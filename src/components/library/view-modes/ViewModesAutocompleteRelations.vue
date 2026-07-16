@@ -261,6 +261,8 @@ const initAutocompleteOption = async () => {
     handleSelect(options);
     populateSelectedOptions(options);
     return;
+  } else if (props.mode === "create") {
+    await allEntitiesHelper.value.initialize();
   }
 
   if (!props.isReadOnly && props.relationFilter) {

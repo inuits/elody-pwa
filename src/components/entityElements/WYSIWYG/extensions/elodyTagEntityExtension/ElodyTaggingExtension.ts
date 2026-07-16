@@ -1,5 +1,5 @@
 import { Node, Extension, type CommandProps } from "@tiptap/core";
-import type { EditorState } from "prosemirror-state";
+import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   AdvancedFilterTypes,
@@ -286,7 +286,46 @@ export const createTipTapNodeExtension = (
   });
 };
 
+// Works around browsers failing to place a caret after a contenteditable="false"
+// atom when it's the last DOM node in its textblock.
+const invisibleCursorAnchorCharacter = "​";
+
+const ensureTrailingSpaceAfterTags = new Plugin({
+  key: new PluginKey("elodyTagTrailingSpace"),
+  appendTransaction(transactions, _oldState, newState) {
+    if (!transactions.some((transaction) => transaction.docChanged)) {
+      return null;
+    }
+
+    const { tr } = newState;
+    const insertionPositions: number[] = [];
+
+    newState.doc.descendants((node, pos) => {
+      if (!node.isTextblock || node.childCount === 0) return true;
+      const lastChild = node.lastChild;
+      if (
+        lastChild &&
+        customExtensionNames.value.includes(lastChild.type.name)
+      ) {
+        insertionPositions.push(pos + node.nodeSize - 1);
+      }
+      return true;
+    });
+
+    if (!insertionPositions.length) return null;
+
+    insertionPositions
+      .sort((a, b) => b - a)
+      .forEach((pos) => tr.insertText(invisibleCursorAnchorCharacter, pos));
+
+    return tr;
+  },
+});
+
 export const createGlobalCommandsExtension = Extension.create({
+  addProseMirrorPlugins() {
+    return [ensureTrailingSpaceAfterTags];
+  },
   addCommands() {
     return {
       openTagModal:

@@ -513,13 +513,10 @@ const showCurrentEntityFlow = computed(() => {
   return showCurrentPreviewFlow !== undefined ? showCurrentPreviewFlow : true;
 });
 const enableSelection = computed<boolean>(() => {
-  return (
-    (config.features.hasBulkSelect &&
-      hasBulkOperations.value &&
-      props.enableBulkOperations &&
-      !props.isSearchLibrary) &&
-    props.selectionEnabled
-  );
+  if (props.isSearchLibrary || !props.selectionEnabled) return false;
+  const wantsSelectionWithoutBulkToolbar = !props.enableBulkOperations;
+  if (wantsSelectionWithoutBulkToolbar) return true;
+  return config.features.hasBulkSelect && hasBulkOperations.value;
 });
 const additionalDefaultFiltersEnabled = computed(() => {
   return (

@@ -26,6 +26,7 @@ const {
   getAdjustedSelectionFrom,
   hasSelectionBeenTagged,
   customExtensionNames,
+  createGlobalCommandsExtension,
 } = await import("../ElodyTaggingExtension");
 
 const TAG_TYPE = "word-testconfig";
@@ -170,5 +171,50 @@ describe("hasSelectionBeenTagged", () => {
       to: 5,
     });
     expect(hasSelectionBeenTagged(makeMockEditor(state))).toBe(false);
+  });
+});
+
+describe("ensureTrailingSpaceAfterTags plugin (via createGlobalCommandsExtension)", () => {
+  it("inserts a zero-width space after a tag that ends up as the last node in a paragraph", async () => {
+    const { Editor } = await import("@tiptap/core");
+    const { default: Document } = await import("@tiptap/extension-document");
+    const { default: Paragraph } = await import("@tiptap/extension-paragraph");
+    const { default: Text } = await import("@tiptap/extension-text");
+    const { Node } = await import("@tiptap/core");
+
+    customExtensionNames.value = [TAG_TYPE];
+
+    const TagNode = Node.create({
+      name: TAG_TYPE,
+      group: "inline",
+      inline: true,
+      atom: true,
+      selectable: false,
+      renderHTML: () => ["span", { "data-tag": "true" }],
+    });
+
+    const editor = new Editor({
+      extensions: [
+        Document,
+        Paragraph,
+        Text,
+        TagNode,
+        createGlobalCommandsExtension,
+      ],
+      content: `<p>hello </p>`,
+    });
+
+    editor.commands.insertContentAt(
+      editor.state.doc.content.size - 1,
+      { type: TAG_TYPE },
+    );
+
+    const paragraph = editor.state.doc.firstChild!;
+    const lastChild = paragraph.lastChild!;
+
+    expect(lastChild.isText).toBe(true);
+    expect(lastChild.text).toBe("​");
+
+    editor.destroy();
   });
 });
