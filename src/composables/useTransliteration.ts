@@ -1,15 +1,33 @@
+const OPEN_SYMBOLS = new Set(["{", "[", "<", "&lt;"]);
+const CLOSE_SYMBOLS = new Set(["}", "]", ">", "&gt;"]);
+const TIGHT_SYMBOLS = new Set(["/"]);
+
+const MULTI_CHAR_TOKENS = ["&lt;", "&gt;"];
+
+const attachesWithoutSpace = (previous: string, current: string): boolean =>
+  OPEN_SYMBOLS.has(previous) ||
+  CLOSE_SYMBOLS.has(current) ||
+  TIGHT_SYMBOLS.has(previous) ||
+  TIGHT_SYMBOLS.has(current);
+
+const WORD_GAP = "\u00A0\u00A0";
+
 export const transliterateText = (
   text: string,
   map: Record<string, string>,
   insertSpaces = false,
 ): string => {
-  const keys = Object.keys(map).sort((a, b) => b.length - a.length);
+  const matchCandidates = [...Object.keys(map), ...MULTI_CHAR_TOKENS].sort(
+    (a, b) => b.length - a.length,
+  );
   const units: string[] = [];
   let index = 0;
   while (index < text.length) {
-    const matchedKey = keys.find((key) => key && text.startsWith(key, index));
+    const matchedKey = matchCandidates.find(
+      (key) => key && text.startsWith(key, index),
+    );
     if (matchedKey) {
-      units.push(map[matchedKey]);
+      units.push(map[matchedKey] ?? matchedKey);
       index += matchedKey.length;
     } else {
       const char = String.fromCodePoint(text.codePointAt(index)!);
@@ -17,9 +35,30 @@ export const transliterateText = (
       index += char.length;
     }
   }
-  // Map first, then optionally add a space between every unit so cursive scripts
-  // (e.g. Arabic) do not visually merge into each other.
-  return units.join(insertSpaces ? " " : "");
+
+  if (!insertSpaces) return units.join("");
+
+  let result = "";
+  let previousUnit = "";
+  let pendingWordBreak = false;
+  for (const unit of units) {
+    if (/^\s+$/.test(unit)) {
+      pendingWordBreak = true;
+      continue;
+    }
+    if (previousUnit === "") {
+      result = unit;
+    } else if (attachesWithoutSpace(previousUnit, unit)) {
+      result += unit;
+    } else if (pendingWordBreak) {
+      result += WORD_GAP + unit;
+    } else {
+      result += " " + unit;
+    }
+    previousUnit = unit;
+    pendingWordBreak = false;
+  }
+  return result;
 };
 
 // Regex covers TipTap-generated HTML only: attribute values never contain raw > chars.
