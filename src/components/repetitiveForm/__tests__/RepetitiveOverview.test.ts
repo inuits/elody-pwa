@@ -109,6 +109,41 @@ describe("RepetitiveOverview", () => {
     expect(row).not.toContain("should not show");
   });
 
+  it("shows a metadataOnly step's collected values via details, without a — placeholder for its (nonexistent) label", () => {
+    const wrapper = getWrapper({
+      branches: [
+        {
+          entities: {
+            work: branches[0].entities.work,
+            role: {
+              key: "role",
+              id: "",
+              type: Entitytyping.User,
+              isNew: false,
+              details: [
+                { label: "metadata.labels.role", value: "booker_admin" },
+                { label: "metadata.labels.function", value: "Coordinator" },
+              ],
+            },
+          },
+        },
+      ],
+      steps: [
+        ...steps,
+        { key: "role", label: "forms.add-existing-contact-person.tabs.role", entityType: Entitytyping.User, createForm: "z", metadataOnly: true },
+      ],
+      repeatable: true,
+    });
+    const row = wrapper.find("[data-testid='repetitive-overview-row']").text();
+    expect(row).toContain("forms.add-existing-contact-person.tabs.role");
+    expect(row).toContain("metadata.labels.role");
+    expect(row).toContain("booker_admin");
+    expect(row).toContain("metadata.labels.function");
+    expect(row).toContain("Coordinator");
+    // no "—" placeholder above the details for a step with no real label/id
+    expect(row).not.toContain("—");
+  });
+
   it("emits remove with the row index when the row's delete button is clicked", async () => {
     const wrapper = getWrapper();
     await wrapper

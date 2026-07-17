@@ -59,6 +59,7 @@
           :picker-parent-uuid="pickerParentUuid"
           @selected="onSelected"
           @created="onCreated"
+          @metadata-submitted="onMetadataSubmitted"
         >
           <template
             #actions
@@ -133,13 +134,19 @@ import {
   type AdvancedFilterInput,
   type RepetitiveForm,
   type RepetitiveCreatableType,
+  type Entitytyping,
 } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
   describeCreatedEntity,
+  toDisplayValue,
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { useModalActions } from "@/composables/useModalActions";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBaseNotification } from "@/composables/useBaseNotification";
+import { getEntityIdFromRoute } from "@/helpers";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
@@ -158,7 +165,10 @@ const emit = defineEmits<{
 const store = useRepetitiveForm();
 const { flowConfig, currentStepIndex, currentBranch, branches } = store;
 const { setEntityId, setDynamicFormId } = useEntityPickerModal();
+const { getEntityUuid } = useEntitySingle();
+const { getCallbackFunctions } = useModalActions();
 const { confirm } = useConfirmModal();
+const { displayErrorNotification } = useBaseNotification();
 const router = useRouter();
 const { t } = useI18n();
 
@@ -225,7 +235,7 @@ const start = () => {
   view.value = store.isLinear() ? "step" : "overview";
 };
 
-const advance = () => {
+const advance = (completeCurrentStep: () => void = store.completeStep) => {
   const wasLast = store.isLastStep();
   // a linear flow has no overview/finalize: completing the last step ends the
   // flow and routes to the configured step's entity
@@ -234,7 +244,7 @@ const advance = () => {
     if (target) emit("finished", { id: target.id, type: target.type });
     return;
   }
-  store.completeStep();
+  completeCurrentStep();
   if (wasLast) view.value = "overview";
 };
 
@@ -267,6 +277,35 @@ const onCreated = async (
   advance();
 };
 
+const onMetadataSubmitted = async (values: Record<string, unknown>) => {
+  // metadataOnly steps have no entity of their own: their relations link the
+  // flow's host entity (the page the flow was launched from) to an earlier
+  // step's staged entity. Nothing is persisted here — it's staged and only
+  // committed as a batch when the user clicks Afronden (see onFinish), so
+  // the overview's remove button can still meaningfully cancel it.
+  const step = activeStep.value;
+  if (step) {
+    store.stagePendingHostRelation(step, values);
+  }
+  if (step) {
+    // no real entity to stage, but record the submitted values so the
+    // overview can display them instead of an empty "—" for this step
+    store.recordEntity({
+      key: step.key,
+      id: "",
+      type: step.entityType as Entitytyping,
+      isNew: false,
+      details: Object.entries(values)
+        .map(([key, value]) => ({
+          label: `metadata.labels.${key}`,
+          value: toDisplayValue(value),
+        }))
+        .filter((detail) => detail.value),
+    });
+  }
+  advance(store.completeMetadataOnlyStep);
+};
+
 const addAnother = () => {
   store.startNewBranch();
   view.value = "step";
@@ -286,9 +325,34 @@ const goBack = () => {
   view.value = "overview";
 };
 
-const onFinish = () => {
-  // no finalize → nothing to assemble; entities were persisted per-step, so
-  // finishing just closes the flow
+const isCommitting = ref(false);
+
+const onFinish = async () => {
+  if (isCommitting.value) return;
+  // matches the resolution useBulkOperationsActionsBar's getCurrentEntityId
+  // uses: the SingleEntity page's resolved uuid, falling back to the route
+  // param (which isn't always populated depending on how the page loaded).
+  const hostEntityId = getEntityUuid() || getEntityIdFromRoute();
+  isCommitting.value = true;
+  try {
+    await store.commitPendingHostRelations(hostEntityId ?? "");
+  } catch {
+    // keep the overview open so staged branches aren't lost — the user can
+    // retry Afronden without redoing the whole flow
+    displayErrorNotification(
+      "repetitiveForm.finish-failed-title",
+      "repetitiveForm.finish-failed-description",
+    );
+    isCommitting.value = false;
+    return;
+  }
+  isCommitting.value = false;
+  // matches EntityPickerComponent.vue's submit handler: refresh whatever
+  // list (e.g. the host page's related-entities library) launched this
+  // bulk operation, since it won't otherwise know a relation was added.
+  for (const callback of getCallbackFunctions() ?? []) {
+    if (callback) await callback();
+  }
   if (!flowConfig.value?.finalize) {
     emit("close");
     return;

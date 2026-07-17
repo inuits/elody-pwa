@@ -352,6 +352,43 @@ describe("RepetitiveStepField", () => {
     ]);
   });
 
+  const metadataOnlyStep = () => ({
+    key: "role",
+    entityType: Entitytyping.User,
+    createForm: "GetContactPersonRoleFieldsForm",
+    metadataOnly: true,
+  });
+
+  it("renders only the fields form for a metadataOnly step, skipping the picker/create views", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), step: metadataOnlyStep() });
+    expect(wrapper.find("[data-testid='repetitive-step-metadata']").exists()).toBe(true);
+    expect(pickerView(wrapper).exists()).toBe(false);
+    expect(createView(wrapper).exists()).toBe(false);
+    const form = wrapper.findComponent(DynamicForm);
+    expect(form.props("dynamicFormQuery")).toBe("GetContactPersonRoleFieldsForm");
+    expect(form.props("skipEntityMutation")).toBe(true);
+  });
+
+  it("emits metadataSubmitted with the values when the metadataOnly form submits", async () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), step: metadataOnlyStep() });
+    wrapper
+      .findComponent(DynamicForm)
+      .vm.$emit("valuesSubmitted", { role: "booker_admin", function: "Coordinator" });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("metadataSubmitted")?.[0]).toEqual([
+      { role: "booker_admin", function: "Coordinator" },
+    ]);
+  });
+
+  it("renders the actions slot for a metadataOnly step", () => {
+    const wrapper = shallowMount(RepetitiveStepField, {
+      props: { ...getDefaultProps(), step: metadataOnlyStep() },
+      slots: { actions: "<button data-testid='external-back' />" },
+      global: { mocks: { $t: (k: string) => k }, renderStubDefaultSlot: true },
+    });
+    expect(wrapper.find("[data-testid='external-back']").exists()).toBe(true);
+  });
+
   it("resets the view to the picker when the step changes", async () => {
     const wrapper = getWrapper();
     await chooseCreateType(wrapper);
