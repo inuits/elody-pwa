@@ -5,9 +5,14 @@ import {
   RepetitiveRelationTrigger,
 } from "@/generated-types/queries";
 import { useRepetitiveForm } from "@/composables/useRepetitiveForm";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { useModalActions } from "@/composables/useModalActions";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
 
-vi.mock("vue-router", () => ({ useRouter: () => ({}), useRoute: () => ({}) }));
+vi.mock("vue-router", () => ({
+  useRouter: () => ({}),
+  useRoute: () => ({ params: { id: "org-1" } }),
+}));
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string, params?: Record<string, unknown>) =>
@@ -50,7 +55,7 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
   default: {
     name: "RepetitiveStepField",
     props: ["step", "scopeFilter", "skipSearch", "createPrefill", "pickerParentUuid"],
-    emits: ["selected", "created"],
+    emits: ["selected", "created", "metadataSubmitted"],
     template: "<div data-testid='step-field'><slot name='actions' /></div>",
   },
 }));
@@ -271,7 +276,7 @@ describe("RepetitiveFlow", () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     overview(wrapper).vm.$emit("finish");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(form(wrapper).exists()).toBe(true);
     expect(form(wrapper).props("dynamicFormQuery")).toBe("GetManifestationCreationForm");
     expect(form(wrapper).props("emitEntityCreated")).toBe(true);
@@ -324,7 +329,7 @@ describe("RepetitiveFlow", () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     overview(wrapper).vm.$emit("finish");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(form(wrapper).exists()).toBe(true);
     await wrapper
       .find("[data-testid='repetitive-flow-back-to-overview']")
@@ -368,7 +373,7 @@ describe("RepetitiveFlow", () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     overview(wrapper).vm.$emit("finish");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     form(wrapper).vm.$emit("entityCreated", { id: "manif-1" });
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("finished")?.[0]).toEqual([{ id: "manif-1" }]);
@@ -542,5 +547,192 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("close")).toBeTruthy();
     expect(form(wrapper).exists()).toBe(false);
+  });
+});
+
+// the podiumnet shape: pick an existing user, then a metadataOnly step
+// collects role/function and links them to the flow's host entity (the org
+// page the flow was launched from — route param "id", mocked as "org-1").
+// Non-linear, matching the real GetRepetitiveFormForContactPersonRole query:
+// the relation link only commits once "Afronden" is clicked on the overview.
+const metadataOnlyConfig = () => ({
+  label: "repetitiveForm.contact-person-title",
+  repeatable: true,
+  steps: [
+    {
+      key: "user",
+      label: "repetitiveForm.step-user",
+      entityType: Entitytyping.User,
+      createForm: "GetUserForm",
+      pickerQuery: "GetUsersForPicker",
+    },
+    {
+      key: "role",
+      label: "repetitiveForm.step-role",
+      entityType: Entitytyping.User,
+      createForm: "GetContactPersonRoleFieldsForm",
+      metadataOnly: true,
+      relations: [
+        {
+          to: "user",
+          relationType: "refUsers",
+          createWhen: RepetitiveRelationTrigger.OnSelect,
+          metadataFields: [
+            { formMetadataKey: "role", relationMetadataKey: "roles", asArray: true },
+            { formMetadataKey: "function", relationMetadataKey: "function" },
+          ],
+        },
+      ],
+    },
+  ],
+});
+
+const getMetadataOnlyWrapper = () =>
+  shallowMount(RepetitiveFlow, {
+    props: { open: true, config: metadataOnlyConfig() },
+    global: {
+      mocks: { $t: (k: string) => k },
+      renderStubDefaultSlot: true,
+      stubs: { RepetitiveStepField: false },
+    },
+  });
+
+describe("RepetitiveFlow — metadataOnly step", () => {
+  beforeEach(() => {
+    useRepetitiveForm().resetFlow();
+    manageMocks.addRelations.mockClear();
+    useEntitySingle().setEntityUuid(undefined as unknown as string);
+    useModalActions().setCallbackFunctions(undefined);
+  });
+
+  const pickUserAndSubmitRole = async (
+    wrapper: ReturnType<typeof getMetadataOnlyWrapper>,
+    values: Record<string, unknown> = { role: "booker_admin", function: "Coordinator" },
+  ) => {
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", { id: "user-1" });
+    await flushPromises();
+    field(wrapper).vm.$emit("metadataSubmitted", values);
+    await flushPromises();
+  };
+
+  it("advances to the metadataOnly step after picking the user", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", { id: "user-1" });
+    await flushPromises();
+    expect(field(wrapper).props("step").key).toBe("role");
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("does not persist the relation when the metadataOnly step submits — only stages it", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    // back on the overview; nothing committed yet
+    expect(overview(wrapper).exists()).toBe(true);
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("links the host entity (falling back to the route param) to the picked user with metadata once Afronden is clicked", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+    expect(manageMocks.addRelations).toHaveBeenCalledWith({
+      entityId: "org-1",
+      relations: [
+        {
+          key: "user-1",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [
+            { key: "roles", value: ["booker_admin"] },
+            { key: "function", value: "Coordinator" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("prefers the resolved entity uuid over the route param for the host entity", async () => {
+    // matches useBulkOperationsActionsBar's getCurrentEntityId precedence:
+    // the SingleEntity page's resolved uuid isn't always the same as the
+    // route param, so it must win when set
+    useEntitySingle().setEntityUuid("org-resolved-uuid");
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper, { role: "booker_admin" });
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+    expect(manageMocks.addRelations).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: "org-resolved-uuid" }),
+    );
+  });
+
+  it("does not persist a relation removed from the overview before Afronden is clicked", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    overview(wrapper).vm.$emit("remove", 0);
+    await wrapper.vm.$nextTick();
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("invokes the bulk-operation's refetch callbacks after linking the relation, so the launching page's list updates", async () => {
+    // set up the way useBulkOperationsActionsBar's initializeGeneralProperties
+    // does before opening the modal (refetchParentEntity/refetchEntities)
+    const refetchParentEntity = vi.fn();
+    const refetchLibrary = vi.fn();
+    useModalActions().setCallbackFunctions([refetchParentEntity, refetchLibrary]);
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper, { role: "booker_admin" });
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+    expect(refetchParentEntity).toHaveBeenCalledTimes(1);
+    expect(refetchLibrary).toHaveBeenCalledTimes(1);
+  });
+
+  it("stages the submitted field values as details, since the step has no entity of its own to display", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    const branch = useRepetitiveForm().branches.value[0];
+    expect(branch.entities.role).toMatchObject({
+      key: "role",
+      id: "",
+      isNew: false,
+      details: [
+        { label: "metadata.labels.role", value: "booker_admin" },
+        { label: "metadata.labels.function", value: "Coordinator" },
+      ],
+    });
+  });
+
+  it("closes the flow after Afronden, since there is no finalize step", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper, { role: "booker_member" });
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+    expect(wrapper.emitted("close")).toBeTruthy();
+  });
+
+  it("still shows the role step and defers the relation to Afronden when a new user is created instead of picked — create and pick behave identically", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("created", { id: "user-new-1" });
+    await flushPromises();
+    // advances to the role step just like a picked user would — the
+    // created user has no relation of its own yet
+    expect(field(wrapper).props("step").key).toBe("role");
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+    field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
+    await flushPromises();
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+    expect(manageMocks.addRelations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityId: "org-1",
+        relations: [expect.objectContaining({ key: "user-new-1" })],
+      }),
+    );
   });
 });

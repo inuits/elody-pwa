@@ -9,6 +9,7 @@ import {
   type MetadataInput,
   type RepetitiveForm,
   type RepetitiveStep,
+  type RepetitiveStepRelation,
 } from "@/generated-types/queries";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -98,13 +99,43 @@ export const describeCreatedEntity = (
   };
 };
 
+// A metadataOnly step's host-relation link isn't fired when its fields are
+// submitted — it's staged here and only committed in one batch when the user
+// clicks Afronden (see commitPendingHostRelations), so removing this branch
+// from the overview beforehand is a real cancel, not a display-only one.
+export type PendingHostRelation = {
+  step: RepetitiveStep;
+  fieldValues: Record<string, unknown>;
+};
+
 export type RepetitiveBranch = {
   entities: Record<string, StagedEntity>;
+  pendingHostRelations: PendingHostRelation[];
 };
+
+// Maps a relation's configured metadataFields onto the values collected for
+// this branch (e.g. role/function fields), skipping fields that weren't set.
+export const buildRelationMetadata = (
+  relation: RepetitiveStepRelation,
+  fieldValues: Record<string, unknown>,
+): MetadataInput[] =>
+  (relation.metadataFields ?? [])
+    .filter((field) => fieldValues[field.formMetadataKey] !== undefined)
+    .map((field) => ({
+      key: field.relationMetadataKey,
+      value: field.asArray
+        ? [fieldValues[field.formMetadataKey]]
+        : fieldValues[field.formMetadataKey],
+    }));
+
+const newBranch = (): RepetitiveBranch => ({
+  entities: {},
+  pendingHostRelations: [],
+});
 
 const flowConfig = ref<RepetitiveForm | null>(null);
 const currentStepIndex = ref<number>(0);
-const currentBranch = ref<RepetitiveBranch>({ entities: {} });
+const currentBranch = ref<RepetitiveBranch>(newBranch());
 const branches = ref<RepetitiveBranch[]>([]);
 
 export const useRepetitiveForm = () => {
@@ -119,7 +150,7 @@ export const useRepetitiveForm = () => {
   const resetFlow = () => {
     flowConfig.value = null;
     currentStepIndex.value = 0;
-    currentBranch.value = { entities: {} };
+    currentBranch.value = newBranch();
     branches.value = [];
   };
 
@@ -148,12 +179,23 @@ export const useRepetitiveForm = () => {
   };
 
   const startNewBranch = () => {
-    currentBranch.value = { entities: {} };
+    currentBranch.value = newBranch();
     currentStepIndex.value = 0;
   };
 
   const completeStep = () => {
     if (!canCompleteStep()) return;
+    if (isLastStep()) {
+      finishBranch();
+    } else {
+      currentStepIndex.value++;
+    }
+  };
+
+  // A metadataOnly step never stages an entity of its own (see
+  // linkHostRelations), so it can't gate on canCompleteStep like a normal
+  // pick/create step — it advances as soon as its fields are confirmed.
+  const completeMetadataOnlyStep = () => {
     if (isLastStep()) {
       finishBranch();
     } else {
@@ -272,9 +314,12 @@ export const useRepetitiveForm = () => {
   // staged. The step's entity (picked OR created) holds the relation pointing
   // to the prior step; collection-api creates the inverse. Runs the same
   // reliable path for both flows — only the trigger set differs.
+  // fieldValues sources any relation.metadataFields (e.g. role/function
+  // collected elsewhere on the step) onto the created relation.
   const applyStepRelations = async (
     step: RepetitiveStep,
     triggers: RepetitiveRelationTrigger[],
+    fieldValues: Record<string, unknown> = {},
   ): Promise<void> => {
     const entity = currentBranch.value.entities[step.key];
     if (!entity) return;
@@ -282,6 +327,7 @@ export const useRepetitiveForm = () => {
       if (!triggers.includes(relation.createWhen)) continue;
       const prior = currentBranch.value.entities[relation.to];
       if (!prior) continue;
+      const metadata = buildRelationMetadata(relation, fieldValues);
       await addRelations({
         entityId: entity.id,
         relations: [
@@ -289,25 +335,97 @@ export const useRepetitiveForm = () => {
             key: prior.id,
             type: relation.relationType,
             editStatus: EditStatus.New,
+            ...(metadata.length ? { metadata } : {}),
           },
         ],
       });
     }
   };
 
+  // A metadataOnly step has no entity of its own: its relations link the
+  // flow's host entity (the page the flow was launched from, not a branch
+  // step) to an earlier step's staged entity, carrying this step's own
+  // collected field values as relation metadata.
+  const linkHostRelations = async (
+    branch: RepetitiveBranch,
+    step: RepetitiveStep,
+    hostEntityId: string,
+    fieldValues: Record<string, unknown>,
+  ): Promise<void> => {
+    for (const relation of step.relations ?? []) {
+      const target = branch.entities[relation.to];
+      if (!target) continue;
+      const metadata = buildRelationMetadata(relation, fieldValues);
+      await addRelations({
+        entityId: hostEntityId,
+        relations: [
+          {
+            key: target.id,
+            type: relation.relationType,
+            editStatus: EditStatus.New,
+            ...(metadata.length ? { metadata } : {}),
+          },
+        ],
+      });
+    }
+  };
+
+  // Stages a metadataOnly step's relation for later — nothing is persisted
+  // until commitPendingHostRelations runs, so removing this branch from the
+  // overview before then is a genuine cancel (see PendingHostRelation).
+  const stagePendingHostRelation = (
+    step: RepetitiveStep,
+    fieldValues: Record<string, unknown>,
+  ) => {
+    // snapshot into a plain object: fieldValues is DynamicForm's live reactive
+    // values object, which gets torn down (deleteForm) right after this emits —
+    // holding onto the reference would read back empty/stale data at commit time
+    currentBranch.value.pendingHostRelations.push({
+      step,
+      fieldValues: { ...fieldValues },
+    });
+  };
+
+  // Fires every staged host-relation link across all branches in one batch,
+  // called once when the user clicks Afronden. Throws on the first failure
+  // so the caller can leave the overview open and let the user retry instead
+  // of silently losing track of which relations already went through.
+  const commitPendingHostRelations = async (
+    hostEntityId: string,
+  ): Promise<void> => {
+    for (const branch of branches.value) {
+      for (const pending of branch.pendingHostRelations) {
+        await linkHostRelations(
+          branch,
+          pending.step,
+          hostEntityId,
+          pending.fieldValues,
+        );
+      }
+    }
+  };
+
   // an existing entity was picked → apply onSelect/always relations
-  const linkOnSelect = (step: RepetitiveStep): Promise<void> =>
-    applyStepRelations(step, [
-      RepetitiveRelationTrigger.OnSelect,
-      RepetitiveRelationTrigger.Always,
-    ]);
+  const linkOnSelect = (
+    step: RepetitiveStep,
+    fieldValues: Record<string, unknown> = {},
+  ): Promise<void> =>
+    applyStepRelations(
+      step,
+      [RepetitiveRelationTrigger.OnSelect, RepetitiveRelationTrigger.Always],
+      fieldValues,
+    );
 
   // a new entity was created → apply onCreate/always relations
-  const linkAfterCreate = (step: RepetitiveStep): Promise<void> =>
-    applyStepRelations(step, [
-      RepetitiveRelationTrigger.OnCreate,
-      RepetitiveRelationTrigger.Always,
-    ]);
+  const linkAfterCreate = (
+    step: RepetitiveStep,
+    fieldValues: Record<string, unknown> = {},
+  ): Promise<void> =>
+    applyStepRelations(
+      step,
+      [RepetitiveRelationTrigger.OnCreate, RepetitiveRelationTrigger.Always],
+      fieldValues,
+    );
 
   const isLinear = (): boolean => Boolean(flowConfig.value?.linear);
 
@@ -421,6 +539,7 @@ export const useRepetitiveForm = () => {
     removeBranch,
     goToPreviousStep,
     completeStep,
+    completeMetadataOnlyStep,
     recordEntity,
     pickExisting,
     recordCreated,
@@ -430,6 +549,8 @@ export const useRepetitiveForm = () => {
     buildCreatePrefill,
     linkOnSelect,
     linkAfterCreate,
+    stagePendingHostRelation,
+    commitPendingHostRelations,
     isLinear,
     routeTarget,
     createForStep,

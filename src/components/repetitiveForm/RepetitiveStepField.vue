@@ -3,7 +3,22 @@
     <!-- The picker and the create form render as views INSIDE the flow's
          single modal. Nested <dialog> elements would steal the app-wide
          '.base-modal--opened' teleport target used by tooltips/dropdowns. -->
-    <div v-if="view === 'pick'" data-testid="repetitive-step-picker">
+    <div v-if="step.metadataOnly" data-testid="repetitive-step-metadata">
+      <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
+        <slot name="actions" />
+      </div>
+      <!-- no entity of its own: just collects field values (e.g. relation
+           metadata) for the flow to attach to an earlier step's entity -->
+      <DynamicForm
+        :key="step.key"
+        :dynamic-form-query="step.createForm"
+        :router="router"
+        :skip-entity-mutation="true"
+        @values-submitted="onMetadataSubmitted"
+      />
+    </div>
+
+    <div v-else-if="view === 'pick'" data-testid="repetitive-step-picker">
       <!-- one row: the flow's back button (slot) next to this step's buttons -->
       <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
         <slot name="actions" />
@@ -118,6 +133,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: "selected", entity: SelectedEntity): void;
   (e: "created", entity: any, entityType?: string): void;
+  (e: "metadataSubmitted", values: Record<string, unknown>): void;
 }>();
 
 const router = useRouter();
@@ -229,5 +245,9 @@ const onPicked = (items: InBulkProcessableItem[]) => {
 
 const onCreated = (entity: any) => {
   emit("created", entity, selectedType.value?.entityType);
+};
+
+const onMetadataSubmitted = (values: Record<string, unknown>) => {
+  emit("metadataSubmitted", values);
 };
 </script>

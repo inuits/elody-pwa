@@ -29,8 +29,12 @@
           <span class="text-base font-semibold text-text-light">
             {{ $t(step.label ?? step.key) }}
           </span>
-          <span class="font-medium truncate">
-            {{ entityLabel(branch, step.key) || "—" }}
+          <!-- a metadataOnly step's staged entity has no real label/id (see
+          RepetitiveFlow.vue's onMetadataSubmitted) — skip this line rather
+          than showing a "—" placeholder above details that already say
+          everything there is to say about this row -->
+          <span v-if="entityLabel(branch, step.key)" class="font-medium truncate">
+            {{ entityLabel(branch, step.key) }}
           </span>
           <span
             v-for="entry in overviewEntries(branch, step)"

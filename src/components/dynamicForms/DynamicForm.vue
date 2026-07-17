@@ -288,6 +288,7 @@ const props = withDefaults(
     prefilledFormValues?: object;
     allFormRelationTypes?: string[];
     emitEntityCreated?: boolean;
+    skipEntityMutation?: boolean;
   }>(),
   {
     formKey: undefined,
@@ -295,10 +296,11 @@ const props = withDefaults(
     showFormTitle: true,
     allFormRelationTypes: undefined,
     emitEntityCreated: false,
+    skipEntityMutation: false,
   },
 );
 
-const emit = defineEmits(["entityCreated", "dynamicFormReady"]);
+const emit = defineEmits(["entityCreated", "dynamicFormReady", "valuesSubmitted"]);
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 const nonStandardFieldTypes: BaseFieldType[] = [
@@ -677,6 +679,16 @@ const submitActionFunction = async (field: FormAction) => {
   }
 
   if (!(await isFormValid())) return;
+
+  if (props.skipEntityMutation) {
+    // used by guided flow's metadataOnly steps: this form just collects field
+    // values (e.g. relation metadata) — no entity gets created or updated.
+    showErrors.value = false;
+    emit("valuesSubmitted", form.value?.values.intialValues ?? {});
+    deleteForm(props.dynamicFormQuery);
+    return;
+  }
+
   const document = await getQuery(field.actionQuery as string);
   const relations = extractActionArguments(field.actionType);
   if (form.value) {

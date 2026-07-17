@@ -8,6 +8,7 @@ import {
   useRepetitiveForm,
   describePickedItem,
   describeCreatedEntity,
+  buildRelationMetadata,
 } from "@/composables/useRepetitiveForm";
 
 const mocks = vi.hoisted(() => ({
@@ -104,7 +105,7 @@ describe("useRepetitiveForm", () => {
     expect(flowConfig.value).toBeNull();
     expect(branches.value).toEqual([]);
     expect(currentStepIndex.value).toBe(0);
-    expect(currentBranch.value).toEqual({ entities: {} });
+    expect(currentBranch.value).toEqual({ entities: {}, pendingHostRelations: [] });
   });
 
   it("initFlow stores the config", () => {
@@ -556,6 +557,258 @@ describe("useRepetitiveForm", () => {
     });
   });
 
+  const configWithRelationMetadata = (): RepetitiveForm => ({
+    repeatable: false,
+    steps: [
+      {
+        key: "user",
+        entityType: Entitytyping.User,
+        createForm: "GetUserForm",
+        pickerQuery: "GetUsers",
+      },
+      {
+        key: "role",
+        entityType: Entitytyping.User,
+        createForm: "GetRoleFieldsForm",
+        relations: [
+          {
+            to: "user",
+            relationType: "refUsers",
+            createWhen: RepetitiveRelationTrigger.OnSelect,
+            metadataFields: [
+              { formMetadataKey: "role", relationMetadataKey: "roles", asArray: true },
+              { formMetadataKey: "function", relationMetadataKey: "function" },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  it("linkOnSelect attaches relation metadata built from the given field values", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithRelationMetadata());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    store.pickExisting({ id: "role-1" }); // step's own "entity" (metadata-only steps still need an id today)
+    await store.linkOnSelect(store.activeStep()!, {
+      role: "booker_admin",
+      function: "Coordinator",
+    });
+    // this covers linkOnSelect's own metadata passthrough, independent of
+    // metadataOnly steps: any step with a real staged entity can carry
+    // relations.metadataFields. See linkHostRelations below for the
+    // metadataOnly (entity-less) case podiumnet actually uses.
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "role-1",
+      relations: [
+        {
+          key: "user-1",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [
+            { key: "roles", value: ["booker_admin"] },
+            { key: "function", value: "Coordinator" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("linkOnSelect omits metadata when the field values are missing", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithRelationMetadata());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    store.pickExisting({ id: "role-1" });
+    await store.linkOnSelect(store.activeStep()!);
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "role-1",
+      relations: [{ key: "user-1", type: "refUsers", editStatus: "new" }],
+    });
+  });
+
+  it("linkOnSelect omits metadata when only some field values are set", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithRelationMetadata());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    store.pickExisting({ id: "role-1" });
+    await store.linkOnSelect(store.activeStep()!, { role: "booker_member" });
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "role-1",
+      relations: [
+        {
+          key: "user-1",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [{ key: "roles", value: ["booker_member"] }],
+        },
+      ],
+    });
+  });
+
+  // the podiumnet shape: step1 picks an existing user (no relation yet — the
+  // host org isn't known here), step2 is metadataOnly and links the host to
+  // that picked user, carrying role/function as relation metadata.
+  const configWithMetadataOnlyStep = (): RepetitiveForm => ({
+    repeatable: false,
+    steps: [
+      {
+        key: "user",
+        entityType: Entitytyping.User,
+        createForm: "GetUserForm",
+        pickerQuery: "GetUsers",
+      },
+      {
+        key: "role",
+        entityType: Entitytyping.User,
+        createForm: "GetContactPersonRoleFieldsForm",
+        metadataOnly: true,
+        relations: [
+          {
+            to: "user",
+            relationType: "refUsers",
+            createWhen: RepetitiveRelationTrigger.OnSelect,
+            metadataFields: [
+              { formMetadataKey: "role", relationMetadataKey: "roles", asArray: true },
+              { formMetadataKey: "function", relationMetadataKey: "function" },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  // linkHostRelations itself is no longer called directly by consumers: a
+  // metadataOnly step stages its relation via stagePendingHostRelation, and
+  // it's only actually persisted in a batch by commitPendingHostRelations
+  // (fired once, when the user clicks Afronden) — see commitPendingHostRelations
+  // tests below.
+
+  it("stagePendingHostRelation defers the call: nothing is persisted until commit", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step (metadataOnly, no entity of its own)
+    store.stagePendingHostRelation(store.activeStep()!, {
+      role: "booker_admin",
+      function: "Coordinator",
+    });
+    expect(mocks.addRelations).not.toHaveBeenCalled();
+    expect(store.currentBranch.value.pendingHostRelations).toHaveLength(1);
+  });
+
+  it("stagePendingHostRelation snapshots fieldValues, immune to the source object being mutated/cleared afterwards", async () => {
+    // matches DynamicForm.vue's submit path: it emits its live reactive
+    // intialValues object then immediately calls deleteForm(), which tears
+    // down that same object. If we held the reference instead of copying,
+    // this simulated post-emit mutation would wipe out the staged values too.
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    const liveFormValues: Record<string, unknown> = {
+      role: "booker_admin",
+      function: "Coordinator",
+    };
+    store.stagePendingHostRelation(store.activeStep()!, liveFormValues);
+    // simulate DynamicForm's deleteForm() clearing its own reactive object
+    delete liveFormValues.role;
+    delete liveFormValues.function;
+    store.completeMetadataOnlyStep();
+    await store.commitPendingHostRelations("org-1");
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "org-1",
+      relations: [
+        {
+          key: "user-1",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [
+            { key: "roles", value: ["booker_admin"] },
+            { key: "function", value: "Coordinator" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("commitPendingHostRelations links the host entity to an earlier step's staged entity, with metadata", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, {
+      role: "booker_admin",
+      function: "Coordinator",
+    });
+    store.completeMetadataOnlyStep(); // finishes the branch (pushes to branches)
+    await store.commitPendingHostRelations("org-1");
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "org-1",
+      relations: [
+        {
+          key: "user-1",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [
+            { key: "roles", value: ["booker_admin"] },
+            { key: "function", value: "Coordinator" },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("commitPendingHostRelations omits metadata when no field values are given", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, {});
+    store.completeMetadataOnlyStep();
+    await store.commitPendingHostRelations("org-1");
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "org-1",
+      relations: [{ key: "user-1", type: "refUsers", editStatus: "new" }],
+    });
+  });
+
+  it("commitPendingHostRelations is a no-op when a branch was removed before committing", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep();
+    store.removeBranch(0); // user cancels from the overview before Afronden
+    await store.commitPendingHostRelations("org-1");
+    expect(mocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("completeMetadataOnlyStep advances to the next step without requiring a staged entity", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep(); // role step
+    expect(store.currentStepIndex.value).toBe(1);
+    store.completeMetadataOnlyStep();
+    expect(store.currentStepIndex.value).toBe(0); // last step → branch finished, reset
+    expect(store.branches.value).toHaveLength(1);
+    expect(store.branches.value[0].entities.user.id).toBe("user-1");
+  });
+
+  it("a metadataOnly step's relation still runs normally for a created (not picked) entity — create and pick are handled uniformly", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.recordCreated({ id: "user-1" }); // created, not picked → isNew: true
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep();
+    expect(store.branches.value[0].pendingHostRelations).toHaveLength(1);
+  });
+
   it("routeTarget returns the configured step's staged entity", () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
@@ -726,6 +979,46 @@ describe("describePickedItem", () => {
       label: "Rowling",
       details: [{ label: "metadata.labels.record-type", value: "persoon" }],
     });
+  });
+});
+
+describe("buildRelationMetadata", () => {
+  const relation = {
+    to: "user",
+    relationType: "refUsers",
+    createWhen: RepetitiveRelationTrigger.OnSelect,
+    metadataFields: [
+      { formMetadataKey: "role", relationMetadataKey: "roles", asArray: true },
+      { formMetadataKey: "function", relationMetadataKey: "function" },
+    ],
+  };
+
+  it("maps each configured field to its relation metadata key", () => {
+    expect(
+      buildRelationMetadata(relation, { role: "booker_admin", function: "Coordinator" }),
+    ).toEqual([
+      { key: "roles", value: ["booker_admin"] },
+      { key: "function", value: "Coordinator" },
+    ]);
+  });
+
+  it("wraps the value in an array only when asArray is set", () => {
+    expect(buildRelationMetadata(relation, { role: "booker_admin" })).toEqual([
+      { key: "roles", value: ["booker_admin"] },
+    ]);
+  });
+
+  it("skips fields that have no value", () => {
+    expect(buildRelationMetadata(relation, {})).toEqual([]);
+  });
+
+  it("returns an empty array for a relation with no metadataFields", () => {
+    expect(
+      buildRelationMetadata(
+        { to: "user", relationType: "refUsers", createWhen: RepetitiveRelationTrigger.OnSelect },
+        { role: "booker_admin" },
+      ),
+    ).toEqual([]);
   });
 });
 
