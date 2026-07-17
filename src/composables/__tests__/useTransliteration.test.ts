@@ -70,6 +70,11 @@ const ARABIC_TO_LATIN: Record<string, string> = {
   ي: "y",
 };
 
+// A source space becomes a widened word gap. Non-breaking spaces are used so the
+// gap survives the reading field's `white-space: nowrap` (which collapses runs of
+// ordinary spaces).
+const WORD_GAP = "\u00A0\u00A0";
+
 describe("useTransliteration", () => {
   const { transliterateText, transliterateHtml } = useTransliteration();
 
@@ -151,6 +156,98 @@ describe("useTransliteration", () => {
     it("does not insert spaces when the flag is omitted", () => {
       expect(transliterateHtml("<p>btr</p>", LATIN_TO_ARABIC)).toBe(
         "<p>بتر</p>",
+      );
+    });
+  });
+
+  describe("transliterateText word boundaries (insertSpaces)", () => {
+    it("turns a single source space into a widened word gap", () => {
+      expect(transliterateText("b t", LATIN_TO_ARABIC, true)).toBe(
+        `ب${WORD_GAP}ت`,
+      );
+    });
+
+    it("keeps single spaces within words and a word gap between them", () => {
+      // "wd dm" -> "و د" <gap> "د م"
+      expect(transliterateText("wd dm", LATIN_TO_ARABIC, true)).toBe(
+        `و د${WORD_GAP}د م`,
+      );
+    });
+
+    it("does not add a leading or trailing word gap", () => {
+      expect(transliterateText(" b ", LATIN_TO_ARABIC, true)).toBe("ب");
+    });
+
+    it("collapses multiple source spaces into one word gap", () => {
+      expect(transliterateText("b  t", LATIN_TO_ARABIC, true)).toBe(
+        `ب${WORD_GAP}ت`,
+      );
+    });
+  });
+
+  describe("transliterateText symbol attachment (insertSpaces)", () => {
+    it("does not space curly braces around a letter", () => {
+      expect(transliterateText("{s}", LATIN_TO_ARABIC, true)).toBe("{س}");
+    });
+
+    it("does not space a slash or braces inside a group", () => {
+      expect(transliterateText("{s/n}", LATIN_TO_ARABIC, true)).toBe("{س/ن}");
+    });
+
+    it("does not space square brackets around a letter", () => {
+      expect(transliterateText("[s]", LATIN_TO_ARABIC, true)).toBe("[س]");
+    });
+
+    it("does not space raw angle brackets around a letter", () => {
+      expect(transliterateText("<b>", LATIN_TO_ARABIC, true)).toBe("<ب>");
+    });
+
+    it("does not space HTML-entity angle brackets (&lt; / &gt;)", () => {
+      expect(transliterateText("&lt;b&gt;", LATIN_TO_ARABIC, true)).toBe(
+        "&lt;ب&gt;",
+      );
+    });
+
+    it("keeps the word gap between two bracketed groups", () => {
+      expect(transliterateText("{s} {n}", LATIN_TO_ARABIC, true)).toBe(
+        `{س}${WORD_GAP}{ن}`,
+      );
+    });
+
+    it("keeps a space before an opening brace that follows a letter", () => {
+      expect(transliterateText("mʿ{ʾ}", LATIN_TO_ARABIC, true)).toBe(
+        "م ع {ا}",
+      );
+    });
+
+    it("keeps a space after a closing brace before the next letter", () => {
+      expect(transliterateText("{ʾ}b", LATIN_TO_ARABIC, true)).toBe("{ا} ب");
+    });
+
+    it("spaces brace groups outside but not inside (real reading example)", () => {
+      // l-mrʿ{ʾ}{ġ}
+      expect(transliterateText("l-mrʿ{ʾ}{ġ}", LATIN_TO_ARABIC, true)).toBe(
+        "ل - م ر ع {ا} {غ}",
+      );
+    });
+  });
+
+  describe("transliterateHtml word gaps and symbol attachment", () => {
+    it("applies the word gap inside a text node", () => {
+      expect(transliterateHtml("<p>b t</p>", LATIN_TO_ARABIC, true)).toBe(
+        `<p>ب${WORD_GAP}ت</p>`,
+      );
+    });
+
+    it("attaches braces/slash with no spaces inside a text node", () => {
+      expect(transliterateHtml("<p>{s/n}</p>", LATIN_TO_ARABIC, true)).toBe(
+        "<p>{س/ن}</p>",
+      );
+    });
+
+    it("attaches entity angle brackets with no spaces", () => {
+      expect(transliterateHtml("<p>&lt;b&gt;</p>", LATIN_TO_ARABIC, true)).toBe(
+        "<p>&lt;ب&gt;</p>",
       );
     });
   });
