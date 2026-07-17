@@ -46,9 +46,19 @@ vi.mock("@/composables/useBaseModal", () => ({
   }),
 }));
 
+const formHelperMocks = vi.hoisted(() => ({
+  addRelations: vi.fn(),
+  replaceRelationsFromSameType: vi.fn(),
+}));
+
+const pickerModalMocks = vi.hoisted(() => ({
+  replaceExistingRelations: false,
+}));
+
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
-    addRelations: vi.fn(),
+    addRelations: formHelperMocks.addRelations,
+    replaceRelationsFromSameType: formHelperMocks.replaceRelationsFromSameType,
     parseFormValuesToFormInput: vi.fn(),
     getForm: vi.fn(() => null),
   }),
@@ -56,14 +66,17 @@ vi.mock("@/composables/useFormHelper", () => ({
 
 vi.mock("@/composables/useEntityPickerModal", () => ({
   default: () => ({
-    getEntityId: vi.fn(() => ""),
-    getRelationType: vi.fn(() => ""),
+    getEntityId: vi.fn(() => "entity-1"),
+    getRelationType: vi.fn(() => "refExpressions"),
     getRefetchEntitiesFunction: vi.fn(() => null),
     getActionsOnResult: vi.fn(() => undefined),
     setCropMode: vi.fn(),
     setCropCoordinatesKey: vi.fn(),
     getRelationMetadataFromFormFields: vi.fn(() => []),
     getDynamicFormId: vi.fn(() => ""),
+    getReplaceExistingRelations: vi.fn(
+      () => pickerModalMocks.replaceExistingRelations,
+    ),
   }),
 }));
 
@@ -119,6 +132,54 @@ const globalConfig = {
 describe("EntityPickerComponent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    pickerModalMocks.replaceExistingRelations = false;
+  });
+
+  describe("saveRelations relation-persist strategy", () => {
+    const saveProps = {
+      ...defaultProps,
+      entityPickerMode: EntityPickerMode.Save,
+      parentEntityType: "manifestation",
+    };
+    const selected = [{ id: "E-new", teaserMetadata: [] }] as any;
+
+    it("appends via addRelations when replaceExistingRelations is false", async () => {
+      const wrapper = shallowMount(EntityPickerComponent, {
+        props: saveProps,
+        global: globalConfig,
+      });
+      await flushPromises();
+      wrapper.findComponent(BaseLibrary).vm.$emit("confirm-selection", selected);
+      await flushPromises();
+
+      expect(formHelperMocks.addRelations).toHaveBeenCalledWith(
+        selected,
+        "refExpressions",
+        "entity-1",
+        true,
+      );
+      expect(
+        formHelperMocks.replaceRelationsFromSameType,
+      ).not.toHaveBeenCalled();
+    });
+
+    it("swaps via replaceRelationsFromSameType when replaceExistingRelations is true", async () => {
+      pickerModalMocks.replaceExistingRelations = true;
+      const wrapper = shallowMount(EntityPickerComponent, {
+        props: saveProps,
+        global: globalConfig,
+      });
+      await flushPromises();
+      wrapper.findComponent(BaseLibrary).vm.$emit("confirm-selection", selected);
+      await flushPromises();
+
+      expect(formHelperMocks.replaceRelationsFromSameType).toHaveBeenCalledWith(
+        selected,
+        "refExpressions",
+        "entity-1",
+      );
+      expect(formHelperMocks.addRelations).not.toHaveBeenCalled();
+    });
   });
 
   it("does not render SearchBar when searchMode is Filters (default)", () => {

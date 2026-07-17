@@ -15,6 +15,7 @@ import { useImport } from "@/composables/useImport";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
 import { useModalActions } from "@/composables/useModalActions";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useStateManagement } from "@/composables/useStateManagement";
 import type { Entitytyping } from "@/generated-types/queries";
 import {
@@ -102,6 +103,9 @@ export const useBulkOperationsActionsBar = (
     resetAllProperties,
   } = useModalActions();
 
+  const { setReplaceExistingRelations, setSelectionLimit } =
+    useEntityPickerModal();
+
   const { openModal, getModalInfo, closeAllModals } = useBaseModal();
   const { confirm } = useConfirmModal();
   const { t } = useI18n();
@@ -186,6 +190,10 @@ export const useBulkOperationsActionsBar = (
     bulkOperationModalConfig: BulkOperationModal,
   ) => {
     setLibraryEntities(libraryEntities);
+    setReplaceExistingRelations(
+      bulkOperationModalConfig.replaceExistingRelations || false,
+    );
+    setSelectionLimit(bulkOperationModalConfig.selectionLimit || 0);
     emit(
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,

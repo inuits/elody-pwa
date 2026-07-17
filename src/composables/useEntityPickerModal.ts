@@ -20,6 +20,8 @@ const cropCoordinatesKey = ref<string>("");
 const actionsOnResult = ref<ActionsOnResult | undefined>(undefined);
 const relationMetadataFromFormFields = ref<RelationMetadataFromFormField[]>([]);
 const dynamicFormId = ref<string>("");
+const replaceExistingRelations = ref<boolean>(false);
+const selectionLimit = ref<number>(0);
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -76,6 +78,14 @@ const useEntityPickerModal = () => {
     dynamicFormId.value = id;
   };
 
+  const setReplaceExistingRelations = (value: boolean) => {
+    replaceExistingRelations.value = value;
+  };
+
+  const setSelectionLimit = (value: number) => {
+    selectionLimit.value = value;
+  };
+
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
   const getEntityId = () => entityId.value;
@@ -91,6 +101,8 @@ const useEntityPickerModal = () => {
   const getRelationMetadataFromFormFields = () =>
     relationMetadataFromFormFields.value;
   const getDynamicFormId = () => dynamicFormId.value;
+  const getReplaceExistingRelations = () => replaceExistingRelations.value;
+  const getSelectionLimit = () => selectionLimit.value;
 
   return {
     getAcceptedTypes,
@@ -119,6 +131,10 @@ const useEntityPickerModal = () => {
     getRelationMetadataFromFormFields,
     setDynamicFormId,
     getDynamicFormId,
+    setReplaceExistingRelations,
+    getReplaceExistingRelations,
+    setSelectionLimit,
+    getSelectionLimit,
   };
 };
 

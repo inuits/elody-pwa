@@ -168,7 +168,7 @@ const allFilters = computed<AdvancedFilterInput[] | undefined>(() => {
 
 const { loadDocument, getDocument } = useCustomQuery();
 const { closeModal, openModal, getModalInfo } = useBaseModal();
-const { addRelations } = useFormHelper();
+const { addRelations, replaceRelationsFromSameType } = useFormHelper();
 const { dequeueAllItemsForBulkProcessing, setBulkSelectionLimit } =
   useBulkOperations();
 const {
@@ -180,6 +180,7 @@ const {
   setCropCoordinatesKey,
   getRelationMetadataFromFormFields,
   getDynamicFormId,
+  getReplaceExistingRelations,
 } = useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
 const { parseFormValuesToFormInput, getForm } = useFormHelper();
@@ -273,7 +274,13 @@ const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
   const selectedIds = new Set(selectedItems.map((item) => item.id));
   pendingEntities.value = pickerLibrary.value?.entities?.filter((e: Entity) => selectedIds.has(e.id)) ?? [];
   const enrichedItems = injectRelationMetadataFromForm(selectedItems);
-  addRelations(enrichedItems, getRelationType(), getEntityId(), true);
+  if (getReplaceExistingRelations())
+    replaceRelationsFromSameType(
+      enrichedItems,
+      getRelationType(),
+      getEntityId(),
+    );
+  else addRelations(enrichedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
   useEditHelper.setSubmitFunction(submit);
   await useEditHelper.save(true);

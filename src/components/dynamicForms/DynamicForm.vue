@@ -52,6 +52,7 @@
           :accepted-types="getAcceptedTypes()"
           :custom-query="getCustomGetEntitiesQuery()"
           :entity-picker-mode="EntityPickerMode.Save"
+          :selection-limit="getSelectionLimit()"
           :show-button="true"
           :enable-advanced-filters="true"
           :search-mode="field.inputField?.entityPickerSearchConfig?.mode ?? undefined"
@@ -360,6 +361,7 @@ const {
   getEntityUuid,
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
+  getSelectionLimit,
   setRelationMetadataFromFormFields,
   setDynamicFormId,
 } = useEntityPickerModal();
