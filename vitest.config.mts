@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
+      "@/generated-types/queries": fileURLToPath(
+        new URL("./src/__mocks__/queries.ts", import.meta.url),
+      ),
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
     dedupe: ["vue"],
