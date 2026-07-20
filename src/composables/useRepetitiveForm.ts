@@ -49,10 +49,11 @@ export const describePickedItem = (item: {
   intialValues?: Record<string, unknown>;
 }): { label?: string; details: StagedEntityDetail[] } => {
   const values = item.intialValues ?? {};
-  const entries = (Array.isArray(item.teaserMetadata) ? item.teaserMetadata : [])
-    .filter(
-      (entry): entry is { label: string; key: string } =>
-        Boolean(entry && typeof entry === "object" && entry.label && entry.key),
+  const entries = (
+    Array.isArray(item.teaserMetadata) ? item.teaserMetadata : []
+  )
+    .filter((entry): entry is { label: string; key: string } =>
+      Boolean(entry && typeof entry === "object" && entry.label && entry.key),
     )
     .map((entry) => ({
       key: entry.key,
@@ -99,10 +100,6 @@ export const describeCreatedEntity = (
   };
 };
 
-// A metadataOnly step's host-relation link isn't fired when its fields are
-// submitted — it's staged here and only committed in one batch when the user
-// clicks Afronden (see commitPendingHostRelations), so removing this branch
-// from the overview beforehand is a real cancel, not a display-only one.
 export type PendingHostRelation = {
   step: RepetitiveStep;
   fieldValues: Record<string, unknown>;
@@ -113,8 +110,6 @@ export type RepetitiveBranch = {
   pendingHostRelations: PendingHostRelation[];
 };
 
-// Maps a relation's configured metadataFields onto the values collected for
-// this branch (e.g. role/function fields), skipping fields that weren't set.
 export const buildRelationMetadata = (
   relation: RepetitiveStepRelation,
   fieldValues: Record<string, unknown>,
@@ -192,9 +187,6 @@ export const useRepetitiveForm = () => {
     }
   };
 
-  // A metadataOnly step never stages an entity of its own (see
-  // linkHostRelations), so it can't gate on canCompleteStep like a normal
-  // pick/create step — it advances as soon as its fields are confirmed.
   const completeMetadataOnlyStep = () => {
     if (isLastStep()) {
       finishBranch();
@@ -310,12 +302,6 @@ export const useRepetitiveForm = () => {
     return { relationValues };
   };
 
-  // Persist the step's relations to the prior step(s) after its entity is
-  // staged. The step's entity (picked OR created) holds the relation pointing
-  // to the prior step; collection-api creates the inverse. Runs the same
-  // reliable path for both flows — only the trigger set differs.
-  // fieldValues sources any relation.metadataFields (e.g. role/function
-  // collected elsewhere on the step) onto the created relation.
   const applyStepRelations = async (
     step: RepetitiveStep,
     triggers: RepetitiveRelationTrigger[],
@@ -342,10 +328,6 @@ export const useRepetitiveForm = () => {
     }
   };
 
-  // A metadataOnly step has no entity of its own: its relations link the
-  // flow's host entity (the page the flow was launched from, not a branch
-  // step) to an earlier step's staged entity, carrying this step's own
-  // collected field values as relation metadata.
   const linkHostRelations = async (
     branch: RepetitiveBranch,
     step: RepetitiveStep,
@@ -370,26 +352,16 @@ export const useRepetitiveForm = () => {
     }
   };
 
-  // Stages a metadataOnly step's relation for later — nothing is persisted
-  // until commitPendingHostRelations runs, so removing this branch from the
-  // overview before then is a genuine cancel (see PendingHostRelation).
   const stagePendingHostRelation = (
     step: RepetitiveStep,
     fieldValues: Record<string, unknown>,
   ) => {
-    // snapshot into a plain object: fieldValues is DynamicForm's live reactive
-    // values object, which gets torn down (deleteForm) right after this emits —
-    // holding onto the reference would read back empty/stale data at commit time
     currentBranch.value.pendingHostRelations.push({
       step,
       fieldValues: { ...fieldValues },
     });
   };
 
-  // Fires every staged host-relation link across all branches in one batch,
-  // called once when the user clicks Afronden. Throws on the first failure
-  // so the caller can leave the overview open and let the user retry instead
-  // of silently losing track of which relations already went through.
   const commitPendingHostRelations = async (
     hostEntityId: string,
   ): Promise<void> => {
