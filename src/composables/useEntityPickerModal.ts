@@ -1,12 +1,6 @@
 import type { Entitytyping, ActionsOnResult } from "@/generated-types/queries";
 import { ref } from "vue";
 
-export interface RelationMetadataFromFormField {
-  formMetadataKey: string;
-  relationMetadataKey: string;
-  asArray?: boolean;
-}
-
 const acceptedTypes = ref<Entitytyping[]>([]);
 const entityUuid = ref<string>("");
 const entityId = ref<string>("");
@@ -18,8 +12,6 @@ const customGetEntitiesFiltersQuery = ref<string>("");
 const isCropModeEnabled = ref<boolean>(false);
 const cropCoordinatesKey = ref<string>("");
 const actionsOnResult = ref<ActionsOnResult | undefined>(undefined);
-const relationMetadataFromFormFields = ref<RelationMetadataFromFormField[]>([]);
-const dynamicFormId = ref<string>("");
 const replaceExistingRelations = ref<boolean>(false);
 const selectionLimit = ref<number>(0);
 
@@ -68,16 +60,6 @@ const useEntityPickerModal = () => {
     actionsOnResult.value = value;
   };
 
-  const setRelationMetadataFromFormFields = (
-    fields: RelationMetadataFromFormField[],
-  ) => {
-    relationMetadataFromFormFields.value = fields;
-  };
-
-  const setDynamicFormId = (id: string) => {
-    dynamicFormId.value = id;
-  };
-
   const setReplaceExistingRelations = (value: boolean) => {
     replaceExistingRelations.value = value;
   };
@@ -98,9 +80,6 @@ const useEntityPickerModal = () => {
   const getIsCropModeEnabled = () => isCropModeEnabled.value;
   const getCropCoordinatesKey = () => cropCoordinatesKey.value;
   const getActionsOnResult = () => actionsOnResult.value;
-  const getRelationMetadataFromFormFields = () =>
-    relationMetadataFromFormFields.value;
-  const getDynamicFormId = () => dynamicFormId.value;
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
 
@@ -127,10 +106,6 @@ const useEntityPickerModal = () => {
     getCropCoordinatesKey,
     setActionsOnResult,
     getActionsOnResult,
-    setRelationMetadataFromFormFields,
-    getRelationMetadataFromFormFields,
-    setDynamicFormId,
-    getDynamicFormId,
     setReplaceExistingRelations,
     getReplaceExistingRelations,
     setSelectionLimit,

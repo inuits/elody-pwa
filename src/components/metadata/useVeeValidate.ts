@@ -5,7 +5,6 @@ import {
   ValidationRules,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
-import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 
 export type GetVeeValidateKeyParams = {
@@ -127,15 +126,6 @@ export const useVeeValidate = (): {
         return `${ValidationFields.RelatedEntityData}.relations.${baseFieldKey}`;
       if (metadata.value?.formatter)
         return `${ValidationFields.IntialValues}.${baseFieldKey}.label`;
-      // Field is part of entity-picker relation metadata (e.g. roles set before picking an entity)
-      const { getKeyBasedOnInputField } = useFormHelper();
-      const { getRelationMetadataFromFormFields } = useEntityPickerModal();
-      const fieldKeyBase = getKeyBasedOnInputField(metadata as PanelMetaData);
-      const isRelationMetadataField = getRelationMetadataFromFormFields().some(
-        (f) => f.formMetadataKey === fieldKeyBase,
-      );
-      if (isRelationMetadataField)
-        return `${ValidationFields.RelatedEntityData}.relations.${baseFieldKey}`;
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
     }
 

@@ -90,8 +90,6 @@ import { useEditMode } from "@/composables/useEdit";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { useSubmitForm } from "vee-validate";
 import { useModalActions } from "@/composables/useModalActions";
-import { buildItemsWithRelationMetadata } from "@/composables/entityPickerRelationMetadata";
-import { dequal } from "dequal";
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 const emit = defineEmits<{
   (event: "entitiesUpdated", numberOfEntities: number): void;
@@ -178,8 +176,6 @@ const {
   getActionsOnResult,
   setCropMode,
   setCropCoordinatesKey,
-  getRelationMetadataFromFormFields,
-  getDynamicFormId,
   getReplaceExistingRelations,
 } = useEntityPickerModal();
 const useEditHelper = useEditMode(getEntityId());
@@ -224,33 +220,6 @@ const emitUpdatedEntities = (numberOfEntities: number) => {
   emit("entitiesUpdated", numberOfEntities);
 };
 
-const injectRelationMetadataFromForm = (
-  items: InBulkProcessableItem[],
-): InBulkProcessableItem[] => {
-  const metadataFields = getRelationMetadataFromFormFields();
-  if (metadataFields.length === 0) return items;
-
-  const dynamicForm = getForm(getDynamicFormId());
-  if (!dynamicForm) return items;
-
-  const enriched = buildItemsWithRelationMetadata(
-    items,
-    metadataFields,
-    (dynamicForm.values.relatedEntityData?.relations as Record<string, any>) ?? {},
-  );
-
-  if (!dequal(enriched, items)) {
-    metadataFields.forEach(({ formMetadataKey }) => {
-      dynamicForm.setFieldValue(
-        `relatedEntityData.relations.${formMetadataKey}`,
-        undefined,
-      );
-    });
-  }
-
-  return enriched;
-};
-
 const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
   if (props.entityPickerMode === EntityPickerMode.Emit) {
     emit("entitiesSelected", selectedItems);
@@ -273,14 +242,13 @@ const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
 
   const selectedIds = new Set(selectedItems.map((item) => item.id));
   pendingEntities.value = pickerLibrary.value?.entities?.filter((e: Entity) => selectedIds.has(e.id)) ?? [];
-  const enrichedItems = injectRelationMetadataFromForm(selectedItems);
   if (getReplaceExistingRelations())
     replaceRelationsFromSameType(
-      enrichedItems,
+      selectedItems,
       getRelationType(),
       getEntityId(),
     );
-  else addRelations(enrichedItems, getRelationType(), getEntityId(), true);
+  else addRelations(selectedItems, getRelationType(), getEntityId(), true);
   dequeueAllItemsForBulkProcessing(getContext());
   useEditHelper.setSubmitFunction(submit);
   await useEditHelper.save(true);
