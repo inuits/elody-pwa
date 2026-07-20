@@ -13,6 +13,7 @@ type BaseAction = {
   label: string;
   icon: string;
   can?: string[];
+  hideForMetadata?: { key: string; equals: string | number | boolean };
 };
 
 export type DownloadZipActionConfig = BaseAction & {

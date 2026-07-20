@@ -225,11 +225,19 @@ const start = () => {
   view.value = store.isLinear() ? "step" : "overview";
 };
 
-const advance = () => {
+const advance = async () => {
   const wasLast = store.isLastStep();
-  // a linear flow has no overview/finalize: completing the last step ends the
-  // flow and routes to the configured step's entity
   if (wasLast && store.isLinear()) {
+    const hostTerminal = flowConfig.value?.finalizeOnHost;
+    if (hostTerminal) {
+      const routeId = router.currentRoute.value.params.id;
+      const hostId = (Array.isArray(routeId) ? routeId[0] : routeId) as
+        | string
+        | undefined;
+      const target = await store.finalizeOnHost(hostId);
+      if (target) emit("finished", { id: target.id });
+      return;
+    }
     const target = store.routeTarget();
     if (target) emit("finished", { id: target.id, type: target.type });
     return;
@@ -243,7 +251,7 @@ const onSelected = async (entity: { id: string; label?: string }) => {
   // persist the link to the prior step before advancing (link-on-select)
   const step = activeStep.value;
   if (step) await store.linkOnSelect(step);
-  advance();
+  await advance();
 };
 
 const onCreated = async (
@@ -264,7 +272,7 @@ const onCreated = async (
     details,
     values: entity.intialValues,
   });
-  advance();
+  await advance();
 };
 
 const addAnother = () => {

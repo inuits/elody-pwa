@@ -56,8 +56,18 @@ watch(
   { immediate: true },
 );
 
-const onFinished = (entity: { id?: string; uuid?: string; type?: string }) => {
+const onFinished = async (entity: {
+  id?: string;
+  uuid?: string;
+  type?: string;
+}) => {
+  const isHostTerminal = Boolean(config.value.finalizeOnHost);
   closeModal(TypeModals.GuidedFlow);
+
+  if (isHostTerminal) {
+    await apolloClient.refetchQueries({ include: "active" });
+    return;
+  }
 
   const entityId = entity.id ?? entity.uuid;
   const entityType = entity.type ?? config.value.finalize?.entityType;

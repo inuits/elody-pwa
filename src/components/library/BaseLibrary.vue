@@ -897,15 +897,28 @@ const syncEditStateCallbacks = (): void => {
   );
 };
 
+const deepRelationsInitialized = ref<boolean>(false);
+
 onMounted(async () => {
   lastProcessedEntityType.value = entityType.value;
-  if (props.fetchDeepRelations) await initializeDeepRelations();
-  else await initializeBaseLibrary();
+  if (props.fetchDeepRelations) {
+    await initializeDeepRelations();
+    deepRelationsInitialized.value = true;
+  } else await initializeBaseLibrary();
   getUserPreferredViewModeConfiguration();
   syncEditStateCallbacks();
   window.addEventListener("beforeunload", resetMapPaginationLimit);
   if (props.isSearchLibrary) paginationStore.setPage(1)
 });
+
+watch(
+  () => parentEntity?.value?.relationValues,
+  async () => {
+    if (props.fetchDeepRelations && deepRelationsInitialized.value)
+      await initializeDeepRelations();
+  },
+  { deep: true },
+);
 
 watch(
   () => useEditHelper.isEdit,

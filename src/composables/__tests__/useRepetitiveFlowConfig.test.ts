@@ -333,4 +333,43 @@ describe("toRepetitiveFormConfig", () => {
     expect(config.linear).toBe(false);
     expect(config.routeToStep).toBeUndefined();
   });
+
+  it("carries a finalizeOnHost terminal (stripping __typename)", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: false,
+      linear: true,
+      work: [
+        { __typename: "RepetitiveStep", key: "work", entityType: "work" },
+      ],
+      finalizeOnHost: {
+        __typename: "RepetitiveHostFinalize",
+        fromStep: "expression",
+        relationType: "refExpressions",
+        replaceExisting: true,
+      },
+    });
+    expect(config.finalizeOnHost).toEqual({
+      fromStep: "expression",
+      relationType: "refExpressions",
+      replaceExisting: true,
+    });
+  });
+
+  it("drops an unused finalizeOnHost echo (empty fromStep/relationType)", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: false,
+      work: [
+        { __typename: "RepetitiveStep", key: "work", entityType: "work" },
+      ],
+      finalizeOnHost: {
+        __typename: "RepetitiveHostFinalize",
+        fromStep: "",
+        relationType: "",
+        replaceExisting: false,
+      },
+    });
+    expect(config.finalizeOnHost).toBeUndefined();
+  });
 });

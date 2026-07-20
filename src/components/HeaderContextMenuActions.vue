@@ -127,12 +127,31 @@ import {
   usePermissions,
   advancedPermissions,
 } from "@/composables/usePermissions";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = defineProps<{
   actions: ContextMenuActionRouteConfig[];
   entityId: string;
   entityType: Entitytyping;
 }>();
+
+const { getForm } = useFormHelper();
+
+const entityMetadata = computed<Record<string, unknown>>(
+  () =>
+    (getForm(props.entityId)?.values?.intialValues as Record<
+      string,
+      unknown
+    >) ?? {},
+);
+
+const isHiddenForMetadata = (
+  action: ContextMenuActionRouteConfig,
+): boolean => {
+  const condition = action.hideForMetadata;
+  if (!condition) return false;
+  return String(entityMetadata.value[condition.key]) === String(condition.equals);
+};
 
 const noOp = () => Promise.resolve();
 
@@ -164,6 +183,7 @@ const filterVisibleActions = async () => {
   for (const action of props.actions) {
     const hidden = "hidden" in action ? action.hidden : false;
     if (hidden) continue;
+    if (isHiddenForMetadata(action)) continue;
 
     const hasPermission =
       !action.can ||
@@ -190,5 +210,12 @@ const filterVisibleActions = async () => {
 };
 
 onMounted(filterVisibleActions);
-watch(() => [props.actions, props.entityId], filterVisibleActions);
+watch(
+  () => [
+    props.actions,
+    props.entityId,
+    props.actions.map((action) => isHiddenForMetadata(action)),
+  ],
+  filterVisibleActions,
+);
 </script>

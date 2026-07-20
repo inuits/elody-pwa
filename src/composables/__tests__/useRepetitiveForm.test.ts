@@ -13,13 +13,30 @@ import {
 const mocks = vi.hoisted(() => ({
   createEntity: vi.fn(),
   addRelations: vi.fn().mockResolvedValue(undefined),
+  saveEntityValues: vi.fn().mockResolvedValue(undefined),
+}));
+
+const formMocks = vi.hoisted(() => ({
+  getForm: vi.fn(() => ({ values: { relationValues: {} } })),
+  replaceRelationsFromSameType: vi.fn(),
+  addRelations: vi.fn(),
+  parseFormValuesToFormInput: vi.fn(() => ({
+    metadata: [],
+    relations: [],
+    updateOnlyRelations: true,
+  })),
 }));
 
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
     createEntity: mocks.createEntity,
     addRelations: mocks.addRelations,
+    saveEntityValues: mocks.saveEntityValues,
   }),
+}));
+
+vi.mock("@/composables/useFormHelper", () => ({
+  useFormHelper: () => formMocks,
 }));
 
 const omnibusConfig = (): RepetitiveForm => ({
@@ -51,11 +68,35 @@ const omnibusConfig = (): RepetitiveForm => ({
   },
 });
 
+const moveExpressionConfig = (
+  replaceExisting = true,
+): RepetitiveForm =>
+  ({
+    repeatable: false,
+    linear: true,
+    routeToRoute: "WemOverview",
+    steps: [
+      { key: "work", entityType: Entitytyping.Work },
+      { key: "expression", entityType: Entitytyping.Expression },
+    ],
+    finalizeOnHost: {
+      fromStep: "expression",
+      relationType: "refExpressions",
+      replaceExisting,
+    },
+  }) as unknown as RepetitiveForm;
+
 describe("useRepetitiveForm", () => {
   beforeEach(() => {
     useRepetitiveForm().resetFlow();
     mocks.createEntity.mockReset();
     mocks.addRelations.mockClear();
+    mocks.saveEntityValues.mockClear();
+    formMocks.replaceRelationsFromSameType.mockClear();
+    formMocks.addRelations.mockClear();
+    formMocks.parseFormValuesToFormInput.mockClear();
+    formMocks.getForm.mockClear();
+    formMocks.getForm.mockReturnValue({ values: { relationValues: {} } });
   });
 
   it("has empty state before a flow is initialised", () => {
@@ -535,6 +576,91 @@ describe("useRepetitiveForm", () => {
     store.completeStep();
     store.pickExisting({ id: "expr-1" });
     expect(store.routeTarget()).toMatchObject({ id: "expr-1" });
+  });
+
+  it("finalizeOnHost swaps the relation on the host form and saves the full form input", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(moveExpressionConfig(true));
+    store.recordEntity({
+      key: "expression",
+      id: "E-new",
+      type: Entitytyping.Expression,
+      isNew: false,
+    });
+    const target = await store.finalizeOnHost("M-host");
+    expect(formMocks.replaceRelationsFromSameType).toHaveBeenCalledWith(
+      [{ id: "E-new" }],
+      "refExpressions",
+      "M-host",
+    );
+    expect(formMocks.parseFormValuesToFormInput).toHaveBeenCalledWith(
+      "M-host",
+      { relationValues: {} },
+      true,
+    );
+    expect(mocks.saveEntityValues).toHaveBeenCalledWith("M-host", {
+      metadata: [],
+      relations: [],
+      updateOnlyRelations: true,
+    });
+    expect(target).toEqual({ id: "M-host" });
+  });
+
+  it("finalizeOnHost appends (does not replace) when replaceExisting is false", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(moveExpressionConfig(false));
+    store.recordEntity({
+      key: "expression",
+      id: "E-new",
+      type: Entitytyping.Expression,
+      isNew: false,
+    });
+    await store.finalizeOnHost("M-host");
+    expect(formMocks.addRelations).toHaveBeenCalledWith(
+      [{ id: "E-new" }],
+      "refExpressions",
+      "M-host",
+      true,
+    );
+    expect(formMocks.replaceRelationsFromSameType).not.toHaveBeenCalled();
+    expect(mocks.saveEntityValues).toHaveBeenCalled();
+  });
+
+  it("finalizeOnHost is a no-op when the fromStep entity is not staged", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(moveExpressionConfig(true));
+    const target = await store.finalizeOnHost("M-host");
+    expect(mocks.saveEntityValues).not.toHaveBeenCalled();
+    expect(target).toBeNull();
+  });
+
+  it("finalizeOnHost is a no-op without a host id", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(moveExpressionConfig(true));
+    store.recordEntity({
+      key: "expression",
+      id: "E-new",
+      type: Entitytyping.Expression,
+      isNew: false,
+    });
+    const target = await store.finalizeOnHost(undefined);
+    expect(mocks.saveEntityValues).not.toHaveBeenCalled();
+    expect(target).toBeNull();
+  });
+
+  it("finalizeOnHost is a no-op when the host form is not loaded", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(moveExpressionConfig(true));
+    store.recordEntity({
+      key: "expression",
+      id: "E-new",
+      type: Entitytyping.Expression,
+      isNew: false,
+    });
+    formMocks.getForm.mockReturnValueOnce(undefined as any);
+    const target = await store.finalizeOnHost("M-host");
+    expect(mocks.saveEntityValues).not.toHaveBeenCalled();
+    expect(target).toBeNull();
   });
 });
 

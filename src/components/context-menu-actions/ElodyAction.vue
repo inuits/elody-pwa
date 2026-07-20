@@ -266,7 +266,8 @@ const doAction = async () => {
   }
 
   if (
-    props.action === ContextMenuElodyActionEnum.CreateEntityFromExternalSource
+    props.action === ContextMenuElodyActionEnum.CreateEntityFromExternalSource ||
+    props.action === ContextMenuElodyActionEnum.ReplaceRelation
   ) {
     const parentIdForRelation = entityFormData?.id || props.entityId;
     const collectionForRelation =

@@ -7,7 +7,11 @@
       <!-- one row: the flow's back button (slot) next to this step's buttons -->
       <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
         <slot name="actions" />
-        <RepetitiveCreateButton :types="creatableOptions" @select="chooseType" />
+        <RepetitiveCreateButton
+          v-if="creatableOptions.length"
+          :types="creatableOptions"
+          @select="chooseType"
+        />
       </div>
       <!-- keyed per step: the picker loads its custom query on mount only -->
       <EntityPickerComponent
@@ -123,19 +127,17 @@ const { getForm } = useFormHelper();
 // values are read from its form the same way copyValueFromParent does
 const parentEntityId = getEntityIdFromRoute();
 
-// the configured subtypes, or a single fallback derived from the step's own
-// createForm so steps that don't configure creatableTypes keep working
-const allCreatableOptions = computed<RepetitiveCreatableType[]>(() =>
-  props.step.creatableTypes?.length
-    ? props.step.creatableTypes
-    : [
-        {
-          label: "repetitiveForm.create-new",
-          entityType: props.step.entityType,
-          createForm: props.step.createForm,
-        },
-      ],
-);
+const allCreatableOptions = computed<RepetitiveCreatableType[]>(() => {
+  if (props.step.creatableTypes?.length) return props.step.creatableTypes;
+  if (!props.step.createForm) return [];
+  return [
+    {
+      label: "repetitiveForm.create-new",
+      entityType: props.step.entityType,
+      createForm: props.step.createForm,
+    },
+  ];
+});
 
 const normalizeTypeValue = (raw: unknown): string | undefined => {
   let value: unknown = Array.isArray(raw) ? raw[0] : raw;

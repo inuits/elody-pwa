@@ -75,8 +75,24 @@ export const useManageEntities = () => {
     });
   };
 
+  const saveEntityValues = async (
+    entityId: string,
+    formInput: unknown,
+  ): Promise<void> => {
+    const mutation = await loadDocument("MutateEntityValues");
+    await apolloClient.mutate({
+      mutation,
+      variables: {
+        id: entityId,
+        formInput,
+        collection: Collection.Entities,
+      },
+    });
+  };
+
   return {
     createEntity,
     addRelations,
+    saveEntityValues,
   };
 };

@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, unref } from "vue";
 import {
   AdvancedFilterTypes,
   EditStatus,
@@ -11,6 +11,8 @@ import {
   type RepetitiveStep,
 } from "@/generated-types/queries";
 import { useManageEntities } from "@/composables/useManageEntities";
+import { useFormHelper } from "@/composables/useFormHelper";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 
 export type StagedEntityDetail = {
   label: string; // translation key (or raw metadata key as fallback)
@@ -106,7 +108,13 @@ const currentBranch = ref<RepetitiveBranch>({ entities: {} });
 const branches = ref<RepetitiveBranch[]>([]);
 
 export const useRepetitiveForm = () => {
-  const { createEntity, addRelations } = useManageEntities();
+  const { createEntity, addRelations, saveEntityValues } = useManageEntities();
+  const {
+    getForm,
+    replaceRelationsFromSameType,
+    addRelations: setFormRelations,
+    parseFormValuesToFormInput,
+  } = useFormHelper();
 
   const resetFlow = () => {
     flowConfig.value = null;
@@ -378,6 +386,26 @@ export const useRepetitiveForm = () => {
     });
   };
 
+  const finalizeOnHost = async (
+    hostId: string | undefined,
+  ): Promise<{ id: string } | null> => {
+    const config = flowConfig.value?.finalizeOnHost;
+    if (!config || !hostId) return null;
+    const staged = currentBranch.value.entities[config.fromStep];
+    if (!staged) return null;
+    const form = getForm(hostId);
+    if (!form) return null;
+    const items = [{ id: staged.id }] as InBulkProcessableItem[];
+    if (config.replaceExisting)
+      replaceRelationsFromSameType(items, config.relationType, hostId);
+    else setFormRelations(items, config.relationType, hostId, true);
+    await saveEntityValues(
+      hostId,
+      parseFormValuesToFormInput(hostId, unref(form.values), true),
+    );
+    return { id: hostId };
+  };
+
   return {
     flowConfig,
     currentStepIndex,
@@ -409,5 +437,6 @@ export const useRepetitiveForm = () => {
     buildFinalizeRelations,
     buildFinalizePrefill,
     finalize,
+    finalizeOnHost,
   };
 };
