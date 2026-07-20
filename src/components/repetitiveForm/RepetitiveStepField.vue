@@ -41,6 +41,10 @@
         :should-use-state-for-route="false"
         :selection-limit="step.maxSelection ?? undefined"
         base-library-height="max-h-[55vh]"
+        :search-mode="step.entityPickerSearchConfig?.mode ?? undefined"
+        :search-metadata-keys="step.entityPickerSearchConfig?.metadataKeys ?? undefined"
+        :search-accepted-types="step.entityPickerSearchConfig?.acceptedTypes ?? undefined"
+        :search-static-filters="step.entityPickerSearchConfig?.staticFilters ?? undefined"
         @entities-selected="onPicked"
       />
     </div>
