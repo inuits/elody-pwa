@@ -164,7 +164,7 @@ const emit = defineEmits<{
 
 const store = useRepetitiveForm();
 const { flowConfig, currentStepIndex, currentBranch, branches } = store;
-const { setEntityId, setDynamicFormId } = useEntityPickerModal();
+const { setEntityId } = useEntityPickerModal();
 const { getEntityUuid } = useEntitySingle();
 const { getCallbackFunctions } = useModalActions();
 const { confirm } = useConfirmModal();
@@ -229,7 +229,6 @@ const selectedFinalizeType = ref<RepetitiveCreatableType | null>(null);
 const start = () => {
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
-  setDynamicFormId(FLOW_ID);
   // linear flows skip the overview and run a single pass straight from step 1;
   // other flows open on the overview so staged branches are visible
   view.value = store.isLinear() ? "step" : "overview";

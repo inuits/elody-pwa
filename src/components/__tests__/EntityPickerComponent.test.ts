@@ -72,8 +72,6 @@ vi.mock("@/composables/useEntityPickerModal", () => ({
     getActionsOnResult: vi.fn(() => undefined),
     setCropMode: vi.fn(),
     setCropCoordinatesKey: vi.fn(),
-    getRelationMetadataFromFormFields: vi.fn(() => []),
-    getDynamicFormId: vi.fn(() => ""),
     getReplaceExistingRelations: vi.fn(
       () => pickerModalMocks.replaceExistingRelations,
     ),
@@ -99,10 +97,6 @@ vi.mock("@/composables/useEdit", () => ({
 
 vi.mock("@/composables/useModalActions", () => ({
   useModalActions: () => ({ getCallbackFunctions: vi.fn(() => []) }),
-}));
-
-vi.mock("@/composables/entityPickerRelationMetadata", () => ({
-  buildItemsWithRelationMetadata: vi.fn((items) => items),
 }));
 
 vi.mock("@/helpers", () => ({

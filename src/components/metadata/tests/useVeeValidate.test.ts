@@ -2,22 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ValidationFields, ValidationRules } from "@/generated-types/queries";
 import type { FieldMetadata } from "@/components/metadata/useMetadataWrapper";
 
-const { mockGetRelationMetadataFromFormFields } = vi.hoisted(() => ({
-  mockGetRelationMetadataFromFormFields: vi.fn().mockReturnValue([]),
-}));
-
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
     getKeyBasedOnInputField: (metadata: {
       key: string;
       inputField?: { fieldKeyToSave?: string };
     }) => metadata.inputField?.fieldKeyToSave ?? metadata.key,
-  }),
-}));
-
-vi.mock("@/composables/useEntityPickerModal", () => ({
-  default: () => ({
-    getRelationMetadataFromFormFields: mockGetRelationMetadataFromFormFields,
   }),
 }));
 
@@ -48,7 +38,6 @@ describe("useVeeValidate", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetRelationMetadataFromFormFields.mockReturnValue([]);
     const result = useVeeValidate();
     getVeeValidateKey = result.getVeeValidateKey;
     isValidationRulePresentOnField = result.isValidationRulePresentOnField;
@@ -259,21 +248,7 @@ describe("useVeeValidate", () => {
       );
     });
 
-    it("returns relatedEntityData.relations key when field is in relationMetadataFromFormFields (no linkedEntityId)", () => {
-      mockGetRelationMetadataFromFormFields.mockReturnValueOnce([
-        { formMetadataKey: "testField", relationMetadataKey: "testField" },
-      ]);
-      const metadata = makeMetadata({
-        inputField: { validation: { value: "" }, relationType: "" },
-      });
-      const result = getVeeValidateKey({ metadata });
-      expect(result).toBe(
-        `${ValidationFields.RelatedEntityData}.relations.testField`,
-      );
-    });
-
-    it("returns intialValues key when no linkedEntityId and not in relationMetadataFromFormFields", () => {
-      mockGetRelationMetadataFromFormFields.mockReturnValueOnce([]);
+    it("returns intialValues key when no linkedEntityId", () => {
       const metadata = makeMetadata({
         inputField: { validation: { value: "" }, relationType: "" },
       });
