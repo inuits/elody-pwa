@@ -176,8 +176,9 @@ const useUpload = (config: any = {}) => {
 
     for await (const upload of generator) {
       if (!upload?.response.ok && !upload?.warning) {
-        __uploadExceptionHandler(upload?.response.text(), upload.file);
-        errors.push(upload?.response.text());
+        const errorText = await upload?.response.text();
+        __uploadExceptionHandler(errorText, upload.file);
+        errors.push(errorText);
         continue;
       }
       updateFileThumbnails(
