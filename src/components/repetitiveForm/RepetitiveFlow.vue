@@ -25,9 +25,7 @@
           </span>
           <span
             :class="
-              index === currentStepIndex
-                ? 'font-bold'
-                : 'text-text-light'
+              index === currentStepIndex ? 'font-bold' : 'text-text-light'
             "
           >
             {{ $t(step.label ?? step.key) }}
@@ -277,18 +275,11 @@ const onCreated = async (
 };
 
 const onMetadataSubmitted = async (values: Record<string, unknown>) => {
-  // metadataOnly steps have no entity of their own: their relations link the
-  // flow's host entity (the page the flow was launched from) to an earlier
-  // step's staged entity. Nothing is persisted here — it's staged and only
-  // committed as a batch when the user clicks Afronden (see onFinish), so
-  // the overview's remove button can still meaningfully cancel it.
   const step = activeStep.value;
   if (step) {
     store.stagePendingHostRelation(step, values);
   }
   if (step) {
-    // no real entity to stage, but record the submitted values so the
-    // overview can display them instead of an empty "—" for this step
     store.recordEntity({
       key: step.key,
       id: "",
@@ -328,16 +319,11 @@ const isCommitting = ref(false);
 
 const onFinish = async () => {
   if (isCommitting.value) return;
-  // matches the resolution useBulkOperationsActionsBar's getCurrentEntityId
-  // uses: the SingleEntity page's resolved uuid, falling back to the route
-  // param (which isn't always populated depending on how the page loaded).
   const hostEntityId = getEntityUuid() || getEntityIdFromRoute();
   isCommitting.value = true;
   try {
     await store.commitPendingHostRelations(hostEntityId ?? "");
   } catch {
-    // keep the overview open so staged branches aren't lost — the user can
-    // retry Afronden without redoing the whole flow
     displayErrorNotification(
       "repetitiveForm.finish-failed-title",
       "repetitiveForm.finish-failed-description",
@@ -346,9 +332,6 @@ const onFinish = async () => {
     return;
   }
   isCommitting.value = false;
-  // matches EntityPickerComponent.vue's submit handler: refresh whatever
-  // list (e.g. the host page's related-entities library) launched this
-  // bulk operation, since it won't otherwise know a relation was added.
   for (const callback of getCallbackFunctions() ?? []) {
     if (callback) await callback();
   }
