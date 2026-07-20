@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
-import { Entitytyping, EntityPickerMode } from "@/generated-types/queries";
+import {
+  Entitytyping,
+  EntityPickerMode,
+  EntityPickerSearchMode,
+} from "@/generated-types/queries";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
@@ -102,6 +106,33 @@ describe("RepetitiveStepField", () => {
     expect(picker.props("entityPickerMode")).toBe(EntityPickerMode.Emit);
     // a picker in a modal must not inherit the route's saved filter state
     expect(picker.props("shouldUseStateForRoute")).toBe(false);
+  });
+
+  it("passes the step's entityPickerSearchConfig to the picker's search props", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: {
+        ...expressionStep(),
+        entityPickerSearchConfig: {
+          mode: EntityPickerSearchMode.Search,
+          metadataKeys: ["podiumnet:1|properties.email.value"],
+          acceptedTypes: ["user"],
+          staticFilters: [],
+        },
+      },
+    });
+    const picker = wrapper.findComponent(EntityPickerComponent);
+    expect(picker.props("searchMode")).toBe(EntityPickerSearchMode.Search);
+    expect(picker.props("searchMetadataKeys")).toEqual([
+      "podiumnet:1|properties.email.value",
+    ]);
+    expect(picker.props("searchAcceptedTypes")).toEqual(["user"]);
+  });
+
+  it("falls back to the picker's default (Filters) search mode when the step has no entityPickerSearchConfig", () => {
+    const wrapper = getWrapper();
+    const picker = wrapper.findComponent(EntityPickerComponent);
+    expect(picker.props("searchMode")).toBe(EntityPickerSearchMode.Filters);
   });
 
   it("passes the step's maxSelection to the picker as its selection limit", () => {
