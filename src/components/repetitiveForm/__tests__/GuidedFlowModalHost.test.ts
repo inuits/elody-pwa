@@ -6,6 +6,7 @@ import {
   shallowMount,
 } from "@vue/test-utils";
 import GuidedFlowModalHost from "@/components/repetitiveForm/GuidedFlowModalHost.vue";
+import { useModalActions } from "@/composables/useModalActions";
 
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
@@ -16,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   },
   loadDocument: vi.fn(),
   apolloQuery: vi.fn(),
+  refetchQueries: vi.fn(),
 }));
 
 const modalInfo = reactive<{ open: boolean; formQuery?: string }>({
@@ -30,7 +32,10 @@ vi.mock("vue-router", () => ({
   useRoute: () => ({}),
 }));
 vi.mock("@/main", () => ({
-  apolloClient: { query: (...args: any[]) => mocks.apolloQuery(...args) },
+  apolloClient: {
+    query: (...args: any[]) => mocks.apolloQuery(...args),
+    refetchQueries: (...args: any[]) => mocks.refetchQueries(...args),
+  },
 }));
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({ loadDocument: mocks.loadDocument }),
@@ -72,6 +77,21 @@ const rawOmnibusResult = {
   },
 };
 
+// A repeatable, create-only flow (no finalize) that opts into refetch-on-finish.
+const rawNoFinalizeResult = {
+  __typename: "RepetitiveForm",
+  repeatable: true,
+  refetchOnFinish: true,
+  frame: [
+    {
+      __typename: "RepetitiveStep",
+      key: "frame",
+      entityType: "web_story_frame",
+      createForm: "GetFrameCreationForm",
+    },
+  ],
+};
+
 const getWrapper = () => shallowMount(GuidedFlowModalHost);
 const flow = (w: ReturnType<typeof getWrapper>) =>
   w.findComponent({ name: "RepetitiveFlow" });
@@ -90,6 +110,8 @@ describe("GuidedFlowModalHost", () => {
     mocks.closeModal.mockReset();
     mocks.loadDocument.mockReset();
     mocks.apolloQuery.mockReset();
+    mocks.refetchQueries.mockReset();
+    useModalActions().setCallbackFunctions(undefined);
     modalInfo.open = false;
     modalInfo.formQuery = undefined;
     mocks.loadDocument.mockResolvedValue(flowDocument);
@@ -156,6 +178,7 @@ describe("GuidedFlowModalHost", () => {
     expect(flow(wrapper).props("config")).toEqual({
       repeatable: true,
       linear: false,
+      refetchOnFinish: false,
       steps: [
         { key: "work", entityType: "work", createForm: "GetWorkCreationForm" },
       ],
@@ -200,5 +223,35 @@ describe("GuidedFlowModalHost", () => {
       name: "SingleEntity",
       params: { id: "manif-2", type: "manifestation" },
     });
+  });
+
+  it("runs the registered refetch callbacks on finish when refetchOnFinish is set", async () => {
+    mocks.apolloQuery.mockResolvedValue({
+      data: { GetRepetitiveForm: rawNoFinalizeResult },
+    });
+    const refetchEntities = vi.fn();
+    useModalActions().setCallbackFunctions([refetchEntities]);
+    const wrapper = getWrapper();
+    await openModal("GetWebStoryFrameGuidedFlow");
+    // no-finalize flow finishes with an empty payload (no entity to route to)
+    flow(wrapper).vm.$emit("finished", {});
+    await wrapper.vm.$nextTick();
+    expect(mocks.closeModal).toHaveBeenCalled();
+    expect(refetchEntities).toHaveBeenCalledTimes(1);
+    // the targeted callback is preferred over the broad active-query refetch
+    expect(mocks.refetchQueries).not.toHaveBeenCalled();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("falls back to refetching active queries when no callbacks are registered", async () => {
+    mocks.apolloQuery.mockResolvedValue({
+      data: { GetRepetitiveForm: rawNoFinalizeResult },
+    });
+    const wrapper = getWrapper();
+    await openModal("GetWebStoryFrameGuidedFlow");
+    flow(wrapper).vm.$emit("finished", {});
+    await wrapper.vm.$nextTick();
+    expect(mocks.refetchQueries).toHaveBeenCalledWith({ include: "active" });
+    expect(mocks.push).not.toHaveBeenCalled();
   });
 });

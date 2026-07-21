@@ -13,6 +13,7 @@ import { useRouter } from "vue-router";
 import { TypeModals, type RepetitiveForm } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useModalActions } from "@/composables/useModalActions";
 import { useImport } from "@/composables/useImport";
 import { toRepetitiveFormConfig } from "@/composables/useRepetitiveFlowConfig";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
@@ -24,7 +25,21 @@ const emptyConfig = (): RepetitiveForm => ({
 
 const { loadDocument } = useImport();
 const { getModalInfo, closeModal } = useBaseModal();
+const { getCallbackFunctions } = useModalActions();
 const router = useRouter();
+
+// Refresh the lists the flow created into. Prefer the targeted refetch
+// callbacks registered when the flow was opened (the same ones bulk operations
+// use — the list's own refetchEntities + parent refetch); fall back to
+// refetching all active queries when none were registered (e.g. a flow opened
+// from a menu item rather than a list action bar).
+const refreshAfterFlow = async (callbacks?: Function[]) => {
+  if (callbacks?.length) {
+    callbacks.forEach((callback) => callback?.());
+    return;
+  }
+  await apolloClient.refetchQueries({ include: "active" });
+};
 
 const config = ref<RepetitiveForm>(emptyConfig());
 const isOpen = computed(() => getModalInfo(TypeModals.GuidedFlow).open);
@@ -62,14 +77,24 @@ const onFinished = async (entity: {
   type?: string;
 }) => {
   const isHostTerminal = Boolean(config.value.finalizeOnHost);
+  // capture the refetch callbacks registered when the flow was opened before
+  // closing the modal clears the shared modal-action state
+  const refetchCallbacks = getCallbackFunctions();
   closeModal(TypeModals.GuidedFlow);
 
   if (isHostTerminal) {
-    await apolloClient.refetchQueries({ include: "active" });
+    await refreshAfterFlow(refetchCallbacks);
     return;
   }
 
   const entityId = entity.id ?? entity.uuid;
+  if (!entityId) {
+    // a repeatable/no-finalize flow finished: no single entity to route to.
+    // Refresh the list(s) the flow created into when it opts in.
+    if (config.value.refetchOnFinish) await refreshAfterFlow(refetchCallbacks);
+    return;
+  }
+
   const entityType = entity.type ?? config.value.finalize?.entityType;
   const routeName = config.value.routeToRoute ?? "SingleEntity";
   const params =

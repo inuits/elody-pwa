@@ -38,6 +38,7 @@ export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
     label,
     repeatable,
     linear,
+    refetchOnFinish,
     routeToStep,
     routeToRoute,
     finalize,
@@ -54,6 +55,7 @@ export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
   };
   if (label) config.label = label;
   config.linear = Boolean(linear);
+  config.refetchOnFinish = Boolean(refetchOnFinish);
   if (routeToStep) config.routeToStep = routeToStep;
   if (routeToRoute) config.routeToRoute = routeToRoute;
   if (finalize) {

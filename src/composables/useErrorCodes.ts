@@ -225,7 +225,6 @@ export const useErrorCodes = (): {
     const code = statusCode?.toString();
     if (!code || !Object.keys(statusCodeHandlers).includes(code)) {
       statusCodeHandlers["default"](errorCodeType, errorMessage);
-      console.trace('comes from here: ');
       console.info(
         `An error with status code ${code} was handled by the default handler, add it to the statusCodeHandlers mapper to implement custom behaviour`,
       );

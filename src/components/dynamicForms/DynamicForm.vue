@@ -636,7 +636,24 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
   if (!enableUploadButton.value) return;
   const entityInput = await createEntityFromFormInput(field.creationType);
 
+  // capture the filenames before uploading — the file list is reset afterwards
+  const uploadedFilenames = mediafiles.value
+    .map((file) => file.name)
+    .join(", ");
+
   await upload(isLinkedUpload.value, entityInput, config, t);
+  if (props.emitEntityCreated) {
+    // hosted in a guided flow: the mediafile is uploaded onto the entity set
+    // by the flow (the prior step's staged entity). Hand completion back to
+    // the flow so it advances, instead of navigating away / opening a job.
+    // Surface the uploaded filename(s) as the step's overview label.
+    deleteForm(props.dynamicFormQuery);
+    emit("entityCreated", {
+      id: useEntitySingle().getEntityUuid(),
+      intialValues: uploadedFilenames ? { label: uploadedFilenames } : undefined,
+    });
+    return;
+  }
   if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,
