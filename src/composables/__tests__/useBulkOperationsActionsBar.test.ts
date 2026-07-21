@@ -5,6 +5,7 @@ import type {
   BulkOperationsActionsBarEmits,
 } from "../useBulkOperationsActionsBar";
 import {
+  ActionContextEntitiesSelectionType,
   BulkOperationTypes,
   ModalStyle,
   RouteNames,
@@ -165,6 +166,75 @@ describe("useBulkOperationsActionsBar", () => {
       const { itemsSelected } = useBulkOperationsActionsBar(props, emit);
 
       expect(itemsSelected.value).toBe(false);
+    });
+  });
+
+  describe("hasBulkOperationsWithItemsSelection", () => {
+    it("should be false when no bulk operations are available", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { hasBulkOperationsWithItemsSelection, bulkOperations } =
+        useBulkOperationsActionsBar(props, emit);
+
+      bulkOperations.value = [];
+
+      expect(hasBulkOperationsWithItemsSelection.value).toBe(false);
+    });
+
+    it("should be false when the only available operation is a create entity operation", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { hasBulkOperationsWithItemsSelection, bulkOperations } =
+        useBulkOperationsActionsBar(props, emit);
+
+      bulkOperations.value = [
+        { value: BulkOperationTypes.CreateEntity } as any,
+      ];
+
+      expect(hasBulkOperationsWithItemsSelection.value).toBe(false);
+    });
+
+    it("should be true when a non-create operation with a some-selected context is available", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { hasBulkOperationsWithItemsSelection, bulkOperations } =
+        useBulkOperationsActionsBar(props, emit);
+
+      bulkOperations.value = [
+        {
+          value: BulkOperationTypes.DownloadMediafiles,
+          actionContext: {
+            entitiesSelectionType:
+              ActionContextEntitiesSelectionType.SomeSelected,
+          },
+        } as any,
+      ];
+
+      expect(hasBulkOperationsWithItemsSelection.value).toBe(true);
+    });
+
+    it("should be true when a create operation is combined with a selectable operation", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { hasBulkOperationsWithItemsSelection, bulkOperations } =
+        useBulkOperationsActionsBar(props, emit);
+
+      bulkOperations.value = [
+        { value: BulkOperationTypes.CreateEntity } as any,
+        {
+          value: BulkOperationTypes.DownloadMediafiles,
+          actionContext: {
+            entitiesSelectionType:
+              ActionContextEntitiesSelectionType.SomeSelected,
+          },
+        } as any,
+      ];
+
+      expect(hasBulkOperationsWithItemsSelection.value).toBe(true);
     });
   });
 

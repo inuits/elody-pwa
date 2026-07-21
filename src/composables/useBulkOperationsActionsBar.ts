@@ -1,7 +1,10 @@
 import { computed, inject, onMounted, ref, type Ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import { type PaginationStore, PaginationStoreKey } from "@/components/library/usePaginationStore";
+import {
+  type PaginationStore,
+  PaginationStoreKey,
+} from "@/components/library/usePaginationStore";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type Context,
@@ -77,7 +80,7 @@ export interface BulkOperationsActionsBarEmits {
 export const useBulkOperationsActionsBar = (
   props: BulkOperationsActionsBarProps,
   emit: BulkOperationsActionsBarEmits,
-  parentEntity: Entity | undefined
+  parentEntity: Entity | undefined,
 ) => {
   const refetchParentEntity: any = inject("RefetchParentEntity");
   const libraryEntities = inject<Ref<Entity[]>>("libraryEntities");
@@ -129,7 +132,16 @@ export const useBulkOperationsActionsBar = (
         );
       },
     );
-    return (bulkOperations.value && operationsWithContext?.length > 0) || false;
+    const bulkOperationsWithoutCreation = bulkOperations.value?.filter(
+      (item: DropdownOption) => {
+        return item.value !== BulkOperationTypes.CreateEntity;
+      },
+    );
+    return (
+      (bulkOperationsWithoutCreation?.length > 0 &&
+        operationsWithContext?.length > 0) ||
+      false
+    );
   });
 
   const itemsSelected = computed<boolean>(
@@ -375,7 +387,7 @@ export const useBulkOperationsActionsBar = (
       undefined,
       bulkOperationModalConfig.askForCloseConfirmation || undefined,
       getModalContextForOperation(operationType),
-      { parentEntity: parentEntity}
+      { parentEntity: parentEntity },
     );
   };
 
