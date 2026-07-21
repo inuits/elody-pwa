@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { useConfirmModal } from "../useConfirmModal";
 import { useBaseModal } from "../useBaseModal";
-import { TypeModals } from "../../generated-types/queries";
+import { TypeModals } from "@/generated-types/queries";
 
 test("confirm() opens the Confirm modal", () => {
   const { confirm } = useConfirmModal();
