@@ -583,4 +583,25 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
     expect(libDetermineViewModes).toHaveBeenCalled();
     expect(libGetUserPreferredViewModeConfiguration).toHaveBeenCalled();
   });
+
+  it("does not re-restore view mode preferences on a second fetch of the same entity type (e.g. clicking Apply on filters)", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    libEntitiesLoading.value = true;
+    await flushPromises();
+    libEntities.value = [makePickerEntity("e1")];
+    libEntitiesLoading.value = false;
+    await flushPromises();
+
+    libGetUserPreferredViewModeConfiguration.mockClear();
+
+    libEntitiesLoading.value = true;
+    await flushPromises();
+    libEntities.value = [makePickerEntity("e2")];
+    libEntitiesLoading.value = false;
+    await flushPromises();
+
+    expect(libGetUserPreferredViewModeConfiguration).not.toHaveBeenCalled();
+  });
 });

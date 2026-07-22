@@ -5,6 +5,7 @@
     :enable-bulk-operations="config.features.hasBulkOperations"
     :list-item-route-name="RouteNames.SingleEntity"
     :filter-type="entityType"
+    :persist-expand-filters="true"
   />
 </template>
 

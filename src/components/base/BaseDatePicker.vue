@@ -50,7 +50,7 @@ const dateValue = computed<string | undefined>({
 });
 
 const modelType = computed(() => {
-  return "yyyy-MM-dd'T'HH:mm:ssXXX";
+  return enableTimePicker.value ? "yyyy-MM-dd'T'HH:mm:ssXXX" : "yyyy-MM-dd";
 });
 
 const formats = computed(() => {

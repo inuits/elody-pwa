@@ -430,6 +430,7 @@ export type BaseLibraryProps = {
   actionsOnResult?: ActionsOnResult;
   addEntitiesToForms?: boolean;
   saveViewPreferences?: boolean;
+  persistExpandFilters?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -463,6 +464,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   centerCoordinatesKey: "",
   cropMediafileCoordinatesKey: "",
   addEntitiesToForms: false,
+  saveViewPreferences: true,
 });
 
 const emit = defineEmits<{
@@ -658,6 +660,7 @@ const {
   route,
   baseLibraryMode: props.baseLibraryMode,
   persistPreferences: props.saveViewPreferences !== false,
+  persistExpandFilters: props.persistExpandFilters,
 });
 
 const noResultTranslations = computed(() => ({
@@ -898,6 +901,7 @@ const syncEditStateCallbacks = (): void => {
 };
 
 const deepRelationsInitialized = ref<boolean>(false);
+const hasRestoredViewModesAfterFetch = ref<boolean>(false);
 
 onMounted(async () => {
   lastProcessedEntityType.value = entityType.value;
@@ -1024,11 +1028,13 @@ watch(
       determineViewModes(viewModes);
       getUserPreferredViewModeConfiguration(viewModes);
       lastProcessedEntityType.value = entityType.value;
+      hasRestoredViewModesAfterFetch.value = true;
     }
 
     if (typeChanged && !hasValidData) {
       determineViewModes([]);
       lastProcessedEntityType.value = entityType.value;
+      hasRestoredViewModesAfterFetch.value = false;
     }
     if (props.addEntitiesToForms) {
       for (const entity of newEntities) {
@@ -1046,15 +1052,16 @@ watch(
 );
 
 watch(entitiesLoading, (loading, wasLoading) => {
-  if (loading || !wasLoading) return;
+  if (loading || !wasLoading || hasRestoredViewModesAfterFetch.value) return;
   const firstEntity = (entities.value as Entity[])?.[0];
-  const viewModes: string[] =
-    firstEntity?.allowedViewModes?.viewModes?.map(
-      (vm: ViewModesWithConfig) => vm.viewMode,
-    ) ?? [];
+  if (!firstEntity?.allowedViewModes) return;
+  const viewModes: string[] = firstEntity.allowedViewModes.viewModes?.map(
+    (vm: ViewModesWithConfig) => vm.viewMode,
+  ) ?? [];
   determineViewModes(viewModes);
   getUserPreferredViewModeConfiguration(viewModes);
   lastProcessedEntityType.value = entityType.value;
+  hasRestoredViewModesAfterFetch.value = true;
 });
 
 watch(

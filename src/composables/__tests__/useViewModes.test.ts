@@ -339,6 +339,7 @@ describe("useViewModes", () => {
         useViewModes({
           entities,
           enableAdvancedFilters: false,
+          persistExpandFilters: true,
         });
 
       getUserPreferredViewModeConfiguration();
@@ -346,7 +347,7 @@ describe("useViewModes", () => {
       expect(expandFilters.value).toBe(false);
     });
 
-    it("restores expandFilters when enableAdvancedFilters is true", () => {
+    it("does not restore expandFilters when persistExpandFilters is false, even with enableAdvancedFilters true", () => {
       mockGetGlobalState.mockReturnValue({
         grid: false,
         table: false,
@@ -357,6 +358,26 @@ describe("useViewModes", () => {
         useViewModes({
           entities,
           enableAdvancedFilters: true,
+          persistExpandFilters: false,
+        });
+
+      getUserPreferredViewModeConfiguration();
+
+      expect(expandFilters.value).toBe(false);
+    });
+
+    it("restores expandFilters when enableAdvancedFilters and persistExpandFilters are both true", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        expandFilters: true,
+      });
+      const entities = ref<Entity[]>([]);
+      const { getUserPreferredViewModeConfiguration, expandFilters } =
+        useViewModes({
+          entities,
+          enableAdvancedFilters: true,
+          persistExpandFilters: true,
         });
 
       getUserPreferredViewModeConfiguration();
@@ -685,12 +706,15 @@ describe("useViewModes", () => {
       expect(displayList.value).toBe(true);
     });
 
-    it("preserves stored expandFilters on SingleEntity route", async () => {
-      mockGetGlobalState.mockReturnValue({ expandFilters: true });
+    it("writes the current expandFilters value when persistExpandFilters is true", async () => {
       const entities = ref<Entity[]>([]);
-      const route = makeRoute("SingleEntity");
-      const { displayGrid } = useViewModes({ entities, route });
+      const { displayGrid, expandFilters } = useViewModes({
+        entities,
+        enableAdvancedFilters: true,
+        persistExpandFilters: true,
+      });
 
+      expandFilters.value = true;
       displayGrid.value = true;
       await nextTick();
 
@@ -700,16 +724,16 @@ describe("useViewModes", () => {
       );
     });
 
-    it("uses current expandFilters value on non-SingleEntity route", async () => {
+    it("preserves the stored expandFilters value (does not write its own) when persistExpandFilters is false", async () => {
+      mockGetGlobalState.mockReturnValue({ expandFilters: true });
       const entities = ref<Entity[]>([]);
-      const route = makeRoute("Overview");
       const { displayGrid, expandFilters } = useViewModes({
         entities,
-        route,
         enableAdvancedFilters: true,
+        persistExpandFilters: false,
       });
 
-      expandFilters.value = true;
+      expandFilters.value = false;
       displayGrid.value = true;
       await nextTick();
 

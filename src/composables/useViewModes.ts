@@ -23,6 +23,10 @@ export type UseViewModesOptions = {
   route?: RouteLocationNormalizedLoaded;
   baseLibraryMode?: BaseLibraryModes;
   persistPreferences?: boolean;
+  // Only the top-level overview library should read/write the shared
+  // cross-route `expandFilters` preference — nested/detail-page instances
+  // (relation lists, pickers, modals) keep their own in-memory-only state.
+  persistExpandFilters?: boolean;
 };
 
 export const useViewModes = (options: UseViewModesOptions) => {
@@ -154,9 +158,10 @@ export const useViewModes = (options: UseViewModesOptions) => {
     const displayPreferences = getGlobalState("_displayPreferences");
     if (!displayPreferences) return;
 
-    expandFilters.value = !options.enableAdvancedFilters
-      ? false
-      : displayPreferences.expandFilters;
+    expandFilters.value =
+      options.enableAdvancedFilters && options.persistExpandFilters
+        ? displayPreferences.expandFilters
+        : false;
 
     if (
       !displayPreview.value &&
@@ -197,10 +202,9 @@ export const useViewModes = (options: UseViewModesOptions) => {
   // ── Persist watcher ───────────────────────────────────────────────────────
 
   watch([displayGrid, displayTable, expandFilters], () => {
-    let _expandFilters = expandFilters.value;
-    if (options.route?.name === "SingleEntity") {
-      _expandFilters = getGlobalState("_displayPreferences")?.expandFilters;
-    }
+    const _expandFilters = options.persistExpandFilters
+      ? expandFilters.value
+      : getGlobalState("_displayPreferences")?.expandFilters;
 
     displayList.value =
       !displayGrid.value && !displayMap.value && !displayTable.value;
