@@ -241,9 +241,6 @@ watch(
   },
 );
 
-// An upload step attaches its mediafile(s) to the staged prior-step entity
-// (scopeToRelationOf). The linked upload reads its target from useEntitySingle,
-// so point it at that entity while the create view is active.
 watch(
   [view, () => props.pickerParentUuid],
   ([currentView, parentUuid]) => {
