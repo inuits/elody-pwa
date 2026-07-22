@@ -709,12 +709,14 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     });
   });
 
-  it("closes the flow after Afronden, since there is no finalize step", async () => {
+  it("finishes the flow after Afronden, since there is no finalize step (the host closes the modal)", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper, { role: "booker_member" });
     overview(wrapper).vm.$emit("finish");
     await flushPromises();
-    expect(wrapper.emitted("close")).toBeTruthy();
+    // a no-finalize flow emits `finished` (not a bare `close`) so the host can
+    // both close the modal and run the refetch callbacks on the way out
+    expect(wrapper.emitted("finished")).toBeTruthy();
   });
 
   it("still shows the role step and defers the relation to Afronden when a new user is created instead of picked — create and pick behave identically", async () => {
