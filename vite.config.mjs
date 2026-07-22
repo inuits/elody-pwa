@@ -17,7 +17,7 @@ const cacheDir =
     : "../node_modules/.vite";
 
 // https://vitejs.dev/config/
-const viteConfig = defineConfig({
+const viteConfig = defineConfig(({ mode }) => ({
   plugins: [
     vue(),
     viteCompression(),
@@ -30,6 +30,9 @@ const viteConfig = defineConfig({
     __VUE_I18N_LEGACY_API__: false,
     __INTLIFY_PROD_DEVTOOLS__: false,
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: true,
+    // Apollo Client gates its dev-mode invariant warnings on this global,
+    // not process.env.NODE_ENV — must be set explicitly per Apollo docs.
+    "globalThis.__DEV__": JSON.stringify(mode !== "production"),
   },
   resolve: {
     alias: {
@@ -100,6 +103,6 @@ const viteConfig = defineConfig({
       plugins: [],
     },
   },
-});
+}));
 
 export default viteConfig;
