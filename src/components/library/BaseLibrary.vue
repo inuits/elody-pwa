@@ -514,20 +514,26 @@ const showCurrentEntityFlow = computed(() => {
   if (!isPreviewElement) return true;
   return showCurrentPreviewFlow !== undefined ? showCurrentPreviewFlow : true;
 });
+const isEntityPickerContext = computed(() => {
+  return (
+    props.bulkOperationsContext ===
+      BulkOperationsContextEnum.EntityElementListEntityPickerModal ||
+    props.bulkOperationsContext ===
+      BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
+  );
+});
 const enableSelection = computed<boolean>(() => {
   if (props.isSearchLibrary || !props.selectionEnabled) return false;
   const wantsSelectionWithoutBulkToolbar = !props.enableBulkOperations;
-  if (wantsSelectionWithoutBulkToolbar) return true;
+  if (wantsSelectionWithoutBulkToolbar || isEntityPickerContext.value)
+    return true;
   return config.features.hasBulkSelect && hasBulkOperations.value;
 });
 const additionalDefaultFiltersEnabled = computed(() => {
   return (
     props.enableAdvancedFilters &&
     manipulationQuery.value?.filtersDocument &&
-    props.bulkOperationsContext !==
-      BulkOperationsContextEnum.EntityElementListEntityPickerModal &&
-    props.bulkOperationsContext !==
-      BulkOperationsContextEnum.EntityElementMediaEntityPickerModal
+    !isEntityPickerContext.value
   );
 });
 
