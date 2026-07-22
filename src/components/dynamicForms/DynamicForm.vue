@@ -636,7 +636,19 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
   if (!enableUploadButton.value) return;
   const entityInput = await createEntityFromFormInput(field.creationType);
 
+  const uploadedFilenames = mediafiles.value
+    .map((file) => file.name)
+    .join(", ");
+
   await upload(isLinkedUpload.value, entityInput, config, t);
+  if (props.emitEntityCreated) {
+    deleteForm(props.dynamicFormQuery);
+    emit("entityCreated", {
+      id: useEntitySingle().getEntityUuid(),
+      intialValues: uploadedFilenames ? { label: uploadedFilenames } : undefined,
+    });
+    return;
+  }
   if (jobIdentifier.value) {
     goToEntityPageById(
       jobIdentifier.value,

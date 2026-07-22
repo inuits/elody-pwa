@@ -533,7 +533,7 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
     expect(field(wrapper).props("skipSearch")).toBe(true);
   });
 
-  it("closes the flow on finish when there is no finalize config", async () => {
+  it("emits finished on finish when there is no finalize config", async () => {
     const wrapper = getBulkWrapper();
     overview(wrapper).vm.$emit("add-another");
     await wrapper.vm.$nextTick();
@@ -542,10 +542,12 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
     await flushPromises();
     expect(overview(wrapper).exists()).toBe(true);
     expect(useRepetitiveForm().branches.value).toHaveLength(1);
-    // finishing a flow with no finalize just closes (entities already exist)
+    // finishing a flow with no finalize emits "finished" with an empty payload
+    // (no container entity) so the host can honor refetchOnFinish and close
     overview(wrapper).vm.$emit("finish");
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted("close")).toBeTruthy();
+    expect(wrapper.emitted("finished")).toBeTruthy();
+    expect(wrapper.emitted("finished")?.[0]).toEqual([{}]);
     expect(form(wrapper).exists()).toBe(false);
   });
 });

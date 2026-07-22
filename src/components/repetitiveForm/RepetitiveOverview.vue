@@ -29,10 +29,7 @@
           <span class="text-base font-semibold text-text-light">
             {{ $t(step.label ?? step.key) }}
           </span>
-          <span
-            v-if="entityLabel(branch, step.key)"
-            class="font-medium truncate"
-          >
+          <span class="font-medium truncate max-w-[400px]">
             {{ entityLabel(branch, step.key) }}
           </span>
           <span

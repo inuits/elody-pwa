@@ -344,7 +344,7 @@ const onFinish = async () => {
     if (callback) await callback();
   }
   if (!flowConfig.value?.finalize) {
-    emit("close");
+    emit("finished", {});
     return;
   }
   // preselect when there is only one creatable type; otherwise show the chooser

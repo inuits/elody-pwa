@@ -106,6 +106,7 @@ import {
 } from "@/composables/useRepetitiveForm";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
+import useEntitySingle from "@/composables/useEntitySingle";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
@@ -238,6 +239,16 @@ watch(
     view.value = initialView();
     selectedType.value = defaultSelectedType();
   },
+);
+
+watch(
+  [view, () => props.pickerParentUuid],
+  ([currentView, parentUuid]) => {
+    if (currentView === "create" && parentUuid) {
+      useEntitySingle().setEntityUuid(parentUuid);
+    }
+  },
+  { immediate: true },
 );
 
 const onPicked = (items: InBulkProcessableItem[]) => {
