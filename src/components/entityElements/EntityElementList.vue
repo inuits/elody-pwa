@@ -223,6 +223,10 @@ const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
 const showElementList = ref<boolean>(false);
+const refetchParentEntity = inject<(() => Promise<unknown> | void) | undefined>(
+  "RefetchParentEntity",
+  undefined,
+);
 
 onBeforeMount(async () => {
   if (requiresCustomQuery.value) await useCustomQuery();
@@ -238,8 +242,10 @@ watch(
     else if (
       uploadStatus.value === UploadStatus.Finished ||
       uploadStatus.value === UploadStatus.Paused
-    )
+    ) {
+      await refetchParentEntity?.();
       await useCustomQuery();
+    }
   },
 );
 
