@@ -98,7 +98,7 @@ vi.mock("../useUploadState", async () => {
 });
 
 describe("useUpload - Missing Mediafiles validation", () => {
-  let mockBatchEntitiesResponse = {
+  const mockBatchEntitiesResponse = {
     errors: {},
     mediafiles: [{ filename: "missing-image.jpg" }],
   };

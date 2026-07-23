@@ -26,7 +26,7 @@ export const useVirtualPagination = (apolloClient: ApolloClient<any>) => {
     internalLoading.value = true;
     internalEntities.value = [];
     let offset = 0;
-    let allRows: Entity[] = [];
+    const allRows: Entity[] = [];
 
     abortController = new AbortController();
 

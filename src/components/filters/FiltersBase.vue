@@ -2,15 +2,15 @@
   <div
     data-cy="filter-base"
     class="relative bg-background-light w-full"
-    :class="expandFilters ? 'rounded-t' : 'rounded-xl'"
+    :class="isExpanded ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
   >
     <div
       class=""
       :class="[
         'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
-        { 'border-accent-highlight rounded-t': expandFilters },
-        { 'border-background-light rounded-xl': !expandFilters },
+        { 'border-accent-highlight rounded-t': isExpanded },
+        { 'border-background-light rounded-xl': !isExpanded },
       ]"
       @click="() => emit('expandFilters', expandFilters)"
     >
@@ -18,28 +18,42 @@
         {{ t("filters.filter") }}
       </span>
       <div class="flex items-center">
-        <span class="text-text-body">
-          {{ activeFilterCount }} {{ t("filters.active") }}
-        </span>
-        <div
-          v-if="
-            (selectedSavedFilter || lastActiveFilter) &&
-            auth.isAuthenticated.value === true
-          "
-          class="bg-accent-highlight border-accent-highlight rounded py-1 px-2 ml-2"
+        <span
+          v-if="simpleSearchActive"
+          data-cy="filters-disabled-label"
+          class="flex items-center gap-1.5 text-text-body"
         >
+          <unicon
+            class="text-text-body"
+            :name="Unicons[DamsIcons.SearchGlass].name"
+          />
+          {{ t("filters.disabled-simple-search") }}
+        </span>
+        <template v-else>
           <span class="text-text-body">
-            {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
+            {{ activeFilterCount }} {{ t("filters.active") }}
           </span>
-        </div>
-        <unicon
-          class="text-text-body ml-4"
-          :name="Unicons[getAngleIcon].name"
-        />
+          <div
+            v-if="
+              (selectedSavedFilter || lastActiveFilter) &&
+              auth.isAuthenticated.value === true
+            "
+            class="bg-accent-highlight border-accent-highlight rounded py-1 px-2 ml-2"
+          >
+            <span class="text-text-body">
+              {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
+            </span>
+          </div>
+          <unicon
+            class="text-text-body ml-4"
+            :name="Unicons[getAngleIcon].name"
+          />
+        </template>
       </div>
     </div>
 
     <div
+      v-if="!simpleSearchActive"
       :class="[
         'w-full rounded-b bg-background-light',
         { hidden: !expandFilters },
@@ -179,6 +193,7 @@ export type FiltersBaseAPI = {
   ) => void;
   removeFilterFromList: (key: string) => void;
   getNormalizedFiltersForApi: () => AdvancedFilterInput[];
+  getHiddenFiltersForApi: () => AdvancedFilterInput[];
 };
 
 export type StandardMatcherCategory =
@@ -210,6 +225,7 @@ const props = withDefaults(
     predefinedFilters: AdvancedFilterInput[];
     additionalDefaultFiltersEnabled?: boolean;
     onRegisterApi?: (api: FiltersBaseAPI) => void;
+    simpleSearchActive?: boolean;
   }>(),
   {
     parentEntityIdentifiers: () => [],
@@ -219,6 +235,7 @@ const props = withDefaults(
     additionalDefaultFiltersEnabled: false,
     onRegisterApi: undefined,
     expandFilters: false,
+    simpleSearchActive: false,
   },
 );
 
@@ -279,6 +296,7 @@ const {
   deactivateFilter,
   removeFilterFromList,
   resetFilters,
+  getHiddenFiltersForApi,
 } = useFiltersBaseNew();
 
 const isResolveOptionIdsFilter = (key: string | string[]) =>
@@ -541,6 +559,10 @@ const getAngleIcon = computed<DamsIcons>(() =>
   props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown,
 );
 
+const isExpanded = computed<boolean>(
+  () => props.expandFilters && !props.simpleSearchActive,
+);
+
 const toggleDisplayedFilters = () => {
   filters.value.forEach((filter) => {
     filter.isDisplayed =
@@ -568,6 +590,7 @@ onMounted(async () => {
       initializeAndActivateNewFilter: initializeAndActivateNewFilter,
       removeFilterFromList: removeFilterFromList,
       getNormalizedFiltersForApi: getNormalizedFiltersForApi,
+      getHiddenFiltersForApi: getHiddenFiltersForApi,
     });
   }
   emit("filterMatcherMappingPromise", filterMatcherMappingPromise);

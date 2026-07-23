@@ -26,13 +26,14 @@
         class="z-header top-0 pt-3 pb-2 bg-background-normal"
         :class="[
           { hidden: !enableAdvancedFilters },
-          { 'row-span-1': !expandFilters },
-          { 'row-span-2': expandFilters },
+          { 'row-span-1': !isFiltersPanelExpanded },
+          { 'row-span-2': isFiltersPanelExpanded },
           { sticky: hasStickyBars },
         ]"
       >
         <FiltersBase
           v-show="enableAdvancedFilters"
+          :simple-search-active="!!simpleSearchTerm"
           :expandFilters="expandFilters"
           :manipulation-query="manipulationQuery"
           :parent-entity-identifiers="parentEntityIdentifiers"
@@ -56,9 +57,21 @@
               filters: AdvancedFilterInput[],
               stateSaved: boolean = false,
               force: boolean = true,
-            ) => await setAdvancedFilters(filters, stateSaved, force, route)
+            ) => {
+              if (simpleSearchTerm) simpleSearchTerm = '';
+              await setAdvancedFilters(filters, stateSaved, force, route);
+            }
           "
-          @expand-filters="expandFilters = !expandFilters"
+          @expand-filters="
+            async () => {
+              if (simpleSearchTerm) {
+                expandFilters = true;
+                await handleSetSimpleSearch('');
+              } else {
+                expandFilters = !expandFilters;
+              }
+            }
+          "
         />
       </div>
       <div
@@ -106,6 +119,8 @@
               :selected-pagination-limit-option="paginationStore.limit.value"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
+              :simple-search-value="simpleSearchTerm"
+              :set-simple-search="handleSetSimpleSearch"
               @pagination-limit-options-promise="
                 (promise) => (paginationLimitOptionsPromise = promise)
               "
@@ -119,8 +134,8 @@
       <div
         :class="[
           'row-span-2 flex flex-col min-h-0',
-          { 'col-span-1 pl-[1%]': expandFilters },
-          { 'col-span-2': !expandFilters },
+          { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
+          { 'col-span-2': !isFiltersPanelExpanded },
         ]"
       >
         <div
@@ -184,8 +199,8 @@
               'text-center my-2':
                 baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
             },
-            { 'col-span-1 pl-[1%]': expandFilters },
-            { 'col-span-2': !expandFilters },
+            { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
+            { 'col-span-2': !isFiltersPanelExpanded },
           ]"
         >
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
@@ -250,7 +265,7 @@
               ]
             "
             :config-per-view-mode="configPerViewMode"
-            :expandFilters="expandFilters"
+            :expandFilters="isFiltersPanelExpanded"
             :refetch-entities="refetchEntities"
             :entity-type="entityType"
             :show-current-entity-flow="showCurrentEntityFlow"
@@ -349,6 +364,7 @@ import {
   ActionsOnResult,
   ActionsOnResultTypes,
   type AdvancedFilterInput,
+  AdvancedFilterTypes,
   type BaseEntity,
   BaseLibraryModes,
   type BaseRelationValuesInput,
@@ -360,6 +376,7 @@ import {
   type EntitySubelement,
   Entitytyping,
   type FetchDeepRelations,
+  Operator,
   type RelationActions,
   SearchInputType,
   TypeModals,
@@ -509,6 +526,13 @@ const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const isInitialLoading = ref<boolean>(true);
+const simpleSearchTerm = ref<string>("");
+const simpleSearchKeys = computed<string[]>(
+  () => (route.meta as any)?.simpleSearch?.keys ?? [],
+);
+const isFiltersPanelExpanded = computed<boolean>(
+  () => expandFilters.value && !simpleSearchTerm.value,
+);
 
 const showCurrentEntityFlow = computed(() => {
   if (!isPreviewElement) return true;
@@ -607,6 +631,23 @@ const {
 const paginationStore = createPaginationStore();
 provide(PaginationStoreKey, paginationStore);
 provide("libraryEntities", entities);
+
+const handleSetSimpleSearch = async (value: string) => {
+  simpleSearchTerm.value = value;
+  const searchFilters: AdvancedFilterInput[] = value
+    ? [
+        ...(filtersBaseAPI.value?.getHiddenFiltersForApi() ?? []),
+        {
+          key: simpleSearchKeys.value,
+          value,
+          type: AdvancedFilterTypes.Text,
+          operator: Operator.Or,
+          match_exact: false,
+        },
+      ]
+    : (filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? []);
+  await setAdvancedFilters(searchFilters, false, true, route);
+};
 
 const {
   bulkOperations,

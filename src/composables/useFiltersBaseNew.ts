@@ -18,6 +18,13 @@ export const useFiltersBaseNew = () => {
     );
   };
 
+  const getHiddenFiltersForApi = () => {
+    return normalization.getNormalizedFiltersForApi(
+      state.filters.value.filter((filter) => filter.advancedFilter.hidden),
+      true,
+    );
+  };
+
   return {
     // basic
     rawFilters: basic.rawFilters,
@@ -40,5 +47,6 @@ export const useFiltersBaseNew = () => {
 
     // normalization
     getNormalizedFiltersForApi,
+    getHiddenFiltersForApi,
   };
 };

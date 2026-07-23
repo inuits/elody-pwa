@@ -51,6 +51,15 @@
         />
       </div>
     </div>
+    <div v-if="simpleSearchKeys.length > 0" class="w-full @md:w-64">
+      <BaseInputTextNumberDatetime
+        data-cy="simple-search"
+        type="text"
+        input-style="defaultWithBorder"
+        v-model="simpleSearchInput"
+        :placeholder="simpleSearchPlaceholder"
+      />
+    </div>
   </div>
 </template>
 
@@ -64,11 +73,13 @@ import {
   type GetPaginationLimitOptionsQuery,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { useImport } from "@/composables/useImport";
+import debounce from "lodash.debounce";
 
 const props = withDefaults(
   defineProps<{
@@ -77,10 +88,14 @@ const props = withDefaults(
     setSortKey: (sortKey: string) => void;
     setSortOrder: (sortOrder: boolean, force?: boolean) => void;
     filtersAvailableOnDetailPage?: boolean;
+    simpleSearchValue?: string;
+    setSimpleSearch?: (value: string) => void;
   }>(),
   {
     selectedPaginationLimitOption: 20,
     filtersAvailableOnDetailPage: false,
+    simpleSearchValue: "",
+    setSimpleSearch: undefined,
   },
 );
 
@@ -113,6 +128,36 @@ const { getStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
 const { t } = useI18n();
 const route = useRoute();
+
+const simpleSearchKeys = computed<string[]>(
+  () => (route.meta as any)?.simpleSearch?.keys ?? [],
+);
+const currentPageLabel = computed<string>(() => {
+  const breadcrumbs = (route.meta as any)?.breadcrumbs;
+  const lastCrumb = breadcrumbs?.[breadcrumbs.length - 1];
+  return lastCrumb?.title ? t(lastCrumb.title) : "";
+});
+const simpleSearchPlaceholder = computed<string>(() =>
+  t("library.simple-search-placeholder", { entity: currentPageLabel.value }),
+);
+const simpleSearchInput = ref<string>(props.simpleSearchValue);
+const debouncedSetSimpleSearch = debounce(
+  (value: string) => props.setSimpleSearch?.(value),
+  250,
+);
+
+watch(
+  () => props.simpleSearchValue,
+  (value) => {
+    if (value !== simpleSearchInput.value) simpleSearchInput.value = value;
+  },
+);
+watch(simpleSearchInput, (value) => {
+  if (value === props.simpleSearchValue) return;
+  debouncedSetSimpleSearch(value);
+});
+
+onUnmounted(() => debouncedSetSimpleSearch.cancel());
 
 const setIsAsc = (sortDirection: "asc" | "desc") => {
   isAsc.value = sortDirection === "asc";

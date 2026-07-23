@@ -62,6 +62,47 @@ describe("useFiltersBaseNew - Integration", () => {
     );
   });
 
+  it("getHiddenFiltersForApi returns only the hidden, always-on filters, even when a user-toggled filter is also active", async () => {
+    const { setVariables, initializeFilters, activateFilter, getHiddenFiltersForApi } =
+      useFiltersBaseNew();
+
+    await setVariables({
+      entityType: "test_entity",
+    });
+
+    await initializeFilters({
+      advancedFilters: {
+        typeFilter: {
+          type: "type",
+          defaultValue: "$entityType",
+          hidden: true,
+          __typename: "AdvancedFilter",
+        },
+        textFilter: {
+          type: "text",
+          key: "test.key",
+          label: "Test",
+          isDisplayedByDefault: true,
+          __typename: "AdvancedFilter",
+        },
+      },
+      fromState: false,
+    });
+
+    activateFilter("test.key", "search_value");
+
+    const hiddenFilters = getHiddenFiltersForApi();
+    expect(sortFilters(hiddenFilters)).toEqual(
+      sortFilters([
+        {
+          type: "type",
+          value: "test_entity",
+          match_exact: true,
+        },
+      ]),
+    );
+  });
+
   it("maintains state when activating multiple filter types", async () => {
     const { filters, initializeFilters, activateFilter } = useFiltersBaseNew();
 
