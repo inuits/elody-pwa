@@ -37,7 +37,12 @@ let libraryEntitiesRef: Ref<Entity[]> | undefined = undefined;
 export const useModalActions = () => {
   const getArgumentsForSubmit = (): SubmitArguments => {
     const relation: { [key: string]: BaseRelationValuesInput[] } = {};
-    if (parentId.value !== undefined) {
+    // parentId is set unconditionally for every bulk op (see
+    // initializeGeneralProperties), even when its modal has no
+    // formRelationType configured — relationType is then just an empty
+    // string, and building a relation from it would attach a bogus,
+    // type-less relation to whatever gets created.
+    if (parentId.value !== undefined && relationType.value) {
       relation[relationType.value] = [
         {
           key: parentId.value,
