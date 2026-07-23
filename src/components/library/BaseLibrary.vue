@@ -448,6 +448,7 @@ export type BaseLibraryProps = {
   addEntitiesToForms?: boolean;
   saveViewPreferences?: boolean;
   persistExpandFilters?: boolean;
+  forceShowFilters?: boolean;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -482,6 +483,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   cropMediafileCoordinatesKey: "",
   addEntitiesToForms: false,
   saveViewPreferences: true,
+  forceShowFilters: false,
 });
 
 const emit = defineEmits<{
@@ -960,6 +962,7 @@ onMounted(async () => {
   syncEditStateCallbacks();
   window.addEventListener("beforeunload", resetMapPaginationLimit);
   if (props.isSearchLibrary) paginationStore.setPage(1)
+  if (props.forceShowFilters) expandFilters.value = true;
 });
 
 watch(

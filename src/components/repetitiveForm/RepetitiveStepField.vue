@@ -36,6 +36,7 @@
         :accepted-types="acceptedTypes"
         :custom-query="step.pickerQuery ?? ''"
         :custom-filters-query="step.pickerFiltersQuery ?? undefined"
+        :force-show-filters="step.pickerFiltersCollapsed !== undefined ? !step.pickerFiltersCollapsed : false"
         :computed-filters="computedFilters"
         :show-button="true"
         :selection-enabled="step.maxSelection === -1 ? true : step.maxSelection >= 1"

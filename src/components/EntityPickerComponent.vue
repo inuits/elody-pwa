@@ -38,6 +38,7 @@
       "
       :should-use-state-for-route="shouldUseStateForRoute"
       :save-view-preferences="false"
+      :force-show-filters="forceShowFilters"
       @confirm-selection="saveRelations"
     />
   </div>
@@ -120,6 +121,7 @@ const props = withDefaults(
     searchAcceptedTypes?: string[];
     searchStaticFilters?: AdvancedFilterInput[];
     filterParentEntity?: any;
+    forceShowFilters?: boolean;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -134,6 +136,7 @@ const props = withDefaults(
     searchAcceptedTypes: () => [],
     searchStaticFilters: () => [],
     filterParentEntity: undefined,
+    forceShowFilters: false,
   },
 );
 
