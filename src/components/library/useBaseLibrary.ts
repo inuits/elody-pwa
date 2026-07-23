@@ -59,6 +59,8 @@ export const useBaseLibrary = (
       : undefined,
   });
   let queryVariables: GetEntitiesQueryVariables = getDefaultQueryVariables();
+  let hasPendingFetch = false;
+  let pendingFetchRoute: RouteLocationNormalizedLoaded | undefined;
 
   const setManipulationOfQuery = (
     manipulate: boolean,
@@ -222,7 +224,13 @@ export const useBaseLibrary = (
     signal?: AbortSignal,
     limitForEntityPicker?: number,
   ): Promise<Entity[] | void> => {
-    if (entitiesLoading.value && !signal) return;
+    if (entitiesLoading.value && !signal) {
+      if (!limitForEntityPicker) {
+        hasPendingFetch = true;
+        pendingFetchRoute = route;
+      }
+      return;
+    }
     entitiesLoading.value = true;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
@@ -283,6 +291,13 @@ export const useBaseLibrary = (
       }
     } finally {
       entitiesLoading.value = false;
+    }
+
+    if (hasPendingFetch && !signal) {
+      hasPendingFetch = false;
+      const nextRoute = pendingFetchRoute ?? route;
+      pendingFetchRoute = undefined;
+      await getEntities(nextRoute);
     }
   };
 
