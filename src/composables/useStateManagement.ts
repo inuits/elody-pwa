@@ -59,20 +59,29 @@ export const useStateManagement = () => {
     else setGlobalState(key, Object.assign(state, value), storageType);
   };
 
+  const parseState = (
+    raw: string | null,
+    storage: Storage,
+    key: string,
+  ): any => {
+    if (!raw) return undefined;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      storage.removeItem(key);
+      return undefined;
+    }
+  };
+
   const getGlobalState = (
     key: string,
     storageType: "localStorage" | "sessionStorage" = "localStorage",
   ) => {
-    if (storageType === "localStorage") {
-      const state = window.localStorage.getItem(key);
-      if (state) return JSON.parse(state);
-      return undefined;
-    }
-    if (storageType === "sessionStorage") {
-      const state = window.sessionStorage.getItem(key);
-      if (state) return JSON.parse(state);
-      return undefined;
-    }
+    const storage =
+      storageType === "localStorage"
+        ? window.localStorage
+        : window.sessionStorage;
+    return parseState(storage.getItem(key), storage, key);
   };
 
   const setStateForRoute = (
@@ -110,16 +119,20 @@ export const useStateManagement = () => {
   ): StateObject | undefined => {
     if (!route) return;
     if (route.name !== "SingleEntity") {
-      const state = window.sessionStorage.getItem(route.path);
-      if (state) return JSON.parse(state);
-    } else {
-      const path = useFullPath
-        ? route.path
-        : sliceSingleEntityRoutePath(route.path);
-      const state = window.sessionStorage.getItem(path);
-      if (state) return JSON.parse(state);
+      return parseState(
+        window.sessionStorage.getItem(route.path),
+        window.sessionStorage,
+        route.path,
+      );
     }
-    return undefined;
+    const path = useFullPath
+      ? route.path
+      : sliceSingleEntityRoutePath(route.path);
+    return parseState(
+      window.sessionStorage.getItem(path),
+      window.sessionStorage,
+      path,
+    );
   };
 
   const clearStorage = () => {

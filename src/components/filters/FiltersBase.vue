@@ -301,7 +301,10 @@ const {
 
 const isResolveOptionIdsFilter = (key: string | string[]) =>
   filters.value
-    .find((filter) => JSON.stringify(filter.advancedFilter.key) === JSON.stringify(key))
+    .find(
+      (filter) =>
+        JSON.stringify(filter.advancedFilter.key) === JSON.stringify(key),
+    )
     ?.advancedFilter.advancedFilterInputForRetrievingOptions?.some(
       (input) => input.resolveDefaultValueToOptionIds,
     );
@@ -530,12 +533,33 @@ const getFiltersFromState = (shouldUseState: boolean) => {
   }
 
   const state = getStateForRoute(props.route);
-  const hasStateFilters = !!state?.filterListItems?.length;
+  const cachedFilters = state?.filterListItems;
+  if (!cachedFilters?.length || !rawFilters.value) {
+    return {
+      filtersToUse: rawFilters.value,
+      fromState: false,
+    };
+  }
 
-  return {
-    filtersToUse: hasStateFilters ? state.filterListItems : rawFilters.value,
-    fromState: hasStateFilters,
-  };
+  const cachedByKey = new Map(
+    cachedFilters.map((item) => [item.advancedFilter?.key, item]),
+  );
+  const filtersToUse = Object.values(rawFilters.value)
+    .filter((filter): filter is AdvancedFilter => typeof filter !== "string")
+    .map((filter) => {
+      const cached = cachedByKey.get(filter.key);
+      return cached
+        ? { ...cached, advancedFilter: filter }
+        : {
+            isActive: filter.hidden || filter.defaultValue !== undefined,
+            isDisplayed: filter.isDisplayedByDefault ?? false,
+            advancedFilter: filter,
+            inputFromState: undefined,
+            selectedMatcher: undefined,
+          };
+    });
+
+  return { filtersToUse, fromState: true };
 };
 
 const saveFiltersToState = () => {

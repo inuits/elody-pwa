@@ -224,7 +224,8 @@ describe("useStateManagement", () => {
         const { getGlobalState } = useStateManagement();
         localStorageMock["malformedKey"] = "invalid json {";
 
-        expect(() => getGlobalState("malformedKey")).toThrow();
+        expect(getGlobalState("malformedKey")).toBeUndefined();
+        expect(localStorageMock["malformedKey"]).toBeUndefined();
       });
     });
 
@@ -612,7 +613,8 @@ describe("useStateManagement", () => {
       const route = createMockRoute("Library", "/library");
       sessionStorageMock[route.path] = "invalid json {";
 
-      expect(() => getStateForRoute(route)).toThrow();
+      expect(getStateForRoute(route)).toBeUndefined();
+      expect(sessionStorageMock[route.path]).toBeUndefined();
     });
 
     it("should handle empty state objects", () => {
