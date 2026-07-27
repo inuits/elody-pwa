@@ -309,6 +309,7 @@ const processedEntities = computed(() => {
       isDisabled,
       currentMode,
       previewEnabled,
+      props.entitiesLoading,
     ];
 
     return {
