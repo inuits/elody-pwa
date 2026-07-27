@@ -450,3 +450,72 @@ describe("useUpload - Warnings from mediafile upload", () => {
     expect(amountUploaded.value).toBeGreaterThan(0);
   });
 });
+
+describe("useUpload - CSV reordering upload", () => {
+  const createReorderCsvFile = (name: string) => {
+    const previewTemplate = document.createElement("div");
+
+    const uploadContainer = document.createElement("div");
+    uploadContainer.classList.add("file-upload-container");
+    ["empty", "loading", "complete", "failed"].forEach((status) => {
+      const step = document.createElement("div");
+      step.classList.add(`file-upload-${status}`);
+      if (status !== "empty") step.classList.add("hidden");
+      uploadContainer.appendChild(step);
+    });
+
+    const warningContainer = document.createElement("div");
+    warningContainer.classList.add("warning-message-container", "hidden");
+    const errorContainer = document.createElement("div");
+    errorContainer.classList.add("error-message-container", "hidden");
+
+    previewTemplate.appendChild(warningContainer);
+    previewTemplate.appendChild(errorContainer);
+    previewTemplate.appendChild(uploadContainer);
+
+    return { name, type: "text/csv", previewTemplate, status: "added" } as any;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("marks the upload step complete after a successful reorder request", async () => {
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true } as Response));
+
+    const { resetUpload, files, uploadCsvForReordering } = useUpload({});
+    resetUpload();
+    const csvFile = createReorderCsvFile("order.csv");
+    files.value = [csvFile];
+
+    await uploadCsvForReordering("parent-1");
+
+    const completeStep = csvFile.previewTemplate.querySelector(
+      ".file-upload-complete",
+    );
+    expect(completeStep?.classList.contains("hidden")).toBe(false);
+    expect(files.value).toHaveLength(0);
+  });
+
+  it("marks the upload step failed when the reorder request fails", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        statusText: "Server Error",
+      } as Response),
+    );
+
+    const { resetUpload, files, uploadCsvForReordering } = useUpload({});
+    resetUpload();
+    const csvFile = createReorderCsvFile("order.csv");
+    files.value = [csvFile];
+
+    await expect(uploadCsvForReordering("parent-1")).rejects.toThrow();
+
+    const failedStep = csvFile.previewTemplate.querySelector(
+      ".file-upload-failed",
+    );
+    expect(failedStep?.classList.contains("hidden")).toBe(false);
+  });
+});

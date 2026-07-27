@@ -59,6 +59,7 @@
         :dropzone-label="dropzoneLabel"
         view-style="p-3 h-full overflow-x-hidden mb-4 grow"
         :isValidationFile="dryRun"
+        :hidePrepareStep="uploadFieldType === UploadFieldType.ReorderEntities"
         :extra-mediafile-type="extraMediafileType"
       />
     </div>
@@ -69,11 +70,8 @@
 import Dropzone from "@/components/base/dropzone/Dropzone.vue";
 import { useDropzone } from "@/composables/useDropzone";
 import useUpload from "@/composables/upload/useUpload";
-import type {
-  DropdownOption,
-  UploadFieldType,
-  UploadFlow,
-} from "@/generated-types/queries";
+import { UploadFieldType } from "@/generated-types/queries";
+import type { DropdownOption, UploadFlow } from "@/generated-types/queries";
 import Papa from "papaparse";
 import { ref, watch, inject } from "vue";
 import { downloadCsv, mapModelValueToDropdownOptions } from "@/helpers";

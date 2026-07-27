@@ -9,6 +9,7 @@
   <Dropzone-preview
     v-model="dropzonePreview"
     :isValidationFile="isValidationFile"
+    :hidePrepareStep="hidePrepareStep"
   />
 </template>
 
@@ -32,10 +33,12 @@ const props = withDefaults(
     dropzoneLabel: string;
     viewStyle: string;
     isValidationFile: boolean;
+    hidePrepareStep?: boolean;
   }>(),
   {
     viewStyle: "",
     isValidationFile: false,
+    hidePrepareStep: false,
   },
 );
 

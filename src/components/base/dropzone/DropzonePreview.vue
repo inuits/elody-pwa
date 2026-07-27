@@ -22,7 +22,10 @@
             data-dz-name
           ></span>
         </div>
-        <upload-file-preview-progress :isValidationFile="isValidationFile" />
+        <upload-file-preview-progress
+          :isValidationFile="isValidationFile"
+          :hidePrepareStep="hidePrepareStep"
+        />
         <div>
           <a
             data-dz-remove
@@ -49,10 +52,16 @@ import UploadFilePreviewProgress from "@/components/dynamicForms/UploadFilePrevi
 
 const dropzonePreview = ref<HTMLDivElement>();
 
-defineProps<{
-  modelValue: HTMLDivElement | undefined;
-  isValidationFile: boolean;
-}>();
+withDefaults(
+  defineProps<{
+    modelValue: HTMLDivElement | undefined;
+    isValidationFile: boolean;
+    hidePrepareStep?: boolean;
+  }>(),
+  {
+    hidePrepareStep: false,
+  },
+);
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: HTMLDivElement | undefined): void;
