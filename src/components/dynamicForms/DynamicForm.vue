@@ -1008,7 +1008,6 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
     );
   } catch (error) {
     handleHttpError(error);
-    submitErrors.value = error.message;
   } finally {
     stopBlocking();
   }

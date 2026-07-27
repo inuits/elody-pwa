@@ -408,8 +408,7 @@ describe("useUpload - Warnings from mediafile upload", () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: false,
-        text: () =>
-          Promise.resolve("A4011 File empty.txt is empty."),
+        text: () => Promise.resolve("A4011 File empty.txt is empty."),
       } as unknown as Response),
     );
 
@@ -497,7 +496,57 @@ describe("useUpload - CSV reordering upload", () => {
     expect(files.value).toHaveLength(0);
   });
 
-  it("marks the upload step failed when the reorder request fails", async () => {
+  it("marks the upload step failed and shows the backend errors under the preview when the reorder request fails", async () => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        statusText: "Server Error",
+        json: () =>
+          Promise.resolve({
+            message: "500: Internal Server Error",
+            extensions: {
+              response: {
+                url: "http://collection-api-digipolis-dams:5000/entities/parent-1/order",
+                status: 500,
+                statusText: "Internal Server Error",
+                body: {
+                  errors: {
+                    entities: [
+                      "1) ParserError('Expected 3 fields in line 3, saw 4')",
+                    ],
+                    mediafiles: [],
+                  },
+                  job_id: "e7c12f41-a527-44ee-afbc-2a34dc98b021",
+                },
+              },
+            },
+          }),
+      } as unknown as Response),
+    );
+
+    const { resetUpload, files, uploadCsvForReordering } = useUpload({});
+    resetUpload();
+    const csvFile = createReorderCsvFile("order.csv");
+    files.value = [csvFile];
+
+    await expect(uploadCsvForReordering("parent-1")).rejects.toThrow();
+
+    const failedStep = csvFile.previewTemplate.querySelector(
+      ".file-upload-failed",
+    );
+    expect(failedStep?.classList.contains("hidden")).toBe(false);
+
+    const errorContainer = csvFile.previewTemplate.querySelector(
+      ".error-message-container",
+    );
+    expect(errorContainer?.classList.contains("hidden")).toBe(false);
+    expect(errorContainer?.innerHTML).toContain(
+      "ParserError('Expected 3 fields in line 3, saw 4')",
+    );
+  });
+
+  it("does not crash when the failed response has no JSON body", async () => {
     global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: false,

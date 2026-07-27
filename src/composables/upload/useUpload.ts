@@ -253,25 +253,16 @@ const useUpload = (config: any = {}) => {
       ProgressStepType.Upload,
       ProgressStepStatus.Loading,
     );
+
+    let response: Response;
     try {
-      const response = await fetch(`/api/upload/csv?parentId=${parentId}`, {
+      response = await fetch(`/api/upload/csv?parentId=${parentId}`, {
         headers: { "Content-Type": "text/csv" },
         method: "POST",
         body: getCsvBlob(),
         // 10 mins timeout because reordering can take a long time if there are many entities
         signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
       });
-      if (!response.ok)
-        throw new Error(
-          `Error while adjusting the order of entities: ${response.status}: ${response.statusText}`,
-        );
-
-      updateFileThumbnails(
-        file,
-        ProgressStepType.Upload,
-        ProgressStepStatus.Complete,
-      );
-      files.value = [];
     } catch (error) {
       updateFileThumbnails(
         file,
@@ -280,6 +271,36 @@ const useUpload = (config: any = {}) => {
       );
       throw error;
     }
+
+    if (!response.ok) {
+      let body: any;
+      try {
+        body = await response.json();
+      } catch {
+        body = undefined;
+      }
+      const upstreamErrors = body?.extensions?.response?.body?.errors;
+      const errors: string[] = [
+        ...(upstreamErrors?.entities ?? []),
+        ...(upstreamErrors?.mediafiles ?? []),
+      ];
+      updateFileThumbnails(
+        file,
+        ProgressStepType.Upload,
+        ProgressStepStatus.Failed,
+        errors,
+      );
+      throw new Error(
+        `Error while adjusting the order of entities: ${response.status}: ${response.statusText}`,
+      );
+    }
+
+    updateFileThumbnails(
+      file,
+      ProgressStepType.Upload,
+      ProgressStepStatus.Complete,
+    );
+    files.value = [];
   };
 
   const __uploadExceptionHandler = (
