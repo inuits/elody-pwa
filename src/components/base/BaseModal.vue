@@ -15,7 +15,7 @@
           currentModalStyle === ModalStyle.CenterWide,
       },
       modalStyle,
-      `@container/modal`,
+      `@container/modal relative`,
     ]"
   >
     <div
@@ -34,6 +34,14 @@
     <div data-testid="modal-content">
       <slot />
     </div>
+    <div
+      v-if="isBlocking && getModalInfo(props.modalType).open"
+      class="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background-light/80"
+      data-testid="modal-blocking-overlay"
+    >
+      <SpinnerLoader theme="accent" :dimensions="16" />
+      <p v-if="blockingMessage">{{ blockingMessage }}</p>
+    </div>
   </dialog>
 </template>
 
@@ -43,6 +51,10 @@ import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useModalActions } from "@/composables/useModalActions";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+
+const { isBlocking, blockingMessage } = useBlockingLoader();
 
 const props = withDefaults(
   defineProps<{

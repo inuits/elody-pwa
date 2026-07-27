@@ -265,6 +265,7 @@ import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useErrorCodes } from "@/composables/useErrorCodes";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {
@@ -990,7 +991,9 @@ const callEndpointActionFunction = async (field: FormAction) => {
 const reorderEntitiesActionFunction = async (field: FormAction) => {
   await form.value.validate();
   if (formContainsErrors.value) return;
+  const { startBlocking, stopBlocking } = useBlockingLoader();
   try {
+    startBlocking(t("modals.reorderingEntities"));
     await uploadCsvForReordering(extractActionArguments(field.actionType));
     const callbackFunctions = getCallbackFunctions();
     if (callbackFunctions !== undefined) {
@@ -1006,6 +1009,8 @@ const reorderEntitiesActionFunction = async (field: FormAction) => {
   } catch (error) {
     handleHttpError(error);
     submitErrors.value = error.message;
+  } finally {
+    stopBlocking();
   }
 };
 
