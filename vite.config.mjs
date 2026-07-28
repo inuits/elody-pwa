@@ -99,9 +99,6 @@ const viteConfig = defineConfig(({ mode }) => ({
   optimizeDeps: {
     exclude: ["session-vue-3-oidc-library", "date-fns"],
     include: ["openseadragon-select-plugin"],
-    esbuildOptions: {
-      plugins: [],
-    },
   },
 }));
 
