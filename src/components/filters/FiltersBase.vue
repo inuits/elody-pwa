@@ -542,12 +542,15 @@ const getFiltersFromState = (shouldUseState: boolean) => {
   }
 
   const cachedByKey = new Map(
-    cachedFilters.map((item) => [item.advancedFilter?.key, item]),
+    cachedFilters.map((item) => [
+      JSON.stringify(item.advancedFilter?.key),
+      item,
+    ]),
   );
   const filtersToUse = Object.values(rawFilters.value)
     .filter((filter): filter is AdvancedFilter => typeof filter !== "string")
     .map((filter) => {
-      const cached = cachedByKey.get(filter.key);
+      const cached = cachedByKey.get(JSON.stringify(filter.key));
       return cached
         ? { ...cached, advancedFilter: filter }
         : {
