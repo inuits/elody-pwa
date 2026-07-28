@@ -6,6 +6,7 @@ import type {
   Matchers,
 } from "@/generated-types/queries";
 import type { SavedSearchType } from "@/composables/useSaveSearchHepler";
+import { deepToRaw } from "@/utils/deepToRaw";
 
 export type FilterListItem = {
   isActive: boolean;
@@ -108,7 +109,11 @@ export const useStateManagement = () => {
   ) => {
     if (!route) return;
     const state = getStateForRoute(route, true);
-    const copyOfState = structuredClone(stateObject);
+    // deepToRaw unwraps reactive proxies (e.g. queryVariables.advancedFilterInputs):
+    // structuredClone throws a DataCloneError on Vue reactive proxies, which
+    // silently aborted saving the search/filter state — the picker/library search
+    // then never ran ("zoeken werkt niet").
+    const copyOfState = structuredClone(deepToRaw(stateObject));
     if (!state) setStateForRoute(route, copyOfState);
     else setStateForRoute(route, Object.assign(state, copyOfState));
   };

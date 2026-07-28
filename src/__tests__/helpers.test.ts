@@ -10,7 +10,9 @@ import {
   extractValueFromObject,
   looksLikeEntityId,
   stripEmbeddedViewerSuffix,
+  deepToRaw,
 } from "@/helpers";
+import { reactive } from "vue";
 import {
   type Entity,
   type ColumnList,
@@ -486,6 +488,100 @@ describe("extractValueFromObject", () => {
 
     it("should return the value when it is explicitly null", () => {
       expect(extractValueFromObject(testObject, "metadata")).toBeNull();
+    });
+  });
+
+  describe("deepToRaw", () => {
+    it("returns a structuredClone-able deep copy of plain nested data", () => {
+      const input = { a: 1, b: { c: [1, 2, { d: "x" }] }, e: null };
+
+      const raw = deepToRaw(input);
+
+      expect(raw).toEqual(input);
+      expect(() => structuredClone(raw)).not.toThrow();
+    });
+
+    it("unwraps Vue reactive proxies into plain, cloneable objects", () => {
+      const input = reactive({ a: 1, nested: reactive({ b: 2 }) });
+
+      const raw = deepToRaw(input);
+
+      expect(raw).toEqual({ a: 1, nested: { b: 2 } });
+      expect(() => structuredClone(raw)).not.toThrow();
+    });
+
+    it("unwraps nested reactive proxy arrays so the search/filter state is structured-cloneable", () => {
+      // Mirrors the shape that broke picker/library search: queryVariables held
+      // reactive advancedFilterInputs whose `key` was a reactive array, which
+      // structuredClone rejects with a DataCloneError.
+      const stateObject = {
+        queryVariables: {
+          advancedFilterInputs: [
+            reactive({
+              type: "text",
+              key: reactive(["vlacc:1|properties.level.value"]),
+              value: "Rug",
+              match_exact: true,
+              operator: "and",
+            }),
+          ],
+        },
+      };
+
+      const raw = deepToRaw(stateObject);
+
+      expect(raw).toEqual({
+        queryVariables: {
+          advancedFilterInputs: [
+            {
+              type: "text",
+              key: ["vlacc:1|properties.level.value"],
+              value: "Rug",
+              match_exact: true,
+              operator: "and",
+            },
+          ],
+        },
+      });
+      expect(() => structuredClone(raw)).not.toThrow();
+    });
+
+    it("drops functions so the result can be structured-cloned", () => {
+      const input = { keep: "yes", fn: () => 42, nested: { cb: () => {} } };
+
+      const raw = deepToRaw(input) as any;
+
+      expect(raw.keep).toBe("yes");
+      expect(raw.fn).toBeUndefined();
+      expect(raw.nested).toEqual({});
+      expect(() => structuredClone(raw)).not.toThrow();
+    });
+
+    it("drops non-cloneable host objects (Window / DOM nodes) instead of throwing", () => {
+      const input = {
+        title: "t",
+        leaked: window,
+        node: document.createElement("div"),
+        relation: { value: "keep", el: document.body },
+      };
+
+      const raw = deepToRaw(input) as any;
+
+      expect(raw.title).toBe("t");
+      expect(raw.leaked).toBeUndefined();
+      expect(raw.node).toBeUndefined();
+      expect(raw.relation).toEqual({ value: "keep" });
+      expect(() => structuredClone(raw)).not.toThrow();
+    });
+
+    it("preserves Date values instead of flattening them to an empty object", () => {
+      const when = new Date("2026-01-01T00:00:00.000Z");
+
+      const raw = deepToRaw({ when }) as any;
+
+      expect(raw.when instanceof Date).toBe(true);
+      expect(raw.when.toISOString()).toBe("2026-01-01T00:00:00.000Z");
+      expect(() => structuredClone(raw)).not.toThrow();
     });
   });
 });
