@@ -39,6 +39,7 @@ vi.mock("@/composables/useBulkOperations", () => ({
 const mockModalActions = {
   initializeGeneralProperties: vi.fn(),
   initializePropertiesForDownload: vi.fn(),
+  initializePropertiesForBulkUpdateMetadata: vi.fn(),
   initializePropertiesForCreateEntity: vi.fn(),
   initializePropertiesForBulkDeleteRelations: vi.fn(),
   initializePropertiesForBulkDeleteEntities: vi.fn(),
@@ -311,6 +312,25 @@ describe("useBulkOperationsActionsBar", () => {
       expect(
         mockModalActions.initializePropertiesForDownload,
       ).toHaveBeenCalled();
+    });
+
+    it("should execute bulk update metadata operation initialization with the enqueued ids", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { executeOperationSpecificInitialization } =
+        useBulkOperationsActionsBar(props, emit);
+
+      const mockConfig = { typeModal: "DynamicForm" as any };
+      executeOperationSpecificInitialization(
+        BulkOperationTypes.BulkUpdateMetadata,
+        mockConfig,
+      );
+
+      expect(
+        mockModalActions.initializePropertiesForBulkUpdateMetadata,
+      ).toHaveBeenCalledWith([{ id: "1" }, { id: "2" }, { id: "3" }]);
+      expect(mockModalActions.setCallbackFunctions).toHaveBeenCalled();
     });
 
     it("should execute add relation operation initialization", () => {

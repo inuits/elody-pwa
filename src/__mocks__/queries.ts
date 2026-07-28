@@ -105,6 +105,7 @@ export type ActionProgressStepStepTypeArgs = {
 };
 
 export enum ActionType {
+  BulkUpdateMetadata = 'bulkUpdateMetadata',
   Download = 'download',
   Endpoint = 'endpoint',
   Ocr = 'ocr',
@@ -483,6 +484,7 @@ export type BulkOperationOptionsOptionsArgs = {
 
 export enum BulkOperationTypes {
   AddRelation = 'addRelation',
+  BulkUpdateMetadata = 'bulkUpdateMetadata',
   CreateEntity = 'createEntity',
   DeleteEntities = 'deleteEntities',
   DeleteRelations = 'deleteRelations',

@@ -27,6 +27,7 @@ const previousEntityId = ref<string | undefined>(undefined);
 const downloadMediafilesInformation = ref<
   DownloadMediafilesInformation | undefined
 >(undefined)
+const bulkUpdateMetadataEntityIds = ref<string[] | undefined>(undefined);
 const savedSearchInformation = ref<any | undefined>(undefined);
 const deletionInformation = ref<{ title: string } | undefined>(undefined);
 const skipItemsWithRelationDuringBulkDelete = ref<string[] | undefined>(
@@ -137,6 +138,10 @@ export const useModalActions = () => {
     return savedSearchInformation.value;
   };
 
+  const getArgumentsForBulkUpdateMetadata = (): { ids: string[] } => {
+    return { ids: bulkUpdateMetadataEntityIds.value ?? [] };
+  };
+
   const getInformationForDelete = (): { title: string } | undefined => {
     return deletionInformation.value;
   };
@@ -175,6 +180,9 @@ export const useModalActions = () => {
       [ActionType.SubmitWithExtraMetadata]: {
         extractActionArguments: () => getArgumentsForSubmitExtraMetadata(),
       },
+      [ActionType.BulkUpdateMetadata]: {
+        extractActionArguments: () => getArgumentsForBulkUpdateMetadata(),
+      },
     };
     return actionObject[actionType].extractActionArguments();
   };
@@ -206,6 +214,12 @@ export const useModalActions = () => {
       entities: !isMediafileArray ? enqueuedItems.map((item) => item.id) : [],
       includeAssetCsv: context !== RouteNames.Mediafile,
     };
+  };
+
+  const initializePropertiesForBulkUpdateMetadata = (
+    enqueuedItems: InBulkProcessableItem[],
+  ): void => {
+    bulkUpdateMetadataEntityIds.value = enqueuedItems.map((item) => item.id);
   };
 
   const initializePropertiesForCreateEntity = (): void => {
@@ -268,12 +282,14 @@ export const useModalActions = () => {
     downloadMediafilesInformation.value = undefined;
     savedSearchInformation.value = undefined;
     skipItemsWithRelationDuringBulkDelete.value = undefined;
+    bulkUpdateMetadataEntityIds.value = undefined;
   };
 
   return {
     extractActionArguments,
     initializeGeneralProperties,
     initializePropertiesForDownload,
+    initializePropertiesForBulkUpdateMetadata,
     initializePropertiesForCreateEntity,
     initializePropertiesForSavedSearch,
     initializePropertiesForDeletion,

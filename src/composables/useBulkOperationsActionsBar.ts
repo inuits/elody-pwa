@@ -98,6 +98,7 @@ export const useBulkOperationsActionsBar = (
   const {
     initializeGeneralProperties,
     initializePropertiesForDownload,
+    initializePropertiesForBulkUpdateMetadata,
     initializePropertiesForCreateEntity,
     initializePropertiesForBulkDeleteRelations,
     initializePropertiesForBulkDeleteEntities,
@@ -196,6 +197,11 @@ export const useBulkOperationsActionsBar = (
       getEnqueuedItems(props.context),
       props.context,
     );
+  };
+
+  const initializeBulkUpdateMetadataOperation = () => {
+    initializePropertiesForBulkUpdateMetadata(getEnqueuedItems(props.context));
+    setCallbackFunctions(getRefetchCallbacks());
   };
 
   const initializeAddRelationOperation = (
@@ -297,6 +303,8 @@ export const useBulkOperationsActionsBar = (
       [BulkOperationTypes.DeleteEntities]: () =>
         initializeDeleteEntitiesOperation(bulkOperationModalConfig),
       [BulkOperationTypes.DeleteRelations]: initializeDeleteRelationsOperation,
+      [BulkOperationTypes.BulkUpdateMetadata]:
+        initializeBulkUpdateMetadataOperation,
     };
 
     const initializerFunction = operationInitializers[operationType];

@@ -227,6 +227,7 @@ import {
   ActionProgressIndicatorType,
   ActionType,
   BaseFieldType,
+  Collection,
   EndpointResponseActions,
   EntityPickerMode,
   MutateEntityValuesDocument,
@@ -1054,6 +1055,43 @@ const startOcrActionFunction = async (field: FormAction) => {
   }
 };
 
+const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
+  try {
+    if (!(await isFormValid())) return;
+    const { ids } = extractActionArguments(field.actionType);
+    // ponytail: one mutateEntityValues call per selected id, so the normal
+    // per-entity entity_changed event still fires for history/aggregation;
+    // add a real bulk endpoint if selections grow into the hundreds.
+    await Promise.all(
+      ids.map((id: string) => {
+        addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
+        const metadata = parseIntialValuesForFormSubmit(
+          form.value.values.intialValues,
+          id,
+        );
+        return mutate({
+          id,
+          formInput: { metadata, relations: [] },
+          collection: Collection.Entities,
+        });
+      }),
+    );
+    const callbackFunctions = getCallbackFunctions();
+    if (callbackFunctions !== undefined) {
+      for (const callback of callbackFunctions) {
+        if (callback) await callback();
+      }
+    }
+    closeAndDeleteForm();
+    displaySuccessNotification(
+      t("notifications.success.entityUpdated.title"),
+      t("notifications.success.entityUpdated.description"),
+    );
+  } catch (e) {
+    submitErrors.value = e.message;
+  }
+};
+
 const performActionButtonClickEvent = (field: FormAction): void => {
   useBaseModal().changeCloseConfirmation(TypeModals.DynamicForm, false);
 
@@ -1072,6 +1110,7 @@ const performActionButtonClickEvent = (field: FormAction): void => {
     submitAllFormTabs: () => submitAllFormTabsActionFunction(field),
     nextFormTab: () => validateAndGoToNextFormTabActionFunction(field),
     previousFormTab: () => goToPreviousFormTabActionFunction(field),
+    bulkUpdateMetadata: () => bulkUpdateMetadataActionFunction(field),
   };
   if (!field.actionType || !actionFunctions[field.actionType])
     throw Error(

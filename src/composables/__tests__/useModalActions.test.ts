@@ -45,3 +45,32 @@ describe("useModalActions extractActionArguments(Submit)", () => {
     expect(extractActionArguments(ActionType.Submit)).toEqual([]);
   });
 });
+
+describe("useModalActions bulk update metadata", () => {
+  beforeEach(() => {
+    useModalActions().resetAllProperties();
+  });
+
+  it("stashes the enqueued item ids and returns them for BulkUpdateMetadata", () => {
+    const { initializePropertiesForBulkUpdateMetadata, extractActionArguments } =
+      useModalActions();
+
+    initializePropertiesForBulkUpdateMetadata([
+      { id: "notif-1" },
+      { id: "notif-2" },
+      { id: "notif-3" },
+    ] as any);
+
+    expect(extractActionArguments(ActionType.BulkUpdateMetadata)).toEqual({
+      ids: ["notif-1", "notif-2", "notif-3"],
+    });
+  });
+
+  it("returns an empty id list when nothing was stashed", () => {
+    const { extractActionArguments } = useModalActions();
+
+    expect(extractActionArguments(ActionType.BulkUpdateMetadata)).toEqual({
+      ids: [],
+    });
+  });
+});
