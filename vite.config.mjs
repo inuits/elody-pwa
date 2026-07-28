@@ -57,7 +57,7 @@ const viteConfig = defineConfig(({ mode }) => ({
   build: {
     assetsDir: "static-assets-pwa",
     sourcemap: false,
-    minify: "esbuild",
+    minify: "oxc",
     commonjsOptions: {
       transformMixedEsModules: true,
       include: [/node_modules/, /openseadragon-select-plugin/],
