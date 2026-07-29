@@ -936,7 +936,7 @@ const useUpload = (config: any = {}) => {
 
   const resetUploadProgress = (): void => {
     if (!uploadProgress.value) return;
-    const newProgress = structuredClone(toRaw(uploadProgress.value));
+    const newProgress = JSON.parse(JSON.stringify(uploadProgress.value));
 
     newProgress.forEach((step: ActionProgressStep) => {
       step.status = ProgressStepStatus.Empty;
@@ -950,14 +950,7 @@ const useUpload = (config: any = {}) => {
     status: ProgressStepStatus,
   ): void => {
     if (!uploadProgress.value) return;
-    const raw = toRaw(uploadProgress.value);
-    try {
-      structuredClone(raw);
-    } catch (err) {
-      console.error('Non-cloneable upload progress item:', raw);
-      throw err;
-    }
-    const newProgress = structuredClone(raw);
+    const newProgress = JSON.parse(JSON.stringify(uploadProgress.value));
 
     newProgress.forEach((step: ActionProgressStep) => {
       if (step.stepType !== stepType) return;
@@ -966,21 +959,6 @@ const useUpload = (config: any = {}) => {
 
     uploadProgress.value = newProgress;
   };
-
-  // const updateGlobalUploadProgress = (
-  //   stepType: ProgressStepType,
-  //   status: ProgressStepStatus,
-  // ): void => {
-  //   if (!uploadProgress.value) return;
-  //   const newProgress = structuredClone(toRaw(uploadProgress.value));
-
-  //   newProgress.forEach((step: ActionProgressStep) => {
-  //     if (step.stepType !== stepType) return;
-  //     step.status = status;
-  //   });
-
-  //   uploadProgress.value = newProgress;
-  // };
 
   const __hideAllFileProgressSteps = (stepTypeContainer: Element): void => {
     Array.from(stepTypeContainer.children).forEach((child: Element) => {
