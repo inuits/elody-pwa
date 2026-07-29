@@ -78,6 +78,7 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
 }));
 
 // --- Pagination store ---------------------------------------------------------
+const libPaginationTotalPages = ref(1);
 vi.mock("../usePaginationStore", () => ({
   PaginationStoreKey: Symbol("PaginationStoreKey"),
   createPaginationStore: () => ({
@@ -86,6 +87,7 @@ vi.mock("../usePaginationStore", () => ({
     updateTotalAmount: vi.fn(),
     skip: ref(1),
     limit: ref(20),
+    totalPages: libPaginationTotalPages,
   }),
 }));
 
@@ -203,6 +205,7 @@ vi.mock("vue-router", () => ({
 
 import BaseLibrary from "../BaseLibrary.vue";
 import ViewModesList from "../view-modes/ViewModesList.vue";
+import { BaseLibraryModes } from "@/generated-types/queries";
 
 // --- Props / wrapper factories ------------------------------------------------
 const getDefaultProps = () => ({
@@ -603,5 +606,67 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
     await flushPromises();
 
     expect(libGetUserPreferredViewModeConfiguration).not.toHaveBeenCalled();
+  });
+});
+
+describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+  const paginationSelector = '[data-test="basic-library-pagination"]';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+    libEntitiesLoading.value = false;
+    libPaginationTotalPages.value = 1;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("shows pagination in BasicBaseLibraryWithBorder mode when there is more than one page (the reeks/series relation panel)", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibraryWithBorder,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(paginationSelector).exists()).toBe(true);
+  });
+
+  it("shows pagination in plain BasicBaseLibrary mode when there is more than one page", async () => {
+    libPaginationTotalPages.value = 2;
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(paginationSelector).exists()).toBe(true);
+  });
+
+  it("hides pagination when everything fits on a single page", async () => {
+    libPaginationTotalPages.value = 1;
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibraryWithBorder,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(paginationSelector).exists()).toBe(false);
+  });
+
+  it("does not add basic-mode pagination in NormalBaseLibrary mode (the bulk-operations bar already owns pagination there)", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(paginationSelector).exists()).toBe(false);
   });
 });
