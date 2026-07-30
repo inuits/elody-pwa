@@ -75,6 +75,7 @@ const initViewer = () => {
     prefixUrl: "/static/openseadragon/images/",
     toolbar: OpenSeadragonToolbar.value ?? undefined,
     tileSources: `/api/iiif/3/${props.imageFilename}/info.json`,
+    maxZoomPixelRatio: 3,
   };
 
   if (zoomInDiv.value) dragonOption.zoomInButton = zoomInDiv.value;
