@@ -101,6 +101,7 @@
               previewComponent?.listItemsCoverage
             "
             :is-primary-mediafile="primaryMediafileId === entity.id"
+            :is-primary-thumbnail="primaryThumbnailId === entity.id"
             :multi-line="multiLine"
             :multi-line-columns="multiLineColumns"
             @navigate-to="
@@ -193,6 +194,7 @@ const props = withDefaults(
     showCurrentEntityFlow?: boolean;
     cropMediafileCoordinatesKey?: string;
     primaryMediafileId?: string;
+    primaryThumbnailId?: string;
   }>(),
   {
     disablePreviews: false,
@@ -209,6 +211,7 @@ const props = withDefaults(
     cropMediafileCoordinatesKey: "",
     expandFilters: false,
     primaryMediafileId: "",
+    primaryThumbnailId: "",
   },
 );
 

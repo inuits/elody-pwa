@@ -37,7 +37,7 @@
                 :base-library-mode="baseLibraryMode"
                 :custom-value="refMetadata.customValue"
                 :translation-key="pillTranslationKey"
-                :highlight="refMetadata.highlightIfPrimaryMediafile && highlight"
+                :highlight="(refMetadata.highlightIfPrimaryMediafile || refMetadata.highlightIfPrimaryThumbnail) && highlight"
                 :break-words="breakWords"
               />
             </MetadataTruncatedText>

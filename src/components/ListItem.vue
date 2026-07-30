@@ -164,7 +164,8 @@
               :linked-entity-id="intialValues?.id || itemId"
               :entity-type="entityTypename"
               :highlight="
-                isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile
+                (isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile) ||
+                (isPrimaryThumbnail && metadataItem?.highlightIfPrimaryThumbnail)
               "
               :break-words="true"
             />
@@ -341,6 +342,7 @@ const props = withDefaults(
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
     isPrimaryMediafile?: boolean;
+    isPrimaryThumbnail?: boolean;
     multiLine?: boolean;
     multiLineColumns?: number;
   }>(),
@@ -369,6 +371,7 @@ const props = withDefaults(
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
     isPrimaryMediafile: false,
+    isPrimaryThumbnail: false,
     multiLine: false,
     multiLineColumns: 5,
   },

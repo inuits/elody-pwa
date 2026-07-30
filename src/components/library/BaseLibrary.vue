@@ -272,6 +272,7 @@
             @add-refetch-function-to-edit-state="syncEditStateCallbacks"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
             :primaryMediafileId="primaryMediafileId"
+            :primaryThumbnailId="primaryThumbnailId"
           />
           <ViewModesTable
             v-show="displayTable && !isInitialLoading && (!entitiesLoading || !!entities?.length)"
@@ -586,6 +587,10 @@ const syncTotalCountWithOptimisticChange = (
 
 const primaryMediafileId = computed(() => {
   return parentEntity?.value?.intialValues?.primary_mediafile_id;
+});
+
+const primaryThumbnailId = computed(() => {
+  return parentEntity?.value?.intialValues?.primary_thumbnail_id;
 });
 
 const wrapperClasses = computed(() => {
