@@ -1,7 +1,8 @@
-import { computed, type Ref, toRaw } from "vue";
+import { computed, type Ref } from "vue";
 import { dequal as isEqual } from "dequal";
 import { getMetadataFields } from "@/helpers";
 import type { Entity, WindowElementPanel } from "@/generated-types/queries";
+import { deepToRaw } from "@/utils/deepToRaw";
 
 interface DiffArgs {
   previousVersion: Entity | null | undefined;
@@ -41,14 +42,14 @@ export function useEntityDiff(
     selectedVersion,
     fields,
   }: DiffArgs) => {
-    const cloneSelected = structuredClone(toRaw(selectedVersion)) as any;
+    const cloneSelected = structuredClone(deepToRaw(selectedVersion)) as any;
     const selectedValues = cloneSelected?.intialValues || {};
     const processedSelected: Record<string, any> = {
       __typename: "IntialValues",
     };
 
     const clonePrevious = previousVersion
-      ? (structuredClone(toRaw(previousVersion)) as any)
+      ? (structuredClone(deepToRaw(previousVersion)) as any)
       : null;
     const previousValues = clonePrevious?.intialValues || {};
     const processedPrevious: Record<string, any> = {

@@ -109,10 +109,6 @@ export const useStateManagement = () => {
   ) => {
     if (!route) return;
     const state = getStateForRoute(route, true);
-    // deepToRaw unwraps reactive proxies (e.g. queryVariables.advancedFilterInputs):
-    // structuredClone throws a DataCloneError on Vue reactive proxies, which
-    // silently aborted saving the search/filter state — the picker/library search
-    // then never ran ("zoeken werkt niet").
     const copyOfState = structuredClone(deepToRaw(stateObject));
     if (!state) setStateForRoute(route, copyOfState);
     else setStateForRoute(route, Object.assign(state, copyOfState));
