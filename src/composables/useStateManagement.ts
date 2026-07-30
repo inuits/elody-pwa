@@ -6,6 +6,7 @@ import type {
   Matchers,
 } from "@/generated-types/queries";
 import type { SavedSearchType } from "@/composables/useSaveSearchHepler";
+import { deepToRaw } from "@/utils/deepToRaw";
 
 export type FilterListItem = {
   isActive: boolean;
@@ -108,7 +109,7 @@ export const useStateManagement = () => {
   ) => {
     if (!route) return;
     const state = getStateForRoute(route, true);
-    const copyOfState = structuredClone(stateObject);
+    const copyOfState = structuredClone(deepToRaw(stateObject));
     if (!state) setStateForRoute(route, copyOfState);
     else setStateForRoute(route, Object.assign(state, copyOfState));
   };

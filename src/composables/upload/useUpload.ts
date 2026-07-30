@@ -24,6 +24,7 @@ import {
 } from "@/composables/upload/useUploadFlowConfiguration";
 import { useUploadState } from "./useUploadState";
 import { type UploadSettings, UploadStatus } from "./types";
+import { deepToRaw } from "@/utils/deepToRaw";
 
 const mainFileTypes = [
   "text/csv",
@@ -936,7 +937,7 @@ const useUpload = (config: any = {}) => {
 
   const resetUploadProgress = (): void => {
     if (!uploadProgress.value) return;
-    const newProgress = JSON.parse(JSON.stringify(uploadProgress.value));
+    const newProgress = structuredClone(deepToRaw(uploadProgress.value));
 
     newProgress.forEach((step: ActionProgressStep) => {
       step.status = ProgressStepStatus.Empty;
@@ -950,7 +951,7 @@ const useUpload = (config: any = {}) => {
     status: ProgressStepStatus,
   ): void => {
     if (!uploadProgress.value) return;
-    const newProgress = JSON.parse(JSON.stringify(uploadProgress.value));
+    const newProgress = structuredClone(deepToRaw(uploadProgress.value));
 
     newProgress.forEach((step: ActionProgressStep) => {
       if (step.stepType !== stepType) return;

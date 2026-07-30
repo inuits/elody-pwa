@@ -38,11 +38,11 @@ import { onBeforeRouteLeave } from "vue-router";
 import { useSubmitForm } from "vee-validate";
 import {
   getChildrenOfHomeRoutes,
-  deepToRaw,
   normalizeEmptyInitialValuesByFieldType,
 } from "@/helpers";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { type GraphQLError } from "graphql/error";
+import { deepToRaw } from "@/utils/deepToRaw";
 
 const props = defineProps<{
   intialValues: IntialValues;

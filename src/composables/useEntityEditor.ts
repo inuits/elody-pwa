@@ -13,7 +13,8 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
-import { getChildrenOfHomeRoutes, deepToRaw } from "@/helpers";
+import { getChildrenOfHomeRoutes } from "@/helpers";
+import { deepToRaw } from "@/utils/deepToRaw";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 
 export function useEntityEditor() {

@@ -241,7 +241,11 @@
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
-            v-show="showViewModesList && !isInitialLoading && (!entitiesLoading || !!entities?.length)"
+            v-show="
+              showViewModesList &&
+              !isInitialLoading &&
+              (!entitiesLoading || !!entities?.length)
+            "
             :entities="entities as Entity[]"
             :placeholder-entities="placeholderEntities as Entity[]"
             :entities-loading="entitiesLoading"
@@ -261,7 +265,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : displayGrid ?? ViewModes.ViewModesGrid
+                  : (displayGrid ?? ViewModes.ViewModesGrid)
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -274,7 +278,11 @@
             :primaryMediafileId="primaryMediafileId"
           />
           <ViewModesTable
-            v-show="displayTable && !isInitialLoading && (!entitiesLoading || !!entities?.length)"
+            v-show="
+              displayTable &&
+              !isInitialLoading &&
+              (!entitiesLoading || !!entities?.length)
+            "
             :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
@@ -391,7 +399,8 @@ import {
   ViewModes,
   type ViewModesWithConfig,
 } from "@/generated-types/queries";
-import { deepToRaw, formatTeaserMetadata, getEntityTitle } from "@/helpers";
+import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
+import { deepToRaw } from "@/utils/deepToRaw";
 import { auth } from "@/main";
 import type { ApolloClient } from "@apollo/client/core";
 import { DefaultApolloClient } from "@vue/apollo-composable";
@@ -571,7 +580,11 @@ const additionalDefaultFiltersEnabled = computed(() => {
   );
 });
 
-const entitiesLoadingWithoutData = computed(() => entitiesLoading.value && (isInitialLoading.value || !entities.value?.length));
+const entitiesLoadingWithoutData = computed(
+  () =>
+    entitiesLoading.value &&
+    (isInitialLoading.value || !entities.value?.length),
+);
 
 const syncTotalCountWithOptimisticChange = (
   newEntities: Entity[],
@@ -581,7 +594,8 @@ const syncTotalCountWithOptimisticChange = (
 ) => {
   const entityDelta = newEntities.length - (oldEntities?.length ?? 0);
   const isOptimisticChange = newCount === oldCount && entityDelta !== 0;
-  if (isOptimisticChange) totalEntityCount.value = Math.max(0, newCount + entityDelta);
+  if (isOptimisticChange)
+    totalEntityCount.value = Math.max(0, newCount + entityDelta);
 };
 
 const primaryMediafileId = computed(() => {
@@ -679,7 +693,8 @@ let customBulkOperationsPromise: () => Promise<void>;
 const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
   useBulkOperations();
 const { closeModal } = useBaseModal();
-const { replaceRelationsFromSameType, getForm, createForm, deleteForm } =  useFormHelper();
+const { replaceRelationsFromSameType, getForm, createForm, deleteForm } =
+  useFormHelper();
 const { uploadStatus } = useUpload(config);
 const {
   setAcceptedTypes,
@@ -963,7 +978,10 @@ const initializeEntityPickerComponent = (
 const syncEditStateCallbacks = (): void => {
   if (props.predefinedEntities || props.fetchDeepRelations) return;
   const functionName = props.useOtherQuery?.name ?? "refetchEntities";
-  useEditHelper.addRefetchFunction(functionName + '_' + props.entityType, refetchEntities);
+  useEditHelper.addRefetchFunction(
+    functionName + "_" + props.entityType,
+    refetchEntities,
+  );
   const entityId = getEntityUuid();
   if (!entityId) return;
   const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}`;
@@ -984,7 +1002,7 @@ onMounted(async () => {
   getUserPreferredViewModeConfiguration();
   syncEditStateCallbacks();
   window.addEventListener("beforeunload", resetMapPaginationLimit);
-  if (props.isSearchLibrary) paginationStore.setPage(1)
+  if (props.isSearchLibrary) paginationStore.setPage(1);
   if (props.forceShowFilters) expandFilters.value = true;
 });
 
@@ -1082,9 +1100,18 @@ watch(
 
 watch(
   [() => entities.value, totalEntityCount, entitiesLoading],
-  ([newEntities, newCount, newLoading], [oldEntities, oldCount, oldLoading]) => {
+  (
+    [newEntities, newCount, newLoading],
+    [oldEntities, oldCount, oldLoading],
+  ) => {
     const wasFetch = !newLoading && !!oldLoading;
-    if (!wasFetch) syncTotalCountWithOptimisticChange(newEntities as Entity[], oldEntities as Entity[], newCount as number, oldCount as number);
+    if (!wasFetch)
+      syncTotalCountWithOptimisticChange(
+        newEntities as Entity[],
+        oldEntities as Entity[],
+        newCount as number,
+        oldCount as number,
+      );
     emit("entitiesUpdated", (newEntities as Entity[]).length);
     paginationStore.updateTotalAmount(totalEntityCount.value);
     if (props.selectInputFieldType) {
@@ -1128,9 +1155,10 @@ watch(entitiesLoading, (loading, wasLoading) => {
   if (loading || !wasLoading || hasRestoredViewModesAfterFetch.value) return;
   const firstEntity = (entities.value as Entity[])?.[0];
   if (!firstEntity?.allowedViewModes) return;
-  const viewModes: string[] = firstEntity.allowedViewModes.viewModes?.map(
-    (vm: ViewModesWithConfig) => vm.viewMode,
-  ) ?? [];
+  const viewModes: string[] =
+    firstEntity.allowedViewModes.viewModes?.map(
+      (vm: ViewModesWithConfig) => vm.viewMode,
+    ) ?? [];
   determineViewModes(viewModes);
   getUserPreferredViewModeConfiguration(viewModes);
   lastProcessedEntityType.value = entityType.value;

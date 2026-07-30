@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { reactive } from "vue";
 import { useStateManagement } from "../useStateManagement";
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import type {
@@ -447,6 +448,38 @@ describe("useStateManagement", () => {
         expect(result).toBeDefined();
         expect(result!.filterListItems).toEqual(originalState.filterListItems);
         expect(result!.entityCountOnPage).toBe(20);
+      });
+
+      it("does not throw when the state holds reactive filter proxies (picker/library search regression)", () => {
+        const { updateStateForRoute, getStateForRoute } = useStateManagement();
+        const route = createMockRoute("Library", "/library");
+        // Reproduces the shape that made picker/library search silently fail:
+        // structuredClone throws a DataCloneError on Vue reactive proxies, so
+        // saving reactive advancedFilterInputs aborted and the search never ran.
+        const state = {
+          queryVariables: createMockQueryVariables({
+            advancedFilterInputs: [
+              reactive({
+                type: "text",
+                key: reactive(["vlacc:1|properties.level.value"]),
+                value: "Rug",
+                match_exact: true,
+                operator: "and",
+              }),
+            ] as unknown as AdvancedFilterInput[],
+          }),
+        };
+
+        expect(() => updateStateForRoute(route, state)).not.toThrow();
+
+        const result = getStateForRoute(route, true);
+        expect(result?.queryVariables?.advancedFilterInputs?.[0]).toEqual({
+          type: "text",
+          key: ["vlacc:1|properties.level.value"],
+          value: "Rug",
+          match_exact: true,
+          operator: "and",
+        });
       });
 
       it("should use structured clone for state updates", () => {
