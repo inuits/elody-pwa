@@ -33,7 +33,7 @@ import {
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useErrorCodes } from "@/composables/useErrorCodes";
 import { apolloClient, auth, typeUrlMapping } from "@/main";
-import { computed, isProxy, toRaw } from "vue";
+import { computed } from "vue";
 import DOMPurify from "dompurify";
 import { onError } from "@apollo/client/link/error";
 import type { GraphQLError } from "graphql/error";
@@ -761,21 +761,10 @@ export const determineDefaultIntialValues = (
   return normalizeEmptyInitialValuesByFieldType(initialData, metadataFields);
 };
 
-export const deepToRaw = <T>(obj: T): T => {
-  if (isProxy(obj)) {
-    obj = toRaw(obj);
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(deepToRaw) as T;
-  } else if (obj !== null && typeof obj === "object") {
-    return Object.fromEntries(
-      Object.entries(obj).map(([key, value]) => [key, deepToRaw(value)]),
-    ) as T;
-  }
-
-  return obj;
-};
+// deepToRaw lives in its own leaf module (only depends on vue) so it can be
+// imported by low-level composables such as useStateManagement without pulling
+// in this module's heavy dependency graph. Re-exported here for existing callers.
+export { deepToRaw } from "@/utils/deepToRaw";
 
 export const mapModelValueToDropdownOptions = (
   values: any | any[],
