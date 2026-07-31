@@ -124,7 +124,7 @@ const downLoadImage = async (): Promise<void> => {
 
   if (!scaledWidth.value && !scaledHeight.value)
     throw new Error(`Please provide at least a width or height`);
-  if (!scaledWidth.value || !scaledHeight.value) handleEmptyWidthHeight();
+  if (!scaledWidth.value || !scaledHeight.value) handleEmptyWidthOrHeight();
 
   const filenameWithoutExtension = originalFilename.value?.replace(/\.[^/.]*$/, "") || "";
   const url = `/api/iiif/3/${fileName.value}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`;
