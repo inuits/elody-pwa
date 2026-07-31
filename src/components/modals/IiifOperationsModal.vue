@@ -8,10 +8,31 @@
         {{ t("iiif-operations-modal.title") }}
       </h2>
       <div class="flex flex-col justify-center">
+        <div>
+          <div class="w-full">
+            <h4 class="text-md font-bold">
+              {{ t("iiif-operations-modal.scale") }}
+            </h4>
+          </div>
+          <div class="flex justify-center p-4">
+            <button
+              v-for="scale in availableScales"
+              :key="scale"
+              :class="[
+                'p-2 mx-2 w-[60px] h-[40px] rounded-lg text-white cursor-pointer',
+                { 'bg-accent-accent': scale === currentScale },
+                { 'bg-neutral-100': scale !== currentScale },
+              ]"
+              @click="currentScale = scale"
+            >
+              {{ scale * 100 }}%
+            </button>
+          </div>
+        </div>
+
         <h4 class="text-md font-bold">
           {{ t("iiif-operations-modal.dimensions") }}
         </h4>
-
         <div class="flex justify-evenly p-4 mb-6">
           <div class="max-w-1/4">
             <p>{{ t("iiif-operations-modal.width") }}</p>
@@ -30,27 +51,6 @@
               type="number"
               @update:model-value="(value: number) => (scaledHeight = value)"
             />
-          </div>
-        </div>
-        <div>
-          <div class="w-full">
-            <h4 class="text-md font-bold">
-              {{ t("iiif-operations-modal.scale") }}
-            </h4>
-          </div>
-          <div class="flex justify-center p-4">
-            <button
-              v-for="scale in availableScales"
-              :key="scale"
-              :class="[
-                'p-2 mx-2 w-[60px] h-[40px] rounded-lg text-white cursor-pointer',
-                { 'bg-accent-accent': scale === currentScale },
-                { 'bg-neutral-100': scale !== currentScale },
-              ]"
-              @click="currentScale = scale"
-            >
-              {{ scale }}
-            </button>
           </div>
         </div>
         <div>
@@ -101,9 +101,7 @@ const { t } = useI18n();
 
 const modalInfo = computed(() => getModalInfo(TypeModals.IiifOperationsModal));
 const fileName = computed<string>(() => modalInfo.value.fileName || "");
-const originalFilename = computed<string>(
-  () => modalInfo.value.originalFilename || "",
-);
+const originalFilename = computed<string>(() => modalInfo.value.originalFilename || "");
 const dimensions = computed<{ width: number; height: number } | undefined>(
   () => modalInfo.value.dimensions,
 );
@@ -124,15 +122,17 @@ const downLoadImage = async (): Promise<void> => {
   if (isDownloading.value) return;
   isDownloading.value = true;
 
-  const filenameWithoutExtension =
-    originalFilename.value?.replace(/\.[^/.]*$/, "") || "";
+  if (!scaledWidth.value && !scaledHeight.value)
+    throw new Error(`Please provide at least a width or height`);
+  if (!scaledWidth.value || !scaledHeight.value) handleEmptyWidthHeight();
+
+  const filenameWithoutExtension = originalFilename.value?.replace(/\.[^/.]*$/, "") || "";
   const url = `/api/iiif/3/${fileName.value}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`;
   const downloadName = `${filenameWithoutExtension}_${scaledWidth.value}x${scaledHeight.value}.${currentFormat.value}`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok)
-      throw new Error(`Image generation failed (${response.status})`);
+    if (!response.ok) throw new Error(`Image generation failed (${response.status})`);
 
     const blob = await response.blob();
     const objectUrl = URL.createObjectURL(blob);
@@ -150,9 +150,19 @@ const downLoadImage = async (): Promise<void> => {
   }
 };
 
+const handleEmptyWidthOrHeight = () => {
+  if (!scaledWidth.value) {
+    const scaleFactor = scaledHeight.value / originalHeight.value;
+    scaledWidth.value = Math.floor(originalWidth.value * scaleFactor);
+  }
+  if (!scaledHeight.value) {
+    const scaleFactor = scaledWidth.value / originalWidth.value;
+    scaledHeight.value = Math.floor(originalHeight.value * scaleFactor);
+  }
+};
+
 const scaleDimensions = (scale: number): { width: number; height: number } => {
-  if (!originalWidth.value || !originalHeight.value)
-    return { width: 0, height: 0 };
+  if (!originalWidth.value || !originalHeight.value) return { width: 0, height: 0 };
   return {
     width: Math.floor(originalWidth.value * scale),
     height: Math.floor(originalHeight.value * scale),
