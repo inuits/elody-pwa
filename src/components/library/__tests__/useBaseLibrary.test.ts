@@ -113,3 +113,79 @@ describe("useBaseLibrary – getEntities count reconciliation", () => {
     expect(fetchSequence.value).toBe(2);
   });
 });
+
+describe("useBaseLibrary – exact count on demand", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+
+  const listingResult = (results: any[], count: number) => ({
+    data: { Entities: { results, count, facets: [] } },
+  });
+  const exactCountResult = (count: number) => ({
+    data: { Entities: { count } },
+  });
+
+  it("revealExactCount fetches the exact total without disturbing listing state", async () => {
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValueOnce(listingResult([{ id: "a" }], 1001)) // capped listing
+        .mockResolvedValueOnce(exactCountResult(30000)), // reveal
+    } as any;
+    const {
+      getEntities,
+      revealExactCount,
+      exactTotalCount,
+      totalEntityCount,
+      entities,
+      fetchSequence,
+    } = useBaseLibrary(apolloClient);
+
+    await getEntities(mockRoute);
+    expect(totalEntityCount.value).toBe(1001);
+    expect(exactTotalCount.value).toBeNull();
+    const seqAfterFetch = fetchSequence.value;
+    const entitiesAfterFetch = entities.value;
+
+    await revealExactCount();
+
+    expect(exactTotalCount.value).toBe(30000);
+    // The listing state must be untouched: the exact count is display-only and
+    // never feeds pagination or the optimistic-count path.
+    expect(totalEntityCount.value).toBe(1001);
+    expect(fetchSequence.value).toBe(seqAfterFetch);
+    expect(entities.value).toBe(entitiesAfterFetch);
+  });
+
+  it("passes exactCount: true to the count query", async () => {
+    const query = vi
+      .fn()
+      .mockResolvedValueOnce(listingResult([{ id: "a" }], 1001))
+      .mockResolvedValueOnce(exactCountResult(30000));
+    const apolloClient = { query } as any;
+    const { getEntities, revealExactCount } = useBaseLibrary(apolloClient);
+
+    await getEntities(mockRoute);
+    await revealExactCount();
+
+    expect(query.mock.calls[1][0].variables.exactCount).toBe(true);
+  });
+
+  it("resets exactTotalCount on the next normal fetch", async () => {
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValueOnce(listingResult([{ id: "a" }], 1001))
+        .mockResolvedValueOnce(exactCountResult(30000))
+        .mockResolvedValueOnce(listingResult([{ id: "a" }], 1001)),
+    } as any;
+    const { getEntities, revealExactCount, exactTotalCount } =
+      useBaseLibrary(apolloClient);
+
+    await getEntities(mockRoute);
+    await revealExactCount();
+    expect(exactTotalCount.value).toBe(30000);
+
+    await getEntities(mockRoute);
+    expect(exactTotalCount.value).toBeNull();
+  });
+});

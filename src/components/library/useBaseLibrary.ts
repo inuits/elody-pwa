@@ -38,6 +38,11 @@ export const useBaseLibrary = (
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
   const fetchSequence = ref<number>(0);
+  // Exact total fetched on demand when the user clicks the capped "<cap>+" count.
+  // Kept separate from totalEntityCount so it stays display-only: it never feeds
+  // pagination or the optimistic-count path. Null means "not revealed".
+  const exactTotalCount = ref<number | null>(null);
+  const exactCountLoading = ref<boolean>(false);
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
 
@@ -233,6 +238,9 @@ export const useBaseLibrary = (
       return;
     }
     entitiesLoading.value = true;
+    // A new listing (filter/page/limit change) invalidates any revealed exact
+    // total; drop back to the capped display until the user asks again.
+    exactTotalCount.value = null;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
@@ -300,6 +308,38 @@ export const useBaseLibrary = (
       const nextRoute = pendingFetchRoute ?? route;
       pendingFetchRoute = undefined;
       await getEntities(nextRoute);
+    }
+  };
+
+  // Fetch the exact (uncapped) total for the current filters on demand, using a
+  // dedicated count-only query so listing state (entities, totalEntityCount,
+  // fetchSequence, pagination) is never touched.
+  // ponytail: scoped to the standard listing filter path; routes that swap in a
+  // custom getEntities query (route.meta.queries.getEntities, e.g. job filters)
+  // aren't covered by this shared count query — wire a matching count query if
+  // one of those ever needs an on-demand exact total.
+  const revealExactCount = async (): Promise<void> => {
+    const { loadDocument } = useImport();
+    const variables =
+      (shouldUseStateForRoute &&
+        _route?.name !== "SingleEntity" &&
+        getStateForRoute(_route)?.queryVariables) ||
+      queryVariables;
+
+    exactCountLoading.value = true;
+    try {
+      const result = await apolloClient.query({
+        query: await loadDocument("GetEntitiesCount"),
+        // limit: 1 — the count query discards its results, so don't fetch a full
+        // page of documents just to read the count.
+        variables: { ...variables, exactCount: true, limit: 1 },
+        fetchPolicy: "no-cache",
+      });
+      exactTotalCount.value = result.data?.Entities?.count ?? null;
+    } catch (error: any) {
+      console.error("Failed to fetch exact count:", error);
+    } finally {
+      exactCountLoading.value = false;
     }
   };
 
@@ -384,5 +424,8 @@ export const useBaseLibrary = (
     resetQueryVariablesForNewPath,
     totalEntityCount,
     fetchSequence,
+    exactTotalCount,
+    exactCountLoading,
+    revealExactCount,
   };
 };
