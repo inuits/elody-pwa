@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 // vi.hoisted() because ref() is not available before imports are resolved.
 const libEntities = ref<any[]>([]);
 const libTotalEntityCount = ref(0);
+const libFetchSequence = ref(0);
 const libGetEntities = vi.fn().mockResolvedValue([]);
 const libEntitiesLoading = ref(false);
 const libDetermineViewModes = vi.fn();
@@ -74,6 +75,7 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     setSortOrder: vi.fn(),
     resetQueryVariablesForNewPath: vi.fn(),
     totalEntityCount: libTotalEntityCount,
+    fetchSequence: libFetchSequence,
   }),
 }));
 
@@ -341,6 +343,7 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
     mocks.addMutationCallback = vi.fn();
     libEntities.value = [];
     libTotalEntityCount.value = 0;
+    libFetchSequence.value = 0;
   });
 
   afterEach(() => {
@@ -408,9 +411,39 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
     libEntities.value = [makeEntity("d"), makeEntity("e")];
     libTotalEntityCount.value = 45;
     libEntitiesLoading.value = false;
+    libFetchSequence.value += 1;
     await flushPromises();
 
     expect(libTotalEntityCount.value).toBe(45);
+  });
+
+  it("does not misapply an optimistic adjustment when a coalesced pagination refetch keeps entitiesLoading pinned at true across the flush", async () => {
+    // Reproduces the page-size-change bug: changing the pagination limit
+    // fires getEntities twice (once directly, once via the paginationStore
+    // watcher). The second call is queued as a pending fetch and re-raises
+    // entitiesLoading back to true in the same synchronous tick that the
+    // first fetch just resolved it to false, so the watcher only ever
+    // observes loading as true -> true (no visible transition) even though a
+    // real fetch just landed and grew `entities` to fill the larger page.
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    libTotalEntityCount.value = 30;
+    libEntitiesLoading.value = true;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    libEntities.value = [
+      makeEntity("a"),
+      makeEntity("b"),
+      makeEntity("c"),
+      makeEntity("d"),
+      makeEntity("e"),
+    ];
+    libTotalEntityCount.value = 30; // backend total is unchanged
+    libFetchSequence.value += 1; // a real fetch applied this response
+    // libEntitiesLoading stays true throughout - never visibly transitions
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(30);
   });
 });
 

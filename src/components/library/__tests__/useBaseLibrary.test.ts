@@ -11,6 +11,13 @@ vi.mock("@/composables/useStateManagement", () => ({
     updateStateForRoute: vi.fn(),
   }),
 }));
+// Avoid the real dynamic import of generated-types/queries.ts — it's slow and
+// irrelevant since apolloClient.query is mocked directly in these tests.
+vi.mock("@/composables/useImport", () => ({
+  useImport: () => ({
+    loadDocument: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
 
 import { useBaseLibrary } from "../useBaseLibrary";
 
@@ -60,5 +67,49 @@ describe("useBaseLibrary – enqueuePromise dedupe", () => {
     await fetchAllPromises();
 
     expect(ran).toBe(1);
+  });
+});
+
+describe("useBaseLibrary – getEntities count reconciliation", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+
+  const mockQueryResult = (entities: any[], count: number) => ({
+    data: {
+      Entities: { results: entities, count, facets: [] },
+    },
+  });
+
+  it("reconciles totalEntityCount with the backend response even when the returned results are deep-equal to the current entities", async () => {
+    const sameEntity = { id: "a" };
+    const apolloClient = {
+      query: vi.fn().mockResolvedValue(mockQueryResult([sameEntity], 30)),
+    } as any;
+    const { entities, totalEntityCount, getEntities } =
+      useBaseLibrary(apolloClient);
+
+    await getEntities(mockRoute);
+    expect(totalEntityCount.value).toBe(30);
+
+    // Simulate a stale/inflated count (e.g. from a mis-fired optimistic
+    // adjustment) while entities itself already matches the backend response.
+    totalEntityCount.value = 40;
+    entities.value = [sameEntity];
+
+    await getEntities(mockRoute);
+
+    expect(totalEntityCount.value).toBe(30);
+  });
+
+  it("exposes a fetchSequence counter that increments each time a response is applied", async () => {
+    const apolloClient = {
+      query: vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }], 30)),
+    } as any;
+    const { getEntities, fetchSequence } = useBaseLibrary(apolloClient);
+
+    expect(fetchSequence.value).toBe(0);
+    await getEntities(mockRoute);
+    expect(fetchSequence.value).toBe(1);
+    await getEntities(mockRoute);
+    expect(fetchSequence.value).toBe(2);
   });
 });

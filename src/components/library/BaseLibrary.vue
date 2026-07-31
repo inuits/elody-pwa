@@ -265,7 +265,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : (displayGrid ?? ViewModes.ViewModesGrid)
+                  : displayGrid ?? ViewModes.ViewModesGrid
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -651,6 +651,7 @@ const {
   setSortOrder,
   resetQueryVariablesForNewPath,
   totalEntityCount,
+  fetchSequence,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
   props.shouldUseStateForRoute,
@@ -674,7 +675,7 @@ const handleSetSimpleSearch = async (value: string) => {
           match_exact: false,
         },
       ]
-    : (filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? []);
+    : filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? [];
   await setAdvancedFilters(searchFilters, false, true, route);
 };
 
@@ -1104,12 +1105,12 @@ watch(
 );
 
 watch(
-  [() => entities.value, totalEntityCount, entitiesLoading],
+  [() => entities.value, totalEntityCount, fetchSequence],
   (
-    [newEntities, newCount, newLoading],
-    [oldEntities, oldCount, oldLoading],
+    [newEntities, newCount, newFetchSequence],
+    [oldEntities, oldCount, oldFetchSequence],
   ) => {
-    const wasFetch = !newLoading && !!oldLoading;
+    const wasFetch = newFetchSequence !== oldFetchSequence;
     if (!wasFetch)
       syncTotalCountWithOptimisticChange(
         newEntities as Entity[],

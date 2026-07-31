@@ -37,6 +37,7 @@ export const useBaseLibrary = (
   const manipulationQuery = ref<object>();
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
+  const fetchSequence = ref<number>(0);
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
 
@@ -272,16 +273,17 @@ export const useBaseLibrary = (
         result.data.Entities || result.data.EntitiesHistory;
       if (limitForEntityPicker) return fetchedEntities;
 
+      totalEntityCount.value = fetchedEntities?.count || 0;
+      facets.value = fetchedEntities.facets || [];
+      fetchSequence.value += 1;
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
         entities.value = fetchedEntities?.results as Entity[];
-        totalEntityCount.value = fetchedEntities?.count || 0;
-        facets.value = fetchedEntities.facets || [];
-        if (shouldUseStateForRoute) {
-          updateStateForRoute(_route, {
-            entityCountOnPage: fetchedEntities.results.length,
-            totalEntityCount: fetchedEntities.count,
-          });
-        }
+      }
+      if (shouldUseStateForRoute) {
+        updateStateForRoute(_route, {
+          entityCountOnPage: fetchedEntities.results.length,
+          totalEntityCount: fetchedEntities.count,
+        });
       }
     } catch (error: any) {
       const isAborted = isAbortError(error);
@@ -381,5 +383,6 @@ export const useBaseLibrary = (
     setLocale,
     resetQueryVariablesForNewPath,
     totalEntityCount,
+    fetchSequence,
   };
 };
