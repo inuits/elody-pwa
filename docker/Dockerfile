@@ -1,10 +1,10 @@
 ### Base stage
-FROM node:22-bookworm-slim as base
+FROM node:22-bookworm-slim AS base
 
 RUN npm install -g pnpm@10.33.4
 WORKDIR /app
 
-FROM base as deps
+FROM base AS deps
 COPY package.json pnpm-lock.yaml* .npmrc* ./
 
 ARG NPM_CONFIG_ALWAYS_AUTH
@@ -14,11 +14,11 @@ ARG NPM_CONFIG__AUTH_TOKEN
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 
 ### Test stage
-FROM deps as test-stage
+FROM deps AS test-stage
 
 COPY . .
 
 RUN mkdir -p /app/src/generated-types && \
-    touch /app/src/generated-types/queries.ts
+  touch /app/src/generated-types/queries.ts
 
 RUN pnpm run test:unit
