@@ -43,6 +43,10 @@ export const useBaseLibrary = (
   // pagination or the optimistic-count path. Null means "not revealed".
   const exactTotalCount = ref<number | null>(null);
   const exactCountLoading = ref<boolean>(false);
+  // Bumped whenever a new listing fetch starts; lets revealExactCount() detect
+  // that the listing changed while its request was in flight and discard a
+  // now-stale response instead of overwriting state for the new listing.
+  let listingGeneration = 0;
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
 
@@ -239,8 +243,13 @@ export const useBaseLibrary = (
     }
     entitiesLoading.value = true;
     // A new listing (filter/page/limit change) invalidates any revealed exact
-    // total; drop back to the capped display until the user asks again.
+    // total (and any in-flight reveal request); drop back to the capped
+    // display until the user asks again. The generation bump lets a
+    // still-in-flight revealExactCount() detect it's now stale and discard
+    // its result instead of overwriting state for the new listing.
+    listingGeneration += 1;
     exactTotalCount.value = null;
+    exactCountLoading.value = false;
 
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
@@ -325,6 +334,7 @@ export const useBaseLibrary = (
         _route?.name !== "SingleEntity" &&
         getStateForRoute(_route)?.queryVariables) ||
       queryVariables;
+    const generation = listingGeneration;
 
     exactCountLoading.value = true;
     try {
@@ -335,11 +345,13 @@ export const useBaseLibrary = (
         variables: { ...variables, exactCount: true, limit: 1 },
         fetchPolicy: "no-cache",
       });
+      // Discard the response if the listing moved on while this was in flight.
+      if (generation !== listingGeneration) return;
       exactTotalCount.value = result.data?.Entities?.count ?? null;
     } catch (error: any) {
       console.error("Failed to fetch exact count:", error);
     } finally {
-      exactCountLoading.value = false;
+      if (generation === listingGeneration) exactCountLoading.value = false;
     }
   };
 

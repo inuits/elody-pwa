@@ -188,4 +188,37 @@ describe("useBaseLibrary – exact count on demand", () => {
     await getEntities(mockRoute);
     expect(exactTotalCount.value).toBeNull();
   });
+
+  it("discards a reveal response that resolves after the listing has already moved on", async () => {
+    let resolveReveal: (value: unknown) => void;
+    const revealPromise = new Promise((resolve) => {
+      resolveReveal = resolve;
+    });
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValueOnce(listingResult([{ id: "a" }], 1001)) // initial capped listing
+        .mockReturnValueOnce(revealPromise) // reveal, left pending
+        .mockResolvedValueOnce(listingResult([{ id: "b" }], 1001)), // listing changes mid-flight
+    } as any;
+    const { getEntities, revealExactCount, exactTotalCount, exactCountLoading } =
+      useBaseLibrary(apolloClient);
+
+    await getEntities(mockRoute);
+    const reveal = revealExactCount();
+    expect(exactCountLoading.value).toBe(true);
+
+    // Filters change while the reveal request is still in flight.
+    await getEntities(mockRoute);
+    expect(exactTotalCount.value).toBeNull();
+    expect(exactCountLoading.value).toBe(false);
+
+    // The stale reveal response now arrives.
+    resolveReveal!(exactCountResult(30000));
+    await reveal;
+
+    // It must not resurrect an exact total for a listing that's no longer current.
+    expect(exactTotalCount.value).toBeNull();
+    expect(exactCountLoading.value).toBe(false);
+  });
 });
