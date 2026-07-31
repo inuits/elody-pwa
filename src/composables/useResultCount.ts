@@ -46,3 +46,25 @@ export const formatResultCount = (
   if (isCountCapped(count)) return `${cap.toLocaleString(locale)}+`;
   return (count ?? 0).toLocaleString(locale);
 };
+
+/**
+ * True when the total is capped ("<cap>+") and the exact total hasn't been
+ * fetched on demand yet — i.e. the count is worth making clickable.
+ */
+export const canRevealExactCount = (
+  count?: number | null,
+  exactCount?: number | null,
+): boolean => exactCount == null && isCountCapped(count);
+
+/**
+ * The count to render: the on-demand exact total shown verbatim (bypassing the
+ * "<cap>+" mask), or the capped/formatted total when nothing was revealed.
+ */
+export const formatDisplayCount = (
+  count?: number | null,
+  exactCount?: number | null,
+  locale?: string,
+): string =>
+  exactCount != null
+    ? exactCount.toLocaleString(locale)
+    : formatResultCount(count, locale);

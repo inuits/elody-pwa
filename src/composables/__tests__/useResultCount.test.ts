@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
   DEFAULT_LISTING_COUNT_CAP,
+  canRevealExactCount,
+  formatDisplayCount,
   formatResultCount,
   getListingCountCap,
   isCountCapped,
@@ -81,6 +83,37 @@ describe("useResultCount", () => {
     it("treats nullish counts as zero", () => {
       expect(formatResultCount(undefined, "en")).toBe("0");
       expect(formatResultCount(null, "en")).toBe("0");
+    });
+  });
+
+  describe("canRevealExactCount", () => {
+    it("is true when capped and no exact total is revealed yet", () => {
+      expect(canRevealExactCount(DEFAULT_LISTING_COUNT_CAP + 1, null)).toBe(true);
+    });
+
+    it("is false once the exact total has been revealed", () => {
+      expect(canRevealExactCount(DEFAULT_LISTING_COUNT_CAP + 1, 30000)).toBe(
+        false,
+      );
+    });
+
+    it("is false when the count is not capped", () => {
+      expect(canRevealExactCount(42, null)).toBe(false);
+    });
+  });
+
+  describe("formatDisplayCount", () => {
+    it("shows the revealed exact total verbatim, bypassing the '<cap>+' mask", () => {
+      expect(
+        formatDisplayCount(DEFAULT_LISTING_COUNT_CAP + 1, 30000, "en"),
+      ).toBe("30,000");
+    });
+
+    it("falls back to the capped/formatted total when nothing is revealed", () => {
+      expect(formatDisplayCount(DEFAULT_LISTING_COUNT_CAP + 1, null, "en")).toBe(
+        "1,000+",
+      );
+      expect(formatDisplayCount(42, null, "en")).toBe("42");
     });
   });
 });
