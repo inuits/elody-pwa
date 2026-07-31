@@ -15,13 +15,27 @@
         <span>
           <span v-if="itemsSelected" class="font-bold"
             >{{ getEnqueuedItemCount(context) }}/</span
-          ><span>{{ formatResultCount(totalItemsCount, locale) }} </span>
+          ><button
+            v-if="canRevealExactCount(totalItemsCount, exactCount)"
+            type="button"
+            class="underline decoration-dotted cursor-pointer disabled:cursor-wait"
+            :disabled="exactCountLoading"
+            :title="$t('bulk-operations.reveal-exact-count')"
+            @click="emit('revealExactCount')"
+          >
+            {{ formatResultCount(totalItemsCount, locale) }}</button
+          ><span v-else
+            >{{ formatDisplayCount(totalItemsCount, exactCount, locale) }} </span
+          >
           {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
       </div>
+      <div v-if="exactCountLoading" class="flex items-center ml-1">
+        <SpinnerLoader theme="accent" :dimensions="20" />
+      </div>
       <BaseTooltip
-        v-if="isCountCapped(totalItemsCount)"
+        v-else-if="canRevealExactCount(totalItemsCount, exactCount)"
         position="top-end"
         :tooltip-offset="8"
       >
@@ -103,8 +117,13 @@
 <script lang="ts" setup>
 import { inject } from "vue";
 import { useI18n } from "vue-i18n";
-import { formatResultCount, isCountCapped } from "@/composables/useResultCount";
+import {
+  canRevealExactCount,
+  formatDisplayCount,
+  formatResultCount,
+} from "@/composables/useResultCount";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
 import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
@@ -140,9 +159,13 @@ const props = withDefaults(
     excludePagination?: boolean;
     showPagination?: boolean;
     isLoading?: boolean;
+    exactCount?: number | null;
+    exactCountLoading?: boolean;
   }>(),
   {
     totalItemsCount: 0,
+    exactCount: null,
+    exactCountLoading: false,
     showButton: true,
     confirmSelectionButton: false,
     customBulkOperations: undefined,
@@ -163,6 +186,7 @@ const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 const emit = defineEmits<{
   (event: "selectPage"): void;
   (event: "selectAll"): void;
+  (event: "revealExactCount"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (
     event: "setBulkOperationsAvailable",

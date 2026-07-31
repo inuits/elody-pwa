@@ -76,6 +76,9 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     resetQueryVariablesForNewPath: vi.fn(),
     totalEntityCount: libTotalEntityCount,
     fetchSequence: libFetchSequence,
+    exactTotalCount: ref(null),
+    exactCountLoading: ref(false),
+    revealExactCount: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 

@@ -149,6 +149,9 @@
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
             :total-items-count="totalEntityCount"
+            :exact-count="exactTotalCount"
+            :exact-count-loading="exactCountLoading"
+            @reveal-exact-count="revealExactCount"
             :use-extended-bulk-operations="!isSearchLibrary"
             :show-button="showButton"
             :confirm-selection-button="confirmSelectionButton"
@@ -652,6 +655,9 @@ const {
   resetQueryVariablesForNewPath,
   totalEntityCount,
   fetchSequence,
+  exactTotalCount,
+  exactCountLoading,
+  revealExactCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
   props.shouldUseStateForRoute,
