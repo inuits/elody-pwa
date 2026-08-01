@@ -276,6 +276,14 @@ const initAutocompleteOption = async () => {
   }
 
   if (
+    !props.isReadOnly &&
+    props.mode === "edit" &&
+    allEntitiesHelper.value?.entityDropdownOptions?.length === 0
+  ) {
+    await allEntitiesHelper.value.initialize();
+  }
+
+  if (
     props.mode !== "create" &&
     props.isReadOnly &&
     !props.modelValue &&
