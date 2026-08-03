@@ -38,14 +38,8 @@ export const useBaseLibrary = (
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
   const fetchSequence = ref<number>(0);
-  // Exact total fetched on demand when the user clicks the capped "<cap>+" count.
-  // Kept separate from totalEntityCount so it stays display-only: it never feeds
-  // pagination or the optimistic-count path. Null means "not revealed".
   const exactTotalCount = ref<number | null>(null);
   const exactCountLoading = ref<boolean>(false);
-  // Bumped whenever a new listing fetch starts; lets revealExactCount() detect
-  // that the listing changed while its request was in flight and discard a
-  // now-stale response instead of overwriting state for the new listing.
   let listingGeneration = 0;
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
@@ -242,11 +236,6 @@ export const useBaseLibrary = (
       return;
     }
     entitiesLoading.value = true;
-    // A new listing (filter/page/limit change) invalidates any revealed exact
-    // total (and any in-flight reveal request); drop back to the capped
-    // display until the user asks again. The generation bump lets a
-    // still-in-flight revealExactCount() detect it's now stale and discard
-    // its result instead of overwriting state for the new listing.
     listingGeneration += 1;
     exactTotalCount.value = null;
     exactCountLoading.value = false;
@@ -320,13 +309,6 @@ export const useBaseLibrary = (
     }
   };
 
-  // Fetch the exact (uncapped) total for the current filters on demand, using a
-  // dedicated count-only query so listing state (entities, totalEntityCount,
-  // fetchSequence, pagination) is never touched.
-  // ponytail: scoped to the standard listing filter path; routes that swap in a
-  // custom getEntities query (route.meta.queries.getEntities, e.g. job filters)
-  // aren't covered by this shared count query — wire a matching count query if
-  // one of those ever needs an on-demand exact total.
   const revealExactCount = async (): Promise<void> => {
     const { loadDocument } = useImport();
     const variables =
@@ -340,12 +322,9 @@ export const useBaseLibrary = (
     try {
       const result = await apolloClient.query({
         query: await loadDocument("GetEntitiesCount"),
-        // limit: 1 — the count query discards its results, so don't fetch a full
-        // page of documents just to read the count.
         variables: { ...variables, exactCount: true, limit: 1 },
         fetchPolicy: "no-cache",
       });
-      // Discard the response if the listing moved on while this was in flight.
       if (generation !== listingGeneration) return;
       exactTotalCount.value = result.data?.Entities?.count ?? null;
     } catch (error: any) {
