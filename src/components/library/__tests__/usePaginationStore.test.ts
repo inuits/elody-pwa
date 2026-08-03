@@ -159,4 +159,43 @@ describe("createPaginationStore", () => {
       expect(store.getLastPage()).toBe(32);
     });
   });
+
+  describe("Exact amount (on-demand reveal unlocks full pagination)", () => {
+    it("stays clamped to the cap while the exact amount is unknown", () => {
+      store.updateTotalAmount(1001);
+      expect(store.countIsCapped.value).toBe(true);
+      expect(store.getLastPage()).toBe(50);
+    });
+
+    it("uses the exact amount for pagination once revealed, unclamping past the cap", () => {
+      store.updateTotalAmount(1001);
+      store.updateExactAmount(30000);
+
+      expect(store.countIsCapped.value).toBe(false);
+      expect(store.getLastPage()).toBe(1500); // ceil(30000 / 20)
+      expect(store.totalPages.value).toBe(1500);
+    });
+
+    it("re-clamps once the exact amount is cleared (e.g. filters changed)", () => {
+      store.updateTotalAmount(1001);
+      store.updateExactAmount(30000);
+      store.updateExactAmount(null);
+
+      expect(store.countIsCapped.value).toBe(true);
+      expect(store.getLastPage()).toBe(50);
+    });
+
+    it("resets an out-of-bounds page once the exact amount is cleared and re-clamped", async () => {
+      store.updateTotalAmount(1001);
+      store.updateExactAmount(30000);
+      store.setPage(60);
+      await nextTick();
+
+      store.updateExactAmount(null);
+      await nextTick();
+
+      // back to capped bounds (50 pages) -> page 60 is now invalid -> reset to 1
+      expect(store.currentPage.value).toBe(1);
+    });
+  });
 });

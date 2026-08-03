@@ -1163,6 +1163,10 @@ watch(
   },
 );
 
+watch(exactTotalCount, (exactCount) => {
+  paginationStore.updateExactAmount(exactCount);
+});
+
 watch(entitiesLoading, (loading, wasLoading) => {
   if (loading || !wasLoading || hasRestoredViewModesAfterFetch.value) return;
   const firstEntity = (entities.value as Entity[])?.[0];

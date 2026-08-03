@@ -25,14 +25,14 @@
           >
             {{ formatResultCount(totalItemsCount, locale) }}</button
           ><span v-else
-            >{{ formatDisplayCount(totalItemsCount, exactCount, locale) }} </span
-          >
+            >{{ formatDisplayCount(totalItemsCount, exactCount, locale) }}
+          </span>
           {{ $t("bulk-operations.items") }}
           <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
         </span>
       </div>
       <div v-if="exactCountLoading" class="flex items-center ml-1">
-        <SpinnerLoader theme="accent" :dimensions="20" />
+        <SpinnerLoader theme="accent" :dimensions="12" />
       </div>
       <BaseTooltip
         v-else-if="canRevealExactCount(totalItemsCount, exactCount)"
