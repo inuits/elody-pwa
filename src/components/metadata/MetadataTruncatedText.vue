@@ -3,14 +3,14 @@
     ref="textContainer"
     class="text-container"
     :style="{ '--line-clamp': lineClamp }"
-    :class="{ 'line-clamp': isClamped }"
+    :class="{ 'line-clamp': !disabled }"
   >
     <slot></slot>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 
 const props = defineProps({
   lineClamp: {
@@ -26,31 +26,29 @@ const props = defineProps({
 const emit = defineEmits(["overflow-status"]);
 
 const textContainer = ref<HTMLDivElement | null>(null);
-const isClamped = ref(false);
-const lineHeight = 20;
 
-const checkOverflow = async () => {
-  if (props.disabled) return;
-
-  await nextTick();
-  if (textContainer.value) {
-    const maxTotalHeight = lineHeight * 2;
-    const isOverflowing = textContainer.value.clientHeight >= maxTotalHeight;
-    isClamped.value = isOverflowing;
-    emit("overflow-status", isOverflowing);
-  }
+const checkOverflow = () => {
+  if (!textContainer.value) return;
+  const isOverflowing =
+    !props.disabled &&
+    textContainer.value.scrollHeight > textContainer.value.clientHeight;
+  emit("overflow-status", isOverflowing);
 };
 
+let resizeObserver: ResizeObserver | undefined;
+
 onMounted(() => {
-  checkOverflow();
+  if (!textContainer.value) return;
+
+  resizeObserver = new ResizeObserver(() => checkOverflow());
+  resizeObserver.observe(textContainer.value);
 });
 
-watch(
-  () => props.lineClamp,
-  () => {
-    checkOverflow();
-  },
-);
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+});
+
+watch(() => [props.lineClamp, props.disabled], checkOverflow);
 </script>
 
 <style scoped>
