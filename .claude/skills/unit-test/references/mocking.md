@@ -126,6 +126,31 @@ const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("deprecated"));
 ```
 
+## Always mock useImport — never let it hit the real generated-types file
+
+Any composable that calls `useImport()` (`loadDocument`/`loadQuery`/`loadQueryVariables`) reads
+from `src/generated-types/queries.ts` via a **hardcoded absolute path**
+(`import("/src/generated-types/queries.ts")`), not the `@/generated-types/queries` alias. The
+`@/generated-types/queries` → `src/__mocks__/queries.ts` alias in `vitest.config.ts` therefore does
+**not** intercept it. If a test doesn't mock `useImport` directly, calling `init`/anything that
+triggers `loadDocument` dynamically imports the real generated file — 10k+ lines, ~14MB — which
+takes seconds to transform on first import and can blow past the default 5000ms test timeout.
+
+Always mock it explicitly, the same way in every test that touches such a composable:
+
+```typescript
+vi.mock("@/composables/useImport", () => ({
+  useImport: () => ({
+    loadDocument: vi.fn().mockResolvedValue("SOME_DOCUMENT"),
+    loadQuery: vi.fn(),
+    loadQueryVariables: vi.fn(),
+  }),
+}));
+```
+
+If the mock value needs to vary between tests, combine with `vi.hoisted` (see above) instead of a
+bare `vi.fn()`, e.g. `mockLoadDocument: vi.fn().mockResolvedValue("ADD_ENTITY_RELATIONS_DOC")`.
+
 ## Reset table
 
 | Method | Clears call history | Resets return values | Restores original |

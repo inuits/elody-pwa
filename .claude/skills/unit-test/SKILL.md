@@ -65,6 +65,9 @@ describe("MyComponent", () => {
 4. **Black-box** — test what it *does*, not how it does it internally.
 5. **No snapshot-only tests** — use explicit `expect` assertions.
 6. **Readable names** — `it("disables submit when form is invalid")` reads as a spec.
+7. **Always mock `@/composables/useImport`** if the code under test (or anything it calls)
+   uses it — otherwise it dynamically imports the real ~14MB `generated-types/queries.ts` and
+   can time out. See [mocking](references/mocking.md#always-mock-useimport--never-let-it-hit-the-real-generated-types-file).
 
 ---
 
@@ -77,6 +80,7 @@ describe("MyComponent", () => {
 | Composable (no lifecycle hooks) | call directly, no wrapper |
 | Composable with `onMounted`/`provide` | `withSetup` helper — see [composable-testing](references/composable-testing.md) |
 | Mock entire module | `vi.mock(...)` |
+| Composable calls `loadDocument`/`loadQuery` (`useImport`) | mock `@/composables/useImport` — see [mocking](references/mocking.md#always-mock-useimport--never-let-it-hit-the-real-generated-types-file) |
 | Keep real module, override one export | `vi.mock` + `importActual` — see [mocking](references/mocking.md) |
 | Mock value differs between tests | `vi.hoisted` — see [mocking](references/mocking.md) |
 | Apollo `useQuery`/`useMutation` | see [apollo-testing](references/apollo-testing.md) |

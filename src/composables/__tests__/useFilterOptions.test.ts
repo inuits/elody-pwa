@@ -22,6 +22,14 @@ vi.mock("@/main", () => ({
   },
 }));
 
+vi.mock("@/composables/useImport", () => ({
+  useImport: () => ({
+    loadDocument: vi.fn().mockResolvedValue("GET_FILTER_OPTIONS_DOC"),
+    loadQuery: vi.fn(),
+    loadQueryVariables: vi.fn(),
+  }),
+}));
+
 vi.mock(import("@/helpers"), async (importOriginal) => {
   const actual = await importOriginal();
   return {
