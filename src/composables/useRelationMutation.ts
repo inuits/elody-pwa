@@ -1,5 +1,6 @@
 import {
   Collection,
+  EditStatus,
   type BaseRelationValuesInput,
   type Entity,
   MutateEntityValuesDocument,
@@ -11,14 +12,24 @@ export const mutateEntityRelations = async (
   relationType: string,
   mapRelation: (relation: BaseRelationValuesInput) => BaseRelationValuesInput,
 ): Promise<void> => {
-  const currentRelations = ((entity.relationValues as Record<string, any>)?.[
-    relationType
-  ] ?? []) as BaseRelationValuesInput[];
+  const relationValues = (entity.relationValues ?? {}) as Record<
+    string,
+    BaseRelationValuesInput[]
+  >;
+  // The backend's PUT /relations replaces the entity's ENTIRE relations array with
+  // whatever is sent, so every type must be included here or untouched types get wiped.
+  const relations = Object.entries(relationValues).flatMap(([type, rels]) =>
+    (rels ?? []).map((relation) =>
+      type === relationType
+        ? mapRelation(relation)
+        : { ...relation, editStatus: EditStatus.Unchanged },
+    ),
+  );
   await apolloClient.mutate({
     mutation: MutateEntityValuesDocument,
     variables: {
       id: entity.id,
-      formInput: { metadata: [], relations: currentRelations.map(mapRelation) },
+      formInput: { metadata: [], relations },
       collection: Collection.Entities,
     },
   });

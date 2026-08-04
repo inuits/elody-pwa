@@ -72,7 +72,7 @@ const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { confirm } = useConfirmModal();
 const { displaySuccessNotification } = useBaseNotification();
 const { openModal } = useBaseModal();
-const { initializeGeneralProperties } = useModalActions();
+const { initializeGeneralProperties, setLibraryEntities } = useModalActions();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { loadDocument } = useImport();
@@ -130,7 +130,26 @@ const mediaTypes = [
 
 const deleteRelation = async () => {
   if (!resolvedRelationType.value) await props.refetchEntities();
-  if (!resolvedRelationType.value) return;
+  if (!resolvedRelationType.value) {
+    const libraryEntity = libraryEntities?.value?.find(
+      (e) => e.id === props.entityId,
+    );
+    if (libraryEntity && !("relationValues" in libraryEntity)) {
+      console.warn(
+        `[ElodyAction] Could not resolve a relation type to delete for entity "${props.entityId}" ` +
+          `(parent "${entityFormData?.id}"): the library entity is missing "relationValues" — ` +
+          `the GraphQL query populating this list likely doesn't select that field. ` +
+          `Add "relationValues" to that query's selection set for this entity type.`,
+      );
+    } else {
+      console.warn(
+        `[ElodyAction] Could not resolve a relation type to delete for entity "${props.entityId}" ` +
+          `(parent "${entityFormData?.id}"): no relation found on the parent's form, and no matching ` +
+          `inverse relation on the library entity's relationValues.`,
+      );
+    }
+    return;
+  }
 
   const hasRelation = props.relation && props.relation !== "no-relation-found";
 
@@ -141,6 +160,7 @@ const deleteRelation = async () => {
     );
   }
 
+  setLibraryEntities(libraryEntities);
   await deleteRelations(
     entityFormData.id,
     resolvedRelationType.value,
