@@ -4,7 +4,10 @@
       <slot name="promoted" />
     </div>
     <div v-if="hasOverflowActions">
-      <div @click.stop.prevent="openContextMenu" class="cursor-pointer">
+      <div
+        @click.stop.prevent="openContextMenu"
+        class="cursor-pointer rounded-md p-1 hover:bg-accent-highlight"
+      >
         <unicon :name="Unicons.EllipsisVThinline.name" />
       </div>
       <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">

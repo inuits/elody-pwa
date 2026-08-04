@@ -82,7 +82,7 @@ const defaultButton: Button = {
   bgColor: "bg-background-normal",
   hoverStyle: {
     textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-background-normal",
+    bgColor: "hover:bg-accent-highlight",
   },
   activeStyle: {
     textColor: "active:text-accent-accent",
@@ -105,7 +105,7 @@ const accentNormalButton: Button = {
   bgColor: "bg-accent-normal",
   hoverStyle: {
     textColor: "hover:text-accent-normal",
-    bgColor: defaultButton.hoverStyle.bgColor,
+    bgColor: "hover:bg-background-normal",
   },
   activeStyle: {
     textColor: "active:text-accent-normal",

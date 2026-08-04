@@ -32,7 +32,7 @@
       v-if="hasSecondaryOptions"
       button-size="small"
       :icon="DamsIcons.EllipsisV"
-      class="!w-max !p-2"
+      class="!w-max !p-2 ml-2"
       @click.stop="
         (event: MouseEvent) => {
           clearSubDropdownOptions();
