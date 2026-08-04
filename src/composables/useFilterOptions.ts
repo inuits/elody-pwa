@@ -29,6 +29,19 @@ type FilterOptionsMappingType = {
   value?: string;
 };
 
+type LimitOptions = {
+  optionsLimit?: number;
+  facetsLimit?: number;
+}
+
+type InitOptions = {
+  entityType: string | Entitytyping;
+  filterOptionsMapping?: FilterOptionsMappingType;
+  selectedOptions?: string[];
+  parentEntity?: Entity;
+  limitConfig?: LimitOptions;
+};
+
 export const useFilterOptions = () => {
   const { loadDocument } = useImport();
   const { t, locale } = useI18n();
@@ -48,15 +61,17 @@ export const useFilterOptions = () => {
   const facetCounts = ref<Map<string, number>>(new Map());
   const hasFacets = ref<boolean>(false);
   const selectedOptions = ref<string[] | undefined>([]);
+  const limitConfig = ref<LimitOptions | undefined>(undefined);
 
   const currentRequestId = ref(0);
 
-  const init = async (
-    entityTypeToSet: string | Entitytyping,
-    filterOptionsMappingValue?: FilterOptionsMappingType,
-    filterSelectedOptions?: string[],
-    parentEntity?: Entity | undefined,
-  ) => {
+  const init = async ({
+    entityType: entityTypeToSet,
+    filterOptionsMapping: filterOptionsMappingValue,
+    selectedOptions: filterSelectedOptions,
+    parentEntity,
+    limitConfig: limitConfigValue,
+  }: InitOptions) => {
     query.value = await loadDocument("GetFilterOptions");
     entityType.value = entityTypeToSet;
     optionsFiltersManager.setVariables({
@@ -66,6 +81,7 @@ export const useFilterOptions = () => {
     facetsFiltersManager.setVariables({ entityType: entityTypeToSet });
     filterOptionsMapping.value = filterOptionsMappingValue;
     selectedOptions.value = filterSelectedOptions;
+    limitConfig.value = limitConfigValue;
   };
 
   const getBaseOptions = async () => {
@@ -120,6 +136,9 @@ export const useFilterOptions = () => {
       await optionsLibrary.setEntityType(
         entityTypeToSet || (entityType.value as Entitytyping),
       );
+      if (limitConfig.value?.optionsLimit !== undefined) {
+        await optionsLibrary.setLimit(limitConfig.value.optionsLimit);
+      }
       optionsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
       if (optionsOrderByKey) {
         optionsLibrary.setSortOrder(true);
@@ -149,6 +168,9 @@ export const useFilterOptions = () => {
 
       await facetsLibrary.setEntityType(entityTypeToSet);
       facetsLibrary.setsearchInputType(SearchInputType.AdvancedInputType);
+      if (limitConfig.value?.facetsLimit !== undefined) {
+        await facetsLibrary.setLimit(limitConfig.value.facetsLimit);
+      }
       await facetsLibrary.setAdvancedFilters(
         facetsFiltersManager.getNormalizedFiltersForApi({
           ignoreFacets: false,
