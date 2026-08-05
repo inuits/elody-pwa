@@ -887,27 +887,37 @@ export const isAbortError = (error: any): boolean => {
   return false;
 };
 
-export const sanitizeHtml = (content: any) => {
+const BASE_ALLOWED_TAGS = [
+  "a",
+  "p",
+  "span",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "li",
+  "ol",
+  "ul",
+  "br",
+  "b",
+  "i",
+];
+
+/**
+ * @param extraTags Additional element names to keep, e.g. the `elody-<tag>` custom
+ *   elements produced by the WYSIWYG tagging extension. Without them DOMPurify's
+ *   closed allowlist drops the element and its `data-entity-id`, silently stripping
+ *   every tag out of rendered content. Callers pass the names their own
+ *   configuration can actually produce, so the allowlist stays closed.
+ */
+export const sanitizeHtml = (content: any, extraTags: string[] = []) => {
   return DOMPurify.sanitize(content, {
     FORBID_TAGS: ["style", "img", "video", "audio", "script", "svg"],
     USE_PROFILES: { html: true },
-    ALLOWED_TAGS: [
-      "a",
-      "p",
-      "span",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "li",
-      "ol",
-      "ul",
-      "br",
-      "b",
-      "i",
-    ],
+    ALLOWED_TAGS: [...BASE_ALLOWED_TAGS, ...extraTags],
+    ADD_ATTR: extraTags.length ? ["data-entity-id", "data-label"] : [],
   });
 };
 
