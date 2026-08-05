@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { defineEmits, onMounted } from "vue";
+import { onMounted } from "vue";
 
 const emit = defineEmits<{
   (event: "updateValue", arg: string): void;

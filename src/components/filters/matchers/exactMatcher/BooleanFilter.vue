@@ -6,7 +6,7 @@
         :key="option.value + '_' + idx"
         v-model="option.isSelected"
         :disabled="isDisabled(option)"
-        :label="String(option.value)"
+        :label="getTranslatedLabel(option.value)"
         ignoreBulkOperations
         input-style="accentNormal"
       />
@@ -18,6 +18,8 @@
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { type FilterListItem } from "@/composables/useStateManagement";
 import { onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -49,6 +51,10 @@ watch(options.value, (newValue) => {
   const selectedOption = newValue.find((option) => option.isSelected);
   emit("updateValue", selectedOption?.value);
 });
+
+const getTranslatedLabel = (value: boolean) => {
+  return value ? t("metadata.labels.yes") : t("metadata.labels.no");
+};
 
 const reset = () => {
   options.value = [

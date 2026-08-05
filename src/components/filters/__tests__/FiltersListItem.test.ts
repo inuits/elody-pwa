@@ -113,6 +113,95 @@ describe("FiltersListItem Matcher Restriction", () => {
   });
 });
 
+describe("FiltersListItem - matcherLabels override", () => {
+  const mockMatchersProps = [
+    { label: "has a value", value: Matchers.AnyMatcher },
+    { label: "has no value", value: Matchers.NoneMatcher },
+    { label: "is any of", value: Matchers.ExactAutoCompleteMatcher },
+  ];
+
+  const defaultProps = {
+    matchers: mockMatchersProps,
+    clearAllActiveFilters: false,
+    getNormalizedActiveFilters: () => ({}),
+    refetchFilterOptions: false,
+  };
+
+  it("overrides the label for matchers listed in matcherLabels, leaving others unchanged", () => {
+    const filter = {
+      isActive: true,
+      advancedFilter: {
+        key: "test-filter",
+        type: AdvancedFilterTypes.Selection,
+        label: "Test Label",
+        matcherLabels: [
+          { matcher: Matchers.AnyMatcher, label: "metadata.labels.yes" },
+          { matcher: Matchers.NoneMatcher, label: "metadata.labels.no" },
+        ],
+      },
+    };
+
+    const wrapper = mount(FiltersListItem, {
+      props: { ...defaultProps, filter },
+    });
+
+    const panel = wrapper.findComponent(FiltersListItemPanel);
+    const passedMatchers = panel.props("matchers");
+
+    expect(passedMatchers).toEqual([
+      { label: "metadata.labels.yes", value: Matchers.AnyMatcher },
+      { label: "metadata.labels.no", value: Matchers.NoneMatcher },
+      { label: "is any of", value: Matchers.ExactAutoCompleteMatcher },
+    ]);
+  });
+
+  it("combines allowedMatchers filtering with matcherLabels overrides", () => {
+    const filter = {
+      isActive: true,
+      advancedFilter: {
+        key: "test-filter",
+        type: AdvancedFilterTypes.Selection,
+        label: "Test Label",
+        defaultMatcher: Matchers.AnyMatcher,
+        allowedMatchers: [Matchers.AnyMatcher, Matchers.NoneMatcher],
+        matcherLabels: [{ matcher: Matchers.AnyMatcher, label: "metadata.labels.yes" }],
+      },
+    };
+
+    const wrapper = mount(FiltersListItem, {
+      props: { ...defaultProps, filter },
+    });
+
+    const panel = wrapper.findComponent(FiltersListItemPanel);
+    const passedMatchers = panel.props("matchers");
+
+    expect(passedMatchers).toEqual([
+      { label: "metadata.labels.yes", value: Matchers.AnyMatcher },
+      { label: "has no value", value: Matchers.NoneMatcher },
+    ]);
+  });
+
+  it("leaves matchers unchanged when matcherLabels is not provided", () => {
+    const filter = {
+      isActive: true,
+      advancedFilter: {
+        key: "test-filter",
+        type: AdvancedFilterTypes.Selection,
+        label: "Test Label",
+      },
+    };
+
+    const wrapper = mount(FiltersListItem, {
+      props: { ...defaultProps, filter },
+    });
+
+    const panel = wrapper.findComponent(FiltersListItemPanel);
+    const passedMatchers = panel.props("matchers");
+
+    expect(passedMatchers).toEqual(mockMatchersProps);
+  });
+});
+
 describe("FiltersListItem - defaultMatcher Logic", () => {
   const mockMatchersProps = [
     { label: "Exact", value: Matchers.ExactMatcher },
