@@ -76,8 +76,8 @@
       :tagging="tagging"
     />
     <inline-tag-suggestion-dropdown
-      v-if="tagging?.inlineSuggestion.value"
-      :suggestion="tagging.inlineSuggestion.value"
+      v-if="tagging?.inlineSuggestion?.value"
+      :suggestion="tagging?.inlineSuggestion?.value"
       :custom-query="element.taggingConfiguration?.customQuery"
       @pick="applyInlineSuggestion"
     />
@@ -99,7 +99,15 @@
 
 <script setup lang="ts">
 import { Editor, EditorContent } from "@tiptap/vue-3";
-import { computed, onMounted, onUnmounted, ref, watch, inject } from "vue";
+import {
+  computed,
+  inject,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  watch,
+} from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import {
@@ -153,7 +161,11 @@ const { t } = useI18n();
 // Stable across remounts, and unique per editor on the page: scopes this editor's
 // injected tag styling and identifies it as the owner of the shared tagging modal.
 const instanceId = `${props.formId}-${props.element.metadataKey}`;
-const tagging = ref<ElodyTaggingInstance | undefined>(undefined);
+// shallowRef, not ref: ref() runs reactive conversion over the stored object, which
+// deeply UNWRAPS the refs the instance exposes — tagging.value.inlineSuggestion would
+// become the raw value instead of a Ref, so `.value` on it is undefined (or a crash
+// when it holds null). shallowRef keeps the instance exactly as the composable built it.
+const tagging = shallowRef<ElodyTaggingInstance | undefined>(undefined);
 
 const form = computed(() => getForm(props.formId));
 const editorNode = ref<HTMLDivElement | undefined>(undefined);
@@ -264,7 +276,7 @@ onMounted(async () => {
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;
         if (!useEditHelper.isEdit) {
-          openDetailModal(node, tagging.value?.configuration.value ?? []);
+          openDetailModal(node, tagging.value?.configuration?.value ?? []);
           return false;
         }
         tagContextMenu.value = {

@@ -210,7 +210,7 @@ const isNonTaggedTextSelected = computed(() => {
   return !hasSelectionBeenTagged(props.editor);
 });
 const isInNeedOfConfigurationEntities = computed<boolean>(
-  () => !!props.tagging?.isInNeedOfConfigurationEntities.value,
+  () => !!props.tagging?.isInNeedOfConfigurationEntities?.value,
 );
 const tagButtonDisabled = computed(() => {
   if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
@@ -219,7 +219,7 @@ const tagButtonDisabled = computed(() => {
 });
 const neededConfigurationEntityTypes = computed<string>(() => {
   const configurationEntityTypes: string[] = (
-    props.tagging?.configurationsByEntity.value ?? []
+    props.tagging?.configurationsByEntity?.value ?? []
   ).map(
     (configurationItem) =>
       configurationItem.tagConfigurationByEntity.configurationEntityType,
