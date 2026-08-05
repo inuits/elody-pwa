@@ -108,6 +108,30 @@ describe("useElodyTagging", () => {
     tagging.destroy();
   });
 
+  it("exposes real refs, which a plain ref() would unwrap", async () => {
+    // Consumers must hold the instance in shallowRef, not ref. ref() runs reactive
+    // conversion over the stored object and deeply UNWRAPS these refs, so
+    // instance.inlineSuggestion becomes its raw value — `.value` is then undefined,
+    // or a crash when the raw value is null. This asserts the contract and documents
+    // the trap that caused exactly that.
+    const { isRef, ref: vueRef, shallowRef } = await import("vue");
+    const tagging = await useElodyTagging(
+      "instance-refs",
+      configurationFor("word", "word"),
+    );
+
+    expect(isRef(tagging.inlineSuggestion)).toBe(true);
+    expect(isRef(tagging.configuration)).toBe(true);
+    expect(isRef(tagging.configurationsByEntity)).toBe(true);
+
+    // shallowRef keeps them intact...
+    expect(isRef(shallowRef(tagging).value.inlineSuggestion)).toBe(true);
+    // ...while ref() strips them, which is the bug this guards against.
+    expect(isRef(vueRef(tagging).value.inlineSuggestion)).toBe(false);
+
+    tagging.destroy();
+  });
+
   it("removes its injected style element on destroy", async () => {
     const configuration = configurationFor("word", "word");
     configuration[0].tagColor = "#ff0000";
