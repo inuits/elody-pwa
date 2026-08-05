@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoading" class="flex items-center justify-center">
-    <SpinnerLoader theme="accent" :dimensions="10" />
+  <SpinnerLoader theme="accent" :dimensions="10" />
   </div>
   <div v-if="showFilters" class="grow">
     <AutocompleteFilter
@@ -134,13 +134,14 @@ const initialize = async () => {
   if (isInitialized.value) return;
 
   try {
-    await init(
-      (props.filter.advancedFilter?.entityType ||
+    await init({
+      entityType: (props.filter.advancedFilter?.entityType ||
         route.meta.entityType) as Entitytyping,
-      props.filter.advancedFilter.filterOptionsMapping,
-      selectedOptions.value,
+      filterOptionsMapping: props.filter.advancedFilter.filterOptionsMapping,
+      limitConfig: props.filter.advancedFilter.limitConfig,
+      selectedOptions: selectedOptions.value,
       parentEntity,
-    );
+    });
     isInitialized.value = true;
   } catch (error) {
     console.error("Initialization failed:", error);

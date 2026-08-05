@@ -1,7 +1,34 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useFilterOptions } from "../useFilterOptions";
+import { AdvancedFilterTypes } from "@/generated-types/queries";
 
 const i18nMocks = vi.hoisted(() => ({ locale: "en" }));
+
+const baseLibraryMocks = vi.hoisted(() => {
+  const instances: any[] = [];
+  const makeLibraryInstance = () => ({
+    entities: { value: [] },
+    facets: { value: [] },
+    entitiesLoading: { value: false },
+    setAdvancedFilters: vi.fn().mockResolvedValue(undefined),
+    setEntityType: vi.fn().mockResolvedValue(undefined),
+    setsearchInputType: vi.fn(),
+    setSortOrder: vi.fn().mockResolvedValue(undefined),
+    setSortKey: vi.fn().mockResolvedValue(undefined),
+    setLimit: vi.fn().mockResolvedValue(undefined),
+    getEntities: vi.fn().mockResolvedValue(undefined),
+  });
+  const useBaseLibrary = vi.fn(() => {
+    const instance = makeLibraryInstance();
+    instances.push(instance);
+    return instance;
+  });
+  return { useBaseLibrary, instances };
+});
+
+vi.mock("@/components/library/useBaseLibrary", () => ({
+  useBaseLibrary: baseLibraryMocks.useBaseLibrary,
+}));
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
@@ -38,6 +65,10 @@ vi.mock(import("@/helpers"), async (importOriginal) => {
   };
 });
 
+beforeEach(() => {
+  baseLibraryMocks.instances.length = 0;
+});
+
 describe("useFilterOptions - data mapping", () => {
   it("should directly return dropdownOptions when available", () => {
     const { options, dropdownOptions } = useFilterOptions();
@@ -62,9 +93,12 @@ describe("useFilterOptions - data mapping", () => {
 
     entities.value = mockEntities;
 
-    await init("TEST_ENTITY", {
-      label: "customName",
-      value: "code",
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "customName",
+        value: "code",
+      },
     });
 
     expect(options.value).toEqual([
@@ -83,9 +117,12 @@ describe("useFilterOptions - data mapping", () => {
 
     entities.value = mockEntities;
 
-    await init("TEST_ENTITY", {
-      label: "code",
-      value: "code",
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "code",
+        value: "code",
+      },
     });
 
     expect(options.value).toEqual([
@@ -104,7 +141,7 @@ describe("useFilterOptions - data mapping", () => {
     ];
 
     entities.value = mockEntities;
-    init("TEST_ENTITY");
+    init({ entityType: "TEST_ENTITY" });
 
     expect(options.value).toEqual([
       { icon: expect.anything(), label: "Entity 1", value: "1" },
@@ -122,7 +159,10 @@ describe("useFilterOptions - data mapping", () => {
 
     entities.value = mockEntities;
 
-    await useFilterOptions().init("TEST_ENTITY", { value: "id" });
+    await useFilterOptions().init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: { value: "id" },
+    });
 
     expect(options.value).toEqual([
       { icon: expect.anything(), label: "Fallback Title 1", value: "1" },
@@ -146,7 +186,10 @@ describe("useFilterOptions - data mapping", () => {
       },
     ];
 
-    await init("TEST_ENTITY", { value: "title", label: "title" });
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: { value: "title", label: "title" },
+    });
 
     entities.value = mockEntities;
 
@@ -177,9 +220,12 @@ describe("useFilterOptions - multilingual (translation) values", () => {
   it("resolves the current locale value when label/value paths share a translation array", async () => {
     const { options, entities, init } = useFilterOptions();
 
-    await init("TEST_ENTITY", {
-      label: "intialValues.name",
-      value: "intialValues.name",
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "intialValues.name",
+        value: "intialValues.name",
+      },
     });
 
     entities.value = buildEntities();
@@ -196,9 +242,12 @@ describe("useFilterOptions - multilingual (translation) values", () => {
   it("produces a single option (not one per language) for a translation array", () => {
     const { options, entities, init } = useFilterOptions();
 
-    init("TEST_ENTITY", {
-      label: "intialValues.name",
-      value: "intialValues.name",
+    init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "intialValues.name",
+        value: "intialValues.name",
+      },
     });
 
     entities.value = buildEntities();
@@ -210,9 +259,12 @@ describe("useFilterOptions - multilingual (translation) values", () => {
     i18nMocks.locale = "fr";
     const { options, entities, init } = useFilterOptions();
 
-    await init("TEST_ENTITY", {
-      label: "intialValues.name",
-      value: "intialValues.name",
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "intialValues.name",
+        value: "intialValues.name",
+      },
     });
 
     entities.value = buildEntities();
@@ -230,9 +282,12 @@ describe("useFilterOptions - multilingual (translation) values", () => {
     i18nMocks.locale = "ar";
     const { options, entities, init } = useFilterOptions();
 
-    await init("TEST_ENTITY", {
-      label: "intialValues.name",
-      value: "intialValues.name",
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "intialValues.name",
+        value: "intialValues.name",
+      },
     });
 
     entities.value = buildEntities();
@@ -245,9 +300,12 @@ describe("useFilterOptions - multilingual (translation) values", () => {
   it("resolves translation arrays when label and value paths differ", async () => {
     const { options, entities, init } = useFilterOptions();
 
-    await init("TEST_ENTITY", {
-      label: "intialValues.title",
-      value: "intialValues.name",
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "intialValues.title",
+        value: "intialValues.name",
+      },
     });
 
     entities.value = [
@@ -289,5 +347,60 @@ describe("useFilterOptions.setPredefinedOptions", () => {
       { icon: "NoIcon", label: "metadata.labels.role", value: "admin" } as any,
     ]);
     expect(entities.value).toEqual([]);
+  });
+});
+
+describe("useFilterOptions - limitConfig", () => {
+  const facetRequestFilters = [
+    { type: AdvancedFilterTypes.Selection, key: "type", value: ["person"] },
+  ] as any;
+
+  it("calls setLimit on the options library with the configured optionsLimit", async () => {
+    const { init, loadOptionsAndFacetsInParallel } = useFilterOptions();
+    const [optionsLibrary] = baseLibraryMocks.instances;
+
+    await init({
+      entityType: "TEST_ENTITY",
+      limitConfig: { optionsLimit: 5 },
+    });
+    await loadOptionsAndFacetsInParallel();
+
+    expect(optionsLibrary.setLimit).toHaveBeenCalledWith(5);
+  });
+
+  it("does not call setLimit on the options library when optionsLimit is not configured", async () => {
+    const { init, loadOptionsAndFacetsInParallel } = useFilterOptions();
+    const [optionsLibrary] = baseLibraryMocks.instances;
+
+    await init({ entityType: "TEST_ENTITY" });
+    await loadOptionsAndFacetsInParallel();
+
+    expect(optionsLibrary.setLimit).not.toHaveBeenCalled();
+  });
+
+  it("calls setLimit on the facets library with the configured facetsLimit when facet filters are requested", async () => {
+    const { init, loadOptionsAndFacetsInParallel } = useFilterOptions();
+    const [, facetsLibrary] = baseLibraryMocks.instances;
+
+    await init({
+      entityType: "TEST_ENTITY",
+      limitConfig: { facetsLimit: 3 },
+    });
+    await loadOptionsAndFacetsInParallel(facetRequestFilters);
+
+    expect(facetsLibrary.setLimit).toHaveBeenCalledWith(3);
+  });
+
+  it("does not call setLimit on the facets library when no facet filters are requested, even if facetsLimit is configured", async () => {
+    const { init, loadOptionsAndFacetsInParallel } = useFilterOptions();
+    const [, facetsLibrary] = baseLibraryMocks.instances;
+
+    await init({
+      entityType: "TEST_ENTITY",
+      limitConfig: { facetsLimit: 3 },
+    });
+    await loadOptionsAndFacetsInParallel();
+
+    expect(facetsLibrary.setLimit).not.toHaveBeenCalled();
   });
 });

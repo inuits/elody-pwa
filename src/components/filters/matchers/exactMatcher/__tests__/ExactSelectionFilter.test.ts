@@ -95,6 +95,42 @@ describe("ExactSelectionFilter with inline options", () => {
   });
 });
 
+describe("ExactSelectionFilter init call arguments", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.options.value = [];
+  });
+
+  it("calls init with the entity type, filter options mapping, selected options and parent entity", async () => {
+    const filterOptionsMapping = { label: "label.path", value: "value.path" };
+    const filter = makeFilter({ filterOptionsMapping });
+    filter.inputFromState = { value: ["existing-value"] };
+    const parentEntity = { id: "parent-1" };
+
+    shallowMount(ExactSelectionFilter, {
+      props: {
+        filter,
+        lastTypedValue: "",
+        isOpen: true,
+        getNormalizedActiveFilters: () => [],
+        refetchFilterOptions: false,
+      },
+      global: {
+        stubs: { SpinnerLoader: true },
+        provide: { ParentEntityProvider: parentEntity },
+      },
+    });
+    await flushPromises();
+
+    expect(mocks.init).toHaveBeenCalledWith({
+      entityType: "user",
+      filterOptionsMapping,
+      selectedOptions: ["existing-value"],
+      parentEntity,
+    });
+  });
+});
+
 describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
   beforeEach(() => {
     vi.clearAllMocks();
