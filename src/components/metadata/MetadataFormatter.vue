@@ -10,7 +10,7 @@
   <MetadataFormatterPill
     v-if="formatterType === CustomFormatterTypes.Pill && label"
     :formatter="formatter"
-    :label="readableLabel"
+    :label="rawLabel"
     :translation-key="translationKey"
   />
   <MetadataRegexpFormatter
@@ -64,6 +64,12 @@ const translateArrayValuesAndJoin = (values: string[], translationKey: string): 
       return translated !== key ? translated : item;
     })
     .join(", ");
+
+// MetadataFormatterPill translates its own display value from translationKey,
+// so it needs the raw (untranslated) value to look up pill colors by.
+const rawLabel = computed(() =>
+  Array.isArray(props.label) ? props.label.join(", ") : (props.label ?? ""),
+);
 
 const readableLabel = computed(() => {
   const isLabelArray = Array.isArray(props.label);

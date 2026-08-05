@@ -787,6 +787,23 @@ describe("useRepetitiveForm", () => {
     expect(mocks.addRelations).not.toHaveBeenCalled();
   });
 
+  it("commitPendingHostRelations commits every branch staged via add-another, not just the first", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting({ id: "user-1" });
+    store.completeStep();
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep();
+    store.startNewBranch(); // simulate "add another"
+    store.pickExisting({ id: "user-2" });
+    store.completeStep();
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_member" });
+    store.completeMetadataOnlyStep();
+
+    await store.commitPendingHostRelations("org-1");
+    expect(mocks.addRelations).toHaveBeenCalledTimes(2);
+  });
+
   it("completeMetadataOnlyStep advances to the next step without requiring a staged entity", () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
