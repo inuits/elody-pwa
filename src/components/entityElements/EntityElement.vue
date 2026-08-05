@@ -116,6 +116,12 @@
         :entity-id="id"
         :can="element.can"
       />
+      <entity-element-comments
+        v-if="element.__typename === 'CommentsElement'"
+        :element="element"
+        :id="id"
+        :entity-type="entityType"
+      />
     </div>
   </div>
 </template>
@@ -130,6 +136,7 @@ import EntityElementWindow from "@/components/entityElements/EntityElementWindow
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import EntityElementHierarchyListViewer from "@/components/entityElements/EntityElementHierarchyListViewer.vue";
+import EntityElementComments from "@/components/entityElements/comments/EntityElementComments.vue";
 
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -150,6 +157,7 @@ import type {
   WindowElement,
   HierarchyListElement,
   WysiwygElement,
+  CommentsElement,
 } from "@/generated-types/queries";
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
@@ -165,7 +173,8 @@ export type Elements =
   | WindowElement
   | MapElement
   | WysiwygElement
-  | HierarchyListElement;
+  | HierarchyListElement
+  | CommentsElement;
 
 const props = withDefaults(
   defineProps<{

@@ -9,6 +9,7 @@
   <ConfirmModal><ConfirmModalView /></ConfirmModal>
   <EntityEditModal />
   <IiifOperationsModal />
+  <CommentThreadModal />
   <InfoPanelHost />
   <GuidedFlowModalHost />
 </template>
@@ -24,6 +25,7 @@ import EntityEditModal from "@/components/modals/EntityEditModal.vue";
 import CreateSavedSearchModal from "@/components/CreateSavedSearchModal.vue";
 import EntityDetailModal from "@/components/modals/EntityDetailModal.vue";
 import IiifOperationsModal from "@/components/modals/IiifOperationsModal.vue";
+import CommentThreadModal from "@/components/entityElements/comments/CommentThreadModal.vue";
 import InfoPanelHost from "@/components/base/InfoPanelHost.vue";
 import GuidedFlowModalHost from "@/components/repetitiveForm/GuidedFlowModalHost.vue";
 import { useRoute } from "vue-router";
