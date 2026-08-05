@@ -6,7 +6,7 @@
     @hide-modal="closeModal(TypeModals.ElodyEntityTaggingModal)"
   >
     <div
-      v-if="element && taggingConfiguration && selectedText"
+      v-if="element && taggingConfiguration && selectedText && isOwningEditor"
       :key="`${taggingConfiguration[formIndex].createNewEntityFormQuery}-${getModalInfo(TypeModals.ElodyEntityTaggingModal).open}`"
       class="p-2"
     >
@@ -112,10 +112,7 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import type { Editor } from "@tiptap/vue-3";
-import {
-  getExtensionConfigurationForEntity,
-  tagEntity,
-} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import type { ElodyTaggingInstance } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
 import {
   extractTitleKeyFromMetadataFilter,
   parseRegexFromString,
@@ -133,9 +130,23 @@ const props = withDefaults(
   defineProps<{
     element: WysiwygElement;
     editor: Editor;
+    editorId: string;
+    tagging?: ElodyTaggingInstance;
   }>(),
   {},
 );
+
+// One modal entry is shared by every editor on the page, and each editor renders its
+// own instance of this component. Only the editor that opened it may render content,
+// otherwise all of them react to the same `open` flag at once.
+const isOwningEditor = computed<boolean>(
+  () =>
+    getModalInfo(TypeModals.ElodyEntityTaggingModal).editorId ===
+    props.editorId,
+);
+
+const getConfigurationForEntity = (entity: { type: string }) =>
+  props.tagging?.getConfigurationForEntity(entity);
 
 const parentId = computed(() => route.params["id"]);
 const formIndex: number = 0;
@@ -194,10 +205,9 @@ const setEntityName = () => {
   if (!textWithReplacements.value || !entityTypes) return;
 
   const titleKeys = entityTypes.map((type: Entitytyping) => {
-    const configuration: TaggableEntityConfiguration =
-      getExtensionConfigurationForEntity({ type });
+    const configuration = getConfigurationForEntity({ type });
     return extractTitleKeyFromMetadataFilter(
-      configuration.metadataFilterForTagContent,
+      configuration?.metadataFilterForTagContent,
     );
   });
 
@@ -224,8 +234,8 @@ const computedAdvancedFilterInputs = computed<AdvancedFilterInput[]>(() => {
   const metadataFilters: AdvancedFilterInput[] = [];
 
   entityTypes.forEach((type: Entitytyping) => {
-    const configurationItem: TaggableEntityConfiguration =
-      getExtensionConfigurationForEntity({ type });
+    const configurationItem = getConfigurationForEntity({ type });
+    if (!configurationItem) return;
 
     typeFilters.push({
       match_exact: true,
@@ -249,15 +259,11 @@ const tagExistingEntityFlow = () => {
   if (!isBulkSelectionLimitReached(context)) return;
 
   const entityToTag = getEnqueuedItems(context)[0];
-  const entityTypeConfigurationItem: TaggableEntityConfiguration =
-    getExtensionConfigurationForEntity({ type: entityToTag.type });
-
-  const relationType = entityTypeConfigurationItem.relationType;
   if (!entityToTag) return;
 
-  tagEntity(entityToTag, relationType, parentId.value, context);
-
-  props.editor.commands.linkEntityToTaggedText(entityToTag);
+  // Resolving the configuration and writing the relation both happen inside the
+  // owning editor's command, so this component no longer needs global lookups.
+  props.editor.commands.tagAndLinkEntity(entityToTag, parentId.value);
 };
 
 onMounted(() => {

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { EditorState } from "prosemirror-state";
 
 // Short-circuit the app-wide import chain (main.ts → App.vue → …) that the
@@ -25,9 +25,10 @@ vi.mock("@/composables/useEntitySingle", () => ({
 const {
   getAdjustedSelectionFrom,
   hasSelectionBeenTagged,
-  customExtensionNames,
-  createGlobalCommandsExtension,
+  createTaggingCommandsExtension,
+  TAG_GROUP,
 } = await import("../ElodyTaggingExtension");
+const { ref } = await import("vue");
 
 const TAG_TYPE = "word-testconfig";
 const OTHER_TYPE = "paragraph";
@@ -54,7 +55,16 @@ const makeMockState = (
           const end = n.pos + n.size;
           if (end > from && n.pos < to) {
             const stop = cb(
-              { type: { name: n.type }, nodeSize: n.size },
+              {
+                type: {
+                  name: n.type,
+                  // Tag identity now comes from the node's ProseMirror group, which
+                  // is per-editor-schema rather than a shared module registry.
+                  isInGroup: (group: string) =>
+                    group === TAG_GROUP && n.type === TAG_TYPE,
+                },
+                nodeSize: n.size,
+              },
               n.pos,
             );
             if (stop === false) break;
@@ -68,10 +78,6 @@ const makeMockState = (
 const makeMockEditor = (state: EditorState) => ({ state }) as any;
 
 describe("getAdjustedSelectionFrom", () => {
-  beforeEach(() => {
-    customExtensionNames.value = [TAG_TYPE];
-  });
-
   it("returns original from when no tag at the selection start", () => {
     // Selection [10, 15] with no tag anywhere
     const state = makeMockState([], { from: 10, to: 15 });
@@ -118,10 +124,6 @@ describe("getAdjustedSelectionFrom", () => {
 });
 
 describe("hasSelectionBeenTagged", () => {
-  beforeEach(() => {
-    customExtensionNames.value = [TAG_TYPE];
-  });
-
   it("returns false for an empty selection", () => {
     const state = makeMockState([{ type: TAG_TYPE, pos: 5, size: 1 }], {
       from: 5,
@@ -174,7 +176,7 @@ describe("hasSelectionBeenTagged", () => {
   });
 });
 
-describe("ensureTrailingSpaceAfterTags plugin (via createGlobalCommandsExtension)", () => {
+describe("ensureTrailingSpaceAfterTags plugin (via createTaggingCommandsExtension)", () => {
   it("inserts a zero-width space after a tag that ends up as the last node in a paragraph", async () => {
     const { Editor } = await import("@tiptap/core");
     const { default: Document } = await import("@tiptap/extension-document");
@@ -182,11 +184,9 @@ describe("ensureTrailingSpaceAfterTags plugin (via createGlobalCommandsExtension
     const { default: Text } = await import("@tiptap/extension-text");
     const { Node } = await import("@tiptap/core");
 
-    customExtensionNames.value = [TAG_TYPE];
-
     const TagNode = Node.create({
       name: TAG_TYPE,
-      group: "inline",
+      group: `inline ${TAG_GROUP}`,
       inline: true,
       atom: true,
       selectable: false,
@@ -199,7 +199,10 @@ describe("ensureTrailingSpaceAfterTags plugin (via createGlobalCommandsExtension
         Paragraph,
         Text,
         TagNode,
-        createGlobalCommandsExtension,
+        createTaggingCommandsExtension({
+          instanceId: "test",
+          configuration: ref([]),
+        }),
       ],
       content: `<p>hello </p>`,
     });

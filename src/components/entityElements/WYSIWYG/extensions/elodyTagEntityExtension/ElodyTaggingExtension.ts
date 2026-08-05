@@ -22,7 +22,7 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { computed, ref } from "vue";
+import type { Ref } from "vue";
 import { apolloClient } from "@/main";
 import { DOMSerializer } from "prosemirror-model";
 
@@ -30,80 +30,89 @@ const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
 const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
-type TaggableEntityConfigurationFromEntity = TaggableEntityConfiguration & {
-  configurationEntityId: string;
-  tagColor: string;
-  attributes?: Record<string, string>;
-  extensionName: string;
+export type TaggableEntityConfigurationFromEntity =
+  TaggableEntityConfiguration & {
+    configurationEntityId: string;
+    tagColor: string;
+    attributes?: Record<string, string>;
+    extensionName: string;
+  };
+
+export type ResolvedTagConfiguration =
+  | TaggableEntityConfiguration
+  | TaggableEntityConfigurationFromEntity;
+
+/**
+ * Everything the TipTap extensions need from their owning editor. Passed in
+ * explicitly so that two editors on one page keep separate configuration —
+ * this used to be module-level state, which made a second editor overwrite the
+ * first one's tag configuration.
+ */
+export type TaggingContext = {
+  instanceId: string;
+  configuration: Ref<ResolvedTagConfiguration[]>;
 };
 
-export const extensionConfigurationsByEntity = ref<
-  TaggableEntityConfiguration[]
->([]);
+// Every tag node joins this ProseMirror group, so "is this a tag?" is answered by
+// the editor's own schema instead of a module-level name registry. That is what
+// lets two editors coexist on one page: schemas are per-instance, a shared array
+// is not. `group` is a first-class NodeSpec field, so it never reaches the
+// serialized HTML — see __tests__/taggedHtmlContract.test.ts.
+export const TAG_GROUP = "elodyTag";
 
-export const extensionConfiguration = ref<
-  (TaggableEntityConfiguration | TaggableEntityConfigurationFromEntity)[]
->([]);
+export const isTagNode = (node: {
+  type: { isInGroup?: (group: string) => boolean };
+}): boolean => !!node?.type?.isInGroup?.(TAG_GROUP);
 
-export const isInNeedOfConfigurationEntities = computed<boolean>(() => {
-  if (!extensionConfiguration.value.length) {
-    if (extensionConfigurationsByEntity.value.length) return true;
-  }
-
-  return false;
-});
-
-export const customExtensionNames = ref<string[]>([]);
-
-export const initializeTaggingExtension: Promise<
-  (Node<any, any> | Extension<any, any>)[]
-> = async (taggableEntityConfiguration: TaggableEntityConfiguration[]) => {
-  const initialExtensionConfigurationsWithTag =
-    taggableEntityConfiguration.filter(
-      (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
-    );
-  const extensionConfigurationsFromEntities: TaggableEntityConfiguration[] =
-    await getPluginsFromConfigurationEntities(taggableEntityConfiguration);
-
-  const usableExtensionConfigurations: TaggableEntityConfiguration[] = [
-    ...initialExtensionConfigurationsWithTag,
-    ...extensionConfigurationsFromEntities,
-  ];
-
-  setExtensionConfiguration(usableExtensionConfigurations);
-
-  const extensionsFromEntities = extensionConfigurationsFromEntities.map(
-    (configuration) => createTipTapNodeExtension(configuration),
+/**
+ * Resolves the configurations for one editor: the ones that already carry a `tag`,
+ * plus the ones derived from configuration entities fetched at runtime.
+ */
+export const resolveTaggingConfigurations = async (
+  taggableEntityConfiguration: TaggableEntityConfiguration[] | undefined,
+  configurationsByEntity: Ref<TaggableEntityConfiguration[]>,
+): Promise<ResolvedTagConfiguration[]> => {
+  const configurations = taggableEntityConfiguration ?? [];
+  const configurationsWithTag = configurations.filter(
+    (configurationItem: TaggableEntityConfiguration) => configurationItem.tag,
   );
-  const extensionConfigurationsWithTag = extensionConfiguration.value.filter(
-    (item) => item.tag,
+  const configurationsFromEntities = await getPluginsFromConfigurationEntities(
+    configurations,
+    configurationsByEntity,
   );
 
-  return [
-    ...extensionConfigurationsWithTag.map((configurationItem) =>
-      createTipTapNodeExtension(configurationItem),
-    ),
-    ...extensionsFromEntities,
-    createGlobalCommandsExtension,
-  ];
+  return [...configurationsWithTag, ...configurationsFromEntities];
 };
 
+/**
+ * The TipTap extensions for exactly ONE editor: one node per configuration, plus
+ * that editor's own commands extension. Previously the entity-derived
+ * configurations were built twice (once directly, once from a second mapped list),
+ * registering two node types per tag and making parseHTML for `elody-<tag>`
+ * ambiguous between them.
+ */
+export const buildTaggingExtensions = (
+  context: TaggingContext,
+): (Node<any, any> | Extension<any, any>)[] => [
+  ...context.configuration.value
+    .filter((configurationItem) => configurationItem.tag)
+    .map((configurationItem) => createTipTapNodeExtension(configurationItem)),
+  createTaggingCommandsExtension(context),
+];
+
+// Pure function of the configuration: the same configuration always yields the same
+// node type name, across remounts and across concurrent editors. Uniqueness only
+// has to hold within one editor's schema, so the instance plays no part. Two
+// configurations that collide here are a client-config error, and TipTap fails
+// loudly on a duplicate node name rather than silently diverging.
 const generateExtensionNameFromConfiguration = (
   configurationItem: TaggableEntityConfigurationFromEntity,
 ): string => {
-  let extensionName: string = configurationItem.tag || "";
-  extensionName = extensionName === "?" ? "unknown" : extensionName;
-  if (configurationItem.configurationEntityId) {
-    extensionName += `-${configurationItem.configurationEntityId}`;
-  }
-  if (customExtensionNames.value.includes(extensionName)) {
-    const occurrences: number = customExtensionNames.value.filter(
-      (name: string) => name.includes(extensionName),
-    ).length;
-    extensionName += `-${occurrences + 1}`;
-  }
-  customExtensionNames.value.push(extensionName);
-  return extensionName;
+  const tag = configurationItem.tag === "?" ? "unknown" : configurationItem.tag;
+  const name = tag || "tag";
+  return configurationItem.configurationEntityId
+    ? `${name}-${configurationItem.configurationEntityId}`
+    : name;
 };
 
 // When the browser resolves a click after a contenteditable=false atom (tag), it may
@@ -113,11 +122,7 @@ export const getAdjustedSelectionFrom = (state: EditorState): number => {
   const { from, to } = state.selection;
   let adjusted = from;
   state.doc.nodesBetween(from, from + 1, (node, pos) => {
-    if (
-      customExtensionNames.value.includes(node.type.name) &&
-      pos === from &&
-      from + node.nodeSize < to
-    ) {
+    if (isTagNode(node) && pos === from && from + node.nodeSize < to) {
       adjusted = from + node.nodeSize;
     }
   });
@@ -172,10 +177,12 @@ const getSelectionHTML = (state: EditorState): string => {
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
 ) => {
+  // Both lists are optional: a configuration that tags by a plain `tag` has no
+  // `tagConfigurationByEntity` block at all, and spreading undefined threw.
   const additionalAttributes = [
-    ...extensionConfiguration.tagConfigurationByEntity
-      ?.metadataKeysToSetAsAttribute,
-    ...extensionConfiguration.metadataKeysToSetAsAttribute,
+    ...(extensionConfiguration.tagConfigurationByEntity
+      ?.metadataKeysToSetAsAttribute ?? []),
+    ...(extensionConfiguration.metadataKeysToSetAsAttribute ?? []),
   ];
 
   const extensionName = generateExtensionNameFromConfiguration(
@@ -185,7 +192,7 @@ export const createTipTapNodeExtension = (
 
   return Node.create({
     name: extensionName,
-    group: "inline",
+    group: `inline ${TAG_GROUP}`,
     inline: true,
     selectable: false,
     atom: true,
@@ -290,47 +297,53 @@ export const createTipTapNodeExtension = (
 // atom when it's the last DOM node in its textblock.
 const invisibleCursorAnchorCharacter = "​";
 
-const ensureTrailingSpaceAfterTags = new Plugin({
-  key: new PluginKey("elodyTagTrailingSpace"),
-  appendTransaction(transactions, _oldState, newState) {
-    if (!transactions.some((transaction) => transaction.docChanged)) {
-      return null;
-    }
-
-    const { tr } = newState;
-    const insertionPositions: number[] = [];
-
-    newState.doc.descendants((node, pos) => {
-      if (!node.isTextblock || node.childCount === 0) return true;
-      const lastChild = node.lastChild;
-      if (
-        lastChild &&
-        customExtensionNames.value.includes(lastChild.type.name)
-      ) {
-        insertionPositions.push(pos + node.nodeSize - 1);
+const createTrailingSpacePlugin = () =>
+  new Plugin({
+    key: new PluginKey("elodyTagTrailingSpace"),
+    appendTransaction(transactions, _oldState, newState) {
+      if (!transactions.some((transaction) => transaction.docChanged)) {
+        return null;
       }
-      return true;
-    });
 
-    if (!insertionPositions.length) return null;
+      const { tr } = newState;
+      const insertionPositions: number[] = [];
 
-    insertionPositions
-      .sort((a, b) => b - a)
-      .forEach((pos) => tr.insertText(invisibleCursorAnchorCharacter, pos));
+      newState.doc.descendants((node, pos) => {
+        if (!node.isTextblock || node.childCount === 0) return true;
+        const lastChild = node.lastChild;
+        if (lastChild && isTagNode(lastChild)) {
+          insertionPositions.push(pos + node.nodeSize - 1);
+        }
+        return true;
+      });
 
-    return tr;
-  },
-});
+      if (!insertionPositions.length) return null;
 
-export const createGlobalCommandsExtension = Extension.create({
+      insertionPositions
+        .sort((a, b) => b - a)
+        .forEach((pos) => tr.insertText(invisibleCursorAnchorCharacter, pos));
+
+      return tr;
+    },
+  });
+
+/**
+ * One commands extension per editor. This must be a factory, not a shared
+ * `Extension.create({...})` instance: TipTap gives every extension instance a
+ * single `storage` and `options` object, so sharing one across editors makes them
+ * fight over the same state.
+ */
+export const createTaggingCommandsExtension = (context: TaggingContext) =>
+  Extension.create({
+    name: "elodyTaggingCommands",
   addProseMirrorPlugins() {
-    return [ensureTrailingSpaceAfterTags];
+    return [createTrailingSpacePlugin()];
   },
   addCommands() {
     return {
       openTagModal:
         () =>
-        ({ state }: CommandProps) => {
+        ({ state, editor }: CommandProps) => {
           const selectedText = getSelectionHTML(state);
 
           const { openModal } = useBaseModal();
@@ -341,8 +354,33 @@ export const createGlobalCommandsExtension = Extension.create({
             undefined,
             false,
             undefined,
-            { selectedText },
+            // `editor` and `editorId` travel with the payload so the modal knows
+            // which of several editors on the page opened it. Setting this once at
+            // mount time meant the last-mounted editor won.
+            { selectedText, editor, editorId: context.instanceId },
           );
+        },
+      /**
+       * Resolves the configuration from the OWNING editor, then tags and links in
+       * one step. Lets callers outside the editor (e.g. DynamicForm's
+       * create-new-entity flow) act without reaching for global configuration.
+       */
+      tagAndLinkEntity:
+        (entity: InBulkProcessableItem, parentEntityId: string) =>
+        ({ commands }: CommandProps) => {
+          const configurationItem = resolveConfigurationForEntity(
+            context.configuration.value,
+            entity,
+          );
+          if (!configurationItem) return false;
+
+          tagEntity(
+            entity,
+            configurationItem.relationType,
+            parentEntityId,
+            BulkOperationsContextEnum.TagEntityModal,
+          );
+          return commands.linkEntityToTaggedText(entity);
         },
       linkEntityToTaggedText:
         (entity: InBulkProcessableItem) =>
@@ -355,7 +393,10 @@ export const createGlobalCommandsExtension = Extension.create({
         }) => {
           const configurationItem:
             | TaggableEntityConfigurationFromEntity
-            | undefined = getExtensionConfigurationForEntity(entity);
+            | undefined = resolveConfigurationForEntity(
+            context.configuration.value,
+            entity,
+          ) as TaggableEntityConfigurationFromEntity | undefined;
           const additionalAttributes: { [key: string]: string } = {};
 
           if (!entity) throw Error("Error tagging text: no entity to tag");
@@ -424,7 +465,7 @@ export const createGlobalCommandsExtension = Extension.create({
           let taggedPos: number | null = null;
 
           state.doc.nodesBetween(from, to, (node, pos) => {
-            if (customExtensionNames.value.includes(node.type.name)) {
+            if (isTagNode(node)) {
               taggedNode = node;
               taggedPos = pos;
               return false;
@@ -443,11 +484,10 @@ export const createGlobalCommandsExtension = Extension.create({
           commands.insertContentAt(taggedPos, { type: "text", text: taggedText });
           commands.setTextSelection(taggedPos + taggedText.length);
 
-          const entityExtensionConfiguration =
-            extensionConfiguration.value.find(
-              (mappingItem: TaggableEntityConfiguration) =>
-                mappingItem.extensionName === taggedNode.type.name,
-            );
+          const entityExtensionConfiguration = context.configuration.value.find(
+            (mappingItem: ResolvedTagConfiguration) =>
+              mappingItem.extensionName === taggedNode.type.name,
+          );
 
           if (entityExtensionConfiguration) {
             deleteRelations(
@@ -473,11 +513,10 @@ export const createGlobalCommandsExtension = Extension.create({
             return false;
           }
 
-          const entityExtensionConfiguration =
-            extensionConfiguration.value.find(
-              (mappingItem: TaggableEntityConfiguration) =>
-                mappingItem.extensionName === node.type.name,
-            );
+          const entityExtensionConfiguration = context.configuration.value.find(
+            (mappingItem: ResolvedTagConfiguration) =>
+              mappingItem.extensionName === node.type.name,
+          );
           if (entityExtensionConfiguration) {
             tr.insertText("", pos, pos + node.nodeSize);
             deleteRelations(
@@ -493,13 +532,7 @@ export const createGlobalCommandsExtension = Extension.create({
         }),
     };
   },
-});
-
-export const setExtensionConfiguration = (
-  TaggableEntityConfiguration: TaggableEntityConfiguration[],
-) => {
-  extensionConfiguration.value = TaggableEntityConfiguration;
-};
+  });
 
 const createConfigurationItemsFromMapping = (
   configurationItemEntitiesMapping: {
@@ -550,18 +583,19 @@ const createConfigurationItemsFromMapping = (
 
 const getConfigurationEntities = async (
   configurations: TaggableEntityConfiguration[],
+  configurationsByEntity: Ref<TaggableEntityConfiguration[]>,
 ) => {
-  extensionConfigurationsByEntity.value = configurations.filter(
+  configurationsByEntity.value = configurations.filter(
     (configurationItem) => configurationItem.tagConfigurationByEntity,
   );
-  if (!extensionConfigurationsByEntity.value.length) return;
+  if (!configurationsByEntity.value.length) return;
 
   const query = GetEntitiesDocument;
 
   const configurationItemEntitiesMappingPromises: Promise<{
     configurationItem: TaggableEntityConfiguration;
     configurationEntities: BaseEntity[];
-  }>[] = extensionConfigurationsByEntity.value.map(
+  }>[] = configurationsByEntity.value.map(
     async (configurationItem) => {
       const queryVariables: GetEntitiesQueryVariables = {
         advancedFilterInputs: {
@@ -603,17 +637,38 @@ const getConfigurationEntities = async (
   return createConfigurationItemsFromMapping(configurationItemEntitiesMapping);
 };
 
-const applyColorStylingFromConfigurationToEditor = (
-  configurations: TaggableEntityConfigurationFromEntity[],
-) => {
+/**
+ * Injects tag colours for ONE editor and returns the element so the caller can
+ * remove it again. Selectors are scoped by `data-wysiwyg-id` rather than the
+ * shared `#wysiwyg-container` id, which several editors on a page would duplicate.
+ */
+export const applyColorStylingFromConfigurationToEditor = (
+  instanceId: string,
+  configurations: ResolvedTagConfiguration[] | undefined,
+): HTMLStyleElement | undefined => {
+  const colouredConfigurations = ((configurations ??
+    []) as TaggableEntityConfigurationFromEntity[]).filter(
+    (configurationItem) => configurationItem.tagColor,
+  );
+  if (!colouredConfigurations.length) return undefined;
+
+  const styleElementId = `elody-tagging-${instanceId}`;
+  document.getElementById(styleElementId)?.remove();
+
   const style = document.createElement("style");
-  configurations.forEach(
+  style.id = styleElementId;
+  colouredConfigurations.forEach(
     (configurationItem: TaggableEntityConfigurationFromEntity) => {
-      const styleDefiningAttribute: string =
+      const styleDefiningAttribute: string | undefined =
         configurationItem.tagConfigurationByEntity
-          .secondaryAttributeToDetermineTagConfig;
+          ?.secondaryAttributeToDetermineTagConfig;
+      // Without a secondary attribute the colour applies to every tag of this name;
+      // indexing `attributes[undefined]` used to throw here.
+      const attributeSelector = styleDefiningAttribute
+        ? `[${styleDefiningAttribute}="${configurationItem.attributes?.[styleDefiningAttribute]}"]`
+        : "";
       style.textContent += `
-      #wysiwyg-container elody-${configurationItem.tag}[${styleDefiningAttribute}="${configurationItem.attributes[styleDefiningAttribute]}"] {
+      [data-wysiwyg-id="${instanceId}"] elody-${configurationItem.tag}${attributeSelector} {
         background-color: ${configurationItem.tagColor};
         color: #fff;
         border-radius: 0.25rem;
@@ -628,35 +683,44 @@ const applyColorStylingFromConfigurationToEditor = (
     },
   );
   document.head.appendChild(style);
+  return style;
 };
 
 export const getPluginsFromConfigurationEntities = async (
   configurations: TaggableEntityConfiguration[],
-): Promise<TaggableEntityConfiguration[]> => {
+  configurationsByEntity: Ref<TaggableEntityConfiguration[]>,
+): Promise<TaggableEntityConfigurationFromEntity[]> => {
   const configurationEntities:
     | TaggableEntityConfigurationFromEntity[]
-    | undefined = await getConfigurationEntities(configurations);
-  applyColorStylingFromConfigurationToEditor(configurationEntities);
-  return configurationEntities;
+    | undefined = await getConfigurationEntities(
+    configurations,
+    configurationsByEntity,
+  );
+  // Undefined when no configuration carries a `tagConfigurationByEntity` block —
+  // callers spread the result, so normalise to an empty array.
+  return configurationEntities ?? [];
 };
 
-export const getExtensionConfigurationForEntity = (
+/**
+ * Pure lookup against one editor's configurations. Was a module-level function
+ * reading shared state, which returned the wrong editor's configuration as soon as
+ * a second editor mounted.
+ */
+export const resolveConfigurationForEntity = (
+  configurations: ResolvedTagConfiguration[],
   entity: InBulkProcessableItem | { type: string },
-): TaggableEntityConfigurationFromEntity | undefined => {
+): ResolvedTagConfiguration | undefined => {
   let configuration = undefined;
 
   if (!entity.relationValues)
-    return extensionConfiguration.value.find(
+    return configurations.find(
       (configurationItem) =>
         configurationItem.taggableEntityType === entity.type,
     );
 
-  const configurationEntityIds: string[] = extensionConfiguration.value.map(
-    (
-      configurationItem:
-        | TaggableEntityConfiguration
-        | TaggableEntityConfigurationFromEntity,
-    ) => configurationItem.configurationEntityId,
+  const configurationEntityIds: string[] = configurations.map(
+    (configurationItem: ResolvedTagConfiguration) =>
+      configurationItem.configurationEntityId,
   );
 
   const entityRelationValues = Object.values(entity.relationValues).map(
@@ -664,7 +728,7 @@ export const getExtensionConfigurationForEntity = (
   );
   entityRelationValues.forEach((relationValue: any) => {
     if (configurationEntityIds.includes(relationValue))
-      configuration = extensionConfiguration.value.find(
+      configuration = configurations.find(
         (configurationItem) =>
           configurationItem.configurationEntityId === relationValue,
       );
@@ -684,7 +748,7 @@ export const hasSelectionBeenTagged = (editor: Editor) => {
   let isTagged = false;
 
   state.doc.nodesBetween(from, to, (node) => {
-    if (customExtensionNames.value.includes(node.type.name)) {
+    if (isTagNode(node)) {
       isTagged = true;
       return false;
     }
@@ -703,20 +767,21 @@ export const tagEntity = (
   dequeueAllItemsForBulkProcessing(context);
 };
 
-const getEntityTypeByTagFromMapping = (tag: string): string => {
-  const mappingForTag = extensionConfiguration.value.find(
-    (mappingItem: TaggableEntityConfiguration) =>
-      mappingItem.tag?.toLowerCase() === tag.toLowerCase(),
-  );
-  if (!mappingForTag)
-    throw Error(`Mapping for '${tag}' tag could not be found`);
-  else return mappingForTag.taggableEntityType;
-};
-
-export const openDetailModal = (node: any) => {
+export const openDetailModal = (
+  node: any,
+  configurations: ResolvedTagConfiguration[],
+) => {
   const entityId = node.attrs.entityId;
-  const tag = node.type.name.split("-")[0];
-  const entityType = getEntityTypeByTagFromMapping(tag);
+  // Look the configuration up by node type name rather than splitting the name on
+  // "-" to recover the tag. That split silently required the tag itself to contain
+  // no hyphen and to be the first segment, which coupled every node-naming decision
+  // to read-mode click-to-open.
+  const configurationForNode = configurations.find(
+    (configurationItem) => configurationItem.extensionName === node.type.name,
+  );
+  if (!configurationForNode)
+    throw Error(`Tagging configuration for '${node.type.name}' not found`);
+  const entityType = configurationForNode.taggableEntityType;
   useBaseModal().openModal(
     TypeModals.EntityDetailModal,
     ModalStyle.CenterWide,
