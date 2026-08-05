@@ -66,6 +66,24 @@ describe("MetadataFormatter", () => {
       expect(wrapper.text()).toBe("programmer, technician");
     });
 
+    it("passes the raw value to a single-value pill so it can look up its colors", async () => {
+      mocks.t.mockImplementation((key: string) =>
+        key === "metadata.labels.user-function.programmer" ? "Programmator" : key,
+      );
+
+      const wrapper = mount(MetadataFormatter, {
+        props: {
+          formatter: "pill",
+          label: "programmer",
+          translationKey: "metadata.labels.user-function.$value",
+        },
+      });
+      await nextTick();
+      const pill = wrapper.findComponent({ name: "MetadataFormatterPill" });
+      expect(pill.props("label")).toBe("programmer");
+      expect(pill.props("translationKey")).toBe("metadata.labels.user-function.$value");
+    });
+
     it("returns dash for empty array", async () => {
       const wrapper = mount(MetadataFormatter, {
         props: {
