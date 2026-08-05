@@ -75,6 +75,12 @@
       :editor-id="instanceId"
       :tagging="tagging"
     />
+    <inline-tag-suggestion-dropdown
+      v-if="tagging?.inlineSuggestion.value"
+      :suggestion="tagging.inlineSuggestion.value"
+      :custom-query="element.taggingConfiguration?.customQuery"
+      @pick="applyInlineSuggestion"
+    />
     <div
       v-if="tagContextMenu"
       data-tag-context-menu
@@ -113,6 +119,7 @@ import {
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
+import InlineTagSuggestionDropdown from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/InlineTagSuggestionDropdown.vue";
 import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
 import WYSIWYGTransliterationToggle from "@/components/entityElements/WYSIWYG/WYSIWYGTransliterationToggle.vue";
 import type { HTMLContent } from "@tiptap/core";
@@ -201,6 +208,13 @@ const handleDocumentClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement | null;
   if (target?.closest("[data-tag-context-menu]")) return;
   closeTagContextMenu();
+};
+
+// The inline flow inserts the tag node only. It must NOT write a relation the way the
+// toolbar flow does, because that writes onto the route entity's form — tagging a user
+// in a comment composer would land the relation on the Work.
+const applyInlineSuggestion = (entity: any, label: string) => {
+  tagging.value?.applyInlineSuggestion(editor.value, entity, label);
 };
 
 const resetContent = () => {

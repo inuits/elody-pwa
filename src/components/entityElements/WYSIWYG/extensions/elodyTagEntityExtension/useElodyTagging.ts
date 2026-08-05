@@ -9,6 +9,11 @@ import {
   resolveTaggingConfigurations,
   type ResolvedTagConfiguration,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import {
+  applyInlineTag,
+  createInlineTagSuggestionExtension,
+  type InlineSuggestionState,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/inlineTagSuggestion";
 
 export type ElodyTaggingInstance = {
   /** Extensions for exactly ONE editor. Pass straight into `new Editor({extensions})`. */
@@ -19,6 +24,14 @@ export type ElodyTaggingInstance = {
   getConfigurationForEntity: (
     entity: InBulkProcessableItem | { type: string },
   ) => ResolvedTagConfiguration | undefined;
+  /** Inline `@` / `#` dropdown state; null when no trigger is active. */
+  inlineSuggestion: Ref<InlineSuggestionState>;
+  /** Inserts the picked entity over the active trigger range, consuming the character. */
+  applyInlineSuggestion: (
+    editor: any,
+    entity: { id: string; [key: string]: any },
+    label: string,
+  ) => boolean;
   /** Removes this instance's injected <style>. MUST be called on unmount. */
   destroy: () => void;
 };
@@ -53,8 +66,19 @@ export const useElodyTagging = async (
     configuration.value,
   );
 
+  const inlineSuggestion = ref<InlineSuggestionState>(null);
+  // Undefined when no configuration declares an inlineTrigger, or when
+  // @tiptap/suggestion is not installed yet — either way the toolbar flow still works.
+  const inlineSuggestionExtension = await createInlineTagSuggestionExtension(
+    configuration.value,
+    inlineSuggestion,
+  );
+
   return {
-    extensions: buildTaggingExtensions({ instanceId, configuration }),
+    extensions: [
+      ...buildTaggingExtensions({ instanceId, configuration }),
+      ...(inlineSuggestionExtension ? [inlineSuggestionExtension] : []),
+    ],
     configuration,
     configurationsByEntity,
     // Tagging needs configuration entities that this tenant has not created yet:
@@ -65,9 +89,23 @@ export const useElodyTagging = async (
     ),
     getConfigurationForEntity: (entity) =>
       resolveConfigurationForEntity(configuration.value, entity),
+    inlineSuggestion,
+    applyInlineSuggestion: (editor, entity, label) => {
+      const applied = applyInlineTag(
+        editor,
+        inlineSuggestion.value,
+        entity,
+        label,
+      );
+      inlineSuggestion.value = null;
+      return applied;
+    },
     // Returned rather than registered via onUnmounted: callers initialise inside an
     // async onMounted, and past the first `await` there is no active component
     // instance left for a lifecycle hook to attach to.
-    destroy: () => styleElement?.remove(),
+    destroy: () => {
+      styleElement?.remove();
+      inlineSuggestion.value = null;
+    },
   };
 };
