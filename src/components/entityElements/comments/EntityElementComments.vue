@@ -1,52 +1,65 @@
 <template>
-  <div v-if="canRead" class="flex flex-col gap-3 p-2">
-    <div class="flex items-center justify-between">
-      <h2 class="subtitle text-text-body">{{ t(element.label) }}</h2>
-      <base-button-new
-        v-if="canPost && !isComposerOpen"
-        :label="t('comments.new-thread')"
-        :icon="DamsIcons.PlusCircle"
-        button-style="accentAccent"
-        @click="isComposerOpen = true"
-      />
-    </div>
-
-    <Transition name="composer">
-      <div v-if="isComposerOpen" class="overflow-hidden">
-        <comment-composer
-          :scratch-form-id="`comment-new-${id}`"
-          :composer="element.composer"
-          :submit-label="t('comments.post')"
-          :cancellable="true"
-          @submit="postSubject"
-          @cancel="isComposerOpen = false"
-        />
-      </div>
-    </Transition>
-
-    <p v-if="isLoading" class="text-sm text-text-placeholder">
-      {{ t("comments.loading") }}
-    </p>
-    <p
-      v-else-if="!threads.length"
-      class="text-sm text-text-placeholder italic"
+  <div v-if="canRead" class="mb-5">
+    <!-- Reuses the shared element wrapper so this block gets the same framed,
+         collapsible header as every other element in the column. -->
+    <entity-element-wrapper
+      :label="element.label"
+      :entity-id="id"
+      :is-collapsed="isCollapsed"
+      @toggle-element-collapse="isCollapsed = !isCollapsed"
     >
-      {{ t("comments.empty") }}
-    </p>
+      <template #content>
+        <div class="flex flex-col gap-3 p-3">
+          <div v-if="canPost && !isComposerOpen" class="self-start">
+            <base-button-new
+              :label="t('comments.new-thread')"
+              :icon="DamsIcons.PlusCircle"
+              button-style="accentAccent"
+              button-size="small"
+              force-show-label
+              @click="isComposerOpen = true"
+            />
+          </div>
 
-    <TransitionGroup name="subject" tag="div" class="flex flex-col gap-2">
-      <comment-item
-        v-for="thread in threads"
-        :key="thread.subject.id"
-        :comment="thread.subject"
-        :taggable-entity-configuration="taggableEntityConfiguration"
-        :status="thread.status"
-        :reply-count="thread.replyCount"
-        :clickable="true"
-        @open="openThread(thread.subject.id)"
-        @open-entity="openTaggedEntity"
-      />
-    </TransitionGroup>
+          <Transition name="composer">
+            <div v-if="isComposerOpen" class="overflow-hidden">
+              <comment-composer
+                :scratch-form-id="`comment-new-${id}`"
+                :composer="element.composer"
+                :submit-label="t('comments.post')"
+                :cancellable="true"
+                @submit="postSubject"
+                @cancel="isComposerOpen = false"
+              />
+            </div>
+          </Transition>
+
+          <p v-if="isLoading" class="text-sm text-text-placeholder">
+            {{ t("comments.loading") }}
+          </p>
+          <p
+            v-else-if="!threads.length"
+            class="text-sm text-text-placeholder italic"
+          >
+            {{ t("comments.empty") }}
+          </p>
+
+          <TransitionGroup name="subject" tag="div" class="flex flex-col gap-2">
+            <comment-item
+              v-for="thread in threads"
+              :key="thread.subject.id"
+              :comment="thread.subject"
+              :taggable-entity-configuration="taggableEntityConfiguration"
+              :status="thread.status"
+              :reply-count="thread.replyCount"
+              :clickable="true"
+              @open="openThread(thread.subject.id)"
+              @open-entity="openTaggedEntity"
+            />
+          </TransitionGroup>
+        </div>
+      </template>
+    </entity-element-wrapper>
   </div>
 </template>
 
@@ -54,6 +67,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
 import { useComments } from "@/composables/useComments";
@@ -83,6 +97,7 @@ const { can, fetchUpdateAndDeletePermission } = usePermissions();
 const parentEditHelper = useEditMode(props.id);
 
 const isComposerOpen = ref<boolean>(false);
+const isCollapsed = ref<boolean>(false);
 const canUpdateParent = ref<boolean>(false);
 
 const canRead = computed<boolean>(() =>
