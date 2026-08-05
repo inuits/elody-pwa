@@ -85,12 +85,20 @@ const headerIcon = computed(() =>
   isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
 );
 const filterMatchers = computed(() => {
-  const allowedMatchers = props.filter.advancedFilter.allowedMatchers;
-  if (!allowedMatchers) return props.matchers;
+  const { allowedMatchers, matcherLabels } = props.filter.advancedFilter;
 
-  return props.matchers.filter((matcher: DropdownOption) =>
-    allowedMatchers.includes(matcher.value),
-  );
+  const base = allowedMatchers
+    ? props.matchers.filter((matcher: DropdownOption) =>
+        allowedMatchers.includes(matcher.value),
+      )
+    : props.matchers;
+
+  if (!matcherLabels?.length) return base;
+
+  return base.map((matcher: DropdownOption) => {
+    const override = matcherLabels.find((o) => o.matcher === matcher.value);
+    return override ? { ...matcher, label: t(override.label) } : matcher;
+  });
 });
 const matcherDefaultLabel = computed(() =>
   t("filters.matcher-labels.select-filter-type"),
