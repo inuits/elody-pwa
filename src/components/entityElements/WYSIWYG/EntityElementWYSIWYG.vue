@@ -36,7 +36,7 @@
     </div>
     <div
       v-if="editor"
-      id="wysiwyg-container"
+      :data-wysiwyg-id="instanceId"
       ref="editorNode"
       :class="['flex flex-col', { 'py-4': !displayInline }]"
     >
@@ -47,6 +47,7 @@
           :editor="editor"
           :extensions="element.extensions"
           :displayInline="displayInline"
+          :tagging="tagging"
         />
       </Transition>
       <div class="flex">
@@ -71,6 +72,8 @@
       "
       :element="element"
       :editor="editor"
+      :editor-id="instanceId"
+      :tagging="tagging"
     />
     <div
       v-if="tagContextMenu"
@@ -94,7 +97,6 @@ import { computed, onMounted, onUnmounted, ref, watch, inject } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import {
-  TypeModals,
   ValidationFields,
   type WysiwygElement,
   type WysiwygElementConfiguration,
@@ -103,14 +105,14 @@ import {
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
+import { openDetailModal } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import {
-  initializeTaggingExtension,
-  openDetailModal,
-} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+  useElodyTagging,
+  type ElodyTaggingInstance,
+} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
-import { useBaseModal } from "@/composables/useBaseModal";
 import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
 import WYSIWYGTransliterationToggle from "@/components/entityElements/WYSIWYG/WYSIWYGTransliterationToggle.vue";
 import type { HTMLContent } from "@tiptap/core";
@@ -138,9 +140,13 @@ const {
   countLinesOfContent,
 } = useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
-const { updateModal } = useBaseModal();
 const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
+
+// Stable across remounts, and unique per editor on the page: scopes this editor's
+// injected tag styling and identifies it as the owner of the shared tagging modal.
+const instanceId = `${props.formId}-${props.element.metadataKey}`;
+const tagging = ref<ElodyTaggingInstance | undefined>(undefined);
 
 const form = computed(() => getForm(props.formId));
 const editorNode = ref<HTMLDivElement | undefined>(undefined);
@@ -226,12 +232,11 @@ onMounted(async () => {
   if (
     props.element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
   ) {
-    const taggableEntityConfiguration =
-      props.element.taggingConfiguration?.taggableEntityConfiguration;
-    const taggingExtensions = await initializeTaggingExtension(
-      taggableEntityConfiguration,
+    tagging.value = await useElodyTagging(
+      instanceId,
+      props.element.taggingConfiguration?.taggableEntityConfiguration,
     );
-    editorExtensions.push(...taggingExtensions);
+    editorExtensions.push(...tagging.value.extensions);
   }
 
   paragraphAmount.value = countLinesOfContent(initialValue.value);
@@ -245,7 +250,7 @@ onMounted(async () => {
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;
         if (!useEditHelper.isEdit) {
-          openDetailModal(node);
+          openDetailModal(node, tagging.value?.configuration.value ?? []);
           return false;
         }
         tagContextMenu.value = {
@@ -277,7 +282,9 @@ onMounted(async () => {
       );
     },
   });
-  updateModal(TypeModals.ElodyEntityTaggingModal, { editor: editor.value });
+  // The editor is no longer registered on the modal at mount time — `openTagModal`
+  // sends it with the payload instead, so several editors can coexist without the
+  // last-mounted one claiming the modal.
   editorLoaded.value = true;
 });
 
@@ -285,6 +292,7 @@ onUnmounted(() => {
   document.removeEventListener("discardEdit", resetContent);
   document.removeEventListener("mousedown", handleDocumentClick);
   editor.value?.destroy();
+  tagging.value?.destroy();
   editorLoaded.value = false;
 });
 

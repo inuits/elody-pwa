@@ -269,11 +269,6 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
-import {
-  getExtensionConfigurationForEntity,
-  tagEntity,
-} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
-import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useUploadState } from "@/composables/upload/useUploadState";
@@ -662,17 +657,10 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
 };
 
 const tagNewlyCreatedEntity = (entity: Entity): void => {
-  const parentId = route.params["id"];
-  const { relationType } = getExtensionConfigurationForEntity(entity);
+  // The editor that opened the tagging modal owns the configuration, so it resolves
+  // the relation type and links the tag itself.
   const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
-
-  tagEntity(
-    entity,
-    relationType,
-    parentId,
-    BulkOperationsContextEnum.TagEntityModal,
-  );
-  modalInfo.editor.commands.linkEntityToTaggedText(entity);
+  modalInfo.editor?.commands.tagAndLinkEntity(entity, route.params["id"]);
 };
 
 const submitActionFunction = async (field: FormAction) => {

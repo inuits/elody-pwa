@@ -184,11 +184,8 @@ import { Unicons } from "@/types";
 import { useEditMode } from "@/composables/useEdit";
 import { computed } from "vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import {
-  hasSelectionBeenTagged,
-  isInNeedOfConfigurationEntities,
-  extensionConfigurationsByEntity,
-} from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
+import type { ElodyTaggingInstance } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -196,6 +193,9 @@ const props = defineProps<{
   editor: Editor;
   extensions: WysiwygExtensions[];
   displayInline: boolean;
+  // The owning editor's tagging instance. Undefined when this editor has no tagging
+  // extension, in which case the Tag button is not rendered anyway.
+  tagging?: ElodyTaggingInstance;
 }>();
 
 const useEditHelper = useEditMode(props.formId);
@@ -209,18 +209,21 @@ const editorHasSelection = computed(() => {
 const isNonTaggedTextSelected = computed(() => {
   return !hasSelectionBeenTagged(props.editor);
 });
+const isInNeedOfConfigurationEntities = computed<boolean>(
+  () => !!props.tagging?.isInNeedOfConfigurationEntities.value,
+);
 const tagButtonDisabled = computed(() => {
   if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
     return true;
   return !isNonTaggedTextSelected.value;
 });
 const neededConfigurationEntityTypes = computed<string>(() => {
-  if (!extensionConfigurationsByEntity.value) return "";
-  const configurationEntityTypes: string[] =
-    extensionConfigurationsByEntity.value.map(
-      (configurationItem) =>
-        configurationItem.tagConfigurationByEntity.configurationEntityType,
-    );
+  const configurationEntityTypes: string[] = (
+    props.tagging?.configurationsByEntity.value ?? []
+  ).map(
+    (configurationItem) =>
+      configurationItem.tagConfigurationByEntity.configurationEntityType,
+  );
   return configurationEntityTypes.join(" or ");
 });
 </script>
