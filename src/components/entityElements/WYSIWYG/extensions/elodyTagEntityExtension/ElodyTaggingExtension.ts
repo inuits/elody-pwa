@@ -359,202 +359,209 @@ const createTrailingSpacePlugin = () =>
 export const createTaggingCommandsExtension = (context: TaggingContext) =>
   Extension.create({
     name: "elodyTaggingCommands",
-  addProseMirrorPlugins() {
-    return [createTrailingSpacePlugin()];
-  },
-  addCommands() {
-    return {
-      openTagModal:
-        () =>
-        ({ state, editor }: CommandProps) => {
-          const selectedText = getSelectionHTML(state);
+    addProseMirrorPlugins() {
+      return [createTrailingSpacePlugin()];
+    },
+    addCommands() {
+      return {
+        openTagModal:
+          () =>
+          ({ state, editor }: CommandProps) => {
+            const selectedText = getSelectionHTML(state);
 
-          const { openModal } = useBaseModal();
-          openModal(
-            TypeModals.ElodyEntityTaggingModal,
-            ModalStyle.Center,
-            undefined,
-            undefined,
-            false,
-            undefined,
-            // `editor` and `editorId` travel with the payload so the modal knows
-            // which of several editors on the page opened it. Setting this once at
-            // mount time meant the last-mounted editor won.
-            { selectedText, editor, editorId: context.instanceId },
-          );
-        },
-      /**
-       * Resolves the configuration from the OWNING editor, then tags and links in
-       * one step. Lets callers outside the editor (e.g. DynamicForm's
-       * create-new-entity flow) act without reaching for global configuration.
-       */
-      tagAndLinkEntity:
-        (entity: InBulkProcessableItem, parentEntityId: string) =>
-        ({ commands }: CommandProps) => {
-          const configurationItem = resolveConfigurationForEntity(
-            context.configuration.value,
-            entity,
-          );
-          if (!configurationItem) return false;
-
-          tagEntity(
-            entity,
-            configurationItem.relationType,
-            parentEntityId,
-            BulkOperationsContextEnum.TagEntityModal,
-          );
-          return commands.linkEntityToTaggedText(entity);
-        },
-      linkEntityToTaggedText:
-        (entity: InBulkProcessableItem) =>
-        async ({
-          commands,
-          state,
-        }: {
-          commands: any;
-          state: EditorState;
-        }) => {
-          const configurationItem:
-            | TaggableEntityConfigurationFromEntity
-            | undefined = resolveConfigurationForEntity(
-            context.configuration.value,
-            entity,
-          ) as TaggableEntityConfigurationFromEntity | undefined;
-          const additionalAttributes: { [key: string]: string } = {};
-
-          if (!entity) throw Error("Error tagging text: no entity to tag");
-          if (!configurationItem || !configurationItem.tag)
-            throw Error(
-              "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
+            const { openModal } = useBaseModal();
+            openModal(
+              TypeModals.ElodyEntityTaggingModal,
+              ModalStyle.Center,
+              undefined,
+              undefined,
+              false,
+              undefined,
+              // `editor` and `editorId` travel with the payload so the modal knows
+              // which of several editors on the page opened it. Setting this once at
+              // mount time meant the last-mounted editor won.
+              { selectedText, editor, editorId: context.instanceId },
             );
+          },
+        /**
+         * Resolves the configuration from the OWNING editor, then tags and links in
+         * one step. Lets callers outside the editor (e.g. DynamicForm's
+         * create-new-entity flow) act without reaching for global configuration.
+         */
+        tagAndLinkEntity:
+          (entity: InBulkProcessableItem, parentEntityId: string) =>
+          ({ commands }: CommandProps) => {
+            const configurationItem = resolveConfigurationForEntity(
+              context.configuration.value,
+              entity,
+            );
+            if (!configurationItem) return false;
 
-          if (configurationItem.attributes) {
-            Object.assign(additionalAttributes, configurationItem.attributes);
-          }
-          if (configurationItem.metadataKeysToSetAsAttribute) {
-            configurationItem.metadataKeysToSetAsAttribute.forEach((key) => {
-              let value = "";
-              if (entity.intialValues) value = entity.intialValues[key];
-              if (entity.teaserMetadata)
-                value = entity.teaserMetadata.find(
-                  (metadataItem: any) => metadataItem.key === key,
-                )?.value;
-              Object.assign(additionalAttributes, {
-                [key]: value,
-              });
-            });
-          }
+            tagEntity(
+              entity,
+              configurationItem.relationType,
+              parentEntityId,
+              BulkOperationsContextEnum.TagEntityModal,
+            );
+            return commands.linkEntityToTaggedText(entity);
+          },
+        linkEntityToTaggedText:
+          (entity: InBulkProcessableItem) =>
+          async ({
+            commands,
+            state,
+          }: {
+            commands: any;
+            state: EditorState;
+          }) => {
+            const configurationItem:
+              | TaggableEntityConfigurationFromEntity
+              | undefined = resolveConfigurationForEntity(
+              context.configuration.value,
+              entity,
+            ) as TaggableEntityConfigurationFromEntity | undefined;
+            const additionalAttributes: { [key: string]: string } = {};
 
-          const { selection } = state;
-          const { to } = selection;
-          const from = getAdjustedSelectionFrom(state);
-          const taggedText = state.doc.textBetween(from, to);
+            if (!entity) throw Error("Error tagging text: no entity to tag");
+            if (!configurationItem || !configurationItem.tag)
+              throw Error(
+                "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
+              );
 
-          const newNodeContent = {
-            type: configurationItem.extensionName,
-            attrs: {
-              entityId: entity.id,
-              taggedText,
-              ...additionalAttributes,
-            },
-          };
-
-          Object.assign(newNodeContent.attrs, additionalAttributes);
-          commands.deleteRange({ from, to });
-          commands.insertContentAt(from, newNodeContent);
-          commands.setTextSelection(from + 1);
-
-          useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
-        },
-      untagSelectedText:
-        () =>
-        async ({
-          editor,
-          state,
-          commands,
-        }: {
-          editor: Editor;
-          state: EditorState;
-          commands: any;
-        }) => {
-          const { selection } = state;
-          const { from, to } = selection;
-
-          if (selection.empty) {
-            throw new Error("No node selected to untag");
-          }
-
-          let taggedNode: any = null;
-          let taggedPos: number | null = null;
-
-          state.doc.nodesBetween(from, to, (node, pos) => {
-            if (isTagNode(node)) {
-              taggedNode = node;
-              taggedPos = pos;
-              return false;
+            if (configurationItem.attributes) {
+              Object.assign(additionalAttributes, configurationItem.attributes);
             }
-          });
+            if (configurationItem.metadataKeysToSetAsAttribute) {
+              configurationItem.metadataKeysToSetAsAttribute.forEach((key) => {
+                let value = "";
+                if (entity.intialValues) value = entity.intialValues[key];
+                if (entity.teaserMetadata)
+                  value = entity.teaserMetadata.find(
+                    (metadataItem: any) => metadataItem.key === key,
+                  )?.value;
+                Object.assign(additionalAttributes, {
+                  [key]: value,
+                });
+              });
+            }
 
-          if (!taggedNode || taggedPos === null) {
-            throw new Error("No tagged node found in selection");
-          }
+            const { selection } = state;
+            const { to } = selection;
+            const from = getAdjustedSelectionFrom(state);
+            const taggedText = state.doc.textBetween(from, to);
 
-          const taggedText = taggedNode.attrs.taggedText || "";
-          const entityId = taggedNode.attrs.entityId;
-          const nodeEnd = taggedPos + taggedNode.nodeSize;
+            const newNodeContent = {
+              type: configurationItem.extensionName,
+              attrs: {
+                entityId: entity.id,
+                taggedText,
+                ...additionalAttributes,
+              },
+            };
 
-          commands.deleteRange({ from: taggedPos, to: nodeEnd });
-          commands.insertContentAt(taggedPos, { type: "text", text: taggedText });
-          commands.setTextSelection(taggedPos + taggedText.length);
+            Object.assign(newNodeContent.attrs, additionalAttributes);
+            commands.deleteRange({ from, to });
+            commands.insertContentAt(from, newNodeContent);
+            commands.setTextSelection(from + 1);
 
-          const entityExtensionConfiguration = context.configuration.value.find(
-            (mappingItem: ResolvedTagConfiguration) =>
-              mappingItem.extensionName === taggedNode.type.name,
-          );
+            useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
+          },
+        untagSelectedText:
+          () =>
+          async ({
+            editor,
+            state,
+            commands,
+          }: {
+            editor: Editor;
+            state: EditorState;
+            commands: any;
+          }) => {
+            const { selection } = state;
+            const { from, to } = selection;
 
-          if (entityExtensionConfiguration) {
-            deleteRelations(
-              entityId,
-              entityExtensionConfiguration.relationType,
-              [{ key: entityId }],
-              BulkOperationsContextEnum.TagEntityModal,
-              false,
-            );
-          }
-        },
-    };
-  },
-  addKeyboardShortcuts() {
-    return {
-      Backspace: () =>
-        this.editor.commands.command(({ tr, state }: CommandProps): boolean => {
-          const { node, pos } = getNodeFromSelection(state);
-          const { getEntityUuid } = useEntitySingle();
-          const entityId = getEntityUuid();
+            if (selection.empty) {
+              throw new Error("No node selected to untag");
+            }
 
-          if (!node || !pos || !entityId) {
-            return false;
-          }
+            let taggedNode: any = null;
+            let taggedPos: number | null = null;
 
-          const entityExtensionConfiguration = context.configuration.value.find(
-            (mappingItem: ResolvedTagConfiguration) =>
-              mappingItem.extensionName === node.type.name,
-          );
-          if (entityExtensionConfiguration) {
-            tr.insertText("", pos, pos + node.nodeSize);
-            deleteRelations(
-              entityId,
-              entityExtensionConfiguration.relationType,
-              [{ key: node.attrs.entityId }],
-              BulkOperationsContextEnum.TagEntityModal,
-              false,
-            );
-            return true;
-          }
-          return false;
-        }),
-    };
-  },
+            state.doc.nodesBetween(from, to, (node, pos) => {
+              if (isTagNode(node)) {
+                taggedNode = node;
+                taggedPos = pos;
+                return false;
+              }
+            });
+
+            if (!taggedNode || taggedPos === null) {
+              throw new Error("No tagged node found in selection");
+            }
+
+            const taggedText = taggedNode.attrs.taggedText || "";
+            const entityId = taggedNode.attrs.entityId;
+            const nodeEnd = taggedPos + taggedNode.nodeSize;
+
+            commands.deleteRange({ from: taggedPos, to: nodeEnd });
+            commands.insertContentAt(taggedPos, {
+              type: "text",
+              text: taggedText,
+            });
+            commands.setTextSelection(taggedPos + taggedText.length);
+
+            const entityExtensionConfiguration =
+              context.configuration.value.find(
+                (mappingItem: ResolvedTagConfiguration) =>
+                  mappingItem.extensionName === taggedNode.type.name,
+              );
+
+            if (entityExtensionConfiguration) {
+              deleteRelations(
+                entityId,
+                entityExtensionConfiguration.relationType,
+                [{ key: entityId }],
+                BulkOperationsContextEnum.TagEntityModal,
+                false,
+              );
+            }
+          },
+      };
+    },
+    addKeyboardShortcuts() {
+      return {
+        Backspace: () =>
+          this.editor.commands.command(
+            ({ tr, state }: CommandProps): boolean => {
+              const { node, pos } = getNodeFromSelection(state);
+              const { getEntityUuid } = useEntitySingle();
+              const entityId = getEntityUuid();
+
+              if (!node || !pos || !entityId) {
+                return false;
+              }
+
+              const entityExtensionConfiguration =
+                context.configuration.value.find(
+                  (mappingItem: ResolvedTagConfiguration) =>
+                    mappingItem.extensionName === node.type.name,
+                );
+              if (entityExtensionConfiguration) {
+                tr.insertText("", pos, pos + node.nodeSize);
+                deleteRelations(
+                  entityId,
+                  entityExtensionConfiguration.relationType,
+                  [{ key: node.attrs.entityId }],
+                  BulkOperationsContextEnum.TagEntityModal,
+                  false,
+                );
+                return true;
+              }
+              return false;
+            },
+          ),
+      };
+    },
   });
 
 const createConfigurationItemsFromMapping = (
@@ -618,39 +625,36 @@ const getConfigurationEntities = async (
   const configurationItemEntitiesMappingPromises: Promise<{
     configurationItem: TaggableEntityConfiguration;
     configurationEntities: BaseEntity[];
-  }>[] = configurationsByEntity.value.map(
-    async (configurationItem) => {
-      const queryVariables: GetEntitiesQueryVariables = {
-        advancedFilterInputs: {
-          match_exact: true,
-          type: AdvancedFilterTypes.Type,
-          value:
-            configurationItem.tagConfigurationByEntity?.configurationEntityType,
-        },
-        searchInputType: SearchInputType.AdvancedInputType,
-        searchValue: {
-          isAsc: true,
-        },
-        type: Entitytyping.BaseEntity,
-        limit: 100,
-        skip: 1,
-      };
+  }>[] = configurationsByEntity.value.map(async (configurationItem) => {
+    const queryVariables: GetEntitiesQueryVariables = {
+      advancedFilterInputs: {
+        match_exact: true,
+        type: AdvancedFilterTypes.Type,
+        value:
+          configurationItem.tagConfigurationByEntity?.configurationEntityType,
+      },
+      searchInputType: SearchInputType.AdvancedInputType,
+      searchValue: {
+        isAsc: true,
+      },
+      type: Entitytyping.BaseEntity,
+      limit: 100,
+      skip: 1,
+    };
 
-      const response = await apolloClient.query({
-        query,
-        variables: queryVariables,
-        fetchPolicy: "no-cache",
-      });
+    const response = await apolloClient.query({
+      query,
+      variables: queryVariables,
+      fetchPolicy: "no-cache",
+    });
 
-      const configurationEntities: BaseEntity[] =
-        response.data.Entities.results;
+    const configurationEntities: BaseEntity[] = response.data.Entities.results;
 
-      return {
-        configurationItem,
-        configurationEntities,
-      };
-    },
-  );
+    return {
+      configurationItem,
+      configurationEntities,
+    };
+  });
 
   const configurationItemEntitiesMapping: {
     configurationItem: TaggableEntityConfiguration;
@@ -694,22 +698,25 @@ export const applyColorStylingFromConfigurationToEditor = (
       const attributeSelector = styleDefiningAttribute
         ? `[${styleDefiningAttribute}="${configurationItem.attributes?.[styleDefiningAttribute]}"]`
         : "";
-      // A configured colour keeps its solid fill and zero horizontal padding: AICAP
-      // tags a sub-string of a single word, and side padding would visually split the
-      // word apart. Without a colour, fall back to a tinted chip — those tags are
-      // whole entities inserted as a unit, so the padding reads correctly there.
+      // Horizontal padding is gated on the FLOW, not on the colour: a trigger-typed tag
+      // is a whole entity inserted as a unit and reads as a chip, while the toolbar flow
+      // tags a sub-string of a single word (AICAP), where side padding visually splits
+      // the word apart. Gating on tagColor did the same thing by accident and broke as
+      // soon as a tag's colour metadata resolved empty.
+      const horizontalPadding = configurationItem.inlineTrigger?.character
+        ? "0.25rem"
+        : "0";
       const appearance = configurationItem.tagColor
         ? `background-color: ${configurationItem.tagColor};
-           color: #fff;
-           padding: 0.125rem 0;`
+           color: #fff;`
         : `background-color: var(--color-accent-light);
            color: var(--color-text-body);
            box-shadow: inset 0 0 0 1px var(--color-accent-accent);
-           font-weight: 500;
-           padding: 0.125rem 0.25rem;`;
+           font-weight: 500;`;
       style.textContent += `
       [data-wysiwyg-id="${instanceId}"] elody-${configurationItem.tag}${attributeSelector} {
         ${appearance}
+        padding: 0.125rem ${horizontalPadding};
         border-radius: 0.25rem;
         margin: 0;
         cursor: pointer;
@@ -810,16 +817,21 @@ export const openDetailModal = (
   configurations: ResolvedTagConfiguration[],
 ) => {
   const entityId = node.attrs.entityId;
+  // The type recorded on the node wins: a configuration that tags any entity
+  // (taggableEntityType BaseEntity) has no single type to look up, and the lookup is
+  // pointless once the node itself knows.
+  //
   // Look the configuration up by node type name rather than splitting the name on
   // "-" to recover the tag. That split silently required the tag itself to contain
   // no hyphen and to be the first segment, which coupled every node-naming decision
   // to read-mode click-to-open.
-  const configurationForNode = configurations.find(
-    (configurationItem) => configurationItem.extensionName === node.type.name,
-  );
-  if (!configurationForNode)
+  const entityType =
+    node.attrs.entityType ??
+    configurations.find(
+      (configurationItem) => configurationItem.extensionName === node.type.name,
+    )?.taggableEntityType;
+  if (!entityType)
     throw Error(`Tagging configuration for '${node.type.name}' not found`);
-  const entityType = configurationForNode.taggableEntityType;
   useBaseModal().openModal(
     TypeModals.EntityDetailModal,
     ModalStyle.CenterWide,
