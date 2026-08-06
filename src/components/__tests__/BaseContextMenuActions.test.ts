@@ -12,20 +12,6 @@ vi.mock("@/types", () => ({
   },
 }));
 
-vi.mock("@/main", () => {
-  const actualModule = vi.importActual("@/main");
-
-  return {
-    ...actualModule,
-    apolloClient: {
-      ...actualModule.apolloClient,
-      query: vi.fn().mockResolvedValue({
-        data: {},
-      }),
-    },
-  };
-});
-
 const mocks = vi.hoisted(() => {
   return {
     advancedPermissions: {} as Record<string, boolean>,

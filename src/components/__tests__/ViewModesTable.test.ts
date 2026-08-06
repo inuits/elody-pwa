@@ -2,8 +2,8 @@ import ViewModesTable from "../library/view-modes/ViewModesTable.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 
-vi.mock("@/helpers", () => {
-  const actualModule = vi.importActual("@/helpers");
+vi.mock("@/helpers", async () => {
+  const actualModule = await vi.importActual("@/helpers");
   return {
     ...actualModule,
     setCssVariable: () => {},
@@ -23,19 +23,13 @@ vi.mock("@/composables/useEntityPageConfig", () => ({
   }),
 }));
 
-vi.mock("@/main", () => {
-  const actualModule = vi.importActual("@/main");
-
-  return {
-    ...actualModule,
-    apolloClient: {
-      ...actualModule.apolloClient,
-      query: vi.fn().mockResolvedValue({
-        data: {},
-      }),
-    },
-  };
-});
+vi.mock("@/main", () => ({
+  apolloClient: {
+    query: vi.fn().mockResolvedValue({
+      data: {},
+    }),
+  },
+}));
 
 const tableContainer = (wrapper: ReturnType<typeof shallowMount>) =>
   wrapper.find('[data-cy="view-modes-table"]');

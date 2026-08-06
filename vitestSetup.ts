@@ -95,19 +95,13 @@ vi.mock("@/utils/openseadragonPlugin", () => ({
   })
 }));
 
-vi.mock("@/main", () => {
-  const actualModule = vi.importActual("@/main");
-
-  return {
-    ...actualModule,
-    apolloClient: {
-      ...actualModule.apolloClient,
-      query: vi.fn().mockResolvedValue({
-        data: {},
-      }),
-    },
-    auth: {
-      isAuthenticated: ref(true),
-    },
-  };
-});
+vi.mock("@/main", () => ({
+  apolloClient: {
+    query: vi.fn().mockResolvedValue({
+      data: {},
+    }),
+  },
+  auth: {
+    isAuthenticated: ref(true),
+  },
+}));

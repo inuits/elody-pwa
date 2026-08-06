@@ -7,8 +7,8 @@ import {
   PreviewTypes,
 } from "@/generated-types/queries";
 
-vi.mock("@/helpers", () => {
-  const actualModule = vi.importActual("@/helpers");
+vi.mock("@/helpers", async () => {
+  const actualModule = await vi.importActual("@/helpers");
   return {
     ...actualModule,
     setCssVariable: () => {},
@@ -28,19 +28,13 @@ vi.mock("@/composables/useEntityPageConfig", () => ({
   }),
 }));
 
-vi.mock("@/main", () => {
-  const actualModule = vi.importActual("@/main");
-
-  return {
-    ...actualModule,
-    apolloClient: {
-      ...actualModule.apolloClient,
-      query: vi.fn().mockResolvedValue({
-        data: {},
-      }),
-    },
-  };
-});
+vi.mock("@/main", () => ({
+  apolloClient: {
+    query: vi.fn().mockResolvedValue({
+      data: {},
+    }),
+  },
+}));
 
 describe("ViewModesList", () => {
   afterEach(() => {

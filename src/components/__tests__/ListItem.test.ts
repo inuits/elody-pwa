@@ -2,8 +2,8 @@ import ListItem from "../ListItem.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 
-vi.mock("@/helpers", () => {
-  const actualModule = vi.importActual("@/helpers");
+vi.mock("@/helpers", async () => {
+  const actualModule = await vi.importActual("@/helpers");
   return {
     ...actualModule,
     setCssVariable: () => {},
