@@ -132,6 +132,21 @@ describe("useElodyTagging", () => {
     tagging.destroy();
   });
 
+  it("styles a tag that has no configured colour", async () => {
+    // tagColor only exists on configurations derived from a configuration entity, so
+    // without this a statically configured tag renders as plain text and the author
+    // cannot tell what they tagged.
+    const tagging = await useElodyTagging(
+      "instance-uncoloured",
+      configurationFor("user", "user"),
+    );
+
+    const style = document.getElementById("elody-tagging-instance-uncoloured");
+    expect(style?.textContent).toContain("elody-user");
+
+    tagging.destroy();
+  });
+
   it("removes its injected style element on destroy", async () => {
     const configuration = configurationFor("word", "word");
     configuration[0].tagColor = "#ff0000";
