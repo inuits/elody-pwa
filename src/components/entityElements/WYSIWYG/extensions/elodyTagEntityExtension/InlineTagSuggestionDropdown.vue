@@ -155,7 +155,16 @@ const filtersFor = (
   return simpleSearchFilters;
 };
 
+/**
+ * Sequences the searches: the watcher fires per keystroke, and without this whichever
+ * request resolved LAST won, so a fast typist could be left looking at results for a
+ * stale prefix — and Enter would then tag the wrong entity.
+ */
+let latestSearch = 0;
+
 const search = async (state: NonNullable<InlineSuggestionState>) => {
+  const thisSearch = ++latestSearch;
+  const isStale = () => thisSearch !== latestSearch;
   isLoading.value = true;
   highlightedIndex.value = 0;
   try {
@@ -192,12 +201,16 @@ const search = async (state: NonNullable<InlineSuggestionState>) => {
       },
       fetchPolicy: "no-cache",
     });
+    if (isStale()) return;
     results.value = response.data?.Entities?.results ?? [];
   } catch (error) {
+    if (isStale()) return;
     console.error("[elody-tagging] inline suggestion search failed", error);
     results.value = [];
   } finally {
-    isLoading.value = false;
+    // Not unconditional: an overtaken request must not clear the spinner while the
+    // request the user is actually waiting for is still in flight.
+    if (!isStale()) isLoading.value = false;
   }
 };
 
