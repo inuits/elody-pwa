@@ -1,4 +1,6 @@
 import { Extension } from "@tiptap/core";
+import { Suggestion } from "@tiptap/suggestion";
+import { Plugin, PluginKey } from "prosemirror-state";
 import type { Ref } from "vue";
 import type { ResolvedTagConfiguration } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
@@ -7,7 +9,8 @@ export type InlineSuggestionState = {
   configuration: ResolvedTagConfiguration;
   query: string;
   range: { from: number; to: number };
-  clientRect: DOMRect | null;
+  /** Viewport coordinates of the trigger, for anchoring the dropdown. */
+  anchor: { left: number; bottom: number };
 } | null;
 
 /**
@@ -35,6 +38,28 @@ export type InlineSuggestionState = {
  * Note this cannot replace the toolbar flow: @tiptap/suggestion only fires at a word
  * boundary, so it is structurally incapable of AICAP's mid-word partial tagging.
  */
+/**
+ * Anchors the dropdown on the trigger's own screen position.
+ *
+ * Deliberately NOT @tiptap/suggestion's `props.clientRect`: that resolves by querying
+ * `view.dom` for the decoration span, so it hands back null whenever the decoration is
+ * not in the DOM at that instant — and a null rect meant the dropdown had no position
+ * and silently never rendered, even though the search request had already fired.
+ * coordsAtPos asks the view directly and cannot fail that way.
+ */
+const openState = (
+  configuration: ResolvedTagConfiguration,
+  props: any,
+): InlineSuggestionState => {
+  const coords = props.editor.view.coordsAtPos(props.range.to);
+  return {
+    configuration,
+    query: props.query,
+    range: props.range,
+    anchor: { left: coords.left, bottom: coords.bottom },
+  };
+};
+
 export const createInlineTagSuggestionExtension = async (
   configurations: ResolvedTagConfiguration[],
   suggestionState: Ref<InlineSuggestionState>,
@@ -44,32 +69,45 @@ export const createInlineTagSuggestionExtension = async (
   );
   if (!inlineConfigurations.length) return undefined;
 
-  let Suggestion: any;
-  try {
-    // Imported through a variable specifier with @vite-ignore so the bundler does not
-    // resolve it at transform time. package.json declares the dependency, but a
-    // checkout that has not rebuilt its container yet does not have it on disk, and a
-    // statically analysed import would fail the whole build rather than this feature.
-    // Degrades to the toolbar Tag flow instead.
-    const suggestionModule = "@tiptap/suggestion";
-    Suggestion = (await import(/* @vite-ignore */ suggestionModule)).Suggestion;
-  } catch {
-    console.warn(
-      "[elody-tagging] @tiptap/suggestion is not installed; inline @/# tagging is " +
-        "disabled and the toolbar Tag flow is used instead. Run a client rebuild to " +
-        "install it.",
-    );
-    return undefined;
-  }
-
   return Extension.create({
     name: "elodyInlineTagSuggestion",
     addProseMirrorPlugins() {
       const editor = this.editor;
 
+      /**
+       * Closes the dropdown when the editor loses focus.
+       *
+       * @tiptap/suggestion only exits on document changes, so nothing else clears the
+       * state when the editor stops being the thing the user is looking at. Closing the
+       * comment modal is the case that exposed it: the dialog only flips its `open`
+       * flag, so the composer stays mounted with an open suggestion — and since the
+       * dropdown is a top-layer popover, it went on floating over the page after the
+       * dialog beneath it was gone.
+       *
+       * Lives here, not in the host component, so every editor that loads this
+       * extension is covered. Picking an option cannot trip it: those handlers
+       * preventDefault on mousedown, so focus never leaves the editor.
+       */
+      const closeOnBlur = new Plugin({
+        props: {
+          handleDOMEvents: {
+            blur: () => {
+              suggestionState.value = null;
+              return false; // Never consume: other extensions handle blur too.
+            },
+          },
+        },
+      });
+
       return inlineConfigurations.map((configuration) =>
         Suggestion({
           editor,
+          // One PluginKey per trigger. Suggestion passes `pluginKey` straight to
+          // `new Plugin({ key })`, and its default is a single shared key, so two
+          // configurations with a trigger (vlacc has `@` and `#`) would both register
+          // `suggestion$` and ProseMirror throws "Adding different instances of a
+          // keyed plugin". extensionName is already unique within one editor's schema.
+          pluginKey: new PluginKey(`suggestion-${configuration.extensionName}`),
           char: configuration.inlineTrigger!.character,
           // Tag content is a title or a person's name, so spaces have to be allowed.
           allowSpaces: true,
@@ -81,20 +119,10 @@ export const createInlineTagSuggestionExtension = async (
           },
           render: () => ({
             onStart: (props: any) => {
-              suggestionState.value = {
-                configuration,
-                query: props.query,
-                range: props.range,
-                clientRect: props.clientRect?.() ?? null,
-              };
+              suggestionState.value = openState(configuration, props);
             },
             onUpdate: (props: any) => {
-              suggestionState.value = {
-                configuration,
-                query: props.query,
-                range: props.range,
-                clientRect: props.clientRect?.() ?? null,
-              };
+              suggestionState.value = openState(configuration, props);
             },
             onKeyDown: (props: any) => {
               if (props.event.key !== "Escape") return false;
@@ -106,7 +134,7 @@ export const createInlineTagSuggestionExtension = async (
             },
           }),
         }),
-      );
+      ).concat(closeOnBlur);
     },
   });
 };
@@ -130,7 +158,14 @@ export const applyInlineTag = (
     .focus()
     .insertContentAt(range, {
       type: configuration.extensionName,
-      attrs: { entityId: entity.id, taggedText: label, label },
+      attrs: {
+        entityId: entity.id,
+        taggedText: label,
+        label,
+        // From the picked entity, not the configuration: a configuration that tags any
+        // type (vlacc's `#`) has no single type to fall back on.
+        entityType: entity.type ?? null,
+      },
     })
     .run();
 };
