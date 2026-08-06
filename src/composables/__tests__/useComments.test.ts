@@ -14,8 +14,13 @@ vi.mock("@/composables/useAuth", () => ({
   useAuth: () => ({ getUserName: () => "Tester" }),
 }));
 
-const { groupComments, extractTaggedRelations, flattenRelationsExceptTags } =
-  await import("../useComments");
+const {
+  groupComments,
+  extractTaggedRelations,
+  flattenRelationsExceptTags,
+  tagElementName,
+  tagRelationTypesOf,
+} = await import("../useComments");
 
 const comment = (
   id: string,
@@ -60,6 +65,49 @@ describe("flattenRelationsExceptTags", () => {
     expect(relations.map((relation: any) => relation.type)).toEqual([
       "refParentEntity",
     ]);
+  });
+});
+
+describe("tagRelationTypesOf", () => {
+  const configurations: any = [
+    { tag: "user", relationType: "refTaggedUsers" },
+    { tag: "entity", relationType: "refTaggedEntities" },
+    // No tag: the toolbar-only entry produces no element and no relation of its own.
+    { relationType: "refWords" },
+  ];
+
+  it("lists every relation type the configuration can produce", () => {
+    expect(tagRelationTypesOf(configurations)).toEqual([
+      "refTaggedUsers",
+      "refTaggedEntities",
+    ]);
+  });
+
+  it("still excludes a relation type whose last tag was just removed", () => {
+    // The regression: deriving the types from the SURVIVING tags left refTaggedUsers out
+    // of the exclusion list, so the old relation was resent as Unchanged and the
+    // un-tagged user stayed linked (and notified).
+    const withUserTag = comment("CMT-a");
+    withUserTag.relationValues.refTaggedUsers = [
+      { key: "U-1", type: "refTaggedUsers" },
+    ];
+
+    const relations = flattenRelationsExceptTags(
+      withUserTag,
+      tagRelationTypesOf(configurations),
+    );
+
+    expect(relations.map((relation: any) => relation.type)).toEqual([
+      "refParentEntity",
+    ]);
+  });
+});
+
+describe("tagElementName", () => {
+  it("lowercases the configured tag, as the browser does", () => {
+    // DOMPurify and createElement both normalise the name, so a comparison against the
+    // configured casing stops matching and every tag is stripped from the body.
+    expect(tagElementName("User")).toBe("elody-user");
   });
 });
 
@@ -117,7 +165,11 @@ describe("groupComments", () => {
 describe("extractTaggedRelations", () => {
   const configurations: any = [
     { tag: "user", relationType: "refTaggedUsers", taggableEntityType: "user" },
-    { tag: "work", relationType: "refTaggedEntities", taggableEntityType: "work" },
+    {
+      tag: "work",
+      relationType: "refTaggedEntities",
+      taggableEntityType: "work",
+    },
   ];
 
   it("maps @ and # tags to their configured relation types and dedupes", () => {
@@ -156,7 +208,10 @@ describe("extractTaggedRelations", () => {
 
   it("skips tag elements that carry no entityId", () => {
     expect(
-      extractTaggedRelations("<p><elody-user>Ann</elody-user></p>", configurations),
+      extractTaggedRelations(
+        "<p><elody-user>Ann</elody-user></p>",
+        configurations,
+      ),
     ).toEqual([]);
   });
 
