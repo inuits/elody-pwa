@@ -414,6 +414,52 @@ const getLinearWrapper = () =>
     },
   });
 
+// startOnFirstStep only moves the entry point: unlike `linear`, the flow keeps
+// its overview and finalize, it just doesn't open on an empty overview first.
+describe("RepetitiveFlow — startOnFirstStep", () => {
+  const getStartOnFirstStepWrapper = () =>
+    shallowMount(RepetitiveFlow, {
+      props: {
+        open: true,
+        config: { ...omnibusConfig(), startOnFirstStep: true },
+      },
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { RepetitiveStepField: false },
+      },
+    });
+
+  beforeEach(() => {
+    useRepetitiveForm().resetFlow();
+  });
+
+  it("opens directly on the first step instead of the empty overview", () => {
+    const wrapper = getStartOnFirstStepWrapper();
+    expect(overview(wrapper).exists()).toBe(false);
+    expect(field(wrapper).exists()).toBe(true);
+    expect(field(wrapper).props("step").key).toBe("work");
+  });
+
+  it("still returns to the overview after the last step, with the branch staged", async () => {
+    const wrapper = getStartOnFirstStepWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("selected", [{ id: "expr-1" }]);
+    await flushPromises();
+    expect(overview(wrapper).exists()).toBe(true);
+    expect(overview(wrapper).props("branches")).toHaveLength(1);
+    // not a linear flow: it must not shortcut to `finished`
+    expect(wrapper.emitted("finished")).toBeUndefined();
+  });
+
+  it("keeps the overview as the entry point when the flag is absent", () => {
+    const wrapper = getWrapper();
+    expect(overview(wrapper).exists()).toBe(true);
+    expect(field(wrapper).exists()).toBe(false);
+  });
+});
+
 describe("RepetitiveFlow — linear mode", () => {
   beforeEach(() => {
     useRepetitiveForm().resetFlow();
