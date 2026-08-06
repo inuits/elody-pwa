@@ -11,10 +11,12 @@ import {
   isTaggedByTriggerOnly,
 } from "../inlineTagSuggestion";
 
-const configurationWithTrigger = (extensionName: string, character: string) =>
+// Deliberately no extensionName: that field is only assigned when the node extensions are
+// built, which happens AFTER the suggestion extension, so the plugin key must not depend
+// on it. Setting it here would test an ordering the app never has.
+const configurationWithTrigger = (tag: string, character: string) =>
   ({
-    extensionName,
-    tag: extensionName,
+    tag,
     inlineTrigger: { character, minCharacters: 1 },
   }) as any;
 
@@ -49,9 +51,9 @@ describe("isTaggedByTriggerOnly", () => {
   });
 
   it("is false for AICAP's trigger-less configuration", () => {
-    expect(isTaggedByTriggerOnly([{ extensionName: "w", tag: "w" } as any])).toBe(
-      false,
-    );
+    expect(
+      isTaggedByTriggerOnly([{ extensionName: "w", tag: "w" } as any]),
+    ).toBe(false);
   });
 
   it("is false when there is no configuration at all", () => {
@@ -74,6 +76,15 @@ describe("createInlineTagSuggestionExtension", () => {
       .filter((key: string) => key?.startsWith("suggestion-"));
     expect(keys).toHaveLength(2);
     expect(new Set(keys).size).toBe(2);
+    // ProseMirror suffixes its own counter, so assert the trigger is in there rather
+    // than an exact match: a key of `suggestion-undefined$` would pass the count check
+    // above purely on that counter.
+    expect(keys.some((key: string) => key.startsWith("suggestion-@"))).toBe(
+      true,
+    );
+    expect(keys.some((key: string) => key.startsWith("suggestion-#"))).toBe(
+      true,
+    );
   });
 
   it("builds nothing when no configuration declares a trigger", async () => {
