@@ -39,18 +39,25 @@ export type InlineSuggestionState = {
  * boundary, so it is structurally incapable of AICAP's mid-word partial tagging.
  */
 /**
- * Anchors the dropdown on the trigger's own screen position.
+ * The open/closed state for one suggestion event.
  *
- * Deliberately NOT @tiptap/suggestion's `props.clientRect`: that resolves by querying
- * `view.dom` for the decoration span, so it hands back null whenever the decoration is
- * not in the DOM at that instant — and a null rect meant the dropdown had no position
- * and silently never rendered, even though the search request had already fired.
+ * minCharacters is enforced HERE and nowhere else. @tiptap/suggestion's `items` callback
+ * is not a gate: the plugin calls render's onStart/onUpdate whether or not items came
+ * back empty, so returning [] for a too-short query still opened the dropdown on a bare
+ * trigger character and searched for "" — the minimum was inert.
+ *
+ * The anchor is deliberately NOT @tiptap/suggestion's `props.clientRect`: that resolves
+ * by querying `view.dom` for the decoration span, so it hands back null whenever the
+ * decoration is not in the DOM at that instant — and a null rect meant the dropdown had
+ * no position and silently never rendered, even though the search had already fired.
  * coordsAtPos asks the view directly and cannot fail that way.
  */
-const openState = (
+export const suggestionStateFor = (
   configuration: ResolvedTagConfiguration,
   props: any,
 ): InlineSuggestionState => {
+  if (props.query.length < (configuration.inlineTrigger?.minCharacters ?? 1))
+    return null;
   const coords = props.editor.view.coordsAtPos(props.range.to);
   return {
     configuration,
@@ -141,17 +148,16 @@ export const createInlineTagSuggestionExtension = async (
             // Tag content is a title or a person's name, so spaces have to be allowed.
             allowSpaces: true,
             startOfLine: false,
-            items: ({ query }: { query: string }) => {
-              const minimum = configuration.inlineTrigger!.minCharacters ?? 1;
-              // The dropdown owns fetching; the plugin only reports what was typed.
-              return query.length >= minimum ? [query] : [];
-            },
+            // The dropdown owns fetching, so the plugin has no item list to keep; the
+            // minimum lives in suggestionStateFor, which is the only thing the plugin
+            // actually acts on.
+            items: () => [],
             render: () => ({
               onStart: (props: any) => {
-                suggestionState.value = openState(configuration, props);
+                suggestionState.value = suggestionStateFor(configuration, props);
               },
               onUpdate: (props: any) => {
-                suggestionState.value = openState(configuration, props);
+                suggestionState.value = suggestionStateFor(configuration, props);
               },
               onKeyDown: (props: any) => {
                 if (props.event.key !== "Escape") return false;

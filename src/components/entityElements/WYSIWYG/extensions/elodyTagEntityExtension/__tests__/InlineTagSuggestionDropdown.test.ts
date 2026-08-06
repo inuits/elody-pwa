@@ -117,6 +117,22 @@ describe("how the dropdown scopes its search", () => {
   });
 });
 
+describe("a typed configuration with no filter key", () => {
+  it("searches nothing rather than listing every entity of the type", async () => {
+    sentVariables.length = 0;
+    const wrapper = await mountDropdown({
+      ...suggestion,
+      configuration: {
+        ...suggestion.configuration,
+        metadataFilterForTagContent: null,
+      },
+    });
+
+    expect(sentVariables).toHaveLength(0);
+    wrapper.unmount();
+  });
+});
+
 describe("which metadata key the option label is read from", () => {
   it("reads it from the configured filter key, not a built-in list", async () => {
     const wrapper = await mountDropdown();
