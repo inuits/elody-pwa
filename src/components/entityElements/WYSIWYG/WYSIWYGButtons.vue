@@ -145,11 +145,18 @@
     >
       <i>I</i>
     </button>
-    <base-tooltip position="top-right" :tooltip-offset="8">
+    <!--
+      Gated on the wrapper, not the button: a hidden button inside a rendered tooltip
+      activator still leaves an empty div sitting in the toolbar's flex row.
+    -->
+    <base-tooltip
+      v-if="showTagButton"
+      position="top-right"
+      :tooltip-offset="8"
+    >
       <template #activator="{ on }">
         <div v-on="on">
           <button
-            v-if="extensions.includes(WysiwygExtensions.ElodyTaggingExtension)"
             :class="[{ 'opacity-30': tagButtonDisabled }]"
             :disabled="buttonsDisabled || tagButtonDisabled"
             @click="editor.commands.openTagModal()"
@@ -186,6 +193,9 @@ import { computed } from "vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import type { ElodyTaggingInstance } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
+// Hides the Tag button when every configured tag has a trigger character, so the
+// toolbar's modal flow cannot compete with typing `@` or `#`.
+import { isTaggedByTriggerOnly } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/inlineTagSuggestion";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -209,6 +219,17 @@ const editorHasSelection = computed(() => {
 const isNonTaggedTextSelected = computed(() => {
   return !hasSelectionBeenTagged(props.editor);
 });
+/**
+ * The toolbar's Tag button opens TagEntityModal, a different flow from the inline
+ * trigger: it tags the current selection and can create a new entity. Where every
+ * configured tag has a trigger character, it is a second inconsistent route to the same
+ * feature, so it goes away and typing `@` / `#` is the only way in.
+ */
+const showTagButton = computed<boolean>(
+  () =>
+    props.extensions.includes(WysiwygExtensions.ElodyTaggingExtension) &&
+    !isTaggedByTriggerOnly(props.tagging?.configuration.value ?? []),
+);
 const isInNeedOfConfigurationEntities = computed<boolean>(
   () => !!props.tagging?.isInNeedOfConfigurationEntities?.value,
 );

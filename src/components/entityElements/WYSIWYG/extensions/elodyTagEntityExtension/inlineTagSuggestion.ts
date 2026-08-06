@@ -60,6 +60,27 @@ const openState = (
   };
 };
 
+/**
+ * Whether typing a trigger character is the ONLY way to tag in this editor.
+ *
+ * The toolbar button opens TagEntityModal, which is a different flow with different
+ * behaviour (it can create a new entity, and it tags whatever text is selected). Where
+ * every configuration declares a trigger, that button is a second, inconsistent route to
+ * the same feature, so the host hides it.
+ *
+ * Deliberately ALL and not SOME: a configuration set can mix the two (AICAP declares no
+ * trigger at all, and its researchers tag sub-strings of a word, which a trigger
+ * structurally cannot do). Hiding the button as soon as one entry has a trigger would
+ * strand every entry that has none.
+ */
+export const isTaggedByTriggerOnly = (
+  configurations: ResolvedTagConfiguration[],
+): boolean =>
+  configurations.length > 0 &&
+  configurations.every(
+    (configuration) => !!configuration.inlineTrigger?.character,
+  );
+
 export const createInlineTagSuggestionExtension = async (
   configurations: ResolvedTagConfiguration[],
   suggestionState: Ref<InlineSuggestionState>,
