@@ -120,42 +120,51 @@ export const createInlineTagSuggestionExtension = async (
         },
       });
 
-      return inlineConfigurations.map((configuration) =>
-        Suggestion({
-          editor,
-          // One PluginKey per trigger. Suggestion passes `pluginKey` straight to
-          // `new Plugin({ key })`, and its default is a single shared key, so two
-          // configurations with a trigger (vlacc has `@` and `#`) would both register
-          // `suggestion$` and ProseMirror throws "Adding different instances of a
-          // keyed plugin". extensionName is already unique within one editor's schema.
-          pluginKey: new PluginKey(`suggestion-${configuration.extensionName}`),
-          char: configuration.inlineTrigger!.character,
-          // Tag content is a title or a person's name, so spaces have to be allowed.
-          allowSpaces: true,
-          startOfLine: false,
-          items: ({ query }: { query: string }) => {
-            const minimum = configuration.inlineTrigger!.minCharacters ?? 1;
-            // The dropdown owns fetching; the plugin only reports what was typed.
-            return query.length >= minimum ? [query] : [];
-          },
-          render: () => ({
-            onStart: (props: any) => {
-              suggestionState.value = openState(configuration, props);
+      return inlineConfigurations
+        .map((configuration) =>
+          Suggestion({
+            editor,
+            // One PluginKey per trigger. Suggestion passes `pluginKey` straight to
+            // `new Plugin({ key })`, and its default is a single shared key, so two
+            // configurations with a trigger (vlacc has `@` and `#`) would both register
+            // `suggestion$` and ProseMirror throws "Adding different instances of a
+            // keyed plugin".
+            //
+            // Keyed on the trigger character, NOT extensionName: that field is only
+            // assigned when the node extensions are built, which happens after this, so
+            // every key came out as `suggestion-undefined`. The character is unique by
+            // definition — two configurations sharing one would be ambiguous anyway.
+            pluginKey: new PluginKey(
+              `suggestion-${configuration.inlineTrigger!.character}`,
+            ),
+            char: configuration.inlineTrigger!.character,
+            // Tag content is a title or a person's name, so spaces have to be allowed.
+            allowSpaces: true,
+            startOfLine: false,
+            items: ({ query }: { query: string }) => {
+              const minimum = configuration.inlineTrigger!.minCharacters ?? 1;
+              // The dropdown owns fetching; the plugin only reports what was typed.
+              return query.length >= minimum ? [query] : [];
             },
-            onUpdate: (props: any) => {
-              suggestionState.value = openState(configuration, props);
-            },
-            onKeyDown: (props: any) => {
-              if (props.event.key !== "Escape") return false;
-              suggestionState.value = null;
-              return true;
-            },
-            onExit: () => {
-              suggestionState.value = null;
-            },
+            render: () => ({
+              onStart: (props: any) => {
+                suggestionState.value = openState(configuration, props);
+              },
+              onUpdate: (props: any) => {
+                suggestionState.value = openState(configuration, props);
+              },
+              onKeyDown: (props: any) => {
+                if (props.event.key !== "Escape") return false;
+                suggestionState.value = null;
+                return true;
+              },
+              onExit: () => {
+                suggestionState.value = null;
+              },
+            }),
           }),
-        }),
-      ).concat(closeOnBlur);
+        )
+        .concat(closeOnBlur);
     },
   });
 };
