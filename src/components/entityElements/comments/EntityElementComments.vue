@@ -11,7 +11,9 @@
       <template #content>
         <!-- bg + mx-1 pb-2 matches EntityElementList: the wrapper itself is
              accent-coloured and expects the content slot to supply its own surface. -->
-        <div class="flex flex-col gap-3 mx-1 mb-1 p-3 bg-background-normal rounded-b">
+        <div
+          class="flex flex-col gap-3 mx-1 mb-1 p-3 bg-background-normal rounded-b"
+        >
           <div v-if="canPost && !isComposerOpen" class="self-start">
             <base-button-new
               :label="t('comments.new-thread')"
@@ -66,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
@@ -93,10 +95,17 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { threads, isLoading, load, post } = useComments();
+const { threadsFor, isLoadingFor, load, post } = useComments();
 const { openModal } = useBaseModal();
 const { can, fetchUpdateAndDeletePermission } = usePermissions();
-const parentEditHelper = useEditMode(props.id);
+// Re-resolved whenever the id changes rather than captured once: the edit state is keyed
+// by entity id, and this component outlives a navigation to the next entity. shallowRef
+// and not a computed, because useEditMode CREATES the state when it is missing, and a
+// computed must not write to the state it reads.
+const parentEditHelper = shallowRef(useEditMode(props.id));
+
+const isParentInEditMode = (): boolean =>
+  ["edit", "edit-delete"].includes(parentEditHelper.value.editMode);
 
 const isComposerOpen = ref<boolean>(false);
 const isCollapsed = ref<boolean>(false);
@@ -114,9 +123,12 @@ const canRead = computed<boolean>(() =>
  */
 const canPost = computed<boolean>(() => {
   if (!can(Permission.Cancreate, Entitytyping.Comment)) return false;
-  if (["edit", "edit-delete"].includes(parentEditHelper.editMode)) return true;
+  if (isParentInEditMode()) return true;
   return canUpdateParent.value;
 });
+
+const threads = computed(() => threadsFor(props.id));
+const isLoading = computed(() => isLoadingFor(props.id));
 
 const taggableEntityConfiguration = computed(
   () =>
@@ -161,15 +173,28 @@ const postSubject = async (
   isComposerOpen.value = false;
 };
 
-onMounted(async () => {
-  await load(props.id);
-  if (["edit", "edit-delete"].includes(parentEditHelper.editMode)) return;
-  const permissions = await fetchUpdateAndDeletePermission(
-    props.id,
-    props.entityType,
-  );
-  canUpdateParent.value = permissions?.get(Permission.Canupdate) ?? false;
-});
+/**
+ * Keyed on the id, not onMounted: the router reuses this component when navigating from
+ * one work to the next, which changes `id` without remounting. Loading only once left the
+ * previous work's threads on screen, and its permission answer alongside them.
+ */
+watch(
+  () => props.id,
+  async (entityId) => {
+    canUpdateParent.value = false;
+    parentEditHelper.value = useEditMode(entityId);
+    await load(entityId, props.element.parentEntityFilterKey);
+    if (isParentInEditMode()) return;
+    const permissions = await fetchUpdateAndDeletePermission(
+      entityId,
+      props.entityType,
+    );
+    // A permission answer that arrives after the next navigation is not about this entity.
+    if (entityId !== props.id) return;
+    canUpdateParent.value = permissions?.get(Permission.Canupdate) ?? false;
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>

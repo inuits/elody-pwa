@@ -1,4 +1,4 @@
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { apolloClient } from "@/main";
 import {
   AdvancedFilterTypes,
@@ -54,12 +54,14 @@ export const groupComments = (comments: Comment[]): CommentThread[] => {
     !comment.relationValues?.[RELATION_SUBJECT]?.length;
 
   const repliesBySubjectId = new Map<string, Comment[]>();
-  comments.filter((comment) => !isSubject(comment)).forEach((reply) => {
-    const subjectId = reply.relationValues![RELATION_SUBJECT][0].key;
-    const existing = repliesBySubjectId.get(subjectId) ?? [];
-    existing.push(reply);
-    repliesBySubjectId.set(subjectId, existing);
-  });
+  comments
+    .filter((comment) => !isSubject(comment))
+    .forEach((reply) => {
+      const subjectId = reply.relationValues![RELATION_SUBJECT][0].key;
+      const existing = repliesBySubjectId.get(subjectId) ?? [];
+      existing.push(reply);
+      repliesBySubjectId.set(subjectId, existing);
+    });
 
   const byCreationDate = (a: Comment, b: Comment) =>
     String(a.intialValues?.created_at ?? "").localeCompare(
@@ -84,6 +86,35 @@ export const groupComments = (comments: Comment[]): CommentThread[] => {
 };
 
 /**
+ * The rendered element name for a configured tag.
+ *
+ * Lowercased because that is what the browser stores: `document.createElement` and
+ * DOMPurify both normalise a custom element name, so a configuration with `tag: "User"`
+ * still yields `<elody-user>` in the saved HTML. Every comparison against a live tag
+ * name has to go through here or it silently stops matching.
+ */
+export const tagElementName = (tag: string): string =>
+  `elody-${tag.toLowerCase()}`;
+
+/**
+ * The relation types this composer's tagging configuration can produce.
+ *
+ * Derived from the configuration and NOT from the tags a body happens to contain:
+ * removing the last @mention has to leave that relation type in the exclusion list, or
+ * flattenRelationsExceptTags resends the old relation and the un-tagged user stays
+ * linked (and notified) forever.
+ */
+export const tagRelationTypesOf = (
+  configurations: TaggableEntityConfiguration[],
+): string[] => [
+  ...new Set(
+    configurations
+      .filter((configuration) => configuration.tag)
+      .map((configuration) => configuration.relationType),
+  ),
+];
+
+/**
  * Reads the tagged entities back out of the composed HTML and turns them into
  * relations.
  *
@@ -105,7 +136,7 @@ export const extractTaggedRelations = (
     configurations
       .filter((configuration) => configuration.tag)
       .map((configuration) => [
-        `elody-${configuration.tag!.toLowerCase()}`,
+        tagElementName(configuration.tag!),
         configuration.relationType,
       ]),
   );
@@ -161,24 +192,48 @@ export const flattenRelationsExceptTags = (
       editStatus: EditStatus.Unchanged,
     }));
 
-// Shared between the detail-page element and the globally-mounted thread modal, so
-// opening a thread costs no extra request.
-const parentEntityId = ref<string | undefined>(undefined);
-const comments = ref<Comment[]>([]);
-const isLoading = ref<boolean>(false);
+/**
+ * Shared between the detail-page element and the globally-mounted thread modal, so
+ * opening a thread costs no extra request.
+ *
+ * Keyed by parent entity, not a single flat list: clicking a #tag opens EntityDetailModal,
+ * which mounts a full EntitySingle — so a second comments element for a DIFFERENT entity
+ * can be mounted at the same time as the first. One shared list meant the second mount
+ * overwrote the first, and refresh() reloaded whichever entity happened to load last.
+ */
+const commentsByParentEntity = ref<Record<string, Comment[]>>({});
+const loadingParentEntities = ref<string[]>([]);
+/**
+ * Where a comment stores its parent entity, which is entirely client configuration (the
+ * schema prefix and the property path both differ per client). Module-level rather than
+ * per-parent: it is the same value for every mount within a client, and keeping it lets
+ * refresh() re-run a load whose caller is no longer in scope.
+ */
+let parentEntityFilterKey: string | undefined;
+
+const parentEntityIdOf = (comment: Comment): string | undefined =>
+  comment.relationValues?.[RELATION_PARENT_ENTITY]?.[0]?.key;
 
 export const useComments = () => {
   const { createEntity, saveEntityValues } = useManageEntities();
   const { getUserName } = useAuth();
 
-  const threads = computed<CommentThread[]>(() => groupComments(comments.value));
+  const threadsFor = (entityId: string): CommentThread[] =>
+    groupComments(commentsByParentEntity.value[entityId] ?? []);
 
+  const isLoadingFor = (entityId: string): boolean =>
+    loadingParentEntities.value.includes(entityId);
+
+  // Scans every loaded parent: comment ids are globally unique, and the modal is opened
+  // from whichever element loaded that thread.
   const threadFor = (subjectId: string): CommentThread | undefined =>
-    threads.value.find((thread) => thread.subject.id === subjectId);
+    Object.keys(commentsByParentEntity.value)
+      .flatMap(threadsFor)
+      .find((thread) => thread.subject.id === subjectId);
 
-  const load = async (entityId: string): Promise<void> => {
-    parentEntityId.value = entityId;
-    isLoading.value = true;
+  const load = async (entityId: string, filterKey: string): Promise<void> => {
+    parentEntityFilterKey = filterKey;
+    loadingParentEntities.value = [...loadingParentEntities.value, entityId];
     try {
       const response = await apolloClient.query({
         query: GetEntitiesDocument,
@@ -197,7 +252,7 @@ export const useComments = () => {
             },
             {
               type: AdvancedFilterTypes.Selection,
-              key: ["vlacc:1|properties.ref_parent_entity.value"],
+              key: [filterKey],
               value: [entityId],
               match_exact: true,
             },
@@ -205,14 +260,22 @@ export const useComments = () => {
         },
         fetchPolicy: "no-cache",
       });
-      comments.value = response.data?.Entities?.results ?? [];
+      commentsByParentEntity.value = {
+        ...commentsByParentEntity.value,
+        [entityId]: response.data?.Entities?.results ?? [],
+      };
     } finally {
-      isLoading.value = false;
+      loadingParentEntities.value = loadingParentEntities.value.filter(
+        (loading) => loading !== entityId,
+      );
     }
   };
 
-  const refresh = async (): Promise<void> => {
-    if (parentEntityId.value) await load(parentEntityId.value);
+  // Reloads exactly the parent whose thread list changed, so the other mounted element
+  // is left alone.
+  const refresh = async (entityId: string | undefined): Promise<void> => {
+    if (entityId && parentEntityFilterKey)
+      await load(entityId, parentEntityFilterKey);
   };
 
   const post = async ({
@@ -252,29 +315,32 @@ export const useComments = () => {
         ...taggedRelations,
       ],
     });
-    await refresh();
+    await refresh(entityId);
   };
 
   const edit = async ({
     comment,
     body,
     taggedRelations = [],
+    configurations,
   }: {
     comment: Comment;
     body: string;
     taggedRelations?: BaseRelationValuesInput[];
+    /** The composer's tagging configuration — see tagRelationTypesOf. */
+    configurations: TaggableEntityConfiguration[];
   }): Promise<void> => {
-    const tagRelationTypes = [
-      ...new Set(taggedRelations.map((relation) => relation.type)),
-    ];
     await saveEntityValues(comment.id, {
       metadata: [{ key: "body", value: body }],
       relations: [
-        ...flattenRelationsExceptTags(comment, tagRelationTypes),
+        ...flattenRelationsExceptTags(
+          comment,
+          tagRelationTypesOf(configurations),
+        ),
         ...taggedRelations,
       ],
     });
-    await refresh();
+    await refresh(parentEntityIdOf(comment));
   };
 
   const setStatus = async (
@@ -287,17 +353,14 @@ export const useComments = () => {
       // current set has to travel along.
       relations: flattenRelationsExceptTags(subject, []),
     });
-    await refresh();
+    await refresh(parentEntityIdOf(subject));
   };
 
   return {
-    threads,
+    threadsFor,
     threadFor,
-    comments,
-    isLoading,
-    parentEntityId,
+    isLoadingFor,
     load,
-    refresh,
     post,
     edit,
     setStatus,

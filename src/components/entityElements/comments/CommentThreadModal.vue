@@ -24,12 +24,17 @@
                   ? t('comments.reopen')
                   : t('comments.resolve')
               "
-              :icon="thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check"
+              :icon="
+                thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check
+              "
               button-style="accentNormal"
               :disabled="isWorking"
               @click="toggleStatus"
             />
-            <div class="cursor-pointer" @click="closeModal(TypeModals.CommentThread)">
+            <div
+              class="cursor-pointer"
+              @click="closeModal(TypeModals.CommentThread)"
+            >
               <unicon :name="Unicons.Cross.name" />
             </div>
           </div>
@@ -76,7 +81,9 @@
                   :initial-body="reply.intialValues?.body ?? ''"
                   :submit-label="t('comments.save')"
                   :cancellable="true"
-                  @submit="(body, relations) => saveEdit(reply, body, relations)"
+                  @submit="
+                    (body, relations) => saveEdit(reply, body, relations)
+                  "
                   @cancel="editingCommentId = undefined"
                 />
               </template>
@@ -95,7 +102,10 @@
             @submit="postReply"
           />
         </div>
-        <p v-else-if="thread.status === 'resolved'" class="text-sm text-text-placeholder">
+        <p
+          v-else-if="thread.status === 'resolved'"
+          class="text-sm text-text-placeholder"
+        >
           {{ t("comments.resolved-hint") }}
         </p>
       </div>
@@ -184,7 +194,14 @@ const saveEdit = (
   relations: BaseRelationValuesInput[],
 ) =>
   withWorking(async () => {
-    await edit({ comment, body, taggedRelations: relations });
+    // The configuration, not the surviving relations, decides which relation types are
+    // being replaced — removing the last @mention has to delete that relation too.
+    await edit({
+      comment,
+      body,
+      taggedRelations: relations,
+      configurations: taggableEntityConfiguration.value,
+    });
     editingCommentId.value = undefined;
   });
 
