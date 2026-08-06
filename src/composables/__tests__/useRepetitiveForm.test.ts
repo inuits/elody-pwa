@@ -9,6 +9,7 @@ import {
   describePickedItem,
   describeCreatedEntity,
   buildRelationMetadata,
+  toDisplayValue,
 } from "@/composables/useRepetitiveForm";
 
 const mocks = vi.hoisted(() => ({
@@ -1163,6 +1164,28 @@ describe("describePickedItem", () => {
       label: "Rowling",
       details: [{ label: "metadata.labels.record-type", value: "persoon" }],
     });
+  });
+});
+
+describe("toDisplayValue", () => {
+  it("renders strings and numbers as-is and joins arrays", () => {
+    expect(toDisplayValue("tekst")).toBe("tekst");
+    expect(toDisplayValue(1976)).toBe("1976");
+    expect(toDisplayValue(["Nederlands", "Engels"])).toBe("Nederlands, Engels");
+  });
+
+  // checkboxes submit booleans; a ticked box is a filled-in value and must be
+  // displayable, an unticked one is not (the empty string drops the row).
+  // A checkmark keeps this locale-free — no yes/no translation key per client.
+  it("renders a true boolean as a checkmark and a false one as empty", () => {
+    expect(toDisplayValue(true)).toBe("✓");
+    expect(toDisplayValue(false)).toBe("");
+  });
+
+  it("renders values it cannot display as empty", () => {
+    expect(toDisplayValue(undefined)).toBe("");
+    expect(toDisplayValue(null)).toBe("");
+    expect(toDisplayValue({ key: "x" })).toBe("");
   });
 });
 

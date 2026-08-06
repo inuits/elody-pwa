@@ -296,7 +296,7 @@ const onMetadataSubmitted = async (values: Record<string, unknown>) => {
       isNew: false,
       details: Object.entries(values)
         .map(([key, value]) => ({
-          label: `metadata.labels.${key}`,
+          label: `metadata.labels.${key.replace(/_/g, "-")}`,
           value: toDisplayValue(value),
         }))
         .filter((detail) => detail.value),

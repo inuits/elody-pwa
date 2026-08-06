@@ -755,6 +755,40 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     });
   });
 
+  // every field the user actually filled in shows up, including ticked
+  // checkboxes; the label key is hyphenated because that is the convention the
+  // metadata.labels.* translations use (no underscored keys exist)
+  it("stages every filled-in field as a detail, with hyphenated label keys", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper, {
+      function: "auteur",
+      main_author: true,
+      on_label: true,
+      instrument: "piano",
+    });
+    const branch = useRepetitiveForm().branches.value[0];
+    expect(branch.entities.role[0].details).toEqual([
+      { label: "metadata.labels.function", value: "auteur" },
+      { label: "metadata.labels.main-author", value: "✓" },
+      { label: "metadata.labels.on-label", value: "✓" },
+      { label: "metadata.labels.instrument", value: "piano" },
+    ]);
+  });
+
+  it("leaves out fields the user did not fill in, including unticked checkboxes", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper, {
+      function: "auteur",
+      main_author: false,
+      on_label: undefined,
+      instrument: "",
+    });
+    const branch = useRepetitiveForm().branches.value[0];
+    expect(branch.entities.role[0].details).toEqual([
+      { label: "metadata.labels.function", value: "auteur" },
+    ]);
+  });
+
   it("finishes the flow after Afronden, since there is no finalize step (the host closes the modal)", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper, { role: "booker_member" });

@@ -37,6 +37,7 @@ export const toDisplayValue = (value: unknown): string => {
       .join(", ");
   if (typeof value === "string" || typeof value === "number")
     return String(value);
+  if (typeof value === "boolean") return value ? "✓" : "";
   return "";
 };
 
