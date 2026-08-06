@@ -226,6 +226,28 @@ export const createTipTapNodeExtension = (
             };
           },
         },
+        // The tagged entity's own type. Needed when one configuration can tag ANY type
+        // (vlacc's `#`), because then the element name no longer identifies the type and
+        // a rendered tag would have no way to open the right detail page.
+        //
+        // Its own entry rather than going through `additionalAttributes` below: that
+        // block reads values out of metadata, and its attribute spec is double-wrapped.
+        // Rendered only when set, so an AICAP tag — which never sets it — keeps its
+        // stored HTML byte-identical.
+        entityType: {
+          default: null,
+          parseHTML: (element: HTMLElement) =>
+            element.getAttribute("data-entity-type"),
+          renderHTML: (attributes: { [key: string]: string }) => {
+            if (!attributes.entityType) {
+              return {};
+            }
+
+            return {
+              "data-entity-type": attributes.entityType,
+            };
+          },
+        },
         taggedText: {
           default: "",
           parseHTML: (element: HTMLElement) => element.textContent || "",
@@ -264,6 +286,7 @@ export const createTipTapNodeExtension = (
             const attributes: { [key: string]: any } = {
               entityId: element.getAttribute("data-entity-id"),
               label: element.getAttribute("data-label"),
+              entityType: element.getAttribute("data-entity-type"),
               taggedText: element.textContent || "",
             };
 
@@ -638,26 +661,30 @@ const getConfigurationEntities = async (
 };
 
 /**
- * Injects tag colours for ONE editor and returns the element so the caller can
+ * Injects tag styling for ONE editor and returns the element so the caller can
  * remove it again. Selectors are scoped by `data-wysiwyg-id` rather than the
  * shared `#wysiwyg-container` id, which several editors on a page would duplicate.
+ *
+ * Every configuration gets a rule, not just the ones carrying a `tagColor`.
+ * `tagColor` only exists on configurations derived from a configuration entity
+ * (AICAP's epi_doc_tags), so a statically configured tag used to render as plain
+ * text — indistinguishable from what the author typed. A tag must always read as
+ * a tag; the colour is the client's choice, the visibility is not.
  */
 export const applyColorStylingFromConfigurationToEditor = (
   instanceId: string,
   configurations: ResolvedTagConfiguration[] | undefined,
 ): HTMLStyleElement | undefined => {
-  const colouredConfigurations = ((configurations ??
-    []) as TaggableEntityConfigurationFromEntity[]).filter(
-    (configurationItem) => configurationItem.tagColor,
-  );
-  if (!colouredConfigurations.length) return undefined;
+  const configurationItems = (configurations ??
+    []) as TaggableEntityConfigurationFromEntity[];
+  if (!configurationItems.length) return undefined;
 
   const styleElementId = `elody-tagging-${instanceId}`;
   document.getElementById(styleElementId)?.remove();
 
   const style = document.createElement("style");
   style.id = styleElementId;
-  colouredConfigurations.forEach(
+  configurationItems.forEach(
     (configurationItem: TaggableEntityConfigurationFromEntity) => {
       const styleDefiningAttribute: string | undefined =
         configurationItem.tagConfigurationByEntity
@@ -667,12 +694,23 @@ export const applyColorStylingFromConfigurationToEditor = (
       const attributeSelector = styleDefiningAttribute
         ? `[${styleDefiningAttribute}="${configurationItem.attributes?.[styleDefiningAttribute]}"]`
         : "";
+      // A configured colour keeps its solid fill and zero horizontal padding: AICAP
+      // tags a sub-string of a single word, and side padding would visually split the
+      // word apart. Without a colour, fall back to a tinted chip — those tags are
+      // whole entities inserted as a unit, so the padding reads correctly there.
+      const appearance = configurationItem.tagColor
+        ? `background-color: ${configurationItem.tagColor};
+           color: #fff;
+           padding: 0.125rem 0;`
+        : `background-color: var(--color-accent-light);
+           color: var(--color-text-body);
+           box-shadow: inset 0 0 0 1px var(--color-accent-accent);
+           font-weight: 500;
+           padding: 0.125rem 0.25rem;`;
       style.textContent += `
       [data-wysiwyg-id="${instanceId}"] elody-${configurationItem.tag}${attributeSelector} {
-        background-color: ${configurationItem.tagColor};
-        color: #fff;
+        ${appearance}
         border-radius: 0.25rem;
-        padding: 0.125rem 0;
         margin: 0;
         cursor: pointer;
         user-select: none;

@@ -149,6 +149,10 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
     expect(html).not.toContain("data-type=");
     expect(html).not.toContain("data-lemma=");
     expect(html).toContain(">maktub<");
+    // data-entity-type only exists for configurations that can tag any entity type.
+    // AICAP never sets it, and it must therefore never reach the stored HTML: this
+    // element string is a backend contract and has to stay byte-identical.
+    expect(html).not.toContain("data-entity-type");
 
     editor.destroy();
   });
