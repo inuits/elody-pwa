@@ -50,7 +50,7 @@
       read-only editor per comment, which would not scale down a long thread.
     -->
     <div
-      class="prose prose-sm max-w-full mt-2 text-text-body"
+      class="comment-body prose prose-sm max-w-full mt-2 text-text-body"
       @click="handleBodyClick"
     >
       <sanitized-html
@@ -68,6 +68,7 @@ import { useI18n } from "vue-i18n";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
 import type { Comment, CommentStatus } from "@/composables/useComments";
 import {
+  type Entitytyping,
   SanitizeMode,
   type TaggableEntityConfiguration,
 } from "@/generated-types/queries";
@@ -90,7 +91,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   open: [];
   edit: [];
-  "open-entity": [entityId: string];
+  "open-entity": [entityId: string, entityType: Entitytyping];
 }>();
 
 const { t, d } = useI18n();
@@ -117,6 +118,36 @@ const handleBodyClick = (event: MouseEvent) => {
   if (!tagElement) return;
   // A #entity tag is a link, so it must not also open the thread.
   event.stopPropagation();
-  emit("open-entity", tagElement.getAttribute("data-entity-id")!);
+
+  // EntityDetailModal needs the type as well as the id. Prefer the type stored on the
+  // tag itself: a configuration that can tag any entity has no single type to look up.
+  // The configuration lookup stays as the fallback for tags written before the attribute
+  // existed, and for statically typed configurations.
+  const configuration = (props.taggableEntityConfiguration ?? []).find(
+    (candidate) =>
+      `elody-${candidate.tag}` === tagElement.tagName.toLowerCase(),
+  );
+  const entityType = (tagElement.getAttribute("data-entity-type") ??
+    configuration?.taggableEntityType) as Entitytyping | undefined;
+  if (!entityType) return;
+
+  emit("open-entity", tagElement.getAttribute("data-entity-id")!, entityType);
 };
 </script>
+
+<style scoped>
+/*
+ * The editor's own tag styling is injected scoped to [data-wysiwyg-id], which a
+ * rendered comment is not inside. Selecting on data-entity-id instead of the element
+ * names keeps this independent of which tags a client configures.
+ */
+.comment-body :deep([data-entity-id]) {
+  background-color: var(--color-accent-light);
+  color: var(--color-text-body);
+  box-shadow: inset 0 0 0 1px var(--color-accent-accent);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+</style>

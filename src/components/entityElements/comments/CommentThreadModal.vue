@@ -116,6 +116,7 @@ import { useAuth } from "@/composables/useAuth";
 import { Unicons } from "@/types";
 import {
   DamsIcons,
+  type Entitytyping,
   ModalStyle,
   TypeModals,
   type BaseRelationValuesInput,
@@ -196,7 +197,7 @@ const toggleStatus = () =>
     );
   });
 
-const openTaggedEntity = (entityId: string) => {
+const openTaggedEntity = (entityId: string, entityType: Entitytyping) => {
   openModal(
     TypeModals.EntityDetailModal,
     ModalStyle.CenterWide,
@@ -204,7 +205,7 @@ const openTaggedEntity = (entityId: string) => {
     undefined,
     false,
     undefined,
-    { entityId },
+    { entityId, entityType },
   );
 };
 </script>
