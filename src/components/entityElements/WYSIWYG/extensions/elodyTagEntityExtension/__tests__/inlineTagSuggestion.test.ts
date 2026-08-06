@@ -6,7 +6,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { ref as vueRef } from "vue";
-import { createInlineTagSuggestionExtension } from "../inlineTagSuggestion";
+import {
+  createInlineTagSuggestionExtension,
+  isTaggedByTriggerOnly,
+} from "../inlineTagSuggestion";
 
 const configurationWithTrigger = (extensionName: string, character: string) =>
   ({
@@ -23,6 +26,40 @@ const pluginsFor = async (configurations: any[]) => {
   // addProseMirrorPlugins reads `this.editor`; nothing in it runs at construction time.
   return extension!.config.addProseMirrorPlugins!.call({ editor: {} } as any);
 };
+
+describe("isTaggedByTriggerOnly", () => {
+  it("is true when every configuration has a trigger", () => {
+    expect(
+      isTaggedByTriggerOnly([
+        configurationWithTrigger("user", "@"),
+        configurationWithTrigger("entity", "#"),
+      ]),
+    ).toBe(true);
+  });
+
+  it("is false when one configuration has no trigger", () => {
+    // Mixed sets must keep the toolbar button: the trigger-less entry has no other
+    // way to be tagged.
+    expect(
+      isTaggedByTriggerOnly([
+        configurationWithTrigger("user", "@"),
+        { extensionName: "w", tag: "w" } as any,
+      ]),
+    ).toBe(false);
+  });
+
+  it("is false for AICAP's trigger-less configuration", () => {
+    expect(isTaggedByTriggerOnly([{ extensionName: "w", tag: "w" } as any])).toBe(
+      false,
+    );
+  });
+
+  it("is false when there is no configuration at all", () => {
+    // An empty set means the configuration entities have not resolved yet; hiding the
+    // button here would make it flicker in once they do.
+    expect(isTaggedByTriggerOnly([])).toBe(false);
+  });
+});
 
 describe("createInlineTagSuggestionExtension", () => {
   it("gives every trigger its own plugin key", async () => {
