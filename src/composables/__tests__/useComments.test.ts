@@ -14,9 +14,8 @@ vi.mock("@/composables/useAuth", () => ({
   useAuth: () => ({ getUserName: () => "Tester" }),
 }));
 
-const { groupComments, extractTaggedRelations } = await import(
-  "../useComments"
-);
+const { groupComments, extractTaggedRelations, flattenRelationsExceptTags } =
+  await import("../useComments");
 
 const comment = (
   id: string,
@@ -32,6 +31,36 @@ const comment = (
       ? { refSubject: [{ key: subjectId, type: "refSubject" }] }
       : {}),
   },
+});
+
+describe("flattenRelationsExceptTags", () => {
+  it("keeps an editStatus on every surviving relation", () => {
+    // BaseRelationValuesInput.editStatus is non-null, so a relation without one fails
+    // variable coercion before the mutation is ever sent — which is what broke
+    // resolving a thread.
+    const relations = flattenRelationsExceptTags(
+      comment("CMT-a", { subjectId: "CMT-x" }),
+      ["refTaggedUsers"],
+    );
+
+    expect(relations.length).toBe(2);
+    for (const relation of relations) {
+      expect(relation.editStatus).toBeTruthy();
+    }
+  });
+
+  it("drops the tag relations it is asked to replace", () => {
+    const withTags = comment("CMT-a");
+    withTags.relationValues.refTaggedUsers = [
+      { key: "U-1", type: "refTaggedUsers" },
+    ];
+
+    const relations = flattenRelationsExceptTags(withTags, ["refTaggedUsers"]);
+
+    expect(relations.map((relation: any) => relation.type)).toEqual([
+      "refParentEntity",
+    ]);
+  });
 });
 
 describe("groupComments", () => {
