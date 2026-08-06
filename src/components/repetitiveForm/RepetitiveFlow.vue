@@ -228,9 +228,7 @@ const selectedFinalizeType = ref<RepetitiveCreatableType | null>(null);
 const start = () => {
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
-  // linear flows skip the overview and run a single pass straight from step 1;
-  // other flows open on the overview so staged branches are visible
-  view.value = store.isLinear() ? "step" : "overview";
+  view.value = store.opensOnFirstStep() ? "step" : "overview";
 };
 
 const advance = async (completeCurrentStep: () => void = store.completeStep) => {

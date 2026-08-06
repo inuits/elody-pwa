@@ -446,6 +446,9 @@ export const useRepetitiveForm = () => {
 
   const isLinear = (): boolean => Boolean(flowConfig.value?.linear);
 
+  const opensOnFirstStep = (): boolean =>
+    isLinear() || Boolean(flowConfig.value?.startOnFirstStep);
+
   const routeTarget = (): StagedEntity | null => {
     const routeKey = flowConfig.value?.routeToStep;
     if (routeKey) return staged(routeKey)[0] ?? null;
@@ -570,6 +573,7 @@ export const useRepetitiveForm = () => {
     stagePendingHostRelation,
     commitPendingHostRelations,
     isLinear,
+    opensOnFirstStep,
     routeTarget,
     createForStep,
     collectedFor,

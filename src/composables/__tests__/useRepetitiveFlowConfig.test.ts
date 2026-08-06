@@ -334,6 +334,44 @@ describe("toRepetitiveFormConfig", () => {
     expect(config.routeToStep).toBeUndefined();
   });
 
+  it("carries startOnFirstStep from the raw response", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: true,
+      startOnFirstStep: true,
+      author: [{ __typename: "RepetitiveStep", key: "author", entityType: "person" }],
+    });
+    expect(config.startOnFirstStep).toBe(true);
+  });
+
+  it("defaults startOnFirstStep to false when the echo is absent or false", () => {
+    const absent = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: true,
+      author: [{ __typename: "RepetitiveStep", key: "author", entityType: "person" }],
+    });
+    expect(absent.startOnFirstStep).toBe(false);
+    // the echo resolver returns false when the client omits the input
+    const echoed = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: true,
+      startOnFirstStep: false,
+      author: [{ __typename: "RepetitiveStep", key: "author", entityType: "person" }],
+    });
+    expect(echoed.startOnFirstStep).toBe(false);
+  });
+
+  it("does not mistake startOnFirstStep for a step (it is not an array)", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: true,
+      startOnFirstStep: true,
+      author: [{ __typename: "RepetitiveStep", key: "author", entityType: "person" }],
+    });
+    expect(config.steps).toHaveLength(1);
+    expect(config.steps[0].key).toBe("author");
+  });
+
   it("carries a finalizeOnHost terminal (stripping __typename)", () => {
     const config = toRepetitiveFormConfig({
       __typename: "RepetitiveForm",

@@ -507,6 +507,28 @@ describe("useRepetitiveForm", () => {
     expect(store.isLinear()).toBe(false);
   });
 
+  // `linear` opens on step 1 *and* skips the overview/finalize entirely;
+  // `startOnFirstStep` only moves the entry point of an overview flow, so a
+  // repeatable flow can skip the empty overview and still come back to it.
+  it("opensOnFirstStep is true for a linear flow", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    expect(store.opensOnFirstStep()).toBe(true);
+  });
+
+  it("opensOnFirstStep is true for an overview flow that configures startOnFirstStep", () => {
+    const store = useRepetitiveForm();
+    store.initFlow({ ...omnibusConfig(), startOnFirstStep: true });
+    expect(store.isLinear()).toBe(false);
+    expect(store.opensOnFirstStep()).toBe(true);
+  });
+
+  it("opensOnFirstStep is false for an overview flow without the flag", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(omnibusConfig());
+    expect(store.opensOnFirstStep()).toBe(false);
+  });
+
   it("buildCreateRelations includes 'always' relations", () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());

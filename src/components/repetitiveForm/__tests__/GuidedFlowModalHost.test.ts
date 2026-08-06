@@ -178,6 +178,7 @@ describe("GuidedFlowModalHost", () => {
     expect(flow(wrapper).props("config")).toEqual({
       repeatable: true,
       linear: false,
+      startOnFirstStep: false,
       refetchOnFinish: false,
       steps: [
         { key: "work", entityType: "work", createForm: "GetWorkCreationForm" },
