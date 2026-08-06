@@ -234,6 +234,13 @@
           </div>
         </div>
         <div
+          v-if="showBasicModePagination"
+          data-test="basic-library-pagination"
+          class="flex justify-center pt-2"
+        >
+          <BasePaginationNew />
+        </div>
+        <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
           class="flex-1 min-h-0"
           data-cy="base-library-grid-container"
@@ -325,13 +332,6 @@
             :setPaginationLimit="setPaginationLimit"
             :setAdvancedFilters="setAdvancedFilters"
           />
-        </div>
-        <div
-          v-if="showBasicModePagination"
-          data-test="basic-library-pagination"
-          class="flex justify-center pt-2"
-        >
-          <BasePaginationNew />
         </div>
       </div>
     </div>
@@ -747,12 +747,6 @@ const {
   persistExpandFilters: props.persistExpandFilters,
 });
 
-// Basic library modes (used for embedded relation panels, e.g. the
-// manifestations-linked-as-serie list on a Title/reeks detail page) do not
-// render the LibraryBar or the BulkOperationsActionsBar, so they lack the page
-// navigation those hosts provide. Without it the list is stuck on page one and
-// only ever shows the first page of related entities. Render a standalone
-// pagination control for these modes whenever the results span multiple pages.
 const showBasicModePagination = computed(
   () =>
     !props.predefinedEntities &&
