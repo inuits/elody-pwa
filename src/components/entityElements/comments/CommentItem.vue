@@ -2,14 +2,19 @@
   <div
     :class="[
       'rounded-md border border-neutral-30 bg-background-light p-3',
-      { 'cursor-pointer hover:border-accent-normal transition-colors': clickable },
+      {
+        'cursor-pointer hover:border-accent-normal transition-colors':
+          clickable,
+      },
     ]"
     @click="clickable && emit('open')"
   >
     <div class="flex items-baseline justify-between gap-2">
       <div class="flex items-baseline gap-2 min-w-0">
         <span class="font-bold text-text-body truncate">
-          {{ comment.intialValues?.author_name || t("comments.unknown-author") }}
+          {{
+            comment.intialValues?.author_name || t("comments.unknown-author")
+          }}
         </span>
         <span class="text-sm text-text-placeholder shrink-0">
           {{ formattedDate }}
@@ -66,7 +71,12 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
-import type { Comment, CommentStatus } from "@/composables/useComments";
+import {
+  tagElementName,
+  type Comment,
+  type CommentStatus,
+} from "@/composables/useComments";
+import { convertDateToReadbleFormat } from "@/helpers";
 import {
   type Entitytyping,
   SanitizeMode,
@@ -94,21 +104,24 @@ const emit = defineEmits<{
   "open-entity": [entityId: string, entityType: Entitytyping];
 }>();
 
-const { t, d } = useI18n();
+const { t } = useI18n();
 
 // Only the element names this composer's configuration can actually produce, so the
 // allowlist stays closed rather than becoming a blanket `elody-*`.
 const allowedTagElements = computed<string[]>(() =>
   (props.taggableEntityConfiguration ?? [])
     .filter((configuration) => configuration.tag)
-    .map((configuration) => `elody-${configuration.tag}`),
+    .map((configuration) => tagElementName(configuration.tag!)),
 );
 
+// The shared formatter, not vue-i18n's d(): no datetimeFormats are registered on this app
+// (setupI18n in helpers.ts), so a named format key resolves to nothing.
 const formattedDate = computed<string>(() => {
   const createdAt = props.comment.intialValues?.created_at;
   if (!createdAt) return "";
-  const date = new Date(createdAt);
-  return isNaN(date.getTime()) ? String(createdAt) : d(date, "short");
+  // Intl.DateTimeFormat throws on an invalid date, so an unparseable value is shown raw.
+  if (isNaN(new Date(createdAt).getTime())) return String(createdAt);
+  return convertDateToReadbleFormat(createdAt, "DEFAULT", true);
 });
 
 const handleBodyClick = (event: MouseEvent) => {
@@ -125,7 +138,8 @@ const handleBodyClick = (event: MouseEvent) => {
   // existed, and for statically typed configurations.
   const configuration = (props.taggableEntityConfiguration ?? []).find(
     (candidate) =>
-      `elody-${candidate.tag}` === tagElement.tagName.toLowerCase(),
+      !!candidate.tag &&
+      tagElementName(candidate.tag) === tagElement.tagName.toLowerCase(),
   );
   const entityType = (tagElement.getAttribute("data-entity-type") ??
     configuration?.taggableEntityType) as Entitytyping | undefined;
