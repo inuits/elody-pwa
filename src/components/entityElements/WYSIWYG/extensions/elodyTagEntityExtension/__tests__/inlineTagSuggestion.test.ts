@@ -9,6 +9,7 @@ import { ref as vueRef } from "vue";
 import {
   createInlineTagSuggestionExtension,
   isTaggedByTriggerOnly,
+  suggestionStateFor,
 } from "../inlineTagSuggestion";
 
 // Deliberately no extensionName: that field is only assigned when the node extensions are
@@ -28,6 +29,34 @@ const pluginsFor = async (configurations: any[]) => {
   // addProseMirrorPlugins reads `this.editor`; nothing in it runs at construction time.
   return extension!.config.addProseMirrorPlugins!.call({ editor: {} } as any);
 };
+
+describe("suggestionStateFor", () => {
+  const propsWith = (query: string) => ({
+    query,
+    range: { from: 1, to: 2 },
+    editor: { view: { coordsAtPos: () => ({ left: 5, bottom: 9 }) } },
+  });
+
+  it("stays closed until minCharacters is typed", () => {
+    // The bare trigger character is the case that mattered: it used to open the
+    // dropdown and search for the empty string, matching everything.
+    const configuration = configurationWithTrigger("entity", "#");
+    configuration.inlineTrigger.minCharacters = 2;
+
+    expect(suggestionStateFor(configuration, propsWith(""))).toBeNull();
+    expect(suggestionStateFor(configuration, propsWith("h"))).toBeNull();
+    expect(suggestionStateFor(configuration, propsWith("he"))).toMatchObject({
+      query: "he",
+    });
+  });
+
+  it("requires one character when no minimum is configured", () => {
+    const configuration = { extensionName: "w", tag: "w", inlineTrigger: { character: "@" } } as any;
+
+    expect(suggestionStateFor(configuration, propsWith(""))).toBeNull();
+    expect(suggestionStateFor(configuration, propsWith("a"))).not.toBeNull();
+  });
+});
 
 describe("isTaggedByTriggerOnly", () => {
   it("is true when every configuration has a trigger", () => {

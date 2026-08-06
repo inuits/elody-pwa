@@ -125,6 +125,14 @@ const filtersFor = (
   state: NonNullable<InlineSuggestionState>,
 ): AdvancedFilterInput[] | undefined => {
   if (state.configuration.taggableEntityType !== Entitytyping.BaseEntity) {
+    // A typed configuration has nothing else to search on, so a missing key would mean
+    // a text filter with no key: every entity of the type, whatever was typed.
+    if (!state.configuration.metadataFilterForTagContent) {
+      console.error(
+        `[elody-tagging] configuration for "${state.configuration.tag}" needs metadataFilterForTagContent to search on`,
+      );
+      return undefined;
+    }
     return [
       {
         type: AdvancedFilterTypes.Type,
