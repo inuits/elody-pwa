@@ -39,7 +39,7 @@
         :force-show-filters="step.pickerFiltersCollapsed !== undefined ? !step.pickerFiltersCollapsed : false"
         :computed-filters="computedFilters"
         :show-button="true"
-        :selection-enabled="step.maxSelection === -1 ? true : step.maxSelection >= 1"
+        :selection-enabled="!step.maxSelection || step.maxSelection === -1 || step.maxSelection >= 1"
         :enable-bulk-operations="true"
         :enable-advanced-filters="true"
         :entity-picker-mode="EntityPickerMode.Emit"
