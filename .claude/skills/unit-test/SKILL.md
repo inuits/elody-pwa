@@ -81,7 +81,8 @@ describe("MyComponent", () => {
 | Composable with `onMounted`/`provide` | `withSetup` helper — see [composable-testing](references/composable-testing.md) |
 | Mock entire module | `vi.mock(...)` |
 | Composable calls `loadDocument`/`loadQuery` (`useImport`) | mock `@/composables/useImport` — see [mocking](references/mocking.md#always-mock-useimport--never-let-it-hit-the-real-generated-types-file) |
-| Keep real module, override one export | `vi.mock` + `importActual` — see [mocking](references/mocking.md) |
+| Keep real module, override one export | `vi.mock` + `importActual` — must `await` it, see [mocking](references/mocking.md) |
+| Mock `@/main` | fully static, no `importActual` — it self-invokes app bootstrap, see [mocking](references/mocking.md#never-partial-mock-main--it-self-invokes-app-bootstrap) |
 | Mock value differs between tests | `vi.hoisted` — see [mocking](references/mocking.md) |
 | Apollo `useQuery`/`useMutation` | see [apollo-testing](references/apollo-testing.md) |
 | Async ops / API calls | `await flushPromises()` |

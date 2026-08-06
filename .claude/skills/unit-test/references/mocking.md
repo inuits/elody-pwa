@@ -57,6 +57,43 @@ vi.mock(import("@/helpers"), async (importOriginal) => {
 });
 ```
 
+**Always `await` `importOriginal()`/`vi.importActual()`.** If the factory isn't `async` or the call
+isn't awaited, the real module import still fires — just as an orphaned, untracked background
+promise. If that promise settles *after* Vitest tears down that test file's environment (a timing
+race that depends on machine load), you get an `EnvironmentTeardownError`, attributed to whatever
+test happens to be running at that moment, not the test that actually caused it. This reliably
+passes locally and fails intermittently in CI, which is what makes it easy to miss:
+
+```typescript
+// BROKEN — actualModule is a Promise; the real import is never awaited
+vi.mock("@/helpers", () => {
+  const actualModule = vi.importActual("@/helpers"); // ❌ no await, no async factory
+  return { ...actualModule, someExport: vi.fn() };
+});
+```
+
+## Never partial-mock `@/main` — it self-invokes app bootstrap
+
+`src/main.ts` calls `start()` unconditionally at module scope (real router/App creation, network
+calls via `getApplicationDetails()`, etc.). Partial-mocking it with `importActual`/`importOriginal`
+actually executes that bootstrap in the test process — at best slow, at worst it throws confusing
+errors deep in unrelated composables (e.g. `usePermissions is not a function`). Combined with the
+unawaited-import pitfall above, this was the exact cause of a flaky-CI-only test failure.
+
+`@/main`'s exports (`apolloClient`, `auth`, `router`, `i18n`, ...) are just live bindings — tests
+only need shaped stand-ins, never the real thing. Mock it fully static, no `importActual`:
+
+```typescript
+vi.mock("@/main", () => ({
+  apolloClient: {
+    query: vi.fn().mockResolvedValue({ data: {} }),
+  },
+  auth: {
+    isAuthenticated: ref(true),
+  },
+}));
+```
+
 ## Mock a default export
 
 ```typescript
