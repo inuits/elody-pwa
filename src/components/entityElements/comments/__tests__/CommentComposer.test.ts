@@ -9,6 +9,7 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
+import { reactive } from "vue";
 
 vi.mock("@/main", () => ({ apolloClient: {} }));
 
@@ -27,11 +28,13 @@ vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
     createForm: (key: string, values: any) => {
       createdForms.push(key);
-      const form = {
+      // reactive: the composer reads the body through a computed over getForm(), so a
+      // plain object would never re-track when a test types into the form.
+      const form = reactive({
         values,
         setFieldValue: vi.fn(),
         meta: { initialValues: values },
-      };
+      });
       formStore.set(key, form);
       return form;
     },
@@ -89,6 +92,7 @@ const mountComposer = (props: Record<string, unknown> = {}) =>
       scratchFormId: "comment-new-W-1",
       composer: composerElement,
       submitLabel: "Post",
+      onSubmit: vi.fn(),
       ...props,
     },
     // The editor child must NOT be stubbed: its mounted hook is what records whether
@@ -123,6 +127,52 @@ describe("CommentComposer", () => {
     expect(formStore.get("comment-edit-CMT-9").values.intialValues.body).toBe(
       "<p>existing</p>",
     );
+
+    wrapper.unmount();
+  });
+
+  it("clears itself only after the post resolves, never before", async () => {
+    formStore.clear();
+    let resolvePost: () => void = () => {};
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolvePost = resolve;
+        }),
+    );
+
+    const wrapper = mountComposer({ scratchFormId: "comment-new-W-2", onSubmit });
+    const form = formStore.get("comment-new-W-2");
+    form.values.intialValues.body = "<p>hello</p>";
+    await wrapper.vm.$nextTick();
+
+    await wrapper.find("button").trigger("click");
+    expect(onSubmit).toHaveBeenCalledWith("<p>hello</p>", []);
+    // Clearing here would throw the author's text away if the request then failed.
+    expect(form.setFieldValue).not.toHaveBeenCalled();
+
+    resolvePost();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(form.setFieldValue).toHaveBeenCalledWith("intialValues.body", "");
+
+    wrapper.unmount();
+  });
+
+  it("leaves an edit composer's content alone, since its parent unmounts it", async () => {
+    formStore.clear();
+    const onSubmit = vi.fn(() => Promise.resolve());
+
+    const wrapper = mountComposer({
+      scratchFormId: "comment-edit-CMT-3",
+      initialBody: "<p>existing</p>",
+      onSubmit,
+    });
+
+    await wrapper.find("button").trigger("click");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onSubmit).toHaveBeenCalled();
+    expect(formStore.get("comment-edit-CMT-3").setFieldValue).not.toHaveBeenCalled();
 
     wrapper.unmount();
   });

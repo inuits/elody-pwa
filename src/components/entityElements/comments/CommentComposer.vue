@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-2">
     <entity-element-w-y-s-i-w-y-g
-      :key="scratchFormId"
+      :key="`${scratchFormId}-${resetCount}`"
       :form-id="scratchFormId"
       :element="composerElement"
       :display-inline="true"
@@ -35,6 +35,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { extractTaggedRelations } from "@/composables/useComments";
 import {
   DamsIcons,
+  ValidationFields,
   type BaseRelationValuesInput,
   type WysiwygElement,
 } from "@/generated-types/queries";
@@ -53,6 +54,16 @@ const props = withDefaults(
     initialBody?: string;
     submitLabel: string;
     cancellable?: boolean;
+    /**
+     * A prop rather than an emit so its promise can be awaited: the composer may only
+     * clear itself once the comment is actually stored, or a failed post would silently
+     * discard what the author typed. Parents still bind it as `@submit`, which Vue
+     * resolves to this prop.
+     */
+    onSubmit: (
+      body: string,
+      taggedRelations: BaseRelationValuesInput[],
+    ) => unknown;
   }>(),
   {
     initialBody: "",
@@ -61,7 +72,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  submit: [body: string, taggedRelations: BaseRelationValuesInput[]];
   cancel: [];
 }>();
 
@@ -90,19 +100,37 @@ const hasContent = computed<boolean>(() => {
   return text.length > 0 || currentBody.value.includes("data-entity-id");
 });
 
-const submit = () => {
+/**
+ * Remount count for the editor. The form-value-to-editor watch in EntityElementWYSIWYG
+ * only fires while NOT in edit mode, and a composer is always editing, so writing "" to
+ * the form does not reach the editor — the editor has to be rebuilt from the cleared
+ * form. Cheap, since this only happens once per posted comment.
+ */
+const resetCount = ref<number>(0);
+
+const clear = () => {
+  getForm(props.scratchFormId)?.setFieldValue(
+    `${ValidationFields.IntialValues}.${bodyKey.value}`,
+    "",
+  );
+  resetCount.value += 1;
+};
+
+const submit = async () => {
   if (!hasContent.value || isSubmitting.value) return;
   isSubmitting.value = true;
   try {
     const body = currentBody.value;
-    emit(
-      "submit",
+    await props.onSubmit(
       body,
       extractTaggedRelations(
         body,
         props.composer.taggingConfiguration?.taggableEntityConfiguration ?? [],
       ),
     );
+    // Only a create composer clears; an edit composer is unmounted by its parent on
+    // success, so clearing it would just flash an empty editor on the way out.
+    if (!props.initialBody) clear();
   } finally {
     isSubmitting.value = false;
   }
