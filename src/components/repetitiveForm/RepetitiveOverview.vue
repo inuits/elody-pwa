@@ -82,6 +82,7 @@
 import { DamsIcons, type RepetitiveStep } from "@/generated-types/queries";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
+  primaryEntity,
   toDisplayValue,
   type RepetitiveBranch,
   type StagedEntityDetail,
@@ -99,7 +100,7 @@ const emit = defineEmits<{
 }>();
 
 const entityLabel = (branch: RepetitiveBranch, stepKey: string): string => {
-  const entity = branch.entities[stepKey];
+  const entity = primaryEntity(branch, stepKey);
   if (!entity) return "";
   return entity.label || entity.id;
 };
@@ -112,7 +113,7 @@ const overviewEntries = (
   branch: RepetitiveBranch,
   step: RepetitiveStep,
 ): StagedEntityDetail[] => {
-  const entity = branch.entities[step.key];
+  const entity = primaryEntity(branch, step.key);
   if (!entity) return [];
   if (step.overviewFields?.length) {
     const label = entityLabel(branch, step.key);

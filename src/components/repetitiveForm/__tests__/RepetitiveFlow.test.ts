@@ -129,9 +129,9 @@ const startBranch = async (w: ReturnType<typeof getWrapper>) => {
 
 const completeOneBranch = async (w: ReturnType<typeof getWrapper>) => {
   await startBranch(w);
-  field(w).vm.$emit("selected", { id: "work-1" });
+  field(w).vm.$emit("selected", [{ id: "work-1" }]);
   await flushPromises();
-  field(w).vm.$emit("selected", { id: "expr-1" });
+  field(w).vm.$emit("selected", [{ id: "expr-1" }]);
   await flushPromises();
 };
 
@@ -223,7 +223,7 @@ describe("RepetitiveFlow", () => {
   it("advances to the expression step when the field emits selected, with a scope filter", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
-    field(wrapper).vm.$emit("selected", { id: "work-1", label: "HP" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-1", label: "HP" }]);
     await flushPromises();
     expect(useRepetitiveForm().currentStepIndex.value).toBe(1);
     expect(field(wrapper).props("step").key).toBe("expression");
@@ -243,7 +243,7 @@ describe("RepetitiveFlow", () => {
       intialValues: { title: "Mooi werk", record_type: "tekst" },
     });
     await wrapper.vm.$nextTick();
-    expect(useRepetitiveForm().currentBranch.value.entities.work).toEqual({
+    expect(useRepetitiveForm().currentBranch.value.entities.work[0]).toEqual({
       key: "work",
       id: "work-9",
       type: Entitytyping.Work,
@@ -294,7 +294,7 @@ describe("RepetitiveFlow", () => {
   it("goes back from the second step to the first via the back button", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
-    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
     await flushPromises();
     expect(field(wrapper).props("step").key).toBe("expression");
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
@@ -306,7 +306,7 @@ describe("RepetitiveFlow", () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     await startBranch(wrapper);
-    field(wrapper).vm.$emit("selected", { id: "work-2" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-2" }]);
     await flushPromises();
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
@@ -428,13 +428,13 @@ describe("RepetitiveFlow — linear mode", () => {
 
   it("advances through the three steps and emits finished with the route target (work)", async () => {
     const wrapper = getLinearWrapper();
-    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
     await flushPromises();
     expect(field(wrapper).props("step").key).toBe("expression");
-    field(wrapper).vm.$emit("selected", { id: "expr-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "expr-1" }]);
     await flushPromises();
     expect(field(wrapper).props("step").key).toBe("manifestation");
-    field(wrapper).vm.$emit("selected", { id: "manif-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "manif-1" }]);
     await flushPromises();
     expect(wrapper.emitted("finished")?.[0]?.[0]).toMatchObject({
       id: "work-1",
@@ -445,9 +445,9 @@ describe("RepetitiveFlow — linear mode", () => {
 
   it("creating the entity at the last step also finishes and routes to the target", async () => {
     const wrapper = getLinearWrapper();
-    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
     await flushPromises();
-    field(wrapper).vm.$emit("selected", { id: "expr-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "expr-1" }]);
     await flushPromises();
     expect(field(wrapper).props("step").key).toBe("manifestation");
     // create (rather than select) the final manifestation
@@ -462,7 +462,7 @@ describe("RepetitiveFlow — linear mode", () => {
   it("does not add relations after create — the relation rides on the create prefill", async () => {
     manageMocks.addRelations.mockClear();
     const wrapper = getLinearWrapper();
-    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
     await flushPromises();
     // the expression create form is prefilled with the refWork relation, so the
     // single create call links it; no extra (replacing) relation call is made
@@ -478,7 +478,7 @@ describe("RepetitiveFlow — linear mode", () => {
 
   it("resets the store and local state when the modal closes", async () => {
     const wrapper = getLinearWrapper();
-    field(wrapper).vm.$emit("selected", { id: "work-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
     await flushPromises();
     expect(useRepetitiveForm().currentBranch.value.entities.work).toBeTruthy();
 
@@ -612,7 +612,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     values: Record<string, unknown> = { role: "booker_admin", function: "Coordinator" },
   ) => {
     await startBranch(wrapper);
-    field(wrapper).vm.$emit("selected", { id: "user-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "user-1" }]);
     await flushPromises();
     field(wrapper).vm.$emit("metadataSubmitted", values);
     await flushPromises();
@@ -621,7 +621,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
   it("advances to the metadataOnly step after picking the user", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await startBranch(wrapper);
-    field(wrapper).vm.$emit("selected", { id: "user-1" });
+    field(wrapper).vm.$emit("selected", [{ id: "user-1" }]);
     await flushPromises();
     expect(field(wrapper).props("step").key).toBe("role");
     expect(manageMocks.addRelations).not.toHaveBeenCalled();
@@ -652,6 +652,52 @@ describe("RepetitiveFlow — metadataOnly step", () => {
             { key: "function", value: "Coordinator" },
           ],
         },
+      ],
+    });
+  });
+
+  // the "add author" shape: the picker step has no maxSelection, so several
+  // people/corporations can be ticked in one pass and the single relation
+  // metadata form that follows applies to all of them
+  it("stages every entity of a multi-select pass as its own overview row", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [
+      { id: "user-1", label: "Jan" },
+      { id: "user-2", label: "Piet" },
+      { id: "user-3", label: "VZW Boekenclub" },
+    ]);
+    await flushPromises();
+    expect(field(wrapper).props("step").key).toBe("role");
+    field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
+    await flushPromises();
+
+    expect(overview(wrapper).exists()).toBe(true);
+    expect(overview(wrapper).props("branches")).toHaveLength(3);
+  });
+
+  it("links the host entity to every entity of a multi-select pass on Afronden", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "user-1" }, { id: "user-2" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
+    await flushPromises();
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+
+    const metadata = [{ key: "roles", value: ["booker_admin"] }];
+    expect(manageMocks.addRelations).toHaveBeenCalledTimes(2);
+    expect(manageMocks.addRelations).toHaveBeenNthCalledWith(1, {
+      entityId: "org-1",
+      relations: [
+        { key: "user-1", type: "refUsers", editStatus: "new", metadata },
+      ],
+    });
+    expect(manageMocks.addRelations).toHaveBeenNthCalledWith(2, {
+      entityId: "org-1",
+      relations: [
+        { key: "user-2", type: "refUsers", editStatus: "new", metadata },
       ],
     });
   });
@@ -698,7 +744,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper);
     const branch = useRepetitiveForm().branches.value[0];
-    expect(branch.entities.role).toMatchObject({
+    expect(branch.entities.role[0]).toMatchObject({
       key: "role",
       id: "",
       isNew: false,

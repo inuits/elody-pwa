@@ -106,8 +106,38 @@ export type PendingHostRelation = {
 };
 
 export type RepetitiveBranch = {
-  entities: Record<string, StagedEntity>;
+  entities: Record<string, StagedEntity[]>;
   pendingHostRelations: PendingHostRelation[];
+};
+
+export const entitiesFor = (
+  branch: RepetitiveBranch,
+  stepKey: string,
+): StagedEntity[] => branch.entities[stepKey] ?? [];
+
+export const primaryEntity = (
+  branch: RepetitiveBranch,
+  stepKey: string,
+): StagedEntity | undefined => entitiesFor(branch, stepKey)[0];
+
+export const fanOutBranch = (branch: RepetitiveBranch): RepetitiveBranch[] => {
+  const copyOf = (source: RepetitiveBranch): RepetitiveBranch => ({
+    entities: { ...source.entities },
+    pendingHostRelations: [...source.pendingHostRelations],
+  });
+  return Object.entries(branch.entities).reduce<RepetitiveBranch[]>(
+    (expanded, [stepKey, staged]) =>
+      staged.length === 0
+        ? expanded
+        : expanded.flatMap((current) =>
+            staged.map((entity) => {
+              const fanned = copyOf(current);
+              fanned.entities[stepKey] = [entity];
+              return fanned;
+            }),
+          ),
+    [{ entities: {}, pendingHostRelations: branch.pendingHostRelations }],
+  );
 };
 
 export const buildRelationMetadata = (
@@ -162,14 +192,19 @@ export const useRepetitiveForm = () => {
     return steps.length > 0 && currentStepIndex.value === steps.length - 1;
   };
 
+  const staged = (stepKey: string): StagedEntity[] =>
+    entitiesFor(currentBranch.value, stepKey);
+
   const canCompleteStep = (): boolean => {
     const step = activeStep();
     if (!step) return false;
-    return Boolean(currentBranch.value.entities[step.key]);
+    return staged(step.key).length > 0;
   };
 
   const finishBranch = () => {
-    branches.value.push(currentBranch.value);
+    // a step that staged several entities yields one branch per entity, so each
+    // gets its own overview row, its own delete button and its own relation
+    branches.value.push(...fanOutBranch(currentBranch.value));
     startNewBranch();
   };
 
@@ -196,26 +231,37 @@ export const useRepetitiveForm = () => {
   };
 
   const recordEntity = (entity: StagedEntity) => {
-    currentBranch.value.entities[entity.key] = entity;
+    currentBranch.value.entities[entity.key] = [entity];
   };
 
-  const pickExisting = (entity: {
-    id: string;
-    label?: string;
-    details?: StagedEntityDetail[];
-    values?: Record<string, unknown>;
-  }) => {
+  const recordEntities = (stepKey: string, entities: StagedEntity[]) => {
+    currentBranch.value.entities[stepKey] = entities;
+  };
+
+  // the picker emits its whole selection: every ticked entity is staged for
+  // this step, replacing any earlier selection
+  const pickExisting = (
+    picked: {
+      id: string;
+      label?: string;
+      details?: StagedEntityDetail[];
+      values?: Record<string, unknown>;
+    }[],
+  ) => {
     const step = activeStep();
-    if (!step) return;
-    recordEntity({
-      key: step.key,
-      id: entity.id,
-      type: step.entityType as Entitytyping,
-      label: entity.label,
-      details: entity.details,
-      values: entity.values,
-      isNew: false,
-    });
+    if (!step || picked.length === 0) return;
+    recordEntities(
+      step.key,
+      picked.map((entity) => ({
+        key: step.key,
+        id: entity.id,
+        type: step.entityType as Entitytyping,
+        label: entity.label,
+        details: entity.details,
+        values: entity.values,
+        isNew: false,
+      })),
+    );
   };
 
   const removeBranch = (index: number) => {
@@ -230,23 +276,24 @@ export const useRepetitiveForm = () => {
     step: RepetitiveStep,
   ): AdvancedFilterInput | null => {
     if (!step.scopeToRelationOf) return null;
-    const prior = currentBranch.value.entities[step.scopeToRelationOf.step];
-    if (!prior) return null;
+    const priors = staged(step.scopeToRelationOf.step);
+    if (priors.length === 0) return null;
     const filterKey =
       step.scopeToRelationOf.filterKey ??
       `elody:1|relations.${step.scopeToRelationOf.relationType}.key`;
     return {
       type: AdvancedFilterTypes.Selection,
       key: [filterKey],
-      value: [prior.id],
+      // a selection filter ORs its values: related to any of the prior picks
+      value: priors.map((prior) => prior.id),
       match_exact: true,
     };
   };
 
   const shouldSkipSearch = (step: RepetitiveStep): boolean => {
     if (!step.skipSearchIfPriorIsNew || !step.scopeToRelationOf) return false;
-    const prior = currentBranch.value.entities[step.scopeToRelationOf.step];
-    return Boolean(prior?.isNew);
+    const priors = staged(step.scopeToRelationOf.step);
+    return priors.length > 0 && priors.every((prior) => prior.isNew);
   };
 
   const buildCreateRelations = (
@@ -258,17 +305,13 @@ export const useRepetitiveForm = () => {
           relation.createWhen === RepetitiveRelationTrigger.OnCreate ||
           relation.createWhen === RepetitiveRelationTrigger.Always,
       )
-      .flatMap((relation) => {
-        const target = currentBranch.value.entities[relation.to];
-        if (!target) return [];
-        return [
-          {
-            key: target.id,
-            type: relation.relationType,
-            editStatus: EditStatus.New,
-          },
-        ];
-      });
+      .flatMap((relation) =>
+        staged(relation.to).map((target) => ({
+          key: target.id,
+          type: relation.relationType,
+          editStatus: EditStatus.New,
+        })),
+      );
 
   const recordCreated = (entity: {
     id?: string;
@@ -307,24 +350,25 @@ export const useRepetitiveForm = () => {
     triggers: RepetitiveRelationTrigger[],
     fieldValues: Record<string, unknown> = {},
   ): Promise<void> => {
-    const entity = currentBranch.value.entities[step.key];
-    if (!entity) return;
-    for (const relation of step.relations ?? []) {
-      if (!triggers.includes(relation.createWhen)) continue;
-      const prior = currentBranch.value.entities[relation.to];
-      if (!prior) continue;
-      const metadata = buildRelationMetadata(relation, fieldValues);
-      await addRelations({
-        entityId: entity.id,
-        relations: [
-          {
-            key: prior.id,
-            type: relation.relationType,
-            editStatus: EditStatus.New,
-            ...(metadata.length ? { metadata } : {}),
-          },
-        ],
-      });
+    // every entity staged for this step gets the same links to the prior step
+    for (const entity of staged(step.key)) {
+      for (const relation of step.relations ?? []) {
+        if (!triggers.includes(relation.createWhen)) continue;
+        const metadata = buildRelationMetadata(relation, fieldValues);
+        for (const prior of staged(relation.to)) {
+          await addRelations({
+            entityId: entity.id,
+            relations: [
+              {
+                key: prior.id,
+                type: relation.relationType,
+                editStatus: EditStatus.New,
+                ...(metadata.length ? { metadata } : {}),
+              },
+            ],
+          });
+        }
+      }
     }
   };
 
@@ -335,20 +379,20 @@ export const useRepetitiveForm = () => {
     fieldValues: Record<string, unknown>,
   ): Promise<void> => {
     for (const relation of step.relations ?? []) {
-      const target = branch.entities[relation.to];
-      if (!target) continue;
       const metadata = buildRelationMetadata(relation, fieldValues);
-      await addRelations({
-        entityId: hostEntityId,
-        relations: [
-          {
-            key: target.id,
-            type: relation.relationType,
-            editStatus: EditStatus.New,
-            ...(metadata.length ? { metadata } : {}),
-          },
-        ],
-      });
+      for (const target of entitiesFor(branch, relation.to)) {
+        await addRelations({
+          entityId: hostEntityId,
+          relations: [
+            {
+              key: target.id,
+              type: relation.relationType,
+              editStatus: EditStatus.New,
+              ...(metadata.length ? { metadata } : {}),
+            },
+          ],
+        });
+      }
     }
   };
 
@@ -402,13 +446,12 @@ export const useRepetitiveForm = () => {
   const isLinear = (): boolean => Boolean(flowConfig.value?.linear);
 
   const routeTarget = (): StagedEntity | null => {
-    const entities = currentBranch.value.entities;
     const routeKey = flowConfig.value?.routeToStep;
-    if (routeKey) return entities[routeKey] ?? null;
+    if (routeKey) return staged(routeKey)[0] ?? null;
     // no explicit target: route to the furthest staged step's entity
     const steps = flowConfig.value?.steps ?? [];
     for (let i = steps.length - 1; i >= 0; i--) {
-      const entity = entities[steps[i].key];
+      const entity = staged(steps[i].key)[0];
       if (entity) return entity;
     }
     return null;
@@ -434,9 +477,7 @@ export const useRepetitiveForm = () => {
   };
 
   const collectedFor = (stepKey: string): StagedEntity[] =>
-    branches.value
-      .map((branch) => branch.entities[stepKey])
-      .filter((entity): entity is StagedEntity => Boolean(entity));
+    branches.value.flatMap((branch) => entitiesFor(branch, stepKey));
 
   const buildFinalizeRelations = (): BaseRelationValuesInput[] => {
     const finalizeConfig = flowConfig.value?.finalize;
@@ -481,11 +522,13 @@ export const useRepetitiveForm = () => {
   ): Promise<{ id: string } | null> => {
     const config = flowConfig.value?.finalizeOnHost;
     if (!config || !hostId) return null;
-    const staged = currentBranch.value.entities[config.fromStep];
-    if (!staged) return null;
+    const stagedEntities = staged(config.fromStep);
+    if (stagedEntities.length === 0) return null;
     const form = getForm(hostId);
     if (!form) return null;
-    const items = [{ id: staged.id }] as InBulkProcessableItem[];
+    const items = stagedEntities.map(({ id }) => ({
+      id,
+    })) as InBulkProcessableItem[];
     if (config.replaceExisting)
       replaceRelationsFromSameType(items, config.relationType, hostId);
     else setFormRelations(items, config.relationType, hostId, true);
@@ -513,6 +556,8 @@ export const useRepetitiveForm = () => {
     completeStep,
     completeMetadataOnlyStep,
     recordEntity,
+    recordEntities,
+    stagedFor: staged,
     pickExisting,
     recordCreated,
     buildScopeFilter,

@@ -150,8 +150,8 @@ describe("useRepetitiveForm", () => {
   it("pickExisting records a selected entity under the active step key", () => {
     const { initFlow, pickExisting, currentBranch } = useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1", label: "Harry Potter" });
-    expect(currentBranch.value.entities.work).toEqual({
+    pickExisting([{ id: "work-1", label: "Harry Potter" }]);
+    expect(currentBranch.value.entities.work[0]).toEqual({
       key: "work",
       id: "work-1",
       type: Entitytyping.Work,
@@ -163,7 +163,7 @@ describe("useRepetitiveForm", () => {
   it("canCompleteStep is true after an entity is picked", () => {
     const { initFlow, pickExisting, canCompleteStep } = useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     expect(canCompleteStep()).toBe(true);
   });
 
@@ -171,7 +171,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, currentStepIndex } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep();
     expect(currentStepIndex.value).toBe(1);
   });
@@ -186,7 +186,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, activeStep, buildScopeFilter } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // now on expression step
     expect(buildScopeFilter(activeStep()!)).toEqual({
       type: "selection",
@@ -203,7 +203,7 @@ describe("useRepetitiveForm", () => {
     config.steps[1].scopeToRelationOf!.filterKey =
       "vlacc:1|properties.ref_work.value";
     initFlow(config);
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // now on expression step
     expect(buildScopeFilter(activeStep()!)).toEqual({
       type: "selection",
@@ -226,7 +226,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, activeStep, shouldSkipSearch } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" }); // existing → isNew false
+    pickExisting([{ id: "work-1" }]); // existing → isNew false
     completeStep();
     expect(shouldSkipSearch(activeStep()!)).toBe(false);
   });
@@ -235,7 +235,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, activeStep, buildCreateRelations } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // expression step
     expect(buildCreateRelations(activeStep()!)).toEqual([
       { key: "work-1", type: "refWork", editStatus: "new" },
@@ -253,7 +253,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, activeStep, createForStep, currentBranch } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // expression step
     const result = await createForStep(activeStep()!, [
       { key: "title", value: "Chamber of Secrets" },
@@ -264,7 +264,7 @@ describe("useRepetitiveForm", () => {
       relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
     });
     expect(result.id).toBe("expr-1");
-    expect(currentBranch.value.entities.expression).toEqual({
+    expect(currentBranch.value.entities.expression[0]).toEqual({
       key: "expression",
       id: "expr-1",
       type: Entitytyping.Expression,
@@ -278,14 +278,14 @@ describe("useRepetitiveForm", () => {
       useRepetitiveForm();
     initFlow(omnibusConfig());
 
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // → expression step
-    pickExisting({ id: "expr-1" });
+    pickExisting([{ id: "expr-1" }]);
     completeStep(); // last step → finish branch
 
     expect(branches.value).toHaveLength(1);
-    expect(branches.value[0].entities.work.id).toBe("work-1");
-    expect(branches.value[0].entities.expression.id).toBe("expr-1");
+    expect(branches.value[0].entities.work[0].id).toBe("work-1");
+    expect(branches.value[0].entities.expression[0].id).toBe("expr-1");
     expect(currentStepIndex.value).toBe(0);
     expect(currentBranch.value.entities).toEqual({});
   });
@@ -293,12 +293,14 @@ describe("useRepetitiveForm", () => {
   it("pickExisting stores the provided details", () => {
     const { initFlow, pickExisting, currentBranch } = useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({
-      id: "work-1",
-      label: "Harry Potter",
-      details: [{ label: "metadata.labels.author", value: "Rowling" }],
-    });
-    expect(currentBranch.value.entities.work.details).toEqual([
+    pickExisting([
+      {
+        id: "work-1",
+        label: "Harry Potter",
+        details: [{ label: "metadata.labels.author", value: "Rowling" }],
+      },
+    ]);
+    expect(currentBranch.value.entities.work[0].details).toEqual([
       { label: "metadata.labels.author", value: "Rowling" },
     ]);
   });
@@ -307,7 +309,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, startNewBranch, currentBranch, currentStepIndex } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     startNewBranch();
     expect(currentBranch.value.entities).toEqual({});
     expect(currentStepIndex.value).toBe(0);
@@ -316,13 +318,13 @@ describe("useRepetitiveForm", () => {
   const buildTwoBranches = () => {
     const store = useRepetitiveForm();
     store.initFlow(omnibusConfig());
-    store.pickExisting({ id: "work-1" });
+    store.pickExisting([{ id: "work-1" }]);
     store.completeStep();
-    store.pickExisting({ id: "expr-1" });
+    store.pickExisting([{ id: "expr-1" }]);
     store.completeStep(); // branch 1 done
-    store.pickExisting({ id: "work-2" });
+    store.pickExisting([{ id: "work-2" }]);
     store.completeStep();
-    store.pickExisting({ id: "expr-2" });
+    store.pickExisting([{ id: "expr-2" }]);
     store.completeStep(); // branch 2 done
     return store;
   };
@@ -339,7 +341,7 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, goToPreviousStep, currentStepIndex } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // expression step
     expect(currentStepIndex.value).toBe(1);
     goToPreviousStep();
@@ -352,7 +354,7 @@ describe("useRepetitiveForm", () => {
     const { removeBranch, branches } = buildTwoBranches();
     removeBranch(0);
     expect(branches.value).toHaveLength(1);
-    expect(branches.value[0].entities.work.id).toBe("work-2");
+    expect(branches.value[0].entities.work[0].id).toBe("work-2");
   });
 
   it("buildFinalizeRelations links the container to all collected expressions", () => {
@@ -389,10 +391,10 @@ describe("useRepetitiveForm", () => {
     const { initFlow, pickExisting, completeStep, recordCreated, currentBranch } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // expression step
     recordCreated({ id: "expr-1", label: "Chamber of Secrets" });
-    expect(currentBranch.value.entities.expression).toEqual({
+    expect(currentBranch.value.entities.expression[0]).toEqual({
       key: "expression",
       id: "expr-1",
       type: Entitytyping.Expression,
@@ -405,15 +407,15 @@ describe("useRepetitiveForm", () => {
     const { initFlow, recordCreated, currentBranch } = useRepetitiveForm();
     initFlow(omnibusConfig());
     recordCreated({ uuid: "work-9" });
-    expect(currentBranch.value.entities.work.id).toBe("work-9");
-    expect(currentBranch.value.entities.work.isNew).toBe(true);
+    expect(currentBranch.value.entities.work[0].id).toBe("work-9");
+    expect(currentBranch.value.entities.work[0].isNew).toBe(true);
   });
 
   it("buildCreatePrefill groups onCreate relations into relationValues", () => {
     const { initFlow, pickExisting, completeStep, activeStep, buildCreatePrefill } =
       useRepetitiveForm();
     initFlow(omnibusConfig());
-    pickExisting({ id: "work-1" });
+    pickExisting([{ id: "work-1" }]);
     completeStep(); // expression step
     expect(buildCreatePrefill(activeStep()!)).toEqual({
       relationValues: {
@@ -507,7 +509,7 @@ describe("useRepetitiveForm", () => {
   it("buildCreateRelations includes 'always' relations", () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
-    store.pickExisting({ id: "work-1" });
+    store.pickExisting([{ id: "work-1" }]);
     store.completeStep(); // expression step
     expect(store.buildCreateRelations(store.activeStep()!)).toEqual([
       { key: "work-1", type: "refWork", editStatus: "new" },
@@ -517,9 +519,9 @@ describe("useRepetitiveForm", () => {
   it("linkOnSelect patches the picked entity's relation to the prior step", async () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
-    store.pickExisting({ id: "work-1" });
+    store.pickExisting([{ id: "work-1" }]);
     store.completeStep(); // expression step
-    store.pickExisting({ id: "expr-7" }); // existing expression picked at this step
+    store.pickExisting([{ id: "expr-7" }]); // existing expression picked at this step
     await store.linkOnSelect(store.activeStep()!);
     expect(mocks.addRelations).toHaveBeenCalledWith({
       entityId: "expr-7",
@@ -530,7 +532,7 @@ describe("useRepetitiveForm", () => {
   it("linkOnSelect is a no-op for a step without onSelect/always relations", async () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
-    store.pickExisting({ id: "work-1" }); // work step has no relations
+    store.pickExisting([{ id: "work-1" }]); // work step has no relations
     await store.linkOnSelect(store.activeStep()!);
     expect(mocks.addRelations).not.toHaveBeenCalled();
   });
@@ -539,7 +541,7 @@ describe("useRepetitiveForm", () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
     store.currentStepIndex.value = 1; // expression step, but no work staged
-    store.pickExisting({ id: "expr-7" });
+    store.pickExisting([{ id: "expr-7" }]);
     await store.linkOnSelect(store.activeStep()!);
     expect(mocks.addRelations).not.toHaveBeenCalled();
   });
@@ -547,7 +549,7 @@ describe("useRepetitiveForm", () => {
   it("linkAfterCreate links a created entity's onCreate/always relations to the prior step", async () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
-    store.pickExisting({ id: "work-1" });
+    store.pickExisting([{ id: "work-1" }]);
     store.completeStep(); // expression step
     store.recordCreated({ id: "expr-9" }); // newly created expression
     await store.linkAfterCreate(store.activeStep()!);
@@ -588,9 +590,9 @@ describe("useRepetitiveForm", () => {
   it("linkOnSelect attaches relation metadata built from the given field values", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithRelationMetadata());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
-    store.pickExisting({ id: "role-1" }); // step's own "entity" (metadata-only steps still need an id today)
+    store.pickExisting([{ id: "role-1" }]); // step's own "entity" (metadata-only steps still need an id today)
     await store.linkOnSelect(store.activeStep()!, {
       role: "booker_admin",
       function: "Coordinator",
@@ -618,9 +620,9 @@ describe("useRepetitiveForm", () => {
   it("linkOnSelect omits metadata when the field values are missing", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithRelationMetadata());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
-    store.pickExisting({ id: "role-1" });
+    store.pickExisting([{ id: "role-1" }]);
     await store.linkOnSelect(store.activeStep()!);
     expect(mocks.addRelations).toHaveBeenCalledWith({
       entityId: "role-1",
@@ -631,9 +633,9 @@ describe("useRepetitiveForm", () => {
   it("linkOnSelect omits metadata when only some field values are set", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithRelationMetadata());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
-    store.pickExisting({ id: "role-1" });
+    store.pickExisting([{ id: "role-1" }]);
     await store.linkOnSelect(store.activeStep()!, { role: "booker_member" });
     expect(mocks.addRelations).toHaveBeenCalledWith({
       entityId: "role-1",
@@ -689,7 +691,7 @@ describe("useRepetitiveForm", () => {
   it("stagePendingHostRelation defers the call: nothing is persisted until commit", () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step (metadataOnly, no entity of its own)
     store.stagePendingHostRelation(store.activeStep()!, {
       role: "booker_admin",
@@ -706,7 +708,7 @@ describe("useRepetitiveForm", () => {
     // this simulated post-emit mutation would wipe out the staged values too.
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
     const liveFormValues: Record<string, unknown> = {
       role: "booker_admin",
@@ -737,7 +739,7 @@ describe("useRepetitiveForm", () => {
   it("commitPendingHostRelations links the host entity to an earlier step's staged entity, with metadata", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
     store.stagePendingHostRelation(store.activeStep()!, {
       role: "booker_admin",
@@ -764,7 +766,7 @@ describe("useRepetitiveForm", () => {
   it("commitPendingHostRelations omits metadata when no field values are given", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
     store.stagePendingHostRelation(store.activeStep()!, {});
     store.completeMetadataOnlyStep();
@@ -778,7 +780,7 @@ describe("useRepetitiveForm", () => {
   it("commitPendingHostRelations is a no-op when a branch was removed before committing", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
     store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
     store.completeMetadataOnlyStep();
@@ -790,12 +792,12 @@ describe("useRepetitiveForm", () => {
   it("commitPendingHostRelations commits every branch staged via add-another, not just the first", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep();
     store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
     store.completeMetadataOnlyStep();
     store.startNewBranch(); // simulate "add another"
-    store.pickExisting({ id: "user-2" });
+    store.pickExisting([{ id: "user-2" }]);
     store.completeStep();
     store.stagePendingHostRelation(store.activeStep()!, { role: "booker_member" });
     store.completeMetadataOnlyStep();
@@ -804,16 +806,181 @@ describe("useRepetitiveForm", () => {
     expect(mocks.addRelations).toHaveBeenCalledTimes(2);
   });
 
+  // A picker step without maxSelection lets the user tick several entities in
+  // one pass (e.g. add three authors at once). All of them are staged, the
+  // following steps apply to each of them, and finishing the branch fans it
+  // out into one branch per picked entity — so every one gets its own overview
+  // row and its own relation.
+
+  it("pickExisting stages every picked entity under the active step key", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([{ id: "user-1" }, { id: "user-2" }, { id: "user-3" }]);
+    expect(store.currentBranch.value.entities.user.map((e) => e.id)).toEqual([
+      "user-1",
+      "user-2",
+      "user-3",
+    ]);
+    expect(store.canCompleteStep()).toBe(true);
+  });
+
+  it("pickExisting replaces an earlier selection for the same step", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([{ id: "user-1" }, { id: "user-2" }]);
+    store.pickExisting([{ id: "user-3" }]);
+    expect(store.currentBranch.value.entities.user.map((e) => e.id)).toEqual([
+      "user-3",
+    ]);
+  });
+
+  it("finishing a branch fans a multi-pick out into one branch per picked entity", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([
+      { id: "user-1", label: "Jan" },
+      { id: "user-2", label: "Piet" },
+    ]);
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep(); // last step → finish branch
+
+    expect(store.branches.value).toHaveLength(2);
+    expect(store.branches.value.map((branch) => branch.entities.user[0])).toMatchObject([
+      { id: "user-1", label: "Jan" },
+      { id: "user-2", label: "Piet" },
+    ]);
+    // the metadata entered once is carried by every fanned-out branch
+    expect(store.branches.value[0].pendingHostRelations).toHaveLength(1);
+    expect(store.branches.value[1].pendingHostRelations).toHaveLength(1);
+  });
+
+  it("commitPendingHostRelations creates one host relation per picked entity, all with the same metadata", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([{ id: "user-1" }, { id: "user-2" }]);
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, {
+      role: "booker_admin",
+      function: "Coordinator",
+    });
+    store.completeMetadataOnlyStep();
+
+    await store.commitPendingHostRelations("org-1");
+    const metadata = [
+      { key: "roles", value: ["booker_admin"] },
+      { key: "function", value: "Coordinator" },
+    ];
+    expect(mocks.addRelations).toHaveBeenCalledTimes(2);
+    expect(mocks.addRelations).toHaveBeenNthCalledWith(1, {
+      entityId: "org-1",
+      relations: [
+        { key: "user-1", type: "refUsers", editStatus: "new", metadata },
+      ],
+    });
+    expect(mocks.addRelations).toHaveBeenNthCalledWith(2, {
+      entityId: "org-1",
+      relations: [
+        { key: "user-2", type: "refUsers", editStatus: "new", metadata },
+      ],
+    });
+  });
+
+  it("removeBranch drops a single picked entity of a fanned-out multi-pick", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([{ id: "user-1" }, { id: "user-2" }]);
+    store.completeStep();
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep();
+
+    store.removeBranch(0);
+    expect(store.branches.value).toHaveLength(1);
+    await store.commitPendingHostRelations("org-1");
+    expect(mocks.addRelations).toHaveBeenCalledTimes(1);
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "org-1",
+      relations: [
+        {
+          key: "user-2",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [{ key: "roles", value: ["booker_admin"] }],
+        },
+      ],
+    });
+  });
+
+  it("linkOnSelect links every picked entity of a multi-pick to the prior step", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(linearConfig());
+    store.pickExisting([{ id: "work-1" }]);
+    store.completeStep(); // expression step
+    store.pickExisting([{ id: "expr-1" }, { id: "expr-2" }]);
+    await store.linkOnSelect(store.activeStep()!);
+    expect(mocks.addRelations).toHaveBeenCalledTimes(2);
+    expect(mocks.addRelations).toHaveBeenNthCalledWith(1, {
+      entityId: "expr-1",
+      relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+    });
+    expect(mocks.addRelations).toHaveBeenNthCalledWith(2, {
+      entityId: "expr-2",
+      relations: [{ key: "work-1", type: "refWork", editStatus: "new" }],
+    });
+  });
+
+  it("buildScopeFilter scopes a next step to every entity of a multi-pick", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(omnibusConfig());
+    store.pickExisting([{ id: "work-1" }, { id: "work-2" }]);
+    store.completeStep(); // expression step
+    expect(store.buildScopeFilter(store.activeStep()!)).toEqual({
+      type: "selection",
+      key: ["elody:1|relations.refWork.key"],
+      value: ["work-1", "work-2"],
+      match_exact: true,
+    });
+  });
+
+  it("buildCreateRelations links a created entity to every entity of a prior multi-pick", () => {
+    const store = useRepetitiveForm();
+    store.initFlow(omnibusConfig());
+    store.pickExisting([{ id: "work-1" }, { id: "work-2" }]);
+    store.completeStep(); // expression step
+    expect(store.buildCreateRelations(store.activeStep()!)).toEqual([
+      { key: "work-1", type: "refWork", editStatus: "new" },
+      { key: "work-2", type: "refWork", editStatus: "new" },
+    ]);
+  });
+
+  it("finalize collects every entity of a multi-pick", async () => {
+    mocks.createEntity.mockResolvedValue({ id: "manif-1" });
+    const store = useRepetitiveForm();
+    store.initFlow(omnibusConfig());
+    store.pickExisting([{ id: "work-1" }]);
+    store.completeStep();
+    store.pickExisting([{ id: "expr-1" }, { id: "expr-2" }]);
+    store.completeStep(); // last step → fans out into two branches
+    expect(store.collectedFor("expression").map((entity) => entity.id)).toEqual([
+      "expr-1",
+      "expr-2",
+    ]);
+    expect(store.buildFinalizeRelations()).toEqual([
+      { key: "expr-1", type: "refExpressions", editStatus: "new" },
+      { key: "expr-2", type: "refExpressions", editStatus: "new" },
+    ]);
+  });
+
   it("completeMetadataOnlyStep advances to the next step without requiring a staged entity", () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());
-    store.pickExisting({ id: "user-1" });
+    store.pickExisting([{ id: "user-1" }]);
     store.completeStep(); // role step
     expect(store.currentStepIndex.value).toBe(1);
     store.completeMetadataOnlyStep();
     expect(store.currentStepIndex.value).toBe(0); // last step → branch finished, reset
     expect(store.branches.value).toHaveLength(1);
-    expect(store.branches.value[0].entities.user.id).toBe("user-1");
+    expect(store.branches.value[0].entities.user[0].id).toBe("user-1");
   });
 
   it("a metadataOnly step's relation still runs normally for a created (not picked) entity — create and pick are handled uniformly", () => {
@@ -829,11 +996,11 @@ describe("useRepetitiveForm", () => {
   it("routeTarget returns the configured step's staged entity", () => {
     const store = useRepetitiveForm();
     store.initFlow(linearConfig());
-    store.pickExisting({ id: "work-1" });
+    store.pickExisting([{ id: "work-1" }]);
     store.completeStep();
-    store.pickExisting({ id: "expr-1" });
+    store.pickExisting([{ id: "expr-1" }]);
     store.completeStep();
-    store.pickExisting({ id: "manif-1" });
+    store.pickExisting([{ id: "manif-1" }]);
     expect(store.routeTarget()).toMatchObject({ id: "work-1", type: Entitytyping.Work });
   });
 
@@ -842,9 +1009,9 @@ describe("useRepetitiveForm", () => {
     const config = linearConfig();
     delete config.routeToStep;
     store.initFlow(config);
-    store.pickExisting({ id: "work-1" });
+    store.pickExisting([{ id: "work-1" }]);
     store.completeStep();
-    store.pickExisting({ id: "expr-1" });
+    store.pickExisting([{ id: "expr-1" }]);
     expect(store.routeTarget()).toMatchObject({ id: "expr-1" });
   });
 

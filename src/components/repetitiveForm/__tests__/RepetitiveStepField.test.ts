@@ -153,9 +153,31 @@ describe("RepetitiveStepField", () => {
         { id: "expr-1", value: "Chamber of Secrets" },
       ]);
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted("selected")?.[0]).toEqual([
+    expect(wrapper.emitted("selected")?.[0]?.[0]).toEqual([
       { id: "expr-1", label: "Chamber of Secrets", details: [] },
     ]);
+  });
+
+  it("emits every picked entity when several are selected at once", async () => {
+    const wrapper = getWrapper();
+    wrapper.findComponent(EntityPickerComponent).vm.$emit("entitiesSelected", [
+      { id: "person-1", value: "Jan Jansen" },
+      { id: "person-2", value: "Piet Peeters" },
+      { id: "corp-1", value: "VZW Boekenclub" },
+    ]);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("selected")?.[0]?.[0]).toEqual([
+      { id: "person-1", label: "Jan Jansen", details: [] },
+      { id: "person-2", label: "Piet Peeters", details: [] },
+      { id: "corp-1", label: "VZW Boekenclub", details: [] },
+    ]);
+  });
+
+  it("does not emit selected when the picker emits an empty selection", async () => {
+    const wrapper = getWrapper();
+    wrapper.findComponent(EntityPickerComponent).vm.$emit("entitiesSelected", []);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("selected")).toBeUndefined();
   });
 
   it("derives a label and details from the picked item's teaser metadata", async () => {
@@ -171,7 +193,7 @@ describe("RepetitiveStepField", () => {
       },
     ]);
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted("selected")?.[0]).toEqual([
+    expect(wrapper.emitted("selected")?.[0]?.[0]).toEqual([
       {
         id: "expr-1",
         label: "Kamer",
@@ -211,7 +233,7 @@ describe("RepetitiveStepField", () => {
       { id: "expr-1", intialValues: { record_type: "tekst" } },
     ]);
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted("selected")?.[0]?.[0]).toMatchObject({
+    expect(wrapper.emitted("selected")?.[0]?.[0]?.[0]).toMatchObject({
       id: "expr-1",
       values: { record_type: "tekst" },
     });

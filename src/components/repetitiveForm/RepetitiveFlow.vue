@@ -137,6 +137,7 @@ import {
 import {
   useRepetitiveForm,
   describeCreatedEntity,
+  primaryEntity,
   toDisplayValue,
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
@@ -201,7 +202,7 @@ const createPrefill = computed(() =>
 );
 const pickerParentUuid = computed(() => {
   const scopeStep = activeStep.value?.scopeToRelationOf?.step;
-  return (scopeStep && currentBranch.value.entities[scopeStep]?.id) || "";
+  return (scopeStep && primaryEntity(currentBranch.value, scopeStep)?.id) || "";
 });
 
 const finalizeLabel = computed(() => flowConfig.value?.finalize?.label ?? "");
@@ -253,8 +254,8 @@ const advance = async (completeCurrentStep: () => void = store.completeStep) => 
   if (wasLast) view.value = "overview";
 };
 
-const onSelected = async (entity: { id: string; label?: string }) => {
-  store.pickExisting(entity);
+const onSelected = async (entities: { id: string; label?: string }[]) => {
+  store.pickExisting(entities);
   // persist the link to the prior step before advancing (link-on-select)
   const step = activeStep.value;
   if (step) await store.linkOnSelect(step);

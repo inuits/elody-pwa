@@ -137,7 +137,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "selected", entity: SelectedEntity): void;
+  (e: "selected", entities: SelectedEntity[]): void;
   (e: "created", entity: any, entityType?: string): void;
   (e: "metadataSubmitted", values: Record<string, unknown>): void;
 }>();
@@ -253,10 +253,14 @@ watch(
 );
 
 const onPicked = (items: InBulkProcessableItem[]) => {
-  const item = items?.[0];
-  if (!item) return;
-  const { label, details } = describePickedItem(item);
-  emit("selected", { id: item.id, label, details, values: item.intialValues });
+  if (!items?.length) return;
+  emit(
+    "selected",
+    items.map((item) => {
+      const { label, details } = describePickedItem(item);
+      return { id: item.id, label, details, values: item.intialValues };
+    }),
+  );
 };
 
 const onCreated = (entity: any) => {
