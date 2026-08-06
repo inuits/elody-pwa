@@ -9,7 +9,9 @@
       @toggle-element-collapse="isCollapsed = !isCollapsed"
     >
       <template #content>
-        <div class="flex flex-col gap-3 p-3">
+        <!-- bg + mx-1 pb-2 matches EntityElementList: the wrapper itself is
+             accent-coloured and expects the content slot to supply its own surface. -->
+        <div class="flex flex-col gap-3 mx-1 mb-1 p-3 bg-background-normal rounded-b">
           <div v-if="canPost && !isComposerOpen" class="self-start">
             <base-button-new
               :label="t('comments.new-thread')"
@@ -139,7 +141,7 @@ const openThread = (subjectId: string) => {
   );
 };
 
-const openTaggedEntity = (entityId: string) => {
+const openTaggedEntity = (entityId: string, entityType: Entitytyping) => {
   openModal(
     TypeModals.EntityDetailModal,
     ModalStyle.CenterWide,
@@ -147,7 +149,7 @@ const openTaggedEntity = (entityId: string) => {
     undefined,
     false,
     undefined,
-    { entityId },
+    { entityId, entityType },
   );
 };
 

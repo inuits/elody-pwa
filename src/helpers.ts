@@ -912,12 +912,22 @@ const BASE_ALLOWED_TAGS = [
  *   every tag out of rendered content. Callers pass the names their own
  *   configuration can actually produce, so the allowlist stays closed.
  */
+const TAG_ATTRIBUTES = ["data-entity-id", "data-label", "data-entity-type"];
+
 export const sanitizeHtml = (content: any, extraTags: string[] = []) => {
   return DOMPurify.sanitize(content, {
     FORBID_TAGS: ["style", "img", "video", "audio", "script", "svg"],
     USE_PROFILES: { html: true },
     ALLOWED_TAGS: [...BASE_ALLOWED_TAGS, ...extraTags],
-    ADD_ATTR: extraTags.length ? ["data-entity-id", "data-label"] : [],
+    ADD_ATTR: extraTags.length ? TAG_ATTRIBUTES : [],
+    // Listing a custom element in ALLOWED_TAGS is NOT enough: DOMPurify routes anything
+    // with a hyphen in its name through this check instead, so without it every
+    // `elody-<tag>` was flattened to its text and the entity id went with it.
+    CUSTOM_ELEMENT_HANDLING: {
+      tagNameCheck: (name: string) => extraTags.includes(name),
+      attributeNameCheck: (name: string) => TAG_ATTRIBUTES.includes(name),
+      allowCustomizedBuiltInElements: false,
+    },
   });
 };
 
