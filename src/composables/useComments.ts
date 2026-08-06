@@ -142,15 +142,24 @@ export const extractTaggedRelations = (
  * present. Sending only the changed tag relations would wipe refParentEntity and
  * refSubject and orphan the comment, so every edit resends the current set with just
  * the tag relations swapped out.
+ *
+ * editStatus is required by BaseRelationValuesInput, so omitting it fails variable
+ * coercion before the request reaches a resolver. Unchanged, because these relations
+ * are exactly the ones being carried over; the resolver only special-cases Deleted
+ * and strips the field before calling putRelations.
  */
-const flattenRelationsExceptTags = (
+export const flattenRelationsExceptTags = (
   comment: Comment,
   tagRelationTypes: string[],
 ): BaseRelationValuesInput[] =>
   Object.values(comment.relationValues ?? {})
     .flat()
     .filter((relation: any) => !tagRelationTypes.includes(relation.type))
-    .map((relation: any) => ({ key: relation.key, type: relation.type }));
+    .map((relation: any) => ({
+      key: relation.key,
+      type: relation.type,
+      editStatus: EditStatus.Unchanged,
+    }));
 
 // Shared between the detail-page element and the globally-mounted thread modal, so
 // opening a thread costs no extra request.
