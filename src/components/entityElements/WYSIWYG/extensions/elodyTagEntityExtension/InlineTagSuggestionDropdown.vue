@@ -58,7 +58,6 @@ import type { InlineSuggestionState } from "@/components/entityElements/WYSIWYG/
 
 const props = defineProps<{
   suggestion: InlineSuggestionState;
-  /** Query name from the tagging configuration, resolved by name at runtime. */
   customQuery?: string | null;
 }>();
 
@@ -66,31 +65,19 @@ const emit = defineEmits<{ pick: [entity: any, label: string] }>();
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
-// At setup top level: useSimpleSearch injects the app config, and inject() resolves to
-// undefined once called from inside the async search().
 const { buildFilters } = useSimpleSearch();
 
 const results = ref<any[]>([]);
 const isLoading = ref<boolean>(false);
 const highlightedIndex = ref<number>(0);
-/** Only to scroll the highlighted option into view when navigating past the fold. */
 const optionElements = ref<HTMLElement[]>([]);
 
-/** "vlacc:1|properties.name.value" -> "name" */
 const metadataKeyOf = (filterKey: string): string => {
   const path = filterKey.split("|").pop() ?? "";
   const segments = path.split(".");
   return segments.length >= 2 ? segments[segments.length - 2] : path;
 };
 
-/**
- * The metadata keys the current search matched on, in filter order — the same keys the
- * label is read from, since a client filters on exactly the fields holding an entity's
- * title. Derived per search rather than hardcoded: which keys those are is entirely
- * client configuration (the typed case names one in metadataFilterForTagContent, the
- * cross-type case gets the client's whole simpleSearchMetadataKey list), and none of
- * those names belong in the shared PWA.
- */
 const labelKeys = ref<string[]>([]);
 
 const labelKeysOf = (filters: AdvancedFilterInput[]): string[] => [
@@ -117,16 +104,11 @@ const labelFor = (entity: any): string => {
  * the client's global simple-search setup: that already declares which types are
  * searchable and which metadata keys hold their titles, per client, with the right
  * schema prefix. Deriving the mode from BaseEntity means no second way to configure it.
- *
- * Returns undefined when the search cannot be scoped, rather than falling back to an
- * unscoped one that would trawl every type in the database.
  */
 const filtersFor = (
   state: NonNullable<InlineSuggestionState>,
 ): AdvancedFilterInput[] | undefined => {
   if (state.configuration.taggableEntityType !== Entitytyping.BaseEntity) {
-    // A typed configuration has nothing else to search on, so a missing key would mean
-    // a text filter with no key: every entity of the type, whatever was typed.
     if (!state.configuration.metadataFilterForTagContent) {
       console.error(
         `[elody-tagging] configuration for "${state.configuration.tag}" needs metadataFilterForTagContent to search on`,
@@ -148,8 +130,6 @@ const filtersFor = (
     ];
   }
 
-  // buildFilters emits its own selection filter on `type`, so adding the Type filter
-  // above would AND `type == BaseEntity` against it and match nothing.
   const simpleSearchFilters = buildFilters(state.query);
   const hasTypeScope = simpleSearchFilters.some(
     (filter) => filter.key === "type",
@@ -163,11 +143,6 @@ const filtersFor = (
   return simpleSearchFilters;
 };
 
-/**
- * Sequences the searches: the watcher fires per keystroke, and without this whichever
- * request resolved LAST won, so a fast typist could be left looking at results for a
- * stale prefix — and Enter would then tag the wrong entity.
- */
 let latestSearch = 0;
 
 const search = async (state: NonNullable<InlineSuggestionState>) => {
@@ -176,9 +151,6 @@ const search = async (state: NonNullable<InlineSuggestionState>) => {
   isLoading.value = true;
   highlightedIndex.value = 0;
   try {
-    // GetEntitiesDocument is imported rather than looked up by name: loadDocument
-    // resolves `${name}Document`, and the generated export is capitalised, so
-    // loadDocument("getEntities") returns undefined.
     const document = props.customQuery
       ? await loadDocument(props.customQuery)
       : GetEntitiesDocument;
@@ -216,8 +188,6 @@ const search = async (state: NonNullable<InlineSuggestionState>) => {
     console.error("[elody-tagging] inline suggestion search failed", error);
     results.value = [];
   } finally {
-    // Not unconditional: an overtaken request must not clear the spinner while the
-    // request the user is actually waiting for is still in flight.
     if (!isStale()) isLoading.value = false;
   }
 };
@@ -236,27 +206,13 @@ watch(
 
 const pick = (entity: any) => emit("pick", entity, labelFor(entity));
 
-/**
- * Keyboard selection.
- *
- * Capture phase on document, not @tiptap/suggestion's own onKeyDown: that hook lives in
- * the extension, which has no access to the fetched results or the highlighted index —
- * those are this component's state. Capture runs before ProseMirror's own keydown
- * listener on the editor element, so stopping propagation here keeps Enter from
- * inserting a hard break and the arrows from moving the caret.
- *
- * Only listening while open is free: the host renders this component with v-if on the
- * suggestion state, so mounted == dropdown visible.
- */
 const onKeyDown = (event: KeyboardEvent) => {
   if (!results.value.length) return;
 
   const move = (delta: number) => {
-    // Wraps, so holding one arrow key cannot dead-end at either edge.
     highlightedIndex.value =
       (highlightedIndex.value + delta + results.value.length) %
       results.value.length;
-    // Optional call: jsdom does not implement scrollIntoView, and scrolling is cosmetic.
     optionElements.value[highlightedIndex.value]?.scrollIntoView?.({
       block: "nearest",
     });
@@ -288,8 +244,6 @@ const showInTopLayer = (element: any) => {
   if (typeof element?.showPopover !== "function") return; // no popover support: plain z-index
   try {
     element.showPopover();
-  } catch {
-    // Already shown; harmless.
-  }
+  } catch {}
 };
 </script>

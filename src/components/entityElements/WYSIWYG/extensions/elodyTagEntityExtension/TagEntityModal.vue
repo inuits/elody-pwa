@@ -136,9 +136,6 @@ const props = withDefaults(
   {},
 );
 
-// One modal entry is shared by every editor on the page, and each editor renders its
-// own instance of this component. Only the editor that opened it may render content,
-// otherwise all of them react to the same `open` flag at once.
 const isOwningEditor = computed<boolean>(
   () =>
     getModalInfo(TypeModals.ElodyEntityTaggingModal).editorId ===
@@ -261,8 +258,6 @@ const tagExistingEntityFlow = () => {
   const entityToTag = getEnqueuedItems(context)[0];
   if (!entityToTag) return;
 
-  // Resolving the configuration and writing the relation both happen inside the
-  // owning editor's command, so this component no longer needs global lookups.
   props.editor.commands.tagAndLinkEntity(entityToTag, parentId.value);
 };
 

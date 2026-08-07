@@ -158,13 +158,7 @@ const { getForm, addEditableMetadataKeys } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
 
-// Stable across remounts, and unique per editor on the page: scopes this editor's
-// injected tag styling and identifies it as the owner of the shared tagging modal.
 const instanceId = `${props.formId}-${props.element.metadataKey}`;
-// shallowRef, not ref: ref() runs reactive conversion over the stored object, which
-// deeply UNWRAPS the refs the instance exposes — tagging.value.inlineSuggestion would
-// become the raw value instead of a Ref, so `.value` on it is undefined (or a crash
-// when it holds null). shallowRef keeps the instance exactly as the composable built it.
 const tagging = shallowRef<ElodyTaggingInstance | undefined>(undefined);
 
 const form = computed(() => getForm(props.formId));
@@ -222,9 +216,6 @@ const handleDocumentClick = (event: MouseEvent) => {
   closeTagContextMenu();
 };
 
-// The inline flow inserts the tag node only. It must NOT write a relation the way the
-// toolbar flow does, because that writes onto the route entity's form — tagging a user
-// in a comment composer would land the relation on the Work.
 const applyInlineSuggestion = (entity: any, label: string) => {
   tagging.value?.applyInlineSuggestion(editor.value, entity, label);
 };
@@ -308,9 +299,6 @@ onMounted(async () => {
       );
     },
   });
-  // The editor is no longer registered on the modal at mount time — `openTagModal`
-  // sends it with the payload instead, so several editors can coexist without the
-  // last-mounted one claiming the modal.
   editorLoaded.value = true;
 });
 

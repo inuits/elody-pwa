@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { EditorState } from "prosemirror-state";
 
-// Short-circuit the app-wide import chain (main.ts → App.vue → …) that the
-// extension pulls in via useBaseModal / useBulkOperations. CI tears the env
-// down before async imports resolve, causing false failures.
 vi.mock("@/main", () => ({ apolloClient: {} }));
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({ openModal: vi.fn(), closeModal: vi.fn() }),
@@ -58,8 +55,6 @@ const makeMockState = (
               {
                 type: {
                   name: n.type,
-                  // Tag identity now comes from the node's ProseMirror group, which
-                  // is per-editor-schema rather than a shared module registry.
                   isInGroup: (group: string) =>
                     group === TAG_GROUP && n.type === TAG_TYPE,
                 },
@@ -207,10 +202,9 @@ describe("ensureTrailingSpaceAfterTags plugin (via createTaggingCommandsExtensio
       content: `<p>hello </p>`,
     });
 
-    editor.commands.insertContentAt(
-      editor.state.doc.content.size - 1,
-      { type: TAG_TYPE },
-    );
+    editor.commands.insertContentAt(editor.state.doc.content.size - 1, {
+      type: TAG_TYPE,
+    });
 
     const paragraph = editor.state.doc.firstChild!;
     const lastChild = paragraph.lastChild!;

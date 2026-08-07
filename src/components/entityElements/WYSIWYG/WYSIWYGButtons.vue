@@ -145,15 +145,7 @@
     >
       <i>I</i>
     </button>
-    <!--
-      Gated on the wrapper, not the button: a hidden button inside a rendered tooltip
-      activator still leaves an empty div sitting in the toolbar's flex row.
-    -->
-    <base-tooltip
-      v-if="showTagButton"
-      position="top-right"
-      :tooltip-offset="8"
-    >
+    <base-tooltip v-if="showTagButton" position="top-right" :tooltip-offset="8">
       <template #activator="{ on }">
         <div v-on="on">
           <button
@@ -193,8 +185,6 @@ import { computed } from "vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import type { ElodyTaggingInstance } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
-// Hides the Tag button when every configured tag has a trigger character, so the
-// toolbar's modal flow cannot compete with typing `@` or `#`.
 import { isTaggedByTriggerOnly } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/inlineTagSuggestion";
 import { useI18n } from "vue-i18n";
 
@@ -203,8 +193,6 @@ const props = defineProps<{
   editor: Editor;
   extensions: WysiwygExtensions[];
   displayInline: boolean;
-  // The owning editor's tagging instance. Undefined when this editor has no tagging
-  // extension, in which case the Tag button is not rendered anyway.
   tagging?: ElodyTaggingInstance;
 }>();
 

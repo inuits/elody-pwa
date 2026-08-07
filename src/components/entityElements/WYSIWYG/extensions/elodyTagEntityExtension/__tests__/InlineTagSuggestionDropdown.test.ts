@@ -1,10 +1,3 @@
-/**
- * Keyboard selection in the suggestion dropdown.
- *
- * The listener is on document in the CAPTURE phase so it beats ProseMirror's own keydown
- * handler; that ordering is the whole mechanism, so it is what these tests exercise —
- * dispatching real events rather than calling the handler directly.
- */
 import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 
@@ -27,7 +20,12 @@ vi.mock("@/main", () => ({
 vi.mock("@/composables/useSimpleSearch", () => ({
   useSimpleSearch: () => ({
     buildFilters: (searchTerm: string) => [
-      { type: "selection", key: "type", value: ["person", "work_word"], match_exact: true },
+      {
+        type: "selection",
+        key: "type",
+        value: ["person", "work_word"],
+        match_exact: true,
+      },
       {
         type: "text",
         key: ["vlacc:1|properties.title.value"],
@@ -63,7 +61,6 @@ const mountDropdown = async (state: any = suggestion) => {
     props: { suggestion: state },
     attachTo: document.body,
   });
-  // The result list is fetched in a watcher with immediate: true, so it lands a tick later.
   await new Promise((resolve) => setTimeout(resolve, 0));
   await wrapper.vm.$nextTick();
   return wrapper;
@@ -105,8 +102,6 @@ describe("how the dropdown scopes its search", () => {
     });
 
     const filters = sentVariables[0].advancedFilterInputs;
-    // A `type` filter alongside simple search's own selection filter would AND
-    // `type == BaseEntity` against the real list and return nothing.
     expect(filters.some((filter: any) => filter.type === "type")).toBe(false);
     expect(filters[0]).toMatchObject({
       key: "type",
@@ -145,9 +140,6 @@ describe("which metadata key the option label is read from", () => {
   });
 
   it("falls back to the id rather than guessing an unconfigured key", async () => {
-    // The mocked simple search filters on `title`; the entities only carry `name`. A
-    // hardcoded fallback list would find `name` anyway — and would be a client-specific
-    // key living in shared PWA code.
     const wrapper = await mountDropdown({
       ...suggestion,
       configuration: {
@@ -178,7 +170,6 @@ describe("inline suggestion dropdown keyboard selection", () => {
   it("wraps past the last option so a held arrow key never dead-ends", async () => {
     const wrapper = await mountDropdown();
 
-    // Three results, four presses: 0 -> 1 -> 2 -> 0.
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -199,7 +190,6 @@ describe("inline suggestion dropdown keyboard selection", () => {
     const wrapper = await mountDropdown();
     wrapper.unmount();
 
-    // Left registered, this would swallow Enter for the whole app.
     expect(press("Enter").defaultPrevented).toBe(false);
   });
 });
