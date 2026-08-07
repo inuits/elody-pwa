@@ -1,10 +1,3 @@
-/**
- * End-to-end check of the inline trigger inside a real editor: typing `@` must open
- * the dropdown state, and picking an entity must insert a tag node rather than text.
- *
- * The unit test next door only asserts plugin keys are distinct. It cannot catch the
- * thing that actually breaks this feature — the plugin never firing at all.
- */
 import { describe, expect, it, vi } from "vitest";
 import { ref } from "vue";
 
@@ -57,8 +50,6 @@ const buildEditor = async (extensions: any[]) => {
   const { default: Paragraph } = await import("@tiptap/extension-paragraph");
   const { default: Text } = await import("@tiptap/extension-text");
 
-  // A real element: the suggestion plugin runs from view lifecycle hooks, which never
-  // fire on a headless editor.
   const element = window.document.createElement("div");
   window.document.body.appendChild(element);
   return new Editor({
@@ -86,8 +77,6 @@ describe("inline @ trigger inside a real editor", () => {
     expect(tagging.inlineSuggestion.value).not.toBeNull();
     expect(tagging.inlineSuggestion.value?.query).toBe("in");
     expect(tagging.inlineSuggestion.value?.configuration.tag).toBe("user");
-    // Without an anchor the dropdown has nothing to position against and renders
-    // nothing at all, even though the search request has already gone out.
     expect(tagging.inlineSuggestion.value?.anchor).toBeDefined();
 
     editor.destroy();

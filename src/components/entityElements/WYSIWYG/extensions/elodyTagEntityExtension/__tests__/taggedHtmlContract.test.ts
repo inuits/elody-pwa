@@ -17,9 +17,6 @@
  */
 import { describe, expect, it, vi } from "vitest";
 
-// Short-circuit the app-wide import chain (main.ts -> App.vue -> ...) that the
-// extension pulls in via useBaseModal / useBulkOperations. CI tears the env down
-// before async imports resolve, causing false failures.
 vi.mock("@/main", () => ({ apolloClient: {} }));
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({ openModal: vi.fn(), closeModal: vi.fn() }),
@@ -40,11 +37,6 @@ vi.mock("@/composables/useEntitySingle", () => ({
 
 const { createTipTapNodeExtension } = await import("../ElodyTaggingExtension");
 
-/**
- * AICAP's live shape, as produced by createConfigurationItemsFromMapping from an
- * `epi_doc_tag` configuration entity. Mirrors clients/ugent-aicap/.../queries/
- * entities/inscription.queries.ts:224-259.
- */
 const aicapConfiguration = () => ({
   tag: "w",
   configurationEntityId: "EDT-1",
@@ -79,16 +71,13 @@ const buildEditor = async (
   const extensions: any[] = [Document, Paragraph, Text, tagNode];
 
   if (withHardBreak) {
-    const { default: HardBreak } = await import(
-      "@tiptap/extension-hard-break"
-    );
+    const { default: HardBreak } = await import("@tiptap/extension-hard-break");
     extensions.push(HardBreak);
   }
 
   return new Editor({ extensions, content });
 };
 
-/** The JS mirror of descriptive_markup_parser.py:29's well-formedness gate. */
 const parsesAsXml = (html: string): boolean => {
   const parsed = new DOMParser().parseFromString(
     `<root>${html}</root>`,
@@ -114,9 +103,6 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
 
     const html = editor.getHTML();
 
-    // The element name derives from config.tag, NOT from the node type name.
-    // A `-EDT-1` suffix leaking in here would make descriptive_markup_parser.py
-    // fail to match, so the tag would never be renamed and the word never linked.
     expect(html).toContain("<elody-w");
     expect(html).not.toContain("elody-w-EDT-1");
     expect(configuration.extensionName).toBe("w-EDT-1");
@@ -141,17 +127,11 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
     const html = editor.getHTML();
 
     expect(html).toContain('data-entity-id="W-42"');
-    // reading_parser.py:27 matches on a BARE `type` attribute and :40 reads a BARE
-    // `lemma`. Not data-type / data-lemma. Rendering these as data-* would silently
-    // detach every word from its tag.
     expect(html).toContain('type="person"');
     expect(html).toContain('lemma="ktb"');
     expect(html).not.toContain("data-type=");
     expect(html).not.toContain("data-lemma=");
     expect(html).toContain(">maktub<");
-    // data-entity-type only exists for configurations that can tag any entity type.
-    // AICAP never sets it, and it must therefore never reach the stored HTML: this
-    // element string is a backend contract and has to stay byte-identical.
     expect(html).not.toContain("data-entity-type");
 
     editor.destroy();
@@ -177,12 +157,6 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
   });
 
   it("survives a parse -> re-render round trip of stored HTML", async () => {
-    // This is the direction AICAP actually hits first on every page load: the
-    // editor is constructed with `content: <stored value>`, which runs parseHTML,
-    // and any subsequent edit re-serializes the whole document. If an attribute is
-    // lost or mangled in that round trip, the next save writes HTML that
-    // reading_parser.py:27 no longer matches -> the word detaches -> the
-    // delete_dangling_words cron removes the word entity.
     const stored =
       '<p>ma<elody-w type="person" data-entity-id="W-42" lemma="ktb" contenteditable="false">ktu</elody-w>b</p>';
 
@@ -200,10 +174,6 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
   });
 
   it("emits hard breaks as bare <br>, the backend's line separator", async () => {
-    // descriptive_markup_parser.py:20 matches "<br>" literally and :21-24 splits the
-    // value into lines on it. "<br/>" or "<br >" would not match, so the whole
-    // line-numbering and line-splitting behaviour silently changes. This pins the
-    // serialization across any @tiptap/extension-hard-break version bump.
     const editor = await buildEditor(
       "<p>first<br>second</p>",
       aicapConfiguration(),
@@ -220,14 +190,9 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
   });
 
   it("keeps flanking characters attached when only part of a word is tagged", async () => {
-    // AICAP researchers tag sub-strings of a single word, so the element sits
-    // inside a word with no adjacent whitespace. Any injected space here would be
-    // baked in by descriptive_markup_parser.py:15-19 and corrupt the word boundary.
     const configuration = aicapConfiguration();
     const editor = await buildEditor("<p>maktub</p>", configuration);
 
-    // "maktub" occupies doc positions 1..7; select "ktb" -> [4, 7) is "tub", so
-    // target the inner "ktu" span [3, 6] to sit strictly inside the word.
     editor.commands.setTextSelection({ from: 3, to: 6 });
     editor.commands.insertContentAt(
       { from: 3, to: 6 },
@@ -244,7 +209,6 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
 
     const html = editor.getHTML();
 
-    // Flanking characters survive, and no space is introduced on either side.
     expect(html).toContain("ma<elody-w");
     expect(html).toMatch(/<\/elody-w>b/);
     expect(html).not.toMatch(/\s<elody-w/);

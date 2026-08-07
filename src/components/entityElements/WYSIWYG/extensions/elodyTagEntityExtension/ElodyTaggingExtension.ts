@@ -42,32 +42,17 @@ export type ResolvedTagConfiguration =
   | TaggableEntityConfiguration
   | TaggableEntityConfigurationFromEntity;
 
-/**
- * Everything the TipTap extensions need from their owning editor. Passed in
- * explicitly so that two editors on one page keep separate configuration —
- * this used to be module-level state, which made a second editor overwrite the
- * first one's tag configuration.
- */
 export type TaggingContext = {
   instanceId: string;
   configuration: Ref<ResolvedTagConfiguration[]>;
 };
 
-// Every tag node joins this ProseMirror group, so "is this a tag?" is answered by
-// the editor's own schema instead of a module-level name registry. That is what
-// lets two editors coexist on one page: schemas are per-instance, a shared array
-// is not. `group` is a first-class NodeSpec field, so it never reaches the
-// serialized HTML — see __tests__/taggedHtmlContract.test.ts.
 export const TAG_GROUP = "elodyTag";
 
 export const isTagNode = (node: {
   type: { isInGroup?: (group: string) => boolean };
 }): boolean => !!node?.type?.isInGroup?.(TAG_GROUP);
 
-/**
- * Resolves the configurations for one editor: the ones that already carry a `tag`,
- * plus the ones derived from configuration entities fetched at runtime.
- */
 export const resolveTaggingConfigurations = async (
   taggableEntityConfiguration: TaggableEntityConfiguration[] | undefined,
   configurationsByEntity: Ref<TaggableEntityConfiguration[]>,
@@ -84,13 +69,6 @@ export const resolveTaggingConfigurations = async (
   return [...configurationsWithTag, ...configurationsFromEntities];
 };
 
-/**
- * The TipTap extensions for exactly ONE editor: one node per configuration, plus
- * that editor's own commands extension. Previously the entity-derived
- * configurations were built twice (once directly, once from a second mapped list),
- * registering two node types per tag and making parseHTML for `elody-<tag>`
- * ambiguous between them.
- */
 export const buildTaggingExtensions = (
   context: TaggingContext,
 ): (Node<any, any> | Extension<any, any>)[] => [
@@ -100,11 +78,6 @@ export const buildTaggingExtensions = (
   createTaggingCommandsExtension(context),
 ];
 
-// Pure function of the configuration: the same configuration always yields the same
-// node type name, across remounts and across concurrent editors. Uniqueness only
-// has to hold within one editor's schema, so the instance plays no part. Two
-// configurations that collide here are a client-config error, and TipTap fails
-// loudly on a duplicate node name rather than silently diverging.
 const generateExtensionNameFromConfiguration = (
   configurationItem: TaggableEntityConfigurationFromEntity,
 ): string => {
@@ -177,8 +150,6 @@ const getSelectionHTML = (state: EditorState): string => {
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
 ) => {
-  // Both lists are optional: a configuration that tags by a plain `tag` has no
-  // `tagConfigurationByEntity` block at all, and spreading undefined threw.
   const additionalAttributes = [
     ...(extensionConfiguration.tagConfigurationByEntity
       ?.metadataKeysToSetAsAttribute ?? []),
@@ -226,14 +197,6 @@ export const createTipTapNodeExtension = (
             };
           },
         },
-        // The tagged entity's own type. Needed when one configuration can tag ANY type
-        // (vlacc's `#`), because then the element name no longer identifies the type and
-        // a rendered tag would have no way to open the right detail page.
-        //
-        // Its own entry rather than going through `additionalAttributes` below: that
-        // block reads values out of metadata, and its attribute spec is double-wrapped.
-        // Rendered only when set, so an AICAP tag — which never sets it — keeps its
-        // stored HTML byte-identical.
         entityType: {
           default: null,
           parseHTML: (element: HTMLElement) =>
@@ -350,12 +313,6 @@ const createTrailingSpacePlugin = () =>
     },
   });
 
-/**
- * One commands extension per editor. This must be a factory, not a shared
- * `Extension.create({...})` instance: TipTap gives every extension instance a
- * single `storage` and `options` object, so sharing one across editors makes them
- * fight over the same state.
- */
 export const createTaggingCommandsExtension = (context: TaggingContext) =>
   Extension.create({
     name: "elodyTaggingCommands",
@@ -377,17 +334,9 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
               undefined,
               false,
               undefined,
-              // `editor` and `editorId` travel with the payload so the modal knows
-              // which of several editors on the page opened it. Setting this once at
-              // mount time meant the last-mounted editor won.
               { selectedText, editor, editorId: context.instanceId },
             );
           },
-        /**
-         * Resolves the configuration from the OWNING editor, then tags and links in
-         * one step. Lets callers outside the editor (e.g. DynamicForm's
-         * create-new-entity flow) act without reaching for global configuration.
-         */
         tagAndLinkEntity:
           (entity: InBulkProcessableItem, parentEntityId: string) =>
           ({ commands }: CommandProps) => {
@@ -664,17 +613,6 @@ const getConfigurationEntities = async (
   return createConfigurationItemsFromMapping(configurationItemEntitiesMapping);
 };
 
-/**
- * Injects tag styling for ONE editor and returns the element so the caller can
- * remove it again. Selectors are scoped by `data-wysiwyg-id` rather than the
- * shared `#wysiwyg-container` id, which several editors on a page would duplicate.
- *
- * Every configuration gets a rule, not just the ones carrying a `tagColor`.
- * `tagColor` only exists on configurations derived from a configuration entity
- * (AICAP's epi_doc_tags), so a statically configured tag used to render as plain
- * text — indistinguishable from what the author typed. A tag must always read as
- * a tag; the colour is the client's choice, the visibility is not.
- */
 export const applyColorStylingFromConfigurationToEditor = (
   instanceId: string,
   configurations: ResolvedTagConfiguration[] | undefined,
@@ -693,16 +631,9 @@ export const applyColorStylingFromConfigurationToEditor = (
       const styleDefiningAttribute: string | undefined =
         configurationItem.tagConfigurationByEntity
           ?.secondaryAttributeToDetermineTagConfig;
-      // Without a secondary attribute the colour applies to every tag of this name;
-      // indexing `attributes[undefined]` used to throw here.
       const attributeSelector = styleDefiningAttribute
         ? `[${styleDefiningAttribute}="${configurationItem.attributes?.[styleDefiningAttribute]}"]`
         : "";
-      // Horizontal padding is gated on the FLOW, not on the colour: a trigger-typed tag
-      // is a whole entity inserted as a unit and reads as a chip, while the toolbar flow
-      // tags a sub-string of a single word (AICAP), where side padding visually splits
-      // the word apart. Gating on tagColor did the same thing by accident and broke as
-      // soon as a tag's colour metadata resolved empty.
       const horizontalPadding = configurationItem.inlineTrigger?.character
         ? "0.25rem"
         : "0";
@@ -741,16 +672,9 @@ export const getPluginsFromConfigurationEntities = async (
     configurations,
     configurationsByEntity,
   );
-  // Undefined when no configuration carries a `tagConfigurationByEntity` block —
-  // callers spread the result, so normalise to an empty array.
   return configurationEntities ?? [];
 };
 
-/**
- * Pure lookup against one editor's configurations. Was a module-level function
- * reading shared state, which returned the wrong editor's configuration as soon as
- * a second editor mounted.
- */
 export const resolveConfigurationForEntity = (
   configurations: ResolvedTagConfiguration[],
   entity: InBulkProcessableItem | { type: string },
@@ -817,14 +741,6 @@ export const openDetailModal = (
   configurations: ResolvedTagConfiguration[],
 ) => {
   const entityId = node.attrs.entityId;
-  // The type recorded on the node wins: a configuration that tags any entity
-  // (taggableEntityType BaseEntity) has no single type to look up, and the lookup is
-  // pointless once the node itself knows.
-  //
-  // Look the configuration up by node type name rather than splitting the name on
-  // "-" to recover the tag. That split silently required the tag itself to contain
-  // no hyphen and to be the first segment, which coupled every node-naming decision
-  // to read-mode click-to-open.
   const entityType =
     node.attrs.entityType ??
     configurations.find(

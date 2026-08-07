@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-// The composable pulls in apollo + entity mutations via the app-wide import chain;
-// only the two pure helpers are under test here.
 vi.mock("@/main", () => ({ apolloClient: {} }));
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
@@ -40,9 +38,6 @@ const comment = (
 
 describe("flattenRelationsExceptTags", () => {
   it("keeps an editStatus on every surviving relation", () => {
-    // BaseRelationValuesInput.editStatus is non-null, so a relation without one fails
-    // variable coercion before the mutation is ever sent — which is what broke
-    // resolving a thread.
     const relations = flattenRelationsExceptTags(
       comment("CMT-a", { subjectId: "CMT-x" }),
       ["refTaggedUsers"],
@@ -72,7 +67,6 @@ describe("tagRelationTypesOf", () => {
   const configurations: any = [
     { tag: "user", relationType: "refTaggedUsers" },
     { tag: "entity", relationType: "refTaggedEntities" },
-    // No tag: the toolbar-only entry produces no element and no relation of its own.
     { relationType: "refWords" },
   ];
 
@@ -84,9 +78,6 @@ describe("tagRelationTypesOf", () => {
   });
 
   it("still excludes a relation type whose last tag was just removed", () => {
-    // The regression: deriving the types from the SURVIVING tags left refTaggedUsers out
-    // of the exclusion list, so the old relation was resent as Unchanged and the
-    // un-tagged user stayed linked (and notified).
     const withUserTag = comment("CMT-a");
     withUserTag.relationValues.refTaggedUsers = [
       { key: "U-1", type: "refTaggedUsers" },
@@ -105,8 +96,6 @@ describe("tagRelationTypesOf", () => {
 
 describe("tagElementName", () => {
   it("lowercases the configured tag, as the browser does", () => {
-    // DOMPurify and createElement both normalise the name, so a comparison against the
-    // configured casing stops matching and every tag is stripped from the body.
     expect(tagElementName("User")).toBe("elody-user");
   });
 });

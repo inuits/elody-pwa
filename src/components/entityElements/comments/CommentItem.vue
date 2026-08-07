@@ -47,13 +47,6 @@
         </button>
       </div>
     </div>
-
-    <!--
-      Reuses the shared sanitizing component, passing the tagging extension's element
-      names so its default allowlist does not strip every @ and # tag along with its
-      data-entity-id. Clicks are delegated on this wrapper rather than mounting a
-      read-only editor per comment, which would not scale down a long thread.
-    -->
     <div
       class="comment-body prose prose-sm max-w-full mt-2 text-text-body"
       @click="handleBodyClick"
@@ -106,20 +99,15 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-// Only the element names this composer's configuration can actually produce, so the
-// allowlist stays closed rather than becoming a blanket `elody-*`.
 const allowedTagElements = computed<string[]>(() =>
   (props.taggableEntityConfiguration ?? [])
     .filter((configuration) => configuration.tag)
     .map((configuration) => tagElementName(configuration.tag!)),
 );
 
-// The shared formatter, not vue-i18n's d(): no datetimeFormats are registered on this app
-// (setupI18n in helpers.ts), so a named format key resolves to nothing.
 const formattedDate = computed<string>(() => {
   const createdAt = props.comment.intialValues?.created_at;
   if (!createdAt) return "";
-  // Intl.DateTimeFormat throws on an invalid date, so an unparseable value is shown raw.
   if (isNaN(new Date(createdAt).getTime())) return String(createdAt);
   return convertDateToReadbleFormat(createdAt, "DEFAULT", true);
 });
@@ -129,13 +117,8 @@ const handleBodyClick = (event: MouseEvent) => {
     "[data-entity-id]",
   );
   if (!tagElement) return;
-  // A #entity tag is a link, so it must not also open the thread.
   event.stopPropagation();
 
-  // EntityDetailModal needs the type as well as the id. Prefer the type stored on the
-  // tag itself: a configuration that can tag any entity has no single type to look up.
-  // The configuration lookup stays as the fallback for tags written before the attribute
-  // existed, and for statically typed configurations.
   const configuration = (props.taggableEntityConfiguration ?? []).find(
     (candidate) =>
       !!candidate.tag &&
@@ -150,11 +133,6 @@ const handleBodyClick = (event: MouseEvent) => {
 </script>
 
 <style scoped>
-/*
- * The editor's own tag styling is injected scoped to [data-wysiwyg-id], which a
- * rendered comment is not inside. Selecting on data-entity-id instead of the element
- * names keeps this independent of which tags a client configures.
- */
 .comment-body :deep([data-entity-id]) {
   background-color: var(--color-accent-light);
   color: var(--color-text-body);

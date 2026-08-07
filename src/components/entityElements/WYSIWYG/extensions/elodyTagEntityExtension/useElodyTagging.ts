@@ -32,23 +32,9 @@ export type ElodyTaggingInstance = {
     entity: { id: string; [key: string]: any },
     label: string,
   ) => boolean;
-  /** Removes this instance's injected <style>. MUST be called on unmount. */
   destroy: () => void;
 };
 
-/**
- * Owns the tagging configuration, extensions and injected styling for ONE WYSIWYG
- * editor.
- *
- * This replaces module-level state that made the extension unusable more than once
- * per page: a second editor overwrote the first one's configuration, node type
- * names drifted (`word` -> `word-2` -> `word-3`) across remounts, and every
- * initialisation leaked a `<style>` element into `document.head`.
- *
- * @param instanceId Stable across remounts — scopes the injected CSS and identifies
- *   which editor opened the shared tagging modal. Callers pass something derived
- *   from their own identity (e.g. `${formId}-${metadataKey}`), never a counter.
- */
 export const useElodyTagging = async (
   instanceId: string,
   taggableEntityConfiguration: TaggableEntityConfiguration[] | undefined,
@@ -67,8 +53,7 @@ export const useElodyTagging = async (
   );
 
   const inlineSuggestion = ref<InlineSuggestionState>(null);
-  // Undefined when no configuration declares an inlineTrigger, or when
-  // @tiptap/suggestion is not installed yet — either way the toolbar flow still works.
+
   const inlineSuggestionExtension = await createInlineTagSuggestionExtension(
     configuration.value,
     inlineSuggestion,
@@ -81,8 +66,6 @@ export const useElodyTagging = async (
     ],
     configuration,
     configurationsByEntity,
-    // Tagging needs configuration entities that this tenant has not created yet:
-    // the toolbar button stays disabled and explains which type is missing.
     isInNeedOfConfigurationEntities: computed<boolean>(
       () =>
         !configuration.value.length && !!configurationsByEntity.value.length,
@@ -100,9 +83,6 @@ export const useElodyTagging = async (
       inlineSuggestion.value = null;
       return applied;
     },
-    // Returned rather than registered via onUnmounted: callers initialise inside an
-    // async onMounted, and past the first `await` there is no active component
-    // instance left for a lifecycle hook to attach to.
     destroy: () => {
       styleElement?.remove();
       inlineSuggestion.value = null;

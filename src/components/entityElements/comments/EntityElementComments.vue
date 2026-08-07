@@ -1,7 +1,5 @@
 <template>
   <div v-if="canRead" class="mb-5">
-    <!-- Reuses the shared element wrapper so this block gets the same framed,
-         collapsible header as every other element in the column. -->
     <entity-element-wrapper
       :label="element.label"
       :entity-id="id"
@@ -9,8 +7,6 @@
       @toggle-element-collapse="isCollapsed = !isCollapsed"
     >
       <template #content>
-        <!-- bg + mx-1 pb-2 matches EntityElementList: the wrapper itself is
-             accent-coloured and expects the content slot to supply its own surface. -->
         <div
           class="flex flex-col gap-3 mx-1 mb-1 p-3 bg-background-normal rounded-b"
         >
@@ -98,10 +94,6 @@ const { t } = useI18n();
 const { threadsFor, isLoadingFor, load, post } = useComments();
 const { openModal } = useBaseModal();
 const { can, fetchUpdateAndDeletePermission } = usePermissions();
-// Re-resolved whenever the id changes rather than captured once: the edit state is keyed
-// by entity id, and this component outlives a navigation to the next entity. shallowRef
-// and not a computed, because useEditMode CREATES the state when it is missing, and a
-// computed must not write to the state it reads.
 const parentEditHelper = shallowRef(useEditMode(props.id));
 
 const isParentInEditMode = (): boolean =>
@@ -115,12 +107,6 @@ const canRead = computed<boolean>(() =>
   can(Permission.Canread, Entitytyping.Comment),
 );
 
-/**
- * Posting, replying and resolving all require edit rights on the PARENT entity, not
- * on the comment. EntitySingle already resolved that into the parent's edit state, so
- * the common case costs no extra request; the fallback covers being mounted where
- * that state was never populated (e.g. inside EntityDetailModal).
- */
 const canPost = computed<boolean>(() => {
   if (!can(Permission.Cancreate, Entitytyping.Comment)) return false;
   if (isParentInEditMode()) return true;
@@ -173,11 +159,6 @@ const postSubject = async (
   isComposerOpen.value = false;
 };
 
-/**
- * Keyed on the id, not onMounted: the router reuses this component when navigating from
- * one work to the next, which changes `id` without remounting. Loading only once left the
- * previous work's threads on screen, and its permission answer alongside them.
- */
 watch(
   () => props.id,
   async (entityId) => {

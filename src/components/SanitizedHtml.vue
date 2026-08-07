@@ -26,11 +26,6 @@ const props = withDefaults(
     content: string;
     linkText?: string;
     linkTextIsTranslationKey?: boolean;
-    /**
-     * Extra element names to keep, e.g. the `elody-<tag>` custom elements from the
-     * WYSIWYG tagging extension. The default allowlist drops them along with their
-     * data-entity-id, which silently strips every tag out of rendered content.
-     */
     extraTags?: string[];
   }>(),
   {

@@ -1,9 +1,3 @@
-/**
- * Guards the one thing that is easy to get wrong here: @tiptap/suggestion defaults to a
- * single shared PluginKey, so more than one trigger on the same editor makes ProseMirror
- * throw "Adding different instances of a keyed plugin (suggestion$)". vlacc ships two
- * triggers (`@` for users, `#` for works), so the default is never usable for us.
- */
 import { describe, expect, it } from "vitest";
 import { ref as vueRef } from "vue";
 import {
@@ -12,9 +6,6 @@ import {
   suggestionStateFor,
 } from "../inlineTagSuggestion";
 
-// Deliberately no extensionName: that field is only assigned when the node extensions are
-// built, which happens AFTER the suggestion extension, so the plugin key must not depend
-// on it. Setting it here would test an ordering the app never has.
 const configurationWithTrigger = (tag: string, character: string) =>
   ({
     tag,
@@ -26,7 +17,6 @@ const pluginsFor = async (configurations: any[]) => {
     configurations,
     vueRef(null),
   );
-  // addProseMirrorPlugins reads `this.editor`; nothing in it runs at construction time.
   return extension!.config.addProseMirrorPlugins!.call({ editor: {} } as any);
 };
 
@@ -38,8 +28,6 @@ describe("suggestionStateFor", () => {
   });
 
   it("stays closed until minCharacters is typed", () => {
-    // The bare trigger character is the case that mattered: it used to open the
-    // dropdown and search for the empty string, matching everything.
     const configuration = configurationWithTrigger("entity", "#");
     configuration.inlineTrigger.minCharacters = 2;
 
@@ -51,7 +39,11 @@ describe("suggestionStateFor", () => {
   });
 
   it("requires one character when no minimum is configured", () => {
-    const configuration = { extensionName: "w", tag: "w", inlineTrigger: { character: "@" } } as any;
+    const configuration = {
+      extensionName: "w",
+      tag: "w",
+      inlineTrigger: { character: "@" },
+    } as any;
 
     expect(suggestionStateFor(configuration, propsWith(""))).toBeNull();
     expect(suggestionStateFor(configuration, propsWith("a"))).not.toBeNull();
@@ -99,15 +91,11 @@ describe("createInlineTagSuggestionExtension", () => {
       configurationWithTrigger("work", "#"),
     ]);
 
-    // One suggestion plugin per trigger, plus the unkeyed close-on-blur plugin.
     const keys = plugins
       .map((plugin: any) => plugin.key)
       .filter((key: string) => key?.startsWith("suggestion-"));
     expect(keys).toHaveLength(2);
     expect(new Set(keys).size).toBe(2);
-    // ProseMirror suffixes its own counter, so assert the trigger is in there rather
-    // than an exact match: a key of `suggestion-undefined$` would pass the count check
-    // above purely on that counter.
     expect(keys.some((key: string) => key.startsWith("suggestion-@"))).toBe(
       true,
     );
@@ -117,7 +105,6 @@ describe("createInlineTagSuggestionExtension", () => {
   });
 
   it("builds nothing when no configuration declares a trigger", async () => {
-    // AICAP's path: no inlineTrigger anywhere, so it must never enter inline mode.
     const extension = await createInlineTagSuggestionExtension(
       [{ extensionName: "w", tag: "w" } as any],
       vueRef(null),
