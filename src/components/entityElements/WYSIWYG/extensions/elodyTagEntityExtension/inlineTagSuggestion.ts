@@ -5,23 +5,59 @@ import type { Ref } from "vue";
 import type { ResolvedTagConfiguration } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 
 export type InlineSuggestionState = {
-  configuration: ResolvedTagConfiguration;
+  /**
+   * Every configuration that declares this trigger character. Usually one; vlacc puts
+   * `user` and `group` on `@` so one dropdown lists people and groups together.
+   */
+  configurations: ResolvedTagConfiguration[];
   query: string;
   range: { from: number; to: number };
   /** Viewport coordinates of the trigger, for anchoring the dropdown. */
   anchor: { left: number; bottom: number };
 } | null;
 
+/** The configurations sharing each trigger character, keyed by that character. */
+export const configurationsByTrigger = (
+  configurations: ResolvedTagConfiguration[],
+): Map<string, ResolvedTagConfiguration[]> => {
+  const byTrigger = new Map<string, ResolvedTagConfiguration[]>();
+  for (const configuration of configurations) {
+    const character = configuration.inlineTrigger?.character;
+    if (!character) continue;
+    byTrigger.set(character, [...(byTrigger.get(character) ?? []), configuration]);
+  }
+  return byTrigger;
+};
+
+/**
+ * The configuration a picked entity was listed by, so the inserted node carries that
+ * entry's tag element and its relation type ends up on the comment.
+ *
+ * Falls back to the first: a BaseEntity configuration matches no single type by design.
+ */
+export const configurationForEntity = (
+  configurations: ResolvedTagConfiguration[],
+  entity: { type?: string },
+): ResolvedTagConfiguration | undefined =>
+  configurations.find(
+    (configuration) => configuration.taggableEntityType === entity?.type,
+  ) ?? configurations[0];
 
 export const suggestionStateFor = (
-  configuration: ResolvedTagConfiguration,
+  configurations: ResolvedTagConfiguration[],
   props: any,
 ): InlineSuggestionState => {
-  if (props.query.length < (configuration.inlineTrigger?.minCharacters ?? 1))
-    return null;
+  // The most permissive minimum wins: an entry that wants to list from one character
+  // must not be held back by a sibling sharing its trigger.
+  const minimum = Math.min(
+    ...configurations.map(
+      (configuration) => configuration.inlineTrigger?.minCharacters ?? 1,
+    ),
+  );
+  if (props.query.length < minimum) return null;
   const coords = props.editor.view.coordsAtPos(props.range.to);
   return {
-    configuration,
+    configurations,
     query: props.query,
     range: props.range,
     anchor: { left: coords.left, bottom: coords.bottom },
@@ -41,10 +77,12 @@ export const createInlineTagSuggestionExtension = async (
   configurations: ResolvedTagConfiguration[],
   suggestionState: Ref<InlineSuggestionState>,
 ): Promise<Extension | undefined> => {
-  const inlineConfigurations = configurations.filter(
-    (configuration) => configuration.inlineTrigger?.character,
-  );
-  if (!inlineConfigurations.length) return undefined;
+  // One plugin per trigger CHARACTER, not per configuration: Suggestion passes
+  // pluginKey straight to `new Plugin({ key })`, so two configurations sharing `@`
+  // would register the same key twice and ProseMirror throws "Adding different
+  // instances of a keyed plugin". They share a dropdown instead.
+  const byTrigger = configurationsByTrigger(configurations);
+  if (!byTrigger.size) return undefined;
 
   return Extension.create({
     name: "elodyInlineTagSuggestion",
@@ -62,23 +100,27 @@ export const createInlineTagSuggestionExtension = async (
         },
       });
 
-      return inlineConfigurations
-        .map((configuration) =>
+      return [...byTrigger.entries()]
+        .map(([character, triggerConfigurations]) =>
           Suggestion({
             editor,
-            pluginKey: new PluginKey(
-              `suggestion-${configuration.inlineTrigger!.character}`,
-            ),
-            char: configuration.inlineTrigger!.character,
+            pluginKey: new PluginKey(`suggestion-${character}`),
+            char: character,
             allowSpaces: true,
             startOfLine: false,
             items: () => [],
             render: () => ({
               onStart: (props: any) => {
-                suggestionState.value = suggestionStateFor(configuration, props);
+                suggestionState.value = suggestionStateFor(
+                  triggerConfigurations,
+                  props,
+                );
               },
               onUpdate: (props: any) => {
-                suggestionState.value = suggestionStateFor(configuration, props);
+                suggestionState.value = suggestionStateFor(
+                  triggerConfigurations,
+                  props,
+                );
               },
               onKeyDown: (props: any) => {
                 if (props.event.key !== "Escape") return false;
@@ -108,7 +150,9 @@ export const applyInlineTag = (
   label: string,
 ): boolean => {
   if (!suggestionState || !editor) return false;
-  const { configuration, range } = suggestionState;
+  const { configurations, range } = suggestionState;
+  const configuration = configurationForEntity(configurations, entity);
+  if (!configuration) return false;
 
   return editor
     .chain()

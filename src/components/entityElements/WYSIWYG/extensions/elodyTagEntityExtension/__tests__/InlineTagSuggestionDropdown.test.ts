@@ -46,11 +46,13 @@ const { default: InlineTagSuggestionDropdown } = await import(
 );
 
 const suggestion = {
-  configuration: {
-    tag: "user",
-    taggableEntityType: "user",
-    metadataFilterForTagContent: "vlacc:1|properties.name.value",
-  },
+  configurations: [
+    {
+      tag: "user",
+      taggableEntityType: "user",
+      metadataFilterForTagContent: "vlacc:1|properties.name.value",
+    },
+  ],
   query: "a",
   range: { from: 1, to: 3 },
   anchor: { left: 10, bottom: 20 },
@@ -95,10 +97,9 @@ describe("how the dropdown scopes its search", () => {
     sentVariables.length = 0;
     const wrapper = await mountDropdown({
       ...suggestion,
-      configuration: {
-        ...suggestion.configuration,
-        taggableEntityType: "BaseEntity",
-      },
+      configurations: [
+        { ...suggestion.configurations[0], taggableEntityType: "BaseEntity" },
+      ],
     });
 
     const filters = sentVariables[0].advancedFilterInputs;
@@ -112,15 +113,63 @@ describe("how the dropdown scopes its search", () => {
   });
 });
 
+describe("two configurations sharing one trigger", () => {
+  it("asks for both types in a single query", async () => {
+    // One request, not one per type: a selection filter on type is what lets the
+    // backend answer from the shared Typesense index and hydrate users and groups
+    // from their separate Mongo collections.
+    sentVariables.length = 0;
+    const wrapper = await mountDropdown({
+      ...suggestion,
+      configurations: [
+        suggestion.configurations[0],
+        {
+          tag: "group",
+          taggableEntityType: "group",
+          metadataFilterForTagContent: "vlacc:1|properties.name.value",
+        },
+      ],
+    });
+
+    expect(sentVariables).toHaveLength(1);
+    expect(sentVariables[0].advancedFilterInputs).toEqual([
+      { type: "selection", key: "type", value: ["user", "group"], match_exact: true },
+      {
+        type: "text",
+        key: ["vlacc:1|properties.name.value"],
+        value: "a",
+        match_exact: false,
+      },
+    ]);
+
+    wrapper.unmount();
+  });
+
+  it("refuses to mix BaseEntity with a named type", async () => {
+    // BaseEntity carries the client's own type list; ANDing it with `user` matches
+    // nothing, so this is a misconfiguration rather than something to merge.
+    sentVariables.length = 0;
+    const wrapper = await mountDropdown({
+      ...suggestion,
+      configurations: [
+        suggestion.configurations[0],
+        { ...suggestion.configurations[0], taggableEntityType: "BaseEntity" },
+      ],
+    });
+
+    expect(sentVariables).toHaveLength(0);
+    wrapper.unmount();
+  });
+});
+
 describe("a typed configuration with no filter key", () => {
   it("searches nothing rather than listing every entity of the type", async () => {
     sentVariables.length = 0;
     const wrapper = await mountDropdown({
       ...suggestion,
-      configuration: {
-        ...suggestion.configuration,
-        metadataFilterForTagContent: null,
-      },
+      configurations: [
+        { ...suggestion.configurations[0], metadataFilterForTagContent: null },
+      ],
     });
 
     expect(sentVariables).toHaveLength(0);
@@ -142,10 +191,9 @@ describe("which metadata key the option label is read from", () => {
   it("falls back to the id rather than guessing an unconfigured key", async () => {
     const wrapper = await mountDropdown({
       ...suggestion,
-      configuration: {
-        ...suggestion.configuration,
-        taggableEntityType: "BaseEntity",
-      },
+      configurations: [
+        { ...suggestion.configurations[0], taggableEntityType: "BaseEntity" },
+      ],
     });
 
     press("Enter");
