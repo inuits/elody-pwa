@@ -76,7 +76,7 @@ describe("inline @ trigger inside a real editor", () => {
 
     expect(tagging.inlineSuggestion.value).not.toBeNull();
     expect(tagging.inlineSuggestion.value?.query).toBe("in");
-    expect(tagging.inlineSuggestion.value?.configuration.tag).toBe("user");
+    expect(tagging.inlineSuggestion.value?.configurations[0].tag).toBe("user");
     expect(tagging.inlineSuggestion.value?.anchor).toBeDefined();
 
     editor.destroy();

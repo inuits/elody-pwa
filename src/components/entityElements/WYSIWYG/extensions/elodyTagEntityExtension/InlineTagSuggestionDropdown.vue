@@ -108,22 +108,50 @@ const labelFor = (entity: any): string => {
 const filtersFor = (
   state: NonNullable<InlineSuggestionState>,
 ): AdvancedFilterInput[] | undefined => {
-  if (state.configuration.taggableEntityType !== Entitytyping.BaseEntity) {
-    if (!state.configuration.metadataFilterForTagContent) {
+  const typed = state.configurations.filter(
+    (configuration) =>
+      configuration.taggableEntityType !== Entitytyping.BaseEntity,
+  );
+
+  if (typed.length) {
+    if (typed.length !== state.configurations.length) {
+      // BaseEntity brings its own type list; ANDing it with named types would
+      // contradict itself, so this is a configuration mistake, not a case to merge.
       console.error(
-        `[elody-tagging] configuration for "${state.configuration.tag}" needs metadataFilterForTagContent to search on`,
+        "[elody-tagging] a trigger character cannot mix BaseEntity with named entity types",
+      );
+      return undefined;
+    }
+    const keys = typed
+      .map((configuration) => configuration.metadataFilterForTagContent)
+      .filter(Boolean) as string[];
+    if (keys.length !== typed.length) {
+      console.error(
+        "[elody-tagging] every configuration on this trigger needs metadataFilterForTagContent to search on",
       );
       return undefined;
     }
     return [
-      {
-        type: AdvancedFilterTypes.Type,
-        value: state.configuration.taggableEntityType,
-        match_exact: true,
-      },
+      // One query for all of them. Several types are a selection filter, which is
+      // what lets the backend answer from the shared Typesense index and hydrate the
+      // hits from each type's own collection (users and groups live apart).
+      typed.length === 1
+        ? {
+            type: AdvancedFilterTypes.Type,
+            value: typed[0].taggableEntityType,
+            match_exact: true,
+          }
+        : {
+            type: AdvancedFilterTypes.Selection,
+            key: "type",
+            value: typed.map(
+              (configuration) => configuration.taggableEntityType,
+            ),
+            match_exact: true,
+          },
       {
         type: AdvancedFilterTypes.Text,
-        key: [state.configuration.metadataFilterForTagContent],
+        key: [...new Set(keys)],
         value: state.query,
         match_exact: false,
       },
@@ -171,7 +199,9 @@ const search = async (state: NonNullable<InlineSuggestionState>) => {
     const response = await apolloClient.query({
       query: document,
       variables: {
-        type: state.configuration.taggableEntityType as Entitytyping,
+        // Only the advanced filters decide what is searched; the backend derives the
+        // collection from them, so this stays the first configured type.
+        type: state.configurations[0].taggableEntityType as Entitytyping,
         limit: 10,
         skip: 1,
         searchValue: { value: "", isAsc: true },
@@ -193,7 +223,10 @@ const search = async (state: NonNullable<InlineSuggestionState>) => {
 };
 
 watch(
-  () => [props.suggestion?.query, props.suggestion?.configuration.tag],
+  () => [
+    props.suggestion?.query,
+    props.suggestion?.configurations.map((configuration) => configuration.tag).join(),
+  ],
   () => {
     if (!props.suggestion) {
       results.value = [];
