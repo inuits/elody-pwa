@@ -11,6 +11,8 @@ import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useImport } from "@/composables/useImport";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { EditStatus } from "@/generated-types/queries";
 import { inject } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
@@ -24,15 +26,27 @@ const props = defineProps<{
   refreshAfterAction?: boolean;
   navigateToCreatedEntity?: boolean;
   entityId: string;
+  relationsFromTypes?: string[];
 }>();
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
+const { getRelationsBasedOnType } = useFormHelper();
 const { displaySuccessNotification, displayErrorNotification } =
   useBaseNotification();
 const apolloClient = inject(DefaultApolloClient);
 const refetchParentEntity: any = inject("RefetchParentEntity");
 const router = useRouter();
+
+const buildVariables = () => {
+  const variables: Record<string, unknown> = { id: props.entityId };
+  if (props.relationsFromTypes?.length) {
+    variables.relations = props.relationsFromTypes
+      .flatMap((type) => getRelationsBasedOnType(props.entityId, type) ?? [])
+      .map((relation) => ({ ...relation, editStatus: EditStatus.New }));
+  }
+  return variables;
+};
 
 const doAction = async () => {
   try {
@@ -40,16 +54,17 @@ const doAction = async () => {
     const isMutation =
       document.definitions[0]?.kind === "OperationDefinition" &&
       (document.definitions[0] as any).operation === "mutation";
+    const variables = buildVariables();
     let result;
     if (isMutation) {
       result = await (apolloClient as ApolloClient<any>).mutate({
         mutation: document,
-        variables: { id: props.entityId },
+        variables,
       });
     } else {
       result = await (apolloClient as ApolloClient<any>).query({
         query: document,
-        variables: { id: props.entityId },
+        variables,
         fetchPolicy: "no-cache",
       });
     }

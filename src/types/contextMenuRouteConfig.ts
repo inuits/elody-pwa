@@ -39,6 +39,7 @@ export type QueryActionConfig = BaseAction & {
   type: "query";
   query: string;
   refreshAfterAction?: boolean;
+  relationsFromTypes?: string[];
 };
 
 export type LinkActionConfig = BaseAction & {
