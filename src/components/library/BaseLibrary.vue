@@ -120,7 +120,9 @@
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
               :simple-search-value="simpleSearchTerm"
-              :set-simple-search="handleSetSimpleSearch"
+              :set-simple-search="
+                isSearchLibrary ? undefined : handleSetSimpleSearch
+              "
               @pagination-limit-options-promise="
                 (promise) => (paginationLimitOptionsPromise = promise)
               "

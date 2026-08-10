@@ -276,6 +276,15 @@ describe("LibraryBar.vue Simple Search", () => {
     expect(wrapper.find('[data-cy="simple-search"]').exists()).toBe(false);
   });
 
+  it("does not render the search box when no setSimpleSearch handler is provided, even if the route configures keys", async () => {
+    const wrapper = await mountWithRouteMeta(
+      { simpleSearch: { keys: ["podiumnet:1|properties.title.value"] } },
+      { setSimpleSearch: undefined },
+    );
+
+    expect(wrapper.find('[data-cy="simple-search"]').exists()).toBe(false);
+  });
+
   it("renders the search box with a placeholder derived from the route's breadcrumb title when simpleSearch keys are configured", async () => {
     const wrapper = await mountWithRouteMeta({
       simpleSearch: { keys: ["podiumnet:1|properties.title.value"] },

@@ -51,7 +51,10 @@
         />
       </div>
     </div>
-    <div v-if="simpleSearchKeys.length > 0" class="w-full @md:w-64">
+    <div
+      v-if="simpleSearchKeys.length > 0 && setSimpleSearch"
+      class="w-full @md:w-64"
+    >
       <BaseInputTextNumberDatetime
         data-cy="simple-search"
         type="text"
