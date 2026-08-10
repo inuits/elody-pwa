@@ -26,7 +26,7 @@ const props = defineProps<{
   refreshAfterAction?: boolean;
   navigateToCreatedEntity?: boolean;
   entityId: string;
-  relationsFromTypes?: string[];
+  relationTypesToExtract?: string[];
 }>();
 
 const { t } = useI18n();
@@ -40,10 +40,10 @@ const router = useRouter();
 
 const buildVariables = () => {
   const variables: Record<string, unknown> = { id: props.entityId };
-  if (props.relationsFromTypes?.length) {
-    variables.relations = props.relationsFromTypes
+  if (props.relationTypesToExtract?.length) {
+    variables.relations = props.relationTypesToExtract
       .flatMap((type) => getRelationsBasedOnType(props.entityId, type) ?? [])
-      .map((relation) => ({ ...relation, editStatus: EditStatus.New }));
+      .map((relation) => ({ ...relation, editStatus: EditStatus.Unchanged }));
   }
   return variables;
 };
