@@ -17,6 +17,17 @@
         <img src="/logo.svg" alt="Elody logo" class="h-12" />
       </router-link>
       <div
+        v-if="environmentLabel"
+        data-cy="environment-pill"
+        class="mb-8 -mt-6 flex justify-center"
+      >
+        <span
+          class="rounded-full bg-accent-normal text-neutral-0 text-xs font-semibold px-2 py-0.5 uppercase"
+        >
+          {{ environmentLabel }}
+        </span>
+      </div>
+      <div
         v-for="menuItem in menuItems"
         :key="menuItem.label"
         @click.capture="
@@ -45,10 +56,14 @@ import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, inject } from "vue";
+import { getEnvironmentLabel } from "@/helpers";
 import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useRouter } from "vue-router";
+
+const config: any = inject("config");
+const environmentLabel = getEnvironmentLabel(config?.DEPLOYMENT_ENVIRONMENT);
 
 const navigation = ref<any>(null);
 const hoveredItem = ref<MenuItem | undefined>(undefined);

@@ -11,6 +11,7 @@ import {
   looksLikeEntityId,
   stripEmbeddedViewerSuffix,
   deepToRaw,
+  getEnvironmentLabel,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -583,5 +584,19 @@ describe("extractValueFromObject", () => {
       expect(raw.when.toISOString()).toBe("2026-01-01T00:00:00.000Z");
       expect(() => structuredClone(raw)).not.toThrow();
     });
+  });
+});
+
+describe("getEnvironmentLabel", () => {
+  it("returns an empty label for production and for an unset environment", () => {
+    expect(getEnvironmentLabel("prod")).toBe("");
+    expect(getEnvironmentLabel("PRODUCTION")).toBe("");
+    expect(getEnvironmentLabel("")).toBe("");
+    expect(getEnvironmentLabel(undefined)).toBe("");
+  });
+
+  it("returns an uppercased label for non-production environments", () => {
+    expect(getEnvironmentLabel("uat")).toBe("UAT");
+    expect(getEnvironmentLabel(" dev ")).toBe("DEV");
   });
 });

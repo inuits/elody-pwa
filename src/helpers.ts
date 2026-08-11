@@ -955,6 +955,14 @@ export const stripEmbeddedViewerSuffix = (url: string): string => {
   }
 };
 
+export const getEnvironmentLabel = (
+  deploymentEnvironment: string | undefined,
+): string => {
+  const environment = deploymentEnvironment?.trim() || "";
+  if (/^(prod|production|prd)$/i.test(environment)) return "";
+  return environment.toUpperCase();
+};
+
 export const graphqlErrorInterceptor = onError(
   ({ graphQLErrors, operation }): any => {
     const { handleGraphqlError } = useErrorCodes();
