@@ -70,6 +70,7 @@
           :query="action.query"
           :refresh-after-action="action.refreshAfterAction"
           :navigate-to-created-entity="action.navigateToCreatedEntity"
+          :relation-types-to-extract="action.relationTypesToExtract"
           :entity-id="entityId"
         />
         <link-action
