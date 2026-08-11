@@ -18,6 +18,10 @@ const routeComponentConfig: RouteComponentConfig[] = [
     routeComponent: () => import("@/views/SingleEntity.vue"),
   },
   {
+    routeName: "HistoryComparison",
+    routeComponent: () => import("@/views/HistoryComparison.vue"),
+  },
+  {
     routeName: "MultiEntityView",
     routeComponent: () => import("@/views/MultiEntityView.vue"),
   },

@@ -12,6 +12,7 @@ import {
   stripEmbeddedViewerSuffix,
   deepToRaw,
   getEnvironmentLabel,
+  findEntityListElement,
 } from "@/helpers";
 import { reactive } from "vue";
 import {

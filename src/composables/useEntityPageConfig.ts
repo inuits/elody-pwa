@@ -37,10 +37,15 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.trackSeen === true,
   );
 
+  const showHistoryButton = computed<boolean>(
+    () => entityConfig.value?.showHistoryButton === true,
+  );
+
   return {
     actions,
     hasEditMetadataButton,
     deleteButton,
     trackSeen,
+    showHistoryButton,
   };
 };

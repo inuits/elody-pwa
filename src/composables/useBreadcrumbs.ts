@@ -14,6 +14,7 @@ import { useRouter } from "vue-router";
 import {
   getChildrenOfHomeRoutes,
   getTitleOrNameFromEntity,
+  getMappedSlug,
   extractValueFromObject,
 } from "@/helpers";
 import { currentLocale } from "@/helpers";
@@ -113,6 +114,30 @@ const useBreadcrumbs = (config: any) => {
 
   const addTitleToBreadcrumb = (title: string) => {
     breadcrumbRoutes.value[0].title = title;
+  };
+
+  const determineBreadcrumbsForEntity = async (
+    entity: Entity,
+  ): Promise<void> => {
+    clearBreadcrumbPath();
+    setRootRoute(
+      entity.id,
+      getTitleOrNameFromEntity(entity),
+      entity.intialValues?.typePillLabel,
+    );
+    let current: Entity | undefined = entity;
+    do {
+      const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
+        getMappedSlug(current),
+      );
+      if (!routeBreadcrumbs) break;
+      current = await iterateOverBreadcrumbs(
+        [current.id],
+        routeBreadcrumbs,
+        true,
+        current,
+      );
+    } while (current);
   };
 
   const getFullBreadcrumbPath = (): BreadcrumbRoute[] => {
@@ -233,6 +258,7 @@ const useBreadcrumbs = (config: any) => {
     addTitleToBreadcrumb,
     clearBreadcrumbPath,
     clearBreadcrumbPathAndAddOverviewPage,
+    determineBreadcrumbsForEntity,
     getFullBreadcrumbPath,
     getRouteBreadcrumbsOfEntity,
     setRootRoute,

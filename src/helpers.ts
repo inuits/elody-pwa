@@ -522,6 +522,27 @@ export const findWysiwygElement = (
   return results;
 }
 
+export const findEntityListElement = (
+  obj: any,
+): EntityListElement[] => {
+  const results: EntityListElement[] = [];
+
+  if (obj && obj.__typename === "EntityListElement") {
+    results.push(obj);
+  }
+
+  if (typeof obj === "object") {
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const nestedResults = findEntityListElement(obj[key]);
+        results.push(...nestedResults);
+      }
+    }
+  }
+
+  return results;
+}
+
 export const getEntityTitle = (entity: BaseEntity): string => {
   let title: string = entity.id;
   if (entity.intialValues?.title) title = entity.intialValues.title;
