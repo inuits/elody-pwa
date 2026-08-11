@@ -12,12 +12,15 @@ const mockEntityPageConfig = {
   actions: ref<unknown[]>([]),
   hasEditMetadataButton: ref<boolean | undefined>(undefined),
   deleteButton: ref<unknown>(undefined),
+  showHistoryButton: ref<boolean>(false),
 };
 
 const mockIsAuthenticated = ref(true);
+const mockHasRoute = vi.fn<(name: string) => boolean>(() => true);
 
 vi.mock("vue-router", () => ({
   useRoute: () => mockRoute.value,
+  useRouter: () => ({ hasRoute: mockHasRoute }),
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -33,6 +36,7 @@ vi.mock("@/composables/useEntityPageConfig", () => ({
     actions: mockEntityPageConfig.actions,
     hasEditMetadataButton: mockEntityPageConfig.hasEditMetadataButton,
     deleteButton: mockEntityPageConfig.deleteButton,
+    showHistoryButton: mockEntityPageConfig.showHistoryButton,
   }),
 }));
 
@@ -71,7 +75,9 @@ describe("TheHeader context menu", () => {
     mockEntityPageConfig.actions.value = [];
     mockEntityPageConfig.hasEditMetadataButton.value = undefined;
     mockEntityPageConfig.deleteButton.value = undefined;
+    mockEntityPageConfig.showHistoryButton.value = false;
     mockIsAuthenticated.value = true;
+    mockHasRoute.mockReturnValue(true);
   });
 
   it("renders HeaderContextMenuActions when on a single-entity page with configured actions", () => {
@@ -122,5 +128,68 @@ describe("TheHeader context menu", () => {
     expect(
       wrapper.findComponent({ name: "HeaderContextMenuActions" }).exists(),
     ).toBe(true);
+  });
+});
+
+describe("TheHeader history button", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.value = {
+      name: "SingleEntity",
+      params: { type: "assets", id: "entity-1" },
+    };
+    mockEntityPageConfig.actions.value = [];
+    mockEntityPageConfig.hasEditMetadataButton.value = undefined;
+    mockEntityPageConfig.deleteButton.value = undefined;
+    mockEntityPageConfig.showHistoryButton.value = false;
+    mockIsAuthenticated.value = true;
+    mockHasRoute.mockReturnValue(true);
+  });
+
+  it("renders HistoryButton when on a single-entity page, config enables it, and the route is registered", () => {
+    mockEntityPageConfig.showHistoryButton.value = true;
+
+    const wrapper = mountHeader();
+    const button = wrapper.findComponent({ name: "HistoryButton" });
+
+    expect(button.exists()).toBe(true);
+    expect(button.props("entityType")).toBe("Asset");
+    expect(button.props("entityId")).toBe("entity-1");
+  });
+
+  it("does not render HistoryButton when config does not enable it", () => {
+    mockEntityPageConfig.showHistoryButton.value = false;
+
+    const wrapper = mountHeader();
+
+    expect(wrapper.findComponent({ name: "HistoryButton" }).exists()).toBe(
+      false,
+    );
+  });
+
+  it("does not render HistoryButton when the HistoryComparison route is not registered", () => {
+    mockEntityPageConfig.showHistoryButton.value = true;
+    mockHasRoute.mockReturnValue(false);
+
+    const wrapper = mountHeader();
+
+    expect(wrapper.findComponent({ name: "HistoryButton" }).exists()).toBe(
+      false,
+    );
+    expect(mockHasRoute).toHaveBeenCalledWith("HistoryComparison");
+  });
+
+  it("does not render HistoryButton on non-single-entity routes", () => {
+    mockRoute.value = {
+      name: "EntityList",
+      params: { type: "assets" },
+    };
+    mockEntityPageConfig.showHistoryButton.value = true;
+
+    const wrapper = mountHeader();
+
+    expect(wrapper.findComponent({ name: "HistoryButton" }).exists()).toBe(
+      false,
+    );
   });
 });

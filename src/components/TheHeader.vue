@@ -7,6 +7,11 @@
       class="ml-0 min-[880px]:ml-6"
       v-if="showEditMetadataButton"
     />
+    <HistoryButton
+      v-if="showHistoryButton"
+      :entity-type="entityType"
+      :entity-id="entityId"
+    />
     <EntityHeaderButton
       v-if="isSingleEntityPage && customDeleteButton"
       :config="customDeleteButton"
@@ -34,7 +39,7 @@
 <script lang="ts" setup>
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
@@ -43,12 +48,14 @@ import { getRouteMetadataInfoFromEntity, mapUrlToEntityType } from "@/helpers";
 import DeleteButton from "@/components/DeleteButton.vue";
 import EntityHeaderButton from "@/components/EntityHeaderButton.vue";
 import HeaderContextMenuActions from "@/components/HeaderContextMenuActions.vue";
+import HistoryButton from "@/components/HistoryButton.vue";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { auth } from "@/main";
 import { usePageStatus } from "@/composables/usePageStatus";
 import type { EntityButtonConfig, ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
 
 const route = useRoute();
+const router = useRouter();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
 const { pageStatus } = usePageStatus();
@@ -56,6 +63,7 @@ const {
   actions: contextMenuActions,
   hasEditMetadataButton: configEditMetadataButton,
   deleteButton: configDeleteButton,
+  showHistoryButton: configShowHistoryButton,
 } = useEntityPageConfig();
 
 const entityType = computed(() => {
@@ -84,6 +92,11 @@ const showDeleteButton = computed(() => {
   const meta = getRouteMetadataInfoFromEntity(config, entityType.value);
   if (meta?.hasDeleteButton === false) return false;
   return true;
+});
+
+const showHistoryButton = computed(() => {
+  if (!isSingleEntityPage.value) return false;
+  return configShowHistoryButton.value && router.hasRoute("HistoryComparison");
 });
 
 const showEditMetadataButton = computed(() => {

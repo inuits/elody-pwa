@@ -16,6 +16,7 @@ const pageName = computed(() => {
     "SingleEntity",
     "SingleMediafile",
     "EmbeddedViewer",
+    "HistoryComparison",
   ];
   if (
     singleEntityNames.includes(route.name as string) ||

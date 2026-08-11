@@ -17,6 +17,7 @@ import {
   downloadFile,
   findPanelMetadata,
   getFromExpressEndpoint,
+  findEntityListElement,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
