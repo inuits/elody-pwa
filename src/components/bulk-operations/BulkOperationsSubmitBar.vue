@@ -26,11 +26,12 @@
             buttonLabel
               ? buttonLabel
               : `${$t('bulk-operations.edit')} ${selectedItemsCount} ${$t(
-                  'bulk-operations.items'
+                  'bulk-operations.items',
                 )}`
           "
           :icon="buttonIcon"
           :disabled="disabled"
+          :loading="loading"
           button-style="accentAccent"
           button-size="small"
           @click="() => emit('submit')"
@@ -63,6 +64,7 @@ withDefaults(
     tooltipLabel?: string;
     buttonIcon?: DamsIcons;
     disabled?: boolean;
+    loading?: boolean;
     showDeleteButton?: boolean;
     selectedItemsCount?: number;
   }>(),
@@ -70,9 +72,10 @@ withDefaults(
     buttonLabel: "",
     buttonIcon: DamsIcons.Edit,
     disabled: false,
+    loading: false,
     showDeleteButton: false,
     selectedItemsCount: 0,
-  }
+  },
 );
 
 const emit = defineEmits<{

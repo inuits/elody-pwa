@@ -25,6 +25,7 @@
         :view-only="true"
       />
     </div>
+    <ListItemSkeleton v-else-if="loading" :amount="4" class="p-4" />
   </BaseModal>
 </template>
 
@@ -41,6 +42,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { getEntityTitle } from "@/helpers";
 import { Unicons } from "@/types";
 import EntitySingle from "@/views/EntitySingle.vue";
+import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 
 const { getModalInfo, closeModal } = useBaseModal();
 
@@ -54,7 +56,7 @@ const queryVariables = computed(() => {
   return { id: entityId.value, type: entityType.value };
 });
 
-const { result, refetch } = useQuery<GetEntityByIdQuery>(
+const { result, refetch, loading } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   () => ({

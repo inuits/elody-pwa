@@ -9,13 +9,8 @@
       :button-icon="DamsIcons.Save"
       :show-delete-button="editModeHelper.editMode === 'edit-delete'"
       :disabled="editModeHelper.showErrors"
-      @submit="
-        async () => {
-          editModeHelper.clickButton();
-          await editModeHelper.save();
-          await getTenants();
-        }
-      "
+      :loading="isSaving"
+      @submit="saveEntity()"
       @cancel="openDiscardModal()"
       @close="openDiscardModal()"
       @delete="openDeleteModal()"
@@ -34,6 +29,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
+import { useAsyncAction } from "@/composables/useAsyncAction";
 
 const props = withDefaults(
   defineProps<{
@@ -48,6 +44,15 @@ const { discardEditForForm } = useFormHelper();
 const { t } = useI18n();
 const config: any = inject("config");
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
+
+const { isBusy: isSaving, run } = useAsyncAction();
+
+const saveEntity = () =>
+  run(async () => {
+    editModeHelper.clickButton();
+    await editModeHelper.save();
+    await getTenants();
+  });
 
 const openDiscardModal = async () => {
   const choice = await confirm({

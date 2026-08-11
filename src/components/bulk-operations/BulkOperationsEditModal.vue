@@ -80,6 +80,9 @@ import { useI18n } from "vue-i18n";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import EntityElementWindow from "../entityElements/EntityElementWindow.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useAsyncAction } from "@/composables/useAsyncAction";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const props = defineProps<{
   context: Context;
@@ -92,6 +95,9 @@ const { getThumbnail } = useThumbnailHelper();
 const { getModalInfo, closeModal } = useBaseModal();
 const { createForm, createEntityValues, getForm, formContainsValues } =
   useFormHelper();
+const { startBlocking, stopBlocking } = useBlockingLoader();
+const { displayErrorNotification } = useBaseNotification();
+const { run } = useAsyncAction();
 const modal = getModalInfo(TypeModals.BulkOperationsEdit);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
@@ -115,14 +121,31 @@ const { mutate: mutateRelations } = useMutation<
   BulkAddRelationsMutationVariables
 >(BulkAddRelationsDocument);
 
-const bulkAddRelations = () => {
-  if (!relationEntityId.value) return;
-  mutateRelations({
-    entityIds: entityIds.value,
-    relationEntityId: relationEntityId.value,
-    relationType: "",
+const bulkAddRelations = () =>
+  run(async () => {
+    if (!relationEntityId.value) return;
+    startBlocking(t("bulk-operations.edit"));
+    let succeeded = false;
+    try {
+      await mutateRelations({
+        entityIds: entityIds.value,
+        relationEntityId: relationEntityId.value,
+        relationType: "",
+      });
+      succeeded = true;
+    } catch (error) {
+      console.error("Error bulk adding relations:", error);
+      displayErrorNotification(
+        t("notifications.errors.generic.title"),
+        t("notifications.errors.generic.description"),
+      );
+    } finally {
+      // stop before closing, otherwise the app-wide overlay flashes in the
+      // tick between the modal closing and blocking ending
+      stopBlocking();
+    }
+    if (succeeded) closeModal(TypeModals.BulkOperationsEdit);
   });
-};
 
 const { onResult: onRelationFormResult } =
   useQuery<GetBulkOperationsRelationFormQuery>(

@@ -55,10 +55,21 @@
           :selection-limit="getSelectionLimit()"
           :show-button="true"
           :enable-advanced-filters="true"
-          :search-mode="field.inputField?.entityPickerSearchConfig?.mode ?? undefined"
-          :search-metadata-keys="field.inputField?.entityPickerSearchConfig?.metadataKeys ?? undefined"
-          :search-accepted-types="field.inputField?.entityPickerSearchConfig?.acceptedTypes ?? undefined"
-          :search-static-filters="field.inputField?.entityPickerSearchConfig?.staticFilters ?? undefined"
+          :search-mode="
+            field.inputField?.entityPickerSearchConfig?.mode ?? undefined
+          "
+          :search-metadata-keys="
+            field.inputField?.entityPickerSearchConfig?.metadataKeys ??
+            undefined
+          "
+          :search-accepted-types="
+            field.inputField?.entityPickerSearchConfig?.acceptedTypes ??
+            undefined
+          "
+          :search-static-filters="
+            field.inputField?.entityPickerSearchConfig?.staticFilters ??
+            undefined
+          "
         />
         <metadata-wrapper
           v-if="
@@ -191,7 +202,11 @@
                 }`
               : t(field.label)
           "
-          :disabled="isButtonDisabled"
+          :disabled="
+            isButtonDisabled ||
+            (!!busyActionType && busyActionType !== field.actionType)
+          "
+          :loading="busyActionType === field.actionType"
           :icon="field.icon"
           button-style="accentAccent"
           @click="performActionButtonClickEvent(field)"
@@ -297,7 +312,11 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits(["entityCreated", "dynamicFormReady", "valuesSubmitted"]);
+const emit = defineEmits([
+  "entityCreated",
+  "dynamicFormReady",
+  "valuesSubmitted",
+]);
 
 type FormFieldTypes = UploadContainer | PanelMetaData | FormAction;
 const nonStandardFieldTypes: BaseFieldType[] = [
@@ -321,8 +340,12 @@ const {
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
 } = useFormHelper();
-const { displaySuccessNotification, displayWarningNotification } =
-  useBaseNotification();
+const {
+  displaySuccessNotification,
+  displayWarningNotification,
+  displayErrorNotification,
+} = useBaseNotification();
+const busyActionType = ref<string | undefined>(undefined);
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
 const {
@@ -642,7 +665,9 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
     deleteForm(props.dynamicFormQuery);
     emit("entityCreated", {
       id: useEntitySingle().getEntityUuid(),
-      intialValues: uploadedFilenames ? { label: uploadedFilenames } : undefined,
+      intialValues: uploadedFilenames
+        ? { label: uploadedFilenames }
+        : undefined,
     });
     return;
   }
@@ -967,10 +992,12 @@ const callEndpointActionFunction = async (field: FormAction) => {
   });
   if (result.status !== 200) {
     const error = new Error(result.statusText);
+    // already surfaced to the user here; returning (rather than throwing)
+    // keeps the dispatcher from stacking a second, vaguer notification on top
     handleHttpError(error);
     closeAndDeleteForm();
     submitErrors.value = error.message;
-    throw error;
+    return;
   }
   const data = await result.text();
   if (endpoint.responseAction === EndpointResponseActions.DownloadResponse)
@@ -1052,7 +1079,10 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
     // add a real bulk endpoint if selections grow into the hundreds.
     await Promise.all(
       ids.map((id: string) => {
-        addEditableMetadataKeys(Object.keys(form.value.values.intialValues), id);
+        addEditableMetadataKeys(
+          Object.keys(form.value.values.intialValues),
+          id,
+        );
         const metadata = parseIntialValuesForFormSubmit(
           form.value.values.intialValues,
           id,
@@ -1105,7 +1135,21 @@ const performActionButtonClickEvent = (field: FormAction): void => {
       `Either actionType is undefined or the Elody frontend has no actionFunction for actionType '${field.actionType}'`,
     );
   showErrors.value = true;
-  actionFunctions[field.actionType]();
+
+  // One in-flight action at a time: re-entry here is the double-submit hole.
+  if (busyActionType.value) return;
+  busyActionType.value = field.actionType;
+  Promise.resolve(actionFunctions[field.actionType]())
+    .catch((error) => {
+      console.error(`Action '${field.actionType}' failed:`, error);
+      displayErrorNotification(
+        t("notifications.errors.generic.title"),
+        t("notifications.errors.generic.description"),
+      );
+    })
+    .finally(() => {
+      busyActionType.value = undefined;
+    });
 };
 
 const getFormProgressIndicator = (): ActionProgress | undefined => {

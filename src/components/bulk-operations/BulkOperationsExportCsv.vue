@@ -118,6 +118,8 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import { useRoute } from "vue-router";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { useAsyncAction } from "@/composables/useAsyncAction";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 
 const entityTypeMappingByContext: {
   [key: string]: Entitytyping;
@@ -148,9 +150,12 @@ const {
   triggerBulkSelectionEvent,
 } = useBulkOperations();
 
-const { getBulkOperationType, getParentId, getRelationType } = useModalActions();
+const { getBulkOperationType, getParentId, getRelationType } =
+  useModalActions();
 
-const isRelatedExport = computed(() => !!(modal as any).relatedExportEntityType && !!getRelationType());
+const isRelatedExport = computed(
+  () => !!(modal as any).relatedExportEntityType && !!getRelationType(),
+);
 
 const config = inject("config") as any;
 const { t } = useI18n();
@@ -195,6 +200,8 @@ const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
 );
 
 const isLoading = useQueryLoading();
+const { startBlocking, stopBlocking } = useBlockingLoader();
+const { run } = useAsyncAction();
 
 const queryVariablesForMediafiles: FetchMediafilesOfEntityQueryVariables = {
   entityIds: [],
@@ -217,51 +224,61 @@ const bulkSelect = () => {
   triggerBulkSelectionEvent(BulkOperationsContextEnum.BulkOperationsCsvExport);
 };
 
-const exportCsv = async () => {
-  const selectedFields = csvExportOptions.value
-    .filter((option) => option.isSelected)
-    .map((option) => option.key.value);
+const exportCsv = () =>
+  run(async () => {
+    startBlocking();
+    try {
+      const selectedFields = csvExportOptions.value
+        .filter((option) => option.isSelected)
+        .map((option) => option.key.value);
 
-  const payload: Record<string, any> = { field: selectedFields, type: entityType.value };
+      const payload: Record<string, any> = {
+        field: selectedFields,
+        type: entityType.value,
+      };
 
-  if (isRelatedExport.value) {
-    payload.parentId = getParentId();
-    payload.relation = getRelationType();
-    payload.ids = [];
-  } else {
-    payload.ids = getEnqueuedItems(context.value).map((item) => item.id);
-    const state = getStateForRoute(route);
-    if (state?.queryVariables) {
-      payload.order_by = state.queryVariables.searchValue.order_by;
-      payload.asc = state.queryVariables.searchValue.isAsc;
+      if (isRelatedExport.value) {
+        payload.parentId = getParentId();
+        payload.relation = getRelationType();
+        payload.ids = [];
+      } else {
+        payload.ids = getEnqueuedItems(context.value).map((item) => item.id);
+        const state = getStateForRoute(route);
+        if (state?.queryVariables) {
+          payload.order_by = state.queryVariables.searchValue.order_by;
+          payload.asc = state.queryVariables.searchValue.isAsc;
+        }
+      }
+
+      await fetch("/api/export/csv", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/csv",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then(async (response) => {
+          if (!response.ok) throw response;
+          return response.text();
+        })
+        .then((csv) => {
+          downloadCsv(`${entityType.value}.csv`, csv);
+        })
+        .catch(async (response: Response) => {
+          displayErrorNotification(
+            t("bulk-operations.csv-export.error.title"),
+            await response.text(),
+          );
+        });
+    } finally {
+      // stop before closing: the modal-scoped overlay disappears with the
+      // modal, and a still-blocking app would flash its full-screen overlay
+      stopBlocking();
     }
-  }
-
-  await fetch("/api/export/csv", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "text/csv",
-    },
-    body: JSON.stringify(payload),
-  })
-    .then(async (response) => {
-      if (!response.ok) throw response;
-      return response.text();
-    })
-    .then((csv) => {
-      downloadCsv(`${entityType.value}.csv`, csv);
-    })
-    .catch(async (response: Response) => {
-      displayErrorNotification(
-        t("bulk-operations.csv-export.error.title"),
-        await response.text(),
-      );
-    });
-
-  dequeueAllItemsInBulk();
-  closeModal(TypeModals.BulkOperations);
-};
+    dequeueAllItemsInBulk();
+    closeModal(TypeModals.BulkOperations);
+  });
 
 onResult((result) => {
   if (result.data) {

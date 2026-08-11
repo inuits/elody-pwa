@@ -43,6 +43,7 @@
         :branches="branches"
         :steps="flowConfig?.steps ?? []"
         :repeatable="flowConfig?.repeatable ?? false"
+        :finishing="isCommitting"
         @add-another="addAnother"
         @finish="onFinish"
         @remove="onRemoveBranch"
@@ -146,6 +147,8 @@ import { useModalActions } from "@/composables/useModalActions";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { getEntityIdFromRoute } from "@/helpers";
+import { useAsyncAction } from "@/composables/useAsyncAction";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
@@ -168,6 +171,8 @@ const { getEntityUuid } = useEntitySingle();
 const { getCallbackFunctions } = useModalActions();
 const { confirm } = useConfirmModal();
 const { displayErrorNotification } = useBaseNotification();
+const { run } = useAsyncAction();
+const { startBlocking, stopBlocking } = useBlockingLoader();
 const router = useRouter();
 const { t } = useI18n();
 
@@ -231,7 +236,9 @@ const start = () => {
   view.value = store.opensOnFirstStep() ? "step" : "overview";
 };
 
-const advance = async (completeCurrentStep: () => void = store.completeStep) => {
+const advance = async (
+  completeCurrentStep: () => void = store.completeStep,
+) => {
   const wasLast = store.isLastStep();
   if (wasLast && store.isLinear()) {
     const hostTerminal = flowConfig.value?.finalizeOnHost;
@@ -252,13 +259,21 @@ const advance = async (completeCurrentStep: () => void = store.completeStep) => 
   if (wasLast) view.value = "overview";
 };
 
-const onSelected = async (entities: { id: string; label?: string }[]) => {
-  store.pickExisting(entities);
-  // persist the link to the prior step before advancing (link-on-select)
-  const step = activeStep.value;
-  if (step) await store.linkOnSelect(step);
-  await advance();
-};
+const onSelected = (entities: { id: string; label?: string }[]) =>
+  run(async () => {
+    store.pickExisting(entities);
+    // persist the link to the prior step before advancing (link-on-select)
+    const step = activeStep.value;
+    startBlocking();
+    try {
+      if (step) await store.linkOnSelect(step);
+    } finally {
+      // advance() can emit "finished", which closes the flow; stop blocking
+      // first so the app-wide overlay never flashes as the modal unmounts
+      stopBlocking();
+    }
+    await advance();
+  });
 
 const onCreated = async (
   entity: {

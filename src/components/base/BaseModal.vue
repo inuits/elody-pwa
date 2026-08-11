@@ -34,14 +34,9 @@
     <div data-testid="modal-content">
       <slot />
     </div>
-    <div
-      v-if="isBlocking && getModalInfo(props.modalType).open"
-      class="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-background-light/80"
-      data-testid="modal-blocking-overlay"
-    >
-      <SpinnerLoader theme="accent" :dimensions="16" />
-      <p v-if="blockingMessage">{{ blockingMessage }}</p>
-    </div>
+    <BlockingOverlay
+      :is-blocking="isBlocking && getModalInfo(props.modalType).open"
+    />
   </dialog>
 </template>
 
@@ -52,9 +47,9 @@ import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 
-const { isBlocking, blockingMessage } = useBlockingLoader();
+const { isBlocking } = useBlockingLoader();
 
 const props = withDefaults(
   defineProps<{

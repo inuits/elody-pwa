@@ -19,6 +19,7 @@
           :icon="DamsIcons.Trash"
           button-style="redDefault"
           button-size="small"
+          :loading="isDeleting"
           @click="deleteSelectedRelations"
         />
       </div>
@@ -28,6 +29,7 @@
           :label="t('confirm.delete-relations.cancel')"
           button-style="default"
           button-size="small"
+          :disabled="isDeleting"
           @click="closeModal(TypeModals.BulkOperationsDeleteRelations)"
         />
       </div>
@@ -52,11 +54,16 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import { useEditMode } from "@/composables/useEdit";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
+import { useAsyncAction } from "@/composables/useAsyncAction";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const { t } = useI18n();
+const { displayErrorNotification } = useBaseNotification();
+const { isBusy: isDeleting, run } = useAsyncAction();
 const { getEnqueuedItems } = useBulkOperations();
 const { closeModal, getModalInfo } = useBaseModal();
-const { getRelationType, getParentId, getCollection, getCallbackFunctions } = useModalActions();
+const { getRelationType, getParentId, getCollection, getCallbackFunctions } =
+  useModalActions();
 const useEditHelper = useEditMode(getParentId());
 
 const { deleteRelations, submit } = useDeleteRelations();
@@ -70,25 +77,35 @@ const getSelectedItems = () => {
   return getEnqueuedItems(context);
 };
 
-const deleteSelectedRelations = async () => {
-  useEditHelper.setSubmitFunction(() =>
-    submit(
-      getParentId() as string,
-      getCollection() as Collection,
-      TypeModals.BulkOperationsDeleteRelations,
-    ),
-  );
-  await deleteRelations(
-    getParentId() as string,
-    getRelationType() as string,
-    getSelectedItems(),
-    modal.value.context as Context,
-  );
-  const callbackFunctions = getCallbackFunctions() || [];
-  for (const callback of callbackFunctions) {
-    if (callback) await callback();
-  }
-};
+const deleteSelectedRelations = () =>
+  run(async () => {
+    useEditHelper.setSubmitFunction(() =>
+      submit(
+        getParentId() as string,
+        getCollection() as Collection,
+        TypeModals.BulkOperationsDeleteRelations,
+      ),
+    );
+    try {
+      await deleteRelations(
+        getParentId() as string,
+        getRelationType() as string,
+        getSelectedItems(),
+        modal.value.context as Context,
+      );
+      const callbackFunctions = getCallbackFunctions() || [];
+      for (const callback of callbackFunctions) {
+        if (callback) await callback();
+      }
+    } catch (error) {
+      console.error("Error deleting selected relations:", error);
+      closeModal(TypeModals.BulkOperationsDeleteRelations);
+      displayErrorNotification(
+        t("notifications.errors.entityDeleted.title"),
+        t("notifications.errors.entityDeleted.description"),
+      );
+    }
+  });
 </script>
 
 <style scoped></style>

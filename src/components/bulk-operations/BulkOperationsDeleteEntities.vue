@@ -76,6 +76,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
+import { useAsyncAction } from "@/composables/useAsyncAction";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { rootRoute } from "@/composables/useBreadcrumbs";
 import { goToEntityPageById } from "@/helpers";
@@ -90,6 +91,7 @@ const { closeModal, getModalInfo } = useBaseModal();
 const { getCallbackFunctions, getInformationForBulkDeleteEntities } =
   useModalActions();
 const { deleteEntities, getDeletionForm, form } = useDeleteEntities();
+const { isBusy: isDeleting, run } = useAsyncAction();
 
 const modal = computed(() => {
   return getModalInfo(TypeModals.BulkOperationsDeleteEntities);
@@ -97,7 +99,6 @@ const modal = computed(() => {
 
 const options = ref<{ isSelected: boolean; key: DropdownOption }[]>([]);
 const configuredRouteTitle = ref<string | undefined>(undefined);
-const isDeleting = ref<boolean>(false);
 
 const normalizeOptions = (
   options: DropdownOption[],
@@ -143,51 +144,49 @@ const message = computed(() => {
       });
 });
 
-const deleteSelectedItems = async () => {
-  isDeleting.value = true;
-  const context = modal.value.context as Context;
-  const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(context);
-  if (selectedItems.length <= 0) return;
+const deleteSelectedItems = () =>
+  run(async () => {
+    const context = modal.value.context as Context;
+    const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(context);
+    if (selectedItems.length <= 0) return;
 
-  try {
-    const linkedEntitiesToRemove = normalizeOptionsToObjectOfKeyValue(
-      options.value,
-    );
-    const jobIdentifier = await deleteEntities(
-      selectedItems,
-      linkedEntitiesToRemove,
-      getInformationForBulkDeleteEntities(),
-    );
-
-    isDeleting.value = false;
-    displaySuccessNotification(
-      t("notifications.success.entityDeleted.title"),
-      t("notifications.success.entityDeleted.description"),
-    );
-    closeModal(TypeModals.BulkOperationsDeleteEntities);
-    dequeueAllItemsForBulkProcessing(context);
-
-    if (jobIdentifier && typeof jobIdentifier === "string") {
-      goToEntityPageById(
-        jobIdentifier,
-        { type: "job", __typename: "job" },
-        "SingleEntity",
-        router,
+    try {
+      const linkedEntitiesToRemove = normalizeOptionsToObjectOfKeyValue(
+        options.value,
       );
-    } else {
-      const callbacks = getCallbackFunctions();
-      if (callbacks && callbacks.length > 0)
-        for (const callback of callbacks) callback();
+      const jobIdentifier = await deleteEntities(
+        selectedItems,
+        linkedEntitiesToRemove,
+        getInformationForBulkDeleteEntities(),
+      );
+
+      displaySuccessNotification(
+        t("notifications.success.entityDeleted.title"),
+        t("notifications.success.entityDeleted.description"),
+      );
+      closeModal(TypeModals.BulkOperationsDeleteEntities);
+      dequeueAllItemsForBulkProcessing(context);
+
+      if (jobIdentifier && typeof jobIdentifier === "string") {
+        goToEntityPageById(
+          jobIdentifier,
+          { type: "job", __typename: "job" },
+          "SingleEntity",
+          router,
+        );
+      } else {
+        const callbacks = getCallbackFunctions();
+        if (callbacks && callbacks.length > 0)
+          for (const callback of callbacks) callback();
+      }
+    } catch (error) {
+      closeModal(TypeModals.BulkOperationsDeleteEntities);
+      displayErrorNotification(
+        t("notifications.errors.entityDeleted.title"),
+        t("notifications.errors.entityDeleted.description"),
+      );
     }
-  } catch (error) {
-    isDeleting.value = false;
-    closeModal(TypeModals.BulkOperationsDeleteEntities);
-    displayErrorNotification(
-      t("notifications.errors.entityDeleted.title"),
-      t("notifications.errors.entityDeleted.description"),
-    );
-  }
-};
+  });
 
 watch(
   () => modal.value,

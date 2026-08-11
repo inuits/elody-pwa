@@ -3,7 +3,7 @@
     ref="dialog"
     data-testid="repetitive-step-modal"
     :class="[
-      'rounded-lg border-0 p-0 w-[80vw] max-h-[90vh] m-auto bg-neutral-white',
+      'relative rounded-lg border-0 p-0 w-[80vw] max-h-[90vh] m-auto bg-neutral-white',
       // teleport target for tooltips/dropdowns while a modal is open
       // (see BaseTooltip/AdvancedDropdown '.base-modal--opened')
       { 'base-modal--opened': open },
@@ -28,12 +28,17 @@
     <div data-testid="repetitive-step-modal-content" class="p-6">
       <slot v-if="open" />
     </div>
+    <BlockingOverlay :is-blocking="isBlocking && open" />
   </dialog>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { Unicons } from "@/types";
+import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
+
+const { isBlocking } = useBlockingLoader();
 
 const props = defineProps<{ open: boolean; title?: string }>();
 const emit = defineEmits<{ (e: "close"): void }>();

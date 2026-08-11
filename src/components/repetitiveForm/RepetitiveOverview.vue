@@ -71,6 +71,7 @@
           button-style="accentAccent"
           button-size="small"
           :disabled="branches.length === 0"
+          :loading="finishing"
           @click="emit('finish')"
         />
       </div>
@@ -92,6 +93,7 @@ const props = defineProps<{
   branches: RepetitiveBranch[];
   steps: RepetitiveStep[];
   repeatable: boolean;
+  finishing?: boolean;
 }>();
 const emit = defineEmits<{
   (e: "add-another"): void;

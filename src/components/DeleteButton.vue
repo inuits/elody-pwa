@@ -5,6 +5,7 @@
       :icon="DamsIcons.Trash"
       button-style="redDefault"
       button-size="small"
+      :loading="isDeleting"
       @click="openDeleteModal()"
     />
   </div>
@@ -31,6 +32,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { useAsyncAction } from "@/composables/useAsyncAction";
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");
@@ -56,6 +58,7 @@ const { confirm } = useConfirmModal();
 const { deleteEntities } = useDeleteEntities();
 const { getForm } = useFormHelper();
 const { previousRoute } = useBreadcrumbs({});
+const { isBusy: isDeleting, run } = useAsyncAction();
 
 const deleteAvailable = computed<boolean>(
   () =>
@@ -68,41 +71,42 @@ const entityType = computed(() => {
   return mapUrlToEntityType(slug) || slug;
 });
 
-const deleteEntity = async (deleteMediafiles: boolean = false) => {
-  const id = entityId.value;
-  const type = entityType.value;
-  const context = previousPageInfo.value.parentRouteName;
+const deleteEntity = (deleteMediafiles: boolean = false) =>
+  run(async () => {
+    const id = entityId.value;
+    const type = entityType.value;
+    const context = previousPageInfo.value.parentRouteName;
 
-  if (context) dequeueItemForBulkProcessing(context, id);
+    if (context) dequeueItemForBulkProcessing(context, id);
 
-  const isDeleted = await deleteEntities([{ id, type }], {
-    deleteMediafiles,
-  });
+    const isDeleted = await deleteEntities([{ id, type }], {
+      deleteMediafiles,
+    });
 
-  if (isDeleted) {
-    await getTenants();
-    closeModal(TypeModals.Confirm);
-    useEditHelper.value.disableEdit();
+    if (isDeleted) {
+      await getTenants();
+      closeModal(TypeModals.Confirm);
+      useEditHelper.value.disableEdit();
 
-    cleanupPreviousPageInfoById(id);
+      cleanupPreviousPageInfoById(id);
 
-    const parent = pageInfo.value.parentRouteName;
-    if (!parent && previousRoute.value) {
-      router.push({ name: previousRoute.value.overviewPage });
-    } else if (parent === "SingleEntity") {
-      router.push({ path: previousPageInfo.value.fullPath });
-    } else if (parent) {
-      router.push({ name: parent });
-    } else {
-      router.push({ path: "/" });
+      const parent = pageInfo.value.parentRouteName;
+      if (!parent && previousRoute.value) {
+        router.push({ name: previousRoute.value.overviewPage });
+      } else if (parent === "SingleEntity") {
+        router.push({ path: previousPageInfo.value.fullPath });
+      } else if (parent) {
+        router.push({ name: parent });
+      } else {
+        router.push({ path: "/" });
+      }
+
+      displaySuccessNotification(
+        t("notifications.success.entityDeleted.title"),
+        t("notifications.success.entityDeleted.description"),
+      );
     }
-
-    displaySuccessNotification(
-      t("notifications.success.entityDeleted.title"),
-      t("notifications.success.entityDeleted.description"),
-    );
-  }
-};
+  });
 
 const openDeleteModal = async () => {
   const form = getForm(entityId.value);

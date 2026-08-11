@@ -41,6 +41,11 @@ import {
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { useSaveSearchHepler } from "@/composables/useSaveSearchHepler";
+import { useAsyncAction } from "@/composables/useAsyncAction";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
+
+const { run } = useAsyncAction();
+const { startBlocking, stopBlocking } = useBlockingLoader();
 
 const { closeModal, getModalInfo } = useBaseModal();
 const handleCloseModal = () => {
@@ -56,12 +61,18 @@ const { dequeueAllItemsForBulkProcessing, setBulkSelectionLimit } =
 
 setBulkSelectionLimit(BulkOperationsContextEnum.SavedSearchFilterModal, 1);
 
-const updateActiveFilter = async (selectedItems: InBulkProcessableItem[]) => {
-  const savedFilter = await fetchSavedSearchById(selectedItems[0].id);
-  setActiveFilter(normalizeSavedSearchFromEntity(savedFilter));
-  dequeueAllItemsForBulkProcessing(
-    BulkOperationsContextEnum.SavedSearchFilterModal,
-  );
-  handleCloseModal();
-};
+const updateActiveFilter = (selectedItems: InBulkProcessableItem[]) =>
+  run(async () => {
+    startBlocking();
+    try {
+      const savedFilter = await fetchSavedSearchById(selectedItems[0].id);
+      setActiveFilter(normalizeSavedSearchFromEntity(savedFilter));
+      dequeueAllItemsForBulkProcessing(
+        BulkOperationsContextEnum.SavedSearchFilterModal,
+      );
+    } finally {
+      stopBlocking();
+    }
+    handleCloseModal();
+  });
 </script>

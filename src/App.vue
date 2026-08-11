@@ -24,6 +24,7 @@
       </div>
       <AppModals />
     </div>
+    <BlockingOverlay :is-blocking="isBlocking && !someModalIsOpened" fixed />
   </div>
   <div
     v-else
@@ -42,6 +43,8 @@ import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
+import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";
 import { inject, onMounted } from "vue";
@@ -50,6 +53,7 @@ const route = useRoute();
 const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
 const { someModalIsOpened } = useBaseModal();
+const { isBlocking } = useBlockingLoader();
 const config: any = inject("config");
 
 useHead({

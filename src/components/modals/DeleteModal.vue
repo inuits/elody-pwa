@@ -90,6 +90,7 @@
           class="h-max"
           :confirm-label="deleteConfirmLabel"
           :cancel-label="deleteCancelLabel"
+          :confirm-loading="isDeleting"
           @confirm="deleteButtonClicked"
           @cancel="closeModal(TypeModals.Delete)"
         />
@@ -124,6 +125,7 @@ import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useModalActions } from "@/composables/useModalActions";
 import { useDeleteEntities } from "@/composables/useDeleteEntities";
+import { useAsyncAction } from "@/composables/useAsyncAction";
 
 const { t } = useI18n();
 const config: any = inject("config");
@@ -138,6 +140,7 @@ const { pageInfo, previousPageInfo, cleanupPreviousPageInfoById } =
   usePageInfo();
 const { deleteEntities } = useDeleteEntities();
 const { displaySuccessNotification } = useBaseNotification();
+const { isBusy: isDeleting, run } = useAsyncAction();
 
 const modalOpenend = ref<boolean>(false);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
@@ -154,7 +157,9 @@ const deleteTranslationKey = computed(
   () => getModalInfo(TypeModals.Delete).translationKey || "delete-entity",
 );
 const deleteConfirmLabel = computed(() =>
-  t(`confirm.${deleteTranslationKey.value}.confirm`, [translatedDeleteEntityLabel.value ?? ""]),
+  t(`confirm.${deleteTranslationKey.value}.confirm`, [
+    translatedDeleteEntityLabel.value ?? "",
+  ]),
 );
 const deleteCancelLabel = computed(() =>
   t(`confirm.${deleteTranslationKey.value}.cancel`),
@@ -203,14 +208,23 @@ const cleanupAfterDeletion = async () => {
   );
 };
 
-const deleteButtonClicked = async () => {
-  await deleteSelectedItems();
-  const callbackFunctions = getCallbackFunctions();
-  for (const callback of callbackFunctions) {
-    if (callback) callback();
-  }
-  await cleanupAfterDeletion();
-};
+const deleteButtonClicked = () =>
+  run(async () => {
+    await deleteSelectedItems();
+    const callbackFunctions = getCallbackFunctions();
+    for (const callback of callbackFunctions) {
+      if (!callback) continue;
+      // awaited: callbacks like DeleteButton's deleteEntity are async and the
+      // cleanup below navigates away. One failing callback must not strand the
+      // modal open with the entity already deleted, so cleanup still runs.
+      try {
+        await callback();
+      } catch (error) {
+        console.error("Delete callback failed:", error);
+      }
+    }
+    await cleanupAfterDeletion();
+  });
 
 const getContext = () => {
   const modalContext = getModalInfo(TypeModals.Delete).context;
@@ -252,7 +266,6 @@ watch(
       ?.blockingRelationsLabel
       ? t(deleteQueryOptions.value?.blockingRelationsLabel)
       : undefined;
-
   },
   { immediate: true },
 );

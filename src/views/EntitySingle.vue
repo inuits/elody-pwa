@@ -1,16 +1,18 @@
 <template>
-  <div class="h-full">
+  <div class="relative h-full">
+    <!-- outside the scroll container so the overlay covers the visible page
+         instead of only the first screenful of a scrolled-down detail page -->
+    <div
+      v-if="showSavingSpinner"
+      class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
+    >
+      <spinner-loader theme="accent" />
+    </div>
     <div
       v-if="!loading && entity"
       class="h-full w-full flex bg-background-normal z-2 overflow-y-auto pb-4"
     >
       <div class="relative h-full w-full">
-        <div
-          v-if="showSavingSpinner"
-          class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
-        >
-          <spinner-loader theme="accent" />
-        </div>
         <entity-column
           v-if="columnList != 'no-values'"
           :entity="entity"
