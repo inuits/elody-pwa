@@ -301,7 +301,7 @@ export const useBaseLibrary = (
       entitiesLoading.value = false;
     }
 
-    if (hasPendingFetch && !signal) {
+    if (hasPendingFetch && !signal?.aborted) {
       hasPendingFetch = false;
       const nextRoute = pendingFetchRoute ?? route;
       pendingFetchRoute = undefined;

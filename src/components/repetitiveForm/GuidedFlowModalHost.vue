@@ -38,14 +38,15 @@ const { getModalInfo, closeModal } = useBaseModal();
 const { getCallbackFunctions } = useModalActions();
 const router = useRouter();
 
-// Refresh the lists the flow created into. Prefer the targeted refetch
-// callbacks registered when the flow was opened (the same ones bulk operations
-// use — the list's own refetchEntities + parent refetch); fall back to
-// refetching all active queries when none were registered (e.g. a flow opened
-// from a menu item rather than a list action bar).
 const refreshAfterFlow = async (callbacks?: Function[]) => {
   if (callbacks?.length) {
-    callbacks.forEach((callback) => callback?.());
+    for (const callback of callbacks) {
+      try {
+        await callback?.();
+      } catch (error) {
+        console.error("Failed to refresh after the guided flow:", error);
+      }
+    }
     return;
   }
   await apolloClient.refetchQueries({ include: "active" });
