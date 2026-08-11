@@ -50,6 +50,10 @@ vi.mock("@/composables/useConfirmModal", () => ({
   useConfirmModal: () => ({ confirm: vi.fn().mockResolvedValue("cancel") }),
 }));
 
+vi.mock("@/main", () => ({
+  typeUrlMapping: { mapping: {}, reverseMapping: {} },
+}));
+
 const config = {
   features: {
     supportsMultilingualMetadataEditing: false,
@@ -300,6 +304,48 @@ describe("useBreadcrumbs", () => {
         overviewPage: "Documents",
       },
     ]);
+  });
+});
+
+describe("useBreadcrumbs determineBreadcrumbsForEntity", () => {
+  const breadcrumbConfig = {
+    routerConfig: [{ name: RouteNames.Home, children: [] }],
+  };
+
+  beforeEach(() => {
+    rootRoute.value = {} as any;
+    breadcrumbRoutes.value = [];
+  });
+
+  it("clears any previous breadcrumb path and sets the root route from the given entity", async () => {
+    breadcrumbRoutes.value = [
+      { id: "stale", type: "stale", title: "Stale", overviewPage: "" } as any,
+    ];
+
+    const entity = {
+      id: "entity-1",
+      type: "someType",
+      intialValues: { title: "Entity One", typePillLabel: "Some Type" },
+    } as any;
+
+    await useBreadcrumbs(breadcrumbConfig).determineBreadcrumbsForEntity(entity);
+
+    expect(breadcrumbRoutes.value).toEqual([]);
+    expect(rootRoute.value.rootId).toBe("entity-1");
+    expect(rootRoute.value.rootTitle).toBe("Entity One");
+    expect(rootRoute.value.typePillLabel).toBe("Some Type");
+  });
+
+  it("stops without adding any breadcrumb when the entity's type has no configured breadcrumbs route", async () => {
+    const entity = {
+      id: "entity-2",
+      type: "unconfiguredType",
+      intialValues: { title: "Entity Two" },
+    } as any;
+
+    await useBreadcrumbs(breadcrumbConfig).determineBreadcrumbsForEntity(entity);
+
+    expect(breadcrumbRoutes.value).toEqual([]);
   });
 });
 

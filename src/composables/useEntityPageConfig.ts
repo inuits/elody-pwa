@@ -60,6 +60,10 @@ export const useEntityPageConfig = () => {
   const showNavigationArrows = computed<boolean>(
     () => entityConfig.value?.showNavigationArrows !== false,
   );
+  
+  const showHistoryButton = computed<boolean>(
+    () => entityConfig.value?.showHistoryButton === true,
+  );
 
   return {
     actions,
@@ -68,5 +72,6 @@ export const useEntityPageConfig = () => {
     trackSeen,
     jobStatusPolling,
     showNavigationArrows,
+    showHistoryButton,
   };
 };
