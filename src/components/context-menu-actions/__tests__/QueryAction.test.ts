@@ -42,6 +42,7 @@ vi.mock("vue-router", () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
+  useRoute: () => ({ params: {} }),
 }));
 
 const flush = async () => {
