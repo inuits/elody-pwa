@@ -329,4 +329,33 @@ describe("slug casing", () => {
 
     expect(hasEditMetadataButton.value).toBe(false);
   });
+
+  describe("showHistoryButton", () => {
+    it("returns false when no config", () => {
+      const { showHistoryButton } = useEntityPageConfig();
+      expect(showHistoryButton.value).toBe(false);
+    });
+
+    it("returns false when configured as false", () => {
+      const config: EntityPageConfig = {
+        production: { showHistoryButton: false },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { showHistoryButton } = useEntityPageConfig();
+
+      expect(showHistoryButton.value).toBe(false);
+    });
+
+    it("returns true when configured as true", () => {
+      const config: EntityPageConfig = {
+        production: { showHistoryButton: true },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { showHistoryButton } = useEntityPageConfig();
+
+      expect(showHistoryButton.value).toBe(true);
+    });
+  });
 });

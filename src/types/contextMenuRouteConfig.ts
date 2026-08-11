@@ -93,6 +93,7 @@ export type EntityConfig = {
   trackSeen?: boolean;
   jobStatusPolling?: boolean;
   showNavigationArrows?: boolean;
+  showHistoryButton?: boolean;
 };
 
 export type EntityPageConfig = Record<string, EntityConfig>;

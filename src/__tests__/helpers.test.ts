@@ -17,6 +17,7 @@ import {
   downloadFile,
   findPanelMetadata,
   getFromExpressEndpoint,
+  findEntityListElement,
   formatTeaserMetadata,
   tagMultilingualMetadata,
 } from "@/helpers";
