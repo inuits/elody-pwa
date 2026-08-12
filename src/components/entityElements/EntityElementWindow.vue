@@ -9,14 +9,14 @@
       v-on:expand-media-list="resizeColumn"
     />
     <div
-      class="h-full w-full border-solid border-neutral-30 border-2 bg-background-light rounded-t-md @container/window"
+      class="h-full w-full border-solid border-accent-light border bg-neutral-white rounded-lg @container/window"
     >
       <div
-        class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row"
+        class="border-solid border-accent-light border-b bg-accent-light rounded-t-lg flex flex-row items-center"
       >
         <h1
           data-cy="entity-element-window-title"
-          class="subtitle text-text-body p-2"
+          class="text-base font-black text-accent-dark p-2"
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
@@ -73,7 +73,7 @@
           :class="[
             'w-full',
             {
-              'border-solid border-neutral-30 border-b-2':
+              'border-solid border-neutral-20 border-b':
                 props.element.layout !== WindowElementLayout.HorizontalGrid,
             },
           ]"

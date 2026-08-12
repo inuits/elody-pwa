@@ -1,6 +1,6 @@
 <template>
   <div
-    class="z-header flex items-center mx-6 my-8 px-6 py-4 rounded-3xl bg-background-light flex-wrap min-[1400px]:flex-nowrap"
+    class="z-header flex items-center px-6 py-2.5 bg-neutral-white border-b border-neutral-30 flex-wrap min-[1400px]:flex-nowrap"
   >
     <BreadCrumbs />
     <MetadataEditButton

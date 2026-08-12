@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="bulkOperationsPromiseIsResolved"
-    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-background-light"
+    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-accent-light"
   >
     <div class="flex justify-start items-center">
       <div
