@@ -66,7 +66,11 @@
       @click.stop.prevent
       @update:value="(value) => (fieldValueProxy = value)"
     />
-    <div v-else class="flex gap-2">
+    <div
+      v-else
+      class="flex gap-2"
+      :class="{ 'opacity-45': fieldValueIsEmpty && !isFieldRequired }"
+    >
       <base-tooltip
         class="w-full basis-[fit-content]"
         position="right-end"
@@ -258,7 +262,10 @@ import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
-import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
+import {
+  metadataValueIsEmpty,
+  useMetadataWrapper,
+} from "@/components/metadata/useMetadataWrapper";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useMetadataVirtualKeyboard } from "@/composables/useMetadataVirtualKeyboard";
@@ -395,6 +402,16 @@ const pillTranslationKey = computed<string | undefined>(() => {
 
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);
+
+// Empty, non-required values dim to 45% opacity; the label keeps full
+// contrast and the field keeps its position so nothing reflows.
+const fieldValueIsEmpty = computed<boolean>(() =>
+  metadataValueIsEmpty(
+    isFormatterField.value
+      ? (props.metadata.value as any)?.label
+      : fieldValueProxy.value,
+  ),
+);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
