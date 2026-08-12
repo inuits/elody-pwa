@@ -21,7 +21,9 @@ const mocks = vi.hoisted(() => ({
   useQueryCalls: [] as any[],
   documents: {} as Record<string, any>,
   queryResults: [] as any[],
+  apolloQueryMock: undefined as unknown as ReturnType<typeof vi.fn>,
 }));
+mocks.apolloQueryMock = vi.fn(() => Promise.resolve({ data: { Entity: null } }));
 
 vi.mock("@vue/apollo-composable", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -43,6 +45,12 @@ vi.mock("@/composables/useImport", () => ({
     loadDocument: (queryName: string) =>
       Promise.resolve(mocks.documents[queryName]),
   }),
+}));
+
+vi.mock("@/main", () => ({
+  get apolloClient() {
+    return { query: mocks.apolloQueryMock };
+  },
 }));
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -246,6 +254,10 @@ describe("useHistoryComparisonData relationDiffs", () => {
     mocks.useQueryCalls.length = 0;
     mocks.documents = {};
     mocks.queryResults = [];
+    mocks.apolloQueryMock.mockClear();
+    mocks.apolloQueryMock.mockImplementation(() =>
+      Promise.resolve({ data: { Entity: null } }),
+    );
   });
 
   const withResult = (value: any) => ({
@@ -254,7 +266,7 @@ describe("useHistoryComparisonData relationDiffs", () => {
     error: { value: null },
   });
 
-  it("skips a panel whose relationType is not in RELATION_TYPE_CONFIG, without crashing", async () => {
+  it("includes any relation panel found in the entityView, not just a hardcoded set of relation types", async () => {
     const entityView = {
       column2: {
         elements: {
@@ -263,10 +275,12 @@ describe("useHistoryComparisonData relationDiffs", () => {
             relationType: "refWords",
             label: "Words",
           },
-          somethingElse: {
+          relatedEntities: {
             __typename: "EntityListElement",
-            relationType: "refSomethingElse",
-            label: "Something Else",
+            relationType: "refRelatedEntities",
+            label: "Related entities",
+            // Deliberately no entityTypes, so no label lookup is possible —
+            // the panel should still show up with a raw-id fallback label.
           },
         },
       },
@@ -275,7 +289,10 @@ describe("useHistoryComparisonData relationDiffs", () => {
     mocks.queryResults[0] = withResult({
       Entity: {
         entityView,
-        relationValues: { refWords: [{ key: "word-1" }] },
+        relationValues: {
+          refWords: [{ key: "word-1" }],
+          refRelatedEntities: [{ key: "genre-1" }],
+        },
         intialValues: {},
       },
     });
@@ -297,11 +314,71 @@ describe("useHistoryComparisonData relationDiffs", () => {
     );
     await flushPromises();
 
-    expect(relationDiffs.value).toHaveLength(1);
-    expect(relationDiffs.value[0].relationType).toBe("refWords");
+    expect(relationDiffs.value).toHaveLength(2);
+    const relatedEntitiesDiff = relationDiffs.value.find(
+      (d) => d.relationType === "refRelatedEntities",
+    );
+    expect(relatedEntitiesDiff).toBeDefined();
     expect(
-      relationDiffs.value.some((d) => d.relationType === "refSomethingElse"),
-    ).toBe(false);
+      relatedEntitiesDiff!.items.find((item) => item.key === "genre-1")
+        ?.label,
+    ).toBe("genre-1");
+    expect(mocks.apolloQueryMock).not.toHaveBeenCalled();
+  });
+
+  it("labels items using the entity type declared on the panel itself, the same way the live entity picker/list titles any entity", async () => {
+    mocks.apolloQueryMock.mockImplementation(({ variables }: any) =>
+      Promise.resolve({
+        data: {
+          Entity:
+            variables.id === "genre-1"
+              ? { id: "genre-1", intialValues: { title: "Fiction" } }
+              : null,
+        },
+      }),
+    );
+
+    const entityView = {
+      column2: {
+        elements: {
+          relatedEntities: {
+            __typename: "EntityListElement",
+            relationType: "refRelatedEntities",
+            label: "Related entities",
+            entityTypes: ["genre", "person"],
+          },
+        },
+      },
+    };
+
+    mocks.queryResults[0] = withResult({
+      Entity: {
+        entityView,
+        relationValues: { refRelatedEntities: [{ key: "genre-1" }] },
+        intialValues: {},
+      },
+    });
+    mocks.queryResults[1] = withResult({
+      EntitiesHistory: { results: [] },
+    });
+
+    const { relationDiffs } = useHistoryComparisonData("entity-1", "genre");
+    await flushPromises();
+    await flushPromises();
+
+    expect(mocks.apolloQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: { id: "genre-1", type: "genre" },
+      }),
+    );
+
+    const relatedEntitiesDiff = relationDiffs.value.find(
+      (d) => d.relationType === "refRelatedEntities",
+    );
+    expect(
+      relatedEntitiesDiff!.items.find((item) => item.key === "genre-1")
+        ?.label,
+    ).toBe("Fiction");
   });
 
   it("assembles added/removed/unchanged items from current vs historical relationValues", async () => {
@@ -760,7 +837,6 @@ describe("useHistoryComparisonData wysiwygDiffs", () => {
 
 describe("useHistoryComparisonData client-specific documents", () => {
   const historyDocument = { kind: "Document", name: "GetHistoryEntities" };
-  const labelsDocument = { kind: "Document", name: "GetRelationLabelsForIds" };
 
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
@@ -768,27 +844,23 @@ describe("useHistoryComparisonData client-specific documents", () => {
     mocks.queryResults = [];
   });
 
-  it("resolves the client-specific documents at runtime and passes them to useQuery as refs", async () => {
+  it("resolves the client-specific history document at runtime and passes it to useQuery as a ref", async () => {
     mocks.documents.GetHistoryEntities = historyDocument;
-    mocks.documents.GetRelationLabelsForIds = labelsDocument;
 
     const { loading } = useHistoryComparisonData("entity-1", "inscription");
 
     const historyDocumentRef = mocks.useQueryCalls[1].document;
-    const labelsDocumentRef = mocks.useQueryCalls[2].document;
     expect(isRef(historyDocumentRef)).toBe(true);
-    expect(isRef(labelsDocumentRef)).toBe(true);
     expect(historyDocumentRef.value).toBeNull();
     expect(loading.value).toBe(true);
 
     await flushPromises();
 
     expect(historyDocumentRef.value).toBe(historyDocument);
-    expect(labelsDocumentRef.value).toBe(labelsDocument);
     expect(loading.value).toBe(false);
   });
 
-  it("leaves the query documents unresolved for clients that do not define them", async () => {
+  it("leaves the query document unresolved for clients that do not define it", async () => {
     const { versionOptions } = useHistoryComparisonData(
       "entity-1",
       "inscription",
@@ -797,7 +869,6 @@ describe("useHistoryComparisonData client-specific documents", () => {
     await flushPromises();
 
     expect(mocks.useQueryCalls[1].document.value).toBeNull();
-    expect(mocks.useQueryCalls[2].document.value).toBeNull();
     expect(versionOptions.value).toEqual([]);
   });
 });
@@ -1005,6 +1076,10 @@ describe("useHistoryComparisonData per-side loading", () => {
     mocks.useQueryCalls.length = 0;
     mocks.documents = {};
     mocks.queryResults = [];
+    mocks.apolloQueryMock.mockClear();
+    mocks.apolloQueryMock.mockImplementation(() =>
+      Promise.resolve({ data: { Entity: null } }),
+    );
   });
 
   const resultWithLoading = (value: any, isLoading: boolean) => ({
@@ -1127,13 +1202,26 @@ describe("useHistoryComparisonData per-side loading", () => {
     expect(rightLoading.value).toBe(true);
   });
 
-  it("leftLoading and rightLoading are both true while any relation-label query is still loading", async () => {
+  it("leftLoading and rightLoading are both true while any relation-label lookup is still in flight", async () => {
+    const entityView = {
+      column2: {
+        elements: {
+          relatedEntities: {
+            __typename: "EntityListElement",
+            relationType: "refRelatedEntities",
+            label: "Related entities",
+            entityTypes: ["genre"],
+          },
+        },
+      },
+    };
+
     mocks.queryResults[0] = resultWithLoading(
       {
         Entity: {
           id: "entity-1",
-          entityView: {},
-          relationValues: {},
+          entityView,
+          relationValues: { refRelatedEntities: [{ key: "genre-1" }] },
           intialValues: {},
         },
       },
@@ -1143,7 +1231,14 @@ describe("useHistoryComparisonData per-side loading", () => {
       { EntitiesHistory: { results: [] } },
       false,
     );
-    mocks.queryResults[2] = resultWithLoading(undefined, true);
+
+    let resolveEntityLookup: (value: any) => void = () => {};
+    mocks.apolloQueryMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveEntityLookup = resolve;
+        }),
+    );
 
     const { leftLoading, rightLoading } = useHistoryComparisonData(
       "entity-1",
@@ -1153,15 +1248,31 @@ describe("useHistoryComparisonData per-side loading", () => {
 
     expect(leftLoading.value).toBe(true);
     expect(rightLoading.value).toBe(true);
+
+    resolveEntityLookup({ data: { Entity: null } });
+    await flushPromises();
   });
 
-  it("leftLoading and rightLoading are both false once every relation-label query has finished loading", async () => {
+  it("leftLoading and rightLoading are both false once every relation-label lookup has finished", async () => {
+    const entityView = {
+      column2: {
+        elements: {
+          relatedEntities: {
+            __typename: "EntityListElement",
+            relationType: "refRelatedEntities",
+            label: "Related entities",
+            entityTypes: ["genre"],
+          },
+        },
+      },
+    };
+
     mocks.queryResults[0] = resultWithLoading(
       {
         Entity: {
           id: "entity-1",
-          entityView: {},
-          relationValues: {},
+          entityView,
+          relationValues: { refRelatedEntities: [{ key: "genre-1" }] },
           intialValues: {},
         },
       },
@@ -1176,6 +1287,7 @@ describe("useHistoryComparisonData per-side loading", () => {
       "entity-1",
       "inscription",
     );
+    await flushPromises();
     await flushPromises();
 
     expect(leftLoading.value).toBe(false);

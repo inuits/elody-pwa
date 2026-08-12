@@ -1,13 +1,7 @@
-import {
-  computed,
-  onUnmounted,
-  ref,
-  shallowRef,
-  watch,
-  type ComputedRef,
-} from "vue";
+import { computed, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import { dequal as isEqual } from "dequal";
+import { apolloClient } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import type { DocumentNode } from "graphql";
@@ -22,6 +16,7 @@ import {
   findPanelMetadata,
   findWysiwygElement,
   convertDateToReadbleFormat,
+  getEntityTitle,
 } from "@/helpers";
 import { useImport } from "@/composables/useImport";
 import { useHistoryFieldDiff } from "@/composables/useHistoryFieldDiff";
@@ -29,21 +24,6 @@ import {
   useRelationListDiff,
   type RelationListDiffResult,
 } from "@/composables/useRelationListDiff";
-
-const RELATION_TYPE_CONFIG: Record<
-  string,
-  { entityType: string; metadataKeyAsLabel?: string; rootKeyAsLabel?: string }
-> = {
-  refWords: { entityType: "word", metadataKeyAsLabel: "original_word" },
-  refMultilingualCounterparts: {
-    entityType: "inscription",
-    rootKeyAsLabel: "id",
-  },
-  refMediafiles: {
-    entityType: "mediafile",
-    rootKeyAsLabel: "original_filename",
-  },
-};
 
 export type RelationDiffItem = {
   key: string;
@@ -124,13 +104,10 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
   });
 
   const historyDocument = shallowRef<DocumentNode | null>(null);
-  const relationLabelsDocument = shallowRef<DocumentNode | null>(null);
   const documentsLoaded = ref<boolean>(false);
 
   const loadDocuments = async () => {
     historyDocument.value = (await loadDocument("GetHistoryEntities")) ?? null;
-    relationLabelsDocument.value =
-      (await loadDocument("GetRelationLabelsForIds")) ?? null;
     documentsLoaded.value = true;
   };
   loadDocuments();
@@ -152,11 +129,12 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     {
       limit: 1000,
       skip: 1,
+      type: entityType,
       advancedFilterInputs: [
         { type: "type", value: entityType },
         {
           type: "selection",
-          key: ["aicap:1|id"],
+          key: ["vlacc:1|id"],
           value: entityId,
           match_exact: true,
         },
@@ -282,14 +260,18 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     })),
   );
 
+  const relationPanels = computed<any[]>(() =>
+    findEntityListElement(leftVersion.value?.entityView),
+  );
+
   const relationListDiffs = computed<Record<string, RelationListDiffResult>>(
     () =>
       Object.fromEntries(
-        Object.keys(RELATION_TYPE_CONFIG).map((relationType) => [
-          relationType,
+        relationPanels.value.map((panel) => [
+          panel.relationType,
           useRelationListDiff(
-            leftVersion.value?.relationValues?.[relationType],
-            rightVersion.value?.relationValues?.[relationType],
+            leftVersion.value?.relationValues?.[panel.relationType],
+            rightVersion.value?.relationValues?.[panel.relationType],
           ),
         ]),
       ),
@@ -301,61 +283,84 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     return [...diff.addedIds, ...diff.removedIds, ...diff.unchangedIds];
   };
 
-  const relationLabels: Record<
-    string,
-    ComputedRef<{ key: string; value: string }[]>
-  > = {};
-  const relationLabelsLoadingFlags: ComputedRef<boolean>[] = [];
+  // Which relation types need a label lookup right now, and against which
+  // entity type. Derived from the panels actually present in the entityView,
+  // so it covers any relation type for any client/entity type — not just a
+  // hardcoded list. A panel without a resolvable entityType (or with nothing
+  // to label yet) is skipped; its items simply fall back to the raw id.
+  const relationLabelQueries = computed(() =>
+    relationPanels.value
+      .map((panel) => ({
+        relationType: panel.relationType as string,
+        entityType: panel.entityTypes?.[0] ?? null,
+        ids: idsToLabel(panel.relationType),
+      }))
+      .filter((query) => query.entityType && query.ids.length > 0),
+  );
 
-  Object.entries(RELATION_TYPE_CONFIG).forEach(([relationType, config]) => {
-    const ids = computed<string[]>(() => idsToLabel(relationType));
+  const relationLabels = ref<Record<string, { key: string; value: string }[]>>(
+    {},
+  );
+  const relationLabelsLoading = ref(false);
 
-    const { result, loading: relationLabelLoading } = useQuery<any>(
-      relationLabelsDocument,
-      () => ({
-        ids: ids.value,
-        type: config.entityType,
-        metadataKeyAsLabel: config.metadataKeyAsLabel ?? null,
-        rootKeyAsLabel: config.rootKeyAsLabel ?? null,
-      }),
-      () => ({ enabled: ids.value.length > 0 }),
-    );
+  // Titles related entities the same way the live entity picker/list UI
+  // already does (BaseLibrary.vue), via the generic getEntityTitle helper
+  // over the same GetEntityById query used for the current entity above —
+  // no per-relation-type or per-client label configuration needed.
+  watch(
+    relationLabelQueries,
+    async (queries) => {
+      if (queries.length === 0) return;
 
-    relationLabels[relationType] = computed(
-      () => result.value?.RelationLabelsForIds ?? [],
-    );
-    relationLabelsLoadingFlags.push(relationLabelLoading);
-  });
-
-  const relationLabelsLoading = computed(() =>
-    relationLabelsLoadingFlags.some((flag) => flag.value),
+      relationLabelsLoading.value = true;
+      await Promise.all(
+        queries.map(async (query) => {
+          const labels = await Promise.all(
+            query.ids.map(async (id) => {
+              try {
+                const { data } = await apolloClient.query<
+                  GetEntityByIdQuery,
+                  GetEntityByIdQueryVariables
+                >({
+                  query: GetEntityByIdDocument,
+                  variables: { id, type: query.entityType as any },
+                  fetchPolicy: "no-cache",
+                });
+                const entity = data?.Entity as Entity | undefined;
+                return { key: id, value: entity ? getEntityTitle(entity as any) : id };
+              } catch {
+                return { key: id, value: id };
+              }
+            }),
+          );
+          relationLabels.value[query.relationType] = labels;
+        }),
+      );
+      relationLabelsLoading.value = false;
+    },
+    { immediate: true },
   );
 
   const relationDiffs = computed<RelationDiff[]>(() =>
-    findEntityListElement(leftVersion.value?.entityView)
-      .map((panel: any): RelationDiff | null => {
-        const config = RELATION_TYPE_CONFIG[panel.relationType];
-        if (!config) return null;
+    relationPanels.value.map((panel): RelationDiff => {
+      const diff = relationListDiffs.value[panel.relationType];
+      const labels = relationLabels.value[panel.relationType] ?? [];
+      const labelFor = (id: string) =>
+        labels.find((label) => label.key === id)?.value ?? id;
 
-        const diff = relationListDiffs.value[panel.relationType];
-        const labels = relationLabels[panel.relationType]?.value ?? [];
-        const labelFor = (id: string) =>
-          labels.find((label) => label.key === id)?.value ?? id;
+      const itemsFor = (ids: string[], status: RelationDiffItem["status"]) =>
+        ids.map((id) => ({ key: id, label: labelFor(id), status }));
 
-        const itemsFor = (ids: string[], status: RelationDiffItem["status"]) =>
-          ids.map((id) => ({ key: id, label: labelFor(id), status }));
-
-        return {
-          relationType: panel.relationType,
-          label: panel.label,
-          items: [
-            ...itemsFor(diff.addedIds, "added"),
-            ...itemsFor(diff.removedIds, "removed"),
-            ...itemsFor(diff.unchangedIds, "unchanged"),
-          ],
-        };
-      })
-      .filter((diff): diff is RelationDiff => diff !== null),
+      return {
+        relationType: panel.relationType,
+        label: panel.label,
+        items: [
+          ...itemsFor(diff.addedIds, "added"),
+          ...itemsFor(diff.removedIds, "removed"),
+          ...itemsFor(diff.unchangedIds, "unchanged"),
+        ],
+      };
+    }),
   );
 
   const leftRelationDiffs = computed<RelationDiff[]>(() =>
