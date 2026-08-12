@@ -11,13 +11,22 @@
       v-if="isSingleEntityPage && customDeleteButton"
       :config="customDeleteButton"
     />
-    <DeleteButton v-else-if="showDeleteButton" />
+    <!-- No standalone red delete button: delete lives last (and red) in
+         the labeled "Actions" menu. -->
     <HeaderContextMenuActions
-      v-if="isSingleEntityPage && contextMenuActions.length > 0"
+      v-if="
+        isSingleEntityPage &&
+        (contextMenuActions.length > 0 || showDeleteButton)
+      "
       :actions="contextMenuActions"
       :entity-id="entityId"
       :entity-type="entityType"
-    />
+      :has-extra-overflow-actions="showDeleteButton"
+    >
+      <template v-if="showDeleteButton" #extra-overflow>
+        <DeleteButton variant="menu-item" />
+      </template>
+    </HeaderContextMenuActions>
     <LanguageSelect class="flex justify-end pr-2 ml-auto" />
     <tenant-switcher
       class="flex justify-end pr-2"

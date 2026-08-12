@@ -1,7 +1,8 @@
 <template>
   <context-menu-actions-shell
     :has-promoted-actions="hasPromotedActions"
-    :has-overflow-actions="hasOverflowActions"
+    :has-overflow-actions="hasOverflowActions || hasExtraOverflowActions"
+    :menu-label="actionsMenuLabel"
   >
     <template #promoted>
       <template v-for="(action, i) in promotedActions" :key="i">
@@ -108,12 +109,15 @@
           :parent-relation="action.parentRelation"
         />
       </template>
+      <!-- destructive actions render last in the menu, styled red -->
+      <slot name="extra-overflow" />
     </template>
   </context-menu-actions-shell>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch, provide } from "vue";
+import { useI18n } from "vue-i18n";
 import type { Entitytyping } from "@/generated-types/queries";
 import type { ContextMenuActionRouteConfig } from "@/types/contextMenuRouteConfig";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
@@ -130,11 +134,21 @@ import {
 } from "@/composables/usePermissions";
 import { useFormHelper } from "@/composables/useFormHelper";
 
-const props = defineProps<{
-  actions: ContextMenuActionRouteConfig[];
-  entityId: string;
-  entityType: Entitytyping;
-}>();
+const props = withDefaults(
+  defineProps<{
+    actions: ContextMenuActionRouteConfig[];
+    entityId: string;
+    entityType: Entitytyping;
+    hasExtraOverflowActions?: boolean;
+  }>(),
+  { hasExtraOverflowActions: false },
+);
+
+const { t, te } = useI18n();
+
+const actionsMenuLabel = computed(() =>
+  te("context-menu.actions") ? t("context-menu.actions") : "Actions",
+);
 
 const { getForm } = useFormHelper();
 
