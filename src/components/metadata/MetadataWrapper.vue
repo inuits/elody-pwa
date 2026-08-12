@@ -451,7 +451,7 @@ const canInlineEdit = computed<boolean>(
     fieldKey.value?.startsWith("intialValues.") &&
     !(props.metadata.value as any)?.formatter &&
     !(props.metadata as any).isMultilingual &&
-    !props.repeatablePanelConfig &&
+    !props.repeatablePanelConfig?.isRepeatable &&
     !props.linkedEntityId,
 );
 
