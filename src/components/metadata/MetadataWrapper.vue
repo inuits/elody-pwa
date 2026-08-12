@@ -66,6 +66,31 @@
       @click.stop.prevent
       @update:value="(value) => (fieldValueProxy = value)"
     />
+    <inline-field-editor
+      v-else-if="canInlineEdit"
+      :form-id="formId"
+      :field-key="inlineSaveKey"
+      :label="fieldLabel"
+      :value="fieldValueProxy"
+      :input-type="fieldType"
+      :required="isFieldRequired"
+      :regex="(metadata.inputField as any)?.validation?.regex"
+      :entity-type="entityType"
+      :dim="fieldValueIsEmpty && !isFieldRequired"
+      @update:value="(value) => (fieldValueProxy = value)"
+    >
+      <entity-element-metadata
+        :label="fieldLabel"
+        v-model:value="fieldValueProxy"
+        :link-text="metadata.linkText"
+        :link-icon="metadata.linkIcon"
+        :unit="metadata.unit"
+        :base-library-mode="baseLibraryMode"
+        :custom-value="metadata.customValue"
+        :translation-key="metadata.valueTranslationKey"
+        :breakWords="breakWords"
+      />
+    </inline-field-editor>
     <div
       v-else
       class="flex gap-2"
@@ -239,6 +264,7 @@
 
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
+import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import MetadataTruncatedText from "./MetadataTruncatedText.vue";
@@ -402,6 +428,38 @@ const pillTranslationKey = computed<string | undefined>(() => {
 
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);
+
+// Per-field inline editing (edit scope = save scope = validation scope):
+// only single-scope scalar metadata qualifies — plain entity metadata that
+// validates and saves on its own. Relation-backed, multilingual, repeatable,
+// formatter and modal-hosted fields keep their existing edit paths.
+const inlineEditableTypes: string[] = [
+  InputFieldTypes.Text,
+  InputFieldTypes.Number,
+  InputFieldTypes.Date,
+];
+const canInlineEdit = computed<boolean>(
+  () =>
+    !props.isEdit &&
+    !props.isUsedInModal &&
+    props.formFlow === "edit" &&
+    Boolean(props.metadata.inputField) &&
+    !(props.metadata as any).nonEditableField &&
+    !(props.metadata as any).disabled &&
+    fieldIsEditableByUser.value &&
+    inlineEditableTypes.includes(fieldType.value as string) &&
+    fieldKey.value?.startsWith("intialValues.") &&
+    !(props.metadata.value as any)?.formatter &&
+    !(props.metadata as any).isMultilingual &&
+    !props.repeatablePanelConfig &&
+    !props.linkedEntityId,
+);
+
+const inlineSaveKey = computed<string>(
+  () =>
+    ((props.metadata.inputField as any)?.fieldKeyToSave as string) ||
+    (props.metadata as any).key,
+);
 
 // Empty, non-required values dim to 45% opacity; the label keeps full
 // contrast and the field keeps its position so nothing reflows.
