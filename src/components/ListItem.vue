@@ -206,11 +206,14 @@
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :primary-label="openRecordLabel"
+        :primary-disabled="isDisabled"
+        @primary="emit('navigateTo')"
         @toggle-loading="toggleLoading"
       />
     </div>
     <div
-      v-if="previewComponentEnabled && isEnableNavigation"
+      v-if="previewComponentEnabled && isEnableNavigation && !openRecordLabel"
       class="flex flex-row"
       @click="() => emit('navigateTo')"
     >
@@ -383,9 +386,19 @@ const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const { getEntityUuid } = useEntitySingle();
+
+// Track A: every list row gets a labeled split-button primary action
+// ("Open record", shortened to "Open" in narrow lists) — never a bare ⋮.
+const openRecordLabel = computed<string | undefined>(() => {
+  if (props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary)
+    return undefined;
+  const key = props.small ? "split-button.open" : "split-button.open-record";
+  const fallback = props.small ? "Open" : "Open record";
+  return te(key) ? t(key) : fallback;
+});
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const loading = ref<boolean>(props.loading);
