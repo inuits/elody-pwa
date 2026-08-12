@@ -29,7 +29,9 @@ vi.mock('@/composables/useEntitySingle', () => ({
   }),
 }));
 
-vi.mock('@/composables/useEdit', () => ({ useEditMode: () => ({ isEdit: false }) }));
+vi.mock('@/composables/useEdit', () => ({
+  useEditMode: () => ({ isEdit: false, showErrors: true }),
+}));
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (k: string) => k }) }));
 vi.mock('@/main', () => ({ auth: { isAuthenticated: { value: true } } }));
 
@@ -307,6 +309,69 @@ describe('EntityElementWindow Permission Logic', () => {
       await flushPromises();
 
       expect(wrapper.findComponent({ name: 'BaseContextMenuActions' }).exists()).toBe(false);
+    });
+  });
+
+  describe('window element status', () => {
+    const metadataWrapperStub = {
+      name: 'MetadataWrapper',
+      props: ['metadata', 'formId', 'isEdit', 'showErrors'],
+      template: '<div data-testid="status-field" />',
+    };
+
+    const buildElement = (validation?: Record<string, any>) => ({
+      label: 'Test Window',
+      windowElementStatus: {
+        label: 'metadata.labels.status',
+        statusMetadataKey: 'status_field',
+        statusInputField: {
+          type: 'dropdownSingleselectMetadata',
+          options: [],
+          ...(validation ? { validation } : {}),
+        },
+      },
+    });
+
+    const mountWithStatus = async (validation?: Record<string, any>) => {
+      mockFetchAdvancedPermissions.mockResolvedValue({});
+      const wrapper = mount(EntityElementWindow, {
+        props: {
+          element: buildElement(validation),
+          identifiers: [],
+          formId: '1',
+          isEditOverwrite: true,
+        },
+        global: { stubs: { MetadataWrapper: metadataWrapperStub } },
+      });
+      await flushPromises();
+      return wrapper;
+    };
+
+    it('forwards the edit state showErrors to the status field', async () => {
+      const wrapper = await mountWithStatus({ value: ['required'] });
+
+      const statusField = wrapper.findComponent({ name: 'MetadataWrapper' });
+      expect(statusField.exists()).toBe(true);
+      expect(statusField.props('showErrors')).toBe(true);
+    });
+
+    it('hands the status field its validation so the generic field renders it', async () => {
+      const wrapper = await mountWithStatus({ value: ['required'] });
+
+      const metadata = wrapper
+        .findComponent({ name: 'MetadataWrapper' })
+        .props('metadata') as any;
+      expect(metadata.inputField.validation).toEqual({ value: ['required'] });
+    });
+
+    it('hands the configured label to the status field instead of rendering its own', async () => {
+      const wrapper = await mountWithStatus({ value: ['required'] });
+
+      const metadata = wrapper
+        .findComponent({ name: 'MetadataWrapper' })
+        .props('metadata') as any;
+      expect(metadata.label).toBe('metadata.labels.status');
+      expect(wrapper.find('h2').exists()).toBe(false);
     });
   });
 });

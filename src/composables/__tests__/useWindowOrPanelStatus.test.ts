@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { ref } from "vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { InputFieldTypes, type PanelStatus } from "@/generated-types/queries";
+import {
+  InputFieldTypes,
+  ValidationRules,
+  type PanelStatus,
+} from "@/generated-types/queries";
 
 const { createForm, editableFields } = useFormHelper();
 
@@ -17,6 +21,14 @@ const mockPanelStatus: PanelStatus = {
       { label: "Concept", value: "concept", icon: null },
       { label: "Final", value: "final", icon: null },
     ],
+  },
+};
+
+const mockRequiredPanelStatus: PanelStatus = {
+  ...mockPanelStatus,
+  statusInputField: {
+    ...mockPanelStatus.statusInputField,
+    validation: { value: [ValidationRules.Required] },
   },
 };
 
@@ -75,6 +87,74 @@ describe("useWindowOrPanelStatus", () => {
       form?.setFieldValue("intialValues.completeness_status", "final");
 
       expect(getStatusMetadata().value).toBe("final");
+    });
+  });
+
+  describe("validation on the status field", () => {
+    it("passes the validation configured on the status input field along", () => {
+      const { getStatusMetadata } = useWindowOrPanelStatus(
+        ref(mockRequiredPanelStatus),
+        ref(FORM_ID),
+      );
+      expect(getStatusMetadata().inputField?.validation?.value).toContain(
+        ValidationRules.Required,
+      );
+    });
+
+    it("passes conditional validation along untouched", () => {
+      const conditionalStatus: PanelStatus = {
+        ...mockPanelStatus,
+        statusInputField: {
+          ...mockPanelStatus.statusInputField,
+          validation: {
+            required_if: { field: "material_type", value: "book" },
+          },
+        },
+      };
+
+      const { getStatusMetadata } = useWindowOrPanelStatus(
+        ref(conditionalStatus),
+        ref(FORM_ID),
+      );
+      expect(
+        getStatusMetadata().inputField?.validation?.required_if,
+      ).toEqual({ field: "material_type", value: "book" });
+    });
+
+    it("carries the configured label so the field title can show the validation state", () => {
+      const statusWithLabel = {
+        ...mockRequiredPanelStatus,
+        label: "metadata.labels.status",
+      };
+
+      const { getStatusMetadata } = useWindowOrPanelStatus(
+        ref(statusWithLabel as any),
+        ref(FORM_ID),
+      );
+      expect(getStatusMetadata().label).toBe("metadata.labels.status");
+    });
+
+    it("leaves the label undefined when no label is configured", () => {
+      const { getStatusMetadata } = useWindowOrPanelStatus(
+        ref(mockPanelStatus),
+        ref(FORM_ID),
+      );
+      expect(getStatusMetadata().label).toBeUndefined();
+    });
+
+    it("does not throw when the status value is missing from the form", () => {
+      createForm(FORM_ID, {
+        intialValues: {} as any,
+        relationValues: {},
+      });
+
+      const { getStatusMetadata } = useWindowOrPanelStatus(
+        ref(mockRequiredPanelStatus),
+        ref(FORM_ID),
+      );
+      expect(() => getStatusMetadata()).not.toThrow();
+      expect(getStatusMetadata().value).toBeUndefined();
+      expect(getStatusMetadata().valueTranslationKey).toBeUndefined();
     });
   });
 

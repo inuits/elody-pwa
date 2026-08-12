@@ -25,12 +25,12 @@
           v-if="element.windowElementStatus"
           class="flex gap-4 w-1/4 items-center"
         >
-          <h2 v-if="element.windowElementStatus.label">{{ t(element.windowElementStatus.label) }}</h2>
           <MetadataWrapper
             class="w-full"
             :metadata="getStatusMetadata()"
             :form-id="formId"
             :isEdit="computedIsEdit"
+            :show-errors="useEditHelper.showErrors"
           />
         </div>
 
@@ -243,7 +243,7 @@ const filteredPanels = computed<WindowElementPanel[]>(() => {
 const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
   computed(() => props.element.windowElementStatus),
   props.formId,
-  computed(() => props.isEdit),
+  computedIsEdit,
 );
 
 onMounted(() => {

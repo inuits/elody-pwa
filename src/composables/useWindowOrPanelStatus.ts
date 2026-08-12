@@ -3,7 +3,6 @@ import {
   type PanelMetaData,
   type PanelStatus,
   type windowElementStatus,
-  CustomFormatterTypes,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 
@@ -26,7 +25,7 @@ export const useWindowOrPanelStatus = (
     const status = unref(windowOrPanelStatus)!;
     const raw = statusValue.value;
 
-    const matchingOption = raw.label
+    const matchingOption = raw?.label
       ? status.statusInputField?.options?.find(
           (opt: any) => opt.value === raw.label,
         )
@@ -34,6 +33,7 @@ export const useWindowOrPanelStatus = (
 
     return {
       key: status.statusMetadataKey,
+      label: isEdit.value ? status.label : undefined,
       inputField: status.statusInputField,
       value: raw,
       valueTranslationKey: matchingOption?.label,

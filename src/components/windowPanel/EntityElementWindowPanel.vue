@@ -13,6 +13,7 @@
           :metadata="getStatusMetadata()"
           :form-id="formId"
           :isEdit="isEdit"
+          :show-errors="editState.showErrors"
         />
       </div>
       <div class="flex justify-end gap-4">
@@ -94,7 +95,6 @@ import {
   type PanelType,
   DamsIcons,
   type PanelRelation,
-  type PanelMetaData,
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
