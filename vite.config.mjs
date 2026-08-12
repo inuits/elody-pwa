@@ -11,6 +11,21 @@ const parsePort = (port) => {
   return parseInt(port) ? parseInt(port) : 8080;
 };
 
+// The generated GraphQL module is tens of MB of (mostly) type declarations;
+// dev-serving it with an inline sourcemap embeds the whole source in the
+// response (~90 MB) and keeps it in Vite's module graph. The file is
+// generated, so a sourcemap adds nothing — drop it in dev.
+const stripGeneratedQueriesSourcemap = () => ({
+  name: "strip-generated-queries-sourcemap",
+  apply: "serve",
+  enforce: "post",
+  transform(code, id) {
+    if (id.includes("/generated-types/")) {
+      return { code, map: { mappings: "" } };
+    }
+  },
+});
+
 const cacheDir =
   process.env.NODE_ENV === "development-docker"
     ? "/app/node_modules/.vite"
@@ -24,6 +39,7 @@ const viteConfig = defineConfig(({ mode }) => ({
     vueDevTools(),
     tailwindSvgPlugin(),
     tailwindcss(),
+    stripGeneratedQueriesSourcemap(),
   ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
@@ -51,6 +67,11 @@ const viteConfig = defineConfig(({ mode }) => ({
     },
     watch: {
       usePolling: true,
+    },
+    // Pre-transform the heavy generated GraphQL module while the server
+    // starts, so the first browser load doesn't wait for it.
+    warmup: {
+      clientFiles: ["./src/generated-types/queries.ts"],
     },
   },
   cacheDir,
