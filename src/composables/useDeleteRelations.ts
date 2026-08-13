@@ -66,6 +66,7 @@ export function useDeleteRelations() {
       relationType,
     );
     const directDeletions: Promise<void>[] = [];
+    let hasOwnSideChange = false;
 
     selectedItems.forEach((item) => {
       const itemKey = "key" in item ? item.key : item.id;
@@ -89,6 +90,7 @@ export function useDeleteRelations() {
           ...relation.relation,
           editStatus: EditStatus.Deleted,
         });
+        hasOwnSideChange = true;
       }
       dequeueItemForBulkProcessing(context, itemKey);
     });
@@ -98,8 +100,14 @@ export function useDeleteRelations() {
       libraryEntities.value = libraryEntities.value.filter((e) => !deletedKeys.has(e.id));
     }
 
-    form.setFieldValue(`relationValues.${relationType}`, relations);
-    if (saveImmediately) await save(true);
+    // Only this entity's own relation array changed if the relation actually lived here;
+    // when it only lived on the other side (deleted above via deleteRelationDirect),
+    // saving here is a redundant, concurrent no-op mutation against the same entities
+    // the backend's own relation-sync hook is touching, and races it.
+    if (hasOwnSideChange) {
+      form.setFieldValue(`relationValues.${relationType}`, relations);
+      if (saveImmediately) await save(true);
+    }
     await Promise.all(directDeletions);
   };
 

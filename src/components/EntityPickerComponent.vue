@@ -1,7 +1,11 @@
 <template>
   <div
     class="flex flex-col w-full overflow-hidden"
-    :class="searchMode === EntityPickerSearchMode.Search ? baseLibraryHeight : undefined"
+    :class="
+      searchMode === EntityPickerSearchMode.Search
+        ? baseLibraryHeight
+        : undefined
+    "
   >
     <SearchBar
       v-if="searchMode === EntityPickerSearchMode.Search"
@@ -11,7 +15,11 @@
     <BaseLibrary
       ref="pickerLibrary"
       class="overflow-auto"
-      :class="searchMode === EntityPickerSearchMode.Search ? 'flex-1 min-h-0' : baseLibraryHeight"
+      :class="
+        searchMode === EntityPickerSearchMode.Search
+          ? 'flex-1 min-h-0'
+          : baseLibraryHeight
+      "
       v-if="queryLoaded || ignoreCustomQuery"
       :bulk-operations-context="getContext()"
       :entity-type="acceptedTypes?.[0]"
@@ -20,7 +28,9 @@
       :show-button="showButton"
       :confirm-selection-button="true"
       :enable-navigation="false"
-      :enable-advanced-filters="searchMode !== EntityPickerSearchMode.Search && enableAdvancedFilters"
+      :enable-advanced-filters="
+        searchMode !== EntityPickerSearchMode.Search && enableAdvancedFilters
+      "
       :enable-bulk-operations="enableBulkOperations"
       :selectionEnabled="selectionEnabled"
       :disable-new-entity-previews="true"
@@ -60,7 +70,10 @@ import {
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
-import { buildEntityPickerSearchFilters, buildEntityPickerTypeFilter } from "@/composables/useEntityPickerSearch";
+import {
+  buildEntityPickerSearchFilters,
+  buildEntityPickerTypeFilter,
+} from "@/composables/useEntityPickerSearch";
 import SearchBar from "@/components/SearchBar.vue";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import {
@@ -143,13 +156,18 @@ const props = withDefaults(
 const { t, locale } = useI18n();
 
 const searchTerm = ref<string>("");
-const onSearch = (term: string) => { searchTerm.value = term; };
+const onSearch = (term: string) => {
+  searchTerm.value = term;
+};
 const isSearchMode = computed<boolean>(
   () => props.searchMode === EntityPickerSearchMode.Search,
 );
 const searchModeFilters = computed<AdvancedFilterInput[]>(() =>
   isSearchMode.value
-    ? buildEntityPickerSearchFilters(searchTerm.value, props.searchMetadataKeys ?? [])
+    ? buildEntityPickerSearchFilters(
+        searchTerm.value,
+        props.searchMetadataKeys ?? [],
+      )
     : [],
 );
 const searchModeTypeFilter = computed<AdvancedFilterInput[]>(() =>
@@ -160,7 +178,7 @@ const searchModeTypeFilter = computed<AdvancedFilterInput[]>(() =>
 const allFilters = computed<AdvancedFilterInput[] | undefined>(() => {
   const filters = [
     ...(props.computedFilters ?? []),
-    ...(isSearchMode.value ? (props.searchStaticFilters ?? []) : []),
+    ...(isSearchMode.value ? props.searchStaticFilters ?? [] : []),
     ...searchModeTypeFilter.value,
     ...searchModeFilters.value,
   ];
@@ -201,7 +219,6 @@ provide(
 addMediafileSelectionStateContext(
   props.customFiltersQuery ? props.customFiltersQuery : "EntityPickerComponent",
 );
-
 
 const childRoutes = getChildrenOfHomeRoutes(config).map(
   (route: any) => route.meta,
@@ -244,7 +261,10 @@ const saveRelations = async (selectedItems: InBulkProcessableItem[]) => {
   }
 
   const selectedIds = new Set(selectedItems.map((item) => item.id));
-  pendingEntities.value = pickerLibrary.value?.entities?.filter((e: Entity) => selectedIds.has(e.id)) ?? [];
+  pendingEntities.value =
+    pickerLibrary.value?.entities?.filter((e: Entity) =>
+      selectedIds.has(e.id),
+    ) ?? [];
   if (getReplaceExistingRelations())
     replaceRelationsFromSameType(
       selectedItems,
@@ -304,7 +324,10 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   const libraryEntities = getLibraryEntities();
   if (libraryEntities?.value && pendingEntities.value.length) {
-    libraryEntities.value = [...libraryEntities.value, ...pendingEntities.value];
+    libraryEntities.value = [
+      ...libraryEntities.value,
+      ...pendingEntities.value,
+    ];
     pendingEntities.value = [];
   }
 
@@ -334,9 +357,16 @@ const submit = useSubmitForm<EntityValues>(async () => {
   }
 
   const mutatedEntity: Entity = result.data.mutateEntityValues as Entity;
+
+  const updatedRelationValues = { ...mutatedEntity.relationValues };
+  Object.keys(unref(form.values).relationValues ?? {}).forEach((key) => {
+    if (!(key in mutatedEntity.relationValues)) {
+      updatedRelationValues[key] = [];
+    }
+  });
   setValues({
     intialValues: mutatedEntity.intialValues,
-    relationValues: mutatedEntity.relationValues,
+    relationValues: updatedRelationValues,
   });
   displaySuccessNotification(
     t("notifications.success.entityUpdated.title"),

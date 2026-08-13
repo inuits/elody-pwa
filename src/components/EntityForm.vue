@@ -136,12 +136,19 @@ const submit = useSubmitForm<EntityValues>(async () => {
   await useEditHelper.performRefetchFunctions();
   mutatedEntity.value = result.data.mutateEntityValues as Entity;
   emit("mutatedEntityUpdated", mutatedEntity.value);
+
+  const updatedRelationValues = { ...mutatedEntity.value.relationValues };
+  Object.keys(unref(form.value).values.relationValues ?? {}).forEach((key) => {
+    if (!(key in mutatedEntity.value.relationValues)) {
+      updatedRelationValues[key] = [];
+    }
+  });
   setValues({
     intialValues: normalizeEmptyInitialValuesByFieldType(
       mutatedEntity.value.intialValues,
       Object.values(props.fields),
     ),
-    relationValues: mutatedEntity.value.relationValues,
+    relationValues: updatedRelationValues,
   });
   displaySuccessNotification(
     t("notifications.success.entityUpdated.title"),
