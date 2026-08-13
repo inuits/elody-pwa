@@ -11,8 +11,11 @@ const mockRoute = ref({
   params: { type: "productions" } as Record<string, unknown>,
 });
 
+const mockRegisteredRoutes = ref<Array<Record<string, unknown>>>([]);
+
 vi.mock("vue-router", () => ({
   useRoute: () => mockRoute.value,
+  useRouter: () => ({ getRoutes: () => mockRegisteredRoutes.value }),
 }));
 
 vi.mock("@/helpers", () => ({
@@ -20,6 +23,7 @@ vi.mock("@/helpers", () => ({
     const map: Record<string, string> = {
       productions: "production",
       venues: "venue",
+      "asset-parts": "AssetPart",
     };
     return map[slug];
   },
@@ -46,6 +50,7 @@ describe("useEntityPageConfig", () => {
       meta: {},
       params: { type: "productions" },
     };
+    mockRegisteredRoutes.value = [];
   });
 
   describe("actions", () => {
@@ -113,6 +118,57 @@ describe("useEntityPageConfig", () => {
         production: { hasEditMetadataButton: false },
       };
       mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { hasEditMetadataButton } = useEntityPageConfig();
+
+      expect(hasEditMetadataButton.value).toBe(false);
+    });
+
+    it("resolves the entity type from the overview route's slug, not from the __typename", () => {
+      mockRegisteredRoutes.value = [
+        { path: "/asset-parts", meta: { slug: "asset-parts", entityType: "asset_part" } },
+      ];
+      const config: EntityPageConfig = {
+        asset_part: { hasEditMetadataButton: false },
+      };
+      mockRoute.value = {
+        meta: { entityPageConfig: config },
+        params: { type: "asset-parts" },
+      };
+
+      const { hasEditMetadataButton } = useEntityPageConfig();
+
+      expect(hasEditMetadataButton.value).toBe(false);
+    });
+
+    it("resolves an overview route whose path is prefixed with a param", () => {
+      mockRegisteredRoutes.value = [
+        { path: "/:tenant?/alerts", meta: { entityType: "iot_alert" } },
+      ];
+      const config: EntityPageConfig = {
+        iot_alert: { hasEditMetadataButton: false },
+      };
+      mockRoute.value = {
+        meta: { entityPageConfig: config },
+        params: { type: "alerts" },
+      };
+
+      const { hasEditMetadataButton } = useEntityPageConfig();
+
+      expect(hasEditMetadataButton.value).toBe(false);
+    });
+
+    it("resolves a slug that has no resemblance to the entity type", () => {
+      mockRegisteredRoutes.value = [
+        { path: "/gizmos", meta: { entityType: "whatsit_type" } },
+      ];
+      const config: EntityPageConfig = {
+        whatsit_type: { hasEditMetadataButton: false },
+      };
+      mockRoute.value = {
+        meta: { entityPageConfig: config },
+        params: { type: "gizmos" },
+      };
 
       const { hasEditMetadataButton } = useEntityPageConfig();
 
