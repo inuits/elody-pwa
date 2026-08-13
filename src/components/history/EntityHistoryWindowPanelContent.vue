@@ -72,17 +72,13 @@
               :can="metadata.can"
             />
 
-            <entity-element-list
-              v-if="metadata.__typename === nonStandardFieldTypes[0]"
-              :id="formId"
-              :types="metadata.entityTypes"
-              :entity-id="formId"
-              :entity-list="metadata.entityList ?? []"
-              :identifiers="identifiers"
-              :disable-library-bar="metadata.disableLibraryBar"
-              :enable-navigation="true"
-              headerStyle="none"
-              v-bind="metadata"
+            <history-relation-diff
+              v-if="
+                metadata.__typename === nonStandardFieldTypes[0] &&
+                hasRelationDiff(relationDiffs, metadata)
+              "
+              :label="metadata.label"
+              :items="relationDiffItemsFor(relationDiffs, metadata)"
             />
             <wysiwyg-read-only
               v-if="metadata.__typename === nonStandardFieldTypes[1]"
@@ -122,7 +118,7 @@ import {
   type MetadataField,
   DamsIcons,
 } from "@/generated-types/queries";
-import EntityElementList from "@/components/entityElements/EntityElementList.vue";
+import HistoryRelationDiff from "@/components/history/HistoryRelationDiff.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
 import WysiwygReadOnly from "@/components/history/WysiwygReadOnly.vue";
@@ -130,7 +126,12 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
-import type { WysiwygDiff } from "@/composables/useHistoryComparisonData";
+import {
+  hasRelationDiff,
+  relationDiffItemsFor,
+  type RelationDiff,
+  type WysiwygDiff,
+} from "@/composables/useHistoryComparisonData";
 
 const emit = defineEmits<{
   (event: "decreaseRepeatedFieldAmount"): void;
@@ -148,6 +149,7 @@ const props = defineProps<{
   parentIsListItem: boolean;
   repeatablePanelConfig?: PanelRepetitionProps;
   wysiwygDiffs: WysiwygDiff[];
+  relationDiffs: RelationDiff[];
 }>();
 
 const { t } = useI18n();

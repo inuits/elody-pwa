@@ -1,5 +1,5 @@
 <template>
-  <div data-cy="entity-element-window" class="h-full flex flex-1">
+  <div data-cy="entity-element-window" class="h-full flex flex-1 mb-2">
     <base-expand-button
       v-if="
         element.expandButtonOptions?.shown &&
@@ -33,30 +33,6 @@
             :isEdit="computedIsEdit"
           />
         </div>
-
-        <MetadataEditButton
-          class="my-2"
-          v-if="
-            auth.isAuthenticated.value === true &&
-            element.editMetadataButton?.hasButton &&
-            showEditMetadataButton
-          "
-          button-size="small"
-          :readmode-label="element.editMetadataButton.readmodeLabel"
-          :editmode-label="element.editMetadataButton.editmodeLabel"
-        />
-        <div
-          class="flex align-center"
-          :class="{ 'ml-auto': !showEditMetadataButton }"
-          v-if="
-            auth.isAuthenticated.value === true && element.contextMenuActions
-          "
-        >
-          <BaseContextMenuActions
-            :context-menu-actions="element.contextMenuActions"
-            :parent-entity-id="formId"
-          />
-        </div>
       </div>
       <div
         :class="[
@@ -83,6 +59,7 @@
             :is-edit="computedIsEdit"
             :form-id="formId"
             :wysiwyg-diffs="wysiwygDiffs"
+            :relation-diffs="relationDiffs"
           />
         </div>
       </div>
@@ -120,7 +97,10 @@ import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
-import type { WysiwygDiff } from "@/composables/useHistoryComparisonData";
+import type {
+  RelationDiff,
+  WysiwygDiff,
+} from "@/composables/useHistoryComparisonData";
 
 const props = defineProps<{
   element: WindowElement;
@@ -131,6 +111,7 @@ const props = defineProps<{
   entityMetadata?: Record<string, any>;
   entityRelations?: Record<string, any>;
   wysiwygDiffs: WysiwygDiff[];
+  relationDiffs: RelationDiff[];
 }>();
 
 const emit = defineEmits<{

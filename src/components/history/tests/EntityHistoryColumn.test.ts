@@ -1,8 +1,12 @@
 import { computed, defineComponent, h, inject, isRef } from "vue";
 import { mount } from "@vue/test-utils";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import EntityHistoryColumn from "../EntityHistoryColumn.vue";
 import { useEditMode } from "@/composables/useEdit";
+
+vi.mock("@/components/history/EntityHistoryElement.vue", () => ({
+  default: { name: "EntityHistoryElement", template: "<div />" },
+}));
 
 const receivedElements: Record<string, any>[] = [];
 const InjectProbe = defineComponent({
@@ -111,6 +115,28 @@ describe("EntityHistoryColumn", () => {
         key: "significance",
         label: "metadata.labels.significance",
       });
+    });
+  });
+
+  describe("column ordering", () => {
+    it("renders one EntityHistoryElement per column, in entityView's own column order", () => {
+      getWrapper({
+        ...getDefaultProps(),
+        entity: {
+          id: "entity-1",
+          uuid: "uuid-1",
+          entityView: {
+            column: { elements: { marker: "first" } },
+            column2: { elements: { marker: "second" } },
+          },
+          intialValues: {},
+          relationValues: {},
+        },
+      });
+
+      expect(receivedElements).toHaveLength(2);
+      expect(receivedElements[0].marker).toBe("first");
+      expect(receivedElements[1].marker).toBe("second");
     });
   });
 });

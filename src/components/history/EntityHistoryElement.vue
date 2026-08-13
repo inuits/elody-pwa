@@ -1,36 +1,24 @@
 <template>
   <div class="w-full flex flex-col">
-    <div v-for="(element, index) in elementList" :key="index">
+    <div v-for="entry in elementList" :key="entry.key">
       <entity-history-window
-        v-if="element.__typename === 'WindowElement'"
-        :element="element"
+        v-if="entry.value.__typename === 'WindowElement'"
+        :element="entry.value"
         :form-id="entity.id"
         :identifiers="identifiers"
         :entity-metadata="entity.intialValues"
         :entity-relations="entity.relationValues"
         :wysiwyg-diffs="wysiwygDiffs"
+        :relation-diffs="relationDiffs"
       />
-      <div
+      <history-relation-diff
         v-else-if="
-          element.__typename === 'EntityListElement' && hasRelationDiff(element)
+          entry.value.__typename === 'EntityListElement' &&
+          hasRelationDiff(relationDiffs, entry.value)
         "
-        class="border-solid border-neutral-30 border-2 bg-background-light rounded-t-md mb-5"
-      >
-        <div
-          class="border-solid border-neutral-30 border-b-2 rounded-t-md flex items-center justify-between p-2"
-        >
-          <h2>{{ $t(element.label) }}</h2>
-        </div>
-        <div class="p-2 w-full">
-          <relation-diff-list
-            v-if="relationDiffItemsFor(element).length"
-            :items="relationDiffItemsFor(element)"
-          />
-          <p v-else class="text-text-light text-sm">
-            {{ $t("history.no-items") }}
-          </p>
-        </div>
-      </div>
+        :label="entry.value.label"
+        :items="relationDiffItemsFor(relationDiffs, entry.value)"
+      />
     </div>
   </div>
 </template>
@@ -38,11 +26,14 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import EntityHistoryWindow from "@/components/history/EntityHistoryWindow.vue";
-import RelationDiffList from "@/components/history/RelationDiffList.vue";
-import type {
-  RelationDiff,
-  WysiwygDiff,
+import HistoryRelationDiff from "@/components/history/HistoryRelationDiff.vue";
+import {
+  hasRelationDiff,
+  relationDiffItemsFor,
+  type RelationDiff,
+  type WysiwygDiff,
 } from "@/composables/useHistoryComparisonData";
+import { useRoute } from "vue-router";
 
 const props = defineProps<{
   elements: Record<string, any>;
@@ -57,22 +48,17 @@ const props = defineProps<{
 }>();
 
 const elementList = computed(() =>
-  Object.values(props.elements).filter(
-    (value) => value && typeof value === "object",
-  ),
+  Object.entries(props.elements)
+    .filter(([, value]) => value && typeof value === "object")
+    .map(([key, value]) => ({ key, value })),
 );
 
+const route = useRoute();
+
 const identifiers = computed<string[]>(() => {
+  return [route.params.id];
   if (props.entity.intialValues?.identifiers)
     return props.entity.intialValues.identifiers;
   return [props.entity.uuid, props.entity.id];
 });
-
-const relationDiffFor = (element: any): RelationDiff | undefined =>
-  props.relationDiffs.find((r) => r.relationType === element.relationType);
-
-const hasRelationDiff = (element: any) => !!relationDiffFor(element);
-
-const relationDiffItemsFor = (element: any) =>
-  relationDiffFor(element)?.items ?? [];
 </script>
