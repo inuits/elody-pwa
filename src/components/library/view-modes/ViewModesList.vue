@@ -65,6 +65,7 @@
           class="flex items-center gap-2 px-1.5 pb-1"
         >
           <div
+            v-if="multiLine"
             class="grid w-full gap-x-4"
             :style="{
               gridTemplateColumns: `repeat(${multiLineColumns}, minmax(0, 1fr))`,
@@ -77,6 +78,14 @@
               :style="
                 header.colSpan ? { gridColumn: `span ${header.colSpan}` } : {}
               "
+              >{{ header.label ? t(header.label) : "" }}</span
+            >
+          </div>
+          <div v-else class="flex w-full items-center">
+            <span
+              v-for="(header, index) in columnHeaders"
+              :key="index"
+              class="w-full truncate text-xs font-bold text-text-light"
               >{{ header.label ? t(header.label) : "" }}</span
             >
           </div>
@@ -294,7 +303,7 @@ const multiLineColumns = computed(() => {
 // Consistency rule: multi-line lists render as a table — one header row
 // with the column labels, cells show values only.
 const columnHeaders = computed<{ label: string; colSpan?: number }[]>(() => {
-  if (props.mode !== "list" || !multiLine.value) return [];
+  if (props.mode !== "list") return [];
   const teaser = (processedEntities.value?.[0] as any)?.teaserMetadata;
   if (!teaser?.length) return [];
   return teaser

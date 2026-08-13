@@ -142,7 +142,9 @@
         :key="`${formId || idx}_${metadataItem?.key || idx}`"
         :class="[
           teaserMetadataStyle,
-          idx < 1 && teaserMetadata[0]?.value?.formatter
+          // with a column-header row the cells must stay equal-width so they
+          // line up under the headers; without one the first pill stays tight
+          idx < 1 && teaserMetadata[0]?.value?.formatter && !hideCellLabels
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine ? '' : 'w-full', // all others stay full width unless multiLine grid handles sizing
         ]"
