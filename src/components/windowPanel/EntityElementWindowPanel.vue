@@ -191,7 +191,7 @@
             <button
               type="button"
               data-cy="block-edit-save"
-              class="rounded-md bg-accent-accent px-3.5 py-1 text-sm font-bold text-neutral-white cursor-pointer hover:bg-accent-normal focus-visible:outline-2 focus-visible:outline-accent-accent"
+              class="rounded-md bg-accent-accent px-3.5 py-1 text-xs font-bold text-neutral-white cursor-pointer hover:bg-accent-normal focus-visible:outline-2 focus-visible:outline-accent-accent"
               @click="saveBlock"
             >
               {{ translate("block-edit.save-block", "Save block") }}
@@ -199,7 +199,7 @@
             <button
               type="button"
               data-cy="block-edit-cancel"
-              class="rounded-md border border-neutral-40 bg-neutral-white px-3.5 py-1 text-sm font-bold text-text-body cursor-pointer hover:bg-neutral-20 focus-visible:outline-2 focus-visible:outline-accent-accent"
+              class="rounded-md border border-neutral-40 bg-neutral-white px-3.5 py-1 text-xs font-bold text-text-body cursor-pointer hover:bg-neutral-20 focus-visible:outline-2 focus-visible:outline-accent-accent"
               @click="cancelRowOrBlock"
             >
               {{ translate("block-edit.cancel", "Cancel") }}

@@ -16,7 +16,7 @@
         v-if="primaryLabel"
         type="button"
         data-cy="split-button-primary"
-        class="rounded-l-md border border-neutral-40 bg-neutral-white px-3 py-0.5 text-sm font-bold text-text-body whitespace-nowrap cursor-pointer hover:bg-accent-light hover:border-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent disabled:opacity-45 disabled:cursor-not-allowed"
+        class="rounded-l-md border border-neutral-40 bg-neutral-white px-3 py-0.5 text-xs font-bold text-text-body whitespace-nowrap cursor-pointer hover:bg-accent-light hover:border-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent disabled:opacity-45 disabled:cursor-not-allowed"
         :class="{ 'rounded-r-md': !hasOverflowActions }"
         :disabled="primaryDisabled"
         @click.stop.prevent="emit('primary')"
@@ -30,7 +30,7 @@
           data-cy="split-button-caret"
           aria-haspopup="menu"
           :aria-label="menuLabel || t('context-menu.more-actions')"
-          class="flex items-center rounded-r-md border border-neutral-40 bg-neutral-white px-1 py-0.5 text-sm font-bold text-text-body whitespace-nowrap cursor-pointer hover:bg-accent-light hover:border-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="flex items-center rounded-r-md border border-neutral-40 bg-neutral-white px-1 py-0.5 text-xs font-bold text-text-body whitespace-nowrap cursor-pointer hover:bg-accent-light hover:border-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="{ 'rounded-l-md px-3': !primaryLabel, '-ml-px': primaryLabel }"
           @click.stop.prevent="openContextMenu"
         >

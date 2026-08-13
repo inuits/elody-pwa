@@ -16,7 +16,7 @@
       >
         <h1
           data-cy="entity-element-window-title"
-          class="text-base font-black text-accent-dark p-2"
+          class="text-sm font-black text-accent-dark p-2"
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
