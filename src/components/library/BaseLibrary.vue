@@ -165,7 +165,7 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap && !isCollapsedEmptyRelationList"
+            :show-pagination="showResultsPagination"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -778,6 +778,16 @@ const isCollapsedEmptyRelationList = computed<boolean>(
     totalEntityCount.value === 0 &&
     !entitiesLoading.value &&
     !simpleSearchTerm.value,
+);
+
+// Embedded relation lists show a pager only when there is more than one
+// page; the main library keeps its pagination band.
+const showResultsPagination = computed<boolean>(
+  () =>
+    !displayMap.value &&
+    !isCollapsedEmptyRelationList.value &&
+    ((props.parentEntityIdentifiers?.length ?? 0) === 0 ||
+      paginationStore.totalPages.value > 1),
 );
 
 const noResultTranslations = computed(() => ({

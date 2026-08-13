@@ -160,6 +160,7 @@
               v-if="!useEditHelper.isEdit"
               :form-id="formId || 'listview'"
               :metadata="(localizedMetadata || metadataItem) as MetadataField"
+              :hide-label="hideCellLabels"
               :is-edit="useEditHelper.isEdit"
               :linked-entity-id="intialValues?.id || itemId"
               :entity-type="entityTypename"
@@ -348,6 +349,7 @@ const props = withDefaults(
     isPrimaryThumbnail?: boolean;
     multiLine?: boolean;
     multiLineColumns?: number;
+    hideCellLabels?: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -377,6 +379,7 @@ const props = withDefaults(
     isPrimaryThumbnail: false,
     multiLine: false,
     multiLineColumns: 5,
+    hideCellLabels: false,
   },
 );
 

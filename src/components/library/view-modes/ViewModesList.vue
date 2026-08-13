@@ -58,6 +58,33 @@
             />
           </div>
         </div>
+        <!-- one column-header row instead of a label in every cell -->
+        <div
+          v-if="columnHeaders.length"
+          data-cy="list-column-headers"
+          class="flex items-center gap-2 px-1.5 pb-1"
+        >
+          <div
+            class="grid w-full gap-x-4"
+            :style="{
+              gridTemplateColumns: `repeat(${multiLineColumns}, minmax(0, 1fr))`,
+            }"
+          >
+            <span
+              v-for="(header, index) in columnHeaders"
+              :key="index"
+              class="truncate text-xs font-bold text-text-light"
+              :style="
+                header.colSpan ? { gridColumn: `span ${header.colSpan}` } : {}
+              "
+              >{{ header.label ? t(header.label) : "" }}</span
+            >
+          </div>
+          <span
+            class="w-28 shrink-0 pr-1 text-right text-xs font-bold text-text-light"
+            >{{ actionsHeaderLabel }}</span
+          >
+        </div>
         <component
           v-for="entity in processedEntities"
           :key="entity.id + '_list'"
@@ -104,6 +131,7 @@
             :is-primary-thumbnail="primaryThumbnailId === entity.id"
             :multi-line="multiLine"
             :multi-line-columns="multiLineColumns"
+            :hide-cell-labels="columnHeaders.length > 0"
             @navigate-to="
               () => {
                 router.push(entity.forcedNavigationPath);
@@ -161,6 +189,7 @@ import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
@@ -250,6 +279,7 @@ const {
   togglePreviewComponent,
 );
 
+const { t, te } = useI18n();
 const { trackSeen } = useEntityPageConfig();
 const { isItemSeen } = useSeenItems();
 
@@ -260,6 +290,24 @@ const multiLineColumns = computed(() => {
   const val = props.config?.find((c) => c.key === "multiLineColumns")?.value;
   return typeof val === "number" ? val : 5;
 });
+
+// Consistency rule: multi-line lists render as a table — one header row
+// with the column labels, cells show values only.
+const columnHeaders = computed<{ label: string; colSpan?: number }[]>(() => {
+  if (props.mode !== "list" || !multiLine.value) return [];
+  const teaser = (processedEntities.value?.[0] as any)?.teaserMetadata;
+  if (!teaser?.length) return [];
+  return teaser
+    .filter((metadata: any) => metadata && !metadata.showOnlyInEditMode)
+    .map((metadata: any) => ({
+      label: metadata.label || "",
+      colSpan: metadata.colSpan,
+    }));
+});
+
+const actionsHeaderLabel = computed(() =>
+  te("library.actions-column") ? t("library.actions-column") : "Actions",
+);
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { getForm, findRelation, getTeaserMetadataInState } = useFormHelper();

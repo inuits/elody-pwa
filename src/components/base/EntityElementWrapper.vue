@@ -2,10 +2,10 @@
   <div
     data-cy="entity-element-wrapper"
     :class="[
-      'bg-accent-normal rounded-t-lg',
+      'bg-accent-light border border-accent-light rounded-t-lg',
       { 'rounded-lg': isCollapsed },
       {
-        'border-t-4 border-accent-normal rounded-t-none':
+        'border-t-4 border-accent-light rounded-t-none':
           headerStyle === 'none',
       },
     ]"
@@ -53,7 +53,7 @@
         </base-tooltip>
         <span
           data-cy="entity-element-wrapper-title"
-          class="subtitle mr-2"
+          class="text-sm font-black text-accent-dark mr-2"
           :class="[
             {
               'text-center absolute left-1/2 transform -translate-x-1/2':
@@ -66,7 +66,7 @@
       </div>
       <span
         v-if="!isPreviewElement"
-        class="p-2 text-text-subtitle"
+        class="p-2 text-accent-dark"
         @click="emit('toggleElementCollapse', entityId, label)"
       >
         <unicon
