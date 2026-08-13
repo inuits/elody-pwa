@@ -261,7 +261,11 @@
         >
           <ListItemSkeleton
             v-show="entitiesLoadingWithoutData && !displayMap"
-            :amount="placeholderEntitiesAmount"
+            :amount="
+              (parentEntityIdentifiers?.length ?? 0) > 0
+                ? Math.min(placeholderEntitiesAmount, 3)
+                : placeholderEntitiesAmount
+            "
           />
           <ViewModesList
             v-show="

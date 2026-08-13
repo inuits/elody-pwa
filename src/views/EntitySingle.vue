@@ -25,9 +25,9 @@
       </div>
       <DeleteModal></DeleteModal>
     </div>
-    <div v-else class="min-h-[30vh] flex justify-center items-center">
-      <spinner-loader theme="accent" />
-    </div>
+    <!-- page-shaped skeleton instead of a centered spinner: the loading
+         state already has the detail anatomy, so nothing jumps on arrival -->
+    <EntityDetailSkeleton v-else />
   </div>
 </template>
 
@@ -74,6 +74,7 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenItems } from "@/composables/useSeenItems";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import EntityDetailSkeleton from "@/components/base/skeletons/EntityDetailSkeleton.vue";
 import DeleteModal from "@/components/modals/DeleteModal.vue";
 import type { GraphQLError } from "graphql/error";
 import type { ApolloError } from "@apollo/client/core";
