@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-wrap p-8 h-[90%]">
-    <div class="flex basis-full gap-8 h-full">
-      <div v-if="!isRelatedExport" class="h-full basis-[56%]">
+  <div class="flex flex-col p-8 h-[calc(90vh-34px)]">
+    <div class="flex flex-1 min-h-0 gap-8">
+      <div v-if="!isRelatedExport" class="flex flex-col min-h-0 basis-[56%]">
         <div class="h-[40px] mb-6">
           <LibraryBar
             v-model:limit="limit"
@@ -9,7 +9,7 @@
             @update:limit="loadItems()"
           />
         </div>
-        <div class="h-[90%] overflow-y-hidden hover:overflow-y-auto">
+        <div class="flex-1 min-h-0 overflow-y-hidden hover:overflow-y-auto">
           <ListItem
             v-for="item in items"
             :key="item.id"
@@ -20,7 +20,7 @@
           />
         </div>
       </div>
-      <div class="grow">
+      <div class="flex flex-col min-h-0 grow">
         <div class="flex items-center h-[40px] mb-6">
           <BulkOperationsActionsBar
             :context="BulkOperationsContextEnum.BulkOperationsCsvExport"
@@ -31,7 +31,7 @@
             @select-all="bulkSelect"
           />
         </div>
-        <div class="h-[90%] overflow-y-hidden hover:overflow-y-auto">
+        <div class="flex-1 min-h-0 overflow-y-hidden hover:overflow-y-auto">
           <div v-if="isLoading">
             <div
               v-for="(_, index) in Array(8).fill(null)"
@@ -57,7 +57,7 @@
         </div>
       </div>
     </div>
-    <div class="basis-full h-[55px]">
+    <div class="shrink-0 h-[55px] mt-6">
       <BulkOperationsSubmitBar
         :button-label="t('bulk-operations.export-to-csv')"
         tooltip-label="export-csv"
