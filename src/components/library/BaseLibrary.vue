@@ -93,7 +93,7 @@
         ]"
       >
         <div
-          v-if="!disableLibraryBar"
+          v-if="!disableLibraryBar && !isCollapsedEmptyRelationList"
           class="h-fit flex flex-row items-center gap-y-4"
         >
           <div
@@ -165,7 +165,7 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap"
+            :show-pagination="!displayMap && !isCollapsedEmptyRelationList"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -210,6 +210,17 @@
         >
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
             -
+          </div>
+          <div
+            v-else-if="isCollapsedEmptyRelationList"
+            data-cy="empty-relation-list"
+            class="text-sm text-text-placeholder !text-left"
+          >
+            {{
+              te("library.no-linked-objects")
+                ? t("library.no-linked-objects")
+                : "No linked objects"
+            }}
           </div>
           <div v-else>
             <div>{{ noResultTranslations.noResult }}</div>
@@ -541,7 +552,7 @@ const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 const { getEntityUuid } = useEntitySingle();
 const route = useRoute();
 const router = useRouter();
-const { t, locale } = useI18n();
+const { t, te, locale } = useI18n();
 const { getStateForRoute } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
 const { getBasicMapProperties } = useMaps();
@@ -756,6 +767,17 @@ const showBasicModePagination = computed(
     (props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder) &&
     paginationStore.totalPages.value > 1,
+);
+
+// Consistency rule: an empty relation list collapses to a single line —
+// no sort/pager chrome around zero items. Only for embedded lists (with a
+// parent entity) and only when no search narrowed the result to zero.
+const isCollapsedEmptyRelationList = computed<boolean>(
+  () =>
+    (props.parentEntityIdentifiers?.length ?? 0) > 0 &&
+    totalEntityCount.value === 0 &&
+    !entitiesLoading.value &&
+    !simpleSearchTerm.value,
 );
 
 const noResultTranslations = computed(() => ({

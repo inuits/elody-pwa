@@ -391,12 +391,15 @@ const { t, te } = useI18n();
 const { getEntityUuid } = useEntitySingle();
 
 // Track A: every list row gets a labeled split-button primary action
-// ("Open record", shortened to "Open" in narrow lists) — never a bare ⋮.
+// ("Open record", shortened to "Open" in narrow/embedded lists) — never a
+// bare ⋮. Pickers pass enable-navigation=false and keep their own row
+// semantics, so they get no navigation button.
 const openRecordLabel = computed<string | undefined>(() => {
-  if (props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary)
-    return undefined;
-  const key = props.small ? "split-button.open" : "split-button.open-record";
-  const fallback = props.small ? "Open" : "Open record";
+  if (!props.isEnableNavigation) return undefined;
+  const isNarrow =
+    props.small || props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary;
+  const key = isNarrow ? "split-button.open" : "split-button.open-record";
+  const fallback = isNarrow ? "Open" : "Open record";
   return te(key) ? t(key) : fallback;
 });
 

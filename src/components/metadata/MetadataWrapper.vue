@@ -77,9 +77,20 @@
       :regex="(metadata.inputField as any)?.validation?.regex"
       :entity-type="entityType"
       :dim="fieldValueIsEmpty && !isFieldRequired"
+      :options="(metadata.inputField as any)?.options"
       @update:value="(value) => (fieldValueProxy = value)"
     >
+      <ViewModesAutocompleteMetadata
+        v-if="autoCompleteType === 'metadataAutocomplete'"
+        v-model:model-value="fieldValueProxy"
+        :metadata-dropdown-options="metadata.inputField.options"
+        :formId="formId"
+        select-type="single"
+        :disabled="true"
+        mode="view"
+      />
       <entity-element-metadata
+        v-else
         :label="fieldLabel"
         v-model:value="fieldValueProxy"
         :link-text="metadata.linkText"
@@ -437,6 +448,7 @@ const inlineEditableTypes: string[] = [
   InputFieldTypes.Text,
   InputFieldTypes.Number,
   InputFieldTypes.Date,
+  InputFieldTypes.DropdownSingleselectMetadata,
 ];
 const canInlineEdit = computed<boolean>(
   () =>

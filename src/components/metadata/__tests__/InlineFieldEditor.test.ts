@@ -165,6 +165,45 @@ describe("InlineFieldEditor", () => {
     );
   });
 
+  it("selects commit on choose: picking an option saves immediately", async () => {
+    const wrapper = mountEditor({
+      inputType: "dropdownSingleselectMetadata",
+      value: "reading",
+      options: [
+        { label: "Lezen", value: "reading" },
+        { label: "Luisteren", value: "listening" },
+      ],
+    });
+    await wrapper.find("[data-cy='inline-edit-toggle']").trigger("click");
+
+    const select = wrapper.find("[data-cy='inline-edit-select']");
+    expect(select.exists()).toBe(true);
+    await select.setValue("listening");
+    await flushPromises();
+
+    expect(mocks.mutate).toHaveBeenCalledTimes(1);
+    expect(mocks.mutate.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "title", value: "listening" },
+    ]);
+    expect(wrapper.find("[data-cy='inline-edit-select']").exists()).toBe(false);
+  });
+
+  it("a required select cannot be emptied", async () => {
+    const wrapper = mountEditor({
+      inputType: "dropdownSingleselectMetadata",
+      value: "reading",
+      required: true,
+      options: [{ label: "Lezen", value: "reading" }],
+    });
+    await wrapper.find("[data-cy='inline-edit-toggle']").trigger("click");
+
+    // required selects render no empty option at all
+    const optionValues = wrapper
+      .findAll("option")
+      .map((option) => (option.element as HTMLOptionElement).value);
+    expect(optionValues).toEqual(["reading"]);
+  });
+
   it("undo writes the old value back as a new change", async () => {
     const wrapper = mountEditor();
     await wrapper.find("[data-cy='inline-edit-toggle']").trigger("click");

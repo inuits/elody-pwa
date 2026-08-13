@@ -45,7 +45,29 @@
     </template>
     <template v-else>
       <div class="flex items-center gap-1 pt-0.5">
+        <select
+          v-if="isSelect"
+          ref="inputRef"
+          v-model="draft"
+          data-cy="inline-edit-select"
+          :aria-label="label"
+          :disabled="saving"
+          class="w-full min-w-0 rounded border border-neutral-40 bg-neutral-white px-2 py-0.5 text-sm text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          @change="save"
+          @keydown.esc.stop.prevent="cancel"
+          @click.stop
+        >
+          <option v-if="!required" value="">—</option>
+          <option
+            v-for="option in options"
+            :key="String(option.value)"
+            :value="option.value"
+          >
+            {{ optionLabel(option) }}
+          </option>
+        </select>
         <input
+          v-else
           ref="inputRef"
           v-model="draft"
           data-cy="inline-edit-input"
@@ -89,7 +111,7 @@
         {{ error }}
       </div>
       <div v-else class="pt-0.5 text-xs text-text-placeholder">
-        {{ hintLabel }}
+        {{ isSelect ? selectHintLabel : hintLabel }}
       </div>
     </template>
   </div>
@@ -124,6 +146,7 @@ const props = withDefaults(
     regex?: string | null;
     entityType?: string;
     dim?: boolean;
+    options?: { label?: string | null; value?: unknown }[] | null;
   }>(),
   {
     inputType: InputFieldTypes.Text,
@@ -131,6 +154,7 @@ const props = withDefaults(
     regex: null,
     entityType: undefined,
     dim: false,
+    options: null,
   },
 );
 
@@ -175,6 +199,22 @@ const htmlInputType = computed(() => {
   if (props.inputType === InputFieldTypes.Date) return "date";
   return "text";
 });
+
+// Selects commit on choose: picking an option saves immediately.
+const isSelect = computed(
+  () =>
+    props.inputType === InputFieldTypes.DropdownSingleselectMetadata &&
+    (props.options?.length ?? 0) > 0,
+);
+
+const optionLabel = (option: { label?: string | null; value?: unknown }) => {
+  const label = option.label ?? String(option.value ?? "");
+  return te(label) ? t(label) : label;
+};
+
+const selectHintLabel = computed(() =>
+  translate("inline-edit.select-hint", "Choosing saves · Esc cancels"),
+);
 
 const collection = computed<Collection>(() => {
   const routeCollection = route.meta?.type as Collection | undefined;

@@ -23,15 +23,63 @@
 
         <div
           v-if="element.windowElementStatus"
-          class="flex gap-4 w-1/4 items-center"
+          class="relative flex gap-4 items-center"
         >
           <h2 v-if="element.windowElementStatus.label">{{ t(element.windowElementStatus.label) }}</h2>
-          <MetadataWrapper
-            class="w-full"
-            :metadata="getStatusMetadata()"
-            :form-id="formId"
-            :isEdit="computedIsEdit"
-          />
+          <!-- quality status chip: click explains WHY a record is (not)
+               checkable, listing blocking empty required fields as jumps -->
+          <button
+            type="button"
+            data-cy="quality-status-chip"
+            aria-haspopup="dialog"
+            :aria-expanded="statusPopoverOpen"
+            class="flex items-center gap-1 cursor-pointer rounded-md border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-accent-accent"
+            @click.stop="statusPopoverOpen = !statusPopoverOpen"
+          >
+            <MetadataWrapper
+              class="w-full pointer-events-none"
+              :metadata="getStatusMetadata()"
+              :form-id="formId"
+              :isEdit="computedIsEdit"
+            />
+            <unicon :name="Unicons.AngleDown.name" height="14" />
+          </button>
+          <div
+            v-if="statusPopoverOpen"
+            role="dialog"
+            data-cy="quality-status-popover"
+            :aria-label="t(element.windowElementStatus.label || 'status')"
+            class="absolute left-0 top-9 z-popover w-[290px] rounded-lg border border-neutral-40 bg-neutral-white p-4 text-sm shadow-[0_12px_32px_rgba(9,30,66,.2)]"
+            @click.stop
+          >
+            <template v-if="requiredEmptyFields.length > 0">
+              <p class="m-0 pb-1.5">
+                {{
+                  translate(
+                    "quality-status.blocked",
+                    "Not checkable yet — required and empty:",
+                  )
+                }}
+              </p>
+              <button
+                v-for="field in requiredEmptyFields"
+                :key="field.key"
+                type="button"
+                class="block w-full cursor-pointer rounded-md border-none bg-transparent px-2 py-1 text-left text-sm font-bold text-red-default hover:bg-red-light focus-visible:outline-2 focus-visible:outline-accent-accent"
+                @click="jumpToField(field.key)"
+              >
+                → {{ getTranslatedMessage(field.label) }}
+              </button>
+            </template>
+            <p v-else class="m-0 font-bold text-green-700">
+              {{
+                translate(
+                  "quality-status.clear",
+                  "All required fields are filled.",
+                )
+              }}
+            </p>
+          </div>
         </div>
 
 
@@ -105,6 +153,10 @@ import {
 import EntityElementWindowPanel from "../windowPanel/EntityElementWindowPanel.vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
+import EventBus from "@/EventBus";
+import { Unicons } from "@/types";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { getTranslatedMessage } from "@/helpers";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 
@@ -122,7 +174,8 @@ const emit = defineEmits<{
   (event: "resizeColumn", toggled: boolean): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+const { getForm } = useFormHelper();
 const { fetchAdvancedPermissions, fetchUpdateAndDeletePermission } =
   usePermissions();
 const useEditHelper = useEditMode(props.formId);
@@ -134,6 +187,39 @@ const isCheckingPermissions = ref(true);
 const computedIsEdit = computed(
   () => props.isEditOverwrite || useEditHelper.isEdit,
 );
+
+const translate = (key: string, fallback: string): string =>
+  te(key) ? t(key) : fallback;
+
+const statusPopoverOpen = ref<boolean>(false);
+
+// Blocking fields: required per input-field config AND currently empty.
+const requiredEmptyFields = computed<{ key: string; label: string }[]>(() => {
+  const form = getForm(props.formId);
+  if (!form) return [];
+  const result: { key: string; label: string }[] = [];
+  for (const panel of allPanels.value) {
+    for (const value of Object.values(panel)) {
+      const metadata = value as any;
+      if (metadata?.__typename !== "PanelMetaData") continue;
+      const rules = metadata.inputField?.validation?.value;
+      if (!rules || !String(rules).includes("required")) continue;
+      const currentValue = (form.values.intialValues as any)?.[metadata.key];
+      const isEmpty =
+        currentValue === undefined ||
+        currentValue === null ||
+        (typeof currentValue === "string" && currentValue.trim() === "") ||
+        (Array.isArray(currentValue) && currentValue.length === 0);
+      if (isEmpty) result.push({ key: metadata.key, label: metadata.label });
+    }
+  }
+  return result;
+});
+
+const jumpToField = (fieldKey: string) => {
+  statusPopoverOpen.value = false;
+  EventBus.emit("jumpToPanelField", fieldKey);
+};
 
 const resizeColumn = (toggled: boolean) => {
   emit("resizeColumn", toggled);

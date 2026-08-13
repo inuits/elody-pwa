@@ -1,5 +1,8 @@
 <template>
-  <div :class="[{ 'pl-10 py-0': parentIsListItem }, ' p-2 w-full']">
+  <div
+    ref="panelRoot"
+    :class="[{ 'pl-10 py-0': parentIsListItem }, ' p-2 w-full']"
+  >
     <div
       v-if="panel.panelHeaderContent?.label"
       @click="toggleIsCollapsed()"
@@ -226,8 +229,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from "vue";
+import { computed, nextTick, onUnmounted, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
+import EventBus from "@/EventBus";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
 import { getMetadataFields } from "@/helpers";
@@ -420,6 +424,18 @@ watchEffect(() => {
   }
   registerEditableKey();
 });
+
+// Quality-status popover jumps: expand + scroll when this panel owns the key.
+const panelRoot = ref<HTMLElement | null>(null);
+const onJumpToField = (fieldKey: unknown) => {
+  if (!editableFields.value.some((field) => field.key === fieldKey)) return;
+  isCollapsed.value = false;
+  nextTick(() =>
+    panelRoot.value?.scrollIntoView({ block: "center", behavior: "smooth" }),
+  );
+};
+EventBus.on("jumpToPanelField", onJumpToField);
+onUnmounted(() => EventBus.off("jumpToPanelField", onJumpToField));
 </script>
 
 <style scoped>
