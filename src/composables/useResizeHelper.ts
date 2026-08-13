@@ -102,7 +102,7 @@ const useEntityElementCollapseHelper = (
         const columnElements = Object.getOwnPropertyNames(col.elements);
         columnElements.forEach((el: string) => {
           const element = elements[el];
-          if (element.label === elementLabel) {
+          if (element?.label === elementLabel) {
             toggleElementColumn = col;
             toggleElement = element;
           }
