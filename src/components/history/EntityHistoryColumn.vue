@@ -1,8 +1,8 @@
 <template>
   <div class="w-full flex flex-col gap-4 px-5">
-    <div v-for="(column, index) in columns" :key="index">
+    <div v-for="column in columns" :key="column.key">
       <entity-history-element
-        :elements="column.elements || {}"
+        :elements="column.value.elements || {}"
         :entity="entity"
         :relation-diffs="relationDiffs"
         :wysiwyg-diffs="wysiwygDiffs"
@@ -68,8 +68,8 @@ const omitIdMetadata = (value: any): any => {
 };
 
 const columns = computed(() =>
-  Object.values(omitIdMetadata(props.entity.entityView) || {}).filter(
-    (value) => value && typeof value === "object",
-  ),
+  Object.entries(omitIdMetadata(props.entity.entityView) || {})
+    .filter(([, value]) => value && typeof value === "object")
+    .map(([key, value]) => ({ key, value })),
 );
 </script>

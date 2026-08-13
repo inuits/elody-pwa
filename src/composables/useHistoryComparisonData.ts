@@ -58,6 +58,19 @@ export type VersionOption = {
 
 export const LIVE_VERSION_ID = "__live__";
 
+export const hasRelationDiff = (
+  relationDiffs: RelationDiff[],
+  element: { relationType?: string | null },
+): boolean =>
+  relationDiffs.some((diff) => diff.relationType === element.relationType);
+
+export const relationDiffItemsFor = (
+  relationDiffs: RelationDiff[],
+  element: { relationType?: string | null },
+): RelationDiffItem[] =>
+  relationDiffs.find((diff) => diff.relationType === element.relationType)
+    ?.items ?? [];
+
 const toTimestamp = (value: any): number => {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
