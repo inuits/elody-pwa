@@ -45,7 +45,10 @@
           :is="entity.componentTag"
           :to="entity.componentPath"
           class="list-item-table"
-          @click="entityWrapperHandler(entity.originalEntity)"
+          @click="() => {
+            if (openEntityInDetailModal) openEntityInModal(entity.id, entity.type);
+            else entityWrapperHandler(entity.originalEntity)
+          }"
           v-memo="entity.memoKey"
         >
           <TableViewRow
@@ -115,7 +118,9 @@ import {
   Entitytyping,
   MediaTypeEntities,
   type Metadata,
+  ModalStyle,
   RelationActions,
+  TypeModals,
 } from "@/generated-types/queries";
 import TableViewRow from "@/components/library/view-modes/TableViewRow.vue";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
@@ -129,6 +134,7 @@ import { usePreviewComponent } from "@/components/library/view-modes/composables
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenItems } from "@/composables/useSeenItems";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -136,6 +142,7 @@ const props = withDefaults(
     entitiesLoading: boolean;
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
+    openEntityInDetailModal?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
@@ -150,6 +157,7 @@ const props = withDefaults(
     cropMediafileCoordinatesKey?: string;
   }>(),
   {
+    openEntityInDetailModal: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
@@ -166,6 +174,7 @@ const { t } = useI18n();
 const { getMediaFilenameFromEntity } = useListItemHelper();
 const { getThumbnail } = useThumbnailHelper();
 const { findRelation } = useFormHelper();
+const { openModal } = useBaseModal();
 
 const refEntities = ref<Entity[]>(props.entities);
 const colMinWidths = ref<string[]>([]);
@@ -326,6 +335,18 @@ const processedEntities = computed(() => {
     };
   });
 });
+
+const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
+  openModal(
+    TypeModals.EntityDetailModal,
+    ModalStyle.CenterWide,
+    undefined,
+    undefined,
+    false,
+    undefined,
+    { entityId, entityType },
+  );
+};
 
 watch(headerColumns, measureColWidths, { immediate: true });
 watch(

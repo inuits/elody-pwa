@@ -264,6 +264,7 @@
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
             :disable-previews="disableNewEntityPreviews"
+            :open-entity-in-detail-modal="openEntityInDetailModal"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
@@ -300,6 +301,7 @@
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
+            :open-entity-in-detail-modal="openEntityInDetailModal"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
@@ -440,6 +442,7 @@ export type BaseLibraryProps = {
   parentEntityIdentifiers?: string[];
   showButton?: boolean;
   confirmSelectionButton?: boolean;
+  openEntityInDetailModal?: boolean;
   enableNavigation?: boolean;
   disableNewEntityPreviews?: boolean;
   idsOfNonSelectableEntities?: string[];
@@ -485,6 +488,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   parentEntityIdentifiers: () => [],
   showButton: true,
   confirmSelectionButton: false,
+  openEntityInDetailModal: false,
   enableNavigation: true,
   disableNewEntityPreviews: false,
   idsOfNonSelectableEntities: () => [],

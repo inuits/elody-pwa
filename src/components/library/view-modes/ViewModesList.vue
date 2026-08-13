@@ -67,7 +67,10 @@
             mode === 'list' ? 'list-item-list' : 'list-item-grid',
             { 'list-item-list-multi-line': mode === 'list' && multiLine },
           ]"
-          @click="entityWrapperHandler(entity.originalEntity)"
+          @click="() => {
+            if (openEntityInDetailModal) openEntityInModal(entity.id, entity.type);
+            else entityWrapperHandler(entity.originalEntity)
+          }"
           v-memo="entity.memoKey"
         >
           <ListItem
@@ -154,7 +157,9 @@ import {
   Entitytyping,
   MediaTypeEntities,
   type Metadata,
+  ModalStyle,
   RelationActions,
+  TypeModals,
 } from "@/generated-types/queries";
 import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
@@ -168,6 +173,7 @@ import { usePreviewComponent } from "@/components/library/view-modes/composables
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenItems } from "@/composables/useSeenItems";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const props = withDefaults(
   defineProps<{
@@ -177,6 +183,7 @@ const props = withDefaults(
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
     disablePreviews?: boolean;
+    openEntityInDetailModal?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
     idsOfNonSelectableEntities?: string[];
@@ -198,6 +205,7 @@ const props = withDefaults(
   }>(),
   {
     disablePreviews: false,
+    openEntityInDetailModal: false,
     enableNavigation: true,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
@@ -227,6 +235,7 @@ watch(
   },
 );
 
+const { openModal } = useBaseModal();
 const {
   previewComponent,
   previewComponentEnabled,
@@ -235,7 +244,6 @@ const {
   closePreviewComponent,
   isPreviewComponentEnabledForListItem,
 } = usePreviewComponent(props, refEntities);
-
 const {
   containerNameForPreview,
   getLinkSettings,
@@ -345,6 +353,18 @@ const processedEntities = computed(() => {
     };
   });
 });
+
+const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
+  openModal(
+    TypeModals.EntityDetailModal,
+    ModalStyle.CenterWide,
+    undefined,
+    undefined,
+    false,
+    undefined,
+    { entityId, entityType },
+  );
+};
 </script>
 
 <style scoped>

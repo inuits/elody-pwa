@@ -27,6 +27,7 @@
       :filters="allFilters"
       :show-button="showButton"
       :confirm-selection-button="true"
+      :open-entity-in-detail-modal="true"
       :enable-navigation="false"
       :enable-advanced-filters="
         searchMode !== EntityPickerSearchMode.Search && enableAdvancedFilters
