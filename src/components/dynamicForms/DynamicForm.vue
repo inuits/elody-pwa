@@ -12,9 +12,10 @@
       class="w-full [&>*>button:last-child]:mb-0"
       :class="[isLoading ? 'opacity-20' : 'opacity-100']"
     >
+      <!-- modal anatomy mirrors panel anatomy: accent-light header band -->
       <h1
         v-if="dynamicForm?.GetDynamicForm?.label && showFormTitle"
-        class="title pb-4"
+        class="-mx-4 mb-4 rounded-t-lg border-b border-accent-light bg-accent-light px-4 py-3 text-base font-black text-accent-dark"
       >
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>

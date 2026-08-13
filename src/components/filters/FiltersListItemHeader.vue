@@ -1,11 +1,21 @@
 <template>
   <div
     data-cy="filters-list-item"
-    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-accent-highlight cursor-pointer select-none"
-    :class="{ 'bg-accent-normal text-neutral-white': isActive }"
+    class="flex relative items-center justify-between px-4 py-2.5 border-t border-neutral-30 cursor-pointer select-none hover:bg-accent-light/40"
     @click="$emit('toggle')"
   >
-    <span data-cy="filters-list-item-label" class="text-lg">
+    <span
+      data-cy="filters-list-item-label"
+      class="flex items-center gap-2 text-sm"
+      :class="{ 'font-bold': isActive }"
+    >
+      <!-- active dot: the filter carries a value -->
+      <span
+        v-if="isActive"
+        data-cy="filter-active-dot"
+        class="h-2 w-2 shrink-0 rounded-full bg-accent-accent"
+        aria-hidden="true"
+      ></span>
       {{ label }}
     </span>
     <div class="flex gap-x-2">
