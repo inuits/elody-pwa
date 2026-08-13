@@ -32,7 +32,7 @@
         </span>
       </div>
       <div v-if="exactCountLoading" class="flex items-center ml-1">
-        <SpinnerLoader theme="accent" :dimensions="12" />
+        <SpinnerLoader theme="accent" :dimensions="4" />
       </div>
       <BaseTooltip
         v-else-if="canRevealExactCount(totalItemsCount, exactCount)"

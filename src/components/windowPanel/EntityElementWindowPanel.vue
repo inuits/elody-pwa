@@ -129,7 +129,7 @@
                   }}
                 </span>
               </template>
-              <SpinnerLoader v-else theme="accent" :dimensions="16" />
+              <SpinnerLoader v-else theme="accent" :dimensions="4" />
               <span
                 v-if="blockError"
                 role="alert"
@@ -213,7 +213,7 @@
               }}
             </span>
           </template>
-          <SpinnerLoader v-else theme="accent" :dimensions="16" />
+          <SpinnerLoader v-else theme="accent" :dimensions="4" />
           <span
             v-if="blockError"
             role="alert"

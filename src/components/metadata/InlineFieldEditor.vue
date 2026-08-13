@@ -100,7 +100,7 @@
             <unicon :name="Unicons.Cross.name" height="12" />
           </button>
         </template>
-        <SpinnerLoader v-else theme="accent" :dimensions="16" />
+        <SpinnerLoader v-else theme="accent" :dimensions="4" />
       </div>
       <div
         v-if="error"

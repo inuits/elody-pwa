@@ -69,7 +69,7 @@
       </div>
     </div>
 
-    <div class="w-8 shrink-0 flex justify-center" @click.stop>
+    <div class="w-fit shrink-0 flex justify-center" @click.stop>
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
         :parent-entity-id="parentEntityId"
@@ -78,6 +78,7 @@
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :menu-label="rowActionsMenuLabel"
       />
     </div>
 
@@ -198,7 +199,12 @@ const emit = defineEmits<{
   (event: "togglePreviewComponent", entityId: string): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+// table rows never show a bare ⋮ either — labeled menu trigger
+const rowActionsMenuLabel = computed<string>(() =>
+  te("context-menu.actions") ? t("context-menu.actions") : "Actions",
+);
 
 const isChecked = ref(false);
 const imageSrcError = ref(false);

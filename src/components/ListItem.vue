@@ -211,6 +211,7 @@
         :refetch-entities="refetchEntities"
         :primary-label="openRecordLabel"
         :primary-disabled="isDisabled"
+        :menu-label="openRecordLabel ? undefined : rowActionsMenuLabel"
         @primary="emit('navigateTo')"
         @toggle-loading="toggleLoading"
       />
@@ -407,6 +408,12 @@ const openRecordLabel = computed<string | undefined>(() => {
   const fallback = isNarrow ? "Open" : "Open record";
   return te(key) ? t(key) : fallback;
 });
+
+// rows without a navigation primary still never show a bare ⋮ — the menu
+// trigger gets a label instead
+const rowActionsMenuLabel = computed<string>(() =>
+  te("context-menu.actions") ? t("context-menu.actions") : "Actions",
+);
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const loading = ref<boolean>(props.loading);
