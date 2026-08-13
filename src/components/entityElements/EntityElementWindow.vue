@@ -9,14 +9,27 @@
       v-on:expand-media-list="resizeColumn"
     />
     <div
-      class="h-full w-full border-solid border-accent-light border bg-neutral-white rounded-lg @container/window"
+      class="h-full w-full border-solid border rounded-lg @container/window"
+      :class="
+        isSectionHeader
+          ? 'border-accent-normal bg-accent-normal'
+          : 'border-accent-light bg-neutral-white'
+      "
     >
+      <!-- the full accent is reserved for section-level headers (a window
+           that only carries a label); content panels get the light band -->
       <div
-        class="border-solid border-accent-light border-b bg-accent-light rounded-t-lg flex flex-row items-center"
+        class="border-solid border-b rounded-t-lg flex flex-row items-center"
+        :class="
+          isSectionHeader
+            ? 'border-accent-normal bg-accent-normal'
+            : 'border-accent-light bg-accent-light'
+        "
       >
         <h1
           data-cy="entity-element-window-title"
-          class="text-sm font-black text-accent-dark p-2"
+          class="text-sm font-black p-2"
+          :class="isSectionHeader ? 'text-neutral-white' : 'text-accent-dark'"
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
@@ -190,6 +203,9 @@ const computedIsEdit = computed(
 
 const translate = (key: string, fallback: string): string =>
   te(key) ? t(key) : fallback;
+
+// a window with a label but no panels is a section-level header
+const isSectionHeader = computed<boolean>(() => allPanels.value.length === 0);
 
 const statusPopoverOpen = ref<boolean>(false);
 

@@ -8,6 +8,7 @@
       fieldIsConditionallyVisible
     "
     :key="fieldLabel"
+    :data-field-key="(metadata as any).key"
     :class="{
       relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
     }"
@@ -105,7 +106,16 @@
     <div
       v-else
       class="flex gap-2"
-      :class="{ 'opacity-45': fieldValueIsEmpty && !isFieldRequired }"
+      :class="[
+        { 'opacity-45': fieldValueIsEmpty && !isFieldRequired },
+        isGroupMember
+          ? 'cursor-pointer rounded px-1 hover:bg-accent-light hover:shadow-[inset_0_0_0_1px_var(--color-accent-accent)] focus-visible:outline-2 focus-visible:outline-accent-accent'
+          : '',
+      ]"
+      v-bind="isGroupMember ? { role: 'button', tabindex: 0 } : {}"
+      :aria-label="isGroupMember ? fieldLabel : undefined"
+      @click="isGroupMember && openInterdependentGroup()"
+      @keydown.enter="isGroupMember && openInterdependentGroup()"
     >
       <base-tooltip
         class="w-full basis-[fit-content]"
@@ -269,6 +279,12 @@
         :value-tooltip="metadata.valueTooltip"
         :entity="metadata.value?.entity"
       />
+      <unicon
+        v-if="isGroupMember"
+        :name="Unicons.Edit.name"
+        height="12"
+        class="ml-auto shrink-0 self-center text-neutral-80"
+      />
     </div>
   </div>
 </template>
@@ -344,6 +360,26 @@ const { t } = useI18n();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
 const mediafileViewerContext = inject<string>("mediafileViewerContext", "");
+
+// One gesture: fields of an interdependent group open the whole group form
+// in place instead of a single-field editor (provided by the window panel).
+const interdependentGroup = inject<{
+  isInterdependent: { value: boolean };
+  open: (fieldKey?: string) => void;
+} | null>("interdependentGroup", null);
+
+const isGroupMember = computed<boolean>(
+  () =>
+    Boolean(interdependentGroup?.isInterdependent?.value) &&
+    !props.isEdit &&
+    !props.isUsedInModal &&
+    Boolean(props.metadata.inputField) &&
+    !(props.metadata as any).nonEditableField &&
+    fieldIsEditableByUser.value,
+);
+
+const openInterdependentGroup = () =>
+  interdependentGroup?.open((props.metadata as any).key);
 const { fieldIsVisibleByCondition } = useConditionalValidation();
 
 const fieldIsConditionallyVisible = computed(() =>
@@ -452,6 +488,7 @@ const inlineEditableTypes: string[] = [
 ];
 const canInlineEdit = computed<boolean>(
   () =>
+    !isGroupMember.value &&
     !props.isEdit &&
     !props.isUsedInModal &&
     props.formFlow === "edit" &&

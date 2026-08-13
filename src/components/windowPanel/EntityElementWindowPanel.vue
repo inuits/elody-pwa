@@ -28,19 +28,8 @@
         />
       </div>
       <div class="flex justify-end gap-4 items-center">
-        <button
-          v-if="canBlockEdit"
-          type="button"
-          data-cy="block-edit-button"
-          :aria-label="`${translate('block-edit.edit-block', 'Edit block')} ${t(
-            panel.panelHeaderContent.label,
-          )}`"
-          class="flex items-center gap-1.5 rounded-md border border-neutral-40 bg-neutral-white px-2.5 py-0.5 text-xs font-bold text-text-light whitespace-nowrap cursor-pointer hover:bg-accent-light hover:border-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
-          @click.stop="startBlockEdit"
-        >
-          <unicon :name="Unicons.Edit.name" height="12" />
-          {{ translate("block-edit.edit-block", "Edit block") }}
-        </button>
+        <!-- no "Edit block" button: clicking any field of an interdependent
+             group opens the whole group form in place (one gesture) -->
         <div v-if="repeatablePanel && isEdit">
           <base-button-new
             :label="t('Add more')"
@@ -65,7 +54,12 @@
     </div>
 
     <transition>
-      <div v-show="!isCollapsed">
+      <div
+        v-show="!isCollapsed"
+        :class="{
+          'interdependent-fields': isInterdependent && !panelIsEditing,
+        }"
+      >
         <div
           v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
@@ -206,10 +200,15 @@
             </button>
             <span class="text-xs text-text-placeholder">
               {{
-                translate(
-                  "block-edit.block-note",
-                  "Saves the whole block in one mutation.",
-                )
+                isInterdependent
+                  ? translate(
+                      "block-edit.group-note",
+                      "These fields belong together and save as one.",
+                    )
+                  : translate(
+                      "block-edit.block-note",
+                      "Saves the whole block in one mutation.",
+                    )
               }}
             </span>
           </template>
@@ -229,7 +228,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, onUnmounted, ref, watchEffect } from "vue";
+import { computed, nextTick, onUnmounted, provide, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import EventBus from "@/EventBus";
 import { Unicons } from "@/types";
@@ -318,14 +317,50 @@ const canBlockEditRows = computed<boolean>(
   () => auth.isAuthenticated.value === true && editableFields.value.length > 0,
 );
 
-const canBlockEdit = computed<boolean>(
-  () =>
-    !props.isEdit &&
-    !repeatablePanel.value &&
-    !isEditingBlock.value &&
-    !props.parentIsListItem &&
-    canBlockEditRows.value,
-);
+// One gesture, system-chosen scope: a panel is an interdependent group when
+// its fields carry cross-field rules (required_if/available_if) or when it
+// mixes relation members with property members (they must commit together).
+// Clicking any field of such a panel opens the whole group form in place —
+// there is no "Edit block" button.
+const isInterdependent = computed<boolean>(() => {
+  if (repeatablePanel.value || props.parentIsListItem) return false;
+  const fields = editableFields.value;
+  if (fields.length < 2) return false;
+  const hasCrossFieldRule = fields.some(
+    (field: any) =>
+      field.inputField?.validation?.required_if ||
+      field.inputField?.validation?.available_if,
+  );
+  const hasRelationMember = fields.some(
+    (field: any) =>
+      field.inputField?.relationType && !field.inputField?.isMetadataField,
+  );
+  const hasPropertyMember = fields.some(
+    (field: any) =>
+      !field.inputField?.relationType || field.inputField?.isMetadataField,
+  );
+  return hasCrossFieldRule || (hasRelationMember && hasPropertyMember);
+});
+
+const openGroupFromField = (fieldKey?: string) => {
+  if (props.isEdit || isEditingBlock.value) return;
+  startBlockEdit();
+  nextTick(() => {
+    const scope = panelRoot.value;
+    if (!scope) return;
+    const selector = fieldKey
+      ? `[data-field-key="${CSS.escape(fieldKey)}"] input, [data-field-key="${CSS.escape(fieldKey)}"] select, [data-field-key="${CSS.escape(fieldKey)}"] textarea`
+      : "input, select, textarea";
+    const el = scope.querySelector<HTMLElement>(selector);
+    el?.focus();
+    if (el instanceof HTMLInputElement) el.select();
+  });
+};
+
+provide("interdependentGroup", {
+  isInterdependent,
+  open: openGroupFromField,
+});
 
 const blockFieldPaths = (rowIndex?: number): string[] =>
   editableFields.value.map((field) =>
@@ -439,6 +474,23 @@ onUnmounted(() => EventBus.off("jumpToPanelField", onJumpToField));
 </script>
 
 <style scoped>
+/* group cue before the click: hovering or focusing any field of an
+   interdependent group tints all fields of the group, so the scope the
+   click will produce is visible in advance */
+.interdependent-fields:has([data-cy="metadata-wrapper"] [role="button"]:hover)
+  :deep([data-cy="metadata-wrapper"]),
+.interdependent-fields:has(
+    [data-cy="metadata-wrapper"] [role="button"]:focus-visible
+  )
+  :deep([data-cy="metadata-wrapper"]) {
+  background-color: color-mix(
+    in srgb,
+    var(--color-accent-light) 45%,
+    transparent
+  );
+  border-radius: 6px;
+}
+
 .v-enter-active,
 .v-leave-active {
   transition: transform 0.1s linear;

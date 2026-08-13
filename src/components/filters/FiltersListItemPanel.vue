@@ -3,16 +3,14 @@
     data-cy="filters-list-item-panel"
     class="flex flex-col gap-1.5 px-4 pb-3 pt-1"
   >
-    <!-- No operator dropdown above the field: single-matcher filters show no
-         operator UI at all; others get a compact select BESIDE the input. -->
-    <div class="flex w-full items-start gap-1.5">
-      <div class="min-w-0 grow">
-        <slot v-if="selectedMatcher" />
-      </div>
+    <!-- The search mode is a prefix in reading order ("bevat · verhulst"):
+         the mode select sits BEFORE the input. Single-matcher filters show
+         no operator UI at all. -->
+    <div class="flex w-full items-start gap-1">
       <AdvancedDropdown
         v-if="matchers.length > 1"
         data-cy="filter-matcher-dropdown"
-        class="max-h-8 w-32 shrink-0 text-xs"
+        class="max-h-8 w-28 shrink-0 text-xs"
         :model-value="selectedMatcher"
         :options="matchers"
         :label="defaultLabel"
@@ -21,6 +19,9 @@
         label-position="inline"
         @update:model-value="$emit('update:selected-matcher', $event)"
       />
+      <div class="min-w-0 grow">
+        <slot v-if="selectedMatcher" />
+      </div>
     </div>
     <button
       v-if="selectedMatcher"
