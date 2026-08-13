@@ -23,7 +23,6 @@
           @mutated-entity-updated="setMutatedEntity"
         />
       </div>
-      <edit-modal :entityId="entity.id" />
       <DeleteModal></DeleteModal>
     </div>
     <div v-else class="min-h-[30vh] flex justify-center items-center">
@@ -75,7 +74,6 @@ import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenItems } from "@/composables/useSeenItems";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import EditModal from "@/components/modals/EditModal.vue";
 import DeleteModal from "@/components/modals/DeleteModal.vue";
 import type { GraphQLError } from "graphql/error";
 import type { ApolloError } from "@apollo/client/core";
