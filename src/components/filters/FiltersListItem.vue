@@ -82,7 +82,7 @@ const tooltipText = computed(() =>
   t(`tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`),
 );
 const headerIcon = computed(() =>
-  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
+  isOpen.value ? Unicons.AngleUp.name : Unicons.AngleDown.name,
 );
 const filterMatchers = computed(() => {
   const { allowedMatchers, matcherLabels } = props.filter.advancedFilter;

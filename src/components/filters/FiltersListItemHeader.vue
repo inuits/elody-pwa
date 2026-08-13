@@ -18,18 +18,18 @@
       ></span>
       {{ label }}
     </span>
-    <div class="flex gap-x-2">
+    <div class="flex items-center gap-x-1.5 text-neutral-200">
       <BaseTooltip v-if="tooltip" position="top-end" :tooltip-offset="8">
         <template #activator="{ on }">
           <div v-on="on">
-            <Unicon :name="Unicons.QuestionCircle.name" height="20" />
+            <Unicon :name="Unicons.QuestionCircle.name" height="14" />
           </div>
         </template>
         <span class="text-sm text-text-placeholder">
           {{ tooltipText }}
         </span>
       </BaseTooltip>
-      <Unicon :name="icon" height="20" />
+      <Unicon :name="icon" height="16" />
     </div>
   </div>
 </template>
