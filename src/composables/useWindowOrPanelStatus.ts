@@ -2,12 +2,14 @@ import { computed, unref, type MaybeRef, type ComputedRef } from "vue";
 import {
   type PanelMetaData,
   type PanelStatus,
-  type windowElementStatus,
+  type WindowElementStatus,
 } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 export const useWindowOrPanelStatus = (
-  windowOrPanelStatus: MaybeRef<PanelStatus | windowElementStatus | null | undefined>,
+  windowOrPanelStatus: MaybeRef<
+    PanelStatus | WindowElementStatus | null | undefined
+  >,
   formId: MaybeRef<string>,
   isEdit: MaybeRef<boolean> = false,
 ) => {
@@ -33,7 +35,9 @@ export const useWindowOrPanelStatus = (
 
     return {
       key: status.statusMetadataKey,
-      label: isEdit.value ? status.label : undefined,
+      label: unref(isEdit)
+        ? ((status as WindowElementStatus).label ?? undefined)
+        : undefined,
       inputField: status.statusInputField,
       value: raw,
       valueTranslationKey: matchingOption?.label,

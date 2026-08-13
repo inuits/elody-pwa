@@ -121,7 +121,7 @@ describe("useWindowOrPanelStatus", () => {
       ).toEqual({ field: "material_type", value: "book" });
     });
 
-    it("carries the configured label so the field title can show the validation state", () => {
+    it("carries the configured label in edit mode so the field title can show the validation state", () => {
       const statusWithLabel = {
         ...mockRequiredPanelStatus,
         label: "metadata.labels.status",
@@ -130,7 +130,26 @@ describe("useWindowOrPanelStatus", () => {
       const { getStatusMetadata } = useWindowOrPanelStatus(
         ref(statusWithLabel as any),
         ref(FORM_ID),
+        ref(true),
       );
+      expect(getStatusMetadata().label).toBe("metadata.labels.status");
+    });
+
+    it("hides the label in read mode", () => {
+      const statusWithLabel = {
+        ...mockRequiredPanelStatus,
+        label: "metadata.labels.status",
+      };
+      const isEdit = ref(false);
+
+      const { getStatusMetadata } = useWindowOrPanelStatus(
+        ref(statusWithLabel as any),
+        ref(FORM_ID),
+        isEdit,
+      );
+      expect(getStatusMetadata().label).toBeUndefined();
+
+      isEdit.value = true;
       expect(getStatusMetadata().label).toBe("metadata.labels.status");
     });
 
@@ -138,6 +157,7 @@ describe("useWindowOrPanelStatus", () => {
       const { getStatusMetadata } = useWindowOrPanelStatus(
         ref(mockPanelStatus),
         ref(FORM_ID),
+        ref(true),
       );
       expect(getStatusMetadata().label).toBeUndefined();
     });
