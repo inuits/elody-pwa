@@ -58,6 +58,7 @@
             :identifiers="identifiers"
             :parent-is-list-item="parentIsListItem"
             :wysiwyg-diffs="wysiwygDiffs"
+            :relation-diffs="relationDiffs"
             :repeatablePanelConfig="{
               isRepeatable: repeatablePanel,
               field: repeatableFieldsHelper.fields.value[idx - 1],
@@ -98,7 +99,10 @@ import {
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
-import type { WysiwygDiff } from "@/composables/useHistoryComparisonData";
+import type {
+  RelationDiff,
+  WysiwygDiff,
+} from "@/composables/useHistoryComparisonData";
 
 const props = withDefaults(
   defineProps<{
@@ -108,6 +112,7 @@ const props = withDefaults(
     formId: string;
     parentIsListItem?: boolean;
     wysiwygDiffs: WysiwygDiff[];
+    relationDiffs: RelationDiff[];
   }>(),
   { parentIsListItem: false },
 );
