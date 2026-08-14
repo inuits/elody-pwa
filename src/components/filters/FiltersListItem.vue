@@ -2,6 +2,7 @@
   <div v-show="!filter.advancedFilter.hidden">
     <FiltersListItemHeader
       :is-active="filter.isActive"
+      :expanded="isOpen"
       :label="filterLabel"
       :tooltip="filter.advancedFilter.tooltip"
       :tooltip-text="tooltipText"

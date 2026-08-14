@@ -4,6 +4,8 @@
        relation list is collapsed-empty only the actions remain. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
+    role="toolbar"
+    :aria-label="$t('bulk-operations.items')"
     class="flex items-center alignment-nested-divs"
     :class="
       hideCount
@@ -13,6 +15,7 @@
   >
     <div v-if="!hideCount" class="flex justify-start items-center">
       <div
+        role="status"
         class="px-2 my-2.5 rounded text-ui"
         :class="
           useExtendedBulkOperations && itemsSelected
@@ -57,15 +60,16 @@
         </span>
       </BaseTooltip>
       <div v-if="itemsSelected">
-        <span
-          class="select-actions"
+        <button
+          type="button"
+          class="select-actions cursor-pointer border-none bg-transparent underline focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="
             useExtendedBulkOperations ? `text-accent-accent` : `text-text-body`
           "
           @click="dequeueAllItemsForBulkProcessing(context)"
         >
           {{ $t("bulk-operations.undo-selection") }}
-        </span>
+        </button>
       </div>
       <div
         v-if="
@@ -74,8 +78,9 @@
           enableSelection
         "
       >
-        <span
-          class="select-actions"
+        <button
+          type="button"
+          class="select-actions cursor-pointer border-none bg-transparent underline focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="
             useExtendedBulkOperations && itemsSelected
               ? `text-accent-accent`
@@ -84,7 +89,7 @@
           @click="() => emit('selectPage')"
         >
           {{ $t("bulk-operations.select-page") }}
-        </span>
+        </button>
       </div>
     </div>
     <div v-if="!excludePagination && showPagination" class="flex">

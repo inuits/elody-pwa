@@ -56,19 +56,36 @@
     <transition>
       <div
         v-show="!isCollapsed"
+        :role="panelIsEditing ? 'group' : undefined"
+        :aria-label="
+          panelIsEditing && panel.panelHeaderContent?.label
+            ? t(panel.panelHeaderContent.label)
+            : undefined
+        "
         :class="{
           'interdependent-fields': isInterdependent && !panelIsEditing,
+          'rounded-lg border border-accent-light-strong bg-surface-group-form p-2 my-1':
+            panelIsEditing,
         }"
+        @keydown.esc.stop.prevent="panelIsEditing || editingRowIndex !== null ? cancelRowOrBlock() : undefined"
       >
         <div
           v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
           :class="{
-            'rounded-lg border border-accent-light bg-neutral-lightest my-1':
+            'rounded-lg border border-accent-light-strong bg-surface-group-form my-1':
               rowIsEditing(idx - 1),
+            'rounded-md bg-surface-repeat-row':
+              repeatablePanel && !rowIsEditing(idx - 1) && (idx - 1) % 2 === 1,
+            'rounded-md hover:bg-surface-row-hover':
+              repeatablePanel && !rowIsEditing(idx - 1) && !panelIsEditing,
           }"
         >
           <WindowPanelContent
+            :class="{
+              'pointer-events-none opacity-60':
+                isSaving && (panelIsEditing || rowIsEditing(idx - 1)),
+            }"
             :panel-type="panelType"
             :relation-array="relationArray"
             :metadatafields="
@@ -98,23 +115,7 @@
           >
             <template v-if="rowIsEditing(idx - 1)">
               <template v-if="!isSaving">
-                <button
-                  type="button"
-                  data-cy="row-edit-save"
-                  class="rounded-md bg-accent-accent px-3 py-1 text-xs font-bold text-neutral-white cursor-pointer hover:bg-accent-normal focus-visible:outline-2 focus-visible:outline-accent-accent"
-                  @click="saveRow"
-                >
-                  {{ translate("block-edit.save-row", "Save row") }}
-                </button>
-                <button
-                  type="button"
-                  data-cy="row-edit-cancel"
-                  class="rounded-md border border-neutral-40 bg-neutral-white px-3 py-1 text-xs font-bold text-text-body cursor-pointer hover:bg-neutral-20 focus-visible:outline-2 focus-visible:outline-accent-accent"
-                  @click="cancelRowOrBlock"
-                >
-                  {{ translate("block-edit.cancel", "Cancel") }}
-                </button>
-                <span class="text-xs text-text-placeholder">
+                <span class="mr-auto text-xs text-text-placeholder">
                   {{
                     translate(
                       "block-edit.row-note",
@@ -122,6 +123,22 @@
                     )
                   }}
                 </span>
+                <button
+                  type="button"
+                  data-cy="row-edit-cancel"
+                  class="rounded-md bg-transparent px-3 py-1 text-xs font-bold text-text-light cursor-pointer hover:bg-accent-wash focus-visible:outline-2 focus-visible:outline-accent-accent"
+                  @click="cancelRowOrBlock"
+                >
+                  {{ translate("block-edit.cancel", "Cancel") }}
+                </button>
+                <button
+                  type="button"
+                  data-cy="row-edit-save"
+                  class="rounded-md bg-accent-accent px-3 py-1 text-xs font-bold text-neutral-white cursor-pointer hover:bg-commit-hover focus-visible:outline-2 focus-visible:outline-accent-accent"
+                  @click="saveRow"
+                >
+                  {{ translate("block-edit.save-row", "Save row") }}
+                </button>
               </template>
               <SpinnerLoader v-else theme="accent" :dimensions="4" />
               <span
@@ -161,20 +178,30 @@
             "
           />
         </div>
-        <button
+        <div
           v-if="
             repeatablePanel &&
             !isEdit &&
             editingRowIndex === null &&
             canBlockEditRows
           "
-          type="button"
-          data-cy="row-add-button"
-          class="mt-1 rounded-pill border border-dashed border-neutral-60 bg-transparent px-3 py-0.5 text-label font-bold text-text-light cursor-pointer hover:border-accent-accent hover:text-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
-          @click.stop="addRow"
+          class="flex items-center gap-2"
         >
-          + {{ translate("block-edit.add-row", "Add row") }}
-        </button>
+          <button
+            type="button"
+            data-cy="row-add-button"
+            class="mt-1 rounded-pill border border-dashed border-border-dashed bg-transparent px-3 py-0.5 text-label font-bold text-text-light cursor-pointer hover:border-accent-accent hover:text-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
+            @click.stop="addRow"
+          >
+            + {{ addRowLabel }}
+          </button>
+          <span
+            v-if="repeatableFieldsHelper.repeatAmount.value === 0"
+            class="mt-1 text-xs text-text-placeholder opacity-45"
+          >
+            {{ translate("block-edit.empty-hint", "No rows yet") }}
+          </span>
+        </div>
         <!-- block form footer: one save for the whole block -->
         <div
           v-if="panelIsEditing"
@@ -182,23 +209,7 @@
           @click.stop
         >
           <template v-if="!isSaving">
-            <button
-              type="button"
-              data-cy="block-edit-save"
-              class="rounded-md bg-accent-accent px-3.5 py-1 text-xs font-bold text-neutral-white cursor-pointer hover:bg-accent-normal focus-visible:outline-2 focus-visible:outline-accent-accent"
-              @click="saveBlock"
-            >
-              {{ translate("block-edit.save-block", "Save block") }}
-            </button>
-            <button
-              type="button"
-              data-cy="block-edit-cancel"
-              class="rounded-md border border-neutral-40 bg-neutral-white px-3.5 py-1 text-xs font-bold text-text-body cursor-pointer hover:bg-neutral-20 focus-visible:outline-2 focus-visible:outline-accent-accent"
-              @click="cancelRowOrBlock"
-            >
-              {{ translate("block-edit.cancel", "Cancel") }}
-            </button>
-            <span class="text-xs text-text-placeholder">
+            <span class="mr-auto text-xs text-text-placeholder">
               {{
                 isInterdependent
                   ? translate(
@@ -211,6 +222,22 @@
                     )
               }}
             </span>
+            <button
+              type="button"
+              data-cy="block-edit-cancel"
+              class="rounded-md bg-transparent px-3.5 py-1 text-xs font-bold text-text-light cursor-pointer hover:bg-accent-wash focus-visible:outline-2 focus-visible:outline-accent-accent"
+              @click="cancelRowOrBlock"
+            >
+              {{ translate("block-edit.cancel", "Cancel") }}
+            </button>
+            <button
+              type="button"
+              data-cy="block-edit-save"
+              class="rounded-md bg-accent-accent px-3.5 py-1 text-xs font-bold text-neutral-white cursor-pointer hover:bg-commit-hover focus-visible:outline-2 focus-visible:outline-accent-accent"
+              @click="saveBlock"
+            >
+              {{ translate("block-edit.save-block", "Save block") }}
+            </button>
           </template>
           <SpinnerLoader v-else theme="accent" :dimensions="4" />
           <span
@@ -378,6 +405,14 @@ const blockFieldPaths = (rowIndex?: number): string[] =>
     }),
   );
 
+// "+ Voeg {type} toe" when the panel carries a label; generic otherwise.
+const addRowLabel = computed<string>(() => {
+  const panelLabel = props.panel.panelHeaderContent?.label;
+  if (panelLabel && te("block-edit.add-typed"))
+    return t("block-edit.add-typed", { type: t(panelLabel) });
+  return translate("block-edit.add-row", "Add row");
+});
+
 const startBlockEdit = () => {
   isCollapsed.value = false;
   editingRowIndex.value = null;
@@ -402,8 +437,21 @@ const cancelRowOrBlock = () => {
   editingRowIndex.value = null;
 };
 
+const saveCopy = () => ({
+  validationSummary: translate(
+    "block-edit.check-fields",
+    "Check the marked fields",
+  ),
+  failureCopy: translate("inline-edit.save-failed", "Saving failed, try again"),
+});
+
 const saveBlock = async () => {
-  const saved = await save(editableFields.value, blockFieldPaths());
+  const saved = await save(
+    editableFields.value,
+    blockFieldPaths(),
+    undefined,
+    saveCopy(),
+  );
   if (saved) editingRowIndex.value = null;
 };
 
@@ -412,6 +460,7 @@ const saveRow = async () => {
     editableFields.value,
     blockFieldPaths(editingRowIndex.value ?? 0),
     panelId.value,
+    saveCopy(),
   );
   if (saved) editingRowIndex.value = null;
 };

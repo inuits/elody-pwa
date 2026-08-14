@@ -1,17 +1,18 @@
 <template>
-  <div class="min-w-0">
+  <div ref="rootEl" class="min-w-0">
     <template v-if="!editing">
       <div class="flex items-center gap-1">
         <button
+          ref="toggleRef"
           type="button"
           data-cy="inline-edit-toggle"
-          class="flex min-h-[26px] w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded px-1 text-left hover:bg-accent-light hover:shadow-[inset_0_0_0_1px_var(--color-accent-accent)] focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="group/ifr flex min-h-[26px] w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded px-1 text-left hover:bg-accent-wash focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="{ 'opacity-45 hover:opacity-100': dim }"
-          :aria-label="`${editFieldLabel} ${label}`"
+          :aria-label="`${label}, ${editFieldLabel}`"
           @click.stop.prevent="startEditing"
         >
           <span
-            class="min-w-0 truncate border-b border-dashed border-neutral-60"
+            class="min-w-0 truncate border-b border-dashed border-border-dashed"
           >
             <slot>{{ value }}</slot>
           </span>
@@ -19,14 +20,18 @@
             <span
               v-if="savedFlash"
               data-cy="inline-edit-saved"
+              role="status"
+              :aria-label="savedLabel"
               class="flex items-center text-green-600"
             >
               <unicon :name="Unicons.Check.name" height="14" />
             </span>
+            <!-- pencil is a hover/focus cue; the dashed underline is the
+                 always-visible affordance -->
             <unicon
               :name="Unicons.Edit.name"
               height="12"
-              class="text-neutral-80"
+              class="text-neutral-80 opacity-0 transition-opacity group-hover/ifr:opacity-100 group-focus-visible/ifr:opacity-100"
             />
           </span>
         </button>
@@ -34,7 +39,6 @@
           v-if="undoValue !== undefined"
           type="button"
           data-cy="inline-edit-undo"
-          role="status"
           class="shrink-0 cursor-pointer text-xs font-bold text-accent-accent underline decoration-dotted hover:text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
           :disabled="saving"
           @click.stop.prevent="undo"
@@ -51,8 +55,10 @@
           v-model="draft"
           data-cy="inline-edit-select"
           :aria-label="label"
+          :aria-describedby="error ? errorId : undefined"
           :disabled="saving"
-          class="w-full min-w-0 rounded border border-neutral-40 bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="w-full min-w-0 rounded-input border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          :class="error ? 'border-red-default' : 'border-neutral-40'"
           @change="save"
           @keydown.esc.stop.prevent="cancel"
           @click.stop
@@ -73,37 +79,39 @@
           data-cy="inline-edit-input"
           :type="htmlInputType"
           :aria-label="label"
+          :aria-describedby="error ? errorId : undefined"
           :disabled="saving"
-          class="w-full min-w-0 rounded border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="w-full min-w-0 rounded-input border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="error ? 'border-red-default' : 'border-neutral-40'"
           @keydown.enter.stop.prevent="save"
           @keydown.esc.stop.prevent="cancel"
           @click.stop.prevent
         />
-        <template v-if="!saving">
-          <button
-            type="button"
-            data-cy="inline-edit-save"
-            :aria-label="`${saveFieldLabel} ${label}`"
-            class="flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center rounded bg-accent-accent text-neutral-white hover:bg-accent-normal focus-visible:outline-2 focus-visible:outline-accent-accent"
-            @click.stop.prevent="save"
-          >
-            <unicon :name="Unicons.Check.name" height="14" />
-          </button>
-          <button
-            type="button"
-            data-cy="inline-edit-cancel"
-            :aria-label="`${cancelFieldLabel} ${label}`"
-            class="flex h-[26px] w-[26px] shrink-0 cursor-pointer items-center justify-center rounded border border-neutral-40 bg-neutral-white text-text-body hover:bg-neutral-20 focus-visible:outline-2 focus-visible:outline-accent-accent"
-            @click.stop.prevent="cancel"
-          >
-            <unicon :name="Unicons.Cross.name" height="12" />
-          </button>
-        </template>
-        <SpinnerLoader v-else theme="accent" :dimensions="4" />
+        <!-- text commit pair: Bewaar (teal rect, spinner while saving),
+             Annuleer (ghost); Bewaar disabled while pristine -->
+        <button
+          type="button"
+          data-cy="inline-edit-save"
+          class="flex h-[26px] shrink-0 cursor-pointer items-center gap-1 rounded-md bg-accent-accent px-2 text-ui font-bold text-neutral-white hover:bg-commit-hover focus-visible:outline-2 focus-visible:outline-accent-accent disabled:cursor-not-allowed disabled:opacity-45"
+          :disabled="saving || (isPristine && !isSelect)"
+          @click.stop.prevent="save"
+        >
+          <SpinnerLoader v-if="saving" :dimensions="3" />
+          {{ saveFieldLabel }}
+        </button>
+        <button
+          type="button"
+          data-cy="inline-edit-cancel"
+          class="flex h-[26px] shrink-0 cursor-pointer items-center rounded-md bg-transparent px-2 text-ui font-bold text-text-light hover:bg-accent-wash focus-visible:outline-2 focus-visible:outline-accent-accent"
+          :disabled="saving"
+          @click.stop.prevent="cancel"
+        >
+          {{ cancelFieldLabel }}
+        </button>
       </div>
       <div
         v-if="error"
+        :id="errorId"
         role="alert"
         data-cy="inline-edit-error"
         class="pt-0.5 text-xs text-red-default"
@@ -118,7 +126,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, ref } from "vue";
+import {
+  computed,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  useId,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
@@ -130,6 +146,7 @@ import {
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { Unicons } from "@/types";
+import { activeInlineScope } from "@/composables/useInlineEditCoordination";
 
 // Per-field inline editing: edit scope = save scope = validation scope.
 // One PATCH per field key via mutateEntityValues with a single metadata
@@ -170,10 +187,15 @@ const { mutate } = useMutation(MutateEntityValuesDocument);
 const editing = ref<boolean>(false);
 const saving = ref<boolean>(false);
 const draft = ref<string>("");
+const originalDraft = ref<string>("");
 const error = ref<string>("");
 const savedFlash = ref<boolean>(false);
 const undoValue = ref<unknown>(undefined);
 const inputRef = ref<HTMLInputElement | null>(null);
+const toggleRef = ref<HTMLButtonElement | null>(null);
+const rootEl = ref<HTMLElement | null>(null);
+const errorId = `inline-edit-error-${useId()}`;
+const scopeId = Symbol("inline-editor");
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -189,10 +211,13 @@ const saveFieldLabel = computed(() =>
 const cancelFieldLabel = computed(() =>
   translate("inline-edit.cancel-field", "Cancel"),
 );
+const savedLabel = computed(() => translate("inline-edit.saved", "Saved"));
 const hintLabel = computed(() =>
   translate("inline-edit.hint", "Enter saves · Esc cancels"),
 );
 const undoLabel = computed(() => translate("inline-edit.undo", "Undo"));
+
+const isPristine = computed(() => draft.value === originalDraft.value);
 
 const htmlInputType = computed(() => {
   if (props.inputType === InputFieldTypes.Number) return "number";
@@ -232,24 +257,53 @@ const collection = computed<Collection>(() => {
   return Collection.Entities;
 });
 
+// Only one scope edits at a time: opening this editor closes any other
+// inline editor; pristine editors also close on outside click.
+watch(activeInlineScope, (scope) => {
+  if (editing.value && scope !== scopeId) cancel({ refocus: false });
+});
+
+const handleOutsideClick = (event: MouseEvent) => {
+  if (!editing.value || saving.value) return;
+  if (rootEl.value?.contains(event.target as Node)) return;
+  if (isPristine.value) cancel({ refocus: false });
+};
+
 const startEditing = () => {
-  draft.value = props.value === undefined || props.value === null
-    ? ""
-    : String(props.value);
+  draft.value =
+    props.value === undefined || props.value === null
+      ? ""
+      : String(props.value);
+  originalDraft.value = draft.value;
   error.value = "";
   editing.value = true;
+  activeInlineScope.value = scopeId;
+  document.addEventListener("click", handleOutsideClick, true);
   nextTick(() => inputRef.value?.focus());
 };
 
-const cancel = () => {
+const stopEditing = () => {
   editing.value = false;
   error.value = "";
+  document.removeEventListener("click", handleOutsideClick, true);
+  if (activeInlineScope.value === scopeId) activeInlineScope.value = null;
 };
+
+const cancel = (options: { refocus?: boolean } = {}) => {
+  stopEditing();
+  if (options.refocus !== false) nextTick(() => toggleRef.value?.focus());
+};
+
+onBeforeUnmount(() =>
+  document.removeEventListener("click", handleOutsideClick, true),
+);
 
 const validateDraft = (): string => {
   const trimmed = draft.value.trim();
   if (props.required && trimmed === "")
-    return translate("inline-edit.required", "This field is required");
+    return te("inline-edit.required")
+      ? t("inline-edit.required", { field: props.label })
+      : `${props.label} is required`;
   if (props.regex && trimmed !== "") {
     const raw = props.regex.replace(/^\/|\/$/g, "").replace(/\\\\/g, "\\");
     try {
@@ -282,7 +336,7 @@ const patchField = async (value: unknown): Promise<void> => {
 const flashSaved = () => {
   savedFlash.value = true;
   if (flashTimer) clearTimeout(flashTimer);
-  flashTimer = setTimeout(() => (savedFlash.value = false), 2500);
+  flashTimer = setTimeout(() => (savedFlash.value = false), 2000);
 };
 
 const offerUndo = (oldValue: unknown) => {
@@ -304,13 +358,17 @@ const save = async () => {
   try {
     await patchField(newValue);
     emit("update:value", newValue);
-    editing.value = false;
+    stopEditing();
+    nextTick(() => toggleRef.value?.focus());
     flashSaved();
     offerUndo(oldValue);
-  } catch (exception: unknown) {
-    error.value =
-      (exception as Error)?.message ||
-      translate("inline-edit.save-failed", "Saving failed, try again");
+  } catch {
+    // The value the user typed is preserved; copy names the action, not
+    // the server internals.
+    error.value = translate(
+      "inline-edit.save-failed",
+      "Saving failed, try again",
+    );
   } finally {
     saving.value = false;
   }

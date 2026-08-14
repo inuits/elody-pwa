@@ -160,8 +160,9 @@ describe("InlineFieldEditor", () => {
     const input = wrapper.find("[data-cy='inline-edit-input']");
     expect(input.exists()).toBe(true);
     expect((input.element as HTMLInputElement).value).toBe("mislukt");
+    // Design rule: the error copy names the action, never server internals.
     expect(wrapper.find("[data-cy='inline-edit-error']").text()).toContain(
-      "server said no",
+      "Saving failed, try again",
     );
   });
 

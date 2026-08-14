@@ -3,7 +3,34 @@
     <router-view />
   </div>
   <div v-else-if="!showSplashScreen">
-    <notifications class="pb-2" position="bottom left" />
+    <!-- Design-system toasts: status toasts announce politely, errors
+         assertively and never auto-dismiss; hover pauses; max 3 stack. -->
+    <notifications class="pb-2" position="bottom left" :max="3" pause-on-hover>
+      <template #body="{ item, close }">
+        <div
+          class="vue-notification"
+          :class="item.type"
+          :role="item.type === 'error' ? 'alert' : 'status'"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div v-if="item.title" class="notification-title">
+                {{ item.title }}
+              </div>
+              <div v-if="item.text">{{ item.text }}</div>
+            </div>
+            <button
+              type="button"
+              class="shrink-0 cursor-pointer border-none bg-transparent p-0 text-neutral-white/70 hover:text-neutral-white focus-visible:outline-2 focus-visible:outline-accent-accent"
+              :aria-label="t('preview-component.close')"
+              @click="close"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      </template>
+    </notifications>
     <div v-if="!someModalIsOpened">
       <notifications
         class="pb-2 cursor-pointer"
@@ -49,7 +76,9 @@ import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";
 import { inject, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const route = useRoute();
 const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();

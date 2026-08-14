@@ -104,9 +104,8 @@ describe("useBlockEditor", () => {
 
     expect(saved).toBe(false);
     expect(mocks.mutate).not.toHaveBeenCalled();
-    expect(editor.blockError.value).toBe(
-      "Plaats is verplicht zodra er een uitgever staat",
-    );
+    // Per-field messages render at the fields; the block shows one summary.
+    expect(editor.blockError.value).toBe("Check the marked fields");
     expect(editor.isEditingBlock.value).toBe(true);
   });
 
@@ -145,7 +144,8 @@ describe("useBlockEditor", () => {
     const saved = await editor.save([field("place")], []);
 
     expect(saved).toBe(false);
-    expect(editor.blockError.value).toContain("server said no");
+    // Error copy names the action, never server internals.
+    expect(editor.blockError.value).toContain("Saving failed, try again");
     expect(editor.isEditingBlock.value).toBe(true);
   });
 });

@@ -86,37 +86,47 @@ export function useBlockEditor(formId: string) {
     return entries;
   };
 
-  const validateBlock = async (
-    fieldPaths: string[],
-  ): Promise<string | undefined> => {
+  // Validate every field so all invalid ones get marked, then report a
+  // single summary; the per-field messages render at the fields themselves.
+  const validateBlock = async (fieldPaths: string[]): Promise<number> => {
     const form = getForm(formId);
-    if (!form) return undefined;
+    if (!form) return 0;
+    let invalid = 0;
     for (const path of fieldPaths) {
       const result = await form.validateField(path as never);
-      if (result && result.valid === false)
-        return result.errors?.[0] ?? "invalid";
+      if (result && result.valid === false) invalid += 1;
     }
-    return undefined;
+    return invalid;
   };
 
   const save = async (
     fields: PanelMetaData[],
     fieldPaths: string[],
     repetitionKey?: string,
+    copy?: { validationSummary?: string; failureCopy?: string },
   ): Promise<boolean> => {
     const form = getForm(formId);
     if (!form) return false;
 
-    const validationError = await validateBlock(fieldPaths);
-    if (validationError) {
-      blockError.value = validationError;
+    const invalidCount = await validateBlock(fieldPaths);
+    if (invalidCount > 0) {
+      blockError.value = copy?.validationSummary ?? "Check the marked fields";
       return false;
     }
 
     const metadata = collectChangedMetadata(fields, repetitionKey);
-    const relations = parseRelationValuesForFormSubmit(
-      form.values.relationValues ?? {},
-    );
+    // Scope rule: the block saves as one unit — only relations that changed
+    // while this block was open go into the mutation, never the whole form.
+    const currentRelations = (form.values.relationValues ?? {}) as Record<
+      string,
+      any
+    >;
+    const changedRelations: Record<string, any> = {};
+    for (const key of Object.keys(currentRelations)) {
+      if (valuesDiffer(currentRelations[key], relationSnapshot?.[key]))
+        changedRelations[key] = currentRelations[key];
+    }
+    const relations = parseRelationValuesForFormSubmit(changedRelations);
 
     if (metadata.length === 0 && relations.length === 0) {
       isEditingBlock.value = false;
@@ -144,8 +154,8 @@ export function useBlockEditor(formId: string) {
       if (flashTimer) clearTimeout(flashTimer);
       flashTimer = setTimeout(() => (savedFlash.value = false), 2500);
       return true;
-    } catch (exception: unknown) {
-      blockError.value = (exception as Error)?.message || "save failed";
+    } catch {
+      blockError.value = copy?.failureCopy ?? "Saving failed, try again";
       return false;
     } finally {
       isSaving.value = false;
