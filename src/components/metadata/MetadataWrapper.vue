@@ -484,6 +484,8 @@ const inlineEditableTypes: string[] = [
   InputFieldTypes.Text,
   InputFieldTypes.Number,
   InputFieldTypes.Date,
+  InputFieldTypes.Textarea,
+  InputFieldTypes.ResizableTextarea,
   InputFieldTypes.DropdownSingleselectMetadata,
 ];
 const canInlineEdit = computed<boolean>(

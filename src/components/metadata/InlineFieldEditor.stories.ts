@@ -65,3 +65,18 @@ export const RequiredField: Story = {
     template: '<div class="p-8 max-w-md"><InlineFieldEditor v-bind="args" /></div>',
   }),
 };
+
+export const RestingTextarea: Story = {
+  args: {
+    ...baseArgs,
+    fieldKey: "intialValues.annotation",
+    label: "Annotatie",
+    value: "Paperback-heruitgave met nieuw voorwoord.",
+    inputType: InputFieldTypes.Textarea,
+  },
+  render: (args) => ({
+    components: { InlineFieldEditor },
+    setup: () => ({ args }),
+    template: '<div class="p-8 max-w-md"><InlineFieldEditor v-bind="args" /></div>',
+  }),
+};

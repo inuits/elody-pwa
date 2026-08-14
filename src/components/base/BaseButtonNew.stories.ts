@@ -35,7 +35,7 @@ export const Loading: Story = {
   args: {
     label: "Saving…",
     loading: true,
-    buttonStyle: "accentNormal",
+    buttonStyle: "accentAccent",
     forceShowLabel: true,
   },
 };

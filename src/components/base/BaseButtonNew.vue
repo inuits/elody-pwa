@@ -187,13 +187,16 @@ export type ButtonStyle =
   | "accentAccent"
   | "accentNormal"
   | "redDefault";
+// Deprecations (design system): the grey `default` variant renders as
+// secondary, the mint `accentNormal` as commit. The names remain accepted
+// so config-driven call sites keep working.
 const buttonStyles: Record<ButtonStyle, Button> = {
-  default: defaultButton,
+  default: secondaryButton,
   primary: primaryButton,
   secondary: secondaryButton,
   ghost: ghostButton,
   accentAccent: accentAccentButton,
-  accentNormal: accentNormalButton,
+  accentNormal: accentAccentButton,
   redDefault: redDefaultButton,
 };
 

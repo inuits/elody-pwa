@@ -281,6 +281,18 @@
 }
 
 
+/* Design-system number inputs: right-aligned, no spinner chrome. */
+input[type="number"] {
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 /* Design-system toasts (@kyvg/vue3-notification): inverted surface, white
    12.5px ink, 10px radius, toast shadow. Status toasts are plain; warnings
    and errors carry a semantic accent bar. */

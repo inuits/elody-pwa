@@ -19,14 +19,29 @@
               </div>
               <div v-if="item.text">{{ item.text }}</div>
             </div>
-            <button
-              type="button"
-              class="shrink-0 cursor-pointer border-none bg-transparent p-0 text-neutral-white/70 hover:text-neutral-white focus-visible:outline-2 focus-visible:outline-accent-accent"
-              :aria-label="t('preview-component.close')"
-              @click="close"
-            >
-              ✕
-            </button>
+            <div class="flex shrink-0 items-center gap-2">
+              <button
+                v-if="item.data?.undoAction"
+                type="button"
+                class="cursor-pointer border-none bg-transparent p-0 text-xs font-bold text-[#7DE3EA] underline decoration-dotted hover:text-neutral-white focus-visible:outline-2 focus-visible:outline-accent-accent"
+                @click="
+                  () => {
+                    item.data.undoAction();
+                    close();
+                  }
+                "
+              >
+                {{ t("inline-edit.undo") }}
+              </button>
+              <button
+                type="button"
+                class="cursor-pointer border-none bg-transparent p-0 text-neutral-white/70 hover:text-neutral-white focus-visible:outline-2 focus-visible:outline-accent-accent"
+                :aria-label="t('preview-component.close')"
+                @click="close"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </div>
       </template>

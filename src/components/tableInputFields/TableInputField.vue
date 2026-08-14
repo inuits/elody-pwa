@@ -8,7 +8,7 @@
         class="!w-auto"
         :icon="DamsIcons.Plus"
         :label="t('actions.labels.add-entry')"
-        button-style="accentNormal"
+        button-style="accentAccent"
         button-size="verySmall"
         @click="addRow"
       />

@@ -15,7 +15,7 @@
       v-bind="
         asButton
           ? {
-              buttonStyle: 'accentNormal',
+              buttonStyle: 'accentAccent',
               buttonSize: 'small',
               disabled: disable,
             }

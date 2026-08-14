@@ -49,28 +49,45 @@
     </template>
     <template v-else>
       <div class="flex items-center gap-1 pt-0.5">
-        <select
+        <!-- custom overlay listbox (native select is deprecated in edit
+             surfaces); clearing = "Geen waarde"; choosing never saves -->
+        <div
           v-if="isSelect"
-          ref="inputRef"
-          v-model="draft"
           data-cy="inline-edit-select"
-          :aria-label="label"
-          :aria-describedby="error ? errorId : undefined"
-          :disabled="saving"
-          class="w-full min-w-0 rounded-input border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
-          :class="error ? 'border-red-default' : 'border-neutral-40'"
+          class="w-full min-w-0"
+          :class="{
+            'rounded-input outline outline-1 outline-red-default': error,
+          }"
           @keydown.esc.stop.prevent="cancel"
           @click.stop
         >
-          <option v-if="!required" value="">—</option>
-          <option
-            v-for="option in options"
-            :key="String(option.value)"
-            :value="option.value"
-          >
-            {{ optionLabel(option) }}
-          </option>
-        </select>
+          <AdvancedDropdown
+            :model-value="draft"
+            :options="listboxOptions"
+            :label="label"
+            :clearable="!required"
+            :disable="saving"
+            :show-menu-header="false"
+            label-position="inline"
+            @update:model-value="onListboxDraft"
+          />
+        </div>
+        <textarea
+          v-else-if="isTextarea"
+          ref="inputRef"
+          v-model="draft"
+          data-cy="inline-edit-textarea"
+          rows="3"
+          :aria-label="label"
+          :aria-describedby="error ? errorId : undefined"
+          :disabled="saving"
+          class="w-full min-w-0 resize-y rounded-input border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          :class="error ? 'border-red-default' : 'border-neutral-40'"
+          @keydown.ctrl.enter.stop.prevent="save"
+          @keydown.meta.enter.stop.prevent="save"
+          @keydown.esc.stop.prevent="cancel"
+          @click.stop
+        ></textarea>
         <input
           v-else
           ref="inputRef"
@@ -118,7 +135,7 @@
         {{ error }}
       </div>
       <div v-else class="pt-0.5 text-xs text-text-placeholder">
-        {{ isSelect ? selectHintLabel : hintLabel }}
+        {{ isTextarea ? textareaHintLabel : hintLabel }}
       </div>
     </template>
   </div>
@@ -146,6 +163,7 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { getChildrenOfHomeRoutes } from "@/helpers";
 import { Unicons } from "@/types";
 import { activeInlineScope } from "@/composables/useInlineEditCoordination";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 // Per-field inline editing: edit scope = save scope = validation scope.
 // One PATCH per field key via mutateEntityValues with a single metadata
@@ -223,6 +241,12 @@ const htmlInputType = computed(() => {
   return "text";
 });
 
+const isTextarea = computed(
+  () =>
+    props.inputType === InputFieldTypes.Textarea ||
+    props.inputType === InputFieldTypes.ResizableTextarea,
+);
+
 // Decision R2-2: selects follow the same pick-then-Bewaar model as text.
 const isSelect = computed(
   () =>
@@ -235,7 +259,21 @@ const optionLabel = (option: { label?: string | null; value?: unknown }) => {
   return te(label) ? t(label) : label;
 };
 
-const selectHintLabel = computed(() => hintLabel.value);
+const listboxOptions = computed(() =>
+  (props.options ?? []).map((option) => ({
+    label: optionLabel(option),
+    value: option.value as string,
+  })),
+);
+
+// Choosing never saves; it only updates the draft (pick-then-Bewaar).
+const onListboxDraft = (value: unknown) => {
+  draft.value = value === undefined || value === null ? "" : String(value);
+};
+
+const textareaHintLabel = computed(() =>
+  translate("inline-edit.textarea-hint", "Ctrl+Enter saves · Esc cancels"),
+);
 
 const collection = computed<Collection>(() => {
   const routeCollection = route.meta?.type as Collection | undefined;
@@ -277,7 +315,10 @@ const startEditing = () => {
   editing.value = true;
   activeInlineScope.value = scopeId;
   document.addEventListener("click", handleOutsideClick, true);
-  nextTick(() => inputRef.value?.focus());
+  nextTick(() => {
+    if (inputRef.value) inputRef.value.focus();
+    else rootEl.value?.querySelector<HTMLInputElement>("input")?.focus();
+  });
 };
 
 const stopEditing = () => {

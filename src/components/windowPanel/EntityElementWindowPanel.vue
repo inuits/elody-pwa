@@ -264,6 +264,8 @@ import { getMetadataFields } from "@/helpers";
 import { useRepeatableFields } from "@/composables/useRepeatableFields";
 import { useEditMode } from "@/composables/useEdit";
 import { useBlockEditor } from "@/composables/useBlockEditor";
+import { useUndo } from "@/composables/useUndo";
+import { deepToRaw } from "@/utils/deepToRaw";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -312,6 +314,7 @@ const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
 );
 
 const { getVeeValidateKey } = useVeeValidate();
+const { displayUndoNotification } = useUndo();
 const {
   isEditingBlock,
   isSaving,
@@ -465,11 +468,26 @@ const saveRow = async () => {
   if (saved) editingRowIndex.value = null;
 };
 
+// Removal executes immediately; the undo toast restores the row with a
+// compensating write (undo-over-confirm).
 const deleteRow = async (index: number) => {
+  const removedRow = structuredClone(
+    deepToRaw(repeatableFieldsHelper.fields.value[index]?.value ?? {}),
+  );
   start();
   repeatableFieldsHelper.decreaseFieldRepeatAmount(index);
-  await save(editableFields.value, [], panelId.value);
+  const saved = await save(editableFields.value, [], panelId.value, saveCopy());
   editingRowIndex.value = null;
+  if (saved)
+    displayUndoNotification(
+      translate("block-edit.row-removed", "Row removed"),
+      "",
+      async () => {
+        start();
+        repeatableFieldsHelper.insertFieldAtIndex(index, removedRow);
+        await save(editableFields.value, [], panelId.value, saveCopy());
+      },
+    );
 };
 
 const toggleIsCollapsed = () => {

@@ -40,7 +40,15 @@ const mountEditor = (props: Record<string, unknown> = {}) =>
       ...props,
     },
     global: {
-      stubs: { unicon: true, SpinnerLoader: true },
+      stubs: {
+        unicon: true,
+        SpinnerLoader: true,
+        AdvancedDropdown: {
+          props: ["clearable"],
+          template:
+            '<div data-cy="advanced-dropdown-stub" :data-clearable="String(clearable)" @click="$emit(\'update:model-value\', \'listening\')"></div>',
+        },
+      },
       provide: { config: {} },
     },
   });
@@ -179,7 +187,7 @@ describe("InlineFieldEditor", () => {
 
     const select = wrapper.find("[data-cy='inline-edit-select']");
     expect(select.exists()).toBe(true);
-    await select.setValue("listening");
+    await wrapper.find("[data-cy='advanced-dropdown-stub']").trigger("click");
     await flushPromises();
     expect(mocks.mutate).not.toHaveBeenCalled();
 
@@ -202,11 +210,10 @@ describe("InlineFieldEditor", () => {
     });
     await wrapper.find("[data-cy='inline-edit-toggle']").trigger("click");
 
-    // required selects render no empty option at all
-    const optionValues = wrapper
-      .findAll("option")
-      .map((option) => (option.element as HTMLOptionElement).value);
-    expect(optionValues).toEqual(["reading"]);
+    // required selects render the listbox without a clear affordance
+    const dropdown = wrapper.find("[data-cy='advanced-dropdown-stub']");
+    expect(dropdown.exists()).toBe(true);
+    expect(dropdown.attributes("data-clearable")).toBe("false");
   });
 
   it("undo writes the old value back as a new change", async () => {
