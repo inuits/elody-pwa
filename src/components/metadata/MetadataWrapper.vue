@@ -103,6 +103,86 @@
         :breakWords="breakWords"
       />
     </inline-field-editor>
+    <inline-relation-editor
+      v-else-if="canInlineEditRelation"
+      :form-id="formId"
+      :label="fieldLabel"
+      :empty="fieldValueIsEmpty && !isFieldRequired"
+    >
+      <template #display>
+        <ViewModesAutocompleteRelations
+          v-model="fieldValueProxy"
+          :is-read-only="true"
+          :field-name="fieldLabel"
+          :formId="formId"
+          :metadata-key-to-get-options-for="metadataKeyToGetOptions"
+          :advanced-filter-input-for-retrieving-options="
+            metadata.inputField.advancedFilterInputForRetrievingOptions
+          "
+          :advanced-filter-input-for-retrieving-related-options="
+            filtersForRetrievingRelatedOptions
+          "
+          :advanced-filter-input-for-retrieving-all-options="
+            filtersForRetrievingOptions
+          "
+          :advanced-filter-input-for-searching-options="
+            metadata.inputField.advancedFilterInputForSearchingOptions
+          "
+          :relation-filter="metadata.inputField.relationFilter"
+          :is-metadata-field="metadata.inputField?.isMetadataField"
+          :relation-type="metadata.inputField?.relationType"
+          :from-relation-type="metadata.inputField?.fromRelationType"
+          :metadataOnRelationConfig="
+            metadata.inputField?.metadataOnRelationFieldConfig
+          "
+          :disabled="true"
+          :readOnlyValueAsPlainText="
+            metadata.inputField?.readOnlyValueAsPlainText
+          "
+        />
+      </template>
+      <template #editor>
+        <ViewModesAutocompleteRelations
+          v-model="fieldValueProxy"
+          :field-name="fieldLabel"
+          :formId="formId"
+          :select-type="
+            fieldType === InputFieldTypes.DropdownSingleselectRelations
+              ? 'single'
+              : 'multi'
+          "
+          :metadata-key-to-get-options-for="metadataKeyToGetOptions"
+          :advanced-filter-input-for-retrieving-options="
+            metadata.inputField.advancedFilterInputForRetrievingOptions
+          "
+          :advanced-filter-input-for-retrieving-related-options="
+            filtersForRetrievingRelatedOptions
+          "
+          :advanced-filter-input-for-retrieving-all-options="
+            filtersForRetrievingOptions
+          "
+          :advanced-filter-input-for-searching-options="
+            metadata.inputField.advancedFilterInputForSearchingOptions
+          "
+          :relation-filter="metadata.inputField.relationFilter"
+          :is-metadata-field="metadata.inputField?.isMetadataField"
+          :relation-type="metadata.inputField?.relationType"
+          :from-relation-type="metadata.inputField?.fromRelationType"
+          :auto-selectable="(metadata.inputField as any)?.autoSelectable"
+          :canCreateOption="
+            (metadata.inputField as any)?.canCreateEntityFromOption
+          "
+          :metadataKeyToCreateEntityFromOption="
+            (metadata.inputField as any)?.metadataKeyToCreateEntityFromOption
+          "
+          :depends-on="(metadata.inputField as any)?.dependsOn"
+          :metadataOnRelationConfig="
+            metadata.inputField?.metadataOnRelationFieldConfig
+          "
+          mode="edit"
+        />
+      </template>
+    </inline-relation-editor>
     <div
       v-else
       class="flex gap-2"
@@ -310,6 +390,7 @@ import {
 } from "@/generated-types/queries";
 import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
+import InlineRelationEditor from "@/components/metadata/InlineRelationEditor.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
@@ -502,6 +583,23 @@ const canInlineEdit = computed<boolean>(
     fieldKey.value?.startsWith("intialValues.") &&
     !(props.metadata.value as any)?.formatter &&
     !(props.metadata as any).isMultilingual &&
+    !props.repeatablePanelConfig?.isRepeatable &&
+    !props.linkedEntityId,
+);
+
+// Relation-backed autocomplete fields edit in place through the tag input;
+// the relation is its own scope and saves as one diffed mutation.
+const canInlineEditRelation = computed<boolean>(
+  () =>
+    autoCompleteType.value === "relationAutocomplete" &&
+    !isGroupMember.value &&
+    !props.isEdit &&
+    !props.isUsedInModal &&
+    props.formFlow === "edit" &&
+    Boolean(props.metadata.inputField) &&
+    !(props.metadata as any).nonEditableField &&
+    !(props.metadata as any).disabled &&
+    fieldIsEditableByUser.value &&
     !props.repeatablePanelConfig?.isRepeatable &&
     !props.linkedEntityId,
 );

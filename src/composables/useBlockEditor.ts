@@ -55,6 +55,17 @@ export function useBlockEditor(formId: string) {
   const valuesDiffer = (a: unknown, b: unknown): boolean =>
     JSON.stringify(a ?? null) !== JSON.stringify(b ?? null);
 
+  // Whether anything changed since start() — outside-click uses this to
+  // decide between closing (pristine) and staying open (dirty).
+  const hasChanges = (): boolean => {
+    const form = getForm(formId);
+    if (!form || !snapshot) return false;
+    return (
+      valuesDiffer(deepToRaw(form.values.intialValues ?? {}), snapshot) ||
+      valuesDiffer(deepToRaw(form.values.relationValues ?? {}), relationSnapshot)
+    );
+  };
+
   const collectChangedMetadata = (
     fields: PanelMetaData[],
     repetitionKey?: string,
@@ -167,6 +178,7 @@ export function useBlockEditor(formId: string) {
     isSaving,
     blockError,
     savedFlash,
+    hasChanges,
     start,
     cancel,
     save,
