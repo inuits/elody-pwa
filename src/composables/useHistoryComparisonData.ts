@@ -148,6 +148,7 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
         { type: "type", value: entityType },
         {
           type: "selection",
+          // TODO: make the key dynamic (config or something similar)
           key: ["vlacc:1|id"],
           value: entityId,
           match_exact: true,
