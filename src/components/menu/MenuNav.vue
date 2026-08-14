@@ -3,9 +3,10 @@
     data-cy="menu-nav"
     ref="navigation"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-background-light px-5 pb-16 z-navigation',
-      { 'w-80': isExpanded },
+      'navbar fixed left-0 top-0 w-[52px] h-screen align-center pt-6 bg-background-light px-1.5 pb-16 z-navigation',
+      { '!w-80 !px-5': isExpanded },
     ]"
+    :aria-label="navAriaLabel"
     @click.self="changeExpandedStateOfMenu(true)"
   >
     <div>
@@ -14,7 +15,7 @@
         @click="setSelectedMenuItem(menuItems[0])"
         class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
       >
-        <img src="/logo.svg" alt="Elody logo" class="h-12" />
+        <img src="/logo.svg" alt="Elody logo" :class="isExpanded ? 'h-12' : 'h-8'" />
       </router-link>
       <div
         v-if="environmentLabel"
@@ -22,7 +23,7 @@
         class="mb-8 -mt-6 flex justify-center"
       >
         <span
-          class="rounded-full bg-accent-normal text-neutral-0 text-xs font-semibold px-2 py-0.5 uppercase"
+          class="rounded-pill bg-accent text-neutral-white text-micro font-bold px-1.5 py-0.5"
         >
           {{ environmentLabel }}
         </span>
@@ -56,12 +57,17 @@ import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { ref, onMounted, onUnmounted, inject } from "vue";
+import { computed, ref, onMounted, onUnmounted, inject } from "vue";
+import { useI18n } from "vue-i18n";
 import { getEnvironmentLabel } from "@/helpers";
 import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useRouter } from "vue-router";
 
+const { t, te } = useI18n();
+const navAriaLabel = computed<string>(() =>
+  te("navigation.main") ? t("navigation.main") : "Main navigation",
+);
 const config: any = inject("config");
 const environmentLabel = getEnvironmentLabel(config?.DEPLOYMENT_ENVIRONMENT);
 
@@ -119,9 +125,9 @@ router.afterEach(() => {
 <style>
 .navbar,
 .logInOut {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
+  transition-property: width, padding;
+  transition-timing-function: var(--ease-ui, ease);
+  transition-duration: var(--transition-duration-ui, 0.13s);
   overflow-x: hidden;
 }
 .navbar:hover .router-link {
