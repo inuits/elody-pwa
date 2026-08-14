@@ -1190,6 +1190,7 @@ const useUpload = (config: any = {}) => {
     removeFileToUpload,
     dryRunCsv,
     dryRunFeedback,
+    getDryRunFeedback,
     upload,
     validateFiles,
     toggleUploadStatus,

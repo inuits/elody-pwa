@@ -371,6 +371,8 @@ const {
   __getCsvString,
   resetUpload,
   mediafiles,
+  dryRunFeedback,
+  getDryRunFeedback,
 } = useUpload(config);
 const {
   handleHttpError,
@@ -952,25 +954,61 @@ const downloadActionFunction = async (field: FormAction) => {
   }
 };
 
+// The batch endpoint answers with per-row {errors, warnings} keyed by collection,
+// the same shape a csv dry run returns. Feeding it to dryRunFeedback puts the
+// messages on the file preview, where an upload shows them, instead of dumping
+// the whole response body under the button.
+const __showCsvBatchFeedback = async (body: any): Promise<boolean> => {
+  let batchResult = body;
+  if (typeof batchResult === "string") {
+    try {
+      batchResult = JSON.parse(batchResult);
+    } catch {
+      return false;
+    }
+  }
+  if (!batchResult?.errors && !batchResult?.warnings) return false;
+
+  const feedback = await getDryRunFeedback(batchResult);
+  if (!feedback.errors.length && !feedback.warnings.length) return false;
+  dryRunFeedback.value = feedback;
+  submitErrors.value = feedback.errors.length
+    ? (t("upload-fields.errors.csv-rows-failed", [
+        feedback.errors.length,
+      ]) as string)
+    : undefined;
+  return true;
+};
+
 const updateMetdataActionFunction = async (field: FormAction) => {
   if (!(await isFormValid())) return;
   try {
+    submitErrors.value = undefined;
+    dryRunFeedback.value = { errors: [], warnings: [] };
     const document = await getQuery(field.actionQuery as string);
     let csv: string;
     await __getCsvString().then((csvResult) => {
       csv = csvResult;
     });
-    await performUpdateMetadataAction(
+    const result = await performUpdateMetadataAction(
       document,
       form.value.values.intialValues.type,
       csv,
     );
+    if (await __showCsvBatchFeedback(result?.data?.updateMetadataWithCsv))
+      return;
     closeAndDeleteForm();
     displaySuccessNotification(
       t("notifications.success.updateMetadataCsv.title"),
       t("notifications.success.updateMetadataCsv.description"),
     );
   } catch (error: ApolloError) {
+    if (
+      await __showCsvBatchFeedback(
+        error?.graphQLErrors?.[0]?.extensions?.response?.body,
+      )
+    )
+      return;
     const errorObject = await getMessageAndCodeFromApolloError(error);
     resetUpload();
     submitErrors.value = errorObject.message;
