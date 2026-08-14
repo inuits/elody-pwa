@@ -30,7 +30,7 @@
             <Unicon :name="Unicons.QuestionCircle.name" height="14" />
           </span>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span class="text-value text-text-placeholder">
           {{ tooltipText }}
         </span>
       </BaseTooltip>

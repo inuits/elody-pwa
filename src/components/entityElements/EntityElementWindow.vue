@@ -30,7 +30,7 @@
       >
         <h3
           data-cy="entity-element-window-title"
-          class="text-sm font-bold px-4 py-2.5 m-0"
+          class="text-value font-bold px-4 py-2.5 m-0"
           :class="isSectionHeader ? 'text-neutral-white' : 'text-accent-dark'"
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
@@ -68,7 +68,7 @@
                 ? t(element.windowElementStatus.label)
                 : translate('quality-status.title', 'Quality status')
             "
-            class="absolute left-0 top-9 z-popover w-[290px] rounded-overlay border border-neutral-40 bg-neutral-white p-4 text-sm shadow-overlay"
+            class="absolute left-0 top-9 z-popover w-[290px] rounded-overlay border border-neutral-40 bg-neutral-white p-4 text-value shadow-overlay"
             @click.stop
             @keydown.escape.stop="statusPopoverOpen = false"
           >
@@ -85,7 +85,7 @@
                 v-for="field in requiredEmptyFields"
                 :key="field.key"
                 type="button"
-                class="block w-full cursor-pointer rounded-md border-none bg-transparent px-2 py-1 text-left text-sm font-bold text-red-default hover:bg-red-light focus-visible:outline-2 focus-visible:outline-accent-accent"
+                class="block w-full cursor-pointer rounded-md border-none bg-transparent px-2 py-1 text-left text-value font-bold text-red-default hover:bg-red-light focus-visible:outline-2 focus-visible:outline-accent-accent"
                 @click="jumpToField(field.key)"
               >
                 → {{ getTranslatedMessage(field.label) }}

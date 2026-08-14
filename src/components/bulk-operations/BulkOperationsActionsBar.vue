@@ -55,7 +55,7 @@
             <Unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span class="text-value text-text-placeholder">
           {{ $t("bulk-operations.capped-items-tooltip") }}
         </span>
       </BaseTooltip>

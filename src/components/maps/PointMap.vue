@@ -15,7 +15,7 @@
         positioning="bottom-center"
         :autoPan="true"
       >
-        <div class="bg-white rounded-card shadow-overlay p-3 text-sm w-48">
+        <div class="bg-white rounded-card shadow-overlay p-3 text-value w-48">
           <div
             v-if="featureLoading"
             class="h-full w-full flex items-center justify-center py-4"
@@ -124,6 +124,13 @@ interface PointItem {
   lon: number;
 }
 
+
+// Map colours come from the client-themed accent token.
+const accentColor = (): string =>
+  getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-accent")
+    .trim() || "#3BA6CB";
+
 const props = withDefaults(
   defineProps<{
     points: PointItem[];
@@ -201,7 +208,7 @@ const clusterStyle = (feature: any) => {
     clusterStyleCache[size] = new Style({
       image: new CircleStyle({
         radius: 16,
-        fill: new Fill({ color: "#3b82f6" }),
+        fill: new Fill({ color: accentColor() }),
         stroke: new Stroke({ color: "#ffffff", width: 2 }),
       }),
       text: new Text({

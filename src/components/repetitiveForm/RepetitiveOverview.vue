@@ -35,7 +35,7 @@
           <span
             v-for="entry in overviewEntries(branch, step)"
             :key="entry.label"
-            class="text-text-light text-sm truncate"
+            class="text-text-light text-value truncate"
           >
             {{ $t(entry.label) }}: {{ entry.value }}
           </span>

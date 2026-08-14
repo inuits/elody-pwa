@@ -9,7 +9,7 @@
       class="flex items-center justify-between cursor-pointer"
     >
       <div class="flex gap-4 w-2/3 items-center">
-        <h2 class="text-sm font-bold text-text-body">
+        <h2 class="text-value font-bold text-text-body">
           {{ t(panel.panelHeaderContent.label) }}
         </h2>
         <span

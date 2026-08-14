@@ -18,7 +18,7 @@
       >
         <div
           v-if="headerColumns.length > 0"
-          class="sticky top-0 z-10 bg-background-light flex items-center gap-2 px-1.5 py-3 border-b-2 border-accent-highlight font-semibold text-sm text-text-body"
+          class="sticky top-0 z-10 bg-background-light flex items-center gap-2 px-1.5 py-3 border-b-2 border-accent-highlight font-semibold text-value text-text-body"
         >
           <div class="w-10 shrink-0" />
 

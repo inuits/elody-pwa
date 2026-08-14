@@ -215,7 +215,7 @@
           <div
             v-else-if="isCollapsedEmptyRelationList"
             data-cy="empty-relation-list"
-            class="text-sm text-text-placeholder !text-left"
+            class="text-value text-text-placeholder !text-left"
           >
             {{
               te("library.no-linked-objects")
@@ -225,7 +225,7 @@
           </div>
           <div v-else>
             <div>{{ noResultTranslations.noResult }}</div>
-            <div class="text-sm">
+            <div class="text-value">
               {{ noResultTranslations.searchTip }}
             </div>
             <div

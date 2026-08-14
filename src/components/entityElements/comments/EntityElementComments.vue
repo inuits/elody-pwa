@@ -34,12 +34,12 @@
             </div>
           </Transition>
 
-          <p v-if="isLoading" class="text-sm text-text-placeholder">
+          <p v-if="isLoading" class="text-value text-text-placeholder">
             {{ t("comments.loading") }}
           </p>
           <p
             v-else-if="!threads.length"
-            class="text-sm text-text-placeholder italic"
+            class="text-value text-text-placeholder italic"
           >
             {{ t("comments.empty") }}
           </p>

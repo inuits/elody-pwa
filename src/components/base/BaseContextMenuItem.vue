@@ -39,7 +39,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span class="text-value text-text-placeholder">
             <div>
               {{ t(tooltipLabel) }}
             </div>

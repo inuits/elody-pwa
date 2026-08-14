@@ -75,7 +75,10 @@ const initializeViewers = () => {
         palette: {
           type: "light",
           primary: {
-            main: "#DCF4F9",
+            main:
+              getComputedStyle(document.documentElement)
+                .getPropertyValue("--color-accent-light")
+                .trim() || "#DEF1FA",
           },
         },
       },

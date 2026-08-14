@@ -44,7 +44,7 @@
             </div>
           </template>
           <template #default>
-            <span class="text-sm text-text-placeholder">
+            <span class="text-value text-text-placeholder">
               <div>
                 {{ t("preview-component.close") }}
               </div>
@@ -53,7 +53,7 @@
         </base-tooltip>
         <span
           data-cy="entity-element-wrapper-title"
-          class="text-sm font-black text-accent-dark mr-2"
+          class="text-value font-black text-accent-dark mr-2"
           :class="[
             {
               'text-center absolute left-1/2 transform -translate-x-1/2':

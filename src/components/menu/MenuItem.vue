@@ -31,7 +31,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm w-max font-bold">
+          <span class="text-value w-max font-bold">
             <div class="w-max">
               {{ t(menuitem?.label) }}
             </div>

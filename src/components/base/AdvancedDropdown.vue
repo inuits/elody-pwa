@@ -59,7 +59,7 @@
       </template>
       <template #tag="{ option }">
         <div class="flex m-1 bg-gray-100 rounded-md">
-          <div class="text-sm text-black px-2 py-1">
+          <div class="text-value text-black px-2 py-1">
             {{ t(option.label) }}
           </div>
           <button
@@ -320,12 +320,12 @@ div.menu-option:hover {
 .vue-advanced-select--light-bordered .vue-select,
 .vue-advanced-select--light-bordered .control {
   --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid #e8eef0;
+  --vs-border: 1px solid var(--color-border-subtle);
   --vs-line-height: 1.375;
 }
 
 .vue-advanced-select--light-bordered .control.focused {
-  --vs-outline-color: #e8eef0;
+  --vs-outline-color: var(--color-focus-ring);
   box-shadow: none !important;
 }
 

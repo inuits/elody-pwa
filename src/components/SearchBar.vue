@@ -13,7 +13,7 @@
     <button
       type="button"
       :class="[
-        'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-accent rounded-md cursor-pointer',
+        'flex justify-center items-center h-10 w-10 p-2.5 text-value font-medium text-neutral-white bg-accent-accent rounded-md cursor-pointer',
         { 'ml-2': inputEnabled },
       ]"
       @click="!inputEnabled ? openSearchModal() : submitSearch()"

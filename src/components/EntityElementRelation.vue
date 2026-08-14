@@ -1,5 +1,5 @@
 <template>
-  <div v-if="relation.value" class="text-sm pl-4">
+  <div v-if="relation.value" class="text-value pl-4">
     <p class="text-text-light w-full">{{ relation.label }}</p>
     <p class="w-full">{{ relation.value }}</p>
   </div>

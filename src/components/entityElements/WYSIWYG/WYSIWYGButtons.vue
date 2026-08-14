@@ -161,7 +161,7 @@
       <template #default>
         <span
           v-if="isInNeedOfConfigurationEntities"
-          class="text-sm text-text-placeholder"
+          class="text-value text-text-placeholder"
         >
           <div>
             {{

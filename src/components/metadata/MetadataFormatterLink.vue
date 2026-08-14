@@ -1,7 +1,7 @@
 <template>
   <component
     :is="requiredAuthForThisEntity ? 'p' : 'a'"
-    :class="[{ underline: !requiredAuthForThisEntity }, 'text-sm']"
+    :class="[{ underline: !requiredAuthForThisEntity }, 'text-value']"
     :href="requiredAuthForThisEntity ? undefined : link"
     :target="shouldOpenInNewTab ? '_blank' : undefined"
     :rel="shouldOpenInNewTab ? 'noopener noreferrer' : undefined"

@@ -8,7 +8,7 @@
   >
     <h1
       data-cy="entity-element-window-title"
-      class="min-w-0 truncate text-sm font-bold text-accent-dark"
+      class="min-w-0 truncate text-value font-bold text-accent-dark"
     >
       <template v-if="previewComponent.title">{{
         t(previewComponent.title)
@@ -45,7 +45,7 @@
           </button>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span class="text-value text-text-placeholder">
             <div>
               {{ t("preview-component.close") }}
             </div>

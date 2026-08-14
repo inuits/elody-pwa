@@ -42,7 +42,7 @@
           classes.tag,
           { 'pr-2': !isEdit },
           {
-            'hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
+            'hover:!bg-background-normal hover:!text-accent-accent !cursor-pointer':
               !isEdit &&
               relationType &&
               props.autocompleteStyle !== 'readOnlyAsPlainText',
@@ -69,7 +69,7 @@
             type="text"
             :disabled="disabled"
           />
-          <div v-else class="pl-0 text-sm !text-[#000000] w-max">
+          <div v-else class="pl-0 text-value !text-text-body w-max">
             {{ getReadOnlyInputValue(option) }}
           </div>
         </div>
@@ -268,7 +268,7 @@ const classes = computed(() => {
   if (props.autocompleteStyle === "readOnlyAsPlainText") {
     result["container"] = "multiselect border-none !bg-transparent";
     result["tag"] =
-      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
+      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-text-body !opacity-100 hover:!bg-transparent hover:!text-text-body";
     result["tags"] = "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
     result["tagsSearchWrapper"] = "!hidden";
   }

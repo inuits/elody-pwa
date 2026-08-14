@@ -15,7 +15,7 @@
       ]"
       @click="() => emit('expandFilters', expandFilters)"
     >
-      <span class="text-sm font-black text-accent-dark">
+      <span class="text-value font-black text-accent-dark">
         {{ t("filters.filter") }}
       </span>
       <div class="flex items-center">

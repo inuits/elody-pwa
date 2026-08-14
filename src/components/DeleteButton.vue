@@ -5,7 +5,7 @@
       type="button"
       role="menuitem"
       data-cy="delete-menu-item"
-      class="block w-full cursor-pointer px-3 py-2 text-left text-sm text-red-default hover:bg-red-light focus-visible:outline-2 focus-visible:outline-accent-accent"
+      class="block w-full cursor-pointer px-3 py-2 text-left text-value text-red-default hover:bg-red-light focus-visible:outline-2 focus-visible:outline-accent-accent"
       :disabled="isDeleting"
       @click.prevent="openDeleteModal()"
     >

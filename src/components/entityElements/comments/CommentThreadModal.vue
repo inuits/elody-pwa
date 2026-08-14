@@ -104,7 +104,7 @@
         </div>
         <p
           v-else-if="thread.status === 'resolved'"
-          class="text-sm text-text-placeholder"
+          class="text-value text-text-placeholder"
         >
           {{ t("comments.resolved-hint") }}
         </p>
