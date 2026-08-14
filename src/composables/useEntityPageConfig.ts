@@ -34,7 +34,6 @@ export const useEntityPageConfig = () => {
       slug ||
       String(route.meta.entityType ?? "");
     if (!entityType) return undefined;
-    console.log(config[entityType] ?? config[entityType.toLowerCase()]);
     return config[entityType] ?? config[entityType.toLowerCase()];
   });
 

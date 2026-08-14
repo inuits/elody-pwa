@@ -677,6 +677,137 @@ describe("useHistoryComparisonData merged entities", () => {
   });
 });
 
+describe("useHistoryComparisonData repeatable panel fields", () => {
+  beforeEach(() => {
+    mocks.useQueryCalls.length = 0;
+    mocks.documents = {};
+    mocks.queryResults = [];
+  });
+
+  const withResult = (value: any) => ({
+    result: { value },
+    loading: { value: false },
+    error: { value: null },
+  });
+
+  const entityView = {
+    column: {
+      elements: {
+        parallelTitle: {
+          __typename: "WindowElementPanel",
+          repetitionConfig: { repetitionKey: "parallel_title_group" },
+          parallel_title: {
+            __typename: "PanelMetaData",
+            key: "parallel_title",
+          },
+          other_title_details: {
+            __typename: "PanelMetaData",
+            key: "other_title_details",
+          },
+        },
+      },
+    },
+  };
+
+  it("pill-tags only the sub-field that changed within a repetition item, on both sides", async () => {
+    mocks.queryResults[0] = withResult({
+      Entity: {
+        id: "entity-1",
+        entityView,
+        relationValues: {},
+        intialValues: {
+          parallel_title_group: [
+            { parallel_title: "New title", other_title_details: "Same" },
+          ],
+        },
+      },
+    });
+    mocks.queryResults[1] = withResult({
+      EntitiesHistory: {
+        results: [
+          {
+            id: "history-1",
+            entityView,
+            relationValues: {},
+            intialValues: {
+              updated_at: "2026-01-01T00:00:00Z",
+              parallel_title_group: [
+                { parallel_title: "Old title", other_title_details: "Same" },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const { leftVersionEntity, rightVersionEntity } =
+      useHistoryComparisonData("entity-1", "inscription");
+    await flushPromises();
+
+    expect(
+      leftVersionEntity.value?.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toEqual({ formatter: "pill|added", label: "New title" });
+    expect(
+      rightVersionEntity.value?.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toEqual({ formatter: "pill|modified", label: "Old title" });
+    expect(
+      leftVersionEntity.value?.intialValues.parallel_title_group[0]
+        .other_title_details,
+    ).toBe("Same");
+  });
+
+  it("shows an entirely added repetition item only on the current side", async () => {
+    mocks.queryResults[0] = withResult({
+      Entity: {
+        id: "entity-1",
+        entityView,
+        relationValues: {},
+        intialValues: {
+          parallel_title_group: [
+            { parallel_title: "First", other_title_details: "A" },
+            { parallel_title: "Second", other_title_details: "B" },
+          ],
+        },
+      },
+    });
+    mocks.queryResults[1] = withResult({
+      EntitiesHistory: {
+        results: [
+          {
+            id: "history-1",
+            entityView,
+            relationValues: {},
+            intialValues: {
+              updated_at: "2026-01-01T00:00:00Z",
+              parallel_title_group: [
+                { parallel_title: "First", other_title_details: "A" },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const { leftVersionEntity, rightVersionEntity } =
+      useHistoryComparisonData("entity-1", "inscription");
+    await flushPromises();
+
+    const currentArr =
+      leftVersionEntity.value?.intialValues.parallel_title_group;
+    expect(currentArr).toHaveLength(2);
+    expect(currentArr[1].parallel_title).toEqual({
+      formatter: "pill|added",
+      label: "Second",
+    });
+
+    expect(
+      rightVersionEntity.value?.intialValues.parallel_title_group,
+    ).toHaveLength(1);
+  });
+});
+
 describe("useHistoryComparisonData wysiwygDiffs", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
