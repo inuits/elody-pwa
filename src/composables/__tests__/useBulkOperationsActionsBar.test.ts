@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { flushPromises } from "@vue/test-utils";
 import { useBulkOperationsActionsBar } from "../useBulkOperationsActionsBar";
 import type {
   BulkOperationsActionsBarProps,
@@ -26,14 +27,16 @@ vi.mock("@vue/apollo-composable", () => ({
   })),
 }));
 
+const mockBulkOperations = vi.hoisted(() => ({
+  getEnqueuedItemCount: vi.fn((context: string) =>
+    context === "test-context" ? 3 : 0,
+  ),
+  getEnqueuedItems: vi.fn(() => [{ id: "1" }, { id: "2" }, { id: "3" }]),
+  dequeueAllItemsForBulkProcessing: vi.fn(),
+}));
+
 vi.mock("@/composables/useBulkOperations", () => ({
-  useBulkOperations: () => ({
-    getEnqueuedItemCount: vi.fn((context) =>
-      context === "test-context" ? 3 : 0,
-    ),
-    getEnqueuedItems: vi.fn(() => [{ id: "1" }, { id: "2" }, { id: "3" }]),
-    dequeueAllItemsForBulkProcessing: vi.fn(),
-  }),
+  useBulkOperations: () => mockBulkOperations,
 }));
 
 const mockModalActions = {
@@ -50,6 +53,42 @@ const mockModalActions = {
 
 vi.mock("@/composables/useModalActions", () => ({
   useModalActions: () => mockModalActions,
+}));
+
+const mockSeenItems = vi.hoisted(() => ({
+  markManyAsSeen: vi.fn(),
+  unmarkManyAsSeen: vi.fn(),
+  isItemSeen: vi.fn(() => false),
+}));
+
+vi.mock("@/composables/useSeenItems", () => ({
+  useSeenItems: () => mockSeenItems,
+}));
+
+const mockEntityPageConfig = vi.hoisted(() => ({
+  trackSeen: { value: true },
+}));
+
+vi.mock("@/composables/useEntityPageConfig", () => ({
+  useEntityPageConfig: () => mockEntityPageConfig,
+}));
+
+const mockConfirmModal = vi.hoisted(() => ({
+  confirm: vi.fn(() => Promise.resolve("confirm")),
+}));
+
+vi.mock("@/composables/useConfirmModal", () => ({
+  useConfirmModal: () => mockConfirmModal,
+}));
+
+const mockNotification = vi.hoisted(() => ({
+  displaySuccessNotification: vi.fn(),
+  displayWarningNotification: vi.fn(),
+  displayErrorNotification: vi.fn(),
+}));
+
+vi.mock("@/composables/useBaseNotification", () => ({
+  useBaseNotification: () => mockNotification,
 }));
 
 const mockBaseModal = vi.hoisted(() => ({
@@ -646,8 +685,145 @@ describe("useBulkOperationsActionsBar", () => {
         undefined,
         true,
         props.context,
-        { "parentEntity": undefined }
+        { parentEntity: undefined },
       );
+    });
+  });
+
+  describe("Mark as seen operations", () => {
+    beforeEach(() => {
+      mockEntityPageConfig.trackSeen.value = true;
+      mockConfirmModal.confirm.mockImplementation(() =>
+        Promise.resolve("confirm"),
+      );
+    });
+
+    const selectOperation = (
+      operationType: BulkOperationTypes,
+      props = createMockProps(),
+    ) => {
+      const emit = createMockEmit();
+      const composable = useBulkOperationsActionsBar(props, emit);
+      composable.selectedBulkOperation.value = {
+        value: operationType,
+      } as any;
+      composable.handleSelectedBulkOperation();
+      return composable;
+    };
+
+    it("marks all enqueued items as seen once the action is confirmed", async () => {
+      selectOperation(BulkOperationTypes.MarkAsSeen);
+      await flushPromises();
+
+      expect(mockConfirmModal.confirm).toHaveBeenCalled();
+      expect(mockSeenItems.markManyAsSeen).toHaveBeenCalledWith([
+        "1",
+        "2",
+        "3",
+      ]);
+      expect(mockSeenItems.unmarkManyAsSeen).not.toHaveBeenCalled();
+    });
+
+    it("unmarks all enqueued items when the unseen operation is confirmed", async () => {
+      selectOperation(BulkOperationTypes.MarkAsUnseen);
+      await flushPromises();
+
+      expect(mockSeenItems.unmarkManyAsSeen).toHaveBeenCalledWith([
+        "1",
+        "2",
+        "3",
+      ]);
+      expect(mockSeenItems.markManyAsSeen).not.toHaveBeenCalled();
+    });
+
+    it("clears the selection and notifies after marking", async () => {
+      const props = createMockProps();
+      selectOperation(BulkOperationTypes.MarkAsSeen, props);
+      await flushPromises();
+
+      expect(
+        mockBulkOperations.dequeueAllItemsForBulkProcessing,
+      ).toHaveBeenCalledWith(props.context);
+      expect(mockNotification.displaySuccessNotification).toHaveBeenCalled();
+    });
+
+    it("does not mark anything when the confirmation is cancelled", async () => {
+      mockConfirmModal.confirm.mockImplementation(() =>
+        Promise.resolve("cancel"),
+      );
+
+      selectOperation(BulkOperationTypes.MarkAsSeen);
+      await flushPromises();
+
+      expect(mockSeenItems.markManyAsSeen).not.toHaveBeenCalled();
+      expect(
+        mockBulkOperations.dequeueAllItemsForBulkProcessing,
+      ).not.toHaveBeenCalled();
+      expect(
+        mockNotification.displaySuccessNotification,
+      ).not.toHaveBeenCalled();
+    });
+
+    it("opens no modal for a seen operation", async () => {
+      selectOperation(BulkOperationTypes.MarkAsSeen);
+      await flushPromises();
+
+      expect(mockBaseModal.openModal).not.toHaveBeenCalled();
+      expect(
+        mockModalActions.initializeGeneralProperties,
+      ).not.toHaveBeenCalled();
+    });
+
+    it("does nothing when no items are enqueued", async () => {
+      mockBulkOperations.getEnqueuedItems.mockReturnValueOnce([]);
+
+      selectOperation(BulkOperationTypes.MarkAsSeen);
+      await flushPromises();
+
+      expect(mockConfirmModal.confirm).not.toHaveBeenCalled();
+      expect(mockSeenItems.markManyAsSeen).not.toHaveBeenCalled();
+    });
+
+    it("clears the selected operation so it can be picked again", async () => {
+      const composable = selectOperation(BulkOperationTypes.MarkAsSeen);
+      await flushPromises();
+
+      expect(composable.selectedBulkOperation.value).toBeUndefined();
+    });
+
+    it("keeps the seen operations available when trackSeen is enabled", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { bulkOperations } = useBulkOperationsActionsBar(props, emit);
+      bulkOperations.value = [
+        { value: BulkOperationTypes.MarkAsSeen } as any,
+        { value: BulkOperationTypes.MarkAsUnseen } as any,
+        { value: BulkOperationTypes.DownloadMediafiles } as any,
+      ];
+
+      expect(bulkOperations.value.map((operation) => operation.value)).toEqual([
+        BulkOperationTypes.MarkAsSeen,
+        BulkOperationTypes.MarkAsUnseen,
+        BulkOperationTypes.DownloadMediafiles,
+      ]);
+    });
+
+    it("filters the seen operations out when trackSeen is disabled", () => {
+      mockEntityPageConfig.trackSeen.value = false;
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { bulkOperations } = useBulkOperationsActionsBar(props, emit);
+      bulkOperations.value = [
+        { value: BulkOperationTypes.MarkAsSeen } as any,
+        { value: BulkOperationTypes.MarkAsUnseen } as any,
+        { value: BulkOperationTypes.DownloadMediafiles } as any,
+      ];
+
+      expect(bulkOperations.value.map((operation) => operation.value)).toEqual([
+        BulkOperationTypes.DownloadMediafiles,
+      ]);
     });
   });
 

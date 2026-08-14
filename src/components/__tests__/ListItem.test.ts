@@ -1,6 +1,29 @@
 import ListItem from "../ListItem.vue";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
+
+const mockSeenItems = vi.hoisted(() => ({
+  isItemSeen: vi.fn(() => false),
+  markAsSeen: vi.fn(),
+  markManyAsSeen: vi.fn(),
+  unmarkManyAsSeen: vi.fn(),
+}));
+
+vi.mock("@/composables/useSeenItems", () => ({
+  useSeenItems: () => mockSeenItems,
+}));
+
+const mockEntityPageConfig = vi.hoisted(() => ({
+  actions: { value: [] },
+  hasEditMetadataButton: { value: undefined },
+  deleteButton: { value: undefined },
+  trackSeen: { value: false },
+}));
+
+vi.mock("@/composables/useEntityPageConfig", () => ({
+  useEntityPageConfig: () => mockEntityPageConfig,
+}));
 
 vi.mock("@/helpers", async () => {
   const actualModule = await vi.importActual("@/helpers");
@@ -41,6 +64,11 @@ vi.mock("vue-i18n", () => ({
 }));
 
 describe("ListItem", () => {
+  beforeEach(() => {
+    mockEntityPageConfig.trackSeen.value = false;
+    mockSeenItems.isItemSeen.mockImplementation(() => false);
+  });
+
   afterEach(() => {
     vi.clearAllMocks();
     vi.resetAllMocks();
@@ -56,6 +84,74 @@ describe("ListItem", () => {
     viewMode: "list" as const,
     teaserMetadata: [],
   };
+
+  describe("seen items", () => {
+    const seenItemProps = {
+      ...defaultProps,
+      itemId: "seen-item",
+      hasSelection: true,
+    };
+
+    const markItemAsSeen = () => {
+      mockEntityPageConfig.trackSeen.value = true;
+      mockSeenItems.isItemSeen.mockImplementation(
+        (id: string) => id === "seen-item",
+      );
+    };
+
+    it("greys out an item that has been seen", () => {
+      markItemAsSeen();
+
+      const wrapper = shallowMount(ListItem, { props: seenItemProps });
+
+      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+        "grayscale",
+      );
+    });
+
+    it("keeps the selection checkbox visible for a seen item", () => {
+      markItemAsSeen();
+
+      const wrapper = shallowMount(ListItem, { props: seenItemProps });
+
+      const checkbox = wrapper.findComponent(BaseInputCheckbox);
+      expect(checkbox.exists()).toBe(true);
+      expect(checkbox.classes()).not.toContain("invisible");
+    });
+
+    it("does not grey out an item that has not been seen", () => {
+      mockEntityPageConfig.trackSeen.value = true;
+
+      const wrapper = shallowMount(ListItem, { props: seenItemProps });
+
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
+        "grayscale",
+      );
+    });
+
+    it("ignores the seen state when the entity type does not track seen items", () => {
+      mockSeenItems.isItemSeen.mockImplementation(() => true);
+
+      const wrapper = shallowMount(ListItem, { props: seenItemProps });
+
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
+        "grayscale",
+      );
+    });
+
+    it("still hides the selection checkbox for a disabled item", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...seenItemProps, isDisabled: true },
+      });
+
+      const checkbox = wrapper.findComponent(BaseInputCheckbox);
+      expect(checkbox.exists()).toBe(true);
+      expect(checkbox.classes()).toContain("invisible");
+      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+        "grayscale",
+      );
+    });
+  });
 
   describe("multiLine prop", () => {
     it("defaults multiLine to false", () => {
@@ -108,7 +204,7 @@ describe("ListItem", () => {
       const metadataItems = wrapper.findAll("[class*='w-full'] > div");
       expect(metadataItems.length).toBeGreaterThan(0);
       expect(metadataItems[0].attributes("style")).toContain(
-        "grid-column: span 2"
+        "grid-column: span 2",
       );
     });
 

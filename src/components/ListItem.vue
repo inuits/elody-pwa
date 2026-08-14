@@ -170,8 +170,10 @@
               :linked-entity-id="intialValues?.id || itemId"
               :entity-type="entityTypename"
               :highlight="
-                (isPrimaryMediafile && metadataItem?.highlightIfPrimaryMediafile) ||
-                (isPrimaryThumbnail && metadataItem?.highlightIfPrimaryThumbnail)
+                (isPrimaryMediafile &&
+                  metadataItem?.highlightIfPrimaryMediafile) ||
+                (isPrimaryThumbnail &&
+                  metadataItem?.highlightIfPrimaryThumbnail)
               "
               :break-words="true"
             />
@@ -308,7 +310,9 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useSeenItems } from "@/composables/useSeenItems";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
@@ -399,6 +403,9 @@ const { t, te } = useI18n();
 
 const { getEntityUuid } = useEntitySingle();
 
+const { trackSeen } = useEntityPageConfig();
+const { isItemSeen } = useSeenItems();
+
 // Track A: every list row gets a labeled split-button primary action
 // ("Open record", shortened to "Open" in narrow/embedded lists) — never a
 // bare ⋮. Pickers pass enable-navigation=false and keep their own row
@@ -433,6 +440,11 @@ const formId = computed(() => getEntityUuid());
 const useEditHelper = useEditMode(
   getEntityUuid() || asString(router.currentRoute.value.params.id),
 );
+
+const isSeen = computed<boolean>(
+  () => trackSeen.value === true && isItemSeen(props.itemId),
+);
+
 const imageSize = computed(() => (isGridMode.value ? 500 : 100));
 const multiLineGridStyle = computed(() =>
   props.multiLine
@@ -518,7 +530,10 @@ const wrapperClasses = computed(() => {
     },
     { "!border-status-new": props.isPreview },
     { "!border-status-deleted": isMarkedAsToBeDeleted.value },
-    { "grayscale brightness-95 !cursor-default": props.isDisabled },
+    {
+      "grayscale brightness-95 !cursor-default":
+        props.isDisabled || isSeen.value,
+    },
     { "animate-pulse": loading.value },
     {
       "bg-background-light hover:bg-surface-row-hover": !isChecked.value,

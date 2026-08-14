@@ -88,6 +88,7 @@ export type EntityConfig = {
   actions?: ContextMenuActionRouteConfig[];
   hasEditMetadataButton?: boolean;
   deleteButton?: EntityButtonConfig | ToggleEntityButtonConfig | false;
+  trackSeen?: boolean;
 };
 
 export type EntityPageConfig = Record<string, EntityConfig>;

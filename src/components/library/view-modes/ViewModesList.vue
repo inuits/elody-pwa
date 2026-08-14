@@ -103,10 +103,13 @@
             mode === 'list' ? 'list-item-list' : 'list-item-grid',
             { 'list-item-list-multi-line': mode === 'list' && multiLine },
           ]"
-          @click="() => {
-            if (openEntityInDetailModal) openEntityInModal(entity.id, entity.type);
-            else entityWrapperHandler(entity.originalEntity)
-          }"
+          @click="
+            () => {
+              if (openEntityInDetailModal)
+                openEntityInModal(entity.id, entity.type);
+              else entityWrapperHandler(entity.originalEntity);
+            }
+          "
           v-memo="entity.memoKey"
         >
           <ListItem
@@ -357,8 +360,8 @@ const processedEntities = computed(() => {
     );
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
-    const isDisabled =
-      isEntityDisabled(entity) || (trackSeen.value && isItemSeen(entity.id));
+    const isDisabled = isEntityDisabled(entity);
+    const isSeen = trackSeen.value === true && isItemSeen(entity.id);
     const formattedMetadata = formatTeaserMetadata(
       entity.teaserMetadata,
       entity.intialValues,
@@ -375,6 +378,7 @@ const processedEntities = computed(() => {
       relation,
       isPreviewActive,
       isDisabled,
+      isSeen,
       currentMode,
       previewEnabled,
       props.entitiesLoading,

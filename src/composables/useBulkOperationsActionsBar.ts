@@ -11,8 +11,11 @@ import {
   type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useEditMode } from "@/composables/useEdit";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useSeenItems } from "@/composables/useSeenItems";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useImport } from "@/composables/useImport";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -77,6 +80,11 @@ export interface BulkOperationsActionsBarEmits {
   ): void;
 }
 
+const seenBulkOperationTypes: string[] = [
+  BulkOperationTypes.MarkAsSeen,
+  BulkOperationTypes.MarkAsUnseen,
+];
+
 export const useBulkOperationsActionsBar = (
   props: BulkOperationsActionsBarProps,
   emit: BulkOperationsActionsBarEmits,
@@ -113,10 +121,25 @@ export const useBulkOperationsActionsBar = (
   const { openModal, getModalInfo, closeAllModals } = useBaseModal();
   const { confirm } = useConfirmModal();
   const { t } = useI18n();
+  const { trackSeen } = useEntityPageConfig();
+  const { markManyAsSeen, unmarkManyAsSeen } = useSeenItems();
+  const { displaySuccessNotification } = useBaseNotification();
 
   const subDropdownOptions = ref<DropdownOption[]>([]);
   const refetchEnabled = ref<boolean>(false);
-  const bulkOperations = ref<DropdownOption[]>([]);
+  const availableBulkOperations = ref<DropdownOption[]>([]);
+
+  const bulkOperations = computed<DropdownOption[]>({
+    get: () =>
+      availableBulkOperations.value.filter(
+        (operation: DropdownOption) =>
+          trackSeen.value ||
+          !seenBulkOperationTypes.includes(String(operation.value)),
+      ),
+    set: (operations: DropdownOption[]) => {
+      availableBulkOperations.value = operations;
+    },
+  });
   const selectedBulkOperation = ref<DropdownOption>();
   const bulkOperationsPromiseIsResolved = ref<boolean>(
     !props.customBulkOperations,
@@ -289,6 +312,36 @@ export const useBulkOperationsActionsBar = (
     setCallbackFunctions(getRefetchCallbacks());
   };
 
+  const handleSeenOperation = (operationType: string) => {
+    const selectedItemIds = getEnqueuedItems(props.context)
+      .map((item: InBulkProcessableItem) => item.id)
+      .filter(Boolean);
+    if (selectedItemIds.length === 0) return;
+
+    const marksAsSeen = operationType === BulkOperationTypes.MarkAsSeen;
+    const translationKey = marksAsSeen ? "mark-as-seen" : "mark-as-unseen";
+
+    void confirm({
+      title: t(`confirm.${translationKey}.title`),
+      message: t(`confirm.${translationKey}.message`, [selectedItemIds.length]),
+      confirmLabel: t(`confirm.${translationKey}.confirm`),
+      cancelLabel: t(`confirm.${translationKey}.cancel`),
+    }).then((choice) => {
+      selectedBulkOperation.value = undefined;
+      if (choice !== "confirm") return;
+      if (marksAsSeen) markManyAsSeen(selectedItemIds);
+      else unmarkManyAsSeen(selectedItemIds);
+
+      dequeueAllItemsForBulkProcessing(props.context);
+      displaySuccessNotification(
+        t(`notifications.success.${translationKey}.title`),
+        t(`notifications.success.${translationKey}.description`, [
+          selectedItemIds.length,
+        ]),
+      );
+    });
+  };
+
   const executeOperationSpecificInitialization = (
     operationType: string,
     bulkOperationModalConfig: BulkOperationModal,
@@ -367,6 +420,11 @@ export const useBulkOperationsActionsBar = (
           return dropdownOption;
         },
       );
+    }
+
+    if (operationType && seenBulkOperationTypes.includes(operationType)) {
+      handleSeenOperation(operationType);
+      return;
     }
 
     if (!bulkOperationModalConfig || !operationType) {

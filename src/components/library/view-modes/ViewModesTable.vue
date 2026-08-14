@@ -45,10 +45,13 @@
           :is="entity.componentTag"
           :to="entity.componentPath"
           class="list-item-table"
-          @click="() => {
-            if (openEntityInDetailModal) openEntityInModal(entity.id, entity.type);
-            else entityWrapperHandler(entity.originalEntity)
-          }"
+          @click="
+            () => {
+              if (openEntityInDetailModal)
+                openEntityInModal(entity.id, entity.type);
+              else entityWrapperHandler(entity.originalEntity);
+            }
+          "
           v-memo="entity.memoKey"
         >
           <TableViewRow
@@ -287,7 +290,8 @@ const processedEntities = computed(() => {
 
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
-    const isDisabled = isEntityDisabled(entity) || (trackSeen.value && isItemSeen(entity.id));
+    const isDisabled = isEntityDisabled(entity);
+    const isSeen = trackSeen.value === true && isItemSeen(entity.id);
     const formattedMetadata = formatTeaserMetadata(
       entity.teaserMetadata,
       entity.intialValues,
@@ -304,6 +308,7 @@ const processedEntities = computed(() => {
       relation,
       isPreviewActive,
       isDisabled,
+      isSeen,
       previewEnabled,
     ];
 
@@ -429,7 +434,7 @@ watch(
   }
 }
 @container parent (max-width: 520px) {
-  .col-secondary:nth-last-child(-n+2) {
+  .col-secondary:nth-last-child(-n + 2) {
     display: none;
   }
 }

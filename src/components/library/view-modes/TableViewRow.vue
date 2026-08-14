@@ -56,7 +56,9 @@
         v-for="(metadataItem, idx) in visibleMetadata"
         :key="`${itemId}_${metadataItem?.key || idx}`"
         :class="columnClass(idx)"
-        :style="props.colMinWidths?.[idx] ? { minWidth: props.colMinWidths[idx] } : {}"
+        :style="
+          props.colMinWidths?.[idx] ? { minWidth: props.colMinWidths[idx] } : {}
+        "
       >
         <ReadOnlyMetadataWrapper
           :form-id="itemId || 'tableview'"
@@ -139,7 +141,9 @@ import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import ReadOnlyMetadataWrapper from "@/components/metadata/ReadOnlyMetadataWrapper.vue";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { hoveredListItem } from "@/composables/useListItemHelper";
+import { useSeenItems } from "@/composables/useSeenItems";
 import { stringIsUrl } from "@/helpers";
 import { auth } from "@/main";
 import { computed, ref } from "vue";
@@ -269,10 +273,17 @@ const isActiveListItem = computed<boolean>(() => {
   return false;
 });
 
+const { trackSeen } = useEntityPageConfig();
+const { isItemSeen } = useSeenItems();
+
+const isSeen = computed<boolean>(
+  () => trackSeen.value === true && isItemSeen(props.itemId),
+);
+
 const wrapperClasses = computed(() => [
   "flex items-center gap-2 p-1.5 border rounded bg-background-light border-accent-highlight cursor-pointer list-none mt-1",
   {
-    "grayscale brightness-95 !cursor-default": props.isDisabled,
+    "grayscale brightness-95 !cursor-default": props.isDisabled || isSeen.value,
     "animate-pulse": props.loading,
     "bg-background-light hover:bg-surface-row-hover": !isChecked.value,
     "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
@@ -301,7 +312,7 @@ const wrapperClasses = computed(() => [
   }
 }
 @container parent (max-width: 520px) {
-  .col-secondary:nth-last-child(-n+2) {
+  .col-secondary:nth-last-child(-n + 2) {
     display: none;
   }
 }
