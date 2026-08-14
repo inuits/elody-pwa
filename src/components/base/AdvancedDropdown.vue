@@ -58,13 +58,16 @@
         </div>
       </template>
       <template #tag="{ option }">
-        <div class="flex m-1 bg-gray-100 rounded-md">
-          <div class="text-value text-black px-2 py-1">
+        <div
+          class="m-0.5 flex items-center rounded bg-chip-relation-bg text-chip-relation-text"
+        >
+          <div class="px-2 py-0.5 text-label font-bold">
             {{ t(option.label) }}
           </div>
           <button
-            class="hover:bg-red-200 px-2"
+            class="cursor-pointer rounded-r border-none bg-transparent px-1.5 text-chip-relation-text hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-accent-accent"
             type="button"
+            :aria-label="t(option.label)"
             @click="() => removeOptionFromListOfOptions(option)"
           >
             &times;

@@ -75,9 +75,13 @@
         </div>
         <span
           v-if="!disabled"
+          role="button"
+          tabindex="0"
+          :aria-label="`${removeChipLabel} ${option.label}`"
           class="multiselect-tag-remove !cursor-pointer"
           @mousedown.stop
           @click.prevent.stop="handleTagRemove(option, $event)"
+          @keydown.enter.prevent.stop="handleTagRemove(option, $event)"
         >
           <span class="multiselect-tag-remove-icon"></span>
         </span>
@@ -153,7 +157,10 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
-const { t } = useI18n();
+const { t, te } = useI18n();
+const removeChipLabel = computed<string>(() =>
+  te("autocomplete.remove-chip") ? t("autocomplete.remove-chip") : "Remove",
+);
 const searchValue = ref<string>();
 const multiselectRef = ref();
 const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKeyboardContext", null);
@@ -244,19 +251,19 @@ const classes = computed(() => {
     inputValue.value.length <= 0 ||
     inputValue.value[0]?.value === "";
 
-  const defaultContainerStyles = "multiselect rounded-lg items-stretch";
+  const defaultContainerStyles = "multiselect rounded-input items-stretch";
   const result: Record<string, string> = {
     container: `${defaultContainerStyles} border-none`,
     containerActive: "outline-1 outline-accent-normal outline-offset-0",
     tagsSearch: "multiselect-tags-search !border-none focus:ring-0 p-0",
-    tag: "multiselect-tag !bg-accent-accent !opacity-100",
+    tag: "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded !font-bold !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",
     ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
   };
 
   if (props.autocompleteStyle === "defaultWithBorder") {
     result["container"] =
-      `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
+      `${defaultContainerStyles} !border-neutral-40 !rounded-input`;
   }
 
   if (props.autocompleteStyle === "readOnly") {

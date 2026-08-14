@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <div class="flex-1 flex items-center min-w-0">
+    <div class="flex-1 flex items-center min-w-0 text-table">
       <div
         v-for="(metadataItem, idx) in visibleMetadata"
         :key="`${itemId}_${metadataItem?.key || idx}`"
@@ -70,7 +70,7 @@
       </div>
     </div>
 
-    <div class="w-fit shrink-0 flex justify-center" @click.stop>
+    <div class="w-28 shrink-0 flex justify-end pr-1" @click.stop>
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
         :parent-entity-id="parentEntityId"
@@ -277,6 +277,12 @@ const wrapperClasses = computed(() => [
 </script>
 
 <style scoped>
+/* the row title is the first cell: link-blue, bold (design entity list) */
+.col-primary :deep([data-cy="metadata-value"]) {
+  color: var(--color-text-light);
+  font-weight: 700;
+}
+
 @container parent (max-width: 640px) {
   .col-primary,
   .col-secondary {

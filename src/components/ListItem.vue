@@ -149,6 +149,7 @@
           idx < 1 && teaserMetadata[0]?.value?.formatter && !hideCellLabels
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine ? '' : 'w-full', // all others stay full width unless multiLine grid handles sizing
+          { 'row-title-cell': idx === 0 && !teaserMetadata[0]?.value?.formatter },
         ]"
         :style="metadataItem.colSpan && props.multiLine
           ? { gridColumn: `span ${metadataItem.colSpan}` }
@@ -572,3 +573,11 @@ const createWindowPanelsFromEntityListElements = (
   return panel;
 };
 </script>
+
+<style scoped>
+/* the row title is the first cell: link-blue, bold (design entity list) */
+.row-title-cell :deep([data-cy="metadata-value"]) {
+  color: var(--color-text-light);
+  font-weight: 700;
+}
+</style>
