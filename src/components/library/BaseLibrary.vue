@@ -150,6 +150,7 @@
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
+            :hide-count="isCollapsedEmptyRelationList"
             :total-items-count="totalEntityCount"
             :exact-count="exactTotalCount"
             :exact-count-loading="exactCountLoading"

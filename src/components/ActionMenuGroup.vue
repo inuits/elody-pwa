@@ -7,9 +7,9 @@
       <BaseButtonNew
         v-for="primaryOption in primaryOptions"
         :key="primaryOption"
-        class="pl-4 pr-6 my-1"
+        class="pl-4 pr-6 my-1 !rounded-pill"
         :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
-        button-style="accentNormal"
+        button-style="primary"
         button-size="small"
         :disabled="isMainActionDisabled || !primaryOption.active"
         :label="t(primaryOption.label, [entityTypeLabel])"
@@ -28,11 +28,14 @@
         "
       />
     </div>
+    <!-- Overflow trigger is always labelled — never a bare ellipsis. -->
     <BaseButtonNew
       v-if="hasSecondaryOptions"
       button-size="small"
-      :icon="DamsIcons.EllipsisV"
-      class="!w-max !p-2 ml-2"
+      :label="t('library.actions-column')"
+      :force-show-label="true"
+      :icon="DamsIcons.AngleDown"
+      class="!w-max !px-2 ml-2"
       @click.stop="
         (event: MouseEvent) => {
           clearSubDropdownOptions();

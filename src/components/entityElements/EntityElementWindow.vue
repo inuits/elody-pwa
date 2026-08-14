@@ -12,7 +12,7 @@
       class="h-full w-full border-solid border rounded-lg @container/window"
       :class="
         isSectionHeader
-          ? 'border-accent-normal bg-accent-normal'
+          ? 'border-accent bg-accent'
           : 'border-accent-light bg-neutral-white'
       "
     >
@@ -22,7 +22,7 @@
         class="border-solid border-b rounded-t-lg flex flex-row items-center"
         :class="
           isSectionHeader
-            ? 'border-accent-normal bg-accent-normal'
+            ? 'border-accent bg-accent'
             : 'border-accent-light bg-accent-light'
         "
       >

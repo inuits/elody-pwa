@@ -1,15 +1,23 @@
 <template>
+  <!-- Selection action bar: plain surface with a 1px border; the count is a
+       muted chip that flips to accent when items are selected. When the
+       relation list is collapsed-empty only the actions remain. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
-    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-accent-light"
+    class="flex items-center alignment-nested-divs"
+    :class="
+      hideCount
+        ? 'justify-end'
+        : 'justify-between rounded-md border border-neutral-40 bg-neutral-white px-3 !py-1'
+    "
   >
-    <div class="flex justify-start items-center">
+    <div v-if="!hideCount" class="flex justify-start items-center">
       <div
-        class="px-2 my-2.5 rounded-md"
+        class="px-2 my-2.5 rounded text-ui"
         :class="
           useExtendedBulkOperations && itemsSelected
-            ? `text-neutral-white bg-accent-normal`
-            : `text-text-body bg-accent-highlight`
+            ? `font-bold text-neutral-white bg-accent`
+            : `text-text-muted bg-surface-muted`
         "
       >
         <span>
@@ -161,8 +169,10 @@ const props = withDefaults(
     isLoading?: boolean;
     exactCount?: number | null;
     exactCountLoading?: boolean;
+    hideCount?: boolean;
   }>(),
   {
+    hideCount: false,
     totalItemsCount: 0,
     exactCount: null,
     exactCountLoading: false,
