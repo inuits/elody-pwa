@@ -35,4 +35,32 @@ describe("useHistoryFieldDiff", () => {
     expect(result.previousVersion).toEqual({});
     expect(result.selectedVersion.intialValues.significance).toBe("High");
   });
+
+  it("passes repeatable field groups through to diff repetition items", () => {
+    const current = {
+      id: "current",
+      intialValues: {
+        parallel_title_group: [{ parallel_title: "New title" }],
+      },
+    } as any;
+    const historical = {
+      id: "hist-1",
+      intialValues: {
+        parallel_title_group: [{ parallel_title: "Old title" }],
+      },
+    } as any;
+
+    const result = useHistoryFieldDiff(current, historical, [], [
+      { repetitionKey: "parallel_title_group", fieldKeys: ["parallel_title"] },
+    ]);
+
+    expect(
+      result.selectedVersion.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toEqual({ formatter: "pill|added", label: "New title" });
+    expect(
+      result.previousVersion.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toEqual({ formatter: "pill|modified", label: "Old title" });
+  });
 });

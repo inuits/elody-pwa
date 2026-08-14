@@ -1,6 +1,6 @@
 import { computed, type Ref } from "vue";
 import { dequal as isEqual } from "dequal";
-import { getMetadataFields } from "@/helpers";
+import { getMetadataFields, type RepeatablePanelFields } from "@/helpers";
 import type { Entity, WindowElementPanel } from "@/generated-types/queries";
 import { deepToRaw } from "@/utils/deepToRaw";
 
@@ -8,6 +8,7 @@ interface DiffArgs {
   previousVersion: Entity | null | undefined;
   selectedVersion: Entity;
   fields: string[];
+  repeatableFields?: RepeatablePanelFields[];
 }
 
 const formatDisplayValue = (val: any) => {
@@ -21,6 +22,7 @@ export const computeEntityDiff = ({
   previousVersion,
   selectedVersion,
   fields,
+  repeatableFields = [],
 }: DiffArgs) => {
   const cloneSelected = structuredClone(deepToRaw(selectedVersion)) as any;
   const selectedValues = cloneSelected?.intialValues || {};
@@ -61,6 +63,63 @@ export const computeEntityDiff = ({
       processedPrevious[key] = prevVal;
       processedSelected[key] = currentVal;
     }
+  });
+
+  // Repeatable panels store one object per repetition under
+  // `intialValues[repetitionKey]`, keyed by each nested field's own key
+  // (e.g. `intialValues.parallel_title_group[0].parallel_title`). Repetitions
+  // aren't identity-matched — they're compared position by position, and
+  // only the fields that actually differ at a given index get pill-wrapped,
+  // the way a plain scalar field would.
+  repeatableFields.forEach(({ repetitionKey, fieldKeys }) => {
+    const currentArr: any[] = Array.isArray(selectedValues[repetitionKey])
+      ? selectedValues[repetitionKey]
+      : [];
+    const prevArr: any[] = Array.isArray(previousValues[repetitionKey])
+      ? previousValues[repetitionKey]
+      : [];
+    const maxLength = Math.max(currentArr.length, prevArr.length);
+
+    const processedCurrentArr: any[] = [];
+    const processedPrevArr: any[] = [];
+
+    for (let index = 0; index < maxLength; index++) {
+      const currentItem = currentArr[index];
+      const prevItem = prevArr[index];
+
+      if (currentItem !== undefined) {
+        const processedItem: Record<string, any> = { ...currentItem };
+        fieldKeys.forEach((subKey) => {
+          const currentVal = currentItem?.[subKey];
+          const prevVal = prevItem?.[subKey];
+          if (canDiff && !isEqual(currentVal, prevVal)) {
+            processedItem[subKey] = {
+              formatter: "pill|added",
+              label: formatDisplayValue(currentVal),
+            };
+          }
+        });
+        processedCurrentArr.push(processedItem);
+      }
+
+      if (prevItem !== undefined) {
+        const processedItem: Record<string, any> = { ...prevItem };
+        fieldKeys.forEach((subKey) => {
+          const currentVal = currentItem?.[subKey];
+          const prevVal = prevItem?.[subKey];
+          if (canDiff && !isEqual(currentVal, prevVal)) {
+            processedItem[subKey] = {
+              formatter: "pill|modified",
+              label: formatDisplayValue(prevVal),
+            };
+          }
+        });
+        processedPrevArr.push(processedItem);
+      }
+    }
+
+    processedSelected[repetitionKey] = processedCurrentArr;
+    processedPrevious[repetitionKey] = processedPrevArr;
   });
 
   cloneSelected.intialValues = processedSelected;

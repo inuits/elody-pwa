@@ -14,6 +14,7 @@ import {
 import {
   findEntityListElement,
   findPanelMetadata,
+  findRepeatablePanelFields,
   findWysiwygElement,
   convertDateToReadbleFormat,
   getEntityTitle,
@@ -209,12 +210,17 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     ),
   );
 
+  const repeatableComparisonFields = computed(() =>
+    findRepeatablePanelFields(leftVersion.value?.entityView),
+  );
+
   const scalarDiff = computed(() => {
     if (!leftVersion.value) return null;
     return useHistoryFieldDiff(
       leftVersion.value,
       rightVersion.value,
       scalarComparisonFields.value,
+      repeatableComparisonFields.value,
     );
   });
 
@@ -239,6 +245,42 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     const diffed = scalarDiff.value?.previousVersion as Record<string, any>;
     if (!diffed || Object.keys(diffed).length === 0) return null;
     return withDiffedIntialValues(rightVersion.value, diffed);
+  });
+
+  // The backend can assemble entityView's nested field maps in a different
+  // order for a historical snapshot than for the live entity (confirmed: the
+  // divergence is already present the moment Apollo delivers the response,
+  // before any frontend processing). A side-by-side diff view can't rely on
+  // each side's own object key order, so both sides render using one
+  // canonical order anchored on the left/current side, with any keys unique
+  // to the right side appended at the end.
+  const orderKeysByReference = (
+    reference: Record<string, any> | undefined,
+    other: Record<string, any> | undefined,
+  ): string[] => {
+    const referenceKeys = Object.keys(reference ?? {});
+    const extraKeys = Object.keys(other ?? {}).filter(
+      (key) => !referenceKeys.includes(key),
+    );
+    return [...referenceKeys, ...extraKeys];
+  };
+
+  const columnOrder = computed<string[]>(() =>
+    orderKeysByReference(
+      leftVersionEntity.value?.entityView,
+      rightVersionEntity.value?.entityView,
+    ),
+  );
+
+  const elementOrderByColumn = computed<Record<string, string[]>>(() => {
+    const result: Record<string, string[]> = {};
+    columnOrder.value.forEach((columnKey) => {
+      result[columnKey] = orderKeysByReference(
+        leftVersionEntity.value?.entityView?.[columnKey]?.elements,
+        rightVersionEntity.value?.entityView?.[columnKey]?.elements,
+      );
+    });
+    return result;
   });
 
   const wysiwygFieldChanges = computed<Omit<WysiwygDiff, "colorVariant">[]>(
@@ -399,6 +441,8 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     rightLoading,
     leftVersionEntity,
     rightVersionEntity,
+    columnOrder,
+    elementOrderByColumn,
     leftWysiwygDiffs,
     rightWysiwygDiffs,
     relationDiffs,

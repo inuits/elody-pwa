@@ -18,14 +18,25 @@ import {
   findPanelMetadata,
   getFromExpressEndpoint,
   findEntityListElement,
+  findRepeatablePanelFields,
+  getValueForPanelMetadata,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
   type Entity,
   type ColumnList,
   InputFieldTypes,
+  PanelType,
 } from "@/generated-types/queries";
 import type { DropzoneFile } from "dropzone";
+
+const mocks = vi.hoisted(() => ({
+  getForm: vi.fn(),
+}));
+
+vi.mock("@/composables/useFormHelper", () => ({
+  useFormHelper: () => ({ getForm: mocks.getForm }),
+}));
 
 const mockTranslations = {
   notification: {
@@ -110,17 +121,32 @@ describe("downloadFile", () => {
 
 describe("looksLikeEntityId", () => {
   it("recognizes prefixed entity ids", () => {
-    for (const id of ["PERS-AbC12", "CORP-XyZ9", "MW-JK174138", "BB-9789012345678", "W-123", "T-abc_def"]) {
+    for (const id of [
+      "PERS-AbC12",
+      "CORP-XyZ9",
+      "MW-JK174138",
+      "BB-9789012345678",
+      "W-123",
+      "T-abc_def",
+    ]) {
       expect(looksLikeEntityId(id)).toBe(true);
     }
   });
 
   it("recognizes uuids", () => {
-    expect(looksLikeEntityId("a1b2c3d4-e5f6-7890-abcd-ef1234567890")).toBe(true);
+    expect(looksLikeEntityId("a1b2c3d4-e5f6-7890-abcd-ef1234567890")).toBe(
+      true,
+    );
   });
 
   it("treats plain names as non-ids", () => {
-    for (const name of ["Wolfgang Amadeus Mozart", "Madonna", "Bach", "Jean-Paul Sartre", ""]) {
+    for (const name of [
+      "Wolfgang Amadeus Mozart",
+      "Madonna",
+      "Bach",
+      "Jean-Paul Sartre",
+      "",
+    ]) {
       expect(looksLikeEntityId(name)).toBe(false);
     }
   });
@@ -811,5 +837,129 @@ describe("getFromExpressEndpoint", () => {
 
     expect(fetchSpy.mock.calls[0][1].headers).toEqual({ "X-Tenant-ID": "" });
     vi.unstubAllGlobals();
+  });
+
+  describe("findRepeatablePanelFields", () => {
+    it("collects the repetitionKey and every nested field's own key from a repeatable panel", () => {
+      const entityView = {
+        column: {
+          elements: {
+            parallelTitle: {
+              __typename: "WindowElementPanel",
+              repetitionConfig: { repetitionKey: "parallel_title_group" },
+              parallel_title: {
+                __typename: "PanelMetaData",
+                key: "parallel_title",
+              },
+              other_title_details: {
+                __typename: "PanelMetaData",
+                key: "other_title_details",
+              },
+            },
+          },
+        },
+      };
+
+      expect(findRepeatablePanelFields(entityView)).toEqual([
+        {
+          repetitionKey: "parallel_title_group",
+          fieldKeys: expect.arrayContaining([
+            "parallel_title",
+            "other_title_details",
+          ]),
+        },
+      ]);
+    });
+
+    it("ignores panels without a repetitionConfig", () => {
+      const entityView = {
+        column: {
+          elements: {
+            info: {
+              __typename: "WindowElementPanel",
+              significance: {
+                __typename: "PanelMetaData",
+                key: "significance",
+              },
+            },
+          },
+        },
+      };
+
+      expect(findRepeatablePanelFields(entityView)).toEqual([]);
+    });
+
+    it("finds every repeatable panel regardless of nesting depth", () => {
+      const entityView = {
+        column: {
+          elements: {
+            isbnGroup: {
+              __typename: "WindowElementPanel",
+              repetitionConfig: { repetitionKey: "isbn_group" },
+              isbn: { __typename: "PanelMetaData", key: "isbn" },
+            },
+            eanGroup: {
+              __typename: "WindowElementPanel",
+              repetitionConfig: { repetitionKey: "ean_group" },
+              ean: { __typename: "PanelMetaData", key: "ean" },
+            },
+          },
+        },
+      };
+
+      const results = findRepeatablePanelFields(entityView);
+
+      expect(results.map((r) => r.repetitionKey)).toEqual(
+        expect.arrayContaining(["isbn_group", "ean_group"]),
+      );
+      expect(results).toHaveLength(2);
+    });
+  });
+
+  describe("getValueForPanelMetadata - repeatable panel fields", () => {
+    it("returns the whole repetition item, for the caller to drill into by field key", () => {
+      mocks.getForm.mockReturnValue({
+        values: {
+          intialValues: {
+            parallel_title_group: [
+              { parallel_title: "par tit", other_title_details: "other le" },
+            ],
+          },
+        },
+      });
+
+      const value = getValueForPanelMetadata(
+        PanelType.Metadata,
+        "parallel_title",
+        "entity-1",
+        "",
+        undefined,
+        { repetitionKey: "parallel_title_group" } as any,
+        0,
+      );
+
+      expect(value).toEqual({
+        parallel_title: "par tit",
+        other_title_details: "other le",
+      });
+    });
+
+    it("returns an empty string when the repetition index is missing", () => {
+      mocks.getForm.mockReturnValue({
+        values: { intialValues: { parallel_title_group: [] } },
+      });
+
+      const value = getValueForPanelMetadata(
+        PanelType.Metadata,
+        "parallel_title",
+        "entity-1",
+        "",
+        undefined,
+        { repetitionKey: "parallel_title_group" } as any,
+        0,
+      );
+
+      expect(value).toBe("");
+    });
   });
 });

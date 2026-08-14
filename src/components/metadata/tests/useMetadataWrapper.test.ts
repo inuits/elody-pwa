@@ -436,3 +436,203 @@ describe("useMetadataWrapper — multi-select empty string initialization", () =
     expect(capturedFieldValueProxy!.value).toBe("");
   });
 });
+
+const makeRepeatableProps = (metadataValue: any) => ({
+  formId: "M-REPEATABLE-TEST",
+  metadata: {
+    key: "parallel_title",
+    label: "metadata.labels.parallel-title",
+    value: metadataValue,
+    __typename: "PanelMetaData",
+  },
+  isEdit: false,
+  baseLibraryMode: "normalBaseLibrary",
+  formFlow: "edit",
+  showErrors: false,
+  repeatablePanelConfig: {
+    isRepeatable: true,
+    index: 0,
+    field: undefined,
+    repeatableFieldsHelper: { fieldKey: "parallel_title_group" } as any,
+  },
+});
+
+describe("useMetadataWrapper — repeatable panel fields", () => {
+  it("seeds fieldValueProxy by drilling into the repetition item by this field's own key", async () => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeRepeatableProps({
+            parallel_title: "par tit",
+            other_title_details: "other le",
+          }) as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldValueProxy!.value).toBe("par tit");
+  });
+
+  it("resolvedMetadataValue exposes this field's own (possibly diff-pill-wrapped) value, not the whole repetition item", async () => {
+    let capturedResolvedMetadataValue: ComputedRef<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { resolvedMetadataValue } = useMetadataWrapper(
+          makeRepeatableProps({
+            parallel_title: { formatter: "pill|added", label: "New title" },
+            other_title_details: "Same",
+          }) as any,
+          () => undefined,
+        );
+        capturedResolvedMetadataValue = resolvedMetadataValue;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedResolvedMetadataValue!.value).toEqual({
+      formatter: "pill|added",
+      label: "New title",
+    });
+  });
+});
+
+const mountWithExtract = (
+  routeEntityId: string,
+  metadata: Record<string, any>,
+  registerForms: (formHelper: ReturnType<typeof useFormHelper>) => void,
+): Promise<(key: string) => string | undefined> => {
+  mockRouteEntityId = routeEntityId;
+  let extract: (key: string) => string | undefined;
+
+  const component = defineComponent({
+    setup() {
+      const formHelper = useFormHelper();
+      registerForms(formHelper);
+
+      useForm();
+      defineRule("no_xss", () => true);
+
+      const { extractIntialValueFromParentByKey } = useMetadataWrapper(
+        {
+          formId: "M-NEW",
+          metadata: { __typename: "PanelMetaData", ...metadata },
+          isEdit: false,
+          baseLibraryMode: "normalBaseLibrary",
+          formFlow: "edit",
+          showErrors: false,
+        } as any,
+        () => undefined,
+      );
+      extract = extractIntialValueFromParentByKey;
+      return () => h("div");
+    },
+  });
+
+  mount(component);
+  return nextTick().then(() => extract!);
+};
+
+describe("useMetadataWrapper — extractIntialValueFromParentByKey", () => {
+  it("reads from the parent's own intialValues when no fromRelationType is set", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-1",
+      { key: "subtitle" },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-1", {
+          intialValues: { subtitle: "parent subtitle" },
+          relationValues: {},
+        });
+      },
+    );
+
+    expect(extract("subtitle")).toBe("parent subtitle");
+  });
+
+  it("traverses fromRelationType to read from the related entity's form", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-2",
+      {
+        key: "title",
+        copyValueFromParent: {
+          key: "original_headtitle",
+          label: "bulk-operations.copy-title-from-work",
+          fromRelationType: "refWork",
+        },
+      },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-2", {
+          intialValues: {},
+          relationValues: { refWork: [{ key: "W-REL-2", type: "refWork" }] },
+        });
+        formHelper.createForm("W-REL-2", {
+          intialValues: { original_headtitle: "Work Head Title" },
+          relationValues: {},
+        });
+      },
+    );
+
+    expect(extract("original_headtitle")).toBe("Work Head Title");
+  });
+
+  it("returns undefined when the related entity's form is not registered", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-3",
+      {
+        key: "title",
+        copyValueFromParent: {
+          key: "original_headtitle",
+          label: "bulk-operations.copy-title-from-work",
+          fromRelationType: "refWork",
+        },
+      },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-3", {
+          intialValues: {},
+          relationValues: { refWork: [{ key: "W-MISSING", type: "refWork" }] },
+        });
+      },
+    );
+
+    expect(extract("original_headtitle")).toBeUndefined();
+  });
+
+  it("returns undefined when the parent has no relation of the configured type", async () => {
+    const extract = await mountWithExtract(
+      "EXPR-PARENT-4",
+      {
+        key: "title",
+        copyValueFromParent: {
+          key: "original_headtitle",
+          label: "bulk-operations.copy-title-from-work",
+          fromRelationType: "refWork",
+        },
+      },
+      (formHelper) => {
+        formHelper.createForm("EXPR-PARENT-4", {
+          intialValues: {},
+          relationValues: {},
+        });
+      },
+    );
+
+    expect(extract("original_headtitle")).toBeUndefined();
+  });
+});

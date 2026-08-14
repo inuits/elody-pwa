@@ -7,16 +7,16 @@
       class="ml-0 min-[880px]:ml-6"
       v-if="showEditMetadataButton"
     />
-    <HistoryButton
-      v-if="showHistoryButton"
-      :entity-type="entityType"
-      :entity-id="entityId"
-    />
     <EntityHeaderButton
       v-if="isSingleEntityPage && customDeleteButton"
       :config="customDeleteButton"
     />
     <DeleteButton v-else-if="showDeleteButton" />
+    <HistoryButton
+      v-if="showHistoryButton"
+      :entity-type="entityType"
+      :entity-id="entityId"
+    />
     <HeaderContextMenuActions
       v-if="isSingleEntityPage && contextMenuActions.length > 0"
       :actions="contextMenuActions"

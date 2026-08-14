@@ -3,6 +3,7 @@
     <div v-for="column in columns" :key="column.key">
       <entity-history-element
         :elements="column.value.elements || {}"
+        :element-order="elementOrderByColumn[column.key] || []"
         :entity="entity"
         :relation-diffs="relationDiffs"
         :wysiwyg-diffs="wysiwygDiffs"
@@ -22,17 +23,25 @@ import type {
   WysiwygDiff,
 } from "@/composables/useHistoryComparisonData";
 
-const props = defineProps<{
-  entity: {
-    id: string;
-    uuid?: string;
-    entityView?: Record<string, any>;
-    intialValues?: Record<string, any>;
-    relationValues?: Record<string, any>;
-  };
-  wysiwygDiffs: WysiwygDiff[];
-  relationDiffs: RelationDiff[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    entity: {
+      id: string;
+      uuid?: string;
+      entityView?: Record<string, any>;
+      intialValues?: Record<string, any>;
+      relationValues?: Record<string, any>;
+    };
+    wysiwygDiffs: WysiwygDiff[];
+    relationDiffs: RelationDiff[];
+    columnOrder?: string[];
+    elementOrderByColumn?: Record<string, string[]>;
+  }>(),
+  {
+    columnOrder: () => [],
+    elementOrderByColumn: () => ({}),
+  },
+);
 
 provide(
   "ParentEntityProvider",
@@ -67,9 +76,16 @@ const omitIdMetadata = (value: any): any => {
   return result;
 };
 
-const columns = computed(() =>
-  Object.entries(omitIdMetadata(props.entity.entityView) || {})
-    .filter(([, value]) => value && typeof value === "object")
-    .map(([key, value]) => ({ key, value })),
-);
+const columns = computed(() => {
+  const omitted = omitIdMetadata(props.entity.entityView) || {};
+  const orderedKeys = props.columnOrder.length
+    ? props.columnOrder
+    : Object.keys(omitted);
+  const extraKeys = Object.keys(omitted).filter(
+    (key) => !orderedKeys.includes(key),
+  );
+  return [...orderedKeys, ...extraKeys]
+    .map((key) => ({ key, value: omitted[key] }))
+    .filter(({ value }) => value && typeof value === "object");
+});
 </script>

@@ -89,6 +89,7 @@ export const useMetadataWrapper = (
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
   fieldErrorMessage: ComputedRef<string | undefined>;
+  resolvedMetadataValue: ComputedRef<any>;
 } => {
   const formHelper = useFormHelper();
   const { forms, editableFields } = formHelper;
@@ -172,6 +173,16 @@ export const useMetadataWrapper = (
   const fieldIsPermittedToBeSeenByUser = ref<boolean>(false);
   const fieldIsEditableByUser = ref<boolean>(false);
 
+  // Inside a repeatable panel, `metadata.value` is the whole repetition item
+  // (all sibling fields keyed by their own `.key`), since every field in the
+  // group shares one repetitionKey. Drill into this field's own key to get
+  // its actual (possibly diff-pill-wrapped) value.
+  const resolvedMetadataValue = computed<any>(() =>
+    props.repeatablePanelConfig?.isRepeatable
+      ? (props.metadata.value as any)?.[metadataKey]
+      : props.metadata.value,
+  );
+
   const getNewFieldValue = (newValue: any): any => {
     if (
       fieldKind.value === "PanelRelationMetaData" &&
@@ -219,7 +230,7 @@ export const useMetadataWrapper = (
       if (props.metadata.inputField?.autoSelectable && !newValue)
         newValue = props.metadata.inputField.options[0]?.value;
       if (props.repeatablePanelConfig?.isRepeatable)
-        newValue = props.metadata.value[props.metadata.key];
+        newValue = resolvedMetadataValue.value;
     } catch {
       throw Error("Unable to auto select value, no options available");
     }
@@ -256,5 +267,6 @@ export const useMetadataWrapper = (
     fieldValueProxy,
     fieldTooltipValue,
     fieldErrorMessage,
+    resolvedMetadataValue,
   };
 };

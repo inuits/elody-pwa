@@ -308,8 +308,12 @@ export const getValueForPanelMetadata = (
   const form = useFormHelper().getForm(entityId);
   if (panelType === PanelType.Metadata && form) {
     if (repetitionConfig && repetitionIndex !== undefined) {
+      // Returns the whole repetition item (an object keyed by each sibling
+      // field's own key), not this field's value — callers (useMetadataWrapper's
+      // mount-time seeding, MetadataWrapper's diff-pill check) drill into it by
+      // their own `metadata.key`.
       return (
-        form.values.intialValues[repetitionConfig.repetitionKey][
+        form.values.intialValues[repetitionConfig.repetitionKey]?.[
           repetitionIndex
         ] || ""
       );
@@ -554,6 +558,42 @@ export const findEntityListElement = (
 
   return results;
 }
+
+export type RepeatablePanelFields = {
+  repetitionKey: string;
+  fieldKeys: string[];
+};
+
+// A repeatable panel (WindowElementPanel with a repetitionConfig) stores its
+// values as an array under `intialValues[repetitionKey]`, one object per
+// repetition, keyed by each nested PanelMetaData's own `.key` — not as flat
+// top-level `intialValues` entries. Diffing needs to know both the array key
+// and the per-item field keys to compare each repetition element-wise.
+export const findRepeatablePanelFields = (
+  obj: any,
+): RepeatablePanelFields[] => {
+  const results: RepeatablePanelFields[] = [];
+
+  if (obj && typeof obj === "object") {
+    const repetitionKey = obj.repetitionConfig?.repetitionKey;
+    if (obj.__typename === "WindowElementPanel" && repetitionKey) {
+      const fieldKeys = Object.values(obj)
+        .filter(
+          (value: any) => value && value.__typename === "PanelMetaData",
+        )
+        .map((value: any) => value.key as string);
+      results.push({ repetitionKey, fieldKeys });
+    }
+
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        results.push(...findRepeatablePanelFields(obj[key]));
+      }
+    }
+  }
+
+  return results;
+};
 
 export const getEntityTitle = (entity: BaseEntity): string => {
   let title: string = entity.id;
