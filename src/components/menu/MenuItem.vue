@@ -6,12 +6,11 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center justify-center min-h-9 mt-3 cursor-pointer rounded-md hover:bg-accent-wash"
+      class="flex flex-row items-center pl-4 min-h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[
         {
-          'bg-accent-wash': isBeingHovered,
-          'bg-accent-wash text-accent font-bold': isActiveParentOrSubmenu,
-          '!justify-start pl-4': isExpanded,
+          'bg-neutral-40 rounded-lg': isBeingHovered,
+          'text-accent-accent': isActiveParentOrSubmenu,
         },
       ]"
     >
@@ -31,7 +30,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-value w-max font-bold">
+          <span class="text-sm w-max font-bold">
             <div class="w-max">
               {{ t(menuitem?.label) }}
             </div>

@@ -2,10 +2,6 @@
   <context-menu-actions-shell
     :has-promoted-actions="hasPromotedActions"
     :has-overflow-actions="hasAvailableContextMenuActions"
-    :primary-label="primaryLabel"
-    :primary-disabled="primaryDisabled"
-    :menu-label="menuLabel"
-    @primary="emit('primary')"
   >
     <template #promoted>
       <context-menu-action
@@ -57,20 +53,14 @@ const props = withDefaults(
     relation?: object | string;
     bulkOperationsContext: Context | undefined;
     refetchEntities?: () => Promise<void>;
-    primaryLabel?: string;
-    primaryDisabled?: boolean;
-    menuLabel?: string;
   }>(),
   {
     contextMenuActions: undefined,
     refetchEntities: undefined,
-    primaryLabel: undefined,
-    primaryDisabled: false,
-    menuLabel: undefined,
   },
 );
 
-const emit = defineEmits(["toggleLoading", "primary"]);
+const emit = defineEmits(["toggleLoading"]);
 
 const handleEmit = () => {
   emit("toggleLoading");

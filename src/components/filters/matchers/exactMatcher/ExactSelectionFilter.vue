@@ -1,25 +1,6 @@
 <template>
-  <!-- option-shaped loading state: checkbox squares + label bars, so the
-       arriving option list doesn't jump -->
-  <div
-    v-if="isLoading"
-    data-cy="filter-options-skeleton"
-    class="flex flex-col gap-2 py-1"
-    aria-hidden="true"
-  >
-    <div
-      v-for="index in 4"
-      :key="`filter-option-skeleton-${index}`"
-      class="flex items-center gap-2"
-    >
-      <span
-        class="h-3.5 w-3.5 shrink-0 animate-pulse rounded-[3px] border border-neutral-40 bg-neutral-20"
-      ></span>
-      <span
-        class="h-[11px] animate-pulse rounded bg-neutral-30"
-        :class="index % 2 === 0 ? 'w-2/5' : 'w-3/5'"
-      ></span>
-    </div>
+  <div v-if="isLoading" class="flex items-center justify-center">
+  <SpinnerLoader theme="accent" :dimensions="10" />
   </div>
   <div v-if="showFilters" class="grow">
     <AutocompleteFilter
@@ -57,6 +38,7 @@ import {
 } from "@/generated-types/queries";
 import AutocompleteFilter from "./AutocompleteFilter.vue";
 import CheckboxFilter from "./CheckboxFilter.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useFilterOptions } from "@/composables/useFilterOptions";
 import { type FilterListItem } from "@/composables/useStateManagement";
 import { useRoute } from "vue-router";

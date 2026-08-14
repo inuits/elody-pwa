@@ -28,7 +28,6 @@
                 :entity="{ type: entityType }"
               />
               <entity-element-metadata
-              :empty-as-dash="true"
                 v-else
                 :label="refMetadata.label as string"
                 :value="refMetadata.value"
@@ -52,7 +51,6 @@
         </template>
         <template #default>
           <entity-element-metadata
-              :empty-as-dash="true"
             class="text-text-placeholder"
             :label="refMetadata.label as string"
             v-model:value="metadataValueToDisplayOnTooltip"

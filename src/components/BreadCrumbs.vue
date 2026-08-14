@@ -1,43 +1,42 @@
 <template>
-  <nav v-if="breadCrumbRoutesExist" :aria-label="breadcrumbAriaLabel">
+  <div v-if="breadCrumbRoutesExist">
     <div
       class="flex flex-wrap gap-2 min-[900px]:h-10 min-[900px]:flex-nowrap relative z-notification"
     >
-      <!-- pill capsule: ancestors are real links so middle-click works -->
       <div
-        class="flex justify-center items-center bg-surface-muted h-full rounded-pill px-1"
+        :class="[
+          'flex justify-center items-center bg-accent-highlight h-full',
+          { 'rounded-t-xl rounded-br-xl': showHistory },
+          { 'rounded-xl': !showHistory },
+        ]"
       >
-        <button
+        <div
           v-if="breadcrumbRoutes.length > 1"
-          type="button"
-          :aria-expanded="showHistory"
-          :aria-label="breadcrumbAriaLabel"
-          class="flex items-center cursor-pointer rounded-pill border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-accent-accent"
           @click="toggleList()"
+          class="flex cursor-pointer"
         >
           <unicon height="24" :name="Unicons.EllipsisH.name"></unicon>
           <p class="ml-1">{{ breadcrumbRoutes.length - 1 }}</p>
-        </button>
+        </div>
         <unicon
           v-if="breadcrumbRoutes.length > 1"
           height="24"
           :name="Unicons.AngleRight.name"
         ></unicon>
-        <a
+        <p
           v-if="previousRoute?.title"
-          :href="resolveHref(previousRoute)"
           :class="[
-            'px-2 cursor-pointer text-text-body no-underline',
+            'px-2 cursor-pointer',
             { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="
             truncatePreviousRouteName = resolveTitle(previousRoute.title).includes(' ')
           "
           @mouseleave="truncatePreviousRouteName = true"
-          @click.prevent="checkNavigationAvailable(previousRoute)"
+          @click="checkNavigationAvailable(previousRoute)"
         >
           {{ resolveTitle(previousRoute?.title) }}
-        </a>
+        </p>
       </div>
       <div
         v-if="previousRoute"
@@ -45,8 +44,13 @@
       >
         <unicon height="24" :name="Unicons.AngleRight.name" />
       </div>
-      <!-- the current record: never truncated, 15px heading -->
-      <div aria-current="page" class="flex items-center text-heading font-bold text-text-body">
+      <div
+        :class="[
+          `flex max-w-[10vw] min-[1200px]:max-w-[20vw] min-[1250px]:max-w-[25vw] min-[1330px]:max-w-[30vw] min-[1400px]:max-w-[33vw] min-[1550px]:max-w-[40vw] min-[1650px]:max-w-[45vw]
+            items-center subtitle text-neutral-black truncate`,
+          { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
+        ]"
+      >
         <div class="mr-2" v-if="typePillLabel">
           <MetadataFormatter class="p-2" v-bind="typePillLabel" />
         </div>
@@ -55,7 +59,7 @@
     </div>
     <div
       v-if="showHistory"
-      class="absolute bg-neutral-white border border-neutral-30 rounded-overlay shadow-overlay z-notification"
+      class="absolute bg-accent-highlight rounded-b-md z-notification"
     >
       <ul>
         <li
@@ -64,11 +68,7 @@
             .slice(0, -1)
             .reverse()"
           :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
-        >
-        <a
-          :href="resolveHref(breadcrumbRoute)"
-          class="block text-text-body no-underline"
-          @click.prevent="checkNavigationAvailable(breadcrumbRoute)"
+          @click="checkNavigationAvailable(breadcrumbRoute)"
         >
           <div class="flex flex-col items-end w-full">
             <div class="px-4">
@@ -101,7 +101,6 @@
               <p>{{ resolveTitle(breadcrumbRoute.title) }}</p>
             </div>
           </div>
-        </a>
         </li>
       </ul>
     </div>
@@ -110,7 +109,7 @@
       class="absolute top-0 left-0 h-screen w-screen z-backdrop"
       @click="showHistory = false"
     ></div>
-  </nav>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -131,7 +130,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
 
-const { t, te, locale } = useI18n();
+const { t, locale } = useI18n();
 const config: any = inject("config");
 
 const resolveTitle = (value: string | TranslationEntry[] | undefined): string => {
@@ -144,29 +143,6 @@ const resolveTitle = (value: string | TranslationEntry[] | undefined): string =>
     );
   }
   return t(value);
-};
-
-const breadcrumbAriaLabel = computed<string>(() =>
-  te("navigation.breadcrumb") ? t("navigation.breadcrumb") : "Breadcrumb",
-);
-
-// Real hrefs for ancestor links (middle-click support); navigation itself
-// still runs through the edit-discard guard on plain click.
-const resolveHref = (route: any): string | undefined => {
-  try {
-    if (route.id)
-      return router.resolve({
-        params: {
-          id: route.id,
-          type: Array.isArray(route.type) ? route.type[0] : route.type,
-        },
-      }).href;
-    if (route.overviewPage)
-      return router.resolve({ name: route.overviewPage }).href;
-  } catch {
-    return undefined;
-  }
-  return undefined;
 };
 
 const showHistory = ref<boolean>(false);

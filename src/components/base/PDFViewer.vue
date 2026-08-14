@@ -39,7 +39,7 @@
         ]"
       >
         <div>
-          <div v-if="error" class="p-4 text-value text-red-700 bg-red-100 rounded">
+          <div v-if="error" class="p-4 text-sm text-red-700 bg-red-100 rounded">
             {{ error }}
           </div>
 

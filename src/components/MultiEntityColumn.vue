@@ -45,7 +45,7 @@
           button-size="small"
           :label="t('metadata.labels.edit-metadata')"
           :icon="DamsIcons.Edit"
-          button-style="accentAccent"
+          button-style="accentNormal"
           @click="startEdit"
         />
         <template v-if="editHelper.isEdit">
@@ -61,7 +61,7 @@
             button-size="small"
             :label="t('bulk-operations.cancel')"
             :icon="DamsIcons.Times"
-            button-style="accentAccent"
+            button-style="accentNormal"
             @click="openDiscardModal"
           />
         </template>

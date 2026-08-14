@@ -17,7 +17,7 @@
         <div class="w-px h-2.5 bg-gray-300" />
         <div
           v-if="index === 0 || index % 2 === 0"
-          class="relative text-center text-value text-gray-300 left-1/2 w-max transform translate-x-[-50%]"
+          class="relative text-center text-sm text-gray-300 left-1/2 w-max transform translate-x-[-50%]"
         >
           {{ number }}
         </div>

@@ -4,13 +4,13 @@
       <template #activator="{ on }">
         <div
           v-on="on"
-          class="cursor-pointer rounded-md text-text-muted"
+          class="cursor-pointer rounded-md text-[#607d8b]"
           @click="toggleKeyboard"
         >
           <unicon :name="Unicons.Keyboard.name" />
         </div>
       </template>
-      <span class="text-value text-text-placeholder">
+      <span class="text-sm text-text-placeholder">
         {{ t("metadata.labels.virtual-keyboard") }}
       </span>
     </BaseTooltip>

@@ -18,7 +18,7 @@
         positioning="bottom-center"
         :autoPan="true"
       >
-        <div class="bg-white rounded-card shadow-overlay p-3 text-value w-48">
+        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
           <div
             v-if="featureLoading"
             class="h-full w-full flex items-center justify-center py-4"
@@ -121,13 +121,6 @@ import { Unicons } from "@/types";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useI18n } from "vue-i18n";
 
-
-// Map colours come from the client-themed accent token.
-const accentColor = (): string =>
-  getComputedStyle(document.documentElement)
-    .getPropertyValue("--color-accent")
-    .trim() || "#3BA6CB";
-
 const props = withDefaults(
   defineProps<{
     wkt: { wkt: string, id: string }[] | HeatMapItem[];
@@ -208,7 +201,7 @@ const features = computed(() => {
 });
 
 const overlayStyle = new Style({
-  stroke: new Stroke({ color: accentColor(), width: 2 }),
+  stroke: new Stroke({ color: "#f97316", width: 2 }),
   fill: new Fill({ color: "rgba(249, 115, 22, 0.15)" }),
 });
 

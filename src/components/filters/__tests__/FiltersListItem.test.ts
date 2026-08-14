@@ -5,7 +5,7 @@ import FiltersListItemPanel from "@/components/filters/FiltersListItemPanel.vue"
 import { Matchers, AdvancedFilterTypes } from "@/__mocks__/queries";
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key, te: () => false }),
+  useI18n: () => ({ t: (key: string) => key }),
 }));
 
 vi.mock("vue-router", () => ({

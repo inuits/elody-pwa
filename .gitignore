@@ -38,6 +38,3 @@ session-vue-3-oidc-library
 
 pnpm-lock.yaml
 
-
-# Storybook build output
-storybook-static/

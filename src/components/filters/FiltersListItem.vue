@@ -2,7 +2,6 @@
   <div v-show="!filter.advancedFilter.hidden">
     <FiltersListItemHeader
       :is-active="filter.isActive"
-      :expanded="isOpen"
       :label="filterLabel"
       :tooltip="filter.advancedFilter.tooltip"
       :tooltip-text="tooltipText"
@@ -83,7 +82,7 @@ const tooltipText = computed(() =>
   t(`tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`),
 );
 const headerIcon = computed(() =>
-  isOpen.value ? Unicons.AngleUp.name : Unicons.AngleDown.name,
+  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
 );
 const filterMatchers = computed(() => {
   const { allowedMatchers, matcherLabels } = props.filter.advancedFilter;

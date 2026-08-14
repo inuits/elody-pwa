@@ -1,28 +1,15 @@
 <template>
-  <!-- Selection action bar: plain surface with a 1px border; the count is a
-       muted chip that flips to accent when items are selected. When the
-       relation list is collapsed-empty only the actions remain. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
-    role="toolbar"
-    :aria-label="$t('bulk-operations.items')"
-    class="flex items-center alignment-nested-divs"
-    :class="
-      hideCount
-        ? 'justify-end'
-        : embedded
-          ? 'justify-between !py-1'
-          : 'justify-between rounded-md border border-neutral-40 bg-neutral-white px-3 !py-1'
-    "
+    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-background-light"
   >
-    <div v-if="!hideCount" class="flex justify-start items-center">
+    <div class="flex justify-start items-center">
       <div
-        role="status"
-        class="px-2 my-2.5 rounded text-ui"
+        class="px-2 my-2.5 rounded-md"
         :class="
           useExtendedBulkOperations && itemsSelected
-            ? `font-bold text-neutral-white bg-accent`
-            : `text-text-muted bg-surface-muted`
+            ? `text-neutral-white bg-accent-normal`
+            : `text-text-body bg-accent-highlight`
         "
       >
         <span>
@@ -45,7 +32,7 @@
         </span>
       </div>
       <div v-if="exactCountLoading" class="flex items-center ml-1">
-        <SpinnerLoader theme="accent" :dimensions="4" />
+        <SpinnerLoader theme="accent" :dimensions="12" />
       </div>
       <BaseTooltip
         v-else-if="canRevealExactCount(totalItemsCount, exactCount)"
@@ -57,21 +44,20 @@
             <Unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
-        <span class="text-value text-text-placeholder">
+        <span class="text-sm text-text-placeholder">
           {{ $t("bulk-operations.capped-items-tooltip") }}
         </span>
       </BaseTooltip>
       <div v-if="itemsSelected">
-        <button
-          type="button"
-          class="select-actions cursor-pointer border-none bg-transparent underline focus-visible:outline-2 focus-visible:outline-accent-accent"
+        <span
+          class="select-actions"
           :class="
             useExtendedBulkOperations ? `text-accent-accent` : `text-text-body`
           "
           @click="dequeueAllItemsForBulkProcessing(context)"
         >
           {{ $t("bulk-operations.undo-selection") }}
-        </button>
+        </span>
       </div>
       <div
         v-if="
@@ -80,9 +66,8 @@
           enableSelection
         "
       >
-        <button
-          type="button"
-          class="select-actions cursor-pointer border-none bg-transparent underline focus-visible:outline-2 focus-visible:outline-accent-accent"
+        <span
+          class="select-actions"
           :class="
             useExtendedBulkOperations && itemsSelected
               ? `text-accent-accent`
@@ -91,7 +76,7 @@
           @click="() => emit('selectPage')"
         >
           {{ $t("bulk-operations.select-page") }}
-        </button>
+        </span>
       </div>
     </div>
     <div v-if="!excludePagination && showPagination" class="flex">
@@ -176,12 +161,8 @@ const props = withDefaults(
     isLoading?: boolean;
     exactCount?: number | null;
     exactCountLoading?: boolean;
-    hideCount?: boolean;
-    embedded?: boolean;
   }>(),
   {
-    hideCount: false,
-    embedded: false,
     totalItemsCount: 0,
     exactCount: null,
     exactCountLoading: false,

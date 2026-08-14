@@ -86,38 +86,14 @@ describe("TheHeader context menu", () => {
     expect(menu.props("entityType")).toBe("Asset");
   });
 
-  it("renders HeaderContextMenuActions when actions list is empty but delete is available (delete lives in the menu)", () => {
+  it("does not render HeaderContextMenuActions when actions list is empty", () => {
     mockEntityPageConfig.actions.value = [];
-
-    const wrapper = mountHeader();
-    const menu = wrapper.findComponent({ name: "HeaderContextMenuActions" });
-
-    expect(menu.exists()).toBe(true);
-    expect(menu.props("hasExtraOverflowActions")).toBe(true);
-  });
-
-  it("does not render HeaderContextMenuActions when actions list is empty and delete is disabled", () => {
-    mockEntityPageConfig.actions.value = [];
-    mockEntityPageConfig.deleteButton.value = false;
 
     const wrapper = mountHeader();
 
     expect(
       wrapper.findComponent({ name: "HeaderContextMenuActions" }).exists(),
     ).toBe(false);
-  });
-
-  it("does not render a standalone DeleteButton in the top bar", () => {
-    mockEntityPageConfig.actions.value = [refreshAction];
-
-    const wrapper = mountHeader();
-    const deleteButton = wrapper.findComponent({ name: "DeleteButton" });
-
-    // the component may render inside the menu slot, but never as a
-    // standalone top-bar button variant
-    if (deleteButton.exists()) {
-      expect(deleteButton.props("variant")).toBe("menu-item");
-    }
   });
 
   it("does not render HeaderContextMenuActions on non-single-entity routes", () => {

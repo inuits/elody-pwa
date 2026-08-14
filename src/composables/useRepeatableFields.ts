@@ -21,7 +21,6 @@ export type UseRepeatableFields = {
   repetitionDeleteIsAvailable: ComputedRef<boolean>;
   increaseFieldRepeatAmount: (fieldValue?: any) => void;
   decreaseFieldRepeatAmount: (index: number) => void;
-  insertFieldAtIndex: (index: number, fieldValue?: any) => void;
   fieldKey: string;
 };
 
@@ -72,11 +71,6 @@ export const useRepeatableFields = (
     fieldArray.value.remove(index);
   };
 
-  // Restores a removed row in place (undo-toast flow).
-  const insertFieldAtIndex = (index: number, fieldValue: any = {}) => {
-    fieldArray.value?.insert(index, fieldValue);
-  };
-
   const fields = computed(() => fieldArray.value?.fields ?? []);
   const repeatAmount = computed(() => fields.value.length || 1);
   const repetitionDeleteIsAvailable = computed(
@@ -90,7 +84,6 @@ export const useRepeatableFields = (
     repetitionDeleteIsAvailable,
     increaseFieldRepeatAmount,
     decreaseFieldRepeatAmount,
-    insertFieldAtIndex,
     fieldKey,
   };
 };

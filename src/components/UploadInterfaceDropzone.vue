@@ -3,7 +3,7 @@
     <div class="flex flex-col">
       <div
         v-if="infoLabelUrl"
-        class="flex items-center text-neutral-white bg-accent-normal text-value font-bold px-4 py-3 mb-2 rounded-[0.5vw]"
+        class="flex items-center text-neutral-white bg-accent-normal text-sm font-bold px-4 py-3 mb-2 rounded-[0.5vw]"
         role="alert"
       >
         <svg
@@ -23,7 +23,7 @@
       </div>
       <div
         v-if="templateCsvs"
-        class="flex items-center text-neutral-white bg-accent-normal text-value font-bold px-4 py-3 mb-4 rounded-[0.5vw]"
+        class="flex items-center text-neutral-white bg-accent-normal text-sm font-bold px-4 py-3 mb-4 rounded-[0.5vw]"
         role="alert"
         @click.stop
       >

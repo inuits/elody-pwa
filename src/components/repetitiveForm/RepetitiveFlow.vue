@@ -12,7 +12,7 @@
           class="flex items-center gap-2"
         >
           <span
-            class="flex items-center justify-center w-6 h-6 rounded-full text-value font-bold"
+            class="flex items-center justify-center w-6 h-6 rounded-full text-sm font-bold"
             :class="
               index === currentStepIndex
                 ? 'bg-accent-accent text-neutral-white'

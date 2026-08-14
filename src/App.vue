@@ -3,53 +3,10 @@
     <router-view />
   </div>
   <div v-else-if="!showSplashScreen">
-    <!-- Design-system toasts: status toasts announce politely, errors
-         assertively and never auto-dismiss; hover pauses; max 3 stack. -->
-    <notifications class="pb-2" position="bottom left" :max="3" pause-on-hover>
-      <template #body="{ item, close }">
-        <div
-          class="vue-notification"
-          :class="item.type"
-          :role="item.type === 'error' ? 'alert' : 'status'"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div v-if="item.title" class="notification-title">
-                {{ item.title }}
-              </div>
-              <div v-if="item.text">{{ item.text }}</div>
-            </div>
-            <div class="flex shrink-0 items-center gap-2">
-              <button
-                v-if="item.data?.undoAction"
-                type="button"
-                class="cursor-pointer border-none bg-transparent p-0 text-xs font-bold text-[#7DE3EA] underline decoration-dotted hover:text-neutral-white focus-visible:outline-2 focus-visible:outline-accent-accent"
-                @click="
-                  () => {
-                    item.data.undoAction();
-                    close();
-                  }
-                "
-              >
-                {{ t("inline-edit.undo") }}
-              </button>
-              <button
-                type="button"
-                class="cursor-pointer border-none bg-transparent p-0 text-neutral-white/70 hover:text-neutral-white focus-visible:outline-2 focus-visible:outline-accent-accent"
-                :aria-label="t('preview-component.close')"
-                @click="close"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-      </template>
-    </notifications>
+    <notifications class="pt-2" />
     <div v-if="!someModalIsOpened">
       <notifications
-        class="pb-2 cursor-pointer"
-        position="bottom left"
+        class="pt-2 cursor-pointer"
         group="serviceVersionManager"
         @click="refreshPage()"
       />
@@ -59,7 +16,7 @@
     </div>
     <the-navigation class="navbar" />
     <div>
-      <div class="bg-background-normal pl-[52px] h-screen flex flex-col">
+      <div class="bg-background-normal pl-24 h-screen flex flex-col">
         <the-header />
         <div :class="['grow overflow-hidden min-h-0', { 'h-0': isSingle }]">
           <router-view />
@@ -91,9 +48,7 @@ import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";
 import { inject, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
 const route = useRoute();
 const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();

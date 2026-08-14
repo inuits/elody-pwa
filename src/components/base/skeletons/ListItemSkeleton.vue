@@ -1,39 +1,32 @@
 <template>
   <div class="max-h-[80vh] overflow-y-auto">
-    <!-- placeholder for the column-header row -->
-    <div class="flex items-center gap-2 px-1.5 pb-1">
-      <div class="flex w-full items-center gap-4">
-        <div
-          v-for="index in 4"
-          :key="`skeleton-header-${index}`"
-          class="h-[10px] w-full max-w-24 animate-pulse rounded bg-neutral-30"
-        ></div>
-      </div>
-      <div class="h-[10px] w-16 shrink-0 animate-pulse rounded bg-neutral-30"></div>
-    </div>
     <div
       v-for="index in amountRef"
       :key="`skeleton-${index}`"
-      class="mb-2 flex list-none items-center gap-2 rounded border border-neutral-20 bg-background-light p-1.5"
+      class="border rounded cursor-pointer list-none z-[-1] flex items-center gap-2 p-1.5 mb-2 bg-background-light border-accent-highlight"
     >
-      <div class="flex w-full items-center gap-4">
-        <div class="h-6 w-8 shrink-0 animate-pulse rounded bg-accent-light"></div>
-        <div class="h-6 w-10 shrink-0 animate-pulse rounded bg-accent-light"></div>
-        <div
-          class="h-[12px] w-full animate-pulse rounded bg-neutral-30"
-          :class="index % 3 === 0 ? 'max-w-[55%]' : 'max-w-[70%]'"
-        ></div>
-        <div class="h-[12px] w-full max-w-[40%] animate-pulse rounded bg-neutral-30"></div>
+      <div class="w-10 h-10 flex justify-center items-center">
+        <div class="w-4 h-4 bg-gray-300 animate-pulse"></div>
       </div>
+
       <div
-        class="h-7 w-24 shrink-0 animate-pulse rounded-md border border-neutral-30 bg-neutral-10"
+        class="w-10 h-10 bg-gray-300 animate-pulse rounded flex-shrink-0"
       ></div>
+
+      <div class="w-full flex flex-col">
+        <div
+          class="h-[16px] bg-gray-300 animate-pulse rounded w-1/2 mb-[2px]"
+        ></div>
+        <div
+          class="h-[16px] bg-gray-300 animate-pulse rounded w-3/4 mt-[2px]"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 
 interface Props {
   amount?: number;

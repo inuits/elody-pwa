@@ -12,7 +12,7 @@
             </div>
           </template>
           <template #default>
-            <span class="text-value text-text-placeholder">
+            <span class="text-sm text-text-placeholder">
               <div>
                 {{ t(`tooltip.buttons.disabled-${tooltipLabel}-button`) }}
               </div>

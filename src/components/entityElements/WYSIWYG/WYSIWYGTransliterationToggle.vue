@@ -1,6 +1,6 @@
 <template>
   <div v-if="Object.keys(transliterationItems).length > 0"
-    class="flex rounded border-solid border-neutral-30 border overflow-hidden select-none text-value">
+    class="flex rounded border-solid border-neutral-30 border overflow-hidden select-none text-sm">
     <button v-for="(item, key, index) in transliterationItems" :key="key" :class="[
       'px-2 py-0.5 cursor-pointer transition-colors',
       index > 0 ? 'border-l border-neutral-30' : '',

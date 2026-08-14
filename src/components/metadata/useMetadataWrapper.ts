@@ -33,13 +33,6 @@ export type FieldMetadata =
   | PanelRelationMetaData
   | PanelRelationRootData;
 
-export const metadataValueIsEmpty = (value: unknown): boolean => {
-  if (value === undefined || value === null) return true;
-  if (typeof value === "string") return value.trim() === "";
-  if (Array.isArray(value)) return value.length === 0;
-  return false;
-};
-
 const checkIfFieldIsRequired = (
   fieldMetadata: FieldMetadata,
   formId: string,

@@ -25,7 +25,7 @@
     <transition name="collapse">
       <div
         v-if="showSanitizedWarning"
-        class="flex items-center justify-between bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 text-value overflow-hidden"
+        class="flex items-center justify-between bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 text-sm overflow-hidden"
       >
         <span>{{ t("text-viewer.sanitized-warning") }}</span>
         <button

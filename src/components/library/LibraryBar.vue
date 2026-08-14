@@ -10,7 +10,7 @@
     ]"
   >
     <div
-      class="flex flex-col @md:flex-row justify-start gap-3 w-full @md:w-auto text-ui"
+      class="flex flex-col @md:flex-row justify-start gap-3 w-full @md:w-auto"
     >
       <div v-if="paginationLimitOptions.length > 0" class="w-full @md:w-auto">
         <AdvancedDropdown
@@ -51,10 +51,9 @@
         />
       </div>
     </div>
-    <!-- search is a pill: it starts something, always safe -->
     <div
       v-if="simpleSearchKeys.length > 0 && setSimpleSearch"
-      class="w-full @md:w-64 [&_input]:!rounded-pill [&_input]:text-value"
+      class="w-full @md:w-64"
     >
       <BaseInputTextNumberDatetime
         data-cy="simple-search"

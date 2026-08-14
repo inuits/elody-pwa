@@ -84,7 +84,7 @@
     <div
       v-if="tagContextMenu"
       data-tag-context-menu
-      class="fixed z-[9999] bg-white border border-neutral-30 rounded-card shadow-overlay py-1"
+      class="fixed z-[9999] bg-white border border-neutral-30 rounded shadow-lg py-1"
       :style="{ left: tagContextMenu.x + 'px', top: tagContextMenu.y + 'px' }"
     >
       <button

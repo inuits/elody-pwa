@@ -3,7 +3,7 @@
     data-cy="base-button"
     type="button"
     :class="[
-      `bg-${bgColor} text-value flex justify-center items-center px-3 py-2 rounded m-1`,
+      `bg-${bgColor} text-sm flex justify-center items-center px-3 py-2 rounded transition-colors duration-300 m-1`,
       loading
         ? `text-${bgColor}`
         : `text-${txtColor} hover:bg-${bgHoverColor} hover:brightness-90`,

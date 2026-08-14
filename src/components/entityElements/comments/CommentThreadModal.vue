@@ -27,7 +27,7 @@
               :icon="
                 thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check
               "
-              button-style="accentAccent"
+              button-style="accentNormal"
               :disabled="isWorking"
               @click="toggleStatus"
             />
@@ -104,7 +104,7 @@
         </div>
         <p
           v-else-if="thread.status === 'resolved'"
-          class="text-value text-text-placeholder"
+          class="text-sm text-text-placeholder"
         >
           {{ t("comments.resolved-hint") }}
         </p>

@@ -7,9 +7,9 @@
       <BaseButtonNew
         v-for="primaryOption in primaryOptions"
         :key="primaryOption"
-        class="pl-4 pr-6 my-1 !rounded-pill"
+        class="pl-4 pr-6 my-1"
         :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
-        button-style="primary"
+        button-style="accentNormal"
         button-size="small"
         :disabled="isMainActionDisabled || !primaryOption.active"
         :label="t(primaryOption.label, [entityTypeLabel])"
@@ -20,29 +20,26 @@
           (event: MouseEvent) => {
             handleEmit(primaryOption);
             if (primaryOption.value === BulkOperationTypes.OpenDropdown)
-              contextMenuHandler.openContextMenu(
-                { x: event.clientX, y: event.clientY },
-                event.currentTarget,
-              );
+              contextMenuHandler.openContextMenu({
+                x: event.clientX,
+                y: event.clientY,
+              });
           }
         "
       />
     </div>
-    <!-- Overflow trigger is always labelled — never a bare ellipsis. -->
     <BaseButtonNew
       v-if="hasSecondaryOptions"
       button-size="small"
-      :label="t('library.actions-column')"
-      :force-show-label="true"
-      :icon="DamsIcons.AngleDown"
-      class="!w-max !px-2 ml-2"
+      :icon="DamsIcons.EllipsisV"
+      class="!w-max !p-2 ml-2"
       @click.stop="
         (event: MouseEvent) => {
           clearSubDropdownOptions();
-          contextMenuHandler.openContextMenu(
-            { x: event.clientX, y: event.clientY },
-            event.currentTarget,
-          );
+          contextMenuHandler.openContextMenu({
+            x: event.clientX,
+            y: event.clientY,
+          });
         }
       "
     />

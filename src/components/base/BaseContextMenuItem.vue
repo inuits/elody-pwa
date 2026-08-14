@@ -6,28 +6,26 @@
       @click="clicked()"
       :class="[
         !asButton
-          ? 'text-text-body block px-2.5 py-1.5 text-table rounded-md flex items-center gap-2 w-full hover:bg-accent-wash cursor-pointer'
+          ? 'text-gray-700 block px-4 py-2 text-sm flex items-center gap-2 w-full hover:bg-neutral-50 cursor-pointer'
           : '',
         disable ? 'opacity-40 cursor-default' : '',
-        highlight ? 'text-text-body bg-accent-wash' : '',
+        highlight ? 'text-neutral-900 bg-blue-50' : '',
       ]"
       id="menu-item-add"
       v-bind="
         asButton
           ? {
-              buttonStyle: 'accentAccent',
+              buttonStyle: 'accentNormal',
               buttonSize: 'small',
               disabled: disable,
             }
           : {
               role: 'menuitem',
-              // Disabled items stay focusable so their reason is reachable.
-              tabindex: 0,
-              'aria-disabled': disable ? 'true' : undefined,
+              tabindex: -1,
             }
       "
     >
-      <BaseIcon v-if="icon" class="w-3.5 h-3.5 cursor-pointer" :name="icon" />
+      <BaseIcon v-if="icon" class="w-6 h-6 cursor-pointer" :name="icon" />
       {{ label }}
     </component>
 
@@ -39,7 +37,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-value text-text-placeholder">
+          <span class="text-sm text-text-placeholder">
             <div>
               {{ t(tooltipLabel) }}
             </div>

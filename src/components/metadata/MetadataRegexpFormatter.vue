@@ -1,5 +1,5 @@
 <template>
-  <div class="text-value break-words">
+  <div class="text-sm break-words">
     {{ label }}
   </div>
 </template>

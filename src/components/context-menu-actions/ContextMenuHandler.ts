@@ -6,7 +6,6 @@ export type ContextMenu = {
     x: number;
     y: number;
   };
-  close?: () => void;
 };
 
 const activeContextMenus = ref<ContextMenu[]>([]);
@@ -15,9 +14,7 @@ export class ContextMenuHandler {
   private contextMenu = ref<ContextMenu>({
     isVisible: false,
     position: { x: 0, y: 0 },
-    close: () => this.closeContextMenu(),
   });
-  private triggerElement: HTMLElement | undefined = undefined;
 
   public addActiveContextMenu = (contextMenu: ContextMenu): void => {
     activeContextMenus.value.push(contextMenu);
@@ -38,23 +35,8 @@ export class ContextMenuHandler {
     return this.contextMenu.value;
   };
 
-  // The menu opens below its trigger when one is given (so keyboard
-  // activation positions correctly); bare coordinates remain supported for
-  // genuine right-click menus.
-  public openContextMenu = (
-    position: { x: number; y: number },
-    trigger?: HTMLElement | EventTarget | null,
-  ): void => {
+  public openContextMenu = (position: { x: number; y: number }): void => {
     this.deactiveAllContextMenus();
-    this.triggerElement =
-      trigger instanceof HTMLElement
-        ? (trigger.closest("button, [role='button']") as HTMLElement) ?? trigger
-        : undefined;
-    if (this.triggerElement) {
-      const rect = this.triggerElement.getBoundingClientRect();
-      position = { x: rect.right, y: rect.bottom + 2 };
-      this.triggerElement.setAttribute("aria-expanded", "true");
-    }
     this.contextMenu.value.isVisible = true;
     this.contextMenu.value.position = position;
     this.addActiveContextMenu(this.contextMenu);
@@ -68,10 +50,5 @@ export class ContextMenuHandler {
     this.contextMenu.value.isVisible = false;
     this.contextMenu.value.position = { x: 0, y: 0 };
     this.removeActiveContextMenu(this.contextMenu.value);
-    if (this.triggerElement) {
-      this.triggerElement.setAttribute("aria-expanded", "false");
-      this.triggerElement.focus();
-      this.triggerElement = undefined;
-    }
   };
 }

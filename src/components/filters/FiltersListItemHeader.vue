@@ -1,42 +1,27 @@
 <template>
-  <!-- Section headers are buttons: focusable, aria-expanded, Enter/Space. -->
-  <button
-    type="button"
+  <div
     data-cy="filters-list-item"
-    class="flex relative w-full items-center justify-between px-4 py-2.5 border-t border-neutral-30 bg-transparent cursor-pointer select-none hover:bg-accent-light/40 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-accent"
-    :aria-expanded="expanded"
+    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-accent-highlight cursor-pointer select-none"
+    :class="{ 'bg-accent-normal text-neutral-white': isActive }"
     @click="$emit('toggle')"
   >
-    <span
-      data-cy="filters-list-item-label"
-      class="flex items-center gap-2 text-label text-left"
-      :class="isActive ? 'font-bold' : 'font-bold text-text-body'"
-    >
-      <!-- active count chip: the filter carries a value -->
-      <span
-        v-if="isActive"
-        data-cy="filter-active-dot"
-        role="status"
-        class="flex h-4 min-w-4 shrink-0 items-center justify-center rounded bg-accent-accent px-1 text-micro font-bold text-neutral-white"
-      >
-        {{ activeCount || 1 }}
-      </span>
+    <span data-cy="filters-list-item-label" class="text-lg">
       {{ label }}
     </span>
-    <span class="flex items-center gap-x-1.5 text-neutral-200">
+    <div class="flex gap-x-2">
       <BaseTooltip v-if="tooltip" position="top-end" :tooltip-offset="8">
         <template #activator="{ on }">
-          <span v-on="on">
-            <Unicon :name="Unicons.QuestionCircle.name" height="14" />
-          </span>
+          <div v-on="on">
+            <Unicon :name="Unicons.QuestionCircle.name" height="20" />
+          </div>
         </template>
-        <span class="text-value text-text-placeholder">
+        <span class="text-sm text-text-placeholder">
           {{ tooltipText }}
         </span>
       </BaseTooltip>
-      <Unicon :name="icon" height="16" />
-    </span>
-  </button>
+      <Unicon :name="icon" height="20" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -45,8 +30,6 @@ import { Unicons } from "@/types";
 
 defineProps({
   isActive: { type: Boolean, required: true },
-  expanded: { type: Boolean, default: false },
-  activeCount: { type: Number, default: 0 },
   label: { type: String, required: true },
   tooltip: { type: [String, Boolean], default: undefined },
   tooltipText: { type: String, default: "" },

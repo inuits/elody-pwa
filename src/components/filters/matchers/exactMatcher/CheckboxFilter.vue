@@ -4,7 +4,6 @@
       v-for="option in filterOptions"
       :key="option.option.value"
       v-model="option.isSelected"
-      class="text-table"
       :class="{ 'mb-2': option.isSelected }"
       :label="option.option.label"
       :item="{ id: option.option.value }"

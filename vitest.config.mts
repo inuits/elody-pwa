@@ -14,7 +14,6 @@ export default defineConfig({
     dedupe: ["vue"],
   },
   test: {
-    exclude: ["**/node_modules/**", ".storybook/**"],
     setupFiles: "./vitestSetup.ts",
     silent: "passed-only",
     environment: "jsdom",

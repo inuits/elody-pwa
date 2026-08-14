@@ -127,7 +127,7 @@ onMounted(() => {
 
 <style scoped>
 .dropzone-highlight {
-  border: 3px dashed var(--color-accent);
-  background-color: var(--color-accent-wash);
+  border: 3px dashed #007bff;
+  background-color: #e7f3ff;
 }
 </style>

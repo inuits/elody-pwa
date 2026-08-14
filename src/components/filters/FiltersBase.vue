@@ -5,17 +5,16 @@
     :class="isExpanded ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
   >
-    <!-- filter panel header mirrors the shared accent-light band anatomy -->
     <div
       class=""
       :class="[
-        'flex justify-between items-center px-4 py-2.5 bg-accent-light border-b border-accent-light select-none cursor-pointer',
-        { 'rounded-t': isExpanded },
-        { 'rounded-xl': !isExpanded },
+        'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
+        { 'border-accent-highlight rounded-t': isExpanded },
+        { 'border-background-light rounded-xl': !isExpanded },
       ]"
       @click="() => emit('expandFilters', expandFilters)"
     >
-      <span class="text-value font-black text-accent-dark">
+      <span class="text-text-body text-xl font-bold">
         {{ t("filters.filter") }}
       </span>
       <div class="flex items-center">
@@ -31,9 +30,7 @@
           {{ t("filters.disabled-simple-search") }}
         </span>
         <template v-else>
-          <span
-            class="rounded-full bg-neutral-white px-2.5 py-0.5 text-xs font-bold text-accent-dark"
-          >
+          <span class="text-text-body">
             {{ activeFilterCount }} {{ t("filters.active") }}
           </span>
           <div
@@ -80,7 +77,7 @@
           <BaseButtonNew
             data-cy="filters-search-button"
             :label="t('filters.apply')"
-            button-style="accentAccent"
+            button-style="accentNormal"
             @click="applyFilters(true)"
           />
           <BaseButtonNew

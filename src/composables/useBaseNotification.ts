@@ -22,9 +22,7 @@ export const useBaseNotification = (): {
   ) => void;
 } => {
   const { notify } = useNotification();
-  // Design system: status 6s, warning 8s; errors never auto-dismiss.
-  const baseDuration: number = 6000;
-  const warningDuration: number = 8000;
+  const baseDuration: number = 10000;
 
   const displaySuccessNotification = (
     title: string,
@@ -49,7 +47,7 @@ export const useBaseNotification = (): {
       title: getTranslatedMessage(title),
       text: getTranslatedMessage(text),
       type: "warn",
-      duration: warningDuration,
+      duration: baseDuration,
       ...extraOptions,
     });
   };
@@ -63,7 +61,7 @@ export const useBaseNotification = (): {
       title: getTranslatedMessage(title),
       text: getTranslatedMessage(text),
       type: "error",
-      duration: -1,
+      duration: baseDuration,
       ...extraOptions,
     });
   };

@@ -18,7 +18,7 @@
         <div
           ref="defaultSlotRef"
           v-if="hasContent && hover"
-          class="shadow-overlay rounded-card bg-background-light p-2 z-tooltip"
+          class="shadow-lg rounded bg-background-light p-2 z-tooltip"
           :style="{ maxWidth: maxWidth, ...floatingStyles }"
         >
           <slot> </slot>

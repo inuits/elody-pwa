@@ -13,7 +13,7 @@
       >
         <span
           data-testid="base-tabs-step-circle"
-          class="flex items-center justify-center w-6 h-6 rounded-full text-value font-bold"
+          class="flex items-center justify-center w-6 h-6 rounded-full text-sm font-bold"
           :class="
             index === state.selectedIndex
               ? 'bg-accent-accent text-neutral-white'
