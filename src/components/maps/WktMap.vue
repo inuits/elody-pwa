@@ -44,7 +44,10 @@
                 <div>
                   <p class="font-bold">{{ t(item.label) }}</p>
                   <p>
-                    {{ featureResult.Entity.intialValues[item.key] || "-" }}
+                    {{
+                      featureResult.Entity.intialValues[item.key] ||
+                      t("metadata.labels.no-value")
+                    }}
                   </p>
                 </div>
               </div>

@@ -137,19 +137,6 @@ const ghostButton: Button = {
   },
   disabledStyle: defaultButton.disabledStyle,
 };
-const accentNormalButton: Button = {
-  textColor: accentAccentButton.textColor,
-  bgColor: "bg-accent-normal",
-  hoverStyle: {
-    textColor: "hover:text-accent-normal",
-    bgColor: "hover:bg-background-normal",
-  },
-  activeStyle: {
-    textColor: "active:text-accent-normal",
-    bgColor: defaultButton.activeStyle.bgColor,
-  },
-  disabledStyle: defaultButton.disabledStyle,
-};
 // Design-system primary: accent fill, white ink, darker accent on hover.
 const primaryButton: Button = {
   textColor: "text-neutral-white",
@@ -163,7 +150,7 @@ const primaryButton: Button = {
     bgColor: "active:bg-accent-hover",
   },
   disabledStyle: defaultButton.disabledStyle,
-  extra: "hover:shadow-[0_2px_6px_rgba(59,166,203,0.4)]",
+  extra: "hover:shadow-[0_2px_6px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]",
 };
 const redDefaultButton: Button = {
   textColor: accentAccentButton.textColor,

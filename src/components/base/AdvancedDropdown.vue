@@ -14,11 +14,12 @@
       class="!text-text-body !bg-background-light border-none !rounded-lg flex-1 min-w-0"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
-      :options="filterDropdownOptions"
+      :options="loading ? [] : selectableOptions"
       :placeholder="label"
       :is-disabled="disable"
       :is-multi="multiple"
       :is-clearable="clearable"
+      :is-searchable="searchEnabled"
       :should-autofocus-option="false"
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
@@ -26,6 +27,21 @@
         menuContainer: `border border-neutral-30 rounded-card shadow-overlay !mt-0 !z-header`,
       }"
     >
+      <template #no-options>
+        <!-- Loading: option-shaped skeletons (never per-option spinners);
+             empty: "Geen opties". -->
+        <div v-if="loading" aria-busy="true">
+          <div
+            v-for="index in 3"
+            :key="index"
+            aria-hidden="true"
+            class="mx-2 my-1.5 h-4 animate-pulse rounded-[4px] bg-neutral-20"
+          />
+        </div>
+        <div v-else class="px-2 py-1.5 text-table text-text-muted">
+          {{ noOptionsLabel }}
+        </div>
+      </template>
       <template #option="{ option }">
         <div v-if="option.value !== selectedItem" class="mr-2">
           <unicon
@@ -110,6 +126,7 @@ const props = withDefaults(
     showMenuHeader?: boolean;
     styleType?: DropdownStyle;
     alwaysCalcualteWidth?: boolean;
+    loading?: boolean;
   }>(),
   {
     selectFirstOptionByDefault: false,
@@ -123,6 +140,7 @@ const props = withDefaults(
     showMenuHeader: true,
     styleType: "default",
     alwaysCalcualteWidth: false,
+    loading: false,
   },
 );
 
@@ -134,7 +152,7 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
-const { t } = useI18n();
+const { t, te } = useI18n();
 const entityFormData: any = inject("entityFormData");
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
 const { isEdit } = useEditMode(entityId.value);
@@ -142,11 +160,17 @@ const { someModalIsOpened } = useBaseModal();
 const selectedItem = ref<any | any[] | undefined>(undefined);
 
 const deselectItem = () => {
-  console.log("Emitted from deselect");
   emit("update:modelValue", "");
 };
 
 const handleUpdateItem = (value: any) => {
+  // Picking the leading "— Geen waarde" option clears the field. Picking
+  // never saves — commit stays with the editor's Bewaar.
+  if (value === NO_VALUE) {
+    selectedItem.value = undefined;
+    emit("update:modelValue", "");
+    return;
+  }
   if (!value && !props.clearable)
     selectedItem.value = selectedItem.value || props.options[0].value;
   emit("update:modelValue", selectedItem.value);
@@ -160,6 +184,31 @@ const dropdownStyle = computed<string>(() => {
   };
 
   return stylesMap[props.styleType];
+});
+
+// Sentinel value for the leading "— Geen waarde" option (design system:
+// non-required single selects always offer an explicit no-value choice).
+const NO_VALUE = "__elody_no_value__";
+
+const noValueLabel = computed(() =>
+  te("metadata.labels.no-value")
+    ? t("metadata.labels.no-value")
+    : "Geen waarde",
+);
+
+const noOptionsLabel = computed(() =>
+  te("dropdown.no-options") ? t("dropdown.no-options") : "Geen opties",
+);
+
+// Search-in-list appears above 10 options (dropdown-select.md).
+const searchEnabled = computed(() => filterDropdownOptions.value.length > 10);
+
+const selectableOptions = computed<DropdownOption[]>(() => {
+  if (props.multiple || !props.clearable) return filterDropdownOptions.value;
+  return [
+    { label: `— ${noValueLabel.value}`, value: NO_VALUE } as DropdownOption,
+    ...filterDropdownOptions.value,
+  ];
 });
 
 const filterDropdownOptions = computed<DropdownOption[]>(() => {
@@ -244,7 +293,6 @@ watch(
   () => {
     if (props.options.length === 0 || !props.selectFirstOptionByDefault) return;
     selectedItem.value = props.options[0].value;
-    console.log("Emitted from watch options");
     emit("update:modelValue", selectedItem.value);
   },
   { immediate: true },
@@ -313,7 +361,8 @@ div.menu-option:hover {
 .vue-advanced-select--bordered .vue-select,
 .vue-advanced-select--bordered .control {
   --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid rgba(0, 58, 82, 0.6);
+  --vs-border: 1px solid
+    color-mix(in srgb, var(--color-text-body) 60%, transparent);
 }
 
 .vue-advanced-select .control.focused {
@@ -337,6 +386,6 @@ div.menu-option:hover {
 }
 
 .vue-advanced-select--bordered .selectedOption {
-  @apply text-black;
+  @apply text-text-strong;
 }
 </style>

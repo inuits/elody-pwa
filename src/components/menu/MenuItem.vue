@@ -61,12 +61,14 @@
           class="w-full flex justify-end align-center"
           v-show="menuitem.subMenu"
         >
+          <!-- Design system: collapsed = ⌄, open = ⌃ (right-pointing
+               collapsed chevron is deprecated). -->
           <unicon
             v-if="isBeingHovered"
-            :name="Unicons.AngleDown.name"
+            :name="Unicons.AngleUp.name"
             height="20"
           />
-          <unicon v-else :name="Unicons.AngleRight.name" height="20" />
+          <unicon v-else :name="Unicons.AngleDown.name" height="20" />
         </div>
       </div>
     </component>

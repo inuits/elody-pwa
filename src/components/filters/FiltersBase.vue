@@ -74,7 +74,7 @@
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
             :icon-height="22"
-            button-style="default"
+            button-style="secondary"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew

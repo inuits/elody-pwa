@@ -18,7 +18,9 @@
     :formatter="formatter"
     :label="readableLabel"
   />
-  <label v-if="!hasLabel">
+  <!-- Design system: empty values render "Geen waarde" at 45% opacity,
+       never "-" (deprecated). -->
+  <label v-if="!hasLabel" class="opacity-45">
     {{ readableLabel }}
   </label>
 </template>
@@ -49,7 +51,7 @@ const props = withDefaults(
   },
 );
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const formatterType = computed(() => {
   const [type] = props.formatter.split("|");
@@ -69,15 +71,19 @@ const hasLabel = computed(() =>
   Array.isArray(props.label) ? props.label.length > 0 : Boolean(props.label),
 );
 
+const noValueLabel = computed(() =>
+  te("metadata.labels.no-value") ? t("metadata.labels.no-value") : "Geen waarde",
+);
+
 const readableLabel = computed(() => {
   if (Array.isArray(props.label)) {
-    if (props.label.length === 0) return "-";
+    if (props.label.length === 0) return noValueLabel.value;
     if (props.translationKey) return translateArrayValuesAndJoin(props.label, props.translationKey);
     return props.label.join(", ");
   }
   return props.label
     ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
-    : "-";
+    : noValueLabel.value;
 });
 
 // A single-value pill translates its own display value from translationKey, so it needs

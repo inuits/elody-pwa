@@ -48,7 +48,7 @@
         <BaseButtonNew
           :disabled="isDeleting"
           :label="t('confirm.delete-entities.cancel')"
-          button-style="default"
+          button-style="secondary"
           button-size="small"
           @click="closeModal(TypeModals.BulkOperationsDeleteEntities)"
         />
@@ -179,7 +179,7 @@ const deleteSelectedItems = () =>
         if (callbacks && callbacks.length > 0)
           for (const callback of callbacks) callback();
       }
-    } catch (error) {
+    } catch {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
       displayErrorNotification(
         t("notifications.errors.entityDeleted.title"),

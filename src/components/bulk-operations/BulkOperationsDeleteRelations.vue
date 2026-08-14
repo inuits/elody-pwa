@@ -27,7 +27,7 @@
       <div>
         <BaseButtonNew
           :label="t('confirm.delete-relations.cancel')"
-          button-style="default"
+          button-style="secondary"
           button-size="small"
           :disabled="isDeleting"
           @click="closeModal(TypeModals.BulkOperationsDeleteRelations)"
