@@ -20,10 +20,10 @@
           (event: MouseEvent) => {
             handleEmit(primaryOption);
             if (primaryOption.value === BulkOperationTypes.OpenDropdown)
-              contextMenuHandler.openContextMenu({
-                x: event.clientX,
-                y: event.clientY,
-              });
+              contextMenuHandler.openContextMenu(
+                { x: event.clientX, y: event.clientY },
+                event.currentTarget,
+              );
           }
         "
       />
@@ -39,10 +39,10 @@
       @click.stop="
         (event: MouseEvent) => {
           clearSubDropdownOptions();
-          contextMenuHandler.openContextMenu({
-            x: event.clientX,
-            y: event.clientY,
-          });
+          contextMenuHandler.openContextMenu(
+            { x: event.clientX, y: event.clientY },
+            event.currentTarget,
+          );
         }
       "
     />

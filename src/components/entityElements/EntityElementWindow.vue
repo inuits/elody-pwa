@@ -10,10 +10,12 @@
     />
     <div
       class="h-full w-full border-solid border rounded-lg @container/window"
+      role="region"
+      :aria-label="previewLabel ? t(previewLabel) : t(element.label)"
       :class="
         isSectionHeader
           ? 'border-accent bg-accent'
-          : 'border-accent-light bg-neutral-white'
+          : 'border-accent-light-strong bg-neutral-white'
       "
     >
       <!-- the full accent is reserved for section-level headers (a window
@@ -23,16 +25,16 @@
         :class="
           isSectionHeader
             ? 'border-accent bg-accent'
-            : 'border-accent-light bg-accent-light'
+            : 'border-accent-light-strong bg-accent-light'
         "
       >
-        <h1
+        <h3
           data-cy="entity-element-window-title"
-          class="text-sm font-black p-2"
+          class="text-sm font-bold px-4 py-2.5 m-0"
           :class="isSectionHeader ? 'text-neutral-white' : 'text-accent-dark'"
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
-        </h1>
+        </h3>
 
         <div
           v-if="element.windowElementStatus"
@@ -61,9 +63,14 @@
             v-if="statusPopoverOpen"
             role="dialog"
             data-cy="quality-status-popover"
-            :aria-label="t(element.windowElementStatus.label || 'status')"
-            class="absolute left-0 top-9 z-popover w-[290px] rounded-lg border border-neutral-40 bg-neutral-white p-4 text-sm shadow-[0_12px_32px_rgba(9,30,66,.2)]"
+            :aria-label="
+              element.windowElementStatus.label
+                ? t(element.windowElementStatus.label)
+                : translate('quality-status.title', 'Quality status')
+            "
+            class="absolute left-0 top-9 z-popover w-[290px] rounded-overlay border border-neutral-40 bg-neutral-white p-4 text-sm shadow-overlay"
             @click.stop
+            @keydown.escape.stop="statusPopoverOpen = false"
           >
             <template v-if="requiredEmptyFields.length > 0">
               <p class="m-0 pb-1.5">
@@ -149,7 +156,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
@@ -208,6 +215,16 @@ const translate = (key: string, fallback: string): string =>
 const isSectionHeader = computed<boolean>(() => allPanels.value.length === 0);
 
 const statusPopoverOpen = ref<boolean>(false);
+
+// Outside click closes the quality-status popover.
+const closeStatusPopover = () => (statusPopoverOpen.value = false);
+watch(statusPopoverOpen, (open) => {
+  if (open) document.addEventListener("click", closeStatusPopover);
+  else document.removeEventListener("click", closeStatusPopover);
+});
+onBeforeUnmount(() =>
+  document.removeEventListener("click", closeStatusPopover),
+);
 
 // Blocking fields: required per input-field config AND currently empty.
 const requiredEmptyFields = computed<{ key: string; label: string }[]>(() => {

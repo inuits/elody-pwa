@@ -16,6 +16,7 @@
         }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
+        :aria-label="rowAccessibleName"
       />
     </div>
 
@@ -207,6 +208,12 @@ const rowActionsMenuLabel = computed<string>(() =>
 );
 
 const isChecked = ref(false);
+
+// The row's accessible name: its first visible metadata value (the title).
+const rowAccessibleName = computed<string>(() => {
+  const value = visibleMetadata.value[0]?.value;
+  return typeof value === "string" ? value : "";
+});
 const imageSrcError = ref(false);
 
 const canShowMedia = computed(() => {
@@ -261,9 +268,10 @@ const wrapperClasses = computed(() => [
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled,
     "animate-pulse": props.loading,
-    "bg-background-light hover:bg-surface-row-hover": !isActiveListItem.value,
+    "bg-background-light hover:bg-surface-row-hover":
+      !isActiveListItem.value && !isChecked.value,
     "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
-      isActiveListItem.value,
+      isActiveListItem.value || isChecked.value,
   },
 ]);
 </script>

@@ -1,18 +1,18 @@
 <template>
+  <!-- Design-system checkbox: commit-teal check, visible keyboard focus, a
+       real label. The 40px hit area stays for touch targets but is no longer
+       painted when selected. -->
   <div data-cy="base-input-checkbox" class="flex items-center">
     <div
-      class="flex-none flex items-center justify-center w-10 h-10 rounded-lg box-border"
-      :class="[
-        inputValue ? `${divSelectedBgColor}` : '',
-        { 'cursor-pointer': !disabled },
-      ]"
+      class="flex-none flex items-center justify-center w-10 h-10 box-border"
+      :class="[{ 'cursor-pointer': !disabled }]"
       @click.prevent="handleItemSelection"
     >
       <input
-        class="border-2 focus:ring-0"
+        :id="checkboxId"
+        class="rounded border-[1.5px] focus:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-ring"
         :class="[
           { 'cursor-pointer': !disabled },
-          { rounded: !inputValue },
           { [selectedInputStyle.disabledStyle.textColor]: disabled },
           { [selectedInputStyle.disabledStyle.bgColor]: disabled },
           { [selectedInputStyle.disabledStyle.borderColor]: disabled },
@@ -22,26 +22,23 @@
         type="checkbox"
         :checked="required"
         :disabled="disabled || isDisabledByContextLimit || required"
+        :aria-label="!label ? ariaLabel : undefined"
         @change.stop
         @click.stop="handleItemSelection"
       />
     </div>
-    <span
+    <label
       v-if="label"
+      :for="checkboxId"
       class="flex flex-row select-none cursor-pointer"
       :class="{ 'ml-2': inputValue }"
-      @change.stop
-      @click.stop="handleItemSelection"
+      @click.prevent="handleItemSelection"
     >
       {{ label }}
-      <div class="pl-2" :title="t(`tooltip.required`)">
-        <unicon
-          v-if="required"
-          :name="Unicons.ExclamationTriangle.name"
-          height="20"
-        />
-      </div>
-    </span>
+      <span v-if="required" class="pl-2" :title="t(`tooltip.required`)">
+        <unicon :name="Unicons.ExclamationTriangle.name" height="20" />
+      </span>
+    </label>
   </div>
 </template>
 
@@ -52,7 +49,7 @@ import {
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, useId, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { TypeModals } from "@/generated-types/queries";
@@ -72,6 +69,7 @@ const props = withDefaults(
     disabled?: boolean;
     ignoreBulkOperations?: boolean;
     required?: boolean;
+    ariaLabel?: string;
   }>(),
   {
     modelValue: false,
@@ -79,6 +77,7 @@ const props = withDefaults(
     disabled: false,
     ignoreBulkOperations: false,
     required: false,
+    ariaLabel: undefined,
   },
 );
 
@@ -107,9 +106,9 @@ type Input = {
   disabledStyle: PseudoStyle;
 };
 const accentNormalInput: Input = {
-  textColor: "text-accent-normal",
-  bgColor: "accent-accent-normal",
-  borderColor: "border-text-light checked:border-neutral-white",
+  textColor: "text-accent-accent",
+  bgColor: "accent-accent-accent",
+  borderColor: "border-neutral-60 checked:border-accent-accent",
   disabledStyle: {
     textColor: "disabled:text-text-light",
     bgColor: "disabled:accent-neutral-white",
@@ -150,9 +149,7 @@ const handleItemSelection = () => {
 };
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
-const divSelectedBgColor = computed<string>(() =>
-  selectedInputStyle.value.textColor.replace(/^text/, "bg"),
-);
+const checkboxId = `base-checkbox-${useId()}`;
 const isDisabledByContextLimit = computed<boolean>(() => {
   if (props.ignoreBulkOperations) return false;
   return (

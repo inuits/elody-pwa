@@ -21,11 +21,13 @@
             }
           : {
               role: 'menuitem',
-              tabindex: -1,
+              // Disabled items stay focusable so their reason is reachable.
+              tabindex: 0,
+              'aria-disabled': disable ? 'true' : undefined,
             }
       "
     >
-      <BaseIcon v-if="icon" class="w-6 h-6 cursor-pointer" :name="icon" />
+      <BaseIcon v-if="icon" class="w-3.5 h-3.5 cursor-pointer" :name="icon" />
       {{ label }}
     </component>
 

@@ -10,7 +10,7 @@ vi.mock("@/types", () => ({
 }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({ t: (key: string) => key, te: () => true }),
 }));
 
 const mountShell = (props: Record<string, unknown>) =>
@@ -77,15 +77,14 @@ describe("ContextMenuActionsShell (split button)", () => {
     ).toBeDefined();
   });
 
-  it("falls back to the legacy ⋮ trigger when no labels are given", () => {
+  it("shows a labelled Actions trigger when no labels are given — never a bare ⋮", () => {
     const wrapper = mountShell({ hasOverflowActions: true });
 
     expect(wrapper.find("[data-cy='split-button-primary']").exists()).toBe(
       false,
     );
-    expect(wrapper.find("[data-cy='split-button-caret']").exists()).toBe(
-      false,
-    );
-    expect(wrapper.find(".cursor-pointer").exists()).toBe(true);
+    const caret = wrapper.find("[data-cy='split-button-caret']");
+    expect(caret.exists()).toBe(true);
+    expect(caret.text()).toContain("library.actions-column");
   });
 });

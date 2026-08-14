@@ -6,7 +6,7 @@
   --font-sans: "Lato", system-ui, sans-serif;
 
   /* Theme colors */
-  --color-accent-light: #DCF4F9;
+  --color-accent-light: #DEF1FA;
   --color-accent-normal: #6BC6B3;
   --color-accent-accent: #0CB2BC;
   --color-accent-dark: #1d5c7a;
@@ -325,7 +325,7 @@
   button:focus-visible,
   [role="button"]:focus-visible,
   a:focus-visible {
-    outline: 2px solid var(--color-accent-accent);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 1px;
   }
 }

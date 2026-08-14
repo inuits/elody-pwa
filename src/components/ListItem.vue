@@ -16,6 +16,7 @@
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
+        :aria-label="rowAccessibleName"
       />
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
@@ -81,6 +82,7 @@
         }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
+        :aria-label="rowAccessibleName"
       />
     </div>
     <div
@@ -419,6 +421,12 @@ const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
+
+// The row's accessible name: its first teaser metadata value (the title).
+const rowAccessibleName = computed<string>(() => {
+  const value = (props.teaserMetadata ?? [])[0]?.value;
+  return typeof value === "string" ? value : "";
+});
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
 const useEditHelper = useEditMode(
@@ -504,11 +512,14 @@ const wrapperClasses = computed(() => {
     { "!border-status-deleted": isMarkedAsToBeDeleted.value },
     { "grayscale brightness-95 !cursor-default": props.isDisabled },
     { "animate-pulse": loading.value },
-    { "bg-background-light hover:bg-surface-row-hover": !isActiveListItem.value },
-    { "border-accent-highlight": !isActiveListItem.value },
+    {
+      "bg-background-light hover:bg-surface-row-hover":
+        !isActiveListItem.value && !isChecked.value,
+    },
+    { "border-accent-highlight": !isActiveListItem.value && !isChecked.value },
     {
       "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
-        isActiveListItem.value,
+        isActiveListItem.value || isChecked.value,
     },
   ];
 });

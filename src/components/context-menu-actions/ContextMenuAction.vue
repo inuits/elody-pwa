@@ -1,5 +1,11 @@
 <template>
-  <div v-for="(element, index) in contextMenuActions" :key="index">
+  <div
+    v-for="(element, index) in contextMenuActions"
+    :key="index"
+    role="menuitem"
+    tabindex="0"
+    @keydown.enter.prevent="activateItem"
+  >
     <link-action
       v-if="element.__typename === 'ContextMenuLinkAction'"
       :label="element.label"
@@ -72,6 +78,13 @@ import QueryAction from "@/components/context-menu-actions/QueryAction.vue";
 import DownloadZipOfRelatedMediafilesAction from "@/components/context-menu-actions/DownloadZipOfRelatedMediafilesAction.vue";
 import { Entitytyping } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
+
+// Enter on a focused menu item activates its inner control.
+const activateItem = (event: KeyboardEvent) => {
+  const host = event.currentTarget as HTMLElement | null;
+  const target = host?.querySelector<HTMLElement>("a,button,[role='button'],div");
+  target?.click();
+};
 
 const emit = defineEmits(["toggleLoading"]);
 
