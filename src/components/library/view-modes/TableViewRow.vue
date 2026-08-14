@@ -229,12 +229,18 @@ const visibleMetadata = computed(() =>
   (props.teaserMetadata ?? []).filter((m) => !m.showOnlyInEditMode),
 );
 
+// The row title is the first cell that isn't a badge/pill formatter.
+const titleCellIndex = computed<number>(() =>
+  visibleMetadata.value.findIndex((m: any) => !m?.value?.formatter),
+);
+
 const columnClass = (idx: number): string => {
   const base = "flex justify-start flex-col mx-2 break-words";
   const pos = idx === 0 ? "col-primary" : "col-secondary";
+  const title = idx === titleCellIndex.value ? " row-title-cell" : "";
   if (visibleMetadata.value[0]?.value?.formatter) {
-    if (idx === 0) return `${base} ${pos} flex-shrink-0 whitespace-nowrap`;
-    return `${base} ${pos} flex-1 min-w-0`;
+    if (idx === 0) return `${base} ${pos}${title} flex-shrink-0 whitespace-nowrap`;
+    return `${base} ${pos}${title} flex-1 min-w-0`;
   }
   const count = visibleMetadata.value.length;
   const amount: string | number = count >= 4 ? "default" : count;
@@ -244,7 +250,7 @@ const columnClass = (idx: number): string => {
     3: "w-1/2",
     default: "w-1/4",
   };
-  return `${base} ${pos} ${widths[amount]}`;
+  return `${base} ${pos}${title} ${widths[amount]}`;
 };
 
 const isActiveListItem = computed<boolean>(() => {
@@ -277,8 +283,8 @@ const wrapperClasses = computed(() => [
 </script>
 
 <style scoped>
-/* the row title is the first cell: link-blue, bold (design entity list) */
-.col-primary :deep([data-cy="metadata-value"]) {
+/* the row title is the first non-badge cell: link-blue, bold */
+.row-title-cell :deep([data-cy="metadata-value"]) {
   color: var(--color-text-light);
   font-weight: 700;
 }

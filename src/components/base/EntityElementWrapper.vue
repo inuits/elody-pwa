@@ -2,12 +2,10 @@
   <div
     data-cy="entity-element-wrapper"
     :class="[
-      'bg-accent-light border border-accent-light rounded-t-lg',
-      { 'rounded-lg': isCollapsed },
-      {
-        'border-t-4 border-accent-light rounded-t-none':
-          headerStyle === 'none',
-      },
+      headerStyle === 'none'
+        ? 'bg-transparent'
+        : 'bg-accent-light border border-accent-light rounded-t-lg',
+      { 'rounded-lg': isCollapsed && headerStyle !== 'none' },
     ]"
   >
     <div

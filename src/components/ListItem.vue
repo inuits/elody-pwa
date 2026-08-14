@@ -149,7 +149,7 @@
           idx < 1 && teaserMetadata[0]?.value?.formatter && !hideCellLabels
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine ? '' : 'w-full', // all others stay full width unless multiLine grid handles sizing
-          { 'row-title-cell': idx === 0 && !teaserMetadata[0]?.value?.formatter },
+          { 'row-title-cell': idx === titleCellIndex },
         ]"
         :style="metadataItem.colSpan && props.multiLine
           ? { gridColumn: `span ${metadataItem.colSpan}` }
@@ -491,6 +491,13 @@ const canShowCopyRight = () => {
 const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const onlyEditableTeaserMetadata = computed(() =>
   props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode),
+);
+
+// The row title is the first cell that isn't a badge/pill formatter.
+const titleCellIndex = computed<number>(() =>
+  (onlyReadModeTeaserMetadata.value ?? []).findIndex(
+    (m: any) => !m?.value?.formatter,
+  ),
 );
 
 const isGridMode = computed(() => props.viewMode === "grid");

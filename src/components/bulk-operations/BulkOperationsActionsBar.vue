@@ -10,7 +10,9 @@
     :class="
       hideCount
         ? 'justify-end'
-        : 'justify-between rounded-md border border-neutral-40 bg-neutral-white px-3 !py-1'
+        : embedded
+          ? 'justify-between !py-1'
+          : 'justify-between rounded-md border border-neutral-40 bg-neutral-white px-3 !py-1'
     "
   >
     <div v-if="!hideCount" class="flex justify-start items-center">
@@ -175,9 +177,11 @@ const props = withDefaults(
     exactCount?: number | null;
     exactCountLoading?: boolean;
     hideCount?: boolean;
+    embedded?: boolean;
   }>(),
   {
     hideCount: false,
+    embedded: false,
     totalItemsCount: 0,
     exactCount: null,
     exactCountLoading: false,

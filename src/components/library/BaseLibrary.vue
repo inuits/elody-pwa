@@ -151,6 +151,7 @@
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
             :hide-count="isCollapsedEmptyRelationList"
+            :embedded="(props.parentEntityIdentifiers?.length ?? 0) > 0"
             :total-items-count="totalEntityCount"
             :exact-count="exactTotalCount"
             :exact-count-loading="exactCountLoading"
