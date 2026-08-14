@@ -59,6 +59,15 @@ export const Collapsed: Story = {
   },
 };
 
+/** Manifest id `filters-filtersbase--default`: sections expanded, matchers
+ *  visible, apply bar ("Pas toe") at the bottom. */
+export const Default: Story = {
+  args: {
+    ...commonArgs,
+    expandFilters: true,
+  },
+};
+
 export const Expanded: Story = {
   args: {
     ...commonArgs,

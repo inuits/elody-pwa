@@ -5,7 +5,7 @@ import RepetitiveStepModal from "./RepetitiveStepModal.vue";
 // button and a content slot. It renders in the browser top layer via
 // showModal(), so the story mostly demonstrates the opened state.
 const meta: Meta<typeof RepetitiveStepModal> = {
-  title: "RepetitiveForm/RepetitiveStepModal",
+  title: "RepetitiveForm/StepModal",
   component: RepetitiveStepModal,
   tags: ["autodocs"],
   render: (args) => ({
@@ -38,3 +38,6 @@ export const WithoutTitle: Story = {
     open: true,
   },
 };
+
+/** Manifest id `repetitiveform-stepmodal--step`. */
+export const Step: Story = { ...Open };

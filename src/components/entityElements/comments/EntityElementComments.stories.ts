@@ -23,7 +23,7 @@ const commentsElement = {
 } as unknown as CommentsElement;
 
 const meta: Meta<typeof EntityElementComments> = {
-  title: "EntityElements/Comments/EntityElementComments",
+  title: "Components/Comments",
   component: EntityElementComments,
   tags: ["autodocs"],
   render: (args) => ({
@@ -47,3 +47,9 @@ export const Empty: Story = {
     entityType: Entitytyping.Manifestation,
   },
 };
+
+/** Manifest id `components-comments--thread`: the comments element. Threads
+ *  come from the backend; under the mock client this shows composer + empty
+ *  thread list — see Components/Comments/CommentItem for thread/reply/resolved
+ *  row states. */
+export const Thread: Story = { ...Empty };

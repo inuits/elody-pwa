@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import BaseInputTextNumberDatetime from "./BaseInputTextNumberDatetime.vue";
 
 const meta: Meta<typeof BaseInputTextNumberDatetime> = {
-  title: "Base/BaseInputTextNumberDatetime",
+  title: "Base/BaseInputText",
   component: BaseInputTextNumberDatetime,
   tags: ["autodocs"],
   argTypes: {
@@ -65,4 +65,22 @@ export const Disabled: Story = {
     type: "text",
     disabled: true,
   },
+};
+
+/** Manifest id `base-baseinputtext--states`: text / number (right-aligned,
+ *  no spinners) / textarea, resting + disabled; one focus treatment
+ *  everywhere (2px focus ring, 1px offset, on :focus-visible — tab through
+ *  the fields to see it). */
+export const States: Story = {
+  render: () => ({
+    components: { BaseInputTextNumberDatetime },
+    template: `
+      <div class="flex w-96 flex-col gap-3 p-4">
+        <BaseInputTextNumberDatetime model-value="Zelfportret met strohoed" input-style="defaultWithBorder" type="text" placeholder="Titel van het object" />
+        <BaseInputTextNumberDatetime :model-value="1889" input-style="defaultWithBorder" type="number" :min="0" :max="2100" />
+        <BaseInputTextNumberDatetime model-value="Olieverf op doek, verworven in 1954." input-style="defaultWithBorder" type="textarea" />
+        <BaseInputTextNumberDatetime model-value="OBJ-2024-0157" input-style="defaultWithBorder" type="text" disabled />
+      </div>
+    `,
+  }),
 };

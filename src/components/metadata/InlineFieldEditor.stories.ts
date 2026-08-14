@@ -11,6 +11,30 @@ export default meta;
 
 type Story = StoryObj<typeof InlineFieldEditor>;
 
+/** Manifest id `metadata-inlinefieldeditor--editing`: the open editor —
+ *  pick-then-Bewaar, keyboard-hint line ("Enter bewaart · Esc annuleert"),
+ *  Bewaar/Annuleer pair. Opened by clicking the value (play function). */
+export const Editing: Story = {
+  args: {
+    formId: "story-form",
+    fieldKey: "intialValues.title",
+    label: "Titel",
+    entityType: "manifestation",
+    value: "De ontdekking van de hemel",
+  },
+  render: (args) => ({
+    components: { InlineFieldEditor },
+    setup: () => ({ args }),
+    template:
+      '<div class="p-8 max-w-md"><InlineFieldEditor v-bind="args" /></div>',
+  }),
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>("[data-cy='inline-edit-toggle']")
+      ?.click();
+  },
+};
+
 const baseArgs = {
   formId: "story-form",
   fieldKey: "intialValues.title",

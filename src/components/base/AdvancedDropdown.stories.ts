@@ -10,7 +10,9 @@ const sortOptions = [
 ] as DropdownOption[];
 
 const meta: Meta<typeof AdvancedDropdown> = {
-  title: "Base/AdvancedDropdown",
+  // "Components/…" so the manifest id
+  // `components-advanceddropdown--multi-search` resolves.
+  title: "Components/AdvancedDropdown",
   component: AdvancedDropdown,
   tags: ["autodocs"],
   argTypes: {
@@ -60,6 +62,49 @@ export const Multiple: Story = {
     options: sortOptions,
     label: "Kolommen",
     multiple: true,
+    styleType: "defaultWithLightBorder",
+  },
+};
+
+const languageOptions = [
+  "Nederlands",
+  "Engels",
+  "Frans",
+  "Duits",
+  "Spaans",
+  "Italiaans",
+  "Portugees",
+  "Zweeds",
+  "Noors",
+  "Deens",
+  "Fins",
+  "Pools",
+].map((label, index) => ({
+  label,
+  value: `lang_${index}`,
+  icon: DamsIcons.NoIcon,
+})) as DropdownOption[];
+
+/** Manifest id `components-advanceddropdown--multi-search`: multi-select with
+ *  checks and, because there are >10 options, the search-in-list input.
+ *  Loading state shows option-shaped skeletons (see the `loading` arg). */
+export const MultiSearch: Story = {
+  args: {
+    modelValue: ["lang_0", "lang_2"],
+    options: languageOptions,
+    label: "Talen",
+    multiple: true,
+    styleType: "defaultWithLightBorder",
+  },
+};
+
+/** Async options: option-shaped skeletons, never per-option spinners. */
+export const LoadingSkeletons: Story = {
+  args: {
+    modelValue: undefined,
+    options: [],
+    label: "Talen",
+    loading: true,
     styleType: "defaultWithLightBorder",
   },
 };

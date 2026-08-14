@@ -40,3 +40,15 @@ export const WithSelectionTools: Story = {
 export const WithoutMediafile: Story = {
   args: {},
 };
+
+/** PDF mode of the unified toolbar: page ‹ n/m › capsule, zoom, fullscreen,
+ *  download — PdfToolbar's separate chrome is retired (media-viewer.md). */
+export const PdfMode: Story = {
+  args: {
+    mode: "pdf",
+    pageNum: 3,
+    pageCount: 12,
+    mediafileId: "mediafile-002",
+    originalFilename: "jaarverslag_1998.pdf",
+  },
+};

@@ -7,7 +7,7 @@ import { BaseFieldType } from "@/generated-types/queries";
 // the stories render the "no directories" empty state with the disabled
 // start-import button.
 const meta: Meta<typeof ImportFromNetworkDrive> = {
-  title: "Imports/ImportFromNetworkDrive",
+  title: "Components/ImportBrowser",
   component: ImportFromNetworkDrive,
   tags: ["autodocs"],
   argTypes: {
@@ -49,3 +49,6 @@ export const MagazineWithMetsImport: Story = {
     closeAndDeleteForm: () => {},
   },
 };
+
+/** Manifest id `components-importbrowser--default`. */
+export const Default: Story = { ...FileSystemImport };

@@ -30,7 +30,7 @@ const entities = [
 ] as unknown as Entity[];
 
 const meta: Meta<typeof PreviewWrapper> = {
-  title: "Previews/PreviewWrapper",
+  title: "Components/PreviewWrapper",
   component: PreviewWrapper,
   tags: ["autodocs"],
   render: (args) => ({
@@ -51,6 +51,30 @@ type Story = StoryObj<typeof PreviewWrapper>;
 export const MediaViewerLoading: Story = {
   args: {
     previewComponent: mediaViewerPreview,
+    entityType: "mediafile" as Entitytyping,
+    entities,
+    entitiesLoading: true,
+    configPerViewMode: {},
+    entityId: "entity-1",
+    parentIds: ["parent-1"],
+    cropMediafileCoordinatesKey: "",
+  },
+};
+
+/** Manifest id `components-previewwrapper--column-list`: the columnlist
+ *  preview on the shared panel shell (accent-light header, close cross and
+ *  "Open detailpagina" in the header actions slot). Column configuration is
+ *  fetched from baseGraphql, so under Storybook's mock client this shows the
+ *  loading state of the columnlist — the chrome around it is the contract. */
+export const ColumnList: Story = {
+  args: {
+    previewComponent: {
+      type: PreviewTypes.ColumnList,
+      listItemsCoverage: ListItemCoverageTypes.OneListItem,
+      previewQuery: undefined,
+      metadataPreviewQuery: undefined,
+      previewConfiguration: { displayOpenDetailPageButton: true },
+    } as unknown as PreviewComponent,
     entityType: "mediafile" as Entitytyping,
     entities,
     entitiesLoading: true,

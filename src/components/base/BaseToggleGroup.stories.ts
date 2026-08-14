@@ -13,6 +13,17 @@ export default meta;
 type Story = StoryObj<typeof BaseToggleGroup>;
 
 // A view-mode switcher as used above entity listings (list / grid / table).
+/** Manifest id `base-basetogglegroup--default`. */
+export const Default: Story = {
+  args: {
+    toggles: [
+      { isOn: true, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
+      { isOn: false, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
+      { isOn: false, iconOn: DamsIcons.Table, iconOff: DamsIcons.Table },
+    ] as any,
+  },
+};
+
 export const ViewModes: Story = {
   args: {
     toggles: [

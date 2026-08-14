@@ -11,7 +11,7 @@ const teaserMetadata = [
 ] as unknown as Metadata[];
 
 const meta: Meta<typeof ListItem> = {
-  title: "Components/ListItem",
+  title: "Library/ViewModes/ListItem",
   component: ListItem,
   tags: ["autodocs"],
   argTypes: {
@@ -50,3 +50,6 @@ export const Disabled: Story = {
 export const Loading: Story = {
   args: { ...baseArgs, viewMode: "list", loading: true },
 };
+
+/** Manifest id `library-viewmodes-listitem--default`. */
+export const Default: Story = { ...ListMode };

@@ -14,7 +14,7 @@ const storyConfig = {
 };
 
 const meta: Meta<typeof SavedSearchesPickerModal> = {
-  title: "Modals/SavedSearchesPickerModal",
+  title: "Modals/SavedSearches",
   component: SavedSearchesPickerModal,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
@@ -37,3 +37,6 @@ export const Default: Story = {
     template: "<SavedSearchesPickerModal />",
   }),
 };
+
+/** Manifest id `modals-savedsearches--picker`. */
+export const Picker: Story = { ...Default };

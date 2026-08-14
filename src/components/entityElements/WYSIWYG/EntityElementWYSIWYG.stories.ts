@@ -47,7 +47,7 @@ const seedForm = (formId: string) => {
 };
 
 const meta: Meta<typeof EntityElementWYSIWYG> = {
-  title: "EntityElements/Wysiwyg/EntityElementWYSIWYG",
+  title: "Components/WYSIWYG",
   component: EntityElementWYSIWYG,
   tags: ["autodocs"],
 };
@@ -89,3 +89,8 @@ export const EditMode: Story = {
       '<div class="max-w-3xl p-4"><EntityElementWYSIWYG v-bind="args" /></div>',
   }),
 };
+
+/** Manifest id `components-wysiwyg--toolbar`: the editor with its formatting
+ *  toolbar (edit mode). The diacritics virtual keyboard is a toolbar toggle —
+ *  see WYSIGYGVirtualKeyboard for the open-keyboard state. */
+export const Toolbar: Story = { ...EditMode };

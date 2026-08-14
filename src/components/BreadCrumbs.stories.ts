@@ -18,7 +18,7 @@ const seedBreadcrumbs = (routes: BreadcrumbRoute[], rootTitle: string) => {
 };
 
 const meta: Meta<typeof BreadCrumbs> = {
-  title: "Components/BreadCrumbs",
+  title: "Components/Breadcrumb",
   component: BreadCrumbs,
   tags: ["autodocs"],
 };
@@ -61,3 +61,6 @@ export const RootOnly: Story = {
     template: '<div class="p-4 h-24 relative"><BreadCrumbs /></div>',
   }),
 };
+
+/** Manifest id `components-breadcrumb--default`. */
+export const Default: Story = { ...WithHistory };

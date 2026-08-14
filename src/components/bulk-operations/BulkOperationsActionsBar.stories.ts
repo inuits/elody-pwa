@@ -32,7 +32,7 @@ const baseArgs = {
 };
 
 const meta: Meta<typeof BulkOperationsActionsBar> = {
-  title: "BulkOperations/BulkOperationsActionsBar",
+  title: "BulkOperations/SelectionActionBar",
   component: BulkOperationsActionsBar,
   tags: ["autodocs"],
   render: (args) => ({

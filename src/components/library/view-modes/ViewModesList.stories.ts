@@ -93,3 +93,6 @@ export const Loading: Story = {
     entitiesLoading: true,
   },
 };
+
+/** Manifest id `library-viewmodes-viewmodeslist--default`. */
+export const Default: Story = { ...ListMode };

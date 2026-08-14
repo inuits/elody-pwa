@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import ContextMenuActionsShell from "./ContextMenuActionsShell.vue";
 
 const meta: Meta<typeof ContextMenuActionsShell> = {
-  title: "Components/ContextMenuActionsShell",
+  title: "ContextMenuActions/ContextMenuActionsShell",
   component: ContextMenuActionsShell,
   tags: ["autodocs"],
   render: (args) => ({
@@ -40,3 +40,11 @@ export const OverflowOnly: Story = {
 export const PromotedOnly: Story = {
   args: { hasPromotedActions: true, hasOverflowActions: false },
 };
+
+/** Manifest id `contextmenuactions-contextmenuactionsshell--split-button`:
+ *  labelled split button — never a bare ⋮. */
+export const SplitButton: Story = { ...PromotedAndOverflow };
+
+/** Manifest id `contextmenuactions-contextmenuactionsshell--overflow-menu`:
+ *  labelled overflow trigger, destructive items last. */
+export const OverflowMenu: Story = { ...OverflowOnly };

@@ -47,6 +47,33 @@ export default meta;
 
 type Story = StoryObj<typeof MetadataWrapper>;
 
+/** Manifest id `metadata-metadatawrapper--default`: the FieldRow state table —
+ *  resting read-only, resting editable (hover shows accent wash + pencil),
+ *  and empty non-required ("Geen waarde" at 45% opacity). Error state lives
+ *  in the inline editor (a closed row never shows an error). */
+export const Default: Story = {
+  render: () => ({
+    components: { MetadataWrapper },
+    setup: () => ({
+      readOnlyMetadata,
+      editableMetadata,
+      emptyMetadata: {
+        ...editableMetadata,
+        key: "subtitle",
+        label: "Subtitle",
+        value: "",
+      },
+    }),
+    template: `
+      <div class="flex w-96 flex-col gap-1 p-4">
+        <MetadataWrapper form-id="storybook-form" :is-edit="false" :metadata="readOnlyMetadata" />
+        <MetadataWrapper form-id="storybook-form" :is-edit="true" form-flow="edit" :metadata="editableMetadata" />
+        <MetadataWrapper form-id="storybook-form" :is-edit="true" form-flow="edit" :metadata="emptyMetadata" />
+      </div>
+    `,
+  }),
+};
+
 export const ReadOnly: Story = {
   args: {
     isEdit: false,

@@ -20,7 +20,7 @@ const comment = (overrides: Record<string, unknown> = {}): Comment =>
   }) as unknown as Comment;
 
 const meta: Meta<typeof CommentItem> = {
-  title: "EntityElements/Comments/CommentItem",
+  title: "Components/Comments/CommentItem",
   component: CommentItem,
   tags: ["autodocs"],
   decorators: [() => ({ template: '<div class="max-w-xl p-4"><story /></div>' })],

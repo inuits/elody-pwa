@@ -9,7 +9,7 @@ const directories = [
 ] as unknown as Directory[];
 
 const meta: Meta<typeof FolderTree> = {
-  title: "Components/FolderTree",
+  title: "Components/HierarchyTree",
   component: FolderTree,
   tags: ["autodocs"],
   decorators: [() => ({ template: '<div class="w-96 p-4"><story /></div>' })],

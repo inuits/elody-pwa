@@ -26,7 +26,7 @@ const composerElement = {
 } as unknown as WysiwygElement;
 
 const meta: Meta<typeof CommentComposer> = {
-  title: "EntityElements/Comments/CommentComposer",
+  title: "Components/Comments/CommentComposer",
   component: CommentComposer,
   tags: ["autodocs"],
   decorators: [() => ({ template: '<div class="max-w-xl p-4"><story /></div>' })],

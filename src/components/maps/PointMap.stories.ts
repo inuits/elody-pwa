@@ -13,7 +13,7 @@ const points = [
 ];
 
 const meta: Meta<typeof PointMap> = {
-  title: "Maps/PointMap",
+  title: "Components/PointMap",
   component: PointMap,
   tags: ["autodocs"],
   argTypes: {
@@ -52,3 +52,6 @@ export const Satellite: Story = {
     mapView: MapViews.Satellite,
   },
 };
+
+/** Manifest id `components-pointmap--default`. */
+export const Default: Story = { ...Markers };

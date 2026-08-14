@@ -14,6 +14,14 @@ export default meta;
 
 type Story = StoryObj<typeof BaseDatePicker>;
 
+/** Manifest id `base-basedatepicker--default`: calendar grid. */
+export const Default: Story = {
+  args: {
+    type: "date",
+    modelValue: "2024-05-17",
+  },
+};
+
 export const DateOnly: Story = {
   args: {
     type: "date",

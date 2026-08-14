@@ -36,6 +36,15 @@ export const Empty: Story = {
   },
 };
 
+/** Manifest id `base-baseinputautocomplete--tags`: chips + input. */
+export const Tags: Story = {
+  args: {
+    modelValue: [keywordOptions[0], keywordOptions[2]],
+    options: keywordOptions,
+    autocompleteStyle: "defaultWithBorder",
+  },
+};
+
 export const WithTags: Story = {
   args: {
     modelValue: [keywordOptions[0], keywordOptions[2]],

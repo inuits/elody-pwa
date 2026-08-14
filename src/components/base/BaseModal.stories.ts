@@ -5,7 +5,7 @@ import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 
 const meta: Meta<typeof BaseModal> = {
-  title: "Base/BaseModal",
+  title: "Modals/BaseModal",
   component: BaseModal,
   tags: ["autodocs"],
   // Modal visibility lives in the useBaseModal store, keyed by modalType.
@@ -56,3 +56,6 @@ export const RightSlideIn: Story = {
     modalType: TypeModals.Confirm,
   },
 };
+
+/** Manifest id `modals-basemodal--default`: scrim, 10px radius, focus trap. */
+export const Default: Story = { ...Center };
