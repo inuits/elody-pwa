@@ -261,8 +261,9 @@ const wrapperClasses = computed(() => [
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled,
     "animate-pulse": props.loading,
-    "bg-background-light": !isActiveListItem.value,
-    "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+    "bg-background-light hover:bg-surface-row-hover": !isActiveListItem.value,
+    "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
+      isActiveListItem.value,
   },
 ]);
 </script>

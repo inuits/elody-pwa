@@ -6,10 +6,10 @@
       @click="clicked()"
       :class="[
         !asButton
-          ? 'text-gray-700 block px-4 py-2 text-sm flex items-center gap-2 w-full hover:bg-neutral-50 cursor-pointer'
+          ? 'text-text-body block px-2.5 py-1.5 text-table rounded-md flex items-center gap-2 w-full hover:bg-accent-wash cursor-pointer'
           : '',
         disable ? 'opacity-40 cursor-default' : '',
-        highlight ? 'text-neutral-900 bg-blue-50' : '',
+        highlight ? 'text-text-body bg-accent-wash' : '',
       ]"
       id="menu-item-add"
       v-bind="

@@ -221,7 +221,7 @@
               <span
                 v-else-if="fieldType === InputFieldTypes.Checkbox"
                 data-cy="metadata-checkbox-value"
-                class="flex items-center gap-1 text-sm"
+                class="flex items-center gap-1 text-value"
               >
                 <unicon
                   :name="

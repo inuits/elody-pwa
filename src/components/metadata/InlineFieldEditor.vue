@@ -52,7 +52,7 @@
           data-cy="inline-edit-select"
           :aria-label="label"
           :disabled="saving"
-          class="w-full min-w-0 rounded border border-neutral-40 bg-neutral-white px-2 py-0.5 text-sm text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="w-full min-w-0 rounded border border-neutral-40 bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
           @change="save"
           @keydown.esc.stop.prevent="cancel"
           @click.stop
@@ -74,7 +74,7 @@
           :type="htmlInputType"
           :aria-label="label"
           :disabled="saving"
-          class="w-full min-w-0 rounded border bg-neutral-white px-2 py-0.5 text-sm text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="w-full min-w-0 rounded border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="error ? 'border-red-default' : 'border-neutral-40'"
           @keydown.enter.stop.prevent="save"
           @keydown.esc.stop.prevent="cancel"

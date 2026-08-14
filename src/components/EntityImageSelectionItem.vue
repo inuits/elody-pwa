@@ -10,7 +10,7 @@
     <div v-if="canShowCopyRight && !imageSrcError" class="relative group">
       <ImageViewer
         :class="[
-          'obtain-cover outline-none shadow-sm rounded cursor-pointer w-full',
+          'obtain-cover outline-none border border-neutral-30 rounded cursor-pointer w-full',
           toBeDeleted.includes(mediafile.id) ? 'filter blur-xs grayscale' : '',
           mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
           getValueOfMediafile(mediafileViewerContext, 'filename', mediafile) ===

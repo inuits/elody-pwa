@@ -60,10 +60,12 @@ const getStyles = () => {
 .context-menu {
   position: fixed;
   z-index: var(--z-context-menu);
-  background-color: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  min-width: 120px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-overlay);
+  min-width: 170px;
+  padding: 4px;
 }
 
 .modal-enter-from .base-context-menu-container,
@@ -73,11 +75,13 @@ const getStyles = () => {
 }
 
 .context-menu div {
-  padding: 8px 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-button);
+  font-size: 12.5px;
   cursor: pointer;
 }
 
 .context-menu div:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-accent-wash);
 }
 </style>

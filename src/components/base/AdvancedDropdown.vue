@@ -23,7 +23,7 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
-        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0 !z-header`,
+        menuContainer: `border border-neutral-30 rounded-card shadow-overlay !mt-0 !z-header`,
       }"
     >
       <template #option="{ option }">

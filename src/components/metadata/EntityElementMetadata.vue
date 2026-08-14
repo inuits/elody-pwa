@@ -2,7 +2,7 @@
   <div
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
-    :class="[{ 'font-bold': highlight}, `text-sm ${breakWords ? 'break-words' : 'break-normal'}`]"
+    :class="[{ 'font-bold': highlight}, `text-value text-text-secondary ${breakWords ? 'break-words' : 'break-normal'}`]"
   >
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">

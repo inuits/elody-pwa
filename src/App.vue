@@ -3,10 +3,11 @@
     <router-view />
   </div>
   <div v-else-if="!showSplashScreen">
-    <notifications class="pt-2" />
+    <notifications class="pb-2" position="bottom left" />
     <div v-if="!someModalIsOpened">
       <notifications
-        class="pt-2 cursor-pointer"
+        class="pb-2 cursor-pointer"
+        position="bottom left"
         group="serviceVersionManager"
         @click="refreshPage()"
       />

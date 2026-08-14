@@ -5,7 +5,7 @@
       :ref="showInTopLayer"
       popover="manual"
       @mousedown.prevent
-      class="fixed z-[10000] w-72 max-h-64 overflow-y-auto rounded-md border border-neutral-30 bg-white shadow-lg py-1"
+      class="fixed z-[10000] w-72 max-h-64 overflow-y-auto rounded-card border border-neutral-30 bg-white shadow-overlay py-1"
       :style="{
         left: `${suggestion.anchor.left}px`,
         top: `${suggestion.anchor.bottom + 4}px`,

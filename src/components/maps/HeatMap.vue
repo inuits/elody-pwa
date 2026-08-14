@@ -16,7 +16,7 @@
         positioning="bottom-center"
         :autoPan="true"
       >
-        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
+        <div class="bg-white rounded-card shadow-overlay p-3 text-sm w-48">
           <div
             v-if="featureLoading"
             class="h-full w-full flex items-center justify-center py-4"

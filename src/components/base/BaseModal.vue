@@ -137,8 +137,7 @@ dialog {
 }
 
 dialog::backdrop {
-  background-color: var(--color-accent-normal);
-  opacity: 0.3;
+  background-color: var(--color-scrim);
 }
 
 dialog:focus {

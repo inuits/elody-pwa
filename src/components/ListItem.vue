@@ -115,7 +115,7 @@
       :class="[
         { 'h-10 w-10': isListMode },
         {
-          'h-48 w-48 flex flex-col justify-center items-center shadow-sm mb-4':
+          'h-48 w-48 flex flex-col justify-center items-center border border-neutral-30 mb-4':
             isGridMode,
         },
         'text-neutral-700 rounded-sm outline-none self-center',
@@ -504,10 +504,11 @@ const wrapperClasses = computed(() => {
     { "!border-status-deleted": isMarkedAsToBeDeleted.value },
     { "grayscale brightness-95 !cursor-default": props.isDisabled },
     { "animate-pulse": loading.value },
-    { "bg-background-light": !isActiveListItem.value },
+    { "bg-background-light hover:bg-surface-row-hover": !isActiveListItem.value },
     { "border-accent-highlight": !isActiveListItem.value },
     {
-      "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+      "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
+        isActiveListItem.value,
     },
   ];
 });

@@ -281,6 +281,29 @@
 }
 
 
+/* Design-system toasts (@kyvg/vue3-notification): inverted surface, white
+   12.5px ink, 10px radius, toast shadow. Status toasts are plain; warnings
+   and errors carry a semantic accent bar. */
+.vue-notification {
+  background: var(--color-surface-inverted) !important;
+  border: none !important;
+  border-radius: var(--radius-overlay);
+  box-shadow: var(--shadow-toast);
+  color: var(--color-text-on-inverted) !important;
+  font-size: 12.5px;
+  margin: 0 0 8px 10px;
+  padding: 10px 14px;
+}
+.vue-notification .notification-title {
+  font-weight: 700;
+}
+.vue-notification.warn {
+  border-left: 3px solid var(--color-warning) !important;
+}
+.vue-notification.error {
+  border-left: 3px solid var(--color-danger) !important;
+}
+
 /* Interaction polish (redesign): every button animates its surface and
    presses down slightly on :active; keyboard focus is always visible. */
 @layer base {

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="metadata.label" class="text-text-light text-xs flex">
+  <div v-if="metadata.label" class="text-text-light text-label font-bold flex">
     <p data-cy="metadata-label">
       {{ t(metadata.label) }}
     </p>

@@ -170,7 +170,7 @@
           "
           type="button"
           data-cy="row-add-button"
-          class="mt-1 rounded-md border border-dashed border-neutral-60 bg-transparent px-2.5 py-0.5 text-xs font-bold text-neutral-200 cursor-pointer hover:border-accent-accent hover:text-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
+          class="mt-1 rounded-pill border border-dashed border-neutral-60 bg-transparent px-3 py-0.5 text-label font-bold text-text-light cursor-pointer hover:border-accent-accent hover:text-accent-accent focus-visible:outline-2 focus-visible:outline-accent-accent"
           @click.stop="addRow"
         >
           + {{ translate("block-edit.add-row", "Add row") }}
