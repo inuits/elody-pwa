@@ -19,6 +19,8 @@
           :entity="leftVersionEntity"
           :wysiwyg-diffs="leftWysiwygDiffs"
           :relation-diffs="leftRelationDiffs"
+          :column-order="columnOrder"
+          :element-order-by-column="elementOrderByColumn"
         />
       </div>
 
@@ -41,6 +43,8 @@
           :entity="rightVersionEntity"
           :wysiwyg-diffs="rightWysiwygDiffs"
           :relation-diffs="rightRelationDiffs"
+          :column-order="columnOrder"
+          :element-order-by-column="elementOrderByColumn"
         />
       </div>
     </div>
@@ -77,6 +81,8 @@ const {
   rightLoading,
   leftVersionEntity,
   rightVersionEntity,
+  columnOrder,
+  elementOrderByColumn,
   leftWysiwygDiffs,
   rightWysiwygDiffs,
   leftRelationDiffs,

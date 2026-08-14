@@ -1,5 +1,5 @@
 <template>
-  <div class="ml-0 min-[880px]:ml-6">
+  <div class="ml-0">
     <BaseButtonNew
       :label="t('history.view-history')"
       :icon="DamsIcons.History"
