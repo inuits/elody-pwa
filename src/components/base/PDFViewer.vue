@@ -10,11 +10,15 @@
       <spinner-loader theme="accent" />
     </div>
 
-    <PdfToolbar
+    <!-- One ViewerToolbar for every viewer mode (media-viewer.md); the
+         separate PdfToolbar is retired. -->
+    <ViewerToolbar
       v-show="!loading"
-      @zoomIn="zoomIn"
-      @zoomOut="zoomOut"
-      @changePage="onChangePage"
+      mode="pdf"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @change-page="onChangePage"
+      @full-page="toggleFullscreen"
       :pageNum="pageNum"
       :pageCount="numPages"
       :mediafileId="props.source?.id"
@@ -60,7 +64,7 @@ import type { Ref } from "vue";
 import { nextTick, onUnmounted, ref, watch } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
 
-import PdfToolbar from "../PdfToolbar.vue";
+import ViewerToolbar from "@/components/ViewerToolbar.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { CacheStrategy, useGetMediafile } from "@/composables/useGetMediafile";
 
@@ -198,6 +202,12 @@ function onChangePage(payload: any): void {
   );
   pageNum.value = clamped;
   queueRenderPage(clamped);
+}
+
+/* ---------- Fullscreen (pdf mode of the shared ViewerToolbar) ---------- */
+function toggleFullscreen(): void {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else spaceForPage.value?.requestFullscreen?.();
 }
 
 /* ---------- Zoom handling (clamped) ---------- */
