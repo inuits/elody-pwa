@@ -81,6 +81,32 @@ pnpm run test:unit
 
 Coverage output lands in `coverage/` and is browsable at `http://dashboard.dams.localhost:8300/coverage/index.html` when the stack is running.
 
+## Design system & Storybook
+
+The elody design system is maintained in two places, each canonical for one
+half:
+
+- **Contracts** (states, accessibility, NL/EN copy) live in the **elody-docs
+  VitePress site** under `/design-system/` (locally
+  `http://docs.localhost:8000/design-system/`). Where code and docs disagree,
+  the docs win.
+- **Rendered states** live in **Storybook** (`pnpm storybook`): every
+  component's states as stories, themed live through the Tenant toolbar (all
+  six `data-elody-client` scopes) and checked by the a11y addon. The docs
+  pages embed these stories via `<StoryEmbed>`.
+
+Change a contract in the docs first, then make the story match. A new
+component needs, in this order: a docs page, a story, and a manifest row
+(see `MANIFEST.md` in the design-system handoff). Changing a token means
+changing the `@theme` block in `src/assets/main.css` first — never hard-code
+a colour, radius, duration or font size in a component.
+
+```sh
+pnpm storybook        # dev server on :6006
+pnpm build-storybook  # static build
+pnpm test:stories     # headless smoke test over all stories
+```
+
 ## Feature docs
 
 `.claude/features/` holds structured docs for non-obvious features (Dynamic Forms, Repetitive Form wizard, …). Check there before exploring a feature from scratch.

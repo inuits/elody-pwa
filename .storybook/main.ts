@@ -3,8 +3,8 @@ import { fileURLToPath, URL } from "node:url";
 import type { StorybookConfig } from "@storybook/vue3-vite";
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.stories.@(ts|mdx)"],
-  addons: ["@storybook/addon-docs"],
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.ts"],
+  addons: ["@storybook/addon-docs", "@storybook/addon-a11y"],
   framework: {
     name: "@storybook/vue3-vite",
     options: {},

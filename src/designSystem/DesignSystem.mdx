@@ -1,0 +1,47 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Design system/Overview" />
+
+# Elody design system
+
+This Storybook is the **living reference** for the elody design system: every
+component's states are maintained here as stories, themed live through the
+Tenant toolbar (all six `data-elody-client` scopes).
+
+**Canonical home:** the written contracts (states, accessibility, NL/EN copy)
+live in the **elody-docs VitePress site** under `/design-system/`; those pages
+embed these stories via `<StoryEmbed>`. This Storybook is the canonical home
+for *rendered states*; the docs site is the canonical home for *contracts*.
+Change a contract in the docs first, then make the story match.
+
+- Local docs: [http://docs.localhost:8000/design-system/](http://docs.localhost:8000/design-system/)
+- Tokens: [`src/assets/main.css`](?path=/docs/design-system-foundations--docs)
+  (`@theme` block + `[data-elody-client]` scopes) — see the
+  [Foundations](?path=/docs/design-system-foundations--docs) page
+- Audit contract: `MANIFEST.md` in the design-system handoff maps
+  component → docs page → Vue file → story id
+
+## Ground rules (short form)
+
+1. Never hard-code a colour, radius, duration or font size — tokens only.
+2. Two elevation levels: cards = 1px border, no shadow; overlays float.
+3. Shape encodes role: pill (14px) *starts* something reversible; rectangle
+   (5–6px) *executes* immediately. Never a pill on a mutating action.
+4. Edit scope = save scope = validation scope (per-field editing).
+5. Structural accessibility is part of "done": role, accessible name, focus
+   order, `role="alert"` for errors, `role="status"` for confirmations.
+6. Copy is Dutch, sentence case, verbs on buttons; NL + EN in i18n.
+
+## Toolbar
+
+- **Tenant** — switches the `data-elody-client` scope on the preview body.
+  Panel headers, section headers, washes and primary buttons shift per client;
+  commit teal, focus ring, semantic colours and badge tones stay put.
+- **Viewport** — the preview-split container tiers (stacked / 500 / 630 /
+  830 / 1024px) used by the entity list's preview split.
+
+## Open by design
+
+Final iconography set (Unicons interim), empty-state illustrations,
+data-visualisation palette, dark mode, Lato binaries (Google Fonts interim).
+Leave text-only treatments and note "Open — see brief".
