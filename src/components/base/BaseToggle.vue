@@ -1,10 +1,14 @@
 <template>
-  <div
-    class="flex items-center justify-center w-9 h-9 rounded bg-background-light cursor-pointer select-none"
-    :class="{
-      'drop-shadow-[0_0_3px_rgba(9,30,66,0.13)]':
-        isPartOfToggleGroup && !toggleOn,
-    }"
+  <!-- Toggle is a real button: pressed = sunken surface, no shadows. -->
+  <button
+    type="button"
+    :aria-pressed="toggleOn"
+    class="flex items-center justify-center w-9 h-9 rounded-input border-none cursor-pointer select-none focus-visible:outline-2 focus-visible:outline-accent-accent"
+    :class="
+      toggleOn && isPartOfToggleGroup
+        ? 'bg-surface-sunken text-text-light'
+        : 'bg-background-light hover:bg-accent-wash'
+    "
     @click="
       () => {
         emit('turnAllTogglesInGroupOff');
@@ -19,7 +23,7 @@
       :height="iconHeight"
     />
     <unicon v-else :name="Unicons[props.iconOff].name" :height="iconHeight" />
-  </div>
+  </button>
 </template>
 
 <script lang="ts" setup>

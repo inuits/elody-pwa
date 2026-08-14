@@ -2,7 +2,7 @@
   <div
     data-cy="metadata-wrapper"
     v-if="inputField && isPermitted"
-    class="text-text-light text-sm"
+    class="text-text-light text-value"
   >
     <p data-cy="metadata-label">
       {{ label ? t(label) : t("metadata.no-label") }}

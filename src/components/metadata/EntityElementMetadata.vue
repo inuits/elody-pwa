@@ -2,7 +2,7 @@
   <div
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
-    :class="[{ 'font-bold': highlight}, `text-sm ${breakWords ? 'break-words' : 'break-normal'}`]"
+    :class="[{ 'font-bold': highlight}, `text-value text-text-secondary ${breakWords ? 'break-words' : 'break-normal'}`]"
   >
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
@@ -41,7 +41,12 @@
           :content="processedDisplayValue.toString()"
         ></SanitizedHtml>
       </p>
-      <p v-else data-cy="metadata-value" class="whitespace-pre-line">
+      <p
+        v-else
+        data-cy="metadata-value"
+        class="whitespace-pre-line"
+        :class="{ 'opacity-45': readableValue === '' }"
+      >
         {{ processedDisplayValue }}
       </p>
     </div>
@@ -75,6 +80,7 @@ const props = withDefaults(
     customValue?: string;
     linkIcon?: string;
     baseLibraryMode?: BaseLibraryModes;
+    emptyAsDash?: boolean;
     translationKey?: string;
     highlight?: boolean;
     breakWords?: boolean;
@@ -82,12 +88,13 @@ const props = withDefaults(
   {
     linkText: "",
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    emptyAsDash: false,
     highlight: false,
     breakWords: false,
   },
 );
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const isCoordinates = computed(() => {
   return (
@@ -108,7 +115,14 @@ const processedDisplayValue = computed<string>(() =>
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;
 
-  if (readableValue.value === "") return "-";
+  if (readableValue.value === "") {
+    // In list/table cells an empty value is a dimmed dash; the "Geen
+    // waarde" copy belongs to field rows only.
+    if (props.emptyAsDash) return "—";
+    return te("metadata.labels.no-value")
+      ? t("metadata.labels.no-value")
+      : "No value";
+  }
   if (Array.isArray(readableValue.value)) return readableValue.value;
 
   if (props.translationKey) {

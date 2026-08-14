@@ -5,6 +5,7 @@
         v-for="(option, idx) in options"
         :key="option.value + '_' + idx"
         v-model="option.isSelected"
+        class="text-table"
         :disabled="isDisabled(option)"
         :label="getTranslatedLabel(option.value)"
         ignoreBulkOperations

@@ -3,7 +3,7 @@
     <div
       data-testid="info-panel"
       role="dialog"
-      class="fixed bottom-[30px] left-1/2 -translate-x-1/2 z-tooltip flex max-h-[60vh] w-[min(90vw,48rem)] flex-col rounded-md border border-neutral-30 bg-background-light shadow-lg"
+      class="fixed bottom-[30px] left-1/2 -translate-x-1/2 z-tooltip flex max-h-[60vh] w-[min(90vw,48rem)] flex-col rounded-overlay border border-neutral-30 bg-background-light shadow-popover"
     >
       <div
         class="flex items-center justify-between border-b border-neutral-30 p-3"

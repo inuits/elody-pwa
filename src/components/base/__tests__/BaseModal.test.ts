@@ -36,6 +36,10 @@ const createBaseModalMock = (
   ...overrides,
 });
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({ t: (key: string) => key, te: () => false }),
+}));
+
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: vi.fn(() => createBaseModalMock()),
 }));
@@ -220,13 +224,17 @@ describe("BaseModal", () => {
     it("should apply icon height correctly", () => {
       const iconHeight = 24;
       wrapper = createWrapper({ iconHeight, cancelButtonAvailabe: false });
-      const icon = wrapper.find('[data-testid="modal-close-button"]');
+      const icon = wrapper.find(
+        '[data-testid="modal-close-button"] [data-testid="unicon"]',
+      );
       expect(icon.attributes("height")).toBe(iconHeight.toString());
     });
 
     it("should use default icon height if not provided", () => {
       wrapper = createWrapper();
-      const icon = wrapper.find('[data-testid="modal-close-button"]');
+      const icon = wrapper.find(
+        '[data-testid="modal-close-button"] [data-testid="unicon"]',
+      );
       expect(icon.attributes("height")).toBe("18");
     });
 
@@ -263,14 +271,14 @@ describe("BaseModal", () => {
       await wrapper.vm.$nextTick();
       const dialog = wrapper.find('[data-testid="modal-dialog"]');
       const classes = dialog.attributes("class");
-      expect(classes).toContain("rounded-xl");
+      expect(classes).toContain("rounded-overlay");
 
       wrapper = createWrapper({}, { modalStyle: ModalStyle.CenterWide });
 
       await wrapper.vm.$nextTick();
       const dialogCenterWide = wrapper.find('[data-testid="modal-dialog"]');
       const centerWideClasses = dialogCenterWide.attributes("class");
-      expect(centerWideClasses).toContain("rounded-xl");
+      expect(centerWideClasses).toContain("rounded-overlay");
     });
 
     it("should handle custom modal height style", async () => {
@@ -304,11 +312,11 @@ describe("BaseModal", () => {
       },
       {
         style: ModalStyle.Center,
-        expectedClasses: ["rounded-xl", "max-h-[75vh]", "my-[12.5vh]"],
+        expectedClasses: ["rounded-overlay", "max-h-[75vh]", "my-[12.5vh]"],
       },
       {
         style: ModalStyle.CenterWide,
-        expectedClasses: ["rounded-xl"],
+        expectedClasses: ["rounded-overlay"],
       },
     ];
 

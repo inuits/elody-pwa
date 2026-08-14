@@ -3,16 +3,18 @@
     data-cy="base-button-new"
     type="button"
     :disabled="disabled || loading"
-    class="flex justify-center items-center whitespace-nowrap w-full rounded-md outline-none transition-colors duration-300 cursor-pointer disabled:cursor-auto"
+    :aria-label="ariaLabel"
+    class="flex justify-center items-center whitespace-nowrap w-full rounded-md font-bold cursor-pointer disabled:cursor-auto focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-ring"
     :class="[
       label ? `pl-1.5` : ``,
       `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
       `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
       `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
       `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
-      { 'text-base p-3': buttonSize === 'normal' },
-      { 'text-[0.925rem] p-1.5': buttonSize === 'small' },
-      { 'text-[0.750rem] p-1': buttonSize === 'verySmall' },
+      selectedButtonStyle.extra ?? '',
+      { 'text-value p-3': buttonSize === 'normal' },
+      { 'text-ui p-1.5': buttonSize === 'small' },
+      { 'text-hint p-1': buttonSize === 'verySmall' },
     ]"
   >
     <spinner-loader
@@ -47,7 +49,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span class="text-value text-text-placeholder">
             <div>
               {{ t(tooltipLabel) }}
             </div>
@@ -76,6 +78,7 @@ type Button = {
   hoverStyle: PseudoStyle;
   activeStyle: PseudoStyle;
   disabledStyle: PseudoStyle;
+  extra?: string;
 };
 const defaultButton: Button = {
   textColor: "text-text-body",
@@ -96,8 +99,42 @@ const defaultButton: Button = {
 const accentAccentButton: Button = {
   textColor: "text-neutral-white",
   bgColor: "bg-accent-accent",
-  hoverStyle: defaultButton.hoverStyle,
-  activeStyle: defaultButton.activeStyle,
+  hoverStyle: {
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-commit-hover",
+  },
+  activeStyle: {
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-commit-strong-hover",
+  },
+  disabledStyle: defaultButton.disabledStyle,
+};
+// Design-system secondary: white surface, 1px border, body ink.
+const secondaryButton: Button = {
+  textColor: "text-text-body",
+  bgColor: "bg-neutral-white border border-neutral-40",
+  hoverStyle: {
+    textColor: "hover:text-text-body",
+    bgColor: "hover:bg-accent-wash",
+  },
+  activeStyle: {
+    textColor: "active:text-text-body",
+    bgColor: "active:bg-accent-light",
+  },
+  disabledStyle: defaultButton.disabledStyle,
+};
+// Design-system ghost: borderless, label-blue ink.
+const ghostButton: Button = {
+  textColor: "text-text-light",
+  bgColor: "bg-transparent",
+  hoverStyle: {
+    textColor: "hover:text-accent-dark",
+    bgColor: "hover:bg-accent-wash",
+  },
+  activeStyle: {
+    textColor: "active:text-accent-dark",
+    bgColor: "active:bg-accent-light",
+  },
   disabledStyle: defaultButton.disabledStyle,
 };
 const accentNormalButton: Button = {
@@ -113,29 +150,53 @@ const accentNormalButton: Button = {
   },
   disabledStyle: defaultButton.disabledStyle,
 };
+// Design-system primary: accent fill, white ink, darker accent on hover.
+const primaryButton: Button = {
+  textColor: "text-neutral-white",
+  bgColor: "bg-accent",
+  hoverStyle: {
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-accent-hover",
+  },
+  activeStyle: {
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-accent-hover",
+  },
+  disabledStyle: defaultButton.disabledStyle,
+  extra: "hover:shadow-[0_2px_6px_rgba(59,166,203,0.4)]",
+};
 const redDefaultButton: Button = {
   textColor: accentAccentButton.textColor,
   bgColor: "bg-red-default",
   hoverStyle: {
-    textColor: "hover:text-red-default",
-    bgColor: "hover:bg-red-lightest",
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-red-dark",
   },
   activeStyle: {
-    textColor: "active:text-red-default",
-    bgColor: "active:bg-red-light",
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-red-dark",
   },
   disabledStyle: defaultButton.disabledStyle,
 };
 
 export type ButtonStyle =
   | "default"
+  | "primary"
+  | "secondary"
+  | "ghost"
   | "accentAccent"
   | "accentNormal"
   | "redDefault";
+// Deprecations (design system): the grey `default` variant renders as
+// secondary, the mint `accentNormal` as commit. The names remain accepted
+// so config-driven call sites keep working.
 const buttonStyles: Record<ButtonStyle, Button> = {
-  default: defaultButton,
+  default: secondaryButton,
+  primary: primaryButton,
+  secondary: secondaryButton,
+  ghost: ghostButton,
   accentAccent: accentAccentButton,
-  accentNormal: accentNormalButton,
+  accentNormal: accentAccentButton,
   redDefault: redDefaultButton,
 };
 
@@ -152,15 +213,17 @@ const props = withDefaults(
     loading?: boolean;
     tooltipLabel?: string;
     forceShowLabel?: boolean;
+    ariaLabel?: string;
   }>(),
   {
     icon: DamsIcons.NoIcon,
     buttonStyle: "default",
     buttonSize: "normal",
     disabled: false,
-    iconHeight: 18,
+    iconHeight: 14,
     loading: false,
     forceShowLabel: false,
+    ariaLabel: undefined,
   },
 );
 

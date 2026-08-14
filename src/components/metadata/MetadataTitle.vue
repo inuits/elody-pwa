@@ -1,5 +1,5 @@
 <template>
-  <div v-if="metadata.label" class="text-text-light text-sm flex">
+  <div v-if="metadata.label" class="text-text-light text-label font-bold flex">
     <p data-cy="metadata-label">
       {{ t(metadata.label) }}
     </p>
@@ -18,7 +18,7 @@
         </div>
       </template>
       <template #default>
-        <span class="text-sm text-text-placeholder">
+        <span class="text-value text-text-placeholder">
           <div>
             {{ t(`${metadata.tooltip}`) }}
           </div>

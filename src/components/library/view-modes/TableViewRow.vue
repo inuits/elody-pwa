@@ -16,6 +16,7 @@
         }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
+        :aria-label="rowAccessibleName"
       />
     </div>
 
@@ -50,7 +51,7 @@
       </div>
     </div>
 
-    <div class="flex-1 flex items-center min-w-0">
+    <div class="flex-1 flex items-center min-w-0 text-table">
       <div
         v-for="(metadataItem, idx) in visibleMetadata"
         :key="`${itemId}_${metadataItem?.key || idx}`"
@@ -69,7 +70,7 @@
       </div>
     </div>
 
-    <div class="w-8 shrink-0 flex justify-center" @click.stop>
+    <div class="w-28 shrink-0 flex justify-end pr-1" @click.stop>
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
         :parent-entity-id="parentEntityId"
@@ -78,6 +79,7 @@
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :menu-label="rowActionsMenuLabel"
       />
     </div>
 
@@ -107,7 +109,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span class="text-value text-text-placeholder">
             {{
               previewComponentCurrentActive
                 ? t("preview-component.close")
@@ -198,9 +200,20 @@ const emit = defineEmits<{
   (event: "togglePreviewComponent", entityId: string): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+// table rows never show a bare ⋮ either — labeled menu trigger
+const rowActionsMenuLabel = computed<string>(() =>
+  te("context-menu.actions") ? t("context-menu.actions") : "Actions",
+);
 
 const isChecked = ref(false);
+
+// The row's accessible name: its first visible metadata value (the title).
+const rowAccessibleName = computed<string>(() => {
+  const value = visibleMetadata.value[0]?.value;
+  return typeof value === "string" ? value : "";
+});
 const imageSrcError = ref(false);
 
 const canShowMedia = computed(() => {
@@ -216,12 +229,18 @@ const visibleMetadata = computed(() =>
   (props.teaserMetadata ?? []).filter((m) => !m.showOnlyInEditMode),
 );
 
+// The row title is the first cell that isn't a badge/pill formatter.
+const titleCellIndex = computed<number>(() =>
+  visibleMetadata.value.findIndex((m: any) => !m?.value?.formatter),
+);
+
 const columnClass = (idx: number): string => {
   const base = "flex justify-start flex-col mx-2 break-words";
   const pos = idx === 0 ? "col-primary" : "col-secondary";
+  const title = idx === titleCellIndex.value ? " row-title-cell" : "";
   if (visibleMetadata.value[0]?.value?.formatter) {
-    if (idx === 0) return `${base} ${pos} flex-shrink-0 whitespace-nowrap`;
-    return `${base} ${pos} flex-1 min-w-0`;
+    if (idx === 0) return `${base} ${pos}${title} flex-shrink-0 whitespace-nowrap`;
+    return `${base} ${pos}${title} flex-1 min-w-0`;
   }
   const count = visibleMetadata.value.length;
   const amount: string | number = count >= 4 ? "default" : count;
@@ -231,7 +250,7 @@ const columnClass = (idx: number): string => {
     3: "w-1/2",
     default: "w-1/4",
   };
-  return `${base} ${pos} ${widths[amount]}`;
+  return `${base} ${pos}${title} ${widths[amount]}`;
 };
 
 const isActiveListItem = computed<boolean>(() => {
@@ -255,13 +274,21 @@ const wrapperClasses = computed(() => [
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled,
     "animate-pulse": props.loading,
-    "bg-background-light": !isActiveListItem.value,
-    "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+    "bg-background-light hover:bg-surface-row-hover": !isChecked.value,
+    "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
+      isChecked.value,
+    "border-l-[3px] border-l-accent": isActiveListItem.value,
   },
 ]);
 </script>
 
 <style scoped>
+/* the row title is the first non-badge cell: link-blue, bold */
+.row-title-cell :deep([data-cy="metadata-value"]) {
+  color: var(--color-text-light);
+  font-weight: 700;
+}
+
 @container parent (max-width: 640px) {
   .col-primary,
   .col-secondary {

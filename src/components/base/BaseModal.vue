@@ -3,6 +3,7 @@
     ref="dialog"
     data-testid="modal-dialog"
     closedby="none"
+    :aria-label="modalAriaLabel"
     @close="hideModal"
     @cancel="handleCancel"
     :class="[
@@ -10,7 +11,7 @@
         'grid grid-rows-[max-content_1fr] base-modal--opened': getModalInfo(
           props.modalType,
         ).open,
-        'rounded-xl':
+        'rounded-overlay':
           currentModalStyle === ModalStyle.Center ||
           currentModalStyle === ModalStyle.CenterWide,
       },
@@ -23,13 +24,15 @@
       class="flex justify-end p-2"
       data-testid="modal-header"
     >
-      <unicon
-        :name="Unicons.Close.name"
-        :height="iconHeight"
-        class="cursor-pointer"
+      <button
+        type="button"
         data-testid="modal-close-button"
+        :aria-label="closeLabel"
+        class="flex cursor-pointer items-center rounded border-none bg-transparent p-0.5 hover:bg-accent-wash focus-visible:outline-2 focus-visible:outline-accent-accent"
         @click="hideModal"
-      />
+      >
+        <unicon :name="Unicons.Close.name" :height="iconHeight" />
+      </button>
     </div>
     <div data-testid="modal-content">
       <slot />
@@ -45,6 +48,7 @@ import { ref, computed, watch, onUnmounted } from "vue";
 import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useI18n } from "vue-i18n";
 import { useModalActions } from "@/composables/useModalActions";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
@@ -69,6 +73,16 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
+const { t, te } = useI18n();
+const modalAriaLabel = computed<string>(() => {
+  const info = getModalInfo(props.modalType) as any;
+  const label = info?.formQuery || props.modalType;
+  return te(String(label)) ? t(String(label)) : String(label);
+});
+const closeLabel = computed<string>(() =>
+  te("preview-component.close") ? t("preview-component.close") : "Close",
+);
+
 const { getModalInfo } = useBaseModal();
 const dialog = ref<HTMLDialogElement>();
 const currentModalStyle = computed(
@@ -82,6 +96,8 @@ const handleDocumentEsc = (event: KeyboardEvent) => {
 
   event.preventDefault();
   event.stopPropagation();
+  // A busy modal (blocking overlay up) never closes on Escape.
+  if (isBlocking.value) return;
   handleCancel(event);
 };
 
@@ -112,6 +128,7 @@ watch(
 const handleCancel = (event: Event) => {
   event.preventDefault();
   event.stopPropagation();
+  if (isBlocking.value) return;
   hideModal();
 };
 
@@ -134,11 +151,11 @@ onUnmounted(() => {
 dialog {
   max-width: 100vw;
   border: 0;
+  box-shadow: var(--shadow-modal);
 }
 
 dialog::backdrop {
-  background-color: var(--color-accent-normal);
-  opacity: 0.3;
+  background-color: var(--color-scrim);
 }
 
 dialog:focus {

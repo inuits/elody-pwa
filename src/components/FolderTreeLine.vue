@@ -59,7 +59,7 @@
               fill-rule="evenodd"
               clip-rule="evenodd"
               d="M0.707107 5.70711C0.316582 5.31658 0.316582 4.68342 0.707107 4.29289L4.24264 0.757359C4.63316 0.366835 5.26633 0.366835 5.65685 0.757359L9.19239 4.29289C9.58291 4.68342 9.58291 5.31658 9.19239 5.70711C8.80186 6.09763 8.1687 6.09763 7.77817 5.70711L4.94975 2.87868L2.12132 5.70711C1.7308 6.09763 1.09763 6.09763 0.707107 5.70711Z"
-              fill="#19265C"
+              fill="currentColor"
             />
           </svg>
         </a>
@@ -201,7 +201,7 @@ export default defineComponent({
 
 .last-ul > li:before {
   content: "";
-  border-left: 1px solid #253858;
+  border-left: 1px solid var(--color-neutral-700);
   position: absolute;
   height: 50%;
   top: 0;
@@ -210,7 +210,7 @@ export default defineComponent({
 
 .last-ul > li:after {
   content: "";
-  border-left: 1px solid #253858;
+  border-left: 1px solid var(--color-neutral-700);
   position: absolute;
   height: 2rem;
   top: -2rem;

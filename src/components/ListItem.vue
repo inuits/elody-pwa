@@ -16,6 +16,7 @@
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
+        :aria-label="rowAccessibleName"
       />
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
@@ -81,6 +82,7 @@
         }"
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
+        :aria-label="rowAccessibleName"
       />
     </div>
     <div
@@ -115,7 +117,7 @@
       :class="[
         { 'h-10 w-10': isListMode },
         {
-          'h-48 w-48 flex flex-col justify-center items-center shadow-sm mb-4':
+          'h-48 w-48 flex flex-col justify-center items-center border border-neutral-30 mb-4':
             isGridMode,
         },
         'text-neutral-700 rounded-sm outline-none self-center',
@@ -142,9 +144,12 @@
         :key="`${formId || idx}_${metadataItem?.key || idx}`"
         :class="[
           teaserMetadataStyle,
-          idx < 1 && teaserMetadata[0]?.value?.formatter
+          // with a column-header row the cells must stay equal-width so they
+          // line up under the headers; without one the first pill stays tight
+          idx < 1 && teaserMetadata[0]?.value?.formatter && !hideCellLabels
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine ? '' : 'w-full', // all others stay full width unless multiLine grid handles sizing
+          { 'row-title-cell': idx === titleCellIndex },
         ]"
         :style="metadataItem.colSpan && props.multiLine
           ? { gridColumn: `span ${metadataItem.colSpan}` }
@@ -160,6 +165,7 @@
               v-if="!useEditHelper.isEdit"
               :form-id="formId || 'listview'"
               :metadata="(localizedMetadata || metadataItem) as MetadataField"
+              :hide-label="hideCellLabels"
               :is-edit="useEditHelper.isEdit"
               :linked-entity-id="intialValues?.id || itemId"
               :entity-type="entityTypename"
@@ -206,11 +212,15 @@
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :primary-label="openRecordLabel"
+        :primary-disabled="isDisabled"
+        :menu-label="openRecordLabel ? undefined : rowActionsMenuLabel"
+        @primary="emit('navigateTo')"
         @toggle-loading="toggleLoading"
       />
     </div>
     <div
-      v-if="previewComponentEnabled && isEnableNavigation"
+      v-if="previewComponentEnabled && isEnableNavigation && !openRecordLabel"
       class="flex flex-row"
       @click="() => emit('navigateTo')"
     >
@@ -244,7 +254,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span class="text-value text-text-placeholder">
             <div>
               {{
                 previewComponentCurrentActive
@@ -345,6 +355,7 @@ const props = withDefaults(
     isPrimaryThumbnail?: boolean;
     multiLine?: boolean;
     multiLineColumns?: number;
+    hideCellLabels?: boolean;
   }>(),
   {
     contextMenuActions: undefined,
@@ -374,6 +385,7 @@ const props = withDefaults(
     isPrimaryThumbnail: false,
     multiLine: false,
     multiLineColumns: 5,
+    hideCellLabels: false,
   },
 );
 
@@ -383,14 +395,39 @@ const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const { getEntityUuid } = useEntitySingle();
+
+// Track A: every list row gets a labeled split-button primary action
+// ("Open record", shortened to "Open" in narrow/embedded lists) — never a
+// bare ⋮. Pickers pass enable-navigation=false and keep their own row
+// semantics, so they get no navigation button.
+const openRecordLabel = computed<string | undefined>(() => {
+  if (!props.isEnableNavigation) return undefined;
+  const isNarrow =
+    props.small || props.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary;
+  const key = isNarrow ? "split-button.open" : "split-button.open-record";
+  const fallback = isNarrow ? "Open" : "Open record";
+  return te(key) ? t(key) : fallback;
+});
+
+// rows without a navigation primary still never show a bare ⋮ — the menu
+// trigger gets a label instead
+const rowActionsMenuLabel = computed<string>(() =>
+  te("context-menu.actions") ? t("context-menu.actions") : "Actions",
+);
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const loading = ref<boolean>(props.loading);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
+
+// The row's accessible name: its first teaser metadata value (the title).
+const rowAccessibleName = computed<string>(() => {
+  const value = (props.teaserMetadata ?? [])[0]?.value;
+  return typeof value === "string" ? value : "";
+});
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
 const useEditHelper = useEditMode(
@@ -456,6 +493,13 @@ const onlyEditableTeaserMetadata = computed(() =>
   props.teaserMetadata?.filter((metadata) => metadata?.showOnlyInEditMode),
 );
 
+// The row title is the first cell that isn't a badge/pill formatter.
+const titleCellIndex = computed<number>(() =>
+  (onlyReadModeTeaserMetadata.value ?? []).findIndex(
+    (m: any) => !m?.value?.formatter,
+  ),
+);
+
 const isGridMode = computed(() => props.viewMode === "grid");
 const isListMode = computed(() => props.viewMode === "list");
 
@@ -476,11 +520,15 @@ const wrapperClasses = computed(() => {
     { "!border-status-deleted": isMarkedAsToBeDeleted.value },
     { "grayscale brightness-95 !cursor-default": props.isDisabled },
     { "animate-pulse": loading.value },
-    { "bg-background-light": !isActiveListItem.value },
-    { "border-accent-highlight": !isActiveListItem.value },
     {
-      "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+      "bg-background-light hover:bg-surface-row-hover": !isChecked.value,
     },
+    { "border-accent-highlight": !isChecked.value },
+    {
+      "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
+        isChecked.value,
+    },
+    { "border-l-[3px] border-l-accent": isActiveListItem.value },
   ];
 });
 
@@ -532,3 +580,11 @@ const createWindowPanelsFromEntityListElements = (
   return panel;
 };
 </script>
+
+<style scoped>
+/* the row title is the first cell: link-blue, bold (design entity list) */
+.row-title-cell :deep([data-cy="metadata-value"]) {
+  color: var(--color-text-light);
+  font-weight: 700;
+}
+</style>

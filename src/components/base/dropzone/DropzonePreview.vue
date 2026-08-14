@@ -16,7 +16,7 @@
           />
         </div>
 
-        <div class="dz-filename text-blue text-sm mt-2 ml-6 pr-6 w-full">
+        <div class="dz-filename text-blue text-value mt-2 ml-6 pr-6 w-full">
           <span
             class="inline-block w-full break-words text-text-body"
             data-dz-name

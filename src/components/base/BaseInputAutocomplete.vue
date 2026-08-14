@@ -42,7 +42,7 @@
           classes.tag,
           { 'pr-2': !isEdit },
           {
-            'hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
+            'hover:!bg-background-normal hover:!text-accent-accent !cursor-pointer':
               !isEdit &&
               relationType &&
               props.autocompleteStyle !== 'readOnlyAsPlainText',
@@ -69,15 +69,19 @@
             type="text"
             :disabled="disabled"
           />
-          <div v-else class="pl-0 text-sm !text-[#000000] w-max">
+          <div v-else class="pl-0 text-value !text-text-body w-max">
             {{ getReadOnlyInputValue(option) }}
           </div>
         </div>
         <span
           v-if="!disabled"
+          role="button"
+          tabindex="0"
+          :aria-label="`${removeChipLabel} ${option.label}`"
           class="multiselect-tag-remove !cursor-pointer"
           @mousedown.stop
           @click.prevent.stop="handleTagRemove(option, $event)"
+          @keydown.enter.prevent.stop="handleTagRemove(option, $event)"
         >
           <span class="multiselect-tag-remove-icon"></span>
         </span>
@@ -153,7 +157,10 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
-const { t } = useI18n();
+const { t, te } = useI18n();
+const removeChipLabel = computed<string>(() =>
+  te("autocomplete.remove-chip") ? t("autocomplete.remove-chip") : "Remove",
+);
 const searchValue = ref<string>();
 const multiselectRef = ref();
 const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKeyboardContext", null);
@@ -244,19 +251,19 @@ const classes = computed(() => {
     inputValue.value.length <= 0 ||
     inputValue.value[0]?.value === "";
 
-  const defaultContainerStyles = "multiselect rounded-lg items-stretch";
+  const defaultContainerStyles = "multiselect rounded-input items-stretch";
   const result: Record<string, string> = {
     container: `${defaultContainerStyles} border-none`,
     containerActive: "outline-1 outline-accent-normal outline-offset-0",
     tagsSearch: "multiselect-tags-search !border-none focus:ring-0 p-0",
-    tag: "multiselect-tag !bg-accent-accent !opacity-100",
+    tag: "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded !font-bold !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",
     ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
   };
 
   if (props.autocompleteStyle === "defaultWithBorder") {
     result["container"] =
-      `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
+      `${defaultContainerStyles} !border-neutral-40 !rounded-input`;
   }
 
   if (props.autocompleteStyle === "readOnly") {
@@ -268,7 +275,7 @@ const classes = computed(() => {
   if (props.autocompleteStyle === "readOnlyAsPlainText") {
     result["container"] = "multiselect border-none !bg-transparent";
     result["tag"] =
-      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-[#000000] !opacity-100 hover:!bg-transparent hover:!text-[#000000]";
+      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-text-body !opacity-100 hover:!bg-transparent hover:!text-text-body";
     result["tags"] = "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
     result["tagsSearchWrapper"] = "!hidden";
   }

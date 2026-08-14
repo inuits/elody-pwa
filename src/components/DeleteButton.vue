@@ -1,14 +1,27 @@
 <template>
-  <div v-if="deleteAvailable" data-cy="edit-toggle" class="ml-2 mr-6">
-    <BaseButtonNew
-      :label="t('bulk-operations.delete')"
-      :icon="DamsIcons.Trash"
-      button-style="redDefault"
-      button-size="small"
-      :loading="isDeleting"
-      @click="openDeleteModal()"
-    />
-  </div>
+  <template v-if="deleteAvailable">
+    <button
+      v-if="variant === 'menu-item'"
+      type="button"
+      role="menuitem"
+      data-cy="delete-menu-item"
+      class="block w-full cursor-pointer px-3 py-2 text-left text-value text-red-default hover:bg-red-light focus-visible:outline-2 focus-visible:outline-accent-accent"
+      :disabled="isDeleting"
+      @click.prevent="openDeleteModal()"
+    >
+      {{ t("bulk-operations.delete") }}
+    </button>
+    <div v-else data-cy="edit-toggle" class="ml-2 mr-6">
+      <BaseButtonNew
+        :label="t('bulk-operations.delete')"
+        :icon="DamsIcons.Trash"
+        button-style="redDefault"
+        button-size="small"
+        :loading="isDeleting"
+        @click="openDeleteModal()"
+      />
+    </div>
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -33,6 +46,15 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useAsyncAction } from "@/composables/useAsyncAction";
+
+withDefaults(
+  defineProps<{
+    // "menu-item" renders the delete action as a red, last-positioned row
+    // inside the header "Actions" menu instead of a standalone red button.
+    variant?: "button" | "menu-item";
+  }>(),
+  { variant: "button" },
+);
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");

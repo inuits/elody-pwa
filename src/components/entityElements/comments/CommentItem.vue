@@ -16,7 +16,7 @@
             comment.intialValues?.author_name || t("comments.unknown-author")
           }}
         </span>
-        <span class="text-sm text-text-placeholder shrink-0">
+        <span class="text-value text-text-placeholder shrink-0">
           {{ formattedDate }}
         </span>
       </div>
@@ -40,7 +40,7 @@
         </span>
         <button
           v-if="canEdit"
-          class="text-sm text-accent-normal hover:underline"
+          class="text-value text-accent-normal hover:underline"
           @click.stop="emit('edit')"
         >
           {{ t("comments.edit") }}

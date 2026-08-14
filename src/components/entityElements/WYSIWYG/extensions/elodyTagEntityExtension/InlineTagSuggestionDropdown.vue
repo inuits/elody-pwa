@@ -5,7 +5,7 @@
       :ref="showInTopLayer"
       popover="manual"
       @mousedown.prevent
-      class="fixed z-[10000] w-72 max-h-64 overflow-y-auto rounded-md border border-neutral-30 bg-white shadow-lg py-1"
+      class="fixed z-[10000] w-72 max-h-64 overflow-y-auto rounded-card border border-neutral-30 bg-white shadow-overlay py-1"
       :style="{
         left: `${suggestion.anchor.left}px`,
         top: `${suggestion.anchor.bottom + 4}px`,
@@ -13,12 +13,12 @@
         padding: '0.25rem 0',
       }"
     >
-      <p v-if="isLoading" class="px-3 py-2 text-sm text-text-placeholder">
+      <p v-if="isLoading" class="px-3 py-2 text-value text-text-placeholder">
         {{ t("comments.loading") }}
       </p>
       <p
         v-else-if="!results.length"
-        class="px-3 py-2 text-sm text-text-placeholder italic"
+        class="px-3 py-2 text-value text-text-placeholder italic"
       >
         {{ t("search.noresult-nofilters") }}
       </p>
@@ -27,7 +27,7 @@
         :key="entity.id"
         :ref="(element) => (optionElements[index] = element as HTMLElement)"
         :class="[
-          'block w-full text-left px-3 py-2 text-sm truncate',
+          'block w-full text-left px-3 py-2 text-value truncate',
           index === highlightedIndex
             ? 'bg-accent-normal text-white'
             : 'hover:bg-neutral-20',

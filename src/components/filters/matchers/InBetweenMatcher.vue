@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-row justify-between gap-4">
     <div class="w-1/2">
-      <span class="text-sm text-text-body">minimum</span>
+      <span class="text-value text-text-body">minimum</span>
       <BaseInputTextNumberDatetime
         v-model="inputMin"
         input-style="default"
@@ -10,7 +10,7 @@
       />
     </div>
     <div class="w-1/2">
-      <span class="text-sm text-text-body">maximum</span>
+      <span class="text-value text-text-body">maximum</span>
       <BaseInputTextNumberDatetime
         v-model="inputMax"
         input-style="default"

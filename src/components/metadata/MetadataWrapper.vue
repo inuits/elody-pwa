@@ -8,6 +8,7 @@
       fieldIsConditionallyVisible
     "
     :key="fieldLabel"
+    :data-field-key="(metadata as any).key"
     :class="{
       relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
     }"
@@ -66,7 +67,136 @@
       @click.stop.prevent
       @update:value="(value) => (fieldValueProxy = value)"
     />
-    <div v-else class="flex gap-2">
+    <inline-field-editor
+      v-else-if="canInlineEdit"
+      :form-id="formId"
+      :field-key="inlineSaveKey"
+      :label="fieldLabel"
+      :value="fieldValueProxy"
+      :input-type="fieldType"
+      :required="isFieldRequired"
+      :regex="(metadata.inputField as any)?.validation?.regex"
+      :entity-type="entityType"
+      :dim="fieldValueIsEmpty && !isFieldRequired"
+      :options="(metadata.inputField as any)?.options"
+      @update:value="(value) => (fieldValueProxy = value)"
+    >
+      <ViewModesAutocompleteMetadata
+        v-if="autoCompleteType === 'metadataAutocomplete'"
+        v-model:model-value="fieldValueProxy"
+        :metadata-dropdown-options="metadata.inputField.options"
+        :formId="formId"
+        select-type="single"
+        :disabled="true"
+        mode="view"
+      />
+      <entity-element-metadata
+        v-else
+        :label="fieldLabel"
+        v-model:value="fieldValueProxy"
+        :link-text="metadata.linkText"
+        :link-icon="metadata.linkIcon"
+        :unit="metadata.unit"
+        :base-library-mode="baseLibraryMode"
+        :custom-value="metadata.customValue"
+        :translation-key="metadata.valueTranslationKey"
+        :breakWords="breakWords"
+      />
+    </inline-field-editor>
+    <inline-relation-editor
+      v-else-if="canInlineEditRelation"
+      :form-id="formId"
+      :label="fieldLabel"
+      :empty="fieldValueIsEmpty && !isFieldRequired"
+    >
+      <template #display>
+        <ViewModesAutocompleteRelations
+          v-model="fieldValueProxy"
+          :is-read-only="true"
+          :field-name="fieldLabel"
+          :formId="formId"
+          :metadata-key-to-get-options-for="metadataKeyToGetOptions"
+          :advanced-filter-input-for-retrieving-options="
+            metadata.inputField.advancedFilterInputForRetrievingOptions
+          "
+          :advanced-filter-input-for-retrieving-related-options="
+            filtersForRetrievingRelatedOptions
+          "
+          :advanced-filter-input-for-retrieving-all-options="
+            filtersForRetrievingOptions
+          "
+          :advanced-filter-input-for-searching-options="
+            metadata.inputField.advancedFilterInputForSearchingOptions
+          "
+          :relation-filter="metadata.inputField.relationFilter"
+          :is-metadata-field="metadata.inputField?.isMetadataField"
+          :relation-type="metadata.inputField?.relationType"
+          :from-relation-type="metadata.inputField?.fromRelationType"
+          :metadataOnRelationConfig="
+            metadata.inputField?.metadataOnRelationFieldConfig
+          "
+          :disabled="true"
+          :readOnlyValueAsPlainText="
+            metadata.inputField?.readOnlyValueAsPlainText
+          "
+        />
+      </template>
+      <template #editor>
+        <ViewModesAutocompleteRelations
+          v-model="fieldValueProxy"
+          :field-name="fieldLabel"
+          :formId="formId"
+          :select-type="
+            fieldType === InputFieldTypes.DropdownSingleselectRelations
+              ? 'single'
+              : 'multi'
+          "
+          :metadata-key-to-get-options-for="metadataKeyToGetOptions"
+          :advanced-filter-input-for-retrieving-options="
+            metadata.inputField.advancedFilterInputForRetrievingOptions
+          "
+          :advanced-filter-input-for-retrieving-related-options="
+            filtersForRetrievingRelatedOptions
+          "
+          :advanced-filter-input-for-retrieving-all-options="
+            filtersForRetrievingOptions
+          "
+          :advanced-filter-input-for-searching-options="
+            metadata.inputField.advancedFilterInputForSearchingOptions
+          "
+          :relation-filter="metadata.inputField.relationFilter"
+          :is-metadata-field="metadata.inputField?.isMetadataField"
+          :relation-type="metadata.inputField?.relationType"
+          :from-relation-type="metadata.inputField?.fromRelationType"
+          :auto-selectable="(metadata.inputField as any)?.autoSelectable"
+          :canCreateOption="
+            (metadata.inputField as any)?.canCreateEntityFromOption
+          "
+          :metadataKeyToCreateEntityFromOption="
+            (metadata.inputField as any)?.metadataKeyToCreateEntityFromOption
+          "
+          :depends-on="(metadata.inputField as any)?.dependsOn"
+          :metadataOnRelationConfig="
+            metadata.inputField?.metadataOnRelationFieldConfig
+          "
+          mode="edit"
+        />
+      </template>
+    </inline-relation-editor>
+    <div
+      v-else
+      class="flex gap-2"
+      :class="[
+        { 'opacity-45': fieldValueIsEmpty && !isFieldRequired },
+        isGroupMember
+          ? 'cursor-pointer rounded px-1 hover:bg-accent-light hover:shadow-[inset_0_0_0_1px_var(--color-accent-accent)] focus-visible:outline-2 focus-visible:outline-accent-accent'
+          : '',
+      ]"
+      v-bind="isGroupMember ? { role: 'button', tabindex: 0 } : {}"
+      :aria-label="isGroupMember ? fieldLabel : undefined"
+      @click="isGroupMember && openInterdependentGroup()"
+      @keydown.enter="isGroupMember && openInterdependentGroup()"
+    >
       <base-tooltip
         class="w-full basis-[fit-content]"
         position="right-end"
@@ -171,7 +301,7 @@
               <span
                 v-else-if="fieldType === InputFieldTypes.Checkbox"
                 data-cy="metadata-checkbox-value"
-                class="flex items-center gap-1 text-sm"
+                class="flex items-center gap-1 text-value"
               >
                 <unicon
                   :name="
@@ -229,12 +359,19 @@
         :value-tooltip="metadata.valueTooltip"
         :entity="metadata.value?.entity"
       />
+      <unicon
+        v-if="isGroupMember"
+        :name="Unicons.Edit.name"
+        height="12"
+        class="ml-auto shrink-0 self-center text-neutral-80"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
+import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import MetadataTruncatedText from "./MetadataTruncatedText.vue";
@@ -253,12 +390,16 @@ import {
 } from "@/generated-types/queries";
 import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
+import InlineRelationEditor from "@/components/metadata/InlineRelationEditor.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
-import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
+import {
+  metadataValueIsEmpty,
+  useMetadataWrapper,
+} from "@/components/metadata/useMetadataWrapper";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useMetadataVirtualKeyboard } from "@/composables/useMetadataVirtualKeyboard";
@@ -300,6 +441,26 @@ const { t } = useI18n();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
 const mediafileViewerContext = inject<string>("mediafileViewerContext", "");
+
+// One gesture: fields of an interdependent group open the whole group form
+// in place instead of a single-field editor (provided by the window panel).
+const interdependentGroup = inject<{
+  isInterdependent: { value: boolean };
+  open: (fieldKey?: string) => void;
+} | null>("interdependentGroup", null);
+
+const isGroupMember = computed<boolean>(
+  () =>
+    Boolean(interdependentGroup?.isInterdependent?.value) &&
+    !props.isEdit &&
+    !props.isUsedInModal &&
+    Boolean(props.metadata.inputField) &&
+    !(props.metadata as any).nonEditableField &&
+    fieldIsEditableByUser.value,
+);
+
+const openInterdependentGroup = () =>
+  interdependentGroup?.open((props.metadata as any).key);
 const { fieldIsVisibleByCondition } = useConditionalValidation();
 
 const fieldIsConditionallyVisible = computed(() =>
@@ -395,6 +556,69 @@ const pillTranslationKey = computed<string | undefined>(() => {
 
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);
+
+// Per-field inline editing (edit scope = save scope = validation scope):
+// only single-scope scalar metadata qualifies — plain entity metadata that
+// validates and saves on its own. Relation-backed, multilingual, repeatable,
+// formatter and modal-hosted fields keep their existing edit paths.
+const inlineEditableTypes: string[] = [
+  InputFieldTypes.Text,
+  InputFieldTypes.Number,
+  InputFieldTypes.Date,
+  InputFieldTypes.Textarea,
+  InputFieldTypes.ResizableTextarea,
+  InputFieldTypes.DropdownSingleselectMetadata,
+];
+const canInlineEdit = computed<boolean>(
+  () =>
+    !isGroupMember.value &&
+    !props.isEdit &&
+    !props.isUsedInModal &&
+    props.formFlow === "edit" &&
+    Boolean(props.metadata.inputField) &&
+    !(props.metadata as any).nonEditableField &&
+    !(props.metadata as any).disabled &&
+    fieldIsEditableByUser.value &&
+    inlineEditableTypes.includes(fieldType.value as string) &&
+    fieldKey.value?.startsWith("intialValues.") &&
+    !(props.metadata.value as any)?.formatter &&
+    !(props.metadata as any).isMultilingual &&
+    !props.repeatablePanelConfig?.isRepeatable &&
+    !props.linkedEntityId,
+);
+
+// Relation-backed autocomplete fields edit in place through the tag input;
+// the relation is its own scope and saves as one diffed mutation.
+const canInlineEditRelation = computed<boolean>(
+  () =>
+    autoCompleteType.value === "relationAutocomplete" &&
+    !isGroupMember.value &&
+    !props.isEdit &&
+    !props.isUsedInModal &&
+    props.formFlow === "edit" &&
+    Boolean(props.metadata.inputField) &&
+    !(props.metadata as any).nonEditableField &&
+    !(props.metadata as any).disabled &&
+    fieldIsEditableByUser.value &&
+    !props.repeatablePanelConfig?.isRepeatable &&
+    !props.linkedEntityId,
+);
+
+const inlineSaveKey = computed<string>(
+  () =>
+    ((props.metadata.inputField as any)?.fieldKeyToSave as string) ||
+    (props.metadata as any).key,
+);
+
+// Empty, non-required values dim to 45% opacity; the label keeps full
+// contrast and the field keeps its position so nothing reflows.
+const fieldValueIsEmpty = computed<boolean>(() =>
+  metadataValueIsEmpty(
+    isFormatterField.value
+      ? (props.metadata.value as any)?.label
+      : fieldValueProxy.value,
+  ),
+);
 
 const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;

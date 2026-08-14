@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="dynamic-form"
-    class="p-4 pt-0 h-full w-full overflow-y-auto"
+    class="p-4 pt-0 h-full w-full overflow-y-auto @container/form"
     :key="dynamicFormQuery"
   >
     <div v-if="!dynamicFormLoaded" class="w-full">
@@ -12,22 +12,25 @@
       class="w-full [&>*>button:last-child]:mb-0"
       :class="[isLoading ? 'opacity-20' : 'opacity-100']"
     >
+      <!-- modal anatomy mirrors panel anatomy: accent-light header band -->
       <h1
         v-if="dynamicForm?.GetDynamicForm?.label && showFormTitle"
-        class="title pb-4"
+        class="-mx-4 mb-4 rounded-t-lg border-b border-accent-light bg-accent-light px-4 py-3 text-value font-black text-accent-dark"
       >
         {{ t(dynamicForm.GetDynamicForm.label) }}
       </h1>
       <p
         v-if="dynamicForm?.GetDynamicForm?.infoLabel"
-        class="text-sm text-text-body pb-4"
+        class="text-value text-text-body pb-4"
       >
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
       </p>
+      <div class="grid grid-cols-1 gap-x-6 @min-[800px]/form:grid-cols-2">
       <div
-        v-for="(field, index) in getSortedFieldArray"
+        v-for="(field, index) in nonActionFields"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
+        :class="{ 'col-span-full': isFullWidthField(field) }"
       >
         <ImportWrapper
           v-if="
@@ -154,69 +157,65 @@
             </div>
           </div>
         </div>
-        <DynamicFormUploadButton
-          v-if="
-            (field.__typename === 'FormAction' &&
-              (field as FormAction).actionType == ActionType.Upload) ||
-            (field as FormAction).actionType == ActionType.UploadWithMetadata ||
-            (field as FormAction).actionType == ActionType.UploadWithOcr ||
-            (field as FormAction).actionType ==
-              ActionType.UploadCsvForReordening ||
-            (field as FormAction).actionType == ActionType.UpdateMetadata ||
-            (field as FormAction).actionType == ActionType.SubmitWithUpload
-          "
-          :label="t((field as FormAction).label)"
-          :icon="(field as FormAction).icon"
-          :disabled="!enableUploadButton || isButtonDisabled"
-          :progressIndicatorType="
-            (field as FormAction).actionProgressIndicator?.type
-          "
-          @click-upload-button="
-            performActionButtonClickEvent(field as FormAction)
-          "
-          @reset-upload="initializeForm"
-          @close-and-delete-form="closeAndDeleteForm"
-        />
-        <BaseButtonNew
-          v-if="
-            field.__typename === 'FormAction' &&
-            field.actionType !== ActionType.Upload &&
-            field.actionType !== ActionType.UploadWithMetadata &&
-            field.actionType !== ActionType.UploadWithOcr &&
-            field.actionType !== ActionType.UploadCsvForReordening &&
-            field.actionType !== ActionType.UpdateMetadata &&
-            field.actionType !== ActionType.SubmitWithUpload
-          "
-          :class="[
-            { 'mt-5 mb-10': !isButtonDisabled },
-            { 'mt-0': isButtonDisabled },
-          ]"
-          :label="
-            config?.features.hasTenantSelect
-              ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
-                  config.tenantDefiningTypes !== field.creationType
-                    ? ` in ${t(
-                        `navigation.tenant`,
-                      ).toLowerCase()} ${currentTenant}`
-                    : ''
-                }`
-              : t(field.label)
-          "
-          :disabled="
-            isButtonDisabled ||
-            (!!busyActionType && busyActionType !== field.actionType)
-          "
-          :loading="busyActionType === field.actionType"
-          :icon="field.icon"
-          button-style="accentAccent"
-          @click="performActionButtonClickEvent(field)"
-        />
+      </div>
+      </div>
+      <!-- ONE sticky submit zone: validation summary left, actions right -->
+      <div
+        v-if="actionFields.length"
+        role="group"
+        data-cy="dynamic-form-submit-zone"
+        :aria-label="formActionsLabel"
+        class="sticky bottom-0 z-content-raised -mx-4 mt-2 flex flex-wrap items-center justify-end gap-2 border-t border-neutral-30 bg-neutral-white px-4 py-3"
+      >
         <p
-          v-if="submitErrors && index === getSortedFieldArray.length - 1"
-          class="text-red-default"
+          v-if="submitErrors"
+          role="alert"
+          class="mr-auto text-xs font-bold text-red-default"
         >
           {{ submitErrors }}
         </p>
+        <template
+          v-for="(field, index) in actionFields"
+          :key="`${dynamicFormQuery}_action_${index}`"
+        >
+          <DynamicFormUploadButton
+            v-if="isUploadAction(field)"
+            :label="t((field as FormAction).label)"
+            :icon="(field as FormAction).icon"
+            :disabled="!enableUploadButton || isButtonDisabled"
+            :progressIndicatorType="
+              (field as FormAction).actionProgressIndicator?.type
+            "
+            @click-upload-button="
+              performActionButtonClickEvent(field as FormAction)
+            "
+            @reset-upload="initializeForm"
+            @close-and-delete-form="closeAndDeleteForm"
+          />
+          <BaseButtonNew
+            v-else
+            class="!w-auto"
+            :label="
+              config?.features.hasTenantSelect
+                ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
+                    config.tenantDefiningTypes !== field.creationType
+                      ? ` in ${t(
+                          `navigation.tenant`,
+                        ).toLowerCase()} ${currentTenant}`
+                      : ''
+                  }`
+                : t(field.label)
+            "
+            :disabled="
+              isButtonDisabled ||
+              (!!busyActionType && busyActionType !== field.actionType)
+            "
+            :loading="busyActionType === field.actionType"
+            :icon="field.icon"
+            button-style="accentAccent"
+            @click="performActionButtonClickEvent(field)"
+          />
+        </template>
       </div>
     </div>
   </div>
@@ -485,6 +484,39 @@ const getSortedFieldArray = computed(() => {
   });
 });
 
+// Design-system anatomy: fields render in the responsive grid, all actions
+// collect in ONE sticky submit zone at the bottom.
+const formActionsLabel = computed<string>(() =>
+  te("dynamic-form.actions") ? t("dynamic-form.actions") : "Form actions",
+);
+
+const nonActionFields = computed(
+  () =>
+    getSortedFieldArray.value?.filter(
+      (field: any) => field.__typename !== "FormAction",
+    ) ?? [],
+);
+const actionFields = computed(
+  () =>
+    getSortedFieldArray.value?.filter(
+      (field: any) => field.__typename === "FormAction",
+    ) ?? [],
+);
+const isUploadAction = (field: any): boolean =>
+  field.actionType === ActionType.Upload ||
+  field.actionType === ActionType.UploadWithMetadata ||
+  field.actionType === ActionType.UploadWithOcr ||
+  field.actionType === ActionType.UploadCsvForReordening ||
+  field.actionType === ActionType.UpdateMetadata ||
+  field.actionType === ActionType.SubmitWithUpload;
+// Pickers, uploads and importers span the full grid width.
+const isFullWidthField = (field: any): boolean =>
+  field.__typename === "UploadContainer" ||
+  field.inputField?.type === BaseFieldType.BaseEntityPickerField ||
+  field.inputField?.type === BaseFieldType.BaseFileSystemImportField ||
+  field.inputField?.type === BaseFieldType.BaseMagazineWithMetsImportField ||
+  field.inputField?.type === BaseFieldType.BaseMagazineWithCsvImportField;
+
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed(
   (): boolean => Object.keys(form.value?.errors ?? {}).length > 0,
@@ -501,7 +533,7 @@ const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
   return !formFields.value && !dynamicForm.value;
 });
-const { t } = useI18n();
+const { t, te } = useI18n();
 const isLinkedUpload = computed<boolean>(() => {
   const uploadContainer: UploadContainer | undefined = formFields.value?.find(
     (formField: any) => formField.__typename === "UploadContainer",

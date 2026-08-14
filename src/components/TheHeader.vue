@@ -1,23 +1,30 @@
 <template>
   <div
-    class="z-header flex items-center mx-6 my-8 px-6 py-4 rounded-3xl bg-background-light flex-wrap min-[1400px]:flex-nowrap"
+    class="z-header flex items-center px-6 py-2.5 bg-neutral-white border-b border-neutral-30 flex-wrap min-[1400px]:flex-nowrap"
   >
     <BreadCrumbs />
-    <MetadataEditButton
-      class="ml-0 min-[880px]:ml-6"
-      v-if="showEditMetadataButton"
-    />
+    <!-- No "edit metadata" button: there is no page-wide edit mode anymore.
+         Editing happens per field, per block or per row, in place. -->
     <EntityHeaderButton
       v-if="isSingleEntityPage && customDeleteButton"
       :config="customDeleteButton"
     />
-    <DeleteButton v-else-if="showDeleteButton" />
+    <!-- No standalone red delete button: delete lives last (and red) in
+         the labeled "Actions" menu. -->
     <HeaderContextMenuActions
-      v-if="isSingleEntityPage && contextMenuActions.length > 0"
+      v-if="
+        isSingleEntityPage &&
+        (contextMenuActions.length > 0 || showDeleteButton)
+      "
       :actions="contextMenuActions"
       :entity-id="entityId"
       :entity-type="entityType"
-    />
+      :has-extra-overflow-actions="showDeleteButton"
+    >
+      <template v-if="showDeleteButton" #extra-overflow>
+        <DeleteButton variant="menu-item" />
+      </template>
+    </HeaderContextMenuActions>
     <LanguageSelect class="flex justify-end pr-2 ml-auto" />
     <tenant-switcher
       class="flex justify-end pr-2"
@@ -33,7 +40,6 @@
 
 <script lang="ts" setup>
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
-import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import { useRoute } from "vue-router";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
@@ -52,11 +58,8 @@ const route = useRoute();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
 const { pageStatus } = usePageStatus();
-const {
-  actions: contextMenuActions,
-  hasEditMetadataButton: configEditMetadataButton,
-  deleteButton: configDeleteButton,
-} = useEntityPageConfig();
+const { actions: contextMenuActions, deleteButton: configDeleteButton } =
+  useEntityPageConfig();
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
@@ -86,13 +89,4 @@ const showDeleteButton = computed(() => {
   return true;
 });
 
-const showEditMetadataButton = computed(() => {
-  if (!isSingleEntityPage.value || !auth.isAuthenticated.value) return false;
-  if (!entityType.value) return true;
-  const fromConfig = configEditMetadataButton.value;
-  if (fromConfig !== undefined) return fromConfig;
-  const meta = getRouteMetadataInfoFromEntity(config, entityType.value);
-  if (meta?.hasEditMetadataButton !== undefined) return meta.hasEditMetadataButton;
-  return true;
-});
 </script>

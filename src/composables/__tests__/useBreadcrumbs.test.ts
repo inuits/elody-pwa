@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string) => key,
+    te: () => false,
     locale: mocks.locale,
   }),
 }));

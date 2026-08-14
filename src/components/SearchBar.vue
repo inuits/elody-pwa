@@ -1,10 +1,10 @@
 <template>
   <div :class="['flex', { 'p-4 bg-background-normal': inputEnabled }]">
-    <div class="flex w-full bg-background-light rounded-lg">
+    <div class="flex w-full bg-background-light rounded-pill">
       <input
         v-if="inputEnabled"
         type="text"
-        class="w-full rounded-lg border-0"
+        class="w-full rounded-pill border-0"
         v-model="inputValue"
         :placeholder="t('search.search-placeholder')"
         @keydown.enter="submitSearch"
@@ -13,7 +13,7 @@
     <button
       type="button"
       :class="[
-        'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg cursor-pointer',
+        'flex justify-center items-center h-10 w-10 p-2.5 text-value font-medium text-neutral-white bg-accent-accent rounded-md cursor-pointer',
         { 'ml-2': inputEnabled },
       ]"
       @click="!inputEnabled ? openSearchModal() : submitSearch()"
