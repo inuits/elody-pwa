@@ -31,7 +31,6 @@ const mainFileTypes = [
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.ms-excel",
 ];
-
 // 10 mins
 const UPLOAD_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -54,28 +53,21 @@ const mainFile = computed((): DropzoneFile | undefined =>
   files.value.find((file: DropzoneFile) => mainFileTypes.includes(file.type)),
 );
 
-const csvFile = computed(() => {
-  return files.value.find(
-    (file: DropzoneFile) =>
-      file.type === "text/csv" || file.type === "application/vnd.ms-excel",
-  );
+const filesContainsFileOfType = (mimetype: string) =>
+  files.value.some((file: DropzoneFile) => file.type === mimetype);
+
+const containsFileOfType = computed<{ [key: string]: boolean }>(() => {
+  return {
+    csv:
+      filesContainsFileOfType("text/csv") ||
+      filesContainsFileOfType("application/vnd.ms-excel"),
+    xml: filesContainsFileOfType("text/xml"),
+    excel: filesContainsFileOfType(
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ),
+  };
 });
 
-const containsCsv = computed(() => !!csvFile.value);
-const containsXml = computed(
-  () =>
-    !!files.value.find((file: DropzoneFile) =>
-      ["text/xml"].includes(file.type),
-    ),
-);
-const containsExcel = computed(
-  () =>
-    !!files.value.find((file: DropzoneFile) =>
-      [
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ].includes(file.type),
-    ),
-);
 const uploadFlowConfiguration = computed<UploadFlowConfiguration | undefined>(
   () =>
     useUploadFlowConfiguration().getUploadFlowConfiguration(uploadFlow.value),
@@ -452,7 +444,7 @@ const useUpload = (config: any = {}) => {
   ): Promise<{ entities: BaseEntity[]; links: string[] } | number> => {
     if (!mainFile.value) throw Error("No main file found for batch upload");
     const filename = __getMainFile().name;
-    const contentType = containsExcel.value
+    const contentType = containsFileOfType.value.excel
       ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       : "text/csv";
     const acceptHeader = "application/json";
@@ -849,7 +841,7 @@ const useUpload = (config: any = {}) => {
     if (uploadFlow.value === UploadFlow.MediafilesWithOcr)
       requiredFileNames.push(...useOcrUpload().optionalFileNames.value);
 
-    const errorMessageEnding = containsExcel.value
+    const errorMessageEnding = containsFileOfType.value.excel
       ? "is not in Excel"
       : "is not in CSV";
     mediafiles.value.forEach((file: DropzoneFile) => {
@@ -873,14 +865,15 @@ const useUpload = (config: any = {}) => {
       if (
         uploadFlow.value === UploadFlow.MediafilesOnly ||
         uploadFlow.value === UploadFlow.OptionalMediafiles ||
-        (uploadFlow.value === UploadFlow.XmlMarc && containsXml.value) ||
+        (uploadFlow.value === UploadFlow.XmlMarc &&
+          containsFileOfType.value.xml) ||
         (uploadFlow.value === UploadFlow.MediafilesWithOptionalCsv &&
-          !containsCsv.value)
+          !containsFileOfType.value.csv)
       ) {
         return true;
       }
 
-      if (!containsCsv.value && !dryRunComplete.value) return false;
+      if (!containsFileOfType.value.csv && !dryRunComplete.value) return false;
 
       const requiredFileNames: string[] = [...requiredMediafiles.value];
       let areAllFilesPresent: boolean = true;
@@ -1227,9 +1220,7 @@ const useUpload = (config: any = {}) => {
     extraMediafileType,
     __handleFileThumbnailError,
     __handleFileThumbnailWarning,
-    containsCsv,
-    containsXml,
-    containsExcel,
+    containsFileOfType,
     batchEntities,
     getCsvBlob,
     getExcelFile,

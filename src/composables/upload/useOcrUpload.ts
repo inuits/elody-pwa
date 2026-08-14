@@ -22,7 +22,7 @@ export const useOcrUpload = (): {
     requiredMediafiles,
     mediafiles,
     files,
-    containsCsv,
+    containsFileOfType,
     updateGlobalUploadProgress,
     dryRunFeedback,
     uploadProgress,
@@ -31,7 +31,7 @@ export const useOcrUpload = (): {
 
   const checkUploadValidity = (): boolean => {
     return (
-      containsCsv.value &&
+      containsFileOfType.value.csv &&
       uploadProgress.value
         .filter(
           (progressStep: ActionProgressStep) =>
@@ -79,7 +79,7 @@ export const useOcrUpload = (): {
 
   const checkFileValidity = (): boolean => {
     return (
-      containsCsv.value &&
+      containsFileOfType.value.csv &&
       mediafiles.value.length > 0 &&
       containsOptionalFile.value
     );

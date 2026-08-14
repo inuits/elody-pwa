@@ -9,11 +9,11 @@ export const useCsvOnlyUpload = (): {
   checkUploadValidity: () => boolean;
   checkFileValidity: () => boolean;
 } => {
-  const { containsCsv, uploadProgress } = useUpload({});
+  const { containsFileOfType, uploadProgress } = useUpload({});
 
   const checkUploadValidity = (): boolean => {
     return (
-      containsCsv.value &&
+      containsFileOfType.value.csv &&
       uploadProgress.value
         .filter(
           (progressStep: ActionProgressStep) =>
@@ -27,7 +27,7 @@ export const useCsvOnlyUpload = (): {
   };
 
   const checkFileValidity = (): boolean => {
-    return containsCsv.value;
+    return containsFileOfType.value.csv;
   };
 
   return { checkFileValidity, checkUploadValidity };

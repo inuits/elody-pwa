@@ -4,14 +4,14 @@ export const useXmlMarcUpload = (): {
   checkUploadValidity: () => boolean;
   checkFileValidity: () => boolean;
 } => {
-  const { containsXml } = useUpload({});
+  const { containsFileOfType } = useUpload({});
 
   const checkUploadValidity = (): boolean => {
-    return containsXml.value;
+    return containsFileOfType.value.xml;
   };
 
   const checkFileValidity = (): boolean => {
-    return containsXml.value;
+    return containsFileOfType.value.xml;
   };
 
   return { checkFileValidity, checkUploadValidity };

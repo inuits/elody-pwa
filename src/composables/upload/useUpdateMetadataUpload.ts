@@ -4,10 +4,10 @@ export const useUpdateMetadataUpload = (): {
   checkUploadValidity: () => boolean;
   checkFileValidity: () => boolean;
 } => {
-  const { containsCsv } = useUpload({});
+  const { containsFileOfType } = useUpload({});
 
   const checkUploadValidity = (): boolean => {
-    return containsCsv.value;
+    return containsFileOfType.value.csv;
   };
 
   const checkFileValidity = (): boolean => {

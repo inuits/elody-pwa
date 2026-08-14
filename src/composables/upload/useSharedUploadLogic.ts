@@ -17,8 +17,7 @@ export const useSharedUploadLogic = (): {
 } => {
   const { prefetchedUploadUrls } = useUpload({});
   const {
-    containsCsv,
-    containsExcel,
+    containsFileOfType,
     getCsvBlob,
     getExcelFile,
     batchEntities,
@@ -28,13 +27,16 @@ export const useSharedUploadLogic = (): {
   const { handleHttpError } = useErrorCodes();
 
   const getUploadUrl = async (file: DropzoneFile): Promise<string> => {
-    if (containsCsv.value || containsExcel.value) return await _getUploadUrlBatch(file);
+    if (containsFileOfType.value.csv || containsFileOfType.value.excel)
+      return await _getUploadUrlBatch(file);
     return _getUploadUrlStandalone(file);
   };
 
   const _getUploadUrlBatch = async (file: DropzoneFile): Promise<string> => {
     if (!prefetchedUploadUrls.value.length) {
-      const file = containsExcel.value ? getExcelFile() : getCsvBlob(); 
+      const file = containsFileOfType.value.excel
+        ? getExcelFile()
+        : getCsvBlob();
       const result = await batchEntities(file, false);
       prefetchedUploadUrls.value = (result as { links: string[] })?.links;
     }

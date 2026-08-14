@@ -12,14 +12,14 @@ export const useMediafilesWithRequiredCsvUpload = (): {
   const {
     mediafiles,
     verifyAllNeededFilesArePresent,
-    containsCsv,
+    containsFileOfType,
     uploadProgress,
   } = useUpload({});
 
   const checkUploadValidity = (): boolean => {
     return (
       verifyAllNeededFilesArePresent() &&
-      containsCsv.value &&
+      containsFileOfType.value.csv &&
       uploadProgress.value
         .filter(
           (progressStep: ActionProgressStep) =>

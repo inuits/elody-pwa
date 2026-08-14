@@ -11,7 +11,7 @@ export const useExcelUpload = (): {
   checkFileValidity: () => boolean;
 } => {
   const {
-    containsExcel,
+    containsFileOfType,
     uploadProgress,
     mediafiles,
     requiredMediafiles,
@@ -26,7 +26,7 @@ export const useExcelUpload = (): {
       },
     );
     return (
-      containsExcel.value &&
+      containsFileOfType.value.excel &&
       noExtraUploadedFiles &&
       uploadProgress.value
         .filter(
@@ -41,7 +41,9 @@ export const useExcelUpload = (): {
   };
 
   const checkFileValidity = (): boolean => {
-    return containsExcel.value && missingFileNames.value.length === 0;
+    return (
+      containsFileOfType.value.excel && missingFileNames.value.length === 0
+    );
   };
 
   watch(
