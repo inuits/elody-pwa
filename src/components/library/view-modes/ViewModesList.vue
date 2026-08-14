@@ -74,7 +74,7 @@
             <span
               v-for="(header, index) in columnHeaders"
               :key="index"
-              class="truncate text-xs font-bold text-text-light"
+              class="truncate text-label font-bold text-text-light"
               :style="
                 header.colSpan ? { gridColumn: `span ${header.colSpan}` } : {}
               "
@@ -85,12 +85,12 @@
             <span
               v-for="(header, index) in columnHeaders"
               :key="index"
-              class="w-full truncate text-xs font-bold text-text-light"
+              class="w-full truncate text-label font-bold text-text-light"
               >{{ header.label ? t(header.label) : "" }}</span
             >
           </div>
           <span
-            class="w-28 shrink-0 pr-1 text-right text-xs font-bold text-text-light"
+            class="w-28 shrink-0 pr-1 text-right text-label font-bold text-text-light"
             >{{ actionsHeaderLabel }}</span
           >
         </div>
@@ -160,7 +160,7 @@
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto bg-background-light rounded-lg"
+        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-lg border border-accent-light-strong bg-neutral-white"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"

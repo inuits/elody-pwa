@@ -113,6 +113,20 @@ const accentNormalButton: Button = {
   },
   disabledStyle: defaultButton.disabledStyle,
 };
+// Design-system primary: accent fill, white ink, darker accent on hover.
+const primaryButton: Button = {
+  textColor: "text-neutral-white",
+  bgColor: "bg-accent",
+  hoverStyle: {
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-accent-hover",
+  },
+  activeStyle: {
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-accent-hover",
+  },
+  disabledStyle: defaultButton.disabledStyle,
+};
 const redDefaultButton: Button = {
   textColor: accentAccentButton.textColor,
   bgColor: "bg-red-default",
@@ -129,11 +143,13 @@ const redDefaultButton: Button = {
 
 export type ButtonStyle =
   | "default"
+  | "primary"
   | "accentAccent"
   | "accentNormal"
   | "redDefault";
 const buttonStyles: Record<ButtonStyle, Button> = {
   default: defaultButton,
+  primary: primaryButton,
   accentAccent: accentAccentButton,
   accentNormal: accentNormalButton,
   redDefault: redDefaultButton,

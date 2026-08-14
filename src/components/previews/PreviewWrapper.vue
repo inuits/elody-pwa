@@ -1,62 +1,58 @@
 <template>
+  <!-- PanelShell chrome: accent-light header band, panel border, primary
+       open-detail action. Same anatomy as EntityElementWindow panels. -->
   <div
-    class="flex items-center justify-between"
-    :class="[{ 'my-2': showHeaderCloseButton }]"
+    class="flex items-center justify-between gap-2 rounded-t-lg bg-accent-light px-4 py-2.5"
+    role="complementary"
+    :aria-label="getTitleFromEntity || t('preview-component.close')"
   >
-    <base-tooltip
-      v-if="showHeaderCloseButton"
-      position="top-right"
-      :tooltip-offset="8"
-      @click="emit('closePreviewComponent')"
-    >
-      <template #activator="{ on }">
-        <div
-          class="flex items-center"
-          data-cy="close-preview-component"
-          v-on="on"
-        >
-          <unicon
-            class="cursor-pointer mr-4 ml-2 flex justify-center items-center"
-            :name="Unicons.Cross.name"
-            height="24"
-          />
-        </div>
-      </template>
-      <template #default>
-        <span class="text-sm text-text-placeholder">
-          <div>
-            {{ t("preview-component.close") }}
-          </div>
-        </span>
-      </template>
-    </base-tooltip>
     <h1
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 truncate max-w-[90%]"
-      v-if="previewComponent.title"
+      class="min-w-0 truncate text-sm font-bold text-accent-dark"
     >
-      {{ t(previewComponent.title) }}
+      <template v-if="previewComponent.title">{{
+        t(previewComponent.title)
+      }}</template>
+      <template v-else>{{ getTitleFromEntity }}</template>
     </h1>
-    <h1
-      data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 truncate max-w-[90%]"
-      v-if="previewComponent.type === PreviewTypes.MediaViewer"
-    >
-      {{ getTitleFromEntity }}
-    </h1>
-    <div
-      v-if="displayOpenDetailPageButton"
-      data-cy="open-detail-page-button"
-      class="px-2"
-    >
-      <base-button-new
-        button-size="small"
-        button-style="accentNormal"
-        :label="t('metadata.labels.open-detail-page')"
-        @click="openDetailPage"
-      />
+    <div class="flex shrink-0 items-center gap-2">
+      <div
+        v-if="displayOpenDetailPageButton"
+        data-cy="open-detail-page-button"
+      >
+        <base-button-new
+          button-size="small"
+          button-style="primary"
+          :label="t('metadata.labels.open-detail-page')"
+          @click="openDetailPage"
+        />
+      </div>
+      <base-tooltip
+        v-if="showHeaderCloseButton"
+        position="top-right"
+        :tooltip-offset="8"
+        @click="emit('closePreviewComponent')"
+      >
+        <template #activator="{ on }">
+          <button
+            type="button"
+            class="flex items-center rounded p-0.5 text-accent-dark cursor-pointer hover:bg-accent-light-strong focus-visible:outline-2 focus-visible:outline-accent-accent"
+            data-cy="close-preview-component"
+            :aria-label="t('preview-component.close')"
+            v-on="on"
+          >
+            <unicon :name="Unicons.Cross.name" height="20" />
+          </button>
+        </template>
+        <template #default>
+          <span class="text-sm text-text-placeholder">
+            <div>
+              {{ t("preview-component.close") }}
+            </div>
+          </span>
+        </template>
+      </base-tooltip>
     </div>
-    <div v-else><!-- Only here to center the title :) --></div>
   </div>
   <div
     v-if="previewLoading"
