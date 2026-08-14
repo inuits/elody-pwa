@@ -59,7 +59,6 @@
           :disabled="saving"
           class="w-full min-w-0 rounded-input border bg-neutral-white px-2 py-0.5 text-value text-text-body focus-visible:outline-2 focus-visible:outline-accent-accent"
           :class="error ? 'border-red-default' : 'border-neutral-40'"
-          @change="save"
           @keydown.esc.stop.prevent="cancel"
           @click.stop
         >
@@ -93,7 +92,7 @@
           type="button"
           data-cy="inline-edit-save"
           class="flex h-[26px] shrink-0 cursor-pointer items-center gap-1 rounded-md bg-accent-accent px-2 text-ui font-bold text-neutral-white hover:bg-commit-hover focus-visible:outline-2 focus-visible:outline-accent-accent disabled:cursor-not-allowed disabled:opacity-45"
-          :disabled="saving || (isPristine && !isSelect)"
+          :disabled="saving || isPristine"
           @click.stop.prevent="save"
         >
           <SpinnerLoader v-if="saving" :dimensions="3" />
@@ -197,7 +196,6 @@ const rootEl = ref<HTMLElement | null>(null);
 const errorId = `inline-edit-error-${useId()}`;
 const scopeId = Symbol("inline-editor");
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
-let undoTimer: ReturnType<typeof setTimeout> | undefined;
 
 const translate = (key: string, fallback: string): string =>
   te(key) ? t(key) : fallback;
@@ -225,7 +223,7 @@ const htmlInputType = computed(() => {
   return "text";
 });
 
-// Selects commit on choose: picking an option saves immediately.
+// Decision R2-2: selects follow the same pick-then-Bewaar model as text.
 const isSelect = computed(
   () =>
     props.inputType === InputFieldTypes.DropdownSingleselectMetadata &&
@@ -237,9 +235,7 @@ const optionLabel = (option: { label?: string | null; value?: unknown }) => {
   return te(label) ? t(label) : label;
 };
 
-const selectHintLabel = computed(() =>
-  translate("inline-edit.select-hint", "Choosing saves · Esc cancels"),
-);
+const selectHintLabel = computed(() => hintLabel.value);
 
 const collection = computed<Collection>(() => {
   const routeCollection = route.meta?.type as Collection | undefined;
@@ -260,7 +256,9 @@ const collection = computed<Collection>(() => {
 // Only one scope edits at a time: opening this editor closes any other
 // inline editor; pristine editors also close on outside click.
 watch(activeInlineScope, (scope) => {
-  if (editing.value && scope !== scopeId) cancel({ refocus: false });
+  if (scope === scopeId) return;
+  if (editing.value) cancel({ refocus: false });
+  if (scope !== null) undoValue.value = undefined;
 });
 
 const handleOutsideClick = (event: MouseEvent) => {
@@ -339,10 +337,10 @@ const flashSaved = () => {
   flashTimer = setTimeout(() => (savedFlash.value = false), 2000);
 };
 
+// Decision R2-3: the inline undo chip lives until the next action (any
+// other edit clears it via the shared scope watcher), not a timer.
 const offerUndo = (oldValue: unknown) => {
   undoValue.value = oldValue;
-  if (undoTimer) clearTimeout(undoTimer);
-  undoTimer = setTimeout(() => (undoValue.value = undefined), 10000);
 };
 
 const save = async () => {

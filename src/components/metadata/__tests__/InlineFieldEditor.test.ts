@@ -166,7 +166,7 @@ describe("InlineFieldEditor", () => {
     );
   });
 
-  it("selects commit on choose: picking an option saves immediately", async () => {
+  it("selects follow pick-then-Bewaar: choosing alone does not save", async () => {
     const wrapper = mountEditor({
       inputType: "dropdownSingleselectMetadata",
       value: "reading",
@@ -180,6 +180,10 @@ describe("InlineFieldEditor", () => {
     const select = wrapper.find("[data-cy='inline-edit-select']");
     expect(select.exists()).toBe(true);
     await select.setValue("listening");
+    await flushPromises();
+    expect(mocks.mutate).not.toHaveBeenCalled();
+
+    await wrapper.find("[data-cy='inline-edit-save']").trigger("click");
     await flushPromises();
 
     expect(mocks.mutate).toHaveBeenCalledTimes(1);

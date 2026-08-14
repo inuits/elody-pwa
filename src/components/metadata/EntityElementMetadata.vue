@@ -87,7 +87,7 @@ const props = withDefaults(
   },
 );
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const isCoordinates = computed(() => {
   return (
@@ -108,7 +108,10 @@ const processedDisplayValue = computed<string>(() =>
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;
 
-  if (readableValue.value === "") return "-";
+  if (readableValue.value === "")
+    return te("metadata.labels.no-value")
+      ? t("metadata.labels.no-value")
+      : "No value";
   if (Array.isArray(readableValue.value)) return readableValue.value;
 
   if (props.translationKey) {

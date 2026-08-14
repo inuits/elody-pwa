@@ -268,10 +268,10 @@ const wrapperClasses = computed(() => [
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled,
     "animate-pulse": props.loading,
-    "bg-background-light hover:bg-surface-row-hover":
-      !isActiveListItem.value && !isChecked.value,
+    "bg-background-light hover:bg-surface-row-hover": !isChecked.value,
     "border-accent-light-strong bg-accent-wash shadow-[0_1px_4px_rgba(59,166,203,0.25)]":
-      isActiveListItem.value || isChecked.value,
+      isChecked.value,
+    "border-l-[3px] border-l-accent": isActiveListItem.value,
   },
 ]);
 </script>
