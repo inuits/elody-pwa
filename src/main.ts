@@ -56,6 +56,14 @@ const applyCustomization = (rulesObject: any) => {
     document.title = rulesObject.applicationTitle;
 };
 
+// Selects the [data-elody-client] token scope in main.css. Without it the
+// vlacc reference accent applies.
+const applyClientThemeScope = (rulesObject: any) => {
+  const client =
+    rulesObject?.elodyClient || import.meta.env.VITE_ELODY_CLIENT || "";
+  if (client) document.body.dataset.elodyClient = client;
+};
+
 const start = async (): Promise<void> => {
   Unicon.add(Object.values(Unicons));
 
@@ -73,6 +81,7 @@ const start = async (): Promise<void> => {
   initializeInputValidation(translations);
 
   if (config.customization) applyCustomization(config.customization);
+  applyClientThemeScope(config.customization);
   auth = auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 
   const head = createHead();

@@ -5,10 +5,13 @@
   /* Fonts */
   --font-sans: "Lato", system-ui, sans-serif;
 
-  /* Theme colors */
-  --color-accent-light: #DCF4F9;
+  /* Theme colors — the five load-bearing names client themes may swap.
+     Values are the vlacc reference triple of the elody design system; the
+     per-client build replaces them from client-customization/theme.txt. */
+  --color-accent-light: #DEF1FA;
   --color-accent-normal: #6BC6B3;
   --color-accent-accent: #0CB2BC;
+  --color-accent-dark: #1d5c7a;
   --color-accent-highlight: #E8EEF0;
   --color-highlight-bg: #4169E1;
   --color-highlight-text: #FFFFFF;
@@ -26,7 +29,7 @@
   --color-text-body: #003A52;
   --color-text-subtitle: #FFFFFF;
   --color-text-placeholder: #9CA3AF;
-  --color-text-link: #1D4ED8;
+  --color-text-link: var(--color-text-light);
 
   --color-background-normal: #F2F7F8;
   --color-background-light: #FFFFFF;
@@ -159,6 +162,222 @@
   /* Legacy variables - to be removed after migration */
   --z-index-1: 1;
   --z-index-2: 2;
+
+  /* ══════════════════════════════════════════════════════════════════════
+     elody design system — role tokens.
+     Source of truth: design-system handoff tokens.css. Client themes may
+     swap only the accent set below; neutrals, semantic colours, commit teal,
+     focus ring and badge tones are platform-fixed.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* ── Accent roles (client-swappable set) ───────────────────────────── */
+  --color-accent: #3BA6CB;
+  --color-accent-hover: #1D8FB8;
+  --color-accent-light-strong: #C8EAF7;
+  --color-accent-ink: var(--color-accent-dark);
+  --color-accent-wash: #EAF6FB;
+  --color-accent-tint: #EDF7FC;
+
+  /* ── Accent-derived aliases. Re-declared inside every [data-elody-client]
+        scope — a custom property resolves var() where it is DEFINED, so
+        aliases living only here would freeze to the vlacc accent. ─────── */
+  --color-surface-panel-header: var(--color-accent-light);
+  --color-surface-section-header: var(--color-accent);
+  --color-surface-editable-hover: var(--color-accent-wash);
+  --color-surface-group-tint: var(--color-accent-tint);
+  --color-text-panel-header: var(--color-accent-ink);
+  --color-text-link-hover: var(--color-accent);
+  --color-border-panel: var(--color-accent-light-strong);
+
+  /* ── Surfaces ──────────────────────────────────────────────────────── */
+  --color-surface: #FFFFFF;
+  --color-surface-app: #F2F7F8;
+  --color-surface-muted: #F4F5F7;
+  --color-surface-sunken: #EBECF0;
+  --color-surface-group-form: #F6FCFE;
+  --color-surface-row-hover: #F6FBFE;
+  --color-surface-repeat-row: #F6FCFD;
+  --color-surface-note: #FFF8E9;
+  --color-surface-inverted: #172B4D;
+
+  /* ── Text ──────────────────────────────────────────────────────────── */
+  --color-text-strong: #172B4D;
+  --color-text-secondary: #505F79;
+  --color-text-muted: #6B778C;
+  --color-text-subtle: #97A0AF;
+  --color-text-field-label: var(--color-text-light);
+  --color-text-on-accent: #FFFFFF;
+  --color-text-accent-strong: var(--color-accent-dark);
+  --color-text-on-inverted: #FFFFFF;
+
+  /* ── Borders ───────────────────────────────────────────────────────── */
+  --color-border-default: #DFE1E6;
+  --color-border-subtle: #EBECF0;
+  --color-border-faint: #F4F5F7;
+  --color-border-dashed: #B3BAC5;
+
+  /* ── Commit / focus (platform-fixed, never themed) ─────────────────── */
+  --color-commit: var(--color-accent-accent);
+  --color-commit-hover: var(--color-accent-normal);
+  --color-commit-strong-hover: #0A9AA3;
+  --color-focus-ring: var(--color-accent-accent);
+
+  /* ── Semantic (platform-fixed) ─────────────────────────────────────── */
+  --color-danger: #D11800;
+  --color-danger-bg: #F9DCDC;
+  --color-danger-wash: #F8F2F2;
+  --color-success: #16a34a;
+  --color-success-strong: #15803d;
+  --color-success-bg: #DAF1DC;
+  --color-warning: #B95000;
+  --color-warning-bg: #FDEBD7;
+  --color-warning-chip: #F2994A;
+  --color-info: #355BA9;
+  --color-info-bg: #C8EAF7;
+
+  /* ── Entity badges — generic three tones, assigned per entity type in
+        config order and never reshuffled. ──────────────────────────────── */
+  --color-badge-tone1-bg: #DAF1DC;
+  --color-badge-tone1-text: #15803d;
+  --color-badge-tone2-bg: #C8EAF7;
+  --color-badge-tone2-text: #355BA9;
+  --color-badge-tone3-bg: #FDEBD7;
+  --color-badge-tone3-text: #B95000;
+  --color-badge-subtype-bg: #E8EEF0;
+  --color-badge-subtype-text: #505F79;
+
+  /* ── Chips ─────────────────────────────────────────────────────────── */
+  --color-chip-relation-bg: #6DBBDE;
+  --color-chip-relation-text: #FFFFFF;
+  --color-chip-neutral-bg: #E8EEF0;
+  --color-chip-neutral-text: #003A52;
+  --color-chip-count-bg: #F4F5F7;
+  --color-scrim: rgba(9, 30, 66, .45);
+
+  /* ── Type — chrome runs 10.5–15px. `--text-base` keeps the Tailwind
+        default so the existing utility scale is untouched; the design
+        system's 14px body size is --text-body. ─────────────────────────── */
+  --text-micro: 10.5px;
+  --text-hint: 11px;
+  --text-label: 11.5px;
+  --text-ui: 12px;
+  --text-table: 12.5px;
+  --text-value: 13px;
+  --text-body: 14px;
+  --text-heading: 15px;
+
+  /* ── Spacing — the design system's dense scale, namespaced as ds-* so it
+        adds p-ds-4/gap-ds-6 utilities instead of remapping p-4/gap-6. ──── */
+  --spacing-ds-1: 2px;
+  --spacing-ds-2: 3px;
+  --spacing-ds-3: 4px;
+  --spacing-ds-4: 5px;
+  --spacing-ds-5: 6px;
+  --spacing-ds-6: 8px;
+  --spacing-ds-7: 9px;
+  --spacing-ds-8: 10px;
+  --spacing-ds-9: 12px;
+  --spacing-ds-10: 14px;
+  --spacing-ds-11: 16px;
+  --spacing-ds-12: 18px;
+  --spacing-ds-13: 20px;
+  --spacing-ds-14: 26px;
+
+  /* ── Radii — shape encodes role: pill STARTS something safe and
+        reversible; rectangle EXECUTES immediately. ─────────────────────── */
+  --radius-chip: 4px;
+  --radius-input: 5px;
+  --radius-button: 6px;
+  --radius-card: 8px;
+  --radius-overlay: 10px;
+  --radius-pill: 14px;
+
+  /* ── Elevation — exactly two levels: cards carry a 1px border and no
+        shadow; only overlays float. ────────────────────────────────────── */
+  --shadow-overlay: 0 8px 24px rgba(9, 30, 66, .15);
+  --shadow-popover: 0 12px 32px rgba(9, 30, 66, .2);
+  --shadow-modal: 0 24px 64px rgba(9, 30, 66, .4);
+  --shadow-toast: 0 12px 32px rgba(9, 30, 66, .35);
+
+  /* ── Motion — one duration, one easing, one press ──────────────────── */
+  --transition-duration-ui: .13s;
+  --ease-ui: ease;
+  --scale-press: .97;
+  --scale-press-tight: .92;
+}
+
+/* ── Client theme scopes. Applied on <body data-elody-client="…">; each
+      scope overrides the accent set AND the catch-all below re-declares the
+      seven accent-derived aliases on the same element, so they resolve
+      against that client's accent rather than the vlacc default. ───────── */
+[data-elody-client="pza"] {
+  --color-accent-light: #DCF4F9;
+  --color-accent-light-strong: #B9E4F1;
+  --color-accent: #2A97E2;
+  --color-accent-hover: #0057B7;
+  --color-accent-ink: #0B5F87;
+  --color-accent-wash: #E9F5FC;
+  --color-accent-tint: #EDF7FD;
+  --color-text-accent-strong: #0B5F87;
+}
+
+[data-elody-client="podiumnet"] {
+  --color-accent-light: #164C85;
+  --color-accent-light-strong: #164C85;
+  --color-accent: #0057b1;
+  --color-accent-hover: #004690;
+  --color-accent-ink: #FFFFFF;
+  --color-accent-wash: #E8F0F9;
+  --color-accent-tint: #EBF3FA;
+  --color-text-accent-strong: #004690;
+}
+
+[data-elody-client="damsv2"] {
+  --color-accent-light: #164C85;
+  --color-accent-light-strong: #164C85;
+  --color-accent: #0057b1;
+  --color-accent-hover: #004690;
+  --color-accent-ink: #FFFFFF;
+  --color-accent-wash: #E8F0F9;
+  --color-accent-tint: #EBF3FA;
+  --color-text-accent-strong: #004690;
+}
+
+[data-elody-client="vliz"] {
+  --color-accent-light: #465DAA;
+  --color-accent-light-strong: #465DAA;
+  --color-accent: #354D9B;
+  --color-accent-hover: #2A3E80;
+  --color-accent-ink: #FFFFFF;
+  --color-accent-wash: #EDF0F8;
+  --color-accent-tint: #F0F2F9;
+  --color-text-accent-strong: #2A3E80;
+}
+
+[data-elody-client="aicap"] {
+  --color-accent-light: #F2EFEC;
+  --color-accent-light-strong: #E5DECF;
+  --color-accent: #9F8332;
+  --color-accent-hover: #846C28;
+  --color-accent-ink: #6E5A22;
+  --color-accent-wash: #F5F1E8;
+  --color-accent-tint: #F7F4ED;
+  --color-text-accent-strong: #6E5A22;
+  --color-surface-app: #FAF8F4;
+  --color-surface: #FFFEFE;
+  --color-text-body: #343a40;
+  --color-text-field-label: #9F8332;
+  --color-text-link: #C2A169;
+}
+
+[data-elody-client] {
+  --color-surface-panel-header: var(--color-accent-light);
+  --color-surface-section-header: var(--color-accent);
+  --color-surface-editable-hover: var(--color-accent-wash);
+  --color-surface-group-tint: var(--color-accent-tint);
+  --color-text-panel-header: var(--color-accent-ink);
+  --color-text-link-hover: var(--color-accent);
+  --color-border-panel: var(--color-accent-light-strong);
 }
 
 
