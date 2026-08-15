@@ -22,7 +22,6 @@
             :item="{ id: option.key.value }"
             :required="false"
             ignore-bulk-operations
-            input-style="accentNormal"
           />
         </div>
       </div>

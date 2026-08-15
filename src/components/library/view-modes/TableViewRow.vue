@@ -5,6 +5,7 @@
         v-if="
           baseLibraryMode === BaseLibraryModes.NormalBaseLibrary && hasSelection
         "
+        :aria-label="t('bulk-operations.select-item')"
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
         :item="{
@@ -15,7 +16,6 @@
           type: itemType,
         }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
     </div>
 

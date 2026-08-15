@@ -11,11 +11,11 @@
           hasSelection &&
           isGridMode
         "
+        :aria-label="t('bulk-operations.select-item')"
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
@@ -70,6 +70,7 @@
           hasSelection &&
           isListMode
         "
+        :aria-label="t('bulk-operations.select-item')"
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
         :item="{
@@ -80,7 +81,6 @@
           type: itemType,
         }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
     </div>
     <div

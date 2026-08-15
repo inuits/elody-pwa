@@ -1,48 +1,25 @@
 <template>
-  <div data-cy="base-input-checkbox" class="flex items-center">
-    <div
-      class="flex-none flex items-center justify-center w-10 h-10 rounded-lg box-border"
-      :class="[
-        inputValue ? `${divSelectedBgColor}` : '',
-        { 'cursor-pointer': !disabled },
-      ]"
-      @click.prevent="handleItemSelection"
-    >
-      <input
-        class="border-2 focus:ring-0"
-        :class="[
-          { 'cursor-pointer': !disabled },
-          { rounded: !inputValue },
-          { [selectedInputStyle.disabledStyle.textColor]: disabled },
-          { [selectedInputStyle.disabledStyle.bgColor]: disabled },
-          { [selectedInputStyle.disabledStyle.borderColor]: disabled },
-          `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor} `,
-        ]"
-        v-model="inputValue"
-        type="checkbox"
-        :checked="required"
-        :disabled="disabled || isDisabledByContextLimit || required"
-        @change.stop
-        @click.stop="handleItemSelection"
-      />
-    </div>
-    <span
-      v-if="label"
-      class="flex flex-row select-none cursor-pointer"
-      :class="{ 'ml-2': inputValue }"
+  <label data-cy="base-input-checkbox" class="ds-checkbox">
+    <input
+      class="ds-checkbox__box"
+      v-model="inputValue"
+      type="checkbox"
+      :checked="required"
+      :disabled="disabled || isDisabledByContextLimit || required"
+      :aria-label="label ? undefined : ariaLabel"
       @change.stop
       @click.stop="handleItemSelection"
-    >
+    />
+    <span v-if="label" class="ds-checkbox__label">
       {{ label }}
-      <div class="pl-2" :title="t(`tooltip.required`)">
-        <unicon
-          v-if="required"
-          :name="Unicons.ExclamationTriangle.name"
-          height="20"
-        />
-      </div>
+      <unicon
+        v-if="required"
+        :name="Unicons.ExclamationTriangle.name"
+        height="16"
+        :title="t('tooltip.required')"
+      />
     </span>
-  </div>
+  </label>
 </template>
 
 <script lang="ts" setup>
@@ -68,7 +45,8 @@ const props = withDefaults(
     label?: string;
     item: InBulkProcessableItem;
     bulkOperationsContext: Context | undefined;
-    inputStyle: InputStyle;
+    /** Required when there is no visible label — a box with no name is unusable. */
+    ariaLabel?: string;
     disabled?: boolean;
     ignoreBulkOperations?: boolean;
     required?: boolean;
@@ -94,33 +72,6 @@ const inputValue = computed<boolean>({
     emit("update:modelValue", props.required ? props.required : value);
   },
 });
-
-type PseudoStyle = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-};
-type Input = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-  disabledStyle: PseudoStyle;
-};
-const accentNormalInput: Input = {
-  textColor: "text-accent-normal",
-  bgColor: "accent-accent-normal",
-  borderColor: "border-text-light checked:border-neutral-white",
-  disabledStyle: {
-    textColor: "disabled:text-text-light",
-    bgColor: "disabled:accent-neutral-white",
-    borderColor: "disabled:border-accent-highlight",
-  },
-};
-
-type InputStyle = "accentNormal";
-const inputStyles: Record<InputStyle, Input> = {
-  accentNormal: accentNormalInput,
-};
 
 const {
   contextWhereSelectionEventIsTriggered,
@@ -149,10 +100,6 @@ const handleItemSelection = () => {
   inputValue.value = !inputValue.value;
 };
 
-const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
-const divSelectedBgColor = computed<string>(() =>
-  selectedInputStyle.value.textColor.replace(/^text/, "bg"),
-);
 const isDisabledByContextLimit = computed<boolean>(() => {
   if (props.ignoreBulkOperations) return false;
   return (
@@ -191,3 +138,77 @@ watch(
   },
 );
 </script>
+
+<style scoped>
+.ds-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-ds-5);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ds-checkbox:has(.ds-checkbox__box:disabled) {
+  cursor: auto;
+}
+
+.ds-checkbox__box {
+  appearance: none;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  border: 1.5px solid var(--color-border-dashed);
+  border-radius: var(--radius-chip);
+  background-color: var(--color-surface);
+  cursor: inherit;
+  transition:
+    background-color var(--transition-duration-ui) var(--ease-ui),
+    border-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.ds-checkbox__box:checked,
+.ds-checkbox__box:indeterminate {
+  background-color: var(--color-commit);
+  border-color: var(--color-commit);
+  /* Tick and dash are drawn rather than iconed: at 15px an icon font renders
+     off-centre by a pixel and the box is the densest control in the app. */
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.ds-checkbox__box:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.2 4.8 8.5 9.5 3.8'/%3E%3C/svg%3E");
+}
+
+.ds-checkbox__box:indeterminate {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' d='M3 6h6'/%3E%3C/svg%3E");
+}
+
+.ds-checkbox__box:not(:disabled):hover {
+  border-color: var(--color-commit);
+}
+
+.ds-checkbox__box:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.ds-checkbox__box:disabled {
+  background-color: var(--color-surface-muted);
+  border-color: var(--color-border-default);
+}
+
+.ds-checkbox__box:disabled:checked {
+  background-color: var(--color-text-disabled);
+  border-color: var(--color-text-disabled);
+}
+
+.ds-checkbox__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-ds-4);
+  font-size: var(--text-value);
+  color: var(--color-text-body);
+}
+</style>

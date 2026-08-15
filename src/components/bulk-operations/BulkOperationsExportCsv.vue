@@ -51,7 +51,6 @@
               :bulk-operations-context="
                 BulkOperationsContextEnum.BulkOperationsCsvExport
               "
-              input-style="accentNormal"
             />
           </div>
         </div>
