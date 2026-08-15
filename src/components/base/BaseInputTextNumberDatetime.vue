@@ -15,12 +15,11 @@
         type !== 'datetime-local' &&
         type !== 'date'
       "
+      class="ds-input"
       :class="[
-        'border rounded-lg focus:ring-0',
+        `ds-input--${inputStyle}`,
         { 'w-full h-full': type !== 'color' },
         { 'w-10 h-6 mt-2': type === 'color' },
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
       ]"
       v-model="inputValue"
       :type="type"
@@ -49,11 +48,8 @@
     <textarea
       data-cy="base-input-text-area"
       v-else-if="type === 'textarea'"
-      class="w-full h-full border rounded-lg focus:ring-0"
-      :class="[
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-      ]"
+      class="ds-input w-full h-full"
+      :class="`ds-input--${inputStyle}`"
       v-model="inputValue"
       :disabled="disabled"
       :placeholder="placeholder"
@@ -64,10 +60,8 @@
     <BaseResizableTextarea
       v-else
       v-model="inputValue"
-      :class="[
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-      ]"
+      class="ds-input"
+      :class="`ds-input--${inputStyle}`"
     ></BaseResizableTextarea>
   </div>
 </template>
@@ -77,57 +71,11 @@ import { computed } from "vue";
 import BaseDatePicker from "./BaseDatePicker.vue";
 import BaseResizableTextarea from "./BaseResizableTextarea.vue";
 
-type PseudoStyle = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-};
-type Input = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-  disabledStyle: PseudoStyle;
-};
-const defaultInput: Input = {
-  textColor: "text-text-body",
-  bgColor: "bg-background-light",
-  borderColor: "border-none",
-  disabledStyle: {
-    textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-background-normal",
-    borderColor: "disabled:border-none",
-  },
-};
-const defaultWithBorderInput: Input = {
-  textColor: defaultInput.textColor,
-  bgColor: defaultInput.bgColor,
-  borderColor: "border-[rgba(0,58,82,0.6)] focus:border-[rgba(0,58,82,0.6)]",
-  disabledStyle: {
-    textColor: defaultInput.disabledStyle.textColor,
-    bgColor: defaultInput.disabledStyle.bgColor,
-    borderColor: "disabled:border-text-disabled",
-  },
-};
-const defaultWithDarkBackgroundInput: Input = {
-  textColor: defaultInput.textColor,
-  bgColor: "bg-accent-highlight",
-  borderColor: defaultInput.borderColor,
-  disabledStyle: {
-    textColor: defaultInput.disabledStyle.textColor,
-    bgColor: defaultInput.disabledStyle.bgColor,
-    borderColor: defaultInput.disabledStyle.borderColor,
-  },
-};
-
-type InputStyle =
+/** Chrome only — the ink, size and focus ring are the same for all three. */
+export type InputStyle =
   | "default"
   | "defaultWithBorder"
   | "defaultWithDarkBackgroundInput";
-const inputStyles: Record<InputStyle, Input> = {
-  default: defaultInput,
-  defaultWithBorder: defaultWithBorderInput,
-  defaultWithDarkBackgroundInput: defaultWithDarkBackgroundInput,
-};
 
 const props = withDefaults(
   defineProps<{
@@ -168,8 +116,6 @@ const inputValue = computed<string | number | boolean | undefined>({
   },
 });
 
-const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
-
 const handleBadNumberInput = (event: Event) => {
   if (props.type !== "number") return;
   const target = event.target as HTMLInputElement;
@@ -180,15 +126,52 @@ const handleBadNumberInput = (event: Event) => {
 </script>
 
 <style scoped>
+.ds-input {
+  border: 1px solid transparent;
+  border-radius: var(--radius-input);
+  background-color: var(--color-surface);
+  color: var(--color-text-body);
+  font-size: var(--text-value);
+  transition: border-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.ds-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+/* One focus treatment for every control in the system. */
+.ds-input:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.ds-input:disabled {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-disabled);
+  border-color: transparent;
+}
+
+.ds-input--defaultWithBorder {
+  border-color: var(--color-border-default);
+}
+
+.ds-input--defaultWithDarkBackgroundInput {
+  background-color: var(--color-surface-muted);
+}
+
+/* Numbers are read by their last digit: right-aligned, and never with the
+   browser's spinners, which cover it. */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  text-align: right;
+}
+
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
-}
-
-input[type="number"] {
-  appearance: textfield;
-  -moz-appearance: textfield;
 }
 
 .textarea {
