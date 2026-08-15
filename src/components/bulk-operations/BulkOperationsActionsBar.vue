@@ -88,12 +88,12 @@
       class="flex justify-end w-fit"
     >
       <div v-if="confirmSelectionButton" class="w-full !m-0">
-        <BaseButtonNew
+        <BaseButton
           :label="$t('bulk-operations.confirm-selection')"
           :icon="DamsIcons.Check"
-          button-style="accentAccent"
+          button-style="commit"
           :disabled="!itemsSelected"
-          button-size="small"
+          button-size="sm"
           @click="emit('confirmSelection', getEnqueuedItems(context))"
         />
       </div>
@@ -124,7 +124,7 @@ import {
 } from "@/composables/useResultCount";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import BasePaginationNew from "@/components/base/BasePagination.vue";
 import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
 import {

@@ -25,9 +25,9 @@ vi.mock("@/components/EntityColumn.vue", () => ({
   default: { name: "EntityColumn", template: "<div />" },
 }));
 
-vi.mock("@/components/base/BaseButtonNew.vue", () => ({
+vi.mock("@/components/base/BaseButton.vue", () => ({
   default: {
-    name: "BaseButtonNew",
+    name: "BaseButton",
     props: ["label"],
     emits: ["click"],
     template: `<button @click="$emit('click')">{{ label }}</button>`,

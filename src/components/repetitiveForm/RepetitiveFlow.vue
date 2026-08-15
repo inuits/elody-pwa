@@ -69,7 +69,7 @@
             "
           >
             <div class="w-fit">
-              <BaseButtonNew
+              <BaseButton
                 data-testid="repetitive-flow-back"
                 :label="
                   currentStepIndex > 0
@@ -77,8 +77,8 @@
                     : $t('repetitiveForm.back-to-overview')
                 "
                 :icon="DamsIcons.AngleLeft"
-                button-style="accentAccent"
-                button-size="small"
+                button-style="commit"
+                button-size="sm"
                 @click="goBack"
               />
             </div>
@@ -88,12 +88,12 @@
 
       <template v-else-if="view === 'finalize'">
         <div class="w-fit mb-4">
-          <BaseButtonNew
+          <BaseButton
             data-testid="repetitive-flow-back-to-overview"
             :label="$t('repetitiveForm.back-to-overview')"
             :icon="DamsIcons.AngleLeft"
-            button-style="accentAccent"
-            button-size="small"
+            button-style="commit"
+            button-size="sm"
             @click="view = 'overview'"
           />
         </div>
@@ -149,7 +149,7 @@ import { useBaseNotification } from "@/composables/useBaseNotification";
 import { getEntityIdFromRoute } from "@/helpers";
 import { useAsyncAction } from "@/composables/useAsyncAction";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
 import RepetitiveOverview from "@/components/repetitiveForm/RepetitiveOverview.vue";

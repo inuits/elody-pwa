@@ -98,7 +98,7 @@ const { default: TableCellInputField } = await import("@/components/tableInputFi
 const { default: AutocompleteRelationCell } = await import(
   "@/components/tableInputFields/AutocompleteRelationCell.vue"
 );
-const { default: BaseButtonNew } = await import("@/components/base/BaseButtonNew.vue");
+const { default: BaseButton } = await import("@/components/base/BaseButton.vue");
 const { default: BaseInputAutocomplete } = await import(
   "@/components/base/BaseInputAutocomplete.vue"
 );
@@ -277,7 +277,7 @@ describe("TableInputField", () => {
           relationType: "refAuthors",
         },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       const pushed = mockPush.mock.calls[0][0];
       expect(pushed.metadata).toContainEqual({ key: "entity_type", value: "" });
     });
@@ -370,7 +370,7 @@ describe("TableInputField", () => {
       const wrapper = shallowMount(TableInputField, {
         props: { subFields: [textSubField, checkboxSubField], formId: "form-1", parentFieldKey: "authors" },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       expect(mockPush).toHaveBeenCalledWith({ name: "", active: false });
     });
 
@@ -378,7 +378,7 @@ describe("TableInputField", () => {
       const wrapper = shallowMount(TableInputField, {
         props: { subFields: [textSubField], formId: "form-1", parentFieldKey: "authors" },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       expect(mockPush.mock.calls[0][0].name).toBe("");
     });
 
@@ -386,7 +386,7 @@ describe("TableInputField", () => {
       const wrapper = shallowMount(TableInputField, {
         props: { subFields: [checkboxSubField], formId: "form-1", parentFieldKey: "authors" },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       expect(mockPush.mock.calls[0][0].active).toBe(false);
     });
 
@@ -394,7 +394,7 @@ describe("TableInputField", () => {
       const wrapper = shallowMount(TableInputField, {
         props: { subFields: [dropdownSubField], formId: "form-1", parentFieldKey: "authors" },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       expect(mockPush.mock.calls[0][0].status).toBe("");
     });
   });
@@ -411,7 +411,7 @@ describe("TableInputField", () => {
           relationType: "refAuthors",
         },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       const pushed = mockPush.mock.calls[0][0];
       expect(pushed.key).toBe("");
       expect(pushed.type).toBe("refAuthors");
@@ -427,7 +427,7 @@ describe("TableInputField", () => {
           relationType: "refAuthors",
         },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       const pushed = mockPush.mock.calls[0][0];
       expect(pushed.metadata).toContainEqual({ key: "function_indication", value: "" });
       expect(pushed.metadata).toContainEqual({ key: "main_author", value: false });
@@ -442,7 +442,7 @@ describe("TableInputField", () => {
           relationType: "refAuthors",
         },
       });
-      await wrapper.findAllComponents(BaseButtonNew)[0].vm.$emit("click");
+      await wrapper.findAllComponents(BaseButton)[0].vm.$emit("click");
       const pushed = mockPush.mock.calls[0][0];
       const metaKeys = (pushed.metadata ?? []).map((m: any) => m.key);
       expect(metaKeys).not.toContain("name");

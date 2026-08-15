@@ -11,11 +11,11 @@
           class="flex flex-col gap-3 mx-1 mb-1 p-3 bg-background-normal rounded-b"
         >
           <div v-if="canPost && !isComposerOpen" class="self-start">
-            <base-button-new
+            <base-button
               :label="t('comments.new-thread')"
               :icon="DamsIcons.PlusCircle"
-              button-style="accentAccent"
-              button-size="small"
+              button-style="commit"
+              button-size="sm"
               force-show-label
               @click="isComposerOpen = true"
             />
@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";

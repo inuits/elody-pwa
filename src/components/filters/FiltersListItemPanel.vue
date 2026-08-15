@@ -16,14 +16,14 @@
         @update:model-value="$emit('update:selected-matcher', $event)"
       />
       <div class="grow"></div>
-      <BaseButtonNew
+      <BaseButton
         class="!w-9 h-9"
         label=""
         :icon="DamsIcons.Cross"
         :icon-height="22"
         :disabled="!selectedMatcher"
-        button-style="accentNormal"
-        button-size="small"
+        button-style="commit"
+        button-size="sm"
         @click="$emit('reset')"
       />
     </div>
@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import type { DropdownOption } from "@/generated-types/queries";
 import { DamsIcons } from "@/generated-types/queries";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";

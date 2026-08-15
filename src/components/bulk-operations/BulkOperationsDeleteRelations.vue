@@ -14,21 +14,21 @@
     </div>
     <div class="flex justify-between mt-4">
       <div>
-        <BaseButtonNew
+        <BaseButton
           :label="t('confirm.delete-relations.confirm')"
           :icon="DamsIcons.Trash"
-          button-style="redDefault"
-          button-size="small"
+          button-style="danger"
+          button-size="sm"
           :loading="isDeleting"
           @click="deleteSelectedRelations"
         />
       </div>
 
       <div>
-        <BaseButtonNew
+        <BaseButton
           :label="t('confirm.delete-relations.cancel')"
-          button-style="default"
-          button-size="small"
+          button-style="secondary"
+          button-size="sm"
           :disabled="isDeleting"
           @click="closeModal(TypeModals.BulkOperationsDeleteRelations)"
         />
@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
 import {

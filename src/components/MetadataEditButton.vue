@@ -8,7 +8,7 @@
     "
     class="ml-auto px-2"
   >
-    <base-button-new
+    <base-button
       v-if="!editModeHelper.isEdit"
       :button-size="buttonSize"
       :label="
@@ -17,10 +17,10 @@
           : t('metadata.labels.edit-metadata')
       "
       :icon="DamsIcons.Edit"
-      button-style="accentNormal"
+      button-style="commit"
       @click="() => editModeHelper.enableEdit()"
     />
-    <base-button-new
+    <base-button
       v-else
       :button-size="buttonSize"
       :label="
@@ -36,9 +36,9 @@
 <script lang="ts" setup>
 import { watch, inject, computed } from "vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
-import BaseButtonNew, {
+import BaseButton, {
   type ButtonSize,
-} from "@/components/base/BaseButtonNew.vue";
+} from "@/components/base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
@@ -52,7 +52,7 @@ const props = withDefaults(
     editmodeLabel?: string;
   }>(),
   {
-    buttonSize: "small",
+    buttonSize: "sm",
     readmodeLabel: "",
     editmodeLabel: "",
   },

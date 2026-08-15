@@ -1,10 +1,10 @@
 <template>
   <div v-if="deleteAvailable" data-cy="edit-toggle" class="ml-2 mr-6">
-    <BaseButtonNew
+    <BaseButton
       :label="t('bulk-operations.delete')"
       :icon="DamsIcons.Trash"
-      button-style="redDefault"
-      button-size="small"
+      button-style="danger"
+      button-size="sm"
       :loading="isDeleting"
       @click="openDeleteModal()"
     />
@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import { inject, computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";

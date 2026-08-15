@@ -2,7 +2,7 @@ import { ref } from "vue";
 import type {
   ButtonSize,
   ButtonStyle,
-} from "@/components/base/BaseButtonNew.vue";
+} from "@/components/base/BaseButton.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 

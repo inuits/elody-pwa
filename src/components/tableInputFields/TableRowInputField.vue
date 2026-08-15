@@ -34,11 +34,11 @@
     v-if="!disabled"
     class="flex items-center justify-center px-1 py-1 border-b border-[rgba(0,58,82,0.08)] border-l border-l-[rgba(0,58,82,0.2)]"
   >
-    <BaseButtonNew
+    <BaseButton
       class="!w-auto"
       :icon="DamsIcons.Trash"
-      button-style="redDefault"
-      button-size="verySmall"
+      button-style="danger"
+      button-size="sm"
       @click="emit('remove-row', rowIndex)"
     />
   </div>
@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import TableCellInputField from "@/components/tableInputFields/TableCellInputField.vue";
 import {

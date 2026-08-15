@@ -32,24 +32,24 @@
     </div>
     <div class="flex justify-between mt-4">
       <div>
-        <BaseButtonNew
+        <BaseButton
           :disabled="isDeleting"
           :label="
             t('confirm.delete-entities.confirm', { type: getCurrentRouteTitle })
           "
           :icon="DamsIcons.Trash"
-          button-style="redDefault"
-          button-size="small"
+          button-style="danger"
+          button-size="sm"
           @click="deleteSelectedItems"
         />
       </div>
 
       <div>
-        <BaseButtonNew
+        <BaseButton
           :disabled="isDeleting"
           :label="t('confirm.delete-entities.cancel')"
-          button-style="default"
-          button-size="small"
+          button-style="secondary"
+          button-size="sm"
           @click="closeModal(TypeModals.BulkOperationsDeleteEntities)"
         />
       </div>
@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import { watch, computed, ref } from "vue";
 import { router } from "@/main";

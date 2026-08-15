@@ -54,8 +54,8 @@ const stubs = {
   MediaViewerPreview: { template: '<div class="media-stub" />' },
   HistoryDiffPreview: { template: '<div class="history-stub" />' },
   unicon: { template: "<i />", props: ["name", "height"] },
-  BaseButtonNew: {
-    template: '<button class="base-button-new-stub">{{ label }}</button>',
+  BaseButton: {
+    template: '<button class="base-button-stub">{{ label }}</button>',
     props: ["label", "buttonSize", "buttonStyle"],
   },
   SpinnerLoader: { template: '<div class="spinner-stub" />' },

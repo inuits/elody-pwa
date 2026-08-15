@@ -14,10 +14,10 @@
       >
         {{ t("comments.cancel") }}
       </button>
-      <base-button-new
+      <base-button
         :label="submitLabel"
         :icon="DamsIcons.Check"
-        button-style="accentAccent"
+        button-style="commit"
         :disabled="!hasContent || isSubmitting"
         @click="submit"
       />
@@ -29,7 +29,7 @@
 import { computed, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import { extractTaggedRelations } from "@/composables/useComments";

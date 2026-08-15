@@ -49,9 +49,9 @@
       data-cy="open-detail-page-button"
       class="px-2"
     >
-      <base-button-new
-        button-size="small"
-        button-style="accentNormal"
+      <base-button
+        button-size="sm"
+        button-style="commit"
         :label="t('metadata.labels.open-detail-page')"
         @click="openDetailPage"
       />
@@ -155,7 +155,7 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity, goToEntityPage } from "@/helpers";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { apolloClient, router } from "@/main";

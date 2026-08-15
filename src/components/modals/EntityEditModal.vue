@@ -30,13 +30,13 @@
         </div>
 
         <div class="flex gap-2">
-          <BaseButtonNew
+          <BaseButton
             label="Save"
             icon="Save"
             :loading="isSaving"
             :disabled="!isFormValid || isSaving"
-            button-style="accentAccent"
-            button-size="small"
+            button-style="commit"
+            button-size="sm"
             @click="onSave"
           />
         </div>
@@ -65,7 +65,7 @@ import { mapUrlToEntityType, getMetadataFields } from "@/helpers";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 const { t } = useI18n();
 const { closeModal, getModalInfo } = useBaseModal();

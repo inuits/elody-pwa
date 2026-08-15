@@ -177,7 +177,7 @@
           @reset-upload="initializeForm"
           @close-and-delete-form="closeAndDeleteForm"
         />
-        <BaseButtonNew
+        <BaseButton
           v-if="
             field.__typename === 'FormAction' &&
             field.actionType !== ActionType.Upload &&
@@ -208,7 +208,7 @@
           "
           :loading="busyActionType === field.actionType"
           :icon="field.icon"
-          button-style="accentAccent"
+          button-style="commit"
           @click="performActionButtonClickEvent(field)"
         />
         <p
@@ -267,7 +267,7 @@ import {
 } from "@/helpers";
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";

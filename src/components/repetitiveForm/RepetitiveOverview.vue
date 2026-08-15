@@ -41,11 +41,11 @@
           </span>
         </div>
         <div class="w-fit ml-auto shrink-0">
-          <BaseButtonNew
+          <BaseButton
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
-            button-style="redDefault"
-            button-size="small"
+            button-style="danger"
+            button-size="sm"
             @click="emit('remove', index)"
           />
         </div>
@@ -54,22 +54,22 @@
 
     <div class="flex gap-3 mt-6">
       <div v-if="repeatable || branches.length === 0" class="w-fit">
-        <BaseButtonNew
+        <BaseButton
           data-testid="repetitive-overview-add"
           :label="$t('repetitiveForm.add-another')"
           :icon="DamsIcons.Plus"
-          button-style="accentAccent"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           @click="emit('add-another')"
         />
       </div>
       <div class="w-fit">
-        <BaseButtonNew
+        <BaseButton
           data-testid="repetitive-overview-finish"
           :label="$t('repetitiveForm.finish')"
           :icon="DamsIcons.Check"
-          button-style="accentAccent"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           :disabled="branches.length === 0"
           :loading="finishing"
           @click="emit('finish')"
@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { DamsIcons, type RepetitiveStep } from "@/generated-types/queries";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import {
   primaryEntity,
   toDisplayValue,

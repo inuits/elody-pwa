@@ -188,7 +188,7 @@ const openDiscardModal = async (route: any) => {
     confirmLabel: t("confirm.discard-edit.confirm"),
     cancelLabel: t("confirm.discard-edit.cancel"),
     secondaryLabel: t("confirm.discard-edit.secondary-confirm"),
-    secondaryButtonStyle: "accentAccent",
+    secondaryButtonStyle: "commit",
   });
   if (choice === "secondary") {
     await useEditHelper.save();

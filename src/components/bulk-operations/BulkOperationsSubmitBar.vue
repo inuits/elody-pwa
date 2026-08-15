@@ -21,7 +21,7 @@
         </base-tooltip>
       </div>
       <div class="min-w-[10rem]">
-        <BaseButtonNew
+        <BaseButton
           :label="
             buttonLabel
               ? buttonLabel
@@ -32,8 +32,8 @@
           :icon="buttonIcon"
           :disabled="disabled"
           :loading="loading"
-          button-style="accentAccent"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           @click="() => emit('submit')"
         />
       </div>
@@ -51,7 +51,7 @@
 
 <script lang="ts" setup>
 import { DamsIcons } from "@/generated-types/queries";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";

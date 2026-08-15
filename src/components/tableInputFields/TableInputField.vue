@@ -4,12 +4,12 @@
     class="relation-metadata-list-field flex flex-col gap-1"
   >
     <div v-if="!disabled" class="absolute top-0 right-0">
-      <BaseButtonNew
+      <BaseButton
         class="!w-auto"
         :icon="DamsIcons.Plus"
         :label="t('actions.labels.add-entry')"
-        button-style="accentNormal"
-        button-size="verySmall"
+        button-style="commit"
+        button-size="sm"
         @click="addRow"
       />
     </div>
@@ -55,7 +55,7 @@
 import { computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useFieldArray } from "vee-validate";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import {
   type SubField,
   InputFieldTypes,

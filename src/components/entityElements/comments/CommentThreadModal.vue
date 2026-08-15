@@ -17,7 +17,7 @@
             {{ t("comments.thread-title") }}
           </h3>
           <div class="flex items-center gap-2">
-            <base-button-new
+            <base-button
               v-if="canPost"
               :label="
                 thread.status === 'resolved'
@@ -27,7 +27,7 @@
               :icon="
                 thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check
               "
-              button-style="accentNormal"
+              button-style="commit"
               :disabled="isWorking"
               @click="toggleStatus"
             />
@@ -117,7 +117,7 @@
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseModal from "@/components/base/BaseModal.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
 import { useBaseModal } from "@/composables/useBaseModal";

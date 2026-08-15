@@ -4,13 +4,13 @@
     :class="[{ 'w-fit': primaryOptions }]"
   >
     <div class="flex flex-col">
-      <BaseButtonNew
+      <BaseButton
         v-for="primaryOption in primaryOptions"
         :key="primaryOption"
         class="pl-4 pr-6 my-1"
         :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
-        button-style="accentNormal"
-        button-size="small"
+        button-style="commit"
+        button-size="sm"
         :disabled="isMainActionDisabled || !primaryOption.active"
         :label="t(primaryOption.label, [entityTypeLabel])"
         :tooltip-label="primaryOption.actionContext?.labelForTooltip"
@@ -28,9 +28,9 @@
         "
       />
     </div>
-    <BaseButtonNew
+    <BaseButton
       v-if="hasSecondaryOptions"
-      button-size="small"
+      button-size="sm"
       :icon="DamsIcons.EllipsisV"
       class="!w-max !p-2 ml-2"
       @click.stop="
@@ -91,7 +91,7 @@ import {
   Entitytyping,
   BulkOperationTypes,
 } from "@/generated-types/queries";
-import BaseButtonNew from "./base/BaseButtonNew.vue";
+import BaseButton from "./base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";

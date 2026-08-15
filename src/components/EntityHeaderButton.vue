@@ -1,11 +1,11 @@
 <template>
   <div class="ml-2 mr-6">
-    <BaseButtonNew
+    <BaseButton
       v-if="deleteAvailable"
       :label="t(activeConfig.label)"
       :icon="activeConfig.icon ? DamsIcons[activeConfig.icon] : undefined"
-      button-style="default"
-      button-size="small"
+      button-style="secondary"
+      button-size="sm"
       :loading="isLoading"
       :style="{
         backgroundColor: activeConfig.style?.background,
@@ -24,7 +24,7 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import type { ApolloClient } from "@apollo/client/core";
 import { DamsIcons } from "@/generated-types/queries";
 import type { EntityButtonConfig } from "@/generated-types/queries";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useImport } from "@/composables/useImport";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import useEntitySingle from "@/composables/useEntitySingle";

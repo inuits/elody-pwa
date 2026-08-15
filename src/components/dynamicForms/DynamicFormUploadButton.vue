@@ -13,32 +13,32 @@
           {{ finishedStatusMessage }}
         </p>
         <div class="w-1/5 @max-6xl/modal:hidden">
-          <base-button-new
+          <base-button
             icon="Redo"
             :label="t('actions.labels.reset-upload')"
-            button-style="accentAccent"
+            button-style="commit"
             @click="resetUpload()"
           />
         </div>
         <div class="@6xl/modal:hidden">
-          <base-button-new
+          <base-button
             icon="Redo"
-            button-style="accentAccent"
+            button-style="commit"
             @click="resetUpload()"
           />
         </div>
         <div class="w-1/5 ml-5 @max-lg/modal:hidden">
-          <base-button-new
+          <base-button
             icon="CheckCircle"
             :label="t('actions.labels.complete')"
-            button-style="accentAccent"
+            button-style="commit"
             @click="emit('closeAndDeleteForm')"
           />
         </div>
         <div class="ml-5 @lg/modal:hidden">
-          <base-button-new
+          <base-button
             icon="CheckCircle"
-            button-style="accentAccent"
+            button-style="commit"
             @click="emit('closeAndDeleteForm')"
           />
         </div>
@@ -57,18 +57,18 @@
           :total-amount-of-steps="mediafiles.length"
         />
         <!--                      <div class="w-1/4 px-2" v-if="uploadFlow === UploadFlow.MediafilesOnly">-->
-        <!--                        <base-button-new-->
+        <!--                        <base-button-->
         <!--                          v-if="uploadStatus === UploadStatus.Uploading"-->
         <!--                          icon="Pause"-->
         <!--                          :label="t('actions.labels.pause-upload')"-->
-        <!--                          button-style="accentAccent"-->
+        <!--                          button-style="commit"-->
         <!--                          @click="pauseUpload()"-->
         <!--                        />-->
-        <!--                        <base-button-new-->
+        <!--                        <base-button-->
         <!--                          v-if="uploadStatus === UploadStatus.Paused"-->
         <!--                          icon="Play"-->
         <!--                          :label="t('actions.labels.resume-upload')"-->
-        <!--                          button-style="accentAccent"-->
+        <!--                          button-style="commit"-->
         <!--                          @click="resumeUpload()"-->
         <!--                        />-->
         <!--                      </div>-->
@@ -126,7 +126,7 @@ import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vu
 import useUpload from "@/composables/upload/useUpload";
 import { UploadStatus } from "@/composables/upload/types";
 import ProgressBar from "@/components/ProgressBar.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 const props = withDefaults(
   defineProps<{

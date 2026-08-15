@@ -354,7 +354,7 @@ const handleCreatingFromTag = async (option: any) => {
     message: t("confirm.create-entity-from-dropdown.message", [option.label]),
     confirmLabel: t("confirm.create-entity-from-dropdown.confirm"),
     cancelLabel: t("confirm.create-entity-from-dropdown.cancel"),
-    confirmButtonStyle: "accentAccent",
+    confirmButtonStyle: "commit",
   });
   if (choice !== "confirm") return;
 

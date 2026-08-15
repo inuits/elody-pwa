@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import { reactive, nextTick } from "vue";
 import IiifOperationsModal from "@/components/modals/IiifOperationsModal.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 const mocks = vi.hoisted(() => ({
   modalInfo: {} as Record<string, any>,
@@ -23,7 +23,7 @@ const getWrapper = () =>
       stubs: {
         BaseModal: { template: "<div><slot /></div>" },
         BaseInputTextNumberDatetime: true,
-        BaseButtonNew: {
+        BaseButton: {
           props: ["label", "buttonStyle", "loading", "disabled"],
           template: '<button :disabled="loading" @click="$emit(\'click\')" />',
         },
@@ -96,7 +96,7 @@ describe("IiifOperationsModal - download loading state", () => {
     const wrapper = getWrapper();
     await flushPromises();
 
-    const button = wrapper.findComponent(BaseButtonNew);
+    const button = wrapper.findComponent(BaseButton);
     expect(button.props("loading")).toBe(false);
 
     const downloadPromise = wrapper.vm.downLoadImage();

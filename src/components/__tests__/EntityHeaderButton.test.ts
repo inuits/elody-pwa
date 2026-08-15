@@ -74,7 +74,7 @@ const mountButton = (
     global: {
       provide: { [DefaultApolloClient as symbol]: mockApolloClient },
       stubs: {
-        BaseButtonNew: {
+        BaseButton: {
           props: ["label", "loading"],
           emits: ["click"],
           template: "<button @click=\"$emit('click')\">{{ label }}</button>",

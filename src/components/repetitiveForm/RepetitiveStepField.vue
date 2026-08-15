@@ -58,12 +58,12 @@
       <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
         <slot name="actions" />
         <div v-if="showBackFromCreate" class="w-fit">
-          <BaseButtonNew
+          <BaseButton
             data-testid="repetitive-step-back-to-search"
             :label="$t(backLabel)"
             :icon="DamsIcons.AngleLeft"
-            button-style="accentAccent"
-            button-size="small"
+            button-style="commit"
+            button-size="sm"
             @click="goBackFromCreate"
           />
         </div>
@@ -108,7 +108,7 @@ import {
 import { getEntityIdFromRoute } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEntitySingle from "@/composables/useEntitySingle";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import RepetitiveCreateButton from "@/components/repetitiveForm/RepetitiveCreateButton.vue";

@@ -76,9 +76,9 @@
         </div>
       </div>
       <div>
-        <base-button-new
+        <base-button
           :label="t('iiif-operations-modal.get-resized-image')"
-          button-style="accentAccent"
+          button-style="commit"
           :loading="isDownloading"
           @click="downLoadImage"
         />
@@ -94,7 +94,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { computed, ref, watch } from "vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();

@@ -41,9 +41,9 @@ vi.mock("@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue", () => ({
   },
 }));
 
-vi.mock("@/components/base/BaseButtonNew.vue", () => ({
+vi.mock("@/components/base/BaseButton.vue", () => ({
   default: {
-    name: "BaseButtonNew",
+    name: "BaseButton",
     props: ["label", "icon", "buttonStyle", "disabled"],
     template: "<button :disabled='disabled'>{{ label }}</button>",
   },

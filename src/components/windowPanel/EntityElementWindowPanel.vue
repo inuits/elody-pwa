@@ -18,11 +18,11 @@
       </div>
       <div class="flex justify-end gap-4">
         <div v-if="repeatablePanel && isEdit">
-          <base-button-new
+          <base-button
             :label="t('Add more')"
             :icon="DamsIcons.Plus"
-            button-size="small"
-            button-style="accentAccent"
+            button-size="sm"
+            button-style="commit"
             @click.stop
             @click="
               () => {
@@ -30,7 +30,7 @@
                 expandPanel();
               }
             "
-          ></base-button-new>
+          ></base-button>
         </div>
         <unicon
           :name="
@@ -89,7 +89,7 @@ import WindowPanelContent from "./WindowPanelContent.vue";
 import { getMetadataFields } from "@/helpers";
 import { useRepeatableFields } from "@/composables/useRepeatableFields";
 import { useEditMode } from "@/composables/useEdit";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import {
   type WindowElementPanel,
   type PanelType,

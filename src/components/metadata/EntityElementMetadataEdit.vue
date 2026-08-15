@@ -87,12 +87,12 @@
         input-style="defaultWithBorder"
         :disabled="fieldEditIsDisabled"
       />
-      <base-button-new
+      <base-button
         v-if="enableCopyFromParent"
         class="ml-1"
         :label="t(copyValueFromParent.label)"
-        button-style="accentAccent"
-        button-size="small"
+        button-style="commit"
+        button-size="sm"
         @click="() => copyValueFromParentAction(copyValueFromParent.key)"
       />
     </div>
@@ -123,7 +123,7 @@ import { computed, inject, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { useHiddenField } from "@/components/metadata/useHiddenField";

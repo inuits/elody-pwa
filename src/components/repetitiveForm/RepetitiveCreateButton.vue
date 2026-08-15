@@ -1,11 +1,11 @@
 <template>
   <div class="w-fit" data-testid="repetitive-create-button">
-    <BaseButtonNew
+    <BaseButton
       data-testid="repetitive-step-create-new"
       :label="$t(label)"
       :icon="DamsIcons.Plus"
-      button-style="accentAccent"
-      button-size="small"
+      button-style="commit"
+      button-size="sm"
       @click.stop="onClick"
     />
     <!-- Mounted only after this component is mounted so the Teleport target
@@ -37,7 +37,7 @@ import {
   type RepetitiveCreatableType,
 } from "@/generated-types/queries";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 

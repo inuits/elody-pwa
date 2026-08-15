@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-between items-center">
     <component
-      :is="asButton ? BaseButtonNew : 'a'"
+      :is="asButton ? BaseButton : 'a'"
       :label="label"
       @click="clicked()"
       :class="[
@@ -15,8 +15,8 @@
       v-bind="
         asButton
           ? {
-              buttonStyle: 'accentNormal',
-              buttonSize: 'small',
+              buttonStyle: 'commit',
+              buttonSize: 'sm',
               disabled: disable,
             }
           : {
@@ -50,7 +50,7 @@
 
 <script lang="ts" setup>
 import BaseIcon from "@/components/base/BaseIcon.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";

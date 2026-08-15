@@ -18,7 +18,7 @@
         >
           <template v-if="hasOverlay" #controls>
             <BaseButton
-              button-size="small"
+              button-size="sm"
               :label="
                 showOverlay && overlayConfig!.hideLabel
                   ? t(overlayConfig!.hideLabel)
@@ -53,7 +53,7 @@ import {
   MapModes,
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import BaseButton from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { getValueForPanelMetadata } from "@/helpers";
 import { computed, inject } from "vue";
 import { useMapCenter } from "@/composables/useMapCenter";

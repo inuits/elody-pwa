@@ -65,22 +65,22 @@
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
         <div class="flex justify-between gap-4 pb-4">
-          <BaseButtonNew
+          <BaseButton
             data-cy="filters-clear-button"
             class="!w-1/3 !p-2.5"
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
             :icon-height="22"
-            button-style="default"
+            button-style="secondary"
             @click="() => (clearAllActiveFilters = true)"
           />
-          <BaseButtonNew
+          <BaseButton
             data-cy="filters-search-button"
             :label="t('filters.apply')"
-            button-style="accentNormal"
+            button-style="commit"
             @click="applyFilters(true)"
           />
-          <BaseButtonNew
+          <BaseButton
             v-if="
               hasSavedSearch &&
               canUseSavedSearches &&
@@ -164,7 +164,7 @@ import {
 } from "@/generated-types/queries";
 import { usePermissions } from "@/composables/usePermissions";
 import { useStateManagement } from "@/composables/useStateManagement";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";

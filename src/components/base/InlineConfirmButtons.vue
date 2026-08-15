@@ -1,16 +1,16 @@
 <template>
   <div class="flex justify-between pt-8">
-    <BaseButtonNew
+    <BaseButton
       :label="confirmLabel"
-      :button-style="confirmButtonStyle ?? 'redDefault'"
-      :button-size="confirmButtonSize ?? 'small'"
+      :button-style="confirmButtonStyle ?? 'danger'"
+      :button-size="confirmButtonSize ?? 'sm'"
       :loading="confirmLoading"
       @click="emit('confirm')"
     />
-    <BaseButtonNew
+    <BaseButton
       :label="cancelLabel"
-      :button-style="cancelButtonStyle ?? 'default'"
-      :button-size="cancelButtonSize ?? 'small'"
+      :button-style="cancelButtonStyle ?? 'secondary'"
+      :button-size="cancelButtonSize ?? 'sm'"
       :disabled="confirmLoading"
       @click="emit('cancel')"
     />
@@ -21,8 +21,8 @@
 import type {
   ButtonSize,
   ButtonStyle,
-} from "@/components/base/BaseButtonNew.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+} from "@/components/base/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 defineProps<{
   confirmLabel: string;

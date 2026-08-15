@@ -12,26 +12,26 @@
     <div class="flex justify-between pt-8">
       <div :class="[{ 'w-3/4': pendingConfirm.options.secondaryLabel }]">
         <div class="flex items-center gap-4">
-          <BaseButtonNew
+          <BaseButton
             :label="pendingConfirm.options.confirmLabel"
-            :button-style="pendingConfirm.options.confirmButtonStyle ?? 'redDefault'"
-            :button-size="pendingConfirm.options.confirmButtonSize ?? 'small'"
+            :button-style="pendingConfirm.options.confirmButtonStyle ?? 'danger'"
+            :button-size="pendingConfirm.options.confirmButtonSize ?? 'sm'"
             @click="resolveConfirm('confirm')"
           />
-          <BaseButtonNew
+          <BaseButton
             v-if="pendingConfirm.options.secondaryLabel"
             :label="pendingConfirm.options.secondaryLabel"
-            :button-style="pendingConfirm.options.secondaryButtonStyle ?? 'redDefault'"
-            :button-size="pendingConfirm.options.secondaryButtonSize ?? 'small'"
+            :button-style="pendingConfirm.options.secondaryButtonStyle ?? 'danger'"
+            :button-size="pendingConfirm.options.secondaryButtonSize ?? 'sm'"
             @click="resolveConfirm('secondary')"
           />
         </div>
       </div>
       <div class="flex items-center">
-        <BaseButtonNew
+        <BaseButton
           :label="pendingConfirm.options.cancelLabel"
-          :button-style="pendingConfirm.options.cancelButtonStyle ?? 'default'"
-          :button-size="pendingConfirm.options.cancelButtonSize ?? 'small'"
+          :button-style="pendingConfirm.options.cancelButtonStyle ?? 'secondary'"
+          :button-size="pendingConfirm.options.cancelButtonSize ?? 'sm'"
           @click="resolveConfirm('cancel')"
         />
       </div>
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 
 const { pendingConfirm, resolveConfirm } = useConfirmModal();

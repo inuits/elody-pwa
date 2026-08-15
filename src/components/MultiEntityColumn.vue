@@ -36,32 +36,32 @@
         </template>
       </div>
       <div class="flex w-1/2 shrink-0 items-center justify-center gap-2">
-        <base-button-new
+        <base-button
           v-if="
             !editHelper.isEdit &&
             (editHelper.editMode === 'edit' ||
               editHelper.editMode === 'edit-delete')
           "
-          button-size="small"
+          button-size="sm"
           :label="t('metadata.labels.edit-metadata')"
           :icon="DamsIcons.Edit"
-          button-style="accentNormal"
+          button-style="commit"
           @click="startEdit"
         />
         <template v-if="editHelper.isEdit">
-          <base-button-new
-            button-size="small"
+          <base-button
+            button-size="sm"
             :label="t('bulk-operations.save')"
             :icon="DamsIcons.Save"
-            button-style="accentAccent"
+            button-style="commit"
             :disabled="editHelper.showErrors"
             @click="saveEdit"
           />
-          <base-button-new
-            button-size="small"
+          <base-button
+            button-size="sm"
             :label="t('bulk-operations.cancel')"
             :icon="DamsIcons.Times"
-            button-style="accentNormal"
+            button-style="commit"
             @click="openDiscardModal"
           />
         </template>
@@ -89,7 +89,7 @@ import {
   type Entity,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import MetadataFormatterPill from "@/components/metadata/MetadataFormatterPill.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";

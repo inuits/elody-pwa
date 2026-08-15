@@ -51,14 +51,14 @@
           base-library-height="max-h-[50vh]"
         />
         <div class="py-2">
-          <BaseButtonNew
+          <BaseButton
             :label="
               t('tagging.tag-selected-button', {
                 entityType: taggingConfiguration[formIndex].taggableEntityType,
               })
             "
             :icon="DamsIcons.Tag"
-            button-style="accentAccent"
+            button-style="commit"
             :disabled="!existingEntitySelected"
             @click="tagExistingEntityFlow()"
           />
@@ -117,7 +117,7 @@ import {
   extractTitleKeyFromMetadataFilter,
   parseRegexFromString,
 } from "@/helpers";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 
 const { setBulkSelectionLimit, isBulkSelectionLimitReached, getEnqueuedItems } =
   useBulkOperations();

@@ -42,7 +42,7 @@
             element.editMetadataButton?.hasButton &&
             showEditMetadataButton
           "
-          button-size="small"
+          button-size="sm"
           :readmode-label="element.editMetadataButton.readmodeLabel"
           :editmode-label="element.editMetadataButton.editmodeLabel"
         />
