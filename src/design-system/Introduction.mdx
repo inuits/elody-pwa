@@ -1,0 +1,57 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Design system/Introduction" />
+
+# elody design system
+
+This Storybook is where the design system is **maintained**. The written
+contracts — anatomy, state tables, accessibility, NL/EN copy — live in the
+elody docs site under `/design-system/`, and each docs page embeds the stories
+from here. One system, two views: docs explain, stories prove.
+
+## The rules that decide every component
+
+1. **No literal values.** Colour, radius, duration and type come from a
+   `--color-*` / `--radius-*` / `--text-*` token. A hex literal cannot be
+   client-themed.
+2. **Only the accent set is themed.** Neutrals, semantic colours, commit teal,
+   focus ring and badge tones are platform-fixed. Switch tenant in the toolbar
+   to check a component both ways.
+3. **Shape encodes role.** Pill (14px) starts something safe and reversible —
+   add, search, breadcrumb, stepper. Rectangle (5–6px) executes immediately —
+   Bewaar, Open record. Never a pill on a mutating action.
+4. **Two elevation levels.** Cards get a 1px border and no shadow; only
+   overlays float.
+5. **Edit scope = save scope = validation scope.** A field saves and validates
+   alone, an interdependent group as one card, a repeatable row as a field.
+6. **Accessibility is part of done.** Role, accessible name, focus order;
+   errors `role="alert"`, confirmations `role="status"`. The a11y addon runs on
+   every story and violations count as failures.
+
+## Using the toolbar
+
+- **Tenant** applies a `[data-elody-client]` scope to the preview `<body>`.
+  All six tenants are listed; vlacc is the unscoped reference.
+- **Surface** switches the story background between the app background and a
+  panel surface, so a component can be judged on the ground it really sits on.
+- **Viewport** carries the container-query tiers the list/preview split uses:
+  stacked below 500px, then 40/60, 35/65, 30/70 and 25/75 at 500, 630, 830 and
+  1024px.
+
+## Adding to the system
+
+A new component is docs page → story → manifest row, in that order. Changing a
+value means changing the token first. A refactor without a story is not done —
+the stories are how this system stays maintained.
+
+<div style={{
+  border: "1px solid var(--color-border-panel)",
+  borderRadius: "var(--radius-card)",
+  padding: "12px 14px",
+  marginTop: "20px",
+}}>
+  <strong>Open by design — do not fill.</strong> Final iconography (Unicons is
+  the interim), empty-state illustrations, the data-visualisation palette and
+  dark mode are deliberately unspecified. Where a screen needs one, leave it
+  text-only and note “Open — see brief”.
+</div>
