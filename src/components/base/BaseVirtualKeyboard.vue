@@ -4,7 +4,7 @@
       <template #activator="{ on }">
         <div
           v-on="on"
-          class="cursor-pointer rounded-md text-[#607d8b]"
+          class="cursor-pointer rounded-md text-text-secondary"
           @click="toggleKeyboard"
         >
           <unicon :name="Unicons.Keyboard.name" />

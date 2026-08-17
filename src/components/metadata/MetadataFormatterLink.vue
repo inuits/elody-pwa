@@ -6,7 +6,7 @@
     :target="shouldOpenInNewTab ? '_blank' : undefined"
     :rel="shouldOpenInNewTab ? 'noopener noreferrer' : undefined"
     :style="{
-      color: requiredAuthForThisEntity ? '#000' : 'var(--color-text-link)',
+      color: requiredAuthForThisEntity ? 'var(--color-text-body)' : 'var(--color-text-link)',
     }"
     @click.stop
   >

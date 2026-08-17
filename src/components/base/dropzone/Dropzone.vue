@@ -126,8 +126,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Dragover is accent border + wash (upload.md); the border stays dashed at the
+   2px the idle zone uses, rather than thickening to 3px on hover. */
 .dropzone-highlight {
-  border: 3px dashed #007bff;
-  background-color: #e7f3ff;
+  border: 2px dashed var(--color-accent);
+  background-color: var(--color-accent-wash);
 }
 </style>
