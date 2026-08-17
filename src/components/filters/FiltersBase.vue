@@ -1,14 +1,19 @@
 <template>
   <div
     data-cy="filter-base"
+    role="complementary"
+    :aria-label="t('filters.filter')"
     class="relative bg-background-light w-full"
     :class="isExpanded ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
   >
-    <div
-      class=""
+    <!-- The rail's own disclosure: a clickable div before, so the keyboard
+         could not expand or collapse the filters (filter-panel.md). -->
+    <button
+      type="button"
+      :aria-expanded="isExpanded"
       :class="[
-        'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
+        'w-full flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
         { 'border-accent-highlight rounded-t': isExpanded },
         { 'border-background-light rounded-xl': !isExpanded },
       ]"
@@ -33,7 +38,7 @@
           <span class="text-text-body">
             {{ activeFilterCount }} {{ t("filters.active") }}
           </span>
-          <div
+          <span
             v-if="
               (selectedSavedFilter || lastActiveFilter) &&
               auth.isAuthenticated.value === true
@@ -43,14 +48,14 @@
             <span class="text-text-body">
               {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
             </span>
-          </div>
+          </span>
           <unicon
             class="text-text-body ml-4"
             :name="Unicons[getAngleIcon].name"
           />
         </template>
       </div>
-    </div>
+    </button>
 
     <div
       v-if="!simpleSearchActive"
@@ -87,7 +92,8 @@
               enableSaveSearchFilters &&
               auth.isAuthenticated.value === true
             "
-            :icon="DamsIcons.EllipsisV"
+            :icon="DamsIcons.AngleDown"
+            :aria-label="t('filters.saved-searches')"
             class="!w-1/5"
             @click.stop="
               (event: MouseEvent) =>

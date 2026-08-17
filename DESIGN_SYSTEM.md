@@ -172,7 +172,8 @@ now.
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
 | WP5 lists & actions | done — rows, preview split, action trigger, selection bar, panel shell, pagination. Only the quality-status chip + jump-to-field popover is left, and it is a feature rather than chrome |
-| WP6–WP9 | open |
+| WP6 filters | filter rail + section headers done; matcher restyling, date picker, picker modal, base modal and saved searches open |
+| WP7–WP9 | open |
 
 ## Conventions for the next component
 
@@ -221,6 +222,8 @@ there; until then vue-i18n renders the key itself.
 | `pagination.results-per-page` | Resultaten per pagina | Results per page | Label of the page-size select. |
 | `pagination.per-page` | {count} per pagina | {count} per page | Page-size options. |
 | `pagination.previous` / `.next` | Vorige pagina / Volgende pagina | Previous page / Next page | The ‹ and › steps. |
+| `filters.section-active` | actief | active | Chip on an active filter section. `filters.active` already exists but means the rail's "N actief", so this is its own key. |
+| `filters.saved-searches` | Bewaarde zoekopdrachten | Saved searches | Accessible name of the saved-searches trigger. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
