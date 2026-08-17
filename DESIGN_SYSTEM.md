@@ -162,6 +162,12 @@ there; until then vue-i18n renders the key itself.
 | `bulk-operations.select-item` | Selecteer item | Select item | The accessible name for a list selection checkbox, which had none. |
 | `dropdown.remove-option` | Verwijder {option} | Remove {option} | The multi-select tag's ✕ was a bare `&times;` with no accessible name. |
 | `metadata.labels.no-value` | Geen waarde | No value | Replaces the deprecated "-" empty placeholder. |
+| `field-row.edit-value` | {label}, bewerken | {label}, edit | Accessible name of the editable value. |
+| `inline-editor.save` | Bewaar | Save | |
+| `inline-editor.cancel` | Annuleer | Cancel | |
+| `inline-editor.saved` | Opgeslagen | Saved | |
+| `inline-editor.keyboard-hint` | Enter bewaart · Esc annuleert | Enter saves · Esc cancels | The hint line under an open editor. |
+| `inline-editor.save-failed` | Opslaan mislukt, probeer opnieuw | Saving failed, try again | Shown when the server rejects a save. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

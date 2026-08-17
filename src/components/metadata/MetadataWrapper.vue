@@ -31,14 +31,17 @@
         @is-open="handleKeyboardOpenState"
       />
     </div>
-    <entity-element-metadata-edit
-      v-if="
-        isEdit &&
-        metadata.inputField &&
-        !metadata.nonEditableField &&
-        fieldIsEditableByUser
-      "
-      :fieldKey="fieldKey"
+    <InlineFieldEditor
+      v-if="isEditingThisField"
+      :is-dirty="isDirty"
+      :is-saving="isSavingThisField"
+      :error-message="editorErrorMessage"
+      :multiline="isMultilineField"
+      @save="fieldEditor.save()"
+      @cancel="fieldEditor.cancel()"
+    >
+      <entity-element-metadata-edit
+        :fieldKey="fieldKey"
       v-model:value="fieldValueProxy"
       :field="metadata.inputField"
       :hidden-field="metadata.hiddenField"
@@ -61,11 +64,12 @@
       :field-is-valid="isFieldValid"
       :is-field-required="isFieldRequired"
       :repeatable-panel-config="repeatablePanelConfig"
-      :disabled="metadata.disabled"
-      :default-value="metadata.defaultValue"
-      @click.stop.prevent
-      @update:value="(value) => (fieldValueProxy = value)"
-    />
+        :disabled="metadata.disabled"
+        :default-value="metadata.defaultValue"
+        @click.stop.prevent
+        @update:value="(value) => (fieldValueProxy = value)"
+      />
+    </InlineFieldEditor>
     <div v-else class="flex gap-2">
       <base-tooltip
         class="w-full basis-[fit-content]"
@@ -76,6 +80,18 @@
           <div
             v-on="showTooltip ? on : {}"
             class="flex column gap-2 items-center"
+            :class="{ 'field-row-value': isFieldEditableInline }"
+            :role="isFieldEditableInline ? 'button' : undefined"
+            :tabindex="isFieldEditableInline ? 0 : undefined"
+            :aria-label="
+              isFieldEditableInline
+                ? t('field-row.edit-value', { label: fieldLabel })
+                : undefined
+            "
+            data-cy="metadata-editable-value"
+            @click="startEditing"
+            @keydown.enter.prevent="startEditing"
+            @keydown.space.prevent="startEditing"
           >
             <MetadataTruncatedText
               @overflow-status="handleOverflowStatus"
@@ -210,6 +226,26 @@
               :value="fieldValueProxy"
               @click.stop.prevent
             />
+            <SpinnerLoader
+              v-if="isSavingThisField"
+              data-cy="metadata-row-saving"
+              :spinner-size="14"
+            />
+            <!-- Wrapped: vue-unicons renders a bare <svg> that scoped styles
+                 cannot reach, so the class goes on an element we own. -->
+            <span
+              v-else-if="isSavedThisField"
+              data-cy="metadata-row-saved"
+              class="field-row-value__saved"
+            >
+              <unicon :name="Unicons.Check.name" height="14" />
+            </span>
+            <span
+              v-else-if="isFieldEditableInline"
+              class="field-row-value__pencil"
+            >
+              <unicon :name="Unicons.EditAlt.name" height="14" />
+            </span>
           </div>
         </template>
         <template #default>
@@ -260,6 +296,9 @@ import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
+import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import { useFieldEditor } from "@/composables/useFieldEditor";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
@@ -395,6 +434,66 @@ const pillTranslationKey = computed<string | undefined>(() => {
   return match?.label;
 });
 
+/* ── Per-field editing ───────────────────────────────────────────────────
+   The row is its own edit, save and validation scope: it opens alone, commits
+   alone and never validates a sibling (per-field-editing.md). */
+
+const persistEntity = inject<(() => Promise<void>) | undefined>(
+  "persistEntity",
+  undefined,
+);
+const fieldEditor = useFieldEditor();
+
+const scopeId = computed<string>(() => `${props.formId}:${fieldKey.value}`);
+
+const isFieldEditableInline = computed<boolean>(() =>
+  Boolean(
+    props.metadata.inputField &&
+      !props.metadata.nonEditableField &&
+      fieldIsEditableByUser.value &&
+      persistEntity,
+  ),
+);
+
+const isEditingThisField = computed(() => fieldEditor.isEditing(scopeId.value));
+const isSavingThisField = computed(() => fieldEditor.isSaving(scopeId.value));
+const isSavedThisField = computed(() => fieldEditor.isSaved(scopeId.value));
+
+const editorErrorMessage = computed<string | undefined>(() =>
+  isEditingThisField.value ? fieldEditor.errorMessage.value : undefined,
+);
+
+const isMultilineField = computed<boolean>(
+  () => fieldType.value === InputFieldTypes.Textarea,
+);
+
+/** The value as it stood when the editor opened, for cancel and dirty. */
+const openedWith = ref<string>("");
+
+const serialiseValue = (): string =>
+  JSON.stringify(fieldValueProxy.value ?? null);
+
+const isDirty = computed<boolean>(
+  () => isEditingThisField.value && serialiseValue() !== openedWith.value,
+);
+
+const startEditing = () => {
+  if (!isFieldEditableInline.value || isEditingThisField.value) return;
+
+  openedWith.value = serialiseValue();
+  fieldEditor.open({
+    id: scopeId.value,
+    isDirty: () => isDirty.value,
+    restore: () => {
+      fieldValueProxy.value = JSON.parse(openedWith.value);
+    },
+    validate: async () => (await field.validate()).valid,
+    submit: async () => {
+      await persistEntity!();
+    },
+  });
+};
+
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);
 
@@ -444,6 +543,43 @@ watch(
 </script>
 
 <style scoped>
+/* Editability is signalled structurally: a dashed underline at rest, the
+   accent wash and a pencil on hover, the one focus ring on focus
+   (field-row.md). */
+.field-row-value {
+  border-bottom: 1px dashed var(--color-border-dashed);
+  border-radius: var(--radius-input);
+  padding: var(--spacing-ds-1) var(--spacing-ds-3);
+  cursor: pointer;
+  transition: background-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.field-row-value:hover {
+  background-color: var(--color-surface-editable-hover);
+}
+
+.field-row-value:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.field-row-value__pencil {
+  display: inline-flex;
+  color: var(--color-text-subtle);
+  opacity: 0;
+  transition: opacity var(--transition-duration-ui) var(--ease-ui);
+}
+
+.field-row-value:hover .field-row-value__pencil,
+.field-row-value:focus-visible .field-row-value__pencil {
+  opacity: 1;
+}
+
+.field-row-value__saved {
+  display: inline-flex;
+  color: var(--color-success);
+}
+
 /* A boolean reads as "Ja"/"Nee" with a check or a dash — never as a bare
    checkbox standing in for a value (field-row.md §Round 2). */
 .metadata-boolean-value {

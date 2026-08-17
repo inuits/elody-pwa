@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
+import { provide } from "vue";
 import MetadataWrapper from "../MetadataWrapper.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { InputFieldTypes } from "@/generated-types/queries";
@@ -26,22 +27,36 @@ type Story = StoryObj<typeof MetadataWrapper>;
 
 const FORM_ID = "story-field-row";
 
-const field = (key: string, label: string, value: unknown) => ({
+/**
+ * A row is only editable when it declares an input field and the record can be
+ * written; the story provides both so the hover, focus and editing states are
+ * reachable.
+ */
+const field = (
+  key: string,
+  label: string,
+  value: unknown,
+  type: InputFieldTypes = InputFieldTypes.Text,
+) => ({
   label,
   key,
   value,
+  inputField: { type, label },
 });
 
 /** A boolean only reads as Ja/Nee when the field declares itself a checkbox. */
-const booleanField = (key: string, label: string, value: boolean) => ({
-  ...field(key, label, value),
-  inputField: { type: InputFieldTypes.Checkbox },
-});
+const booleanField = (key: string, label: string, value: boolean) =>
+  field(key, label, value, InputFieldTypes.Checkbox);
 
 export const Default: Story = {
   render: () => ({
     components: { MetadataWrapper },
     setup() {
+      // Field rows commit through this; the story resolves it so Bewaar works.
+      provide("persistEntity", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      });
+
       const { createForm } = useFormHelper();
       createForm(FORM_ID, {
         intialValues: {

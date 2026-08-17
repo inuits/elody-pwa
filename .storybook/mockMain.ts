@@ -54,12 +54,28 @@ export const i18n = createI18n({
         labels: { "no-value": "Geen waarde", yes: "Ja", no: "Nee" },
       },
       dropdown: { "remove-option": "Verwijder {option}" },
+      "field-row": { "edit-value": "{label}, bewerken" },
+      "inline-editor": {
+        save: "Bewaar",
+        cancel: "Annuleer",
+        saved: "Opgeslagen",
+        "keyboard-hint": "Enter bewaart · Esc annuleert",
+        "save-failed": "Opslaan mislukt, probeer opnieuw",
+      },
     },
     en: {
       metadata: {
         labels: { "no-value": "No value", yes: "Yes", no: "No" },
       },
       dropdown: { "remove-option": "Remove {option}" },
+      "field-row": { "edit-value": "{label}, edit" },
+      "inline-editor": {
+        save: "Save",
+        cancel: "Cancel",
+        saved: "Saved",
+        "keyboard-hint": "Enter saves · Esc cancels",
+        "save-failed": "Saving failed, try again",
+      },
     },
   },
   missingWarn: false,

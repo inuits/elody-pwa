@@ -91,7 +91,17 @@ const mutatedEntity = ref<Entity | undefined>(undefined);
 const formContainsErrors = computed((): boolean => !form?.value.meta.valid);
 
 const { setValues } = form.value;
-const submit = useSubmitForm<EntityValues>(async () => {
+
+/**
+ * Writes the form to the server. Kept separate from `submit` because
+ * per-field editing commits one row without validating the whole record —
+ * validation never crosses the scope boundary (per-field-editing.md) — while
+ * `submit` keeps the whole-form validate in front of it.
+ *
+ * Throws on failure so the caller can keep its editor open; the notification
+ * is still shown here.
+ */
+const persistEntity = async (): Promise<void> => {
   const collection =
     childRoutes.find(
       (route: any) =>
@@ -129,7 +139,7 @@ const submit = useSubmitForm<EntityValues>(async () => {
       true,
     );
     displayErrorNotification("Error", errorMessage);
-    return;
+    throw new Error(errorMessage);
   }
 
   await useEditHelper.performMutationCallbacks();
@@ -157,7 +167,13 @@ const submit = useSubmitForm<EntityValues>(async () => {
 
   form.value.resetForm({ values: form.value.values });
   useEditHelper.disableEdit();
-});
+};
+
+const submit = useSubmitForm<EntityValues>(persistEntity);
+
+// Field rows commit through this: one row's editor saves the record without
+// dragging the rest of the form's validation in with it.
+provide("persistEntity", persistEntity);
 
 provide("entityFormData", {
   id: props.id,
