@@ -65,6 +65,13 @@ export const i18n = createI18n({
       },
       "group-form": { "check-highlighted-fields": "Controleer de gemarkeerde velden" },
       "context-menu": { actions: "Acties" },
+      pagination: {
+        "nav-label": "Paginering",
+        "results-per-page": "Resultaten per pagina",
+        "per-page": "{count} per pagina",
+        previous: "Vorige pagina",
+        next: "Volgende pagina",
+      },
       "bulk-operations": {
         "toolbar-label": "Acties op selectie",
         items: "items",
@@ -89,6 +96,13 @@ export const i18n = createI18n({
       },
       "group-form": { "check-highlighted-fields": "Check the highlighted fields" },
       "context-menu": { actions: "Actions" },
+      pagination: {
+        "nav-label": "Pagination",
+        "results-per-page": "Results per page",
+        "per-page": "{count} per page",
+        previous: "Previous page",
+        next: "Next page",
+      },
       "bulk-operations": {
         "toolbar-label": "Selection actions",
         items: "items",
