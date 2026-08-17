@@ -65,6 +65,13 @@ export const i18n = createI18n({
       },
       "group-form": { "check-highlighted-fields": "Controleer de gemarkeerde velden" },
       "context-menu": { actions: "Acties" },
+      "bulk-operations": {
+        "toolbar-label": "Acties op selectie",
+        items: "items",
+        selected: "geselecteerd",
+        "undo-selection": "Wis selectie",
+        "select-page": "Selecteer pagina",
+      },
     },
     en: {
       metadata: {
@@ -82,6 +89,13 @@ export const i18n = createI18n({
       },
       "group-form": { "check-highlighted-fields": "Check the highlighted fields" },
       "context-menu": { actions: "Actions" },
+      "bulk-operations": {
+        "toolbar-label": "Selection actions",
+        items: "items",
+        selected: "selected",
+        "undo-selection": "Clear selection",
+        "select-page": "Select page",
+      },
     },
   },
   missingWarn: false,

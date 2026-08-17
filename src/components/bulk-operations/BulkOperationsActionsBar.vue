@@ -1,16 +1,17 @@
 <template>
   <div
     v-if="bulkOperationsPromiseIsResolved"
+    role="toolbar"
+    :aria-label="$t('bulk-operations.toolbar-label')"
     class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-background-light"
   >
     <div class="flex justify-start items-center">
       <div
-        class="px-2 my-2.5 rounded-md"
-        :class="
-          useExtendedBulkOperations && itemsSelected
-            ? `text-neutral-white bg-accent-normal`
-            : `text-text-body bg-accent-highlight`
-        "
+        class="selection-count"
+        :class="{
+          'selection-count--active': useExtendedBulkOperations && itemsSelected,
+        }"
+        role="status"
       >
         <span>
           <span v-if="itemsSelected" class="font-bold"
@@ -49,15 +50,9 @@
         </span>
       </BaseTooltip>
       <div v-if="itemsSelected">
-        <span
-          class="select-actions"
-          :class="
-            useExtendedBulkOperations ? `text-accent-accent` : `text-text-body`
-          "
-          @click="dequeueAllItemsForBulkProcessing(context)"
-        >
+        <button type="button" class="select-actions" @click="dequeueAllItemsForBulkProcessing(context)">
           {{ $t("bulk-operations.undo-selection") }}
-        </span>
+        </button>
       </div>
       <div
         v-if="
@@ -66,17 +61,13 @@
           enableSelection
         "
       >
-        <span
+        <button
+          type="button"
           class="select-actions"
-          :class="
-            useExtendedBulkOperations && itemsSelected
-              ? `text-accent-accent`
-              : `text-text-body`
-          "
           @click="() => emit('selectPage')"
         >
           {{ $t("bulk-operations.select-page") }}
-        </span>
+        </button>
       </div>
     </div>
     <div v-if="!excludePagination && showPagination" class="flex">
@@ -233,8 +224,41 @@ const {
   @apply py-1 mr-3;
 }
 
+/* The live count. Selected swaps to the panel-header pair rather than the
+   retired mint, so it stays legible on the dark-accent tenants too. */
+.selection-count {
+  padding: var(--spacing-ds-3) var(--spacing-ds-6);
+  margin: var(--spacing-ds-6) 0;
+  border-radius: var(--radius-chip);
+  background-color: var(--color-chip-count-bg);
+  color: var(--color-text-body);
+  font-size: var(--text-ui);
+}
+
+.selection-count--active {
+  background-color: var(--color-surface-panel-header);
+  color: var(--color-text-panel-header);
+}
+
+/* Real buttons: these were clickable spans, so the keyboard could not reach
+   "Wis selectie" or "Selecteer pagina" at all. */
 .select-actions {
-  @apply px-2 underline cursor-pointer select-none;
+  padding: 0 var(--spacing-ds-5);
+  text-decoration: underline;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--text-ui);
+  color: var(--color-text-link);
+  border-radius: var(--radius-input);
+}
+
+.select-actions:hover {
+  color: var(--color-text-link-hover);
+}
+
+.select-actions:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
 }
 
 .disabled-select-actions {
