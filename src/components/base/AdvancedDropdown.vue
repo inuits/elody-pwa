@@ -11,7 +11,7 @@
     }"
   >
     <VueSelect
-      class="!text-text-body !bg-background-light border-none !rounded-lg flex-1 min-w-0"
+      class="flex-1 min-w-0"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
       :options="filterDropdownOptions"
@@ -19,12 +19,12 @@
       :is-disabled="disable"
       :is-multi="multiple"
       :is-clearable="clearable"
+      :is-searchable="isSearchable"
+      :close-on-select="!multiple"
       :should-autofocus-option="false"
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
-      :classes="{
-        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0 !z-header`,
-      }"
+      :classes="{ menuContainer: 'elody-dropdown-menu' }"
     >
       <template #option="{ option }">
         <div v-if="option.value !== selectedItem" class="mr-2">
@@ -58,13 +58,12 @@
         </div>
       </template>
       <template #tag="{ option }">
-        <div class="flex m-1 bg-gray-100 rounded-md">
-          <div class="text-sm text-black px-2 py-1">
-            {{ t(option.label) }}
-          </div>
+        <div class="elody-dropdown-tag">
+          <span class="elody-dropdown-tag__label">{{ t(option.label) }}</span>
           <button
-            class="hover:bg-red-200 px-2"
+            class="elody-dropdown-tag__remove"
             type="button"
+            :aria-label="t('dropdown.remove-option', { option: t(option.label) })"
             @click="() => removeOptionFromListOfOptions(option)"
           >
             &times;
@@ -139,7 +138,6 @@ const { someModalIsOpened } = useBaseModal();
 const selectedItem = ref<any | any[] | undefined>(undefined);
 
 const deselectItem = () => {
-  console.log("Emitted from deselect");
   emit("update:modelValue", "");
 };
 
@@ -176,6 +174,12 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
     return viewMode && numberOfEntities;
   });
 });
+
+/**
+ * A list short enough to read at a glance does not get a search field; past ten
+ * options the search-in-list pill appears (dropdown-select.md).
+ */
+const isSearchable = computed(() => filterDropdownOptions.value.length > 10);
 
 const removeOptionFromListOfOptions = (option: any) => {
   if (!Array.isArray(selectedItem.value)) return;
@@ -241,7 +245,6 @@ watch(
   () => {
     if (props.options.length === 0 || !props.selectFirstOptionByDefault) return;
     selectedItem.value = props.options[0].value;
-    console.log("Emitted from watch options");
     emit("update:modelValue", selectedItem.value);
   },
   { immediate: true },
@@ -263,77 +266,87 @@ watch(
 </script>
 
 <style>
-@reference "@/assets/main.css"
-
-:deep(.vue-select) {
-  --vs-border-radius: 10px;
-}
-
-body > .menu {
-  --vs-menu-z-index: var(--z-dropdown) !important;
-}
-
-div.menu-option.selected {
-  background-color: var(--color-accent-highlight) !important;
-}
-
-div.menu-option {
-  line-height: 1.375;
-}
-
-div.menu-option:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-accent-highlight) 30%,
-    transparent
-  ) !important;
-}
-
-.vue-advanced-select .search-input {
-  &:focus {
-    outline: none !important;
-    box-shadow: none;
-  }
-}
+/* Not scoped: the menu teleports to <body>, so it is styled by its own class
+   rather than through this component's tree. */
 
 .vue-advanced-select .vue-select,
 .vue-advanced-select .control {
-  --vs-border-radius: 0.5rem;
-  --vs-border: none;
+  --vs-border-radius: var(--radius-input);
+  --vs-border: 1px solid transparent;
   --vs-line-height: 1.375;
-}
-
-.vue-advanced-select .control.focused {
-  --vs-outline-color: none;
+  --vs-font-size: var(--text-value);
+  --vs-text-color: var(--color-text-body);
+  --vs-placeholder-color: var(--color-text-placeholder);
+  --vs-background-color: var(--color-surface);
+  /* The one focus treatment in the system; the previous `none` left the
+     control with no visible focus at all. */
+  --vs-outline-color: var(--color-focus-ring);
+  --vs-outline-width: 2px;
 }
 
 .vue-advanced-select--bordered .vue-select,
 .vue-advanced-select--bordered .control {
-  --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid rgba(0, 58, 82, 0.6);
-}
-
-.vue-advanced-select .control.focused {
-  --vs-outline-color: none;
+  --vs-border: 1px solid var(--color-border-default);
 }
 
 .vue-advanced-select--light-bordered .vue-select,
 .vue-advanced-select--light-bordered .control {
-  --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid #e8eef0;
-  --vs-line-height: 1.375;
-}
-
-.vue-advanced-select--light-bordered .control.focused {
-  --vs-outline-color: #e8eef0;
-  box-shadow: none !important;
+  --vs-border: 1px solid var(--color-border-subtle);
 }
 
 .vue-advanced-select .selectedOption {
-  @apply text-text-body;
+  color: var(--color-text-body);
 }
 
-.vue-advanced-select--bordered .selectedOption {
-  @apply text-black;
+/* ── The teleported menu ──────────────────────────────────────────────── */
+
+/* The library's own rules carry a scoped-attribute selector and outrank a
+   plain class, so the menu is themed through the variables they read. */
+.elody-dropdown-menu {
+  --vs-menu-z-index: var(--z-dropdown);
+  --vs-menu-offset-top: 0;
+  --vs-border-radius: var(--radius-card);
+  --vs-menu-border: 1px solid var(--color-border-default);
+  --vs-menu-box-shadow: var(--shadow-overlay);
+  --vs-menu-background-color: var(--color-surface);
+  --vs-option-font-size: var(--text-table);
+  --vs-option-text-color: var(--color-text-body);
+  --vs-option-hover-background-color: var(--color-surface-editable-hover);
+  --vs-option-hover-text-color: var(--color-text-body);
+  --vs-option-selected-background-color: var(--color-accent-highlight);
+  --vs-option-selected-text-color: var(--color-text-body);
+  --vs-option-focused-background-color: var(--color-surface-editable-hover);
+  --vs-option-focused-text-color: var(--color-text-body);
+}
+
+.elody-dropdown-menu .menu-option {
+  line-height: 1.375;
+}
+
+/* ── Multi-select tags ────────────────────────────────────────────────── */
+
+.vue-advanced-select .elody-dropdown-tag {
+  display: flex;
+  align-items: center;
+  margin: var(--spacing-ds-1);
+  border-radius: var(--radius-chip);
+  background-color: var(--color-chip-neutral-bg);
+  color: var(--color-chip-neutral-text);
+}
+
+.vue-advanced-select .elody-dropdown-tag__label {
+  padding: var(--spacing-ds-1) var(--spacing-ds-6);
+  font-size: var(--text-label);
+}
+
+.vue-advanced-select .elody-dropdown-tag__remove {
+  padding: 0 var(--spacing-ds-6);
+  border-radius: 0 var(--radius-chip) var(--radius-chip) 0;
+  transition: background-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.vue-advanced-select .elody-dropdown-tag__remove:hover {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 </style>

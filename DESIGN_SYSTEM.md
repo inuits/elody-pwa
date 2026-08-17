@@ -66,13 +66,47 @@ its own rule rather than a decision already taken. The tokens are left at the
 handoff values; darkening the accents (or reserving the pale ones for fills
 that carry no text) is a palette decision to take before the screen-level pass.
 
+## Still open on `AdvancedDropdown`
+
+The dropdown is on tokens and honours the two behavioural rules its docs page
+states outright — search past ten options, popup stays open while multi-picking
+— but four items on `dropdown-select.md` are wrapper work on
+`vue3-select-component` rather than styling, and are not done:
+
+- the "—" (Geen waarde) option non-required single selects should start with;
+- option-shaped skeletons while options load (the library shows a spinner);
+- checkboxes in multi-select rows, and the "{n} gekozen" count in the trigger
+  (it renders one tag per value today);
+- the "Geen opties" / "Zoek…" copy, which needs the translation keys.
+
+Worth doing together, since all four are the same slot-override exercise
+against the library.
+
+## Blocked — entity badge tone assignment
+
+`foundations.md` specifies that every entity type a client declares gets one of
+three fixed tones, "assigned in config order and never reshuffled", and the
+`--color-badge-tone1/2/3-*` tokens are already in `main.css` waiting for it.
+
+Nothing consumes them, because the PWA has no ordered list of a client's entity
+types to assign from. `entityTypes` exists only per `EntityListElement`, which
+is a per-list filter and neither ordered nor complete; deriving tones from it
+would give the same entity type different colours on different screens — the
+one thing the rule forbids.
+
+The mapping therefore has to come from the config side (a badge tone on the
+entity-type definition in baseGraphql), which is a schema change in another
+repo and a decision to take rather than guess. Until then the badge is
+deliberately not implemented; the three tone tokens stay unused rather than
+being bound to an order the client never declared.
+
 ## Status against the migration plan
 
 | WP | State |
 |---|---|
 | WP1 tokens | done — tokens, client scopes, boot wiring, Foundations pages |
 | WP2 Storybook | done — tenant + surface toolbars, split-tier viewports, a11y addon |
-| WP3 primitives | button, checkbox, spinner, text/number/textarea done; tooltip, badge/chip and `AdvancedDropdown` open |
+| WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
 | WP4–WP9 | open |
 
 ## Conventions for the next component
@@ -100,7 +134,10 @@ button, checkbox and text inputs.
 
 ## Needs a translation key
 
-`bulk-operations.select-item` — the accessible name for a list selection
-checkbox, which had none. NL "Selecteer item", EN "Select item". Translations
-are served by the graphql service, so the key has to be added there; until
-then vue-i18n renders the key itself.
+Translations are served by the graphql service, so these keys have to be added
+there; until then vue-i18n renders the key itself.
+
+| Key | NL | EN | Why |
+|---|---|---|---|
+| `bulk-operations.select-item` | Selecteer item | Select item | The accessible name for a list selection checkbox, which had none. |
+| `dropdown.remove-option` | Verwijder {option} | Remove {option} | The multi-select tag's ✕ was a bare `&times;` with no accessible name. |
