@@ -63,6 +63,7 @@ export const i18n = createI18n({
         "save-failed": "Opslaan mislukt, probeer opnieuw",
         undo: "Ongedaan maken",
       },
+      "group-form": { "check-highlighted-fields": "Controleer de gemarkeerde velden" },
     },
     en: {
       metadata: {
@@ -78,6 +79,7 @@ export const i18n = createI18n({
         "save-failed": "Saving failed, try again",
         undo: "Undo",
       },
+      "group-form": { "check-highlighted-fields": "Check the highlighted fields" },
     },
   },
   missingWarn: false,

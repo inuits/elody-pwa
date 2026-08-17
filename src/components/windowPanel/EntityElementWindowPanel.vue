@@ -41,7 +41,15 @@
     </div>
 
     <transition>
-      <div v-show="!isCollapsed">
+      <div
+        v-show="!isCollapsed"
+        :class="{
+          'field-group': isGroup,
+          'field-group--editing': isGroup && group.isEditing.value,
+        }"
+        :role="isGroup ? 'group' : undefined"
+        @keydown.escape="isGroup && fieldEditor.cancel()"
+      >
         <div
           v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
@@ -76,13 +84,42 @@
             "
           />
         </div>
+
+        <!-- One Bewaar/Annuleer for the whole group, never one per field
+             (group-form-card.md). -->
+        <div v-if="isGroup && group.isEditing.value" class="field-group__actions">
+          <p
+            v-if="fieldEditor.errorMessage.value"
+            role="alert"
+            class="field-group__error"
+          >
+            {{ t("group-form.check-highlighted-fields") }}
+          </p>
+          <BaseButton
+            button-style="commit"
+            button-size="sm"
+            :label="t('inline-editor.save')"
+            :disabled="!group.isDirty.value || group.isSaving.value"
+            :loading="group.isSaving.value"
+            data-cy="field-group-save"
+            @click="fieldEditor.save()"
+          />
+          <BaseButton
+            button-style="ghost"
+            button-size="sm"
+            :label="t('inline-editor.cancel')"
+            :disabled="group.isSaving.value"
+            data-cy="field-group-cancel"
+            @click="fieldEditor.cancel()"
+          />
+        </div>
       </div>
     </transition>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from "vue";
+import { computed, inject, provide, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
@@ -98,6 +135,8 @@ import {
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
+import { useBlockEditor } from "@/composables/useBlockEditor";
+import { useFieldEditor } from "@/composables/useFieldEditor";
 
 const props = withDefaults(
   defineProps<{
@@ -123,6 +162,22 @@ const repeatableFieldsHelper = useRepeatableFields(
   panelId.value!,
   props.formId,
 );
+/* Fields that make no sense apart edit as one group; every other panel keeps
+   its rows independent. The flag is opt-in from the form definition. */
+const isGroup = computed<boolean>(() => Boolean((props.panel as any).isGroup));
+const persistEntity = inject<(() => Promise<void>) | undefined>(
+  "persistEntity",
+  undefined,
+);
+const fieldEditor = useFieldEditor();
+const group = useBlockEditor(`${props.formId}:panel:${props.panel.metaData?.key ?? panelId.value ?? "group"}`, async () => {
+  await persistEntity?.();
+});
+
+// Only a real group publishes itself; without this every row would look for a
+// group that has no card and no actions to commit through.
+if (isGroup.value) provide("fieldGroup", group);
+
 const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
   computed(() => props.panel.panelHeaderContent?.panelStatus),
   props.formId,
@@ -168,6 +223,42 @@ watchEffect(() => {
 </script>
 
 <style scoped>
+/* Resting, the group's rows carry a tint to signal that they belong together;
+   editing, the whole group lifts into a card (group-form-card.md). */
+.field-group {
+  background-color: var(--color-surface-group-tint);
+  border-radius: var(--radius-card);
+  padding: var(--spacing-ds-6);
+  transition:
+    background-color var(--transition-duration-ui) var(--ease-ui),
+    border-color var(--transition-duration-ui) var(--ease-ui);
+  border: 1px solid transparent;
+}
+
+.field-group--editing {
+  background-color: var(--color-surface-group-form);
+  border-color: var(--color-border-default);
+}
+
+.field-group__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-ds-5);
+  margin-top: var(--spacing-ds-6);
+}
+
+.field-group__actions > :deep(.ds-button) {
+  flex: none;
+  width: auto;
+}
+
+.field-group__error {
+  margin-right: auto;
+  font-size: var(--text-hint);
+  color: var(--color-danger);
+}
+
 .v-enter-active,
 .v-leave-active {
   transition: transform 0.1s linear;

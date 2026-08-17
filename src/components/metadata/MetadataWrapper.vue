@@ -27,11 +27,12 @@
       />
     </div>
     <InlineFieldEditor
-      v-if="isEditingThisField"
+      v-if="isEditingThisField || isGroupEditing"
       :is-dirty="isDirty"
       :is-saving="isSavingThisField"
       :error-message="editorErrorMessage"
       :multiline="isMultilineField"
+      :show-commit-actions="!isGroupEditing"
       @save="fieldEditor.save()"
       @cancel="fieldEditor.cancel()"
     >
@@ -295,7 +296,16 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
+import {
+  ref,
+  onBeforeMount,
+  onMounted,
+  onUnmounted,
+  computed,
+  inject,
+  provide,
+  watch,
+} from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
@@ -305,6 +315,9 @@ import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocale
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useFieldEditor } from "@/composables/useFieldEditor";
+import type { useBlockEditor } from "@/composables/useBlockEditor";
+
+type FieldGroupContext = ReturnType<typeof useBlockEditor>;
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
@@ -448,6 +461,8 @@ const persistEntity = inject<(() => Promise<void>) | undefined>(
   "persistEntity",
   undefined,
 );
+/** Present only inside a panel that declared its fields interdependent. */
+const fieldGroup = inject<FieldGroupContext | undefined>("fieldGroup", undefined);
 const fieldEditor = useFieldEditor();
 
 const scopeId = computed<string>(() => `${props.formId}:${fieldKey.value}`);
@@ -484,8 +499,18 @@ const isDirty = computed<boolean>(
   () => isEditingThisField.value && serialiseValue() !== openedWith.value,
 );
 
+const isGroupEditing = computed<boolean>(
+  () => Boolean(fieldGroup?.isEditing.value) && isFieldEditableInline.value,
+);
+
 const startEditing = () => {
   if (!isFieldEditableInline.value || isEditingThisField.value) return;
+
+  // One gesture: inside a group, a click on any member opens all of them.
+  if (fieldGroup) {
+    fieldGroup.open();
+    return;
+  }
 
   openedWith.value = serialiseValue();
   fieldEditor.open({
@@ -500,6 +525,22 @@ const startEditing = () => {
     },
   });
 };
+
+/* A group commits as one, so it needs to reach every member's value. The row
+   still owns that value; it only hands the group the three operations. */
+if (fieldGroup) {
+  onMounted(() =>
+    fieldGroup.register({
+      key: fieldKey.value,
+      snapshot: serialiseValue,
+      restore: (snapshot: string) => {
+        fieldValueProxy.value = JSON.parse(snapshot);
+      },
+      validate: async () => (await field.validate()).valid,
+    }),
+  );
+  onUnmounted(() => fieldGroup.unregister(fieldKey.value));
+}
 
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);

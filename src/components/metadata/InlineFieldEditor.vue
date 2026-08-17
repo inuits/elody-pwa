@@ -4,26 +4,28 @@
       <div class="inline-field-editor__input">
         <slot />
       </div>
-      <BaseButton
-        button-style="commit"
-        button-size="sm"
-        :label="t('inline-editor.save')"
-        :disabled="!isDirty || isSaving"
-        :loading="isSaving"
-        data-cy="inline-field-editor-save"
-        @click="emit('save')"
-      />
-      <BaseButton
-        button-style="ghost"
-        button-size="sm"
-        :label="t('inline-editor.cancel')"
-        :disabled="isSaving"
-        data-cy="inline-field-editor-cancel"
-        @click="emit('cancel')"
-      />
+      <template v-if="showCommitActions">
+        <BaseButton
+          button-style="commit"
+          button-size="sm"
+          :label="t('inline-editor.save')"
+          :disabled="!isDirty || isSaving"
+          :loading="isSaving"
+          data-cy="inline-field-editor-save"
+          @click="emit('save')"
+        />
+        <BaseButton
+          button-style="ghost"
+          button-size="sm"
+          :label="t('inline-editor.cancel')"
+          :disabled="isSaving"
+          data-cy="inline-field-editor-cancel"
+          @click="emit('cancel')"
+        />
+      </template>
     </div>
 
-    <p class="inline-field-editor__hint">
+    <p v-if="showCommitActions" class="inline-field-editor__hint">
       {{ t("inline-editor.keyboard-hint") }}
     </p>
 
@@ -47,6 +49,7 @@ const {
   isSaving = false,
   errorMessage = undefined,
   multiline = false,
+  showCommitActions = true,
 } = defineProps<{
   /** Pick-then-Bewaar: nothing commits until the value actually changed. */
   isDirty?: boolean;
@@ -54,6 +57,11 @@ const {
   errorMessage?: string;
   /** A textarea keeps Enter for newlines and commits on Ctrl+Enter. */
   multiline?: boolean;
+  /**
+   * Off for a field inside an open group: the group carries one Bewaar and
+   * one Annuleer for all of its members, never one per field.
+   */
+  showCommitActions?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -64,6 +72,9 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const handleKeydown = (event: KeyboardEvent) => {
+  // Inside a group the keys belong to the group, so let them bubble untouched.
+  if (!showCommitActions) return;
+
   if (event.key === "Escape") {
     event.stopPropagation();
     emit("cancel");

@@ -126,8 +126,26 @@ Three consequences worth knowing before testing:
 WYSIWYG use it as their own mechanism, and none of those are the metadata
 whole-form path.
 
-Still open in WP4: the inline undo chip (WP4.3) and one-gesture group editing
-in `EntityElementWindowPanel` + `useBlockEditor` (WP4.4).
+## Group editing needs `isGroup` from the service
+
+Group editing is built (`useBlockEditor.ts` + the card on
+`EntityElementWindowPanel`), but it only switches on for a panel whose form
+definition says its fields are interdependent. Nothing expressed that: a panel
+is a layout grouping, and treating every panel as a group would recreate
+whole-form editing one level down.
+
+`isGroup` was therefore added to `WindowElementPanel` in **baseGraphql**
+(branch `feat/panel-is-group`), opt-in and defaulting to false. Two steps
+remain, and neither can be done from this repo:
+
+1. merge and deploy that branch, then
+2. run `task generate` with the stack up, so `isGroup` reaches
+   `src/generated-types/queries.ts` and the panel query.
+
+Until then `EntityElementWindowPanel` reads the flag defensively and every
+panel behaves as independent field rows — which is the correct default anyway.
+The Storybook story drives the flag directly, so the group card is reviewable
+now.
 
 ## Status against the migration plan
 
@@ -137,7 +155,7 @@ in `EntityElementWindowPanel` + `useBlockEditor` (WP4.4).
 | WP2 Storybook | done — tenant + surface toolbars, split-tier viewports, a11y addon |
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
-| WP4 fields & editing | field row + inline editor done, whole-form path removed; undo chip (4.3) and group editing (4.4) open |
+| WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
 | WP5–WP9 | open |
 
 ## Conventions for the next component
@@ -180,6 +198,7 @@ there; until then vue-i18n renders the key itself.
 | `inline-editor.keyboard-hint` | Enter bewaart · Esc annuleert | Enter saves · Esc cancels | The hint line under an open editor. |
 | `inline-editor.save-failed` | Opslaan mislukt, probeer opnieuw | Saving failed, try again | Shown when the server rejects a save. |
 | `inline-editor.undo` | Ongedaan maken | Undo | The inline undo chip beside a just-saved value. |
+| `group-form.check-highlighted-fields` | Controleer de gemarkeerde velden | Check the highlighted fields | Group validation summary. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
