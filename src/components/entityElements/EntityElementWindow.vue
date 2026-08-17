@@ -8,45 +8,28 @@
       :orientation="element.expandButtonOptions.orientation"
       v-on:expand-media-list="resizeColumn"
     />
-    <div
-      class="h-full w-full border-solid border-neutral-30 border-2 bg-background-light rounded-t-md @container/window"
+    <BasePanelShell
+      class="h-full w-full @container/window"
+      data-cy="entity-element-window-title"
+      :title="previewLabel ? t(previewLabel) : t(element.label)"
     >
-      <div
-        class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row"
+      <template #status v-if="element.windowElementStatus">
+        <MetadataWrapper
+          :metadata="getStatusMetadata()"
+          :form-id="formId"
+          :isEdit="computedIsEdit"
+          :show-errors="useEditHelper.showErrors"
+        />
+      </template>
+      <template
+        #actions
+        v-if="auth.isAuthenticated.value === true && element.contextMenuActions"
       >
-        <h1
-          data-cy="entity-element-window-title"
-          class="subtitle text-text-body p-2"
-        >
-          {{ previewLabel ? t(previewLabel) : t(element.label) }}
-        </h1>
-
-        <div
-          v-if="element.windowElementStatus"
-          class="flex gap-4 w-1/4 items-center"
-        >
-          <MetadataWrapper
-            class="w-full"
-            :metadata="getStatusMetadata()"
-            :form-id="formId"
-            :isEdit="computedIsEdit"
-            :show-errors="useEditHelper.showErrors"
-          />
-        </div>
-
-
-        <div
-          class="flex align-center ml-auto"
-          v-if="
-            auth.isAuthenticated.value === true && element.contextMenuActions
-          "
-        >
-          <BaseContextMenuActions
-            :context-menu-actions="element.contextMenuActions"
-            :parent-entity-id="formId"
-          />
-        </div>
-      </div>
+        <BaseContextMenuActions
+          :context-menu-actions="element.contextMenuActions"
+          :parent-entity-id="formId"
+        />
+      </template>
       <div
         :class="[
           {
@@ -74,7 +57,7 @@
           />
         </div>
       </div>
-    </div>
+    </BasePanelShell>
     <base-expand-button
       v-if="
         element.expandButtonOptions?.shown &&
@@ -103,6 +86,7 @@ import {
 } from "@/generated-types/queries";
 import EntityElementWindowPanel from "../windowPanel/EntityElementWindowPanel.vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
+import BasePanelShell from "@/components/base/BasePanelShell.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";

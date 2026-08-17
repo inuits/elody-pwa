@@ -5,16 +5,13 @@
     complementary region named by the entity it is showing, and its body
     announces politely when a different row swaps the content underneath it.
   -->
-  <section role="complementary" :aria-label="headerTitle">
-  <div class="preview-header">
-    <h2
-      data-cy="entity-element-window-title"
-      class="preview-header__title"
-      v-if="headerTitle"
-    >
-      {{ headerTitle }}
-    </h2>
-    <div class="preview-header__actions">
+  <BasePanelShell
+    data-cy="entity-element-window-title"
+    heading-level="h2"
+    landmark="complementary"
+    :title="headerTitle"
+  >
+    <template #actions>
       <base-button
         v-if="displayOpenDetailPageButton"
         data-cy="open-detail-page-button"
@@ -33,8 +30,7 @@
       >
         <unicon :name="Unicons.Cross.name" height="20" />
       </button>
-    </div>
-  </div>
+    </template>
   <div
     v-if="previewLoading"
     data-cy="preview-loading"
@@ -110,7 +106,7 @@
       @close-preview-component="emit('closePreviewComponent')"
     />
   </div>
-  </section>
+  </BasePanelShell>
 </template>
 
 <script setup lang="ts">
@@ -133,6 +129,7 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity, goToEntityPage } from "@/helpers";
 import { Unicons } from "@/types";
 import BaseButton from "@/components/base/BaseButton.vue";
+import BasePanelShell from "@/components/base/BasePanelShell.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { apolloClient, router } from "@/main";
@@ -286,41 +283,8 @@ watch(
 </script>
 
 <style scoped>
-/* The shared panel-shell header: accent-light bar, 10/16px padding, 14px bold
-   panel-header ink, actions right (panel-and-block-shells.md). Both colours
-   are client-themed, so a dark-accent tenant flips the ink to white on its own. */
-.preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-ds-6);
-  padding: var(--spacing-ds-8) var(--spacing-ds-11);
-  background-color: var(--color-surface-panel-header);
-  border-radius: var(--radius-card) var(--radius-card) 0 0;
-}
-
-.preview-header__title {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--text-body);
-  font-weight: 700;
-  color: var(--color-text-panel-header);
-}
-
-.preview-header__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-ds-5);
-  flex: none;
-}
-
-.preview-header__actions > :deep(.ds-button) {
-  flex: none;
-  width: auto;
-}
-
+/* Header chrome comes from BasePanelShell; only the close control is the
+   preview's own. */
 .preview-header__close {
   display: inline-flex;
   padding: var(--spacing-ds-1);

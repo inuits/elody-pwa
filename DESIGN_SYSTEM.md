@@ -135,11 +135,11 @@ down to the first metadata column was already there too, in
 `ViewModesTable.vue` and `TableViewRow.vue`. WP5b only needed the panel shell
 on `PreviewWrapper`.
 
-`PreviewWrapper` cannot currently be rendered in Storybook — it resolves its
-own preview query through Apollo — and its unit test is one of the ten files
-that die on the jsdom localStorage problem. Its header was verified through
-the token probe (all six tenants), eslint and both builds, but not with a
-screenshot. Worth a story once the panel shell is extracted in WP5e.
+`PreviewWrapper` cannot be rendered in Storybook — it resolves its own preview
+query through Apollo — and its unit test is one of the ten files that die on
+the jsdom localStorage problem. Since WP5e its header is `BasePanelShell`,
+which *is* storied and screenshot-verified under a light and a dark tenant, so
+the chrome is covered even though the wrapper itself is not.
 
 ## Group editing needs `isGroup` from the service
 
@@ -171,7 +171,7 @@ now.
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
-| WP5 lists & actions | row states (5a), preview split (5b), action trigger (5c) and selection bar (5d) done; panel shells and pagination open |
+| WP5 lists & actions | 5a–5e done (rows, preview split, action trigger, selection bar, panel shell); pagination (5f) and the quality popover open |
 | WP6–WP9 | open |
 
 ## Conventions for the next component
