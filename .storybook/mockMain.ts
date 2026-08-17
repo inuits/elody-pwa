@@ -64,6 +64,7 @@ export const i18n = createI18n({
         undo: "Ongedaan maken",
       },
       "group-form": { "check-highlighted-fields": "Controleer de gemarkeerde velden" },
+      "context-menu": { actions: "Acties" },
     },
     en: {
       metadata: {
@@ -80,6 +81,7 @@ export const i18n = createI18n({
         undo: "Undo",
       },
       "group-form": { "check-highlighted-fields": "Check the highlighted fields" },
+      "context-menu": { actions: "Actions" },
     },
   },
   missingWarn: false,

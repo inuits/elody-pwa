@@ -156,7 +156,8 @@ now.
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
-| WP5–WP9 | open |
+| WP5 lists & actions | row states (5a) and the labelled action trigger (5c) done; preview split, selection bar, panel shells and pagination open |
+| WP6–WP9 | open |
 
 ## Conventions for the next component
 
@@ -199,6 +200,7 @@ there; until then vue-i18n renders the key itself.
 | `inline-editor.save-failed` | Opslaan mislukt, probeer opnieuw | Saving failed, try again | Shown when the server rejects a save. |
 | `inline-editor.undo` | Ongedaan maken | Undo | The inline undo chip beside a just-saved value. |
 | `group-form.check-highlighted-fields` | Controleer de gemarkeerde velden | Check the highlighted fields | Group validation summary. |
+| `context-menu.actions` | Acties | Actions | Label on the overflow trigger that replaced the bare ⋮. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
