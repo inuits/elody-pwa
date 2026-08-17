@@ -6,6 +6,7 @@
 // The alias in .storybook/vite.config.ts points at this file instead.
 import { ApolloClient, InMemoryCache } from "@apollo/client/core";
 import { createRouter, createWebHistory } from "vue-router";
+import { createI18n } from "vue-i18n";
 
 export const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
@@ -34,4 +35,34 @@ export const formattersSettings = {
   },
 };
 export const typeUrlMapping = { mapping: {}, reverseMapping: {} };
-export const i18n = undefined;
+
+// helpers.ts reaches for `i18n.global.t` outside a component, so this has to
+// be a real instance rather than a placeholder. preview.ts installs this same
+// one on the app, so a story and a helper translate through one catalogue.
+//
+// Stories render component chrome, not translated product copy: an unknown key
+// renders as itself so a story never depends on the translation service. Only
+// the copy the design system itself specifies is declared here.
+export const i18n = createI18n({
+  legacy: false,
+  globalInjection: true,
+  locale: "nl",
+  fallbackLocale: "en",
+  messages: {
+    nl: {
+      metadata: {
+        labels: { "no-value": "Geen waarde", yes: "Ja", no: "Nee" },
+      },
+      dropdown: { "remove-option": "Verwijder {option}" },
+    },
+    en: {
+      metadata: {
+        labels: { "no-value": "No value", yes: "Yes", no: "No" },
+      },
+      dropdown: { "remove-option": "Remove {option}" },
+    },
+  },
+  missingWarn: false,
+  fallbackWarn: false,
+  missing: (_locale, key) => key,
+});

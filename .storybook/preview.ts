@@ -1,26 +1,17 @@
 import type { Preview } from "@storybook/vue3-vite";
 import { setup } from "@storybook/vue3-vite";
 import type { Plugin } from "vue";
-import { createI18n } from "vue-i18n";
 import Notifications from "@kyvg/vue3-notification";
 import Unicon from "vue-unicons";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { Unicons } from "../src/types";
-import { apolloClient, router } from "./mockMain";
+import { apolloClient, i18n, router } from "./mockMain";
+import { useInputValidation } from "../src/composables/useInputValidation";
 import "../src/assets/main.css";
 
-// Stories render component chrome, not translated product copy: an unknown key
-// renders as itself so a story never depends on the translation service.
-const i18n = createI18n({
-  legacy: false,
-  globalInjection: true,
-  locale: "nl",
-  fallbackLocale: "en",
-  messages: { nl: {}, en: {} },
-  missingWarn: false,
-  fallbackWarn: false,
-  missing: (_locale, key) => key,
-});
+// Field rows validate through vee-validate; without the rules registered, any
+// story containing one throws "No such validator '…' exists".
+useInputValidation().initializeInputValidation({});
 
 Unicon.add(Object.values(Unicons));
 

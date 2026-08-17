@@ -84,7 +84,7 @@ describe("MetadataFormatter", () => {
       expect(pill.props("translationKey")).toBe("metadata.labels.user-function.$value");
     });
 
-    it("returns dash for empty array", async () => {
+    it("returns the empty-value placeholder for an empty array", async () => {
       const wrapper = mount(MetadataFormatter, {
         props: {
           formatter: "pill",
@@ -93,7 +93,7 @@ describe("MetadataFormatter", () => {
         },
       });
       await nextTick();
-      expect(wrapper.text()).toBe("-");
+      expect(wrapper.text()).toBe("metadata.labels.no-value");
     });
   });
 });

@@ -171,15 +171,17 @@
               <span
                 v-else-if="fieldType === InputFieldTypes.Checkbox"
                 data-cy="metadata-checkbox-value"
-                class="flex items-center gap-1 text-sm"
+                class="metadata-boolean-value flex items-center gap-1"
               >
                 <unicon
                   :name="
-                    fieldValueProxy ? Unicons.Check.name : Unicons.Cross.name
+                    fieldValueProxy ? Unicons.Check.name : Unicons.Minus.name
                   "
                   class="-mx-1"
                   :class="
-                    fieldValueProxy ? 'text-green-600' : 'text-gray-600'
+                    fieldValueProxy
+                      ? 'metadata-boolean-value__yes'
+                      : 'metadata-boolean-value__no'
                   "
                   height="18"
                 />
@@ -440,3 +442,19 @@ watch(
   { deep: true },
 );
 </script>
+
+<style scoped>
+/* A boolean reads as "Ja"/"Nee" with a check or a dash — never as a bare
+   checkbox standing in for a value (field-row.md §Round 2). */
+.metadata-boolean-value {
+  font-size: var(--text-value);
+}
+
+.metadata-boolean-value__yes {
+  color: var(--color-success);
+}
+
+.metadata-boolean-value__no {
+  color: var(--color-text-muted);
+}
+</style>

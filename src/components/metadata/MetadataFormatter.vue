@@ -18,7 +18,7 @@
     :formatter="formatter"
     :label="readableLabel"
   />
-  <label v-if="!hasLabel">
+  <label v-if="!hasLabel" class="metadata-empty-value">
     {{ readableLabel }}
   </label>
 </template>
@@ -71,13 +71,13 @@ const hasLabel = computed(() =>
 
 const readableLabel = computed(() => {
   if (Array.isArray(props.label)) {
-    if (props.label.length === 0) return "-";
+    if (props.label.length === 0) return t("metadata.labels.no-value");
     if (props.translationKey) return translateArrayValuesAndJoin(props.label, props.translationKey);
     return props.label.join(", ");
   }
   return props.label
     ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
-    : "-";
+    : t("metadata.labels.no-value");
 });
 
 // A single-value pill translates its own display value from translationKey, so it needs

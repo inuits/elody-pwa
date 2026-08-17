@@ -22,7 +22,7 @@ import {
   type WysiwygElement,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
-import { i18n } from "@/main.ts";
+import { i18n } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
 import {

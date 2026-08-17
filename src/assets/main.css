@@ -422,6 +422,12 @@
   color: var(--color-text-subtitle);
 }
 
+/* An empty non-required value reads as absent rather than as content:
+   "Geen waarde" at 45% opacity (field-row.md). */
+@utility metadata-empty-value {
+  opacity: 0.45;
+}
+
 /* Other utilities */
 @utility checkboard {
   background-color: #fff;

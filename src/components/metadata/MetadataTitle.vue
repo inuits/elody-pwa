@@ -1,5 +1,5 @@
 <template>
-  <div v-if="metadata.label" class="text-text-light text-sm flex">
+  <div v-if="metadata.label" class="metadata-title flex">
     <p data-cy="metadata-label">
       {{ t(metadata.label) }}
     </p>
@@ -66,3 +66,13 @@ const { openPanel } = useInfoPanel();
 
 const infoPanel = computed(() => props.metadata.infoPanel ?? null);
 </script>
+
+<style scoped>
+/* The label line of a field row: 11.5px bold in field-label blue, sitting
+   above a 13px value (field-row.md). */
+.metadata-title {
+  font-size: var(--text-label);
+  font-weight: 700;
+  color: var(--color-text-field-label);
+}
+</style>

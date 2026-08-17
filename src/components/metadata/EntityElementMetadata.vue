@@ -2,7 +2,11 @@
   <div
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
-    :class="[{ 'font-bold': highlight}, `text-sm ${breakWords ? 'break-words' : 'break-normal'}`]"
+    :class="[
+      { 'font-bold': highlight },
+      'metadata-value',
+      breakWords ? 'break-words' : 'break-normal',
+    ]"
   >
     <div v-if="Array.isArray(readableValue)">
       <div v-for="item in readableValue" :key="item">
@@ -11,7 +15,9 @@
           t(linkText) || item
         }}</a>
       </div>
-      <div v-if="readableValue.length == 0">-</div>
+      <div v-if="readableValue.length == 0" class="metadata-empty-value">
+        {{ t("metadata.labels.no-value") }}
+      </div>
     </div>
     <div v-else-if="isCoordinates">
       {{ `(${value.latitude}, ${value.longitude})` }}
@@ -41,7 +47,12 @@
           :content="processedDisplayValue.toString()"
         ></SanitizedHtml>
       </p>
-      <p v-else data-cy="metadata-value" class="whitespace-pre-line">
+      <p
+        v-else
+        data-cy="metadata-value"
+        class="whitespace-pre-line"
+        :class="{ 'metadata-empty-value': isEmptyValue }"
+      >
         {{ processedDisplayValue }}
       </p>
     </div>
@@ -105,10 +116,12 @@ const processedDisplayValue = computed<string>(() =>
   displayValue.value.toString(),
 );
 
+const isEmptyValue = computed<boolean>(() => readableValue.value === "");
+
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;
 
-  if (readableValue.value === "") return "-";
+  if (readableValue.value === "") return t("metadata.labels.no-value");
   if (Array.isArray(readableValue.value)) return readableValue.value;
 
   if (props.translationKey) {
@@ -124,3 +137,10 @@ const displayValue = computed(() => {
   return readableValue.value;
 });
 </script>
+
+<style scoped>
+/* The value line of a field row: 13px, the reading size (field-row.md). */
+.metadata-value {
+  font-size: var(--text-value);
+}
+</style>

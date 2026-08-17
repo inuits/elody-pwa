@@ -20,9 +20,11 @@ export default defineConfig({
       // Stories and decorators are written as string templates, so the
       // workshop needs the build of Vue that ships the compiler.
       { find: /^vue$/, replacement: "vue/dist/vue.esm-bundler.js" },
-      // Must precede the "@" alias so it wins for this one specifier.
+      // Must precede the "@" alias so it wins for this one specifier. The
+      // optional extension is deliberate: a single `@/main.ts` import would
+      // otherwise slip past and pull the real application in beside the mock.
       {
-        find: /^@\/main$/,
+        find: /^@\/main(\.ts)?$/,
         replacement: fileURLToPath(new URL("./mockMain.ts", import.meta.url)),
       },
       {

@@ -100,6 +100,24 @@ repo and a decision to take rather than guess. Until then the badge is
 deliberately not implemented; the three tone tokens stay unused rather than
 being bound to an order the client never declared.
 
+## WP4 — what the field row still waits on
+
+The field row's *presentation* is on tokens: label, value, the "Geen waarde"
+empty state and the Ja/Nee boolean. Its *interactive* states — hover wash and
+pencil, focus ring on the value, editing, saving, saved, the inline undo chip
+— are not, and cannot be until per-field editing exists.
+
+Today a whole panel enters edit mode and every row swaps to
+`EntityElementMetadataEdit` at once; a resting row is not a control, so there
+is nothing to hover, focus or ring. `InlineFieldEditor.vue` is in `MANIFEST.md`
+but does not exist in this repo yet. Building it is WP4.2 and it is the
+behavioural half of the package — pick-then-Bewaar changes muscle memory for
+cataloguers, which is why the migration plan suggests a flag for one release.
+
+So the order is: WP4.2 first (the editor and the per-field edit path), then the
+row's interactive states land on top of it, and only then does `field-row.md`'s
+state table close.
+
 ## Status against the migration plan
 
 | WP | State |
@@ -107,7 +125,8 @@ being bound to an order the client never declared.
 | WP1 tokens | done — tokens, client scopes, boot wiring, Foundations pages |
 | WP2 Storybook | done — tenant + surface toolbars, split-tier viewports, a11y addon |
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
-| WP4–WP9 | open |
+| WP4 fields & editing | field-row presentation done; the interactive states wait on WP4.2 (above) |
+| WP5–WP9 | open |
 
 ## Conventions for the next component
 
@@ -141,3 +160,7 @@ there; until then vue-i18n renders the key itself.
 |---|---|---|---|
 | `bulk-operations.select-item` | Selecteer item | Select item | The accessible name for a list selection checkbox, which had none. |
 | `dropdown.remove-option` | Verwijder {option} | Remove {option} | The multi-select tag's ✕ was a bare `&times;` with no accessible name. |
+| `metadata.labels.no-value` | Geen waarde | No value | Replaces the deprecated "-" empty placeholder. |
+
+Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
+read as designed while the keys are still missing from the service.

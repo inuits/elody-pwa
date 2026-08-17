@@ -92,12 +92,15 @@ describe("EntityElementMetadata", () => {
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("opened");
     });
 
-    it('should show "-" when readableValue is empty and no translation exists', async () => {
+    it('should show the empty-value placeholder when readableValue is empty and no translation exists', async () => {
+      mocks.t.mockImplementation((key: string) => key);
       const wrapper = mount(EntityElementMetadata, {
         props: { value: "", translationKey: "some.key.$value" },
       });
       await nextTick();
-      expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("-");
+      expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe(
+        "metadata.labels.no-value",
+      );
     });
   });
 
@@ -131,10 +134,11 @@ describe("EntityElementMetadata", () => {
       );
     });
 
-    it('should show "-" when value is an empty array', async () => {
+    it('should show the empty-value placeholder when value is an empty array', async () => {
+      mocks.t.mockImplementation((key: string) => key);
       const wrapper = mount(EntityElementMetadata, { props: { value: [] } });
       await nextTick();
-      expect(wrapper.text()).toBe("-");
+      expect(wrapper.text()).toBe("metadata.labels.no-value");
     });
   });
 });

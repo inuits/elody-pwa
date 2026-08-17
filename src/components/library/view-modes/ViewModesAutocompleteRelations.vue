@@ -48,8 +48,9 @@
       mode !== 'create' &&
       !isLoading
     "
+    class="metadata-empty-value"
   >
-    {{ "-" }}
+    {{ t("metadata.labels.no-value") }}
   </p>
 </template>
 

@@ -15,8 +15,8 @@
     "
     @add-option="handleCreatingFromTag"
   />
-  <p v-else data-cy="metadata-value">
-    {{ "-" }}
+  <p v-else data-cy="metadata-value" class="metadata-empty-value">
+    {{ t("metadata.labels.no-value") }}
   </p>
 </template>
 
