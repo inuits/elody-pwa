@@ -256,6 +256,17 @@
           />
         </template>
       </base-tooltip>
+      <!-- Stands beside the value until the next action, replacing the undo
+           toast for saves (field-row.md §Round 2). -->
+      <button
+        v-if="canUndoThisField"
+        type="button"
+        class="field-row-value__undo"
+        data-cy="metadata-row-undo"
+        @click.stop="fieldEditor.undo()"
+      >
+        {{ t("inline-editor.undo") }}
+      </button>
       <MetadataValueTooltip
         class="grow-0 shrink-0 basis-0 items-center"
         v-if="metadata.valueTooltip?.type && metadata.value"
@@ -453,6 +464,7 @@ const isFieldEditableInline = computed<boolean>(() =>
 const isEditingThisField = computed(() => fieldEditor.isEditing(scopeId.value));
 const isSavingThisField = computed(() => fieldEditor.isSaving(scopeId.value));
 const isSavedThisField = computed(() => fieldEditor.isSaved(scopeId.value));
+const canUndoThisField = computed(() => fieldEditor.canUndo(scopeId.value));
 
 const editorErrorMessage = computed<string | undefined>(() =>
   isEditingThisField.value ? fieldEditor.errorMessage.value : undefined,
@@ -573,6 +585,28 @@ watch(
 .field-row-value__saved {
   display: inline-flex;
   color: var(--color-success);
+}
+
+/* A pill, because undo starts something reversible rather than executing. */
+.field-row-value__undo {
+  flex: none;
+  align-self: center;
+  padding: var(--spacing-ds-1) var(--spacing-ds-6);
+  border: 1px solid var(--color-commit);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  color: var(--color-commit);
+  font-size: var(--text-hint);
+  white-space: nowrap;
+}
+
+.field-row-value__undo:hover {
+  background-color: var(--color-surface-editable-hover);
+}
+
+.field-row-value__undo:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
 }
 
 /* A boolean reads as "Ja"/"Nee" with a check or a dash — never as a bare

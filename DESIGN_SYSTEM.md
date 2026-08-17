@@ -179,6 +179,7 @@ there; until then vue-i18n renders the key itself.
 | `inline-editor.saved` | Opgeslagen | Saved | |
 | `inline-editor.keyboard-hint` | Enter bewaart · Esc annuleert | Enter saves · Esc cancels | The hint line under an open editor. |
 | `inline-editor.save-failed` | Opslaan mislukt, probeer opnieuw | Saving failed, try again | Shown when the server rejects a save. |
+| `inline-editor.undo` | Ongedaan maken | Undo | The inline undo chip beside a just-saved value. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

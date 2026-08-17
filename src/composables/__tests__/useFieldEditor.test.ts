@@ -48,6 +48,50 @@ describe("useFieldEditor", () => {
     });
   });
 
+  describe("undo", () => {
+    it("puts the value back the way it was and commits that", async () => {
+      const editor = useFieldEditor();
+      const restore = vi.fn();
+      const submit = vi.fn().mockResolvedValue(undefined);
+      editor.open(scope("a", { restore, submit }));
+      await editor.save();
+
+      await editor.undo();
+
+      expect(restore).toHaveBeenCalledOnce();
+      expect(submit).toHaveBeenCalledTimes(2);
+      expect(editor.canUndo("a")).toBe(false);
+    });
+
+    it("withdraws the offer as soon as the next edit starts", async () => {
+      const editor = useFieldEditor();
+      editor.open(scope("a"));
+      await editor.save();
+
+      editor.open(scope("b"));
+
+      expect(editor.canUndo("a")).toBe(false);
+    });
+
+    it("keeps the offer standing when undoing fails", async () => {
+      const editor = useFieldEditor();
+      let attempt = 0;
+      editor.open(
+        scope("a", {
+          submit: async () => {
+            attempt += 1;
+            if (attempt > 1) throw new Error("conflict");
+          },
+        }),
+      );
+      await editor.save();
+
+      await editor.undo();
+
+      expect(editor.canUndo("a")).toBe(true);
+    });
+  });
+
   describe("cancel", () => {
     it("restores the value it opened with and closes", () => {
       const editor = useFieldEditor();
@@ -115,6 +159,30 @@ describe("useFieldEditor", () => {
       expect(editor.errorMessage.value).toBeTruthy();
       // A closed row never renders an error state, so nothing is rolled back.
       expect(restore).not.toHaveBeenCalled();
+    });
+
+    it("offers to undo the save it just made", async () => {
+      const editor = useFieldEditor();
+      editor.open(scope("a"));
+      await editor.save();
+
+      expect(editor.canUndo("a")).toBe(true);
+      expect(editor.canUndo("b")).toBe(false);
+    });
+
+    it("does not offer undo for a save that failed", async () => {
+      const editor = useFieldEditor();
+      editor.open(
+        scope("a", {
+          submit: async () => {
+            throw new Error("conflict");
+          },
+        }),
+      );
+
+      await editor.save();
+
+      expect(editor.canUndo("a")).toBe(false);
     });
 
     it("reports saving while the commit is in flight", async () => {

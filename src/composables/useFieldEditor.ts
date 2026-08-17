@@ -28,6 +28,13 @@ const errorMessage = ref<string | undefined>();
 let savedTimeout: ReturnType<typeof setTimeout> | undefined;
 
 /**
+ * The last save, offered back as an inline undo chip beside the value. Unlike
+ * the saved check this has no timer: it stands until the next action, because
+ * the point is to catch a mistake the user only notices a moment later.
+ */
+const undoableScope = ref<EditScope | undefined>();
+
+/**
  * The per-field editing pattern: edit scope = save scope = validation scope.
  * Only one scope edits at a time, and opening a second one neither commits nor
  * discards the first — a dirty editor simply refuses to be left.
@@ -53,6 +60,8 @@ export const useFieldEditor = () => {
     const current = activeScope.value;
     if (current && current.id !== scope.id && current.isDirty()) return false;
 
+    // Starting an edit is the "next action" that withdraws the undo offer.
+    undoableScope.value = undefined;
     clearSavedMark();
     activeScope.value = scope;
     status.value = "idle";
@@ -97,8 +106,30 @@ export const useFieldEditor = () => {
       savedScopeId.value = undefined;
       savedTimeout = undefined;
     }, SAVED_MARK_MS);
+    undoableScope.value = scope;
     close();
   };
+
+  /**
+   * Puts the value back to what it was before the save and commits that. The
+   * offer stands if the revert itself fails — the user is no worse off, and
+   * taking it away would strand them.
+   */
+  const undo = async (): Promise<void> => {
+    const scope = undoableScope.value;
+    if (!scope) return;
+
+    scope.restore();
+    try {
+      await scope.submit();
+    } catch {
+      return;
+    }
+    undoableScope.value = undefined;
+  };
+
+  const canUndo = (scopeId: string): boolean =>
+    undoableScope.value?.id === scopeId;
 
   const isEditing = (scopeId: string): boolean =>
     activeScope.value?.id === scopeId;
@@ -111,6 +142,7 @@ export const useFieldEditor = () => {
   /** Test seam: drops all state so one spec cannot leak into the next. */
   const reset = () => {
     clearSavedMark();
+    undoableScope.value = undefined;
     close();
   };
 
@@ -121,6 +153,8 @@ export const useFieldEditor = () => {
     open,
     cancel,
     save,
+    undo,
+    canUndo,
     isEditing,
     isSaving,
     isSaved,

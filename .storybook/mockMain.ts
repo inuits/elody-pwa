@@ -61,6 +61,7 @@ export const i18n = createI18n({
         saved: "Opgeslagen",
         "keyboard-hint": "Enter bewaart · Esc annuleert",
         "save-failed": "Opslaan mislukt, probeer opnieuw",
+        undo: "Ongedaan maken",
       },
     },
     en: {
@@ -75,6 +76,7 @@ export const i18n = createI18n({
         saved: "Saved",
         "keyboard-hint": "Enter saves · Esc cancels",
         "save-failed": "Saving failed, try again",
+        undo: "Undo",
       },
     },
   },
