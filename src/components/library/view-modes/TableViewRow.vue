@@ -262,17 +262,42 @@ const isSeen = computed<boolean>(
 );
 
 const wrapperClasses = computed(() => [
-  "flex items-center gap-2 p-1.5 border rounded bg-background-light border-accent-highlight cursor-pointer list-none mt-1",
+  "entity-row flex items-center gap-2 p-1.5 border rounded cursor-pointer list-none mt-1",
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled || isSeen.value,
     "animate-pulse": props.loading,
-    "bg-background-light": !isActiveListItem.value,
-    "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+    // The checkbox owns the wash and the ring; the row whose preview is open
+    // is marked by an accent border-left and nothing else (entity-list-element.md).
+    "entity-row--selected": isChecked.value,
+    "entity-row--preview-open": isActiveListItem.value,
   },
 ]);
 </script>
 
 <style scoped>
+/* Row states. Selection and preview are two different things and never
+   collapse into one cue (entity-list-element.md §Round 2). */
+.entity-row {
+  background-color: var(--color-surface);
+  border-color: var(--color-border-subtle);
+  border-left: 3px solid transparent;
+  font-size: var(--text-table);
+  transition: background-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.entity-row:hover {
+  background-color: var(--color-surface-row-hover);
+}
+
+.entity-row--selected {
+  background-color: var(--color-surface-editable-hover);
+  box-shadow: var(--shadow-row-selected);
+}
+
+.entity-row--preview-open {
+  border-left-color: var(--color-accent);
+}
+
 @container parent (max-width: 640px) {
   .col-primary,
   .col-secondary {

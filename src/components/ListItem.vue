@@ -491,11 +491,13 @@ const wrapperClasses = computed(() => {
         props.isDisabled || isSeen.value,
     },
     { "animate-pulse": loading.value },
-    { "bg-background-light": !isActiveListItem.value },
-    { "border-accent-highlight": !isActiveListItem.value },
-    {
-      "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
-    },
+    "entity-row",
+    // The checkbox owns the wash and the ring; the row whose preview is open
+    // is marked by an accent border-left and nothing else
+    // (entity-list-element.md §Round 2).
+    { "entity-row--selected": isChecked.value },
+    { "entity-row--preview-open": isActiveListItem.value },
+    { "entity-row--card": isGridMode.value },
   ];
 });
 
@@ -547,3 +549,32 @@ const createWindowPanelsFromEntityListElements = (
   return panel;
 };
 </script>
+
+<style scoped>
+/* Row states. Selection and preview are two different things and never
+   collapse into one cue (entity-list-element.md §Round 2). */
+.entity-row {
+  background-color: var(--color-surface);
+  border-color: var(--color-border-subtle);
+  border-left: 3px solid transparent;
+  transition: background-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.entity-row:hover {
+  background-color: var(--color-surface-row-hover);
+}
+
+.entity-row--selected {
+  background-color: var(--color-surface-editable-hover);
+  box-shadow: var(--shadow-row-selected);
+}
+
+.entity-row--preview-open {
+  border-left-color: var(--color-accent);
+}
+
+/* Grid card: 8px radius, 1px border, no shadow — only overlays float. */
+.entity-row--card {
+  border-radius: var(--radius-card);
+}
+</style>

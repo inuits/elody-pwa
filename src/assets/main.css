@@ -298,6 +298,11 @@
   --shadow-popover: 0 12px 32px rgba(9, 30, 66, .2);
   --shadow-modal: 0 24px 64px rgba(9, 30, 66, .4);
   --shadow-toast: 0 12px 32px rgba(9, 30, 66, .35);
+  /* Selection ring on a list row. Not in the handoff's tokens.css, which asks
+     for an "accent row shadow" without giving one; a ring rather than a drop
+     shadow keeps the elevation rule intact — only overlays float. Being
+     accent-derived, it is re-declared in the client scopes below. */
+  --shadow-row-selected: 0 0 0 1px var(--color-accent);
 
   /* ── Motion — one duration, one easing, one press ──────────────────── */
   --transition-duration-ui: .13s;
@@ -378,6 +383,7 @@
   --color-text-panel-header: var(--color-accent-ink);
   --color-text-link-hover: var(--color-accent);
   --color-border-panel: var(--color-accent-light-strong);
+  --shadow-row-selected: 0 0 0 1px var(--color-accent);
 }
 
 
