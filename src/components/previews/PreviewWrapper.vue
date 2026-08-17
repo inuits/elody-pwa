@@ -1,62 +1,39 @@
 <template>
-  <div
-    class="flex items-center justify-between"
-    :class="[{ 'my-2': showHeaderCloseButton }]"
-  >
-    <base-tooltip
-      v-if="showHeaderCloseButton"
-      position="top-right"
-      :tooltip-offset="8"
-      @click="emit('closePreviewComponent')"
-    >
-      <template #activator="{ on }">
-        <div
-          class="flex items-center"
-          data-cy="close-preview-component"
-          v-on="on"
-        >
-          <unicon
-            class="cursor-pointer mr-4 ml-2 flex justify-center items-center"
-            :name="Unicons.Cross.name"
-            height="24"
-          />
-        </div>
-      </template>
-      <template #default>
-        <span>
-          <div>
-            {{ t("preview-component.close") }}
-          </div>
-        </span>
-      </template>
-    </base-tooltip>
-    <h1
+  <!--
+    The preview is a panel like any other, so it wears the shared panel shell:
+    accent-light header, title left, actions right (preview-panel.md). It is a
+    complementary region named by the entity it is showing, and its body
+    announces politely when a different row swaps the content underneath it.
+  -->
+  <section role="complementary" :aria-label="headerTitle">
+  <div class="preview-header">
+    <h2
       data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 truncate max-w-[90%]"
-      v-if="previewComponent.title"
+      class="preview-header__title"
+      v-if="headerTitle"
     >
-      {{ t(previewComponent.title) }}
-    </h1>
-    <h1
-      data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 truncate max-w-[90%]"
-      v-if="previewComponent.type === PreviewTypes.MediaViewer"
-    >
-      {{ getTitleFromEntity }}
-    </h1>
-    <div
-      v-if="displayOpenDetailPageButton"
-      data-cy="open-detail-page-button"
-      class="px-2"
-    >
+      {{ headerTitle }}
+    </h2>
+    <div class="preview-header__actions">
       <base-button
+        v-if="displayOpenDetailPageButton"
+        data-cy="open-detail-page-button"
         button-size="sm"
-        button-style="commit"
+        button-style="primary"
         :label="t('metadata.labels.open-detail-page')"
         @click="openDetailPage"
       />
+      <button
+        v-if="showHeaderCloseButton"
+        type="button"
+        data-cy="close-preview-component"
+        class="preview-header__close"
+        :aria-label="t('preview-component.close')"
+        @click="emit('closePreviewComponent')"
+      >
+        <unicon :name="Unicons.Cross.name" height="20" />
+      </button>
     </div>
-    <div v-else><!-- Only here to center the title :) --></div>
   </div>
   <div
     v-if="previewLoading"
@@ -65,7 +42,7 @@
   >
     <spinner-loader theme="accent" :dimensions="10" />
   </div>
-  <div class="primary-preview">
+  <div class="primary-preview" aria-live="polite">
     <entity-column
       :key="entityId"
       v-if="
@@ -133,6 +110,7 @@
       @close-preview-component="emit('closePreviewComponent')"
     />
   </div>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -154,7 +132,6 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity, goToEntityPage } from "@/helpers";
 import { Unicons } from "@/types";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import BaseButton from "@/components/base/BaseButton.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
@@ -245,6 +222,13 @@ const getTitleFromEntity = computed(() => {
   else return getTitleOrNameFromEntity(entity);
 });
 
+/** A configured title wins; otherwise the panel is named by its entity. */
+const headerTitle = computed<string>(() =>
+  props.previewComponent.title
+    ? t(props.previewComponent.title)
+    : getTitleFromEntity.value,
+);
+
 // A primary ColumnList preview renders its own close button deeper down
 // (inside the entity list's EntityElementWrapper). Every other case —
 // MediaViewer, Map, History, and metadata-only previews — relies on this
@@ -301,4 +285,56 @@ watch(
 );
 </script>
 
-<style scoped></style>
+<style scoped>
+/* The shared panel-shell header: accent-light bar, 10/16px padding, 14px bold
+   panel-header ink, actions right (panel-and-block-shells.md). Both colours
+   are client-themed, so a dark-accent tenant flips the ink to white on its own. */
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-ds-6);
+  padding: var(--spacing-ds-8) var(--spacing-ds-11);
+  background-color: var(--color-surface-panel-header);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.preview-header__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--color-text-panel-header);
+}
+
+.preview-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-ds-5);
+  flex: none;
+}
+
+.preview-header__actions > :deep(.ds-button) {
+  flex: none;
+  width: auto;
+}
+
+.preview-header__close {
+  display: inline-flex;
+  padding: var(--spacing-ds-1);
+  border-radius: var(--radius-input);
+  color: var(--color-text-panel-header);
+}
+
+.preview-header__close:hover {
+  background-color: var(--color-surface-editable-hover);
+  color: var(--color-text-body);
+}
+
+.preview-header__close:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+</style>

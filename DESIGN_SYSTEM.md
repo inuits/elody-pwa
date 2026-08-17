@@ -126,6 +126,21 @@ Three consequences worth knowing before testing:
 WYSIWYG use it as their own mechanism, and none of those are the metadata
 whole-form path.
 
+## Already correct — do not redo
+
+The preview split's container-query tiers were **already** exactly what
+`entity-list-element.md` specifies (500 → 40/60, 630 → 35/65, 830 → 30/70,
+1024 → 25/75, stacked below 500), and the table's progressive column collapse
+down to the first metadata column was already there too, in
+`ViewModesTable.vue` and `TableViewRow.vue`. WP5b only needed the panel shell
+on `PreviewWrapper`.
+
+`PreviewWrapper` cannot currently be rendered in Storybook — it resolves its
+own preview query through Apollo — and its unit test is one of the ten files
+that die on the jsdom localStorage problem. Its header was verified through
+the token probe (all six tenants), eslint and both builds, but not with a
+screenshot. Worth a story once the panel shell is extracted in WP5e.
+
 ## Group editing needs `isGroup` from the service
 
 Group editing is built (`useBlockEditor.ts` + the card on
@@ -156,7 +171,7 @@ now.
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
-| WP5 lists & actions | row states (5a) and the labelled action trigger (5c) done; preview split, selection bar, panel shells and pagination open |
+| WP5 lists & actions | row states (5a), preview split (5b) and the labelled action trigger (5c) done; selection bar, panel shells and pagination open |
 | WP6–WP9 | open |
 
 ## Conventions for the next component
