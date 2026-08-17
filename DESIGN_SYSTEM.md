@@ -125,6 +125,7 @@ state table close.
 | WP1 tokens | done — tokens, client scopes, boot wiring, Foundations pages |
 | WP2 Storybook | done — tenant + surface toolbars, split-tier viewports, a11y addon |
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
+| WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | field-row presentation done; the interactive states wait on WP4.2 (above) |
 | WP5–WP9 | open |
 
