@@ -1,12 +1,7 @@
 <template>
   <div
     data-cy="metadata-wrapper"
-    v-if="
-      (!metadata.showOnlyInEditMode ||
-        (metadata.showOnlyInEditMode && isEdit)) &&
-      fieldIsPermittedToBeSeenByUser &&
-      fieldIsConditionallyVisible
-    "
+    v-if="fieldIsPermittedToBeSeenByUser && fieldIsConditionallyVisible"
     :key="fieldLabel"
     :class="{
       relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
@@ -18,12 +13,12 @@
           'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
         }"
         :metadata="metadata"
-        :is-field-required="isFieldRequired && isEdit"
-        :is-one-of-required="isOneOfRequired && isEdit"
+        :is-field-required="isFieldRequired"
+        :is-one-of-required="isOneOfRequired"
       />
       <MultilingualLocaleSelector :field-key="metadata.key" />
       <BaseVirtualKeyboard
-        v-if="isEdit && virtualKeyboardLayouts"
+        v-if="isEditingThisField && virtualKeyboardLayouts"
         :input="keyboardInput"
         :layouts="virtualKeyboardLayouts"
         :keyboard-class="safeKeyboardClass"

@@ -35,20 +35,8 @@
         </div>
 
 
-        <MetadataEditButton
-          class="my-2"
-          v-if="
-            auth.isAuthenticated.value === true &&
-            element.editMetadataButton?.hasButton &&
-            showEditMetadataButton
-          "
-          button-size="sm"
-          :readmode-label="element.editMetadataButton.readmodeLabel"
-          :editmode-label="element.editMetadataButton.editmodeLabel"
-        />
         <div
-          class="flex align-center"
-          :class="{ 'ml-auto': !showEditMetadataButton }"
+          class="flex align-center ml-auto"
           v-if="
             auth.isAuthenticated.value === true && element.contextMenuActions
           "
@@ -103,7 +91,6 @@ import { computed, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { usePermissions } from "@/composables/usePermissions";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {
@@ -116,7 +103,6 @@ import {
 } from "@/generated-types/queries";
 import EntityElementWindowPanel from "../windowPanel/EntityElementWindowPanel.vue";
 import BaseExpandButton from "../base/BaseExpandButton.vue";
-import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
@@ -138,7 +124,6 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const { fetchAdvancedPermissions, fetchUpdateAndDeletePermission } =
   usePermissions();
-const { getForm } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
 
 const permissionResults = ref<Record<string, boolean>>({});
@@ -148,15 +133,6 @@ const isCheckingPermissions = ref(true);
 const computedIsEdit = computed(
   () => props.isEditOverwrite || useEditHelper.isEdit,
 );
-
-const showEditMetadataButton = computed(() => {
-  const key = props.element.editMetadataButton?.hideIfMetadataNotPresent;
-  if (!key) return true;
-  const form = getForm(props.formId);
-  if (!form) return true;
-  const value = form.values.intialValues?.[key];
-  return value !== undefined && value !== null && value !== "";
-});
 
 const resizeColumn = (toggled: boolean) => {
   emit("resizeColumn", toggled);

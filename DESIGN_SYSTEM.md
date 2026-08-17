@@ -100,23 +100,34 @@ repo and a decision to take rather than guess. Until then the badge is
 deliberately not implemented; the three tone tokens stay unused rather than
 being bound to an order the client never declared.
 
-## WP4 — what the field row still waits on
+## WP4 — the whole-form edit path is gone
 
-The field row's *presentation* is on tokens: label, value, the "Geen waarde"
-empty state and the Ja/Nee boolean. Its *interactive* states — hover wash and
-pencil, focus ring on the value, editing, saving, saved, the inline undo chip
-— are not, and cannot be until per-field editing exists.
+Per-field editing replaced it outright rather than sitting behind a flag: the
+redesign ships as a separate beta build of the PWA, so it can be tested in
+phases without a switch in the code.
 
-Today a whole panel enters edit mode and every row swaps to
-`EntityElementMetadataEdit` at once; a resting row is not a control, so there
-is nothing to hover, focus or ring. `InlineFieldEditor.vue` is in `MANIFEST.md`
-but does not exist in this repo yet. Building it is WP4.2 and it is the
-behavioural half of the package — pick-then-Bewaar changes muscle memory for
-cataloguers, which is why the migration plan suggests a flag for one release.
+Removed: `MetadataEditButton.vue` (the page-level *Bewerk* toggle, in the
+header and on every panel) and `modals/EditModal.vue` (the fixed save bar at
+the bottom of the record — the global save bar `per-field-editing.md` forbids).
 
-So the order is: WP4.2 first (the editor and the per-field edit path), then the
-row's interactive states land on top of it, and only then does `field-row.md`'s
-state table close.
+Three consequences worth knowing before testing:
+
+- **`showOnlyInEditMode` no longer hides anything.** It meant "only while the
+  page is in edit mode", and there is no such mode now. Keeping it would hide
+  a field permanently, since you cannot click a value you cannot see, so those
+  fields are always visible. Configs using it should be reviewed.
+- **The required `*` and the one-of-required marker are always shown.** They
+  used to appear only in edit mode, which meant a reader never learned a field
+  was required.
+- **The virtual keyboard follows the open editor** instead of the page's edit
+  mode.
+
+`useEditMode` itself stays: ordering, entity pickers, bulk operations and the
+WYSIWYG use it as their own mechanism, and none of those are the metadata
+whole-form path.
+
+Still open in WP4: the inline undo chip (WP4.3) and one-gesture group editing
+in `EntityElementWindowPanel` + `useBlockEditor` (WP4.4).
 
 ## Status against the migration plan
 
@@ -126,7 +137,7 @@ state table close.
 | WP2 Storybook | done — tenant + surface toolbars, split-tier viewports, a11y addon |
 | WP3 primitives | button, checkbox, spinner, text/number/textarea, tooltip, relation chip, `AdvancedDropdown` done; entity badge blocked (below) |
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
-| WP4 fields & editing | field-row presentation done; the interactive states wait on WP4.2 (above) |
+| WP4 fields & editing | field row + inline editor done, whole-form path removed; undo chip (4.3) and group editing (4.4) open |
 | WP5–WP9 | open |
 
 ## Conventions for the next component

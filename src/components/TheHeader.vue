@@ -3,10 +3,6 @@
     class="z-header flex items-center mx-6 my-8 px-6 py-4 rounded-3xl bg-background-light flex-wrap min-[1400px]:flex-nowrap"
   >
     <BreadCrumbs />
-    <MetadataEditButton
-      class="ml-0 min-[880px]:ml-6"
-      v-if="showEditMetadataButton"
-    />
     <EntityHeaderButton
       v-if="isSingleEntityPage && customDeleteButton"
       :config="customDeleteButton"
@@ -33,7 +29,6 @@
 
 <script lang="ts" setup>
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
-import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import { useRoute } from "vue-router";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import SearchBar from "@/components/SearchBar.vue";
@@ -45,18 +40,13 @@ import EntityHeaderButton from "@/components/EntityHeaderButton.vue";
 import HeaderContextMenuActions from "@/components/HeaderContextMenuActions.vue";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { auth } from "@/main";
-import { usePageStatus } from "@/composables/usePageStatus";
 import type { EntityButtonConfig, ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
 
 const route = useRoute();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
-const { pageStatus } = usePageStatus();
-const {
-  actions: contextMenuActions,
-  hasEditMetadataButton: configEditMetadataButton,
-  deleteButton: configDeleteButton,
-} = useEntityPageConfig();
+const { actions: contextMenuActions, deleteButton: configDeleteButton } =
+  useEntityPageConfig();
 
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
@@ -86,13 +76,4 @@ const showDeleteButton = computed(() => {
   return true;
 });
 
-const showEditMetadataButton = computed(() => {
-  if (!isSingleEntityPage.value || !auth.isAuthenticated.value) return false;
-  if (!entityType.value) return true;
-  const fromConfig = configEditMetadataButton.value;
-  if (fromConfig !== undefined) return fromConfig;
-  const meta = getRouteMetadataInfoFromEntity(config, entityType.value);
-  if (meta?.hasEditMetadataButton !== undefined) return meta.hasEditMetadataButton;
-  return true;
-});
 </script>
