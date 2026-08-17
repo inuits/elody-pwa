@@ -71,4 +71,41 @@ describe("MetadataFormatterPill", () => {
       expect(wrapper.text()).toBe("concept");
     });
   });
+
+  describe("colours", () => {
+    it("takes the relation-chip tokens for an auto pill, not a hard-coded fill", () => {
+      const wrapper = mount(MetadataFormatterPill, {
+        props: { formatter: "pill|auto", label: "Jan Persoon" },
+      });
+      const pill = wrapper.get("div");
+      expect(pill.classes()).toContain("pill--relation");
+      // The fill is the token, so nothing is written inline.
+      expect(pill.attributes("style")).toBeUndefined();
+    });
+
+    it("keeps client-configured colours inline — those are config, not design", () => {
+      const wrapper = mount(MetadataFormatterPill, {
+        props: { formatter: "pill", label: "concept" },
+      });
+      const style = wrapper.get("div").attributes("style");
+      expect(style).toContain("background: rgb(170, 170, 170)");
+      expect(style).toContain("color: rgb(255, 255, 255)");
+    });
+
+    it("stays unstyled when the client configured no group for the formatter", () => {
+      const wrapper = mount(MetadataFormatterPill, {
+        props: { formatter: "badge", label: "concept" },
+      });
+      expect(wrapper.get("div").classes()).not.toContain("pill");
+    });
+
+    it("stays unstyled when the client configured no colours for the value", () => {
+      const wrapper = mount(MetadataFormatterPill, {
+        props: { formatter: "pill", label: "unconfigured-value" },
+      });
+      const pill = wrapper.get("div");
+      expect(pill.classes()).not.toContain("pill");
+      expect(pill.attributes("style")).toBeUndefined();
+    });
+  });
 });

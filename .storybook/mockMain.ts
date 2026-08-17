@@ -24,6 +24,14 @@ export const auth = {
 };
 
 export const bulkSelectAllSizeLimit = 999999;
-export const formattersSettings = {};
+// Stand-in tenant config: pill colours are declared per client, so a story
+// showing a configured pill needs a group to look its colours up in.
+export const formattersSettings = {
+  pill: {
+    concept: { background: "#E8EEF0", text: "#003A52" },
+    gepubliceerd: { background: "#DAF1DC", text: "#15803d" },
+    vervallen: { background: "#FDEBD7", text: "#B95000" },
+  },
+};
 export const typeUrlMapping = { mapping: {}, reverseMapping: {} };
 export const i18n = undefined;
