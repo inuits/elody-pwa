@@ -1,7 +1,5 @@
 <template>
-  <div v-if="isLoading" class="flex items-center justify-center">
-  <SpinnerLoader theme="accent" :dimensions="10" />
-  </div>
+  <FilterOptionsSkeleton v-if="isLoading" />
   <div v-if="showFilters" class="grow">
     <AutocompleteFilter
       v-if="useAutocomplete"
@@ -38,7 +36,7 @@ import {
 } from "@/generated-types/queries";
 import AutocompleteFilter from "./AutocompleteFilter.vue";
 import CheckboxFilter from "./CheckboxFilter.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import FilterOptionsSkeleton from "@/components/base/skeletons/FilterOptionsSkeleton.vue";
 import { useFilterOptions } from "@/composables/useFilterOptions";
 import { type FilterListItem } from "@/composables/useStateManagement";
 import { useRoute } from "vue-router";

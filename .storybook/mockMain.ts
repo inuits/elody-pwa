@@ -67,6 +67,7 @@ export const i18n = createI18n({
       "context-menu": { actions: "Acties" },
       filters: {
         "section-active": "actief",
+        "clear-filter": "Wis filter",
         "saved-searches": "Bewaarde zoekopdrachten",
       },
       pagination: {
@@ -102,6 +103,7 @@ export const i18n = createI18n({
       "context-menu": { actions: "Actions" },
       filters: {
         "section-active": "active",
+        "clear-filter": "Clear filter",
         "saved-searches": "Saved searches",
       },
       pagination: {

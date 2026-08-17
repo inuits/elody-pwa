@@ -141,6 +141,20 @@ the jsdom localStorage problem. Since WP5e its header is `BasePanelShell`,
 which *is* storied and screenshot-verified under a light and a dark tenant, so
 the chrome is covered even though the wrapper itself is not.
 
+## Next in WP6 — facet counts are fetched but never shown
+
+`filter-panel.md` wants option counts beside each checkbox, and in its
+accessible name ("BOEK, 812 resultaten"). `useFilterOptions` already builds a
+`facetCounts` map and uses it — but only to *hide* options whose count is
+zero. The numbers never reach the UI.
+
+Surfacing them means exporting `facetCounts` from the composable, threading it
+through `ExactSelectionFilter` to `CheckboxFilter`, and deciding one thing:
+`BaseInputCheckbox` ignores `ariaLabel` when a visible `label` is set, so
+either the count goes into the label string ("BOEK (812)", read aloud as
+"BOEK 812") or the checkbox gains a label slot to get the docs' exact wording.
+The second is cleaner and is the reason this was not done blind.
+
 ## Group editing needs `isGroup` from the service
 
 Group editing is built (`useBlockEditor.ts` + the card on
@@ -172,7 +186,7 @@ now.
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
 | WP5 lists & actions | done — rows, preview split, action trigger, selection bar, panel shell, pagination. Only the quality-status chip + jump-to-field popover is left, and it is a feature rather than chrome |
-| WP6 filters | filter rail + section headers done; matcher restyling, date picker, picker modal, base modal and saved searches open |
+| WP6 filters | rail, section headers, matcher panel chrome and option skeletons done; facet counts, date picker, picker modal, base modal and saved searches open |
 | WP7–WP9 | open |
 
 ## Conventions for the next component
@@ -224,6 +238,7 @@ there; until then vue-i18n renders the key itself.
 | `pagination.previous` / `.next` | Vorige pagina / Volgende pagina | Previous page / Next page | The ‹ and › steps. |
 | `filters.section-active` | actief | active | Chip on an active filter section. `filters.active` already exists but means the rail's "N actief", so this is its own key. |
 | `filters.saved-searches` | Bewaarde zoekopdrachten | Saved searches | Accessible name of the saved-searches trigger. |
+| `filters.clear-filter` | Wis filter | Clear filter | Per-section clear, which applies immediately. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
