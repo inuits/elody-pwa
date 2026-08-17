@@ -52,7 +52,7 @@
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{
             canCrop
               ? $t("tooltip.media-viewer.selection")
@@ -78,7 +78,7 @@
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{
             canCrop
               ? $t("tooltip.media-viewer.remove-selected-area")
@@ -121,7 +121,7 @@
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{ $t("iiif-operations-modal.title") }}
         </span>
       </BaseTooltip>

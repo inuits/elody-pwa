@@ -44,7 +44,7 @@
           <Unicon :name="Unicons.QuestionCircle.name" height="20" />
         </div>
       </template>
-      <span class="text-sm text-text-placeholder">
+      <span>
         {{ $t("pagination.capped-pages-tooltip") }}
       </span>
     </BaseTooltip>

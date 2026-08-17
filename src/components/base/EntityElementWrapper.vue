@@ -44,7 +44,7 @@
             </div>
           </template>
           <template #default>
-            <span class="text-sm text-text-placeholder">
+            <span>
               <div>
                 {{ t("preview-component.close") }}
               </div>

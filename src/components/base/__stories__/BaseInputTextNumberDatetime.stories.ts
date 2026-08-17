@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { ref } from "vue";
 import BaseInputTextNumberDatetime from "../BaseInputTextNumberDatetime.vue";
+import BaseTooltip from "../BaseTooltip.vue";
 
 const meta: Meta<typeof BaseInputTextNumberDatetime> = {
   // Story id base-baseinputtext--states, per MANIFEST.md.
@@ -55,6 +56,46 @@ export const States: Story = {
 
         <label for="s-area">textarea</label>
         <base-input-text-number-datetime id="s-area" v-model="area" type="textarea" input-style="defaultWithBorder" />
+      </div>`,
+  }),
+};
+
+/**
+ * The tooltip is supplementary only: an inverted surface that appears after
+ * 300ms on hover, at once on keyboard focus, and closes on Escape. It is the
+ * escape hatch for a truncated value — never the sole carrier of required
+ * information, and never interactive.
+ */
+export const Tooltip: Story = {
+  render: () => ({
+    components: { BaseTooltip },
+    template: `
+      <div style="display:grid;grid-template-columns:150px 260px;gap:18px 14px;align-items:center;
+                  font-size:var(--text-label);padding-top:60px">
+        <span>truncated value</span>
+        <base-tooltip position="top" :tooltip-offset="8">
+          <template #activator="{ on }">
+            <button
+              type="button"
+              v-on="on"
+              style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;
+                     font-size:var(--text-value);background:none;border:0;padding:0;text-align:left;cursor:default"
+            >
+              Verhalen uit de Noordzee — een bloemlezing over kustvisserij
+            </button>
+          </template>
+          <span>Verhalen uit de Noordzee — een bloemlezing over kustvisserij</span>
+        </base-tooltip>
+
+        <span>hint on an icon</span>
+        <base-tooltip position="top" :tooltip-offset="8">
+          <template #activator="{ on }">
+            <button type="button" v-on="on" style="background:none;border:0;cursor:default;font-size:var(--text-value)">
+              ⓘ
+            </button>
+          </template>
+          <span>Deze waarde komt uit de import en is niet bewerkbaar.</span>
+        </base-tooltip>
       </div>`,
   }),
 };

@@ -10,7 +10,7 @@
           <unicon :name="Unicons.Keyboard.name" />
         </div>
       </template>
-      <span class="text-sm text-text-placeholder">
+      <span>
         {{ t("metadata.labels.virtual-keyboard") }}
       </span>
     </BaseTooltip>

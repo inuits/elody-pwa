@@ -246,7 +246,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             <div>
               {{
                 previewComponentCurrentActive

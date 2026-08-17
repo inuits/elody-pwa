@@ -37,7 +37,7 @@
             </div>
           </template>
           <template #default>
-            <span class="text-sm text-text-placeholder">
+            <span>
               <div>
                 {{ t(`tooltip.manifest-viewer-add-to-comparison`) }}
               </div>
