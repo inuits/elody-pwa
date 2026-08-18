@@ -79,6 +79,15 @@ export const useFieldValidation = (
       return `${defaultRules}:${amount}:${relationType}:${exact}`;
     }
 
+    if (isRulePresent(validationOnField, ValidationRules.HasMinMaxAmountOfRelations)) {
+      const {
+        relationType,
+        min,
+        max,
+      } = validationOnField.has_min_max_amount_of_relations ?? {};
+      return `${defaultRules}:${relationType}:${min}:${max}`;
+    }
+
     if (
       isRulePresent(
         validationOnField,

@@ -26,6 +26,10 @@ export const useInputValidation = () => {
       _getHasSpecificRelationRule,
     );
     defineRule(
+      ValidationRules.HasMinMaxAmountOfRelations,
+      _getHasMinMaxAmountOfRelationsRule,
+    );
+    defineRule(
       ValidationRules.HasOneOfRequiredRelations,
       _getHasOneOfSpecificRelationsRule,
     );
@@ -92,6 +96,25 @@ export const useInputValidation = () => {
       return false;
     }
   };
+
+  const _getHasMinMaxAmountOfRelationsRule = (
+    value: BaseRelationValuesInput[],
+    parameters: string[],
+  ): boolean => {
+    if (!Array.isArray(value)) {
+      return false;
+    }
+    const relations = value.filter(
+      (relation: BaseRelationValuesInput) =>
+        relation.editStatus !== EditStatus.Deleted,
+    );
+    const [relationType, min, max] = parameters[0].split(":");
+    const specificRelationsLength =
+      relations.filter(
+        (relation: BaseRelationValuesInput) => relation.type === relationType,
+      )?.length || 0;
+    return specificRelationsLength <= Number(max) && specificRelationsLength >= Number(min);
+  }
 
   const _getHasOneOfSpecificRelationsRule = (
     value: BaseRelationValuesInput[],
