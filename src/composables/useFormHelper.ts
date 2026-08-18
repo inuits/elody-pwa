@@ -1,5 +1,6 @@
 import {
   type BaseRelationValuesInput,
+  BulkEditModes,
   EditStatus,
   type IntialValues,
   type MetadataValuesInput,
@@ -14,12 +15,22 @@ import { useInheritedRelations } from "./useInheritedRelations";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
+// How a bulk-edit form applies its relation values, chosen by the user per form.
+const bulkEditRelationModes = ref<{ [formId: string]: BulkEditModes }>({});
 const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 const multilingualTranslations = ref<{
   [formId: string]: {
     [fieldKey: string]: { key: string; value: unknown; lang: string }[];
   };
 }>({});
+
+export type BulkEditPayload = {
+  metadata: MetadataValuesInput[];
+  relationsToAdd: BaseRelationValuesInput[];
+  relationsToRemove: BaseRelationValuesInput[];
+  relationsToReplace: BaseRelationValuesInput[];
+  hasChanges: boolean;
+};
 
 export type EntityValues = {
   intialValues?: IntialValues;
@@ -584,6 +595,90 @@ const useFormHelper = () => {
     return { metadata, relations, updateOnlyRelations };
   };
 
+  /**
+   * Payload for a bulk edit: the same form is applied to many entities, so only
+   * fields the user actually touched may be sent. Every rendered field key is
+   * present in intialValues from setup on, and metadata is patched by key, so an
+   * untouched key that slips through would blank that field on every selected
+   * entity.
+   */
+  const buildBulkEditPayload = (
+    values: EntityValues,
+    {
+      formId,
+      isFieldDirty,
+      relationMode = BulkEditModes.Add,
+    }: {
+      formId: string;
+      isFieldDirty: (path: string) => boolean;
+      relationMode?: BulkEditModes;
+    },
+  ): BulkEditPayload => {
+    const metadata: MetadataValuesInput[] = [];
+    const relationsToAdd: BaseRelationValuesInput[] = [];
+    const relationsToRemove: BaseRelationValuesInput[] = [];
+    const relationsToReplace: BaseRelationValuesInput[] = [];
+
+    const allowedKeys = editableFields.value[formId] ?? [];
+    const { intialValues, relationValues } =
+      extractMainValuesFromEntityValues(values);
+
+    Object.entries(intialValues ?? {}).forEach(([key, value]) => {
+      if (key === "__typename") return;
+      if (!allowedKeys.includes(key)) return;
+      if (value === undefined || value === null) return;
+      if (!isFieldDirty(`intialValues.${key}`)) return;
+      metadata.push({ key, value: extractMetadataValue(value) });
+    });
+
+    // The mode is a single choice for the whole form: metadata is always patched
+    // by key, only relations can be added, replaced or removed.
+    const target =
+      relationMode === BulkEditModes.Remove
+        ? relationsToRemove
+        : relationMode === BulkEditModes.Replace
+          ? relationsToReplace
+          : relationsToAdd;
+
+    Object.entries(relationValues ?? {}).forEach(([, relations]) => {
+      if (!Array.isArray(relations)) return;
+      // A bulk form starts with empty pickers and removal is expressed by the
+      // mode, so a deleted status here can only be leftover state. Letting it
+      // through would flip the backend to a full relation replacement and wipe
+      // relations on every selected entity.
+      const picked = relations.filter(
+        (relation: any) =>
+          relation && relation.editStatus !== EditStatus.Deleted && relation.key,
+      );
+      // ponytail: an empty picker means "leave this alone", so replace-to-empty
+      // ("clear all genres on these works") cannot be expressed. Add an explicit
+      // clear toggle if someone asks for it.
+      if (picked.length === 0) return;
+
+      picked.forEach((relation: any) =>
+        target.push({
+          ...relation,
+          editStatus:
+            relationMode === BulkEditModes.Remove
+              ? EditStatus.Deleted
+              : EditStatus.New,
+        }),
+      );
+    });
+
+    return {
+      metadata,
+      relationsToAdd,
+      relationsToRemove,
+      relationsToReplace,
+      hasChanges:
+        metadata.length > 0 ||
+        relationsToAdd.length > 0 ||
+        relationsToRemove.length > 0 ||
+        relationsToReplace.length > 0,
+    };
+  };
+
   const setMultilingualTranslations = (
     formId: string,
     fieldKey: string,
@@ -600,6 +695,17 @@ const useFormHelper = () => {
     fieldKey: string,
   ): { key: string; value: unknown; lang: string }[] | undefined => {
     return multilingualTranslations.value[formId]?.[fieldKey];
+  };
+
+  const getBulkEditRelationMode = (formId: string): BulkEditModes =>
+    bulkEditRelationModes.value[formId] ?? BulkEditModes.Add;
+
+  const setBulkEditRelationMode = (formId: string, mode: BulkEditModes): void => {
+    bulkEditRelationModes.value[formId] = mode;
+  };
+
+  const clearBulkEditRelationMode = (formId: string): void => {
+    delete bulkEditRelationModes.value[formId];
   };
 
   return {
@@ -626,6 +732,10 @@ const useFormHelper = () => {
     getTeaserMetadataInState,
     deleteTeaserMetadataItemInState,
     parseFormValuesToFormInput,
+    buildBulkEditPayload,
+    getBulkEditRelationMode,
+    setBulkEditRelationMode,
+    clearBulkEditRelationMode,
     parseIntialValuesForFormSubmit,
     parseRelationValuesForFormSubmit,
     parseRelationMetadataForFormSubmit,
