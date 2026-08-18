@@ -17,7 +17,7 @@
         </h2>
 
         <dynamic-form
-          :dynamic-form-query="'ProcessorRelationConfig'"
+          :dynamic-form-query="currentFormQuery"
           :form-key="activeFormId"
           :modal-form-fields="relationFormFields"
           :prefilled-form-values="relationPrefill"
@@ -77,7 +77,6 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { gql } from "@apollo/client/core";
 import { apolloClient } from "@/main";
 import {
   TypeModals,
@@ -89,6 +88,7 @@ import { useRouter } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEntityEditor } from "@/composables/useEntityEditor";
+import { useImport } from "@/composables/useImport";
 import { mapUrlToEntityType, getMetadataFields } from "@/helpers";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
@@ -100,6 +100,7 @@ const { t } = useI18n();
 const router = useRouter();
 const { closeModal, getModalInfo } = useBaseModal();
 const { deleteForm, getForm } = useFormHelper();
+const { loadDocument } = useImport();
 const {
   entity,
   editableFields,
@@ -123,12 +124,9 @@ const relationConfig = ref<{
 // fields object (modalFormFields) + prefilled values rendered by DynamicForm
 const relationFormFields = ref<Record<string, any> | null>(null);
 const relationPrefill = ref<Record<string, any>>({});
-
-const ProcessorConfigFormDocument = gql`
-  query ProcessorConfigForm($id: String!) {
-    ProcessorConfigForm(id: $id)
-  }
-`;
+// Name of the field-source query, taken from the action's formQuery input and
+// resolved by name at runtime — no client-specific query is baked in here.
+const currentFormQuery = ref<string>("");
 
 const currentEntityId = ref<string | null>(null);
 const currentEntityType = ref<string | null>(null);
@@ -151,12 +149,29 @@ const metadataFields = computed(() =>
 const initializeRelationConfig = async (info: any) => {
   isLoading.value = true;
   try {
+    currentFormQuery.value = info.formQuery || "";
+    // Resolve the field-source query by name (the action's formQuery input),
+    // exactly like useEntityEditor.initialize does. The query takes the related
+    // entity id and returns a dynamic field-set (e.g. SHACL-derived processor
+    // config). Reading the single root field keeps this query-name-agnostic.
+    const document = await loadDocument(currentFormQuery.value);
+    if (!document) {
+      console.log(
+        `Relation-config form query "${currentFormQuery.value}" not found`,
+      );
+      return;
+    }
     const { data } = await apolloClient.query({
-      query: ProcessorConfigFormDocument,
-      variables: { id: info.entityId },
+      query: document,
+      // parentEntityId is the entity the relation hangs off (e.g. the
+      // pipeline). Field-source queries that only declare $id ignore it;
+      // those that relate two entities — connecting one component on a
+      // pipeline to another — cannot be answered without it.
+      variables: { id: info.entityId, parentEntityId: info.parentEntityId },
       fetchPolicy: "no-cache",
     });
-    const formFields = data?.ProcessorConfigForm || {};
+    const formFields =
+      (Object.values(data ?? {})[0] as Record<string, any>) || {};
     // field array drives the save (its keys); the object drives DynamicForm
     editableFields.value = Object.values(formFields).filter(
       (f: any) => f?.inputField,
@@ -208,6 +223,7 @@ const onSave = async ({
         relationConfig.value.relationType,
         formValues,
         modalInfo.callback,
+        modalInfo.relationMetadata,
       );
       if (success) handleCloseModal();
     } finally {
@@ -245,6 +261,7 @@ const resetData = () => {
   relationConfig.value = null;
   relationFormFields.value = null;
   relationPrefill.value = {};
+  currentFormQuery.value = "";
 };
 
 watch(

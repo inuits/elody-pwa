@@ -242,4 +242,43 @@ describe("useFiltersBaseNew - Variable Resolution", () => {
       },
     ]);
   });
+
+  it("does not leak an unresolved $entity relation template when the relation is empty", async () => {
+    const { initializeFilters, setVariables, getNormalizedFiltersForApi } =
+      useFiltersBaseNew();
+
+    // An entity (e.g. a freshly created pipeline) with no related processors.
+    setVariables({
+      entity: {
+        relationValues: {},
+      },
+    });
+
+    const fetchedFilters = {
+      relation: {
+        type: "selection",
+        key: ["elody:1|identifiers"],
+        defaultValue: "$entity.relationValues.hasProcessor.key",
+        hidden: true,
+        __typename: "AdvancedFilter",
+      },
+      __typename: "AdvancedFilters",
+    };
+
+    await initializeFilters({
+      advancedFilters: fetchedFilters,
+      fromState: false,
+    });
+
+    // The raw "$entity..." template must never reach the API. An unresolved
+    // relation resolves to an empty selection (matching nothing) instead.
+    expect(getNormalizedFiltersForApi()).toEqual([
+      {
+        type: "selection",
+        key: ["elody:1|identifiers"],
+        value: [],
+        match_exact: true,
+      },
+    ]);
+  });
 });
