@@ -30,8 +30,7 @@ export const useExportXlsx = () => {
       const state = getStateForRoute(route);
       const payload: Record<string, any> = {
         type: entityType,
-        // limit: state?.totalEntityCount ?? 0,
-        limit: 100,
+        limit: state?.totalEntityCount ?? 0,
       };
       if (state?.queryVariables) {
         payload.order_by = state.queryVariables.searchValue?.order_by;
