@@ -482,6 +482,12 @@ export type BulkOperationOptionsOptionsArgs = {
   input: Array<DropdownOptionInput>;
 };
 
+export enum BulkEditModes {
+  Add = 'add',
+  Remove = 'remove',
+  Replace = 'replace'
+}
+
 export enum BulkOperationTypes {
   AddRelation = 'addRelation',
   BulkUpdateMetadata = 'bulkUpdateMetadata',
