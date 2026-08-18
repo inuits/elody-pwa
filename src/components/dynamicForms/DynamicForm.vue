@@ -24,6 +24,17 @@
       >
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
       </p>
+      <div v-if="isBulkEditFormWithRelations" class="pb-4">
+        <AdvancedDropdown
+          data-cy="bulk-edit-relation-mode"
+          v-model="selectedRelationMode"
+          :options="relationModeOptions"
+          :label="t('bulk-operations.relation-mode.label')"
+          :clearable="false"
+          :add-label-to-value="true"
+          label-position="inline"
+        />
+      </div>
       <div
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
@@ -85,6 +96,17 @@
           :key="`${dynamicFormQuery}_field_${index}`"
           :is-used-in-modal="true"
         />
+        <p
+          v-if="field.onlyForEntityTypes?.length && isBulkEditForm"
+          class="text-xs text-text-body pt-1"
+        >
+          {{
+            t("bulk-operations.field-partial-scope", [
+              bulkItemCountForTypes(field.onlyForEntityTypes),
+              bulkItems.length,
+            ])
+          }}
+        </p>
         <div v-if="field.__typename === 'UploadContainer'">
           <div
             v-for="(uploadContainerField, idx) in Object.values(
@@ -234,6 +256,10 @@ import type {
   MetadataInput,
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables,
+  BulkEditEntitiesMutation,
+  BulkEditEntitiesMutationVariables,
+  BulkUpdateEntitiesWithJsonMutation,
+  BulkUpdateEntitiesWithJsonMutationVariables,
   PanelMetaData,
   UploadContainer,
   UploadField,
@@ -246,6 +272,9 @@ import {
   EndpointResponseActions,
   EntityPickerMode,
   MutateEntityValuesDocument,
+  BulkEditEntitiesDocument,
+  BulkUpdateEntitiesWithJsonDocument,
+  BulkEditModes,
   OcrType,
   RouteNames,
   TypeModals,
@@ -268,6 +297,7 @@ import {
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -286,6 +316,9 @@ import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 import { useEditMode } from "@/composables/useEdit";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBulkOperations } from "@/composables/useBulkOperations";
+import { useBulkEditForm } from "@/composables/useBulkEditForm";
 import { useUploadState } from "@/composables/upload/useUploadState";
 
 const props = withDefaults(
@@ -339,7 +372,13 @@ const {
   parseInheritedRelationValuesFromFormSubmit,
   parseIntialValuesForFormSubmit,
   addEditableMetadataKeys,
+  buildBulkEditPayload,
+  getBulkEditRelationMode,
+  setBulkEditRelationMode,
 } = useFormHelper();
+const { confirm } = useConfirmModal();
+const { dequeueItemForBulkProcessing, getEnqueuedItems } = useBulkOperations();
+const { buildJsonDocuments, groupIdsByType } = useBulkEditForm();
 const {
   displaySuccessNotification,
   displayWarningNotification,
@@ -399,6 +438,16 @@ const { mutate } = useMutation<
   MutateEntityValuesMutation,
   MutateEntityValuesMutationVariables
 >(MutateEntityValuesDocument);
+
+const { mutate: bulkEdit } = useMutation<
+  BulkEditEntitiesMutation,
+  BulkEditEntitiesMutationVariables
+>(BulkEditEntitiesDocument);
+
+const { mutate: bulkUpdateWithJson } = useMutation<
+  BulkUpdateEntitiesWithJsonMutation,
+  BulkUpdateEntitiesWithJsonMutationVariables
+>(BulkUpdateEntitiesWithJsonDocument);
 
 const dynamicForm = computed(() => {
   return props.tabName
@@ -485,6 +534,75 @@ const getSortedFieldArray = computed(() => {
   });
 });
 
+const isBulkEditForm = computed<boolean>(() =>
+  (getFieldArray.value ?? []).some(
+    (field: any) => field.actionType === ActionType.BulkUpdateMetadata,
+  ),
+);
+
+const isBulkEditFormWithRelations = computed<boolean>(
+  () =>
+    isBulkEditForm.value &&
+    (getFieldArray.value ?? []).some(
+      (field: any) => field.inputField?.relationType,
+    ),
+);
+
+// A bulk-edit form runs either in the merged bulk-edit modal or, for a
+// single-type form configured with a formQuery, in the plain DynamicForm modal.
+const bulkEditContext = computed(
+  () =>
+    getModalInfo(TypeModals.BulkOperationsEdit).context ??
+    getModalInfo(TypeModals.DynamicForm).context,
+);
+
+const bulkItems = computed(() =>
+  bulkEditContext.value ? getEnqueuedItems(bulkEditContext.value as any) : [],
+);
+
+const bulkItemCountForTypes = (types: string[]): number =>
+  bulkItems.value.filter((item: any) =>
+    types.some(
+      (type) => String(type).toLowerCase() === String(item.type).toLowerCase(),
+    ),
+  ).length;
+
+const relationModeOptions = [
+  { label: "bulk-operations.relation-mode.add", value: BulkEditModes.Add },
+  {
+    label: "bulk-operations.relation-mode.replace",
+    value: BulkEditModes.Replace,
+  },
+  { label: "bulk-operations.relation-mode.remove", value: BulkEditModes.Remove },
+];
+
+const selectedRelationMode = computed<BulkEditModes>({
+  get: () => getBulkEditRelationMode(formId.value),
+  // AdvancedDropdown emits either the raw value or the whole option
+  set: (mode: any) =>
+    setBulkEditRelationMode(
+      formId.value,
+      mode?.value ?? mode ?? BulkEditModes.Add,
+    ),
+});
+
+// A bulk-edit form is applied to entities it never loaded, so its own field keys
+// are the editable set. Seeding them here lets MetadataWrapper strip back the
+// ones the user has no canEdit permission for, before anything is submitted.
+watch(
+  () => getFieldArray.value,
+  (fields: any[]) => {
+    if (!isBulkEditForm.value) return;
+    addEditableMetadataKeys(
+      fields
+        .filter((field) => field.__typename === "PanelMetaData" && field.key)
+        .map((field) => field.key),
+      formId.value,
+    );
+  },
+  { immediate: true },
+);
+
 const form = ref<FormContext<any>>();
 const formContainsErrors = computed(
   (): boolean => Object.keys(form.value?.errors ?? {}).length > 0,
@@ -499,6 +617,8 @@ const createdEntity = ref<Entity | null>(null);
 const { changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
+  // A caller-supplied field set (bulk edit) has no fetched form behind it.
+  if (modalFormFields) return false;
   return !formFields.value && !dynamicForm.value;
 });
 const { t } = useI18n();
@@ -664,7 +784,7 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
 
   await upload(isLinkedUpload.value, entityInput, config, t);
   if (props.emitEntityCreated) {
-    deleteForm(props.dynamicFormQuery);
+    deleteForm(formId.value);
     emit("entityCreated", {
       id: useEntitySingle().getEntityUuid(),
       intialValues: uploadedFilenames
@@ -712,7 +832,7 @@ const submitActionFunction = async (field: FormAction) => {
     // values (e.g. relation metadata) — no entity gets created or updated.
     showErrors.value = false;
     emit("valuesSubmitted", form.value?.values.intialValues ?? {});
-    deleteForm(props.dynamicFormQuery);
+    deleteForm(formId.value);
     return;
   }
 
@@ -742,7 +862,7 @@ const submitActionFunction = async (field: FormAction) => {
       // and swaps in the next form itself. closeAndDeleteForm's upload reset
       // would re-fetch THIS form's definition into the shared dynamicForm
       // state and overwrite the next form's fields, so only drop the form.
-      deleteForm(props.dynamicFormQuery);
+      deleteForm(formId.value);
       emit("entityCreated", entity);
     } else {
       if (config.features.hasBulkSelect && callbackFunctions !== undefined) {
@@ -1111,38 +1231,193 @@ const startOcrActionFunction = async (field: FormAction) => {
 const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
   try {
     if (!(await isFormValid())) return;
+
     const { ids } = extractActionArguments(field.actionType);
-    // ponytail: one mutateEntityValues call per selected id, so the normal
-    // per-entity entity_changed event still fires for history/aggregation;
-    // add a real bulk endpoint if selections grow into the hundreds.
-    await Promise.all(
-      ids.map((id: string) => {
-        addEditableMetadataKeys(
-          Object.keys(form.value.values.intialValues),
-          id,
-        );
-        const metadata = parseIntialValuesForFormSubmit(
-          form.value.values.intialValues,
-          id,
-        );
-        return mutate({
-          id,
-          formInput: { metadata, relations: [] },
+    if (!ids?.length) {
+      displayErrorNotification(
+        t("notifications.errors.bulk-edit-without-selection.title"),
+        t("notifications.errors.bulk-edit-without-selection.description"),
+      );
+      return;
+    }
+
+    const typePerId = new Map<string, string | undefined>(
+      bulkItems.value.map((item: any) => [item.id, item.type]),
+    );
+    const { byType, missingType } = groupIdsByType(
+      ids.map((id: string) => ({
+        id,
+        type:
+          typePerId.get(id) ?? (route.meta.entityType as string | undefined),
+      })),
+    );
+    // Without a type an entity cannot be routed to a document, and a bulk write
+    // that silently skips part of the selection is worse than one that refuses.
+    if (missingType.length > 0) {
+      displayErrorNotification(
+        t("notifications.errors.bulk-edit-untyped-items.title"),
+        t("notifications.errors.bulk-edit-untyped-items.description", [
+          missingType.length,
+        ]),
+      );
+      return;
+    }
+    const payload = buildBulkEditPayload(form.value.values, {
+      formId: formId.value,
+      isFieldDirty: (path: string) => form.value.isFieldDirty(path),
+      relationMode: selectedRelationMode.value,
+    });
+
+    if (!payload.hasChanges) {
+      displayWarningNotification(
+        t("notifications.warning.bulk-edit-without-changes.title"),
+        t("notifications.warning.bulk-edit-without-changes.description"),
+      );
+      return;
+    }
+
+    const changeCount =
+      payload.metadata.length +
+      payload.relationsToAdd.length +
+      payload.relationsToRemove.length +
+      payload.relationsToReplace.length;
+    const choice = await confirm({
+      title: t("confirm.bulk-edit.title"),
+      message: t("confirm.bulk-edit.message", [
+        changeCount,
+        ids.length,
+        t(`bulk-operations.relation-mode.${selectedRelationMode.value}`),
+      ]),
+      confirmLabel: t("confirm.bulk-edit.confirm"),
+      cancelLabel: t("confirm.bulk-edit.cancel"),
+    });
+    if (choice !== "confirm") return;
+
+    const succeededPerTransport: string[][] = [];
+    const failedIds = new Set<string>();
+
+    // Metadata (merged by key) and relation replacement (a relation type in the
+    // document overwrites that type) match the batch endpoint's own semantics.
+    const documents = buildJsonDocuments(
+      byType,
+      payload,
+      fieldTypeMap.value ?? {},
+      selectedRelationMode.value,
+    );
+
+    if (documents.length > 0) {
+      const jsonResult = await bulkUpdateWithJson({ documents });
+      const jsonOutcome = jsonResult?.data?.bulkUpdateEntitiesWithJson;
+      const jsonSucceeded = jsonOutcome?.succeededIds ?? [];
+
+      if (jsonSucceeded.length === 0) {
+        // Nothing landed: this client has no json batch serializer (or the endpoint
+        // refused the whole body). Write the same values through the per-entity
+        // mutation, which every client supports.
+        const fallbackResult = await bulkEdit({
+          ids: documents.map((document: any) => document.id),
+          metadata: payload.metadata,
+          relationsToAdd: [],
+          relationsToRemove: [],
+          relationsToReplace:
+            selectedRelationMode.value === BulkEditModes.Replace
+              ? payload.relationsToReplace
+              : [],
           collection: Collection.Entities,
         });
-      }),
+        const fallbackOutcome = fallbackResult?.data?.bulkEditEntities;
+        succeededPerTransport.push(fallbackOutcome?.succeededIds ?? []);
+        (fallbackOutcome?.failedIds ?? []).forEach((id: string) =>
+          failedIds.add(id),
+        );
+      } else {
+        succeededPerTransport.push(jsonSucceeded);
+        (jsonOutcome?.failedIds ?? []).forEach((id: string) => failedIds.add(id));
+      }
+    }
+
+    // Adding and removing relations need the read-modify-write mutation: the batch
+    // endpoint would overwrite the whole relation type instead.
+    const relationsToAdd =
+      selectedRelationMode.value === BulkEditModes.Add
+        ? payload.relationsToAdd
+        : [];
+    const relationsToRemove =
+      selectedRelationMode.value === BulkEditModes.Remove
+        ? payload.relationsToRemove
+        : [];
+    if (relationsToAdd.length > 0 || relationsToRemove.length > 0) {
+      const mutationResult = await bulkEdit({
+        ids,
+        metadata: [],
+        relationsToAdd,
+        relationsToRemove,
+        relationsToReplace: [],
+        collection: Collection.Entities,
+      });
+      const mutationOutcome = mutationResult?.data?.bulkEditEntities;
+      succeededPerTransport.push(mutationOutcome?.succeededIds ?? []);
+      (mutationOutcome?.failedIds ?? []).forEach((id: string) =>
+        failedIds.add(id),
+      );
+    }
+
+    // An entity is done when every transport that actually carried work for it
+    // reported it. Entities whose type had no applicable field are not written to
+    // at all, so they are finished rather than failed.
+    const writtenIds = new Set<string>([
+      ...documents.map((document: any) => document.id),
+      ...(relationsToAdd.length > 0 || relationsToRemove.length > 0 ? ids : []),
+    ]);
+    const skippedIds = ids.filter((id: string) => !writtenIds.has(id));
+    const succeededIds = ids.filter(
+      (id: string) =>
+        !failedIds.has(id) &&
+        (skippedIds.includes(id) ||
+          succeededPerTransport.every((succeeded) => succeeded.includes(id))),
     );
+
+    if (bulkEditContext.value)
+      succeededIds.forEach((id: string) =>
+        dequeueItemForBulkProcessing(bulkEditContext.value as any, id),
+      );
+
     const callbackFunctions = getCallbackFunctions();
     if (callbackFunctions !== undefined) {
       for (const callback of callbackFunctions) {
         if (callback) await callback();
       }
     }
+
+    const updatedCount = succeededIds.length - skippedIds.length;
+    if (updatedCount > 0)
+      displaySuccessNotification(
+        t("notifications.success.entitiesUpdated.title"),
+        t("notifications.success.entitiesUpdated.description", [updatedCount]),
+      );
+
+    if (skippedIds.length > 0)
+      displayWarningNotification(
+        t("notifications.warning.bulk-edit-skipped-items.title"),
+        t("notifications.warning.bulk-edit-skipped-items.description", [
+          skippedIds.length,
+        ]),
+      );
+
+    // Keep the failed entities selected and the modal open, so a partial batch
+    // can be retried without reselecting everything.
+    if (succeededIds.length < ids.length) {
+      displayErrorNotification(
+        t("notifications.errors.bulk-edit-partially-failed.title"),
+        t("notifications.errors.bulk-edit-partially-failed.description", [
+          ids.length - succeededIds.length,
+        ]),
+      );
+      return;
+    }
+
     closeAndDeleteForm();
-    displaySuccessNotification(
-      t("notifications.success.entityUpdated.title"),
-      t("notifications.success.entityUpdated.description"),
-    );
+    closeModal(TypeModals.BulkOperationsEdit);
   } catch (e) {
     submitErrors.value = e.message;
   }
@@ -1228,6 +1503,12 @@ const initializeForm = async (
   oldQueryName: string | undefined,
 ) => {
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
+  // Fields were supplied by the caller: there is nothing to fetch, but the
+  // template still waits on dynamicFormLoaded.
+  if (modalFormFields) {
+    dynamicFormLoaded.value = true;
+    return;
+  }
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
   getDynamicForm(document, props.tabName);
@@ -1236,7 +1517,7 @@ const initializeForm = async (
 const closeAndDeleteForm = () => {
   closeModal(TypeModals.DynamicForm);
   changeExpandedState(false);
-  deleteForm(props.dynamicFormQuery);
+  deleteForm(formId.value);
   resetUpload();
 };
 
