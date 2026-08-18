@@ -10,15 +10,16 @@
       <spinner-loader theme="accent" />
     </div>
 
-    <PdfToolbar
+    <ViewerToolbar
       v-show="!loading"
-      @zoomIn="zoomIn"
-      @zoomOut="zoomOut"
-      @changePage="onChangePage"
-      :pageNum="pageNum"
-      :pageCount="numPages"
-      :mediafileId="props.source?.id"
-      :originalFilename="props.source?.original_filename"
+      mode="pdf"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @change-page="onChangePage"
+      :page-num="pageNum"
+      :page-count="numPages"
+      :mediafile-id="props.source?.id"
+      :original-filename="props.source?.original_filename"
     />
 
     <div
@@ -60,7 +61,7 @@ import type { Ref } from "vue";
 import { nextTick, onUnmounted, ref, watch } from "vue";
 import * as pdfjsLibImport from "pdfjs-dist";
 
-import PdfToolbar from "../PdfToolbar.vue";
+import ViewerToolbar from "@/components/ViewerToolbar.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { CacheStrategy, useGetMediafile } from "@/composables/useGetMediafile";
 

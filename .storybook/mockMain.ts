@@ -95,6 +95,14 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
+      viewer: {
+        "toolbar-label": "Viewer-acties",
+        "zoom-in": "Zoom in",
+        "zoom-out": "Zoom uit",
+        fullscreen: "Volledig scherm",
+        download: "Download",
+      },
+      entity: { "reset-viewer": "Herstel weergave" },
     },
     en: {
       metadata: {
@@ -142,6 +150,14 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
+      viewer: {
+        "toolbar-label": "Viewer actions",
+        "zoom-in": "Zoom in",
+        "zoom-out": "Zoom out",
+        fullscreen: "Fullscreen",
+        download: "Download",
+      },
+      entity: { "reset-viewer": "Reset view" },
     },
   },
   missingWarn: false,

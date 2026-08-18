@@ -125,3 +125,74 @@ describe("ViewerToolbar - logo", () => {
     );
   });
 });
+
+describe("ViewerToolbar - one toolbar, pdf mode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("is a named toolbar", () => {
+    const wrapper = getWrapper();
+    const toolbar = wrapper.find('[role="toolbar"]');
+    expect(toolbar.exists()).toBe(true);
+    expect(toolbar.attributes("aria-label")).toBe("viewer.toolbar-label");
+  });
+
+  it("shows the page position and hides the image-only actions in pdf mode", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      mode: "pdf",
+      pageNum: 3,
+      pageCount: 12,
+    });
+
+    expect(wrapper.find('[data-testid="viewer-page-nav"]').exists()).toBe(true);
+    expect(wrapper.text()).toContain("12");
+    expect(
+      wrapper.find('[data-testid="open-iiif-operations-modal"]').exists(),
+    ).toBe(false);
+  });
+
+  it("emits a clamped page change", async () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      mode: "pdf",
+      pageNum: 12,
+      pageCount: 12,
+    });
+
+    await wrapper.find('[data-testid="viewer-next-page"]').trigger("click");
+    // Already on the last page: no event rather than page 13.
+    expect(wrapper.emitted("changePage")).toBeUndefined();
+
+    await wrapper.find('[data-testid="viewer-previous-page"]').trigger("click");
+    expect(wrapper.emitted("changePage")?.[0]).toEqual([{ num: 11 }]);
+  });
+
+  it("emits zoom clicks so viewers without OpenSeadragon can listen", async () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), mode: "pdf" });
+
+    await wrapper.find('[data-testid="viewer-zoom-in"]').trigger("click");
+    await wrapper.find('[data-testid="viewer-zoom-out"]').trigger("click");
+
+    expect(wrapper.emitted("zoomIn")).toHaveLength(1);
+    expect(wrapper.emitted("zoomOut")).toHaveLength(1);
+  });
+
+  it("names every icon button", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      mode: "pdf",
+      pageNum: 1,
+      pageCount: 2,
+    });
+
+    const unnamed = wrapper
+      .findAll("button")
+      .filter(
+        (button) =>
+          !button.attributes("aria-label") && !button.text().trim().length,
+      );
+    expect(unnamed).toHaveLength(0);
+  });
+});

@@ -200,7 +200,8 @@ now.
 | WP5 lists & actions | done — rows, preview split, action trigger, selection bar, panel shell, pagination. Only the quality-status chip + jump-to-field popover is left, and it is a feature rather than chrome |
 | WP6 filters | done — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome, date picker and the saved-searches surfaces. Left open, needing entity-side support: the default star (Maak standaard), the shared/team flag, undo-over-confirm on delete and Save-vs-Save-as (below). The date range variant stays unbuilt until a field needs it |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
-| WP7–WP9 | open |
+| WP7 viewers | one ViewerToolbar for image + PDF, PdfToolbar deleted; AV/text modes, IIIF-manifest filmstrip, map accent styling and the media-first detail column open |
+| WP8–WP9 | open |
 
 ## Conventions for the next component
 
@@ -261,6 +262,10 @@ there; until then vue-i18n renders the key itself.
 | `saved-searches.create-title` | Bewaar zoekopdracht | Save search | Title of the create modal. |
 | `saved-searches.applied-chip` | Opgeslagen zoekopdracht: {name}, verwijderen | Saved search: {name}, remove | Accessible name of the applied chip. |
 | `saved-searches.modified` | Gewijzigd | Modified | Title of the modified dot on the chip. |
+| `viewer.toolbar-label` | Viewer-acties | Viewer actions | Accessible name of the viewer toolbar. |
+| `viewer.zoom-in` / `.zoom-out` | Zoom in / Zoom uit | Zoom in / Zoom out | |
+| `viewer.fullscreen` | Volledig scherm | Fullscreen | |
+| `viewer.download` | Download | Download | |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
