@@ -700,6 +700,17 @@ export function downloadCsv(fileName: string, csvString?: string): void {
   URL.revokeObjectURL(url);
 }
 
+export function downloadFile(fileName: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
 export const extractObjectsByTypename = (
   obj: Record<string, any>,
   typename: string,

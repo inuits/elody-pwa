@@ -12,6 +12,7 @@ import {
   stripEmbeddedViewerSuffix,
   deepToRaw,
   getEnvironmentLabel,
+  downloadFile,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -68,6 +69,39 @@ vi.mock("@/main", () => ({
     },
   },
 }));
+
+describe("downloadFile", () => {
+  it("creates an object URL, triggers a download link click, and revokes the URL", () => {
+    const blob = new Blob(["binary-content"], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const mockUrl = "blob:mock-url";
+    const createObjectURLSpy = vi
+      .spyOn(URL, "createObjectURL")
+      .mockReturnValue(mockUrl);
+    const revokeObjectURLSpy = vi
+      .spyOn(URL, "revokeObjectURL")
+      .mockImplementation(() => {});
+    const clickSpy = vi.fn();
+    const createElementSpy = vi
+      .spyOn(document, "createElement")
+      .mockReturnValue({
+        set href(_value: string) {},
+        set download(_value: string) {},
+        click: clickSpy,
+      } as unknown as HTMLAnchorElement);
+
+    downloadFile("inscription.xlsx", blob);
+
+    expect(createObjectURLSpy).toHaveBeenCalledWith(blob);
+    expect(clickSpy).toHaveBeenCalledOnce();
+    expect(revokeObjectURLSpy).toHaveBeenCalledWith(mockUrl);
+
+    createElementSpy.mockRestore();
+    createObjectURLSpy.mockRestore();
+    revokeObjectURLSpy.mockRestore();
+  });
+});
 
 describe("looksLikeEntityId", () => {
   it("recognizes prefixed entity ids", () => {

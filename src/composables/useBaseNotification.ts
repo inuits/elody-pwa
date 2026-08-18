@@ -20,6 +20,13 @@ export const useBaseNotification = (): {
     text: string,
     extraOptions?: NotificationsOptions,
   ) => void;
+  displayPersistentNotification: (
+    id: number,
+    title: string,
+    text: string,
+    type: "warn" | "success" | "error",
+  ) => void;
+  closeNotification: (id: number) => void;
 } => {
   const { notify } = useNotification();
   const baseDuration: number = 10000;
@@ -66,9 +73,30 @@ export const useBaseNotification = (): {
     });
   };
 
+  const displayPersistentNotification = (
+    id: number,
+    title: string,
+    text: string,
+    type: "warn" | "success" | "error",
+  ): void => {
+    notify({
+      id,
+      title: getTranslatedMessage(title),
+      text: getTranslatedMessage(text),
+      type,
+      duration: -1,
+    });
+  };
+
+  const closeNotification = (id: number): void => {
+    notify.close(id);
+  };
+
   return {
     displaySuccessNotification,
     displayWarningNotification,
     displayErrorNotification,
+    displayPersistentNotification,
+    closeNotification,
   };
 };

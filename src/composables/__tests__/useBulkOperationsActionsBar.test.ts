@@ -65,6 +65,14 @@ vi.mock("@/composables/useSeenItems", () => ({
   useSeenItems: () => mockSeenItems,
 }));
 
+const mockExportXlsx = vi.hoisted(() => ({
+  exportEntitiesToXlsx: vi.fn(),
+}));
+
+vi.mock("@/composables/useExportXlsx", () => ({
+  useExportXlsx: () => mockExportXlsx,
+}));
+
 const mockEntityPageConfig = vi.hoisted(() => ({
   trackSeen: { value: true },
 }));
@@ -824,6 +832,35 @@ describe("useBulkOperationsActionsBar", () => {
       expect(bulkOperations.value.map((operation) => operation.value)).toEqual([
         BulkOperationTypes.DownloadMediafiles,
       ]);
+    });
+  });
+
+  describe("Export xlsx operation", () => {
+    const selectOperation = (props = createMockProps()) => {
+      const emit = createMockEmit();
+      const composable = useBulkOperationsActionsBar(props, emit);
+      composable.selectedBulkOperation.value = {
+        value: BulkOperationTypes.ExportXlsx,
+      } as any;
+      composable.handleSelectedBulkOperation();
+      return composable;
+    };
+
+    it("delegates to useExportXlsx with the current entity type", () => {
+      selectOperation();
+
+      expect(mockExportXlsx.exportEntitiesToXlsx).toHaveBeenCalledWith(
+        Entitytyping.Asset,
+      );
+    });
+
+    it("opens no modal for an export xlsx operation", () => {
+      selectOperation();
+
+      expect(mockBaseModal.openModal).not.toHaveBeenCalled();
+      expect(
+        mockModalActions.initializeGeneralProperties,
+      ).not.toHaveBeenCalled();
     });
   });
 
