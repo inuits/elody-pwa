@@ -10,6 +10,7 @@
           v-for="(step, index) in flowConfig?.steps ?? []"
           :key="step.key"
           class="flex items-center gap-2"
+          :aria-current="index === currentStepIndex ? 'step' : undefined"
         >
           <span
             class="flex items-center justify-center w-6 h-6 rounded-full text-sm font-bold"

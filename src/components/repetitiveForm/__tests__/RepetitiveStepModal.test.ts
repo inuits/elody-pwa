@@ -12,7 +12,7 @@ const getWrapper = (open = false, title = "") =>
   mount(RepetitiveStepModal, {
     props: { open, title },
     slots: { default: "<p data-testid='slot-content'>hi</p>" },
-    global: { stubs: { unicon: true } },
+    global: { stubs: { unicon: true }, mocks: { $t: (key: string) => key } },
   });
 
 describe("RepetitiveStepModal", () => {

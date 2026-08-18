@@ -8,7 +8,16 @@
       {{ $t("repetitiveForm.no-entities-yet") }}
     </p>
 
-    <ul v-else data-testid="repetitive-overview-list" class="flex flex-col">
+    <h2 v-if="branches.length" class="repetitive-overview__heading">
+      {{ $t("repetitiveForm.created-this-session") }}
+    </h2>
+    <ul
+      v-if="branches.length"
+      data-testid="repetitive-overview-list"
+      role="log"
+      aria-live="polite"
+      class="flex flex-col"
+    >
       <!-- rows follow the base library list-item styling -->
       <li
         v-for="(branch, index) in branches"
@@ -44,6 +53,7 @@
           <BaseButton
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
+            :aria-label="$t('repetitiveForm.remove-entry')"
             button-style="danger"
             button-size="sm"
             @click="emit('remove', index)"
@@ -89,7 +99,7 @@ import {
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
 
-const props = defineProps<{
+defineProps<{
   branches: RepetitiveBranch[];
   steps: RepetitiveStep[];
   repeatable: boolean;
@@ -129,3 +139,14 @@ const overviewEntries = (
   return entity.details ?? [];
 };
 </script>
+
+<style scoped>
+.repetitive-overview__heading {
+  font-size: var(--text-label);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: var(--spacing-ds-4);
+}
+</style>

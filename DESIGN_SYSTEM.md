@@ -175,6 +175,20 @@ delete (needs a restore path — recreating the search client-side would mint a
 new id), and the Save vs Save-as prompt for a modified shared search. Like the
 badge tones and `isGroup`, these want entity/config-side work first.
 
+## Guided flow — chrome on contract, layout deviation recorded
+
+The step modal wears the overlay contract now (10px radius, modal shadow, the
+system scrim, panel-shell header, named close, aria-labelledby) and the
+created-so-far list is a polite `role="log"` under its "Aangemaakt in deze
+sessie" heading, with the remove button named. The step indicator marks the
+active step with `aria-current="step"`.
+
+One recorded deviation: guided-flow.md draws the created-so-far list as a
+right rail beside the step card; the flow shows it as its own overview view
+between steps. That is the flow's information architecture, not chrome —
+restructuring it belongs to a product pass on the guided flow, not to this
+migration.
+
 ## Group editing needs `isGroup` from the service
 
 Group editing is built (`useBlockEditor.ts` + the card on
@@ -209,7 +223,7 @@ now.
 | WP6 filters | done — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome, date picker and the saved-searches surfaces. Left open, needing entity-side support: the default star (Maak standaard), the shared/team flag, undo-over-confirm on delete and Save-vs-Save-as (below). The date range variant stays unbuilt until a field needs it |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7 viewers | one ViewerToolbar for image + PDF (PdfToolbar deleted) and maps on the tenant accent with capsule zoom controls; AV/text toolbar modes, the IIIF-manifest filmstrip and the media-first detail column open |
-| WP8 flows & feedback | toasts and the DynamicForm chrome done (tablist with accent underline + error dots, sticky submit zone with counted validation summary); guided flow, upload progress, history diff, comments, trees, import browser and nav chrome open |
+| WP8 flows & feedback | toasts, DynamicForm chrome and the guided-flow chrome done; upload progress, history diff, comments, trees, import browser and nav chrome open |
 | WP9 | open |
 
 ## Conventions for the next component
@@ -277,6 +291,8 @@ there; until then vue-i18n renders the key itself.
 | `viewer.download` | Download | Download | |
 | `dynamic-form.actions-label` | Formulier-acties | Form actions | Accessible name of the submit zone. |
 | `dynamic-form.check-fields` | Controleer de gemarkeerde velden ({count}) | Check the highlighted fields ({count}) | The validation summary in the submit zone. |
+| `repetitiveForm.created-this-session` | Aangemaakt in deze sessie | Created this session | Heading of the guided flow's log. |
+| `repetitiveForm.remove-entry` | Verwijder dit item | Remove this entry | Accessible name of a created-so-far row's remove. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

@@ -38,7 +38,7 @@ const { getModalInfo, closeModal } = useBaseModal();
 const { getCallbackFunctions } = useModalActions();
 const router = useRouter();
 
-const refreshAfterFlow = async (callbacks?: Function[]) => {
+const refreshAfterFlow = async (callbacks?: (...args: unknown[]) => unknown[]) => {
   if (callbacks?.length) {
     for (const callback of callbacks) {
       try {

@@ -95,6 +95,10 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
+      repetitiveForm: {
+        "created-this-session": "Aangemaakt in deze sessie",
+        "remove-entry": "Verwijder dit item",
+      },
       "dynamic-form": {
         "actions-label": "Formulier-acties",
         "check-fields": "Controleer de gemarkeerde velden ({count})",
@@ -154,6 +158,10 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
+      repetitiveForm: {
+        "created-this-session": "Created this session",
+        "remove-entry": "Remove this entry",
+      },
       "dynamic-form": {
         "actions-label": "Form actions",
         "check-fields": "Check the highlighted fields ({count})",
