@@ -44,7 +44,13 @@
             {{ t("comments.empty") }}
           </p>
 
-          <TransitionGroup name="subject" tag="div" class="flex flex-col gap-2">
+          <TransitionGroup
+            name="subject"
+            tag="div"
+            role="log"
+            :aria-label="t('comments.log-label')"
+            class="flex flex-col gap-2"
+          >
             <comment-item
               v-for="thread in threads"
               :key="thread.subject.id"

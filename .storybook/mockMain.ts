@@ -96,6 +96,14 @@ export const i18n = createI18n({
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
       "history-diff": { was: "was", nu: "nu", "no-differences": "Geen verschillen" },
+      comments: {
+        "log-label": "Opmerkingen",
+        "edit-named": "Bewerk opmerking van {author}, {time}",
+        status: { open: "Open", resolved: "Opgelost" },
+        "reply-count": "1 antwoord | {count} antwoorden",
+        edit: "Bewerk",
+        "unknown-author": "Onbekend",
+      },
       upload: {
         "zone-label": "Upload bestanden",
         "remove-file": "Verwijder bestand",
@@ -166,6 +174,14 @@ export const i18n = createI18n({
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
       "history-diff": { was: "was", nu: "now", "no-differences": "No differences" },
+      comments: {
+        "log-label": "Comments",
+        "edit-named": "Edit comment by {author}, {time}",
+        status: { open: "Open", resolved: "Resolved" },
+        "reply-count": "1 reply | {count} replies",
+        edit: "Edit",
+        "unknown-author": "Unknown",
+      },
       upload: {
         "zone-label": "Upload files",
         "remove-file": "Remove file",
