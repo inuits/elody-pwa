@@ -1090,6 +1090,22 @@ const syncEditStateCallbacks = (): void => {
 const deepRelationsInitialized = ref<boolean>(false);
 const hasRestoredViewModesAfterFetch = ref<boolean>(false);
 
+// Opt-in periodic refresh, requested by a route via meta.pollIntervalMs.
+// Used by overviews of live external sources (the SPARQL alert feed) so a new
+// item appears without the user reloading. Routes that do not ask for it are
+// untouched, and getEntities only swaps the list when the result differs, so a
+// poll returning the same data does not disturb the view.
+let pollTimer: ReturnType<typeof setInterval> | undefined;
+
+const startPollingIfRequested = () => {
+  const interval = Number(route.meta?.pollIntervalMs ?? 0);
+  if (!interval || props.isSearchLibrary) return;
+  pollTimer = setInterval(() => {
+    if (useEditHelper.isEdit) return; // never refetch out from under an edit
+    getEntities(route);
+  }, interval);
+};
+
 onMounted(async () => {
   lastProcessedEntityType.value = entityType.value;
   if (props.fetchDeepRelations) {
@@ -1101,6 +1117,7 @@ onMounted(async () => {
   window.addEventListener("beforeunload", resetMapPaginationLimit);
   if (props.isSearchLibrary) paginationStore.setPage(1);
   if (props.forceShowFilters) expandFilters.value = true;
+  startPollingIfRequested();
 });
 
 watch(
@@ -1120,6 +1137,7 @@ watch(
 );
 
 onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer);
   window.removeEventListener("beforeunload", resetMapPaginationLimit);
   formIdsAddedToState.forEach((id) => deleteForm(id));
   formIdsAddedToState.clear();
