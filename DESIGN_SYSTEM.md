@@ -43,28 +43,36 @@ already written against.
 | `--spacing-1 … --spacing-14` (2–26px) | `--spacing-ds-1 … --spacing-ds-14` | Defining `--spacing-4: 5px` would turn every existing `p-4` from 16px into 5px. The namespaced scale adds `p-ds-4` instead and leaves the app's spacing alone. |
 | `--text-base: 14px` | `--text-body: 14px` | `--text-base` is Tailwind's own `text-base` (1rem). Overriding it resizes every `text-base` in the app at once — a change that belongs to the screen-level pass, not the token PR. |
 
-## Open finding — accent contrast
+## Accent contrast — decided and applied (2026-08-18)
 
-The a11y addon reports a genuine violation on filled buttons, not a story
-artefact: white text on the accent does not reach WCAG AA (4.5:1) for
-normal-size text.
+White on the accent failed WCAG AA (4.5:1) on three tenants and on the commit
+teal itself. Jeroen chose darkening the failing fills over reserving them for
+non-text use; hue and saturation are kept, lightness lowered until the ratio
+holds. Verified per tenant in the browser after the change:
 
-| Fill | Contrast with white |
-|---|---|
-| commit teal `#0CB2BC` | 2.59 |
-| accent vlacc `#3BA6CB` | 2.80 |
-| accent pza `#2A97E2` | 3.17 |
-| accent aicap `#9F8332` | 3.64 |
-| accent podiumnet / damsv2 `#0057b1` | 7.00 |
-| accent vliz `#354D9B` | 7.82 |
-| danger `#D11800` | 5.47 |
+| Fill | Before | After | Ratio now |
+|---|---|---|---|
+| commit teal (every *Bewaar*) | `#0CB2BC` (2.59) | `#09828A` | 4.59 |
+| commit strong hover | `#0A9AA3` (3.41) | `#087076` | 5.85 |
+| accent vlacc | `#3BA6CB` (2.80) | `#2A7F9D` | 4.54 |
+| accent-hover vlacc | `#1D8FB8` | `#246D87` | 5.81 |
+| accent pza | `#2A97E2` (3.17) | `#1A7ABD` | 4.60 |
+| accent aicap | `#9F8332` (3.64) | `#8C732C` | 4.56 |
+| podiumnet / damsv2 / vliz / danger | already passing | unchanged | 7.00 / 7.82 / 5.47 |
 
-Three tenants pass, three do not, and the commit teal — the colour on every
-*Bewaar* — is the worst of them. `client-theming.md` asks for 4.5:1 against
-white and accent-light for every accent, so this is the system contradicting
-its own rule rather than a decision already taken. The tokens are left at the
-handoff values; darkening the accents (or reserving the pale ones for fills
-that carry no text) is a palette decision to take before the screen-level pass.
+The pale accent-light/wash/tint surfaces never carry white text and are
+untouched. Client theme.txt files that swap the load-bearing names should
+adopt the new values on their next sync; the scope blocks here already have
+them.
+
+## AV viewer — native controls, by decision (2026-08-18)
+
+media-viewer.md §Round 2 sketches an AV mode on the ViewerToolbar (play/pause,
+scrubber, volume in the capsule style). The audio and video players use the
+browser's native controls, which are accessible out of the box; replacing
+them with custom chrome is real a11y risk for a visual win. Decision: keep
+native controls. The ViewerToolbar's AV mode is deliberately not built, and
+this section is the recorded deviation from the docs page.
 
 ## Still open on `AdvancedDropdown`
 

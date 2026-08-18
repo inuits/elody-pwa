@@ -10,7 +10,7 @@
      per-client build replaces them from client-customization/theme.txt. */
   --color-accent-light: #DEF1FA;
   --color-accent-normal: #6BC6B3;
-  --color-accent-accent: #0CB2BC;
+  --color-accent-accent: #09828A;
   --color-accent-dark: #1d5c7a;
   --color-accent-highlight: #E8EEF0;
   --color-highlight-bg: #4169E1;
@@ -171,8 +171,8 @@
      ══════════════════════════════════════════════════════════════════════ */
 
   /* ── Accent roles (client-swappable set) ───────────────────────────── */
-  --color-accent: #3BA6CB;
-  --color-accent-hover: #1D8FB8;
+  --color-accent: #2A7F9D;
+  --color-accent-hover: #246D87;
   --color-accent-light-strong: #C8EAF7;
   --color-accent-ink: var(--color-accent-dark);
   --color-accent-wash: #EAF6FB;
@@ -219,7 +219,7 @@
   /* ── Commit / focus (platform-fixed, never themed) ─────────────────── */
   --color-commit: var(--color-accent-accent);
   --color-commit-hover: var(--color-accent-normal);
-  --color-commit-strong-hover: #0A9AA3;
+  --color-commit-strong-hover: #087076;
   --color-focus-ring: var(--color-accent-accent);
 
   /* ── Semantic (platform-fixed) ─────────────────────────────────────── */
@@ -318,7 +318,7 @@
 [data-elody-client="pza"] {
   --color-accent-light: #DCF4F9;
   --color-accent-light-strong: #B9E4F1;
-  --color-accent: #2A97E2;
+  --color-accent: #1A7ABD;
   --color-accent-hover: #0057B7;
   --color-accent-ink: #0B5F87;
   --color-accent-wash: #E9F5FC;
@@ -362,7 +362,7 @@
 [data-elody-client="aicap"] {
   --color-accent-light: #F2EFEC;
   --color-accent-light-strong: #E5DECF;
-  --color-accent: #9F8332;
+  --color-accent: #8C732C;
   --color-accent-hover: #846C28;
   --color-accent-ink: #6E5A22;
   --color-accent-wash: #F5F1E8;
