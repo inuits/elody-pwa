@@ -65,6 +65,7 @@ export const i18n = createI18n({
       },
       "group-form": { "check-highlighted-fields": "Controleer de gemarkeerde velden" },
       "context-menu": { actions: "Acties" },
+      modal: { close: "Sluiten" },
       filters: {
         "section-active": "actief",
         "clear-filter": "Wis filter",
@@ -102,6 +103,7 @@ export const i18n = createI18n({
       },
       "group-form": { "check-highlighted-fields": "Check the highlighted fields" },
       "context-menu": { actions: "Actions" },
+      modal: { close: "Close" },
       filters: {
         "section-active": "active",
         "clear-filter": "Clear filter",

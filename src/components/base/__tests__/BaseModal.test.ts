@@ -220,13 +220,17 @@ describe("BaseModal", () => {
     it("should apply icon height correctly", () => {
       const iconHeight = 24;
       wrapper = createWrapper({ iconHeight, cancelButtonAvailabe: false });
-      const icon = wrapper.find('[data-testid="modal-close-button"]');
+      const icon = wrapper.find(
+        '[data-testid="modal-close-button"] [height]',
+      );
       expect(icon.attributes("height")).toBe(iconHeight.toString());
     });
 
     it("should use default icon height if not provided", () => {
       wrapper = createWrapper();
-      const icon = wrapper.find('[data-testid="modal-close-button"]');
+      const icon = wrapper.find(
+        '[data-testid="modal-close-button"] [height]',
+      );
       expect(icon.attributes("height")).toBe("18");
     });
 

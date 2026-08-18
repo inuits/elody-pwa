@@ -3,6 +3,7 @@
     ref="dialog"
     data-testid="modal-dialog"
     closedby="none"
+    :aria-labelledby="title ? titleId : undefined"
     @close="hideModal"
     @cancel="handleCancel"
     :class="[
@@ -20,18 +21,24 @@
   >
     <div
       v-if="!cancelButtonAvailabe"
-      class="flex justify-end p-2"
+      class="base-modal__header"
+      :class="{ 'base-modal__header--titled': title }"
       data-testid="modal-header"
     >
-      <unicon
-        :name="Unicons.Close.name"
-        :height="iconHeight"
-        class="cursor-pointer"
+      <h2 v-if="title" :id="titleId" class="base-modal__title">
+        {{ title }}
+      </h2>
+      <button
+        type="button"
+        class="base-modal__close"
         data-testid="modal-close-button"
+        :aria-label="t('modal.close')"
         @click="hideModal"
-      />
+      >
+        <unicon :name="Unicons.Close.name" :height="iconHeight" />
+      </button>
     </div>
-    <div data-testid="modal-content">
+    <div ref="contentRef" data-testid="modal-content">
       <slot />
     </div>
     <BlockingOverlay
@@ -41,7 +48,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onUnmounted } from "vue";
+import { nextTick, ref, computed, useId, watch, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -58,6 +66,8 @@ const props = withDefaults(
     iconHeight?: number;
     modalColor?: string;
     cancelButtonAvailabe?: boolean;
+    /** Names the dialog (modal.md: title = the task, "Kies persoon"). */
+    title?: string;
   }>(),
   {
     modalHeightStyle: "max-h-[75vh] my-[12.5vh]",
@@ -69,8 +79,25 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
+const { t } = useI18n();
 const { getModalInfo } = useBaseModal();
 const dialog = ref<HTMLDialogElement>();
+const contentRef = ref<HTMLElement>();
+const titleId = `base-modal-title-${useId()}`;
+
+/**
+ * showModal() focuses the first focusable element, which is the close cross
+ * in the header; the docs put first focus on the first interactive element of
+ * the body instead (modal.md).
+ */
+const focusFirstInteractive = async () => {
+  await nextTick();
+  contentRef.value
+    ?.querySelector<HTMLElement>(
+      'a[href], button:not(:disabled), input:not(:disabled), select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    ?.focus();
+};
 const currentModalStyle = computed(
   () => getModalInfo(props.modalType).modalStyle,
 );
@@ -98,6 +125,7 @@ watch(
   (isModalOpen: boolean) => {
     if (isModalOpen) {
       dialog.value?.showModal();
+      focusFirstInteractive();
       document.body.classList.add("overflow-hidden");
       document.addEventListener("keydown", handleDocumentEsc, true);
       return;
@@ -134,14 +162,64 @@ onUnmounted(() => {
 dialog {
   max-width: 100vw;
   border: 0;
+  border-radius: var(--radius-overlay);
+  box-shadow: var(--shadow-modal);
 }
 
 dialog::backdrop {
-  background-color: var(--color-accent-normal);
-  opacity: 0.3;
+  /* The one scrim in the system; the mint accent at 0.3 is retired. */
+  background-color: var(--color-scrim);
 }
 
 dialog:focus {
   outline: none;
+}
+
+.base-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-ds-6);
+  padding: var(--spacing-ds-3);
+}
+
+/* With a title the header wears the panel shell, like every other panel. */
+.base-modal__header--titled {
+  justify-content: space-between;
+  padding: var(--spacing-ds-8) var(--spacing-ds-11);
+  background-color: var(--color-surface-panel-header);
+  border-radius: var(--radius-overlay) var(--radius-overlay) 0 0;
+}
+
+.base-modal__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--color-text-panel-header);
+}
+
+.base-modal__close {
+  display: inline-flex;
+  flex: none;
+  padding: var(--spacing-ds-1);
+  border-radius: var(--radius-input);
+  cursor: pointer;
+}
+
+.base-modal__header--titled .base-modal__close {
+  color: var(--color-text-panel-header);
+}
+
+.base-modal__close:hover {
+  background-color: var(--color-surface-editable-hover);
+  color: var(--color-text-body);
+}
+
+.base-modal__close:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
 }
 </style>
