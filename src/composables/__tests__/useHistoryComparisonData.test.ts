@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { defineComponent, isRef } from "vue";
+import { computed, defineComponent, unref } from "vue";
 import { mount } from "@vue/test-utils";
 import {
   findPanelMetadata,
@@ -19,7 +19,10 @@ import {
 
 const mocks = vi.hoisted(() => ({
   useQueryCalls: [] as any[],
-  documents: {} as Record<string, any>,
+  // Each entry is either a static { result, loading, error } object (used for
+  // slots whose variables never change within a test), or a function
+  // (variables) => { result, loading?, error? } for slots that must react to
+  // variable changes (e.g. a detail query re-keyed when a version id switches).
   queryResults: [] as any[],
   apolloQueryMock: undefined as unknown as ReturnType<typeof vi.fn>,
 }));
@@ -30,8 +33,18 @@ vi.mock("@vue/apollo-composable", async (importOriginal) => ({
   useQuery: (document: any, variables: any, options: any) => {
     const callIndex = mocks.useQueryCalls.length;
     mocks.useQueryCalls.push({ document, variables, options });
+    const spec = mocks.queryResults[callIndex];
+
+    if (typeof spec === "function") {
+      return {
+        result: computed(() => spec(unref(variables))?.result),
+        loading: computed(() => spec(unref(variables))?.loading ?? false),
+        error: computed(() => spec(unref(variables))?.error ?? null),
+      };
+    }
+
     return (
-      mocks.queryResults[callIndex] ?? {
+      spec ?? {
         result: { value: undefined },
         loading: { value: false },
         error: { value: null },
@@ -41,10 +54,7 @@ vi.mock("@vue/apollo-composable", async (importOriginal) => ({
 }));
 
 vi.mock("@/composables/useImport", () => ({
-  useImport: () => ({
-    loadDocument: (queryName: string) =>
-      Promise.resolve(mocks.documents[queryName]),
-  }),
+  useImport: () => ({ loadDocument: () => Promise.resolve(null) }),
 }));
 
 vi.mock("@/main", () => ({
@@ -58,6 +68,13 @@ const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 const row = (id: string, updated_at?: string): HistoryVersionRow => ({
   id,
   intialValues: { updated_at },
+});
+
+const versionRow = (versionId: string, timestamp?: string) => ({
+  versionId,
+  documentVersion: 1,
+  timestamp,
+  editedBy: "tester",
 });
 
 describe("sortHistoryVersionsByDate", () => {
@@ -252,7 +269,6 @@ describe("relation list panel derivation", () => {
 describe("useHistoryComparisonData relationDiffs", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
     mocks.apolloQueryMock.mockClear();
     mocks.apolloQueryMock.mockImplementation(() =>
@@ -297,14 +313,13 @@ describe("useHistoryComparisonData relationDiffs", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            intialValues: { updated_at: "2026-01-01T00:00:00Z" },
-            relationValues: {},
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        intialValues: { updated_at: "2026-01-01T00:00:00Z" },
+        relationValues: {},
       },
     });
 
@@ -358,9 +373,7 @@ describe("useHistoryComparisonData relationDiffs", () => {
         intialValues: {},
       },
     });
-    mocks.queryResults[1] = withResult({
-      EntitiesHistory: { results: [] },
-    });
+    mocks.queryResults[1] = withResult({ EntityHistoryVersions: [] });
 
     const { relationDiffs } = useHistoryComparisonData("entity-1", "genre");
     await flushPromises();
@@ -404,14 +417,13 @@ describe("useHistoryComparisonData relationDiffs", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            intialValues: { updated_at: "2026-01-01T00:00:00Z" },
-            relationValues: { refWords: [{ key: "word-1" }] },
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        intialValues: { updated_at: "2026-01-01T00:00:00Z" },
+        relationValues: { refWords: [{ key: "word-1" }] },
       },
     });
 
@@ -458,16 +470,15 @@ describe("useHistoryComparisonData relationDiffs", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            intialValues: { updated_at: "2026-01-01T00:00:00Z" },
-            relationValues: {
-              refWords: [{ key: "word-1" }, { key: "word-3" }],
-            },
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        intialValues: { updated_at: "2026-01-01T00:00:00Z" },
+        relationValues: {
+          refWords: [{ key: "word-1" }, { key: "word-3" }],
+        },
       },
     });
 
@@ -513,7 +524,6 @@ describe("useHistoryComparisonData relationDiffs", () => {
 describe("useHistoryComparisonData merged entities", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
   });
 
@@ -581,15 +591,14 @@ describe("useHistoryComparisonData merged entities", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            entityView,
-            relationValues: {},
-            intialValues: historicalIntialValues,
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        entityView,
+        relationValues: {},
+        intialValues: historicalIntialValues,
       },
     });
   };
@@ -680,7 +689,6 @@ describe("useHistoryComparisonData merged entities", () => {
 describe("useHistoryComparisonData repeatable panel fields", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
   });
 
@@ -723,20 +731,19 @@ describe("useHistoryComparisonData repeatable panel fields", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            entityView,
-            relationValues: {},
-            intialValues: {
-              updated_at: "2026-01-01T00:00:00Z",
-              parallel_title_group: [
-                { parallel_title: "Old title", other_title_details: "Same" },
-              ],
-            },
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        entityView,
+        relationValues: {},
+        intialValues: {
+          updated_at: "2026-01-01T00:00:00Z",
+          parallel_title_group: [
+            { parallel_title: "Old title", other_title_details: "Same" },
+          ],
+        },
       },
     });
 
@@ -773,20 +780,19 @@ describe("useHistoryComparisonData repeatable panel fields", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            entityView,
-            relationValues: {},
-            intialValues: {
-              updated_at: "2026-01-01T00:00:00Z",
-              parallel_title_group: [
-                { parallel_title: "First", other_title_details: "A" },
-              ],
-            },
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        entityView,
+        relationValues: {},
+        intialValues: {
+          updated_at: "2026-01-01T00:00:00Z",
+          parallel_title_group: [
+            { parallel_title: "First", other_title_details: "A" },
+          ],
+        },
       },
     });
 
@@ -811,7 +817,6 @@ describe("useHistoryComparisonData repeatable panel fields", () => {
 describe("useHistoryComparisonData wysiwygDiffs", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
   });
 
@@ -850,18 +855,17 @@ describe("useHistoryComparisonData wysiwygDiffs", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            intialValues: {
-              updated_at: "2026-01-01T00:00:00Z",
-              reading: "<p>Historical reading</p>",
-              translation: "<p>Same on both sides</p>",
-            },
-            relationValues: {},
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        intialValues: {
+          updated_at: "2026-01-01T00:00:00Z",
+          reading: "<p>Historical reading</p>",
+          translation: "<p>Same on both sides</p>",
+        },
+        relationValues: {},
       },
     });
 
@@ -899,17 +903,16 @@ describe("useHistoryComparisonData wysiwygDiffs", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "history-1",
-            intialValues: {
-              updated_at: "2026-01-01T00:00:00Z",
-              reading: "<p>Historical reading</p>",
-            },
-            relationValues: {},
-          },
-        ],
+      EntityHistoryVersions: [versionRow("history-1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "history-1",
+        intialValues: {
+          updated_at: "2026-01-01T00:00:00Z",
+          reading: "<p>Historical reading</p>",
+        },
+        relationValues: {},
       },
     });
 
@@ -966,41 +969,19 @@ describe("useHistoryComparisonData wysiwygDiffs", () => {
   });
 });
 
-describe("useHistoryComparisonData client-specific documents", () => {
-  const historyDocument = { kind: "Document", name: "GetHistoryEntities" };
-
+describe("useHistoryComparisonData versions query", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
   });
 
-  it("resolves the client-specific history document at runtime and passes it to useQuery as a ref", async () => {
-    mocks.documents.GetHistoryEntities = historyDocument;
+  it("requests EntityHistoryVersions scoped to the given id and type directly, with no client-key-format filter hack", () => {
+    useHistoryComparisonData("entity-1", "inscription");
 
-    const { loading } = useHistoryComparisonData("entity-1", "inscription");
-
-    const historyDocumentRef = mocks.useQueryCalls[1].document;
-    expect(isRef(historyDocumentRef)).toBe(true);
-    expect(historyDocumentRef.value).toBeNull();
-    expect(loading.value).toBe(true);
-
-    await flushPromises();
-
-    expect(historyDocumentRef.value).toBe(historyDocument);
-    expect(loading.value).toBe(false);
-  });
-
-  it("leaves the query document unresolved for clients that do not define it", async () => {
-    const { versionOptions } = useHistoryComparisonData(
-      "entity-1",
-      "inscription",
-    );
-
-    await flushPromises();
-
-    expect(mocks.useQueryCalls[1].document.value).toBeNull();
-    expect(versionOptions.value).toEqual([]);
+    expect(mocks.useQueryCalls[1].variables).toEqual({
+      id: "entity-1",
+      type: "inscription",
+    });
   });
 });
 
@@ -1055,7 +1036,6 @@ describe("useHistoryComparisonData edit-state isolation", () => {
 describe("useHistoryComparisonData left/right version selection", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
   });
 
@@ -1089,29 +1069,42 @@ describe("useHistoryComparisonData left/right version selection", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntitiesHistory: {
-        results: [
-          {
-            id: "hist-old",
-            entityView,
-            relationValues: {},
-            intialValues: {
-              updated_at: "2026-01-01T00:00:00Z",
-              significance: "old significance",
-            },
-          },
-          {
-            id: "hist-new",
-            entityView,
-            relationValues: {},
-            intialValues: {
-              updated_at: "2026-02-01T00:00:00Z",
-              significance: "new significance",
-            },
-          },
-        ],
+      EntityHistoryVersions: [
+        versionRow("hist-old", "2026-01-01T00:00:00Z"),
+        versionRow("hist-new", "2026-02-01T00:00:00Z"),
+      ],
+    });
+
+    const detailByVersionId: Record<string, any> = {
+      "hist-old": {
+        id: "hist-old",
+        entityView,
+        relationValues: {},
+        intialValues: {
+          updated_at: "2026-01-01T00:00:00Z",
+          significance: "old significance",
+        },
+      },
+      "hist-new": {
+        id: "hist-new",
+        entityView,
+        relationValues: {},
+        intialValues: {
+          updated_at: "2026-02-01T00:00:00Z",
+          significance: "new significance",
+        },
+      },
+    };
+    // Function specs, so each side's detail query reactively re-resolves
+    // whenever that side's own version id changes.
+    const detailSpec = (variables: any) => ({
+      result: {
+        EntityHistoryVersionDetail:
+          detailByVersionId[variables.versionId] ?? null,
       },
     });
+    mocks.queryResults[2] = detailSpec;
+    mocks.queryResults[3] = detailSpec;
 
     return useHistoryComparisonData("entity-1", "inscription");
   };
@@ -1205,7 +1198,6 @@ describe("useHistoryComparisonData left/right version selection", () => {
 describe("useHistoryComparisonData per-side loading", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
-    mocks.documents = {};
     mocks.queryResults = [];
     mocks.apolloQueryMock.mockClear();
     mocks.apolloQueryMock.mockImplementation(() =>
@@ -1222,7 +1214,7 @@ describe("useHistoryComparisonData per-side loading", () => {
   it("leftLoading follows the live entity query's own loading state while showing the live version", async () => {
     mocks.queryResults[0] = resultWithLoading(undefined, true);
     mocks.queryResults[1] = resultWithLoading(
-      { EntitiesHistory: { results: [] } },
+      { EntityHistoryVersions: [] },
       false,
     );
 
@@ -1236,7 +1228,7 @@ describe("useHistoryComparisonData per-side loading", () => {
     expect(leftLoading.value).toBe(true);
   });
 
-  it("leftLoading follows the shared history loading state once switched to a historical version, independently of the live query's own loading state", async () => {
+  it("leftLoading follows its own detail query's loading state once switched to a historical version, independently of the live query", async () => {
     mocks.queryResults[0] = resultWithLoading(
       {
         Entity: {
@@ -1249,15 +1241,16 @@ describe("useHistoryComparisonData per-side loading", () => {
       true,
     );
     mocks.queryResults[1] = resultWithLoading(
+      { EntityHistoryVersions: [versionRow("hist-1", "2026-01-01T00:00:00Z")] },
+      false,
+    );
+    mocks.queryResults[2] = resultWithLoading(
       {
-        EntitiesHistory: {
-          results: [
-            {
-              id: "hist-1",
-              intialValues: { updated_at: "2026-01-01T00:00:00Z" },
-              relationValues: {},
-            },
-          ],
+        EntityHistoryVersionDetail: {
+          id: "hist-1",
+          entityView: {},
+          relationValues: {},
+          intialValues: {},
         },
       },
       false,
@@ -1270,11 +1263,12 @@ describe("useHistoryComparisonData per-side loading", () => {
     await flushPromises();
 
     leftVersionId.value = "hist-1";
+    await flushPromises();
 
     expect(leftLoading.value).toBe(false);
   });
 
-  it("rightLoading follows the shared history loading state, independently of the live query's own loading state", async () => {
+  it("rightLoading follows its own detail query's loading state, independently of the live query", async () => {
     mocks.queryResults[0] = resultWithLoading(
       {
         Entity: {
@@ -1287,15 +1281,16 @@ describe("useHistoryComparisonData per-side loading", () => {
       true,
     );
     mocks.queryResults[1] = resultWithLoading(
+      { EntityHistoryVersions: [versionRow("hist-1", "2026-01-01T00:00:00Z")] },
+      false,
+    );
+    mocks.queryResults[3] = resultWithLoading(
       {
-        EntitiesHistory: {
-          results: [
-            {
-              id: "hist-1",
-              intialValues: { updated_at: "2026-01-01T00:00:00Z" },
-              relationValues: {},
-            },
-          ],
+        EntityHistoryVersionDetail: {
+          id: "hist-1",
+          entityView: {},
+          relationValues: {},
+          intialValues: {},
         },
       },
       false,
@@ -1310,7 +1305,7 @@ describe("useHistoryComparisonData per-side loading", () => {
     expect(rightLoading.value).toBe(false);
   });
 
-  it("rightLoading is true while the shared history data is still loading", async () => {
+  it("rightLoading is true while its own detail query is still loading", async () => {
     mocks.queryResults[0] = resultWithLoading(
       {
         Entity: {
@@ -1322,7 +1317,11 @@ describe("useHistoryComparisonData per-side loading", () => {
       },
       false,
     );
-    mocks.queryResults[1] = resultWithLoading(undefined, true);
+    mocks.queryResults[1] = resultWithLoading(
+      { EntityHistoryVersions: [versionRow("hist-1", "2026-01-01T00:00:00Z")] },
+      false,
+    );
+    mocks.queryResults[3] = resultWithLoading(undefined, true);
 
     const { rightLoading } = useHistoryComparisonData(
       "entity-1",
@@ -1359,7 +1358,7 @@ describe("useHistoryComparisonData per-side loading", () => {
       false,
     );
     mocks.queryResults[1] = resultWithLoading(
-      { EntitiesHistory: { results: [] } },
+      { EntityHistoryVersions: [] },
       false,
     );
 
@@ -1410,7 +1409,7 @@ describe("useHistoryComparisonData per-side loading", () => {
       false,
     );
     mocks.queryResults[1] = resultWithLoading(
-      { EntitiesHistory: { results: [] } },
+      { EntityHistoryVersions: [] },
       false,
     );
 

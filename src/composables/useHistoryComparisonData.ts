@@ -1,14 +1,17 @@
-import { computed, onUnmounted, ref, shallowRef, watch } from "vue";
+import { computed, onUnmounted, ref, watch, type Ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import { dequal as isEqual } from "dequal";
 import { apolloClient } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
-import type { DocumentNode } from "graphql";
+import { useEntityHistoryVersions } from "@/composables/useEntityHistoryVersions";
 import {
   GetEntityByIdDocument,
   type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
+  GetEntityHistoryVersionDetailDocument,
+  type GetEntityHistoryVersionDetailQuery,
+  type GetEntityHistoryVersionDetailQueryVariables,
   type Entity,
 } from "@/generated-types/queries";
 import {
@@ -19,7 +22,6 @@ import {
   convertDateToReadbleFormat,
   getEntityTitle,
 } from "@/helpers";
-import { useImport } from "@/composables/useImport";
 import { useHistoryFieldDiff } from "@/composables/useHistoryFieldDiff";
 import {
   useRelationListDiff,
@@ -100,7 +102,6 @@ export const buildVersionOptions = (
 export function useHistoryComparisonData(entityId: string, entityType: string) {
   const leftVersionId = ref<string | null>(LIVE_VERSION_ID);
   const rightVersionId = ref<string | null>(null);
-  const { loadDocument } = useImport();
 
   const previousEntityUuid = useEntitySingle().getEntityUuid();
   const previousEntityType = useEntitySingle().getEntityType();
@@ -117,15 +118,6 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     currentEntityEditState.isEdit = wasEditingCurrentEntity;
   });
 
-  const historyDocument = shallowRef<DocumentNode | null>(null);
-  const documentsLoaded = ref<boolean>(false);
-
-  const loadDocuments = async () => {
-    historyDocument.value = (await loadDocument("GetHistoryEntities")) ?? null;
-    documentsLoaded.value = true;
-  };
-  loadDocuments();
-
   const { result: currentResult, loading: currentEntityLoading } = useQuery<
     GetEntityByIdQuery,
     GetEntityByIdQueryVariables
@@ -138,42 +130,25 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     () => currentResult.value?.Entity as Entity | undefined,
   );
 
-  const { result: historyResult, loading: historyLoading } = useQuery<any>(
-    historyDocument,
-    {
-      limit: 1000,
-      skip: 1,
-      type: entityType,
-      advancedFilterInputs: [
-        { type: "type", value: entityType },
-        {
-          type: "selection",
-          // TODO: make the key dynamic (config or something similar)
-          key: ["vlacc:1|id"],
-          value: entityId,
-          match_exact: true,
-        },
-      ],
-    },
+  // Lightweight version metadata only (no entityView/intialValues/relationValues) —
+  // replaces bulk-fetching every historical snapshot just to populate the picker.
+  const { versions, loading: versionsLoading } = useEntityHistoryVersions(
+    entityId,
+    entityType,
   );
 
-  const historyVersions = computed<HistoryVersionRow[]>(() =>
-    sortHistoryVersionsByDate(
-      (historyResult.value?.EntitiesHistory?.results ??
-        []) as HistoryVersionRow[],
-    ),
+  const historyVersionRows = computed<HistoryVersionRow[]>(() =>
+    versions.value.map((version) => ({
+      id: version.versionId,
+      intialValues: { updated_at: version.timestamp },
+    })),
   );
 
   const versionOptions = computed<VersionOption[]>(() =>
-    buildVersionOptions(
-      (historyResult.value?.EntitiesHistory?.results ??
-        []) as HistoryVersionRow[],
-    ),
+    buildVersionOptions(historyVersionRows.value),
   );
 
-  const loading = computed(
-    () => !documentsLoaded.value || historyLoading.value,
-  );
+  const loading = versionsLoading;
 
   watch(
     versionOptions,
@@ -185,24 +160,58 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     { immediate: true },
   );
 
-  const resolveVersion = (id: string | null): any =>
+  // Full entity content (entityView/intialValues/relationValues) for exactly the
+  // version a side is showing, fetched on demand instead of pulled in bulk — one
+  // query per side, since left/right can independently show different versions.
+  const useVersionDetail = (versionId: Ref<string | null>) => {
+    const variables = computed(() => ({
+      id: entityId,
+      type: entityType,
+      versionId: versionId.value ?? "",
+    }));
+    return useQuery<
+      GetEntityHistoryVersionDetailQuery,
+      GetEntityHistoryVersionDetailQueryVariables
+    >(GetEntityHistoryVersionDetailDocument, variables, () => ({
+      enabled: versionId.value !== null && versionId.value !== LIVE_VERSION_ID,
+    }));
+  };
+
+  const { result: leftDetailResult, loading: leftDetailLoading } =
+    useVersionDetail(leftVersionId);
+  const { result: rightDetailResult, loading: rightDetailLoading } =
+    useVersionDetail(rightVersionId);
+
+  const resolveVersion = (
+    id: string | null,
+    detailResult: Ref<GetEntityHistoryVersionDetailQuery | undefined>,
+  ): any =>
     id === LIVE_VERSION_ID
       ? (currentEntity.value ?? null)
-      : (historyVersions.value.find((v) => v.id === id) ?? null);
+      : (detailResult.value?.EntityHistoryVersionDetail ?? null);
 
-  const leftVersion = computed<any>(() => resolveVersion(leftVersionId.value));
+  const leftVersion = computed<any>(() =>
+    resolveVersion(leftVersionId.value, leftDetailResult),
+  );
   const rightVersion = computed<any>(() =>
-    resolveVersion(rightVersionId.value),
+    resolveVersion(rightVersionId.value, rightDetailResult),
   );
 
-  const isVersionLoading = (id: string | null): boolean =>
-    id === LIVE_VERSION_ID ? currentEntityLoading.value : loading.value;
+  const isVersionLoading = (
+    id: string | null,
+    detailLoading: Ref<boolean>,
+  ): boolean =>
+    id === LIVE_VERSION_ID ? currentEntityLoading.value : detailLoading.value;
 
   const leftLoading = computed(
-    () => isVersionLoading(leftVersionId.value) || relationLabelsLoading.value,
+    () =>
+      isVersionLoading(leftVersionId.value, leftDetailLoading) ||
+      relationLabelsLoading.value,
   );
   const rightLoading = computed(
-    () => isVersionLoading(rightVersionId.value) || relationLabelsLoading.value,
+    () =>
+      isVersionLoading(rightVersionId.value, rightDetailLoading) ||
+      relationLabelsLoading.value,
   );
 
   const scalarComparisonFields = computed<string[]>(() =>

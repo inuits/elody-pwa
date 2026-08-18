@@ -5623,3 +5623,33 @@ export type GetRepetitiveFormQueryVariables = Exact<{
 export type GetRepetitiveFormQuery = { __typename?: 'Query', GetRepetitiveForm?: any };
 
 export const GetRepetitiveFormDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetRepetitiveFormQuery, GetRepetitiveFormQueryVariables>;
+
+export type GetEntityHistoryVersionsQueryVariables = Exact<{
+  id: Scalars['String'];
+  type: Scalars['String'];
+  limit?: InputMaybe<Scalars['Int']>;
+  skip?: InputMaybe<Scalars['Int']>;
+}>;
+
+export type GetEntityHistoryVersionsQuery = {
+  __typename?: 'Query',
+  EntityHistoryVersions: Array<{
+    __typename?: 'EntityHistoryVersion',
+    versionId: string,
+    documentVersion?: number | null,
+    timestamp?: string | null,
+    editedBy?: string | null,
+  }>,
+};
+
+export const GetEntityHistoryVersionsDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetEntityHistoryVersionsQuery, GetEntityHistoryVersionsQueryVariables>;
+
+export type GetEntityHistoryVersionDetailQueryVariables = Exact<{
+  id: Scalars['String'];
+  type: Scalars['String'];
+  versionId: Scalars['String'];
+}>;
+
+export type GetEntityHistoryVersionDetailQuery = { __typename?: 'Query', EntityHistoryVersionDetail?: any };
+
+export const GetEntityHistoryVersionDetailDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetEntityHistoryVersionDetailQuery, GetEntityHistoryVersionDetailQueryVariables>;
