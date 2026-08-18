@@ -187,6 +187,7 @@ now.
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
 | WP5 lists & actions | done — rows, preview split, action trigger, selection bar, panel shell, pagination. Only the quality-status chip + jump-to-field popover is left, and it is a feature rather than chrome |
 | WP6 filters | rail, section headers, matcher panel chrome and option skeletons done; facet counts, date picker, picker modal, base modal and saved searches open |
+| WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7–WP9 | open |
 
 ## Conventions for the next component
