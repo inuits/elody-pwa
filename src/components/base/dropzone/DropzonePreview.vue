@@ -27,12 +27,14 @@
           :hidePrepareStep="hidePrepareStep"
         />
         <div>
-          <a
+          <button
+            type="button"
             data-dz-remove
+            :aria-label="$t('upload.remove-file')"
             class="cursor-pointer flex justify-center items-center bg-accent-highlight rounded-lg w-10 h-8 mt-1 mr-2"
           >
             <unicon :name="Unicons.Trash.name" height="14" />
-          </a>
+          </button>
         </div>
       </div>
       <div

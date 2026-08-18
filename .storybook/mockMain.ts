@@ -95,6 +95,12 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
+      upload: {
+        "zone-label": "Upload bestanden",
+        "remove-file": "Verwijder bestand",
+        uploaded: "{n} van {m} geüpload",
+        retry: "Opnieuw",
+      },
       repetitiveForm: {
         "created-this-session": "Aangemaakt in deze sessie",
         "remove-entry": "Verwijder dit item",
@@ -158,6 +164,12 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
+      upload: {
+        "zone-label": "Upload files",
+        "remove-file": "Remove file",
+        uploaded: "{n} of {m} uploaded",
+        retry: "Retry",
+      },
       repetitiveForm: {
         "created-this-session": "Created this session",
         "remove-entry": "Remove this entry",

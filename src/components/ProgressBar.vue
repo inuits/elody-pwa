@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full bg-background-light rounded-md">
+  <div class="progress-track w-full">
     <div class="top-0 w-full"></div>
 
     <progress
@@ -46,16 +46,28 @@ const progressText = computed(() => {
 </script>
 
 <style scoped>
+/* Commit teal fill on a sunken track (upload.md) — the mint is retired. */
+.progress-track {
+  background-color: var(--color-surface-sunken);
+  border-radius: var(--radius-chip);
+  overflow: hidden;
+}
+
 progress {
   -webkit-appearance: none;
   appearance: none;
+  display: block;
+}
+
+progress::-webkit-progress-bar {
+  background-color: transparent;
 }
 
 progress::-webkit-progress-value {
-  background-color: var(--color-accent-normal);
+  background-color: var(--color-commit);
 }
 
 progress::-moz-progress-bar {
-  background-color: var(--color-accent-normal);
+  background-color: var(--color-commit);
 }
 </style>
