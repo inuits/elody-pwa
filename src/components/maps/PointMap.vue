@@ -107,6 +107,7 @@ import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 import { useQuery } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
+import { getAccentColor } from "@/components/maps/accentMapStyle";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import {
   MapViews,
@@ -201,7 +202,8 @@ const clusterStyle = (feature: any) => {
     clusterStyleCache[size] = new Style({
       image: new CircleStyle({
         radius: 16,
-        fill: new Fill({ color: "#3b82f6" }),
+        // Markers follow the tenant accent (map-viewer.md).
+        fill: new Fill({ color: getAccentColor() }),
         stroke: new Stroke({ color: "#ffffff", width: 2 }),
       }),
       text: new Text({

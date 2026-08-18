@@ -99,7 +99,10 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, onMounted } from "vue";
 import { Map, Layers, Sources } from "vue3-openlayers";
-import { Style, Stroke, Fill } from "ol/style";
+import {
+  getAccentFeatureStyle,
+  getOverlayFeatureStyle,
+} from "@/components/maps/accentMapStyle";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
@@ -197,13 +200,15 @@ const wkt = computed(() => {
 });
 
 const features = computed(() => {
-  return [...wkt.value, point.value].filter((feature) => !!feature);
+  const list = [...wkt.value, point.value].filter((feature) => !!feature);
+  // vue3-openlayers only takes a styles prop on its WebGL layer, so the
+  // accent style rides each feature, like the overlay's below.
+  list.forEach((feature) => feature.setStyle(featureStyle));
+  return list;
 });
 
-const overlayStyle = new Style({
-  stroke: new Stroke({ color: "#f97316", width: 2 }),
-  fill: new Fill({ color: "rgba(249, 115, 22, 0.15)" }),
-});
+const featureStyle = getAccentFeatureStyle();
+const overlayStyle = getOverlayFeatureStyle();
 
 const overlayFeatures = computed(() => {
   const features = transformDataToWktFeatures(

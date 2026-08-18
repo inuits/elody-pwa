@@ -428,6 +428,39 @@
   color: var(--color-text-subtitle);
 }
 
+/* OpenLayers zoom control: the same capsule the viewer toolbar uses
+   (map-viewer.md) — third-party chrome, so themed here rather than scoped. */
+.ol-zoom {
+  top: var(--spacing-ds-6);
+  left: var(--spacing-ds-6);
+  padding: var(--spacing-ds-2);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--color-surface-inverted) 72%, transparent);
+}
+
+.ol-zoom .ol-zoom-in,
+.ol-zoom .ol-zoom-out {
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  border-radius: var(--radius-input);
+  background-color: transparent;
+  color: var(--color-text-on-inverted);
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.ol-zoom .ol-zoom-in:hover,
+.ol-zoom .ol-zoom-out:hover {
+  background-color: color-mix(in srgb, var(--color-text-on-inverted) 18%, transparent);
+}
+
+.ol-zoom .ol-zoom-in:focus-visible,
+.ol-zoom .ol-zoom-out:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
 /* An empty non-required value reads as absent rather than as content:
    "Geen waarde" at 45% opacity (field-row.md). */
 @utility metadata-empty-value {
