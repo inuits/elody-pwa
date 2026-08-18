@@ -460,7 +460,12 @@ export const useBulkOperationsActionsBar = (
       undefined,
       bulkOperationModalConfig.askForCloseConfirmation || undefined,
       getModalContextForOperation(operationType),
-      { parentEntity: parentEntity },
+      {
+        parentEntity: parentEntity,
+        // openModal only has a slot for a single formQuery; bulk edit derives its
+        // form from a list of them.
+        formQueries: bulkOperationModalConfig.formQueries || undefined,
+      },
     );
   };
 
@@ -499,7 +504,8 @@ export const useBulkOperationsActionsBar = (
   watch(
     () =>
       getModalInfo(TypeModals.DynamicForm).open ||
-      getModalInfo(TypeModals.BulkOperations).open,
+      getModalInfo(TypeModals.BulkOperations).open ||
+      getModalInfo(TypeModals.BulkOperationsEdit).open,
     (isBulkOperationModalOpen: boolean | undefined) => {
       if (!isBulkOperationModalOpen) {
         selectedBulkOperation.value = undefined;
@@ -520,6 +526,7 @@ export const useBulkOperationsActionsBar = (
         getModalInfo(TypeModals.DynamicForm).open,
         getModalInfo(TypeModals.BulkOperations).open,
         getModalInfo(TypeModals.BulkOperationsDeleteEntities).open,
+        getModalInfo(TypeModals.BulkOperationsEdit).open,
       ].some((isOpen) => isOpen),
     (isAnyModalOpen) => {
       if (!isAnyModalOpen) {

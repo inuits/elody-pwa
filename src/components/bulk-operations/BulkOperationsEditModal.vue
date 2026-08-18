@@ -1,53 +1,68 @@
 <template>
-  <BaseModal
-    v-if="modal && form"
-    :modal-type="TypeModals.BulkOperationsEdit"
-    @hide-modal="closeModal(TypeModals.BulkOperationsEdit)"
-  >
-    <div class="flex flex-wrap p-8 h-full">
-      <div class="flex basis-full gap-8 h-[94%]">
-        <div class="h-full basis-[56%]">
-          <div class="h-[40px] mb-6">
-            <LibraryBar
-              v-model:skip="skip"
-              v-model:limit="limit"
-              :total-items="getEnqueuedItemCount(context)"
-              @update:skip="loadItems()"
-              @update:limit="loadItems()"
-            />
-          </div>
-          <div class="h-[90%] overflow-y-hidden hover:overflow-y-auto">
-            <ListItem
-              v-for="item in items"
-              :key="item.id"
-              :item-id="item.id"
-              :teaser-metadata="item.teaserMetadata"
-              :bulk-operations-context="context"
-              :thumb-icon="getThumbnail(item)"
-            />
-          </div>
+  <div class="flex flex-col p-8 h-[calc(90vh-34px)]">
+    <div class="flex flex-1 min-h-0 gap-8">
+      <div class="flex flex-col min-h-0 basis-[56%]">
+        <div class="h-[40px] mb-6">
+          <LibraryBar
+            v-model:skip="skip"
+            v-model:limit="limit"
+            :total-items="getEnqueuedItemCount(context)"
+            @update:skip="loadItems()"
+            @update:limit="loadItems()"
+          />
         </div>
-        <div class="grow mb-6">
-          <EntityElementWindow
-            v-if="relationForm"
-            :element="relationForm"
-            :is-edit-overwrite="editRelations"
-            :form-id="formId"
+        <div class="flex-1 min-h-0 overflow-y-hidden hover:overflow-y-auto">
+          <ListItem
+            v-for="item in items"
+            :key="item.id"
+            :item-id="item.id"
+            :item-type="item.type"
+            :teaser-metadata="item.teaserMetadata"
+            :bulk-operations-context="context"
+            :thumb-icon="getThumbnail(item)"
           />
         </div>
       </div>
-      <div class="basis-full h-[55px]">
-        <BulkOperationsSubmitBar
-          :button-label="t('bulk-operations.edit')"
-          :button-icon="DamsIcons.DocumentInfo"
-          :selected-items-count="getEnqueuedItemCount(context)"
-          :disabled="!relationFormHasValues || !relationEntityId"
-          @submit="bulkAddRelations()"
-          @cancel="closeModal(TypeModals.BulkOperationsEdit)"
+      <div class="flex flex-col min-h-0 grow overflow-y-auto">
+        <h1 class="title pb-2">{{ t("bulk-operations.bulk-edit") }}</h1>
+        <p class="text-sm text-text-body pb-2">
+          {{ t("bulk-operations.bulk-edit-info") }}
+        </p>
+        <p
+          v-if="mergedForm?.unmatchedTypes.length"
+          class="text-sm text-accent-normal pb-2"
+        >
+          {{
+            t("bulk-operations.bulk-edit-unmatched-types", [
+              mergedForm.unmatchedTypes.join(", "),
+            ])
+          }}
+        </p>
+        <p
+          v-for="conflict in mergedForm?.conflicts ?? []"
+          :key="conflict.key"
+          class="text-sm text-accent-normal pb-2"
+        >
+          {{
+            t("bulk-operations.bulk-edit-field-conflict", [
+              conflict.key,
+              conflict.droppedTypes.join(", "),
+            ])
+          }}
+        </p>
+        <DynamicForm
+          v-if="mergedForm"
+          :key="formKey"
+          :dynamic-form-query="''"
+          :form-key="formKey"
+          :modal-form-fields="mergedForm.formFields"
+          :show-form-title="false"
+          :router="useRouter()"
+          :tab-name="''"
         />
       </div>
     </div>
-  </BaseModal>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -56,119 +71,84 @@ import type {
   InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import { useBulkOperations } from "@/composables/useBulkOperations";
-import type {
-  BulkAddRelationsMutation,
-  BulkAddRelationsMutationVariables,
-  GetBulkOperationsRelationFormQuery,
-  PanelMetaData,
-  WindowElement,
-} from "@/generated-types/queries";
-import {
-  BulkAddRelationsDocument,
-  DamsIcons,
-  GetBulkOperationsRelationFormDocument,
-  TypeModals,
-} from "@/generated-types/queries";
-import BaseModal from "@/components/base/BaseModal.vue";
-import BulkOperationsSubmitBar from "@/components/bulk-operations/BulkOperationsSubmitBar.vue";
+import { TypeModals } from "@/generated-types/queries";
+import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ListItem from "@/components/ListItem.vue";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
+import {
+  useBulkEditForm,
+  type MergedBulkEditForm,
+} from "@/composables/useBulkEditForm";
 import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useI18n } from "vue-i18n";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import EntityElementWindow from "../entityElements/EntityElementWindow.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { useAsyncAction } from "@/composables/useAsyncAction";
-import { useBlockingLoader } from "@/composables/useBlockingLoader";
-import { useBaseNotification } from "@/composables/useBaseNotification";
-
-const props = defineProps<{
-  context: Context;
-}>();
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 
 const { getEnqueuedItems, getEnqueuedItemCount } = useBulkOperations();
+const { buildMergedBulkEditForm } = useBulkEditForm();
 const config = inject("config") as any;
 const { t } = useI18n();
 const { getThumbnail } = useThumbnailHelper();
-const { getModalInfo, closeModal } = useBaseModal();
-const { createForm, createEntityValues, getForm, formContainsValues } =
-  useFormHelper();
-const { startBlocking, stopBlocking } = useBlockingLoader();
-const { displayErrorNotification } = useBaseNotification();
-const { run } = useAsyncAction();
+const { getModalInfo } = useBaseModal();
+const { clearBulkEditRelationMode } = useFormHelper();
+
+const formKey = "bulk-edit";
 const modal = getModalInfo(TypeModals.BulkOperationsEdit);
+const context = computed(
+  (): Context => getModalInfo(TypeModals.BulkOperationsEdit).context,
+);
 const skip = ref<number>(1);
 const limit = ref<number>(config.bulkSelectAllSizeLimit);
-const relationForm = ref<WindowElement | undefined>(undefined);
 const items = ref<InBulkProcessableItem[]>([]);
-const entityIds = computed(() =>
-  items.value.map((item: InBulkProcessableItem) => item.id),
-);
-const formId = "bulkEdit";
-const form = computed(() => getForm(formId));
-const relationFormHasValues = computed(() => formContainsValues(formId));
-const relationEntityId = computed((): string | undefined => {
-  const intialValues = form.value?.values.intialValues;
-  if (!intialValues) return undefined;
-  return Object.values(intialValues)[0] as string;
-});
-const editRelations = ref<boolean>(true);
-
-const { mutate: mutateRelations } = useMutation<
-  BulkAddRelationsMutation,
-  BulkAddRelationsMutationVariables
->(BulkAddRelationsDocument);
-
-const bulkAddRelations = () =>
-  run(async () => {
-    if (!relationEntityId.value) return;
-    startBlocking(t("bulk-operations.edit"));
-    let succeeded = false;
-    try {
-      await mutateRelations({
-        entityIds: entityIds.value,
-        relationEntityId: relationEntityId.value,
-        relationType: "",
-      });
-      succeeded = true;
-    } catch (error) {
-      console.error("Error bulk adding relations:", error);
-      displayErrorNotification(
-        t("notifications.errors.generic.title"),
-        t("notifications.errors.generic.description"),
-      );
-    } finally {
-      // stop before closing, otherwise the app-wide overlay flashes in the
-      // tick between the modal closing and blocking ending
-      stopBlocking();
-    }
-    if (succeeded) closeModal(TypeModals.BulkOperationsEdit);
-  });
-
-const { onResult: onRelationFormResult } =
-  useQuery<GetBulkOperationsRelationFormQuery>(
-    GetBulkOperationsRelationFormDocument,
-  );
-
-onRelationFormResult((relationFormResult: any) => {
-  relationForm.value = relationFormResult?.data?.BulkOperationsRelationForm;
-  const panels: any = relationForm.value;
-  if (panels) {
-    const fields = Object.values(panels.relations);
-    const entityValues = createEntityValues(fields as PanelMetaData[]);
-    createForm(formId, entityValues);
-  }
-});
+const mergedForm = ref<MergedBulkEditForm | undefined>(undefined);
 
 const loadItems = () =>
-  (items.value = getEnqueuedItems(props.context, skip.value, limit.value));
+  (items.value = getEnqueuedItems(context.value, skip.value, limit.value));
+
+const buildForm = async () => {
+  const formQueries = modal.formQueries ?? [];
+  if (formQueries.length === 0) {
+    console.error(
+      "Bulk edit: the bulk operation has no formQueries configured, nothing to render",
+    );
+    return;
+  }
+  const typesInSelection = [
+    ...new Set(
+      getEnqueuedItems(context.value)
+        .map((item: InBulkProcessableItem) => item.type)
+        .filter(Boolean) as string[],
+    ),
+  ];
+  mergedForm.value = await buildMergedBulkEditForm(formQueries, typesInSelection);
+};
 
 watch(
-  () => modal.modal?.open,
+  () => modal.open,
   (isModalOpen) => {
-    if (isModalOpen) loadItems();
+    if (!isModalOpen) {
+      mergedForm.value = undefined;
+      // Module state: a mode left behind would preselect itself next time.
+      clearBulkEditRelationMode(formKey);
+      return;
+    }
+    loadItems();
+    // ponytail: built once per open, never re-derived while the modal is up.
+    // editableFields only ever grows, so a field that disappeared from a re-merged
+    // form would still be submitted for types that no longer have it.
+    buildForm();
+  },
+  { immediate: true },
+);
+
+// A partial batch dequeues only the entities that succeeded, so refresh the list
+// to show exactly what a retry would still apply to.
+watch(
+  () => getEnqueuedItemCount(context.value),
+  () => {
+    if (modal.open) loadItems();
   },
 );
 </script>
