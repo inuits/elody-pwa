@@ -167,6 +167,7 @@ export function useEntityEditor() {
     relationType: string,
     formValues: Record<string, any>,
     callback?: () => void,
+    existingMetadata?: { key: string; value: any }[],
   ) => {
     isSaving.value = true;
     try {
@@ -188,7 +189,16 @@ export function useEntityEditor() {
         }
         return out;
       };
-      const metadata = flatten(formValues);
+      // The relation's metadata is replaced wholesale by the mutation, but a
+      // relation-config form only renders part of it: the processor config
+      // modal shows the SHACL fields, the connect modal shows the connection
+      // fields. Merging over what is already stored keeps each modal from
+      // wiping the other's keys.
+      const merged = new Map<string, any>(
+        (existingMetadata ?? []).map((item) => [item.key, item.value]),
+      );
+      flatten(formValues).forEach((item) => merged.set(item.key, item.value));
+      const metadata = Array.from(merged, ([key, value]) => ({ key, value }));
 
       const result = await mutate({
         id: targetEntityId,

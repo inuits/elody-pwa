@@ -110,6 +110,12 @@
         :form-id="formId"
         :element="element"
       />
+      <entity-element-shacl-shape
+        v-if="element.__typename === 'ShaclShapeElement'"
+        :element="element"
+        :entity="entity"
+        :form-id="id"
+      />
       <EntityElementHierarchyListViewer
         v-if="element.__typename === 'HierarchyListElement'"
         :element="element"
@@ -137,6 +143,7 @@ import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElem
 import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
 import EntityElementHierarchyListViewer from "@/components/entityElements/EntityElementHierarchyListViewer.vue";
 import EntityElementComments from "@/components/entityElements/comments/EntityElementComments.vue";
+import EntityElementShaclShape from "@/components/entityElements/EntityElementShaclShape.vue";
 
 import { computed, watch } from "vue";
 import { useEditMode } from "@/composables/useEdit";
@@ -185,10 +192,14 @@ const props = withDefaults(
     previewLabel?: string;
     entityMetadata?: Record<string, any>;
     entityRelations?: Record<string, any>;
+    // The entity itself, for elements rendered from a field set carried on it
+    // (see EntityElementShaclShape) rather than declared in the query.
+    entity?: Record<string, any>;
   }>(),
   {
     previewLabel: undefined,
     entityMetadata: undefined,
+    entity: undefined,
   },
 );
 const emit = defineEmits<{

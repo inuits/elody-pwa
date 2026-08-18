@@ -144,6 +144,13 @@ export const useFilterState = () => {
       value = resolveAllVariables(value, filter.defaultValueMapping);
     }
 
+    // If a variable reference could not be resolved (e.g. an entity relation
+    // that has no related entities), the raw "$..." template must not leak to
+    // the API. Treat it as an empty selection so it matches nothing.
+    if (typeof value === "string" && /\$[\w.]+/.test(value)) {
+      return [];
+    }
+
     value = tryParseJson(value);
 
     const additionalFilterValues = getAdditionalFilterValues(filter);
