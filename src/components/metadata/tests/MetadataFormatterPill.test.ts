@@ -72,6 +72,31 @@ describe("MetadataFormatterPill", () => {
     });
   });
 
+  describe("diff variants", () => {
+    it("strikes the old value in muted ink, with a spoken 'was' prefix", () => {
+      mocks.t.mockImplementation((key: string) => key);
+      const wrapper = mount(MetadataFormatterPill, {
+        props: { formatter: "pill|modified", label: "Lannoo" },
+      });
+      const pill = wrapper.get("div");
+      expect(pill.classes()).toContain("pill--diff-old");
+      // The strike is not the only signal (history-diff.md).
+      expect(pill.text()).toContain("was");
+      expect(pill.attributes("style")).toBeUndefined();
+    });
+
+    it("marks the new value with the changed tint, spoken as 'nu'", () => {
+      mocks.t.mockImplementation((key: string) => key);
+      const wrapper = mount(MetadataFormatterPill, {
+        props: { formatter: "pill|added", label: "Standaard Uitgeverij" },
+      });
+      const pill = wrapper.get("div");
+      expect(pill.classes()).toContain("pill--diff-new");
+      expect(pill.text()).toContain("nu");
+      expect(pill.attributes("style")).toBeUndefined();
+    });
+  });
+
   describe("colours", () => {
     it("takes the relation-chip tokens for an auto pill, not a hard-coded fill", () => {
       const wrapper = mount(MetadataFormatterPill, {

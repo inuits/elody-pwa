@@ -6,11 +6,19 @@
         pill: pillSettings,
         'pill--lg': pillSettings && size === 'lg',
         'pill--relation': isRelationChip,
+        'pill--diff-old': diffVariant === 'modified',
+        'pill--diff-new': diffVariant === 'added',
       },
     ]"
     :style="configuredColours"
   >
-    {{ displayValue }}
+    <!-- The strike/tint is never the only signal (history-diff.md). -->
+    <span v-if="diffVariant" class="sr-only">
+      {{ t(diffVariant === "modified" ? "history-diff.was" : "history-diff.nu") }}
+    </span>
+    <span :class="{ 'pill--diff-old__value': diffVariant === 'modified' }">
+      {{ displayValue }}
+    </span>
   </div>
 </template>
 
@@ -42,8 +50,18 @@ const pillType = computed(() => {
 /** "auto" is the relation chip: a value whose click navigates. */
 const isRelationChip = computed(() => props.formatter.split("|")[1] === "auto");
 
+/**
+ * The history diff's value states are design-owned, not tenant pills: the old
+ * value struck in muted ink, the new one on the changed tint (history-diff.md).
+ */
+const diffVariant = computed<"modified" | "added" | undefined>(() => {
+  const variant = props.formatter.split("|")[1];
+  return variant === "modified" || variant === "added" ? variant : undefined;
+});
+
 const pillSettings = computed(() => {
   if (isRelationChip.value) return true;
+  if (diffVariant.value) return true;
   const [formatterType] = props.formatter.split("|");
   // A client whose config declares no group for this formatter renders the
   // plain value rather than crashing the row it sits in.
@@ -56,7 +74,8 @@ const pillSettings = computed(() => {
  * and takes its fill from the tokens.
  */
 const configuredColours = computed(() => {
-  if (isRelationChip.value || !pillSettings.value) return undefined;
+  if (isRelationChip.value || diffVariant.value || !pillSettings.value)
+    return undefined;
   return {
     background: pillSettings.value.background,
     color: pillSettings.value.text,
@@ -97,5 +116,27 @@ const displayValue = computed(() => {
 .pill--relation {
   background: var(--color-chip-relation-bg);
   color: var(--color-chip-relation-text);
+}
+
+/* History diff: old struck in muted, new on the changed tint. */
+.pill--diff-old {
+  color: var(--color-text-muted);
+}
+
+.pill--diff-old__value {
+  text-decoration: line-through;
+}
+
+.pill--diff-new {
+  background: var(--color-accent-tint);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

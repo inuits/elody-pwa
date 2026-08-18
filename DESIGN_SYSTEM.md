@@ -175,6 +175,22 @@ delete (needs a restore path — recreating the search client-side would mint a
 new id), and the Save vs Save-as prompt for a modified shared search. Like the
 badge tones and `isGroup`, these want entity/config-side work first.
 
+## History diff — value states done, table semantics recorded
+
+Changed values in the version compare were riding the tenant pill mechanism
+(`pill|modified` / `pill|added` looked their colours up in client formatter
+settings — unconfigured clients got nothing). They are design-owned states on
+`MetadataFormatterPill` now: the old value struck in muted ink, the new one on
+the changed tint, each with a visually-hidden was/nu prefix so colour is never
+the only signal.
+
+Recorded, not rebuilt: history-diff.md wants the two versions as one
+`role="table"` with version column headers, plus the "Toon alleen wijzigingen"
+toggle and a "Herstel deze versie" action. The wrapper renders two
+EntityColumn instances per version — restructuring that into one table is
+surgery on the entity-panel pipeline and belongs with the quality-popover tier
+of feature work, not chrome.
+
 ## Guided flow — chrome on contract, layout deviation recorded
 
 The step modal wears the overlay contract now (10px radius, modal shadow, the
@@ -223,7 +239,7 @@ now.
 | WP6 filters | done — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome, date picker and the saved-searches surfaces. Left open, needing entity-side support: the default star (Maak standaard), the shared/team flag, undo-over-confirm on delete and Save-vs-Save-as (below). The date range variant stays unbuilt until a field needs it |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7 viewers | one ViewerToolbar for image + PDF (PdfToolbar deleted) and maps on the tenant accent with capsule zoom controls; AV/text toolbar modes, the IIIF-manifest filmstrip and the media-first detail column open |
-| WP8 flows & feedback | toasts, DynamicForm chrome, guided-flow chrome and upload chrome done; history diff, comments, trees, import browser and nav chrome open |
+| WP8 flows & feedback | toasts, DynamicForm chrome, guided-flow chrome, upload chrome and the history-diff value states done; comments, trees, import browser and nav chrome open |
 | WP9 | open |
 
 ## Conventions for the next component
@@ -295,6 +311,7 @@ there; until then vue-i18n renders the key itself.
 | `repetitiveForm.remove-entry` | Verwijder dit item | Remove this entry | Accessible name of a created-so-far row's remove. |
 | `upload.zone-label` | Upload bestanden | Upload files | Accessible name of the dropzone. |
 | `upload.remove-file` | Verwijder bestand | Remove file | Accessible name of a file row's remove. |
+| `history-diff.was` / `.nu` | was / nu | was / now | Spoken prefixes on diffed values — colour is never the only signal. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

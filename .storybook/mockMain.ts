@@ -95,6 +95,7 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
+      "history-diff": { was: "was", nu: "nu", "no-differences": "Geen verschillen" },
       upload: {
         "zone-label": "Upload bestanden",
         "remove-file": "Verwijder bestand",
@@ -164,6 +165,7 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
+      "history-diff": { was: "was", nu: "now", "no-differences": "No differences" },
       upload: {
         "zone-label": "Upload files",
         "remove-file": "Remove file",
