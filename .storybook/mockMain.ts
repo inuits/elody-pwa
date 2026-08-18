@@ -85,7 +85,9 @@ export const i18n = createI18n({
         selected: "geselecteerd",
         "undo-selection": "Wis selectie",
         "select-page": "Selecteer pagina",
+        "confirm-selection-count": "Bevestig selectie ({count})",
       },
+      search: { "search-placeholder": "Zoek…", submit: "Zoek" },
     },
     en: {
       metadata: {
@@ -123,7 +125,9 @@ export const i18n = createI18n({
         selected: "selected",
         "undo-selection": "Clear selection",
         "select-page": "Select page",
+        "confirm-selection-count": "Confirm selection ({count})",
       },
+      search: { "search-placeholder": "Search…", submit: "Search" },
     },
   },
   missingWarn: false,

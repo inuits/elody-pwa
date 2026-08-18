@@ -80,7 +80,11 @@
     >
       <div v-if="confirmSelectionButton" class="w-full !m-0">
         <BaseButton
-          :label="$t('bulk-operations.confirm-selection')"
+          :label="
+            $t('bulk-operations.confirm-selection-count', {
+              count: getEnqueuedItemCount(context),
+            })
+          "
           :icon="DamsIcons.Check"
           button-style="commit"
           :disabled="!itemsSelected"

@@ -182,7 +182,7 @@ now.
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
 | WP5 lists & actions | done — rows, preview split, action trigger, selection bar, panel shell, pagination. Only the quality-status chip + jump-to-field popover is left, and it is a feature rather than chrome |
-| WP6 filters | rail, section headers, matcher panel chrome, option skeletons, facet counts and the base modal done; date picker, picker modal and saved searches open |
+| WP6 filters | rail, section headers, matcher panel chrome, option skeletons, facet counts, base modal and picker chrome done; date picker and saved searches open |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7–WP9 | open |
 
@@ -238,6 +238,8 @@ there; until then vue-i18n renders the key itself.
 | `filters.clear-filter` | Wis filter | Clear filter | Per-section clear, which applies immediately. |
 | `filters.option-count-name` | {label}, {count} resultaten | {label}, {count} results | Accessible name of a counted filter option. |
 | `modal.close` | Sluiten | Close | Accessible name of the modal close cross. |
+| `bulk-operations.confirm-selection-count` | Bevestig selectie ({count}) | Confirm selection ({count}) | The picker's commit, with the live count. |
+| `search.submit` | Zoek | Search | Submit inside the search pill. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
