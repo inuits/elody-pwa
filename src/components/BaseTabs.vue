@@ -39,22 +39,33 @@
         >
       </li>
     </ol>
-    <div v-else class="flex gap-3">
-      <div
+    <!-- Real tabs (dynamic-form.md): 12.5px bold labels, the active one
+         underlined in the accent, an error tab marked with a danger dot. -->
+    <div v-else role="tablist" class="flex gap-3">
+      <button
         v-for="(tab, index) in tabs"
         :key="index"
+        type="button"
+        role="tab"
         data-testid="base-tabs-tab"
-        @click="selectTab(index)"
-        class="text-center p-3"
+        :aria-selected="index === state.selectedIndex"
+        :tabindex="index === state.selectedIndex ? 0 : -1"
+        class="ds-tab"
         :class="[
-          index === state.selectedIndex
-            ? 'text-text-body font-bold border-b-2'
-            : 'text-text-light',
+          { 'ds-tab--active': index === state.selectedIndex },
           tabNavigationDisabled ? '' : 'cursor-pointer',
         ]"
+        @click="selectTab(index)"
+        @keydown.left.prevent="moveFocus(index - 1)"
+        @keydown.right.prevent="moveFocus(index + 1)"
       >
         {{ tab }}
-      </div>
+        <span
+          v-if="errorTabs.includes(index)"
+          class="ds-tab__error-dot"
+          :title="errorDotTitle"
+        />
+      </button>
     </div>
     <slot></slot>
   </div>
@@ -68,11 +79,16 @@ const props = withDefaults(
     tabs: string[];
     tabNavigationDisabled: boolean;
     stepStrip?: boolean;
+    /** Indexes of tabs holding validation errors; each gets a danger dot. */
+    errorTabs?: number[];
+    errorDotTitle?: string;
   }>(),
   {
     tabs: () => [],
     tabNavigationDisabled: false,
     stepStrip: false,
+    errorTabs: () => [],
+    errorDotTitle: "",
   },
 );
 
@@ -88,4 +104,41 @@ const selectTab = (i: number) => {
   if (props.tabNavigationDisabled) return;
   state.selectedIndex = i;
 };
+
+/** Arrow keys move and select, per the tabs pattern. */
+const moveFocus = (i: number) => {
+  if (props.tabNavigationDisabled) return;
+  if (i < 0 || i >= props.tabs.length) return;
+  selectTab(i);
+};
 </script>
+
+<style scoped>
+.ds-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-ds-3);
+  padding: var(--spacing-ds-5) var(--spacing-ds-6);
+  font-size: var(--text-table);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+}
+
+.ds-tab--active {
+  color: var(--color-text-body);
+  border-bottom-color: var(--color-accent);
+}
+
+.ds-tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.ds-tab__error-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-danger);
+}
+</style>

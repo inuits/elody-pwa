@@ -1,6 +1,7 @@
 <template>
   <div
     v-show="isActive"
+    role="tabpanel"
     class="flex flex-col h-full p-3 bg-[var(--color-background-normal)]"
   >
     <slot></slot>

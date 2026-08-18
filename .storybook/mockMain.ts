@@ -95,6 +95,10 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
+      "dynamic-form": {
+        "actions-label": "Formulier-acties",
+        "check-fields": "Controleer de gemarkeerde velden ({count})",
+      },
       viewer: {
         "toolbar-label": "Viewer-acties",
         "zoom-in": "Zoom in",
@@ -150,6 +154,10 @@ export const i18n = createI18n({
       },
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
+      "dynamic-form": {
+        "actions-label": "Form actions",
+        "check-fields": "Check the highlighted fields ({count})",
+      },
       viewer: {
         "toolbar-label": "Viewer actions",
         "zoom-in": "Zoom in",

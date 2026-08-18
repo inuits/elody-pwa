@@ -25,7 +25,7 @@
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
       </p>
       <div
-        v-for="(field, index) in getSortedFieldArray"
+        v-for="(field, index) in contentFields"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
       >
@@ -154,69 +154,85 @@
             </div>
           </div>
         </div>
-        <DynamicFormUploadButton
-          v-if="
-            (field.__typename === 'FormAction' &&
-              (field as FormAction).actionType == ActionType.Upload) ||
-            (field as FormAction).actionType == ActionType.UploadWithMetadata ||
-            (field as FormAction).actionType == ActionType.UploadWithOcr ||
-            (field as FormAction).actionType ==
-              ActionType.UploadCsvForReordening ||
-            (field as FormAction).actionType == ActionType.UpdateMetadata ||
-            (field as FormAction).actionType == ActionType.SubmitWithUpload
-          "
-          :label="t((field as FormAction).label)"
-          :icon="(field as FormAction).icon"
-          :disabled="!enableUploadButton || isButtonDisabled"
-          :progressIndicatorType="
-            (field as FormAction).actionProgressIndicator?.type
-          "
-          @click-upload-button="
-            performActionButtonClickEvent(field as FormAction)
-          "
-          @reset-upload="initializeForm"
-          @close-and-delete-form="closeAndDeleteForm"
-        />
-        <BaseButton
-          v-if="
-            field.__typename === 'FormAction' &&
-            field.actionType !== ActionType.Upload &&
-            field.actionType !== ActionType.UploadWithMetadata &&
-            field.actionType !== ActionType.UploadWithOcr &&
-            field.actionType !== ActionType.UploadCsvForReordening &&
-            field.actionType !== ActionType.UpdateMetadata &&
-            field.actionType !== ActionType.SubmitWithUpload
-          "
-          :class="[
-            { 'mt-5 mb-10': !isButtonDisabled },
-            { 'mt-0': isButtonDisabled },
-          ]"
-          :label="
-            config?.features.hasTenantSelect
-              ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
-                  config.tenantDefiningTypes !== field.creationType
-                    ? ` in ${t(
-                        `navigation.tenant`,
-                      ).toLowerCase()} ${currentTenant}`
-                    : ''
-                }`
-              : t(field.label)
-          "
-          :disabled="
-            isButtonDisabled ||
-            (!!busyActionType && busyActionType !== field.actionType)
-          "
-          :loading="busyActionType === field.actionType"
-          :icon="field.icon"
-          button-style="commit"
-          @click="performActionButtonClickEvent(field)"
-        />
+      </div>
+
+      <!-- One submit zone (dynamic-form.md): sticky bottom, actions right,
+           the validation summary on the left when there is something to say. -->
+      <div
+        class="dynamic-form__submit-zone"
+        role="group"
+        :aria-label="$t('dynamic-form.actions-label')"
+      >
         <p
-          v-if="submitErrors && index === getSortedFieldArray.length - 1"
-          class="text-red-default"
+          v-if="showErrors && formErrorCount > 0"
+          role="alert"
+          class="dynamic-form__summary"
         >
+          {{ $t("dynamic-form.check-fields", { count: formErrorCount }) }}
+        </p>
+        <p v-if="submitErrors" role="alert" class="dynamic-form__summary">
           {{ submitErrors }}
         </p>
+        <div class="dynamic-form__actions">
+          <template
+            v-for="(field, actionIndex) in actionFields"
+            :key="`${dynamicFormQuery}_action_${actionIndex}`"
+          >
+      <DynamicFormUploadButton
+        v-if="
+          (field.__typename === 'FormAction' &&
+            (field as FormAction).actionType == ActionType.Upload) ||
+          (field as FormAction).actionType == ActionType.UploadWithMetadata ||
+          (field as FormAction).actionType == ActionType.UploadWithOcr ||
+          (field as FormAction).actionType ==
+            ActionType.UploadCsvForReordening ||
+          (field as FormAction).actionType == ActionType.UpdateMetadata ||
+          (field as FormAction).actionType == ActionType.SubmitWithUpload
+        "
+        :label="t((field as FormAction).label)"
+        :icon="(field as FormAction).icon"
+        :disabled="!enableUploadButton || isButtonDisabled"
+        :progressIndicatorType="
+          (field as FormAction).actionProgressIndicator?.type
+        "
+        @click-upload-button="
+          performActionButtonClickEvent(field as FormAction)
+        "
+        @reset-upload="initializeForm"
+        @close-and-delete-form="closeAndDeleteForm"
+      />
+      <BaseButton
+        v-if="
+          field.__typename === 'FormAction' &&
+          field.actionType !== ActionType.Upload &&
+          field.actionType !== ActionType.UploadWithMetadata &&
+          field.actionType !== ActionType.UploadWithOcr &&
+          field.actionType !== ActionType.UploadCsvForReordening &&
+          field.actionType !== ActionType.UpdateMetadata &&
+          field.actionType !== ActionType.SubmitWithUpload
+        "
+        :label="
+          config?.features.hasTenantSelect
+            ? `${t(field.label)} ${t(`types.${field.creationType}`)}${
+                config.tenantDefiningTypes !== field.creationType
+                  ? ` in ${t(
+                      `navigation.tenant`,
+                    ).toLowerCase()} ${currentTenant}`
+                  : ''
+              }`
+            : t(field.label)
+        "
+        :disabled="
+          isButtonDisabled ||
+          (!!busyActionType && busyActionType !== field.actionType)
+        "
+        :loading="busyActionType === field.actionType"
+        :icon="field.icon"
+        button-style="commit"
+        @click="performActionButtonClickEvent(field)"
+      />
+          </template>
+        </div>
       </div>
     </div>
   </div>
@@ -486,8 +502,20 @@ const getSortedFieldArray = computed(() => {
 });
 
 const form = ref<FormContext<any>>();
-const formContainsErrors = computed(
-  (): boolean => Object.keys(form.value?.errors ?? {}).length > 0,
+const formErrorCount = computed(
+  (): number => Object.keys(form.value?.errors ?? {}).length,
+);
+const formContainsErrors = computed((): boolean => formErrorCount.value > 0);
+
+const contentFields = computed(() =>
+  getSortedFieldArray.value.filter(
+    (field: any) => field.__typename !== "FormAction",
+  ),
+);
+const actionFields = computed(() =>
+  getSortedFieldArray.value.filter(
+    (field: any) => field.__typename === "FormAction",
+  ),
 );
 const showErrors = ref<boolean>(false);
 const isButtonDisabled = computed((): boolean =>
@@ -810,9 +838,8 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
         undefined,
         form,
       );
-      let entity: Entity;
-      entity = (await performSubmitAction(document, entityInput)).data
-        .CreateEntity;
+      const entity: Entity = (await performSubmitAction(document, entityInput))
+        .data.CreateEntity;
       setArgumentForSubmitAllFormTabs(
         entity["id"],
         props.allFormRelationTypes[formKeyIndex],
@@ -918,13 +945,13 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   closeAndDeleteForm();
 };
 
-const validateAndGoToNextFormTabActionFunction = async (field: FormAction) => {
+const validateAndGoToNextFormTabActionFunction = async () => {
   const valid = await isFormValid();
   if (!valid) return;
   tabs.selectedIndex++;
 };
 
-const goToPreviousFormTabActionFunction = async (field: FormAction) => {
+const goToPreviousFormTabActionFunction = async () => {
   tabs.selectedIndex--;
 };
 
@@ -1316,4 +1343,36 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Sticky, so the actions stay reachable while a long form scrolls; one zone,
+   never save buttons scattered per section (dynamic-form.md). */
+.dynamic-form__submit-zone {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-ds-8);
+  margin-top: var(--spacing-ds-8);
+  padding: var(--spacing-ds-6) 0;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.dynamic-form__summary {
+  margin-right: auto;
+  font-size: var(--text-hint);
+  color: var(--color-danger);
+}
+
+.dynamic-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-ds-5);
+}
+
+.dynamic-form__actions :deep(.ds-button) {
+  flex: none;
+  width: auto;
+}
+</style>
