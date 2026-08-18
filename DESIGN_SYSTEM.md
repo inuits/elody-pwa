@@ -239,7 +239,7 @@ now.
 | WP6 filters | done — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome, date picker and the saved-searches surfaces. Left open, needing entity-side support: the default star (Maak standaard), the shared/team flag, undo-over-confirm on delete and Save-vs-Save-as (below). The date range variant stays unbuilt until a field needs it |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7 viewers | one ViewerToolbar for image + PDF (PdfToolbar deleted) and maps on the tenant accent with capsule zoom controls; AV/text toolbar modes, the IIIF-manifest filmstrip and the media-first detail column open |
-| WP8 flows & feedback | done except the nav chrome — toasts, DynamicForm, guided flow, upload, history-diff values, comments, folder tree and import browser are in. Open: nav chrome; arrow-key tree navigation; and the import browser's fuller file table (per-file checkboxes, path breadcrumb, size/type/date columns), which is a feature the directory-import flow does not have — today a whole directory is imported at once |
+| WP8 flows & feedback | **done** — toasts, DynamicForm, guided flow, upload, history-diff values, comments, folder tree, import browser and nav chrome. Still open from the package, all feature-tier: arrow-key tree navigation, the import browser's file table, and the 52px rail width (a layout change that belongs to WP9's two-fixed-elements rule) |
 | WP9 | open |
 
 ## Conventions for the next component
@@ -315,6 +315,7 @@ there; until then vue-i18n renders the key itself.
 | `comments.log-label` | Opmerkingen | Comments | Accessible name of the comments log. |
 | `comments.edit-named` | Bewerk opmerking van {author}, {time} | Edit comment by {author}, {time} | The edit action carries author + time in its name. |
 | `tree.expand` / `.collapse` | Klap uit / Klap in | Expand / Collapse | Accessible name of a tree row's disclosure. |
+| `navigation.main-label` | Hoofdnavigatie | Main navigation | Accessible name of the nav rail/flyout. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

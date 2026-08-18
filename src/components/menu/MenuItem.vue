@@ -6,11 +6,11 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center pl-4 min-h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
+      class="menu-item-row flex flex-row items-center pl-4 min-h-9 mt-3 w-full text-left cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[
         {
           'bg-neutral-40 rounded-lg': isBeingHovered,
-          'text-accent-accent': isActiveParentOrSubmenu,
+          'menu-item-row--active': isActiveParentOrSubmenu,
         },
       ]"
     >
@@ -117,7 +117,8 @@ const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link,
 );
 const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
-const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
+// A non-link action is a real button, so the keyboard can reach it.
+const linkTag = computed(() => (isLink.value ? "router-link" : "button"));
 const route = useRoute();
 
 const props = defineProps<{

@@ -47,7 +47,8 @@ const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link
 );
-const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
+// A non-link action is a real button, so the keyboard can reach it.
+const linkTag = computed(() => (isLink.value ? "router-link" : "button"));
 const isPermitted = ref<boolean>(false);
 
 onMounted(async () => {

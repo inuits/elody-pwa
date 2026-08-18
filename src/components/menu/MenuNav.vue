@@ -2,9 +2,11 @@
   <nav
     data-cy="menu-nav"
     ref="navigation"
+    :aria-label="$t('navigation.main-label')"
+    @keydown.escape="changeExpandedStateOfMenu(false)"
     :class="[
       'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-background-light px-5 pb-16 z-navigation',
-      { 'w-80': isExpanded },
+      { 'w-80 navbar--expanded': isExpanded },
     ]"
     @click.self="changeExpandedStateOfMenu(true)"
   >
@@ -21,9 +23,7 @@
         data-cy="environment-pill"
         class="mb-8 -mt-6 flex justify-center"
       >
-        <span
-          class="rounded-full bg-accent-normal text-neutral-0 text-xs font-semibold px-2 py-0.5 uppercase"
-        >
+        <span class="environment-pill">
           {{ environmentLabel }}
         </span>
       </div>
@@ -103,8 +103,7 @@ const closeExpanded = (event: any) => {
   if (!navigation.value) return;
 
   const isClickedOutsideNavigation =
-    navigation.value &&
-    !navigation.value.innerHTML.includes(event.target.innerHTML);
+    navigation.value && !navigation.value.contains(event.target);
   if (isClickedOutsideNavigation && !someModalIsOpened.value) {
     changeExpandedStateOfMenu(false);
     changeHoveredItem(undefined);
@@ -117,6 +116,25 @@ router.afterEach(() => {
 </script>
 
 <style>
+/* The flyout floats over content, so it carries the overlay shadow; the
+   collapsed rail sits in the layout and floats nothing (navigation.md). */
+.navbar--expanded {
+  box-shadow: var(--shadow-overlay);
+}
+
+/* Not production: the warning pair, legible on every tenant — the mint with
+   white text failed contrast everywhere. */
+.environment-pill {
+  padding: 0 var(--spacing-ds-5);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
 .navbar,
 .logInOut {
   transition-property: all;
