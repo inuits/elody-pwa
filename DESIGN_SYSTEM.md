@@ -239,7 +239,7 @@ now.
 | WP6 filters | done — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome, date picker and the saved-searches surfaces. Left open, needing entity-side support: the default star (Maak standaard), the shared/team flag, undo-over-confirm on delete and Save-vs-Save-as (below). The date range variant stays unbuilt until a field needs it |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7 viewers | one ViewerToolbar for image + PDF (PdfToolbar deleted) and maps on the tenant accent with capsule zoom controls; AV/text toolbar modes, the IIIF-manifest filmstrip and the media-first detail column open |
-| WP8 flows & feedback | toasts, DynamicForm chrome, guided-flow chrome, upload chrome, history-diff value states and the comments chrome done; trees, import browser and nav chrome open |
+| WP8 flows & feedback | toasts, DynamicForm chrome, guided-flow chrome, upload chrome, history-diff value states, comments chrome and the folder tree done; import browser and nav chrome open. The full arrow-key tree navigation (↑↓→← across recursive nodes) is left open — it needs focus management across the recursion |
 | WP9 | open |
 
 ## Conventions for the next component
@@ -314,6 +314,7 @@ there; until then vue-i18n renders the key itself.
 | `history-diff.was` / `.nu` | was / nu | was / now | Spoken prefixes on diffed values — colour is never the only signal. |
 | `comments.log-label` | Opmerkingen | Comments | Accessible name of the comments log. |
 | `comments.edit-named` | Bewerk opmerking van {author}, {time} | Edit comment by {author}, {time} | The edit action carries author + time in its name. |
+| `tree.expand` / `.collapse` | Klap uit / Klap in | Expand / Collapse | Accessible name of a tree row's disclosure. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

@@ -96,6 +96,7 @@ export const i18n = createI18n({
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
       "date-picker": { placeholder: "dd-mm-jjjj" },
       "history-diff": { was: "was", nu: "nu", "no-differences": "Geen verschillen" },
+      tree: { expand: "Klap uit", collapse: "Klap in" },
       comments: {
         "log-label": "Opmerkingen",
         "edit-named": "Bewerk opmerking van {author}, {time}",
@@ -174,6 +175,7 @@ export const i18n = createI18n({
       search: { "search-placeholder": "Search…", submit: "Search" },
       "date-picker": { placeholder: "dd-mm-yyyy" },
       "history-diff": { was: "was", nu: "now", "no-differences": "No differences" },
+      tree: { expand: "Expand", collapse: "Collapse" },
       comments: {
         "log-label": "Comments",
         "edit-named": "Edit comment by {author}, {time}",
