@@ -17,6 +17,7 @@
       ref="filterComponentRef"
       :filter="filter"
       :options="options"
+      :counts="facetCounts"
       :loading="false"
       @filterOptions="$emit('filterOptions', $event)"
       @updateValue="$emit('updateValue', $event)"
@@ -66,6 +67,7 @@ const {
   init,
   updateSelectedOptions,
   setPredefinedOptions,
+  facetCounts,
   loading: isLoadingOptions,
 } = useFilterOptions();
 const route = useRoute();

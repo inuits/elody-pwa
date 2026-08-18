@@ -6,12 +6,12 @@
       type="checkbox"
       :checked="required"
       :disabled="disabled || isDisabledByContextLimit || required"
-      :aria-label="label ? undefined : ariaLabel"
+      :aria-label="ariaLabel || undefined"
       @change.stop
       @click.stop="handleItemSelection"
     />
-    <span v-if="label" class="ds-checkbox__label">
-      {{ label }}
+    <span v-if="label || $slots.label" class="ds-checkbox__label">
+      <slot name="label">{{ label }}</slot>
       <unicon
         v-if="required"
         :name="Unicons.ExclamationTriangle.name"
@@ -45,7 +45,10 @@ const props = withDefaults(
     label?: string;
     item: InBulkProcessableItem;
     bulkOperationsContext: Context | undefined;
-    /** Required when there is no visible label — a box with no name is unusable. */
+    /**
+     * Overrides the visible label as accessible name when given; required
+     * when there is no visible label — a box with no name is unusable.
+     */
     ariaLabel?: string;
     disabled?: boolean;
     ignoreBulkOperations?: boolean;

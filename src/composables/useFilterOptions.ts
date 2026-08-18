@@ -391,6 +391,9 @@ export const useFilterOptions = () => {
     entitiesLoading: optionsLibrary.entitiesLoading,
     options,
     dropdownOptions,
+    // Per-option result counts from the facets query; the checkbox list
+    // shows them beside each option (filter-panel.md).
+    facetCounts,
     loading,
   };
 };

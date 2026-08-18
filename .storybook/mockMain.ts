@@ -68,6 +68,7 @@ export const i18n = createI18n({
       filters: {
         "section-active": "actief",
         "clear-filter": "Wis filter",
+        "option-count-name": "{label}, {count} resultaten",
         "saved-searches": "Bewaarde zoekopdrachten",
       },
       pagination: {
@@ -104,6 +105,7 @@ export const i18n = createI18n({
       filters: {
         "section-active": "active",
         "clear-filter": "Clear filter",
+        "option-count-name": "{label}, {count} results",
         "saved-searches": "Saved searches",
       },
       pagination: {
