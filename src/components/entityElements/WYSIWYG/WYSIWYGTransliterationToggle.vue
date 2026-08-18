@@ -28,6 +28,10 @@ const { transliterateHtml } = useTransliteration();
 
 const activeKey = ref<string | null>(null);
 const originalContent = ref<string>("");
+const originalEditorClass = ref<string>("");
+
+const ITALIC_CLASS = "italic";
+const NON_ITALIC_TRANSLITERATION_KEYS = new Set(["arabic"]);
 
 type TransliterationItem = {
   label: string;
@@ -47,27 +51,63 @@ const transliterationItems = computed(() => {
   ) as Record<string, TransliterationItem>;
 });
 
+const hasInitialItalicClass = computed(() =>
+  originalEditorClass.value.split(/\s+/).includes(ITALIC_CLASS),
+);
+
+function getEditorClass(): string {
+  const attributes = props.editor?.options?.editorProps?.attributes;
+  return typeof attributes === "object" ? (attributes.class ?? "") : "";
+}
+
+function setEditorItalic(shouldHaveItalic: boolean): void {
+  if (!props.editor) return;
+  const editorProps = props.editor.options.editorProps ?? {};
+  const attributes = typeof editorProps.attributes === "object" ? editorProps.attributes : {};
+  const classes = getEditorClass().split(/\s+/).filter(Boolean);
+  const nextClasses = shouldHaveItalic
+    ? classes.includes(ITALIC_CLASS)
+      ? classes
+      : [...classes, ITALIC_CLASS]
+    : classes.filter((className) => className !== ITALIC_CLASS);
+
+  props.editor.setOptions({
+    editorProps: {
+      ...editorProps,
+      attributes: { ...attributes, class: nextClasses.join(" ") },
+    },
+  });
+}
+
 onMounted(() => {
   if (props.editor) {
     originalContent.value = props.editor.getHTML();
+    originalEditorClass.value = getEditorClass();
   }
 });
 
 onUnmounted(() => {
-  if (activeKey.value !== null && originalContent.value) {
+  if (activeKey.value === null) return;
+  if (originalContent.value) {
     props.editor?.commands.setContent(originalContent.value);
+  }
+  if (hasInitialItalicClass.value) {
+    setEditorItalic(true);
   }
 });
 
 watch(activeKey, (key) => {
   if (!props.editor || !originalContent.value) return;
   const item = key ? transliterationItems.value[key] : null;
-  if (item?.mapping) {
-    props.editor.commands.setContent(
-      transliterateHtml(originalContent.value, item.mapping, item.insertSpaces ?? false),
-    );
-  } else {
-    props.editor.commands.setContent(originalContent.value);
+  const nextContent = item?.mapping
+    ? transliterateHtml(originalContent.value, item.mapping, item.insertSpaces ?? false)
+    : originalContent.value;
+
+  props.editor.commands.setContent(nextContent);
+
+  if (hasInitialItalicClass.value) {
+    const isNonItalicScript = key !== null && NON_ITALIC_TRANSLITERATION_KEYS.has(key);
+    setEditorItalic(!isNonItalicScript);
   }
 });
 </script>

@@ -13,12 +13,20 @@ const makeConfig = () => {
   };
 };
 
-const makeEditor = (html = "<p>bs</p>") => {
+const makeEditor = (html = "<p>bs</p>", initialClass = "") => {
+  const options = { editorProps: { attributes: { class: initialClass } } };
   return {
     getHTML: vi.fn().mockReturnValue(html),
     commands: { setContent: vi.fn() },
+    options,
+    setOptions: vi.fn((next: { editorProps?: { attributes?: { class?: string } } }) => {
+      Object.assign(options, next);
+    }),
   };
 };
+
+const getLatestClass = (editor: ReturnType<typeof makeEditor>): string | undefined =>
+  editor.options.editorProps.attributes?.class;
 
 describe("WYSIWYGTransliterationToggle", () => {
   describe("rendering", () => {
@@ -239,6 +247,68 @@ describe("WYSIWYGTransliterationToggle", () => {
       });
       wrapper.unmount();
       expect(editor.commands.setContent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("italic class handling", () => {
+    it("removes the italic class when switching to a mapping that produces non-Latin script", async () => {
+      const editor = makeEditor("<p>bs</p>", "prose italic text-sm");
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: makeConfig() },
+      });
+      const [, arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      expect(getLatestClass(editor)?.split(/\s+/)).not.toContain("italic");
+    });
+
+    it("keeps the rest of the original classes when removing italic", async () => {
+      const editor = makeEditor("<p>bs</p>", "prose italic text-sm");
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: makeConfig() },
+      });
+      const [, arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      const classes = getLatestClass(editor)?.split(/\s+/);
+      expect(classes).toContain("prose");
+      expect(classes).toContain("text-sm");
+    });
+
+    it("restores the italic class when switching back to a Latin-producing mapping", async () => {
+      const editor = makeEditor("<p>bs</p>", "prose italic text-sm");
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: makeConfig() },
+      });
+      const [latinBtn, arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      await latinBtn.trigger("click");
+      await nextTick();
+      expect(getLatestClass(editor)?.split(/\s+/)).toContain("italic");
+    });
+
+    it("does not touch the editor class when it never had an italic class initially", async () => {
+      const editor = makeEditor("<p>bs</p>", "prose text-sm");
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: makeConfig() },
+      });
+      const [, arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      expect(editor.setOptions).not.toHaveBeenCalled();
+    });
+
+    it("restores the italic class on unmount if it was removed while active", async () => {
+      const editor = makeEditor("<p>bs</p>", "prose italic text-sm");
+      const wrapper = mount(WYSIWYGTransliterationToggle, {
+        props: { editor, transliterationConfig: makeConfig() },
+      });
+      const [, arabicBtn] = wrapper.findAll("button");
+      await arabicBtn.trigger("click");
+      await nextTick();
+      wrapper.unmount();
+      expect(getLatestClass(editor)?.split(/\s+/)).toContain("italic");
     });
   });
 });
