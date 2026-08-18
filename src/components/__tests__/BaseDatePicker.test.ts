@@ -37,7 +37,7 @@ describe('BaseDatePicker', () => {
 
     const input = wrapper.find('input.dp__input');
     
-    await input.setValue('15/01/2026 11:11');
+    await input.setValue('15-01-2026 11:11');
     
     await input.trigger('keydown', { key: 'Enter', code: 'Enter' });
     await wrapper.vm.$nextTick();
@@ -57,11 +57,11 @@ describe('BaseDatePicker', () => {
 
     await wrapper.vm.$nextTick();
 
-    expect(input.html()).toContain('15/01/2026 10:11');
+    expect(input.html()).toContain('15-01-2026 10:11');
 
     await wrapper.vm.$nextTick();
     
-    await input.setValue('22/06/2026 11:11');
+    await input.setValue('22-06-2026 11:11');
     
     await input.trigger('keydown', { key: 'Enter', code: 'Enter' });
     await wrapper.vm.$nextTick();

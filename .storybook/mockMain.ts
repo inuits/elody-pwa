@@ -88,6 +88,7 @@ export const i18n = createI18n({
         "confirm-selection-count": "Bevestig selectie ({count})",
       },
       search: { "search-placeholder": "Zoek…", submit: "Zoek" },
+      "date-picker": { placeholder: "dd-mm-jjjj" },
     },
     en: {
       metadata: {
@@ -128,6 +129,7 @@ export const i18n = createI18n({
         "confirm-selection-count": "Confirm selection ({count})",
       },
       search: { "search-placeholder": "Search…", submit: "Search" },
+      "date-picker": { placeholder: "dd-mm-yyyy" },
     },
   },
   missingWarn: false,
