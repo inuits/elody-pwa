@@ -3,6 +3,7 @@
     :modal-type="TypeModals.SaveSearch"
     modal-color="bg-background-light"
     modalHeightStyle="max-h-[75vh] my-[12.5vh]"
+    :title="$t('saved-searches.create-title')"
     @hide-modal="handleCloseModal"
   >
     <div class="bg-background-light w-full">

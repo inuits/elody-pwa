@@ -151,6 +151,22 @@ now overrides the visible label whenever it is given (it used to be ignored
 as soon as a visible label existed). An option the facets know nothing about
 shows no number and keeps its plain label as name.
 
+## Saved searches — chip and titles done, four items need the entity
+
+The applied saved search in the rail header is now a removable chip — a real
+button named "Opgeslagen zoekopdracht: {naam}, verwijderen" — carrying the
+modified dot when the active filters differ from the saved set. Both modals
+ride the new BaseModal title. The rail header was restructured for it: a
+button cannot nest a button, so the disclosure now wraps only the label and
+chevron.
+
+Four saved-searches.md items are not buildable from the PWA alone, because the
+SavedSearch entity has no fields for them: the default star (Maak standaard,
+auto-apply on open), the shared/team flag on a row, undo-over-confirm on
+delete (needs a restore path — recreating the search client-side would mint a
+new id), and the Save vs Save-as prompt for a modified shared search. Like the
+badge tones and `isGroup`, these want entity/config-side work first.
+
 ## Group editing needs `isGroup` from the service
 
 Group editing is built (`useBlockEditor.ts` + the card on
@@ -182,7 +198,7 @@ now.
 | WP3 done-when | met — `src/components` holds no colour literals outside the IIIF logo, Mirador's theme and the OpenLayers map styles |
 | WP4 fields & editing | done — field row, inline editor, undo chip, group editing; whole-form path removed. Group editing waits on `isGroup` reaching the generated types (above) |
 | WP5 lists & actions | done — rows, preview split, action trigger, selection bar, panel shell, pagination. Only the quality-status chip + jump-to-field popover is left, and it is a feature rather than chrome |
-| WP6 filters | done except saved searches — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome and date picker are in. The range variant date-picker.md sketches is not implemented by the wrapper today and is left for when a field needs it |
+| WP6 filters | done — rail, section headers, matcher chrome, option skeletons, facet counts, base modal, picker chrome, date picker and the saved-searches surfaces. Left open, needing entity-side support: the default star (Maak standaard), the shared/team flag, undo-over-confirm on delete and Save-vs-Save-as (below). The date range variant stays unbuilt until a field needs it |
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7–WP9 | open |
 
@@ -241,6 +257,10 @@ there; until then vue-i18n renders the key itself.
 | `bulk-operations.confirm-selection-count` | Bevestig selectie ({count}) | Confirm selection ({count}) | The picker's commit, with the live count. |
 | `search.submit` | Zoek | Search | Submit inside the search pill. |
 | `date-picker.placeholder` | dd-mm-jjjj | dd-mm-yyyy | Typed entry is first-class; the placeholder is the format. |
+| `saved-searches.picker-title` | Bewaarde zoekopdrachten | Saved searches | Title of the picker modal. |
+| `saved-searches.create-title` | Bewaar zoekopdracht | Save search | Title of the create modal. |
+| `saved-searches.applied-chip` | Opgeslagen zoekopdracht: {name}, verwijderen | Saved search: {name}, remove | Accessible name of the applied chip. |
+| `saved-searches.modified` | Gewijzigd | Modified | Title of the modified dot on the chip. |
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.

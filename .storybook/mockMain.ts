@@ -72,6 +72,12 @@ export const i18n = createI18n({
         "option-count-name": "{label}, {count} resultaten",
         "saved-searches": "Bewaarde zoekopdrachten",
       },
+      "saved-searches": {
+        "picker-title": "Bewaarde zoekopdrachten",
+        "create-title": "Bewaar zoekopdracht",
+        "applied-chip": "Opgeslagen zoekopdracht: {name}, verwijderen",
+        modified: "Gewijzigd",
+      },
       pagination: {
         "nav-label": "Paginering",
         "results-per-page": "Resultaten per pagina",
@@ -112,6 +118,12 @@ export const i18n = createI18n({
         "clear-filter": "Clear filter",
         "option-count-name": "{label}, {count} results",
         "saved-searches": "Saved searches",
+      },
+      "saved-searches": {
+        "picker-title": "Saved searches",
+        "create-title": "Save search",
+        "applied-chip": "Saved search: {name}, remove",
+        modified: "Modified",
       },
       pagination: {
         "nav-label": "Pagination",

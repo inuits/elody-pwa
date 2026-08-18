@@ -7,22 +7,27 @@
     :class="isExpanded ? 'rounded-t' : 'rounded-xl'"
     @keydown.enter="applyFilters(true)"
   >
-    <!-- The rail's own disclosure: a clickable div before, so the keyboard
-         could not expand or collapse the filters (filter-panel.md). -->
-    <button
-      type="button"
-      :aria-expanded="isExpanded"
+    <!-- The applied saved search is a button of its own, so the disclosure
+         wraps only the label and chevron — a button cannot nest a button. -->
+    <div
       :class="[
-        'w-full flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
+        'w-full flex justify-between items-center px-4 h-12 border-t border-x select-none',
         { 'border-accent-highlight rounded-t': isExpanded },
         { 'border-background-light rounded-xl': !isExpanded },
       ]"
-      @click="() => emit('expandFilters', expandFilters)"
     >
-      <span class="text-text-body text-xl font-bold">
-        {{ t("filters.filter") }}
-      </span>
-      <div class="flex items-center">
+      <button
+        type="button"
+        class="filter-rail-toggle"
+        :aria-expanded="isExpanded"
+        @click="() => emit('expandFilters', expandFilters)"
+      >
+        <span class="text-text-body text-xl font-bold">
+          {{ t("filters.filter") }}
+        </span>
+        <unicon class="text-text-body" :name="Unicons[getAngleIcon].name" />
+      </button>
+      <div class="flex items-center gap-2">
         <span
           v-if="simpleSearchActive"
           data-cy="filters-disabled-label"
@@ -38,24 +43,33 @@
           <span class="text-text-body">
             {{ activeFilterCount }} {{ t("filters.active") }}
           </span>
-          <span
-            v-if="
-              (selectedSavedFilter || lastActiveFilter) &&
-              auth.isAuthenticated.value === true
+          <button
+            v-if="appliedSavedSearch && auth.isAuthenticated.value === true"
+            type="button"
+            class="saved-search-chip"
+            data-cy="applied-saved-search"
+            :aria-label="
+              t('saved-searches.applied-chip', {
+                name: appliedSavedSearch.title,
+              })
             "
-            class="bg-accent-highlight border-accent-highlight rounded py-1 px-2 ml-2"
+            @click.stop="removeAppliedSavedSearch"
           >
-            <span class="text-text-body">
-              {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
+            <span class="saved-search-chip__title">
+              {{ appliedSavedSearch.title }}
             </span>
-          </span>
-          <unicon
-            class="text-text-body ml-4"
-            :name="Unicons[getAngleIcon].name"
-          />
+            <!-- The modified dot: filters were edited since applying. -->
+            <span
+              v-if="savedSearchIsModified"
+              class="saved-search-chip__modified"
+              :title="t('saved-searches.modified')"
+              >•</span
+            >
+            <span aria-hidden="true">✕</span>
+          </button>
         </template>
       </div>
-    </button>
+    </div>
 
     <div
       v-if="!simpleSearchActive"
@@ -170,6 +184,7 @@ import {
 } from "@/generated-types/queries";
 import { usePermissions } from "@/composables/usePermissions";
 import { useStateManagement } from "@/composables/useStateManagement";
+import type { FilterListItem } from "@/composables/useStateManagement";
 import BaseButton from "@/components/base/BaseButton.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
@@ -348,6 +363,36 @@ const addFilterOptions = computed(() =>
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
 });
+
+const appliedSavedSearch = computed<SavedSearchType | undefined>(
+  () => selectedSavedFilter.value || lastActiveFilter.value,
+);
+
+/** The active values per filter key, for spotting edits since applying. */
+const normalizedActiveInputs = (items: FilterListItem[]) =>
+  JSON.stringify(
+    items
+      .filter((item) => item.isActive && item.inputFromState)
+      .map((item) => [item.advancedFilter.key, item.inputFromState?.value])
+      .sort(),
+  );
+
+const savedSearchIsModified = computed<boolean>(() => {
+  const saved = appliedSavedSearch.value?.value;
+  if (!saved) return false;
+  return normalizedActiveInputs(saved) !== normalizedActiveInputs(filters.value);
+});
+
+const removeAppliedSavedSearch = () => {
+  if (selectedSavedFilter.value) {
+    // The watcher on selectedSavedFilter clears the filters and the state.
+    setActiveSavedFilter(null);
+    return;
+  }
+  lastActiveFilter.value = undefined;
+  addLastUsedFilterToStateForRoute(props.route, undefined);
+  clearAllActiveFilters.value = true;
+};
 
 // fetched even when predefined filters are present: those only narrow the
 // custom query's own filters, which stay user-editable and need matchers to
@@ -744,5 +789,54 @@ EventBus.on(ContextMenuGeneralActionEnum.SetPrimaryThumbnail, async () => {
 .scrollable {
   overflow-y: auto;
   height: 70vh;
+}
+
+.filter-rail-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-ds-4);
+  border-radius: var(--radius-input);
+  cursor: pointer;
+}
+
+.filter-rail-toggle:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+/* The applied saved search: a removable chip, named in words. */
+.saved-search-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-ds-3);
+  max-width: 180px;
+  padding: var(--spacing-ds-2) var(--spacing-ds-5);
+  border-radius: var(--radius-chip);
+  background-color: var(--color-accent-highlight);
+  color: var(--color-text-body);
+  font-size: var(--text-ui);
+  cursor: pointer;
+}
+
+.saved-search-chip:hover {
+  background-color: var(--color-surface-editable-hover);
+}
+
+.saved-search-chip:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.saved-search-chip__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-search-chip__modified {
+  flex: none;
+  color: var(--color-commit);
+  font-weight: 700;
 }
 </style>
