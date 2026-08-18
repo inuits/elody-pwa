@@ -3,10 +3,29 @@
     <router-view />
   </div>
   <div v-else-if="!showSplashScreen">
-    <notifications class="pt-2" />
+    <notifications position="bottom left" :pause-on-hover="true">
+      <template #body="{ item, close }">
+        <BaseToast
+          :type="item.type"
+          :title="item.title"
+          :text="item.text"
+          :action-label="item.data?.actionLabel"
+          @action="
+            () => {
+              item.data?.onAction?.();
+              close();
+            }
+          "
+          @close="close"
+        />
+      </template>
+    </notifications>
     <div v-if="!someModalIsOpened">
+      <!-- The one sanctioned global toast: top-centre, whole-clickable,
+           never auto-dismisses (feedback.md §Round 2). -->
       <notifications
         class="pt-2 cursor-pointer"
+        position="top center"
         group="serviceVersionManager"
         @click="refreshPage()"
       />
@@ -35,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import BaseToast from "@/components/base/BaseToast.vue";
 import AppModals from "@/components/AppModals.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/menu/MenuNav.vue";

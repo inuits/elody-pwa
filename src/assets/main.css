@@ -209,6 +209,8 @@
   --color-text-on-accent: #FFFFFF;
   --color-text-accent-strong: var(--color-accent-dark);
   --color-text-on-inverted: #FFFFFF;
+  /* Action links on the inverted toast surface (feedback.md). */
+  --color-accent-on-inverted: #7DE3EA;
 
   /* ── Borders ───────────────────────────────────────────────────────── */
   --color-border-default: #DFE1E6;
