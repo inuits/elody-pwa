@@ -18,20 +18,21 @@
       <p>{{ t("import.no-magazines") }}</p>
     </div>
   </div>
-  <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
-    <button
+  <div class="import-footer w-full flex justify-end sticky bottom-0 z-10">
+    <BaseButton
+      button-style="commit"
+      :label="t('import.start-import')"
       :disabled="!selectedItem"
-      :class="buttonClass"
+      style="width: auto"
       @click="doImport(selectedItem)"
-    >
-      {{ t("import.start-import") }}
-    </button>
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { computed, ref, onMounted } from "vue";
+import BaseButton from "@/components/base/BaseButton.vue";
+import { ref, onMounted } from "vue";
 import { BaseFieldType } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import ImportListItem from "@/components/imports/ImportListItem.vue";
@@ -99,15 +100,12 @@ const updateSelectedItem = (item: any) => {
   selectedItem.value = item;
 };
 
-const buttonClass = computed(() => {
-  return {
-    "bg-accent-accent": selectedItem.value,
-    "bg-neutral-100": !selectedItem.value,
-    "text-neutral-0": true,
-    "px-4 py-2 rounded": true,
-    "hover:bg-blue-100": selectedItem.value,
-  };
-});
 </script>
 
-<style scoped></style>
+<style scoped>
+.import-footer {
+  padding: var(--spacing-ds-8);
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border-subtle);
+}
+</style>

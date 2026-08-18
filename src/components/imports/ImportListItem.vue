@@ -1,28 +1,18 @@
 <template>
-  <ul v-if="item" class="border-neutral-700">
-    <li
-      data-test="li-tree"
-      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
-      :class="{
-        'bg-blue-75': selectedItem && selectedItem === item,
-      }"
-    >
-      <div
-        class="py-4 flex items-center grow mr-10 group cursor-pointer"
-        @click="emit('updateSelectedItem', item)"
-      >
-        <span
-          class="inline-block h-[1px] bg-neutral-700 group=hover:bg-blue-500"
-        />
-        <span
-          class="w-2.5 h-2.5 rounded-full bg-neutral-700 inline-block mr-4 -ml-1 z-10 group-hover:bg-blue-500"
-        />
-        <span class="inline-block mr-3 group-hover:text-blue-500">
-          {{ item }}
-        </span>
-      </div>
-    </li>
-  </ul>
+  <!-- A pick row is a real button; selection shows as the accent wash like
+       every selected row (import-browser.md). -->
+  <button
+    v-if="item"
+    type="button"
+    data-test="li-tree"
+    class="import-item"
+    :class="{ 'import-item--selected': selectedItem && selectedItem === item }"
+    :aria-pressed="!!(selectedItem && selectedItem === item)"
+    @click="emit('updateSelectedItem', item)"
+  >
+    <span class="import-item__dot" aria-hidden="true" />
+    <span class="import-item__title">{{ item }}</span>
+  </button>
 </template>
 
 <script setup lang="ts">
@@ -36,4 +26,45 @@ const emit = defineEmits<{
 }>();
 </script>
 
-<style scoped></style>
+<style scoped>
+.import-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-ds-6);
+  width: 100%;
+  padding: var(--spacing-ds-6) var(--spacing-ds-8);
+  text-align: left;
+  font-size: var(--text-table);
+  font-weight: 700;
+  color: var(--color-text-body);
+  cursor: pointer;
+  transition: background-color var(--transition-duration-ui) var(--ease-ui);
+}
+
+.import-item:hover {
+  background-color: var(--color-surface-row-hover);
+}
+
+.import-item--selected {
+  background-color: var(--color-surface-editable-hover);
+}
+
+.import-item:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.import-item__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-text-secondary);
+}
+
+.import-item__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>

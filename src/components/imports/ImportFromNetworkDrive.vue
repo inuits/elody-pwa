@@ -18,14 +18,14 @@
         <p>{{ t("import.no-directories") }}</p>
       </div>
     </div>
-    <div class="w-full flex flex-col sticky bottom-0 p-5 bg-neutral-30 z-10">
-      <button
+    <div class="import-footer w-full flex justify-end sticky bottom-0 z-10">
+      <BaseButton
+        button-style="commit"
+        :label="t('import.start-import')"
         :disabled="!selectedDirectory"
-        :class="buttonClass"
+        style="width: auto"
         @click="doImport(selectedDirectory?.id)"
-      >
-        {{ t("import.start-import") }}
-      </button>
+      />
     </div>
   </div>
 </template>
@@ -40,9 +40,10 @@ import {
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import BaseButton from "@/components/base/BaseButton.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { goToEntityPageById, goToEntityTypeRoute } from "@/helpers";
-import { provide, ref, computed, onMounted } from "vue";
+import { provide, ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
@@ -246,15 +247,6 @@ const doImportOfDirectories = async (folder) => {
     });
 };
 
-const buttonClass = computed(() => {
-  return {
-    "bg-accent-accent": selectedDirectory.value,
-    "bg-neutral-100": !selectedDirectory.value,
-    "text-neutral-0": true,
-    "px-4 py-2 rounded": true,
-    "hover:bg-blue-100": selectedDirectory.value,
-  };
-});
 
 const updateSelectedDirectory = (directory) => {
   selectedDirectory.value = directory;
@@ -263,3 +255,11 @@ const updateSelectedDirectory = (directory) => {
 provide("selectedDirectory", selectedDirectory);
 provide("updateSelectedDirectory", updateSelectedDirectory);
 </script>
+
+<style scoped>
+.import-footer {
+  padding: var(--spacing-ds-8);
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border-subtle);
+}
+</style>
