@@ -59,7 +59,7 @@
           showErrors ||
           (field.meta.dirty &&
             !isFieldValid &&
-          metadata.inputField?.validation?.fastValidationMessage)
+            metadata.inputField?.validation?.fastValidationMessage)
         "
         :copy-value-from-parent="metadata.copyValueFromParent"
         :extract-value-from-parent="extractIntialValueFromParentByKey"
@@ -71,7 +71,6 @@
         @click.stop.prevent
         @update:value="(value) => (fieldValueProxy = value)"
       />
-      <!-- Opt-in: nothing renders and nothing shifts unless a parent fills it. -->
       <slot name="fieldAction" />
     </div>
     <div
@@ -196,9 +195,7 @@
                     fieldValueProxy ? Unicons.Check.name : Unicons.Cross.name
                   "
                   class="-mx-1"
-                  :class="
-                    fieldValueProxy ? 'text-green-600' : 'text-gray-600'
-                  "
+                  :class="fieldValueProxy ? 'text-green-600' : 'text-gray-600'"
                   height="18"
                 />
                 {{

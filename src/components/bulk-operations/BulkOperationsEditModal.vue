@@ -124,7 +124,10 @@ const buildForm = async () => {
         .filter(Boolean) as string[],
     ),
   ];
-  mergedForm.value = await buildMergedBulkEditForm(formQueries, typesInSelection);
+  mergedForm.value = await buildMergedBulkEditForm(
+    formQueries,
+    typesInSelection,
+  );
 };
 
 watch(
@@ -135,22 +138,16 @@ watch(
       return;
     }
     loadItems();
-    // ponytail: built once per open, never re-derived while the modal is up.
-    // editableFields only ever grows, so a field that disappeared from a re-merged
-    // form would still be submitted for types that no longer have it.
     buildForm();
   },
   { immediate: true },
 );
 
-// A partial batch dequeues only the entities that succeeded, so refresh the list
-// to show exactly what a retry would still apply to.
 watch(
   () => getEnqueuedItemCount(context.value),
   (count) => {
     if (!modal.open) return;
     loadItems();
-    // The queue shrank past the start of the current page, which would render empty.
     if (items.value.length === 0 && count > 0) {
       skip.value = 1;
       loadItems();

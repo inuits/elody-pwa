@@ -663,7 +663,10 @@ const relationModeOptions = [
     label: "bulk-operations.relation-mode.replace",
     value: BulkEditModes.Replace,
   },
-  { label: "bulk-operations.relation-mode.remove", value: BulkEditModes.Remove },
+  {
+    label: "bulk-operations.relation-mode.remove",
+    value: BulkEditModes.Remove,
+  },
 ];
 
 const selectedRelationMode = computed<BulkEditModes>({
@@ -1164,10 +1167,6 @@ const downloadActionFunction = async (field: FormAction) => {
   }
 };
 
-// The batch endpoint answers with per-row {errors, warnings} keyed by collection,
-// the same shape a csv dry run returns. Feeding it to dryRunFeedback puts the
-// messages on the file preview, where an upload shows them, instead of dumping
-// the whole response body under the button.
 const __showCsvBatchFeedback = async (body: any): Promise<boolean> => {
   let batchResult = body;
   if (typeof batchResult === "string") {
@@ -1240,8 +1239,6 @@ const callEndpointActionFunction = async (field: FormAction) => {
   });
   if (result.status !== 200) {
     const error = new Error(result.statusText);
-    // already surfaced to the user here; returning (rather than throwing)
-    // keeps the dispatcher from stacking a second, vaguer notification on top
     handleHttpError(error);
     closeAndDeleteForm();
     submitErrors.value = error.message;
@@ -1341,8 +1338,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
           typePerId.get(id) ?? (route.meta.entityType as string | undefined),
       })),
     );
-    // Without a type an entity cannot be routed to a document, and a bulk write
-    // that silently skips part of the selection is worse than one that refuses.
     if (missingType.length > 0) {
       displayErrorNotification(
         t("notifications.errors.bulk-edit-untyped-items.title"),
@@ -1396,8 +1391,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       (outcome?.failedIds ?? []).forEach((id: string) => failedIds.add(id));
     };
 
-    // Metadata (merged by key) and relation replacement (a relation type in the
-    // document overwrites that type) match the batch endpoint's own semantics.
     const documents = buildJsonDocuments(
       byType,
       payload,
@@ -1412,16 +1405,11 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       const jsonOutcome = jsonResult?.data?.bulkUpdateEntitiesWithJson;
 
       if ((jsonOutcome?.succeededIds ?? []).length === 0) {
-        // Nothing landed: this client has no json batch serializer (or the endpoint
-        // refused the whole body). Write the same documents through the per-entity
-        // mutation, which every client supports — one call per entity type, so the
-        // per-type field scoping baked into the documents survives the fallback.
         for (const type of Object.keys(byType)) {
           const documentsOfType = documents.filter(
             (document: any) => document.type === type,
           );
           if (documentsOfType.length === 0) continue;
-          // Every document of a type carries the same values, only a different id.
           const [{ metadata, relations }] = documentsOfType as any[];
           const fallbackResult = await bulkEdit({
             ids: documentsOfType.map((document: any) => document.id),
@@ -1441,9 +1429,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       }
     }
 
-    // Adding and removing relations need the read-modify-write mutation: the batch
-    // endpoint would overwrite the whole relation type instead. Per entity type,
-    // because a relation field can be scoped to a subset of the selection.
     const relationsToAdd =
       selectedRelationMode.value === BulkEditModes.Add
         ? payload.relationsToAdd
@@ -1461,8 +1446,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
         scope,
         type,
       );
-      // Nothing applies to this type: an all-empty call still reaches putRelations,
-      // which would write an empty relation list.
       if (
         addForType.length === 0 &&
         removeForType.length === 0 &&
@@ -1485,7 +1468,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
     const carriedIds = new Set<string>(
       transports.flatMap((transport) => transport.carriedIds),
     );
-    // Nothing applied to these: no field of the merged form covered their type.
     const skippedIds = ids.filter((id: string) => !carriedIds.has(id));
     const succeededIds = resolveSucceededIds(ids, transports, failedIds);
 
@@ -1493,9 +1475,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       succeededIds.forEach((id: string) =>
         dequeueItemForBulkProcessing(bulkEditContext.value as any, id),
       );
-      // Row checkboxes keep their own state and only resync on this event, so
-      // without it a dequeued row stays ticked. Fired once for the whole batch
-      // rather than per item, which would stack 50ms timeouts.
       triggerBulkSelectionEvent(bulkEditContext.value as any);
     }
 
@@ -1521,8 +1500,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
         ]),
       );
 
-    // Keep the failed entities selected and the modal open, so a partial batch
-    // can be retried without reselecting everything.
     if (succeededIds.length < ids.length) {
       displayErrorNotification(
         t("notifications.errors.bulk-edit-partially-failed.title"),
@@ -1620,8 +1597,6 @@ const initializeForm = async (
   oldQueryName: string | undefined,
 ) => {
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
-  // Fields were supplied by the caller: there is nothing to fetch, but the
-  // template still waits on dynamicFormLoaded.
   if (modalFormFields) {
     dynamicFormLoaded.value = true;
     return;
@@ -1711,8 +1686,6 @@ watch(
 onUnmounted(() => {
   dynamicFormLoaded.value = false;
   useUploadState().resetState();
-  // Both bulk-edit paths (merged modal, single-type formQuery) unmount this form when
-  // their modal closes, so this is the one place that catches either one.
   if (isBulkEditForm.value) clearBulkEditFormState(formId.value);
 });
 </script>
