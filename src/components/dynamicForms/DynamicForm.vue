@@ -1273,6 +1273,8 @@ const startOcrActionFunction = async (field: FormAction) => {
 };
 
 const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
+  const { startBlocking, stopBlocking } = useBlockingLoader();
+  let isBlockingForBulkEdit = false;
   try {
     if (!(await isFormValid())) return;
 
@@ -1337,6 +1339,9 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       cancelLabel: t("confirm.bulk-edit.cancel"),
     });
     if (choice !== "confirm") return;
+
+    startBlocking(t("modals.bulkEditingEntities"));
+    isBlockingForBulkEdit = true;
 
     const transports: { carriedIds: string[]; succeededIds: string[] }[] = [];
     const failedIds = new Set<string>();
@@ -1428,14 +1433,25 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
     const skippedIds = ids.filter((id: string) => !carriedIds.has(id));
     const succeededIds = resolveSucceededIds(ids, transports, failedIds);
 
-    if (bulkEditContext.value) {
-      succeededIds.forEach((id: string) =>
-        dequeueItemForBulkProcessing(bulkEditContext.value as any, id),
-      );
-      triggerBulkSelectionEvent(bulkEditContext.value as any);
+    // Both go stale once the modal closes, so read them while it is still open.
+    const context = bulkEditContext.value;
+    const callbackFunctions = getCallbackFunctions();
+
+    const failedCount = ids.length - succeededIds.length;
+    if (failedCount === 0) {
+      closeAndDeleteForm();
+      closeModal(TypeModals.BulkOperationsEdit);
     }
 
-    const callbackFunctions = getCallbackFunctions();
+    // Refetching only after the modal is gone keeps the listing from visibly
+    // emptying itself underneath it while the user waits.
+    if (context) {
+      succeededIds.forEach((id: string) =>
+        dequeueItemForBulkProcessing(context as any, id),
+      );
+      triggerBulkSelectionEvent(context as any);
+    }
+
     if (callbackFunctions !== undefined) {
       for (const callback of callbackFunctions) {
         if (callback) await callback();
@@ -1457,20 +1473,17 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
         ]),
       );
 
-    if (succeededIds.length < ids.length) {
+    if (failedCount > 0)
       displayErrorNotification(
         t("notifications.errors.bulk-edit-partially-failed.title"),
         t("notifications.errors.bulk-edit-partially-failed.description", [
-          ids.length - succeededIds.length,
+          failedCount,
         ]),
       );
-      return;
-    }
-
-    closeAndDeleteForm();
-    closeModal(TypeModals.BulkOperationsEdit);
   } catch (e) {
     submitErrors.value = e.message;
+  } finally {
+    if (isBlockingForBulkEdit) stopBlocking();
   }
 };
 
