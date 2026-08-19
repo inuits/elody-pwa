@@ -1281,9 +1281,6 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
   try {
     if (!(await isFormValid())) return;
 
-    // The ids handed over when the modal opened are a snapshot, and the modal
-    // stays open after a partial failure — a retry would re-send items that were
-    // already dequeued. The enqueued selection is the live truth.
     const ids: string[] = bulkItems.value.map((item: any) => item.id);
     if (!ids.length) {
       displayErrorNotification(
