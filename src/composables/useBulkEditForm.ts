@@ -2,6 +2,7 @@ import {
   ActionType,
   BulkEditModes,
   DamsIcons,
+  ValidationRules,
 } from "@/generated-types/queries";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useImport } from "@/composables/useImport";
@@ -31,6 +32,17 @@ const formCache = new Map<string, ExtractedForm>();
 
 const sameType = (a: unknown, b: unknown): boolean =>
   String(a).toLowerCase() === String(b).toLowerCase();
+
+// required_if is deliberately left out: it depends on values this form does not
+// know, so treat such a field as clearable and let the backend judge.
+const isRequiredField = (field: any): boolean => {
+  const rules: string[] = field?.inputField?.validation?.value ?? [];
+  return [
+    ValidationRules.Required,
+    ValidationRules.HasRequiredRelation,
+    ValidationRules.HasOneOfRequiredRelations,
+  ].some((rule) => rules.includes(rule));
+};
 
 const stripRelationForStorage = (relation: any): any => {
   const { editStatus, value, teaserMetadata, ...rest } = relation;
@@ -103,8 +115,15 @@ const useBulkEditForm = () => {
     return form;
   };
 
-  const buildBulkField = (field: any, types: string[]): any => {
+  const buildBulkField = (
+    field: any,
+    types: string[],
+    requiredForAllTypes: boolean,
+  ): any => {
     const clone = structuredClone(field);
+    // Validation is dropped below, so carry the one bit the form still needs:
+    // a field every selected type requires can never be emptied.
+    clone.requiredForAllTypes = requiredForAllTypes;
     // A bulk form submits only the fields the user touched, so nothing may be
     // required — and validation is read straight off the field on every render.
     delete clone.inputField.validation;
@@ -172,7 +191,17 @@ const useBulkEditForm = () => {
       keptTypes.some((keptType) => sameType(keptType, type)),
     );
 
-    return { conflict, field, keptTypes, coversWholeSelection };
+    const requiredForAllTypes = candidates
+      .filter(({ type }) => keptTypes.includes(type))
+      .every(({ field: candidate }) => isRequiredField(candidate));
+
+    return {
+      conflict,
+      field,
+      keptTypes,
+      coversWholeSelection,
+      requiredForAllTypes,
+    };
   };
 
   const mergeFormFields = (
@@ -186,8 +215,13 @@ const useBulkEditForm = () => {
     const candidatesPerKey = getCandidatesPerKey(forms, typesInSelection);
 
     candidatesPerKey.forEach((candidates, key) => {
-      const { conflict, field, keptTypes, coversWholeSelection } =
-        resolveFieldCandidates(key, candidates, typesInSelection);
+      const {
+        conflict,
+        field,
+        keptTypes,
+        coversWholeSelection,
+        requiredForAllTypes,
+      } = resolveFieldCandidates(key, candidates, typesInSelection);
 
       if (conflict) {
         conflicts.push(conflict);
@@ -196,7 +230,7 @@ const useBulkEditForm = () => {
         );
       }
 
-      formFields[key] = buildBulkField(field, keptTypes);
+      formFields[key] = buildBulkField(field, keptTypes, requiredForAllTypes);
 
       if (coversWholeSelection) {
         delete formFields[key].onlyForEntityTypes;

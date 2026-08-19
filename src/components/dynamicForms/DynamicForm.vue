@@ -94,7 +94,10 @@
               isFieldCleared(field.key),
           }"
         >
-          <template v-if="isBulkEditForm" #fieldAction>
+          <template
+            v-if="isBulkEditForm && !field.requiredForAllTypes"
+            #fieldAction
+          >
             <BulkEditClearFieldButton
               :field-key="field.key"
               :cleared="isFieldCleared(field.key)"

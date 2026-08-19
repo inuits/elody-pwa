@@ -28,7 +28,11 @@ const {
   clearBulkEditFormCache,
 } = useBulkEditForm();
 
-const metaField = (key: string, inputFieldType: string, extra: object = {}) => ({
+const metaField = (
+  key: string,
+  inputFieldType: string,
+  extra: object = {},
+) => ({
   __typename: "PanelMetaData",
   key,
   label: `metadata.labels.${key}`,
@@ -39,7 +43,11 @@ const metaField = (key: string, inputFieldType: string, extra: object = {}) => (
 const form = (
   creationType: string,
   fields: Record<string, any>,
-): ExtractedForm => ({ queryName: `Get${creationType}Form`, creationType, fields });
+): ExtractedForm => ({
+  queryName: `Get${creationType}Form`,
+  creationType,
+  fields,
+});
 
 // Mirrors the real vlacc shape: one FormTab keyed by an alias, a create FormAction
 // carrying creationType, and the fields alongside it.
@@ -70,8 +78,12 @@ describe("mergeFormFields", () => {
   it("merges a field defined identically on every type into one universal field", () => {
     const merged = mergeFormFields(
       [
-        form("work_map", { quality_marks: metaField("quality_marks", "dropdown") }),
-        form("work_word", { quality_marks: metaField("quality_marks", "dropdown") }),
+        form("work_map", {
+          quality_marks: metaField("quality_marks", "dropdown"),
+        }),
+        form("work_word", {
+          quality_marks: metaField("quality_marks", "dropdown"),
+        }),
       ],
       ["work_map", "work_word"],
     );
@@ -86,7 +98,9 @@ describe("mergeFormFields", () => {
     const merged = mergeFormFields(
       [
         form("work_map", { scale: metaField("scale", "text") }),
-        form("work_word", { quality_marks: metaField("quality_marks", "dropdown") }),
+        form("work_word", {
+          quality_marks: metaField("quality_marks", "dropdown"),
+        }),
       ],
       ["work_map", "work_word"],
     );
@@ -104,7 +118,10 @@ describe("mergeFormFields", () => {
     const merged = mergeFormFields(
       [
         form("work_map", {
-          literary_type: metaField("literary_type", "literaryTypeForWorkMapTypeField"),
+          literary_type: metaField(
+            "literary_type",
+            "literaryTypeForWorkMapTypeField",
+          ),
         }),
         form("work_word", {
           literary_type: metaField("literary_type", "literaryTypeTypeField"),
@@ -136,7 +153,9 @@ describe("mergeFormFields", () => {
     const merged = mergeFormFields(
       [
         form("work_map", { scale: metaField("scale", "text") }),
-        form("work_word", { quality_marks: metaField("quality_marks", "dropdown") }),
+        form("work_word", {
+          quality_marks: metaField("quality_marks", "dropdown"),
+        }),
       ],
       ["work_word"],
     );
@@ -163,15 +182,82 @@ describe("mergeFormFields", () => {
     expect(field.defaultValue).toBeUndefined();
   });
 
+  it("marks a field required on every type that carries it", () => {
+    const merged = mergeFormFields(
+      [
+        form("work_map", { title: metaField("title", "text") }),
+        form("work_word", { title: metaField("title", "text") }),
+      ],
+      ["work_map", "work_word"],
+    );
+
+    expect(merged.formFields.title.requiredForAllTypes).toBe(true);
+  });
+
+  it("does not mark a field that is optional on one of its types", () => {
+    const merged = mergeFormFields(
+      [
+        form("work_map", { title: metaField("title", "text") }),
+        form("work_word", {
+          title: metaField("title", "text", {
+            inputField: { type: "text", validation: { value: ["numeric"] } },
+          }),
+        }),
+      ],
+      ["work_map", "work_word"],
+    );
+
+    expect(merged.formFields.title.requiredForAllTypes).toBe(false);
+  });
+
+  it("ignores the required rule of a type excluded by an input field conflict", () => {
+    const merged = mergeFormFields(
+      [
+        form("work_map", {
+          literary_type: metaField(
+            "literary_type",
+            "literaryTypeForWorkMapTypeField",
+          ),
+        }),
+        form("work_word", {
+          literary_type: metaField("literary_type", "literaryTypeTypeField", {
+            inputField: {
+              type: "literaryTypeTypeField",
+              validation: { value: [] },
+            },
+          }),
+        }),
+        form("work_serial", {
+          literary_type: metaField("literary_type", "literaryTypeTypeField", {
+            inputField: {
+              type: "literaryTypeTypeField",
+              validation: { value: [] },
+            },
+          }),
+        }),
+      ],
+      ["work_map", "work_word", "work_serial"],
+    );
+
+    expect(merged.formFields.literary_type.requiredForAllTypes).toBe(false);
+  });
+
   it("does not mutate the source field objects", () => {
     const source = metaField("quality_marks", "dropdown");
-    mergeFormFields([form("work_word", { quality_marks: source })], ["work_word"]);
+    mergeFormFields(
+      [form("work_word", { quality_marks: source })],
+      ["work_word"],
+    );
     expect(source.inputField.validation).toBeDefined();
   });
 
   it("appends a bulk submit action", () => {
     const merged = mergeFormFields(
-      [form("work_word", { quality_marks: metaField("quality_marks", "dropdown") })],
+      [
+        form("work_word", {
+          quality_marks: metaField("quality_marks", "dropdown"),
+        }),
+      ],
       ["work_word"],
     );
 
@@ -185,7 +271,10 @@ describe("mergeFormFields", () => {
     const merged = mergeFormFields(
       [
         form("work_word", {
-          readonly_thing: { __typename: "PanelMetaData", key: "readonly_thing" },
+          readonly_thing: {
+            __typename: "PanelMetaData",
+            key: "readonly_thing",
+          },
         }),
       ],
       ["work_word"],
@@ -206,7 +295,11 @@ describe("metadataKeysForType", () => {
 
   it("drops type-scoped keys for other types", () => {
     expect(
-      metadataKeysForType(["quality_marks", "scale"], fieldTypeMap, "work_word"),
+      metadataKeysForType(
+        ["quality_marks", "scale"],
+        fieldTypeMap,
+        "work_word",
+      ),
     ).toEqual(["quality_marks"]);
   });
 
@@ -403,10 +496,10 @@ describe("buildMergedBulkEditForm", () => {
           }),
     );
 
-    const merged = await buildMergedBulkEditForm(["MapForm", "WordForm"], [
-      "work_map",
-      "work_word",
-    ]);
+    const merged = await buildMergedBulkEditForm(
+      ["MapForm", "WordForm"],
+      ["work_map", "work_word"],
+    );
 
     expect(Object.keys(merged.formFields).sort()).toEqual([
       "bulkEditAction",
@@ -423,9 +516,10 @@ describe("buildMergedBulkEditForm", () => {
       }),
     );
 
-    const merged = await buildMergedBulkEditForm(["MissingForm", "WordForm"], [
-      "work_word",
-    ]);
+    const merged = await buildMergedBulkEditForm(
+      ["MissingForm", "WordForm"],
+      ["work_word"],
+    );
 
     expect(Object.keys(merged.formFields)).toContain("quality_marks");
     expect(queryMock).toHaveBeenCalledTimes(1);
@@ -438,10 +532,10 @@ describe("buildMergedBulkEditForm", () => {
       }),
     );
 
-    const merged = await buildMergedBulkEditForm(["WordForm"], [
-      "work_word",
-      "work_music",
-    ]);
+    const merged = await buildMergedBulkEditForm(
+      ["WordForm"],
+      ["work_word", "work_music"],
+    );
 
     expect(merged.unmatchedTypes).toEqual(["work_music"]);
   });
