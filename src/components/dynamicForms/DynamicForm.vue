@@ -24,16 +24,30 @@
       >
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
       </p>
-      <div v-if="isBulkEditFormWithRelations" class="pb-4">
-        <AdvancedDropdown
-          data-cy="bulk-edit-relation-mode"
-          v-model="selectedRelationMode"
-          :options="relationModeOptions"
-          :label="t('bulk-operations.relation-mode.label')"
-          :clearable="false"
-          :add-label-to-value="true"
-          label-position="inline"
-        />
+      <div
+        v-if="isBulkEditFormWithRelations"
+        class="mb-6 p-4 rounded border border-accent-normal bg-neutral-lightest"
+      >
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-sm font-bold">
+            {{ t("bulk-operations.relation-mode.question") }}
+          </span>
+          <AdvancedDropdown
+            data-cy="bulk-edit-relation-mode"
+            v-model="selectedRelationMode"
+            :options="relationModeOptions"
+            :clearable="false"
+            :add-label-to-value="true"
+            label-position="inline"
+          />
+        </div>
+        <p class="pt-2 text-sm text-text-body">
+          {{
+            t(
+              `bulk-operations.relation-mode.explanation.${selectedRelationMode}`,
+            )
+          }}
+        </p>
       </div>
       <div
         v-for="(field, index) in getSortedFieldArray"
@@ -82,20 +96,56 @@
             undefined
           "
         />
-        <metadata-wrapper
+        <div
+          v-if="
+            isBulkEditForm &&
+            field.__typename === 'PanelMetaData' &&
+            !nonStandardFieldTypes.includes(field.inputField.type)
+          "
+          class="flex justify-end"
+        >
+          <BaseButtonNew
+            :data-cy="`bulk-edit-clear-${field.key}`"
+            :label="
+              t(
+                isFieldCleared(field.key)
+                  ? 'bulk-operations.keep-field'
+                  : 'bulk-operations.clear-field',
+              )
+            "
+            :icon="isFieldCleared(field.key) ? DamsIcons.ArrowCircleLeft : DamsIcons.Trash"
+            :button-style="isFieldCleared(field.key) ? 'accentNormal' : 'default'"
+            button-size="verySmall"
+            :force-show-label="true"
+            @click="toggleBulkEditClearedField(formId, field.key)"
+          />
+        </div>
+        <div
           v-if="
             field.__typename === 'PanelMetaData' &&
             !nonStandardFieldTypes.includes(field.inputField.type)
           "
-          v-show="!field.hiddenField?.hidden"
-          :form-id="formId"
-          :metadata="field as PanelMetaData"
-          :is-edit="true"
-          form-flow="create"
-          :show-errors="showErrors"
-          :key="`${dynamicFormQuery}_field_${index}`"
-          :is-used-in-modal="true"
-        />
+          :class="{
+            'opacity-40 pointer-events-none': isFieldCleared(field.key),
+          }"
+        >
+          <metadata-wrapper
+            v-show="!field.hiddenField?.hidden"
+            :form-id="formId"
+            :metadata="field as PanelMetaData"
+            :is-edit="true"
+            form-flow="create"
+            :show-errors="showErrors"
+            :key="`${dynamicFormQuery}_field_${index}`"
+            :is-used-in-modal="true"
+          />
+        </div>
+        <p
+          v-if="isBulkEditForm && isFieldCleared(field.key)"
+          class="text-xs text-accent-normal pt-1"
+        >
+          {{ t("bulk-operations.field-will-be-emptied") }}
+        </p>
         <p
           v-if="field.onlyForEntityTypes?.length && isBulkEditForm"
           class="text-xs text-text-body pt-1"
@@ -375,6 +425,8 @@ const {
   buildBulkEditPayload,
   getBulkEditRelationMode,
   setBulkEditRelationMode,
+  getBulkEditClearedFields,
+  toggleBulkEditClearedField,
 } = useFormHelper();
 const { confirm } = useConfirmModal();
 const { dequeueItemForBulkProcessing, getEnqueuedItems } = useBulkOperations();
@@ -559,6 +611,15 @@ const bulkEditContext = computed(
 const bulkItems = computed(() =>
   bulkEditContext.value ? getEnqueuedItems(bulkEditContext.value as any) : [],
 );
+
+const bulkEditFields = computed(() =>
+  (getFieldArray.value ?? []).filter(
+    (field: any) => field.__typename === "PanelMetaData",
+  ),
+);
+
+const isFieldCleared = (key: string): boolean =>
+  getBulkEditClearedFields(formId.value).includes(key);
 
 const bulkItemCountForTypes = (types: string[]): number =>
   bulkItems.value.filter((item: any) =>
@@ -1266,6 +1327,8 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       formId: formId.value,
       isFieldDirty: (path: string) => form.value.isFieldDirty(path),
       relationMode: selectedRelationMode.value,
+      fields: bulkEditFields.value as any,
+      clearedKeys: getBulkEditClearedFields(formId.value),
     });
 
     if (!payload.hasChanges) {
@@ -1280,7 +1343,8 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       payload.metadata.length +
       payload.relationsToAdd.length +
       payload.relationsToRemove.length +
-      payload.relationsToReplace.length;
+      payload.relationsToReplace.length +
+      payload.relationTypesToClear.length;
     const choice = await confirm({
       title: t("confirm.bulk-edit.title"),
       message: t("confirm.bulk-edit.message", [
@@ -1346,13 +1410,19 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       selectedRelationMode.value === BulkEditModes.Remove
         ? payload.relationsToRemove
         : [];
-    if (relationsToAdd.length > 0 || relationsToRemove.length > 0) {
+    const relationTypesToClear = payload.relationTypesToClear;
+    if (
+      relationsToAdd.length > 0 ||
+      relationsToRemove.length > 0 ||
+      relationTypesToClear.length > 0
+    ) {
       const mutationResult = await bulkEdit({
         ids,
         metadata: [],
         relationsToAdd,
         relationsToRemove,
         relationsToReplace: [],
+        relationTypesToClear,
         collection: Collection.Entities,
       });
       const mutationOutcome = mutationResult?.data?.bulkEditEntities;
@@ -1367,7 +1437,11 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
     // at all, so they are finished rather than failed.
     const writtenIds = new Set<string>([
       ...documents.map((document: any) => document.id),
-      ...(relationsToAdd.length > 0 || relationsToRemove.length > 0 ? ids : []),
+      ...(relationsToAdd.length > 0 ||
+      relationsToRemove.length > 0 ||
+      relationTypesToClear.length > 0
+        ? ids
+        : []),
     ]);
     const skippedIds = ids.filter((id: string) => !writtenIds.has(id));
     const succeededIds = ids.filter(
