@@ -24,30 +24,11 @@
       >
         {{ t(dynamicForm.GetDynamicForm.infoLabel) }}
       </p>
-      <div
+      <BulkEditRelationModeSelector
         v-if="isBulkEditFormWithRelations"
-        class="mb-6 p-4 rounded border border-accent-normal bg-neutral-lightest"
-      >
-        <div class="flex flex-wrap items-center gap-3">
-          <span class="text-sm font-bold">
-            {{ t("bulk-operations.relation-mode.question") }}
-          </span>
-          <AdvancedDropdown
-            data-cy="bulk-edit-relation-mode"
-            v-model="selectedRelationMode"
-            :options="relationModeOptions"
-            :clearable="false"
-            label-position="inline"
-          />
-        </div>
-        <p class="pt-2 text-sm text-text-body">
-          {{
-            t(
-              `bulk-operations.relation-mode.explanation.${selectedRelationMode}`,
-            )
-          }}
-        </p>
-      </div>
+        v-model="selectedRelationMode"
+        :options="relationModeOptions"
+      />
       <div
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
@@ -114,43 +95,18 @@
           }"
         >
           <template v-if="isBulkEditForm" #fieldAction>
-            <div
-              class="shrink-0 w-8"
-              :title="
-                t(
-                  isFieldCleared(field.key)
-                    ? 'bulk-operations.keep-field'
-                    : 'bulk-operations.clear-field',
-                )
-              "
-            >
-              <BaseButtonNew
-                :data-cy="`bulk-edit-clear-${field.key}`"
-                :icon="
-                  isFieldCleared(field.key)
-                    ? DamsIcons.ArrowCircleLeft
-                    : DamsIcons.Trash
-                "
-                :button-style="
-                  isFieldCleared(field.key) ? 'accentNormal' : 'default'
-                "
-                button-size="verySmall"
-                @click="toggleBulkEditClearedField(formId, field.key)"
-              />
-            </div>
+            <BulkEditClearFieldButton
+              :field-key="field.key"
+              :cleared="isFieldCleared(field.key)"
+              @toggle="toggleBulkEditClearedField(formId, field.key)"
+            />
           </template>
         </metadata-wrapper>
-        <p
+        <BulkEditFieldScopeNote
           v-if="field.onlyForEntityTypes?.length && isBulkEditForm"
-          class="text-xs text-text-body pt-1"
-        >
-          {{
-            t("bulk-operations.field-partial-scope", [
-              bulkItemCountForTypes(field.onlyForEntityTypes),
-              bulkItems.length,
-            ])
-          }}
-        </p>
+          :matched="bulkItemCountForTypes(field.onlyForEntityTypes)"
+          :total="bulkItems.length"
+        />
         <div v-if="field.__typename === 'UploadContainer'">
           <div
             v-for="(uploadContainerField, idx) in Object.values(
@@ -313,7 +269,6 @@ import {
   ActionType,
   BaseFieldType,
   Collection,
-  DamsIcons,
   EndpointResponseActions,
   EntityPickerMode,
   MutateEntityValuesDocument,
@@ -342,7 +297,9 @@ import {
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BulkEditRelationModeSelector from "@/components/bulk-operations/BulkEditRelationModeSelector.vue";
+import BulkEditClearFieldButton from "@/components/bulk-operations/BulkEditClearFieldButton.vue";
+import BulkEditFieldScopeNote from "@/components/bulk-operations/BulkEditFieldScopeNote.vue";
 import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";

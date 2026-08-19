@@ -20,18 +20,37 @@ const unresolvedTemplateBindings = (relativePath: string): string[] => {
     source: descriptor.template?.content ?? "",
     filename,
     id: filename,
-    compilerOptions: { bindingMetadata: script.bindings, prefixIdentifiers: true },
+    compilerOptions: {
+      bindingMetadata: script.bindings,
+      prefixIdentifiers: true,
+    },
   });
 
   // Everything a script-setup binding resolves to is emitted as $setup.x; whatever
   // is left on _ctx was not declared anywhere.
-  return [...new Set([...code.matchAll(/_ctx\.([A-Za-z_$][\w$]*)/g)].map((m) => m[1]))]
+  return [
+    ...new Set(
+      [...code.matchAll(/_ctx\.([A-Za-z_$][\w$]*)/g)].map((m) => m[1]),
+    ),
+  ]
     .filter((name) => !name.startsWith("$"))
     .sort();
 };
 
+// Blocks lifted out of DynamicForm.vue leave its template's scope, so the ones it
+// still drives through props have to be walked too.
+const templates = [
+  "DynamicForm.vue",
+  "../bulk-operations/BulkEditRelationModeSelector.vue",
+  "../bulk-operations/BulkEditClearFieldButton.vue",
+  "../bulk-operations/BulkEditFieldScopeNote.vue",
+];
+
 describe("DynamicForm template", () => {
-  it("reads no identifier that the script does not declare", () => {
-    expect(unresolvedTemplateBindings("DynamicForm.vue")).toEqual([]);
-  });
+  it.each(templates)(
+    "%s reads no identifier that the script does not declare",
+    (template) => {
+      expect(unresolvedTemplateBindings(template)).toEqual([]);
+    },
+  );
 });
