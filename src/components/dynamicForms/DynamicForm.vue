@@ -430,7 +430,11 @@ const {
   toggleBulkEditClearedField,
 } = useFormHelper();
 const { confirm } = useConfirmModal();
-const { dequeueItemForBulkProcessing, getEnqueuedItems } = useBulkOperations();
+const {
+  dequeueItemForBulkProcessing,
+  getEnqueuedItems,
+  triggerBulkSelectionEvent,
+} = useBulkOperations();
 const { buildJsonDocuments, groupIdsByType } = useBulkEditForm();
 const {
   displaySuccessNotification,
@@ -1452,10 +1456,15 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
           succeededPerTransport.every((succeeded) => succeeded.includes(id))),
     );
 
-    if (bulkEditContext.value)
+    if (bulkEditContext.value) {
       succeededIds.forEach((id: string) =>
         dequeueItemForBulkProcessing(bulkEditContext.value as any, id),
       );
+      // Row checkboxes keep their own state and only resync on this event, so
+      // without it a dequeued row stays ticked. Fired once for the whole batch
+      // rather than per item, which would stack 50ms timeouts.
+      triggerBulkSelectionEvent(bulkEditContext.value as any);
+    }
 
     const callbackFunctions = getCallbackFunctions();
     if (callbackFunctions !== undefined) {
