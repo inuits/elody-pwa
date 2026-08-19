@@ -1,8 +1,10 @@
 <template>
-  <div class="flex flex-col p-8 h-[calc(90vh-34px)]">
-    <div class="flex flex-1 min-h-0 gap-8">
-      <div class="flex flex-col min-h-0 basis-[56%]">
-        <div class="h-[40px] mb-6">
+  <div
+    class="@container flex flex-col p-8 h-[calc(90vh-34px)] overflow-y-auto @4xl:overflow-y-hidden"
+  >
+    <div class="flex flex-col @4xl:flex-row flex-1 min-h-0 gap-8">
+      <div class="flex flex-col min-h-0 @4xl:basis-[56%]">
+        <div class="mb-6">
           <LibraryBar
             v-model:skip="skip"
             v-model:limit="limit"
@@ -11,7 +13,9 @@
             @update:limit="loadItems()"
           />
         </div>
-        <div class="flex-1 min-h-0 overflow-y-hidden hover:overflow-y-auto">
+        <div
+          class="flex-1 min-h-0 max-h-[40vh] overflow-y-auto @4xl:max-h-none @4xl:overflow-y-hidden @4xl:hover:overflow-y-auto"
+        >
           <ListItem
             v-for="item in items"
             :key="item.id"
@@ -23,7 +27,7 @@
           />
         </div>
       </div>
-      <div class="flex flex-col min-h-0 grow overflow-y-auto">
+      <div class="flex flex-col min-w-0 min-h-0 grow @4xl:overflow-y-auto">
         <h1 class="title pb-2">{{ t("bulk-operations.bulk-edit") }}</h1>
         <p class="text-sm text-text-body pb-2">
           {{ t("bulk-operations.bulk-edit-info") }}
