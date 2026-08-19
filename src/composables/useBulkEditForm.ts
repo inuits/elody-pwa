@@ -20,12 +20,9 @@ export type BulkEditFieldConflict = {
 };
 
 export type MergedBulkEditForm = {
-  /** Shape DynamicForm's modalFormFields prop expects. */
   formFields: Record<string, any>;
-  /** Field key -> the entity types it applies to. Universal keys are absent. */
   fieldTypeMap: Record<string, string[]>;
   typesInSelection: string[];
-  /** Selected types that none of the configured form queries described. */
   unmatchedTypes: string[];
   conflicts: BulkEditFieldConflict[];
 };
@@ -35,8 +32,6 @@ const formCache = new Map<string, ExtractedForm>();
 const sameType = (a: unknown, b: unknown): boolean =>
   String(a).toLowerCase() === String(b).toLowerCase();
 
-// The other write paths strip these before sending; a relation document should not
-// carry form bookkeeping or a teaser copy of the related entity.
 const stripRelationForStorage = (relation: any): any => {
   const { editStatus, value, teaserMetadata, ...rest } = relation;
   return rest;
@@ -60,7 +55,7 @@ const useBulkEditForm = () => {
     const entries = Object.entries<any>(formTab.formFields).filter(
       ([, value]) => typeof value === "object" && value !== null,
     );
-    // Each per-type form names the type it creates, so no type-to-query config is needed.
+
     const creationType = entries.find(
       ([, value]) => value.__typename === "FormAction",
     )?.[1]?.creationType;
@@ -80,17 +75,20 @@ const useBulkEditForm = () => {
 
     const query = await loadDocument(queryName);
     if (!query) {
-      console.warn(`Bulk edit: no query named '${queryName}' exists, skipping it`);
+      console.warn(
+        `Bulk edit: no query named '${queryName}' exists, skipping it`,
+      );
       return undefined;
     }
 
-    // Queried directly instead of through useDynamicForm, whose dynamicForm and
-    // dynamicFormLoaded are module singletons shared with any open form.
     let result: any;
     try {
       result = await apolloClient.query({ query, fetchPolicy: "cache-first" });
     } catch (error) {
-      console.warn(`Bulk edit: fetching '${queryName}' failed, skipping it`, error);
+      console.warn(
+        `Bulk edit: fetching '${queryName}' failed, skipping it`,
+        error,
+      );
       return undefined;
     }
     const form = extractForm(queryName, result?.data);
@@ -116,71 +114,95 @@ const useBulkEditForm = () => {
     return clone;
   };
 
-  const mergeFormFields = (
+  const getCandidatesPerKey = (
     forms: ExtractedForm[],
     typesInSelection: string[],
-  ): Pick<
-    MergedBulkEditForm,
-    "formFields" | "fieldTypeMap" | "conflicts"
-  > => {
+  ) => {
     const relevantForms = forms.filter((form) =>
       typesInSelection.some((type) => sameType(type, form.creationType)),
     );
 
     const candidatesPerKey = new Map<string, { type: string; field: any }[]>();
+
     relevantForms.forEach((form) =>
       Object.values(form.fields).forEach((field: any) => {
         if (!field.key || !field.inputField?.type) return;
+
         const candidates = candidatesPerKey.get(field.key) ?? [];
         candidates.push({ type: form.creationType, field });
         candidatesPerKey.set(field.key, candidates);
       }),
     );
 
+    return candidatesPerKey;
+  };
+
+  const resolveFieldCandidates = (
+    key: string,
+    candidates: { type: string; field: any }[],
+    typesInSelection: string[],
+  ) => {
+    const perInputField = new Map<string, string[]>();
+
+    candidates.forEach(({ type, field }) => {
+      const inputFieldType = field.inputField.type;
+      perInputField.set(inputFieldType, [
+        ...(perInputField.get(inputFieldType) ?? []),
+        type,
+      ]);
+    });
+
+    // Find the input field type shared by the most entities
+    const [keptInputField, keptTypes] = [...perInputField.entries()].reduce(
+      (widest, entry) => (entry[1].length > widest[1].length ? entry : widest),
+    );
+
+    const droppedTypes = candidates
+      .map(({ type }) => type)
+      .filter((type) => !keptTypes.includes(type));
+
+    const conflict =
+      droppedTypes.length > 0 ? { key, keptInputField, droppedTypes } : null;
+
+    const field = candidates.find(
+      ({ field: candidate }) => candidate.inputField.type === keptInputField,
+    )!.field;
+
+    const coversWholeSelection = typesInSelection.every((type) =>
+      keptTypes.some((keptType) => sameType(keptType, type)),
+    );
+
+    return { conflict, field, keptTypes, coversWholeSelection };
+  };
+
+  const mergeFormFields = (
+    forms: ExtractedForm[],
+    typesInSelection: string[],
+  ): Pick<MergedBulkEditForm, "formFields" | "fieldTypeMap" | "conflicts"> => {
     const formFields: Record<string, any> = {};
     const fieldTypeMap: Record<string, string[]> = {};
     const conflicts: BulkEditFieldConflict[] = [];
 
+    const candidatesPerKey = getCandidatesPerKey(forms, typesInSelection);
+
     candidatesPerKey.forEach((candidates, key) => {
-      // One key means one form value, so two variants of the same key cannot both
-      // render. Group by input field and keep the widest group: a type that loses
-      // simply does not get the field, which beats writing a value picked from the
-      // wrong option list.
-      const perInputField = new Map<string, string[]>();
-      candidates.forEach(({ type, field }) => {
-        const inputFieldType = field.inputField.type;
-        perInputField.set(inputFieldType, [
-          ...(perInputField.get(inputFieldType) ?? []),
-          type,
-        ]);
-      });
+      const { conflict, field, keptTypes, coversWholeSelection } =
+        resolveFieldCandidates(key, candidates, typesInSelection);
 
-      // Ties keep the first input field seen, so the order of the configured
-      // formQueries decides which types win.
-      const [keptInputField, keptTypes] = [...perInputField.entries()].reduce(
-        (widest, entry) => (entry[1].length > widest[1].length ? entry : widest),
-      );
-      const droppedTypes = candidates
-        .map(({ type }) => type)
-        .filter((type) => !keptTypes.includes(type));
-
-      if (droppedTypes.length > 0) {
-        conflicts.push({ key, keptInputField, droppedTypes });
+      if (conflict) {
+        conflicts.push(conflict);
         console.warn(
-          `Bulk edit: '${key}' uses a different input field on ${droppedTypes.join(", ")}; those types are excluded from this field`,
+          `Bulk edit: '${key}' uses a different input field on ${conflict.droppedTypes.join(", ")}; those types are excluded from this field`,
         );
       }
 
-      const field = candidates.find(
-        ({ field: candidate }) => candidate.inputField.type === keptInputField,
-      )!.field;
-      const coversWholeSelection = typesInSelection.every((type) =>
-        keptTypes.some((keptType) => sameType(keptType, type)),
-      );
-
       formFields[key] = buildBulkField(field, keptTypes);
-      if (coversWholeSelection) delete formFields[key].onlyForEntityTypes;
-      else fieldTypeMap[key] = keptTypes;
+
+      if (coversWholeSelection) {
+        delete formFields[key].onlyForEntityTypes;
+      } else {
+        fieldTypeMap[key] = keptTypes;
+      }
     });
 
     formFields.bulkEditAction = {
@@ -212,10 +234,6 @@ const useBulkEditForm = () => {
     };
   };
 
-  /**
-   * A field the merged form scoped to a subset of the selection may only be written
-   * to those types. An unscoped name applies everywhere.
-   */
   const appliesToType = (
     scope: Record<string, string[]>,
     name: string,
@@ -233,7 +251,6 @@ const useBulkEditForm = () => {
   ): string[] =>
     keys.filter((key) => appliesToType(fieldTypeMap, key, entityType));
 
-  /** Same scoping for relations, whose scope is keyed by relation type. */
   const relationsForType = <T extends { type: string }>(
     relations: T[],
     relationTypeScope: Record<string, string[]>,
@@ -252,12 +269,6 @@ const useBulkEditForm = () => {
       appliesToType(relationTypeScope, relationType, entityType),
     );
 
-  /**
-   * A bulk edit is written by more than one transport and not every transport
-   * carries every entity, so an entity is done when the transports that did carry it
-   * all reported it. An entity no transport carried had no applicable field and is
-   * finished rather than failed.
-   */
   const resolveSucceededIds = (
     ids: string[],
     transports: { carriedIds: string[]; succeededIds: string[] }[],
@@ -270,12 +281,6 @@ const useBulkEditForm = () => {
         .every((transport) => transport.succeededIds.includes(id));
     });
 
-  /**
-   * One elody-shaped document per selected entity, carrying only the metadata keys
-   * that exist on that entity's type. `relations` is present only to replace them:
-   * the batch endpoint overwrites every relation of a type it sees, and omitting the
-   * key leaves relations untouched — so adding or removing must not come through here.
-   */
   const buildJsonDocuments = (
     byType: Record<string, string[]>,
     payload: {

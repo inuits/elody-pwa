@@ -462,8 +462,6 @@ export const useBulkOperationsActionsBar = (
       getModalContextForOperation(operationType),
       {
         parentEntity: parentEntity,
-        // openModal only has a slot for a single formQuery; bulk edit derives its
-        // form from a list of them.
         formQueries: bulkOperationModalConfig.formQueries || undefined,
       },
     );
