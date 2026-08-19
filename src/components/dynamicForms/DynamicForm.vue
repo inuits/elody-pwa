@@ -37,7 +37,6 @@
             v-model="selectedRelationMode"
             :options="relationModeOptions"
             :clearable="false"
-            :add-label-to-value="true"
             label-position="inline"
           />
         </div>
@@ -363,7 +362,10 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import { useBulkOperations } from "@/composables/useBulkOperations";
+import {
+  type Context,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { useBulkEditForm } from "@/composables/useBulkEditForm";
 import { useUploadState } from "@/composables/upload/useUploadState";
 
@@ -423,6 +425,7 @@ const {
   setBulkEditRelationMode,
   getBulkEditClearedFields,
   toggleBulkEditClearedField,
+  clearBulkEditFormState,
 } = useFormHelper();
 const { confirm } = useConfirmModal();
 const {
@@ -430,7 +433,13 @@ const {
   getEnqueuedItems,
   triggerBulkSelectionEvent,
 } = useBulkOperations();
-const { buildJsonDocuments, groupIdsByType } = useBulkEditForm();
+const {
+  buildJsonDocuments,
+  groupIdsByType,
+  relationsForType,
+  relationTypesForType,
+  resolveSucceededIds,
+} = useBulkEditForm();
 const {
   displaySuccessNotification,
   displayWarningNotification,
@@ -571,6 +580,20 @@ const fieldTypeMap = computed<Record<string, string[]>>(() => {
   );
 });
 
+// Same scoping as fieldTypeMap, but keyed by relation type: that is what a relation
+// entry in the payload carries, not the field key.
+const relationTypeScope = computed<Record<string, string[]>>(() =>
+  (getFieldArray.value ?? []).reduce(
+    (scope, field: any) => {
+      const relationType = field.inputField?.relationType;
+      if (relationType && field.onlyForEntityTypes?.length)
+        scope[relationType] = field.onlyForEntityTypes;
+      return scope;
+    },
+    {} as Record<string, string[]>,
+  ),
+);
+
 const getFieldArray = computed(() => {
   return modalFormFields
     ? normalizeModalFormFields(modalFormFields)
@@ -602,10 +625,16 @@ const isBulkEditFormWithRelations = computed<boolean>(
 
 // A bulk-edit form runs either in the merged bulk-edit modal or, for a
 // single-type form configured with a formQuery, in the plain DynamicForm modal.
+// Closing a modal does not drop its context, so only an open one may be read.
+const contextOfOpenModal = (modalType: TypeModals): Context | undefined => {
+  const modal = getModalInfo(modalType);
+  return modal.open ? modal.context : undefined;
+};
+
 const bulkEditContext = computed(
   () =>
-    getModalInfo(TypeModals.BulkOperationsEdit).context ??
-    getModalInfo(TypeModals.DynamicForm).context,
+    contextOfOpenModal(TypeModals.BulkOperationsEdit) ??
+    contextOfOpenModal(TypeModals.DynamicForm),
 );
 
 const bulkItems = computed(() =>
@@ -1357,8 +1386,15 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
     });
     if (choice !== "confirm") return;
 
-    const succeededPerTransport: string[][] = [];
+    const transports: { carriedIds: string[]; succeededIds: string[] }[] = [];
     const failedIds = new Set<string>();
+    const collectOutcome = (carriedIds: string[], outcome: any) => {
+      transports.push({
+        carriedIds,
+        succeededIds: outcome?.succeededIds ?? [],
+      });
+      (outcome?.failedIds ?? []).forEach((id: string) => failedIds.add(id));
+    };
 
     // Metadata (merged by key) and relation replacement (a relation type in the
     // document overwrites that type) match the batch endpoint's own semantics.
@@ -1367,41 +1403,47 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       payload,
       fieldTypeMap.value ?? {},
       selectedRelationMode.value,
+      relationTypeScope.value,
     );
 
     if (documents.length > 0) {
+      const documentIds = documents.map((document: any) => document.id);
       const jsonResult = await bulkUpdateWithJson({ documents });
       const jsonOutcome = jsonResult?.data?.bulkUpdateEntitiesWithJson;
-      const jsonSucceeded = jsonOutcome?.succeededIds ?? [];
 
-      if (jsonSucceeded.length === 0) {
+      if ((jsonOutcome?.succeededIds ?? []).length === 0) {
         // Nothing landed: this client has no json batch serializer (or the endpoint
-        // refused the whole body). Write the same values through the per-entity
-        // mutation, which every client supports.
-        const fallbackResult = await bulkEdit({
-          ids: documents.map((document: any) => document.id),
-          metadata: payload.metadata,
-          relationsToAdd: [],
-          relationsToRemove: [],
-          relationsToReplace:
-            selectedRelationMode.value === BulkEditModes.Replace
-              ? payload.relationsToReplace
-              : [],
-          collection: Collection.Entities,
-        });
-        const fallbackOutcome = fallbackResult?.data?.bulkEditEntities;
-        succeededPerTransport.push(fallbackOutcome?.succeededIds ?? []);
-        (fallbackOutcome?.failedIds ?? []).forEach((id: string) =>
-          failedIds.add(id),
-        );
+        // refused the whole body). Write the same documents through the per-entity
+        // mutation, which every client supports — one call per entity type, so the
+        // per-type field scoping baked into the documents survives the fallback.
+        for (const type of Object.keys(byType)) {
+          const documentsOfType = documents.filter(
+            (document: any) => document.type === type,
+          );
+          if (documentsOfType.length === 0) continue;
+          // Every document of a type carries the same values, only a different id.
+          const [{ metadata, relations }] = documentsOfType as any[];
+          const fallbackResult = await bulkEdit({
+            ids: documentsOfType.map((document: any) => document.id),
+            metadata,
+            relationsToAdd: [],
+            relationsToRemove: [],
+            relationsToReplace: relations ?? [],
+            collection: Collection.Entities,
+          });
+          collectOutcome(
+            documentsOfType.map((document: any) => document.id),
+            fallbackResult?.data?.bulkEditEntities,
+          );
+        }
       } else {
-        succeededPerTransport.push(jsonSucceeded);
-        (jsonOutcome?.failedIds ?? []).forEach((id: string) => failedIds.add(id));
+        collectOutcome(documentIds, jsonOutcome);
       }
     }
 
     // Adding and removing relations need the read-modify-write mutation: the batch
-    // endpoint would overwrite the whole relation type instead.
+    // endpoint would overwrite the whole relation type instead. Per entity type,
+    // because a relation field can be scoped to a subset of the selection.
     const relationsToAdd =
       selectedRelationMode.value === BulkEditModes.Add
         ? payload.relationsToAdd
@@ -1410,46 +1452,42 @@ const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
       selectedRelationMode.value === BulkEditModes.Remove
         ? payload.relationsToRemove
         : [];
-    const relationTypesToClear = payload.relationTypesToClear;
-    if (
-      relationsToAdd.length > 0 ||
-      relationsToRemove.length > 0 ||
-      relationTypesToClear.length > 0
-    ) {
+    for (const [type, idsOfType] of Object.entries(byType)) {
+      const scope = relationTypeScope.value;
+      const addForType = relationsForType(relationsToAdd, scope, type);
+      const removeForType = relationsForType(relationsToRemove, scope, type);
+      const clearForType = relationTypesForType(
+        payload.relationTypesToClear,
+        scope,
+        type,
+      );
+      // Nothing applies to this type: an all-empty call still reaches putRelations,
+      // which would write an empty relation list.
+      if (
+        addForType.length === 0 &&
+        removeForType.length === 0 &&
+        clearForType.length === 0
+      )
+        continue;
+
       const mutationResult = await bulkEdit({
-        ids,
+        ids: idsOfType,
         metadata: [],
-        relationsToAdd,
-        relationsToRemove,
+        relationsToAdd: addForType,
+        relationsToRemove: removeForType,
         relationsToReplace: [],
-        relationTypesToClear,
+        relationTypesToClear: clearForType,
         collection: Collection.Entities,
       });
-      const mutationOutcome = mutationResult?.data?.bulkEditEntities;
-      succeededPerTransport.push(mutationOutcome?.succeededIds ?? []);
-      (mutationOutcome?.failedIds ?? []).forEach((id: string) =>
-        failedIds.add(id),
-      );
+      collectOutcome(idsOfType, mutationResult?.data?.bulkEditEntities);
     }
 
-    // An entity is done when every transport that actually carried work for it
-    // reported it. Entities whose type had no applicable field are not written to
-    // at all, so they are finished rather than failed.
-    const writtenIds = new Set<string>([
-      ...documents.map((document: any) => document.id),
-      ...(relationsToAdd.length > 0 ||
-      relationsToRemove.length > 0 ||
-      relationTypesToClear.length > 0
-        ? ids
-        : []),
-    ]);
-    const skippedIds = ids.filter((id: string) => !writtenIds.has(id));
-    const succeededIds = ids.filter(
-      (id: string) =>
-        !failedIds.has(id) &&
-        (skippedIds.includes(id) ||
-          succeededPerTransport.every((succeeded) => succeeded.includes(id))),
+    const carriedIds = new Set<string>(
+      transports.flatMap((transport) => transport.carriedIds),
     );
+    // Nothing applied to these: no field of the merged form covered their type.
+    const skippedIds = ids.filter((id: string) => !carriedIds.has(id));
+    const succeededIds = resolveSucceededIds(ids, transports, failedIds);
 
     if (bulkEditContext.value) {
       succeededIds.forEach((id: string) =>
@@ -1673,6 +1711,9 @@ watch(
 onUnmounted(() => {
   dynamicFormLoaded.value = false;
   useUploadState().resetState();
+  // Both bulk-edit paths (merged modal, single-type formQuery) unmount this form when
+  // their modal closes, so this is the one place that catches either one.
+  if (isBulkEditForm.value) clearBulkEditFormState(formId.value);
 });
 </script>
 

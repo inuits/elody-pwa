@@ -752,9 +752,15 @@ const useFormHelper = () => {
     bulkEditRelationModes.value[formId] = mode;
   };
 
-  const clearBulkEditRelationMode = (formId: string): void => {
+  /**
+   * All three are module state, so a mode, a cleared field or an editable key left
+   * behind by one bulk edit would be applied by the next one — on entity types whose
+   * form never showed that field. editableFields only ever grows, hence the delete.
+   */
+  const clearBulkEditFormState = (formId: string): void => {
     delete bulkEditRelationModes.value[formId];
     delete bulkEditClearedFields.value[formId];
+    delete editableFields.value[formId];
   };
 
   const getBulkEditClearedFields = (formId: string): string[] =>
@@ -794,7 +800,7 @@ const useFormHelper = () => {
     buildBulkEditPayload,
     getBulkEditRelationMode,
     setBulkEditRelationMode,
-    clearBulkEditRelationMode,
+    clearBulkEditFormState,
     getBulkEditClearedFields,
     toggleBulkEditClearedField,
     parseIntialValuesForFormSubmit,

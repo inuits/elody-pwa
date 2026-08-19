@@ -212,15 +212,62 @@ const useBulkEditForm = () => {
     };
   };
 
+  /**
+   * A field the merged form scoped to a subset of the selection may only be written
+   * to those types. An unscoped name applies everywhere.
+   */
+  const appliesToType = (
+    scope: Record<string, string[]>,
+    name: string,
+    entityType: string,
+  ): boolean => {
+    const types = scope[name];
+    if (!types) return true;
+    return types.some((type) => sameType(type, entityType));
+  };
+
   const metadataKeysForType = (
     keys: string[],
     fieldTypeMap: Record<string, string[]>,
     entityType: string,
   ): string[] =>
-    keys.filter((key) => {
-      const types = fieldTypeMap[key];
-      if (!types) return true;
-      return types.some((type) => sameType(type, entityType));
+    keys.filter((key) => appliesToType(fieldTypeMap, key, entityType));
+
+  /** Same scoping for relations, whose scope is keyed by relation type. */
+  const relationsForType = <T extends { type: string }>(
+    relations: T[],
+    relationTypeScope: Record<string, string[]>,
+    entityType: string,
+  ): T[] =>
+    relations.filter((relation) =>
+      appliesToType(relationTypeScope, relation.type, entityType),
+    );
+
+  const relationTypesForType = (
+    relationTypes: string[],
+    relationTypeScope: Record<string, string[]>,
+    entityType: string,
+  ): string[] =>
+    relationTypes.filter((relationType) =>
+      appliesToType(relationTypeScope, relationType, entityType),
+    );
+
+  /**
+   * A bulk edit is written by more than one transport and not every transport
+   * carries every entity, so an entity is done when the transports that did carry it
+   * all reported it. An entity no transport carried had no applicable field and is
+   * finished rather than failed.
+   */
+  const resolveSucceededIds = (
+    ids: string[],
+    transports: { carriedIds: string[]; succeededIds: string[] }[],
+    failedIds: Set<string>,
+  ): string[] =>
+    ids.filter((id) => {
+      if (failedIds.has(id)) return false;
+      return transports
+        .filter((transport) => transport.carriedIds.includes(id))
+        .every((transport) => transport.succeededIds.includes(id));
     });
 
   /**
@@ -237,26 +284,31 @@ const useBulkEditForm = () => {
     },
     fieldTypeMap: Record<string, string[]>,
     relationMode: BulkEditModes,
+    relationTypeScope: Record<string, string[]> = {},
   ): Record<string, unknown>[] => {
     const metadataKeys = payload.metadata.map((entry) => entry.key);
-    const replacesRelations =
-      relationMode === BulkEditModes.Replace &&
-      payload.relationsToReplace.length > 0;
+    const replaces = relationMode === BulkEditModes.Replace;
 
     return Object.entries(byType).flatMap(([type, idsOfType]) => {
       const keysForType = metadataKeysForType(metadataKeys, fieldTypeMap, type);
       const metadata = payload.metadata.filter((entry) =>
         keysForType.includes(entry.key),
       );
-      if (metadata.length === 0 && !replacesRelations) return [];
+      const relations = replaces
+        ? relationsForType(
+            payload.relationsToReplace,
+            relationTypeScope,
+            type,
+          ).map(stripRelationForStorage)
+        : [];
+      if (metadata.length === 0 && relations.length === 0) return [];
 
-      const relations = payload.relationsToReplace.map(stripRelationForStorage);
       return idsOfType.map((id) => ({
         id,
         identifiers: [id],
         type,
         metadata,
-        ...(replacesRelations ? { relations } : {}),
+        ...(relations.length > 0 ? { relations } : {}),
       }));
     });
   };
@@ -284,6 +336,9 @@ const useBulkEditForm = () => {
     buildMergedBulkEditForm,
     mergeFormFields,
     metadataKeysForType,
+    relationsForType,
+    relationTypesForType,
+    resolveSucceededIds,
     buildJsonDocuments,
     groupIdsByType,
     clearBulkEditFormCache,

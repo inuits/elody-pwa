@@ -86,7 +86,6 @@ import {
 } from "@/composables/useBulkEditForm";
 import { computed, inject, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
@@ -96,7 +95,6 @@ const config = inject("config") as any;
 const { t } = useI18n();
 const { getThumbnail } = useThumbnailHelper();
 const { getModalInfo } = useBaseModal();
-const { clearBulkEditRelationMode } = useFormHelper();
 
 const formKey = "bulk-edit";
 const modal = getModalInfo(TypeModals.BulkOperationsEdit);
@@ -134,8 +132,6 @@ watch(
   (isModalOpen) => {
     if (!isModalOpen) {
       mergedForm.value = undefined;
-      // Module state: a mode left behind would preselect itself next time.
-      clearBulkEditRelationMode(formKey);
       return;
     }
     loadItems();
@@ -151,8 +147,14 @@ watch(
 // to show exactly what a retry would still apply to.
 watch(
   () => getEnqueuedItemCount(context.value),
-  () => {
-    if (modal.open) loadItems();
+  (count) => {
+    if (!modal.open) return;
+    loadItems();
+    // The queue shrank past the start of the current page, which would render empty.
+    if (items.value.length === 0 && count > 0) {
+      skip.value = 1;
+      loadItems();
+    }
   },
 );
 </script>

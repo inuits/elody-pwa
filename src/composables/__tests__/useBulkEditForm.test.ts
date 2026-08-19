@@ -22,6 +22,9 @@ const {
   metadataKeysForType,
   buildJsonDocuments,
   groupIdsByType,
+  relationsForType,
+  relationTypesForType,
+  resolveSucceededIds,
   clearBulkEditFormCache,
 } = useBulkEditForm();
 
@@ -292,6 +295,78 @@ describe("buildJsonDocuments", () => {
 
     expect(documents).toHaveLength(3);
     expect(documents[0]).toMatchObject({ metadata: [] });
+  });
+
+  it("keeps a scoped relation replacement off the types it does not apply to", () => {
+    const documents = buildJsonDocuments(
+      byType,
+      { metadata: [], relationsToReplace: payload.relationsToReplace },
+      fieldTypeMap,
+      BulkEditModes.Replace,
+      { refLanguages: ["work_map"] },
+    );
+
+    // work_word never saw the field, so replacing its languages would wipe them.
+    expect(documents.map((document: any) => document.id)).toEqual(["a", "b"]);
+    expect(documents[0].relations).toEqual(payload.relationsToReplace);
+  });
+});
+
+describe("resolveSucceededIds", () => {
+  const ids = ["a", "b", "c"];
+
+  it("needs only the transports that carried an id to report it", () => {
+    const transports = [
+      { carriedIds: ["a"], succeededIds: ["a"] },
+      { carriedIds: ["b"], succeededIds: ["b"] },
+    ];
+
+    expect(resolveSucceededIds(ids, transports, new Set())).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+  });
+
+  it("fails an id a transport that carried it did not report", () => {
+    const transports = [
+      { carriedIds: ["a", "b"], succeededIds: ["a", "b"] },
+      { carriedIds: ["a"], succeededIds: [] },
+    ];
+
+    expect(resolveSucceededIds(ids, transports, new Set())).toEqual(["b", "c"]);
+  });
+
+  it("fails an explicitly failed id even when another transport reported it", () => {
+    const transports = [{ carriedIds: ids, succeededIds: ids }];
+
+    expect(resolveSucceededIds(ids, transports, new Set(["c"]))).toEqual([
+      "a",
+      "b",
+    ]);
+  });
+});
+
+describe("relation scoping", () => {
+  const scope = { refLanguages: ["work_map"] };
+
+  it("passes an unscoped relation type to every entity type", () => {
+    const relations = [{ type: "refAuthors", key: "person-1" }];
+
+    expect(relationsForType(relations, scope, "work_word")).toEqual(relations);
+    expect(relationTypesForType(["refAuthors"], scope, "work_word")).toEqual([
+      "refAuthors",
+    ]);
+  });
+
+  it("drops a scoped relation type for a type outside the scope", () => {
+    const relations = [{ type: "refLanguages", key: "lang-nl" }];
+
+    expect(relationsForType(relations, scope, "work_word")).toEqual([]);
+    expect(relationsForType(relations, scope, "work_map")).toEqual(relations);
+    expect(relationTypesForType(["refLanguages"], scope, "work_word")).toEqual(
+      [],
+    );
   });
 });
 
