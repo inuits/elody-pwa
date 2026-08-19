@@ -16,6 +16,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useSeenItems } from "@/composables/useSeenItems";
+import { useExportXlsx } from "@/composables/useExportXlsx";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useImport } from "@/composables/useImport";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -123,6 +124,7 @@ export const useBulkOperationsActionsBar = (
   const { t } = useI18n();
   const { trackSeen } = useEntityPageConfig();
   const { markManyAsSeen, unmarkManyAsSeen } = useSeenItems();
+  const { exportEntitiesToXlsx } = useExportXlsx();
   const { displaySuccessNotification } = useBaseNotification();
 
   const subDropdownOptions = ref<DropdownOption[]>([]);
@@ -424,6 +426,11 @@ export const useBulkOperationsActionsBar = (
 
     if (operationType && seenBulkOperationTypes.includes(operationType)) {
       handleSeenOperation(operationType);
+      return;
+    }
+
+    if (operationType === BulkOperationTypes.ExportXlsx) {
+      exportEntitiesToXlsx(entityType.value);
       return;
     }
 

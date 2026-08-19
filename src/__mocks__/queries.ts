@@ -492,6 +492,7 @@ export enum BulkOperationTypes {
   Edit = 'edit',
   ExportCsv = 'exportCsv',
   ExportCsvOfMediafilesFromAsset = 'exportCsvOfMediafilesFromAsset',
+  ExportXlsx = 'exportXlsx',
   MarkAsSeen = 'markAsSeen',
   MarkAsUnseen = 'markAsUnseen',
   ReorderEntities = 'reorderEntities',
