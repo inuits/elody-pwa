@@ -214,6 +214,84 @@ describe("buildBulkEditPayload", () => {
     ]);
   });
 
+  it("clears a metadata field the user marked for clearing, without touching it", () => {
+    const payload = buildBulkEditPayload(
+      { intialValues: { quality_marks: undefined, record_format: undefined } as any },
+      {
+        formId,
+        isFieldDirty: noneDirty,
+        fields: [
+          {
+            key: "quality_marks",
+            inputField: { type: "dropdownMultiselectMetadata" },
+          },
+          { key: "record_format", inputField: { type: "text" } },
+        ] as any,
+        clearedKeys: ["quality_marks", "record_format"],
+      },
+    );
+
+    // An array-valued property refuses "" and a string property refuses [], so the
+    // empty value has to match the field.
+    expect(payload.metadata).toEqual([
+      { key: "quality_marks", value: [] },
+      { key: "record_format", value: "" },
+    ]);
+    expect(payload.hasChanges).toBe(true);
+  });
+
+  it("uses the touched value's own shape when clearing", () => {
+    editableFields.value[formId] = ["summary"];
+
+    const payload = buildBulkEditPayload(
+      { intialValues: { summary: ["something"] } as any },
+      {
+        formId,
+        isFieldDirty: allDirty,
+        fields: [{ key: "summary", inputField: { type: "text" } }] as any,
+        clearedKeys: ["summary"],
+      },
+    );
+
+    expect(payload.metadata).toEqual([{ key: "summary", value: [] }]);
+  });
+
+  it("collects the relation types to clear and ignores their picked values", () => {
+    editableFields.value[formId] = ["refAuthors"];
+
+    const payload = buildBulkEditPayload(
+      {
+        intialValues: {} as any,
+        relationValues: { refAuthors: [relation("refAuthors", "person-1")] },
+      },
+      {
+        formId,
+        isFieldDirty: allDirty,
+        relationMode: BulkEditModes.Add,
+        fields: [
+          {
+            key: "refAuthors",
+            inputField: { type: "dropdownMultiselectRelations", relationType: "refAuthors" },
+          },
+        ] as any,
+        clearedKeys: ["refAuthors"],
+      },
+    );
+
+    expect(payload.relationTypesToClear).toEqual(["refAuthors"]);
+    expect(payload.relationsToAdd).toEqual([]);
+    expect(payload.hasChanges).toBe(true);
+  });
+
+  it("has no relation types to clear when nothing was marked", () => {
+    const payload = buildBulkEditPayload(
+      { intialValues: { quality_marks: ["awarded"] } as any },
+      { formId, isFieldDirty: allDirty },
+    );
+
+    expect(payload.relationTypesToClear).toEqual([]);
+  });
+
   it("reports whether anything is going to be written", () => {
     expect(
       buildBulkEditPayload(

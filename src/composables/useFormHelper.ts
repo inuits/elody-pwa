@@ -17,6 +17,8 @@ const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
 // How a bulk-edit form applies its relation values, chosen by the user per form.
 const bulkEditRelationModes = ref<{ [formId: string]: BulkEditModes }>({});
+// Fields the user marked to be emptied on every selected entity.
+const bulkEditClearedFields = ref<{ [formId: string]: string[] }>({});
 const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 const multilingualTranslations = ref<{
   [formId: string]: {
@@ -29,6 +31,8 @@ export type BulkEditPayload = {
   relationsToAdd: BaseRelationValuesInput[];
   relationsToRemove: BaseRelationValuesInput[];
   relationsToReplace: BaseRelationValuesInput[];
+  /** Relation types to empty completely, regardless of the chosen mode. */
+  relationTypesToClear: string[];
   hasChanges: boolean;
 };
 
@@ -596,6 +600,20 @@ const useFormHelper = () => {
   };
 
   /**
+   * "" clears a string property but is refused for an array one, and the other way
+   * around, so the empty value is taken from the value at hand when the user
+   * touched the field and from the input field otherwise.
+   */
+  const emptyValueForField = (field: any, currentValue: unknown): unknown => {
+    if (Array.isArray(currentValue)) return [];
+    return String(field?.inputField?.type ?? "")
+      .toLowerCase()
+      .includes("multiselect")
+      ? []
+      : "";
+  };
+
+  /**
    * Payload for a bulk edit: the same form is applied to many entities, so only
    * fields the user actually touched may be sent. Every rendered field key is
    * present in intialValues from setup on, and metadata is patched by key, so an
@@ -608,24 +626,52 @@ const useFormHelper = () => {
       formId,
       isFieldDirty,
       relationMode = BulkEditModes.Add,
+      fields = [],
+      clearedKeys = [],
     }: {
       formId: string;
       isFieldDirty: (path: string) => boolean;
       relationMode?: BulkEditModes;
+      fields?: PanelMetaData[];
+      clearedKeys?: string[];
     },
   ): BulkEditPayload => {
     const metadata: MetadataValuesInput[] = [];
     const relationsToAdd: BaseRelationValuesInput[] = [];
     const relationsToRemove: BaseRelationValuesInput[] = [];
     const relationsToReplace: BaseRelationValuesInput[] = [];
+    const relationTypesToClear: string[] = [];
 
     const allowedKeys = editableFields.value[formId] ?? [];
     const { intialValues, relationValues } =
       extractMainValuesFromEntityValues(values);
 
+    const fieldByKey = new Map<string, any>(
+      fields.map((field: any) => [field.key, field]),
+    );
+    // A cleared relation field empties that whole relation type; a cleared metadata
+    // field is written as the empty value for its kind. Either way the values the
+    // user may have picked in that field are irrelevant.
+    const clearedRelationTypes = new Set<string>();
+    clearedKeys.forEach((key) => {
+      const field = fieldByKey.get(key);
+      const relationType = field?.inputField?.relationType;
+      if (relationType) {
+        clearedRelationTypes.add(relationType);
+        relationTypesToClear.push(relationType);
+        return;
+      }
+      if (!allowedKeys.includes(key)) return;
+      metadata.push({
+        key,
+        value: emptyValueForField(field, (intialValues as any)?.[key]),
+      });
+    });
+
     Object.entries(intialValues ?? {}).forEach(([key, value]) => {
       if (key === "__typename") return;
       if (!allowedKeys.includes(key)) return;
+      if (clearedKeys.includes(key)) return;
       if (value === undefined || value === null) return;
       if (!isFieldDirty(`intialValues.${key}`)) return;
       metadata.push({ key, value: extractMetadataValue(value) });
@@ -640,8 +686,9 @@ const useFormHelper = () => {
           ? relationsToReplace
           : relationsToAdd;
 
-    Object.entries(relationValues ?? {}).forEach(([, relations]) => {
+    Object.entries(relationValues ?? {}).forEach(([relationType, relations]) => {
       if (!Array.isArray(relations)) return;
+      if (clearedRelationTypes.has(relationType)) return;
       // A bulk form starts with empty pickers and removal is expressed by the
       // mode, so a deleted status here can only be leftover state. Letting it
       // through would flip the backend to a full relation replacement and wipe
@@ -650,9 +697,8 @@ const useFormHelper = () => {
         (relation: any) =>
           relation && relation.editStatus !== EditStatus.Deleted && relation.key,
       );
-      // ponytail: an empty picker means "leave this alone", so replace-to-empty
-      // ("clear all genres on these works") cannot be expressed. Add an explicit
-      // clear toggle if someone asks for it.
+      // An empty picker means "leave this field alone"; emptying a field is asked
+      // for with its clear button instead.
       if (picked.length === 0) return;
 
       picked.forEach((relation: any) =>
@@ -671,11 +717,13 @@ const useFormHelper = () => {
       relationsToAdd,
       relationsToRemove,
       relationsToReplace,
+      relationTypesToClear,
       hasChanges:
         metadata.length > 0 ||
         relationsToAdd.length > 0 ||
         relationsToRemove.length > 0 ||
-        relationsToReplace.length > 0,
+        relationsToReplace.length > 0 ||
+        relationTypesToClear.length > 0,
     };
   };
 
@@ -706,6 +754,17 @@ const useFormHelper = () => {
 
   const clearBulkEditRelationMode = (formId: string): void => {
     delete bulkEditRelationModes.value[formId];
+    delete bulkEditClearedFields.value[formId];
+  };
+
+  const getBulkEditClearedFields = (formId: string): string[] =>
+    bulkEditClearedFields.value[formId] ?? [];
+
+  const toggleBulkEditClearedField = (formId: string, key: string): void => {
+    const cleared = getBulkEditClearedFields(formId);
+    bulkEditClearedFields.value[formId] = cleared.includes(key)
+      ? cleared.filter((clearedKey) => clearedKey !== key)
+      : [...cleared, key];
   };
 
   return {
@@ -736,6 +795,8 @@ const useFormHelper = () => {
     getBulkEditRelationMode,
     setBulkEditRelationMode,
     clearBulkEditRelationMode,
+    getBulkEditClearedFields,
+    toggleBulkEditClearedField,
     parseIntialValuesForFormSubmit,
     parseRelationValuesForFormSubmit,
     parseRelationMetadataForFormSubmit,
