@@ -15,9 +15,7 @@ import { useInheritedRelations } from "./useInheritedRelations";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
-// How a bulk-edit form applies its relation values, chosen by the user per form.
 const bulkEditRelationModes = ref<{ [formId: string]: BulkEditModes }>({});
-// Fields the user marked to be emptied on every selected entity.
 const bulkEditClearedFields = ref<{ [formId: string]: string[] }>({});
 const teaserMetadataSaved = ref<{ [key: string]: object }>({});
 const multilingualTranslations = ref<{
@@ -599,11 +597,6 @@ const useFormHelper = () => {
     return { metadata, relations, updateOnlyRelations };
   };
 
-  /**
-   * "" clears a string property but is refused for an array one, and the other way
-   * around, so the empty value is taken from the value at hand when the user
-   * touched the field and from the input field otherwise.
-   */
   const emptyValueForField = (field: any, currentValue: unknown): unknown => {
     if (Array.isArray(currentValue)) return [];
     return String(field?.inputField?.type ?? "")
@@ -613,13 +606,37 @@ const useFormHelper = () => {
       : "";
   };
 
-  /**
-   * Payload for a bulk edit: the same form is applied to many entities, so only
-   * fields the user actually touched may be sent. Every rendered field key is
-   * present in intialValues from setup on, and metadata is patched by key, so an
-   * untouched key that slips through would blank that field on every selected
-   * entity.
-   */
+  const processClearedKeys = (
+    clearedKeys: string[],
+    fieldByKey: Map<string, any>,
+    allowedKeys: string[],
+    intialValues: any,
+  ) => {
+    const clearedMetadata: MetadataValuesInput[] = [];
+    const relationTypesToClear: string[] = [];
+    const clearedRelationTypes = new Set<string>();
+
+    clearedKeys.forEach((key) => {
+      const field = fieldByKey.get(key);
+      const relationType = field?.inputField?.relationType;
+
+      if (relationType) {
+        clearedRelationTypes.add(relationType);
+        relationTypesToClear.push(relationType);
+        return;
+      }
+
+      if (!allowedKeys.includes(key)) return;
+
+      clearedMetadata.push({
+        key,
+        value: emptyValueForField(field, (intialValues as any)?.[key]),
+      });
+    });
+
+    return { clearedMetadata, relationTypesToClear, clearedRelationTypes };
+  };
+
   const buildBulkEditPayload = (
     values: EntityValues,
     {
@@ -636,11 +653,9 @@ const useFormHelper = () => {
       clearedKeys?: string[];
     },
   ): BulkEditPayload => {
-    const metadata: MetadataValuesInput[] = [];
     const relationsToAdd: BaseRelationValuesInput[] = [];
     const relationsToRemove: BaseRelationValuesInput[] = [];
     const relationsToReplace: BaseRelationValuesInput[] = [];
-    const relationTypesToClear: string[] = [];
 
     const allowedKeys = editableFields.value[formId] ?? [];
     const { intialValues, relationValues } =
@@ -649,24 +664,11 @@ const useFormHelper = () => {
     const fieldByKey = new Map<string, any>(
       fields.map((field: any) => [field.key, field]),
     );
-    // A cleared relation field empties that whole relation type; a cleared metadata
-    // field is written as the empty value for its kind. Either way the values the
-    // user may have picked in that field are irrelevant.
-    const clearedRelationTypes = new Set<string>();
-    clearedKeys.forEach((key) => {
-      const field = fieldByKey.get(key);
-      const relationType = field?.inputField?.relationType;
-      if (relationType) {
-        clearedRelationTypes.add(relationType);
-        relationTypesToClear.push(relationType);
-        return;
-      }
-      if (!allowedKeys.includes(key)) return;
-      metadata.push({
-        key,
-        value: emptyValueForField(field, (intialValues as any)?.[key]),
-      });
-    });
+
+    const { clearedMetadata, relationTypesToClear, clearedRelationTypes } =
+      processClearedKeys(clearedKeys, fieldByKey, allowedKeys, intialValues);
+
+    const metadata: MetadataValuesInput[] = [...clearedMetadata];
 
     Object.entries(intialValues ?? {}).forEach(([key, value]) => {
       if (key === "__typename") return;
@@ -674,43 +676,43 @@ const useFormHelper = () => {
       if (clearedKeys.includes(key)) return;
       if (value === undefined || value === null) return;
       if (!isFieldDirty(`intialValues.${key}`)) return;
+
       metadata.push({ key, value: extractMetadataValue(value) });
     });
 
-    // The mode is a single choice for the whole form: metadata is always patched
-    // by key, only relations can be added, replaced or removed.
-    const target =
-      relationMode === BulkEditModes.Remove
-        ? relationsToRemove
-        : relationMode === BulkEditModes.Replace
-          ? relationsToReplace
-          : relationsToAdd;
+    const targetMapping: { [key: string]: BaseRelationValuesInput[] } = {
+      [BulkEditModes.Remove]: relationsToRemove,
+      [BulkEditModes.Add]: relationsToAdd,
+      [BulkEditModes.Replace]: relationsToReplace,
+    };
 
-    Object.entries(relationValues ?? {}).forEach(([relationType, relations]) => {
-      if (!Array.isArray(relations)) return;
-      if (clearedRelationTypes.has(relationType)) return;
-      // A bulk form starts with empty pickers and removal is expressed by the
-      // mode, so a deleted status here can only be leftover state. Letting it
-      // through would flip the backend to a full relation replacement and wipe
-      // relations on every selected entity.
-      const picked = relations.filter(
-        (relation: any) =>
-          relation && relation.editStatus !== EditStatus.Deleted && relation.key,
-      );
-      // An empty picker means "leave this field alone"; emptying a field is asked
-      // for with its clear button instead.
-      if (picked.length === 0) return;
+    const target: BaseRelationValuesInput[] = targetMapping[relationMode];
 
-      picked.forEach((relation: any) =>
-        target.push({
-          ...relation,
-          editStatus:
-            relationMode === BulkEditModes.Remove
-              ? EditStatus.Deleted
-              : EditStatus.New,
-        }),
-      );
-    });
+    Object.entries(relationValues ?? {}).forEach(
+      ([relationType, relations]) => {
+        if (!Array.isArray(relations)) return;
+        if (clearedRelationTypes.has(relationType)) return;
+
+        const picked = relations.filter(
+          (relation: any) =>
+            relation &&
+            relation.editStatus !== EditStatus.Deleted &&
+            relation.key,
+        );
+
+        if (picked.length === 0) return;
+
+        picked.forEach((relation: any) =>
+          target.push({
+            ...relation,
+            editStatus:
+              relationMode === BulkEditModes.Remove
+                ? EditStatus.Deleted
+                : EditStatus.New,
+          }),
+        );
+      },
+    );
 
     return {
       metadata,
@@ -748,15 +750,13 @@ const useFormHelper = () => {
   const getBulkEditRelationMode = (formId: string): BulkEditModes =>
     bulkEditRelationModes.value[formId] ?? BulkEditModes.Add;
 
-  const setBulkEditRelationMode = (formId: string, mode: BulkEditModes): void => {
+  const setBulkEditRelationMode = (
+    formId: string,
+    mode: BulkEditModes,
+  ): void => {
     bulkEditRelationModes.value[formId] = mode;
   };
 
-  /**
-   * All three are module state, so a mode, a cleared field or an editable key left
-   * behind by one bulk edit would be applied by the next one — on entity types whose
-   * form never showed that field. editableFields only ever grows, hence the delete.
-   */
   const clearBulkEditFormState = (formId: string): void => {
     delete bulkEditRelationModes.value[formId];
     delete bulkEditClearedFields.value[formId];
