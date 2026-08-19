@@ -319,6 +319,7 @@ import {
   ActionType,
   BaseFieldType,
   Collection,
+  DamsIcons,
   EndpointResponseActions,
   EntityPickerMode,
   MutateEntityValuesDocument,
