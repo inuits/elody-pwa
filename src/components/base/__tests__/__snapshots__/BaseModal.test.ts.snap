@@ -6,6 +6,7 @@ exports[`BaseModal > Snapshot Tests > matches snapshot for center modal 1`] = `
     <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
   </div>
   <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <notifications data-v-5078ddf1="" class="pt-2" group="modal"></notifications>
   <!--v-if-->
 </dialog>"
 `;
@@ -16,6 +17,7 @@ exports[`BaseModal > Snapshot Tests > matches snapshot for center wide modal 1`]
     <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
   </div>
   <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <notifications data-v-5078ddf1="" class="pt-2" group="modal"></notifications>
   <!--v-if-->
 </dialog>"
 `;
@@ -26,6 +28,7 @@ exports[`BaseModal > Snapshot Tests > matches snapshot for left modal 1`] = `
     <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
   </div>
   <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <notifications data-v-5078ddf1="" class="pt-2" group="modal"></notifications>
   <!--v-if-->
 </dialog>"
 `;
@@ -36,6 +39,7 @@ exports[`BaseModal > Snapshot Tests > matches snapshot for right modal 1`] = `
     <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
   </div>
   <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <notifications data-v-5078ddf1="" class="pt-2" group="modal"></notifications>
   <!--v-if-->
 </dialog>"
 `;

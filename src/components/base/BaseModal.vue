@@ -34,6 +34,11 @@
     <div data-testid="modal-content">
       <slot />
     </div>
+    <notifications
+      v-if="getModalInfo(props.modalType).open"
+      class="pt-2"
+      :group="modalNotificationGroup"
+    />
     <BlockingOverlay
       :is-blocking="isBlocking && getModalInfo(props.modalType).open"
     />
@@ -47,6 +52,7 @@ import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
+import { modalNotificationGroup } from "@/composables/useBaseNotification";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 
 const { isBlocking } = useBlockingLoader();
