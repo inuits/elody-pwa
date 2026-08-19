@@ -31,42 +31,60 @@
         @is-open="handleKeyboardOpenState"
       />
     </div>
-    <entity-element-metadata-edit
+    <div
       v-if="
         isEdit &&
         metadata.inputField &&
         !metadata.nonEditableField &&
         fieldIsEditableByUser
       "
-      :fieldKey="fieldKey"
-      v-model:value="fieldValueProxy"
-      :field="metadata.inputField"
-      :hidden-field="metadata.hiddenField"
-      :formId="formId"
-      :formFlow="formFlow"
-      :unit="metadata.unit"
-      :link-text="metadata.linkText"
-      :isMetadataOnRelation="fieldKind === 'PanelRelationData'"
-      :isRootdataOnRelation="fieldKind === 'PanelRelationRootData'"
-      :error="fieldErrorMessage"
-      :relation-filter="metadata.inputField.relationFilter"
-      :show-errors="
-        showErrors ||
-        (field.meta.dirty &&
-          !isFieldValid &&
+      class="flex items-center gap-2"
+    >
+      <entity-element-metadata-edit
+        data-cy="metadata-input"
+        class="grow min-w-0"
+        :fieldKey="fieldKey"
+        v-model:value="fieldValueProxy"
+        :field="metadata.inputField"
+        :hidden-field="metadata.hiddenField"
+        :formId="formId"
+        :formFlow="formFlow"
+        :unit="metadata.unit"
+        :link-text="metadata.linkText"
+        :isMetadataOnRelation="fieldKind === 'PanelRelationData'"
+        :isRootdataOnRelation="fieldKind === 'PanelRelationRootData'"
+        :error="fieldErrorMessage"
+        :relation-filter="metadata.inputField.relationFilter"
+        :show-errors="
+          showErrors ||
+          (field.meta.dirty &&
+            !isFieldValid &&
           metadata.inputField?.validation?.fastValidationMessage)
+        "
+        :copy-value-from-parent="metadata.copyValueFromParent"
+        :extract-value-from-parent="extractIntialValueFromParentByKey"
+        :field-is-valid="isFieldValid"
+        :is-field-required="isFieldRequired"
+        :repeatable-panel-config="repeatablePanelConfig"
+        :disabled="metadata.disabled"
+        :default-value="metadata.defaultValue"
+        @click.stop.prevent
+        @update:value="(value) => (fieldValueProxy = value)"
+      />
+      <!-- Opt-in: nothing renders and nothing shifts unless a parent fills it. -->
+      <slot name="fieldAction" />
+    </div>
+    <div
+      v-if="
+        !(
+          isEdit &&
+          metadata.inputField &&
+          !metadata.nonEditableField &&
+          fieldIsEditableByUser
+        )
       "
-      :copy-value-from-parent="metadata.copyValueFromParent"
-      :extract-value-from-parent="extractIntialValueFromParentByKey"
-      :field-is-valid="isFieldValid"
-      :is-field-required="isFieldRequired"
-      :repeatable-panel-config="repeatablePanelConfig"
-      :disabled="metadata.disabled"
-      :default-value="metadata.defaultValue"
-      @click.stop.prevent
-      @update:value="(value) => (fieldValueProxy = value)"
-    />
-    <div v-else class="flex gap-2">
+      class="flex gap-2"
+    >
       <base-tooltip
         class="w-full basis-[fit-content]"
         position="right-end"
