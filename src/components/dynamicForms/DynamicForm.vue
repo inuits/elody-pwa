@@ -96,56 +96,51 @@
             undefined
           "
         />
-        <div
+        <metadata-wrapper
           v-if="
             field.__typename === 'PanelMetaData' &&
             !nonStandardFieldTypes.includes(field.inputField.type)
           "
-          class="flex items-center gap-2"
+          v-show="!field.hiddenField?.hidden"
+          :form-id="formId"
+          :metadata="field as PanelMetaData"
+          :is-edit="true"
+          form-flow="create"
+          :show-errors="showErrors"
+          :key="`${dynamicFormQuery}_field_${index}`"
+          :is-used-in-modal="true"
+          :class="{
+            '[&_[data-cy=metadata-input]]:opacity-40 [&_[data-cy=metadata-input]]:pointer-events-none':
+              isFieldCleared(field.key),
+          }"
         >
-          <div
-            class="grow min-w-0"
-            :class="{
-              'opacity-40 pointer-events-none': isFieldCleared(field.key),
-            }"
-          >
-            <metadata-wrapper
-              v-show="!field.hiddenField?.hidden"
-              :form-id="formId"
-              :metadata="field as PanelMetaData"
-              :is-edit="true"
-              form-flow="create"
-              :show-errors="showErrors"
-              :key="`${dynamicFormQuery}_field_${index}`"
-              :is-used-in-modal="true"
-            />
-          </div>
-          <div
-            v-if="isBulkEditForm && !field.hiddenField?.hidden"
-            class="shrink-0 w-8"
-            :title="
-              t(
-                isFieldCleared(field.key)
-                  ? 'bulk-operations.keep-field'
-                  : 'bulk-operations.clear-field',
-              )
-            "
-          >
-            <BaseButtonNew
-              :data-cy="`bulk-edit-clear-${field.key}`"
-              :icon="
-                isFieldCleared(field.key)
-                  ? DamsIcons.ArrowCircleLeft
-                  : DamsIcons.Trash
+          <template v-if="isBulkEditForm" #fieldAction>
+            <div
+              class="shrink-0 w-8"
+              :title="
+                t(
+                  isFieldCleared(field.key)
+                    ? 'bulk-operations.keep-field'
+                    : 'bulk-operations.clear-field',
+                )
               "
-              :button-style="
-                isFieldCleared(field.key) ? 'accentNormal' : 'default'
-              "
-              button-size="verySmall"
-              @click="toggleBulkEditClearedField(formId, field.key)"
-            />
-          </div>
-        </div>
+            >
+              <BaseButtonNew
+                :data-cy="`bulk-edit-clear-${field.key}`"
+                :icon="
+                  isFieldCleared(field.key)
+                    ? DamsIcons.ArrowCircleLeft
+                    : DamsIcons.Trash
+                "
+                :button-style="
+                  isFieldCleared(field.key) ? 'accentNormal' : 'default'
+                "
+                button-size="verySmall"
+                @click="toggleBulkEditClearedField(formId, field.key)"
+              />
+            </div>
+          </template>
+        </metadata-wrapper>
         <p
           v-if="field.onlyForEntityTypes?.length && isBulkEditForm"
           class="text-xs text-text-body pt-1"
