@@ -505,7 +505,7 @@ describe("useBulkOperationsActionsBar", () => {
 
       const mockConfig = {
         typeModal: "DynamicForm" as any,
-        formQuery: "GetWorkCreateForm",
+        formQueries: ["GetWorkCreateForm"],
         formRelationType: "isWorkFor",
         askForCloseConfirmation: true,
         pageToNavigateToAfterCreation: BulkNavigationPages.DetailPage,
@@ -533,7 +533,7 @@ describe("useBulkOperationsActionsBar", () => {
 
       const mockConfig = {
         typeModal: "DynamicForm" as any,
-        formQuery: "GetWorkCreateForm",
+        formQueries: ["GetWorkCreateForm"],
         formRelationType: "isWorkFor",
         askForCloseConfirmation: true,
         pageToNavigateToAfterCreation: null,
@@ -667,7 +667,7 @@ describe("useBulkOperationsActionsBar", () => {
       const mockConfig = {
         typeModal: "TestModal" as any,
         formRelationType: "test-relation-type",
-        formQuery: "test-query",
+        formQueries: ["test-query"],
         askForCloseConfirmation: true,
       };
 
@@ -693,7 +693,7 @@ describe("useBulkOperationsActionsBar", () => {
         undefined,
         true,
         props.context,
-        { parentEntity: undefined },
+        { parentEntity: undefined, formQueries: ["test-query"] },
       );
     });
   });

@@ -294,11 +294,12 @@ export const useBulkOperationsActionsBar = (
       cancelLabel: t("confirm.bulk-mutation.cancel"),
     }).then(async (choice) => {
       if (choice !== "confirm") return;
-      if (!bulkOperationModalConfig.formQuery) return;
+      const mutationQuery = bulkOperationModalConfig.formQueries?.[0];
+      if (!mutationQuery) return;
       const selectedItems: InBulkProcessableItem[] = getEnqueuedItems(
         props.context,
       );
-      const document = await loadDocument(bulkOperationModalConfig.formQuery);
+      const document = await loadDocument(mutationQuery);
       await Promise.all(
         selectedItems.map((item) =>
           apolloClient.mutate({
@@ -365,7 +366,7 @@ export const useBulkOperationsActionsBar = (
     const initializerFunction = operationInitializers[operationType];
     if (initializerFunction) {
       initializerFunction();
-    } else if (bulkOperationModalConfig.formQuery) {
+    } else if (bulkOperationModalConfig.formQueries?.length) {
       initializeBulkMutationOperation(bulkOperationModalConfig);
     }
   };
@@ -456,7 +457,7 @@ export const useBulkOperationsActionsBar = (
     openModal(
       bulkOperationModalConfig.typeModal,
       determineModalStyle(operationType),
-      bulkOperationModalConfig.formQuery || undefined,
+      bulkOperationModalConfig.formQueries?.[0] || undefined,
       undefined,
       bulkOperationModalConfig.askForCloseConfirmation || undefined,
       getModalContextForOperation(operationType),

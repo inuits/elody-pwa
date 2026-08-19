@@ -74,7 +74,7 @@ describe("ActionMenuGroup", () => {
     },
     bulkOperationModal: {
       typeModal: TypeModals.DynamicForm,
-      formQuery: "GetForm",
+      formQueries: ["GetForm"],
       formRelationType: null,
       askForCloseConfirmation: true,
       neededPermission: Permission.Canupdate,
