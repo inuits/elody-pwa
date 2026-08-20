@@ -380,9 +380,6 @@ if (multilingual) {
 </style>
 
 <style scoped>
-/* Tint only the actual editor box (ProseMirror's own bordered/rounded
-   element), not the surrounding margins or the line-numbers gutter that
-   sit alongside it in the wrapper. */
 .locked-field :deep(.ProseMirror) {
   background: var(--color-background-normal) !important;
 }
