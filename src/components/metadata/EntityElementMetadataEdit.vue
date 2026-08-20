@@ -32,7 +32,7 @@
       :mode="formFlow"
       :form-id="formId"
       :auto-selectable="field.autoSelectable"
-      :disabled="field.disabled"
+      :disabled="fieldEditIsDisabled"
       :canCreateOption="field.canCreateEntityFromOption"
       :metadataKeyToCreateEntityFromOption="
         field.metadataKeyToCreateEntityFromOption
@@ -54,7 +54,7 @@
           ? 'single'
           : 'multi'
       "
-      :disabled="field.disabled"
+      :disabled="fieldEditIsDisabled"
       mode="edit"
     />
     <AdvancedDropdown

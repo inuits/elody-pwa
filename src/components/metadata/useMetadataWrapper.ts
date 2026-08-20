@@ -23,6 +23,7 @@ import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
 import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useFieldLock } from "@/composables/useFieldLock";
 import {
   getMultilingualProvideKey,
   type MultilingualFieldProvide,
@@ -85,6 +86,7 @@ export const useMetadataWrapper = (
   fieldValidationRules: ComputedRef<string>;
   fieldIsPermittedToBeSeenByUser: Ref<boolean>;
   fieldIsEditableByUser: Ref<boolean>;
+  fieldIsLocked: ComputedRef<boolean>;
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
   fieldErrorMessage: ComputedRef<string | undefined>;
@@ -109,6 +111,11 @@ export const useMetadataWrapper = (
       repeatablePanelConfig: props.repeatablePanelConfig,
     });
   };
+
+  const { isLocked: fieldIsLocked } = useFieldLock(
+    () => props.formId,
+    () => metadataKey,
+  );
 
   const { setExtraVariables, fetchAdvancedPermissions } = usePermissions();
 
@@ -316,6 +323,7 @@ export const useMetadataWrapper = (
     fieldValidationRules,
     fieldIsPermittedToBeSeenByUser,
     fieldIsEditableByUser,
+    fieldIsLocked,
     fieldValueProxy,
     fieldTooltipValue,
     fieldErrorMessage,

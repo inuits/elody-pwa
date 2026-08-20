@@ -15,11 +15,12 @@
       </h1>
     </div>
     <div v-else class="pl-2 py-2 flex gap-2 items-center">
-      <metadata-title :metadata="element" />
+      <metadata-title :metadata="element" :is-locked="isLocked" />
       <WYSIGYGVirtualKeyboard
         v-if="
           wysiwygElementConfiguration.virtualKeyboardLayouts &&
-          useEditHelper.isEdit
+          useEditHelper.isEdit &&
+          !isLocked
         "
         :editor="editor"
         :keyboardClass="element.metadataKey"
@@ -38,11 +39,20 @@
       v-if="editor"
       :data-wysiwyg-id="instanceId"
       ref="editorNode"
-      :class="['flex flex-col', { 'py-4': !displayInline }]"
+      data-testid="locked-field-view-container"
+      :class="[
+        'flex flex-col relative',
+        { 'py-4': !displayInline },
+        { 'locked-field': isLocked },
+      ]"
     >
+      <locked-field-indicator
+        :is-locked="isLocked"
+        :tooltip="element.lockedTooltip"
+      />
       <Transition>
         <WYSIWYGButtons
-          v-if="useEditHelper.isEdit"
+          v-if="useEditHelper.isEdit && !isLocked"
           :formId="formId"
           :editor="editor"
           :extensions="element.extensions"
@@ -118,6 +128,7 @@ import {
 } from "@/generated-types/queries";
 import { useI18n } from "vue-i18n";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useFieldLock } from "@/composables/useFieldLock";
 import { useEditMode } from "@/composables/useEdit";
 import { openDetailModal } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import {
@@ -125,6 +136,7 @@ import {
   type ElodyTaggingInstance,
 } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import LockedFieldIndicator from "@/components/metadata/LockedFieldIndicator.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import InlineTagSuggestionDropdown from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/InlineTagSuggestionDropdown.vue";
@@ -157,6 +169,11 @@ const {
 const { getForm, addEditableMetadataKeys } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
+
+const { isLocked } = useFieldLock(
+  () => props.formId,
+  () => props.element.metadataKey,
+);
 
 const instanceId = `${props.formId}-${props.element.metadataKey}`;
 const tagging = shallowRef<ElodyTaggingInstance | undefined>(undefined);
@@ -266,7 +283,7 @@ onMounted(async () => {
       },
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;
-        if (!useEditHelper.isEdit) {
+        if (!useEditHelper.isEdit || isLocked.value) {
           openDetailModal(node, tagging.value?.configuration?.value ?? []);
           return false;
         }
@@ -282,7 +299,7 @@ onMounted(async () => {
     parseOptions: {
       preserveWhitespace: true,
     },
-    editable: useEditHelper.isEdit,
+    editable: useEditHelper.isEdit && !isLocked.value,
     content: initialValue.value,
     onUpdate({ editor }) {
       if (isSwappingLocale.value) return;
@@ -311,9 +328,9 @@ onUnmounted(() => {
 });
 
 watch(
-  () => useEditHelper.isEdit,
-  (isEdit: boolean) => {
-    if (editor.value) editor.value.setEditable(isEdit);
+  [() => useEditHelper.isEdit, isLocked],
+  ([isEdit, locked]) => {
+    if (editor.value) editor.value.setEditable(isEdit && !locked);
   },
   { immediate: true },
 );
@@ -359,5 +376,14 @@ if (multilingual) {
 
 .tiptap p {
   @apply block m-0;
+}
+</style>
+
+<style scoped>
+/* Tint only the actual editor box (ProseMirror's own bordered/rounded
+   element), not the surrounding margins or the line-numbers gutter that
+   sit alongside it in the wrapper. */
+.locked-field :deep(.ProseMirror) {
+  background: var(--color-background-normal) !important;
 }
 </style>

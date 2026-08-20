@@ -26,7 +26,7 @@
       </template>
     </base-tooltip>
     <div
-      v-if="infoPanel?.content"
+      v-if="infoPanel?.content && !isLocked"
       data-testid="info-panel-trigger"
       class="cursor-pointer pl-1 text-text-light"
       @click="
@@ -55,10 +55,12 @@ const props = withDefaults(
     metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
     isFieldRequired?: boolean;
     isOneOfRequired?: boolean;
+    isLocked?: boolean;
   }>(),
   {
     isOneOfRequired: false,
     isFieldRequired: false,
+    isLocked: false,
   },
 );
 const { t } = useI18n();

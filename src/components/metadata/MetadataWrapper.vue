@@ -20,6 +20,7 @@
         :metadata="metadata"
         :is-field-required="isFieldRequired && isEdit"
         :is-one-of-required="isOneOfRequired && isEdit"
+        :is-locked="fieldIsLocked"
       />
       <MultilingualLocaleSelector :field-key="metadata.key" />
       <BaseVirtualKeyboard
@@ -36,7 +37,8 @@
         isEdit &&
         metadata.inputField &&
         !metadata.nonEditableField &&
-        fieldIsEditableByUser
+        fieldIsEditableByUser &&
+        !fieldIsLocked
       "
       class="flex items-center gap-2"
     >
@@ -71,19 +73,23 @@
         @click.stop.prevent
         @update:value="(value) => (fieldValueProxy = value)"
       />
-      <slot name="fieldAction" />
     </div>
     <div
-      v-if="
-        !(
-          isEdit &&
-          metadata.inputField &&
-          !metadata.nonEditableField &&
-          fieldIsEditableByUser
-        )
-      "
-      class="flex gap-2"
+      v-else
+      data-testid="locked-field-view-container"
+      class="relative flex gap-2"
+      :class="[
+        {
+          'locked-field p-1 bg-background-normal/70 rounded-md': fieldIsLocked,
+        },
+      ]"
     >
+      <locked-field-indicator
+        v-if="fieldIsLocked"
+        :is-locked="fieldIsLocked"
+        position="middle-right"
+        :tooltip="(metadata as any).lockedTooltip"
+      />
       <base-tooltip
         class="w-full basis-[fit-content]"
         position="right-end"
@@ -206,6 +212,7 @@
               </span>
               <entity-element-metadata
                 v-else
+                :class="{ 'pr-6': fieldIsLocked }"
                 :label="fieldLabel"
                 v-model:value="fieldValueProxy"
                 :link-text="metadata.linkText"
@@ -272,6 +279,7 @@ import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewM
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import LockedFieldIndicator from "@/components/metadata/LockedFieldIndicator.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
@@ -329,6 +337,7 @@ const {
   field,
   fieldIsPermittedToBeSeenByUser,
   fieldIsEditableByUser,
+  fieldIsLocked,
   fieldLabel,
   fieldKey,
   isFormatterField,
@@ -455,3 +464,17 @@ watch(
   { deep: true },
 );
 </script>
+
+<style scoped>
+@layer utilities {
+  .locked-field :deep(.multiselect),
+  .locked-field :deep(.multiselect-wrapper) {
+    background: var(--color-background-normal) !important;
+    border-width: 0 !important;
+  }
+
+  .locked-field :deep(.multiselect-search) {
+    background: var(--color-background-normal) !important;
+  }
+}
+</style>
