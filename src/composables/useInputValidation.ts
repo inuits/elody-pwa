@@ -97,24 +97,37 @@ export const useInputValidation = () => {
     }
   };
 
+  const _toRelationAmount = (
+    parameter: string | undefined,
+    fallback: number,
+  ): number => {
+    if (parameter === undefined || parameter.trim() === "") return fallback;
+    const amount = Number(parameter);
+    return Number.isFinite(amount) ? amount : fallback;
+  };
+
   const _getHasMinMaxAmountOfRelationsRule = (
     value: BaseRelationValuesInput[],
     parameters: string[],
   ): boolean => {
-    if (!Array.isArray(value)) {
-      return false;
-    }
-    const relations = value.filter(
-      (relation: BaseRelationValuesInput) =>
-        relation.editStatus !== EditStatus.Deleted,
+    const relations = Array.isArray(value)
+      ? value.filter(
+          (relation: BaseRelationValuesInput) =>
+            relation.editStatus !== EditStatus.Deleted,
+        )
+      : [];
+    const [relationType, min, max] =
+      parameters.length > 1 ? parameters : String(parameters[0]).split(":");
+    const specificRelationsLength = relations.filter(
+      (relation: BaseRelationValuesInput) => relation.type === relationType,
+    ).length;
+    const minAmount = _toRelationAmount(min, 0);
+    const maxAmount = _toRelationAmount(max, Infinity);
+    return (
+      specificRelationsLength >= minAmount &&
+      specificRelationsLength <= maxAmount
     );
-    const [relationType, min, max] = parameters[0].split(":");
-    const specificRelationsLength =
-      relations.filter(
-        (relation: BaseRelationValuesInput) => relation.type === relationType,
-      )?.length || 0;
-    return specificRelationsLength <= Number(max) && specificRelationsLength >= Number(min);
-  }
+  };
 
   const _getHasOneOfSpecificRelationsRule = (
     value: BaseRelationValuesInput[],
@@ -228,6 +241,7 @@ export const useInputValidation = () => {
 
   const __test__ = {
     _regexValidator,
+    _getHasMinMaxAmountOfRelationsRule,
   };
 
   return {

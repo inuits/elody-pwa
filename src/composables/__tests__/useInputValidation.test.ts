@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { useInputValidation } from "@/composables/useInputValidation";
+import { EditStatus, ValidationRules } from "@/generated-types/queries";
+import { validate } from "vee-validate";
 
 describe("useInputValidation", () => {
   const { extractValidationTranslationsFromAllTranslations } =
@@ -213,5 +215,128 @@ describe("useInputValidation - _regexValidator", () => {
         false,
       );
     });
+  });
+});
+
+describe("useInputValidation - _getHasMinMaxAmountOfRelationsRule", () => {
+  const { __test__ } = useInputValidation();
+  // vee-validate splits the rule params on commas, so the real call receives
+  // three params; the colon form stays supported for hand written rule strings.
+  const rule = (value: any, parameter: string) =>
+    __test__._getHasMinMaxAmountOfRelationsRule(value, parameter.split(","));
+
+  const relation = (
+    type: string,
+    editStatus: EditStatus = EditStatus.Unchanged,
+  ) => ({ key: `${type}-key`, type, editStatus });
+
+  it("treats an untouched field (no relations on the form) as zero relations", () => {
+    expect(rule(undefined, "refLabelGenres,0,1")).toBe(true);
+    expect(rule(null, "refLabelGenres,0,1")).toBe(true);
+    expect(rule([], "refLabelGenres,0,1")).toBe(true);
+  });
+
+  it("fails when a minimum is required and no relations are present", () => {
+    expect(rule(undefined, "refLabelGenres,1,2")).toBe(false);
+    expect(rule([], "refLabelGenres,1,2")).toBe(false);
+  });
+
+  it("accepts an amount of relations within the min/max range", () => {
+    expect(rule([relation("refLabelGenres")], "refLabelGenres,0,1")).toBe(true);
+    expect(
+      rule(
+        [relation("refLabelGenres"), relation("refLabelGenres")],
+        "refLabelGenres,1,2",
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects more relations than the maximum", () => {
+    expect(
+      rule(
+        [relation("refLabelGenres"), relation("refLabelGenres")],
+        "refLabelGenres,0,1",
+      ),
+    ).toBe(false);
+  });
+
+  it("does not count deleted relations", () => {
+    expect(
+      rule(
+        [
+          relation("refLabelGenres"),
+          relation("refLabelGenres", EditStatus.Deleted),
+        ],
+        "refLabelGenres,0,1",
+      ),
+    ).toBe(true);
+    expect(
+      rule(
+        [relation("refLabelGenres", EditStatus.Deleted)],
+        "refLabelGenres,1,1",
+      ),
+    ).toBe(false);
+  });
+
+  it("only counts relations of the configured type", () => {
+    expect(
+      rule(
+        [relation("refOtherGenres"), relation("refOtherGenres")],
+        "refLabelGenres,0,1",
+      ),
+    ).toBe(true);
+    expect(rule([relation("refOtherGenres")], "refLabelGenres,1,1")).toBe(
+      false,
+    );
+  });
+
+  it("falls back to sane bounds when min or max is not a number", () => {
+    expect(rule([relation("refLabelGenres")], "refLabelGenres,,")).toBe(true);
+    expect(rule([], "refLabelGenres,,")).toBe(true);
+    expect(
+      rule([relation("refLabelGenres")], "refLabelGenres,0,notANumber"),
+    ).toBe(true);
+  });
+
+  it("reports the configured bounds in the failure message", async () => {
+    const { initializeInputValidation } = useInputValidation();
+    initializeInputValidation({
+      en: {
+        "input-validation": {
+          messages: {
+            _default: "{field} is niet geldig",
+            has_min_max_amount_of_relations:
+              "{field} moet tussen 1:{min} en 2:{max} relaties bevatten",
+          },
+        },
+      },
+    });
+
+    const result = await validate(
+      [relation("refLabelGenres"), relation("refLabelGenres")],
+      `no_xss|${ValidationRules.HasMinMaxAmountOfRelations}:refLabelGenres,0,1`,
+      { name: "Genre op etiket" },
+    );
+
+    expect(result.valid).toBe(false);
+    expect(result.errors[0]).toBe(
+      "Genre op etiket moet tussen 0 en 1 relaties bevatten",
+    );
+  });
+
+  it("also accepts a single colon separated param", () => {
+    const colonRule = (value: any, parameter: string) =>
+      __test__._getHasMinMaxAmountOfRelationsRule(value, [parameter]);
+
+    expect(colonRule(undefined, "refLabelGenres:0:1")).toBe(true);
+    expect(colonRule([relation("refLabelGenres")], "refLabelGenres:0:1")).toBe(
+      true,
+    );
+    expect(
+      colonRule(
+        [relation("refLabelGenres"), relation("refLabelGenres")],
+        "refLabelGenres:0:1",
+      ),
+    ).toBe(false);
   });
 });

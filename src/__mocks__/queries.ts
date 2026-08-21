@@ -3278,6 +3278,19 @@ export type RequiredOneOfRelationValidationInput = {
   relationTypes: Array<Scalars['String']>;
 };
 
+export type MinMaxAmountOfRelationsValidation = {
+  __typename?: 'MinMaxAmountOfRelationsValidation';
+  max: Scalars['Int'];
+  min: Scalars['Int'];
+  relationType: Scalars['String'];
+};
+
+export type MinMaxAmountOfRelationsValidationInput = {
+  max: Scalars['Int'];
+  min: Scalars['Int'];
+  relationType: Scalars['String'];
+};
+
 export type RequiredRelationValidation = {
   __typename?: 'RequiredRelationValidation';
   amount: Scalars['Int'];
@@ -3770,6 +3783,7 @@ export type Validation = {
   available_if?: Maybe<Conditional>;
   customValue?: Maybe<Scalars['String']>;
   fastValidationMessage?: Maybe<Scalars['String']>;
+  has_min_max_amount_of_relations?: Maybe<MinMaxAmountOfRelationsValidation>;
   has_one_of_required_metadata?: Maybe<RequiredOneOfMetadataValidation>;
   has_one_of_required_relations?: Maybe<RequiredOneOfRelationValidation>;
   has_required_relation?: Maybe<RequiredRelationValidation>;
@@ -3791,6 +3805,7 @@ export type ValidationInput = {
   available_if?: InputMaybe<ConditionalInput>;
   customValue?: InputMaybe<Scalars['String']>;
   fastValidationMessage?: InputMaybe<Scalars['String']>;
+  has_min_max_amount_of_relations?: InputMaybe<MinMaxAmountOfRelationsValidationInput>;
   has_one_of_required_metadata?: InputMaybe<RequiredOneOfMetadataValidationInput>;
   has_one_of_required_relations?: InputMaybe<RequiredOneOfRelationValidationInput>;
   has_required_relation?: InputMaybe<RequiredRelationValidationInput>;
@@ -3807,10 +3822,13 @@ export enum ValidationRules {
   CustomValue = 'customValue',
   Email = 'email',
   ExistingDate = 'existing_date',
+  HasMinMaxAmountOfRelations = 'has_min_max_amount_of_relations',
   HasOneOfRequiredMetadata = 'has_one_of_required_metadata',
   HasOneOfRequiredRelations = 'has_one_of_required_relations',
   HasRequiredRelation = 'has_required_relation',
   MaxDateToday = 'max_date_today',
+  NoXss = 'no_xss',
+  Numeric = 'numeric',
   Regex = 'regex',
   Required = 'required',
   Url = 'url'
