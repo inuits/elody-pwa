@@ -3,7 +3,7 @@
     v-if="isLocked"
     data-testid="locked-field-indicator"
     :class="[
-      'absolute right-2 z-10 pointer-events-auto',
+      'absolute right-1 z-10 pointer-events-auto',
       position === 'middle-right' ? 'top-1/2 -translate-y-1/2' : 'top-1',
     ]"
   >

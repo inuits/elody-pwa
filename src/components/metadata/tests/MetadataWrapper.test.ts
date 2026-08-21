@@ -23,6 +23,7 @@ vi.mock("@/main", () => ({
 
 import MetadataWrapper from "../MetadataWrapper.vue";
 import { InputFieldTypes } from "@/generated-types/queries";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 const uniconStub = {
   template: "<div></div>",
@@ -59,9 +60,9 @@ const editStub = {
   ],
 };
 
-// "title" is in useFieldLock's current hardcoded lockedProperties list, so it
-// reliably resolves to locked regardless of the (separately broken, see
-// useFieldLock.ts) form-driven logic.
+// useFieldLock resolves a field as locked when its key is present in the
+// entity form's intialValues.lockedProperties. The harness below registers
+// "title" as locked so metadata keyed "title" reliably resolves to locked.
 const buildProps = (key: string, isEdit: boolean) => ({
   formId: "MW-TEST",
   isEdit,
@@ -84,7 +85,10 @@ const buildProps = (key: string, isEdit: boolean) => ({
 const mountWrapper = async (props: ReturnType<typeof buildProps>) => {
   const Harness = defineComponent({
     setup() {
-      useForm();
+      const form = useForm({
+        initialValues: { intialValues: { lockedProperties: ["title"] } },
+      });
+      useFormHelper().addForm(props.formId, form);
       defineRule("no_xss", () => true);
       return () => h(MetadataWrapper, props as any);
     },
