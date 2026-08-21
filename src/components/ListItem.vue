@@ -157,7 +157,7 @@
         >
           <template #default="{ localizedMetadata }">
             <ReadOnlyMetadataWrapper
-              v-if="!useEditHelper.isEdit && !metadataItem?.inputField"
+              v-if="!useEditHelper.isEdit || !metadataItem?.inputField"
               :form-id="formId || 'listview'"
               :metadata="(localizedMetadata || metadataItem) as MetadataField"
               :is-edit="useEditHelper.isEdit"

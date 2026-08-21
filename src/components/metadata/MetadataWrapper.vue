@@ -73,9 +73,18 @@
         @click.stop.prevent
         @update:value="(value) => (fieldValueProxy = value)"
       />
+      <slot name="fieldAction" />
     </div>
     <div
-      v-else
+      v-if="
+        !(
+          isEdit &&
+          metadata.inputField &&
+          !metadata.nonEditableField &&
+          fieldIsEditableByUser &&
+          !fieldIsLocked
+        )
+      "
       data-testid="locked-field-view-container"
       class="relative flex gap-2"
       :class="[
