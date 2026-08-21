@@ -57,4 +57,10 @@ watch(
 );
 </script>
 
-<style scoped></style>
+<style>
+[data-cy="sanitized-value"] mark {
+  background: none;
+  color: inherit;
+  font-weight: bold;
+}
+</style>

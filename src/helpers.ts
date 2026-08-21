@@ -914,6 +914,7 @@ const BASE_ALLOWED_TAGS = [
   "br",
   "b",
   "i",
+  "mark",
 ];
 
 /**

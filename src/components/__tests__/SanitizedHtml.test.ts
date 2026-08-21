@@ -108,6 +108,19 @@ describe("Allowed formatting tags", () => {
       "<sup>1</sup>",
     );
   });
+
+  it("preserves <mark> for search highlights", async () => {
+    const wrapper = mount(SanitizedHtml, {
+      props: {
+        content: "<p>l <mark>dd</mark>t w</p>",
+        mode: SanitizeMode.Html,
+      },
+    });
+    await nextTick();
+    expect(wrapper.find("[data-cy='sanitized-value']").html()).toContain(
+      "<mark>dd</mark>",
+    );
+  });
 });
 
 describe("XSS Security", () => {
