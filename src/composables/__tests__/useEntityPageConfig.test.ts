@@ -187,6 +187,30 @@ describe("useEntityPageConfig", () => {
     });
   });
 
+  describe("jobStatusPolling", () => {
+    it("returns false when not configured", () => {
+      const config: EntityPageConfig = {
+        production: { actions: [] },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { jobStatusPolling } = useEntityPageConfig();
+
+      expect(jobStatusPolling.value).toBe(false);
+    });
+
+    it("returns true when configured as true", () => {
+      const config: EntityPageConfig = {
+        production: { jobStatusPolling: true },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { jobStatusPolling } = useEntityPageConfig();
+
+      expect(jobStatusPolling.value).toBe(true);
+    });
+  });
+
   describe("deleteButton", () => {
     it("returns undefined when not configured", () => {
       const config: EntityPageConfig = {

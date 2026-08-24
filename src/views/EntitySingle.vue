@@ -74,6 +74,7 @@ import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useJobStatusPolling } from "@/composables/useJobStatusPolling";
 import { useSeenItems } from "@/composables/useSeenItems";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import EditModal from "@/components/modals/EditModal.vue";
@@ -83,7 +84,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const { trackSeen } = useEntityPageConfig();
+const { trackSeen, jobStatusPolling } = useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
@@ -146,6 +147,13 @@ const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
     fetchPolicy: "no-cache",
   }),
 );
+
+useJobStatusPolling({
+  enabled: jobStatusPolling,
+  entityId: id,
+  entityType,
+  onJobCompleted: () => refetch(queryVariables),
+});
 
 const columnList = ref<ColumnList | "no-values">("no-values");
 const permissionToEdit = ref<boolean>();

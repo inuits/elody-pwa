@@ -90,6 +90,7 @@ export type EntityConfig = {
   hasEditMetadataButton?: boolean;
   deleteButton?: EntityButtonConfig | ToggleEntityButtonConfig | false;
   trackSeen?: boolean;
+  jobStatusPolling?: boolean;
 };
 
 export type EntityPageConfig = Record<string, EntityConfig>;
