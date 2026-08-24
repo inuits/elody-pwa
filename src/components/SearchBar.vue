@@ -33,18 +33,21 @@
 
 <script lang="ts" setup>
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
-import { computed, inject, ref, useId } from "vue";
+import { computed, inject, onUnmounted, ref, useId, watch } from "vue";
+import debounce from "lodash.debounce";
 import { Unicons } from "@/types";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     inputEnabled?: boolean;
+    debounceMs?: number;
   }>(),
   {
     inputEnabled: false,
+    debounceMs: 250,
   },
 );
 
@@ -63,7 +66,19 @@ const virtualKeyboardLayouts = computed(
 
 const keyboardClass = `virtual-keyboard-search-${useId()}`;
 
+const debouncedSearch = debounce(
+  (term: string) => emit("search", term),
+  props.debounceMs,
+);
+
+watch(inputValue, (term) => {
+  if (props.inputEnabled) debouncedSearch(term);
+});
+
+onUnmounted(() => debouncedSearch.cancel());
+
 const submitSearch = () => {
+  debouncedSearch.cancel();
   emit("search", inputValue.value);
 };
 
