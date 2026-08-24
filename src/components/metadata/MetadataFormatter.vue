@@ -10,8 +10,8 @@
   <MetadataFormatterPill
     v-if="formatterType === CustomFormatterTypes.Pill && hasLabel"
     :formatter="formatter"
-    :label="pillLabel"
-    :translation-key="pillTranslationKey"
+    :label="label"
+    :translation-key="translationKey"
   />
   <MetadataRegexpFormatter
     v-if="formatterType === CustomFormatterTypes.RegexpMatch && hasLabel"
@@ -79,15 +79,4 @@ const readableLabel = computed(() => {
     ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
     : "-";
 });
-
-// A single-value pill translates its own display value from translationKey, so it needs
-// the raw (untranslated) value to look up its colors by. An array can only be translated
-// per element, which the pill cannot do on a joined string — hand it the finished text.
-const pillLabel = computed(() =>
-  Array.isArray(props.label) ? readableLabel.value : props.label,
-);
-
-const pillTranslationKey = computed(() =>
-  Array.isArray(props.label) ? undefined : props.translationKey,
-);
 </script>

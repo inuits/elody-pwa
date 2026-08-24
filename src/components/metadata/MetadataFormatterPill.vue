@@ -1,19 +1,24 @@
 <template>
-  <div
-    :class="[
-      size === 'lg' ? 'text-lg' : 'text-sm',
-      {
-        'rounded-md bg-slate-800 border border-transparent': pillSettings,
-        'py-0.25 px-1 mt-1': pillSettings && size !== 'lg',
-        'py-1 px-3': pillSettings && size === 'lg',
-      },
-    ]"
-    :style="{
-      background: pillSettings?.background,
-      color: pillSettings?.text,
-    }"
-  >
-    {{ displayValue }}
+  <div class="flex flex-wrap items-center gap-1">
+    <div
+      v-for="value in values"
+      :key="value"
+      :class="[
+        size === 'lg' ? 'text-lg' : 'text-sm',
+        {
+          'rounded-md bg-slate-800 border border-transparent':
+            settingsFor(value),
+          'py-0.25 px-1 mt-1': settingsFor(value) && size !== 'lg',
+          'py-1 px-3': settingsFor(value) && size === 'lg',
+        },
+      ]"
+      :style="{
+        background: settingsFor(value)?.background,
+        color: settingsFor(value)?.text,
+      }"
+    >
+      {{ displayValue(value) }}
+    </div>
   </div>
 </template>
 
@@ -25,7 +30,7 @@ import { useI18n } from "vue-i18n";
 const props = withDefaults(
   defineProps<{
     formatter: string;
-    label: string;
+    label: string | string[];
     translationKey?: string;
     size?: "sm" | "lg";
   }>(),
@@ -37,25 +42,26 @@ const props = withDefaults(
 
 const { t } = useI18n();
 
-const pillSettings = computed(() => {
-  const [formatterType, pillTypeInit] = props.formatter.split("|");
-  let pillType = pillTypeInit;
-  if (pillType === "auto") {
+// Every value gets its own pill: one pill cannot carry two colours, and a
+// joined string has no entry in formattersSettings to look up.
+const values = computed<string[]>(() =>
+  (Array.isArray(props.label) ? props.label : [props.label]).filter(Boolean),
+);
+
+// Colours are keyed on the raw value, never on the translated display text —
+// "medewerker" has no entry, its raw value "member" does.
+const settingsFor = (value: string) => {
+  const [formatterType, configuredPillType] = props.formatter.split("|");
+  if (configuredPillType === "auto")
     return { background: "#6DBBDE", text: "#FFFFFF" };
-  } else {
-    if (!pillType) pillType = props.label.toLowerCase();
-    return formattersSettings[formatterType][pillType];
-  }
-});
+  const pillType = configuredPillType || value.toLowerCase();
+  return formattersSettings[formatterType]?.[pillType];
+};
 
-const displayValue = computed(() => {
-  if (props.translationKey) {
-    const key = props.translationKey;
-    const normalizedTranslationKey = key.replace("$value", String(props.label));
-    const translated = t(normalizedTranslationKey);
-    if (translated !== normalizedTranslationKey) return translated;
-  }
-
-  return props.label;
-});
+const displayValue = (value: string): string => {
+  if (!props.translationKey) return value;
+  const key = props.translationKey.replace("$value", value);
+  const translated = t(key);
+  return translated !== key ? translated : value;
+};
 </script>

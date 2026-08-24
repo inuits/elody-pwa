@@ -21,7 +21,7 @@ vi.mock("vue-i18n", () => ({
 
 describe("MetadataFormatter", () => {
   describe("translateArrayValuesAndJoin", () => {
-    it("translates each array element and joins with comma", async () => {
+    it("translates each array element into its own pill", async () => {
       mocks.t.mockImplementation((key: string) => {
         const translations: Record<string, string> = {
           "metadata.labels.user-function.programmer": "Programmator",
@@ -38,7 +38,7 @@ describe("MetadataFormatter", () => {
         },
       });
       await nextTick();
-      expect(wrapper.text()).toBe("Programmator, Technieker");
+      expect(wrapper.text()).toBe("ProgrammatorTechnieker");
     });
 
     it("falls back to raw value when translation key has no match", async () => {
@@ -52,10 +52,10 @@ describe("MetadataFormatter", () => {
         },
       });
       await nextTick();
-      expect(wrapper.text()).toBe("programmer, technician");
+      expect(wrapper.text()).toBe("programmertechnician");
     });
 
-    it("joins raw values without translation when no translationKey", async () => {
+    it("renders one pill per raw value when no translationKey", async () => {
       const wrapper = mount(MetadataFormatter, {
         props: {
           formatter: "pill",
@@ -63,7 +63,7 @@ describe("MetadataFormatter", () => {
         },
       });
       await nextTick();
-      expect(wrapper.text()).toBe("programmer, technician");
+      expect(wrapper.text()).toBe("programmertechnician");
     });
 
     it("passes the raw value to a single-value pill so it can look up its colors", async () => {
@@ -94,6 +94,30 @@ describe("MetadataFormatter", () => {
       });
       await nextTick();
       expect(wrapper.text()).toBe("-");
+    });
+
+    // The colour lookup keys on the raw value, so a translated display value
+    // must not be what reaches the pill.
+    it("hands the pill the raw array values, not the translated text", async () => {
+      mocks.t.mockImplementation((key: string) =>
+        key === "metadata.labels.user-role.member" ? "medewerker" : key,
+      );
+
+      const wrapper = mount(MetadataFormatter, {
+        props: {
+          formatter: "pill",
+          label: ["member"],
+          translationKey: "metadata.labels.user-role.$value",
+        },
+      });
+      await nextTick();
+
+      const pill = wrapper.findComponent({ name: "MetadataFormatterPill" });
+      expect(pill.props("label")).toEqual(["member"]);
+      expect(pill.props("translationKey")).toBe(
+        "metadata.labels.user-role.$value",
+      );
+      expect(wrapper.text()).toBe("medewerker");
     });
   });
 });
