@@ -133,4 +133,25 @@ describe("ViewModesTable", () => {
       expect(wrapper.vm.processedEntities[1].memoKey).toContain(false);
     });
   });
+
+  describe("row loading state", () => {
+    // A refetch returning deep-equal results keeps the same entity objects, so
+    // nothing else in the memo key changes and the rows would never be patched.
+    it("stops pulsing the rows when a refetch over identical entities finishes", async () => {
+      const entities = [{ id: "entity1" }, { id: "entity2" }];
+      const wrapper = shallowMount(ViewModesTable, {
+        props: { entities, entitiesLoading: true } as any,
+      });
+      await flushPromises();
+
+      const rowIsLoading = () =>
+        wrapper.findComponent({ name: "TableViewRow" }).props("loading");
+      expect(rowIsLoading()).toBe(true);
+
+      await wrapper.setProps({ entities, entitiesLoading: false } as any);
+      await flushPromises();
+
+      expect(rowIsLoading()).toBe(false);
+    });
+  });
 });

@@ -223,4 +223,33 @@ describe("ListItem", () => {
       expect(metadataItems[0].attributes("style")).toBeFalsy();
     });
   });
+
+  describe("loading state", () => {
+    it("stops pulsing once the parent finished loading, even when a context menu action toggled loading around the fetch", async () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...defaultProps, loading: false },
+      });
+
+      // action starts -> toggle on, parent refetch -> loading, fetch resolves,
+      // action's finally -> toggle off
+      wrapper.vm.toggleLoading();
+      await wrapper.setProps({ loading: true });
+      await wrapper.setProps({ loading: false });
+      wrapper.vm.toggleLoading();
+      await wrapper.vm.$nextTick();
+
+      expect(
+        wrapper.find("[data-cy='list-item']").classes(),
+      ).not.toContain("animate-pulse");
+    });
+
+    it("pulses while the parent is loading", async () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...defaultProps, loading: true },
+      });
+      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+        "animate-pulse",
+      );
+    });
+  });
 });

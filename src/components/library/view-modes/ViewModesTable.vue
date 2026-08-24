@@ -310,6 +310,9 @@ const processedEntities = computed(() => {
       isDisabled,
       isSeen,
       previewEnabled,
+      // rows bind :loading to entitiesLoading, so it has to invalidate the memo
+      // or a refetch returning identical data leaves them pulsing forever
+      props.entitiesLoading,
     ];
 
     return {

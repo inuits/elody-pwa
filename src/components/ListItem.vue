@@ -395,7 +395,10 @@ const { trackSeen } = useEntityPageConfig();
 const { isItemSeen } = useSeenItems();
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-const loading = ref<boolean>(props.loading);
+// Context menu actions and the parent's fetch state both drive the loading
+// look; keep them separate so a refetch finishing can't leave the item stuck.
+const actionLoading = ref<boolean>(false);
+const loading = computed<boolean>(() => props.loading || actionLoading.value);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
@@ -449,7 +452,7 @@ onUpdated(() => {
 });
 
 const toggleLoading = () => {
-  loading.value = !loading.value;
+  actionLoading.value = !actionLoading.value;
 };
 
 const setNoImage = (value: boolean = true) => {
@@ -518,13 +521,6 @@ const isActiveListItem = computed<boolean>(() => {
 watch(
   () => useEditHelper.isEdit,
   (isEdit: boolean) => (!isEdit ? (isMarkedAsToBeDeleted.value = false) : ""),
-);
-
-watch(
-  () => props.loading,
-  (val) => {
-    loading.value = val;
-  },
 );
 
 watch(
