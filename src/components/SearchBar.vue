@@ -9,6 +9,14 @@
         :placeholder="t('search.search-placeholder')"
         @keydown.enter="submitSearch"
       />
+      <BaseVirtualKeyboard
+        v-if="inputEnabled && virtualKeyboardLayouts"
+        class="flex items-center pr-2"
+        :input="inputValue"
+        :layouts="virtualKeyboardLayouts"
+        :keyboard-class="keyboardClass"
+        @on-change="inputValue = $event"
+      />
     </div>
     <button
       type="button"
@@ -25,8 +33,9 @@
 
 <script lang="ts" setup>
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
-import { ref } from "vue";
+import { computed, inject, ref, useId } from "vue";
 import { Unicons } from "@/types";
+import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
@@ -45,7 +54,14 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { openModal } = useBaseModal();
+const config = inject<any>("config", undefined);
 const inputValue = ref<string>("");
+
+const virtualKeyboardLayouts = computed(
+  () => config?.features?.simpleSearch?.virtualKeyboardLayouts ?? null,
+);
+
+const keyboardClass = `virtual-keyboard-search-${useId()}`;
 
 const submitSearch = () => {
   emit("search", inputValue.value);
