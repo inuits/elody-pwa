@@ -144,11 +144,15 @@
           teaserMetadataStyle,
           idx < 1 && teaserMetadata[0]?.value?.formatter
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
-            : props.multiLine ? '' : 'w-full', // all others stay full width unless multiLine grid handles sizing
+            : props.multiLine
+              ? ''
+              : 'w-full', // all others stay full width unless multiLine grid handles sizing
         ]"
-        :style="metadataItem.colSpan && props.multiLine
-          ? { gridColumn: `span ${metadataItem.colSpan}` }
-          : {}"
+        :style="
+          metadataItem.colSpan && props.multiLine
+            ? { gridColumn: `span ${metadataItem.colSpan}` }
+            : {}
+        "
       >
         <MultilingualWrapper
           :metadata="metadataItem"
@@ -395,8 +399,6 @@ const { trackSeen } = useEntityPageConfig();
 const { isItemSeen } = useSeenItems();
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-// Context menu actions and the parent's fetch state both drive the loading
-// look; keep them separate so a refetch finishing can't leave the item stuck.
 const actionLoading = ref<boolean>(false);
 const loading = computed<boolean>(() => props.loading || actionLoading.value);
 const isMarkedAsToBeDeleted = ref<boolean>(false);
