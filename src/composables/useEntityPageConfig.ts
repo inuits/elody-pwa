@@ -53,10 +53,15 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.trackSeen === true,
   );
 
+  const jobStatusPolling = computed<boolean>(
+    () => entityConfig.value?.jobStatusPolling === true,
+  );
+
   return {
     actions,
     hasEditMetadataButton,
     deleteButton,
     trackSeen,
+    jobStatusPolling,
   };
 };
