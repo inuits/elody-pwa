@@ -74,19 +74,20 @@
         />
       </span>
     </div>
-    <div
-      class="h-full @container/wrapper-content"
-      v-if="!useVshowInsteadOfVif && !isCollapsed"
-    >
-      <slot name="content"></slot>
-    </div>
-    <div
-      class="h-full @container/wrapper-content"
-      v-if="useVshowInsteadOfVif"
-      v-show="!isCollapsed"
-    >
-      <slot name="content"></slot>
-    </div>
+    <transition name="collapse">
+      <div v-if="!useVshowInsteadOfVif && !isCollapsed">
+        <div class="h-full min-h-0 @container/wrapper-content">
+          <slot name="content"></slot>
+        </div>
+      </div>
+    </transition>
+    <transition name="collapse">
+      <div v-if="useVshowInsteadOfVif" v-show="!isCollapsed">
+        <div class="h-full min-h-0 @container/wrapper-content">
+          <slot name="content"></slot>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -128,3 +129,21 @@ const isPreviewElement: boolean = inject("IsPreviewElement", false);
 
 const { t } = useI18n();
 </script>
+
+<style scoped>
+/* Animate the real layout height so collapsing is as smooth as expanding.
+   overflow is only hidden while animating, otherwise dropdowns inside the
+   content get clipped. */
+.collapse-enter-active,
+.collapse-leave-active {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transition: grid-template-rows 200ms ease-out;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  grid-template-rows: 0fr;
+}
+</style>
