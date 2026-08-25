@@ -339,16 +339,28 @@ const goBack = () => {
 
 const isCommitting = ref(false);
 
+const commitFailureText = (error: any): string =>
+  error?.graphQLErrors?.[0]?.extensions?.response?.body?.message ||
+  error?.message ||
+  "repetitiveForm.finish-failed-description";
+
 const onFinish = async () => {
   if (isCommitting.value) return;
   const hostEntityId = getEntityUuid() || getEntityIdFromRoute();
-  isCommitting.value = true;
-  try {
-    await store.commitPendingHostRelations(hostEntityId ?? "");
-  } catch {
+  if (!hostEntityId) {
     displayErrorNotification(
       "repetitiveForm.finish-failed-title",
       "repetitiveForm.finish-failed-description",
+    );
+    return;
+  }
+  isCommitting.value = true;
+  try {
+    await store.commitPendingHostRelations(hostEntityId);
+  } catch (error: any) {
+    displayErrorNotification(
+      "repetitiveForm.finish-failed-title",
+      commitFailureText(error),
     );
     isCommitting.value = false;
     return;

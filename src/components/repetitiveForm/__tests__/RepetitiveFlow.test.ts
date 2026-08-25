@@ -9,9 +9,10 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useModalActions } from "@/composables/useModalActions";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
 
+const routeMocks = vi.hoisted(() => ({ id: "org-1" as string | undefined }));
 vi.mock("vue-router", () => ({
   useRouter: () => ({}),
-  useRoute: () => ({ params: { id: "org-1" } }),
+  useRoute: () => ({ params: { id: routeMocks.id } }),
 }));
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
@@ -43,6 +44,14 @@ vi.mock("@/composables/useConfirmModal", () => ({
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({}),
 }));
+const notificationMocks = vi.hoisted(() => ({
+  displayErrorNotification: vi.fn(),
+}));
+vi.mock("@/composables/useBaseNotification", () => ({
+  useBaseNotification: () => ({
+    displayErrorNotification: notificationMocks.displayErrorNotification,
+  }),
+}));
 vi.mock("@/components/repetitiveForm/RepetitiveStepModal.vue", () => ({
   default: {
     name: "RepetitiveStepModal",
@@ -54,7 +63,13 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepModal.vue", () => ({
 vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
   default: {
     name: "RepetitiveStepField",
-    props: ["step", "scopeFilter", "skipSearch", "createPrefill", "pickerParentUuid"],
+    props: [
+      "step",
+      "scopeFilter",
+      "skipSearch",
+      "createPrefill",
+      "pickerParentUuid",
+    ],
     emits: ["selected", "created", "metadataSubmitted"],
     template: "<div data-testid='step-field'><slot name='actions' /></div>",
   },
@@ -70,7 +85,12 @@ vi.mock("@/components/repetitiveForm/RepetitiveOverview.vue", () => ({
 vi.mock("@/components/dynamicForms/DynamicForm.vue", () => ({
   default: {
     name: "DynamicForm",
-    props: ["dynamicFormQuery", "router", "prefilledFormValues", "emitEntityCreated"],
+    props: [
+      "dynamicFormQuery",
+      "router",
+      "prefilledFormValues",
+      "emitEntityCreated",
+    ],
     emits: ["entityCreated"],
     template: "<div data-testid='dynamic-form-stub' />",
   },
@@ -92,7 +112,13 @@ const omnibusConfig = () => ({
       createForm: "GetExpressionCreationForm",
       scopeToRelationOf: { step: "work", relationType: "refWork" },
       skipSearchIfPriorIsNew: true,
-      relations: [{ to: "work", relationType: "refWork", createWhen: RepetitiveRelationTrigger.OnCreate }],
+      relations: [
+        {
+          to: "work",
+          relationType: "refWork",
+          createWhen: RepetitiveRelationTrigger.OnCreate,
+        },
+      ],
     },
   ],
   finalize: {
@@ -100,7 +126,11 @@ const omnibusConfig = () => ({
     entityType: Entitytyping.Manifestation,
     createForm: "GetManifestationCreationForm",
     relations: [
-      { toAllOf: "expression", relationType: "refExpressions", createWhen: RepetitiveRelationTrigger.OnFinalize },
+      {
+        toAllOf: "expression",
+        relationType: "refExpressions",
+        createWhen: RepetitiveRelationTrigger.OnFinalize,
+      },
     ],
   },
 });
@@ -117,10 +147,14 @@ const getWrapper = () =>
     },
   });
 
-const field = (w: ReturnType<typeof getWrapper>) => w.findComponent({ name: "RepetitiveStepField" });
-const overview = (w: ReturnType<typeof getWrapper>) => w.findComponent({ name: "RepetitiveOverview" });
-const form = (w: ReturnType<typeof getWrapper>) => w.findComponent({ name: "DynamicForm" });
-const modal = (w: ReturnType<typeof getWrapper>) => w.findComponent({ name: "RepetitiveStepModal" });
+const field = (w: ReturnType<typeof getWrapper>) =>
+  w.findComponent({ name: "RepetitiveStepField" });
+const overview = (w: ReturnType<typeof getWrapper>) =>
+  w.findComponent({ name: "RepetitiveOverview" });
+const form = (w: ReturnType<typeof getWrapper>) =>
+  w.findComponent({ name: "DynamicForm" });
+const modal = (w: ReturnType<typeof getWrapper>) =>
+  w.findComponent({ name: "RepetitiveStepModal" });
 
 const startBranch = async (w: ReturnType<typeof getWrapper>) => {
   overview(w).vm.$emit("add-another");
@@ -166,7 +200,9 @@ describe("RepetitiveFlow", () => {
   it("shows the back button by default (no showBackButton on the step)", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
-    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(true);
+    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(
+      true,
+    );
   });
 
   it("hides the back button when the step sets showBackButton: false", async () => {
@@ -198,7 +234,9 @@ describe("RepetitiveFlow", () => {
     });
     await startBranch(wrapper);
     expect(field(wrapper).props("step").key).toBe("work");
-    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(false);
+    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(
+      false,
+    );
   });
 
   it("titles the modal with the step counter while in a step", async () => {
@@ -211,7 +249,9 @@ describe("RepetitiveFlow", () => {
 
   it("renders a numbered step strip with step labels during a step", async () => {
     const wrapper = getWrapper();
-    expect(wrapper.find("[data-testid='repetitive-flow-steps']").exists()).toBe(false);
+    expect(wrapper.find("[data-testid='repetitive-flow-steps']").exists()).toBe(
+      false,
+    );
     await startBranch(wrapper);
     const strip = wrapper.find("[data-testid='repetitive-flow-steps']");
     expect(strip.text()).toContain("repetitiveForm.step-work");
@@ -278,11 +318,15 @@ describe("RepetitiveFlow", () => {
     overview(wrapper).vm.$emit("finish");
     await flushPromises();
     expect(form(wrapper).exists()).toBe(true);
-    expect(form(wrapper).props("dynamicFormQuery")).toBe("GetManifestationCreationForm");
+    expect(form(wrapper).props("dynamicFormQuery")).toBe(
+      "GetManifestationCreationForm",
+    );
     expect(form(wrapper).props("emitEntityCreated")).toBe(true);
     expect(form(wrapper).props("prefilledFormValues")).toEqual({
       relationValues: {
-        refExpressions: [{ key: "expr-1", type: "refExpressions", editStatus: "new" }],
+        refExpressions: [
+          { key: "expr-1", type: "refExpressions", editStatus: "new" },
+        ],
       },
       intialValues: {},
     });
@@ -386,20 +430,37 @@ const linearConfig = () => ({
   linear: true,
   routeToStep: "work",
   steps: [
-    { key: "work", label: "repetitiveForm.step-work", entityType: Entitytyping.Work, createForm: "GetWorkForm" },
+    {
+      key: "work",
+      label: "repetitiveForm.step-work",
+      entityType: Entitytyping.Work,
+      createForm: "GetWorkForm",
+    },
     {
       key: "expression",
       label: "repetitiveForm.step-expression",
       entityType: Entitytyping.Expression,
       createForm: "GetExpressionForm",
-      relations: [{ to: "work", relationType: "refWork", createWhen: RepetitiveRelationTrigger.Always }],
+      relations: [
+        {
+          to: "work",
+          relationType: "refWork",
+          createWhen: RepetitiveRelationTrigger.Always,
+        },
+      ],
     },
     {
       key: "manifestation",
       label: "repetitiveForm.step-manifestation",
       entityType: Entitytyping.Manifestation,
       createForm: "GetManifestationForm",
-      relations: [{ to: "expression", relationType: "refExpressions", createWhen: RepetitiveRelationTrigger.Always }],
+      relations: [
+        {
+          to: "expression",
+          relationType: "refExpressions",
+          createWhen: RepetitiveRelationTrigger.Always,
+        },
+      ],
     },
   ],
 });
@@ -497,7 +558,10 @@ describe("RepetitiveFlow — linear mode", () => {
     await flushPromises();
     expect(field(wrapper).props("step").key).toBe("manifestation");
     // create (rather than select) the final manifestation
-    field(wrapper).vm.$emit("created", { id: "manif-9", intialValues: { title: "New" } });
+    field(wrapper).vm.$emit("created", {
+      id: "manif-9",
+      intialValues: { title: "New" },
+    });
     await flushPromises();
     expect(wrapper.emitted("finished")?.[0]?.[0]).toMatchObject({
       id: "work-1",
@@ -517,7 +581,10 @@ describe("RepetitiveFlow — linear mode", () => {
         refWork: [{ key: "work-1", type: "refWork", editStatus: "new" }],
       },
     });
-    field(wrapper).vm.$emit("created", { id: "expr-9", intialValues: { title: "E" } });
+    field(wrapper).vm.$emit("created", {
+      id: "expr-9",
+      intialValues: { title: "E" },
+    });
     await flushPromises();
     expect(manageMocks.addRelations).not.toHaveBeenCalled();
   });
@@ -549,7 +616,11 @@ const bulkConfig = () => ({
       createForm: "GetWorkForm",
       // no pickerQuery → create-only (nothing to search)
       creatableTypes: [
-        { label: "x", entityType: Entitytyping.Work, createForm: "GetWorkForm" },
+        {
+          label: "x",
+          entityType: Entitytyping.Work,
+          createForm: "GetWorkForm",
+        },
       ],
     },
   ],
@@ -584,7 +655,10 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
     overview(wrapper).vm.$emit("add-another");
     await wrapper.vm.$nextTick();
     // create the entity (persisted per-step) → branch pushed, back to overview
-    field(wrapper).vm.$emit("created", { id: "work-1", intialValues: { title: "W1" } });
+    field(wrapper).vm.$emit("created", {
+      id: "work-1",
+      intialValues: { title: "W1" },
+    });
     await flushPromises();
     expect(overview(wrapper).exists()).toBe(true);
     expect(useRepetitiveForm().branches.value).toHaveLength(1);
@@ -626,7 +700,11 @@ const metadataOnlyConfig = () => ({
           relationType: "refUsers",
           createWhen: RepetitiveRelationTrigger.OnSelect,
           metadataFields: [
-            { formMetadataKey: "role", relationMetadataKey: "roles", asArray: true },
+            {
+              formMetadataKey: "role",
+              relationMetadataKey: "roles",
+              asArray: true,
+            },
             { formMetadataKey: "function", relationMetadataKey: "function" },
           ],
         },
@@ -649,13 +727,19 @@ describe("RepetitiveFlow — metadataOnly step", () => {
   beforeEach(() => {
     useRepetitiveForm().resetFlow();
     manageMocks.addRelations.mockClear();
+    manageMocks.addRelations.mockResolvedValue(undefined);
+    notificationMocks.displayErrorNotification.mockClear();
+    routeMocks.id = "org-1";
     useEntitySingle().setEntityUuid(undefined as unknown as string);
     useModalActions().setCallbackFunctions(undefined);
   });
 
   const pickUserAndSubmitRole = async (
     wrapper: ReturnType<typeof getMetadataOnlyWrapper>,
-    values: Record<string, unknown> = { role: "booker_admin", function: "Coordinator" },
+    values: Record<string, unknown> = {
+      role: "booker_admin",
+      function: "Coordinator",
+    },
   ) => {
     await startBranch(wrapper);
     field(wrapper).vm.$emit("selected", [{ id: "user-1" }]);
@@ -762,6 +846,45 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     );
   });
 
+  // the collection-api rejects a relation whose metadata does not match the
+  // document's schema; the generic "something went wrong" text hides which
+  // field it was, so the API's own message has to reach the user
+  it("surfaces the API message when committing the relation fails", async () => {
+    manageMocks.addRelations.mockRejectedValue({
+      graphQLErrors: [
+        {
+          extensions: {
+            response: {
+              body: { message: "'technician' is not of type 'array'" },
+            },
+          },
+        },
+      ],
+    });
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+
+    expect(notificationMocks.displayErrorNotification).toHaveBeenCalledWith(
+      "repetitiveForm.finish-failed-title",
+      "'technician' is not of type 'array'",
+    );
+    // the overview stays open so the staged branches survive a retry
+    expect(overview(wrapper).exists()).toBe(true);
+  });
+
+  it("does not commit to an empty host id when the host entity cannot be resolved", async () => {
+    routeMocks.id = undefined;
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+    expect(notificationMocks.displayErrorNotification).toHaveBeenCalled();
+  });
+
   it("does not persist a relation removed from the overview before Afronden is clicked", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper);
@@ -777,7 +900,10 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     // does before opening the modal (refetchParentEntity/refetchEntities)
     const refetchParentEntity = vi.fn();
     const refetchLibrary = vi.fn();
-    useModalActions().setCallbackFunctions([refetchParentEntity, refetchLibrary]);
+    useModalActions().setCallbackFunctions([
+      refetchParentEntity,
+      refetchLibrary,
+    ]);
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper, { role: "booker_admin" });
     overview(wrapper).vm.$emit("finish");

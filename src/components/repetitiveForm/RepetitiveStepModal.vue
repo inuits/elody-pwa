@@ -28,6 +28,7 @@
     <div data-testid="repetitive-step-modal-content" class="p-6">
       <slot v-if="open" />
     </div>
+    <notifications v-if="open" class="pt-2" :group="modalNotificationGroup" />
     <BlockingOverlay :is-blocking="isBlocking && open" />
   </dialog>
 </template>
@@ -37,6 +38,7 @@ import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { Unicons } from "@/types";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
+import { modalNotificationGroup } from "@/composables/useBaseNotification";
 
 const { isBlocking } = useBlockingLoader();
 
