@@ -24,16 +24,20 @@
     @search-change="handleSearchChange"
     :on-create="handleTagCreate"
   >
-    <template
-      v-if="createOptionConfig.createPromptTranslationKey"
-      v-slot:option="{ option }"
-    >
-      <div v-if="!options?.some((o) => o.value === option.value)">
+    <template v-slot:option="{ option }">
+      <div
+        v-if="
+          createOptionConfig.createPromptTranslationKey &&
+          !options?.some((o) => o.value === option.value)
+        "
+      >
         {{ t(createOptionConfig.createPromptTranslationKey, [option.label]) }}
       </div>
-      <div v-else>
-        {{ option.label }}
-      </div>
+      <SanitizedHtml
+        v-else
+        :mode="SanitizeMode.Html"
+        :content="option.label"
+      ></SanitizedHtml>
     </template>
     <template v-slot:tag="{ option, handleTagRemove, disabled }">
       <div
@@ -50,7 +54,7 @@
         ]"
         @click.stop="() => emit('handleTagClick', option)"
       >
-        {{ option.label }}
+        {{ stripHighlightTags(option.label) }}
         <div
           v-if="displayInputForTag"
           @click.stop
@@ -92,8 +96,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { DropdownOption } from "@/generated-types/queries";
+import { SanitizeMode, type DropdownOption } from "@/generated-types/queries";
 import Multiselect from "@vueform/multiselect";
+import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { stripHighlightTags } from "@/helpers";
 import useEntitySingle from "@/composables/useEntitySingle";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { computed, inject, ref, watch } from "vue";

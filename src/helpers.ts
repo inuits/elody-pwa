@@ -943,6 +943,9 @@ export const sanitizeHtml = (content: any, extraTags: string[] = []) => {
   });
 };
 
+export const stripHighlightTags = <T>(value: T): T =>
+  typeof value === "string" ? (value.replace(/<\/?mark>/gi, "") as T) : value;
+
 export const toArray = <T>(value: T | T[] | undefined): T[] => {
   if (value == null) return [];
   return Array.isArray(value) ? value : [value];

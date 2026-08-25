@@ -39,7 +39,10 @@
           <unicon :name="Unicons.Check.name" height="18" width="18" />
         </div>
         <div class="text-text-body">
-          {{ t(option.label) }}
+          <SanitizedHtml
+            :mode="SanitizeMode.Html"
+            :content="t(option.label)"
+          ></SanitizedHtml>
         </div>
       </template>
       <template #value="{ option }">
@@ -53,14 +56,14 @@
           />
           <p class="text-center">
             {{ addLabelToValue ? label : "" }}{{ addLabelToValue ? ":" : "" }}
-            {{ t(option.label) }}
+            {{ stripHighlightTags(t(option.label)) }}
           </p>
         </div>
       </template>
       <template #tag="{ option }">
         <div class="flex m-1 bg-gray-100 rounded-md">
           <div class="text-sm text-black px-2 py-1">
-            {{ t(option.label) }}
+            {{ stripHighlightTags(t(option.label)) }}
           </div>
           <button
             class="hover:bg-red-200 px-2"
@@ -80,8 +83,11 @@ import { computed, ref, watch, inject, onMounted } from "vue";
 import {
   ActionContextEntitiesSelectionType,
   ActionContextViewModeTypes,
+  SanitizeMode,
   type DropdownOption,
 } from "@/generated-types/queries";
+import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { stripHighlightTags } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
 import VueSelect from "vue3-select-component";
@@ -215,7 +221,7 @@ const calculateWidth = () => {
 
   let maxWidth = 0;
   props.options.forEach((option) => {
-    span.textContent = t(option.label);
+    span.textContent = stripHighlightTags(t(option.label));
     maxWidth = Math.max(maxWidth, span.offsetWidth);
   });
 

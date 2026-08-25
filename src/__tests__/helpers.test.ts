@@ -10,6 +10,7 @@ import {
   extractValueFromObject,
   looksLikeEntityId,
   stripEmbeddedViewerSuffix,
+  stripHighlightTags,
   deepToRaw,
   getEnvironmentLabel,
   downloadFile,
@@ -163,6 +164,36 @@ describe("stripEmbeddedViewerSuffix", () => {
     expect(
       stripEmbeddedViewerSuffix("https://dams.antwerpen.be/assets/813ef4f8"),
     ).toBe("https://dams.antwerpen.be/assets/813ef4f8");
+  });
+});
+
+describe("stripHighlightTags", () => {
+  it("removes the search highlight markup added by typesense", () => {
+    expect(stripHighlightTags("Met <mark>kat</mark> op reis")).toBe(
+      "Met kat op reis",
+    );
+  });
+
+  it("removes every occurrence", () => {
+    expect(stripHighlightTags("<mark>Kip</mark> en <mark>kat</mark>")).toBe(
+      "Kip en kat",
+    );
+  });
+
+  it("leaves a value without highlight markup untouched", () => {
+    expect(stripHighlightTags("Kip en kat")).toBe("Kip en kat");
+  });
+
+  it("keeps other markup so unrelated content is not silently altered", () => {
+    expect(stripHighlightTags("<p>Kip <mark>en</mark> kat</p>")).toBe(
+      "<p>Kip en kat</p>",
+    );
+  });
+
+  it("returns non-string values unchanged", () => {
+    expect(stripHighlightTags(undefined)).toBe(undefined);
+    expect(stripHighlightTags(null)).toBe(null);
+    expect(stripHighlightTags(42)).toBe(42);
   });
 });
 
