@@ -76,8 +76,9 @@ export type ContextMenuActionRouteConfig =
 export type ToggleEntityButtonConfig = {
   toggle: true;
   metadataKey: string;
-  whenTrue: EntityButtonConfig;
-  whenFalse: EntityButtonConfig;
+  equals?: string | number | boolean;
+  whenTrue: EntityButtonConfig | false;
+  whenFalse: EntityButtonConfig | false;
 };
 
 export const isToggleButton = (

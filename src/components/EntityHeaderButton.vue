@@ -1,7 +1,6 @@
 <template>
-  <div class="ml-2 mr-6">
+  <div v-if="deleteAvailable && activeConfig" class="ml-2 mr-6">
     <BaseButtonNew
-      v-if="deleteAvailable"
       :label="t(activeConfig.label)"
       :icon="activeConfig.icon ? DamsIcons[activeConfig.icon] : undefined"
       button-style="default"
@@ -62,16 +61,21 @@ const deleteAvailable = computed<boolean>(
 
 const isLoading = ref(false);
 
-const activeConfig = computed<EntityButtonConfig>(() => {
+const activeConfig = computed<EntityButtonConfig | false>(() => {
   if (!isToggleButton(props.config)) return props.config;
   const formValues = getFormByRouteId().form?.values;
-  const val = props.config.metadataKey
+  const metadataValue = props.config.metadataKey
     .split(".")
-    .reduce((o: any, k) => o?.[k], formValues);
-  return val ? props.config.whenTrue : props.config.whenFalse;
+    .reduce((o: any, key) => o?.[key], formValues);
+  const matches =
+    props.config.equals !== undefined
+      ? metadataValue === props.config.equals
+      : Boolean(metadataValue);
+  return matches ? props.config.whenTrue : props.config.whenFalse;
 });
 
 const doAction = async () => {
+  if (!activeConfig.value) return;
   isLoading.value = true;
   try {
     const document = await loadDocument(activeConfig.value.mutation);

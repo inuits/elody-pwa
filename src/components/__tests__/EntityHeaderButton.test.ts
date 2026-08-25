@@ -212,4 +212,36 @@ describe("EntityHeaderButton", () => {
       expect(wrapper.find("button").text()).toBe("header.enable-user");
     });
   });
+
+  describe("with toggle config comparing a value", () => {
+    const archiveConfig: ToggleEntityButtonConfig = {
+      toggle: true,
+      metadataKey: "intialValues.status.label",
+      equals: "archived",
+      whenTrue: false,
+      whenFalse: { label: "header.archive", mutation: "ArchiveProduction" },
+    };
+
+    it("hides the button entirely when the value matches", () => {
+      mockFormValues = { intialValues: { status: { label: "archived" } } };
+      const wrapper = mountButton(archiveConfig);
+
+      expect(wrapper.find("button").exists()).toBe(false);
+      expect(wrapper.html()).toBe("<!--v-if-->");
+    });
+
+    it("shows the whenFalse button when the value does not match", () => {
+      mockFormValues = { intialValues: { status: { label: "published" } } };
+      const wrapper = mountButton(archiveConfig);
+
+      expect(wrapper.find("button").text()).toBe("header.archive");
+    });
+
+    it("shows the whenFalse button when the value is absent", () => {
+      mockFormValues = {};
+      const wrapper = mountButton(archiveConfig);
+
+      expect(wrapper.find("button").text()).toBe("header.archive");
+    });
+  });
 });
