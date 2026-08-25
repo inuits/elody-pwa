@@ -59,7 +59,7 @@ watch(
 
 <style>
 [data-cy="sanitized-value"] mark {
-  background: none;
+  background: var(--color-accent-highlight);
   color: inherit;
   font-weight: bold;
 }
