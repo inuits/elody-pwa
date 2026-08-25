@@ -119,7 +119,7 @@
         class="grow w-full border-0"
         :src="embedUrl"
         :title="t('media-viewer.external-url')"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-presentation allow-forms"
+        referrerpolicy="strict-origin-when-cross-origin"
         allowfullscreen
       ></iframe>
     </div>
@@ -185,10 +185,7 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMediafileCrop } from "@/composables/useMediafileCrop";
 import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
 import { useMediafileDownload } from "@/composables/useMediafileDownload";
-import {
-  getEmbeddableUrl,
-  getExternalHttpUrl,
-} from "@/utils/embeddableUrl";
+import { getEmbeddableUrl, getExternalHttpUrl } from "@/utils/embeddableUrl";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
