@@ -35,7 +35,11 @@
         @mouseenter="highlightedIndex = index"
         @mousedown.prevent="pick(entity)"
       >
-        {{ labelFor(entity) }}
+        <SanitizedHtml
+          class="truncate"
+          :mode="SanitizeMode.Html"
+          :content="labelFor(entity)"
+        ></SanitizedHtml>
       </button>
     </div>
   </Teleport>
@@ -52,8 +56,11 @@ import {
   AdvancedFilterTypes,
   Entitytyping,
   GetEntitiesDocument,
+  SanitizeMode,
   SearchInputType,
 } from "@/generated-types/queries";
+import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { stripHighlightTags } from "@/helpers";
 import type { InlineSuggestionState } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/inlineTagSuggestion";
 
 const props = defineProps<{
@@ -237,7 +244,8 @@ watch(
   { immediate: true },
 );
 
-const pick = (entity: any) => emit("pick", entity, labelFor(entity));
+const pick = (entity: any) =>
+  emit("pick", entity, stripHighlightTags(labelFor(entity)));
 
 const onKeyDown = (event: KeyboardEvent) => {
   if (!results.value.length) return;

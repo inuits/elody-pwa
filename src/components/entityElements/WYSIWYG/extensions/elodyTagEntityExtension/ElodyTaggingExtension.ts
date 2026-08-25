@@ -22,6 +22,7 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { stripHighlightTags } from "@/helpers";
 import type { Ref } from "vue";
 import { apolloClient } from "@/main";
 import { DOMSerializer } from "prosemirror-model";
@@ -389,7 +390,7 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
                     (metadataItem: any) => metadataItem.key === key,
                   )?.value;
                 Object.assign(additionalAttributes, {
-                  [key]: value,
+                  [key]: stripHighlightTags(value),
                 });
               });
             }

@@ -241,3 +241,34 @@ describe("inline suggestion dropdown keyboard selection", () => {
     expect(press("Enter").defaultPrevented).toBe(false);
   });
 });
+
+describe("typesense search highlighting on the suggestions", () => {
+  // Search results carry <mark> around the typed text. It has to render as markup in
+  // the list, and must never end up in the tag that is written into the document.
+  const withHighlightedName = async (run: (wrapper: any) => void | Promise<void>) => {
+    const original = entities[0].intialValues.name;
+    entities[0].intialValues.name = "<mark>Ad</mark>a";
+    const wrapper = await mountDropdown();
+    try {
+      await run(wrapper);
+    } finally {
+      entities[0].intialValues.name = original;
+      wrapper.unmount();
+    }
+  };
+
+  it("renders the highlight as markup instead of literal tags", async () => {
+    await withHighlightedName(() => {
+      const option = document.querySelectorAll("button")[0];
+      expect(option.querySelector("mark")).not.toBeNull();
+      expect(option.textContent?.trim()).toBe("Ada");
+    });
+  });
+
+  it("tags the plain text, so no markup is written into the document", async () => {
+    await withHighlightedName((wrapper) => {
+      press("Enter");
+      expect(wrapper.emitted("pick")?.[0]).toEqual([entities[0], "Ada"]);
+    });
+  });
+});

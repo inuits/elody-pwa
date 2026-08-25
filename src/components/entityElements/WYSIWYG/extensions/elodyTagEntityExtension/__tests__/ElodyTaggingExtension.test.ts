@@ -215,3 +215,67 @@ describe("ensureTrailingSpaceAfterTags plugin (via createTaggingCommandsExtensio
     editor.destroy();
   });
 });
+
+describe("metadata copied from the picked entity onto the tag", () => {
+  it("strips typesense highlight markup so it is not persisted in the tag attributes", async () => {
+    // The entity comes out of a search, so its metadata can carry <mark> around the
+    // matched text. The attributes end up in the saved document.
+    const { Editor } = await import("@tiptap/core");
+    const { default: Document } = await import("@tiptap/extension-document");
+    const { default: Paragraph } = await import("@tiptap/extension-paragraph");
+    const { default: Text } = await import("@tiptap/extension-text");
+    const { Node } = await import("@tiptap/core");
+
+    const TagNode = Node.create({
+      name: TAG_TYPE,
+      group: `inline ${TAG_GROUP}`,
+      inline: true,
+      atom: true,
+      selectable: false,
+      addAttributes: () => ({
+        entityId: { default: null },
+        taggedText: { default: null },
+        name: { default: null },
+      }),
+      renderHTML: () => ["span", { "data-tag": "true" }],
+    });
+
+    const editor = new Editor({
+      extensions: [
+        Document,
+        Paragraph,
+        Text,
+        TagNode,
+        createTaggingCommandsExtension({
+          instanceId: "test",
+          configuration: ref([
+            {
+              tag: "user",
+              extensionName: TAG_TYPE,
+              taggableEntityType: "user",
+              metadataKeysToSetAsAttribute: ["name"],
+            },
+          ] as any),
+        }),
+      ],
+      content: `<p>hello</p>`,
+    });
+
+    editor.commands.setTextSelection({ from: 1, to: 6 });
+    await editor.commands.linkEntityToTaggedText({
+      id: "U-1",
+      type: "user",
+      intialValues: { name: "<mark>Ad</mark>a" },
+    } as any);
+
+    let tagNode: any = null;
+    editor.state.doc.descendants((node: any) => {
+      if (node.type.name === TAG_TYPE) tagNode = node;
+      return true;
+    });
+
+    expect(tagNode?.attrs.name).toBe("Ada");
+
+    editor.destroy();
+  });
+});
