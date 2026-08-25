@@ -96,6 +96,50 @@
       />
     </div>
     <div
+      v-else-if="!loading && !viewerType && embedUrl"
+      class="flex flex-col h-full w-full bg-neutral-0"
+    >
+      <div
+        class="flex items-center justify-between gap-2 px-3 py-2 border-b border-neutral-30"
+      >
+        <span class="truncate text-sm text-text-body" :title="linkOutUrl">
+          {{ linkOutUrl }}
+        </span>
+        <a
+          class="flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-md bg-accent-normal text-white hover:bg-accent-dark transition cursor-pointer"
+          :href="linkOutUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <unicon height="16" width="16" :name="Unicons.Link.name" />
+          {{ t("media-viewer.open-url") }}
+        </a>
+      </div>
+      <iframe
+        class="grow w-full border-0"
+        :src="embedUrl"
+        :title="t('media-viewer.external-url')"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-presentation allow-forms"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <div
+      v-else-if="!loading && !viewerType && linkOutUrl"
+      class="flex flex-col justify-center items-center h-full w-full p-12 text-center"
+    >
+      <unicon height="64" width="64" class="pb-4" :name="Unicons.Link.name" />
+      <p>{{ t("media-viewer.external-url") }}</p>
+      <a
+        class="mt-4 flex items-center gap-2 px-4 py-2 rounded-md bg-accent-normal text-white hover:bg-accent-dark transition cursor-pointer"
+        :href="linkOutUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <unicon height="18" width="18" :name="Unicons.Link.name" />
+        {{ t("media-viewer.open-url") }}
+      </a>
+    </div>
+    <div
       v-else-if="!loading && !viewerType"
       class="flex flex-col justify-center items-center h-full w-full p-12 text-center"
     >
@@ -141,6 +185,10 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMediafileCrop } from "@/composables/useMediafileCrop";
 import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
 import { useMediafileDownload } from "@/composables/useMediafileDownload";
+import {
+  getEmbeddableUrl,
+  getExternalHttpUrl,
+} from "@/utils/embeddableUrl";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
@@ -197,6 +245,23 @@ const originalFilename = computed<string | undefined>(() =>
     "original_filename",
     mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
   ),
+);
+
+// Reserved key: a mediafile can stand in for an external link instead of a stored file.
+const externalUrl = computed<string | undefined>(() =>
+  getValueOfMediafile(
+    mediafileViewerContext,
+    "external_url",
+    mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
+  ),
+);
+// Only providers with a real embed player are framed - see getEmbeddableUrl. Everything
+// else would hit X-Frame-Options and render a blank frame, so it links out instead.
+const embedUrl = computed<string | undefined>(() =>
+  getEmbeddableUrl(externalUrl.value),
+);
+const linkOutUrl = computed<string | undefined>(() =>
+  getExternalHttpUrl(externalUrl.value),
 );
 
 const getMediaDimensions = ():

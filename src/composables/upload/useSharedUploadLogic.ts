@@ -95,8 +95,30 @@ export const useSharedUploadLogic = (): {
     return JSON.parse(await response.text());
   };
 
+  const createMediafileOnEntityWithoutFile = async (
+    entityId: string,
+    entityInput: EntityInput | undefined = undefined,
+  ): Promise<void> => {
+    const response = await fetch(
+      `/api/upload/single?entityId=${entityId}&hasRelation=true`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify({ entityInput }),
+      },
+    );
+
+    if (!response.ok) {
+      const httpErrorMessage = await handleHttpError(response);
+      return Promise.reject(httpErrorMessage);
+    }
+    // ponytail: the response body is not needed and is empty when no upload ticket is
+    // generated, so it is deliberately not parsed.
+  };
+
   return {
     getUploadUrl,
     getUploadUrlForMediafileOnEntity,
+    createMediafileOnEntityWithoutFile,
   };
 };

@@ -15,6 +15,7 @@ type MediaFileMetadataKeys =
   | "display_filename"
   | "thumbnail_file_location"
   | "mimetype"
+  | "external_url"
   | "is_primary"
   | "is_primary_thumbnail"
   | "height"

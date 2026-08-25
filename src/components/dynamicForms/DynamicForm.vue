@@ -319,6 +319,7 @@ import { useErrorCodes } from "@/composables/useErrorCodes";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import ImportWrapper from "@/components/imports/ImportWrapper.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useSharedUploadLogic } from "@/composables/upload/useSharedUploadLogic";
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -827,15 +828,37 @@ const uploadActionFunction = async () => {
   }
 };
 
+// The bulk operation registers the listing's refetch callbacks when it opens the modal.
+const refetchAfterAction = async () => {
+  for (const callback of getCallbackFunctions() ?? []) {
+    if (callback) await callback();
+  }
+};
+
 const uploadWithMetadataActionFunction = async (field: FormAction) => {
   if (!enableUploadButton.value) return;
+  const isFilelessCreate =
+    mediafiles.value.length === 0 && isLinkedUpload.value;
+  if (isFilelessCreate && !(await isFormValid())) return;
   const entityInput = await createEntityFromFormInput(field.creationType);
 
   const uploadedFilenames = mediafiles.value
     .map((file) => file.name)
     .join(", ");
 
-  await upload(isLinkedUpload.value, entityInput, config, t);
+  if (isFilelessCreate) {
+    await useSharedUploadLogic().createMediafileOnEntityWithoutFile(
+      useEntitySingle().getEntityUuid(),
+      entityInput,
+    );
+  } else {
+    await upload(isLinkedUpload.value, entityInput, config, t);
+  }
+  if (isFilelessCreate && !props.emitEntityCreated) {
+    await refetchAfterAction();
+    closeAndDeleteForm();
+    return;
+  }
   if (props.emitEntityCreated) {
     deleteForm(formId.value);
     emit("entityCreated", {
