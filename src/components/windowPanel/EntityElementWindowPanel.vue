@@ -40,8 +40,11 @@
       </div>
     </div>
 
-    <transition>
-      <div v-show="!isCollapsed">
+    <div
+      class="grid transition-[grid-template-rows] duration-200 ease-out"
+      :class="isCollapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'"
+    >
+      <div class="min-h-0 overflow-hidden">
         <div
           v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
@@ -77,7 +80,7 @@
           />
         </div>
       </div>
-    </transition>
+    </div>
   </div>
 </template>
 
@@ -166,19 +169,3 @@ watchEffect(() => {
   registerEditableKey();
 });
 </script>
-
-<style scoped>
-.v-enter-active,
-.v-leave-active {
-  transition: transform 0.1s linear;
-
-  transform-origin: top;
-}
-
-.v-enter-from,
-.v-leave-to {
-  transform: scaleY(0%);
-
-  transform-origin: top;
-}
-</style>
