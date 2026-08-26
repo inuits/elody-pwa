@@ -27,7 +27,7 @@
       />
     </div>
     <InlineFieldEditor
-      v-if="isEditingThisField || isGroupEditing"
+      v-if="(isEditingThisField && isFieldEditableInline) || isGroupEditing"
       :is-dirty="isDirty"
       :is-saving="isSavingThisField"
       :error-message="editorErrorMessage"
@@ -48,7 +48,7 @@
       :isMetadataOnRelation="fieldKind === 'PanelRelationData'"
       :isRootdataOnRelation="fieldKind === 'PanelRelationRootData'"
       :error="fieldErrorMessage"
-      :relation-filter="metadata.inputField.relationFilter"
+      :relation-filter="metadata.inputField?.relationFilter"
       :show-errors="
         showErrors ||
         (field.meta.dirty &&

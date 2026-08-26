@@ -5,6 +5,7 @@
       data-test="menu-item-component"
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
+      :aria-label="t(menuitem?.label)"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
       class="menu-item-row flex flex-row items-center min-h-9 mt-3 w-full text-left cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[

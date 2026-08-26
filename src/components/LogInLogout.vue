@@ -1,23 +1,17 @@
 <template>
   <div class="!bg-background-light">
-    <div
-      class="flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap"
+    <button
+      v-if="auth.isAuthenticated.value === false"
+      type="button"
+      class="session-action flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap"
+      :aria-label="t('navigation.log-in')"
+      @click="auth.redirectToLogin()"
     >
-      <unicon
-        v-if="auth.isAuthenticated.value === false"
-        @click="auth.redirectToLogin()"
-        :name="Unicons.UserCircle.name"
-        height="21"
-        class="mt-1 ml-2"
-      />
-      <span
-        v-if="auth.isAuthenticated.value === false && isExpanded"
-        @click="auth.redirectToLogin()"
-        class="overflow-hidden px-4 font-bold"
-      >
+      <unicon :name="Unicons.UserCircle.name" height="21" class="mt-1 ml-2" />
+      <span v-if="isExpanded" class="overflow-hidden px-4 font-bold">
         {{ t("navigation.log-in") }}
       </span>
-    </div>
+    </button>
 
     <div
       v-if="auth.isAuthenticated.value === true"
@@ -31,7 +25,7 @@
           :tooltip-offset="8"
         >
           <template #activator="{ on }">
-            <router-link :to="`/user/${elodyUser.id}`"
+            <router-link :to="`/user/${elodyUser.id}`" :aria-label="getUserName()"
               ><div v-on="on">
                 <unicon
                   :name="Unicons.UserCircle.name"
@@ -58,47 +52,37 @@
           {{ getUserName() }}
         </span>
       </div>
-      <div
-        class="flex flex-row hover:text-accent-accent cursor-pointer whitespace-nowrap"
-      >
-        <base-tooltip
-          v-if="!isExpanded"
-          position="top-right"
-          :tooltip-offset="8"
-        >
-          <template #activator="{ on }">
-            <div v-on="on">
-              <unicon
-                @click="openConfirmationModal"
-                :name="Unicons.SignOut.name"
-                height="20"
-                class="mt-1 ml-2"
-              />
+      <base-tooltip v-if="!isExpanded" position="top-right" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <button
+            type="button"
+            class="session-action flex flex-row hover:text-accent-accent cursor-pointer whitespace-nowrap"
+            :aria-label="t('navigation.log-out')"
+            v-on="on"
+            @click="openConfirmationModal"
+          >
+            <unicon :name="Unicons.SignOut.name" height="20" class="mt-1 ml-2" />
+          </button>
+        </template>
+        <template #default>
+          <span class="w-max hover:text-accent-accent">
+            <div>
+              {{ t("navigation.log-out") }}
             </div>
-          </template>
-          <template #default>
-            <span class="w-max hover:text-accent-accent">
-              <div>
-                {{ t("navigation.log-out") }}
-              </div>
-            </span>
-          </template>
-        </base-tooltip>
-        <unicon
-          v-if="isExpanded"
-          @click="openConfirmationModal"
-          :name="Unicons.SignOut.name"
-          height="20"
-          class="mt-1 ml-2"
-        />
-        <span
-          v-if="isExpanded"
-          @click="openConfirmationModal"
-          class="overflow-hidden px-4 font-bold"
-        >
+          </span>
+        </template>
+      </base-tooltip>
+      <button
+        v-if="isExpanded"
+        type="button"
+        class="session-action flex flex-row items-center hover:text-accent-accent cursor-pointer whitespace-nowrap"
+        @click="openConfirmationModal"
+      >
+        <unicon :name="Unicons.SignOut.name" height="20" class="mt-1 ml-2" />
+        <span class="overflow-hidden px-4 font-bold">
           {{ t("navigation.log-out") }}
         </span>
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -131,3 +115,10 @@ const openConfirmationModal = async () => {
 };
 </script>
 
+<style scoped>
+.session-action:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-chip);
+}
+</style>

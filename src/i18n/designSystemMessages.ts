@@ -13,6 +13,7 @@ export const designSystemMessages: Record<string, object> = {
     nl: {
       metadata: {
         labels: { "no-value": "Geen waarde", yes: "Ja", no: "Nee" },
+        "no-label": "Veld zonder label",
       },
       dropdown: { "remove-option": "Verwijder {option}" },
       "field-row": { "edit-value": "{label}, bewerken" },
@@ -93,6 +94,7 @@ export const designSystemMessages: Record<string, object> = {
     en: {
       metadata: {
         labels: { "no-value": "No value", yes: "Yes", no: "No" },
+        "no-label": "Unlabelled field",
       },
       dropdown: { "remove-option": "Remove {option}" },
       "field-row": { "edit-value": "{label}, edit" },
