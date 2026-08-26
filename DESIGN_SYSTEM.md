@@ -240,7 +240,7 @@ now.
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7 viewers | one ViewerToolbar for image + PDF (PdfToolbar deleted) and maps on the tenant accent with capsule zoom controls; AV/text toolbar modes, the IIIF-manifest filmstrip and the media-first detail column open |
 | WP8 flows & feedback | **done** — toasts, DynamicForm, guided flow, upload, history-diff values, comments, folder tree, import browser and nav chrome. Still open from the package, all feature-tier: arrow-key tree navigation, the import browser's file table, and the 52px rail width (a layout change that belongs to WP9's two-fixed-elements rule) |
-| WP9 | open |
+| WP9 | **screen pass done for the vlacc main flows** (2026-08-26, live against the local stack): list → detail → creation → upload → import MARC21 → nav chrome. The 52px rail is in (collapsed rail + w-80 overlay, logo scales, Escape closes); the detail header stays put through the flex layout (scroll lives inside the router-view container), so the two-fixed-elements rule holds. Fixed during the pass: embedded relation panels off the legacy mint onto the panel contract (`EntityElementWrapper`); a per-field-editor crash when one field key renders twice on a screen (shared edit scope hit a summary row without `inputField`); **creation forms had lost their inputs entirely** — create-flow rows now render inputs permanently with the form's single submit zone; inline-editor autofocus (single-field mode only); window-panel expand/collapse as a named button; upload info banners on the accent-light pair; design-system copy as i18n fallback under the service catalogue (`src/i18n/designSystemMessages.ts`, shared with mockMain). Screens not walkable on vlacc: the filesystem import browser (other client) — covered by its Storybook stories |
 
 ## Conventions for the next component
 
@@ -268,7 +268,11 @@ button, checkbox and text inputs.
 ## Needs a translation key
 
 Translations are served by the graphql service, so these keys have to be added
-there; until then vue-i18n renders the key itself.
+there. Since WP9 the app carries this copy as a local **fallback catalogue**
+(`src/i18n/designSystemMessages.ts`, merged under the service messages in
+`setupI18n`, and the same object Storybook's mockMain uses), so the beta reads
+as designed in the meantime — the service catalogue still wins the moment a
+key lands there.
 
 | Key | NL | EN | Why |
 |---|---|---|---|
@@ -319,3 +323,37 @@ there; until then vue-i18n renders the key itself.
 
 Storybook declares this copy itself in `.storybook/mockMain.ts`, so the stories
 read as designed while the keys are still missing from the service.
+
+## WP9 screen-pass findings (2026-08-26)
+
+Walked live on the local vlacc stack (dashboard container mounts this
+working tree, HMR active): library list → detail record → creation flow →
+upload → import MARC21 → nav chrome.
+
+- **Span/div-as-button counter: 24.** New in this pass: menu rows without an
+  accessible name in the collapsed rail, LogInLogout's clickable
+  unicons/spans (3), the window-panel expand icon, and the CSV template
+  download `<p>`.
+- **Creation forms had no inputs** after the whole-form path removal —
+  the defining regression of the pass; see the WP9 row in the status table.
+- **Duplicate field keys share an edit scope.** vlacc renders the same
+  metadata key in a summary block and in a full panel of one detail screen;
+  both react to the scope opening. Rendering is now guarded, but the scope id
+  (`formId:fieldKey`) still cannot tell the two rows apart — harmless today,
+  worth a per-instance suffix if it ever bites.
+- **Third-party gap:** `vue3-select-component` renders its dropdown-indicator
+  as a nameless `<button class="dropdown-icon">`; not reachable from our
+  code. Theming stays via `--vs-*`.
+- **Dev quirk:** a pre-existing circular import chain
+  (`useBulkOperations` / `usePermissions` / `useEditState` /
+  `ElodyTaggingExtension`) makes some vite HMR reloads throw "Cannot access …
+  before initialization" and white-screen the tab; a hard reload recovers.
+  Worth untangling in WP10.
+- **Legacy leftovers still referenced** (`--color-accent-normal`, the white
+  `subtitle` utility): UploadInterfaceDropzone is clean now, but
+  WYSIWYG extensions, MediaViewerNew, NotFound and the transliteration
+  toggle still use `bg-accent-normal`. Sweep in WP10's dead-code pass.
+- The tenant-configured "paperback" pill on vlacc renders mint because the
+  **client config** carries the old colour — that is the client
+  `formattersSettings`, not code; covered by the client theme.txt adoption
+  item.
