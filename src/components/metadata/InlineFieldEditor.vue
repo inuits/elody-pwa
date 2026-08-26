@@ -75,8 +75,11 @@ const { t } = useI18n();
 const inputZone = ref<HTMLElement>();
 
 /* Opening is a keyboard gesture (Enter on the row), so the input must take
-   focus — without it Enter-saves and Esc-cancels never reach the editor. */
+   focus — without it Enter-saves and Esc-cancels never reach the editor.
+   Only the single-field editor grabs it: in a group or a creation form many
+   editors mount at once, and focus belongs to the document flow there. */
 onMounted(async () => {
+  if (!showCommitActions) return;
   await nextTick();
   const target = inputZone.value?.querySelector<HTMLElement>(
     "input:not([type=hidden]):not([disabled]), textarea, select, [contenteditable], [tabindex]:not([tabindex='-1'])",

@@ -18,7 +18,7 @@
       />
       <MultilingualLocaleSelector :field-key="metadata.key" />
       <BaseVirtualKeyboard
-        v-if="isEditingThisField && virtualKeyboardLayouts"
+        v-if="(isEditingThisField || isCreateFlowField) && virtualKeyboardLayouts"
         :input="keyboardInput"
         :layouts="virtualKeyboardLayouts"
         :keyboard-class="safeKeyboardClass"
@@ -27,12 +27,16 @@
       />
     </div>
     <InlineFieldEditor
-      v-if="(isEditingThisField && isFieldEditableInline) || isGroupEditing"
+      v-if="
+        (isEditingThisField && isFieldEditableInline) ||
+        isGroupEditing ||
+        isCreateFlowField
+      "
       :is-dirty="isDirty"
       :is-saving="isSavingThisField"
       :error-message="editorErrorMessage"
       :multiline="isMultilineField"
-      :show-commit-actions="!isGroupEditing"
+      :show-commit-actions="!isGroupEditing && !isCreateFlowField"
       @save="fieldEditor.save()"
       @cancel="fieldEditor.cancel()"
     >
@@ -501,6 +505,17 @@ const isDirty = computed<boolean>(
 
 const isGroupEditing = computed<boolean>(
   () => Boolean(fieldGroup?.isEditing.value) && isFieldEditableInline.value,
+);
+
+/* A creation form has no persisted value to fall back on: its rows render
+   their inputs permanently, and the form's single submit zone commits —
+   never a per-field Bewaar (dynamic-form.md). */
+const isCreateFlowField = computed<boolean>(
+  () =>
+    props.formFlow === "create" &&
+    Boolean(props.metadata.inputField) &&
+    !props.metadata.nonEditableField &&
+    fieldIsEditableByUser.value,
 );
 
 const startEditing = () => {
