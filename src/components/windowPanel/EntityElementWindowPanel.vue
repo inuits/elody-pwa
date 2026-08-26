@@ -32,11 +32,19 @@
             "
           ></base-button>
         </div>
-        <unicon
-          :name="
-            !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
-          "
-        />
+        <button
+          type="button"
+          class="window-panel__toggle"
+          :aria-expanded="!isCollapsed"
+          :aria-label="t(isCollapsed ? 'tree.expand' : 'tree.collapse')"
+          @click.stop="toggleIsCollapsed()"
+        >
+          <unicon
+            :name="
+              !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
+            "
+          />
+        </button>
       </div>
     </div>
 
@@ -223,6 +231,19 @@ watchEffect(() => {
 </script>
 
 <style scoped>
+.window-panel__toggle {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-ds-1);
+  border-radius: var(--radius-chip);
+  cursor: pointer;
+}
+
+.window-panel__toggle:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Resting, the group's rows carry a tint to signal that they belong together;
    editing, the whole group lifts into a card (group-form-card.md). */
 .field-group {

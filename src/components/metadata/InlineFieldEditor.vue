@@ -1,7 +1,7 @@
 <template>
   <div class="inline-field-editor" @keydown="handleKeydown">
     <div class="inline-field-editor__row">
-      <div class="inline-field-editor__input">
+      <div ref="inputZone" class="inline-field-editor__input">
         <slot />
       </div>
       <template v-if="showCommitActions">
@@ -42,6 +42,7 @@
 
 <script lang="ts" setup>
 import BaseButton from "@/components/base/BaseButton.vue";
+import { nextTick, onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 const {
@@ -70,6 +71,18 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+
+const inputZone = ref<HTMLElement>();
+
+/* Opening is a keyboard gesture (Enter on the row), so the input must take
+   focus — without it Enter-saves and Esc-cancels never reach the editor. */
+onMounted(async () => {
+  await nextTick();
+  const target = inputZone.value?.querySelector<HTMLElement>(
+    "input:not([type=hidden]):not([disabled]), textarea, select, [contenteditable], [tabindex]:not([tabindex='-1'])",
+  );
+  target?.focus();
+});
 
 const handleKeydown = (event: KeyboardEvent) => {
   // Inside a group the keys belong to the group, so let them bubble untouched.
