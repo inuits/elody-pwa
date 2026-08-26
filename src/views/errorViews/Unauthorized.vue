@@ -9,18 +9,20 @@
         <p>
           {{ t("error-pages.unauthorized.description") }}
         </p>
-        <div
-          class="flex bg-accent-normal text-neutral-white cursor-pointer p-4 mt-12 w-1/4 justify-center items-center"
+        <BaseButton
+          class="mt-12"
+          style="width: auto"
+          button-style="primary"
+          :label="t('navigation.log-in')"
           @click="logIn"
-        >
-          {{ t("navigation.log-in") }}
-        </div>
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { onMounted } from "vue";

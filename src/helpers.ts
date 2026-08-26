@@ -22,6 +22,7 @@ import {
   type WysiwygElement,
 } from "@/generated-types/queries";
 import { createI18n } from "vue-i18n";
+import { mergeWithDesignSystemMessages } from "@/i18n/designSystemMessages";
 import { i18n } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -211,7 +212,11 @@ export const setupI18n = (translations: object, applicationLocale: string) => {
     globalInjection: true,
     locale: applicationLocale,
     fallbackLocale: "en",
-    messages: translations,
+    // The design system's own copy sits underneath; anything the translation
+    // service serves wins over it.
+    messages: mergeWithDesignSystemMessages(
+      translations as Record<string, object>,
+    ),
     missingWarn: false,
     fallbackWarn: false,
   });

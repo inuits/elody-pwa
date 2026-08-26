@@ -5,8 +5,8 @@
     :aria-label="$t('navigation.main-label')"
     @keydown.escape="changeExpandedStateOfMenu(false)"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-background-light px-5 pb-16 z-navigation',
-      { 'w-80 navbar--expanded': isExpanded },
+      'navbar fixed left-0 top-0 h-screen align-center pt-10 bg-background-light pb-16 z-navigation',
+      isExpanded ? 'w-80 px-5 navbar--expanded' : 'w-[52px] px-1',
     ]"
     @click.self="changeExpandedStateOfMenu(true)"
   >
@@ -16,7 +16,11 @@
         @click="setSelectedMenuItem(menuItems[0])"
         class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
       >
-        <img src="/logo.svg" alt="Elody logo" class="h-12" />
+        <img
+          src="/logo.svg"
+          alt="Elody logo"
+          :class="isExpanded ? 'h-12' : 'h-8'"
+        />
       </router-link>
       <div
         v-if="environmentLabel"
@@ -46,7 +50,7 @@
     </div>
     <LogInLogout
       :is-expanded="isExpanded"
-      :class="['fixed bg-white pb-8 bottom-0 left-0 pl-4']"
+      :class="['fixed bg-white pb-8 bottom-0 left-0', isExpanded ? 'pl-4' : 'pl-1']"
     />
   </nav>
 </template>

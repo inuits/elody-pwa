@@ -6,8 +6,9 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="menu-item-row flex flex-row items-center pl-4 min-h-9 mt-3 w-full text-left cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
+      class="menu-item-row flex flex-row items-center min-h-9 mt-3 w-full text-left cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
       :class="[
+        isExpanded ? 'pl-4' : 'justify-center',
         {
           'bg-neutral-40 rounded-lg': isBeingHovered,
           'menu-item-row--active': isActiveParentOrSubmenu,

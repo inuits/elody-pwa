@@ -8,7 +8,7 @@
         @click="auth.redirectToLogin()"
         :name="Unicons.UserCircle.name"
         height="21"
-        class="mt-1 ml-5"
+        class="mt-1 ml-2"
       />
       <span
         v-if="auth.isAuthenticated.value === false && isExpanded"
@@ -36,7 +36,7 @@
                 <unicon
                   :name="Unicons.UserCircle.name"
                   height="20"
-                  class="mt-1 ml-5"
+                  class="mt-1 ml-2"
                 /></div
             ></router-link>
           </template>
@@ -52,7 +52,7 @@
           v-if="isExpanded"
           :name="Unicons.UserCircle.name"
           height="20"
-          class="mt-1 ml-5"
+          class="mt-1 ml-2"
         />
         <span v-if="isExpanded" class="overflow-hidden px-4 font-bold">
           {{ getUserName() }}
@@ -72,7 +72,7 @@
                 @click="openConfirmationModal"
                 :name="Unicons.SignOut.name"
                 height="20"
-                class="mt-1 ml-5"
+                class="mt-1 ml-2"
               />
             </div>
           </template>
@@ -89,7 +89,7 @@
           @click="openConfirmationModal"
           :name="Unicons.SignOut.name"
           height="20"
-          class="mt-1 ml-5"
+          class="mt-1 ml-2"
         />
         <span
           v-if="isExpanded"
@@ -104,7 +104,6 @@
 </template>
 
 <script lang="ts" setup>
-import { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
 import { useConfirmModal } from "@/composables/useConfirmModal";
