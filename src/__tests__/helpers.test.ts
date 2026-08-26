@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   getEntityPageRoute,
+  goToEntityPage,
   getMappedSlug,
   mapUrlToEntityType,
   extractObjectsByTypename,
@@ -267,6 +268,98 @@ describe("Entity Mapping Functions", () => {
           id: undefined,
           type: "our-invoices",
         },
+      });
+    });
+
+    it("should route to the configured navigation target instead of the entity itself", () => {
+      const entity: Entity = {
+        __typename: "Order",
+        uuid: "order-789",
+        intialValues: {
+          navigate_to_id: "product-123",
+          navigate_to_type: "our-products",
+        },
+      };
+      const result = getEntityPageRoute(entity, "entity-page");
+      expect(result).toEqual({
+        name: "entity-page",
+        params: {
+          id: "product-123",
+          type: "our-products",
+        },
+      });
+    });
+
+    it("should route to the entity itself when only part of the navigation target resolves", () => {
+      const entityWithoutType: Entity = {
+        __typename: "Order",
+        uuid: "order-789",
+        intialValues: { navigate_to_id: "product-123", navigate_to_type: "" },
+      };
+      const entityWithoutId: Entity = {
+        __typename: "Order",
+        uuid: "order-789",
+        intialValues: { navigate_to_id: "", navigate_to_type: "our-products" },
+      };
+
+      expect(getEntityPageRoute(entityWithoutType, "entity-page")).toEqual({
+        name: "entity-page",
+        params: { id: "order-789", type: "our-orders" },
+      });
+      expect(getEntityPageRoute(entityWithoutId, "entity-page")).toEqual({
+        name: "entity-page",
+        params: { id: "order-789", type: "our-orders" },
+      });
+    });
+
+    it("should prefer the navigation target over the slug", () => {
+      const entity: Entity = {
+        __typename: "Order",
+        uuid: "order-789",
+        intialValues: {
+          slug: "order-slug",
+          navigate_to_id: "product-123",
+          navigate_to_type: "our-products",
+        },
+      };
+      expect(getEntityPageRoute(entity, "entity-page")).toEqual({
+        name: "entity-page",
+        params: { id: "product-123", type: "our-products" },
+      });
+    });
+  });
+
+  describe("goToEntityPage", () => {
+    it("should push the entity route", () => {
+      const router = { push: vi.fn() } as any;
+      goToEntityPage(
+        { __typename: "Category", uuid: "category-456" } as Entity,
+        "category-list",
+        router,
+      );
+      expect(router.push).toHaveBeenCalledWith({
+        name: "category-list",
+        params: { id: "category-456", type: "our-categories" },
+      });
+    });
+
+    it("should push the configured navigation target", () => {
+      const router = { push: vi.fn() } as any;
+      goToEntityPage(
+        {
+          __typename: "Order",
+          uuid: "order-789",
+          intialValues: {
+            navigate_to_id: "product-123",
+            navigate_to_type: "our-products",
+          },
+        } as Entity,
+        "entity-page",
+        router,
+      );
+      expect(router.push).toHaveBeenCalledWith({
+        name: "entity-page",
+        params: { id: "product-123", type: "our-products" },
       });
     });
   });

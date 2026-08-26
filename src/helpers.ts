@@ -38,26 +38,36 @@ import DOMPurify from "dompurify";
 import { onError } from "@apollo/client/link/error";
 import type { GraphQLError } from "graphql/error";
 
+
+const navigationTargetIdKey = "navigate_to_id";
+const navigationTargetTypeKey = "navigate_to_type";
+
+const getEntityRouteParams = (
+  entity: Entity,
+): { id: string | undefined; type: string } => {
+  const intialValues = entity.intialValues as Record<string, any> | undefined;
+  const targetId = intialValues?.[navigationTargetIdKey];
+  const targetType = intialValues?.[navigationTargetTypeKey];
+  if (targetId && targetType) return { id: targetId, type: targetType };
+
+  return {
+    id:
+      entity.intialValues?.slug ||
+      entity.uuid ||
+      getValueFromTeaserMetadata(
+        entity.teaserMetadata as Record<string, MetadataInput>,
+        "id",
+      ),
+    type: getMappedSlug(entity),
+  };
+};
+
 export const goToEntityPage = (
   entity: Entity,
   listItemRouteName: string,
   router: Router,
 ) => {
-  const entityId =
-    entity.intialValues?.slug ||
-    entity.uuid ||
-    getValueFromTeaserMetadata(
-      entity.teaserMetadata as Record<string, MetadataInput>,
-      "id",
-    );
-
-  router.push({
-    name: listItemRouteName,
-    params: {
-      id: entityId,
-      type: getMappedSlug(entity),
-    },
-  });
+  router.push(getEntityPageRoute(entity, listItemRouteName));
 };
 
 export const goToEntityTypeRoute = (
@@ -142,20 +152,9 @@ export const getEntityPageRoute = (
   entity: Entity,
   listItemRouteName: string,
 ) => {
-  const entityId =
-    entity.intialValues?.slug ||
-    entity.uuid ||
-    getValueFromTeaserMetadata(
-      entity.teaserMetadata as Record<string, metadataInput>,
-      "id",
-    );
-
   return {
     name: listItemRouteName,
-    params: {
-      id: entityId,
-      type: getMappedSlug(entity),
-    },
+    params: getEntityRouteParams(entity),
   };
 };
 
