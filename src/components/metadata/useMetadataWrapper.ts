@@ -1,5 +1,5 @@
 import type { MetadataWrapperProps } from "@/components/metadata/MetadataWrapper.vue";
-import { type FieldContext, type FormContext, useField } from "vee-validate";
+import { type FieldContext, useField } from "vee-validate";
 import {
   computed,
   inject,
@@ -21,7 +21,7 @@ import { useConditionalValidation } from "@/composables/useConditionalValidation
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { usePermissions } from "@/composables/usePermissions";
-import { getEntityIdFromRoute, getTranslatedMessage } from "@/helpers";
+import { getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useFieldLock } from "@/composables/useFieldLock";
 import {
@@ -90,10 +90,9 @@ export const useMetadataWrapper = (
   fieldValueProxy: ComputedRef<any>;
   fieldTooltipValue: ComputedRef<any>;
   fieldErrorMessage: ComputedRef<string | undefined>;
-  extractIntialValueFromParentByKey: (key: string) => string | undefined;
 } => {
   const formHelper = useFormHelper();
-  const { forms, editableFields, getForm } = formHelper;
+  const { forms, editableFields } = formHelper;
   const { conditionalFieldIsRequired } = useConditionalValidation();
 
   const mediafileViewerContext: any = inject("mediafileViewerContext", "");
@@ -243,32 +242,6 @@ export const useMetadataWrapper = (
     },
   });
 
-  const parentForm = ref<FormContext | undefined>(
-    getForm(getEntityIdFromRoute()),
-  );
-
-  const extractIntialValueFromParentByKey = (
-    key: string,
-  ): string | undefined => {
-    if (!parentForm.value || !key) return undefined;
-    const fromRelationType = (props.metadata as any).copyValueFromParent?.fromRelationType;
-    if (fromRelationType) {
-      const relations = parentForm.value.values.relationValues?.[fromRelationType];
-      const relatedId = Array.isArray(relations)
-        ? relations[0]?.key
-        : undefined;
-      const relatedForm = relatedId ? getForm(relatedId) : undefined;
-      const relatedValue = relatedForm?.values.intialValues?.[key];
-      if (relatedValue !== undefined && relatedValue !== "") return relatedValue;
-      // Fall back to the host parent (e.g. the muziekweb entity hosting a guided
-      // flow) when the related entity isn't staged or has no value for this key —
-      // otherwise fromRelationType fields (like the manifestation title copied
-      // from the work) never pre-fill in the flow.
-      return parentForm.value.values.intialValues?.[key];
-    }
-    return parentForm?.value.values.intialValues[key];
-  };
-
   watch(
     () => props.formId,
     () =>
@@ -327,6 +300,5 @@ export const useMetadataWrapper = (
     fieldValueProxy,
     fieldTooltipValue,
     fieldErrorMessage,
-    extractIntialValueFromParentByKey,
   };
 };

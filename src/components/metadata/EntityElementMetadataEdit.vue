@@ -79,23 +79,14 @@
       :relation-type="field.relationType"
       :disabled="fieldEditIsDisabled"
     />
-    <div v-else :class="[{ 'grid grid-cols-[80%_20%]': enableCopyFromParent }]">
-      <BaseInputTextNumberDatetime
-        :name="fieldKey"
-        v-model:model-value="metadataValue"
-        :type="field.type as any"
-        input-style="defaultWithBorder"
-        :disabled="fieldEditIsDisabled"
-      />
-      <base-button-new
-        v-if="enableCopyFromParent"
-        class="ml-1"
-        :label="t(copyValueFromParent.label)"
-        button-style="accentAccent"
-        button-size="small"
-        @click="() => copyValueFromParentAction(copyValueFromParent.key)"
-      />
-    </div>
+    <BaseInputTextNumberDatetime
+      v-else
+      :name="fieldKey"
+      v-model:model-value="metadataValue"
+      :type="field.type as any"
+      input-style="defaultWithBorder"
+      :disabled="fieldEditIsDisabled"
+    />
     <div v-if="showErrors && !fieldIsValid" class="text-red-default">
       <p>
         {{ computedError }}
@@ -108,7 +99,6 @@
 import {
   type AdvancedFilterInput,
   type Conditional,
-  type CopyValueFromParentIntialValues,
   type DropdownOption,
   type HiddenField,
   type BaseRelationValuesInput,
@@ -123,7 +113,6 @@ import { computed, inject, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { useHiddenField } from "@/components/metadata/useHiddenField";
@@ -149,10 +138,6 @@ const props = defineProps<{
   fieldIsValid: boolean;
   formFlow?: string;
   isFieldRequired: boolean;
-  copyValueFromParent?: CopyValueFromParentIntialValues;
-  extractValueFromParent: (
-    key: string,
-  ) => string | string[] | number | number[] | undefined;
   repeatablePanelConfig?: PanelRepetitionProps;
   disabled?: boolean;
   defaultValue?: string;
@@ -230,22 +215,9 @@ const fieldEditIsDisabled = computed(() => {
   );
 });
 
-const enableCopyFromParent = computed(() => {
-  if (
-    !props.copyValueFromParent ||
-    !props.extractValueFromParent ||
-    !props.copyValueFromParent.label
-  )
-    return false;
-  const value = props.extractValueFromParent(props.copyValueFromParent?.key);
-  return !(!value || value == "");
-});
-
 onMounted(() => {
   if (props.isMetadataOnRelation || props.isRootDataOnRelation)
     addEditableMetadataKeys([props.fieldKey], props.formId);
-  if (props.copyValueFromParent?.autoCopy)
-    copyValueFromParentAction(props.copyValueFromParent.key);
 });
 
 const getValueFromMetadata = (
@@ -277,10 +249,4 @@ const metadataKeyToGetOptionsFor = computed(() => {
     ? field.advancedFilterInputForSearchingOptions?.item_types[0]
     : props.fieldKey;
 });
-
-const copyValueFromParentAction = (key: string) => {
-  const newValue = props.extractValueFromParent(key);
-  if (!newValue) return;
-  metadataValue.value = newValue;
-};
 </script>

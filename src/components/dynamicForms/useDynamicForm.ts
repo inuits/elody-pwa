@@ -21,9 +21,9 @@ const useDynamicForm = () => {
   const getDynamicForm = (
     queryDocument: any,
     tabName: string | undefined = undefined,
-  ): void => {
+  ): Promise<void> => {
     dynamicFormLoaded.value = false;
-    apolloClient
+    return apolloClient
       .query({
         query: queryDocument,
       })

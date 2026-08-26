@@ -29,6 +29,16 @@
         v-model="selectedRelationMode"
         :options="relationModeOptions"
       />
+      <div v-if="copyAllLabel && canCopyFromParent" class="mb-4 w-fit">
+        <BaseButtonNew
+          data-cy="copy-all-from-parent"
+          :label="t(copyAllLabel)"
+          button-style="accentAccent"
+          button-size="small"
+          force-show-label
+          @click="copyAllFromParent"
+        />
+      </div>
       <div
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
@@ -287,7 +297,15 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
-import { computed, inject, ref, watch, onUnmounted } from "vue";
+import {
+  computed,
+  inject,
+  nextTick,
+  provide,
+  ref,
+  watch,
+  onUnmounted,
+} from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
 import { useI18n } from "vue-i18n";
@@ -323,6 +341,13 @@ import { useSharedUploadLogic } from "@/composables/upload/useSharedUploadLogic"
 import DynamicFormSkeleton from "./DynamicFormSkeleton.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import {
+  type CopyFromParentConfig,
+  type NestedFormValues,
+  copyFromParentContextKey,
+  mergeNestedValues,
+  useCopyFromParent,
+} from "@/composables/useCopyFromParent";
 import {
   type Context,
   useBulkOperations,
@@ -516,6 +541,53 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
   if (formTabObjects.length === 0) return undefined;
 
   return normalizeFields(formTabObjects);
+});
+
+const copyFromParentConfig = computed<CopyFromParentConfig | undefined>(() => {
+  const formObject: any = dynamicForm.value?.GetDynamicForm;
+  if (!formObject) return undefined;
+  const tabConfig = findFormTabObjects(formObject)
+    .map((formTab: any) => formTab.copyFromParent)
+    .find(Boolean);
+  return tabConfig ?? formObject.copyFromParent ?? undefined;
+});
+
+const copyableFields = (): PanelMetaData[] =>
+  (formFields.value ?? []).filter(
+    (formField: any) => formField.__typename === "PanelMetaData",
+  ) as PanelMetaData[];
+
+const {
+  plan: copyFromParentPlan,
+  autoCopyValues,
+  copyAllLabel,
+  entryFor: copyEntryFor,
+  buttonEntryFor: copyButtonEntryFor,
+} = useCopyFromParent({
+  config: () => copyFromParentConfig.value,
+  fields: copyableFields,
+});
+
+const copyFieldFromParent = (field: PanelMetaData) => {
+  const entry = copyEntryFor(field);
+  if (!entry || !form.value) return;
+  form.value.setFieldValue(entry.formKey, entry.value);
+};
+
+const copyAllFromParent = () => {
+  if (!form.value) return;
+  for (const entry of copyFromParentPlan.value)
+    form.value.setFieldValue(entry.formKey, entry.value);
+};
+
+const canCopyFromParent = computed(() => copyFromParentPlan.value.length > 0);
+
+provide(copyFromParentContextKey, {
+  buttonFor: (field: PanelMetaData) => {
+    const entry = copyButtonEntryFor(field);
+    if (!entry) return undefined;
+    return { label: entry.label!, copy: () => copyFieldFromParent(field) };
+  },
 });
 
 const formId = computed<string>(() => {
@@ -1595,11 +1667,28 @@ const initializeForm = async (
   resetVeeValidateForDynamicForm(newQueryName, oldQueryName);
   if (modalFormFields) {
     dynamicFormLoaded.value = true;
+    await seedFormValues();
     return;
   }
   if (!props.dynamicFormQuery) return;
   const document = await getQuery(props.dynamicFormQuery);
-  getDynamicForm(document, props.tabName);
+  await getDynamicForm(document, props.tabName);
+  await seedFormValues();
+};
+
+
+const seedFormValues = async () => {
+  if (!form.value) return;
+  await nextTick();
+
+  const prefilled = (props.prefilledFormValues ?? {}) as NestedFormValues;
+  const seeded = mergeNestedValues(autoCopyValues.value, prefilled);
+  if (Object.keys(seeded).length === 0) return;
+
+  form.value.resetForm(
+    { values: mergeNestedValues(form.value.values, seeded) },
+    { force: true },
+  );
 };
 
 const closeAndDeleteForm = () => {
@@ -1665,18 +1754,6 @@ watch(
     }
   },
   { deep: true },
-);
-
-watch(
-  () => dynamicFormLoaded.value,
-  () => {
-    if (dynamicFormLoaded.value && props.prefilledFormValues) {
-      // Todo: This timeout is ugly, form creation from metadatafields should be awaited
-      setTimeout(() => {
-        form.value.setValues(props.prefilledFormValues, false);
-      }, 100);
-    }
-  },
 );
 
 onUnmounted(() => {

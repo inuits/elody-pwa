@@ -24,6 +24,10 @@ vi.mock("@/main", () => ({
 import MetadataWrapper from "../MetadataWrapper.vue";
 import { InputFieldTypes } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
+import {
+  copyFromParentContextKey,
+  type CopyFromParentContext,
+} from "@/composables/useCopyFromParent";
 
 const uniconStub = {
   template: "<div></div>",
@@ -82,7 +86,10 @@ const buildProps = (key: string, isEdit: boolean) => ({
   },
 });
 
-const mountWrapper = async (props: ReturnType<typeof buildProps>) => {
+const mountWrapper = async (
+  props: ReturnType<typeof buildProps>,
+  copyContext?: CopyFromParentContext,
+) => {
   const Harness = defineComponent({
     setup() {
       const form = useForm({
@@ -96,6 +103,9 @@ const mountWrapper = async (props: ReturnType<typeof buildProps>) => {
 
   const wrapper = mount(Harness, {
     global: {
+      provide: copyContext
+        ? { [copyFromParentContextKey as unknown as symbol]: copyContext }
+        : {},
       stubs: {
         unicon: uniconStub,
         BaseTooltip: baseTooltipStub,
@@ -199,5 +209,63 @@ describe("MetadataWrapper — locked field rendering", () => {
       '[data-testid="locked-field-view-container"]',
     );
     expect(container.classes()).toContain("bg-background-normal/70");
+  });
+});
+
+describe("MetadataWrapper — copy-from-parent button layout", () => {
+  const copy = vi.fn();
+  const context: CopyFromParentContext = {
+    buttonFor: () => ({ label: "bulk-operations.copy-title-from-work", copy }),
+  };
+
+  it("renders the copy button when the form provides one for this field", async () => {
+    const wrapper = await mountWrapper(buildProps("subtitle", true), context);
+
+    expect(wrapper.find('[data-cy="copy-from-parent"]').exists()).toBe(true);
+  });
+
+  it("renders no copy button when the form provides none", async () => {
+    const wrapper = await mountWrapper(buildProps("subtitle", true), {
+      buttonFor: () => undefined,
+    });
+
+    expect(wrapper.find('[data-cy="copy-from-parent"]').exists()).toBe(false);
+  });
+
+  it("renders no copy button outside edit mode", async () => {
+    const wrapper = await mountWrapper(buildProps("subtitle", false), context);
+
+    expect(wrapper.find('[data-cy="copy-from-parent"]').exists()).toBe(false);
+  });
+
+  it("wraps the button in a width-owning container so it cannot take the whole row", async () => {
+    // BaseButtonNew's root <button> hard-codes w-full, so as a direct flex child it
+    // resolves to 100% of the row and squeezes the input to nothing. It has to sit
+    // in a shrink-to-fit wrapper, the same way BulkEditClearFieldButton does.
+    const wrapper = await mountWrapper(buildProps("subtitle", true), context);
+
+    const action = wrapper.find('[data-testid="copy-from-parent-action"]');
+    expect(action.exists()).toBe(true);
+    expect(action.classes()).toContain("shrink-0");
+    expect(action.classes()).toContain("w-fit");
+    expect(wrapper.find('[data-cy="copy-from-parent"]').element.parentElement).
+      toBe(action.element);
+  });
+
+  it("forces the label to stay visible - the button has no icon to fall back on", async () => {
+    // BaseButtonNew hides its label in narrow containers unless forceShowLabel is
+    // set; with no icon configured that would render an empty box.
+    const wrapper = await mountWrapper(buildProps("subtitle", true), context);
+
+    expect(
+      wrapper.findComponent({ name: "BaseButtonNew" }).props("forceShowLabel"),
+    ).toBe(true);
+  });
+
+  it("copies through the provided context when clicked", async () => {
+    const wrapper = await mountWrapper(buildProps("subtitle", true), context);
+    await wrapper.find('[data-cy="copy-from-parent"]').trigger("click");
+
+    expect(copy).toHaveBeenCalled();
   });
 });

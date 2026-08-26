@@ -63,8 +63,6 @@
             !isFieldValid &&
             metadata.inputField?.validation?.fastValidationMessage)
         "
-        :copy-value-from-parent="metadata.copyValueFromParent"
-        :extract-value-from-parent="extractIntialValueFromParentByKey"
         :field-is-valid="isFieldValid"
         :is-field-required="isFieldRequired"
         :repeatable-panel-config="repeatablePanelConfig"
@@ -73,6 +71,20 @@
         @click.stop.prevent
         @update:value="(value) => (fieldValueProxy = value)"
       />
+      <div
+        v-if="copyFromParentButton"
+        data-testid="copy-from-parent-action"
+        class="shrink-0 w-fit"
+      >
+        <base-button-new
+          data-cy="copy-from-parent"
+          :label="t(copyFromParentButton.label)"
+          button-style="accentAccent"
+          button-size="small"
+          force-show-label
+          @click="copyFromParentButton.copy()"
+        />
+      </div>
       <slot name="fieldAction" />
     </div>
     <div
@@ -293,6 +305,8 @@ import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocale
 import { useMetadataWrapper } from "@/components/metadata/useMetadataWrapper";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { copyFromParentContextKey } from "@/composables/useCopyFromParent";
 import { useMetadataVirtualKeyboard } from "@/composables/useMetadataVirtualKeyboard";
 import { useMetadataWrapperDropdownOptions } from "./useMetadataWrapperDropdownOptions";
 import { useVeeValidate } from "./useVeeValidate";
@@ -357,8 +371,14 @@ const {
   isFieldRequired,
   fieldTooltipValue,
   fieldErrorMessage,
-  extractIntialValueFromParentByKey,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
+
+const copyFromParent = inject(copyFromParentContextKey, undefined);
+
+const copyFromParentButton = computed(() => {
+  if (!props.isEdit) return undefined;
+  return copyFromParent?.buttonFor(props.metadata as PanelMetaData);
+});
 const {
   initializeDropdownStates,
   metadataKeyToGetOptions,
