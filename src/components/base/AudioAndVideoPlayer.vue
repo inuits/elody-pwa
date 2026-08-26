@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full h-full relative">
+  <div class="w-full h-full relative flex flex-col">
     <div
-      class="w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10"
+      class="w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10 shrink-0"
     >
       <button @click="downloadVideo">
         <unicon
@@ -11,7 +11,7 @@
         />
       </button>
     </div>
-    <div class="h-full" v-if="mediaType === 'Video'">
+    <div class="flex-1 min-h-0" v-if="mediaType === 'Video'">
       <video
         class="w-full h-full bg-white"
         preload="auto"
@@ -22,7 +22,7 @@
         Video not supported
       </video>
     </div>
-    <div class="grid grid-rows-2 h-full" v-else>
+    <div class="grid grid-rows-2 flex-1 min-h-0" v-else>
       <div class="flex justify-center items-end w-full bg-white">
         <unicon class="h-24 w-24 text-neutral-70" :name="Unicons.Music.name" />
       </div>
