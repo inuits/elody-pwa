@@ -151,6 +151,63 @@ describe("saveRelatedEntityData", () => {
     expect(rolesEntry?.value).toEqual(["venue_member"]);
   });
 
+  it("does not mutate when the seeded value equals what the relation already holds", async () => {
+    const user1 = makeEntity("user-1", {
+      refOrganizations: [
+        {
+          key: "org-1",
+          editStatus: EditStatus.Unchanged,
+          metadata: [
+            { key: "roles", value: ["admin"] },
+            { key: "function", value: ["technician"] },
+          ],
+        },
+      ],
+    });
+    mockGetForm.mockReturnValue({
+      values: {
+        relatedEntityData: {
+          metadata: {},
+          relations: {
+            "roles-user-1": { label: ["admin"], formatter: "pill" },
+            "function-user-1": { label: ["technician"], formatter: "pill" },
+          },
+        },
+      },
+    });
+
+    await saveRelatedEntityData("org-1", [user1]);
+
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+
+  it("does not send an empty display value for a key the relation never had", async () => {
+    const user1 = makeEntity("user-1", {
+      refOrganizations: [
+        {
+          key: "org-1",
+          editStatus: EditStatus.Unchanged,
+          metadata: [{ key: "roles", value: ["admin"] }],
+        },
+      ],
+    });
+    mockGetForm.mockReturnValue({
+      values: {
+        relatedEntityData: {
+          metadata: {},
+          relations: {
+            "roles-user-1": { label: ["admin"], formatter: "pill" },
+            "function-user-1": { label: "", formatter: "pill" },
+          },
+        },
+      },
+    });
+
+    await saveRelatedEntityData("org-1", [user1]);
+
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
+
   it("calls updateRelationDirect for each linked entity with non-null values", async () => {
     const user1 = makeEntity("user-1", {
       refOrganizations: [

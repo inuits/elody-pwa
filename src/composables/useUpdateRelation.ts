@@ -74,6 +74,58 @@ export const saveRelatedEntityData = async (
     if (!relatedEntity) continue;
     const inverseRelationType = findInverseRelationType(relatedEntity, entityId);
     if (!inverseRelationType) continue;
-    await updateRelationDirect(relatedEntity, inverseRelationType, entityId, updates);
+    const changedUpdates = keepChangedUpdates(
+      updates,
+      findRelationMetadata(relatedEntity, inverseRelationType, entityId),
+    );
+    if (!Object.keys(changedUpdates).length) continue;
+    await updateRelationDirect(
+      relatedEntity,
+      inverseRelationType,
+      entityId,
+      changedUpdates,
+    );
   }
 };
+
+const findRelationMetadata = (
+  entity: Entity,
+  relationType: string,
+  relationKey: string,
+): Array<{ key: string; value: any }> => {
+  const relations = (entity.relationValues ?? {}) as Record<string, any[]>;
+  return (
+    relations[relationType]?.find(
+      (relation) => relation.key === relationKey,
+    )?.metadata ?? []
+  );
+};
+
+const isEmptyValue = (value: any): boolean =>
+  value === "" || (Array.isArray(value) && !value.length);
+
+const hasSameValue = (currentValue: any, newValue: any): boolean => {
+  const normalized =
+    Array.isArray(currentValue) && !Array.isArray(newValue)
+      ? [newValue]
+      : newValue;
+  return JSON.stringify(currentValue) === JSON.stringify(normalized);
+};
+
+// Every rendered relation field seeds itself with the value it was displayed
+// with, so an untouched field is indistinguishable from an edited one by
+// presence alone. Compare against what the relation already holds and only send
+// real changes — otherwise saving unrelated metadata (a title, say) rewrites
+// every linked entity, and a display-formatted value that never round-trips
+// (an empty pill, a label string) fails validation.
+const keepChangedUpdates = (
+  updates: Record<string, any>,
+  currentMetadata: Array<{ key: string; value: any }>,
+): Record<string, any> =>
+  Object.fromEntries(
+    Object.entries(updates).filter(([key, value]) => {
+      const current = currentMetadata.find((entry) => entry.key === key);
+      if (!current) return !isEmptyValue(value);
+      return !hasSameValue(current.value, value);
+    }),
+  );
