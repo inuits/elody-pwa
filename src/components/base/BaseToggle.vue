@@ -1,10 +1,12 @@
 <template>
-  <div
-    class="flex items-center justify-center w-9 h-9 rounded bg-background-light cursor-pointer select-none"
+  <button
+    type="button"
+    class="flex items-center justify-center w-9 h-9 rounded bg-background-light cursor-pointer select-none base-toggle"
     :class="{
       'drop-shadow-[0_0_3px_rgba(9,30,66,0.13)]':
         isPartOfToggleGroup && !toggleOn,
     }"
+    :aria-pressed="toggleOn"
     @click="
       () => {
         emit('turnAllTogglesInGroupOff');
@@ -19,7 +21,7 @@
       :height="iconHeight"
     />
     <unicon v-else :name="Unicons[props.iconOff].name" :height="iconHeight" />
-  </div>
+  </button>
 </template>
 
 <script lang="ts" setup>
@@ -48,3 +50,10 @@ const emit = defineEmits<{
 
 const { modelValue: toggleOn } = toRefs(props);
 </script>
+
+<style scoped>
+.base-toggle:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+</style>

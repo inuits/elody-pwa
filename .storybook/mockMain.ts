@@ -4,13 +4,52 @@
 // "@/main"; importing the real module would boot the whole application
 // (OIDC redirect, app config fetch) as a side effect of rendering a story.
 // The alias in .storybook/vite.config.ts points at this file instead.
-import { ApolloClient, InMemoryCache } from "@apollo/client/core";
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  Observable,
+} from "@apollo/client/core";
 import { createRouter, createWebHistory } from "vue-router";
 import { createI18n } from "vue-i18n";
 import { designSystemMessages } from "@/i18n/designSystemMessages";
 
+/**
+ * Fixture-backed transport. Components that query on mount (filters, saved
+ * searches) resolve against data their story registered instead of a network
+ * that does not exist here; an unregistered operation resolves to empty data
+ * rather than rejecting, so a story never hangs on a request.
+ */
+const queryFixtures: Record<string, unknown> = {};
+export const registerQueryFixture = (
+  operationName: string,
+  data: unknown,
+): void => {
+  queryFixtures[operationName] = data;
+};
+
+const fixtureLink = new ApolloLink(
+  (operation) =>
+    new Observable((observer) => {
+      if (!(operation.operationName in queryFixtures)) {
+        // Silent empty answers are hard to debug; say what was asked.
+        console.debug(
+          `[storybook] unfixtured query "${operation.operationName}" answered {}`,
+        );
+      }
+      observer.next({
+        data: (queryFixtures[operation.operationName] ?? {}) as Record<
+          string,
+          unknown
+        >,
+      });
+      observer.complete();
+    }),
+);
+
 export const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
+  link: fixtureLink,
 });
 
 export const router = createRouter({

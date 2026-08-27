@@ -62,10 +62,16 @@
       />
 
       <Layers.OlTileLayer>
-        <Sources.OlSourceOsm v-if="mapView === MapViews.Standard" />
+        <Sources.OlSourceOsm
+          v-if="mapView === MapViews.Standard"
+          :url="tileUrl"
+        />
         <Sources.OlSourceXyz
           v-if="mapView === MapViews.Satellite"
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          :url="
+            tileUrl ??
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+          "
           :attributions="[
             'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
           ]"
@@ -82,7 +88,7 @@
         </Sources.OlSourceCluster>
       </Layers.OlVectorLayer>
 
-      <Layers.OlVectorLayer v-else>
+      <Layers.OlVectorLayer v-else :style="pointStyle">
         <Sources.OlSourceVector
           ref="vectorSourceRef"
           :features="pointFeatures"
@@ -135,6 +141,12 @@ const props = withDefaults(
     useFilters?: boolean;
     geoFilters?: AdvancedFilters;
     clustering?: boolean;
+    /**
+     * Overrides the base-layer tile template. Exists for offline rendering
+     * (Storybook uses a data-URI tile so the map never touches the network);
+     * the app leaves it unset.
+     */
+    tileUrl?: string;
   }>(),
   {
     center: () => [],
@@ -142,6 +154,7 @@ const props = withDefaults(
     useFilters: false,
     geoFilters: undefined,
     clustering: false,
+    tileUrl: undefined,
   },
 );
 
@@ -188,6 +201,15 @@ const { result: featureResult, loading: featureLoading } =
 
 const markerStyle = new Style({
   image: new Icon({ anchor: [0.5, 1], src: "/marker.png", scale: 0.075 }),
+});
+
+// Loose points wear the tenant accent (map-viewer.md), not OL's default blue.
+const pointStyle = new Style({
+  image: new CircleStyle({
+    radius: 6,
+    fill: new Fill({ color: getAccentColor() }),
+    stroke: new Stroke({ color: "#ffffff", width: 2 }),
+  }),
 });
 
 const clusterStyleCache: Record<number, Style> = {};

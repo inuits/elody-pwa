@@ -84,6 +84,37 @@ export const GroupEditing: Story = {
 };
 
 /**
+ * A panel with a repetitionConfig repeats its row block: "Add more" appends a
+ * block, each block after the first carries its own remove, and a rule
+ * separates the blocks (repeatable-row-group.md).
+ */
+export const Repeatable: Story = {
+  render: () => ({
+    components: { EntityElementWindowPanel },
+    setup() {
+      setupForm();
+      return {
+        panel: {
+          ...panel(false),
+          panelHeaderContent: { label: "Identificatienummers" },
+          repetitionConfig: { repetitionKey: "identifiers" },
+        },
+        formId: FORM_ID,
+      };
+    },
+    template: `
+      <div style="max-width:560px">
+        <entity-element-window-panel
+          :panel="panel"
+          :identifiers="['story-entity']"
+          :is-edit="true"
+          :form-id="formId"
+        />
+      </div>`,
+  }),
+};
+
+/**
  * The same three fields without the flag: independent rows, each saving on its
  * own. This is what every panel does unless the form definition says otherwise.
  */

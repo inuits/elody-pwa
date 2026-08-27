@@ -19,7 +19,7 @@
       <div class="flex justify-end gap-4">
         <div v-if="repeatablePanel && isEdit">
           <base-button
-            :label="t('Add more')"
+            :label="t('repetitiveForm.add-more')"
             :icon="DamsIcons.Plus"
             button-size="sm"
             button-style="commit"

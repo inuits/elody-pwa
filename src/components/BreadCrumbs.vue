@@ -10,23 +10,27 @@
           { 'rounded-xl': !showHistory },
         ]"
       >
-        <div
+        <button
           v-if="breadcrumbRoutes.length > 1"
+          type="button"
+          class="breadcrumbs__control flex cursor-pointer"
+          :aria-expanded="showHistory"
+          :aria-label="t('navigation.breadcrumb-history')"
           @click="toggleList()"
-          class="flex cursor-pointer"
         >
           <unicon height="24" :name="Unicons.EllipsisH.name"></unicon>
           <p class="ml-1">{{ breadcrumbRoutes.length - 1 }}</p>
-        </div>
+        </button>
         <unicon
           v-if="breadcrumbRoutes.length > 1"
           height="24"
           :name="Unicons.AngleRight.name"
         ></unicon>
-        <p
+        <button
           v-if="previousRoute?.title"
+          type="button"
           :class="[
-            'px-2 cursor-pointer',
+            'breadcrumbs__control px-2 cursor-pointer',
             { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="
@@ -36,7 +40,7 @@
           @click="checkNavigationAvailable(previousRoute)"
         >
           {{ resolveTitle(previousRoute?.title) }}
-        </p>
+        </button>
       </div>
       <div
         v-if="previousRoute"
@@ -68,7 +72,6 @@
             .slice(0, -1)
             .reverse()"
           :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
-          @click="checkNavigationAvailable(breadcrumbRoute)"
         >
           <div class="flex flex-col items-end w-full">
             <div class="px-4">
@@ -78,12 +81,14 @@
                 :name="Unicons.AngleUp.name"
               ></unicon>
             </div>
-            <div
+            <button
+              type="button"
               :class="[
-                'cursor-pointer hover:bg-background-normal w-full flex px-4',
+                'breadcrumbs__control cursor-pointer hover:bg-background-normal w-full flex px-4',
                 { 'justify-between': breadcrumbRoute.icon },
                 { 'justify-end': !breadcrumbRoute.icon },
               ]"
+              @click="checkNavigationAvailable(breadcrumbRoute)"
             >
               <div class="mr-2" v-if="breadcrumbRoute.icon">
                 <unicon
@@ -99,7 +104,7 @@
                 />
               </div>
               <p>{{ resolveTitle(breadcrumbRoute.title) }}</p>
-            </div>
+            </button>
           </div>
         </li>
       </ul>
@@ -223,4 +228,16 @@ const navigateToEntity = (route: any) => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.breadcrumbs__control {
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+.breadcrumbs__control:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-chip);
+}
+</style>

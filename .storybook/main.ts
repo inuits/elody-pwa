@@ -20,6 +20,8 @@ const config: StorybookConfig = {
   },
   core: { disableTelemetry: true },
   docs: { defaultName: "Docs" },
+  // The map stories reference /marker.png the way the app does.
+  staticDirs: ["../public"],
 };
 
 export default config;
