@@ -15,15 +15,15 @@
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto rounded-lg border border-[rgba(0,58,82,0.2)]">
+    <div class="overflow-x-auto rounded-lg border border-border-default">
       <div class="grid w-max min-w-full" :style="gridStyle">
         <!-- Header row -->
         <div
           v-for="(subField, index) in visibleSubFields"
           :key="`header-${subField.key}`"
-          class="flex items-center bg-background-normal px-2 py-1.5 text-xs font-medium text-text-body border-b border-[rgba(0,58,82,0.2)]"
+          class="flex items-center bg-background-normal px-2 py-1.5 text-xs font-medium text-text-body border-b border-border-default"
           :class="{
-            'border-r border-r-[rgba(0,58,82,0.2)]':
+            'border-r border-r-border-default':
               index < visibleSubFields.length - 1,
           }"
         >
@@ -31,7 +31,7 @@
         </div>
         <div
           v-if="!disabled"
-          class="bg-background-normal border-b border-[rgba(0,58,82,0.2)] border-l border-l-[rgba(0,58,82,0.2)]"
+          class="bg-background-normal border-b border-border-default border-l border-l-border-default"
         />
         <!-- Data rows -->
         <TableRowInputField

@@ -1,8 +1,10 @@
 <template>
+  <!-- An enabled instance IS the editor and always shows its input; the
+       defunct whole-form edit mode no longer decides anything here. -->
   <base-input-autocomplete
     v-show="
       selectedDropdownOptions.length > 0 ||
-      isEdit ||
+      !disabled ||
       mode === 'create' ||
       isLoading
     "
@@ -44,7 +46,7 @@
   <p
     v-show="
       selectedDropdownOptions.length === 0 &&
-      !isEdit &&
+      disabled &&
       mode !== 'create' &&
       !isLoading
     "
@@ -72,7 +74,6 @@ import {
 } from "./mapDropdownOptionsToBulkProcessableItem";
 import { dequal as isEqual } from "dequal";
 import debounce from "lodash.debounce";
-import useEntitySingle from "@/composables/useEntitySingle";
 import {
   computed,
   onBeforeMount,
@@ -88,7 +89,6 @@ import {
   looksLikeEntityId,
 } from "@/helpers";
 import { getFormattersSettings, goToEntityPageById } from "@/helpers";
-import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { useRouter } from "vue-router";
@@ -148,7 +148,6 @@ const { t } = useI18n();
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const tagInputValues = ref<Map<string | number, string>>(new Map());
 const { createEntity } = useManageEntities();
-const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { replaceRelationsFromSameType, addRelations, getRelationsBasedOnType } =
   useFormHelper();
 
@@ -451,7 +450,9 @@ const findAutocompleteOption = async (
 };
 
 const handleTagClick = async (tag: DropdownOption) => {
-  if (isEdit) return;
+  // Chips navigate in the read-only row; inside an open editor they are
+  // values being edited, not links.
+  if (!props.disabled) return;
   const linkFormattersSettings = (await getFormattersSettings())?.link || {};
   const [entityType, linkSetting] =
     Object.entries(linkFormattersSettings).find(

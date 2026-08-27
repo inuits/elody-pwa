@@ -2,9 +2,9 @@
   <div
     v-for="(subField, colIndex) in visibleSubFields"
     :key="subField.key"
-    class="flex items-center px-2 py-1 border-b border-[rgba(0,58,82,0.08)]"
+    class="flex items-center px-2 py-1 border-b border-border-faint"
     :class="{
-      'border-r border-r-[rgba(0,58,82,0.15)]':
+      'border-r border-r-border-subtle':
         colIndex < visibleSubFields.length - 1,
     }"
   >
@@ -32,7 +32,7 @@
   </div>
   <div
     v-if="!disabled"
-    class="flex items-center justify-center px-1 py-1 border-b border-[rgba(0,58,82,0.08)] border-l border-l-[rgba(0,58,82,0.2)]"
+    class="flex items-center justify-center px-1 py-1 border-b border-border-faint border-l border-l-border-default"
   >
     <BaseButton
       class="!w-auto"

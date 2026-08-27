@@ -256,7 +256,7 @@ const classes = computed(() => {
 
   if (props.autocompleteStyle === "defaultWithBorder") {
     result["container"] =
-      `${defaultContainerStyles} !border-[rgba(0,58,82,0.6)] !rounded-lg`;
+      `${defaultContainerStyles} !border-border-default !rounded-lg`;
   }
 
   if (props.autocompleteStyle === "readOnly") {

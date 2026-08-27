@@ -262,7 +262,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-[rgba(0,58,82,0.6)] rounded-md  p-2  ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
+        class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-border-default rounded-md  p-2  ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
       },
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;
