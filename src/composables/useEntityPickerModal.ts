@@ -14,6 +14,10 @@ const cropCoordinatesKey = ref<string>("");
 const actionsOnResult = ref<ActionsOnResult | undefined>(undefined);
 const replaceExistingRelations = ref<boolean>(false);
 const selectionLimit = ref<number>(0);
+// Whether an entity the parent is already related to can be picked again. Most
+// relations want it off -- picking the same author twice is a slip. A pipeline
+// step is a *use* of a component, so a component can legitimately appear twice.
+const allowDuplicateRelations = ref<boolean>(false);
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -68,6 +72,10 @@ const useEntityPickerModal = () => {
     selectionLimit.value = value;
   };
 
+  const setAllowDuplicateRelations = (value: boolean) => {
+    allowDuplicateRelations.value = value;
+  };
+
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
   const getEntityId = () => entityId.value;
@@ -82,6 +90,7 @@ const useEntityPickerModal = () => {
   const getActionsOnResult = () => actionsOnResult.value;
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
+  const getAllowDuplicateRelations = () => allowDuplicateRelations.value;
 
   const resetState = () => {
     acceptedTypes.value = [];
@@ -127,6 +136,8 @@ const useEntityPickerModal = () => {
     getReplaceExistingRelations,
     setSelectionLimit,
     getSelectionLimit,
+    setAllowDuplicateRelations,
+    getAllowDuplicateRelations,
   };
 };
 

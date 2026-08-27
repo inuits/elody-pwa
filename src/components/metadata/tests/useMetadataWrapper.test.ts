@@ -436,3 +436,84 @@ describe("useMetadataWrapper — multi-select empty string initialization", () =
     expect(capturedFieldValueProxy!.value).toBe("");
   });
 });
+
+describe("useMetadataWrapper and a field whose value is not its own", () => {
+  const configFieldProps = (formId: string) => ({
+    formId,
+    metadata: {
+      key: "url",
+      label: "Url",
+      // no `value`: this is what a dynamic field set looks like
+      inputField: { type: InputFieldTypes.Text, __typename: "InputField" },
+      __typename: "PanelMetaData",
+    },
+    isEdit: true,
+    baseLibraryMode: "normalBaseLibrary",
+    formFlow: "edit",
+    showErrors: false,
+  });
+
+  const mountField = (formId: string, seed: object) => {
+    let captured: Ref<any>;
+    const component = defineComponent({
+      setup() {
+        const form = useForm({ initialValues: seed });
+        defineRule("no_xss", () => true);
+        useFormHelper().addForm(formId, form as any);
+        const { fieldValueProxy } = useMetadataWrapper(
+          configFieldProps(formId),
+          () => undefined,
+        );
+        captured = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+    mount(component);
+    return () => captured!.value;
+  };
+
+  it("keeps a value the form was seeded with", async () => {
+    const read = mountField("P-SEEDED", {
+      intialValues: { url: "https://example.org/weather" },
+    });
+
+    await nextTick();
+
+    expect(read()).toBe("https://example.org/weather");
+  });
+
+  it("still leaves an unseeded field empty", async () => {
+    const read = mountField("P-EMPTY", { intialValues: {} });
+
+    await nextTick();
+
+    expect(read()).toBeFalsy();
+  });
+
+  it("shows a value applied to the form after the field mounted", async () => {
+    // What DynamicForm actually does: create the form empty, render the
+    // fields, then setValues() the relation metadata onto it.
+    let captured: Ref<any>;
+    let form: any;
+    const component = defineComponent({
+      setup() {
+        form = useForm({ initialValues: { intialValues: {} } });
+        defineRule("no_xss", () => true);
+        useFormHelper().addForm("P-LATE", form);
+        const { fieldValueProxy } = useMetadataWrapper(
+          configFieldProps("P-LATE"),
+          () => undefined,
+        );
+        captured = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+    mount(component);
+    await nextTick();
+
+    form.setValues({ intialValues: { url: "https://example.org/late" } }, false);
+    await nextTick();
+
+    expect(captured!.value).toBe("https://example.org/late");
+  });
+});
