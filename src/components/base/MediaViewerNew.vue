@@ -111,7 +111,7 @@
       <p v-else>{{ t("media-viewer.no-viewer") }}</p>
       <button
         v-if="mediafileId && mimetype"
-        class="mt-4 flex items-center gap-2 px-4 py-2 rounded-md bg-accent-normal text-white hover:bg-accent-dark transition cursor-pointer"
+        class="mt-4 flex items-center gap-2 px-4 py-2 rounded-md bg-accent-accent text-white hover:bg-accent-dark transition cursor-pointer"
         @click="downloadMediafile(mediafileId!, originalFilename)"
       >
         <unicon height="18" width="18" :name="Unicons.Download.name" />

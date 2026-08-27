@@ -481,7 +481,7 @@ const wrapperClasses = computed(() => {
       "p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]": isGridMode.value,
     },
     {
-      "border-dashed border-2 !border-accent-normal":
+      "border-dashed border-2 !border-accent-accent":
         props.isPreview || isMarkedAsToBeDeleted.value,
     },
     { "!border-status-new": props.isPreview },

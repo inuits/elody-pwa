@@ -246,7 +246,7 @@ button {
 }
 
 .is-active {
-  background-color: var(--color-accent-normal);
+  background-color: var(--color-accent-accent);
   color: var(--color-white);
 }
 
@@ -254,12 +254,4 @@ button {
   background-color: rgba(255, 255, 255, 0.95);
 }
 
-.is-active {
-  background-color: var(--color-accent-normal);
-  color: var(--color-white);
-}
-
-.transparent-bg {
-  background-color: rgba(255, 255, 255, 0.95);
-}
 </style>

@@ -15,7 +15,7 @@
           mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
           getValueOfMediafile(mediafileViewerContext, 'filename', mediafile) ===
             getValueOfMediafile(mediafileViewerContext, 'filename')
-            ? 'p-6 border-2 border-accent-normal'
+            ? 'p-6 border-2 border-accent-accent'
             : '',
         ]"
         :url="
@@ -60,7 +60,7 @@
           mediafileSelectionState[mediafileViewerContext].selectedMediafile &&
           getValueOfMediafile(mediafileViewerContext, 'filename', mediafile) ===
             getValueOfMediafile(mediafileViewerContext, 'filename')
-            ? 'p-6 border-2 border-accent-normal'
+            ? 'p-6 border-2 border-accent-accent'
             : '',
         ]"
       />

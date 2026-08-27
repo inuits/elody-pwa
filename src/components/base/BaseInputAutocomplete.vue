@@ -247,7 +247,7 @@ const classes = computed(() => {
   const defaultContainerStyles = "multiselect rounded-lg items-stretch";
   const result: Record<string, string> = {
     container: `${defaultContainerStyles} border-none`,
-    containerActive: "outline-1 outline-accent-normal outline-offset-0",
+    containerActive: "outline-1 outline-accent-accent outline-offset-0",
     tagsSearch: "multiselect-tags-search !border-none focus:ring-0 p-0",
     tag: "multiselect-tag !bg-accent-accent !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",

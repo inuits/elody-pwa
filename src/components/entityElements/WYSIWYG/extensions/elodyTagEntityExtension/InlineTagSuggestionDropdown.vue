@@ -29,7 +29,7 @@
         :class="[
           'block w-full text-left px-3 py-2 text-sm truncate',
           index === highlightedIndex
-            ? 'bg-accent-normal text-white'
+            ? 'bg-accent-accent text-white'
             : 'hover:bg-neutral-20',
         ]"
         @mouseenter="highlightedIndex = index"

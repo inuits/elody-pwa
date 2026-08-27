@@ -11,7 +11,7 @@
       class="p-2"
     >
       <div
-        class="p-2 bg-accent-normal rounded-t-md text-white flex justify-between items-center"
+        class="p-2 bg-accent-light rounded-t-md text-accent-ink flex justify-between items-center"
       >
         <h3 class="text-lg font-bold">
           {{

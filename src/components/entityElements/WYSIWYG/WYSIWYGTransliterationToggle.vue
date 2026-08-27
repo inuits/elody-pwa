@@ -5,7 +5,7 @@
       'px-2 py-0.5 cursor-pointer transition-colors',
       index > 0 ? 'border-l border-neutral-30' : '',
       activeKey === key
-        ? 'bg-accent-normal text-neutral-white'
+        ? 'bg-accent-accent text-neutral-white'
         : 'bg-background-light text-text-body',
     ]" @click="activeKey = String(key)">
       {{ item.label }}

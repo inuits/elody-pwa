@@ -9,6 +9,8 @@
      Values are the vlacc reference triple of the elody design system; the
      per-client build replaces them from client-customization/theme.txt. */
   --color-accent-light: #DEF1FA;
+  /* accent-normal: no component references this any more (WP10 sweep); it
+     stays only because client theme.txt files still swap the name. */
   --color-accent-normal: #6BC6B3;
   --color-accent-accent: #09828A;
   --color-accent-dark: #1d5c7a;
@@ -220,7 +222,6 @@
 
   /* ── Commit / focus (platform-fixed, never themed) ─────────────────── */
   --color-commit: var(--color-accent-accent);
-  --color-commit-hover: var(--color-accent-normal);
   --color-commit-strong-hover: #087076;
   --color-focus-ring: var(--color-accent-accent);
 

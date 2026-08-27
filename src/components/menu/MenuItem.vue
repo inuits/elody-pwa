@@ -138,7 +138,7 @@ const showMenuItem = computed(() => {
   );
 });
 const iconColor = computed(() =>
-  isActive.value ? "accent-normal" : "text-body",
+  isActive.value ? "accent-accent" : "text-body",
 );
 const isActiveParentOrSubmenu = computed(() => {
   const routePath = route.path.substring(route.path.lastIndexOf("/") + 1);

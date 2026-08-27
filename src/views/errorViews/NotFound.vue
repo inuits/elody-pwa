@@ -9,18 +9,20 @@
         <p>
           {{ t("error-pages.not-found.description") }}
         </p>
-        <div
-          class="flex bg-accent-normal text-neutral-white cursor-pointer p-4 mt-12 w-1/4 justify-center items-center"
+        <BaseButton
+          class="mt-12"
+          style="width: auto"
+          button-style="primary"
+          :label="t('navigation.go-home')"
           @click="navigateHome"
-        >
-          {{ t("navigation.go-home") }}
-        </div>
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import BaseButton from "@/components/base/BaseButton.vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 
