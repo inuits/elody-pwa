@@ -240,6 +240,7 @@ now.
 | WP10 stories | `library-viewmodes-viewmodeslist--default` resolves — list + grid + selected rows from the real bulk-operations store. The preview-split-open state is not in the story: `getPreviewComponents` in this build's generated types selects only `__typename`, so preview config is client-specific; the tiers are exercised via the viewport toolbar and the row cue lives in the ListItem story |
 | WP7 viewers | one ViewerToolbar for image + PDF (PdfToolbar deleted) and maps on the tenant accent with capsule zoom controls; AV/text toolbar modes, the IIIF-manifest filmstrip and the media-first detail column open |
 | WP8 flows & feedback | **done** — toasts, DynamicForm, guided flow, upload, history-diff values, comments, folder tree, import browser and nav chrome. Still open from the package, all feature-tier: arrow-key tree navigation, the import browser's file table, and the 52px rail width (a layout change that belongs to WP9's two-fixed-elements rule) |
+| WP10 | **done** (2026-08-27) — every docs `<StoryEmbed>` resolves against the built Storybook (38 embeds / 62 entries; `node scripts/audit-story-embeds.mjs` re-checks it), with 7 new stories incl. PointMap on an offline data-URI tile fixture and FiltersBase over the new mockMain fixture link (`registerQueryFixture`). Two embeds re-pointed with recorded reasons (PreviewWrapper → panel shell, EntityPicker → saved-searches picker). CI: `pages` publishes the static Storybook from this branch via GitLab Pages, MRs build it as a smoke artifact. CONTRIBUTING.md carries the working rules. Dead-code sweep done (see below) |
 | WP9 | **screen pass done for the vlacc main flows** (2026-08-26, live against the local stack): list → detail → creation → upload → import MARC21 → nav chrome. The 52px rail is in (collapsed rail + w-80 overlay, logo scales, Escape closes); the detail header stays put through the flex layout (scroll lives inside the router-view container), so the two-fixed-elements rule holds. Fixed during the pass: embedded relation panels off the legacy mint onto the panel contract (`EntityElementWrapper`); a per-field-editor crash when one field key renders twice on a screen (shared edit scope hit a summary row without `inputField`); **creation forms had lost their inputs entirely** — create-flow rows now render inputs permanently with the form's single submit zone; inline-editor autofocus (single-field mode only); window-panel expand/collapse as a named button; upload info banners on the accent-light pair; design-system copy as i18n fallback under the service catalogue (`src/i18n/designSystemMessages.ts`, shared with mockMain). Screens not walkable on vlacc: the filesystem import browser (other client) — covered by its Storybook stories |
 
 ## Conventions for the next component
@@ -349,10 +350,11 @@ upload → import MARC21 → nav chrome.
   `ElodyTaggingExtension`) makes some vite HMR reloads throw "Cannot access …
   before initialization" and white-screen the tab; a hard reload recovers.
   Worth untangling in WP10.
-- **Legacy leftovers still referenced** (`--color-accent-normal`, the white
-  `subtitle` utility): UploadInterfaceDropzone is clean now, but
-  WYSIWYG extensions, MediaViewerNew, NotFound and the transliteration
-  toggle still use `bg-accent-normal`. Sweep in WP10's dead-code pass.
+- **Legacy leftovers**: swept in WP10 — no component references
+  `--color-accent-normal` any more (the token stays only because client
+  theme.txt files swap the name, and `--color-commit-hover` is deleted as
+  unused). The white `subtitle` utility remains but every use overrides its
+  colour; it is retired in effect.
 - The tenant-configured "paperback" pill on vlacc renders mint because the
   **client config** carries the old colour — that is the client
   `formattersSettings`, not code; covered by the client theme.txt adoption

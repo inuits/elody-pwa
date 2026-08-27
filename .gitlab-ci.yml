@@ -38,3 +38,44 @@ uat:
 prod:
   rules:
     - when: never
+
+# --------------------------------------------------------------
+# Storybook — the design system's workshop
+# --------------------------------------------------------------
+# Publishes the static Storybook via GitLab Pages so the docs site's
+# <StoryEmbed> iframes have a stable base URL (set VITE_STORYBOOK_BASE in
+# the docs build to this Pages URL). On merge requests the build runs as
+# an artifact only, as a smoke check that every story still compiles.
+# Both jobs use the built-in .post stage so the pipeline-template stages
+# stay untouched.
+
+.storybook-base: &storybook-base
+  stage: .post
+  needs: []
+  image: node:22
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest-10 --activate
+    - pnpm install --frozen-lockfile
+
+storybook:build:
+  <<: *storybook-base
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - pnpm build-storybook
+  artifacts:
+    paths:
+      - storybook-static
+    expire_in: 2 weeks
+
+pages:
+  <<: *storybook-base
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "redesign/design-system"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  script:
+    - pnpm build-storybook -o public
+  artifacts:
+    paths:
+      - public
