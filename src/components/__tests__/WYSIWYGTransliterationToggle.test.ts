@@ -99,7 +99,7 @@ describe("WYSIWYGTransliterationToggle", () => {
         props: { editor: makeEditor(), transliterationConfig: makeConfig() },
       });
       for (const button of wrapper.findAll("button")) {
-        expect(button.classes()).not.toContain("bg-accent-normal");
+        expect(button.classes()).not.toContain("bg-accent-accent");
       }
     });
 
@@ -127,7 +127,7 @@ describe("WYSIWYGTransliterationToggle", () => {
       });
       const [, arabicBtn] = wrapper.findAll("button");
       await arabicBtn.trigger("click");
-      expect(arabicBtn.classes()).toContain("bg-accent-normal");
+      expect(arabicBtn.classes()).toContain("bg-accent-accent");
     });
 
     it("removes the active style from the previously clicked button", async () => {
@@ -137,8 +137,8 @@ describe("WYSIWYGTransliterationToggle", () => {
       const [latinBtn, arabicBtn] = wrapper.findAll("button");
       await arabicBtn.trigger("click");
       await latinBtn.trigger("click");
-      expect(arabicBtn.classes()).not.toContain("bg-accent-normal");
-      expect(latinBtn.classes()).toContain("bg-accent-normal");
+      expect(arabicBtn.classes()).not.toContain("bg-accent-accent");
+      expect(latinBtn.classes()).toContain("bg-accent-accent");
     });
 
     it("calls setContent with transliterated HTML when a button with a mapping is clicked", async () => {
