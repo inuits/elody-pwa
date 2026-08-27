@@ -27,6 +27,10 @@ const selectionLimit = ref<number>(0);
 // the values travel here. Cleared on every normal initialization so a scope
 // never leaks into the next picker.
 const additionalFilterVariables = ref<Record<string, unknown>>({});
+// Whether an entity the parent is already related to can be picked again. Most
+// relations want it off -- picking the same author twice is a slip. A pipeline
+// step is a *use* of a component, so a component can legitimately appear twice.
+const allowDuplicateRelations = ref<boolean>(false);
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -86,7 +90,9 @@ const useEntityPickerModal = () => {
   const setAdditionalFilterVariables = (variables: Record<string, unknown>) => {
     additionalFilterVariables.value = variables;
   };
-
+  const setAllowDuplicateRelations = (value: boolean) => {
+    allowDuplicateRelations.value = value;
+  };
 
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
@@ -103,6 +109,7 @@ const useEntityPickerModal = () => {
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
   const getAdditionalFilterVariables = () => additionalFilterVariables.value;
+  const getAllowDuplicateRelations = () => allowDuplicateRelations.value;
 
   const resetState = () => {
     acceptedTypes.value = [];
@@ -151,6 +158,8 @@ const useEntityPickerModal = () => {
     getSelectionLimit,
     setAdditionalFilterVariables,
     getAdditionalFilterVariables,
+    setAllowDuplicateRelations,
+    getAllowDuplicateRelations,
   };
 };
 

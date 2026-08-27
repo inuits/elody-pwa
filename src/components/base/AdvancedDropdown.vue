@@ -14,7 +14,7 @@
       class="!text-text-body !bg-background-light border-none !rounded-lg flex-1 min-w-0"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? modalTeleportTarget() : 'body'"
-      :options="filterDropdownOptions"
+      :options="dropdownOptions"
       :placeholder="label"
       :is-disabled="disable"
       :is-multi="multiple"
@@ -184,6 +184,26 @@ const filterDropdownOptions = computed<DropdownOption[]>(() => {
   });
 });
 
+// The options, plus the value the field already holds when nothing offers it.
+//
+// A dropdown has to be able to show the value it was handed. Dynamically
+// described forms bind values whose option list is a suggestion rather than a
+// closed set -- a processor's channel dropdown offers the channels that exist,
+// while a pipeline connection names one it derived itself -- and without this
+// the field renders as "Select an option": a configured processor reads as
+// unconfigured, and saving from that form is how the value gets lost.
+const dropdownOptions = computed<DropdownOption[]>(() => {
+  const options = filterDropdownOptions.value;
+  const current = props.modelValue;
+  if (typeof current !== "string" || !current) return options;
+  if (options.some((option: DropdownOption) => option.value === current))
+    return options;
+  return [
+    ...options,
+    { icon: "NoIcon", label: current, value: current } as DropdownOption,
+  ];
+});
+
 const removeOptionFromListOfOptions = (option: any) => {
   if (!Array.isArray(selectedItem.value)) return;
   selectedItem.value = selectedItem.value.filter(
@@ -258,9 +278,17 @@ watch(
   () => {
     if (!props.modelValue) return;
     if (typeof props.modelValue === "string") {
-      selectedItem.value = props.options.find(
-        (option: DropdownOption) => option.value === props.modelValue,
-      ).value;
+      // A value with no option of its own is kept, not dropped: dynamically
+      // described forms are bound to values whose option list is a *suggestion*
+      // -- a processor's channel dropdown offers the channels that exist, and a
+      // pipeline connection names one it derived itself. Reaching straight into
+      // `.find(...).value` threw on those, and because this watcher is
+      // immediate the throw aborted the whole render flush: the sibling fields
+      // either never mounted or kept the value they had rendered with.
+      selectedItem.value =
+        props.options.find(
+          (option: DropdownOption) => option.value === props.modelValue,
+        )?.value ?? props.modelValue;
       return;
     }
     selectedItem.value = props.modelValue;

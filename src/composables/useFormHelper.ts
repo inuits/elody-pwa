@@ -12,6 +12,7 @@ import { ref, inject, nextTick, getCurrentInstance, unref } from "vue";
 import { useRoute } from "vue-router";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 import { useInheritedRelations } from "./useInheritedRelations";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
 
 const forms = ref<{ [key: string]: FormContext<any> }>({});
 const editableFields = ref<{ [key: string]: string[] }>({});
@@ -192,6 +193,50 @@ const useFormHelper = () => {
     teaserMetadataSaved.value[id] = teaserMetadata;
   };
 
+  // A key for a relation that is allowed to repeat.
+  //
+  // Relations are patched by key -- `PATCH /entities/<id>/relations` replaces
+  // every existing relation whose key is in the payload, and only the New and
+  // Changed ones are sent. So a second relation to the same entity, keyed the
+  // same way, does not add anything: it replaces the first, configuration and
+  // all. Where duplicates are meaningful (a pipeline step is a *use* of a
+  // component, and one component can be used twice) the second one needs a key
+  // of its own.
+  //
+  // `entity~name-2`, because that is the form the collection side resolves back
+  // to the entity, and the suffix is what it would have named the second use
+  // anyway.
+  const __slugify = (value: string) =>
+    String(value)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  const __nameOf = (item: any) =>
+    item?.intialValues?.name ??
+    item?.teaserMetadata?.name?.value ??
+    // the last segment of an id is the entity it names; for a component id
+    // like `owner--repo--LogProcessorJs` that is exactly its class
+    String(item?.id ?? "").split("--").pop() ??
+    "";
+
+  const __relationKeyFor = (
+    item: InBulkProcessableItem,
+    taken: string[],
+  ): string => {
+    const { getAllowDuplicateRelations } = useEntityPickerModal();
+    if (!getAllowDuplicateRelations()) return item.id;
+    const alreadyUsed = taken.some(
+      (key) => key === item.id || key.startsWith(`${item.id}~`),
+    );
+    if (!alreadyUsed) return item.id;
+
+    const base = __slugify(__nameOf(item)) || __slugify(item.id);
+    let index = 2;
+    while (taken.includes(`${item.id}~${base}-${index}`)) index += 1;
+    return `${item.id}~${base}-${index}`;
+  };
+
   const addRelations = (
     selectedItems: InBulkProcessableItem[],
     relationType: string,
@@ -203,21 +248,35 @@ const useFormHelper = () => {
       : getFormByRouteId().form;
     if (!form) return;
 
+    const { getAllowDuplicateRelations } = useEntityPickerModal();
     const relationsToSet: BaseRelationValuesInput[] = [];
     if (keepExisted) {
       const existingRelations = form.values.relationValues[relationType];
       const currentRelations = Array.isArray(existingRelations)
         ? existingRelations.filter(
             (relation: BaseRelationValuesInput) =>
-              !relation.editStatus || relation.editStatus !== EditStatus.New,
+              // A picker session's selection is normally the authority on what
+              // it added, so anything added-but-unsaved is dropped and replaced.
+              // Where the same entity may be related twice that reading is
+              // wrong: each session adds, it does not restate. Dropping them
+              // would lose the step *and* let the next key reuse a number the
+              // patch would then treat as a rewire of it.
+              getAllowDuplicateRelations() ||
+              !relation.editStatus ||
+              relation.editStatus !== EditStatus.New,
           )
         : [];
       relationsToSet.push(...currentRelations);
     }
     selectedItems.forEach((item) => {
       addTeaserMetadataToState(item.id, item.teaserMetadata);
+      const key = __relationKeyFor(
+        item,
+        relationsToSet.map((relation: BaseRelationValuesInput) => relation.key),
+      );
+      addTeaserMetadataToState(key, item.teaserMetadata);
       relationsToSet.push({
-        key: item.id,
+        key,
         type: relationType,
         editStatus: EditStatus.New,
         metadata: item.metadata ? item.metadata : undefined,

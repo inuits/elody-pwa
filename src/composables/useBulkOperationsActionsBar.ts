@@ -116,8 +116,11 @@ export const useBulkOperationsActionsBar = (
     resetAllProperties,
   } = useModalActions();
 
-  const { setReplaceExistingRelations, setSelectionLimit } =
-    useEntityPickerModal();
+  const {
+    setReplaceExistingRelations,
+    setSelectionLimit,
+    setAllowDuplicateRelations,
+  } = useEntityPickerModal();
 
   const { openModal, getModalInfo, closeAllModals } = useBaseModal();
   const { confirm } = useConfirmModal();
@@ -237,6 +240,9 @@ export const useBulkOperationsActionsBar = (
       bulkOperationModalConfig.replaceExistingRelations || false,
     );
     setSelectionLimit(bulkOperationModalConfig.selectionLimit || 0);
+    setAllowDuplicateRelations(
+      bulkOperationModalConfig.allowDuplicateRelations || false,
+    );
     emit(
       "initializeEntityPickerComponent",
       bulkOperationModalConfig.enableImageCrop || false,

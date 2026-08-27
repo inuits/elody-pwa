@@ -68,6 +68,7 @@
           :custom-query="getCustomGetEntitiesQuery()"
           :entity-picker-mode="EntityPickerMode.Save"
           :selection-limit="getSelectionLimit()"
+          :enable-non-selectable-entities="!getAllowDuplicateRelations()"
           :show-button="true"
           :enable-advanced-filters="true"
           :search-mode="
@@ -482,6 +483,7 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
   getSelectionLimit,
+  getAllowDuplicateRelations,
 } = useEntityPickerModal();
 const {
   extractActionArguments,

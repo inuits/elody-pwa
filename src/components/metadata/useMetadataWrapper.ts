@@ -279,7 +279,23 @@ export const useMetadataWrapper = (
     const isRelationValuesBound = fieldKey.value.startsWith(
       `${ValidationFields.RelationValues}.`,
     );
-    if (!isRelationValuesBound) fieldValueProxy.value = newValue;
+    // A dynamically described field says what it is, not what it holds: a
+    // SHACL-derived processor config ships key, label and inputField, and its
+    // values live on the pipeline's hasProcessor relation, seeded into the form
+    // by whoever opened it. Writing this panel's absent value over that emptied
+    // every configured field the moment it mounted -- so a panel with no value
+    // of its own does not overrule one the form already has.
+    //
+    // A panel that does carry a value still wins, `""` included: for a
+    // query-driven form the panel is the value's only source, and "this field
+    // is empty" is something it is entitled to say.
+    const panelHasNoValueOfItsOwn = newValue === undefined;
+    const formAlreadyHasOne = field.value.value !== undefined;
+    if (
+      !isRelationValuesBound &&
+      !(panelHasNoValueOfItsOwn && formAlreadyHasOne)
+    )
+      fieldValueProxy.value = newValue;
     determineFieldPermissions();
   });
 
