@@ -13,6 +13,7 @@ export enum BulkOperationsContextEnum {
   ManifestCollection = "ManifestCollection",
   SavedSearchFilterModal = "SavedSearchFilterModal",
   TagEntityModal = "TagEntityModal",
+  GuidedFlowStepPicker = "GuidedFlowStepPicker",
 }
 
 export type Context = RouteNames | BulkOperationsContextEnum;

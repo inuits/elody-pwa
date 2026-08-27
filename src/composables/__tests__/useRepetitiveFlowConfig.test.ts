@@ -394,6 +394,53 @@ describe("toRepetitiveFormConfig", () => {
     });
   });
 
+  it("carries returnsSelection from the raw response", () => {
+    const config = toRepetitiveFormConfig({
+      __typename: "RepetitiveForm",
+      repeatable: false,
+      linear: true,
+      returnsSelection: true,
+      work: [{ __typename: "RepetitiveStep", key: "work", entityType: "work" }],
+    });
+    expect(config.returnsSelection).toBe(true);
+  });
+
+  it("defaults returnsSelection to false when absent or echoed as false", () => {
+    expect(
+      toRepetitiveFormConfig({
+        repeatable: false,
+        work: [{ key: "work", entityType: "work" }],
+      }).returnsSelection,
+    ).toBe(false);
+    expect(
+      toRepetitiveFormConfig({
+        repeatable: false,
+        returnsSelection: false,
+        work: [{ key: "work", entityType: "work" }],
+      }).returnsSelection,
+    ).toBe(false);
+  });
+
+  it("keeps a configured terminalActionLabel and drops the empty echo", () => {
+    const config = toRepetitiveFormConfig({
+      repeatable: false,
+      work: [
+        {
+          key: "work",
+          entityType: "work",
+          terminalActionLabel: "repetitiveForm.tag-this-work",
+        },
+      ],
+      expression: [
+        { key: "expression", entityType: "expression", terminalActionLabel: "" },
+      ],
+    });
+    expect(config.steps[0].terminalActionLabel).toBe(
+      "repetitiveForm.tag-this-work",
+    );
+    expect(config.steps[1].terminalActionLabel).toBeUndefined();
+  });
+
   it("drops an unused finalizeOnHost echo (empty fromStep/relationType)", () => {
     const config = toRepetitiveFormConfig({
       __typename: "RepetitiveForm",

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 
 // --- Hoisted mutable state (changes between tests) ---------------------------
@@ -478,6 +478,37 @@ describe("BaseLibrary.vue route navigation triggers refetch", () => {
     await flushPromises();
 
     expect(libGetEntities.mock.calls.length).toBeGreaterThan(callsAfterMount);
+  });
+
+  it("does not re-fetch once the navigation unmounts it", async () => {
+    // vue-router updates `route` BEFORE the outgoing page's components unmount,
+    // so this watcher also fires in libraries that are on their way out. They
+    // would refetch with filters whose entity context is already gone (the
+    // backend rejects those: missing `value`) and double the traffic of every
+    // navigation.
+    //
+    // A post-flush watcher reproduces that order faithfully: pre-flush watchers
+    // (the library's) run first, then the render flush swaps <router-view> and
+    // tears the outgoing component down.
+    const local = getWrapper();
+    wrapper = local;
+    await flushPromises();
+    const callsAfterMount = libGetEntities.mock.calls.length;
+
+    const stopUnmountOnNavigate = watch(
+      () => mockRoute.path,
+      () => {
+        local.unmount();
+        wrapper = null;
+      },
+      { flush: "post" },
+    );
+
+    mockRoute.path = "/other";
+    await flushPromises();
+    stopUnmountOnNavigate();
+
+    expect(libGetEntities.mock.calls.length).toBe(callsAfterMount);
   });
 
   it("does not re-fetch when predefinedEntities is provided", async () => {

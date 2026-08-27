@@ -104,4 +104,7 @@ vi.mock("@/main", () => ({
   auth: {
     isAuthenticated: ref(true),
   },
+  // read by useBulkOperations on every enqueue; without it any test that
+  // selects an item through the composable throws on the missing export
+  bulkSelectAllSizeLimit: 999999,
 }));

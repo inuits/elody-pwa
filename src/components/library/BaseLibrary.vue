@@ -415,6 +415,7 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import {
   computed,
   inject,
+  nextTick,
   onMounted,
   onUnmounted,
   provide,
@@ -1038,15 +1039,27 @@ onUnmounted(() => {
   window.removeEventListener("beforeunload", resetMapPaginationLimit);
   formIdsAddedToState.forEach((id) => deleteForm(id));
   formIdsAddedToState.clear();
+  isMounted.value = false;
 });
 
 const resetMapPaginationLimit = () => {
   if (displayMap.value) setPaginationLimit(0);
 };
 
+const isMounted = ref<boolean>(true);
+
 watch(
   () => route.path,
   async () => {
+    // `route` updates before the outgoing page unmounts, so this also fires in
+    // libraries that are about to disappear — they would refetch with filters
+    // whose entity context is already gone (the backend rejects those: missing
+    // `value`) and double the traffic of every navigation. After one tick the
+    // render flush has swapped <router-view>, so a library that is still
+    // mounted is one the new route actually reuses.
+    await nextTick();
+    if (!isMounted.value) return;
+
     if (
       !props.predefinedEntities &&
       router.currentRoute.value.name !== "SingleEntity"

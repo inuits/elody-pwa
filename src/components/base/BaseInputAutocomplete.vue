@@ -12,7 +12,7 @@
     :classes="classes"
     :caret="!disabled"
     :placeholder="placeholder"
-    :append-to="someModalIsOpened ? '.base-modal--opened' : 'body'"
+    :append-to="someModalIsOpened ? modalTeleportTarget() : 'body'"
     :loading="loading"
     :disabled="disabled"
     :noOptionsText="noOptionsText"
@@ -107,6 +107,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import type { VirtualKeyboardContext } from "@/composables/useMetadataVirtualKeyboard";
+import { modalTeleportTarget } from "@/composables/useModalTeleportTarget";
 
 type AutocompleteStyle =
   | "default"

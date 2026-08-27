@@ -6,6 +6,11 @@ import {
 } from "@/generated-types/queries";
 import { useRepetitiveForm } from "@/composables/useRepetitiveForm";
 import useEntitySingle from "@/composables/useEntitySingle";
+import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import { useModalActions } from "@/composables/useModalActions";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
 
@@ -30,9 +35,8 @@ vi.mock("@/composables/useManageEntities", () => ({
     addRelations: manageMocks.addRelations,
   }),
 }));
-vi.mock("@/composables/useEntityPickerModal", () => ({
-  default: () => ({ setEntityId: vi.fn(), setDynamicFormId: vi.fn() }),
-}));
+// deliberately NOT mocked: it is module-scoped state shared with the page the
+// flow opens on top of, and the tests below assert the flow leaves it clean
 const confirmMocks = vi.hoisted(() => ({
   confirm: vi.fn(),
 }));
@@ -70,7 +74,7 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
       "createPrefill",
       "pickerParentUuid",
     ],
-    emits: ["selected", "created", "metadataSubmitted"],
+    emits: ["selected", "created", "metadataSubmitted", "terminalSelected"],
     template: "<div data-testid='step-field'><slot name='actions' /></div>",
   },
 }));
@@ -990,5 +994,191 @@ describe("RepetitiveFlow — metadataOnly step", () => {
         relations: [expect.objectContaining({ key: "user-new-1" })],
       }),
     );
+  });
+});
+
+
+// A flow that hands its result back to whoever opened it (e.g. the WYSIWYG tag
+// button) instead of routing to the picked entity or relating it to a host.
+const returnsSelectionConfig = () => ({
+  label: "repetitiveForm.tag-wem-title",
+  repeatable: false,
+  linear: true,
+  returnsSelection: true,
+  steps: [
+    {
+      key: "work",
+      label: "repetitiveForm.step-work",
+      entityType: Entitytyping.Work,
+      terminalActionLabel: "repetitiveForm.tag-this-work",
+    },
+    {
+      key: "expression",
+      label: "repetitiveForm.step-expression",
+      entityType: Entitytyping.Expression,
+      terminalActionLabel: "repetitiveForm.tag-this-expression",
+    },
+    {
+      key: "manifestation",
+      label: "repetitiveForm.step-manifestation",
+      entityType: Entitytyping.Manifestation,
+      terminalActionLabel: "repetitiveForm.tag-this-manifestation",
+    },
+  ],
+});
+
+describe("RepetitiveFlow — returnsSelection", () => {
+  const getReturningWrapper = () =>
+    shallowMount(RepetitiveFlow, {
+      props: { open: true, config: returnsSelectionConfig() },
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { RepetitiveStepField: false },
+      },
+    });
+
+  beforeEach(() => {
+    useRepetitiveForm().resetFlow();
+    confirmMocks.confirm.mockReset();
+    manageMocks.createEntity.mockClear();
+    manageMocks.addRelations.mockClear();
+  });
+
+  it("ends the flow at the first step with the raw picked entity", async () => {
+    const wrapper = getReturningWrapper();
+    const work = {
+      id: "work-1",
+      type: Entitytyping.Work,
+      intialValues: { title: "Het verdriet van België" },
+    };
+    field(wrapper).vm.$emit("terminalSelected", [work]);
+    await flushPromises();
+    expect(wrapper.emitted("finished")?.[0]).toEqual([work]);
+  });
+
+  it("ends the flow from a later step, after drilling down", async () => {
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    expect(field(wrapper).props("step").key).toBe("expression");
+    const expression = { id: "expr-1", type: Entitytyping.Expression };
+    field(wrapper).vm.$emit("terminalSelected", [expression]);
+    await flushPromises();
+    expect(wrapper.emitted("finished")?.[0]).toEqual([expression]);
+  });
+
+  it("returns the picked entity instead of routing when the last step is confirmed", async () => {
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("selected", [{ id: "expr-1" }]);
+    await flushPromises();
+    const manifestation = {
+      id: "manif-1",
+      type: Entitytyping.Manifestation,
+      intialValues: { title: "1e druk" },
+    };
+    field(wrapper).vm.$emit("selected", [manifestation]);
+    await flushPromises();
+    // the raw item, not the staged summary: the caller needs type + intialValues
+    expect(wrapper.emitted("finished")?.[0]).toEqual([manifestation]);
+  });
+
+  it("never creates or relates anything on the way out", async () => {
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("terminalSelected", [{ id: "expr-1" }]);
+    await flushPromises();
+    expect(manageMocks.createEntity).not.toHaveBeenCalled();
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("closes without a confirmation prompt — nothing was created to lose", async () => {
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    wrapper.findComponent({ name: "RepetitiveStepModal" }).vm.$emit("close");
+    await flushPromises();
+    expect(confirmMocks.confirm).not.toHaveBeenCalled();
+    expect(wrapper.emitted("close")).toBeTruthy();
+  });
+});
+
+describe("RepetitiveFlow — shared state cleanup on close", () => {
+  const picker = useEntityPickerModal();
+
+  const getReturningWrapper = () =>
+    shallowMount(RepetitiveFlow, {
+      props: { open: true, config: returnsSelectionConfig() },
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { RepetitiveStepField: false },
+      },
+    });
+
+  beforeEach(() => {
+    useRepetitiveForm().resetFlow();
+    picker.resetState();
+  });
+
+  it("hands the picker state back to its initial values when the flow closes", async () => {
+    const wrapper = getReturningWrapper();
+    // the flow claimed the shared picker state on open
+    expect(picker.getEntityId()).toBe("repetitive-flow");
+
+    field(wrapper).vm.$emit("terminalSelected", [{ id: "work-1" }]);
+    await flushPromises();
+    await wrapper.setProps({ open: false });
+
+    expect(picker.getEntityId()).toBe("");
+    expect(picker.getRelationType()).toBe("no-type-set");
+    expect(picker.getAcceptedTypes()).toEqual([]);
+    expect(picker.getRefetchEntitiesFunction()).toBeUndefined();
+  });
+
+  it("clears its own picker selection so the next flow does not inherit it", async () => {
+    const { enqueueItemForBulkProcessing, getEnqueuedItems } =
+      useBulkOperations();
+    enqueueItemForBulkProcessing(
+      BulkOperationsContextEnum.GuidedFlowStepPicker,
+      { id: "work-1", type: Entitytyping.Work },
+    );
+    const wrapper = getReturningWrapper();
+    await wrapper.setProps({ open: false });
+
+    expect(
+      getEnqueuedItems(BulkOperationsContextEnum.GuidedFlowStepPicker),
+    ).toEqual([]);
+  });
+
+  it("does not touch the current-entity singleton — the page underneath still owns it", async () => {
+    // clearing it would blank the entity the user is still looking at, which
+    // ListItem, DeleteButton, EntityHeaderButton and BaseInputAutocomplete read
+    useEntitySingle().setEntityUuid("W-YA4VJ6H42O");
+    useEntitySingle().setEntityType("work_word");
+
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("terminalSelected", [{ id: "work-1" }]);
+    await flushPromises();
+    await wrapper.setProps({ open: false });
+
+    expect(useEntitySingle().getEntityUuid()).toBe("W-YA4VJ6H42O");
+    expect(useEntitySingle().getEntityType()).toBe("work_word");
+  });
+
+  it("leaves the shared state alone when no flow ever ran", async () => {
+    picker.setEntityId("work-detail-page");
+    // mounting closed runs reset() immediately; it must not clean up state it
+    // never claimed
+    shallowMount(RepetitiveFlow, {
+      props: { open: false, config: returnsSelectionConfig() },
+      global: { mocks: { $t: (k: string) => k }, renderStubDefaultSlot: true },
+    });
+    await flushPromises();
+
+    expect(picker.getEntityId()).toBe("work-detail-page");
   });
 });

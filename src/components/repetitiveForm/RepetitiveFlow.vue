@@ -59,6 +59,7 @@
           @selected="onSelected"
           @created="onCreated"
           @metadata-submitted="onMetadataSubmitted"
+          @terminal-selected="onTerminalSelected"
         >
           <template
             #actions
@@ -142,6 +143,10 @@ import {
   toDisplayValue,
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useModalActions } from "@/composables/useModalActions";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -161,12 +166,22 @@ const FLOW_ID = "repetitive-flow";
 const props = defineProps<{ open: boolean; config: RepetitiveForm }>();
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "finished", entity: { id?: string; uuid?: string; type?: string }): void;
+  (
+    e: "finished",
+    entity: {
+      id?: string;
+      uuid?: string;
+      type?: string;
+      [key: string]: unknown;
+    },
+  ): void;
 }>();
 
 const store = useRepetitiveForm();
 const { flowConfig, currentStepIndex, currentBranch, branches } = store;
-const { setEntityId } = useEntityPickerModal();
+const { setEntityId, resetState: resetEntityPickerState } =
+  useEntityPickerModal();
+const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 const { getEntityUuid } = useEntitySingle();
 const { getCallbackFunctions } = useModalActions();
 const { confirm } = useConfirmModal();
@@ -177,6 +192,8 @@ const router = useRouter();
 const { t } = useI18n();
 
 const view = ref<"step" | "overview" | "finalize">("overview");
+let hasStarted = false;
+const lastPicked = ref<Record<string, any> | undefined>(undefined);
 
 const activeStep = computed(() => store.activeStep());
 
@@ -231,6 +248,7 @@ const finalizeOptions = computed<RepetitiveCreatableType[]>(() => {
 const selectedFinalizeType = ref<RepetitiveCreatableType | null>(null);
 
 const start = () => {
+  hasStarted = true;
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
   view.value = store.opensOnFirstStep() ? "step" : "overview";
@@ -241,6 +259,10 @@ const advance = async (
 ) => {
   const wasLast = store.isLastStep();
   if (wasLast && store.isLinear()) {
+    if (flowConfig.value?.returnsSelection) {
+      if (lastPicked.value) emit("finished", lastPicked.value);
+      return;
+    }
     const hostTerminal = flowConfig.value?.finalizeOnHost;
     if (hostTerminal) {
       const routeId = router.currentRoute.value.params.id;
@@ -261,6 +283,7 @@ const advance = async (
 
 const onSelected = (entities: { id: string; label?: string }[]) =>
   run(async () => {
+    lastPicked.value = entities[0];
     store.pickExisting(entities);
     // persist the link to the prior step before advancing (link-on-select)
     const step = activeStep.value;
@@ -316,6 +339,12 @@ const onMetadataSubmitted = async (values: Record<string, unknown>) => {
     });
   }
   advance(store.completeMetadataOnlyStep);
+};
+
+const onTerminalSelected = (items: Record<string, any>[]) => {
+  const entity = items?.[0];
+  if (!entity) return;
+  emit("finished", entity);
 };
 
 const addAnother = () => {
@@ -384,8 +413,9 @@ const onFinalized = (entity: { id?: string; uuid?: string; type?: string }) => {
 };
 
 const hasStagedProgress = (): boolean =>
-  branches.value.length > 0 ||
-  Object.keys(currentBranch.value.entities).length > 0;
+  !flowConfig.value?.returnsSelection &&
+  (branches.value.length > 0 ||
+    Object.keys(currentBranch.value.entities).length > 0);
 
 // Closing mid-flow abandons the staging (already-created entities are kept,
 // but the flow won't be finalized), so confirm first when there is progress.
@@ -410,7 +440,14 @@ const requestClose = async () => {
 const reset = () => {
   store.resetFlow();
   selectedFinalizeType.value = null;
+  lastPicked.value = undefined;
   view.value = "overview";
+  if (!hasStarted) return;
+  hasStarted = false;
+  dequeueAllItemsForBulkProcessing(
+    BulkOperationsContextEnum.GuidedFlowStepPicker,
+  );
+  resetEntityPickerState();
 };
 
 watch(

@@ -13,7 +13,7 @@
     <VueSelect
       class="!text-text-body !bg-background-light border-none !rounded-lg flex-1 min-w-0"
       v-model="selectedItem"
-      :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
+      :teleport="someModalIsOpened ? modalTeleportTarget() : 'body'"
       :options="filterDropdownOptions"
       :placeholder="label"
       :is-disabled="disable"
@@ -94,6 +94,7 @@ import VueSelect from "vue3-select-component";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { modalTeleportTarget } from "@/composables/useModalTeleportTarget";
 
 type DropdownStyle = "default" | "defaultWithBorder" | "defaultWithLightBorder";
 

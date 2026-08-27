@@ -9,6 +9,11 @@ import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import RepetitiveCreateButton from "@/components/repetitiveForm/RepetitiveCreateButton.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 
 vi.mock("vue-router", () => ({
   useRouter: () => ({}),
@@ -440,6 +445,94 @@ describe("RepetitiveStepField", () => {
       global: { mocks: { $t: (k: string) => k }, renderStubDefaultSlot: true },
     });
     expect(wrapper.find("[data-testid='external-back']").exists()).toBe(true);
+  });
+
+  it("passes its own bulk-operations context to the picker so other pickers are not read", () => {
+    const picker = getWrapper().findComponent(EntityPickerComponent);
+    expect(picker.props("context")).toBe(
+      BulkOperationsContextEnum.GuidedFlowStepPicker,
+    );
+  });
+
+  it("renders no terminal action button when the step does not configure one", () => {
+    const wrapper = getWrapper();
+    expect(
+      wrapper.find("[data-testid='repetitive-step-terminal']").exists(),
+    ).toBe(false);
+  });
+
+  it("renders the terminal action button with its configured label", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: {
+        ...expressionStep(),
+        terminalActionLabel: "repetitiveForm.tag-this-expression",
+      },
+    });
+    const button = wrapper.findComponent(
+      "[data-testid='repetitive-step-terminal']" as any,
+    );
+    expect(button.exists()).toBe(true);
+    expect(button.props("label")).toBe("repetitiveForm.tag-this-expression");
+  });
+
+  it("disables the terminal action button until something is selected", async () => {
+    const { enqueueItemForBulkProcessing, dequeueAllItemsForBulkProcessing } =
+      useBulkOperations();
+    dequeueAllItemsForBulkProcessing(
+      BulkOperationsContextEnum.GuidedFlowStepPicker,
+    );
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: {
+        ...expressionStep(),
+        terminalActionLabel: "repetitiveForm.tag-this-expression",
+      },
+    });
+    const button = () =>
+      wrapper.findComponent("[data-testid='repetitive-step-terminal']" as any);
+    expect(button().props("disabled")).toBe(true);
+
+    enqueueItemForBulkProcessing(
+      BulkOperationsContextEnum.GuidedFlowStepPicker,
+      { id: "expression-1", type: Entitytyping.Expression },
+    );
+    await wrapper.vm.$nextTick();
+    expect(button().props("disabled")).toBe(false);
+    dequeueAllItemsForBulkProcessing(
+      BulkOperationsContextEnum.GuidedFlowStepPicker,
+    );
+  });
+
+  it("emits terminalSelected with the raw picked item and clears the selection", async () => {
+    const { enqueueItemForBulkProcessing, getEnqueuedItems } =
+      useBulkOperations();
+    const item = {
+      id: "expression-1",
+      type: Entitytyping.Expression,
+      intialValues: { title: "Het verdriet van België" },
+    };
+    enqueueItemForBulkProcessing(
+      BulkOperationsContextEnum.GuidedFlowStepPicker,
+      item,
+    );
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      step: {
+        ...expressionStep(),
+        terminalActionLabel: "repetitiveForm.tag-this-expression",
+      },
+    });
+    wrapper
+      .findComponent("[data-testid='repetitive-step-terminal']" as any)
+      .vm.$emit("click");
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.emitted("terminalSelected")?.[0]).toEqual([[item]]);
+    // the next step must not inherit this step's selection
+    expect(
+      getEnqueuedItems(BulkOperationsContextEnum.GuidedFlowStepPicker),
+    ).toEqual([]);
   });
 
   it("resets the view to the picker when the step changes", async () => {

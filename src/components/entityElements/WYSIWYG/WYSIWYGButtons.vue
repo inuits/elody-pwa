@@ -145,6 +145,16 @@
     >
       <i>I</i>
     </button>
+    <button
+      v-for="configurationItem in guidedFlowConfigurations"
+      :key="`tag-flow-${configurationItem.tag}`"
+      data-testid="wysiwyg-tag-flow-button"
+      :disabled="buttonsDisabled"
+      @click="editor.commands.openTagFlow(configurationItem)"
+      :title="t(labelForFlow(configurationItem))"
+    >
+      {{ t(labelForFlow(configurationItem)) }}
+    </button>
     <base-tooltip v-if="showTagButton" position="top-right" :tooltip-offset="8">
       <template #activator="{ on }">
         <div v-on="on">
@@ -218,6 +228,15 @@ const showTagButton = computed<boolean>(
     props.extensions.includes(WysiwygExtensions.ElodyTaggingExtension) &&
     !isTaggedByTriggerOnly(props.tagging?.configuration.value ?? []),
 );
+const guidedFlowConfigurations = computed(() =>
+  (props.tagging?.configuration.value ?? []).filter(
+    (configurationItem) => !!configurationItem.guidedFlowQuery,
+  ),
+);
+const labelForFlow = (configurationItem: {
+  guidedFlowButtonLabel?: string | null;
+}): string => configurationItem.guidedFlowButtonLabel || "tagging.tag-via-flow";
+
 const isInNeedOfConfigurationEntities = computed<boolean>(
   () => !!props.tagging?.isInNeedOfConfigurationEntities?.value,
 );

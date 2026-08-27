@@ -12,7 +12,7 @@
 
     <Transition>
       <Teleport
-        :to="someModalIsOpened ? '.base-modal--opened' : 'body'"
+        :to="someModalIsOpened ? modalTeleportTarget() : 'body'"
         v-if="hasContent && hover"
       >
         <div
@@ -37,6 +37,7 @@ import {
   autoPlacement,
 } from "@floating-ui/vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { modalTeleportTarget } from "@/composables/useModalTeleportTarget";
 
 const {
   position = "top-end",

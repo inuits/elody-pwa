@@ -3,7 +3,7 @@
     class="base-date-picker"
     v-model="dateValue"
     :time-config="{ enableTimePicker: enableTimePicker }"
-    :teleport="someModalIsOpened ? '.base-modal--opened' : 'body'"
+    :teleport="someModalIsOpened ? modalTeleportTarget() : 'body'"
     :model-type="modelType"
     :formats="formats"
     :disabled="disabled"
@@ -18,6 +18,7 @@ import { VueDatePicker } from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { modalTeleportTarget } from "@/composables/useModalTeleportTarget";
 
 const props = withDefaults(
   defineProps<{

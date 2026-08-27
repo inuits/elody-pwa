@@ -83,7 +83,24 @@ const useEntityPickerModal = () => {
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
 
+  const resetState = () => {
+    acceptedTypes.value = [];
+    entityUuid.value = "";
+    entityId.value = "";
+    parentEntityType.value = [];
+    refetchEntitiesFunction.value = undefined;
+    relationType.value = "no-type-set";
+    customGetEntitiesQuery.value = "";
+    customGetEntitiesFiltersQuery.value = "";
+    isCropModeEnabled.value = false;
+    cropCoordinatesKey.value = "";
+    actionsOnResult.value = undefined;
+    replaceExistingRelations.value = false;
+    selectionLimit.value = 0;
+  };
+
   return {
+    resetState,
     getAcceptedTypes,
     getEntityUuid,
     getEntityId,

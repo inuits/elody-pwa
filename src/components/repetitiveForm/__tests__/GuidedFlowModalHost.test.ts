@@ -14,15 +14,21 @@ const mocks = vi.hoisted(() => ({
   modalInfo: { open: false, formQuery: undefined } as {
     open: boolean;
     formQuery?: string;
+    onEntitySelected?: (entity: any) => void;
   },
   loadDocument: vi.fn(),
   apolloQuery: vi.fn(),
   refetchQueries: vi.fn(),
 }));
 
-const modalInfo = reactive<{ open: boolean; formQuery?: string }>({
+const modalInfo = reactive<{
+  open: boolean;
+  formQuery?: string;
+  onEntitySelected?: (entity: any) => void;
+}>({
   open: false,
   formQuery: undefined,
+  onEntitySelected: undefined,
 });
 // the hoisted mock factory below resolves modal info through this indirection
 mocks.modalInfo = modalInfo;
@@ -92,6 +98,22 @@ const rawNoFinalizeResult = {
   ],
 };
 
+// A linear pick-only flow that hands its result back to the caller.
+const rawReturnsSelectionResult = {
+  __typename: "RepetitiveForm",
+  repeatable: false,
+  linear: true,
+  returnsSelection: true,
+  work: [
+    {
+      __typename: "RepetitiveStep",
+      key: "work",
+      entityType: "work",
+      terminalActionLabel: "repetitiveForm.tag-this-work",
+    },
+  ],
+};
+
 const getWrapper = () => shallowMount(GuidedFlowModalHost);
 const flow = (w: ReturnType<typeof getWrapper>) =>
   w.findComponent({ name: "RepetitiveFlow" });
@@ -114,6 +136,7 @@ describe("GuidedFlowModalHost", () => {
     useModalActions().setCallbackFunctions(undefined);
     modalInfo.open = false;
     modalInfo.formQuery = undefined;
+    modalInfo.onEntitySelected = undefined;
     mocks.loadDocument.mockResolvedValue(flowDocument);
     mocks.apolloQuery.mockResolvedValue({
       data: { GetRepetitiveForm: rawOmnibusResult },
@@ -180,6 +203,7 @@ describe("GuidedFlowModalHost", () => {
       linear: false,
       startOnFirstStep: false,
       refetchOnFinish: false,
+      returnsSelection: false,
       steps: [
         { key: "work", entityType: "work", createForm: "GetWorkCreationForm" },
       ],
@@ -254,5 +278,47 @@ describe("GuidedFlowModalHost", () => {
     await wrapper.vm.$nextTick();
     expect(mocks.refetchQueries).toHaveBeenCalledWith({ include: "active" });
     expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("hands the picked entity to the caller and does not route for a returnsSelection flow", async () => {
+    const onEntitySelected = vi.fn();
+    modalInfo.onEntitySelected = onEntitySelected;
+    mocks.apolloQuery.mockResolvedValue({
+      data: { GetRepetitiveForm: rawReturnsSelectionResult },
+    });
+    const wrapper = getWrapper();
+    await openModal("GetTagWemFlow");
+    const entity = { id: "work-1", type: "work" };
+    flow(wrapper).vm.$emit("finished", entity);
+    await flushPromises();
+
+    expect(onEntitySelected).toHaveBeenCalledWith(entity);
+    expect(mocks.closeModal).toHaveBeenCalled();
+    // the caller is mid-edit: routing away or refetching would throw its work out
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(mocks.refetchQueries).not.toHaveBeenCalled();
+  });
+
+  it("still closes cleanly when a returnsSelection flow has no caller handler", async () => {
+    mocks.apolloQuery.mockResolvedValue({
+      data: { GetRepetitiveForm: rawReturnsSelectionResult },
+    });
+    const wrapper = getWrapper();
+    await openModal("GetTagWemFlow");
+    flow(wrapper).vm.$emit("finished", { id: "work-1" });
+    await flushPromises();
+    expect(mocks.closeModal).toHaveBeenCalled();
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("keeps routing for a flow that does not return its selection", async () => {
+    const onEntitySelected = vi.fn();
+    modalInfo.onEntitySelected = onEntitySelected;
+    const wrapper = getWrapper();
+    await openModal();
+    flow(wrapper).vm.$emit("finished", { id: "manif-1", type: "manifestation" });
+    await flushPromises();
+    expect(onEntitySelected).not.toHaveBeenCalled();
+    expect(mocks.push).toHaveBeenCalled();
   });
 });

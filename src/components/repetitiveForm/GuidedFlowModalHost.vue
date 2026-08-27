@@ -92,13 +92,18 @@ const onFinished = async (entity: {
   id?: string;
   uuid?: string;
   type?: string;
+  [key: string]: unknown;
 }) => {
   const isHostTerminal = Boolean(config.value.finalizeOnHost);
-  // capture the refetch callbacks registered when the flow was opened before
-  // closing the modal clears the shared modal-action state
+  const returnsSelection = Boolean(config.value.returnsSelection);
   const refetchCallbacks = getCallbackFunctions();
-  closeModal(TypeModals.GuidedFlow);
+  const onEntitySelected = getModalInfo(TypeModals.GuidedFlow).onEntitySelected as ((entity: unknown) => void) | undefined;
 
+  closeModal(TypeModals.GuidedFlow);
+  if (returnsSelection) {
+    onEntitySelected?.(entity);
+    return;
+  }
   if (isHostTerminal) {
     await refreshAfterFlow(refetchCallbacks);
     return;

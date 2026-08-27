@@ -70,7 +70,9 @@ export const isTaggedByTriggerOnly = (
 ): boolean =>
   configurations.length > 0 &&
   configurations.every(
-    (configuration) => !!configuration.inlineTrigger?.character,
+    (configuration) =>
+      !!configuration.inlineTrigger?.character ||
+      !!configuration.guidedFlowQuery,
   );
 
 export const createInlineTagSuggestionExtension = async (

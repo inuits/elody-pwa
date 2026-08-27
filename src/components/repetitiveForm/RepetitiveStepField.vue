@@ -27,10 +27,22 @@
           :types="creatableOptions"
           @select="chooseType"
         />
+        <div v-if="step.terminalActionLabel" class="w-fit">
+          <BaseButtonNew
+            data-testid="repetitive-step-terminal"
+            :label="$t(step.terminalActionLabel)"
+            :icon="DamsIcons.Check"
+            button-style="accentAccent"
+            button-size="small"
+            :disabled="!hasSelection"
+            @click="onTerminalAction"
+          />
+        </div>
       </div>
       <!-- keyed per step: the picker loads its custom query on mount only -->
       <EntityPickerComponent
         :key="step.key"
+        :context="terminalContext"
         :entity-uuid="pickerParentUuid"
         :filter-parent-entity="getForm(parentEntityId)?.values"
         :accepted-types="acceptedTypes"
@@ -100,7 +112,11 @@ import {
   type RepetitiveStep,
   type RepetitiveCreatableType,
 } from "@/generated-types/queries";
-import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+  type InBulkProcessableItem,
+} from "@/composables/useBulkOperations";
 import {
   describePickedItem,
   type StagedEntityDetail,
@@ -140,10 +156,18 @@ const emit = defineEmits<{
   (e: "selected", entities: SelectedEntity[]): void;
   (e: "created", entity: any, entityType?: string): void;
   (e: "metadataSubmitted", values: Record<string, unknown>): void;
+  (e: "terminalSelected", items: InBulkProcessableItem[]): void;
 }>();
 
 const router = useRouter();
 const { getForm } = useFormHelper();
+const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
+  useBulkOperations();
+
+const terminalContext = BulkOperationsContextEnum.GuidedFlowStepPicker;
+const hasSelection = computed<boolean>(
+  () => getEnqueuedItems(terminalContext).length > 0,
+);
 
 // the entity whose detail page hosts the flow (e.g. the boekenbank); parent
 // values are read from its form the same way copyValueFromParent does
@@ -269,5 +293,12 @@ const onCreated = (entity: any) => {
 
 const onMetadataSubmitted = (values: Record<string, unknown>) => {
   emit("metadataSubmitted", values);
+};
+
+const onTerminalAction = () => {
+  const items = [...getEnqueuedItems(terminalContext)];
+  if (!items.length) return;
+  dequeueAllItemsForBulkProcessing(terminalContext);
+  emit("terminalSelected", items);
 };
 </script>

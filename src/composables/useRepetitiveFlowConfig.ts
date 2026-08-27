@@ -20,6 +20,7 @@ const normalizeStep = (step: any): RepetitiveStep => {
     "label",
     "pickerQuery",
     "pickerFiltersQuery",
+    "terminalActionLabel",
   ]);
   if (!normalized.maxSelection) delete normalized.maxSelection;
   if (!normalized.overviewFields?.length) delete normalized.overviewFields;
@@ -40,6 +41,7 @@ export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
     linear,
     startOnFirstStep,
     refetchOnFinish,
+    returnsSelection,
     routeToStep,
     routeToRoute,
     finalize,
@@ -58,6 +60,7 @@ export const toRepetitiveFormConfig = (raw: any): RepetitiveForm => {
   config.linear = Boolean(linear);
   config.startOnFirstStep = Boolean(startOnFirstStep);
   config.refetchOnFinish = Boolean(refetchOnFinish);
+  config.returnsSelection = Boolean(returnsSelection);
   if (routeToStep) config.routeToStep = routeToStep;
   if (routeToRoute) config.routeToRoute = routeToRoute;
   if (finalize) {

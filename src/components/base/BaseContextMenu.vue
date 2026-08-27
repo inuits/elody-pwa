@@ -1,5 +1,5 @@
 <template>
-  <Teleport :to="someModalIsOpened ? '.base-modal--opened' : 'body'">
+  <Teleport :to="someModalIsOpened ? modalTeleportTarget() : 'body'">
     <Transition class="base-context-menu-container">
       <div
         @click.prevent
@@ -17,6 +17,7 @@
 import { type ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
 import { ContextMenuDirection } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { modalTeleportTarget } from "@/composables/useModalTeleportTarget";
 
 const { someModalIsOpened } = useBaseModal();
 

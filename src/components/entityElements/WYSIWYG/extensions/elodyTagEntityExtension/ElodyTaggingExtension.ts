@@ -22,7 +22,7 @@ import {
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { stripHighlightTags } from "@/helpers";
+import { getEntityTitle, stripHighlightTags } from "@/helpers";
 import type { Ref } from "vue";
 import { apolloClient } from "@/main";
 import { DOMSerializer } from "prosemirror-model";
@@ -314,6 +314,25 @@ const createTrailingSpacePlugin = () =>
     },
   });
 
+export const buildTagAttributes = (
+  configurationItem: TaggableEntityConfigurationFromEntity,
+  entity: InBulkProcessableItem,
+): { [key: string]: string } => {
+  const attributes: { [key: string]: string } = {};
+  if (configurationItem.attributes)
+    Object.assign(attributes, configurationItem.attributes);
+  configurationItem.metadataKeysToSetAsAttribute?.forEach((key) => {
+    let value = "";
+    if (entity.intialValues) value = entity.intialValues[key] as string;
+    if (entity.teaserMetadata)
+      value = (entity.teaserMetadata as any).find(
+        (metadataItem: any) => metadataItem.key === key,
+      )?.value;
+    Object.assign(attributes, { [key]: stripHighlightTags(value) });
+  });
+  return attributes;
+};
+
 export const createTaggingCommandsExtension = (context: TaggingContext) =>
   Extension.create({
     name: "elodyTaggingCommands",
@@ -336,6 +355,61 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
               false,
               undefined,
               { selectedText, editor, editorId: context.instanceId },
+            );
+          },
+        openTagFlow:
+          (configurationItem: ResolvedTagConfiguration) =>
+          ({ editor }: CommandProps) => {
+            if (!configurationItem?.guidedFlowQuery) return false;
+
+            const { openModal } = useBaseModal();
+            openModal(
+              TypeModals.GuidedFlow,
+              ModalStyle.CenterWide,
+              configurationItem.guidedFlowQuery,
+              undefined,
+              false,
+              undefined,
+              {
+                editorId: context.instanceId,
+                onEntitySelected: (entity: InBulkProcessableItem) =>
+                  editor.commands.tagEntityFromFlow(entity, configurationItem),
+              },
+            );
+            return true;
+          },
+        tagEntityFromFlow:
+          (
+            entity: InBulkProcessableItem,
+            configurationItem: ResolvedTagConfiguration,
+          ) =>
+          ({ commands, state }: { commands: any; state: EditorState }) => {
+            if (!entity || !configurationItem?.tag) return false;
+
+            const { to } = state.selection;
+            const from = getAdjustedSelectionFrom(state);
+            const taggedText =
+              from === to
+                ? stripHighlightTags(getEntityTitle(entity as any))
+                : state.doc.textBetween(from, to);
+
+            return commands.insertContentAt(
+              { from, to },
+              {
+                type: (
+                  configurationItem as TaggableEntityConfigurationFromEntity
+                ).extensionName,
+                attrs: {
+                  entityId: entity.id,
+                  taggedText,
+                  label: taggedText,
+                  entityType: entity.type ?? null,
+                  ...buildTagAttributes(
+                    configurationItem as TaggableEntityConfigurationFromEntity,
+                    entity,
+                  ),
+                },
+              },
             );
           },
         tagAndLinkEntity:
@@ -378,22 +452,10 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
                 "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
               );
 
-            if (configurationItem.attributes) {
-              Object.assign(additionalAttributes, configurationItem.attributes);
-            }
-            if (configurationItem.metadataKeysToSetAsAttribute) {
-              configurationItem.metadataKeysToSetAsAttribute.forEach((key) => {
-                let value = "";
-                if (entity.intialValues) value = entity.intialValues[key];
-                if (entity.teaserMetadata)
-                  value = entity.teaserMetadata.find(
-                    (metadataItem: any) => metadataItem.key === key,
-                  )?.value;
-                Object.assign(additionalAttributes, {
-                  [key]: stripHighlightTags(value),
-                });
-              });
-            }
+            Object.assign(
+              additionalAttributes,
+              buildTagAttributes(configurationItem, entity),
+            );
 
             const { selection } = state;
             const { to } = selection;
@@ -635,9 +697,11 @@ export const applyColorStylingFromConfigurationToEditor = (
       const attributeSelector = styleDefiningAttribute
         ? `[${styleDefiningAttribute}="${configurationItem.attributes?.[styleDefiningAttribute]}"]`
         : "";
-      const horizontalPadding = configurationItem.inlineTrigger?.character
-        ? "0.25rem"
-        : "0";
+      const horizontalPadding =
+        configurationItem.inlineTrigger?.character ||
+        configurationItem.guidedFlowQuery
+          ? "0.25rem"
+          : "0";
       const appearance = configurationItem.tagColor
         ? `background-color: ${configurationItem.tagColor};
            color: #fff;`
