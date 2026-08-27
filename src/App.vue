@@ -3,7 +3,9 @@
     <router-view />
   </div>
   <div v-else-if="!showSplashScreen">
-    <notifications class="pt-2" />
+    <Teleport :to="topmostOpenDialog ?? 'body'" :disabled="!topmostOpenDialog">
+      <notifications class="pt-2" />
+    </Teleport>
     <div v-if="!someModalIsOpened">
       <notifications
         class="pt-2 cursor-pointer"
@@ -52,7 +54,7 @@ import { inject, onMounted } from "vue";
 const route = useRoute();
 const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
-const { someModalIsOpened } = useBaseModal();
+const { someModalIsOpened, topmostOpenDialog } = useBaseModal();
 const { isBlocking } = useBlockingLoader();
 const config: any = inject("config");
 

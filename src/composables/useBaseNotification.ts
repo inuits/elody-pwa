@@ -3,9 +3,6 @@ import {
   type NotificationsOptions,
 } from "@kyvg/vue3-notification";
 import { getTranslatedMessage } from "@/helpers";
-import { useBaseModal } from "@/composables/useBaseModal";
-
-export const modalNotificationGroup = "modal";
 
 export const useBaseNotification = (): {
   displaySuccessNotification: (
@@ -32,10 +29,7 @@ export const useBaseNotification = (): {
   closeNotification: (id: number) => void;
 } => {
   const { notify } = useNotification();
-  const { someModalIsOpened } = useBaseModal();
   const baseDuration: number = 10000;
-  const visibleGroup = (): string =>
-    someModalIsOpened.value ? modalNotificationGroup : "";
 
   const displaySuccessNotification = (
     title: string,
@@ -47,7 +41,6 @@ export const useBaseNotification = (): {
       text: getTranslatedMessage(text),
       type: "success",
       duration: baseDuration,
-      group: visibleGroup(),
       ...extraOptions,
     });
   };
@@ -62,7 +55,6 @@ export const useBaseNotification = (): {
       text: getTranslatedMessage(text),
       type: "warn",
       duration: baseDuration,
-      group: visibleGroup(),
       ...extraOptions,
     });
   };
@@ -77,7 +69,6 @@ export const useBaseNotification = (): {
       text: getTranslatedMessage(text),
       type: "error",
       duration: baseDuration,
-      group: visibleGroup(),
       ...extraOptions,
     });
   };

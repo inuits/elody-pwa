@@ -1,4 +1,4 @@
-import { reactive, ref, readonly } from "vue";
+import { computed, reactive, ref, readonly } from "vue";
 import {
   type DeleteQueryOptions,
   ModalStyle,
@@ -20,7 +20,7 @@ export type ModalInfo = {
 const initialModalInfo: ModalInfo = {
   open: false,
   closeConfirmation: false,
-  modalStyle: ModalStyle.Center
+  modalStyle: ModalStyle.Center,
 };
 
 const getInitialModals = (): { [key: string]: ModalInfo } => {
@@ -36,6 +36,18 @@ const modalToCloseAfterConfirm = ref<TypeModals | undefined>(undefined);
 const deleteQueryOptions = ref<DeleteQueryOptions | undefined>(undefined);
 const _someModalIsOpened = ref(false);
 const someModalIsOpened = readonly(_someModalIsOpened);
+
+const openDialogs = ref<HTMLElement[]>([]);
+const topmostOpenDialog = computed<HTMLElement | undefined>(
+  () => openDialogs.value[openDialogs.value.length - 1],
+);
+const registerOpenDialog = (dialog: HTMLElement | undefined): void => {
+  if (!dialog || openDialogs.value.includes(dialog)) return;
+  openDialogs.value.push(dialog);
+};
+const unregisterOpenDialog = (dialog: HTMLElement | undefined): void => {
+  openDialogs.value = openDialogs.value.filter((entry) => entry !== dialog);
+};
 
 export const useBaseModal = () => {
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
@@ -120,5 +132,8 @@ export const useBaseModal = () => {
     modalToCloseAfterConfirm,
     someModalIsOpened,
     closeAllModals,
+    topmostOpenDialog,
+    registerOpenDialog,
+    unregisterOpenDialog,
   };
 };

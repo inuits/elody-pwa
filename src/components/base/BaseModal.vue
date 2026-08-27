@@ -34,11 +34,6 @@
     <div data-testid="modal-content">
       <slot />
     </div>
-    <notifications
-      v-if="getModalInfo(props.modalType).open"
-      class="pt-2"
-      :group="modalNotificationGroup"
-    />
     <BlockingOverlay
       :is-blocking="isBlocking && getModalInfo(props.modalType).open"
     />
@@ -52,7 +47,6 @@ import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
-import { modalNotificationGroup } from "@/composables/useBaseNotification";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 
 const { isBlocking } = useBlockingLoader();
@@ -75,7 +69,8 @@ const props = withDefaults(
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
 
-const { getModalInfo } = useBaseModal();
+const { getModalInfo, registerOpenDialog, unregisterOpenDialog } =
+  useBaseModal();
 const dialog = ref<HTMLDialogElement>();
 const currentModalStyle = computed(
   () => getModalInfo(props.modalType).modalStyle,
@@ -104,12 +99,14 @@ watch(
   (isModalOpen: boolean) => {
     if (isModalOpen) {
       dialog.value?.showModal();
+      registerOpenDialog(dialog.value);
       document.body.classList.add("overflow-hidden");
       document.addEventListener("keydown", handleDocumentEsc, true);
       return;
     }
 
     document.removeEventListener("keydown", handleDocumentEsc, true);
+    unregisterOpenDialog(dialog.value);
     dialog.value?.close();
     document.body.classList.remove("overflow-hidden");
   },
@@ -133,6 +130,7 @@ const hideModal = () => {
 
 onUnmounted(() => {
   document.removeEventListener("keydown", handleDocumentEsc, true);
+  unregisterOpenDialog(dialog.value);
 });
 </script>
 

@@ -477,6 +477,26 @@ describe("useBaseModal", () => {
     });
   });
 
+  describe("open dialog stack", () => {
+    it("tracks the topmost open dialog and falls back to the one below it", () => {
+      const { topmostOpenDialog, registerOpenDialog, unregisterOpenDialog } =
+        useBaseModal();
+      const lower = document.createElement("dialog");
+      const upper = document.createElement("dialog");
+
+      registerOpenDialog(lower);
+      registerOpenDialog(upper);
+      registerOpenDialog(upper);
+      expect(topmostOpenDialog.value).toBe(upper);
+
+      unregisterOpenDialog(upper);
+      expect(topmostOpenDialog.value).toBe(lower);
+
+      unregisterOpenDialog(lower);
+      expect(topmostOpenDialog.value).toBeUndefined();
+    });
+  });
+
   it("should return undefined for non existed modal type", () => {
     const { getModalInfo } = useBaseModal();
 

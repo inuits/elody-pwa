@@ -28,7 +28,6 @@
     <div data-testid="repetitive-step-modal-content" class="p-6">
       <slot v-if="open" />
     </div>
-    <notifications v-if="open" class="pt-2" :group="modalNotificationGroup" />
     <BlockingOverlay :is-blocking="isBlocking && open" />
   </dialog>
 </template>
@@ -38,9 +37,10 @@ import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { Unicons } from "@/types";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
-import { modalNotificationGroup } from "@/composables/useBaseNotification";
+import { useBaseModal } from "@/composables/useBaseModal";
 
 const { isBlocking } = useBlockingLoader();
+const { registerOpenDialog, unregisterOpenDialog } = useBaseModal();
 
 const props = defineProps<{ open: boolean; title?: string }>();
 const emit = defineEmits<{ (e: "close"): void }>();
@@ -50,17 +50,25 @@ const dialog = ref<HTMLDialogElement>();
 watch(
   () => props.open,
   (isOpen) => {
-    if (isOpen) dialog.value?.showModal?.();
-    else dialog.value?.close?.();
+    if (isOpen) {
+      dialog.value?.showModal?.();
+      registerOpenDialog(dialog.value);
+      return;
+    }
+    unregisterOpenDialog(dialog.value);
+    dialog.value?.close?.();
   },
 );
 
 onMounted(() => {
-  if (props.open) dialog.value?.showModal?.();
+  if (!props.open) return;
+  dialog.value?.showModal?.();
+  registerOpenDialog(dialog.value);
 });
 
 onBeforeUnmount(() => {
   // leave the top layer cleanly before the element is removed
+  unregisterOpenDialog(dialog.value);
   dialog.value?.close?.();
 });
 </script>
