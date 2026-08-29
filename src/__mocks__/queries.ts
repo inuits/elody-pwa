@@ -821,6 +821,7 @@ export enum DamsIcons {
   SquareFull = 'SquareFull',
   Swatchbook = 'Swatchbook',
   Tag = 'Tag',
+  Sitemap = 'Sitemap',
   Table = 'Table',
   Text = 'Text',
   Trash = 'Trash',
@@ -3856,6 +3857,7 @@ export enum ViewModes {
   ViewModesGrid = 'ViewModesGrid',
   ViewModesList = 'ViewModesList',
   ViewModesMap = 'ViewModesMap',
+  ViewModesPipeline = 'ViewModesPipeline',
   /** @deprecated We use the new mediaviewer integrated in previews */
   ViewModesMedia = 'ViewModesMedia'
 }

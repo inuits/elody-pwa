@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import { ref, reactive, watch } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
+import { ViewModes } from "@/generated-types/queries";
 
 // --- Hoisted mutable state (changes between tests) ---------------------------
 const mocks = vi.hoisted(() => ({
@@ -172,6 +173,7 @@ vi.mock("@/composables/useViewModes", () => ({
     displayTable: ref(false),
     displayPreview: ref(false),
     displayMap: ref(false),
+    displayPipeline: ref(false),
     expandFilters: ref(false),
     toggles: ref([]),
     configPerViewMode: ref({}),
@@ -584,6 +586,50 @@ describe("BaseLibrary.vue predefinedEntities initialization", () => {
 
     expect((wrapper.vm as any).entities).not.toBe(predefined);
     expect((wrapper.vm as any).entities).toEqual(predefined);
+  });
+
+  it("passes ViewModesPipeline through to determineViewModes outside the entity picker", async () => {
+    const predefined = [
+      {
+        ...makePredefined("e1"),
+        allowedViewModes: {
+          viewModes: [
+            { viewMode: ViewModes.ViewModesList, config: null },
+            { viewMode: ViewModes.ViewModesPipeline, config: null },
+          ],
+        },
+      },
+    ];
+    wrapper = getWrapper({ predefinedEntities: predefined });
+    await flushPromises();
+
+    expect(libDetermineViewModes).toHaveBeenCalledWith([
+      ViewModes.ViewModesList,
+      ViewModes.ViewModesPipeline,
+    ]);
+  });
+
+  it("strips ViewModesPipeline from the view modes inside the entity picker", async () => {
+    const predefined = [
+      {
+        ...makePredefined("e1"),
+        allowedViewModes: {
+          viewModes: [
+            { viewMode: ViewModes.ViewModesList, config: null },
+            { viewMode: ViewModes.ViewModesPipeline, config: null },
+          ],
+        },
+      },
+    ];
+    wrapper = getWrapper({
+      predefinedEntities: predefined,
+      bulkOperationsContext: "EntityElementListEntityPickerModal",
+    });
+    await flushPromises();
+
+    expect(libDetermineViewModes).toHaveBeenCalledWith([
+      ViewModes.ViewModesList,
+    ]);
   });
 
   it("reflects predefinedEntities in entities when they are provided after mount", async () => {

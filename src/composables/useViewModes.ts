@@ -39,6 +39,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
   const displayTable = ref<boolean>(false);
   const displayPreview = ref<boolean>(options.enablePreview ?? false);
   const displayMap = ref<boolean>(false);
+  const displayPipeline = ref<boolean>(false);
   const expandFilters = ref<boolean>(false);
 
   const toggles = ref<ViewModeToggle[]>([]);
@@ -72,12 +73,13 @@ export const useViewModes = (options: UseViewModesOptions) => {
   });
 
   const showViewModesList = computed<boolean>(() => {
-    if (displayTable.value) return false;
+    if (displayTable.value || displayPipeline.value) return false;
     return (
       displayList.value ||
       displayGrid.value ||
       ((options.entitiesLoading?.value ?? false) &&
         !displayMap.value &&
+        !displayPipeline.value &&
         (options.route?.name !== "SingleEntity" ||
           options.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
     );
@@ -141,11 +143,21 @@ export const useViewModes = (options: UseViewModesOptions) => {
           iconOn: DamsIcons.Map,
           iconOff: DamsIcons.Map,
         });
+      } else if (viewMode === ViewModes.ViewModesPipeline) {
+        // No shared-teaser-metadata precondition here (unlike Table): mixed
+        // entity types are normal in a pipeline.
+        newToggles.push({
+          isOn: displayPipeline,
+          iconOn: DamsIcons.Sitemap,
+          iconOff: DamsIcons.Sitemap,
+        });
       }
     }
 
     if (!viewModes.includes(ViewModes.Table)) displayTable.value = false;
     if (!viewModes.includes(ViewModes.ViewModesMap)) displayMap.value = false;
+    if (!viewModes.includes(ViewModes.ViewModesPipeline))
+      displayPipeline.value = false;
 
     toggles.value = newToggles;
   };
@@ -172,6 +184,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
       displayList.value = keys.includes(ViewModes.ViewModesList);
       displayGrid.value = keys.includes(ViewModes.ViewModesGrid);
       displayTable.value = keys.includes(ViewModes.Table);
+      displayPipeline.value = keys.includes(ViewModes.ViewModesPipeline);
       return;
     }
 
@@ -184,9 +197,18 @@ export const useViewModes = (options: UseViewModesOptions) => {
     }
 
     if (
+      !displayPreview.value &&
+      displayPreferences.pipeline &&
+      viewModes.includes(ViewModes.ViewModesPipeline)
+    ) {
+      displayPipeline.value = displayPreferences.pipeline;
+    }
+
+    if (
       displayGrid.value === false &&
       !displayMap.value &&
-      !displayTable.value
+      !displayTable.value &&
+      !displayPipeline.value
     ) {
       displayList.value = true;
     }
@@ -196,23 +218,28 @@ export const useViewModes = (options: UseViewModesOptions) => {
     displayMap.value = false;
     displayGrid.value = false;
     displayTable.value = false;
+    displayPipeline.value = false;
     displayList.value = true;
   };
 
   // ── Persist watcher ───────────────────────────────────────────────────────
 
-  watch([displayGrid, displayTable, expandFilters], () => {
+  watch([displayGrid, displayTable, displayPipeline, expandFilters], () => {
     const _expandFilters = options.persistExpandFilters
       ? expandFilters.value
       : getGlobalState("_displayPreferences")?.expandFilters;
 
     displayList.value =
-      !displayGrid.value && !displayMap.value && !displayTable.value;
+      !displayGrid.value &&
+      !displayMap.value &&
+      !displayTable.value &&
+      !displayPipeline.value;
 
     if (options.persistPreferences !== false) {
       updateGlobalState("_displayPreferences", {
         grid: displayPreview.value ? false : displayGrid.value,
         table: displayTable.value,
+        pipeline: displayPreview.value ? false : displayPipeline.value,
         expandFilters: _expandFilters,
       });
     }
@@ -226,6 +253,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
     displayTable,
     displayPreview,
     displayMap,
+    displayPipeline,
     expandFilters,
     toggles,
     configPerViewMode,
