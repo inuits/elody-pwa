@@ -1,11 +1,19 @@
-import type { Entitytyping, ActionsOnResult } from "@/generated-types/queries";
+import type {
+  ActionsOnResult,
+  AdvancedFilterInput,
+  Entitytyping,
+} from "@/generated-types/queries";
 import { ref } from "vue";
 
 const acceptedTypes = ref<Entitytyping[]>([]);
 const entityUuid = ref<string>("");
 const entityId = ref<string>("");
 const parentEntityType = ref<Entitytyping[]>([]);
-const refetchEntitiesFunction = ref<Function | undefined>(undefined);
+type RefetchEntitiesFunction = () => Promise<void> | void;
+
+const refetchEntitiesFunction = ref<RefetchEntitiesFunction | undefined>(
+  undefined,
+);
 const relationType = ref<string | "no-type-set">("no-type-set");
 const customGetEntitiesQuery = ref<string>("");
 const customGetEntitiesFiltersQuery = ref<string>("");
@@ -18,6 +26,10 @@ const selectionLimit = ref<number>(0);
 // relations want it off -- picking the same author twice is a slip. A pipeline
 // step is a *use* of a component, so a component can legitimately appear twice.
 const allowDuplicateRelations = ref<boolean>(false);
+// Extra filters with concrete values, set by whoever opens the picker (e.g.
+// the pipeline view scoping it to one output port's shape). Cleared on every
+// normal initialization so a scope never leaks into the next picker.
+const additionalFilters = ref<AdvancedFilterInput[]>([]);
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -36,7 +48,9 @@ const useEntityPickerModal = () => {
     parentEntityType.value = parentEntityTypes;
   };
 
-  const setRefetchEntitiesFunction = (refetchEntities: Function) => {
+  const setRefetchEntitiesFunction = (
+    refetchEntities: RefetchEntitiesFunction,
+  ) => {
     refetchEntitiesFunction.value = refetchEntities;
   };
 
@@ -76,6 +90,10 @@ const useEntityPickerModal = () => {
     allowDuplicateRelations.value = value;
   };
 
+  const setAdditionalFilters = (filters: AdvancedFilterInput[]) => {
+    additionalFilters.value = filters;
+  };
+
   const getAcceptedTypes = () => acceptedTypes.value;
   const getEntityUuid = () => entityUuid.value;
   const getEntityId = () => entityId.value;
@@ -91,6 +109,7 @@ const useEntityPickerModal = () => {
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
   const getAllowDuplicateRelations = () => allowDuplicateRelations.value;
+  const getAdditionalFilters = () => additionalFilters.value;
 
   const resetState = () => {
     acceptedTypes.value = [];
@@ -138,6 +157,8 @@ const useEntityPickerModal = () => {
     getSelectionLimit,
     setAllowDuplicateRelations,
     getAllowDuplicateRelations,
+    setAdditionalFilters,
+    getAdditionalFilters,
   };
 };
 
