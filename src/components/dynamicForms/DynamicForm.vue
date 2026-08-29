@@ -68,6 +68,7 @@
           :custom-query="getCustomGetEntitiesQuery()"
           :entity-picker-mode="EntityPickerMode.Save"
           :selection-limit="getSelectionLimit()"
+          :computed-filters="getAdditionalFilters()"
           :show-button="true"
           :enable-advanced-filters="true"
           :search-mode="
@@ -472,6 +473,7 @@ const {
   getCustomGetEntitiesFiltersQuery,
   getCustomGetEntitiesQuery,
   getSelectionLimit,
+  getAdditionalFilters,
 } = useEntityPickerModal();
 const {
   extractActionArguments,

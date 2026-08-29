@@ -224,6 +224,21 @@ const {
   emit as BulkOperationsActionsBarEmits,
   parentEntity,
 );
+
+// Run one of this bar's operations as if the user picked it from the
+// dropdown — the pipeline view's port action opens the add-component picker
+// through exactly the flow the dropdown uses.
+const triggerBulkOperation = (operationValue: string): boolean => {
+  const option = (bulkOperations.value || []).find(
+    (candidate: any) => candidate?.value === operationValue,
+  );
+  if (!option) return false;
+  selectedBulkOperation.value = option;
+  handleSelectedBulkOperation();
+  return true;
+};
+
+defineExpose({ triggerBulkOperation });
 </script>
 
 <style>
