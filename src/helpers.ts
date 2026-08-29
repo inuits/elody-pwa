@@ -1071,8 +1071,18 @@ export function enrichProcessorConfig(
         showOnlyInEditMode: null,
       };
 
-      const value =
-        relation?.metadata?.find((m: any) => m.key === field.key)?.value ?? "";
+      // catalog facts (e.g. the contract's Consumes/Produces) arrive with a
+      // server-set value; relation metadata only overrides when present
+      let value =
+        relation?.metadata?.find((m: any) => m.key === field.key)?.value ??
+        field.value ??
+        "";
+      // A connection reference reads as "step-id|port"; on a card the step's
+      // readable name is what tells the user what is wired to what.
+      if (/^connections\..+\.from$/.test(field.key) && typeof value === "string" && value) {
+        const step = value.split("|")[0].replace(/^local--/, "");
+        value = step.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+      }
       newIntialValues[field.key] = value;
     }
   }
