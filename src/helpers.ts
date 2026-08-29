@@ -1012,3 +1012,82 @@ export const graphqlErrorInterceptor = onError(
     }
   },
 );
+
+const PROCESSOR_FIELD_TYPE_MAP: Record<string, string> = {
+  baseTextField: "text",
+  baseNumberField: "number",
+  baseCheckbox: "checkbox",
+  baseSelectField: "dropdown",
+};
+
+function mapProcessorFieldType(inputFieldType: string): string {
+  return PROCESSOR_FIELD_TYPE_MAP[inputFieldType] ?? inputFieldType;
+}
+
+function buildDropdownOptions(
+  inValues: string[],
+): Array<{ icon: string; label: string; value: string; __typename: string }> {
+  return inValues.map((v) => ({
+    icon: "NoIcon",
+    label: v,
+    value: v,
+    __typename: "DropdownOption",
+  }));
+}
+
+export function enrichProcessorConfig(
+  teaserMetadata: Record<string, any>,
+  intialValues: Record<string, any>,
+  processorConfig: {
+    panels: Array<{ fields: Array<any>; isEditable?: boolean }>;
+  },
+  relation: any | null,
+): { teaserMetadata: Record<string, any>; intialValues: Record<string, any> } {
+  const newTeaserMetadata = { ...teaserMetadata };
+  const newIntialValues = { ...intialValues };
+
+  for (const panel of processorConfig.panels) {
+    for (const field of panel.fields) {
+      const mappedType = mapProcessorFieldType(field.inputFieldType);
+      const isDropdown = mappedType === "dropdown";
+
+      newTeaserMetadata[field.key] = {
+        key: field.key,
+        label: field.label,
+        __typename: "PanelRelationMetaData",
+        // panels marked non-editable stay read-only in the entity edit mode;
+        // their config is edited through the Configure modal instead
+        nonEditableField: panel.isEditable === false,
+        inputField: {
+          type: mappedType,
+          __typename: "InputField",
+          validation: field.isRequired
+            ? { value: ["required"], __typename: "Validation" }
+            : null,
+          ...(isDropdown
+            ? { options: buildDropdownOptions(field.inValues || []) }
+            : {}),
+        },
+        unit: null,
+        linkText: null,
+        showOnlyInEditMode: null,
+      };
+
+      // catalog facts (e.g. the contract's Consumes/Produces) arrive with a
+      // server-set value; relation metadata only overrides when present
+      let value =
+        relation?.metadata?.find((m: any) => m.key === field.key)?.value ??
+        field.value ??
+        "";
+      // A connection reference reads as "step-id|port"; on a card the step's
+      // readable name is what tells the user what is wired to what.
+      if (/^connections\..+\.from$/.test(field.key) && typeof value === "string" && value) {
+        const step = value.split("|")[0].replace(/^local--/, "");
+        value = step.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+      }
+      newIntialValues[field.key] = value;
+    }
+  }
+
+  return { teaserMetadata: newTeaserMetadata, intialValues: newIntialValues };
+}

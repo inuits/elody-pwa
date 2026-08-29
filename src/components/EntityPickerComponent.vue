@@ -36,9 +36,7 @@
       :selectionEnabled="selectionEnabled"
       :disable-new-entity-previews="true"
       :use-other-query="newQuery"
-      :parent-entity-identifiers="
-        entityPickerMode === EntityPickerMode.Emit ? [entityUuid] : undefined
-      "
+      :parent-entity-identifiers="entityUuid ? [entityUuid] : undefined"
       :ids-of-non-selectable-entities="
         enableNonSelectableEntities ? alreadySelectedEntityIdsFetched : []
       "
@@ -60,7 +58,6 @@ import type { Entity } from "@/generated-types/queries";
 import {
   type BaseEntity,
   type AdvancedFilterInput,
-  type BaseRelationValuesInput,
   Collection,
   EntityPickerMode,
   EntityPickerSearchMode,
@@ -288,25 +285,6 @@ const getContext = () => {
   if (props.acceptedTypes[0] == Entitytyping.Mediafile)
     return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
   return props.context;
-};
-
-const getAlreadySelectedEntityIds = (): string[] => {
-  if (!form) return [];
-  const relationValues = form?.values.relationValues;
-  const normalizedRelationIds = Object.keys(relationValues)
-    .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
-    .map((relationKey: string) =>
-      relationValues[relationKey].map(
-        (relation: BaseRelationValuesInput) => relation,
-      ),
-    )
-    .flat();
-
-  const filteredRelationIds = normalizedRelationIds
-    .filter((relation: BaseRelationValuesInput) => !relation.editStatus)
-    .map((relation: BaseRelationValuesInput) => relation.key);
-
-  return filteredRelationIds;
 };
 
 const submit = useSubmitForm<EntityValues>(async () => {
