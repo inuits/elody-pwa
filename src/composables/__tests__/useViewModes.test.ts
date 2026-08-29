@@ -248,6 +248,65 @@ describe("useViewModes", () => {
       expect(toggles.value[0].isOn).toBe(true);
     });
 
+    it("adds a pipeline toggle with the sitemap glyph when ViewModesPipeline is allowed", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, toggles } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.ViewModesList, ViewModes.ViewModesPipeline]);
+
+      expect(toggles.value).toHaveLength(2);
+      expect(toggles.value[1].iconOn).toBe(DamsIcons.Sitemap);
+    });
+
+    it("does not require shared teaserMetadata columns for the pipeline toggle", () => {
+      // unlike Table: mixed entity types are normal in a pipeline
+      const entities = ref<Entity[]>([
+        makeEntity("dataset", [], { title: {} }),
+        makeEntity("component", [], { name: {} }),
+      ]);
+      const { determineViewModes, toggles } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.ViewModesPipeline]);
+
+      expect(toggles.value).toHaveLength(1);
+      expect(toggles.value[0].iconOn).toBe(DamsIcons.Sitemap);
+    });
+
+    it("sets displayPipeline to false when ViewModesPipeline is not in viewModes", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, displayPipeline } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      determineViewModes([ViewModes.Table]);
+
+      expect(displayPipeline.value).toBe(false);
+    });
+
+    it("does not reset displayPipeline when ViewModesPipeline is in viewModes", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, displayPipeline } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      determineViewModes([ViewModes.ViewModesPipeline]);
+
+      expect(displayPipeline.value).toBe(true);
+    });
+
+    it("binds displayPipeline ref to the pipeline toggle's isOn", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, toggles, displayPipeline } = useViewModes({
+        entities,
+      });
+
+      determineViewModes([ViewModes.ViewModesPipeline]);
+
+      displayPipeline.value = true;
+      expect(toggles.value[0].isOn).toBe(true);
+
+      displayPipeline.value = false;
+      expect(toggles.value[0].isOn).toBe(false);
+    });
+
     it("ignores unknown view mode names", () => {
       const entities = ref<Entity[]>([makeEntity("production")]);
       const { determineViewModes, toggles } = useViewModes({ entities });
@@ -421,7 +480,6 @@ describe("useViewModes", () => {
         getUserPreferredViewModeConfiguration,
         displayGrid,
         displayTable,
-        displayPreview,
       } = useViewModes({
         entities,
         enablePreview: true,
@@ -461,6 +519,91 @@ describe("useViewModes", () => {
       // displayMap only affects the single-mode early-return path, not the general preference restoration
       expect(displayGrid.value).toBe(true);
       expect(displayTable.value).toBe(true);
+    });
+  });
+
+  describe("pipeline persistence and exclusivity", () => {
+    it("restores the pipeline preference when stored and allowed", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        pipeline: true,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("pipeline", [
+          ViewModes.ViewModesList,
+          ViewModes.ViewModesPipeline,
+        ]),
+      ]);
+      const { getUserPreferredViewModeConfiguration, displayPipeline } =
+        useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesList,
+        ViewModes.ViewModesPipeline,
+      ]);
+
+      expect(displayPipeline.value).toBe(true);
+    });
+
+    it("does not restore the pipeline preference when the mode is not allowed", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        pipeline: true,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("pipeline", [ViewModes.ViewModesList, ViewModes.ViewModesGrid]),
+      ]);
+      const { getUserPreferredViewModeConfiguration, displayPipeline } =
+        useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesList,
+        ViewModes.ViewModesGrid,
+      ]);
+
+      expect(displayPipeline.value).toBe(false);
+    });
+
+    it("persists the pipeline preference when displayPipeline changes", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayPipeline } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      await nextTick();
+
+      expect(mockUpdateGlobalState).toHaveBeenCalledWith(
+        "_displayPreferences",
+        expect.objectContaining({ pipeline: true }),
+      );
+    });
+
+    it("turns displayList off while displayPipeline is on, and back on after", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayPipeline, displayList } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      await nextTick();
+      expect(displayList.value).toBe(false);
+
+      displayPipeline.value = false;
+      await nextTick();
+      expect(displayList.value).toBe(true);
+    });
+
+    it("makes showViewModesList false while displayPipeline is on", () => {
+      const entities = ref<Entity[]>([]);
+      const { showViewModesList, displayList, displayPipeline } = useViewModes({
+        entities,
+      });
+
+      displayList.value = true;
+      displayPipeline.value = true;
+
+      expect(showViewModesList.value).toBe(false);
     });
   });
 
@@ -678,7 +821,7 @@ describe("useViewModes", () => {
 
     it("saves grid as false when displayPreview is active even if displayGrid is true", async () => {
       const entities = ref<Entity[]>([]);
-      const { displayGrid, displayPreview } = useViewModes({
+      const { displayGrid } = useViewModes({
         entities,
         enablePreview: true,
       });
@@ -694,7 +837,7 @@ describe("useViewModes", () => {
 
     it("sets displayList to true when all view modes are turned off", async () => {
       const entities = ref<Entity[]>([]);
-      const { displayGrid, displayTable, displayList } = useViewModes({
+      const { displayGrid, displayList } = useViewModes({
         entities,
       });
 
