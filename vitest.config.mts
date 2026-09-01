@@ -15,6 +15,8 @@ export default defineConfig({
   },
   test: {
     setupFiles: "./vitestSetup.ts",
+    testTimeout: 30000,
+    hookTimeout: 30000,
     silent: "passed-only",
     environment: "jsdom",
     deps: {

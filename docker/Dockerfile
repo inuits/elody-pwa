@@ -21,7 +21,7 @@ COPY . .
 RUN mkdir -p /app/src/generated-types && \
   touch /app/src/generated-types/queries.ts
 
-RUN pnpm run test:unit
+RUN pnpm run test:unit -- --maxWorkers=2
 
 ### Ship stage: raw PWA source only.
 # Client builds copy /app into their own build and run pnpm install there,
