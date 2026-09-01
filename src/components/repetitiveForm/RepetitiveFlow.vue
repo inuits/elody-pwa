@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
   DamsIcons,
@@ -151,7 +151,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useModalActions } from "@/composables/useModalActions";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import { getEntityIdFromRoute } from "@/helpers";
+import { asString } from "@/helpers";
 import { useAsyncAction } from "@/composables/useAsyncAction";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -189,10 +189,12 @@ const { displayErrorNotification } = useBaseNotification();
 const { run } = useAsyncAction();
 const { startBlocking, stopBlocking } = useBlockingLoader();
 const router = useRouter();
+const route = useRoute();
 const { t } = useI18n();
 
 const view = ref<"step" | "overview" | "finalize">("overview");
 let hasStarted = false;
+const hostEntityId = ref<string | undefined>(undefined);
 const lastPicked = ref<Record<string, any> | undefined>(undefined);
 
 const activeStep = computed(() => store.activeStep());
@@ -251,6 +253,7 @@ const start = () => {
   hasStarted = true;
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
+  hostEntityId.value = getEntityUuid() || asString(route.params.id) || undefined;
   view.value = store.opensOnFirstStep() ? "step" : "overview";
 };
 
@@ -375,8 +378,7 @@ const commitFailureText = (error: any): string =>
 
 const onFinish = async () => {
   if (isCommitting.value) return;
-  const hostEntityId = getEntityUuid() || getEntityIdFromRoute();
-  if (!hostEntityId) {
+  if (!hostEntityId.value) {
     displayErrorNotification(
       "repetitiveForm.finish-failed-title",
       "repetitiveForm.finish-failed-description",
@@ -385,7 +387,7 @@ const onFinish = async () => {
   }
   isCommitting.value = true;
   try {
-    await store.commitPendingHostRelations(hostEntityId);
+    await store.commitPendingHostRelations(hostEntityId.value);
   } catch (error: any) {
     displayErrorNotification(
       "repetitiveForm.finish-failed-title",
@@ -439,6 +441,7 @@ const requestClose = async () => {
 // currentBranch would otherwise linger and trip the close-confirm on reopen).
 const reset = () => {
   store.resetFlow();
+  hostEntityId.value = undefined;
   selectedFinalizeType.value = null;
   lastPicked.value = undefined;
   view.value = "overview";

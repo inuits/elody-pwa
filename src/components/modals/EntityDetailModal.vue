@@ -41,10 +41,19 @@ import BaseModal from "@/components/base/BaseModal.vue";
 import { useQuery } from "@vue/apollo-composable";
 import { getEntityTitle } from "@/helpers";
 import { Unicons } from "@/types";
+import useEntitySingle from "@/composables/useEntitySingle";
 import EntitySingle from "@/views/EntitySingle.vue";
 import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 
 const { getModalInfo, closeModal } = useBaseModal();
+const {
+  getEntityUuid,
+  setEntityUuid,
+  getEntityType,
+  setEntityType,
+  getRefetch,
+  setRefetch,
+} = useEntitySingle();
 
 provide("OwnsRouteState", false);
 
@@ -72,6 +81,29 @@ watch(
   () => entityId.value,
   () => {
     refetch();
+  },
+);
+
+let pageEntity:
+  | { uuid?: string; type?: string; refetch?: () => void }
+  | undefined;
+
+watch(
+  () => getModalInfo(TypeModals.EntityDetailModal).open,
+  (isOpen: boolean) => {
+    if (isOpen) {
+      pageEntity = {
+        uuid: getEntityUuid(),
+        type: getEntityType(),
+        refetch: getRefetch(),
+      };
+      return;
+    }
+    if (!pageEntity) return;
+    setEntityUuid(pageEntity.uuid ?? "");
+    setEntityType(pageEntity.type ?? "");
+    if (pageEntity.refetch) setRefetch(pageEntity.refetch);
+    pageEntity = undefined;
   },
 );
 </script>

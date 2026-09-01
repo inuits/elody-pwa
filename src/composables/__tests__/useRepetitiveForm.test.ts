@@ -812,6 +812,42 @@ describe("useRepetitiveForm", () => {
     expect(mocks.addRelations).not.toHaveBeenCalled();
   });
 
+  // a host that is also the picked entity can only come from a stale host id;
+  // vlacc's virtual relation sync recurses forever on a self-relation, so the
+  // client must never send one
+  it("commitPendingHostRelations skips a target that is the host entity itself", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([{ id: "user-1" }]);
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep();
+    await store.commitPendingHostRelations("user-1");
+    expect(mocks.addRelations).not.toHaveBeenCalled();
+  });
+
+  it("commitPendingHostRelations still commits the other targets of a branch that contains the host itself", async () => {
+    const store = useRepetitiveForm();
+    store.initFlow(configWithMetadataOnlyStep());
+    store.pickExisting([{ id: "user-1" }, { id: "user-2" }]);
+    store.completeStep(); // role step
+    store.stagePendingHostRelation(store.activeStep()!, { role: "booker_admin" });
+    store.completeMetadataOnlyStep();
+    await store.commitPendingHostRelations("user-1");
+    expect(mocks.addRelations).toHaveBeenCalledTimes(1);
+    expect(mocks.addRelations).toHaveBeenCalledWith({
+      entityId: "user-1",
+      relations: [
+        {
+          key: "user-2",
+          type: "refUsers",
+          editStatus: "new",
+          metadata: [{ key: "roles", value: ["booker_admin"] }],
+        },
+      ],
+    });
+  });
+
   it("commitPendingHostRelations commits every branch staged via add-another, not just the first", async () => {
     const store = useRepetitiveForm();
     store.initFlow(configWithMetadataOnlyStep());

@@ -850,6 +850,37 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     );
   });
 
+  // opening a picked entity in the EntityDetailModal makes its EntitySingle
+  // claim the module-scoped single-entity state, so reading it at Afronden
+  // time posted the relations onto the entity that was peeked at
+  it("keeps the host entity resolved when the flow opened, even if the single-entity state changes mid-flow", async () => {
+    useEntitySingle().setEntityUuid("W-HOST");
+    const wrapper = getMetadataOnlyWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "user-1" }]);
+    await flushPromises();
+    useEntitySingle().setEntityUuid("PERS-PEEKED");
+    field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
+    await flushPromises();
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+
+    expect(manageMocks.addRelations).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: "W-HOST" }),
+    );
+  });
+
+  it("never links the host entity to itself", async () => {
+    useEntitySingle().setEntityUuid("user-1");
+    const wrapper = getMetadataOnlyWrapper();
+    await pickUserAndSubmitRole(wrapper);
+    overview(wrapper).vm.$emit("finish");
+    await flushPromises();
+
+    expect(manageMocks.addRelations).not.toHaveBeenCalled();
+    expect(wrapper.emitted("finished")).toBeTruthy();
+  });
+
   // the collection-api rejects a relation whose metadata does not match the
   // document's schema; the generic "something went wrong" text hides which
   // field it was, so the API's own message has to reach the user

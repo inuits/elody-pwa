@@ -382,6 +382,7 @@ export const useRepetitiveForm = () => {
     for (const relation of step.relations ?? []) {
       const metadata = buildRelationMetadata(relation, fieldValues);
       for (const target of entitiesFor(branch, relation.to)) {
+        if (target.id === hostEntityId) continue;
         await addRelations({
           entityId: hostEntityId,
           relations: [
