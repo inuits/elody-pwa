@@ -586,11 +586,18 @@ const enableSelection = computed<boolean>(() => {
     return true;
   return config.features.hasBulkSelect && hasBulkOperations.value;
 });
+const isPickerLibrary = computed(() => {
+  return (
+    isEntityPickerContext.value ||
+    props.bulkOperationsContext ===
+      BulkOperationsContextEnum.GuidedFlowStepPicker
+  );
+});
 const additionalDefaultFiltersEnabled = computed(() => {
   return (
     props.enableAdvancedFilters &&
     manipulationQuery.value?.filtersDocument &&
-    !isEntityPickerContext.value
+    !isPickerLibrary.value
   );
 });
 

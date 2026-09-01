@@ -17,6 +17,7 @@ const libTotalEntityCount = ref(0);
 const libFetchSequence = ref(0);
 const libGetEntities = vi.fn().mockResolvedValue([]);
 const libEntitiesLoading = ref(false);
+const libManipulationQuery = ref<any>(undefined);
 const libDetermineViewModes = vi.fn();
 const libGetUserPreferredViewModeConfiguration = vi.fn();
 
@@ -61,7 +62,7 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     fetchAllPromises: vi.fn().mockResolvedValue(undefined),
     getEntities: libGetEntities,
     getEntityById: vi.fn().mockResolvedValue(undefined),
-    manipulationQuery: ref(undefined),
+    manipulationQuery: libManipulationQuery,
     setAdvancedFilters: vi.fn(),
     setEntityType: vi.fn(),
     setIsSearchLibrary: vi.fn(),
@@ -119,6 +120,7 @@ vi.mock("@/composables/useBulkOperations", () => ({
   BulkOperationsContextEnum: {
     EntityElementListEntityPickerModal: "EntityElementListEntityPickerModal",
     EntityElementMediaEntityPickerModal: "EntityElementMediaEntityPickerModal",
+    GuidedFlowStepPicker: "GuidedFlowStepPicker",
   },
 }));
 
@@ -815,5 +817,49 @@ describe("BaseLibrary.vue does not own route state inside a preview subtree", ()
     await flushPromises();
     const filters = wrapper.findComponent({ name: "FiltersBase" });
     expect(filters.props("shouldUseStateForRoute")).toBe(true);
+  });
+});
+
+describe("BaseLibrary.vue additional default filters for picker libraries", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    libGetEntities.mockResolvedValue([]);
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    libManipulationQuery.value = { filtersDocument: { kind: "Document" } };
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+    libManipulationQuery.value = undefined;
+  });
+
+  it("does not add the route's default filters to a guided-flow step picker", async () => {
+    wrapper = getWrapper({ bulkOperationsContext: "GuidedFlowStepPicker" });
+    await flushPromises();
+    const filters = wrapper.findComponent({ name: "FiltersBase" });
+    expect(filters.exists()).toBe(true);
+    expect(filters.props("additionalDefaultFiltersEnabled")).toBeFalsy();
+  });
+
+  it("does not add the route's default filters to an entity-picker modal", async () => {
+    wrapper = getWrapper({
+      bulkOperationsContext: "EntityElementListEntityPickerModal",
+    });
+    await flushPromises();
+    const filters = wrapper.findComponent({ name: "FiltersBase" });
+    expect(filters.props("additionalDefaultFiltersEnabled")).toBeFalsy();
+  });
+
+  it("still adds the route's default filters to a page's own library", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    const filters = wrapper.findComponent({ name: "FiltersBase" });
+    expect(filters.props("additionalDefaultFiltersEnabled")).toBeTruthy();
   });
 });
