@@ -260,7 +260,7 @@ export const useMetadataWrapper = (
   onMounted(() => {
     let newValue = props.metadata.value;
     try {
-      if (props.metadata.inputField?.autoSelectable)
+      if (props.metadata.inputField?.autoSelectable && !newValue)
         newValue = props.metadata.inputField.options[0]?.value;
       if (props.repeatablePanelConfig?.isRepeatable)
         newValue = props.metadata.value[props.metadata.key];
