@@ -98,7 +98,7 @@ import { collectMergeFields } from "@/composables/useMergeFields";
 import {
   Collection,
   GetEntityByIdDocument,
-  GetInboundReferenceCountDocument,
+  GetMergePreviewDocument,
   MergeEntitiesDocument,
   TypeModals,
 } from "@/generated-types/queries";
@@ -115,6 +115,7 @@ const survivorIndex = ref<number>(0);
 const choices = ref<MergeChoices>({});
 const loadedEntities = ref<Record<string, any>>({});
 const inboundReferenceCount = ref<number>(0);
+const automaticRelationTypes = ref<string[]>([]);
 const isLoading = ref<boolean>(false);
 const isMerging = ref<boolean>(false);
 
@@ -138,9 +139,17 @@ const labelFor = (item: InBulkProcessableItem | undefined): string =>
 const entityFor = (item: InBulkProcessableItem | undefined) =>
   item ? loadedEntities.value[item.id] : undefined;
 
-const mergeFields = computed(() =>
-  collectMergeFields(entityFor(survivor.value)?.entityView),
-);
+// Relations the backend repoints on its own are not the user's to decide:
+// offering them would present a choice that is silently discarded.
+const mergeFields = computed(() => {
+  const fields = collectMergeFields(entityFor(survivor.value)?.entityView);
+  return {
+    ...fields,
+    relationFields: fields.relationFields.filter(
+      (field) => !automaticRelationTypes.value.includes(field.relationType),
+    ),
+  };
+});
 
 const rows = computed(() => {
   const survivorEntity = entityFor(survivor.value);
@@ -170,13 +179,13 @@ const fetchEntity = async (item: InBulkProcessableItem) => {
   return data?.Entity;
 };
 
-const fetchInboundReferenceCount = async (id: string) => {
+const fetchMergePreview = async (id: string) => {
   const { data } = await apolloClient.query({
-    query: GetInboundReferenceCountDocument,
+    query: GetMergePreviewDocument,
     variables: { id, collection: Collection.Entities },
     fetchPolicy: "no-cache",
   });
-  return data?.inboundReferenceCount ?? 0;
+  return data?.mergePreview;
 };
 
 const loadComparison = async () => {
@@ -193,12 +202,12 @@ const loadComparison = async () => {
   }
 };
 
-// The count is informational, so it must never hold up the comparison.
-const loadInboundReferenceCount = async () => {
+// Informational, so it must never hold up the comparison.
+const loadMergePreview = async () => {
   if (!victim.value) return;
-  inboundReferenceCount.value = await fetchInboundReferenceCount(
-    victim.value.id,
-  ).catch(() => 0);
+  const preview = await fetchMergePreview(victim.value.id).catch(() => null);
+  inboundReferenceCount.value = preview?.inboundReferenceCount ?? 0;
+  automaticRelationTypes.value = preview?.automaticRelationTypes ?? [];
 };
 
 watch(
@@ -211,7 +220,7 @@ watch(
   { immediate: true },
 );
 
-watch(victim, loadInboundReferenceCount, { immediate: true });
+watch(victim, loadMergePreview, { immediate: true });
 
 const submitMerge = async () => {
   if (!survivor.value || !victim.value) return;

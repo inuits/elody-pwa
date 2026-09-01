@@ -68,6 +68,55 @@ describe("collectMergeFields", () => {
     expect(collectMergeFields(entityView).relationFields).toEqual([]);
   });
 
+  it("skips fields in a panel the client marked read-only", () => {
+    // Audit panels (created/updated timestamps) are declared isEditable:false.
+    // They describe the record rather than belong to it, so the survivor keeps
+    // its own — there is nothing for a user to decide.
+    const entityView = {
+      audit: {
+        isEditable: false,
+        elements: { a: panelMetaData("created_at", "Created at") },
+      },
+      info: {
+        isEditable: true,
+        elements: { b: panelMetaData("name", "Name") },
+      },
+    };
+
+    expect(collectMergeFields(entityView).metadataFields).toEqual([
+      { key: "name", label: "Name" },
+    ]);
+  });
+
+  it("skips relation panels that are read-only", () => {
+    const entityView = {
+      audit: {
+        isEditable: false,
+        elements: { a: entityList("refAuthors", "Works") },
+      },
+    };
+
+    expect(collectMergeFields(entityView).relationFields).toEqual([]);
+  });
+
+  it("keeps fields in panels that say nothing about editability", () => {
+    const entityView = { panel: { elements: { a: panelMetaData("name", "Name") } } };
+
+    expect(collectMergeFields(entityView).metadataFields).toHaveLength(1);
+  });
+
+  it("keeps a nested field read-only once its panel is", () => {
+    // The flag sits on the panel; deeply nested metadata must still inherit it.
+    const entityView = {
+      audit: {
+        isEditable: false,
+        group: { nested: { deeper: panelMetaData("created_at", "Created at") } },
+      },
+    };
+
+    expect(collectMergeFields(entityView).metadataFields).toEqual([]);
+  });
+
   it("copes with an empty or missing entity view", () => {
     expect(collectMergeFields(undefined)).toEqual({
       metadataFields: [],
