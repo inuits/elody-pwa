@@ -160,9 +160,10 @@ export const getEntityPageRoute = (
 export const getRouterLinkForEntityDetailPage = (
   entityId: string,
   entityTypename: any,
+  listItemRouteName: string = "SingleEntity",
 ) => {
   return {
-    name: "SingleEntity",
+    name: listItemRouteName,
     params: {
       id: entityId,
       type: getMappedSlug(entityTypename),
@@ -176,8 +177,13 @@ export const goToEntityPageById = (
   listItemRouteName: string = "SingleEntity",
   router: Router,
 ) => {
-  const routerLink = getRouterLinkForEntityDetailPage(entityId, entityTypename);
-  router.push(routerLink);
+  router.push(
+    getRouterLinkForEntityDetailPage(
+      entityId,
+      entityTypename,
+      listItemRouteName,
+    ),
+  );
 };
 
 export const getMappedSlug = (entity: Entity): string => {

@@ -83,13 +83,16 @@ export const buildMergedRelations = (
   leftRelations: RelationValues,
   rightRelations: RelationValues,
   choices: MergeChoices,
-): { key: string; type: string }[] =>
+): { key: string; type: string; editStatus: string }[] =>
   relationFields.flatMap(({ relationType }) => {
     const relations =
       choices[relationType] === "right" ? rightRelations : leftRelations;
     return relationKeys(relations, relationType).map((key) => ({
       key,
       type: relationType,
+      // BaseRelationValuesInput requires it, the collection API datasource
+      // strips it again — the merge writes the whole set regardless.
+      editStatus: "new",
     }));
   });
 
