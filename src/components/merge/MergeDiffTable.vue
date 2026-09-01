@@ -16,7 +16,17 @@
               :key="side.name"
               class="w-3/8 p-2 text-left align-bottom"
             >
-              {{ side.label }}
+              <RouterLink
+                class="cursor-pointer"
+                :to="`/${side.type}/${side.id}`"
+                target="_blank"
+              >
+                {{ side.label }}
+                <unicon
+                  height="16"
+                  :name="Unicons.ExternalLinkAlt.name"
+                ></unicon
+              ></RouterLink>
             </th>
           </tr>
         </thead>
@@ -56,12 +66,20 @@ import type {
   MergeRow,
   MergeSide,
 } from "@/composables/useMergeDiff";
+import { Unicons } from "@/types";
+import { getRouterLinkForEntityDetailPage } from "@/helpers";
+
+export type SideInfo = {
+  label: string;
+  id: string;
+  type: string;
+};
 
 const props = withDefaults(
   defineProps<{
     rows: MergeRow[];
-    leftLabel: string;
-    rightLabel: string;
+    leftSideInfo: SideInfo;
+    rightSideInfo: SideInfo;
     choices?: MergeChoices;
   }>(),
   { choices: () => ({}) },
@@ -73,9 +91,23 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const sides = computed<{ name: MergeSide; label: string }[]>(() => [
-  { name: "left", label: props.leftLabel },
-  { name: "right", label: props.rightLabel },
+const sides = computed<(SideInfo & { name: MergeSide; link: any })[]>(() => [
+  {
+    name: "left",
+    ...props.leftSideInfo,
+    link: getRouterLinkForEntityDetailPage(
+      props.leftSideInfo.id,
+      props.leftSideInfo.type,
+    ),
+  },
+  {
+    name: "right",
+    ...props.rightSideInfo,
+    link: getRouterLinkForEntityDetailPage(
+      props.leftSideInfo.id,
+      props.leftSideInfo.type,
+    ),
+  },
 ]);
 
 const choiceFor = (key: string): MergeSide => props.choices[key] ?? "left";

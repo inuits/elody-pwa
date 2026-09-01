@@ -27,15 +27,15 @@
             :data-testid="`survivor-${index}`"
             @change="survivorIndex = index"
           />
-          {{ labelFor(item) }}
+          {{ sideInfoFor(item).label }}
         </label>
       </fieldset>
 
       <div class="flex-1 overflow-y-auto pt-4">
         <MergeDiffTable
           :rows="rows"
-          :left-label="labelFor(survivor)"
-          :right-label="labelFor(victim)"
+          :left-side-info="sideInfoFor(survivor)"
+          :right-side-info="sideInfoFor(victim)"
           :choices="choices"
           @update:choices="choices = $event"
         />
@@ -77,7 +77,9 @@ import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { apolloClient } from "@/main";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import MergeDiffTable from "@/components/merge/MergeDiffTable.vue";
+import MergeDiffTable, {
+  SideInfo,
+} from "@/components/merge/MergeDiffTable.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
@@ -123,7 +125,9 @@ const isMerging = ref<boolean>(false);
 const context = computed(
   (): Context => getModalInfo(TypeModals.BulkOperationsMerge).context,
 );
-const isOpen = computed(() => getModalInfo(TypeModals.BulkOperationsMerge).open);
+const isOpen = computed(
+  () => getModalInfo(TypeModals.BulkOperationsMerge).open,
+);
 
 const selectedItems = computed((): InBulkProcessableItem[] =>
   context.value ? getEnqueuedItems(context.value) : [],
@@ -139,10 +143,11 @@ const entityFor = (item: InBulkProcessableItem | undefined) =>
 
 // Selection paths do not set a display value, so the id is only a fallback
 // until the entity itself is loaded.
-const labelFor = (item: InBulkProcessableItem | undefined): string => {
-  if (!item) return "";
+const sideInfoFor = (item: InBulkProcessableItem | undefined): SideInfo => {
+  if (!item) return { label: "", id: "", type: "" };
   const entity = entityFor(item);
-  return entity ? getEntityTitle(entity) : (item.value ?? item.id);
+  const entityTitle: string = getEntityTitle(entity) || item.value || item.id;
+  return { label: entityTitle, id: item.id, type: item.type };
 };
 
 // Relations the backend repoints on its own are not the user's to decide:
