@@ -18,7 +18,7 @@
             >
               <RouterLink
                 class="cursor-pointer"
-                :to="`/${side.type}/${side.id}`"
+                :to="side.link"
                 target="_blank"
               >
                 {{ side.label }}
@@ -91,24 +91,18 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const sides = computed<(SideInfo & { name: MergeSide; link: any })[]>(() => [
-  {
-    name: "left",
-    ...props.leftSideInfo,
-    link: getRouterLinkForEntityDetailPage(
-      props.leftSideInfo.id,
-      props.leftSideInfo.type,
-    ),
-  },
-  {
-    name: "right",
-    ...props.rightSideInfo,
-    link: getRouterLinkForEntityDetailPage(
-      props.leftSideInfo.id,
-      props.leftSideInfo.type,
-    ),
-  },
-]);
+const sides = computed<(SideInfo & { name: MergeSide; link: any })[]>(() =>
+  [
+    { name: "left" as MergeSide, ...props.leftSideInfo },
+    { name: "right" as MergeSide, ...props.rightSideInfo },
+  ].map((side) => ({
+    ...side,
+    link: getRouterLinkForEntityDetailPage(side.id, {
+      type: side.type,
+      __typename: side.type,
+    }),
+  })),
+);
 
 const choiceFor = (key: string): MergeSide => props.choices[key] ?? "left";
 

@@ -1,10 +1,13 @@
-import { mount } from "@vue/test-utils";
+import { mount, RouterLinkStub } from "@vue/test-utils";
 import { describe, it, expect, vi } from "vitest";
 
 // The global setup stubs t as identity, which cannot distinguish a translated
 // label from a raw one. Make the call observable instead.
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => `translated(${key})` }),
+}));
+vi.mock("@/main", () => ({
+  typeUrlMapping: { mapping: {}, reverseMapping: {} },
 }));
 import MergeDiffTable from "../MergeDiffTable.vue";
 import type { MergeRow } from "@/composables/useMergeDiff";
@@ -16,10 +19,19 @@ const rows: MergeRow[] = [
 
 const mountTable = (props = {}) =>
   mount(MergeDiffTable, {
-    props: { rows, leftLabel: "Record A", rightLabel: "Record B", ...props },
+    props: {
+      rows,
+      leftSideInfo: { label: "Record A", id: "PERS-A", type: "person" },
+      rightSideInfo: { label: "Record B", id: "PERS-B", type: "person" },
+      ...props,
+    },
     global: {
       mocks: { $t: (key: string) => key },
-      stubs: { "i18n-t": true },
+      stubs: {
+        "i18n-t": true,
+        unicon: true,
+        RouterLink: RouterLinkStub,
+      },
     },
   });
 
@@ -33,6 +45,14 @@ describe("MergeDiffTable", () => {
 
     expect(headers[1].text()).toBe("Record A");
     expect(headers[2].text()).toBe("Record B");
+  });
+
+  it("links each column header to its own record, in a new tab", () => {
+    const links = mountTable().findAllComponents(RouterLinkStub);
+
+    expect(links[0].props("to")).toMatchObject({ params: { id: "PERS-A" } });
+    expect(links[1].props("to")).toMatchObject({ params: { id: "PERS-B" } });
+    expect(links[0].attributes("target")).toBe("_blank");
   });
 
   it("shows a placeholder where a record has no value", () => {
