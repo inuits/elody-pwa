@@ -42,7 +42,7 @@
           :additional-default-filters-enabled="additionalDefaultFiltersEnabled"
           :enable-save-search-filters="enableSaveSearchFilters"
           :entity-type="entityType as Entitytyping"
-          :should-use-state-for-route="shouldUseStateForRoute"
+          :should-use-state-for-route="ownsRouteState"
           :filters-need-context="filtersNeedContext"
           :predefined-filters="filters"
           :on-register-api="handleRegisterAPI"
@@ -541,6 +541,9 @@ const emit = defineEmits<{
 const config: any = inject("config");
 const apolloClient = inject(DefaultApolloClient);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
+const ancestorOwnsRouteState: boolean = inject("OwnsRouteState", true);
+const ownsRouteState: boolean =
+  props.shouldUseStateForRoute && ancestorOwnsRouteState;
 const showCurrentPreviewFlow: boolean = inject("showCurrentPreviewFlow", true);
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 const { getEntityUuid } = useEntitySingle();
@@ -667,7 +670,7 @@ const {
   revealExactCount,
 } = useBaseLibrary(
   apolloClient as ApolloClient<any>,
-  props.shouldUseStateForRoute,
+  ownsRouteState,
   props.baseLibraryMode,
 );
 

@@ -185,6 +185,7 @@ const emit = defineEmits<{
 }>();
 
 provide("IsPreviewElement", true);
+provide("OwnsRouteState", false);
 provide(
   "showCurrentPreviewFlow",
   props.previewComponent.showCurrentPreviewFlow,

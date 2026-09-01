@@ -737,3 +737,83 @@ describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
     expect(wrapper.find(paginationSelector).exists()).toBe(false);
   });
 });
+
+describe("BaseLibrary.vue does not own route state inside a preview subtree", () => {
+  // EntityDetailModal renders a whole EntitySingle (with all its relation
+  // panels) from AppModals, which lives OUTSIDE <router-view>. Those panels see
+  // the live overview route, so if they saved their handful of filters under
+  // that route's key they would replace the page's own filter set — and the
+  // next visit restores a cache missing every filter the page actually has.
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  const getPreviewWrapper = () =>
+    shallowMount(BaseLibrary, {
+      props: getDefaultProps(),
+      global: {
+        provide: {
+          config,
+          [DefaultApolloClient as symbol]: { query: vi.fn(), mutate: vi.fn() },
+          IsPreviewElement: true,
+          OwnsRouteState: false,
+          showCurrentPreviewFlow: true,
+          ParentEntityProvider: undefined,
+        },
+        stubs: { teleport: true },
+      },
+    });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    libGetEntities.mockResolvedValue([]);
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const getModalWrapper = () =>
+    shallowMount(BaseLibrary, {
+      props: getDefaultProps(),
+      global: {
+        provide: {
+          config,
+          [DefaultApolloClient as symbol]: { query: vi.fn(), mutate: vi.fn() },
+          IsPreviewElement: false,
+          OwnsRouteState: false,
+          showCurrentPreviewFlow: true,
+          ParentEntityProvider: undefined,
+        },
+        stubs: { teleport: true },
+      },
+    });
+
+  it("tells its filters not to use route state when it is a preview", async () => {
+    wrapper = getPreviewWrapper();
+    await flushPromises();
+    const filters = wrapper.findComponent({ name: "FiltersBase" });
+    expect(filters.exists()).toBe(true);
+    expect(filters.props("shouldUseStateForRoute")).toBe(false);
+  });
+
+  it("tells its filters not to use route state inside a detail modal", async () => {
+    // the modal renders the entity's real columns, so it must NOT be marked as
+    // a preview (that flag drops `flex` and stacks them) — it disclaims route
+    // state ownership through its own key instead
+    wrapper = getModalWrapper();
+    await flushPromises();
+    const filters = wrapper.findComponent({ name: "FiltersBase" });
+    expect(filters.props("shouldUseStateForRoute")).toBe(false);
+  });
+
+  it("still uses route state when it is the page's own library", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    const filters = wrapper.findComponent({ name: "FiltersBase" });
+    expect(filters.props("shouldUseStateForRoute")).toBe(true);
+  });
+});

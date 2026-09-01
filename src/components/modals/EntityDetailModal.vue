@@ -35,7 +35,7 @@ import {
   type GetEntityByIdQuery,
   TypeModals,
 } from "@/generated-types/queries";
-import { computed, watch } from "vue";
+import { computed, provide, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -45,6 +45,8 @@ import EntitySingle from "@/views/EntitySingle.vue";
 import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 
 const { getModalInfo, closeModal } = useBaseModal();
+
+provide("OwnsRouteState", false);
 
 const entityId = computed<string>(() => {
   return getModalInfo(TypeModals.EntityDetailModal).entityId;
