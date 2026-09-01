@@ -11,6 +11,7 @@ import {
   type InBulkProcessableItem,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useEditMode } from "@/composables/useEdit";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
@@ -606,10 +607,14 @@ export const determineActiveState = (
   item: DropdownOption,
   parentEntityId: string | undefined,
   itemsSelected: boolean,
+  selectedItems: InBulkProcessableItem[] = [],
 ) => {
   const useEditHelper = useEditMode(parentEntityId);
 
   if (!item.actionContext) return true;
+
+  if (determineSelectionConstraintViolation(item.actionContext, selectedItems))
+    return false;
 
   let metadataConditionAccepts = true;
   if (item.actionContext.matchMetadataValue) {

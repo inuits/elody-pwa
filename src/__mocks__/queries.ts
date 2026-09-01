@@ -501,6 +501,7 @@ export enum BulkOperationTypes {
   ExportXlsx = 'exportXlsx',
   MarkAsSeen = 'markAsSeen',
   MarkAsUnseen = 'markAsUnseen',
+  MergeEntities = 'mergeEntities',
   ReorderEntities = 'reorderEntities',
   StartOcr = 'startOcr'
 }
@@ -3633,6 +3634,7 @@ export enum TypeModals {
   BulkOperationsDeleteEntities = 'BulkOperationsDeleteEntities',
   BulkOperationsDeleteRelations = 'BulkOperationsDeleteRelations',
   BulkOperationsEdit = 'BulkOperationsEdit',
+  BulkOperationsMerge = 'BulkOperationsMerge',
   CommentThread = 'CommentThread',
   Confirm = 'Confirm',
   Delete = 'Delete',

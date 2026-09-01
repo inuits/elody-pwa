@@ -104,6 +104,7 @@
           @update:modelValue="handleSelectedBulkOperation"
           :options="bulkOperations"
           :items-selected="itemsSelected"
+          :selected-items="getEnqueuedItems(context)"
           :entity-type="entityType"
           :parent-entity-id="parentEntityId"
           :sub-dropdown-options="subDropdownOptions"
