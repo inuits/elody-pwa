@@ -13,7 +13,7 @@
         button-size="small"
         :disabled="isMainActionDisabled || !primaryOption.active"
         :label="t(primaryOption.label, [entityTypeLabel])"
-        :tooltip-label="primaryOption.actionContext?.labelForTooltip"
+        :tooltip-label="tooltipFor(primaryOption)"
         :icon="primaryOption.icon"
         :force-show-label="primaryOptions.length > 1"
         @click.stop="
@@ -57,7 +57,7 @@
               t(`entity-translations.plural.${props.entityType}`),
             ])
           "
-          :tooltip-label="option?.actionContext?.labelForTooltip"
+          :tooltip-label="tooltipFor(option)"
           :disable="!option.active"
           @clicked="handleEmit(option)"
         />
@@ -72,7 +72,7 @@
           v-for="(option, idx) in filterSecondaryDropdownOptions"
           :key="idx"
           :label="t(option?.label, [entityTypeLabel])"
-          :tooltip-label="option?.actionContext?.labelForTooltip"
+          :tooltip-label="tooltipFor(option)"
           :disable="!option.active"
           @clicked="handleEmit(option)"
         />
@@ -101,6 +101,8 @@ import {
   advancedPermissions,
 } from "@/composables/usePermissions";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
+import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
+import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 
 const emit = defineEmits(["update:modelValue"]);
 const {
@@ -115,6 +117,7 @@ const props = withDefaults(
     options: DropdownOption[];
     isMainActionDisabled?: boolean;
     itemsSelected?: boolean;
+    selectedItems?: InBulkProcessableItem[];
     entityType: Entitytyping;
     parentEntityId?: string | undefined;
     subDropdownOptions?: DropdownOption[];
@@ -123,6 +126,7 @@ const props = withDefaults(
   {
     isMainActionDisabled: false,
     itemsSelected: false,
+    selectedItems: () => [],
     options: () => [],
     subDropdownOptions: () => [],
   },
@@ -131,6 +135,15 @@ const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
 const availableOptions = ref<DropdownOption[]>([]);
+
+const tooltipFor = (option: DropdownOption): string | undefined => {
+  const violation = determineSelectionConstraintViolation(
+    option?.actionContext,
+    props.selectedItems,
+  );
+  if (violation) return t(`tooltip.bulkOperations.${violation}`);
+  return option?.actionContext?.labelForTooltip ?? undefined;
+};
 
 const entityTypeLabel = computed(() =>
   t(`entity-translations.plural.${props.entityType}`),
@@ -147,6 +160,7 @@ const primaryOptions = computed(() => {
           option,
           props.parentEntityId,
           props.itemsSelected,
+          props.selectedItems,
         ),
       };
     });
@@ -168,6 +182,7 @@ const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
       dropdownOption,
       props.parentEntityId,
       props.itemsSelected,
+      props.selectedItems,
     );
     return dropdownOption;
   });

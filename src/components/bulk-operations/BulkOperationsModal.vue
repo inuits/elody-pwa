@@ -7,6 +7,7 @@
     <BulkOperationsDeleteEntities v-if="isDeleteEntitiesModal" />
     <BulkOperationsDeleteRelations v-if="isDeleteRelationsModal" />
     <BulkOperationsEditModal v-if="isBulkEditModal" />
+    <BulkOperationsMergeModal v-if="isMergeModal" />
   </BaseModal>
 </template>
 
@@ -16,6 +17,7 @@ import BulkOperationsExportCsv from "./BulkOperationsExportCsv.vue";
 import BulkOperationsDeleteEntities from "./BulkOperationsDeleteEntities.vue";
 import BulkOperationsDeleteRelations from "./BulkOperationsDeleteRelations.vue";
 import BulkOperationsEditModal from "./BulkOperationsEditModal.vue";
+import BulkOperationsMergeModal from "./BulkOperationsMergeModal.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { computed } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -37,11 +39,16 @@ const isBulkEditModal = computed(() => {
   return getModalInfo(TypeModals.BulkOperationsEdit).open;
 });
 
+const isMergeModal = computed(() => {
+  return getModalInfo(TypeModals.BulkOperationsMerge).open;
+});
+
 const openedModalType = computed(() => {
   if (isCsvExportModal.value) return TypeModals.BulkOperations;
   if (isDeleteEntitiesModal.value)
     return TypeModals.BulkOperationsDeleteEntities;
   if (isBulkEditModal.value) return TypeModals.BulkOperationsEdit;
+  if (isMergeModal.value) return TypeModals.BulkOperationsMerge;
   return TypeModals.BulkOperationsDeleteRelations;
 });
 </script>
