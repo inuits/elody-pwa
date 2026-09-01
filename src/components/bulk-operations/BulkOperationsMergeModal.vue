@@ -209,6 +209,14 @@ const loadComparison = async () => {
     loadedEntities.value = Object.fromEntries(
       selectedItems.value.map((item, index) => [item.id, entities[index]]),
     );
+  } catch (error) {
+    // Without both records there is nothing to compare, and an empty table
+    // would read as "these two are identical".
+    displayErrorNotification(
+      t("notifications.errors.merge-entities.title"),
+      String(error),
+    );
+    closeModal(TypeModals.BulkOperationsMerge);
   } finally {
     isLoading.value = false;
   }
@@ -233,6 +241,12 @@ watch(
 );
 
 watch(victim, loadMergePreview, { immediate: true });
+
+// Choices are "left" or "right", and swapping the survivor swaps the columns:
+// keeping them would silently flip every value the user already picked.
+watch(survivorIndex, () => {
+  choices.value = {};
+});
 
 const submitMerge = async () => {
   if (!survivor.value || !victim.value) return;

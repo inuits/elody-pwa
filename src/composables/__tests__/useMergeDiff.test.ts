@@ -170,8 +170,8 @@ describe("buildMergedRelations", () => {
     const relations = buildMergedRelations(relationFields, left, right, {});
 
     expect(relations).toEqual([
-      { key: "A", type: "refRelatedEntities" },
-      { key: "G1", type: "refGenres" },
+      { key: "A", type: "refRelatedEntities", editStatus: "new" },
+      { key: "G1", type: "refGenres", editStatus: "new" },
     ]);
   });
 
@@ -181,9 +181,16 @@ describe("buildMergedRelations", () => {
     });
 
     expect(relations).toEqual([
-      { key: "B", type: "refRelatedEntities" },
-      { key: "G1", type: "refGenres" },
+      { key: "B", type: "refRelatedEntities", editStatus: "new" },
+      { key: "G1", type: "refGenres", editStatus: "new" },
     ]);
+  });
+
+  it("carries the editStatus BaseRelationValuesInput demands", () => {
+    // Without it the whole mutation is rejected before it reaches a resolver.
+    const [relation] = buildMergedRelations(relationFields, left, right, {});
+
+    expect(relation.editStatus).toBe("new");
   });
 
   it("produces nothing when neither record has relations", () => {
