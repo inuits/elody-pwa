@@ -6,7 +6,7 @@
         inputValue ? `${divSelectedBgColor}` : '',
         { 'cursor-pointer': !disabled },
       ]"
-      @click.prevent="handleItemSelection"
+      @click.prevent.stop="handleItemSelection"
     >
       <input
         class="border-2 focus:ring-0"
