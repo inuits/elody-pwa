@@ -26,7 +26,7 @@
             :key="row.key"
             class="border-b border-neutral-30"
           >
-            <td class="p-2 font-bold align-top">{{ row.label }}</td>
+            <td class="p-2 font-bold align-top">{{ t(row.label) }}</td>
             <td v-for="side in sides" :key="side.name" class="p-2 align-top">
               <label class="flex gap-2 cursor-pointer items-start">
                 <input

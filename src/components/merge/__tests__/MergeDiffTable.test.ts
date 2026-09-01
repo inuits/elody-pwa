@@ -1,5 +1,11 @@
 import { mount } from "@vue/test-utils";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// The global setup stubs t as identity, which cannot distinguish a translated
+// label from a raw one. Make the call observable instead.
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({ t: (key: string) => `translated(${key})` }),
+}));
 import MergeDiffTable from "../MergeDiffTable.vue";
 import type { MergeRow } from "@/composables/useMergeDiff";
 
@@ -30,7 +36,26 @@ describe("MergeDiffTable", () => {
   });
 
   it("shows a placeholder where a record has no value", () => {
-    expect(mountTable().text()).toContain("merge-modal.empty-value");
+    expect(mountTable().text()).toContain(
+      "translated(bulk-operations.merge-modal.empty-value)",
+    );
+  });
+
+  it("translates the field label", () => {
+    // Panel labels are translation keys (metadata.labels.created-at), not
+    // display text.
+    const table = mountTable({
+      rows: [
+        {
+          key: "name",
+          label: "metadata.labels.name",
+          leftValue: "A",
+          rightValue: "B",
+        },
+      ],
+    });
+
+    expect(table.text()).toContain("translated(metadata.labels.name)");
   });
 
   it("selects the surviving record's value by default", () => {
@@ -66,7 +91,9 @@ describe("MergeDiffTable", () => {
     const table = mountTable({ rows: [] });
 
     expect(table.find("table").exists()).toBe(false);
-    expect(table.text()).toContain("merge-modal.no-differences");
+    expect(table.text()).toContain(
+      "translated(bulk-operations.merge-modal.no-differences)",
+    );
   });
 
   it("renders list values as a readable list", () => {

@@ -95,6 +95,7 @@ import {
   type MergeChoices,
 } from "@/composables/useMergeDiff";
 import { collectMergeFields } from "@/composables/useMergeFields";
+import { getEntityTitle } from "@/helpers";
 import {
   Collection,
   GetEntityByIdDocument,
@@ -133,11 +134,16 @@ const victim = computed(
   () => selectedItems.value[survivorIndex.value === 0 ? 1 : 0],
 );
 
-const labelFor = (item: InBulkProcessableItem | undefined): string =>
-  item?.value ?? item?.id ?? "";
-
 const entityFor = (item: InBulkProcessableItem | undefined) =>
   item ? loadedEntities.value[item.id] : undefined;
+
+// Selection paths do not set a display value, so the id is only a fallback
+// until the entity itself is loaded.
+const labelFor = (item: InBulkProcessableItem | undefined): string => {
+  if (!item) return "";
+  const entity = entityFor(item);
+  return entity ? getEntityTitle(entity) : (item.value ?? item.id);
+};
 
 // Relations the backend repoints on its own are not the user's to decide:
 // offering them would present a choice that is silently discarded.
