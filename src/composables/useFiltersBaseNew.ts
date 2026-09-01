@@ -32,6 +32,7 @@ export const useFiltersBaseNew = () => {
       basic.transformFilterInputIntoAdvancedFilters,
 
     // state manager
+    createFilterInput: state.createFilterInput,
     filters: state.filters,
     variables: state.variables,
     setVariables: state.setVariables,

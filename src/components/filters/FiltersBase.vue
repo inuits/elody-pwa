@@ -289,6 +289,7 @@ const {
   displayedFilters,
   initializeFilters,
   initializeNewAdvancedFilters,
+  createFilterInput,
   transformFilterInputIntoAdvancedFilters,
   getNormalizedFiltersForApi,
   setVariables,
@@ -557,7 +558,7 @@ const getFiltersFromState = (shouldUseState: boolean) => {
             isActive: filter.hidden || filter.defaultValue !== undefined,
             isDisplayed: filter.isDisplayedByDefault ?? false,
             advancedFilter: filter,
-            inputFromState: undefined,
+            inputFromState: createFilterInput(filter),
             selectedMatcher: undefined,
           };
     });

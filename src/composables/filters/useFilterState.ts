@@ -240,6 +240,7 @@ export const useFilterState = () => {
     activeFilters,
     initializeFilters,
     initializeNewAdvancedFilters,
+    createFilterInput,
     resetFilters,
     activateFilter,
     deactivateFilter,

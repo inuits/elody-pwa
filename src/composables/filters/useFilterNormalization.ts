@@ -53,6 +53,7 @@ export const useFilterNormalization = () => {
   ): AdvancedFilterInput[] => {
     return filters
       .filter((filter) => filter.isActive)
+      .filter((filter) => !isNil(filter.inputFromState?.value))
       .map((filter) =>
         normalizeFilterForApi(
           filter,

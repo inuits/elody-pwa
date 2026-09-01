@@ -1489,3 +1489,52 @@ describe("useFilterNormalization - shouldMatchExact", () => {
     expect(shouldMatchExact(undefined)).toBe(false);
   });
 });
+
+describe("getNormalizedFiltersForApi — never emits a filter without a value", () => {
+  // JSON.stringify drops keys whose value is undefined, so an active filter
+  // with no input used to serialize to { type, key } — which the backend
+  // rejects with `Field "value" of required type "JSON!" was not provided`.
+  it("drops an active filter that has no value", () => {
+    const { filters, getNormalizedFiltersForApi } = useFiltersBaseNew();
+    filters.value = [
+      {
+        isActive: true,
+        isDisplayed: true,
+        inputFromState: undefined,
+        selectedMatcher: undefined,
+        advancedFilter: {
+          type: "selection",
+          key: ["vlacc:1|properties.status.value"],
+        },
+      },
+    ] as any;
+    expect(getNormalizedFiltersForApi()).toEqual([]);
+  });
+
+  it("keeps active filters that do have a value", () => {
+    const { filters, getNormalizedFiltersForApi } = useFiltersBaseNew();
+    filters.value = [
+      {
+        isActive: true,
+        isDisplayed: true,
+        inputFromState: { value: ["open"], match_exact: true },
+        selectedMatcher: undefined,
+        advancedFilter: { type: "selection", key: "type" },
+      },
+    ] as any;
+    const result = getNormalizedFiltersForApi();
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toEqual(["open"]);
+  });
+
+  it("keeps a falsy but present value (empty string, false, 0)", () => {
+    const { filters, getNormalizedFiltersForApi } = useFiltersBaseNew();
+    filters.value = ["", false, 0].map((value, index) => ({
+      isActive: true,
+      isDisplayed: true,
+      inputFromState: { value },
+      advancedFilter: { type: "boolean", key: [`k${index}`] },
+    })) as any;
+    expect(getNormalizedFiltersForApi()).toHaveLength(3);
+  });
+});
