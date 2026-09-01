@@ -146,8 +146,9 @@ const entityFor = (item: InBulkProcessableItem | undefined) =>
 const sideInfoFor = (item: InBulkProcessableItem | undefined): SideInfo => {
   if (!item) return { label: "", id: "", type: "" };
   const entity = entityFor(item);
-  const entityTitle: string = getEntityTitle(entity) || item.value || item.id;
-  return { label: entityTitle, id: item.id, type: item.type };
+  const entityTitle: string =
+    (entity && getEntityTitle(entity)) || item.value || item.id;
+  return { label: entityTitle, id: item.id, type: item.type ?? "" };
 };
 
 // Relations the backend repoints on its own are not the user's to decide:
