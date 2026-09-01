@@ -38,7 +38,6 @@ import DOMPurify from "dompurify";
 import { onError } from "@apollo/client/link/error";
 import type { GraphQLError } from "graphql/error";
 
-
 const navigationTargetIdKey = "navigate_to_id";
 const navigationTargetTypeKey = "navigate_to_type";
 
@@ -158,19 +157,27 @@ export const getEntityPageRoute = (
   };
 };
 
-export const goToEntityPageById = (
+export const getRouterLinkForEntityDetailPage = (
   entityId: string,
   entityTypename: any,
-  listItemRouteName: string,
-  router: Router,
 ) => {
-  router.push({
-    name: listItemRouteName,
+  return {
+    name: "SingleEntity",
     params: {
       id: entityId,
       type: getMappedSlug(entityTypename),
     },
-  });
+  };
+};
+
+export const goToEntityPageById = (
+  entityId: string,
+  entityTypename: any,
+  listItemRouteName: string = "SingleEntity",
+  router: Router,
+) => {
+  const routerLink = getRouterLinkForEntityDetailPage(entityId, entityTypename);
+  router.push(routerLink);
 };
 
 export const getMappedSlug = (entity: Entity): string => {
@@ -500,9 +507,7 @@ export const findPanelMetadata = (
   return results;
 };
 
-export const findWysiwygElement = (
-  obj: any,
-): WysiwygElement[] => {
+export const findWysiwygElement = (obj: any): WysiwygElement[] => {
   const results: WysiwygElement[] = [];
 
   if (obj && obj.__typename === "WysiwygElement") {
@@ -519,15 +524,17 @@ export const findWysiwygElement = (
   }
 
   return results;
-}
+};
 
 export const getEntityTitle = (entity: BaseEntity): string => {
   let title: string = entity.id;
   if (entity.intialValues?.title) title = entity.intialValues.title;
   else if (entity.intialValues?.name) title = entity.intialValues.name;
-  else if (entity.intialValues?.computed_title) title = entity.intialValues.computed_title;
+  else if (entity.intialValues?.computed_title)
+    title = entity.intialValues.computed_title;
   else if (entity.intialValues?.email) title = entity.intialValues.email;
-  else if (entity.intialValues?.prefLabel) title = entity.intialValues.prefLabel;
+  else if (entity.intialValues?.prefLabel)
+    title = entity.intialValues.prefLabel;
   else if (entity.intialValues?.code) title = entity.intialValues.code;
   else if (entity.intialValues?.wording) title = entity.intialValues.wording;
   else if (entity.intialValues?.originalTitle)
@@ -536,7 +543,8 @@ export const getEntityTitle = (entity: BaseEntity): string => {
     title = entity.intialValues.preferred_title;
   else if (entity.intialValues?.original_headtitle)
     title = entity.intialValues.original_headtitle;
-  else if (entity.intialValues?.description) title = entity.intialValues.description;
+  else if (entity.intialValues?.description)
+    title = entity.intialValues.description;
   return title;
 };
 
@@ -950,11 +958,15 @@ export const toArray = <T>(value: T | T[] | undefined): T[] => {
   return Array.isArray(value) ? value : [value];
 };
 
-export const looksLikeEntityId = (value: string | undefined | null): boolean => {
+export const looksLikeEntityId = (
+  value: string | undefined | null,
+): boolean => {
   if (!value || /\s/.test(value)) return false;
   const isPrefixedId = /^[A-Z0-9]{1,12}-[A-Za-z0-9_-]{3,}$/.test(value);
   const isUuid =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value,
+    );
   return isPrefixedId || isUuid;
 };
 
