@@ -40,6 +40,23 @@ describe("determineSelectionConstraintViolation", () => {
         ]),
       ).toBe("too-many-items");
     });
+
+    it("asks for an exact count when the bounds are the same", () => {
+      // "select more" and "you selected too many" both read as a range when
+      // the action takes one number of items and nothing else.
+      const exactlyTwo = { minSelectedItems: 2, maxSelectedItems: 2 };
+
+      expect(
+        determineSelectionConstraintViolation(exactlyTwo, [person("1")]),
+      ).toBe("exact-items");
+      expect(
+        determineSelectionConstraintViolation(exactlyTwo, [
+          person("1"),
+          person("2"),
+          person("3"),
+        ]),
+      ).toBe("exact-items");
+    });
   });
 
   describe("same type", () => {
