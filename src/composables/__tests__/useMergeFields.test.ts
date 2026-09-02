@@ -147,3 +147,48 @@ describe("collectMergeFields without labels", () => {
     ]);
   });
 });
+
+describe("collectMergeFields with relation-keyed metadata", () => {
+  it("treats a ref-keyed metadata panel as a relation", () => {
+    // A work's entityView exposes refAuthors as a metaData entry whose value is
+    // a display projection. Writing that back is rejected outright by the
+    // schema, so it can only be offered as a relation.
+    const entityView = {
+      column1: {
+        elements: { a: panelMetaData("refAuthors", "Authors") },
+      },
+    };
+
+    const { metadataFields, relationFields } = collectMergeFields(entityView);
+
+    expect(metadataFields).toEqual([]);
+    expect(relationFields).toEqual([
+      { relationType: "refAuthors", label: "Authors" },
+    ]);
+  });
+
+  it("offers a relation once when a panel and a metadata entry both name it", () => {
+    const entityView = {
+      column1: {
+        elements: {
+          list: { __typename: "EntityListElement", relationType: "refAuthors" },
+          meta: panelMetaData("refAuthors", "Authors"),
+        },
+      },
+    };
+
+    expect(collectMergeFields(entityView).relationFields).toEqual([
+      { relationType: "refAuthors", label: "Authors" },
+    ]);
+  });
+
+  it("keeps a metadata key that merely starts with ref", () => {
+    const entityView = {
+      column1: { elements: { a: panelMetaData("reference_note", "Note") } },
+    };
+
+    expect(collectMergeFields(entityView).metadataFields).toEqual([
+      { key: "reference_note", label: "Note" },
+    ]);
+  });
+});
