@@ -141,7 +141,11 @@ const tooltipFor = (option: DropdownOption): string | undefined => {
     option?.actionContext,
     props.selectedItems,
   );
-  if (violation) return t(`tooltip.bulkOperations.${violation}`);
+  if (violation)
+    return t(`tooltip.bulkOperations.${violation}`, {
+      minimum: option?.actionContext?.minSelectedItems ?? 0,
+      maximum: option?.actionContext?.maxSelectedItems ?? 0,
+    });
   return option?.actionContext?.labelForTooltip ?? undefined;
 };
 

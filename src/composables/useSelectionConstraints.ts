@@ -7,6 +7,7 @@ export type SelectionConstraints = {
 };
 
 export type SelectionConstraintViolation =
+  | "exact-items"
   | "too-few-items"
   | "too-many-items"
   | "mixed-types";
@@ -19,6 +20,11 @@ export const determineSelectionConstraintViolation = (
 
   const { requiresSameType, minSelectedItems, maxSelectedItems } = constraints;
 
+  const requiresExactly =
+    minSelectedItems && minSelectedItems === maxSelectedItems;
+
+  if (requiresExactly && selectedItems.length !== minSelectedItems)
+    return "exact-items";
   if (minSelectedItems && selectedItems.length < minSelectedItems)
     return "too-few-items";
   if (maxSelectedItems && selectedItems.length > maxSelectedItems)
