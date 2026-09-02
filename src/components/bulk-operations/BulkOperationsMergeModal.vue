@@ -53,7 +53,7 @@
       </p>
     </template>
 
-    <div class="flex justify-between mt-4">
+    <div class="flex justify-between gap-4 mt-4">
       <BaseButtonNew
         :disabled="isLoading || isMerging"
         :label="t('bulk-operations.merge-modal.confirm')"
