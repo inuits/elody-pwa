@@ -8,6 +8,7 @@
     :loading="isLoading"
     :create-option-config="{ canCreateOption: inputField.canCreateEntityFromOption ?? false }"
     :disable-virtual-keyboard-context="true"
+    :search-filter="(option: unknown) => option"
     @search-change="debouncedSearch"
     @update:model-value="handleSelect"
     @add-option="handleCreateFromTag"

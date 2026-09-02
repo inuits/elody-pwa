@@ -666,6 +666,26 @@ describe("AutocompleteRelationCell", () => {
     expect(mockSetFieldValue).not.toHaveBeenCalled();
   });
 
+  it("passes a search filter that keeps every backend option", () => {
+    const wrapper = shallowMount(AutocompleteRelationCell, {
+      props: { modelValue: undefined, inputField, formId: "form-1" },
+    });
+
+    const searchFilter = wrapper
+      .findComponent(BaseInputAutocomplete)
+      .props("searchFilter") as (option: any, query: string) => any;
+
+    expect(typeof searchFilter).toBe("function");
+    expect(
+      searchFilter(
+        { label: "<mark>De</mark> <mark>kat</mark> van Fien", value: "1" },
+        "de kat",
+      ),
+    ).toBeTruthy();
+    expect(
+      searchFilter({ label: "Something else", value: "2" }, "de kat"),
+    ).toBeTruthy();
+  });
 });
 
 // ─── TableCellInputField ──────────────────────────────────────────────────────

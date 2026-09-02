@@ -18,7 +18,7 @@
     :noOptionsText="noOptionsText"
     :object="true"
     :create-option="createOptionConfig.canCreateOption"
-    :search-filter="searchFilter"
+    :search-filter="resolvedSearchFilter"
     label="label"
     valueProp="value"
     @search-change="handleSearchChange"
@@ -131,7 +131,7 @@ const props = withDefaults(
       canCreateOption: boolean;
       createPromptTranslationKey?: string;
     };
-    searchFilter?: () => any;
+    searchFilter?: (option: any, query: string, context?: any) => any;
     displayInputForTag?: boolean;
     initialTagInputValues?: Map<string | number, string>;
     disableVirtualKeyboardContext?: boolean;
@@ -228,6 +228,19 @@ const inputValue = computed<DropdownOption[] | undefined>({
 });
 
 const safeOptions = computed(() => props.options?.map((o) => ({ ...o })) ?? []);
+
+const defaultSearchFilter = (option: DropdownOption, query: string) => {
+  const label = stripHighlightTags(String(option?.label ?? "")).toLowerCase();
+  return query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((term) => label.includes(term));
+};
+
+const resolvedSearchFilter = computed(
+  () => props.searchFilter ?? defaultSearchFilter,
+);
 
 const searchable = computed<boolean>(() => {
   return (
