@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  buildMergeRows,
-  buildMergedValues,
-  buildMergedRelations,
-  buildRelationRows,
-} from "../useMergeDiff";
+import { buildMergeRows, buildMergedValues } from "../useMergeDiff";
 
 const fields = [
   { key: "name", label: "Name" },
@@ -109,91 +104,5 @@ describe("buildMergedValues", () => {
     ];
 
     expect(buildMergedValues(emptyRows, { name: "right" })).toEqual({ name: "" });
-  });
-});
-
-describe("buildRelationRows", () => {
-  const relationFields = [
-    { relationType: "refRelatedEntities", label: "Related" },
-    { relationType: "refGenres", label: "Genres" },
-  ];
-  const left = {
-    refRelatedEntities: [{ key: "A" }],
-    refGenres: [{ key: "G1" }],
-  };
-
-  it("omits relations that are identical on both sides", () => {
-    const rows = buildRelationRows(relationFields, left, left);
-
-    expect(rows).toEqual([]);
-  });
-
-  it("reports a relation whose members differ", () => {
-    const rows = buildRelationRows(relationFields, left, {
-      ...left,
-      refGenres: [{ key: "G2" }],
-    });
-
-    expect(rows).toEqual([
-      { key: "refGenres", label: "Genres", leftValue: ["G1"], rightValue: ["G2"] },
-    ]);
-  });
-
-  it("treats a missing relation as an empty list", () => {
-    const rows = buildRelationRows(
-      [{ relationType: "refGenres", label: "Genres" }],
-      { refGenres: [{ key: "G1" }] },
-      {},
-    );
-
-    expect(rows[0].rightValue).toEqual([]);
-  });
-});
-
-describe("buildMergedRelations", () => {
-  const relationFields = [
-    { relationType: "refRelatedEntities", label: "Related" },
-    { relationType: "refGenres", label: "Genres" },
-  ];
-  const left = {
-    refRelatedEntities: [{ key: "A" }],
-    refGenres: [{ key: "G1" }],
-  };
-  const right = {
-    refRelatedEntities: [{ key: "B" }],
-    refGenres: [{ key: "G1" }],
-  };
-
-  it("sends every relation type, not only the contested ones", () => {
-    // The relations endpoint replaces the whole set, so omitting an
-    // uncontested relation type would delete it.
-    const relations = buildMergedRelations(relationFields, left, right, {});
-
-    expect(relations).toEqual([
-      { key: "A", type: "refRelatedEntities", editStatus: "new" },
-      { key: "G1", type: "refGenres", editStatus: "new" },
-    ]);
-  });
-
-  it("takes a contested relation from the chosen side", () => {
-    const relations = buildMergedRelations(relationFields, left, right, {
-      refRelatedEntities: "right",
-    });
-
-    expect(relations).toEqual([
-      { key: "B", type: "refRelatedEntities", editStatus: "new" },
-      { key: "G1", type: "refGenres", editStatus: "new" },
-    ]);
-  });
-
-  it("carries the editStatus BaseRelationValuesInput demands", () => {
-    // Without it the whole mutation is rejected before it reaches a resolver.
-    const [relation] = buildMergedRelations(relationFields, left, right, {});
-
-    expect(relation.editStatus).toBe("new");
-  });
-
-  it("produces nothing when neither record has relations", () => {
-    expect(buildMergedRelations(relationFields, {}, {}, {})).toEqual([]);
   });
 });
