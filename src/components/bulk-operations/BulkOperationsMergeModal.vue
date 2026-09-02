@@ -41,7 +41,6 @@
         />
       </div>
 
-      <p class="pt-4">{{ t("bulk-operations.merge-modal.relations-note") }}</p>
       <p v-if="inboundReferenceCount > 0" class="pt-4">
         {{
           t("bulk-operations.merge-modal.inbound-references", {
