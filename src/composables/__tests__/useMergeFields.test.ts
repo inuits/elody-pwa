@@ -20,13 +20,15 @@ describe("collectMergeFields", () => {
       column2: { elements: { b: panelMetaData("birth_year", "Birth year") } },
     };
 
-    expect(collectMergeFields(entityView).metadataFields).toEqual([
+    expect(collectMergeFields(entityView)).toEqual([
       { key: "name", label: "Name" },
       { key: "birth_year", label: "Birth year" },
     ]);
   });
 
-  it("collects relation panels separately from metadata", () => {
+  it("never offers a relation as a choice", () => {
+    // Relations are unioned by the merge itself: two lists of authors cannot be
+    // reconciled by picking one of them.
     const entityView = {
       column1: {
         elements: {
@@ -36,11 +38,28 @@ describe("collectMergeFields", () => {
       },
     };
 
-    const { metadataFields, relationFields } = collectMergeFields(entityView);
+    expect(collectMergeFields(entityView)).toEqual([
+      { key: "name", label: "Name" },
+    ]);
+  });
 
-    expect(metadataFields).toEqual([{ key: "name", label: "Name" }]);
-    expect(relationFields).toEqual([
-      { relationType: "refRelatedEntities", label: "Related" },
+  it("never offers a relation reached as a metadata projection", () => {
+    // A work's entityView exposes refAuthors as a metaData entry too, and the
+    // schema rejects that key outright on a write.
+    const entityView = {
+      column1: { elements: { a: panelMetaData("refAuthors", "Authors") } },
+    };
+
+    expect(collectMergeFields(entityView)).toEqual([]);
+  });
+
+  it("keeps a metadata key that merely starts with ref", () => {
+    const entityView = {
+      column1: { elements: { a: panelMetaData("reference_note", "Note") } },
+    };
+
+    expect(collectMergeFields(entityView)).toEqual([
+      { key: "reference_note", label: "Note" },
     ]);
   });
 
@@ -48,7 +67,7 @@ describe("collectMergeFields", () => {
     // Merging ids is meaningless: the survivor keeps its own.
     const entityView = { a: panelMetaData("id", "Id") };
 
-    expect(collectMergeFields(entityView).metadataFields).toEqual([]);
+    expect(collectMergeFields(entityView)).toEqual([]);
   });
 
   it("lists each field once even when it appears in several panels", () => {
@@ -57,56 +76,34 @@ describe("collectMergeFields", () => {
       b: panelMetaData("name", "Name"),
     };
 
-    expect(collectMergeFields(entityView).metadataFields).toHaveLength(1);
-  });
-
-  it("ignores a relation panel that declares no relation type", () => {
-    const entityView = {
-      a: { __typename: "EntityListElement", label: "Broken" },
-    };
-
-    expect(collectMergeFields(entityView).relationFields).toEqual([]);
+    expect(collectMergeFields(entityView)).toHaveLength(1);
   });
 
   it("skips fields in a panel the client marked read-only", () => {
-    // Audit panels (created/updated timestamps) are declared isEditable:false.
     // They describe the record rather than belong to it, so the survivor keeps
-    // its own — there is nothing for a user to decide.
+    // its own.
     const entityView = {
       audit: {
         isEditable: false,
         elements: { a: panelMetaData("created_at", "Created at") },
       },
-      info: {
-        isEditable: true,
-        elements: { b: panelMetaData("name", "Name") },
-      },
+      main: { elements: { b: panelMetaData("name", "Name") } },
     };
 
-    expect(collectMergeFields(entityView).metadataFields).toEqual([
+    expect(collectMergeFields(entityView)).toEqual([
       { key: "name", label: "Name" },
     ]);
   });
 
-  it("skips relation panels that are read-only", () => {
-    const entityView = {
-      audit: {
-        isEditable: false,
-        elements: { a: entityList("refAuthors", "Works") },
-      },
-    };
-
-    expect(collectMergeFields(entityView).relationFields).toEqual([]);
-  });
-
   it("keeps fields in panels that say nothing about editability", () => {
-    const entityView = { panel: { elements: { a: panelMetaData("name", "Name") } } };
+    const entityView = { a: panelMetaData("name", "Name") };
 
-    expect(collectMergeFields(entityView).metadataFields).toHaveLength(1);
+    expect(collectMergeFields(entityView)).toEqual([
+      { key: "name", label: "Name" },
+    ]);
   });
 
   it("keeps a nested field read-only once its panel is", () => {
-    // The flag sits on the panel; deeply nested metadata must still inherit it.
     const entityView = {
       audit: {
         isEditable: false,
@@ -114,81 +111,23 @@ describe("collectMergeFields", () => {
       },
     };
 
-    expect(collectMergeFields(entityView).metadataFields).toEqual([]);
+    expect(collectMergeFields(entityView)).toEqual([]);
   });
 
   it("copes with an empty or missing entity view", () => {
-    expect(collectMergeFields(undefined)).toEqual({
-      metadataFields: [],
-      relationFields: [],
-    });
+    expect(collectMergeFields(undefined)).toEqual([]);
   });
-});
 
-describe("collectMergeFields without labels", () => {
   it("falls back to the key when a client left the label out", () => {
     // label is nullable in the schema, and t(undefined) throws in the table.
     const entityView = {
       column1: {
-        elements: {
-          a: { __typename: "PanelMetaData", key: "literary_type" },
-          b: { __typename: "EntityListElement", relationType: "refAuthors" },
-        },
+        elements: { a: { __typename: "PanelMetaData", key: "literary_type" } },
       },
     };
 
-    const { metadataFields, relationFields } = collectMergeFields(entityView);
-
-    expect(metadataFields).toEqual([
+    expect(collectMergeFields(entityView)).toEqual([
       { key: "literary_type", label: "literary_type" },
-    ]);
-    expect(relationFields).toEqual([
-      { relationType: "refAuthors", label: "refAuthors" },
-    ]);
-  });
-});
-
-describe("collectMergeFields with relation-keyed metadata", () => {
-  it("treats a ref-keyed metadata panel as a relation", () => {
-    // A work's entityView exposes refAuthors as a metaData entry whose value is
-    // a display projection. Writing that back is rejected outright by the
-    // schema, so it can only be offered as a relation.
-    const entityView = {
-      column1: {
-        elements: { a: panelMetaData("refAuthors", "Authors") },
-      },
-    };
-
-    const { metadataFields, relationFields } = collectMergeFields(entityView);
-
-    expect(metadataFields).toEqual([]);
-    expect(relationFields).toEqual([
-      { relationType: "refAuthors", label: "Authors" },
-    ]);
-  });
-
-  it("offers a relation once when a panel and a metadata entry both name it", () => {
-    const entityView = {
-      column1: {
-        elements: {
-          list: { __typename: "EntityListElement", relationType: "refAuthors" },
-          meta: panelMetaData("refAuthors", "Authors"),
-        },
-      },
-    };
-
-    expect(collectMergeFields(entityView).relationFields).toEqual([
-      { relationType: "refAuthors", label: "Authors" },
-    ]);
-  });
-
-  it("keeps a metadata key that merely starts with ref", () => {
-    const entityView = {
-      column1: { elements: { a: panelMetaData("reference_note", "Note") } },
-    };
-
-    expect(collectMergeFields(entityView).metadataFields).toEqual([
-      { key: "reference_note", label: "Note" },
     ]);
   });
 });

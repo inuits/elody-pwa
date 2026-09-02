@@ -41,6 +41,7 @@
         />
       </div>
 
+      <p class="pt-4">{{ t("bulk-operations.merge-modal.relations-note") }}</p>
       <p v-if="inboundReferenceCount > 0" class="pt-4">
         {{
           t("bulk-operations.merge-modal.inbound-references", {
@@ -91,9 +92,7 @@ import {
 import { useModalActions } from "@/composables/useModalActions";
 import {
   buildMergeRows,
-  buildMergedRelations,
   buildMergedValues,
-  buildRelationRows,
   type MergeChoices,
 } from "@/composables/useMergeDiff";
 import { collectMergeFields } from "@/composables/useMergeFields";
@@ -118,7 +117,6 @@ const survivorIndex = ref<number>(0);
 const choices = ref<MergeChoices>({});
 const loadedEntities = ref<Record<string, any>>({});
 const inboundReferenceCount = ref<number>(0);
-const automaticRelationTypes = ref<string[]>([]);
 const isLoading = ref<boolean>(false);
 const isMerging = ref<boolean>(false);
 
@@ -151,35 +149,20 @@ const sideInfoFor = (item: InBulkProcessableItem | undefined): SideInfo => {
   return { label: entityTitle, id: item.id, type: item.type ?? "" };
 };
 
-// Relations the backend repoints on its own are not the user's to decide:
-// offering them would present a choice that is silently discarded.
-const mergeFields = computed(() => {
-  const fields = collectMergeFields(entityFor(survivor.value)?.entityView);
-  return {
-    ...fields,
-    relationFields: fields.relationFields.filter(
-      (field) => !automaticRelationTypes.value.includes(field.relationType),
-    ),
-  };
-});
+const mergeFields = computed(() =>
+  collectMergeFields(entityFor(survivor.value)?.entityView),
+);
 
 const rows = computed(() => {
   const survivorEntity = entityFor(survivor.value);
   const victimEntity = entityFor(victim.value);
   if (!survivorEntity || !victimEntity) return [];
 
-  return [
-    ...buildMergeRows(
-      mergeFields.value.metadataFields,
-      survivorEntity.intialValues ?? {},
-      victimEntity.intialValues ?? {},
-    ),
-    ...buildRelationRows(
-      mergeFields.value.relationFields,
-      survivorEntity.relationValues ?? {},
-      victimEntity.relationValues ?? {},
-    ),
-  ];
+  return buildMergeRows(
+    mergeFields.value,
+    survivorEntity.intialValues ?? {},
+    victimEntity.intialValues ?? {},
+  );
 });
 
 const fetchEntity = async (item: InBulkProcessableItem) => {
@@ -227,7 +210,6 @@ const loadMergePreview = async () => {
   if (!victim.value) return;
   const preview = await fetchMergePreview(victim.value.id).catch(() => null);
   inboundReferenceCount.value = preview?.inboundReferenceCount ?? 0;
-  automaticRelationTypes.value = preview?.automaticRelationTypes ?? [];
 };
 
 watch(
@@ -260,18 +242,15 @@ const submitMerge = async () => {
         victimId: victim.value.id,
         collection: Collection.Entities,
         formInput: {
-          metadata: mergeFields.value.metadataFields
+          metadata: mergeFields.value
             .filter((field) => field.key in metadataValues)
             .map((field) => ({
               key: field.key,
               value: metadataValues[field.key],
             })),
-          relations: buildMergedRelations(
-            mergeFields.value.relationFields,
-            entityFor(survivor.value)?.relationValues ?? {},
-            entityFor(victim.value)?.relationValues ?? {},
-            choices.value,
-          ),
+          // Relations are unioned by the merge itself, so there is nothing to
+          // send: the survivor keeps its own and gains the victim's.
+          relations: [],
         },
       },
     });
