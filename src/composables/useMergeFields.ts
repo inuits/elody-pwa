@@ -36,7 +36,12 @@ export const collectMergeFields = (entityView: unknown): MergeFields => {
       node.__typename === "PanelMetaData" &&
       node.key !== IDENTIFIER_KEY
     ) {
-      metadataFields.set(node.key, { key: node.key, label: node.label });
+      // The label is nullable in the schema, and a missing translation key
+      // throws where the row is rendered.
+      metadataFields.set(node.key, {
+        key: node.key,
+        label: node.label ?? node.key,
+      });
     }
     if (
       isMergeable &&
@@ -45,7 +50,7 @@ export const collectMergeFields = (entityView: unknown): MergeFields => {
     ) {
       relationFields.set(node.relationType, {
         relationType: node.relationType,
-        label: node.label,
+        label: node.label ?? node.relationType,
       });
     }
 

@@ -124,3 +124,26 @@ describe("collectMergeFields", () => {
     });
   });
 });
+
+describe("collectMergeFields without labels", () => {
+  it("falls back to the key when a client left the label out", () => {
+    // label is nullable in the schema, and t(undefined) throws in the table.
+    const entityView = {
+      column1: {
+        elements: {
+          a: { __typename: "PanelMetaData", key: "literary_type" },
+          b: { __typename: "EntityListElement", relationType: "refAuthors" },
+        },
+      },
+    };
+
+    const { metadataFields, relationFields } = collectMergeFields(entityView);
+
+    expect(metadataFields).toEqual([
+      { key: "literary_type", label: "literary_type" },
+    ]);
+    expect(relationFields).toEqual([
+      { relationType: "refAuthors", label: "refAuthors" },
+    ]);
+  });
+});
