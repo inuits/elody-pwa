@@ -75,6 +75,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import { apolloClient } from "@/main";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import MergeDiffTable, {
@@ -95,7 +96,7 @@ import {
   type MergeChoices,
 } from "@/composables/useMergeDiff";
 import { collectMergeFields } from "@/composables/useMergeFields";
-import { getEntityTitle } from "@/helpers";
+import { getEntityTitle, goToEntityPage } from "@/helpers";
 import {
   Collection,
   GetEntityByIdDocument,
@@ -105,6 +106,7 @@ import {
 } from "@/generated-types/queries";
 
 const { t } = useI18n();
+const router = useRouter();
 const { closeModal, getModalInfo } = useBaseModal();
 const { displaySuccessNotification, displayErrorNotification } =
   useBaseNotification();
@@ -261,6 +263,9 @@ const submitMerge = async () => {
     closeModal(TypeModals.BulkOperationsMerge);
     dequeueAllItemsForBulkProcessing(context.value);
     for (const callback of getCallbackFunctions() ?? []) callback();
+    // The same route a row click produces, so the id/slug handling stays in
+    // one place.
+    goToEntityPage(entityFor(survivor.value), "SingleEntity", router);
   } catch (error) {
     displayErrorNotification(
       t("notifications.errors.merge-entities.title"),
