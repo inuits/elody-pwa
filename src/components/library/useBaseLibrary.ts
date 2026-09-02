@@ -13,16 +13,39 @@ import {
 } from "@/generated-types/queries";
 import { useEditMode } from "@/composables/useEdit";
 import { asString } from "@/helpers";
-import { ref, shallowRef, watch, inject } from "vue";
+import type { PanelLibraryData } from "@/generated-types/queries";
+import {
+  ref,
+  shallowRef,
+  shallowReactive,
+  watch,
+  inject,
+  onScopeDispose,
+  type Ref,
+} from "vue";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import { isAbortError } from "@/helpers";
 import { useImport } from "@/composables/useImport";
 
+const registeredLibraryData = shallowReactive<
+  Record<string, { count: Ref<number>; fetchSequence: Ref<number> }>
+>({});
+
+export const getLibraryDataValue = (
+  config: PanelLibraryData | null | undefined,
+): number | undefined => {
+  if (config?.dataKey !== "count") return undefined;
+  const library = registeredLibraryData[config.queryName];
+  if (!library || library.fetchSequence.value === 0) return undefined;
+  return library.count.value;
+};
+
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
   shouldUseStateForRoute: boolean = true,
   baseLibraryMode: BaseLibraryModes = BaseLibraryModes.NormalBaseLibrary,
+  libraryDataKey?: string,
 ) => {
   let entityType: Entitytyping = Entitytyping.BaseEntity;
   let _route: RouteLocationNormalizedLoaded | undefined;
@@ -379,6 +402,14 @@ export const useBaseLibrary = (
       }
     },
   );
+
+  if (libraryDataKey) {
+    registeredLibraryData[libraryDataKey] = {
+      count: totalEntityCount,
+      fetchSequence,
+    };
+    onScopeDispose(() => delete registeredLibraryData[libraryDataKey]);
+  }
 
   const resetQueryVariablesForNewPath = () => {
     const state = getStateForRoute(_route, true);

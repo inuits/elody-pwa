@@ -15,7 +15,6 @@
       ]"
       :entity-id="entityId"
       :label="label"
-
       :isCollapsed="isCollapsed"
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
@@ -69,6 +68,7 @@
               customQueryEntityPickerListFilters
             "
             :id="id"
+            :library-data-key="libraryDataKey"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
           />
           <BaseLibrary
@@ -103,6 +103,7 @@
             :fetch-deep-relations="fetchDeepRelations"
             :filters-need-context="filtersNeedContext"
             :id="id"
+            :library-data-key="libraryDataKey"
             :actions-on-result="actionsOnResult"
             :add-entities-to-forms="addEntitiesToForms"
           />
@@ -218,6 +219,10 @@ const emit = defineEmits<{
 
 provide("mediafileViewerContext", props.customQueryFilters);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
+
+const libraryDataKey = computed(
+  () => props.customQueryFilters || props.customQuery,
+);
 
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);

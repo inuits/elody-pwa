@@ -7,6 +7,13 @@
     >
       <div class="flex gap-4 w-2/3 items-center">
         <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
+        <span
+          v-if="libraryDataValue !== undefined"
+          data-cy="panel-header-library-data"
+          class="px-2 py-0.5 rounded-full bg-accent-normal text-sm text-text-body whitespace-nowrap"
+        >
+          {{ libraryDataLabel }}
+        </span>
         <MetadataWrapper
           class="w-full max-w-[50%]"
           v-if="panel.panelHeaderContent.panelStatus"
@@ -101,6 +108,7 @@ import {
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
+import { getLibraryDataValue } from "@/components/library/useBaseLibrary";
 
 const props = withDefaults(
   defineProps<{
@@ -131,6 +139,16 @@ const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
   props.formId,
   computed(() => props.isEdit),
 );
+
+const libraryDataValue = computed(() =>
+  getLibraryDataValue(props.panel.panelHeaderContent?.libraryData),
+);
+const libraryDataLabel = computed(() => {
+  const label = props.panel.panelHeaderContent?.libraryData?.label;
+  return label
+    ? t(label, { count: libraryDataValue.value })
+    : String(libraryDataValue.value);
+});
 
 const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;

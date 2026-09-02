@@ -278,7 +278,7 @@
               configPerViewMode[
                 displayList
                   ? ViewModes.ViewModesList
-                  : displayGrid ?? ViewModes.ViewModesGrid
+                  : (displayGrid ?? ViewModes.ViewModesGrid)
               ]
             "
             :config-per-view-mode="configPerViewMode"
@@ -476,6 +476,7 @@ export type BaseLibraryProps = {
   saveViewPreferences?: boolean;
   persistExpandFilters?: boolean;
   forceShowFilters?: boolean;
+  libraryDataKey?: string;
 };
 
 const props = withDefaults(defineProps<BaseLibraryProps>(), {
@@ -679,6 +680,7 @@ const {
   apolloClient as ApolloClient<any>,
   ownsRouteState,
   props.baseLibraryMode,
+  props.libraryDataKey,
 );
 
 const paginationStore = createPaginationStore();
@@ -698,7 +700,7 @@ const handleSetSimpleSearch = async (value: string) => {
           match_exact: false,
         },
       ]
-    : filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? [];
+    : (filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? []);
   await setAdvancedFilters(searchFilters, false, true, route);
 };
 
