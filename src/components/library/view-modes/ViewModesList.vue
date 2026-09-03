@@ -168,7 +168,7 @@ import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import {
-  enrichProcessorConfig,
+  enrichDynamicFormConfig,
   formatTeaserMetadata,
   getMappedSlug,
 } from "@/helpers";
@@ -314,15 +314,15 @@ const processedEntities = computed(() => {
     let enrichedTeaserMetadata = entity.teaserMetadata;
     let enrichedIntialValues = entity.intialValues;
 
-    if ((entity as any).processorConfig?.panels) {
+    if ((entity as any).dynamicFormConfig?.panels) {
       const relationObj =
         relation !== "no-relation-found"
           ? (relation as { relation: any }).relation
           : null;
-      const result = enrichProcessorConfig(
+      const result = enrichDynamicFormConfig(
         entity.teaserMetadata,
         entity.intialValues,
-        (entity as any).processorConfig,
+        (entity as any).dynamicFormConfig,
         relationObj,
       );
       enrichedTeaserMetadata = result.teaserMetadata;

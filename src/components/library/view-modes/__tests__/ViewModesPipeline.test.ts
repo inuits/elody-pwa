@@ -46,7 +46,7 @@ vi.mock(
 );
 
 vi.mock("@/helpers", () => ({
-  enrichProcessorConfig: (
+  enrichDynamicFormConfig: (
     teaserMetadata: any,
     intialValues: any,
   ): { teaserMetadata: any; intialValues: any } => ({

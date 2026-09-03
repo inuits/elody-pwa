@@ -1035,10 +1035,15 @@ function buildDropdownOptions(
   }));
 }
 
-export function enrichProcessorConfig(
+// An entity may carry a `dynamicFormConfig` JSON field: panels of field
+// definitions plus server-computed values, derived at read time (e.g. from a
+// SHACL shape) instead of declared per field in the query. This merges those
+// panels into the teaser metadata and initial values right before render, so
+// list and pipeline cards show them like any declared metadata.
+export function enrichDynamicFormConfig(
   teaserMetadata: Record<string, any>,
   intialValues: Record<string, any>,
-  processorConfig: {
+  dynamicFormConfig: {
     panels: Array<{ fields: Array<any>; isEditable?: boolean }>;
   },
   relation: any | null,
@@ -1046,7 +1051,7 @@ export function enrichProcessorConfig(
   const newTeaserMetadata = { ...teaserMetadata };
   const newIntialValues = { ...intialValues };
 
-  for (const panel of processorConfig.panels) {
+  for (const panel of dynamicFormConfig.panels) {
     for (const field of panel.fields) {
       const mappedType = mapProcessorFieldType(field.inputFieldType);
       const isDropdown = mappedType === "dropdown";
