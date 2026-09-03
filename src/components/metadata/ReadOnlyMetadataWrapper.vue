@@ -74,6 +74,7 @@
 
 <script lang="ts" setup>
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
+import { resolveValueTranslationKey } from "@/components/metadata/useValueTranslationKey";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import MetadataTruncatedText from "./MetadataTruncatedText.vue";
 import MetadataValueTooltip from "./MetadataValueTooltip.vue";
@@ -132,14 +133,9 @@ const metadataValueToDisplayOnTooltip = computed(
   () => refMetadata.value?.value?.label || refMetadata.value?.value,
 );
 
-const pillTranslationKey = computed<string | undefined>(() => {
-  if (refMetadata.value.valueTranslationKey) return refMetadata.value.valueTranslationKey;
-  const value = (refMetadata.value as any).value?.label;
-  const options = (refMetadata.value as any).inputField?.options;
-  if (!value || !options?.length) return undefined;
-  const match = options.find((opt: any) => opt.value === value);
-  return match?.label;
-});
+const pillTranslationKey = computed<string | undefined>(() =>
+  resolveValueTranslationKey(refMetadata.value),
+);
 
 const label = computed(() =>
   refMetadata.value.label

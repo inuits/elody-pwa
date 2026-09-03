@@ -21,7 +21,13 @@ vi.mock("@/main", () => ({
   },
 }));
 
+const loadDocumentMock = vi.fn().mockResolvedValue({ kind: "Document" });
+vi.mock("@/composables/useImport", () => ({
+  useImport: () => ({ loadDocument: loadDocumentMock }),
+}));
+
 import MetadataWrapper from "../MetadataWrapper.vue";
+import MetadataMaskedValue from "../MetadataMaskedValue.vue";
 import { InputFieldTypes } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
 import {
@@ -267,5 +273,56 @@ describe("MetadataWrapper — copy-from-parent button layout", () => {
     await wrapper.find('[data-cy="copy-from-parent"]').trigger("click");
 
     expect(copy).toHaveBeenCalled();
+  });
+});
+
+describe("MetadataWrapper — masked field delegation", () => {
+  const buildMaskedProps = (extra: Record<string, unknown> = {}) => ({
+    ...buildProps("_key", false),
+    metadata: {
+      key: "_key",
+      label: "metadata.labels.test",
+      value: "elk_secret",
+      masked: true,
+      copyToClipboard: true,
+      __typename: "PanelMetaData",
+      inputField: {
+        type: InputFieldTypes.Text,
+        options: [],
+        __typename: "InputField",
+      },
+      ...extra,
+    },
+  });
+
+  it("hands a masked field to MetadataMaskedValue with the reveal config", async () => {
+    const wrapper = await mountWrapper(
+      buildMaskedProps({ revealQuery: "GetTokenSecret" }) as any,
+    );
+
+    const masked = wrapper.findComponent(MetadataMaskedValue);
+    expect(masked.exists()).toBe(true);
+    expect(masked.props()).toMatchObject({
+      metadataKey: "_key",
+      revealQuery: "GetTokenSecret",
+      entityId: "MW-TEST",
+      copyToClipboard: true,
+    });
+  });
+
+  it("does not render its own copy button for a masked field", async () => {
+    const wrapper = await mountWrapper(buildMaskedProps() as any);
+
+    // the masked component owns copying, so the value is never exposed twice
+    expect(
+      wrapper.findComponent(MetadataMaskedValue).exists(),
+    ).toBe(true);
+    expect(wrapper.text()).not.toContain("elk_secret");
+  });
+
+  it("leaves ordinary fields on the normal render path", async () => {
+    const wrapper = await mountWrapper(buildProps("plain_key", false));
+
+    expect(wrapper.findComponent(MetadataMaskedValue).exists()).toBe(false);
   });
 });

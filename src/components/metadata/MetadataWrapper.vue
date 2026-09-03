@@ -121,7 +121,16 @@
             v-on="showTooltip ? on : {}"
             class="flex column gap-2 items-center"
           >
+            <MetadataMaskedValue
+              v-if="isMaskedField"
+              :metadata-key="metadata.key"
+              :value="fieldValueProxy"
+              :reveal-query="metadata.revealQuery"
+              :entity-id="linkedEntityId || formId"
+              :copy-to-clipboard="metadata.copyToClipboard ?? false"
+            />
             <MetadataTruncatedText
+              v-else
               @overflow-status="handleOverflowStatus"
               :disabled="!linkedEntityId && !metadata.lineClamp"
               :line-clamp="metadata.lineClamp || 1"
@@ -241,12 +250,12 @@
                 :unit="metadata.unit"
                 :base-library-mode="baseLibraryMode"
                 :custom-value="metadata.customValue"
-                :translation-key="metadata.valueTranslationKey"
+                :translation-key="pillTranslationKey"
                 :breakWords="breakWords"
               />
             </MetadataTruncatedText>
             <BaseCopyToClipboard
-              v-if="metadata.copyToClipboard"
+              v-if="metadata.copyToClipboard && !isMaskedField"
               class="w-6 h-6"
               :value="fieldValueProxy"
               @click.stop.prevent
@@ -283,6 +292,8 @@ import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import MetadataTruncatedText from "./MetadataTruncatedText.vue";
 import MetadataValueTooltip from "./MetadataValueTooltip.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import MetadataMaskedValue from "@/components/metadata/MetadataMaskedValue.vue";
+import { resolveValueTranslationKey } from "@/components/metadata/useValueTranslationKey";
 import {
   BaseLibraryModes,
   type PanelMetaData,
@@ -373,6 +384,10 @@ const {
   fieldErrorMessage,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 
+const isMaskedField = computed(
+  () => (props.metadata as PanelMetaData).masked === true,
+);
+
 const copyFromParent = inject(copyFromParentContextKey, undefined);
 
 const copyFromParentButton = computed(() => {
@@ -436,15 +451,9 @@ const autoCompleteType = computed<
   return undefined;
 });
 
-const pillTranslationKey = computed<string | undefined>(() => {
-  if (props.metadata.valueTranslationKey)
-    return props.metadata.valueTranslationKey;
-  const value = (props.metadata.value as any)?.label;
-  const options = (props.metadata.inputField as any)?.options;
-  if (!value || !options?.length) return undefined;
-  const match = options.find((opt: any) => opt.value === value);
-  return match?.label;
-});
+const pillTranslationKey = computed<string | undefined>(() =>
+  resolveValueTranslationKey(props.metadata),
+);
 
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);
