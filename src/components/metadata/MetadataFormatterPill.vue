@@ -26,12 +26,14 @@
 import { computed } from "vue";
 import { formattersSettings } from "@/main";
 import { useI18n } from "vue-i18n";
+import { resolveOptionLabel } from "@/components/metadata/useValueTranslationKey";
 
 const props = withDefaults(
   defineProps<{
     formatter: string;
     label: string | string[];
     translationKey?: string;
+    valueOptions?: any[];
     size?: "sm" | "lg";
   }>(),
   {
@@ -59,8 +61,11 @@ const settingsFor = (value: string) => {
 };
 
 const displayValue = (value: string): string => {
-  if (!props.translationKey) return value;
-  const key = props.translationKey.replace("$value", value);
+  const key = props.translationKey
+    ? props.translationKey.replace("$value", value)
+    : resolveOptionLabel(value, props.valueOptions);
+  if (!key) return value;
+
   const translated = t(key);
   return translated !== key ? translated : value;
 };

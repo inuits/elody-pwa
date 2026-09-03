@@ -358,6 +358,7 @@ export const getMetadataFields = (
             repetitionIndex,
           ),
         inputField: (value as PanelMetaData).inputField,
+        nonEditableField: (value as PanelMetaData).nonEditableField,
         showOnlyInEditMode: (value as PanelMetaData).showOnlyInEditMode,
         tooltip: (value as PanelMetaData).tooltip,
         lineClamp: (value as PanelMetaData).lineClamp,

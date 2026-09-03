@@ -72,3 +72,82 @@ describe("MetadataFormatterPill", () => {
     });
   });
 });
+
+describe("MetadataFormatterPill — multi-value fields", () => {
+  const rolesOptions = [
+    {
+      label: "dropdown-labels.token-role-partner-read",
+      value: "partner_read",
+    },
+    { label: "dropdown-labels.token-role-admin", value: "admin" },
+  ];
+
+  const TRANSLATIONS: Record<string, string> = {
+    "dropdown-labels.token-role-partner-read": "Alleen lezen (partner)",
+    "dropdown-labels.token-role-admin": "Beheerder",
+  };
+
+  it("translates every entry through the field options when there is no single key", async () => {
+    // one $value pattern cannot cover partner_read -> ...-partner-read and
+    // admin -> ...-admin, so no translationKey is resolvable for the field
+    mocks.t.mockImplementation((key: string) => TRANSLATIONS[key] ?? key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill",
+        label: ["partner_read", "admin"],
+        valueOptions: rolesOptions,
+      },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).toContain("Alleen lezen (partner)");
+    expect(wrapper.text()).toContain("Beheerder");
+    expect(wrapper.text()).not.toContain("partner_read");
+  });
+
+  it("keeps an entry raw when no option matches", async () => {
+    mocks.t.mockImplementation((key: string) => TRANSLATIONS[key] ?? key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill",
+        label: ["mystery_role"],
+        valueOptions: rolesOptions,
+      },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).toBe("mystery_role");
+  });
+
+  it("still prefers an explicit translationKey over the options", async () => {
+    mocks.t.mockImplementation((key: string) =>
+      key === "explicit.partner_read" ? "Explicit" : key,
+    );
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill",
+        label: ["partner_read"],
+        translationKey: "explicit.$value",
+        valueOptions: rolesOptions,
+      },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).toBe("Explicit");
+  });
+
+  it("renders one pill per entry", async () => {
+    mocks.t.mockImplementation((key: string) => TRANSLATIONS[key] ?? key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill",
+        label: ["partner_read", "admin"],
+        valueOptions: rolesOptions,
+      },
+    });
+    await nextTick();
+
+    // the root div is the flex container; each child is one pill
+    expect(wrapper.element.children.length).toBe(2);
+  });
+});

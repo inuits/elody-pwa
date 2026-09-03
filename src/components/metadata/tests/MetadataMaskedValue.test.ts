@@ -130,7 +130,8 @@ describe("MetadataMaskedValue — value fetched on request", () => {
     } as any);
 
     const wrapper = mountComponent(revealProps);
-    for (const _ of [1, 2, 3]) {
+    // show, hide, show again
+    for (let press = 0; press < 3; press++) {
       await toggle(wrapper).trigger("click");
       await flushPromises();
     }

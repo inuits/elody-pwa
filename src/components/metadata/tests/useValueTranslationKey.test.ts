@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveValueTranslationKey } from "../useValueTranslationKey";
+import {
+  resolveOptionLabel,
+  resolveValueTranslationKey,
+} from "../useValueTranslationKey";
 
 const rolesField = {
   inputField: {
@@ -56,5 +59,32 @@ describe("resolveValueTranslationKey", () => {
       resolveValueTranslationKey({ ...rolesField, value: "" }),
     ).toBeUndefined();
     expect(resolveValueTranslationKey(undefined)).toBeUndefined();
+  });
+});
+
+describe("resolveOptionLabel", () => {
+  const options = rolesField.inputField.options;
+
+  it("maps a raw value to its option label", () => {
+    expect(resolveOptionLabel("admin", options)).toBe(
+      "dropdown-labels.token-role-admin",
+    );
+  });
+
+  it("returns undefined for an unknown value", () => {
+    expect(resolveOptionLabel("nonsense", options)).toBeUndefined();
+  });
+
+  it("returns undefined for empty or missing input", () => {
+    expect(resolveOptionLabel("", options)).toBeUndefined();
+    expect(resolveOptionLabel(undefined, options)).toBeUndefined();
+    expect(resolveOptionLabel(null, options)).toBeUndefined();
+    expect(resolveOptionLabel("admin", undefined)).toBeUndefined();
+    expect(resolveOptionLabel("admin", [])).toBeUndefined();
+  });
+
+  it("does not try to match an array as a single value", () => {
+    // multi-value fields are resolved per entry, not as a whole
+    expect(resolveOptionLabel(["admin"], options)).toBeUndefined();
   });
 });

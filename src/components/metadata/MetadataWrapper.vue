@@ -139,6 +139,7 @@
                 v-if="metadata.value?.formatter"
                 v-bind="metadata.value"
                 :translation-key="pillTranslationKey"
+                :value-options="metadata.inputField?.options"
                 :unit="metadata.unit"
                 :entity="{ type: entityType }"
               />

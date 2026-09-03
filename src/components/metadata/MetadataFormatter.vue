@@ -12,6 +12,7 @@
     :formatter="formatter"
     :label="label"
     :translation-key="translationKey"
+    :value-options="valueOptions"
   />
   <MetadataRegexpFormatter
     v-if="formatterType === CustomFormatterTypes.RegexpMatch && hasLabel"
@@ -39,6 +40,7 @@ const props = withDefaults(
     link?: string;
     entity?: any;
     translationKey?: string;
+    valueOptions?: any[];
     openInNewTab?: boolean;
     unit?: string;
   }>(),

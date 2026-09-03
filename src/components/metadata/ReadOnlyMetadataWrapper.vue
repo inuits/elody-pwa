@@ -25,6 +25,7 @@
                 v-if="refMetadata.value?.formatter"
                 v-bind="refMetadata.value"
                 :translation-key="pillTranslationKey"
+                :value-options="refMetadata.inputField?.options"
                 :entity="{ type: entityType }"
               />
               <entity-element-metadata
