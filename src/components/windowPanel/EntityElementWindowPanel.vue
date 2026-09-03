@@ -10,7 +10,8 @@
         <span
           v-if="libraryDataValue !== undefined"
           data-cy="panel-header-library-data"
-          class="px-2 py-0.5 rounded-full bg-accent-normal text-sm text-text-body whitespace-nowrap"
+          class="px-2 py-0.5 rounded-full text-sm text-text-body whitespace-nowrap"
+          :class="libraryDataValue ? 'bg-accent-normal' : 'bg-neutral-30'"
         >
           {{ libraryDataLabel }}
         </span>
@@ -144,10 +145,12 @@ const libraryDataValue = computed(() =>
   getLibraryDataValue(props.panel.panelHeaderContent?.libraryData),
 );
 const libraryDataLabel = computed(() => {
-  const label = props.panel.panelHeaderContent?.libraryData?.label;
-  return label
-    ? t(label, { count: libraryDataValue.value })
-    : String(libraryDataValue.value);
+  const libraryData = props.panel.panelHeaderContent?.libraryData;
+  if (!libraryData?.label) return String(libraryDataValue.value);
+  return t(libraryData.label, {
+    [libraryData.dataKey]: libraryDataValue.value,
+    count: libraryDataValue.value,
+  });
 });
 
 const toggleIsCollapsed = () => {
