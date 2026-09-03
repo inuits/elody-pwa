@@ -15,6 +15,12 @@ export type PipelineViewConfig = {
   producesField: string;
   // sub-field of produces carrying the raw shape IRIs for the port picker
   shapeIriField: string;
+  // the declared bulk operation an output port's "+" triggers — the port
+  // picker IS that operation's ordinary picker, only scoped
+  addConsumerBulkOperation: string;
+  // the hidden selection-filter key that carries the clicked port's shape
+  // IRIs into that picker; the backend interprets it
+  portFilterKey: string;
   // an unpaged listing shows the whole chain; a config override wins
   paginationLimit: number;
 };
@@ -25,6 +31,8 @@ export const DEFAULT_PIPELINE_VIEW_CONFIG: PipelineViewConfig = {
   consumesField: "consumes",
   producesField: "produces",
   shapeIriField: "iri",
+  addConsumerBulkOperation: "addRelation",
+  portFilterKey: "suggest_for_shape",
   paginationLimit: 1000,
 };
 
