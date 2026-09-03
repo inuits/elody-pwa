@@ -10,6 +10,7 @@ import {
   useGetDropdownOptions,
   type UseGetDropdownOptionsParams,
 } from "@/composables/useGetDropdownOptions";
+import { useModalActions } from "@/composables/useModalActions";
 
 export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
@@ -94,6 +95,12 @@ export const useMetadataWrapperDropdownOptions = (
   );
 
   const fieldId = computed<string>(() => props.linkedEntityId || props.formId);
+
+  const optionsFormId = computed<string>(() => {
+    if (!props.metadata.inputField?.resolveOptionsFilterOnModalParent)
+      return fieldId.value;
+    return useModalActions().getParentId() || fieldId.value;
+  });
   const relationType = computed<string | undefined>(
     () => props.metadata.inputField?.relationType || undefined,
   );
@@ -131,7 +138,7 @@ export const useMetadataWrapperDropdownOptions = (
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
       advancedFilterInputForRetrievingOptions:
         filtersForRetrievingRelatedOptions.value,
-      formId: fieldId.value,
+      formId: optionsFormId.value,
       relationFilter: undefined,
     },
     fetchRelations: {
@@ -147,7 +154,7 @@ export const useMetadataWrapperDropdownOptions = (
       searchFilterInput: advancedFilterInputForSearchingOptions.value,
       advancedFilterInputForRetrievingOptions:
         filtersForRetrievingRelatedOptions.value,
-      formId: fieldId.value,
+      formId: optionsFormId.value,
       relationFilter: props.metadata.inputField
         ?.relationFilter as AdvancedFilterInputType,
     },
