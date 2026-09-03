@@ -52,6 +52,7 @@
             :base-library-mode="baseLibraryMode"
             :is-enable-navigation="enableNavigation"
             view-mode="pipeline"
+            :pipeline-view-config="viewConfig"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="false"
             :preview-component-current-active="false"
@@ -91,6 +92,7 @@ import {
   PIPELINE_CARD_WIDTH,
 } from "@/components/library/view-modes/composables/usePipelineLayout";
 import { buildPipelineGraph } from "@/components/library/view-modes/composables/useEntityPipelineGraph";
+import { pipelineViewConfigFrom } from "@/components/library/view-modes/composables/usePipelineViewConfig";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import {
@@ -166,15 +168,17 @@ const { isEntityDisabled, getContextMenu } = useEntityListHelpers(
   () => {},
 );
 
+// Every convention this view leans on — which metadata keys wire the cards,
+// which carry the contract chips, the page size — comes from the declared
+// view-mode config, with defaults matching today's behaviour.
+const viewConfig = computed(() => pipelineViewConfigFrom(props.config));
+
 // A pipeline shows the whole chain — no pager, like the map mode. The limit
-// mirrors the map's: a real number (config override or 1000), because a
-// literal 0 is an empty page to the backing store, not "everything".
-const paginationLimit = computed<number>(() => {
-  const value = props.config?.find(
-    (item) => item.key === "paginationLimit",
-  )?.value;
-  return typeof value === "number" && value > 0 ? value : 1000;
-});
+// is a real number (config override or the default 1000), because a literal
+// 0 is an empty page to the backing store, not "everything".
+const paginationLimit = computed<number>(() =>
+  viewConfig.value.paginationLimit > 0 ? viewConfig.value.paginationLimit : 1000,
+);
 onMounted(() => props.setPaginationLimit?.(paginationLimit.value, true));
 onUnmounted(() => props.setPaginationLimit?.(20, true));
 
@@ -235,6 +239,7 @@ const graph = computed(() =>
           ? (item.relation as any)
           : undefined,
     })),
+    viewConfig.value,
   ),
 );
 

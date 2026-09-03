@@ -242,4 +242,30 @@ describe("ViewModesPipeline", () => {
     wrapper.unmount();
     expect(setPaginationLimit).toHaveBeenCalledWith(20, true);
   });
+
+  it("follows the conventions the view-mode config declares", () => {
+    const setPaginationLimit = vi.fn();
+    relationByEntityId["consumer"] = {
+      idx: 0,
+      relation: {
+        // a different wiring prefix, declared instead of hardcoded
+        metadata: [{ key: "wiring.in.from", value: "producer|out" }],
+      },
+    };
+    const wrapper = mountPipeline(
+      [makeEntity("producer"), makeEntity("consumer")],
+      {
+        setPaginationLimit,
+        config: [
+          { key: "connectionsKey", value: "wiring" },
+          { key: "paginationLimit", value: 250 },
+        ],
+      },
+    );
+
+    expect(setPaginationLimit).toHaveBeenCalledWith(250, true);
+    expect(wrapper.find('[data-cy="pipeline-edge-unknown"]').exists()).toBe(
+      true,
+    );
+  });
 });

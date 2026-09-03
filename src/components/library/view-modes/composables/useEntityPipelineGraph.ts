@@ -7,14 +7,25 @@
 //
 // Recognised inputs, in order of preference per entity:
 // 1. `entity.connections` — `{ [portId]: { from, port?, status?, label? } }`
-// 2. the entity's relation metadata — `connections.<port>.from` (raw value,
-//    e.g. "local--alert-monitor-cm|out"), with optional
-//    `connections.<port>.status` / `.state` and `.label` / `.badge`.
+// 2. the entity's relation metadata — `<connectionsKey>.<port>.from` (raw
+//    value, e.g. "local--alert-monitor-cm|out"), with optional
+//    `<connectionsKey>.<port>.status` / `.state` and `.label` / `.badge`.
 //    The status is the validation verdict already computed elsewhere; this
 //    module never validates shapes itself.
-// Contract labels surface as the `contracts.consumes` / `contracts.produces`
-// values (SHACL/DCAT catalog facts) and drive the implicit single input /
-// output port when no explicit `entity.ports` is present.
+// Contract labels surface as the consumes/produces metadata values
+// (SHACL/DCAT catalog facts) and drive the implicit single input / output
+// port when no explicit `entity.ports` is present.
+//
+// The metadata key names themselves are not fixed here: they come from the
+// PipelineViewConfig the query declares (with sensible defaults).
+
+import {
+  DEFAULT_PIPELINE_VIEW_CONFIG,
+  consumesKey,
+  producesIrisKey,
+  producesKey,
+  type PipelineViewConfig,
+} from "./usePipelineViewConfig";
 
 export type PipelinePort = {
   id: string;
@@ -102,7 +113,13 @@ const readStatus = (raw: unknown): "valid" | "mismatch" | "unknown" => {
   return "unknown";
 };
 
-const connectionsOf = (input: PipelineGraphInput): RawConnection[] => {
+const escapeForRegex = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const connectionsOf = (
+  input: PipelineGraphInput,
+  config: PipelineViewConfig,
+): RawConnection[] => {
   // 1. the spec shape, straight on the entity
   const direct = input.entity?.connections;
   if (direct && typeof direct === "object" && !Array.isArray(direct)) {
@@ -122,8 +139,10 @@ const connectionsOf = (input: PipelineGraphInput): RawConnection[] => {
   if (!Array.isArray(metadata)) return [];
   const byKey = new Map(metadata.map((entry) => [entry.key, entry.value]));
   const connections: RawConnection[] = [];
+  const wiring = config.connectionsKey;
+  const fromPattern = new RegExp(`^${escapeForRegex(wiring)}\\.(.+)\\.from$`);
   for (const entry of metadata) {
-    const match = /^connections\.(.+)\.from$/.exec(entry.key ?? "");
+    const match = fromPattern.exec(entry.key ?? "");
     if (!match || !entry.value) continue;
     const port = match[1];
     const rawValue = String(entry.value);
@@ -133,20 +152,17 @@ const connectionsOf = (input: PipelineGraphInput): RawConnection[] => {
       from,
       fromPort: fromPort || undefined,
       status:
-        byKey.get(`connections.${port}.status`) ??
-        byKey.get(`connections.${port}.state`),
+        byKey.get(`${wiring}.${port}.status`) ??
+        byKey.get(`${wiring}.${port}.state`),
       label:
-        byKey.get(`connections.${port}.label`) ??
-        byKey.get(`connections.${port}.badge`),
+        byKey.get(`${wiring}.${port}.label`) ??
+        byKey.get(`${wiring}.${port}.badge`),
     });
   }
   return connections;
 };
 
-const contractValue = (
-  input: PipelineGraphInput,
-  key: "contracts.consumes" | "contracts.produces" | "contracts.produces.iri",
-): string => {
+const contractValue = (input: PipelineGraphInput, key: string): string => {
   const fromValues = input.values?.[key];
   if (fromValues) return String(fromValues);
   const fromInitial = input.entity?.intialValues?.[key];
@@ -155,13 +171,14 @@ const contractValue = (
 
 export const buildPipelineGraph = (
   inputs: PipelineGraphInput[],
+  config: PipelineViewConfig = DEFAULT_PIPELINE_VIEW_CONFIG,
 ): PipelineGraph => {
   const edges: PipelineGraphEdge[] = [];
   const referencedProducers = new Set<string>();
   const connectionsPerNode = new Map<string, RawConnection[]>();
 
   for (const input of inputs) {
-    const connections = connectionsOf(input);
+    const connections = connectionsOf(input, config);
     connectionsPerNode.set(input.id, connections);
     for (const connection of connections) {
       const producer = matchReference(connection.from, inputs);
@@ -181,9 +198,9 @@ export const buildPipelineGraph = (
 
   const nodes: PipelineGraphNode[] = inputs.map((input) => {
     const connections = connectionsPerNode.get(input.id) ?? [];
-    const consumes = contractValue(input, "contracts.consumes");
-    const produces = contractValue(input, "contracts.produces");
-    const producesIris = contractValue(input, "contracts.produces.iri")
+    const consumes = contractValue(input, consumesKey(config));
+    const produces = contractValue(input, producesKey(config));
+    const producesIris = contractValue(input, producesIrisKey(config))
       .split(/\s+/)
       .filter(Boolean);
 
