@@ -1,5 +1,21 @@
 <template>
-  <li data-cy="list-item" :class="wrapperClasses">
+  <!-- the pipeline card is its own component; ListItem stays the single
+       entry point for every view mode but owns only list and grid -->
+  <PipelineListItemCard
+    v-if="isPipelineMode"
+    :bulk-operations-context="bulkOperationsContext"
+    :context-menu-actions="contextMenuActions"
+    :item-id="itemId"
+    :entity-typename="entityTypename"
+    :loading="loading"
+    :teaser-metadata="teaserMetadata"
+    :intial-values="intialValues"
+    :relation="relation"
+    :is-disabled="isDisabled"
+    :refetch-entities="refetchEntities"
+    :view-config="pipelineViewConfig"
+  />
+  <li v-else data-cy="list-item" :class="wrapperClasses">
     <div
       v-if="isGridMode && !isPreviewElement"
       class="flex justify-between items-center pb-2"
@@ -84,7 +100,7 @@
       />
     </div>
     <div
-      v-if="!isPipelineMode && canShowCopyRight() && media && !imageSrcError"
+      v-if="canShowCopyRight() && media && !imageSrcError"
       :class="[
         'flex items-center',
         { 'justify-center mb-4 h-[50%]': isGridMode },
@@ -107,10 +123,7 @@
     </div>
     <div
       v-if="
-        !isPipelineMode &&
-        (!canShowCopyRight() ||
-          (media && imageSrcError) ||
-          (!media && isMediaType))
+        !canShowCopyRight() || (media && imageSrcError) || (!media && isMediaType)
       "
       :key="`${itemId}-icon-${imageSize}`"
       :class="[
@@ -129,46 +142,17 @@
       <div v-if="isGridMode" class="text-neutral-70">No media</div>
     </div>
 
-    <!-- pipeline cards: no multiselect and no header row; the actions menu
-         (connect/configure) floats in the top-right corner and the card
-         itself does not navigate -->
-    <div v-if="isPipelineMode && !isPreviewElement" class="absolute top-1 right-1">
-      <BaseContextMenuActions
-        :context-menu-actions="contextMenuActions"
-        :parent-entity-id="formId"
-        :entity-id="itemId"
-        :entity-type="entityTypename"
-        :relation="relation"
-        :bulk-operations-context="bulkOperationsContext"
-        :refetch-entities="refetchEntities"
-        @toggle-loading="toggleLoading"
-      />
-    </div>
-    <div
-      v-if="isPipelineMode && pipelineContractTeaserMetadata.length > 0"
-      class="flex flex-wrap gap-1 pb-1 pr-6"
-    >
-      <span
-        v-for="contractItem in pipelineContractTeaserMetadata"
-        :key="contractItem.key"
-        :data-cy="`pipeline-contract-${contractItem.key}`"
-        class="rounded-full bg-tag-neutral px-2 py-0.5 text-sm w-fit"
-      >
-        {{ contractItem.label }}: {{ contractItem.value }}
-      </span>
-    </div>
     <div
       :class="[
         'w-full',
         { 'flex items-center': isListMode && !props.multiLine },
         { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
         { 'p-4': isGridMode },
-        { 'flex flex-col gap-1': isPipelineMode },
       ]"
       :style="multiLineGridStyle"
     >
       <div
-        v-for="(metadataItem, idx) in visibleTeaserMetadata"
+        v-for="(metadataItem, idx) in onlyReadModeTeaserMetadata"
         :key="`${formId || idx}_${metadataItem?.key || idx}`"
         :class="[
           teaserMetadataStyle,
@@ -345,6 +329,8 @@ import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
+import PipelineListItemCard from "@/components/library/view-modes/pipeline/PipelineListItemCard.vue";
+import type { PipelineViewConfig } from "@/components/library/view-modes/composables/usePipelineViewConfig";
 
 const props = withDefaults(
   defineProps<{
@@ -374,6 +360,7 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid" | "pipeline";
+    pipelineViewConfig?: PipelineViewConfig;
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
     previewComponentCurrentActive: boolean;
@@ -406,6 +393,7 @@ const props = withDefaults(
     isEnableNavigation: false,
     entityListElements: undefined,
     viewMode: "list",
+    pipelineViewConfig: undefined,
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
     isPrimaryMediafile: false,
@@ -453,7 +441,6 @@ const multiLineGridStyle = computed(() =>
 );
 const teaserMetadataStyle = computed<string>(() => {
   if (isGridMode.value) return "w-full";
-  if (isPipelineMode.value) return "flex justify-start flex-col break-words w-full";
   if (props.multiLine) return "flex justify-start flex-col break-words";
 
   const amountOfTeaserMetadataItems: string | number =
@@ -508,39 +495,6 @@ const isGridMode = computed(() => props.viewMode === "grid");
 const isListMode = computed(() => props.viewMode === "list");
 const isPipelineMode = computed(() => props.viewMode === "pipeline");
 
-// Pipeline cards rearrange the teaser metadata: the entity-type pill is
-// dropped (in a pipeline everything is a component, so it says nothing) and
-// the SHACL contract facts (Consumes / Produces) become the primary chip
-// row — matching contracts is what makes two cards connectable.
-const PIPELINE_CONTRACT_KEYS = ["contracts.consumes", "contracts.produces"];
-const pipelinePillTeaserMetadata = computed(() =>
-  isPipelineMode.value
-    ? onlyReadModeTeaserMetadata.value.find(
-        (metadata: any) => metadata?.value?.formatter,
-      )
-    : undefined,
-);
-const pipelineContractTeaserMetadata = computed(() =>
-  isPipelineMode.value
-    ? onlyReadModeTeaserMetadata.value.filter(
-        (metadata: any) =>
-          PIPELINE_CONTRACT_KEYS.includes(metadata?.key) && metadata?.value,
-      )
-    : [],
-);
-const visibleTeaserMetadata = computed(() => {
-  if (!isPipelineMode.value) return onlyReadModeTeaserMetadata.value;
-  return onlyReadModeTeaserMetadata.value.filter(
-    (metadata: any) =>
-      metadata !== pipelinePillTeaserMetadata.value &&
-      // contract facts render as the chip row; anything else under
-      // contracts.* (like the raw shape IRIs) is bookkeeping, and the edges
-      // already draw what feeds what, so connections.* stays off the card too
-      !String(metadata?.key ?? "").startsWith("contracts.") &&
-      !String(metadata?.key ?? "").startsWith("connections."),
-  );
-});
-
 const wrapperClasses = computed(() => {
   return [
     "border rounded cursor-pointer list-none z-[-1]",
@@ -549,12 +503,6 @@ const wrapperClasses = computed(() => {
     },
     {
       "p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]": isGridMode.value,
-    },
-    {
-      // the base z-[-1] is inert on a static li, but `relative` (needed to
-      // anchor the corner menu) would activate it and put the whole card
-      // behind its canvas wrapper for hit-testing — so force it back up
-      "relative !z-0 p-3 flex flex-col w-[272px] !cursor-default": isPipelineMode.value,
     },
     {
       "border-dashed border-2 !border-accent-normal":
