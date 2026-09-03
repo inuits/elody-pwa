@@ -377,6 +377,7 @@ import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
+import { pipelineViewConfigFrom } from "@/components/library/view-modes/composables/usePipelineViewConfig";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
 import { UploadStatus } from "@/composables/upload/types";
@@ -414,6 +415,7 @@ import {
   type BaseEntity,
   BaseLibraryModes,
   type BaseRelationValuesInput,
+  type ConfigItem,
   DamsIcons,
   DeepRelationsFetchStrategy,
   type DropdownOption,
@@ -1032,20 +1034,27 @@ const bulkOperationsActionsBarRef = ref<InstanceType<
   typeof BulkOperationsActionsBar
 > | null>(null);
 
-// "Add a consumer for this output": run the ordinary add-component operation,
-// then narrow the picker to components whose input shape matches the clicked
-// port. The trigger initializes (and clears) the picker synchronously, so the
-// scope set afterwards is what the opened picker reads.
+// "Add a consumer for this output": run the ordinary declared add operation,
+// then narrow its picker to components whose input shape matches the clicked
+// port. Which bulk operation and which filter key are part of the declared
+// pipeline view config; the trigger initializes (and clears) the picker
+// synchronously, so the scope set afterwards is what the opened picker reads.
 const openConsumerPickerForPort = (port: { shapeIris?: string[] }) => {
   const shapeIris = port.shapeIris ?? [];
   if (shapeIris.length === 0) return;
-  const triggered =
-    bulkOperationsActionsBarRef.value?.triggerBulkOperation("addRelation");
+  const pipelineConfig = pipelineViewConfigFrom(
+    configPerViewMode.value?.[ViewModes.ViewModesPipeline] as
+      | ConfigItem[]
+      | undefined,
+  );
+  const triggered = bulkOperationsActionsBarRef.value?.triggerBulkOperation(
+    pipelineConfig.addConsumerBulkOperation,
+  );
   if (!triggered) return;
   setAdditionalFilters([
     {
       type: AdvancedFilterTypes.Selection,
-      key: ["suggest_for_shape"],
+      key: [pipelineConfig.portFilterKey],
       value: shapeIris,
       match_exact: true,
     },
