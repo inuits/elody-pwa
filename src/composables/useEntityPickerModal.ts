@@ -1,6 +1,5 @@
 import type {
   ActionsOnResult,
-  AdvancedFilterInput,
   Entitytyping,
 } from "@/generated-types/queries";
 import { ref } from "vue";
@@ -26,10 +25,12 @@ const selectionLimit = ref<number>(0);
 // relations want it off -- picking the same author twice is a slip. A pipeline
 // step is a *use* of a component, so a component can legitimately appear twice.
 const allowDuplicateRelations = ref<boolean>(false);
-// Extra filters with concrete values, set by whoever opens the picker (e.g.
-// the pipeline view scoping it to one output port's shape). Cleared on every
-// normal initialization so a scope never leaks into the next picker.
-const additionalFilters = ref<AdvancedFilterInput[]>([]);
+// Extra filter variables, set by whoever opens the picker (e.g. the pipeline
+// view handing the clicked output port's shape IRIs to a declared
+// "$portShapeIris" filter). The picker's own query declares the filter; only
+// the values travel here. Cleared on every normal initialization so a scope
+// never leaks into the next picker.
+const additionalFilterVariables = ref<Record<string, unknown>>({});
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -89,9 +90,8 @@ const useEntityPickerModal = () => {
   const setAllowDuplicateRelations = (value: boolean) => {
     allowDuplicateRelations.value = value;
   };
-
-  const setAdditionalFilters = (filters: AdvancedFilterInput[]) => {
-    additionalFilters.value = filters;
+  const setAdditionalFilterVariables = (variables: Record<string, unknown>) => {
+    additionalFilterVariables.value = variables;
   };
 
   const getAcceptedTypes = () => acceptedTypes.value;
@@ -109,7 +109,7 @@ const useEntityPickerModal = () => {
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
   const getAllowDuplicateRelations = () => allowDuplicateRelations.value;
-  const getAdditionalFilters = () => additionalFilters.value;
+  const getAdditionalFilterVariables = () => additionalFilterVariables.value;
 
   const resetState = () => {
     acceptedTypes.value = [];
@@ -125,6 +125,7 @@ const useEntityPickerModal = () => {
     actionsOnResult.value = undefined;
     replaceExistingRelations.value = false;
     selectionLimit.value = 0;
+    additionalFilterVariables.value = {};
   };
 
   return {
@@ -157,8 +158,8 @@ const useEntityPickerModal = () => {
     getSelectionLimit,
     setAllowDuplicateRelations,
     getAllowDuplicateRelations,
-    setAdditionalFilters,
-    getAdditionalFilters,
+    setAdditionalFilterVariables,
+    getAdditionalFilterVariables,
   };
 };
 
