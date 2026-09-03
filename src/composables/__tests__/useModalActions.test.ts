@@ -1,6 +1,11 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { useModalActions } from "@/composables/useModalActions";
-import { ActionType, BulkOperationTypes, Collection } from "@/generated-types/queries";
+import {
+  ActionType,
+  BulkOperationTypes,
+  Collection,
+  RouteNames,
+} from "@/generated-types/queries";
 
 describe("useModalActions extractActionArguments(Submit)", () => {
   beforeEach(() => {
@@ -43,6 +48,63 @@ describe("useModalActions extractActionArguments(Submit)", () => {
     // falls through to the generic (empty) callback-functions arguments
     // instead of a relation object
     expect(extractActionArguments(ActionType.Submit)).toEqual([]);
+  });
+});
+
+describe("useModalActions download", () => {
+  beforeEach(() => {
+    useModalActions().resetAllProperties();
+  });
+
+  // The completeness-overview panels render their mediafile list through a
+  // per-panel custom context, so the ids can only be recognised as mediafiles
+  // by the type the enqueued items carry themselves.
+  it("sends mediafiles enqueued in a custom context as mediafiles, not entities", () => {
+    const { initializePropertiesForDownload, extractActionArguments } =
+      useModalActions();
+
+    initializePropertiesForDownload(
+      [
+        { id: "mf-1", type: "mediafile" },
+        { id: "mf-2", type: "MediaFile" },
+      ] as any,
+      "EntityElementListrefMediafilesPosters" as any,
+    );
+
+    expect(extractActionArguments(ActionType.Download)).toMatchObject({
+      mediafiles: ["mf-1", "mf-2"],
+      entities: [],
+    });
+  });
+
+  it("keeps sending non-mediafile items as entities", () => {
+    const { initializePropertiesForDownload, extractActionArguments } =
+      useModalActions();
+
+    initializePropertiesForDownload(
+      [{ id: "prod-1", type: "production" }] as any,
+      "EntityElementListrefProductions" as any,
+    );
+
+    expect(extractActionArguments(ActionType.Download)).toMatchObject({
+      mediafiles: [],
+      entities: ["prod-1"],
+    });
+  });
+
+  it("falls back to the context when the enqueued items carry no type", () => {
+    const { initializePropertiesForDownload, extractActionArguments } =
+      useModalActions();
+
+    initializePropertiesForDownload(
+      [{ id: "mf-1" }] as any,
+      RouteNames.Mediafiles,
+    );
+
+    expect(extractActionArguments(ActionType.Download)).toMatchObject({
+      mediafiles: ["mf-1"],
+      entities: [],
+    });
   });
 });
 

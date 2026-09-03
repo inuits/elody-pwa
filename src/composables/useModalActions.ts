@@ -1,8 +1,13 @@
-import type { BulkOperationTypes, Collection, Entity } from "@/generated-types/queries";
+import type {
+  BulkOperationTypes,
+  Collection,
+  Entity,
+} from "@/generated-types/queries";
 import {
   ActionType,
   type BaseRelationValuesInput,
   EditStatus,
+  Entitytyping,
   RouteNames,
 } from "@/generated-types/queries";
 import { ref, type Ref } from "vue";
@@ -17,7 +22,10 @@ export type DownloadMediafilesInformation = {
   includeAssetCsv: boolean;
 };
 
-type SubmitArguments = { [key: string]: BaseRelationValuesInput[] } | Function[] | undefined;
+type SubmitArguments =
+  | { [key: string]: BaseRelationValuesInput[] }
+  | Function[]
+  | undefined;
 const parentId = ref<string | undefined>(undefined);
 const relationType = ref<string | undefined>(undefined);
 const collection = ref<Collection | undefined>(undefined);
@@ -26,7 +34,7 @@ const bulkOperationType = ref<BulkOperationTypes | undefined>(undefined);
 const previousEntityId = ref<string | undefined>(undefined);
 const downloadMediafilesInformation = ref<
   DownloadMediafilesInformation | undefined
->(undefined)
+>(undefined);
 const bulkUpdateMetadataEntityIds = ref<string[] | undefined>(undefined);
 const savedSearchInformation = ref<any | undefined>(undefined);
 const deletionInformation = ref<{ title: string } | undefined>(undefined);
@@ -49,8 +57,8 @@ export const useModalActions = () => {
           key: parentId.value,
           type: relationType.value,
           editStatus: EditStatus.New,
-        }
-      ]
+        },
+      ];
       parentId.value = undefined;
       return relation;
     }
@@ -66,8 +74,8 @@ export const useModalActions = () => {
           key: previousEntityId.value,
           type: relationType.value,
           editStatus: EditStatus.New,
-        }
-      ]
+        },
+      ];
       previousEntityId.value = undefined;
       relationType.value = undefined;
       return relation;
@@ -76,10 +84,13 @@ export const useModalActions = () => {
     return callbackFunctions.value;
   };
 
-  const setArgumentForSubmitAllFormTabs = (entityId: string, relation: string): undefined => {
+  const setArgumentForSubmitAllFormTabs = (
+    entityId: string,
+    relation: string,
+  ): undefined => {
     previousEntityId.value = entityId;
     relationType.value = relation;
-  }
+  };
 
   const getArgumentsForDownload = (): {
     relations: BaseRelationValuesInput[];
@@ -205,7 +216,14 @@ export const useModalActions = () => {
     enqueuedItems: InBulkProcessableItem[],
     context: any,
   ): void => {
+    const typesOfEnqueuedItems = enqueuedItems
+      .map((item) => item.type?.toLowerCase())
+      .filter(Boolean);
     const isMediafileArray =
+      (typesOfEnqueuedItems.length > 0 &&
+        typesOfEnqueuedItems.every(
+          (type) => type === Entitytyping.Mediafile,
+        )) ||
       context === RouteNames.Mediafile ||
       context === RouteNames.Mediafiles ||
       context === BulkOperationsContextEnum.EntityElementMedia;

@@ -165,6 +165,58 @@ describe("EntityElementList", () => {
     expect(refetchParentEntity).toHaveBeenCalledTimes(1);
   });
 
+  // The completeness-overview panels all list mediafiles over the same
+  // relation, so the relation type alone gave every panel one shared bulk
+  // selection queue: ticking a poster showed up as a selection in the
+  // scene-images panel and got zipped along with it.
+  it("gives each panel its own bulk selection context", async () => {
+    mocks.fetchAdvancedPermissions.mockReturnValue(true);
+    const contextOf = (wrapper: any) =>
+      wrapper
+        .find('[data-test="base-library-stub"]')
+        .attributes("bulk-operations-context");
+
+    const posters = mount(EntityElementList, {
+      props: {
+        ...getBasicProps(),
+        relationType: "refMediafiles",
+        customQueryFilters: "GetRelatedMediafilesWithTypePosterFilters",
+      },
+    });
+    const sceneImages = mount(EntityElementList, {
+      props: {
+        ...getBasicProps(),
+        relationType: "refMediafiles",
+        customQueryFilters: "GetRelatedMediafilesWithTypeSceneImagesFilters",
+      },
+    });
+
+    await flushPromises();
+
+    expect(contextOf(posters)).toBeTruthy();
+    expect(contextOf(posters)).not.toBe(contextOf(sceneImages));
+  });
+
+  it("falls back to the element label when no custom query filters are configured", async () => {
+    mocks.fetchAdvancedPermissions.mockReturnValue(true);
+    const contextOf = (wrapper: any) =>
+      wrapper
+        .find('[data-test="base-library-stub"]')
+        .attributes("bulk-operations-context");
+
+    const first = mount(EntityElementList, {
+      props: { ...getBasicProps(), label: "element-labels.zones" },
+    });
+    const second = mount(EntityElementList, {
+      props: { ...getBasicProps(), label: "element-labels.areas" },
+    });
+
+    await flushPromises();
+
+    expect(contextOf(first)).toContain("element-labels.zones");
+    expect(contextOf(first)).not.toBe(contextOf(second));
+  });
+
   it("does not refetch the parent entity while an upload is only in progress", async () => {
     mocks.fetchAdvancedPermissions.mockReturnValue(true);
     const refetchParentEntity = vi.fn();

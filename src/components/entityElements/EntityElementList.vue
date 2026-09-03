@@ -76,7 +76,9 @@
             v-else
             :bulk-operations-context="
               createCustomContext(
-                BulkOperationsContextEnum.EntityElementList + relationType,
+                BulkOperationsContextEnum.EntityElementList +
+                  relationType +
+                  (customQueryFilters || label),
               )
             "
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
