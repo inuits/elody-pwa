@@ -2,11 +2,14 @@ import { mount } from "@vue/test-utils";
 import MetadataFormatterPill from "../MetadataFormatterPill.vue";
 import { nextTick } from "vue";
 import { describe, it, expect, vi } from "vitest";
+import { Unicons } from "@/types";
 
 vi.mock("@/main", () => ({
   formattersSettings: {
     pill: {
       concept: { background: "#aaa", text: "#fff" },
+      queued: { background: "#eee", text: "#444", icon: "Process", spin: true },
+      finished: { background: "#dfd", text: "#0b8" },
     },
   },
 }));
@@ -149,5 +152,32 @@ describe("MetadataFormatterPill — multi-value fields", () => {
 
     // the root div is the flex container; each child is one pill
     expect(wrapper.element.children.length).toBe(2);
+  });
+});
+
+describe("MetadataFormatterPill — configured icon", () => {
+  it("renders the configured icon, spinning", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: { formatter: "pill", label: "queued" },
+      global: { stubs: { unicon: true } },
+    });
+    await nextTick();
+
+    const icon = wrapper.find("unicon-stub");
+    expect(icon.exists()).toBe(true);
+    expect(icon.attributes("name")).toBe(Unicons.Process.name);
+    expect(icon.classes()).toContain("animate-spin");
+  });
+
+  it("renders no icon when the pill config has none", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: { formatter: "pill", label: "finished" },
+      global: { stubs: { unicon: true } },
+    });
+    await nextTick();
+
+    expect(wrapper.find("unicon-stub").exists()).toBe(false);
   });
 });

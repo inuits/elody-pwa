@@ -5,6 +5,7 @@
       :key="value"
       :class="[
         size === 'lg' ? 'text-lg' : 'text-sm',
+        'inline-flex items-center gap-1',
         {
           'rounded-md bg-slate-800 border border-transparent':
             settingsFor(value),
@@ -17,7 +18,16 @@
         color: settingsFor(value)?.text,
       }"
     >
-      {{ displayValue(value) }}
+      <unicon
+        v-if="iconFor(value)"
+        :name="iconFor(value)?.name"
+        :class="{
+          'animate-spin [animation-direction:reverse]': settingsFor(value)?.spin,
+        }"
+        height="14"
+        width="14"
+      />
+      <span>{{ displayValue(value) }}</span>
     </div>
   </div>
 </template>
@@ -27,6 +37,7 @@ import { computed } from "vue";
 import { formattersSettings } from "@/main";
 import { useI18n } from "vue-i18n";
 import { resolveOptionLabel } from "@/components/metadata/useValueTranslationKey";
+import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -52,13 +63,15 @@ const values = computed<string[]>(() =>
 
 // Colours are keyed on the raw value, never on the translated display text —
 // "medewerker" has no entry, its raw value "member" does.
-const settingsFor = (value: string) => {
+const settingsFor = (value: string): any => {
   const [formatterType, configuredPillType] = props.formatter.split("|");
   if (configuredPillType === "auto")
     return { background: "#6DBBDE", text: "#FFFFFF" };
   const pillType = configuredPillType || value.toLowerCase();
   return formattersSettings[formatterType]?.[pillType];
 };
+
+const iconFor = (value: string) => Unicons[settingsFor(value)?.icon];
 
 const displayValue = (value: string): string => {
   const key = props.translationKey
