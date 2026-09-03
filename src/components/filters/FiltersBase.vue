@@ -226,6 +226,9 @@ const props = withDefaults(
     additionalDefaultFiltersEnabled?: boolean;
     onRegisterApi?: (api: FiltersBaseAPI) => void;
     simpleSearchActive?: boolean;
+    // extra named values for declared "$<name>" filter references, on top of
+    // the standard parentIds/entityType/entity/dateToday set
+    extraVariables?: Record<string, unknown>;
   }>(),
   {
     parentEntityIdentifiers: () => [],
@@ -236,6 +239,7 @@ const props = withDefaults(
     onRegisterApi: undefined,
     expandFilters: false,
     simpleSearchActive: false,
+    extraVariables: undefined,
   },
 );
 
@@ -639,8 +643,15 @@ const updateFilterVariables = () => {
     entityType: props.entityType,
     entity: parentEntity?.value || parentEntity,
     dateToday: DateTime.now().toISO(),
+    ...(props.extraVariables ?? {}),
   });
 };
+
+watch(
+  () => props.extraVariables,
+  () => updateFilterVariables(),
+  { deep: true },
+);
 
 if (props.parentEntityIdentifiers.length > 0)
   watch(

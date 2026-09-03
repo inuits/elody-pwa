@@ -28,7 +28,6 @@ describe("pipelineViewConfigFrom", () => {
     // untouched entries keep their defaults
     expect(config.consumesField).toBe("consumes");
     expect(config.addConsumerBulkOperation).toBe("addRelation");
-    expect(config.portFilterKey).toBe("suggest_for_shape");
   });
 
   it("ignores unknown keys and wrongly typed values", () => {

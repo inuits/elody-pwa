@@ -1,6 +1,5 @@
 import type {
   ActionsOnResult,
-  AdvancedFilterInput,
   Entitytyping,
 } from "@/generated-types/queries";
 import { ref } from "vue";
@@ -22,10 +21,12 @@ const cropCoordinatesKey = ref<string>("");
 const actionsOnResult = ref<ActionsOnResult | undefined>(undefined);
 const replaceExistingRelations = ref<boolean>(false);
 const selectionLimit = ref<number>(0);
-// Extra filters with concrete values, set by whoever opens the picker (e.g.
-// a pipeline view scoping it to one output port's shape). Cleared on every
-// normal initialization so a scope never leaks into the next picker.
-const additionalFilters = ref<AdvancedFilterInput[]>([]);
+// Extra filter variables, set by whoever opens the picker (e.g. the pipeline
+// view handing the clicked output port's shape IRIs to a declared
+// "$portShapeIris" filter). The picker's own query declares the filter; only
+// the values travel here. Cleared on every normal initialization so a scope
+// never leaks into the next picker.
+const additionalFilterVariables = ref<Record<string, unknown>>({});
 
 const useEntityPickerModal = () => {
   const setAcceptedTypes = (types: Entitytyping[]) => {
@@ -82,8 +83,8 @@ const useEntityPickerModal = () => {
     selectionLimit.value = value;
   };
 
-  const setAdditionalFilters = (filters: AdvancedFilterInput[]) => {
-    additionalFilters.value = filters;
+  const setAdditionalFilterVariables = (variables: Record<string, unknown>) => {
+    additionalFilterVariables.value = variables;
   };
 
 
@@ -101,7 +102,7 @@ const useEntityPickerModal = () => {
   const getActionsOnResult = () => actionsOnResult.value;
   const getReplaceExistingRelations = () => replaceExistingRelations.value;
   const getSelectionLimit = () => selectionLimit.value;
-  const getAdditionalFilters = () => additionalFilters.value;
+  const getAdditionalFilterVariables = () => additionalFilterVariables.value;
 
   const resetState = () => {
     acceptedTypes.value = [];
@@ -117,7 +118,7 @@ const useEntityPickerModal = () => {
     actionsOnResult.value = undefined;
     replaceExistingRelations.value = false;
     selectionLimit.value = 0;
-    additionalFilters.value = [];
+    additionalFilterVariables.value = {};
   };
 
   return {
@@ -148,8 +149,8 @@ const useEntityPickerModal = () => {
     getReplaceExistingRelations,
     setSelectionLimit,
     getSelectionLimit,
-    setAdditionalFilters,
-    getAdditionalFilters,
+    setAdditionalFilterVariables,
+    getAdditionalFilterVariables,
   };
 };
 

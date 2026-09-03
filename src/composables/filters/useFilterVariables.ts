@@ -6,6 +6,9 @@ type FilterVariables = {
   entityType?: Entitytyping | string;
   entity?: Entity;
   dateToday?: string;
+  // callers may hand extra named values for declared "$<name>" references
+  // (e.g. the pipeline port picker's portShapeIris)
+  [extra: string]: unknown;
 };
 
 export const useFilterVariables = () => {

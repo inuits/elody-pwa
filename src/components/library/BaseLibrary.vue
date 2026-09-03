@@ -37,6 +37,7 @@
           :expandFilters="expandFilters"
           :manipulation-query="manipulationQuery"
           :parent-entity-identifiers="parentEntityIdentifiers"
+          :extra-variables="getAdditionalFilterVariables()"
           :route="route"
           :set-advanced-filters="setAdvancedFilters"
           :additional-default-filters-enabled="additionalDefaultFiltersEnabled"
@@ -776,7 +777,8 @@ const {
   setCropMode,
   setCropCoordinatesKey,
   setActionsOnResult,
-  setAdditionalFilters,
+  setAdditionalFilterVariables,
+  getAdditionalFilterVariables,
 } = useEntityPickerModal();
 
 const {
@@ -1038,20 +1040,23 @@ const initializeEntityPickerComponent = (
   setCropMode(enableCropMode);
   setCropCoordinatesKey(keyToSaveCropCoordinates);
   setActionsOnResult(props.actionsOnResult);
-  // a port-scoped picker sets its filter *after* this runs; every normal
+  // a port-scoped picker sets its variables *after* this runs; every normal
   // opening starts unscoped
-  setAdditionalFilters([]);
+  setAdditionalFilterVariables({});
 };
 
 const bulkOperationsActionsBarRef = ref<InstanceType<
   typeof BulkOperationsActionsBar
 > | null>(null);
 
-// "Add a consumer for this output": run the ordinary declared add operation,
-// then narrow its picker to components whose input shape matches the clicked
-// port. Which bulk operation and which filter key are part of the declared
-// pipeline view config; the trigger initializes (and clears) the picker
-// synchronously, so the scope set afterwards is what the opened picker reads.
+// "Add a consumer for this output": run the ordinary declared add operation
+// (which one is part of the declared pipeline view config) and hand the
+// clicked port's shape IRIs over as the $portShapeIris filter variable. The
+// scoping filter itself lives in the picker's own declared filters, exactly
+// like a "$parentIds" filter; without such a declaration the values are
+// simply never read. The trigger initializes (and clears) the picker
+// synchronously, so the variables set afterwards are what the opened picker
+// resolves.
 const openConsumerPickerForPort = (port: { shapeIris?: string[] }) => {
   const shapeIris = port.shapeIris ?? [];
   if (shapeIris.length === 0) return;
@@ -1064,14 +1069,7 @@ const openConsumerPickerForPort = (port: { shapeIris?: string[] }) => {
     pipelineConfig.addConsumerBulkOperation,
   );
   if (!triggered) return;
-  setAdditionalFilters([
-    {
-      type: AdvancedFilterTypes.Selection,
-      key: [pipelineConfig.portFilterKey],
-      value: shapeIris,
-      match_exact: true,
-    },
-  ]);
+  setAdditionalFilterVariables({ portShapeIris: shapeIris });
 };
 
 const syncEditStateCallbacks = (): void => {
