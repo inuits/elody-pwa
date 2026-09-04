@@ -54,7 +54,7 @@
           :key="idx"
           :label="
             t(option?.label, [
-              t(`entity-translations.plural.${props.entityType}`),
+              t(`entity-translations.${props.entityType?.toLowerCase()}`, 2),
             ])
           "
           :tooltip-label="option?.actionContext?.labelForTooltip"
@@ -133,7 +133,7 @@ const { t } = useI18n();
 const availableOptions = ref<DropdownOption[]>([]);
 
 const entityTypeLabel = computed(() =>
-  t(`entity-translations.plural.${props.entityType}`),
+  t(`entity-translations.${props.entityType?.toLowerCase()}`, 2),
 );
 const primaryOptions = computed(() => {
   let options = availableOptions.value.filter(

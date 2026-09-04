@@ -75,7 +75,7 @@ describe("LinkAction", () => {
       const wrapper = getWrapper();
       const item = wrapper.findComponent({ name: "BaseContextMenuItem" });
       expect(item.props("label")).toBe(
-        "actions.openEntity:entity-translations.singular.mediafile",
+        "actions.openEntity:entity-translations.mediafile",
       );
     });
 

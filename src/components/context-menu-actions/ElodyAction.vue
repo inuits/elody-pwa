@@ -109,7 +109,7 @@ const resolvedRelationType = computed<string | undefined>(() => {
 });
 
 const entityTypeLabel = computed(() =>
-  t(`entity-translations.singular.${props.entityType}`),
+  t(`entity-translations.${props.entityType?.toLowerCase()}`),
 );
 const isDisabled = computed(() => {
   return (

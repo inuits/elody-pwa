@@ -215,12 +215,12 @@ describe("toRepetitiveFormConfig", () => {
           createForm: "GetWorkForm",
           creatableTypes: [
             {
-              label: "entity-translations.singular.work_word",
+              label: "entity-translations.work_word",
               entityType: "work_word",
               createForm: "GetFullWorkWordCreateForm",
             },
             {
-              label: "entity-translations.singular.work_serial",
+              label: "entity-translations.work_serial",
               entityType: "work_serial",
               createForm: "GetFullWorkSerialCreateForm",
             },
@@ -241,7 +241,7 @@ describe("toRepetitiveFormConfig", () => {
         relations: [],
         creatableTypes: [
           {
-            label: "entity-translations.singular.manifestation_word",
+            label: "entity-translations.manifestation_word",
             entityType: "manifestation_word",
             createForm: "GetBasicManifestationWordCreateForm",
           },
@@ -250,12 +250,12 @@ describe("toRepetitiveFormConfig", () => {
     });
     expect(result.steps[0].creatableTypes).toEqual([
       {
-        label: "entity-translations.singular.work_word",
+        label: "entity-translations.work_word",
         entityType: "work_word",
         createForm: "GetFullWorkWordCreateForm",
       },
       {
-        label: "entity-translations.singular.work_serial",
+        label: "entity-translations.work_serial",
         entityType: "work_serial",
         createForm: "GetFullWorkSerialCreateForm",
       },
@@ -263,7 +263,7 @@ describe("toRepetitiveFormConfig", () => {
     expect(result.steps[1].creatableTypes).toBeUndefined();
     expect(result.finalize?.creatableTypes).toEqual([
       {
-        label: "entity-translations.singular.manifestation_word",
+        label: "entity-translations.manifestation_word",
         entityType: "manifestation_word",
         createForm: "GetBasicManifestationWordCreateForm",
       },

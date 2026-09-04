@@ -30,7 +30,7 @@ const props = defineProps<{
 }>();
 
 const entityTypeLabel = computed(() =>
-  t(`entity-translations.singular.${props.entityType}`),
+  t(`entity-translations.${props.entityType?.toLowerCase()}`),
 );
 const urlType = computed(
   () => typeUrlMapping?.mapping?.[props.entityType] || props.entityType,

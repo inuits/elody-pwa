@@ -132,7 +132,7 @@ const pillLabel = computed<string | undefined>(() => {
   return undefined;
 });
 const columnLabel = computed<string>(() =>
-  t(`entity-translations.singular.${props.entity.type}`),
+  t(`entity-translations.${props.entity.type?.toLowerCase()}`),
 );
 const entityPageRoute = computed(() =>
   getEntityPageRoute(props.entity, "SingleEntity"),

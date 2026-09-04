@@ -167,7 +167,7 @@ describe("MultiEntityColumn", () => {
     // enter edit mode
     await wrapper.find("button").trigger("click");
     expect(wrapper.findComponent(RouterLinkStub).exists()).toBe(false);
-    expect(wrapper.text()).toContain("entity-translations.singular.work_word");
+    expect(wrapper.text()).toContain("entity-translations.work_word");
   });
 
   it("saves through its own edit state", async () => {

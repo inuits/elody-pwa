@@ -9,12 +9,12 @@ vi.mock("vue-i18n", () => ({
 
 const types = [
   {
-    label: "entity-translations.singular.work_word",
+    label: "entity-translations.work_word",
     entityType: "work_word",
     createForm: "GetFullWorkWordCreateForm",
   },
   {
-    label: "entity-translations.singular.work_serial",
+    label: "entity-translations.work_serial",
     entityType: "work_serial",
     createForm: "GetFullWorkSerialCreateForm",
   },

@@ -10,9 +10,7 @@ describe("useInputValidation", () => {
   const mockTranslations = {
     nl: {
       "entity-translations": {
-        singular: {
-          BaseEntity: "basis entiteit",
-        },
+        baseentity: "basis entiteit | basis entiteiten",
       },
       audio: {
         "no-support": "Uw browser ondersteund het audio element niet",
@@ -27,9 +25,7 @@ describe("useInputValidation", () => {
     },
     en: {
       "entity-translations": {
-        singular: {
-          BaseEntity: "base entity",
-        },
+        baseentity: "base entity | base entities",
       },
       audio: {
         "no-support": "Your browser does not support the audio element",
@@ -44,9 +40,7 @@ describe("useInputValidation", () => {
     },
     ar: {
       "entity-translations": {
-        singular: {
-          BaseEntity: "base entity",
-        },
+        baseentity: "base entity | base entities",
       },
     },
   };
