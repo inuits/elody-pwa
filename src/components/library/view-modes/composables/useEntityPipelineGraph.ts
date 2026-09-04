@@ -1,35 +1,28 @@
 // The ONLY place that knows how pipeline entities encode their wiring.
 //
-// The pipeline view mode reads metadata the entities already carry; nothing
-// is persisted for it. Every source of truth below is optional and a missing
-// piece degrades gracefully — an unmatched producer reference simply yields
-// no edge, never an error.
+// The pipeline view mode reads data the entities already carry; nothing is
+// persisted for it. Every source below is optional and a missing piece
+// degrades gracefully — an unmatched producer reference simply yields no
+// edge, never an error.
 //
-// Recognised inputs, in order of preference per entity:
-// 1. `entity.connections` — `{ [portId]: { from, port?, status?, label? } }`
-// 2. the entity's relation metadata — `connections.<port>.from` (raw
-//    value, e.g. "local--alert-monitor-cm|out"), with optional
-//    `connections.<port>.status` / `.state` and `.label` / `.badge`.
-//    The status is the validation verdict already computed elsewhere; this
-//    module never validates shapes itself.
-// 3. declared edge relations — the view config names relation types
+// Recognised sources, all typed shapes (never string-key parsing):
+// 1. declared edge relations — the view config names relation types
 //    (`edgeRelations`) whose related entity is the producer feeding this
 //    one; edges come straight from `entity.relationValues`, so a plain
 //    hierarchy needs no wiring data at all.
-// Contract labels surface as the consumes/produces metadata values
-// (SHACL/DCAT catalog facts) and drive the implicit single input / output
-// port when no explicit `entity.ports` is present.
-//
-// The connections/contracts names are fixed platform conventions (clients
-// project their data into them); only edgeRelations comes from the
-// declared PipelineViewConfig.
+// 2. a `connections` object — `{ [portId]: { from, port?, status?, label? } }`
+//    — either directly on the entity, or as the value of a single relation
+//    metadata entry keyed "connections" (per-use wiring: the same entity may
+//    appear twice in one flow, so the wiring belongs to the relation). The
+//    status is a validation verdict computed elsewhere; this module never
+//    validates anything itself.
+// 3. a `ports` list on the entity — `[{ id|name, direction: "in"|"out",
+//    label?, required?, shapeIri?|shapeIris? }]` — naming the ports and, for
+//    outputs, the shape IRIs that power the port-scoped "add a consumer"
+//    picker.
 
 import {
   DEFAULT_PIPELINE_VIEW_CONFIG,
-  PIPELINE_CONNECTIONS_KEY,
-  PIPELINE_CONSUMES_KEY,
-  PIPELINE_PRODUCES_IRIS_KEY,
-  PIPELINE_PRODUCES_KEY,
   type PipelineViewConfig,
 } from "./usePipelineViewConfig";
 
@@ -38,7 +31,7 @@ export type PipelinePort = {
   label?: string;
   required?: boolean;
   connected: boolean;
-  // output ports: the contract's shape IRI(s), for the port-scoped
+  // output ports: the port's shape IRI(s), for the port-scoped
   // "add a consumer" picker
   shapeIris?: string[];
 };
@@ -119,47 +112,37 @@ const readStatus = (raw: unknown): "valid" | "mismatch" | "unknown" => {
   return "unknown";
 };
 
-const connectionsOf = (input: PipelineGraphInput): RawConnection[] => {
-  // 1. the spec shape, straight on the entity
-  const direct = input.entity?.connections;
-  if (direct && typeof direct === "object" && !Array.isArray(direct)) {
-    return Object.entries<any>(direct)
-      .filter(([, value]) => value?.from)
-      .map(([port, value]) => ({
-        port,
-        from: String(value.from),
-        fromPort: value.port ? String(value.port) : undefined,
-        status: value.status,
-        label: value.label,
-      }));
+const objectToConnections = (raw: unknown): RawConnection[] => {
+  let value: any = raw;
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      return [];
+    }
   }
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  return Object.entries<any>(value)
+    .filter(([, entry]) => entry?.from)
+    .map(([port, entry]) => ({
+      port,
+      from: String(entry.from),
+      fromPort: entry.port ? String(entry.port) : undefined,
+      status: entry.status,
+      label: entry.label,
+    }));
+};
 
-  // 2. relation metadata written by the connect modal
+const connectionsOf = (input: PipelineGraphInput): RawConnection[] => {
+  // directly on the entity (client-computed, entity-level wiring)
+  const direct = objectToConnections(input.entity?.connections);
+  if (direct.length > 0) return direct;
+
+  // as a single relation metadata entry (per-use wiring)
   const metadata = input.relation?.relation?.metadata;
   if (!Array.isArray(metadata)) return [];
-  const byKey = new Map(metadata.map((entry) => [entry.key, entry.value]));
-  const connections: RawConnection[] = [];
-  const wiring = PIPELINE_CONNECTIONS_KEY;
-  const fromPattern = new RegExp(`^${wiring}\\.(.+)\\.from$`);
-  for (const entry of metadata) {
-    const match = fromPattern.exec(entry.key ?? "");
-    if (!match || !entry.value) continue;
-    const port = match[1];
-    const rawValue = String(entry.value);
-    const [from, fromPort] = rawValue.split("|");
-    connections.push({
-      port,
-      from,
-      fromPort: fromPort || undefined,
-      status:
-        byKey.get(`${wiring}.${port}.status`) ??
-        byKey.get(`${wiring}.${port}.state`),
-      label:
-        byKey.get(`${wiring}.${port}.label`) ??
-        byKey.get(`${wiring}.${port}.badge`),
-    });
-  }
-  return connections;
+  const entry = metadata.find((item) => item?.key === "connections");
+  return entry ? objectToConnections(entry.value) : [];
 };
 
 // Edges declared as relations: for every relation of a configured type on
@@ -185,13 +168,6 @@ const relationEdgesOf = (
     }
   }
   return connections;
-};
-
-const contractValue = (input: PipelineGraphInput, key: string): string => {
-  const fromValues = input.values?.[key];
-  if (fromValues) return String(fromValues);
-  const fromInitial = input.entity?.intialValues?.[key];
-  return fromInitial ? String(fromInitial) : "";
 };
 
 export const buildPipelineGraph = (
@@ -226,54 +202,54 @@ export const buildPipelineGraph = (
 
   const nodes: PipelineGraphNode[] = inputs.map((input) => {
     const connections = connectionsPerNode.get(input.id) ?? [];
-    const consumes = contractValue(input, PIPELINE_CONSUMES_KEY);
-    const produces = contractValue(input, PIPELINE_PRODUCES_KEY);
-    const producesIris = contractValue(input, PIPELINE_PRODUCES_IRIS_KEY)
-      .split(/\s+/)
-      .filter(Boolean);
+    const feedsSomeone = referencedProducers.has(input.id);
 
-    const explicitPorts = input.entity?.ports;
-    let inputs_: PipelinePort[];
-    let outputs: PipelinePort[];
     const isConnectedInput = (portId: string) =>
       connections.some((c) => c.port === portId && c.from);
 
-    if (explicitPorts?.in || explicitPorts?.out) {
-      inputs_ = (explicitPorts.in ?? []).map((port: any) => ({
-        id: String(port.id),
-        label: port.label,
-        required: Boolean(port.required),
-        connected: isConnectedInput(String(port.id)),
-      }));
-      outputs = (explicitPorts.out ?? []).map((port: any) => ({
-        id: String(port.id),
-        label: port.label,
-        connected: edges.some(
-          (e) => e.from === input.id && e.fromPort === String(port.id),
-        ),
-        shapeIris: port.shapeIri ? [String(port.shapeIri)] : producesIris,
-      }));
+    const portList: any[] = Array.isArray(input.entity?.ports)
+      ? input.entity.ports
+      : [];
+    let inputs_: PipelinePort[];
+    let outputs: PipelinePort[];
+
+    if (portList.length > 0) {
+      const portId = (port: any) => String(port.id ?? port.name ?? "");
+      const portShapeIris = (port: any): string[] | undefined => {
+        if (Array.isArray(port.shapeIris) && port.shapeIris.length > 0)
+          return port.shapeIris.map(String);
+        return port.shapeIri ? [String(port.shapeIri)] : undefined;
+      };
+      inputs_ = portList
+        .filter((port) => port?.direction === "in")
+        .map((port) => ({
+          id: portId(port),
+          label: port.label ?? port.shapeLabel ?? undefined,
+          required: Boolean(port.required),
+          connected: isConnectedInput(portId(port)),
+        }));
+      outputs = portList
+        .filter((port) => port?.direction === "out")
+        .map((port) => ({
+          id: portId(port),
+          label: port.label ?? port.shapeLabel ?? undefined,
+          connected:
+            feedsSomeone ||
+            edges.some(
+              (e) => e.from === input.id && e.fromPort === portId(port),
+            ),
+          shapeIris: portShapeIris(port),
+        }));
     } else {
-      // implicit ports: one per named connection, or a single one derived
-      // from the presence of a Consumes / Produces contract
+      // implicit ports: one input per named connection, one output when
+      // something downstream is fed by this node
       inputs_ = connections.map((connection) => ({
         id: connection.port,
         connected: Boolean(connection.from),
       }));
-      if (inputs_.length === 0 && consumes)
-        inputs_ = [{ id: "in", label: consumes, required: true, connected: false }];
-      const feedsSomeone = referencedProducers.has(input.id);
-      outputs =
-        produces || feedsSomeone
-          ? [
-              {
-                id: "out",
-                label: produces || undefined,
-                connected: feedsSomeone,
-                shapeIris: producesIris,
-              },
-            ]
-          : [];
+      outputs = feedsSomeone
+        ? [{ id: "out", connected: true }]
+        : [];
     }
 
     return {

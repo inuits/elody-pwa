@@ -1,9 +1,9 @@
 import type { ConfigItem } from "@/generated-types/queries";
 
 // The pipeline view mode's declared configuration. Deliberately small:
-// wiring is either declared relations (edgeRelations) or the fixed platform
-// conventions below — platform vocabulary like `teaserMetadata`, not
-// client vocabulary, so it is not renameable.
+// wiring is declared relations (edgeRelations) or the typed shapes the
+// graph adapter reads (a `connections` object, a `ports` list) — never
+// string-key naming conventions.
 export type PipelineViewConfig = {
   // relation types that ARE the wiring: for every relation of these types
   // on an entity, an edge is drawn from the related entity (the producer)
@@ -18,16 +18,6 @@ export const DEFAULT_PIPELINE_VIEW_CONFIG: PipelineViewConfig = {
   edgeRelations: [],
   paginationLimit: 1000,
 };
-
-// Fixed platform conventions for the richer wiring channel: relation
-// metadata `connections.<port>.from` (with optional status/label) and the
-// contract facts shown as chips / carrying the port shape IRIs. Clients
-// project their data INTO these names, the way metadata projects into
-// teaserMetadata.
-export const PIPELINE_CONNECTIONS_KEY = "connections";
-export const PIPELINE_CONSUMES_KEY = "contracts.consumes";
-export const PIPELINE_PRODUCES_KEY = "contracts.produces";
-export const PIPELINE_PRODUCES_IRIS_KEY = "contracts.produces.iri";
 
 export const pipelineViewConfigFrom = (
   config?: ConfigItem[] | null,

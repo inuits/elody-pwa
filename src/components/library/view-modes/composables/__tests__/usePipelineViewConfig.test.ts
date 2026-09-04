@@ -1,10 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   DEFAULT_PIPELINE_VIEW_CONFIG,
-  PIPELINE_CONNECTIONS_KEY,
-  PIPELINE_CONSUMES_KEY,
-  PIPELINE_PRODUCES_IRIS_KEY,
-  PIPELINE_PRODUCES_KEY,
   pipelineViewConfigFrom,
 } from "../usePipelineViewConfig";
 
@@ -38,10 +34,4 @@ describe("pipelineViewConfigFrom", () => {
     expect(config).not.toHaveProperty("connectionsKey");
   });
 
-  it("exposes the fixed platform conventions", () => {
-    expect(PIPELINE_CONNECTIONS_KEY).toBe("connections");
-    expect(PIPELINE_CONSUMES_KEY).toBe("contracts.consumes");
-    expect(PIPELINE_PRODUCES_KEY).toBe("contracts.produces");
-    expect(PIPELINE_PRODUCES_IRIS_KEY).toBe("contracts.produces.iri");
-  });
 });
