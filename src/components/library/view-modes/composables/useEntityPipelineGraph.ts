@@ -12,6 +12,10 @@
 //    `<connectionsKey>.<port>.status` / `.state` and `.label` / `.badge`.
 //    The status is the validation verdict already computed elsewhere; this
 //    module never validates shapes itself.
+// 3. declared edge relations — the view config names relation types
+//    (`edgeRelations`) whose related entity is the producer feeding this
+//    one; edges come straight from `entity.relationValues`, so a plain
+//    hierarchy needs no wiring data at all.
 // Contract labels surface as the consumes/produces metadata values
 // (SHACL/DCAT catalog facts) and drive the implicit single input / output
 // port when no explicit `entity.ports` is present.
@@ -162,6 +166,31 @@ const connectionsOf = (
   return connections;
 };
 
+// Edges declared as relations: for every relation of a configured type on
+// this entity, the related entity feeds it. The port id combines relation
+// type and producer so multiple relations of one type stay distinct.
+const relationEdgesOf = (
+  input: PipelineGraphInput,
+  config: PipelineViewConfig,
+): RawConnection[] => {
+  if (config.edgeRelations.length === 0) return [];
+  const relationValues = input.entity?.relationValues;
+  if (!relationValues || typeof relationValues !== "object") return [];
+  const connections: RawConnection[] = [];
+  for (const relationType of config.edgeRelations) {
+    const relations = relationValues[relationType];
+    if (!Array.isArray(relations)) continue;
+    for (const relation of relations) {
+      if (!relation?.key) continue;
+      connections.push({
+        port: `${relationType}:${relation.key}`,
+        from: String(relation.key),
+      });
+    }
+  }
+  return connections;
+};
+
 const contractValue = (input: PipelineGraphInput, key: string): string => {
   const fromValues = input.values?.[key];
   if (fromValues) return String(fromValues);
@@ -178,7 +207,10 @@ export const buildPipelineGraph = (
   const connectionsPerNode = new Map<string, RawConnection[]>();
 
   for (const input of inputs) {
-    const connections = connectionsOf(input, config);
+    const connections = [
+      ...connectionsOf(input, config),
+      ...relationEdgesOf(input, config),
+    ];
     connectionsPerNode.set(input.id, connections);
     for (const connection of connections) {
       const producer = matchReference(connection.from, inputs);

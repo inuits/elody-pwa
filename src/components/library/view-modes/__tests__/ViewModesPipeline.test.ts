@@ -243,6 +243,21 @@ describe("ViewModesPipeline", () => {
     expect(setPaginationLimit).toHaveBeenCalledWith(20, true);
   });
 
+  it("draws edges from declared edge relations without any wiring data", () => {
+    const producer = makeEntity("W-1");
+    const consumer = makeEntity("E-1");
+    (consumer as any).relationValues = {
+      refWork: [{ key: "W-1", type: "refWork" }],
+    };
+    const wrapper = mountPipeline([producer, consumer], {
+      config: [{ key: "edgeRelations", value: ["refWork"] }],
+    });
+
+    expect(wrapper.find('[data-cy="pipeline-edge-unknown"]').exists()).toBe(
+      true,
+    );
+  });
+
   it("follows the conventions the view-mode config declares", () => {
     const setPaginationLimit = vi.fn();
     relationByEntityId["consumer"] = {
