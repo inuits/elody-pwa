@@ -20,10 +20,13 @@ const stubs = {
 const teaserMetadata = [
   { key: "type", label: "Type", value: { formatter: "pill|auto" } },
   { key: "name", label: "Name", value: "alert-monitor" },
-  { key: "contracts.consumes", label: "Consumes", value: "Error events" },
-  { key: "contracts.produces", label: "Produces", value: "Alerts" },
-  { key: "contracts.produces.iri", label: "", value: "http://x/AlertShape" },
-  { key: "connections.in.from", label: "Connected to", value: "reader|out" },
+  { key: "consumes", label: "Consumes", value: "Error events" },
+  {
+    key: "wiring",
+    label: "Connected to",
+    value: "reader|out",
+    hideOnPipelineCard: true,
+  },
 ];
 
 const mountCard = (props: Record<string, unknown> = {}) =>
@@ -39,19 +42,12 @@ const mountCard = (props: Record<string, unknown> = {}) =>
   });
 
 describe("PipelineListItemCard", () => {
-  it("shows the contract facts as chips and keeps bookkeeping off the card", () => {
+  it("drops the type pill and structurally hidden fields, keeps the rest", () => {
     const wrapper = mountCard();
 
-    const chips = wrapper.findAll("[data-cy^='pipeline-contract-']");
-    expect(chips.map((chip) => chip.text())).toEqual([
-      "Consumes: Error events",
-      "Produces: Alerts",
-    ]);
-
     const visible = wrapper.findAll(".meta").map((node) => node.text());
-    // the type pill says nothing in a pipeline, the raw IRIs and the wiring
-    // are bookkeeping the edges already draw
-    expect(visible).toEqual(["name"]);
+    // the type pill says nothing in a flow; fields flagged
+    // hideOnPipelineCard (like wiring rows) are redundant next to the edges
+    expect(visible).toEqual(["name", "consumes"]);
   });
-
 });

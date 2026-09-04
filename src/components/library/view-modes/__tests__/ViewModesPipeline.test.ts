@@ -138,14 +138,16 @@ describe("ViewModesPipeline", () => {
       idx: 0,
       relation: {
         metadata: [
-          { key: "connections.in.from", value: "producer|out" },
-          { key: "connections.in.status", value: "valid" },
+          {
+            key: "connections",
+            value: { in: { from: "producer|out", status: "valid" } },
+          },
         ],
       },
     };
     const wrapper = mountPipeline([
-      makeEntity("producer", { "contracts.produces": "Measurements in cm" }),
-      makeEntity("consumer", { "contracts.consumes": "Measurements in cm" }),
+      makeEntity("producer"),
+      makeEntity("consumer"),
     ]);
 
     expect(wrapper.find('[data-cy="pipeline-edge-valid"]').exists()).toBe(true);
@@ -156,15 +158,18 @@ describe("ViewModesPipeline", () => {
       idx: 0,
       relation: {
         metadata: [
-          { key: "connections.in.from", value: "producer|out" },
-          { key: "connections.in.status", value: "mismatch" },
-          { key: "connections.in.badge", value: "mm ≠ cm" },
+          {
+            key: "connections",
+            value: {
+              in: { from: "producer|out", status: "mismatch", label: "mm ≠ cm" },
+            },
+          },
         ],
       },
     };
     const wrapper = mountPipeline([
-      makeEntity("producer", { "contracts.produces": "Measurements in mm" }),
-      makeEntity("consumer", { "contracts.consumes": "Measurements in cm" }),
+      makeEntity("producer"),
+      makeEntity("consumer"),
     ]);
 
     const edge = wrapper.find('[data-cy="pipeline-edge-mismatch"]');
@@ -193,12 +198,11 @@ describe("ViewModesPipeline", () => {
   });
 
   it("offers an add-consumer action on an output port that knows its shape", async () => {
-    const wrapper = mountPipeline([
-      makeEntity("producer", {
-        "contracts.produces": "Error alert",
-        "contracts.produces.iri": "http://x/shapes/ErrorShape",
-      }),
-    ]);
+    const producer = makeEntity("producer");
+    (producer as any).ports = [
+      { name: "out", direction: "out", shapeIri: "http://x/shapes/ErrorShape" },
+    ];
+    const wrapper = mountPipeline([producer]);
 
     const portButton = wrapper.find('button[data-cy="pipeline-port-out-out"]');
     expect(portButton.exists()).toBe(true);
@@ -216,7 +220,9 @@ describe("ViewModesPipeline", () => {
     relationByEntityId["consumer"] = {
       idx: 0,
       relation: {
-        metadata: [{ key: "connections.in.from", value: "producer|out" }],
+        metadata: [
+          { key: "connections", value: { in: { from: "producer|out" } } },
+        ],
       },
     };
     // the producer feeds someone, so it has an output port — but no shape IRI

@@ -1044,7 +1044,13 @@ export function enrichDynamicFormConfig(
   teaserMetadata: Record<string, any>,
   intialValues: Record<string, any>,
   dynamicFormConfig: {
-    panels: Array<{ fields: Array<any>; isEditable?: boolean }>;
+    panels: Array<{
+      fields: Array<any>;
+      isEditable?: boolean;
+      // structural flag: this panel's fields are redundant on pipeline
+      // cards (e.g. wiring rows next to the drawn edges)
+      hideOnPipelineCard?: boolean;
+    }>;
   },
   relation: any | null,
 ): { teaserMetadata: Record<string, any>; intialValues: Record<string, any> } {
@@ -1063,6 +1069,7 @@ export function enrichDynamicFormConfig(
         // panels marked non-editable stay read-only in the entity edit mode;
         // their config is edited through the Configure modal instead
         nonEditableField: panel.isEditable === false,
+        hideOnPipelineCard: panel.hideOnPipelineCard === true,
         inputField: {
           type: mappedType,
           __typename: "InputField",
@@ -1084,9 +1091,10 @@ export function enrichDynamicFormConfig(
         relation?.metadata?.find((m: any) => m.key === field.key)?.value ??
         field.value ??
         "";
-      // A connection reference reads as "step-id|port"; on a card the step's
-      // readable name is what tells the user what is wired to what.
-      if (/^connections\..+\.from$/.test(field.key) && typeof value === "string" && value) {
+      // A field flagged as a step reference carries "step-id|port"; on a
+      // card the step's readable name is what tells the user what is wired
+      // to what. The flag is structural — set by whoever built the field.
+      if (field.stepReference === true && typeof value === "string" && value) {
         const step = value.split("|")[0].replace(/^local--/, "");
         value = step.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
       }
