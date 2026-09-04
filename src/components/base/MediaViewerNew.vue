@@ -186,6 +186,7 @@ import { useMediafileCrop } from "@/composables/useMediafileCrop";
 import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
 import { useMediafileDownload } from "@/composables/useMediafileDownload";
 import { getEmbeddableUrl, getExternalHttpUrl } from "@/utils/embeddableUrl";
+import { getViewerForMimetype } from "@/utils/mimetype";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
@@ -278,14 +279,6 @@ const getMediaDimensions = ():
   return undefined;
 };
 
-const viewerMap: Record<string, ElodyViewers> = {
-  pdf: ElodyViewers.Pdf,
-  image: ElodyViewers.Iiif,
-  audio: ElodyViewers.Audio,
-  video: ElodyViewers.Video,
-  text: ElodyViewers.Text,
-};
-
 const displayProcessingImage = computed<boolean>(() => {
   if (viewerType.value !== ElodyViewers.Iiif) return false;
   const hasTranscodeFilename = !!getValueOfMediafile(
@@ -296,19 +289,9 @@ const displayProcessingImage = computed<boolean>(() => {
   return hasTranscodeFilename ? false : true;
 });
 
-const viewerType = computed<ElodyViewers | undefined>(() => {
-  try {
-    for (const type in viewerMap) {
-      if (mimetype.value.includes(type)) {
-        return viewerMap[type];
-      }
-    }
-  } catch {
-    return undefined;
-  }
-
-  return undefined;
-});
+const viewerType = computed<ElodyViewers | undefined>(() =>
+  getViewerForMimetype(mimetype.value),
+);
 
 const togglePreviewComponent = (id: string): void => {
   emit("togglePreviewComponent", id);

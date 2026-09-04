@@ -78,6 +78,7 @@ import TextViewer from "@/components/base/TextViewer.vue";
 import { computed, toRefs, watch, inject, defineAsyncComponent } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
+import { getViewerForMimetype } from "@/utils/mimetype";
 
 const PDFViewer = defineAsyncComponent(
   () => import("@/components/base/PDFViewer.vue"),
@@ -93,32 +94,16 @@ const { mediafiles } = toRefs(props);
 const { mediafileSelectionState, getValueOfMediafile } =
   useEntityMediafileSelector();
 
-const viewerMap: Record<string, ElodyViewers> = {
-  pdf: ElodyViewers.Pdf,
-  image: ElodyViewers.Iiif,
-  audio: ElodyViewers.Audio,
-  video: ElodyViewers.Video,
-  text: ElodyViewers.Text,
-};
-
-const viewerType = computed<ElodyViewers | undefined>(() => {
-  try {
-    const mimetype: string = getValueOfMediafile(
+const viewerType = computed<ElodyViewers | undefined>(() =>
+  getViewerForMimetype(
+    getValueOfMediafile(
       mediafileViewerContext,
       "mimetype",
-      mediafileSelectionState.value[mediafileViewerContext].selectedMediafile,
-    );
-    for (const type in viewerMap) {
-      if (mimetype.includes(type)) {
-        return viewerMap[type];
-      }
-    }
-  } catch {
-    return undefined;
-  }
-
-  return undefined;
-});
+      mediafileSelectionState.value?.[mediafileViewerContext]
+        ?.selectedMediafile,
+    ),
+  ),
+);
 
 watch(
   [() => props.loading, mediafiles],
