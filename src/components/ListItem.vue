@@ -13,7 +13,6 @@
     :relation="relation"
     :is-disabled="isDisabled"
     :refetch-entities="refetchEntities"
-    :view-config="pipelineViewConfig"
   />
   <li v-else data-cy="list-item" :class="wrapperClasses">
     <div
@@ -330,7 +329,6 @@ import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
 import PipelineListItemCard from "@/components/library/view-modes/pipeline/PipelineListItemCard.vue";
-import type { PipelineViewConfig } from "@/components/library/view-modes/composables/usePipelineViewConfig";
 
 const props = withDefaults(
   defineProps<{
@@ -360,7 +358,6 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid" | "pipeline";
-    pipelineViewConfig?: PipelineViewConfig;
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
     previewComponentCurrentActive: boolean;
@@ -393,7 +390,6 @@ const props = withDefaults(
     isEnableNavigation: false,
     entityListElements: undefined,
     viewMode: "list",
-    pipelineViewConfig: undefined,
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
     isPrimaryMediafile: false,

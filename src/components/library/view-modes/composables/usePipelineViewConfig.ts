@@ -1,25 +1,10 @@
 import type { ConfigItem } from "@/generated-types/queries";
 
-// The metadata conventions that wire pipeline cards together. Nothing here is
-// hardcoded knowledge of a particular client: these are DEFAULTS, and a query
-// declares different ones through the pipeline view mode's generic config
-// channel (`viewModes(input: [{ viewMode: ViewModesPipeline, config: [...] }])`)
-// — e.g. `{ key: "connectionsKey", value: "wiring" }`.
+// The pipeline view mode's declared configuration. Deliberately small:
+// wiring is either declared relations (edgeRelations) or the fixed platform
+// conventions below — platform vocabulary like `teaserMetadata`, not
+// client vocabulary, so it is not renameable.
 export type PipelineViewConfig = {
-  // metadata prefix whose `<prefix>.<port>.from` entries draw the edges
-  connectionsKey: string;
-  // metadata prefix carrying the contract facts shown as chips
-  contractsKey: string;
-  // sub-field names under the contracts prefix
-  consumesField: string;
-  producesField: string;
-  // sub-field of produces carrying the raw shape IRIs for the port picker
-  shapeIriField: string;
-  // the declared bulk operation an output port's "+" triggers — the port
-  // picker IS that operation's ordinary picker, only scoped. The scoping
-  // filter itself is declared in that picker's query (a hidden filter
-  // referencing the $portShapeIris variable), not here.
-  addConsumerBulkOperation: string;
   // relation types that ARE the wiring: for every relation of these types
   // on an entity, an edge is drawn from the related entity (the producer)
   // to this one. Lets a plain hierarchy declare its edges without any
@@ -30,24 +15,26 @@ export type PipelineViewConfig = {
 };
 
 export const DEFAULT_PIPELINE_VIEW_CONFIG: PipelineViewConfig = {
-  connectionsKey: "connections",
-  contractsKey: "contracts",
-  consumesField: "consumes",
-  producesField: "produces",
-  shapeIriField: "iri",
-  addConsumerBulkOperation: "addRelation",
   edgeRelations: [],
   paginationLimit: 1000,
 };
+
+// Fixed platform conventions for the richer wiring channel: relation
+// metadata `connections.<port>.from` (with optional status/label) and the
+// contract facts shown as chips / carrying the port shape IRIs. Clients
+// project their data INTO these names, the way metadata projects into
+// teaserMetadata.
+export const PIPELINE_CONNECTIONS_KEY = "connections";
+export const PIPELINE_CONSUMES_KEY = "contracts.consumes";
+export const PIPELINE_PRODUCES_KEY = "contracts.produces";
+export const PIPELINE_PRODUCES_IRIS_KEY = "contracts.produces.iri";
 
 export const pipelineViewConfigFrom = (
   config?: ConfigItem[] | null,
 ): PipelineViewConfig => {
   const merged = { ...DEFAULT_PIPELINE_VIEW_CONFIG };
   for (const entry of config ?? []) {
-    const key = entry?.key as keyof PipelineViewConfig | undefined;
-    if (!key || !(key in merged)) continue;
-    if (key === "edgeRelations") {
+    if (entry?.key === "edgeRelations") {
       const raw = entry.value;
       const list = Array.isArray(raw)
         ? raw
@@ -57,19 +44,9 @@ export const pipelineViewConfigFrom = (
       merged.edgeRelations = list
         .map((value) => String(value).trim())
         .filter(Boolean);
-      continue;
     }
-    const current = merged[key];
-    if (typeof entry.value === typeof current)
-      (merged as Record<string, unknown>)[key] = entry.value;
+    if (entry?.key === "paginationLimit" && typeof entry.value === "number")
+      merged.paginationLimit = entry.value;
   }
   return merged;
 };
-
-// the composed metadata keys the convention produces
-export const consumesKey = (config: PipelineViewConfig): string =>
-  `${config.contractsKey}.${config.consumesField}`;
-export const producesKey = (config: PipelineViewConfig): string =>
-  `${config.contractsKey}.${config.producesField}`;
-export const producesIrisKey = (config: PipelineViewConfig): string =>
-  `${producesKey(config)}.${config.shapeIriField}`;

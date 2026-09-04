@@ -7,9 +7,9 @@
 //
 // Recognised inputs, in order of preference per entity:
 // 1. `entity.connections` — `{ [portId]: { from, port?, status?, label? } }`
-// 2. the entity's relation metadata — `<connectionsKey>.<port>.from` (raw
+// 2. the entity's relation metadata — `connections.<port>.from` (raw
 //    value, e.g. "local--alert-monitor-cm|out"), with optional
-//    `<connectionsKey>.<port>.status` / `.state` and `.label` / `.badge`.
+//    `connections.<port>.status` / `.state` and `.label` / `.badge`.
 //    The status is the validation verdict already computed elsewhere; this
 //    module never validates shapes itself.
 // 3. declared edge relations — the view config names relation types
@@ -20,14 +20,16 @@
 // (SHACL/DCAT catalog facts) and drive the implicit single input / output
 // port when no explicit `entity.ports` is present.
 //
-// The metadata key names themselves are not fixed here: they come from the
-// PipelineViewConfig the query declares (with sensible defaults).
+// The connections/contracts names are fixed platform conventions (clients
+// project their data into them); only edgeRelations comes from the
+// declared PipelineViewConfig.
 
 import {
   DEFAULT_PIPELINE_VIEW_CONFIG,
-  consumesKey,
-  producesIrisKey,
-  producesKey,
+  PIPELINE_CONNECTIONS_KEY,
+  PIPELINE_CONSUMES_KEY,
+  PIPELINE_PRODUCES_IRIS_KEY,
+  PIPELINE_PRODUCES_KEY,
   type PipelineViewConfig,
 } from "./usePipelineViewConfig";
 
@@ -117,13 +119,7 @@ const readStatus = (raw: unknown): "valid" | "mismatch" | "unknown" => {
   return "unknown";
 };
 
-const escapeForRegex = (value: string): string =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const connectionsOf = (
-  input: PipelineGraphInput,
-  config: PipelineViewConfig,
-): RawConnection[] => {
+const connectionsOf = (input: PipelineGraphInput): RawConnection[] => {
   // 1. the spec shape, straight on the entity
   const direct = input.entity?.connections;
   if (direct && typeof direct === "object" && !Array.isArray(direct)) {
@@ -143,8 +139,8 @@ const connectionsOf = (
   if (!Array.isArray(metadata)) return [];
   const byKey = new Map(metadata.map((entry) => [entry.key, entry.value]));
   const connections: RawConnection[] = [];
-  const wiring = config.connectionsKey;
-  const fromPattern = new RegExp(`^${escapeForRegex(wiring)}\\.(.+)\\.from$`);
+  const wiring = PIPELINE_CONNECTIONS_KEY;
+  const fromPattern = new RegExp(`^${wiring}\\.(.+)\\.from$`);
   for (const entry of metadata) {
     const match = fromPattern.exec(entry.key ?? "");
     if (!match || !entry.value) continue;
@@ -208,7 +204,7 @@ export const buildPipelineGraph = (
 
   for (const input of inputs) {
     const connections = [
-      ...connectionsOf(input, config),
+      ...connectionsOf(input),
       ...relationEdgesOf(input, config),
     ];
     connectionsPerNode.set(input.id, connections);
@@ -230,9 +226,9 @@ export const buildPipelineGraph = (
 
   const nodes: PipelineGraphNode[] = inputs.map((input) => {
     const connections = connectionsPerNode.get(input.id) ?? [];
-    const consumes = contractValue(input, consumesKey(config));
-    const produces = contractValue(input, producesKey(config));
-    const producesIris = contractValue(input, producesIrisKey(config))
+    const consumes = contractValue(input, PIPELINE_CONSUMES_KEY);
+    const produces = contractValue(input, PIPELINE_PRODUCES_KEY);
+    const producesIris = contractValue(input, PIPELINE_PRODUCES_IRIS_KEY)
       .split(/\s+/)
       .filter(Boolean);
 

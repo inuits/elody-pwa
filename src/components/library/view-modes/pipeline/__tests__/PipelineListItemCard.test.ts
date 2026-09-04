@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import PipelineListItemCard from "../PipelineListItemCard.vue";
-import { pipelineViewConfigFrom } from "../../composables/usePipelineViewConfig";
 
 vi.mock("@/composables/useEntitySingle", () => ({
   default: () => ({ getEntityUuid: () => "parent-1" }),
@@ -55,28 +54,4 @@ describe("PipelineListItemCard", () => {
     expect(visible).toEqual(["name"]);
   });
 
-  it("follows the declared convention keys instead of hardcoded ones", () => {
-    const wrapper = mountCard({
-      teaserMetadata: [
-        { key: "name", label: "Name", value: "alert-monitor" },
-        { key: "io.consumes", label: "Consumes", value: "Error events" },
-        { key: "wiring.in.from", label: "Connected to", value: "reader|out" },
-        { key: "contracts.consumes", label: "Old", value: "not a contract here" },
-      ],
-      viewConfig: pipelineViewConfigFrom([
-        { key: "contractsKey", value: "io" },
-        { key: "connectionsKey", value: "wiring" },
-      ] as any),
-    });
-
-    const chips = wrapper.findAll("[data-cy^='pipeline-contract-']");
-    expect(chips.map((chip) => chip.text())).toEqual([
-      "Consumes: Error events",
-    ]);
-
-    const visible = wrapper.findAll(".meta").map((node) => node.text());
-    expect(visible).toContain("name");
-    expect(visible).toContain("contracts.consumes");
-    expect(visible).not.toContain("wiring.in.from");
-  });
 });

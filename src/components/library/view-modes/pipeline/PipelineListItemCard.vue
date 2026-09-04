@@ -71,10 +71,9 @@ import ReadOnlyMetadataWrapper from "@/components/metadata/ReadOnlyMetadataWrapp
 import useEntitySingle from "@/composables/useEntitySingle";
 import { computed, inject, ref } from "vue";
 import {
-  DEFAULT_PIPELINE_VIEW_CONFIG,
-  consumesKey,
-  producesKey,
-  type PipelineViewConfig,
+  PIPELINE_CONNECTIONS_KEY,
+  PIPELINE_CONSUMES_KEY,
+  PIPELINE_PRODUCES_KEY,
 } from "../composables/usePipelineViewConfig";
 
 const props = withDefaults(
@@ -91,7 +90,6 @@ const props = withDefaults(
       | "no-relation-found";
     isDisabled?: boolean;
     refetchEntities?: () => Promise<void>;
-    viewConfig?: PipelineViewConfig;
   }>(),
   {
     contextMenuActions: undefined,
@@ -103,7 +101,6 @@ const props = withDefaults(
     isDisabled: false,
     relation: "no-relation-found",
     refetchEntities: undefined,
-    viewConfig: () => DEFAULT_PIPELINE_VIEW_CONFIG,
   },
 );
 
@@ -123,12 +120,9 @@ const readModeTeaserMetadata = computed(() =>
 // Pipeline cards rearrange the teaser metadata: the entity-type pill is
 // dropped (in a pipeline everything is a component, so it says nothing) and
 // the contract facts (Consumes / Produces) become the primary chip row —
-// matching contracts is what makes two cards connectable. Which metadata
-// keys carry those facts comes from the declared PipelineViewConfig.
-const contractKeys = computed(() => [
-  consumesKey(props.viewConfig),
-  producesKey(props.viewConfig),
-]);
+// matching contracts is what makes two cards connectable. The facts live
+// under the fixed platform conventions.
+const contractKeys = [PIPELINE_CONSUMES_KEY, PIPELINE_PRODUCES_KEY];
 const pillTeaserMetadata = computed(() =>
   readModeTeaserMetadata.value.find(
     (metadata: any) => metadata?.value?.formatter,
@@ -137,7 +131,7 @@ const pillTeaserMetadata = computed(() =>
 const contractTeaserMetadata = computed(() =>
   readModeTeaserMetadata.value.filter(
     (metadata: any) =>
-      contractKeys.value.includes(metadata?.key) && metadata?.value,
+      contractKeys.includes(metadata?.key) && metadata?.value,
   ),
 );
 const visibleTeaserMetadata = computed(() =>
@@ -148,12 +142,8 @@ const visibleTeaserMetadata = computed(() =>
       // contracts prefix (like the raw shape IRIs) is bookkeeping, and the
       // edges already draw what feeds what, so the wiring prefix stays off
       // the card too
-      !String(metadata?.key ?? "").startsWith(
-        `${props.viewConfig.contractsKey}.`,
-      ) &&
-      !String(metadata?.key ?? "").startsWith(
-        `${props.viewConfig.connectionsKey}.`,
-      ),
+      !String(metadata?.key ?? "").startsWith("contracts.") &&
+      !String(metadata?.key ?? "").startsWith(`${PIPELINE_CONNECTIONS_KEY}.`),
   ),
 );
 
