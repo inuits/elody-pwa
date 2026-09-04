@@ -110,7 +110,10 @@ const checkTenantParameter = async (
   return null;
 };
 
-const handleRequiredAuthentication = (router: Router) => {
+const handleRequiredAuthentication = (router: Router, config: any) => {
+  // anonymous mode exists to browse without a login, so requiresAuth
+  // routes only force the login redirect when it is off
+  if (config?.allowAnonymousUsers) return;
   const authManager = auth as unknown as OpenIdConnectClient;
   if (
     router.currentRoute.value.meta.requiresAuth &&
@@ -141,7 +144,7 @@ const checkForNewVersion = async (): Promise<void> => {
 
 export const addRouterNavigationGuards = (router: Router, config: any) => {
   router.afterEach(() => {
-    handleRequiredAuthentication(router);
+    handleRequiredAuthentication(router, config);
     const authManager = auth as unknown as OpenIdConnectClient;
 
     const authRedirectUrl = getRedirectUrl(router.currentRoute.value);
