@@ -39,6 +39,20 @@ describe("pipelineViewConfigFrom", () => {
     expect(config).toEqual(DEFAULT_PIPELINE_VIEW_CONFIG);
   });
 
+  it("parses edgeRelations from a list or a comma-separated string", () => {
+    expect(
+      pipelineViewConfigFrom([
+        { key: "edgeRelations", value: ["refWork", "refExpressions"] },
+      ] as any).edgeRelations,
+    ).toEqual(["refWork", "refExpressions"]);
+    expect(
+      pipelineViewConfigFrom([
+        { key: "edgeRelations", value: "refWork, refExpressions" },
+      ] as any).edgeRelations,
+    ).toEqual(["refWork", "refExpressions"]);
+    expect(pipelineViewConfigFrom([]).edgeRelations).toEqual([]);
+  });
+
   it("composes the contract metadata keys from the declared parts", () => {
     const config = pipelineViewConfigFrom([
       { key: "contractsKey", value: "io" },

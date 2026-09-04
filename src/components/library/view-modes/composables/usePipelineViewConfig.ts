@@ -20,6 +20,11 @@ export type PipelineViewConfig = {
   // filter itself is declared in that picker's query (a hidden filter
   // referencing the $portShapeIris variable), not here.
   addConsumerBulkOperation: string;
+  // relation types that ARE the wiring: for every relation of these types
+  // on an entity, an edge is drawn from the related entity (the producer)
+  // to this one. Lets a plain hierarchy declare its edges without any
+  // client resolver deriving a connections object.
+  edgeRelations: string[];
   // an unpaged listing shows the whole chain; a config override wins
   paginationLimit: number;
 };
@@ -31,6 +36,7 @@ export const DEFAULT_PIPELINE_VIEW_CONFIG: PipelineViewConfig = {
   producesField: "produces",
   shapeIriField: "iri",
   addConsumerBulkOperation: "addRelation",
+  edgeRelations: [],
   paginationLimit: 1000,
 };
 
@@ -41,6 +47,18 @@ export const pipelineViewConfigFrom = (
   for (const entry of config ?? []) {
     const key = entry?.key as keyof PipelineViewConfig | undefined;
     if (!key || !(key in merged)) continue;
+    if (key === "edgeRelations") {
+      const raw = entry.value;
+      const list = Array.isArray(raw)
+        ? raw
+        : typeof raw === "string"
+          ? raw.split(",")
+          : [];
+      merged.edgeRelations = list
+        .map((value) => String(value).trim())
+        .filter(Boolean);
+      continue;
+    }
     const current = merged[key];
     if (typeof entry.value === typeof current)
       (merged as Record<string, unknown>)[key] = entry.value;
