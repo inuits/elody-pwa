@@ -378,7 +378,6 @@ import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
-import { pipelineViewConfigFrom } from "@/components/library/view-modes/composables/usePipelineViewConfig";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
 import { UploadStatus } from "@/composables/upload/types";
@@ -416,7 +415,6 @@ import {
   type BaseEntity,
   BaseLibraryModes,
   type BaseRelationValuesInput,
-  type ConfigItem,
   DamsIcons,
   DeepRelationsFetchStrategy,
   type DropdownOption,
@@ -1036,25 +1034,18 @@ const bulkOperationsActionsBarRef = ref<InstanceType<
   typeof BulkOperationsActionsBar
 > | null>(null);
 
-// "Add a consumer for this output": run the ordinary declared add operation
-// (which one is part of the declared pipeline view config) and hand the
-// clicked port's shape IRIs over as the $portShapeIris filter variable. The
-// scoping filter itself lives in the picker's own declared filters, exactly
-// like a "$parentIds" filter; without such a declaration the values are
-// simply never read. The trigger initializes (and clears) the picker
-// synchronously, so the variables set afterwards are what the opened picker
-// resolves.
+// "Add a consumer for this output": run the type's ordinary declared
+// addRelation operation and hand the clicked port's shape IRIs over as the
+// $portShapeIris filter variable. The scoping filter itself lives in the
+// picker's own declared filters, exactly like a "$parentIds" filter;
+// without such a declaration the values are simply never read. The trigger
+// initializes (and clears) the picker synchronously, so the variables set
+// afterwards are what the opened picker resolves.
 const openConsumerPickerForPort = (port: { shapeIris?: string[] }) => {
   const shapeIris = port.shapeIris ?? [];
   if (shapeIris.length === 0) return;
-  const pipelineConfig = pipelineViewConfigFrom(
-    configPerViewMode.value?.[ViewModes.ViewModesPipeline] as
-      | ConfigItem[]
-      | undefined,
-  );
-  const triggered = bulkOperationsActionsBarRef.value?.triggerBulkOperation(
-    pipelineConfig.addConsumerBulkOperation,
-  );
+  const triggered =
+    bulkOperationsActionsBarRef.value?.triggerBulkOperation("addRelation");
   if (!triggered) return;
   setAdditionalFilterVariables({ portShapeIris: shapeIris });
 };

@@ -52,7 +52,6 @@
             :base-library-mode="baseLibraryMode"
             :is-enable-navigation="enableNavigation"
             view-mode="pipeline"
-            :pipeline-view-config="viewConfig"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="false"
             :preview-component-current-active="false"
@@ -168,9 +167,9 @@ const { isEntityDisabled, getContextMenu } = useEntityListHelpers(
   () => {},
 );
 
-// Every convention this view leans on — which metadata keys wire the cards,
-// which carry the contract chips, the page size — comes from the declared
-// view-mode config, with defaults matching today's behaviour.
+// The declared view-mode config: which relations are edges, and the page
+// size. The connections/contracts metadata names are fixed platform
+// conventions, not configuration.
 const viewConfig = computed(() => pipelineViewConfigFrom(props.config));
 
 // A pipeline shows the whole chain — no pager, like the map mode. The limit

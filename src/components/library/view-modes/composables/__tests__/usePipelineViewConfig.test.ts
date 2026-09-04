@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
   DEFAULT_PIPELINE_VIEW_CONFIG,
-  consumesKey,
+  PIPELINE_CONNECTIONS_KEY,
+  PIPELINE_CONSUMES_KEY,
+  PIPELINE_PRODUCES_IRIS_KEY,
+  PIPELINE_PRODUCES_KEY,
   pipelineViewConfigFrom,
-  producesIrisKey,
-  producesKey,
 } from "../usePipelineViewConfig";
 
 describe("pipelineViewConfigFrom", () => {
@@ -13,30 +14,6 @@ describe("pipelineViewConfigFrom", () => {
       DEFAULT_PIPELINE_VIEW_CONFIG,
     );
     expect(pipelineViewConfigFrom([])).toEqual(DEFAULT_PIPELINE_VIEW_CONFIG);
-  });
-
-  it("lets the declaration override any convention key", () => {
-    const config = pipelineViewConfigFrom([
-      { key: "connectionsKey", value: "wiring" },
-      { key: "contractsKey", value: "io" },
-      { key: "paginationLimit", value: 250 },
-    ] as any);
-
-    expect(config.connectionsKey).toBe("wiring");
-    expect(config.contractsKey).toBe("io");
-    expect(config.paginationLimit).toBe(250);
-    // untouched entries keep their defaults
-    expect(config.consumesField).toBe("consumes");
-    expect(config.addConsumerBulkOperation).toBe("addRelation");
-  });
-
-  it("ignores unknown keys and wrongly typed values", () => {
-    const config = pipelineViewConfigFrom([
-      { key: "multiLine", value: true },
-      { key: "connectionsKey", value: 42 },
-    ] as any);
-
-    expect(config).toEqual(DEFAULT_PIPELINE_VIEW_CONFIG);
   });
 
   it("parses edgeRelations from a list or a comma-separated string", () => {
@@ -50,17 +27,21 @@ describe("pipelineViewConfigFrom", () => {
         { key: "edgeRelations", value: "refWork, refExpressions" },
       ] as any).edgeRelations,
     ).toEqual(["refWork", "refExpressions"]);
-    expect(pipelineViewConfigFrom([]).edgeRelations).toEqual([]);
   });
 
-  it("composes the contract metadata keys from the declared parts", () => {
+  it("takes a declared pagination limit and ignores unknown keys", () => {
     const config = pipelineViewConfigFrom([
-      { key: "contractsKey", value: "io" },
-      { key: "shapeIriField", value: "shape" },
+      { key: "paginationLimit", value: 250 },
+      { key: "connectionsKey", value: "wiring" },
     ] as any);
+    expect(config.paginationLimit).toBe(250);
+    expect(config).not.toHaveProperty("connectionsKey");
+  });
 
-    expect(consumesKey(config)).toBe("io.consumes");
-    expect(producesKey(config)).toBe("io.produces");
-    expect(producesIrisKey(config)).toBe("io.produces.shape");
+  it("exposes the fixed platform conventions", () => {
+    expect(PIPELINE_CONNECTIONS_KEY).toBe("connections");
+    expect(PIPELINE_CONSUMES_KEY).toBe("contracts.consumes");
+    expect(PIPELINE_PRODUCES_KEY).toBe("contracts.produces");
+    expect(PIPELINE_PRODUCES_IRIS_KEY).toBe("contracts.produces.iri");
   });
 });
