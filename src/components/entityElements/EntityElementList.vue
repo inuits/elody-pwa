@@ -3,7 +3,6 @@
     <metadata-title v-if="headerStyle === 'none'" :metadata="{ label }" />
     <entity-element-wrapper
       data-test="entity-element-wrapper"
-      v-if="showElementList"
       :class="[
         {
           'mb-5':
@@ -143,7 +142,6 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useQueryVariablesFactory } from "@/composables/useQueryVariablesFactory";
 import useUpload from "@/composables/upload/useUpload";
 import { UploadStatus } from "@/composables/upload/types";
-import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
 const config: any = inject("config");
@@ -157,7 +155,6 @@ const {
   setSearchInputType,
   setEntityType,
 } = useQueryVariablesFactory();
-const { fetchAdvancedPermission } = usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -185,7 +182,6 @@ const props = withDefaults(
     allowedActionsOnRelations?: RelationActions[];
     fetchDeepRelations?: FetchDeepRelations;
     entityType: Entitytyping;
-    can?: string[];
     filtersNeedContext?: EntitySubelement[];
     id: string;
     previewLabel?: string;
@@ -229,7 +225,6 @@ const libraryDataKey = computed(
 const requiresCustomQuery = computed(() => props.customQuery != undefined);
 const queryLoaded = ref<boolean>(false);
 const newQuery = ref<object>(undefined);
-const showElementList = ref<boolean>(false);
 const refetchParentEntity = inject<(() => Promise<unknown> | void) | undefined>(
   "RefetchParentEntity",
   undefined,
@@ -237,7 +232,6 @@ const refetchParentEntity = inject<(() => Promise<unknown> | void) | undefined>(
 
 onBeforeMount(async () => {
   if (requiresCustomQuery.value) await useCustomQuery();
-  await checkElementListPermission();
 });
 
 watch(
@@ -270,16 +264,6 @@ const useCustomQuery = async () => {
     filtersDocument: filtersDocument,
   };
   queryLoaded.value = true;
-};
-
-const checkElementListPermission = async () => {
-  if (!props.can) {
-    showElementList.value = true;
-    return;
-  }
-
-  const isPermitted: boolean = await fetchAdvancedPermission(props.can);
-  showElementList.value = isPermitted;
 };
 
 const predefinedEntities = computed(() => {

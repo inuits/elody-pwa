@@ -1,6 +1,5 @@
 <template>
   <entity-element-wrapper
-    v-if="showHierarchyList"
     :isCollapsed="element.isCollapsed"
     :entity-id="entityId"
     :label="element.label"
@@ -49,19 +48,17 @@ import {
   type HierarchyRelationListOutput,
 } from "@/generated-types/queries";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
-import { ref, onMounted, watch, provide } from "vue";
+import { ref, onMounted, provide } from "vue";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
 import { useFormHelper } from "@/composables/useFormHelper";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useI18n } from "vue-i18n";
-import { usePermissions } from "@/composables/usePermissions";
 
 const props = defineProps<{
   element: HierarchyListElement;
   entityId: string;
-  can?: string[];
 }>();
 
 provide("mediafileViewerContext", props.element.customQuery);
@@ -69,12 +66,10 @@ provide("mediafileViewerContext", props.element.customQuery);
 const { loadDocument } = useImport();
 const { getForm } = useFormHelper();
 const { t } = useI18n();
-const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 
 const query = ref<any>(null);
 const isLoading = ref<boolean>(true);
 const hierachyList = ref<any[]>([]);
-const showHierarchyList = ref<boolean>(false);
 
 const getQuery = async () => {
   if (query.value) return query.value;
@@ -82,8 +77,6 @@ const getQuery = async () => {
 };
 
 const fetchAllHierarchy = async () => {
-  if (!showHierarchyList.value) return;
-
   const hierarchyList = props.element
     .hierarchyRelationList as HierarchyRelationListOutput[];
 
@@ -139,32 +132,7 @@ const fetchEntity = async (id: string, type: Entitytyping) => {
     });
 };
 
-onMounted(async () => {
-  await checkHierarchyListPermission();
+onMounted(() => {
   fetchAllHierarchy();
 });
-
-const updatePermissionVariables = () => {
-  setExtraVariables({
-    parentEntityId: props.entityId,
-    childEntityId: "",
-  });
-};
-
-const checkHierarchyListPermission = async () => {
-  if (!props.can) {
-    showHierarchyList.value = true;
-    return;
-  }
-
-  showHierarchyList.value = await fetchAdvancedPermission(props.can);
-};
-
-watch(
-  () => props.entityId,
-  () => {
-    updatePermissionVariables();
-  },
-  { immediate: true },
-);
 </script>

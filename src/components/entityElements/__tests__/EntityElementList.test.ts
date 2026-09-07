@@ -35,29 +35,10 @@ vi.mock("@/composables/useEntityMediafileSelector", () => ({
   }),
 }));
 
-const mocks = vi.hoisted(() => {
-  return {
-    fetchAdvancedPermissions: vi.fn(),
-    advancedPermissions: {
-      canReadElementList: false,
-    },
-  };
-});
-
 vi.mock("@/components/library/BaseLibrary.vue", () => ({
   default: {
     template: '<div data-test="base-library-stub"></div>',
   },
-}));
-
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: vi.fn(),
-    fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
-    setExtraVariables: vi.fn(),
-  }),
-  ignorePermissions: { value: false },
-  advancedPermissions: mocks.advancedPermissions,
 }));
 
 const getBasicProps = () => ({
@@ -105,44 +86,7 @@ describe("EntityElementList", () => {
     expect(entityElementList.exists()).toBe(true);
   });
 
-  it("does not render the entity element list when the user lacks the required permissions", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(false);
-
-    const wrapper = mount(EntityElementList, {
-      props: {
-        ...getBasicProps(),
-        can: ["canReadElementList"],
-      },
-    });
-
-    await flushPromises();
-
-    const entityElementList = await wrapper.find(
-      '[data-test="entity-element-wrapper"]',
-    );
-    expect(entityElementList.exists()).toBe(false);
-  });
-
-  it("renders the entity element list when valid permissions are granted", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
-
-    const wrapper = mount(EntityElementList, {
-      props: {
-        ...getBasicProps(),
-        can: ["canReadElementList"],
-      },
-    });
-
-    await flushPromises();
-
-    const entityElementList = await wrapper.find(
-      '[data-test="entity-element-wrapper"]',
-    );
-    expect(entityElementList.exists()).toBe(true);
-  });
-
   it("refetches the parent entity when an upload finishes so $entity-based filters resolve against fresh relations", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
     const refetchParentEntity = vi.fn();
 
     mount(EntityElementList, {
@@ -170,7 +114,6 @@ describe("EntityElementList", () => {
   // selection queue: ticking a poster showed up as a selection in the
   // scene-images panel and got zipped along with it.
   it("gives each panel its own bulk selection context", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
     const contextOf = (wrapper: any) =>
       wrapper
         .find('[data-test="base-library-stub"]')
@@ -198,7 +141,6 @@ describe("EntityElementList", () => {
   });
 
   it("falls back to the element label when no custom query filters are configured", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
     const contextOf = (wrapper: any) =>
       wrapper
         .find('[data-test="base-library-stub"]')
@@ -218,7 +160,6 @@ describe("EntityElementList", () => {
   });
 
   it("does not refetch the parent entity while an upload is only in progress", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
     const refetchParentEntity = vi.fn();
 
     mount(EntityElementList, {
