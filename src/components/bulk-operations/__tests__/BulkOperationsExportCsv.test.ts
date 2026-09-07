@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import BulkOperationsExportCsv from "../BulkOperationsExportCsv.vue";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 
 const mocks = vi.hoisted(() => ({
   closeModal: vi.fn(),
@@ -234,5 +235,82 @@ describe("BulkOperationsExportCsv - exportCsv payload", () => {
     expect(body.ids).toEqual(["id-1", "id-2"]);
     expect(body.parentId).toBeUndefined();
     expect(body.relation).toBeUndefined();
+  });
+});
+
+describe("BulkOperationsExportCsv - field selection", () => {
+  const csvExportKeysResult = {
+    data: {
+      BulkOperationCsvExportKeys: {
+        options: [
+          { value: "title", label: "title", icon: null },
+          { value: "description", label: "description", icon: null },
+        ],
+      },
+    },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupUseQueryMock();
+    mockModalInfo = { open: false };
+    mockRelationType = "";
+  });
+
+  const resolveCsvExportKeys = () => {
+    const resultCallback = mocks.onResult.mock.calls[0][0];
+    resultCallback(csvExportKeysResult);
+  };
+
+  it("selects all available fields by default once the export keys load", async () => {
+    mountComponent();
+    await flushPromises();
+
+    resolveCsvExportKeys();
+    await flushPromises();
+
+    expect(mocks.enqueueItem).toHaveBeenCalledWith("BulkOperationsCsvExport", {
+      id: "title",
+    });
+    expect(mocks.enqueueItem).toHaveBeenCalledWith("BulkOperationsCsvExport", {
+      id: "description",
+    });
+  });
+
+  it("hides the select-all link once every field is already selected", async () => {
+    const wrapper = mountComponent();
+    await flushPromises();
+    resolveCsvExportKeys();
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="csv-export-select-all"]').exists()).toBe(
+      false,
+    );
+  });
+
+  it("shows the select-all link again once a field gets deselected, and re-selects all fields when clicked", async () => {
+    const wrapper = mountComponent();
+    await flushPromises();
+    resolveCsvExportKeys();
+    await flushPromises();
+
+    await wrapper.findComponent(BaseInputCheckbox).vm.$emit(
+      "update:modelValue",
+      false,
+    );
+    mocks.enqueueItem.mockClear();
+
+    expect(wrapper.find('[data-cy="csv-export-select-all"]').exists()).toBe(
+      true,
+    );
+
+    await wrapper.find('[data-cy="csv-export-select-all"]').trigger("click");
+
+    expect(mocks.enqueueItem).toHaveBeenCalledWith("BulkOperationsCsvExport", {
+      id: "title",
+    });
+    expect(mocks.enqueueItem).toHaveBeenCalledWith("BulkOperationsCsvExport", {
+      id: "description",
+    });
   });
 });

@@ -45,6 +45,7 @@ export const useBulkOperations = () => {
     context: Context,
     inBulkProcessableItem: InBulkProcessableItem,
   ) => {
+    if (!items.value[context]) items.value[context] = [];
     if (
       !isEnqueued(context, inBulkProcessableItem.id) &&
       items.value[context].length < bulkSelectAllSizeLimit
