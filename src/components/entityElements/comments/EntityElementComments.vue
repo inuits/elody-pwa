@@ -1,5 +1,5 @@
 <template>
-  <div v-if="canRead" class="mb-5">
+  <div class="mb-5">
     <entity-element-wrapper
       :label="element.label"
       :entity-id="id"
@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
@@ -72,14 +72,11 @@ import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
 import { useComments } from "@/composables/useComments";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { usePermissions } from "@/composables/usePermissions";
-import { useEditMode } from "@/composables/useEdit";
 import {
   type CommentsElement,
   DamsIcons,
   Entitytyping,
   ModalStyle,
-  Permission,
   TypeModals,
   type BaseRelationValuesInput,
 } from "@/generated-types/queries";
@@ -87,31 +84,17 @@ import {
 const props = defineProps<{
   element: CommentsElement;
   id: string;
-  entityType: Entitytyping;
 }>();
 
 const { t } = useI18n();
 const { threadsFor, isLoadingFor, load, post } = useComments();
 const { openModal } = useBaseModal();
-const { can, fetchUpdateAndDeletePermission } = usePermissions();
-const parentEditHelper = shallowRef(useEditMode(props.id));
-
-const isParentInEditMode = (): boolean =>
-  ["edit", "edit-delete"].includes(parentEditHelper.value.editMode);
-
 const isComposerOpen = ref<boolean>(false);
 const isCollapsed = ref<boolean>(false);
-const canUpdateParent = ref<boolean>(false);
 
-const canRead = computed<boolean>(() =>
-  can(Permission.Canread, Entitytyping.Comment),
-);
-
-const canPost = computed<boolean>(() => {
-  if (!can(Permission.Cancreate, Entitytyping.Comment)) return false;
-  if (isParentInEditMode()) return true;
-  return canUpdateParent.value;
-});
+// The graphql layer leaves this element out for a user who may not read
+// comments, and marks it read-only for one who may not post.
+const canPost = computed<boolean>(() => !props.element.readOnly);
 
 const threads = computed(() => threadsFor(props.id));
 const isLoading = computed(() => isLoadingFor(props.id));
@@ -162,17 +145,7 @@ const postSubject = async (
 watch(
   () => props.id,
   async (entityId) => {
-    canUpdateParent.value = false;
-    parentEditHelper.value = useEditMode(entityId);
     await load(entityId, props.element.parentEntityFilterKey);
-    if (isParentInEditMode()) return;
-    const permissions = await fetchUpdateAndDeletePermission(
-      entityId,
-      props.entityType,
-    );
-    // A permission answer that arrives after the next navigation is not about this entity.
-    if (entityId !== props.id) return;
-    canUpdateParent.value = permissions?.get(Permission.Canupdate) ?? false;
   },
   { immediate: true },
 );

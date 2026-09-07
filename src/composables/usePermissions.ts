@@ -1,5 +1,4 @@
 import type {
-  Permission,
   GetPermissionMappingEntityDetailQuery,
   GetPermissionMappingEntityDetailQueryVariables,
   DropdownOption,
@@ -9,11 +8,9 @@ import type {
   ContextMenuLinkAction,
 } from "@/generated-types/queries";
 import {
-  GetPermissionMappingDocument,
   GetPermissionMappingEntityDetailDocument,
   GetAdvancedPermissionsDocument,
   GetAdvancedPermissionDocument,
-  Entitytyping,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { reactive, ref } from "vue";
@@ -42,59 +39,21 @@ export interface PermissionCacheKeyOptions {
 }
 
 const ignorePermissions = ref<boolean>(false);
-const isPermissionsLoaded = ref<boolean>(false);
 const setIgnorePermissions = (value: boolean) => {
   ignorePermissions.value = value;
 };
-const permittedEntitiesToCreate = ref<Entitytyping[]>([]);
 let advancedPermissions: { [key: string]: boolean } = {};
-
-const permissionsMappings = ref<Map<string, Map<Permission, boolean>>>(
-  new Map<string, Map<Permission, boolean>>(),
-);
 
 type ContextMenuActionType =
   | ContextMenuElodyAction
   | ContextMenuGeneralAction
   | ContextMenuLinkAction;
 
-const setPermissionsMappings = async () => {
-  return await apolloClient
-    .query({
-      query: GetPermissionMappingDocument,
-      variables: {
-        entities: Object.values(Entitytyping),
-      },
-      fetchPolicy: "no-cache",
-      notifyOnNetworkStatusChange: true,
-    })
-    .then((result) => {
-      permissionsMappings.value = normalizePermissions(
-        result.data.PermissionMapping,
-      );
-      isPermissionsLoaded.value = true;
-    });
-};
-
 const resetAdvancedPermissions = () => {
   advancedPermissions = {};
 };
 
-const normalizePermissions = (response: {
-  [key: string]: { [key: string]: boolean };
-}): Map<string, Map<Permission, boolean>> => {
-  const normalizedData: { [key: string]: Map<Permission, boolean> } = {};
-  for (const property in response) {
-    normalizedData[property] = new Map(
-      Object.entries(response[property]),
-    ) as Map<Permission, boolean>;
-  }
-
-  return new Map(Object.entries(normalizedData));
-};
-
 const usePermissions = () => {
-  const numberOfEntities = Object.keys(Entitytyping).length;
   let parentEntityId: string | undefined = undefined;
   let childEntityId: string | undefined = undefined;
 
@@ -109,25 +68,6 @@ const usePermissions = () => {
       key += `|child:${options.childEntityId}`;
     }
     return key;
-  };
-
-  const can = (
-    permission: Permission.Canread | Permission.Cancreate,
-    entity: Entitytyping | undefined,
-  ) => {
-    if (ignorePermissions.value) return true;
-    try {
-      if (!isPermissionsLoaded.value && permissionsMappings.value.size < 1) {
-        throw Error("The mappings are not fetched yet. Wait a bit.");
-      }
-      if (entity != undefined) {
-        const entityMapping = permissionsMappings.value!.get(entity);
-        return entityMapping?.get(permission) || false;
-      }
-      throw Error("There is something wrong with how this function is used");
-    } catch (e) {
-      console.log(e);
-    }
   };
 
   const fetchAdvancedPermission = (
@@ -309,10 +249,8 @@ const usePermissions = () => {
   };
 
   return {
-    can,
     createPermissionCacheKey,
     fetchUpdateAndDeletePermission,
-    numberOfEntities,
     fetchAdvancedPermission,
     fetchAdvancedPermissions,
     fetchPermissionsForDropdownOptions,
@@ -324,9 +262,7 @@ const usePermissions = () => {
 
 export {
   ignorePermissions,
-  permittedEntitiesToCreate,
   setIgnorePermissions,
-  setPermissionsMappings,
   usePermissions,
   resetAdvancedPermissions,
   advancedPermissions,

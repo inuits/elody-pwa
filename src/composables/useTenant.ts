@@ -7,7 +7,6 @@ import {
 } from "@/generated-types/queries";
 import { ref, computed } from "vue";
 import {
-  setPermissionsMappings,
   resetAdvancedPermissions,
 } from "@/composables/usePermissions";
 import { useRouter } from "vue-router";
@@ -59,11 +58,9 @@ const useTenant = (
         await setTennant(tenantFromSession.label, tenantFromSession.id);
       }
 
-      await setPermissionsMappings();
       resetAdvancedPermissions();
       tenantsLoaded.value = "loaded";
     } else {
-      await setPermissionsMappings();
       resetAdvancedPermissions();
       tenantsLoaded.value = "no-switcher";
     }

@@ -5,7 +5,6 @@ import {
   ignorePermissions,
   resetAdvancedPermissions,
   advancedPermissions,
-  permittedEntitiesToCreate,
 } from "../usePermissions";
 import { Permission, Entitytyping } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
@@ -30,7 +29,6 @@ describe("usePermissions", () => {
     vi.clearAllMocks();
     resetAdvancedPermissions();
     setIgnorePermissions(false);
-    permittedEntitiesToCreate.value = [];
   });
 
   describe("Permission Ignoring", () => {
@@ -48,7 +46,6 @@ describe("usePermissions", () => {
   describe("resetAdvancedPermissions", () => {
     it("should clear advanced permissions cache only", () => {
       advancedPermissions["test-permission"] = true;
-      permittedEntitiesToCreate.value = [Entitytyping.Asset];
 
       expect(Object.keys(advancedPermissions)).toHaveLength(1);
 
@@ -63,51 +60,6 @@ describe("usePermissions", () => {
 
     beforeEach(() => {
       permissions = usePermissions();
-    });
-
-    describe("can function", () => {
-      it("should return true when ignorePermissions is enabled", () => {
-        setIgnorePermissions(true);
-
-        const result = permissions.can(Permission.Canread, Entitytyping.Asset);
-        expect(result).toBe(true);
-      });
-
-      it("should log error when permissions are not loaded", () => {
-        setIgnorePermissions(false);
-        const consoleSpy = vi
-          .spyOn(console, "log")
-          .mockImplementation(() => {});
-
-        const result = permissions.can(Permission.Canread, Entitytyping.Asset);
-
-        expect(result).toBeUndefined();
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: "The mappings are not fetched yet. Wait a bit.",
-          }),
-        );
-
-        consoleSpy.mockRestore();
-      });
-
-      it("should log error when entity is undefined", () => {
-        setIgnorePermissions(false);
-        const consoleSpy = vi
-          .spyOn(console, "log")
-          .mockImplementation(() => {});
-
-        const result = permissions.can(Permission.Canread, undefined);
-
-        expect(result).toBeUndefined();
-        expect(consoleSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            message: "The mappings are not fetched yet. Wait a bit.",
-          }),
-        );
-
-        consoleSpy.mockRestore();
-      });
     });
 
     describe("fetchAdvancedPermission", () => {

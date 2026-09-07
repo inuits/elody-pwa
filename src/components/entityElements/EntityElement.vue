@@ -118,7 +118,6 @@
         v-if="element.__typename === 'CommentsElement'"
         :element="element"
         :id="id"
-        :entity-type="entityType"
       />
     </div>
   </div>
