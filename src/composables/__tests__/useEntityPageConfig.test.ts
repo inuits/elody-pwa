@@ -307,3 +307,26 @@ describe("useEntityPageConfig", () => {
     });
   });
 });
+
+describe("slug casing", () => {
+  beforeEach(() => {
+    mockRegisteredRoutes.value = [];
+  });
+
+  // The url carries the entity type as the app spells it ("MediaFile"), while
+  // the config is keyed by the type as the backend stores it ("mediafile").
+  it("finds the config of a slug that differs from its key only in casing", () => {
+    mockRoute.value = {
+      meta: {
+        entityPageConfig: {
+          mediafile: { hasEditMetadataButton: false },
+        } as EntityPageConfig,
+      },
+      params: { type: "MediaFile" },
+    };
+
+    const { hasEditMetadataButton } = useEntityPageConfig();
+
+    expect(hasEditMetadataButton.value).toBe(false);
+  });
+});
