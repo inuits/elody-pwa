@@ -85,38 +85,26 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  Entitytyping,
-  type DamsIcons,
-  type MenuItem,
-} from "@/generated-types/queries";
+import { type DamsIcons, type MenuItem } from "@/generated-types/queries";
 import CustomIcon from "../CustomIcon.vue";
 import MenuSubItem from "@/components/menu/MenuSubItem.vue";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
-import { computed, onMounted, ref } from "vue";
-import { Permission } from "@/generated-types/queries";
+import { computed, ref } from "vue";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import {
-  ignorePermissions,
-  permittedEntitiesToCreate,
-  usePermissions,
-} from "@/composables/usePermissions";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
 const { t } = useI18n();
-const { can, fetchAdvancedPermission } = usePermissions();
 
 const menuSubitem = ref<Array<MenuItem>>([]);
 const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link,
 );
-const hasPermissionForMenuItem = ref<boolean>(ignorePermissions.value);
 const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
 const route = useRoute();
 
@@ -128,10 +116,14 @@ const props = defineProps<{
 }>();
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
+// GraphQL omits the config of anything the user may not see, so a group whose
+// children were all left out has nothing left to show.
 const showMenuItem = computed(() => {
+  const isEmptyGroup =
+    !!props.menuitem?.subMenu && menuSubitem.value.length === 0;
   return (
     (props.menuitem?.isLoggedIn ? auth.isAuthenticated.value : true) &&
-    hasPermissionForMenuItem.value
+    !isEmptyGroup
   );
 });
 const iconColor = computed(() =>
@@ -152,55 +144,11 @@ const handleSubMenu = () => {
   const submenu = props.menuitem.subMenu;
   if (submenu) {
     menuSubitem.value = Object.values(submenu).filter(
-      (menu: MenuItem) => menu.typeLink,
+      (menu: MenuItem) => menu?.typeLink,
     );
   }
 };
 handleSubMenu();
-
-onMounted(async () => {
-  let allowed = false;
-  const neededPermission = props.menuitem.typeLink.modal
-    ?.neededPermission as Permission;
-
-  if (props.menuitem.requiresAuth === false) allowed = true;
-  else if (neededPermission === Permission.Cancreate) {
-    permittedEntitiesToCreate.value = [];
-    Object.values(Entitytyping).forEach((entityType) => {
-      if (can(Permission.Cancreate, entityType)) {
-        allowed = true;
-        permittedEntitiesToCreate.value.push(entityType);
-      }
-    });
-  } else if (props.menuitem.entityType)
-    allowed = allowed || can(Permission.Canread, props.menuitem.entityType);
-
-  for (const item of menuSubitem.value) {
-    if (item.requiresAuth === false) allowed = true;
-    else if (item.typeLink?.modal?.neededPermission === Permission.Cancreate) {
-      permittedEntitiesToCreate.value = [];
-      Object.values(Entitytyping).forEach((entityType) => {
-        if (can(Permission.Cancreate, entityType)) {
-          allowed = true;
-          permittedEntitiesToCreate.value.push(entityType);
-        }
-      });
-    } else if (item.entityType)
-      allowed = allowed || can(Permission.Canread, item.entityType);
-
-    if (item.can && item.can?.length > 0) {
-      allowed = await fetchAdvancedPermission(item.can);
-    }
-
-    if (allowed) break;
-  }
-
-  if (props.menuitem.can && props.menuitem.can?.length > 0) {
-    allowed = await fetchAdvancedPermission(props.menuitem.can);
-  }
-
-  hasPermissionForMenuItem.value = allowed;
-});
 </script>
 
 <style></style>
