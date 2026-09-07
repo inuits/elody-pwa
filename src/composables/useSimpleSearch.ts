@@ -2,20 +2,15 @@ import { computed, inject } from "vue";
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
-  Entitytyping,
   Operator,
-  Permission,
 } from "@/generated-types/queries";
-import { usePermissions } from "@/composables/usePermissions";
 
 export function useSimpleSearch() {
   const config = inject("config") as any;
-  const { can } = usePermissions();
 
   const entityTypeFilters = computed<AdvancedFilterInput[]>(() => {
-    const allowedTypes = config.features.simpleSearch.itemTypes?.filter(
-      (type: string) => !!can(Permission.Canread, type as Entitytyping),
-    );
+    // The app config only lists the item types the user may read.
+    const allowedTypes = config.features.simpleSearch.itemTypes;
     if (!allowedTypes || allowedTypes.length === 0) return [];
     return [
       {
