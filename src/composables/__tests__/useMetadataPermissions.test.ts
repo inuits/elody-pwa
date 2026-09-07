@@ -71,7 +71,7 @@ describe("useMetadataWrapper", () => {
       key: "testField",
       label: "Test Field",
       can: [] as string[],
-      canEdit: [] as string[],
+      readOnly: false,
       value: "initial",
       __typename: "PanelMetaData",
     },
@@ -97,13 +97,11 @@ describe("Permissions for displaying & editing", () => {
       expect(result.fieldIsEditableByUser.value).toBe(true);
     });
 
-    it("should correctly determine permissions for editing", async () => {
+    it("keeps a field the graphql layer did not mark read-only editable", async () => {
       const props = {
         ...defaultProps,
-        metadata: { ...defaultProps.metadata, canEdit: ["perm_edit"] },
+        metadata: { ...defaultProps.metadata, readOnly: false },
       };
-
-      mockFetchAdvancedPermissions.mockResolvedValue({ perm_edit: true });
 
       const { result } = mountComposable(props);
       
@@ -113,13 +111,11 @@ describe("Permissions for displaying & editing", () => {
       expect(result.fieldIsEditableByUser.value).toBe(true);
     });
 
-    it("should correctly determine permissions for editing with negative result", async () => {
+    it("makes a field the graphql layer marked read-only uneditable", async () => {
       const props = {
         ...defaultProps,
-        metadata: { ...defaultProps.metadata, canEdit: ["perm_edit"] },
+        metadata: { ...defaultProps.metadata, readOnly: true },
       };
-
-      mockFetchAdvancedPermissions.mockResolvedValue({ perm_edit: false });
 
       const { result } = mountComposable(props);
       
@@ -164,10 +160,14 @@ describe("Permissions for displaying & editing", () => {
     it("should correctly determine permissions for viewing & editing", async () => {
       const props = {
         ...defaultProps,
-        metadata: { ...defaultProps.metadata, can: ["perm_view"], canEdit: ["perm_edit"] },
+        metadata: {
+          ...defaultProps.metadata,
+          can: ["perm_view"],
+          readOnly: false,
+        },
       };
 
-      mockFetchAdvancedPermissions.mockResolvedValue({ perm_view: true, perm_edit: true });
+      mockFetchAdvancedPermissions.mockResolvedValue({ perm_view: true });
 
       const { result } = mountComposable(props);
       
@@ -181,10 +181,14 @@ describe("Permissions for displaying & editing", () => {
     it("should correctly determine permissions for viewing & editing with negative result", async () => {
       const props = {
         ...defaultProps,
-        metadata: { ...defaultProps.metadata, can: ["perm_view"], canEdit: ["perm_edit"] },
+        metadata: {
+          ...defaultProps.metadata,
+          can: ["perm_view"],
+          readOnly: true,
+        },
       };
 
-      mockFetchAdvancedPermissions.mockResolvedValue({ perm_view: false, perm_edit: false });
+      mockFetchAdvancedPermissions.mockResolvedValue({ perm_view: false });
 
       const { result } = mountComposable(props);
       
@@ -206,16 +210,14 @@ describe("Permissions for displaying & editing", () => {
         formId,
         metadata: { 
           ...defaultProps.metadata, 
-          key: fieldKey, 
-          canEdit: ["restricted_permission"] 
+          key: fieldKey,
+          readOnly: true,
         },
       };
 
       mockEditableFields.value = {
         [formId]: [fieldKey, "otherField"]
       };
-      
-      mockFetchAdvancedPermissions.mockResolvedValue({ restricted_permission: false });
 
       mountComposable(props);
       
@@ -235,16 +237,14 @@ describe("Permissions for displaying & editing", () => {
         formId,
         metadata: { 
           ...defaultProps.metadata, 
-          key: fieldKey, 
-          canEdit: ["restricted_permission"] 
+          key: fieldKey,
+          readOnly: false,
         },
       };
 
       mockEditableFields.value = {
         [formId]: [fieldKey, "otherField"]
       };
-      
-      mockFetchAdvancedPermissions.mockResolvedValue({ restricted_permission: true });
 
       mountComposable(props);
       

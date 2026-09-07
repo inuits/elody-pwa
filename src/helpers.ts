@@ -378,7 +378,7 @@ export const getMetadataFields = (
         valueTranslationKey: (value as PanelMetaData).valueTranslationKey,
         onlyForEntityTypes: (value as PanelMetaData).onlyForEntityTypes,
         can: (value as PanelMetaData).can,
-        canEdit: (value as PanelMetaData).canEdit,
+        readOnly: (value as PanelMetaData).readOnly,
         copyToClipboard: (value as PanelMetaData).copyToClipboard,
         defaultValue: (value as PanelMetaData).defaultValue,
         disabled: (value as PanelMetaData).disabled,

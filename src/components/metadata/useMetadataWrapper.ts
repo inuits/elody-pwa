@@ -119,42 +119,23 @@ export const useMetadataWrapper = (
   const { setExtraVariables, fetchAdvancedPermissions } = usePermissions();
 
   const determineFieldPermissions = async (): Promise<void> => {
-    const {
-      can: viewPermissions = [],
-      canEdit: editPermissions = [],
-      key: fieldKey,
-    } = props.metadata;
+    const { can: viewPermissions = [], key: fieldKey } = props.metadata;
 
-    const hasViewPermissions = viewPermissions.length > 0;
-    const hasEditPermissions = editPermissions.length > 0;
+    // The graphql layer resolved the edit permission into `readOnly`, so a
+    // field left out of the editable list stays out of every payload built
+    // from it.
+    fieldIsEditableByUser.value = !props.metadata.readOnly;
+    if (!fieldIsEditableByUser.value) removeFieldFromEditableList(fieldKey);
 
-    if (!hasViewPermissions && !hasEditPermissions) {
+    if (!viewPermissions.length) {
       fieldIsPermittedToBeSeenByUser.value = true;
-      fieldIsEditableByUser.value = true;
       return;
     }
 
-    const requiredPermissions = [
-      ...new Set([...viewPermissions, ...editPermissions]),
-    ];
-
-    const permissionResults =
-      await fetchAdvancedPermissions(requiredPermissions);
-
-    const isPermitted = (permissions: string[]): boolean =>
-      permissions.some((permission) => permissionResults[permission]);
-
-    fieldIsPermittedToBeSeenByUser.value = !hasViewPermissions
-      ? true
-      : isPermitted(viewPermissions);
-
-    fieldIsEditableByUser.value = !hasEditPermissions
-      ? true
-      : isPermitted(editPermissions);
-
-    if (!fieldIsEditableByUser.value) {
-      removeFieldFromEditableList(fieldKey);
-    }
+    const permissionResults = await fetchAdvancedPermissions(viewPermissions);
+    fieldIsPermittedToBeSeenByUser.value = viewPermissions.some(
+      (permission) => permissionResults[permission],
+    );
   };
 
   const removeFieldFromEditableList = (fieldKey: string): void => {

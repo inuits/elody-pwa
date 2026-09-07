@@ -714,7 +714,7 @@ const selectedRelationMode = computed<BulkEditModes>({
 
 // A bulk-edit form is applied to entities it never loaded, so its own field keys
 // are the editable set. Seeding them here lets MetadataWrapper strip back the
-// ones the user has no canEdit permission for, before anything is submitted.
+// ones the graphql layer marked read-only, before anything is submitted.
 watch(
   () => getFieldArray.value,
   (fields: any[]) => {
