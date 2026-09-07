@@ -30,6 +30,14 @@
             @select-page="bulkSelect"
             @select-all="bulkSelect"
           />
+          <span
+            v-if="!allFieldsSelected"
+            data-cy="csv-export-select-all"
+            class="select-actions text-text-body"
+            @click="bulkSelect"
+          >
+            {{ t("bulk-operations.select-all") }}
+          </span>
         </div>
         <div class="flex-1 min-h-0 overflow-y-hidden hover:overflow-y-auto">
           <div v-if="isLoading">
@@ -198,6 +206,11 @@ const { refetch, onResult } = useQuery<GetBulkOperationCsvExportKeysQuery>(
 const csvExportOptions = ref<{ isSelected: boolean; key: DropdownOption }[]>(
   [],
 );
+const allFieldsSelected = computed<boolean>(
+  () =>
+    csvExportOptions.value.length > 0 &&
+    csvExportOptions.value.every((option) => option.isSelected),
+);
 
 const isLoading = useQueryLoading();
 const { startBlocking, stopBlocking } = useBlockingLoader();
@@ -284,7 +297,8 @@ onResult((result) => {
   if (result.data) {
     csvExportOptions.value = [];
     for (const key of result.data.BulkOperationCsvExportKeys.options)
-      csvExportOptions.value.push({ isSelected: key.required, key });
+      csvExportOptions.value.push({ isSelected: true, key });
+    bulkSelect();
   }
 });
 
