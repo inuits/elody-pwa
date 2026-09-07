@@ -271,14 +271,14 @@ watch(
           return;
         }
 
-        if (auth.isAuthenticated.value) {
-          if (permissionToEdit.value && permissionToDelete.value) {
-            useEditHelper.value.setEditMode("edit-delete");
-          } else if (permissionToEdit.value && !permissionToDelete.value) {
-            useEditHelper.value.setEditMode("edit");
-          } else if (permissionToDelete.value && !permissionToEdit.value) {
-            useEditHelper.value.setEditMode("delete");
-          } else useEditHelper.value.hideEditButton();
+        if (
+          auth.isAuthenticated.value &&
+          (permissionToEdit.value || permissionToDelete.value)
+        ) {
+          useEditHelper.value.setPermittedEditMode({
+            canUpdate: permissionToEdit.value,
+            canDelete: permissionToDelete.value,
+          });
         } else useEditHelper.value.hideEditButton();
       });
     }

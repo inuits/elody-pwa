@@ -150,13 +150,11 @@ const applyEditPermissions = () => {
   );
   if (!mappings) return;
   mappings.then((result) => {
-    const canEdit = result.get(Permission.Canupdate);
+    const canUpdate = result.get(Permission.Canupdate);
     const canDelete = result.get(Permission.Candelete);
-    if (!auth.isAuthenticated.value) return editHelper.hideEditButton();
-    if (canEdit && canDelete) editHelper.setEditMode("edit-delete");
-    else if (canEdit) editHelper.setEditMode("edit");
-    else if (canDelete) editHelper.setEditMode("delete");
-    else editHelper.hideEditButton();
+    if (!auth.isAuthenticated.value || (!canUpdate && !canDelete))
+      return editHelper.hideEditButton();
+    editHelper.setPermittedEditMode({ canUpdate, canDelete });
   });
 };
 

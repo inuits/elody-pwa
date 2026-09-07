@@ -106,6 +106,7 @@ describe("MultiEntityColumn", () => {
       discard: vi.fn(),
       clickButton: vi.fn(),
       setEditMode: vi.fn(),
+      setPermittedEditMode: vi.fn(),
       hideEditButton: vi.fn(),
     });
     mocks.fetchUpdateAndDeletePermission.mockReturnValue(
@@ -134,7 +135,10 @@ describe("MultiEntityColumn", () => {
       "W-1",
       "work_word",
     );
-    expect(mocks.editHelper.setEditMode).toHaveBeenCalledWith("edit-delete");
+    expect(mocks.editHelper.setPermittedEditMode).toHaveBeenCalledWith({
+      canUpdate: true,
+      canDelete: true,
+    });
   });
 
   it("enters edit mode and focuses the entity-single singleton on its own entity", async () => {

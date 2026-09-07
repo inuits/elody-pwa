@@ -51,4 +51,46 @@ describe("useEditState", () => {
       expect(cb).not.toHaveBeenCalled();
     });
   });
+
+  describe("permitted edit mode", () => {
+    // The first call hands back the raw state, later ones the reactive proxy
+    // whose refs are unwrapped — the tests read it the way components do.
+    const permittedState = (name: string) => {
+      useEditMode(name, "delete");
+      useEditMode(name);
+      return useEditMode(name);
+    };
+
+    it.each([
+      [{ canUpdate: true, canDelete: true }, "edit-delete"],
+      [{ canUpdate: true, canDelete: false }, "edit"],
+      [{ canUpdate: false, canDelete: true }, "delete"],
+      [{ canUpdate: false, canDelete: false }, "view"],
+    ])("maps %o onto edit mode %s", (permissions, expected) => {
+      const state = permittedState(`permitted-${expected}`);
+
+      state.setPermittedEditMode(permissions);
+
+      expect(state.editMode).toBe(expected);
+    });
+
+    it("restores the permitted mode after the button was hidden", () => {
+      const state = permittedState("permitted-restore");
+      state.setPermittedEditMode({ canUpdate: true, canDelete: false });
+
+      state.hideEditButton();
+      expect(state.editMode).toBe("no-edit");
+
+      state.disableEdit();
+      expect(state.editMode).toBe("edit");
+    });
+
+    it("leaves an entity nobody reported permissions for viewable", () => {
+      const state = permittedState("permitted-unknown");
+
+      state.disableEdit();
+
+      expect(state.editMode).toBe("view");
+    });
+  });
 });

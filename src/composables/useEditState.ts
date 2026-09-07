@@ -15,18 +15,14 @@ const createCallbackRegistry = <T extends () => Promise<void> | void>() => {
   };
   return { fns: callbacks, add, perform, clear };
 };
-import { usePermissions } from "@/composables/usePermissions";
-import { type Entitytyping, Permission } from "@/generated-types/queries";
-import useEntitySingle from "@/composables/useEntitySingle";
-
 export type EditModes = "edit" | "no-edit" | "view" | "delete" | "edit-delete";
 export type Callback = (e?: Event | undefined) => Promise<unknown>;
-const { fetchUpdateAndDeletePermission } = usePermissions();
 
 export const useEditState = (editStateName: string) => {
   const buttonClicked = ref(false);
   const isDisabled = ref(false);
   const editMode = ref<EditModes>("no-edit");
+  const permittedEditMode = ref<EditModes>("view");
   const submitFn = ref<Callback | undefined>();
   const refetchRegistry = createCallbackRegistry<() => void>();
   const mutationRegistry = createCallbackRegistry<() => Promise<void>>();
@@ -49,7 +45,7 @@ export const useEditState = (editStateName: string) => {
 
   const disableEdit = () => {
     isEdit.value = false;
-    applyPermittedEditMode();
+    setEditMode(permittedEditMode.value);
   };
 
   const setSubmitFunction = (editSubmitFn: Callback | undefined) => {
@@ -108,22 +104,19 @@ export const useEditState = (editStateName: string) => {
     buttonClicked.value = false;
   };
 
-  const applyPermittedEditMode = () => {
-    const entityId: string = useEntitySingle().getEntityUuid() as string;
-    const entityType: Entitytyping =
-      useEntitySingle().getEntityType() as Entitytyping;
-    const mappings = fetchUpdateAndDeletePermission(entityId, entityType);
-    if (mappings) {
-      mappings.then((mappingResult) => {
-        const canEdit = mappingResult.get(Permission.Canupdate);
-        const canDelete = mappingResult.get(Permission.Candelete);
-
-        if (canEdit && canDelete) setEditMode("edit-delete");
-        else if (canEdit && !canDelete) setEditMode("edit");
-        else if (canDelete && !canEdit) setEditMode("delete");
-        else setEditMode("view");
-      });
-    } else setEditMode("view");
+  // What the user may do with this entity is asked once, by whoever loaded it.
+  // Remembering it here is what lets a temporarily hidden edit button come back
+  // without a second permission call.
+  const setPermittedEditMode = (permissions: {
+    canUpdate?: boolean;
+    canDelete?: boolean;
+  }) => {
+    const { canUpdate, canDelete } = permissions;
+    if (canUpdate && canDelete) permittedEditMode.value = "edit-delete";
+    else if (canUpdate) permittedEditMode.value = "edit";
+    else if (canDelete) permittedEditMode.value = "delete";
+    else permittedEditMode.value = "view";
+    setEditMode(permittedEditMode.value);
   };
 
   return {
@@ -132,6 +125,8 @@ export const useEditState = (editStateName: string) => {
     buttonClicked,
     isDisabled,
     editMode,
+    permittedEditMode,
+    setPermittedEditMode,
     submitFn,
     refetchFns,
     mutationCallbackFns,
