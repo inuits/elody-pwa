@@ -7,7 +7,6 @@ const mocks = vi.hoisted(() => ({
   editHelper: {} as any,
   getEditableMetadataKeys: vi.fn(),
   discardEditForForm: vi.fn(),
-  fetchUpdateAndDeletePermission: vi.fn(),
   setEntityUuid: vi.fn(),
   setEntityType: vi.fn(),
   isAuthenticated: { value: true },
@@ -45,12 +44,6 @@ vi.mock("@/composables/useFormHelper", () => ({
   }),
 }));
 
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    fetchUpdateAndDeletePermission: mocks.fetchUpdateAndDeletePermission,
-  }),
-}));
-
 vi.mock("@/composables/useEntitySingle", () => ({
   default: () => ({
     setEntityUuid: mocks.setEntityUuid,
@@ -78,14 +71,14 @@ const entity = {
   id: "W-1",
   uuid: "W-1",
   type: "work_word",
-  intialValues: { identifiers: ["W-1"] },
+  intialValues: { identifiers: ["W-1"], canUpdate: true, canDelete: true },
   entityView: { column: {} },
   relationValues: {},
 } as any;
 
-const getWrapper = () =>
+const getWrapper = (entityOverride: any = entity) =>
   mount(MultiEntityColumn, {
-    props: { entity, refetch: vi.fn() },
+    props: { entity: entityOverride, refetch: vi.fn() },
     global: {
       mocks: { $t: (key: string) => key },
       stubs: { RouterLink: RouterLinkStub },
@@ -109,14 +102,6 @@ describe("MultiEntityColumn", () => {
       setPermittedEditMode: vi.fn(),
       hideEditButton: vi.fn(),
     });
-    mocks.fetchUpdateAndDeletePermission.mockReturnValue(
-      Promise.resolve(
-        new Map([
-          ["canupdate", true],
-          ["candelete", true],
-        ]),
-      ),
-    );
   });
 
   it("registers editable metadata keys under the entity id (so saved metadata is not dropped)", async () => {
@@ -128,17 +113,23 @@ describe("MultiEntityColumn", () => {
     );
   });
 
-  it("fetches and applies edit permissions for its own entity", async () => {
+  it("applies the edit permissions the graphql layer resolved on its own entity", async () => {
     getWrapper();
     await flushPromises();
-    expect(mocks.fetchUpdateAndDeletePermission).toHaveBeenCalledWith(
-      "W-1",
-      "work_word",
-    );
     expect(mocks.editHelper.setPermittedEditMode).toHaveBeenCalledWith({
       canUpdate: true,
       canDelete: true,
     });
+  });
+
+  it("hides the edit button for an entity the graphql layer marked unwritable", async () => {
+    getWrapper({
+      ...entity,
+      intialValues: { identifiers: ["W-1"], canUpdate: false, canDelete: false },
+    });
+    await flushPromises();
+    expect(mocks.editHelper.setPermittedEditMode).not.toHaveBeenCalled();
+    expect(mocks.editHelper.hideEditButton).toHaveBeenCalled();
   });
 
   it("enters edit mode and focuses the entity-single singleton on its own entity", async () => {

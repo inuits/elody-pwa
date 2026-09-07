@@ -34,7 +34,6 @@
 <script lang="ts" setup>
 import {
   GetEntityByIdDocument,
-  Permission,
   type ColumnList,
   type GetEntityByIdQueryVariables,
   type GetEntityByIdQuery,
@@ -68,7 +67,6 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { usePermissions } from "@/composables/usePermissions";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -88,7 +86,6 @@ const { trackSeen, jobStatusPolling } = useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
-const { fetchUpdateAndDeletePermission } = usePermissions();
 const {
   clearBreadcrumbPath,
   getRouteBreadcrumbsOfEntity,
@@ -156,8 +153,6 @@ useJobStatusPolling({
 });
 
 const columnList = ref<ColumnList | "no-values">("no-values");
-const permissionToEdit = ref<boolean>();
-const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
 provide("RefetchParentEntity", refetch);
@@ -257,31 +252,15 @@ watch(
       ].selectedMediafile = entity.value as MediaFileEntity;
     }
 
-    const mappings = fetchUpdateAndDeletePermission(
-      entity.value.id,
-      entity.value.type,
-    );
-    if (mappings) {
-      mappings.then((result) => {
-        permissionToEdit.value = result.get(Permission.Canupdate);
-        permissionToDelete.value = result.get(Permission.Candelete);
+    const { canUpdate, canDelete } = entity.value.intialValues;
+    if (
+      !props.viewOnly &&
+      auth.isAuthenticated.value &&
+      (canUpdate || canDelete)
+    )
+      useEditHelper.value.setPermittedEditMode({ canUpdate, canDelete });
+    else useEditHelper.value.hideEditButton();
 
-        if (props.viewOnly) {
-          useEditHelper.value.hideEditButton();
-          return;
-        }
-
-        if (
-          auth.isAuthenticated.value &&
-          (permissionToEdit.value || permissionToDelete.value)
-        ) {
-          useEditHelper.value.setPermittedEditMode({
-            canUpdate: permissionToEdit.value,
-            canDelete: permissionToDelete.value,
-          });
-        } else useEditHelper.value.hideEditButton();
-      });
-    }
     loading.value = false;
   },
 );

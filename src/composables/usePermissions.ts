@@ -1,6 +1,4 @@
 import type {
-  GetPermissionMappingEntityDetailQuery,
-  GetPermissionMappingEntityDetailQueryVariables,
   DropdownOption,
   ContextMenuActions,
   ContextMenuElodyAction,
@@ -8,12 +6,11 @@ import type {
   ContextMenuLinkAction,
 } from "@/generated-types/queries";
 import {
-  GetPermissionMappingEntityDetailDocument,
   GetAdvancedPermissionsDocument,
   GetAdvancedPermissionDocument,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
-import { reactive, ref } from "vue";
+import { ref } from "vue";
 
 interface PermissionResult {
   permission: string;
@@ -216,41 +213,8 @@ const usePermissions = () => {
     await Promise.all(promises);
   };
 
-  const fetchUpdateAndDeletePermission = (id: string, entityType: string) => {
-    const permissions = new Map<Permission, boolean>();
-    try {
-      return apolloClient
-        .query<GetPermissionMappingEntityDetailQuery>({
-          query: GetPermissionMappingEntityDetailDocument,
-          variables: reactive<GetPermissionMappingEntityDetailQueryVariables>({
-            id: id,
-            entityType: entityType,
-          }),
-          fetchPolicy: "no-cache",
-          notifyOnNetworkStatusChange: true,
-        })
-        .then((result) => {
-          for (
-            let i = 0;
-            i < result.data?.PermissionMappingEntityDetail.length;
-            i++
-          )
-            permissions.set(
-              result.data?.PermissionMappingEntityDetail[i].permission,
-              result.data?.PermissionMappingEntityDetail[i].hasPermission,
-            );
-          return permissions;
-        });
-    } catch (e) {
-      console.log(
-        `Error in usePermissions fetch function for update & delete entities/id: ${e}`,
-      );
-    }
-  };
-
   return {
     createPermissionCacheKey,
-    fetchUpdateAndDeletePermission,
     fetchAdvancedPermission,
     fetchAdvancedPermissions,
     fetchPermissionsForDropdownOptions,

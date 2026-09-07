@@ -84,7 +84,6 @@
 import { computed, onMounted, provide, watch } from "vue";
 import {
   DamsIcons,
-  Permission,
   type BaseEntity,
   type Entity,
 } from "@/generated-types/queries";
@@ -93,7 +92,6 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import MetadataFormatterPill from "@/components/metadata/MetadataFormatterPill.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { usePermissions } from "@/composables/usePermissions";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
@@ -111,7 +109,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { getEditableMetadataKeys, discardEditForForm } = useFormHelper();
-const { fetchUpdateAndDeletePermission } = usePermissions();
 const { confirm } = useConfirmModal();
 
 useEditMode(props.entity.id);
@@ -144,18 +141,10 @@ const focusThisEntity = () => {
 };
 
 const applyEditPermissions = () => {
-  const mappings = fetchUpdateAndDeletePermission(
-    props.entity.id,
-    props.entity.type,
-  );
-  if (!mappings) return;
-  mappings.then((result) => {
-    const canUpdate = result.get(Permission.Canupdate);
-    const canDelete = result.get(Permission.Candelete);
-    if (!auth.isAuthenticated.value || (!canUpdate && !canDelete))
-      return editHelper.hideEditButton();
-    editHelper.setPermittedEditMode({ canUpdate, canDelete });
-  });
+  const { canUpdate, canDelete } = props.entity.intialValues ?? {};
+  if (!auth.isAuthenticated.value || (!canUpdate && !canDelete))
+    return editHelper.hideEditButton();
+  editHelper.setPermittedEditMode({ canUpdate, canDelete });
 };
 
 const startEdit = () => {
