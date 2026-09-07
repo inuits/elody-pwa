@@ -137,4 +137,57 @@ describe("EntityElementMetadata", () => {
       expect(wrapper.text()).toBe("-");
     });
   });
+
+  describe("Multiline text values", () => {
+    it("should render each newline-separated URL as its own link", async () => {
+      stringIsUrl.mockImplementation((value: unknown) =>
+        typeof value === "string" && value.startsWith("https://"),
+      );
+      const wrapper = mount(EntityElementMetadata, {
+        props: {
+          value:
+            "https://diconab.huma-num.fr/inscriptions/73\nhttps://ociana.osu.edu/inscriptions/14022",
+        },
+      });
+      await nextTick();
+      const links = wrapper.findAll("a");
+      expect(links).toHaveLength(2);
+      expect(links[0].attributes("href")).toBe(
+        "https://diconab.huma-num.fr/inscriptions/73",
+      );
+      expect(links[1].attributes("href")).toBe(
+        "https://ociana.osu.edu/inscriptions/14022",
+      );
+    });
+
+    it("should render non-url lines as plain text alongside links", async () => {
+      stringIsUrl.mockImplementation((value: unknown) =>
+        typeof value === "string" && value.startsWith("https://"),
+      );
+      const wrapper = mount(EntityElementMetadata, {
+        props: {
+          value: "see also\nhttps://ociana.osu.edu/inscriptions/14022",
+        },
+      });
+      await nextTick();
+      const links = wrapper.findAll("a");
+      expect(links).toHaveLength(1);
+      expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe(
+        "see also",
+      );
+    });
+
+    it("should not split a single-line value into the multi-line renderer", async () => {
+      stringIsUrl.mockReturnValue(true);
+      const wrapper = mount(EntityElementMetadata, {
+        props: { value: "https://diconab.huma-num.fr/inscriptions/73" },
+      });
+      await nextTick();
+      const links = wrapper.findAll("a");
+      expect(links).toHaveLength(1);
+      expect(links[0].attributes("href")).toBe(
+        "https://diconab.huma-num.fr/inscriptions/73",
+      );
+    });
+  });
 });

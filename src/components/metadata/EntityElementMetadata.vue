@@ -4,14 +4,14 @@
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
     :class="[{ 'font-bold': highlight}, `text-sm ${breakWords ? 'break-words' : 'break-normal'}`]"
   >
-    <div v-if="Array.isArray(readableValue)">
-      <div v-for="item in readableValue" :key="item">
+    <div v-if="linesToRender">
+      <div v-for="(item, index) in linesToRender" :key="index">
         <p data-cy="metadata-value" v-if="!stringIsUrl(item)">{{ item }}</p>
         <a v-else class="underline" target="_blank" :href="item">{{
           t(linkText) || item
         }}</a>
       </div>
-      <div v-if="readableValue.length == 0">-</div>
+      <div v-if="linesToRender.length == 0">-</div>
     </div>
     <div v-else-if="isCoordinates">
       {{ `(${value.latitude}, ${value.longitude})` }}
@@ -99,6 +99,18 @@ const isCoordinates = computed(() => {
 const readableValue = computed(() => {
   if (isCoordinates.value) return {};
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
+});
+
+const linesToRender = computed<string[] | null>(() => {
+  if (Array.isArray(readableValue.value)) return readableValue.value;
+  if (typeof readableValue.value === "string") {
+    const lines = readableValue.value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line !== "");
+    if (lines.length > 1) return lines;
+  }
+  return null;
 });
 
 const processedDisplayValue = computed<string>(() =>
