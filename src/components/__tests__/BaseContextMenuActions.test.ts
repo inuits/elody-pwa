@@ -1,6 +1,6 @@
 import { shallowMount } from "@vue/test-utils";
 import BaseContextMenuActions from "../BaseContextMenuActions.vue";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { Entitytyping } from "@/generated-types/queries";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
@@ -12,184 +12,90 @@ vi.mock("@/types", () => ({
   },
 }));
 
-const mocks = vi.hoisted(() => {
-  return {
-    advancedPermissions: {} as Record<string, boolean>,
-  };
-});
+const followLink = {
+  label: "contextMenu.contextMenuLinkAction.followLink",
+  icon: "AngleRight",
+};
 
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: vi.fn(),
-    fetchAdvancedPermission: vi.fn(),
-    fetchPermissionsOfContextMenu: vi.fn(),
-    setExtraVariables: vi.fn(),
-    createPermissionCacheKey: vi.fn((options) => {
-      let key = options.permission;
-      if (options.parentEntityId) {
-        key += `|parent:${options.parentEntityId}`;
-      }
-      if (options.childEntityId) {
-        key += `|child:${options.childEntityId}`;
-      }
-      return key;
-    }),
-  }),
-  ignorePermissions: { value: false },
-  advancedPermissions: mocks.advancedPermissions,
-}));
+const deleteRelation = {
+  label: "contextMenu.contextMenuElodyAction.delete-relation",
+  action: "DeleteRelation",
+  icon: "Trash",
+};
+
+const getWrapper = (contextMenuActions: unknown) =>
+  shallowMount(BaseContextMenuActions, {
+    props: {
+      contextMenuActions: contextMenuActions as ContextMenuActions,
+      entityId: "2f4d",
+      entityType: "BaseType" as Entitytyping,
+      bulkOperationsContext: BulkOperationsContextEnum.Home,
+    },
+  });
 
 describe("BaseContextMenuActions", () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-    vi.resetAllMocks();
-  });
-
-  const contextMenuActions = {
-    doLinkAction: {
-      label: "contextMenu.contextMenuLinkAction.followLink",
-      icon: "AngleRight",
-    },
-    doElodyAction: {
-      label: "contextMenu.contextMenuElodyAction.delete-relation",
-      action: "DeleteRelation",
-      can: ["can_delete"],
-      icon: "Trash",
-    },
-  } as ContextMenuActions;
-
-  it("contains 1 option if permission is granted", async () => {
-    mocks.advancedPermissions["can_delete|child:2f4d"] = true;
-
-    const wrapper = shallowMount(BaseContextMenuActions, {
-      props: {
-        contextMenuActions,
-        entityId: "2f4d",
-        entityType: "BaseType" as Entitytyping,
-        bulkOperationsContext: BulkOperationsContextEnum.Home,
-      },
-    });
-
+  it("renders every action the graphql layer handed it", async () => {
+    const actions = { doLinkAction: followLink, doElodyAction: deleteRelation };
+    const wrapper = getWrapper(actions);
     await flushPromises();
 
     expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
-    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(2);
-    expect(wrapper.vm.overflowActions).toStrictEqual(contextMenuActions);
+    expect(wrapper.vm.overflowActions).toStrictEqual(actions);
   });
 
-  it("has only basic option if permission is not granted", async () => {
-    mocks.advancedPermissions["can_delete|child:24"] = false;
-
-    const wrapper = shallowMount(BaseContextMenuActions, {
-      props: {
-        contextMenuActions,
-        entityId: "24",
-        entityType: "BaseType" as Entitytyping,
-        bulkOperationsContext: BulkOperationsContextEnum.Home,
-      },
+  it("skips an action the graphql layer left out", async () => {
+    const wrapper = getWrapper({
+      doLinkAction: followLink,
+      doElodyAction: null,
     });
-
     await flushPromises();
 
-    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
     expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(1);
     expect(wrapper.vm.overflowActions).toStrictEqual({
-      doLinkAction: contextMenuActions.doLinkAction,
+      doLinkAction: followLink,
     });
   });
 
-  it("contains 2 basic options if permissions are not provided", async () => {
-    const basicContextMenuActions = {
-      doLinkAction: {
-        label: "contextMenu.contextMenuLinkAction.followLink",
-        icon: "AngleRight",
-      },
-      doElodyAction: {
-        label: "contextMenu.contextMenuElodyAction.delete-relation",
-        action: "DeleteRelation",
-        icon: "Trash",
-      },
-    } as ContextMenuActions;
-
-    const wrapper = shallowMount(BaseContextMenuActions, {
-      props: {
-        contextMenuActions: basicContextMenuActions,
-        entityId: "24",
-        entityType: "BaseType" as Entitytyping,
-        bulkOperationsContext: BulkOperationsContextEnum.Home,
-      },
+  it("skips an action the config hides", async () => {
+    const wrapper = getWrapper({
+      doLinkAction: followLink,
+      doElodyAction: { ...deleteRelation, hidden: true },
     });
-
     await flushPromises();
 
-    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
-    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(2);
-    expect(wrapper.vm.overflowActions).toStrictEqual(basicContextMenuActions);
+    expect(wrapper.vm.overflowActions).toStrictEqual({
+      doLinkAction: followLink,
+    });
   });
 
-  it("contains regular and promoted context menus", async () => {
-    const basicContextMenuActions = {
-      doLinkAction: {
-        label: "contextMenu.contextMenuLinkAction.followLink",
-        icon: "AngleRight",
-      },
-      doElodyAction: {
-        label: "contextMenu.contextMenuElodyAction.delete-relation",
-        action: "DeleteRelation",
-        showAsButton: true,
-        icon: "Trash",
-      },
-    };
-
-    const wrapper = shallowMount(BaseContextMenuActions, {
-      props: {
-        contextMenuActions: basicContextMenuActions as unknown as ContextMenuActions,
-        entityId: "24",
-        entityType: "BaseType" as Entitytyping,
-        bulkOperationsContext: BulkOperationsContextEnum.Home,
-      },
+  it("promotes the actions configured as a button", async () => {
+    const promotedAction = { ...deleteRelation, showAsButton: true };
+    const wrapper = getWrapper({
+      doLinkAction: followLink,
+      doElodyAction: promotedAction,
     });
-
     await flushPromises();
 
-    expect(wrapper.vm.hasAvailableContextMenuActions).toBeTruthy();
     expect(wrapper.vm.hasPromotedActions).toBeTruthy();
-    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(1);
-    expect(Object.keys(wrapper.vm.promotedActions!).length).toBe(1);
     expect(wrapper.vm.overflowActions).toStrictEqual({
-      doLinkAction: basicContextMenuActions.doLinkAction,
+      doLinkAction: followLink,
     });
     expect(wrapper.vm.promotedActions).toStrictEqual({
-      doElodyAction: basicContextMenuActions.doElodyAction,
+      doElodyAction: promotedAction,
     });
   });
 
-  it("contains the option to render if options were provided with delay", async () => {
-    mocks.advancedPermissions["can_delete|child:24"] = true;
-
-    const wrapper = shallowMount(BaseContextMenuActions, {
-      props: {
-        contextMenuActions: undefined,
-        entityId: "24",
-        entityType: "BaseType" as Entitytyping,
-        bulkOperationsContext: BulkOperationsContextEnum.Home,
-      },
-    });
-
+  it("renders actions that only arrive after mount", async () => {
+    const wrapper = getWrapper(undefined);
     await flushPromises();
-
     expect(wrapper.vm.hasAvailableContextMenuActions).toBeFalsy();
 
-    await wrapper.setProps({
-      contextMenuActions,
-    });
-
+    const actions = { doLinkAction: followLink, doElodyAction: deleteRelation };
+    await wrapper.setProps({ contextMenuActions: actions as ContextMenuActions });
     await flushPromises();
 
-    expect(wrapper.vm.overflowActions).toBeDefined();
-    expect(Object.keys(wrapper.vm.overflowActions!).length).toBe(2);
     expect(Object.keys(wrapper.vm.overflowActions!)).toStrictEqual(
-      Object.keys(contextMenuActions),
+      Object.keys(actions),
     );
   });
 });

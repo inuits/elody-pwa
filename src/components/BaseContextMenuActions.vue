@@ -37,11 +37,7 @@ import type { Entitytyping } from "@/generated-types/queries";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
-import { ref, computed, onMounted, watch } from "vue";
-import {
-  usePermissions,
-  advancedPermissions,
-} from "@/composables/usePermissions";
+import { computed } from "vue";
 import type { Context } from "@/composables/useBulkOperations";
 
 const props = withDefaults(
@@ -66,16 +62,9 @@ const handleEmit = () => {
   emit("toggleLoading");
 };
 
-const {
-  fetchPermissionsOfContextMenu,
-  setExtraVariables,
-  createPermissionCacheKey,
-} = usePermissions();
-
-const promotedActions = ref<Partial<ContextMenuActions>>({});
-const overflowActions = ref<Partial<ContextMenuActions>>({});
-
-const getAvailableContextMenuActions = () => {
+// The graphql layer leaves out every action the user has no permission for, so
+// what arrives here only still needs splitting over the two slots.
+const availableActions = computed(() => {
   const { __typename, ...restMenuActions } = { ...props.contextMenuActions };
 
   const promoted: Partial<ContextMenuActions> = {};
@@ -84,59 +73,23 @@ const getAvailableContextMenuActions = () => {
   for (const key in restMenuActions) {
     const action = restMenuActions[key as keyof typeof restMenuActions];
     if (!action) continue;
-    const permission = "can" in action ? action.can : undefined;
-    const hidden = "hidden" in action ? action.hidden : false;
+    if ("hidden" in action && action.hidden) continue;
 
-    const hasPermission =
-      !permission ||
-      permission.length === 0 ||
-      advancedPermissions[
-        createPermissionCacheKey({
-          permission: permission[0] as string,
-          parentEntityId: props.parentEntityId,
-          childEntityId: props.entityId,
-        })
-      ];
-
-    if (hasPermission && !hidden) {
-      if ("showAsButton" in action) {
-        promoted[key as keyof ContextMenuActions] = action as any;
-      } else {
-        overflow[key as keyof ContextMenuActions] = action as any;
-      }
-    }
+    const slot = "showAsButton" in action ? promoted : overflow;
+    slot[key as keyof ContextMenuActions] = action as any;
   }
 
-  promotedActions.value = promoted;
-  overflowActions.value = overflow;
-};
-
-const hasAvailableContextMenuActions = computed(() => {
-  return Object.keys(overflowActions.value).length > 0;
+  return { promoted, overflow };
 });
 
-const hasPromotedActions = computed(() => {
-  return Object.keys(promotedActions.value).length > 0;
-});
+const promotedActions = computed(() => availableActions.value.promoted);
+const overflowActions = computed(() => availableActions.value.overflow);
 
-onMounted(async () => {
-  await initializeMenuActions();
-});
-
-watch(
-  () => props.contextMenuActions,
-  async () => {
-    await initializeMenuActions();
-  },
+const hasAvailableContextMenuActions = computed(
+  () => Object.keys(overflowActions.value).length > 0,
 );
 
-const initializeMenuActions = async () => {
-  if (!props.contextMenuActions) return;
-  setExtraVariables({
-    parentEntityId: props.parentEntityId,
-    childEntityId: props.entityId,
-  });
-  await fetchPermissionsOfContextMenu(props.contextMenuActions);
-  getAvailableContextMenuActions();
-};
+const hasPromotedActions = computed(
+  () => Object.keys(promotedActions.value).length > 0,
+);
 </script>

@@ -113,7 +113,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch, provide } from "vue";
+import { computed, provide } from "vue";
 import type { Entitytyping } from "@/generated-types/queries";
 import type { ContextMenuActionRouteConfig } from "@/types/contextMenuRouteConfig";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
@@ -124,10 +124,6 @@ import LinkAction from "@/components/context-menu-actions/LinkAction.vue";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import CustomAction from "@/components/context-menu-actions/CustomAction.vue";
 import ExportCsvRelatedAction from "@/components/context-menu-actions/ExportCsvRelatedAction.vue";
-import {
-  usePermissions,
-  advancedPermissions,
-} from "@/composables/usePermissions";
 import { useFormHelper } from "@/composables/useFormHelper";
 
 const props = defineProps<{
@@ -158,65 +154,25 @@ const noOp = () => Promise.resolve();
 
 provide("RefetchParentEntity", noOp);
 
-const { fetchAdvancedPermission, setExtraVariables, createPermissionCacheKey } =
-  usePermissions();
-
-const promotedActions = ref<ContextMenuActionRouteConfig[]>([]);
-const overflowActions = ref<ContextMenuActionRouteConfig[]>([]);
-
-const hasPromotedActions = computed(() => promotedActions.value.length > 0);
-const hasOverflowActions = computed(() => overflowActions.value.length > 0);
-
-const filterVisibleActions = async () => {
-  setExtraVariables({
-    parentEntityId: props.entityId,
-    childEntityId: props.entityId,
-  });
-
-  const permissionFetches = props.actions
-    .filter((a) => a.can && a.can.length > 0)
-    .map((a) => fetchAdvancedPermission(a.can as string[]));
-  await Promise.all(permissionFetches);
-
+const visibleActions = computed(() => {
   const promoted: ContextMenuActionRouteConfig[] = [];
   const overflow: ContextMenuActionRouteConfig[] = [];
 
   for (const action of props.actions) {
-    const hidden = "hidden" in action ? action.hidden : false;
-    if (hidden) continue;
+    if ("hidden" in action && action.hidden) continue;
     if (isHiddenForMetadata(action)) continue;
 
-    const hasPermission =
-      !action.can ||
-      action.can.length === 0 ||
-      advancedPermissions[
-        createPermissionCacheKey({
-          permission: action.can[0],
-          parentEntityId: props.entityId,
-          childEntityId: props.entityId,
-        })
-      ];
-
-    if (!hasPermission) continue;
-
-    if ("showAsButton" in action && action.showAsButton) {
-      promoted.push(action);
-    } else {
-      overflow.push(action);
-    }
+    const slot =
+      "showAsButton" in action && action.showAsButton ? promoted : overflow;
+    slot.push(action);
   }
 
-  promotedActions.value = promoted;
-  overflowActions.value = overflow;
-};
+  return { promoted, overflow };
+});
 
-onMounted(filterVisibleActions);
-watch(
-  () => [
-    props.actions,
-    props.entityId,
-    props.actions.map((action) => isHiddenForMetadata(action)),
-  ],
-  filterVisibleActions,
-);
+const promotedActions = computed(() => visibleActions.value.promoted);
+const overflowActions = computed(() => visibleActions.value.overflow);
+
+const hasPromotedActions = computed(() => promotedActions.value.length > 0);
+const hasOverflowActions = computed(() => overflowActions.value.length > 0);
 </script>

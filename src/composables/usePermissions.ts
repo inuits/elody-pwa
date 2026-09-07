@@ -1,10 +1,4 @@
-import type {
-  DropdownOption,
-  ContextMenuActions,
-  ContextMenuElodyAction,
-  ContextMenuGeneralAction,
-  ContextMenuLinkAction,
-} from "@/generated-types/queries";
+import type { DropdownOption } from "@/generated-types/queries";
 import {
   GetAdvancedPermissionsDocument,
   GetAdvancedPermissionDocument,
@@ -40,11 +34,6 @@ const setIgnorePermissions = (value: boolean) => {
   ignorePermissions.value = value;
 };
 let advancedPermissions: { [key: string]: boolean } = {};
-
-type ContextMenuActionType =
-  | ContextMenuElodyAction
-  | ContextMenuGeneralAction
-  | ContextMenuLinkAction;
 
 const resetAdvancedPermissions = () => {
   advancedPermissions = {};
@@ -199,26 +188,10 @@ const usePermissions = () => {
     await Promise.all(promises);
   };
 
-  const fetchPermissionsOfContextMenu = async (actions: ContextMenuActions) => {
-    const actionValues = Object.values(actions) as ContextMenuActionType[];
-
-    const promises = actionValues
-      .filter((item: ContextMenuActionType) => {
-        return item.can && item.can.length > 0;
-      })
-      .map((item) => {
-        return fetchAdvancedPermission(item.can as string[]);
-      });
-
-    await Promise.all(promises);
-  };
-
   return {
-    createPermissionCacheKey,
     fetchAdvancedPermission,
     fetchAdvancedPermissions,
     fetchPermissionsForDropdownOptions,
-    fetchPermissionsOfContextMenu,
     extractMenuPermissions,
     setExtraVariables,
   };

@@ -20,6 +20,9 @@ vi.mock("@/composables/useImport", () => ({
 }));
 
 import { useBaseLibrary } from "../useBaseLibrary";
+import useEntitySingle from "@/composables/useEntitySingle";
+
+const { setEntityUuid } = useEntitySingle();
 
 const mockApolloClient = {} as any;
 
@@ -111,6 +114,37 @@ describe("useBaseLibrary – getEntities count reconciliation", () => {
     expect(fetchSequence.value).toBe(1);
     await getEntities(mockRoute);
     expect(fetchSequence.value).toBe(2);
+  });
+});
+
+describe("useBaseLibrary – parent entity header", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+  const mockQueryResult = (results: any[]) => ({
+    data: { Entities: { results, count: results.length, facets: [] } },
+  });
+
+  it("names the open detail entity so the graphql layer can resolve its relations' permissions", async () => {
+    setEntityUuid("PROD-1");
+    const query = vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }]));
+    const { getEntities } = useBaseLibrary({ query } as any);
+
+    await getEntities(mockRoute);
+
+    expect(query.mock.calls[0][0].context.headers).toEqual({
+      "X-Parent-Entity-Id": "PROD-1",
+    });
+  });
+
+  it("sends an empty parent when no detail entity is open", async () => {
+    setEntityUuid("");
+    const query = vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }]));
+    const { getEntities } = useBaseLibrary({ query } as any);
+
+    await getEntities(mockRoute);
+
+    expect(query.mock.calls[0][0].context.headers).toEqual({
+      "X-Parent-Entity-Id": "",
+    });
   });
 });
 

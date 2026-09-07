@@ -27,6 +27,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import { isAbortError } from "@/helpers";
 import { useImport } from "@/composables/useImport";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const registeredLibraryData = shallowReactive<
   Record<string, { count: Ref<number>; fetchSequence: Ref<number> }>
@@ -66,6 +67,7 @@ export const useBaseLibrary = (
   let listingGeneration = 0;
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
+  const { getEntityUuid } = useEntitySingle();
 
   const getDefaultQueryVariables = (): GetEntitiesQueryVariables => ({
     type: Entitytyping.BaseEntity,
@@ -292,6 +294,10 @@ export const useBaseLibrary = (
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
         context: {
+          // The graphql layer resolves the `$parentEntityId` of a listed
+          // entity's context menu against whichever entity is open, which is
+          // also why this query must never be cached.
+          headers: { "X-Parent-Entity-Id": getEntityUuid() ?? "" },
           fetchOptions: {
             signal,
           },
