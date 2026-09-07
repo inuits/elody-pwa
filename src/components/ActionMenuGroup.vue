@@ -96,20 +96,11 @@ import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { auth } from "@/main";
-import {
-  usePermissions,
-  advancedPermissions,
-} from "@/composables/usePermissions";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
 import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 
 const emit = defineEmits(["update:modelValue"]);
-const {
-  fetchPermissionsForDropdownOptions,
-  setExtraVariables,
-  createPermissionCacheKey,
-} = usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -204,46 +195,15 @@ const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
 };
 
-const getAvailableOptions = () => {
-  const permittedOptions = props.options.filter((item: DropdownOption) => {
-    return (
-      !item.can ||
-      (item.can &&
-        item.can.length > 0 &&
-        advancedPermissions[
-          createPermissionCacheKey({
-            permission: item.can[0],
-            parentEntityId: props.parentEntityId,
-          })
-        ])
-    );
-  });
-
-  availableOptions.value = permittedOptions.filter((item: DropdownOption) => {
-    return (
-      !item?.requiresAuth ||
-      (item?.requiresAuth && auth.isAuthenticated.value === true) ||
-      (item.can &&
-        item.can.length > 0 &&
-        advancedPermissions[
-          createPermissionCacheKey({
-            permission: item.can[0],
-            parentEntityId: props.parentEntityId,
-          })
-        ])
-    );
-  });
-};
-
+// GraphQL leaves out every option the user has no permission for, so what
+// arrives here only still needs the login check.
 watch(
   () => props.options,
-  async () => {
-    setExtraVariables({
-      parentEntityId: props.parentEntityId,
-      childEntityId: "",
-    });
-    await fetchPermissionsForDropdownOptions(props.options);
-    getAvailableOptions();
+  () => {
+    availableOptions.value = props.options.filter(
+      (item: DropdownOption) =>
+        !item?.requiresAuth || auth.isAuthenticated.value === true,
+    );
   },
   { deep: true, immediate: true },
 );

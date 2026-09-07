@@ -180,9 +180,16 @@ export const useBulkOperationsActionsBar = (
       const variables = {
         entityType: entityType.value,
       };
+      // The graphql layer resolves `$parentEntityId` permissions against this
+      // header, so these queries must stay uncached: Apollo keys its cache on
+      // variables only and would serve one parent's options to another.
+      const context = {
+        headers: { "X-Parent-Entity-Id": props.parentEntityId ?? "" },
+      };
       const result = await apolloClient.query({
         query: await determineBulkOperationsQuery(),
         variables,
+        context,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       });
@@ -383,6 +390,9 @@ export const useBulkOperationsActionsBar = (
       .query({
         query: query,
         variables,
+        context: {
+          headers: { "X-Parent-Entity-Id": props.parentEntityId ?? "" },
+        },
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
       })
