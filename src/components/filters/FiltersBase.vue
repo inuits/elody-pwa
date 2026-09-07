@@ -83,7 +83,6 @@
           <BaseButtonNew
             v-if="
               hasSavedSearch &&
-              canUseSavedSearches &&
               enableSaveSearchFilters &&
               auth.isAuthenticated.value === true
             "
@@ -162,7 +161,6 @@ import {
   DamsIcons,
   GetFilterMatcherMappingDocument,
 } from "@/generated-types/queries";
-import { usePermissions } from "@/composables/usePermissions";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
@@ -322,10 +320,9 @@ const handleActivateFilter = (
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider", undefined);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-const savedSearchConfig = config.features.savedSearch ?? {};
-const hasSavedSearch = savedSearchConfig.enabled ?? false;
-const canUseSavedSearches = ref(false);
-const { fetchAdvancedPermission } = usePermissions();
+// Saved search is on when the module is installed, and the graphql layer only
+// reports it enabled to a user who may create one.
+const hasSavedSearch = config.features.savedSearch?.enabled ?? false;
 
 const addFilterOptions = computed(() =>
   filters.value
@@ -625,12 +622,6 @@ onMounted(async () => {
   emit("advancedFiltersPromise", advancedFiltersPromise);
   lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
   updateFilterVariables();
-  if (hasSavedSearch) {
-    const permissionKeys: string[] = savedSearchConfig.permission ?? [];
-    canUseSavedSearches.value = permissionKeys.length
-      ? await fetchAdvancedPermission(permissionKeys)
-      : true;
-  }
 });
 
 const updateFilterVariables = () => {
