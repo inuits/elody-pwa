@@ -15,6 +15,7 @@ import {
   deepToRaw,
   getEnvironmentLabel,
   downloadFile,
+  findPanelMetadata,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -756,5 +757,25 @@ describe("getEnvironmentLabel", () => {
   it("returns an uppercased label for non-production environments", () => {
     expect(getEnvironmentLabel("uat")).toBe("UAT");
     expect(getEnvironmentLabel(" dev ")).toBe("DEV");
+  });
+});
+
+describe("findPanelMetadata", () => {
+  // GraphQL leaves out a panel the user has no permission for, so the walker
+  // that collects editable metadata keys meets nulls in the element tree.
+  it("walks past a panel the graphql layer left out", () => {
+    const windowElement = {
+      __typename: "WindowElement",
+      hidden: null,
+      shown: {
+        __typename: "WindowElementPanel",
+        isEditable: true,
+        title: { __typename: "PanelMetaData", key: "title" },
+      },
+    };
+
+    const found = findPanelMetadata(windowElement);
+
+    expect(found.map((field) => field.key)).toEqual(["title"]);
   });
 });
