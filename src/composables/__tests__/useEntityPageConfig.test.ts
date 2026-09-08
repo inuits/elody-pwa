@@ -263,4 +263,47 @@ describe("useEntityPageConfig", () => {
       expect(deleteButton.value).toEqual(toggleConfig);
     });
   });
+
+  describe("showNavigationArrows", () => {
+    it("defaults to true when there is no entityPageConfig on the route", () => {
+      mockRoute.value = { meta: {}, params: { type: "productions" } };
+
+      const { showNavigationArrows } = useEntityPageConfig();
+
+      expect(showNavigationArrows.value).toBe(true);
+    });
+
+    it("defaults to true when not explicitly configured for the entity type", () => {
+      const config: EntityPageConfig = {
+        production: { actions: [] },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { showNavigationArrows } = useEntityPageConfig();
+
+      expect(showNavigationArrows.value).toBe(true);
+    });
+
+    it("returns false when explicitly disabled for the entity type", () => {
+      const config: EntityPageConfig = {
+        production: { showNavigationArrows: false },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { showNavigationArrows } = useEntityPageConfig();
+
+      expect(showNavigationArrows.value).toBe(false);
+    });
+
+    it("returns true when explicitly enabled for the entity type", () => {
+      const config: EntityPageConfig = {
+        production: { showNavigationArrows: true },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { showNavigationArrows } = useEntityPageConfig();
+
+      expect(showNavigationArrows.value).toBe(true);
+    });
+  });
 });

@@ -379,6 +379,7 @@ import {
 import { useEditMode } from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEntitySingle from "@/composables/useEntitySingle";
+import { useEntityNavigation } from "@/composables/useEntityNavigation";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { saveRelatedEntityData } from "@/composables/useUpdateRelation";
 import { useMaps } from "@/composables/useMaps";
@@ -686,6 +687,24 @@ const {
 const paginationStore = createPaginationStore();
 provide(PaginationStoreKey, paginationStore);
 provide("libraryEntities", entities);
+
+// Entity detail pages render their own nested BaseLibrary instances for
+// related entities (e.g. a "Mediafiles" tab). Those live under a route that
+// already has an "id" param, unlike the actual overview/list page, so this
+// check keeps the navigation cache from being overwritten by them.
+const isOverviewRoute = !route.params["id"];
+
+if (
+  isOverviewRoute &&
+  !isPreviewElement &&
+  ownsRouteState &&
+  !props.isSearchLibrary
+) {
+  useEntityNavigation().setNavigationEntities(
+    entities,
+    props.listItemRouteName,
+  );
+}
 
 const handleSetSimpleSearch = async (value: string) => {
   simpleSearchTerm.value = value;

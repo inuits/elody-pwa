@@ -57,11 +57,16 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.jobStatusPolling === true,
   );
 
+  const showNavigationArrows = computed<boolean>(
+    () => entityConfig.value?.showNavigationArrows !== false,
+  );
+
   return {
     actions,
     hasEditMetadataButton,
     deleteButton,
     trackSeen,
     jobStatusPolling,
+    showNavigationArrows,
   };
 };

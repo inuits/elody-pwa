@@ -91,6 +91,7 @@ export type EntityConfig = {
   deleteButton?: EntityButtonConfig | ToggleEntityButtonConfig | false;
   trackSeen?: boolean;
   jobStatusPolling?: boolean;
+  showNavigationArrows?: boolean;
 };
 
 export type EntityPageConfig = Record<string, EntityConfig>;
