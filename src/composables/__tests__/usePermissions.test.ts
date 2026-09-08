@@ -4,7 +4,6 @@ import {
   resetAdvancedPermissions,
   advancedPermissions,
 } from "../usePermissions";
-import { Permission, Entitytyping } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 
 const createMockQueryResult = <T>(data: T) => ({
@@ -40,241 +39,79 @@ describe("usePermissions", () => {
     });
   });
 
-  describe("usePermissions composable", () => {
+  describe("fetchAdvancedPermission", () => {
     let permissions: ReturnType<typeof usePermissions>;
 
     beforeEach(() => {
       permissions = usePermissions();
     });
 
-    describe("fetchAdvancedPermission", () => {
-      it("should return cached permission when available", () => {
-        const cacheKey = "test-permission|parent:parent1|child:child1";
-        advancedPermissions[cacheKey] = true;
+    it("should return cached permission when available", () => {
+      advancedPermissions["test-permission"] = true;
 
-        permissions.setExtraVariables({
-          parentEntityId: "parent1",
-          childEntityId: "child1",
-        });
-        const result = permissions.fetchAdvancedPermission(["test-permission"]);
+      const result = permissions.fetchAdvancedPermission(["test-permission"]);
 
-        expect(result).toBe(true);
-        expect(mockApolloQuery).not.toHaveBeenCalled();
-      });
-
-      it("should fetch permission from API when not cached", async () => {
-        const mockPermissionResponse = {
-          AdvancedPermission: true,
-        };
-
-        mockApolloQuery.mockResolvedValueOnce(
-          createMockQueryResult(mockPermissionResponse),
-        );
-        permissions.setExtraVariables({
-          parentEntityId: "parent1",
-          childEntityId: "child1",
-        });
-
-        const resultPromise = permissions.fetchAdvancedPermission([
-          "test-permission",
-        ]);
-        const result = await resultPromise;
-
-        expect(result).toBe(true);
-        expect(mockApolloQuery).toHaveBeenCalledWith({
-          query: expect.any(Object),
-          variables: {
-            permission: "test-permission",
-            parentEntityId: "parent1",
-            childEntityId: "child1",
-          },
-          fetchPolicy: "no-cache",
-          notifyOnNetworkStatusChange: true,
-        });
-      });
-
-      it("should handle API errors gracefully", async () => {
-        const consoleSpy = vi
-          .spyOn(console, "log")
-          .mockImplementation(() => {});
-        mockApolloQuery.mockRejectedValueOnce(new Error("API Error"));
-
-        const result = permissions.fetchAdvancedPermission(["test-permission"]);
-
-        expect(result).toBeInstanceOf(Promise);
-
-        await expect(result).rejects.toThrow("API Error");
-
-        consoleSpy.mockRestore();
-      });
-    });
-
-    describe("fetchAdvancedPermissions (batch)", () => {
-      it("should fetch multiple permissions and cache them", async () => {
-        const mockPermissionsResponse = {
-          AdvancedPermissions: [
-            { permission: "permission1", hasPermission: true },
-            { permission: "permission2", hasPermission: false },
-          ],
-        };
-
-        mockApolloQuery.mockResolvedValueOnce(
-          createMockQueryResult(mockPermissionsResponse),
-        );
-        permissions.setExtraVariables({
-          parentEntityId: "parent1",
-          childEntityId: "child1",
-        });
-
-        const result = await permissions.fetchAdvancedPermissions([
-          "permission1",
-          "permission2",
-        ]);
-
-        expect(result).toEqual({
-          permission1: true,
-          permission2: false,
-        });
-
-        expect(
-          advancedPermissions["permission1|parent:parent1|child:child1"],
-        ).toBe(true);
-        expect(
-          advancedPermissions["permission2|parent:parent1|child:child1"],
-        ).toBe(false);
-      });
-
-      it("should handle API errors and return false for all permissions", async () => {
-        const consoleErrorSpy = vi
-          .spyOn(console, "error")
-          .mockImplementation(() => {});
-        mockApolloQuery.mockRejectedValueOnce(new Error("API Error"));
-
-        const result = await permissions.fetchAdvancedPermissions([
-          "permission1",
-          "permission2",
-        ]);
-
-        expect(result).toEqual({
-          permission1: false,
-          permission2: false,
-        });
-
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          "Failed to fetch advanced permissions:",
-          expect.any(Error),
-        );
-
-        consoleErrorSpy.mockRestore();
-      });
-    });
-
-    describe("extractMenuPermissions", () => {
-      it("should extract permissions from nested menu structure", () => {
-        const menu = {
-          item1: {
-            can: ["permission1"],
-            subMenu: {
-              subItem1: {
-                can: ["permission2"],
-              },
-              subItem2: {
-                can: ["permission3"],
-                subMenu: {
-                  deepItem: {
-                    can: ["permission4"],
-                  },
-                },
-              },
-            },
-          },
-          item2: {
-            can: ["permission5"],
-          },
-        };
-
-        const result = permissions.extractMenuPermissions(menu);
-
-        expect(result).toEqual([
-          "permission1",
-          "permission2",
-          "permission3",
-          "permission4",
-          "permission5",
-        ]);
-      });
-
-      it("should handle menu items without permissions", () => {
-        const menu = {
-          item1: {
-            can: ["permission1"],
-          },
-          item2: {},
-          item3: {
-            can: [],
-          },
-        };
-
-        const result = permissions.extractMenuPermissions(menu);
-
-        expect(result).toEqual(["permission1"]);
-      });
-    });
-
-    describe("Cache key generation", () => {
-      it("should generate consistent cache keys with context variables", async () => {
-        permissions.setExtraVariables({
-          parentEntityId: "parent1",
-          childEntityId: "child1",
-        });
-
-        const mockResponse = { AdvancedPermission: true };
-        mockApolloQuery.mockResolvedValue(createMockQueryResult(mockResponse));
-
-        await permissions.fetchAdvancedPermission(["test-permission"]);
-
-        const expectedKey = "test-permission|parent:parent1|child:child1";
-        expect(advancedPermissions[expectedKey]).toBe(true);
-      });
-
-      it("should generate cache keys with only parent ID", async () => {
-        permissions.setExtraVariables({
-          parentEntityId: "parent1",
-          childEntityId: undefined as any,
-        });
-
-        const mockResponse = { AdvancedPermission: true };
-        mockApolloQuery.mockResolvedValue(createMockQueryResult(mockResponse));
-
-        await permissions.fetchAdvancedPermission(["test-permission"]);
-
-        const expectedKey = "test-permission|parent:parent1";
-        expect(advancedPermissions[expectedKey]).toBe(true);
-      });
-
-      it("should generate cache keys with no context variables", async () => {
-        permissions.setExtraVariables();
-
-        const mockResponse = { AdvancedPermission: true };
-        mockApolloQuery.mockResolvedValue(createMockQueryResult(mockResponse));
-
-        await permissions.fetchAdvancedPermission(["test-permission"]);
-
-        const expectedKey = "test-permission";
-        expect(advancedPermissions[expectedKey]).toBe(true);
-      });
-    });
-  });
-
-  describe("Integration tests", () => {
-    it("should handle cached permissions correctly", () => {
-      advancedPermissions["cached-permission"] = false;
-
-      const permissions = usePermissions();
-      const result = permissions.fetchAdvancedPermission(["cached-permission"]);
-
-      expect(result).toBe(false);
+      expect(result).toBe(true);
       expect(mockApolloQuery).not.toHaveBeenCalled();
+    });
+
+    it("should fetch permission from API when not cached", async () => {
+      mockApolloQuery.mockResolvedValueOnce(
+        createMockQueryResult({ AdvancedPermission: true }) as any,
+      );
+
+      const result = await permissions.fetchAdvancedPermission([
+        "test-permission",
+      ]);
+
+      expect(result).toBe(true);
+      expect(mockApolloQuery).toHaveBeenCalledTimes(1);
+      expect(mockApolloQuery.mock.calls[0][0].variables).toEqual({
+        permission: "test-permission",
+      });
+    });
+
+    // Route permissions are the only ones the frontend still resolves itself,
+    // and a route is guarded before the entity behind it exists, so the request
+    // carries no entity id at all.
+    it("caches on the permission alone, since no entity id is ever sent", async () => {
+      mockApolloQuery.mockResolvedValueOnce(
+        createMockQueryResult({ AdvancedPermission: false }) as any,
+      );
+
+      await permissions.fetchAdvancedPermission(["test-permission"]);
+      const cached = permissions.fetchAdvancedPermission(["test-permission"]);
+
+      expect(cached).toBe(false);
+      expect(mockApolloQuery).toHaveBeenCalledTimes(1);
+      expect(Object.keys(advancedPermissions)).toEqual(["test-permission"]);
+    });
+
+    it("refetches when asked to force", async () => {
+      mockApolloQuery
+        .mockResolvedValueOnce(
+          createMockQueryResult({ AdvancedPermission: false }) as any,
+        )
+        .mockResolvedValueOnce(
+          createMockQueryResult({ AdvancedPermission: true }) as any,
+        );
+
+      await permissions.fetchAdvancedPermission(["test-permission"]);
+      const refetched = await permissions.fetchAdvancedPermission(
+        ["test-permission"],
+        true,
+      );
+
+      expect(refetched).toBe(true);
+      expect(mockApolloQuery).toHaveBeenCalledTimes(2);
+    });
+
+    it("should handle API errors gracefully", async () => {
+      mockApolloQuery.mockRejectedValueOnce(new Error("Network error"));
+
+      await expect(
+        permissions.fetchAdvancedPermission(["test-permission"]),
+      ).rejects.toThrow("Network error");
     });
   });
 });

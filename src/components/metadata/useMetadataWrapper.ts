@@ -20,7 +20,6 @@ import {
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
-import { usePermissions } from "@/composables/usePermissions";
 import { getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useFieldLock } from "@/composables/useFieldLock";
@@ -116,26 +115,16 @@ export const useMetadataWrapper = (
     () => metadataKey,
   );
 
-  const { setExtraVariables, fetchAdvancedPermissions } = usePermissions();
-
   const determineFieldPermissions = async (): Promise<void> => {
-    const { can: viewPermissions = [], key: fieldKey } = props.metadata;
-
-    // The graphql layer resolved the edit permission into `readOnly`, so a
-    // field left out of the editable list stays out of every payload built
-    // from it.
+    // The graphql layer resolved the edit permission into `readOnly` and the
+    // view permission into `permitted`, so a field left out of the editable
+    // list stays out of every payload built from it. Either flag absent means
+    // no permission was configured for the field.
     fieldIsEditableByUser.value = !props.metadata.readOnly;
-    if (!fieldIsEditableByUser.value) removeFieldFromEditableList(fieldKey);
+    if (!fieldIsEditableByUser.value)
+      removeFieldFromEditableList(props.metadata.key);
 
-    if (!viewPermissions.length) {
-      fieldIsPermittedToBeSeenByUser.value = true;
-      return;
-    }
-
-    const permissionResults = await fetchAdvancedPermissions(viewPermissions);
-    fieldIsPermittedToBeSeenByUser.value = viewPermissions.some(
-      (permission) => permissionResults[permission],
-    );
+    fieldIsPermittedToBeSeenByUser.value = props.metadata.permitted !== false;
   };
 
   const removeFieldFromEditableList = (fieldKey: string): void => {
@@ -222,16 +211,6 @@ export const useMetadataWrapper = (
       field.value.value = getNewFieldValue(val);
     },
   });
-
-  watch(
-    () => props.formId,
-    () =>
-      setExtraVariables({
-        parentEntityId: props.formId,
-        childEntityId: "",
-      }),
-    { immediate: true },
-  );
 
   const multiSelectTypes = [
     InputFieldTypes.DropdownMultiselectMetadata,

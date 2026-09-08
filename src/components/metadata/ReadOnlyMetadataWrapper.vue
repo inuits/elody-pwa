@@ -87,10 +87,9 @@ import {
   type PanelRelationRootData,
   type Entitytyping,
 } from "@/generated-types/queries";
-import { computed, onMounted, watch, ref } from "vue";
+import { computed, watch, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
-import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 
 const props = withDefaults(
@@ -117,11 +116,12 @@ const props = withDefaults(
   },
 );
 
-const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 const { t } = useI18n();
 
 const showTooltip = ref<boolean>(false);
-const isPermitted = ref<boolean>(false);
+// The graphql layer resolved this field's `can` into `permitted`; absent means
+// no permission was configured for it.
+const isPermitted = computed(() => refMetadata.value.permitted !== false);
 const refMetadata = ref<
   PanelMetaData | PanelRelationMetaData | PanelRelationRootData
 >(props.metadata);
@@ -144,24 +144,6 @@ const label = computed(() =>
     : t("metadata.no-label"),
 );
 
-const updatePermissionVariables = () => {
-  setExtraVariables({
-    parentEntityId: props.formId,
-    childEntityId: "",
-  });
-};
-
-const isPermittedToDisplay = async () => {
-  const permissions = refMetadata.value.can;
-  const hasPermissionsToCheck = permissions && permissions?.length > 0;
-
-  if (!hasPermissionsToCheck) {
-    isPermitted.value = true;
-    return;
-  }
-  isPermitted.value = await fetchAdvancedPermission(permissions);
-};
-
 watch(
   () => props.metadata,
   (newValue) => {
@@ -169,15 +151,4 @@ watch(
   },
 );
 
-watch(
-  () => props.formId,
-  () => {
-    updatePermissionVariables();
-  },
-  { immediate: true },
-);
-
-onMounted(async () => {
-  await isPermittedToDisplay();
-});
 </script>

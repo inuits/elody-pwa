@@ -41,13 +41,12 @@ import type {
   InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { type PropType, computed, onMounted, inject, ref, watch } from "vue";
+import { type PropType, computed, onMounted, inject, ref } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
-import { usePermissions } from "@/composables/usePermissions";
 
 export type Location = {
   latitude: string;
@@ -60,7 +59,9 @@ const props = defineProps({
   value: { type: Object as PropType<Location>, required: true },
   inputField: { type: Object as PropType<InputFieldType>, required: false },
   entityUuid: { type: String, required: true },
-  can: { type: Array, required: false },
+  // The graphql layer resolved this field's `can` into `permitted`; absent
+  // means no permission was configured for it.
+  permitted: { type: Boolean, required: false, default: undefined },
 });
 
 const mediafileViewerContext: any = inject("mediafileViewerContext", "");
@@ -81,26 +82,13 @@ const coordinateEditIsDisabled = computed(() => {
   );
 });
 const { t } = useI18n();
-const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 
-const isPermitted = ref<boolean>(false);
+const isPermitted = computed(() => props.permitted !== false);
 
-onMounted(async () => {
+onMounted(() => {
   setFormValues(computedLatitude.value, computedLongitude.value);
-  await isPermittedToDisplay();
   useEditHelper.value = useEditMode(props.entityUuid);
 });
-
-const isPermittedToDisplay = async () => {
-  const permissions = props.can || [];
-  const hasPermissionsToCheck = permissions && permissions?.length > 0;
-
-  if (!hasPermissionsToCheck) {
-    isPermitted.value = true;
-    return;
-  }
-  isPermitted.value = await fetchAdvancedPermission(permissions as string[]);
-};
 
 const setFormValues = (latitude: string, longitude: string) => {
   if (form) {
@@ -128,19 +116,4 @@ const computedLatitude = computed<any>({
     if (form) setFormValues(value, computedLongitude.value);
   },
 });
-
-const updatePermissionVariables = () => {
-  setExtraVariables({
-    parentEntityId: props.entityUuid,
-    childEntityId: "",
-  });
-};
-
-watch(
-  () => props.entityUuid,
-  () => {
-    updatePermissionVariables();
-  },
-  { immediate: true },
-);
 </script>
