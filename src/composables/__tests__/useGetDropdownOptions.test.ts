@@ -8,6 +8,7 @@ import { type FormContext } from "vee-validate";
 const mocks = vi.hoisted(() => {
   return {
     getForm: vi.fn(),
+    calls: [] as string[],
   };
 });
 
@@ -26,9 +27,13 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     entities: entitiesRef,
     getEntities: vi.fn(),
     setAdvancedFilters: vi.fn(),
-    setEntityType: vi.fn(),
     setIsSearchLibrary: vi.fn(),
     setsearchInputType: vi.fn(),
+    setEntityType: vi.fn(() => mocks.calls.push("setEntityType")),
+    setSortKey: vi.fn((key: string) => mocks.calls.push(`setSortKey:${key}`)),
+    setSortOrder: vi.fn((isAsc: boolean) =>
+      mocks.calls.push(`setSortOrder:${isAsc}`),
+    ),
   }),
 }));
 
@@ -224,5 +229,52 @@ describe("findNewRelationValue", () => {
 
     const result = findNewRelationValue(relations);
     expect(result).toBeNull();
+  });
+});
+
+describe("optionsOrderByKey", () => {
+  const optionsFilters = [
+    { type: "type", key: "type", value: "organization", match_exact: true },
+  ] as any;
+
+  const createState = (optionsOrderByKey?: string) => {
+    mocks.calls.length = 0;
+    return useGetDropdownOptionsState(
+      "organization" as Entitytyping,
+      shallowRef("fetchAll") as any,
+      "refCompanies",
+      "",
+      undefined,
+      optionsFilters,
+      undefined,
+      undefined,
+      optionsOrderByKey,
+    );
+  };
+
+  it("sorts the options ascending by the configured key, after the entity type is set", async () => {
+    await createState("properties.name.value").initialize();
+
+    // setEntityType resets searchValue, so the sort must be applied after it
+    expect(mocks.calls).toEqual([
+      "setEntityType",
+      "setSortOrder:true",
+      "setSortKey:properties.name.value",
+    ]);
+  });
+
+  it("also sorts the options fetched while searching", async () => {
+    await createState("properties.name.value").getAutocompleteOptions("ant");
+
+    expect(mocks.calls).toEqual([
+      "setSortOrder:true",
+      "setSortKey:properties.name.value",
+    ]);
+  });
+
+  it("does not sort when no key is configured", async () => {
+    await createState(undefined).initialize();
+
+    expect(mocks.calls).toEqual(["setEntityType"]);
   });
 });

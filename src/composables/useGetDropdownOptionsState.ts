@@ -28,6 +28,7 @@ export const useGetDropdownOptionsState = (
   advancedFilterInputForRetrievingOptions?: [AdvancedFilterInput],
   formId?: string,
   relationFilter?: AdvancedFilterInput,
+  optionsOrderByKey?: string,
 ) => {
   const { locale } = useI18n();
   const apolloClient = inject(DefaultApolloClient);
@@ -42,7 +43,15 @@ export const useGetDropdownOptionsState = (
     setEntityType,
     setIsSearchLibrary,
     setsearchInputType,
+    setSortKey,
+    setSortOrder,
   } = useBaseLibrary(apolloClient as ApolloClient<any>);
+
+  const applyOptionsOrder = () => {
+    if (!optionsOrderByKey) return;
+    setSortOrder(true);
+    setSortKey(optionsOrderByKey);
+  };
 
   const baseTypeFilter = {
     type: "type",
@@ -118,6 +127,8 @@ export const useGetDropdownOptionsState = (
     setAdvancedFilters(filters as AdvancedFilterInput[]);
     setsearchInputType(SearchInputType.AdvancedInputType);
     setEntityType(entityTypeToSet as Entitytyping);
+    // after setEntityType: it resets searchValue, wiping any order_by set before it
+    applyOptionsOrder();
 
     try {
       if (requestId === currentRequestId.value) {
@@ -170,6 +181,7 @@ export const useGetDropdownOptionsState = (
     }
 
     setAdvancedFilters(advancedFilters as AdvancedFilterInput[]);
+    applyOptionsOrder();
 
     try {
       if (requestId === currentRequestId.value) {

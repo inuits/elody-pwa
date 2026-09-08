@@ -21,6 +21,7 @@ export type UseGetDropdownOptionsParams = {
   advancedFilterInputForRetrievingOptions?: AdvancedFilterInput[];
   formId?: string;
   relationFilter?: AdvancedFilterInput;
+  optionsOrderByKey?: string;
 };
 
 export const useGetDropdownOptions = (
@@ -34,6 +35,7 @@ export const useGetDropdownOptions = (
   advancedFilterInputForRetrievingOptions?: [AdvancedFilterInput],
   formId?: string,
   relationFilter?: AdvancedFilterInput,
+  optionsOrderByKey?: string,
 ): ReturnType<typeof useGetDropdownOptionsState> => {
   const createNewDropdownOptionsState = () => {
     const newDropdownOptionsState = useGetDropdownOptionsState(
@@ -45,6 +47,7 @@ export const useGetDropdownOptions = (
       advancedFilterInputForRetrievingOptions,
       formId,
       relationFilter,
+      optionsOrderByKey,
     );
 
     dropdownOptionsStates.value = {

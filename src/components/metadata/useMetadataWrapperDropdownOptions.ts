@@ -104,6 +104,9 @@ export const useMetadataWrapperDropdownOptions = (
   const relationType = computed<string | undefined>(
     () => props.metadata.inputField?.relationType || undefined,
   );
+  const optionsOrderByKey = computed<string | undefined>(
+    () => props.metadata.inputField?.optionsOrderByKey || undefined,
+  );
   const advancedFilterInputForSearchingOptions = computed<
     AdvancedFilterInputType | undefined
   >(
@@ -123,6 +126,7 @@ export const useMetadataWrapperDropdownOptions = (
     c.advancedFilterInputForRetrievingOptions,
     c.formId,
     c.relationFilter,
+    c.optionsOrderByKey,
   ];
 
   const dropDownoptionsConfigMapping: {
@@ -140,6 +144,7 @@ export const useMetadataWrapperDropdownOptions = (
         filtersForRetrievingRelatedOptions.value,
       formId: optionsFormId.value,
       relationFilter: undefined,
+      optionsOrderByKey: optionsOrderByKey.value,
     },
     fetchRelations: {
       dropdownOptionsStateName: `${fieldId.value}-${relationType.value}-fetchRelations`,
@@ -157,6 +162,7 @@ export const useMetadataWrapperDropdownOptions = (
       formId: optionsFormId.value,
       relationFilter: props.metadata.inputField
         ?.relationFilter as AdvancedFilterInputType,
+      optionsOrderByKey: optionsOrderByKey.value,
     },
   };
 
