@@ -4,7 +4,6 @@ import {
   GetAdvancedPermissionDocument,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
-import { ref } from "vue";
 
 interface PermissionResult {
   permission: string;
@@ -29,10 +28,6 @@ export interface PermissionCacheKeyOptions {
   childEntityId?: string;
 }
 
-const ignorePermissions = ref<boolean>(false);
-const setIgnorePermissions = (value: boolean) => {
-  ignorePermissions.value = value;
-};
 let advancedPermissions: { [key: string]: boolean } = {};
 
 const resetAdvancedPermissions = () => {
@@ -198,8 +193,6 @@ const usePermissions = () => {
 };
 
 export {
-  ignorePermissions,
-  setIgnorePermissions,
   usePermissions,
   resetAdvancedPermissions,
   advancedPermissions,

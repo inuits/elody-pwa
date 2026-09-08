@@ -564,7 +564,15 @@ export const getFromExpressEndpoint = async (
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
       : `/api/${endpoint}`,
-    { cache: "no-store" },
+    {
+      cache: "no-store",
+      // The config endpoint resolves permissions server-side, and on a client
+      // with tenant select those verdicts are tenant-scoped. Selecting a tenant
+      // reloads the page, so this picks the new tenant up on the way back.
+      headers: {
+        "X-Tenant-ID": sessionStorage.getItem("active_tenant_id") || "",
+      },
+    },
   );
   return await response.json();
 };

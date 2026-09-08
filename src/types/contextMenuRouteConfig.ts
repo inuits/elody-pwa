@@ -12,7 +12,6 @@ export type { EntityButtonStyle, EntityButtonConfig };
 type BaseAction = {
   label: string;
   icon: string;
-  can?: string[];
   hideForMetadata?: { key: string; equals: string | number | boolean };
 };
 

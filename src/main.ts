@@ -25,7 +25,6 @@ import {
   graphqlErrorInterceptor,
 } from "@/helpers";
 import { OpenIdConnectClient } from "session-vue-3-oidc-library";
-import { setIgnorePermissions } from "./composables/usePermissions";
 import { setListingCountCap } from "@/composables/useResultCount";
 import { Unicons } from "./types";
 import { addRouterNavigationGuards } from "./routerNavigationGuards";
@@ -59,7 +58,7 @@ const applyCustomization = (rulesObject: any) => {
 const start = async (): Promise<void> => {
   Unicon.add(Object.values(Unicons));
 
-  const { config, translations, version, urlMapping } =
+  let { config, translations, version, urlMapping } =
     await getApplicationDetails();
   i18n = setupI18n(translations, config.customization.applicationLocale);
 
@@ -90,6 +89,11 @@ const start = async (): Promise<void> => {
     await auth.processAuthCode(authCode);
     if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
       await auth.redirectToLogin();
+    // processAuthCode is what puts a token on the express session, so the
+    // config fetched above had its permission-gated parts (simple search item
+    // types, module features) resolved as an anonymous user. Everything that
+    // reads them runs below this point.
+    config = (await getApplicationDetails()).config;
   } else {
     await auth.verifyServerAuth();
   }
@@ -145,7 +149,6 @@ const start = async (): Promise<void> => {
     cache: new InMemoryCache(),
   });
 
-  setIgnorePermissions(config.IGNORE_PERMISSIONS);
   const [formattersSettingsResult] = await Promise.all([
     getFormattersSettings(),
   ]);

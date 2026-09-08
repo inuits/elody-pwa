@@ -16,6 +16,7 @@ import {
   getEnvironmentLabel,
   downloadFile,
   findPanelMetadata,
+  getFromExpressEndpoint,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -777,5 +778,37 @@ describe("findPanelMetadata", () => {
     const found = findPanelMetadata(windowElement);
 
     expect(found.map((field) => field.key)).toEqual(["title"]);
+  });
+});
+
+describe("getFromExpressEndpoint", () => {
+  // The express config endpoint resolves permissions server-side, and on a
+  // client with tenant select those verdicts are tenant-scoped.
+  it("names the active tenant so the config is resolved for it", async () => {
+    sessionStorage.setItem("active_tenant_id", "TENANT-1");
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue({ json: async () => ({ config: {} }) });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await getFromExpressEndpoint("app-configs");
+
+    expect(fetchSpy.mock.calls[0][1].headers).toEqual({
+      "X-Tenant-ID": "TENANT-1",
+    });
+    sessionStorage.removeItem("active_tenant_id");
+    vi.unstubAllGlobals();
+  });
+
+  it("sends an empty tenant when none is selected", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue({ json: async () => ({ config: {} }) });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await getFromExpressEndpoint("app-configs");
+
+    expect(fetchSpy.mock.calls[0][1].headers).toEqual({ "X-Tenant-ID": "" });
+    vi.unstubAllGlobals();
   });
 });

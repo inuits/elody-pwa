@@ -65,7 +65,7 @@ describe("useEditState", () => {
       [{ canUpdate: true, canDelete: true }, "edit-delete"],
       [{ canUpdate: true, canDelete: false }, "edit"],
       [{ canUpdate: false, canDelete: true }, "delete"],
-      [{ canUpdate: false, canDelete: false }, "view"],
+      [{ canUpdate: false, canDelete: false }, "no-edit"],
     ])("maps %o onto edit mode %s", (permissions, expected) => {
       const state = permittedState(`permitted-${expected}`);
 
@@ -85,12 +85,12 @@ describe("useEditState", () => {
       expect(state.editMode).toBe("edit");
     });
 
-    it("leaves an entity nobody reported permissions for viewable", () => {
+    it("shows no edit button for an entity nobody reported permissions for", () => {
       const state = permittedState("permitted-unknown");
 
       state.disableEdit();
 
-      expect(state.editMode).toBe("view");
+      expect(state.editMode).toBe("no-edit");
     });
   });
 });

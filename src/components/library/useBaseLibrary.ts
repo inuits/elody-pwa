@@ -27,7 +27,6 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import { isAbortError } from "@/helpers";
 import { useImport } from "@/composables/useImport";
-import useEntitySingle from "@/composables/useEntitySingle";
 
 const registeredLibraryData = shallowReactive<
   Record<string, { count: Ref<number>; fetchSequence: Ref<number> }>
@@ -57,6 +56,7 @@ export const useBaseLibrary = (
   const placeholderEntitiesAmount = ref<number>(0);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
+  const parentEntityId = ref<string>();
   const manipulateQuery = ref<boolean>(false);
   const manipulationQuery = ref<object>();
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
@@ -67,7 +67,6 @@ export const useBaseLibrary = (
   let listingGeneration = 0;
   const { locale } = useI18n();
   const { getStateForRoute, updateStateForRoute } = useStateManagement();
-  const { getEntityUuid } = useEntitySingle();
 
   const getDefaultQueryVariables = (): GetEntitiesQueryVariables => ({
     type: Entitytyping.BaseEntity,
@@ -101,6 +100,13 @@ export const useBaseLibrary = (
 
   const setParentEntityIdentifiers = (identifiers: string[]) => {
     queryVariables.userUuid = identifiers[0];
+  };
+
+  // Which entity this listing hangs off, for the permissions the graphql layer
+  // resolves against `$parentEntityId`. Kept apart from the global "entity
+  // currently open", which no navigation reliably clears.
+  const setParentEntityId = (identifier: string | undefined) => {
+    parentEntityId.value = identifier;
   };
 
   const setIsSearchLibrary = (searchLibrary: boolean): void => {
@@ -295,9 +301,9 @@ export const useBaseLibrary = (
         notifyOnNetworkStatusChange: true,
         context: {
           // The graphql layer resolves the `$parentEntityId` of a listed
-          // entity's context menu against whichever entity is open, which is
-          // also why this query must never be cached.
-          headers: { "X-Parent-Entity-Id": getEntityUuid() ?? "" },
+          // entity's context menu against this, which is also why this query
+          // must never be cached.
+          headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
           fetchOptions: {
             signal,
           },
@@ -444,6 +450,7 @@ export const useBaseLibrary = (
     setLimit,
     setManipulationOfQuery,
     setParentEntityIdentifiers,
+    setParentEntityId,
     setsearchInputType,
     setSkip,
     setSortKey,

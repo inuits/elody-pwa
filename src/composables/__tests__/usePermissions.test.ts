@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   usePermissions,
-  setIgnorePermissions,
-  ignorePermissions,
   resetAdvancedPermissions,
   advancedPermissions,
 } from "../usePermissions";
@@ -28,19 +26,6 @@ describe("usePermissions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetAdvancedPermissions();
-    setIgnorePermissions(false);
-  });
-
-  describe("Permission Ignoring", () => {
-    it("should set and get ignorePermissions value", () => {
-      expect(ignorePermissions.value).toBe(false);
-
-      setIgnorePermissions(true);
-      expect(ignorePermissions.value).toBe(true);
-
-      setIgnorePermissions(false);
-      expect(ignorePermissions.value).toBe(false);
-    });
   });
 
   describe("resetAdvancedPermissions", () => {
@@ -283,8 +268,6 @@ describe("usePermissions", () => {
 
   describe("Integration tests", () => {
     it("should handle cached permissions correctly", () => {
-      setIgnorePermissions(false);
-
       advancedPermissions["cached-permission"] = false;
 
       const permissions = usePermissions();

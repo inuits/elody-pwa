@@ -666,6 +666,7 @@ const {
   setLimit,
   setManipulationOfQuery,
   setParentEntityIdentifiers,
+  setParentEntityId,
   setsearchInputType,
   setSkip,
   setLocale,
@@ -873,6 +874,8 @@ const mapDropdownOptionsToBulkProcessableItem = (
 };
 
 const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
+
+setParentEntityId(props.parentEntityIdentifiers?.[0]);
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);

@@ -22,7 +22,7 @@ export const useEditState = (editStateName: string) => {
   const buttonClicked = ref(false);
   const isDisabled = ref(false);
   const editMode = ref<EditModes>("no-edit");
-  const permittedEditMode = ref<EditModes>("view");
+  const permittedEditMode = ref<EditModes>("no-edit");
   const submitFn = ref<Callback | undefined>();
   const refetchRegistry = createCallbackRegistry<() => void>();
   const mutationRegistry = createCallbackRegistry<() => Promise<void>>();
@@ -115,7 +115,8 @@ export const useEditState = (editStateName: string) => {
     if (canUpdate && canDelete) permittedEditMode.value = "edit-delete";
     else if (canUpdate) permittedEditMode.value = "edit";
     else if (canDelete) permittedEditMode.value = "delete";
-    else permittedEditMode.value = "view";
+    // "view" still renders an Edit button, so neither permission means none.
+    else permittedEditMode.value = "no-edit";
     setEditMode(permittedEditMode.value);
   };
 

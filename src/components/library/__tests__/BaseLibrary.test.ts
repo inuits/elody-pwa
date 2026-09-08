@@ -72,6 +72,7 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     setLimit: vi.fn(),
     setManipulationOfQuery: vi.fn(),
     setParentEntityIdentifiers: vi.fn(),
+    setParentEntityId: vi.fn(),
     setsearchInputType: vi.fn(),
     setSkip: vi.fn(),
     setLocale: vi.fn(),

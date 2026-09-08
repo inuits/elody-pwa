@@ -22,8 +22,6 @@ vi.mock("@/composables/useImport", () => ({
 import { useBaseLibrary } from "../useBaseLibrary";
 import useEntitySingle from "@/composables/useEntitySingle";
 
-const { setEntityUuid } = useEntitySingle();
-
 const mockApolloClient = {} as any;
 
 // Force a specific function.name to simulate what esbuild minification does:
@@ -123,10 +121,10 @@ describe("useBaseLibrary – parent entity header", () => {
     data: { Entities: { results, count: results.length, facets: [] } },
   });
 
-  it("names the open detail entity so the graphql layer can resolve its relations' permissions", async () => {
-    setEntityUuid("PROD-1");
+  it("names the entity this listing hangs off so the graphql layer can resolve its relations' permissions", async () => {
     const query = vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }]));
-    const { getEntities } = useBaseLibrary({ query } as any);
+    const { getEntities, setParentEntityId } = useBaseLibrary({ query } as any);
+    setParentEntityId("PROD-1");
 
     await getEntities(mockRoute);
 
@@ -135,10 +133,13 @@ describe("useBaseLibrary – parent entity header", () => {
     });
   });
 
-  it("sends an empty parent when no detail entity is open", async () => {
-    setEntityUuid("");
+  it("sends an empty parent for a listing with no parent, whatever entity was last opened", async () => {
+    // The globally remembered "entity currently open" is not cleared by every
+    // navigation, so a top-level listing must not inherit it.
+    useEntitySingle().setEntityUuid("STALE-1");
     const query = vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }]));
-    const { getEntities } = useBaseLibrary({ query } as any);
+    const { getEntities, setParentEntityId } = useBaseLibrary({ query } as any);
+    setParentEntityId(undefined);
 
     await getEntities(mockRoute);
 
