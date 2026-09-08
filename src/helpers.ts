@@ -377,7 +377,6 @@ export const getMetadataFields = (
         lineClamp: (value as PanelMetaData).lineClamp,
         valueTranslationKey: (value as PanelMetaData).valueTranslationKey,
         onlyForEntityTypes: (value as PanelMetaData).onlyForEntityTypes,
-        can: (value as PanelMetaData).can,
         readOnly: (value as PanelMetaData).readOnly,
         copyToClipboard: (value as PanelMetaData).copyToClipboard,
         defaultValue: (value as PanelMetaData).defaultValue,
