@@ -95,13 +95,17 @@ import { useI18n } from "vue-i18n";
 import { computed, ref, watch } from "vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 const { closeModal, getModalInfo } = useBaseModal();
 const { t } = useI18n();
 
 const modalInfo = computed(() => getModalInfo(TypeModals.IiifOperationsModal));
+const { displayErrorNotification } = useBaseNotification();
 const fileName = computed<string>(() => modalInfo.value.fileName || "");
-const originalFilename = computed<string>(() => modalInfo.value.originalFilename || "");
+const originalFilename = computed<string>(
+  () => modalInfo.value.originalFilename || "",
+);
 const dimensions = computed<{ width: number; height: number } | undefined>(
   () => modalInfo.value.dimensions,
 );
@@ -122,17 +126,25 @@ const downLoadImage = async (): Promise<void> => {
   if (isDownloading.value) return;
   isDownloading.value = true;
 
-  if (!scaledWidth.value && !scaledHeight.value)
-    throw new Error(`Please provide at least a width or height`);
+  if (!scaledWidth.value && !scaledHeight.value) {
+    displayErrorNotification(
+      "iiif-operations-modal.missing-dimensions-title",
+      "iiif-operations-modal.missing-dimensions-description",
+    );
+    isDownloading.value = false;
+    return;
+  }
   if (!scaledWidth.value || !scaledHeight.value) handleEmptyWidthOrHeight();
 
-  const filenameWithoutExtension = originalFilename.value?.replace(/\.[^/.]*$/, "") || "";
+  const filenameWithoutExtension =
+    originalFilename.value?.replace(/\.[^/.]*$/, "") || "";
   const url = `/api/iiif/3/${fileName.value}/full/^!${scaledWidth.value},${scaledHeight.value}/0/default.${currentFormat.value}`;
   const downloadName = `${filenameWithoutExtension}_${scaledWidth.value}x${scaledHeight.value}.${currentFormat.value}`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Image generation failed (${response.status})`);
+    if (!response.ok)
+      throw new Error(`Image generation failed (${response.status})`);
 
     const blob = await response.blob();
     const objectUrl = URL.createObjectURL(blob);
@@ -162,7 +174,8 @@ const handleEmptyWidthOrHeight = () => {
 };
 
 const scaleDimensions = (scale: number): { width: number; height: number } => {
-  if (!originalWidth.value || !originalHeight.value) return { width: 0, height: 0 };
+  if (!originalWidth.value || !originalHeight.value)
+    return { width: 0, height: 0 };
   return {
     width: Math.floor(originalWidth.value * scale),
     height: Math.floor(originalHeight.value * scale),
