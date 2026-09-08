@@ -6,9 +6,6 @@ import {
   type GetTenantsQuery,
 } from "@/generated-types/queries";
 import { ref, computed } from "vue";
-import {
-  resetAdvancedPermissions,
-} from "@/composables/usePermissions";
 import { useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
@@ -58,10 +55,8 @@ const useTenant = (
         await setTennant(tenantFromSession.label, tenantFromSession.id);
       }
 
-      resetAdvancedPermissions();
       tenantsLoaded.value = "loaded";
     } else {
-      resetAdvancedPermissions();
       tenantsLoaded.value = "no-switcher";
     }
   };

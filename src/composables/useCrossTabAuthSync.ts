@@ -1,7 +1,6 @@
 import { watch, onUnmounted, inject } from "vue";
 import { auth, apolloClient } from "@/main";
 import { useAuth } from "./useAuth";
-import { resetAdvancedPermissions } from "./usePermissions";
 import { useApp } from "@/composables/useApp";
 
 type ActionType = "login" | "logout" | (string & {});
@@ -32,7 +31,6 @@ export const useCrossTabAuthSync = () => {
       performLogout();
     }
     if (action === "login" && auth!.isAuthenticated.value === false) {
-      resetAdvancedPermissions();
       auth.verifyServerAuth();
       useApp().initApp(auth, config, apolloClient);
     }

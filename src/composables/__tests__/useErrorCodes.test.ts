@@ -12,7 +12,6 @@ const sharedMocks = vi.hoisted(() => ({
 
   logout: vi.fn(),
   setTenantInSessionStorage: vi.fn(),
-  resetAdvancedPermissions: vi.fn(),
 }));
 
 vi.mock("@/composables/useStateManagement", () => ({
@@ -47,10 +46,6 @@ vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: vi.fn(() => ({
     closeAllModals: sharedMocks.closeAllModals,
   })),
-}));
-
-vi.mock("@/composables/usePermissions", () => ({
-  resetAdvancedPermissions: sharedMocks.resetAdvancedPermissions,
 }));
 
 vi.mock("@/helpers", () => ({
@@ -265,7 +260,6 @@ describe("useErrorCodes", () => {
 
         expect(sharedMocks.logout).toHaveBeenCalledTimes(1);
         expect(sharedMocks.clearStorage).toHaveBeenCalled();
-        expect(sharedMocks.resetAdvancedPermissions).toHaveBeenCalled();
         expect(sharedMocks.setPageStatus).toHaveBeenCalledWith(
           PageStatus.Unauthorized,
         );

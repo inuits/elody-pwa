@@ -3,7 +3,6 @@ import { useRoute } from "vue-router";
 import { apolloClient, auth } from "@/main";
 import { useApp } from "@/composables/useApp";
 import { useStateManagement } from "@/composables/useStateManagement";
-import { resetAdvancedPermissions } from "@/composables/usePermissions";
 import useTenant from "@/composables/useTenant";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
@@ -50,7 +49,6 @@ export const useAuth = () => {
   const performLogout = async (): Promise<void> => {
     try {
       await auth.logout();
-      resetAdvancedPermissions();
       clearStorage();
       setTenantInSessionStorage("");
       closeAllModals();

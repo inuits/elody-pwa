@@ -9,26 +9,44 @@ import { getFromExpressEndpoint } from "@/helpers";
 import { ElodyServices, RouteNames } from "@/generated-types/queries";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
-import { usePermissions } from "@/composables/usePermissions";
 import type { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { usePageStatus } from "@/composables/usePageStatus";
 
-const checkAlternativeRoutes = async (
+type RouteVerdicts = { [routeKey: string]: boolean };
+
+const routeKey = (route: { name?: unknown; path?: string }): string =>
+  String(route.name ?? route.path ?? "");
+
+// The graphql layer resolved every route `can` into `meta.permitted` when it
+// served the config. The router was built from the config fetched before the
+// auth code was processed, so the verdicts are read from the config handed to
+// the guards instead of from the router's own meta.
+const collectRouteVerdicts = (
+  routes: any[] | undefined,
+  verdicts: RouteVerdicts = {},
+): RouteVerdicts => {
+  for (const route of routes ?? []) {
+    if (typeof route?.meta?.permitted === "boolean")
+      verdicts[routeKey(route)] = route.meta.permitted;
+    if (route?.children) collectRouteVerdicts(route.children, verdicts);
+  }
+  return verdicts;
+};
+
+const checkAlternativeRoutes = (
   to: RouteLocationNormalized,
-): Promise<RouteLocationRaw | null> => {
+  routeVerdicts: RouteVerdicts,
+): RouteLocationRaw | null => {
   const toData = to.matched[to.matched.length - 1];
   const toMeta = toData?.meta || {};
-  const permission = toMeta.can as string[] | undefined;
 
-  if (!permission) return null;
+  if (routeVerdicts[routeKey(toData ?? {})] !== false) return null;
 
-  const { fetchAdvancedPermission } = usePermissions();
-  const isPermitted = await fetchAdvancedPermission(permission);
   const alternativeRoutes = toMeta.alternativeRoutes as
     | { [role: string]: string }
     | undefined;
 
-  if (isPermitted || !alternativeRoutes) return null;
+  if (!alternativeRoutes) return null;
 
   const authManager = auth as unknown as OpenIdConnectClient;
   const userRole = authManager.user?.role || "fallback";
@@ -140,6 +158,8 @@ const checkForNewVersion = async (): Promise<void> => {
 };
 
 export const addRouterNavigationGuards = (router: Router, config: any) => {
+  const routeVerdicts = collectRouteVerdicts(config?.routerConfig);
+
   router.afterEach(() => {
     handleRequiredAuthentication(router);
     const authManager = auth as unknown as OpenIdConnectClient;
@@ -155,7 +175,7 @@ export const addRouterNavigationGuards = (router: Router, config: any) => {
       const { resetPageStatus } = usePageStatus();
       resetPageStatus();
 
-      const alternativeRedirect = await checkAlternativeRoutes(to);
+      const alternativeRedirect = checkAlternativeRoutes(to, routeVerdicts);
       if (alternativeRedirect) return next(alternativeRedirect);
 
       const authRedirect = checkRequiresAuthFromOverview(to, config);

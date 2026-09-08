@@ -7,7 +7,6 @@ import { ErrorCodeType, PageStatus } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { getTranslatedMessage, isAbortError } from "@/helpers";
-import { resetAdvancedPermissions } from "@/composables/usePermissions";
 import { usePageStatus } from "@/composables/usePageStatus";
 
 export type MessageSeverity = "error" | "warning";
@@ -144,7 +143,6 @@ export const useErrorCodes = (): {
     const { closeAllModals } = useBaseModal();
 
     await auth.logout();
-    resetAdvancedPermissions();
     useStateManagement().clearStorage();
     setTenantInSessionStorage("");
     closeAllModals();

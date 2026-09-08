@@ -712,11 +712,6 @@ const selectedRelationMode = computed<BulkEditModes>({
     ),
 });
 
-// A bulk-edit form is applied to entities it never loaded, so its own field keys
-// are the editable set. Seeding them here lets MetadataWrapper strip back the
-// ones marked read-only before anything is submitted — though only panel
-// metadata carries that mark, and a bulk-edit form is built from form fields,
-// which have no entity to resolve an edit permission against.
 watch(
   () => getFieldArray.value,
   (fields: any[]) => {
@@ -1677,7 +1672,6 @@ const initializeForm = async (
   await getDynamicForm(document, props.tabName);
   await seedFormValues();
 };
-
 
 const seedFormValues = async () => {
   if (!form.value) return;
