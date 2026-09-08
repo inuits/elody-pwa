@@ -27,7 +27,10 @@ const mockRoute = reactive({
   path: "/test",
   fullPath: "/test",
   meta: { entityType: "BaseEntity" },
+  params: {} as Record<string, unknown>,
 });
+
+const mockSetNavigationEntities = vi.fn();
 
 // --- Edit composable (the behavioral seam under test) ------------------------
 vi.mock("@/composables/useEdit", () => ({
@@ -185,6 +188,12 @@ vi.mock("@/composables/useViewModes", () => ({
 
 vi.mock("@/composables/useUpdateRelation", () => ({
   saveRelatedEntityData: vi.fn(),
+}));
+
+vi.mock("@/composables/useEntityNavigation", () => ({
+  useEntityNavigation: () => ({
+    setNavigationEntities: mockSetNavigationEntities,
+  }),
 }));
 
 vi.mock("@/helpers", () => ({
@@ -817,6 +826,81 @@ describe("BaseLibrary.vue does not own route state inside a preview subtree", ()
     await flushPromises();
     const filters = wrapper.findComponent({ name: "FiltersBase" });
     expect(filters.props("shouldUseStateForRoute")).toBe(true);
+  });
+});
+
+describe("BaseLibrary.vue navigation cache", () => {
+  // Entity detail pages render their own nested BaseLibrary instances for
+  // related entities (e.g. a "Mediafiles" tab). Those must never overwrite
+  // the prev/next navigation cache populated by the page's real overview
+  // library, or the header arrows end up navigating through the wrong list.
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mockRoute.params = {};
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  // vitestSetup.ts mocks vue's `inject` to drop the default-value argument
+  // for every key except "config", so `inject("OwnsRouteState", true)`
+  // resolves to undefined unless explicitly provided here — this mirrors
+  // what the real default (true) would be in the app itself.
+  const getOverviewWrapper = (
+    props: Record<string, unknown> = {},
+    provideOverrides: Record<string, unknown> = {},
+  ) =>
+    shallowMount(BaseLibrary, {
+      props: { ...getDefaultProps(), ...props },
+      global: {
+        provide: {
+          config,
+          [DefaultApolloClient as symbol]: { query: vi.fn(), mutate: vi.fn() },
+          IsPreviewElement: false,
+          OwnsRouteState: true,
+          showCurrentPreviewFlow: true,
+          ParentEntityProvider: undefined,
+          ...provideOverrides,
+        },
+        stubs: { teleport: true },
+      },
+    });
+
+  it("caches entities for navigation when it is the page's own overview library", () => {
+    wrapper = getOverviewWrapper();
+
+    expect(mockSetNavigationEntities).toHaveBeenCalledWith(
+      libEntities,
+      "SingleEntity",
+    );
+  });
+
+  it("does not cache entities when embedded in a detail page (route has an id param)", () => {
+    mockRoute.params = { id: "entity-123" };
+
+    wrapper = getOverviewWrapper();
+
+    expect(mockSetNavigationEntities).not.toHaveBeenCalled();
+  });
+
+  it("does not cache entities inside a preview subtree", () => {
+    wrapper = getOverviewWrapper({}, { IsPreviewElement: true });
+
+    expect(mockSetNavigationEntities).not.toHaveBeenCalled();
+  });
+
+  it("does not cache entities for search libraries", () => {
+    wrapper = getOverviewWrapper({ isSearchLibrary: true });
+
+    expect(mockSetNavigationEntities).not.toHaveBeenCalled();
   });
 });
 

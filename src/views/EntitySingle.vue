@@ -1,7 +1,6 @@
 <template>
   <div class="relative h-full">
-    <!-- outside the scroll container so the overlay covers the visible page
-         instead of only the first screenful of a scrolled-down detail page -->
+    <entity-navigation-arrows class="px-6" />
     <div
       v-if="showSavingSpinner"
       class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
@@ -48,6 +47,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
+import EntityNavigationArrows from "@/components/EntityNavigationArrows.vue";
 import {
   asString,
   getTitleOrNameFromEntity,
@@ -139,7 +139,7 @@ watch(entityType, (value) => {
   queryVariables.type = value;
 });
 
-const { result, refetch, onError } = useQuery<GetEntityByIdQuery>(
+const { result, refetch } = useQuery<GetEntityByIdQuery>(
   GetEntityByIdDocument,
   queryVariables,
   () => ({

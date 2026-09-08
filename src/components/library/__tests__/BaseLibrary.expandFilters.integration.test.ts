@@ -17,6 +17,7 @@ const mockRoute = reactive({
   path: "/test",
   fullPath: "/test",
   meta: { entityType: "BaseEntity" },
+  params: {} as Record<string, unknown>,
 });
 
 vi.mock("@/composables/useEdit", () => ({
