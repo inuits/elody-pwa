@@ -17,10 +17,6 @@ type RouteVerdicts = { [routeKey: string]: boolean };
 const routeKey = (route: { name?: unknown; path?: string }): string =>
   String(route.name ?? route.path ?? "");
 
-// The graphql layer resolved every route `can` into `meta.permitted` when it
-// served the config. The router was built from the config fetched before the
-// auth code was processed, so the verdicts are read from the config handed to
-// the guards instead of from the router's own meta.
 const collectRouteVerdicts = (
   routes: any[] | undefined,
   verdicts: RouteVerdicts = {},

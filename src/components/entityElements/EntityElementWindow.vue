@@ -34,7 +34,6 @@
           />
         </div>
 
-
         <MetadataEditButton
           class="my-2"
           v-if="
@@ -162,16 +161,20 @@ const allPanels = computed<WindowElementPanel[]>(() => {
 
 const getPanelsAllowedToDisplay = (): WindowElementPanel[] => {
   return allPanels.value.filter((panel) => {
-    if (panel.__typename !== 'WindowElementPanel') return true;
-    const condition = (panel as WindowElementPanel).displayCondition as DisplayCondition | undefined;
+    if (panel.__typename !== "WindowElementPanel") return true;
+    const condition = (panel as WindowElementPanel).displayCondition as
+      | DisplayCondition
+      | undefined;
     if (!condition?.key) return true;
-    if (condition.value) return String(props.entityMetadata?.[condition.key]) === String(condition.value)
+    if (condition.value)
+      return (
+        String(props.entityMetadata?.[condition.key]) ===
+        String(condition.value)
+      );
     return props.entityRelations?.[condition.key] !== undefined;
-  })
+  });
 };
 
-// GraphQL leaves out every panel the user has no permission for, so what
-// arrives here only still needs its display condition checked.
 const filteredPanels = computed<WindowElementPanel[]>(() =>
   getPanelsAllowedToDisplay(),
 );

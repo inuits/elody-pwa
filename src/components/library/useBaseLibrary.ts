@@ -102,9 +102,6 @@ export const useBaseLibrary = (
     queryVariables.userUuid = identifiers[0];
   };
 
-  // Which entity this listing hangs off, for the permissions the graphql layer
-  // resolves against `$parentEntityId`. Kept apart from the global "entity
-  // currently open", which no navigation reliably clears.
   const setParentEntityId = (identifier: string | undefined) => {
     parentEntityId.value = identifier;
   };
@@ -300,9 +297,6 @@ export const useBaseLibrary = (
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
         context: {
-          // The graphql layer resolves the `$parentEntityId` of a listed
-          // entity's context menu against this, which is also why this query
-          // must never be cached.
           headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
           fetchOptions: {
             signal,

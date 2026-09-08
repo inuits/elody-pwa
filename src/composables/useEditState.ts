@@ -55,13 +55,15 @@ export const useEditState = (editStateName: string) => {
   const addRefetchFunction = (name: string, fn: () => void): void =>
     refetchRegistry.add(name, fn, false);
 
-  const performRefetchFunctions = (): Promise<void> => refetchRegistry.perform();
+  const performRefetchFunctions = (): Promise<void> =>
+    refetchRegistry.perform();
   const clearRefetchFunctions = (): void => refetchRegistry.clear();
 
   const addMutationCallback = (name: string, fn: () => Promise<void>): void =>
     mutationRegistry.add(name, fn);
 
-  const performMutationCallbacks = (): Promise<void> => mutationRegistry.perform();
+  const performMutationCallbacks = (): Promise<void> =>
+    mutationRegistry.perform();
   const clearMutationCallbacks = (): void => mutationRegistry.clear();
 
   const hideEditButton = () => setEditMode("no-edit");
@@ -104,9 +106,6 @@ export const useEditState = (editStateName: string) => {
     buttonClicked.value = false;
   };
 
-  // What the user may do with this entity is asked once, by whoever loaded it.
-  // Remembering it here is what lets a temporarily hidden edit button come back
-  // without a second permission call.
   const setPermittedEditMode = (permissions: {
     canUpdate?: boolean;
     canDelete?: boolean;
@@ -115,7 +114,6 @@ export const useEditState = (editStateName: string) => {
     if (canUpdate && canDelete) permittedEditMode.value = "edit-delete";
     else if (canUpdate) permittedEditMode.value = "edit";
     else if (canDelete) permittedEditMode.value = "delete";
-    // "view" still renders an Edit button, so neither permission means none.
     else permittedEditMode.value = "no-edit";
     setEditMode(permittedEditMode.value);
   };

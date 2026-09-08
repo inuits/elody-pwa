@@ -59,8 +59,6 @@ const props = defineProps({
   value: { type: Object as PropType<Location>, required: true },
   inputField: { type: Object as PropType<InputFieldType>, required: false },
   entityUuid: { type: String, required: true },
-  // The graphql layer resolved this field's `can` into `permitted`; absent
-  // means no permission was configured for it.
   permitted: { type: Boolean, required: false, default: undefined },
 });
 

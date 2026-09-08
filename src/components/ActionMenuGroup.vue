@@ -195,8 +195,6 @@ const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
 };
 
-// GraphQL leaves out every option the user has no permission for, so what
-// arrives here only still needs the login check.
 watch(
   () => props.options,
   () => {

@@ -116,8 +116,6 @@ const props = defineProps<{
 }>();
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
-// GraphQL omits the config of anything the user may not see, so a group whose
-// children were all left out has nothing left to show.
 const showMenuItem = computed(() => {
   const isEmptyGroup =
     !!props.menuitem?.subMenu && menuSubitem.value.length === 0;

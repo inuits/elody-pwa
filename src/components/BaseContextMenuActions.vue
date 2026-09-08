@@ -62,8 +62,6 @@ const handleEmit = () => {
   emit("toggleLoading");
 };
 
-// The graphql layer leaves out every action the user has no permission for, so
-// what arrives here only still needs splitting over the two slots.
 const availableActions = computed(() => {
   const { __typename, ...restMenuActions } = { ...props.contextMenuActions };
 

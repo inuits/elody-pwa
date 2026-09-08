@@ -116,10 +116,6 @@ export const useMetadataWrapper = (
   );
 
   const determineFieldPermissions = async (): Promise<void> => {
-    // The graphql layer resolved the edit permission into `readOnly` and the
-    // view permission into `permitted`, so a field left out of the editable
-    // list stays out of every payload built from it. Either flag absent means
-    // no permission was configured for the field.
     fieldIsEditableByUser.value = !props.metadata.readOnly;
     if (!fieldIsEditableByUser.value)
       removeFieldFromEditableList(props.metadata.key);

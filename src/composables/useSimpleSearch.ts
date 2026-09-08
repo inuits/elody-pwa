@@ -9,7 +9,6 @@ export function useSimpleSearch() {
   const config = inject("config") as any;
 
   const entityTypeFilters = computed<AdvancedFilterInput[]>(() => {
-    // The app config only lists the item types the user may read.
     const allowedTypes = config.features.simpleSearch.itemTypes;
     if (!allowedTypes || allowedTypes.length === 0) return [];
     return [
@@ -23,7 +22,10 @@ export function useSimpleSearch() {
   });
 
   const createKeyBasedOnFormat = (metadataKey: string | object): string[] => {
-    if (typeof metadataKey === "object" && (metadataKey as any)?.preConfigured) {
+    if (
+      typeof metadataKey === "object" &&
+      (metadataKey as any)?.preConfigured
+    ) {
       return (metadataKey as any).key;
     }
     const clientKeyFormat = config.features.simpleSearch.clientKeyFormat;

@@ -4,7 +4,11 @@
     v-if="!refMetadata.showOnlyInEditMode && isPermitted"
     :key="label"
   >
-    <metadata-title v-if="!hideLabel" :metadata="refMetadata" :is-field-required="false" />
+    <metadata-title
+      v-if="!hideLabel"
+      :metadata="refMetadata"
+      :is-field-required="false"
+    />
     <div class="flex gap-2">
       <base-tooltip
         class="w-full basis-[fit-content]"
@@ -38,7 +42,11 @@
                 :base-library-mode="baseLibraryMode"
                 :custom-value="refMetadata.customValue"
                 :translation-key="pillTranslationKey"
-                :highlight="(refMetadata.highlightIfPrimaryMediafile || refMetadata.highlightIfPrimaryThumbnail) && highlight"
+                :highlight="
+                  (refMetadata.highlightIfPrimaryMediafile ||
+                    refMetadata.highlightIfPrimaryThumbnail) &&
+                  highlight
+                "
                 :break-words="breakWords"
               />
             </MetadataTruncatedText>
@@ -119,8 +127,6 @@ const props = withDefaults(
 const { t } = useI18n();
 
 const showTooltip = ref<boolean>(false);
-// The graphql layer resolved this field's `can` into `permitted`; absent means
-// no permission was configured for it.
 const isPermitted = computed(() => refMetadata.value.permitted !== false);
 const refMetadata = ref<
   PanelMetaData | PanelRelationMetaData | PanelRelationRootData
@@ -150,5 +156,4 @@ watch(
     refMetadata.value = newValue;
   },
 );
-
 </script>

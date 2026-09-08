@@ -92,8 +92,6 @@ const { openModal } = useBaseModal();
 const isComposerOpen = ref<boolean>(false);
 const isCollapsed = ref<boolean>(false);
 
-// The graphql layer leaves this element out for a user who may not read
-// comments, and marks it read-only for one who may not post.
 const canPost = computed<boolean>(() => !props.element.readOnly);
 
 const threads = computed(() => threadsFor(props.id));

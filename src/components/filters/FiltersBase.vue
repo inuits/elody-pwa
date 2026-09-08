@@ -320,8 +320,6 @@ const handleActivateFilter = (
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider", undefined);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-// Saved search is on when the module is installed, and the graphql layer only
-// reports it enabled to a user who may create one.
 const hasSavedSearch = config.features.savedSearch?.enabled ?? false;
 
 const addFilterOptions = computed(() =>
