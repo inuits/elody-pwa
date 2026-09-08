@@ -404,3 +404,128 @@ describe("useFilterOptions - limitConfig", () => {
     expect(facetsLibrary.setLimit).not.toHaveBeenCalled();
   });
 });
+
+describe("useFilterOptions - nested array values", () => {
+  beforeEach(() => {
+    i18nMocks.locale = "en";
+  });
+
+  const initWithSourcesMapping = async (instance: any) =>
+    instance.init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "intialValues.sources",
+        value: "intialValues.sources",
+      },
+    });
+
+  it("maps a value nested one level deeper to a single option", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      { id: "1", intialValues: { sources: [["CloudLibrary"]] } },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+    ]);
+  });
+
+  it("maps every value of every group and deduplicates them", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      { id: "1", intialValues: { sources: [["CloudLibrary", "Cantook"]] } },
+      { id: "2", intialValues: { sources: [["CloudLibrary"], ["Overdrive"]] } },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+      { icon: expect.anything(), label: "Cantook", value: "Cantook" },
+      { icon: expect.anything(), label: "Overdrive", value: "Overdrive" },
+    ]);
+  });
+
+  it("keeps mapping a flat array of values", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      { id: "1", intialValues: { sources: ["CloudLibrary", "Cantook"] } },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+      { icon: expect.anything(), label: "Cantook", value: "Cantook" },
+    ]);
+  });
+
+  it("keeps mapping a single value that is not an array", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      { id: "1", intialValues: { sources: "CloudLibrary" } },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+    ]);
+  });
+
+  it("reads the label of a nested formatter value", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      {
+        id: "1",
+        intialValues: {
+          sources: [[{ label: "CloudLibrary", formatter: "pill" }]],
+        },
+      },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+    ]);
+  });
+
+  it("resolves a nested translation array to one option for the active locale", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      {
+        id: "1",
+        intialValues: {
+          sources: [
+            [
+              { key: "sources", value: "CloudLibrary", lang: "en" },
+              { key: "sources", value: "WolkBibliotheek", lang: "nl" },
+            ],
+          ],
+        },
+      },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+    ]);
+  });
+
+  it("skips empty values instead of producing empty options", async () => {
+    const instance = useFilterOptions();
+    await initWithSourcesMapping(instance);
+
+    instance.entities.value = [
+      { id: "1", intialValues: { sources: [[null, "", "CloudLibrary"], []] } },
+    ];
+
+    expect(instance.options.value).toEqual([
+      { icon: expect.anything(), label: "CloudLibrary", value: "CloudLibrary" },
+    ]);
+  });
+});

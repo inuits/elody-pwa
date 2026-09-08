@@ -284,6 +284,18 @@ export const useFilterOptions = () => {
     return baseOption;
   };
 
+  const flattenOptionValues = (value: unknown): unknown[] => {
+    if (isTranslationEntry(value) || isTranslationArray(value)) {
+      return [resolveTranslatableValue(value)];
+    }
+
+    if (Array.isArray(value)) {
+      return value.flatMap(flattenOptionValues);
+    }
+
+    return [value];
+  };
+
   const getOptionsFromArrayValue = (
     entity: BaseEntity,
     path: string,
@@ -294,19 +306,22 @@ export const useFilterOptions = () => {
       return [getOptionFromEntity(entity, counts)];
     }
 
-    return arrayValue.map((item) => {
-      const baseOption = {
-        icon: DamsIcons.NoIcon,
-        label: getReadableProp(item),
-        value: getReadableProp(item),
-      };
+    return flattenOptionValues(arrayValue)
+      .map((item) => getReadableProp(item as any))
+      .filter((label) => !!label)
+      .map((label) => {
+        const baseOption = {
+          icon: DamsIcons.NoIcon,
+          label,
+          value: label,
+        };
 
-      if (hasFacets.value) {
-        const count = counts.get(baseOption.value);
-        baseOption.label = `${baseOption.label} (${count ?? 0})`;
-      }
-      return baseOption;
-    });
+        if (hasFacets.value) {
+          const count = counts.get(baseOption.value);
+          baseOption.label = `${baseOption.label} (${count ?? 0})`;
+        }
+        return baseOption;
+      });
   };
 
   const updateSelectedOptions = (options: string[]) => {
