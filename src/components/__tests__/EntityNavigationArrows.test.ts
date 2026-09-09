@@ -50,9 +50,10 @@ vi.mock("@/composables/useEntityNavigation", () => ({
   }),
 }));
 
-const getWrapper = () =>
+const getWrapper = (ownsRouteState: boolean = true) =>
   shallowMount(EntityNavigationArrows, {
     global: {
+      provide: { OwnsRouteState: ownsRouteState },
       stubs: {
         // The real BaseTooltip computes the `on` scoped-slot prop itself;
         // the default auto-stub can't reproduce that, so it renders neither
@@ -79,6 +80,17 @@ describe("EntityNavigationArrows", () => {
       { id: "3", type: "assets" },
     ];
     mockListItemRouteName = "SingleEntity";
+  });
+
+  it("does not render inside a modal that does not own the route state", () => {
+    const wrapper = getWrapper(false);
+
+    expect(
+      wrapper.find('[data-cy="entity-navigation-previous"]').exists(),
+    ).toBe(false);
+    expect(wrapper.find('[data-cy="entity-navigation-next"]').exists()).toBe(
+      false,
+    );
   });
 
   it("renders the previous/next buttons when navigation entities are cached", () => {
