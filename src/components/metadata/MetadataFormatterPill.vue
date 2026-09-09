@@ -61,14 +61,41 @@ const values = computed<string[]>(() =>
   (Array.isArray(props.label) ? props.label : [props.label]).filter(Boolean),
 );
 
+// Design-system badge tones: a client config may reference a tone instead of
+// raw hex values ({ tone: "tone1" }); vlacc maps W->tone1, E->tone2, M->tone3.
+const toneSettings: Record<string, { background: string; text: string }> = {
+  tone1: {
+    background: "var(--color-badge-tone1-bg)",
+    text: "var(--color-badge-tone1-text)",
+  },
+  tone2: {
+    background: "var(--color-badge-tone2-bg)",
+    text: "var(--color-badge-tone2-text)",
+  },
+  tone3: {
+    background: "var(--color-badge-tone3-bg)",
+    text: "var(--color-badge-tone3-text)",
+  },
+  subtype: {
+    background: "var(--color-badge-subtype-bg)",
+    text: "var(--color-badge-subtype-text)",
+  },
+};
+
 // Colours are keyed on the raw value, never on the translated display text —
 // "medewerker" has no entry, its raw value "member" does.
 const settingsFor = (value: string): any => {
   const [formatterType, configuredPillType] = props.formatter.split("|");
   if (configuredPillType === "auto")
-    return { background: "#6DBBDE", text: "#FFFFFF" };
+    return {
+      background: "var(--color-chip-relation-bg)",
+      text: "var(--color-chip-relation-text)",
+    };
   const pillType = configuredPillType || value.toLowerCase();
-  return formattersSettings[formatterType]?.[pillType];
+  const settings = formattersSettings[formatterType]?.[pillType];
+  if (settings?.tone && toneSettings[settings.tone])
+    return toneSettings[settings.tone];
+  return settings;
 };
 
 const iconFor = (value: string) => Unicons[settingsFor(value)?.icon];

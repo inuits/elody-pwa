@@ -29,7 +29,7 @@
     </div>
     <div
       :class="[
-        'flex items-center rounded-2xl p-2 bg-accent-highlight',
+        'flex items-center rounded-2xl p-2 bg-accent-wash',
         { 'mb-4': isGridMode },
       ]"
       v-show="useEditHelper.isEdit"
@@ -497,7 +497,7 @@ const wrapperClasses = computed(() => {
     },
     { "animate-pulse": loading.value },
     { "bg-background-light": !isActiveListItem.value },
-    { "border-accent-highlight": !isActiveListItem.value },
+    { "border-border-subtle": !isActiveListItem.value },
     {
       "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
     },

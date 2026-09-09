@@ -54,6 +54,10 @@ export let typeUrlMapping:
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)
     document.title = rulesObject.applicationTitle;
+  // Design-system client theming: a [data-elody-client] scope in main.css
+  // swaps the accent set. vlacc is the :root default and sets nothing.
+  if (rulesObject.clientTheme)
+    document.body.dataset.elodyClient = rulesObject.clientTheme;
 };
 
 const start = async (): Promise<void> => {

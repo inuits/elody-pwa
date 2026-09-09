@@ -23,7 +23,7 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
-        menuContainer: `border border-gray-200 rounded-md shadow-lg !mt-0 !z-header`,
+        menuContainer: `border border-neutral-30 rounded-card shadow-overlay !mt-0 !z-header`,
       }"
     >
       <template #option="{ option }">
@@ -61,13 +61,16 @@
         </div>
       </template>
       <template #tag="{ option }">
-        <div class="flex m-1 bg-gray-100 rounded-md">
-          <div class="text-sm text-black px-2 py-1">
+        <div
+          class="m-0.5 flex items-center rounded bg-chip-relation-bg text-chip-relation-text"
+        >
+          <div class="px-2 py-0.5 text-label font-bold">
             {{ stripHighlightTags(t(option.label)) }}
           </div>
           <button
-            class="hover:bg-red-200 px-2"
+            class="cursor-pointer rounded-r border-none bg-transparent px-1.5 text-chip-relation-text hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-accent-accent"
             type="button"
+            :aria-label="stripHighlightTags(t(option.label))"
             @click="() => removeOptionFromListOfOptions(option)"
           >
             &times;
@@ -281,7 +284,7 @@ body > .menu {
 }
 
 div.menu-option.selected {
-  background-color: var(--color-accent-highlight) !important;
+  background-color: var(--color-accent-wash) !important;
 }
 
 div.menu-option {
@@ -291,7 +294,7 @@ div.menu-option {
 div.menu-option:hover {
   background-color: color-mix(
     in srgb,
-    var(--color-accent-highlight) 30%,
+    var(--color-accent-wash) 30%,
     transparent
   ) !important;
 }
@@ -327,12 +330,12 @@ div.menu-option:hover {
 .vue-advanced-select--light-bordered .vue-select,
 .vue-advanced-select--light-bordered .control {
   --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid #e8eef0;
+  --vs-border: 1px solid var(--color-border-subtle);
   --vs-line-height: 1.375;
 }
 
 .vue-advanced-select--light-bordered .control.focused {
-  --vs-outline-color: #e8eef0;
+  --vs-outline-color: var(--color-focus-ring);
   box-shadow: none !important;
 }
 

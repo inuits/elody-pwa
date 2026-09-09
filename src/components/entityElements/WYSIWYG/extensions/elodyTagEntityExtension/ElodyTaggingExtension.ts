@@ -481,11 +481,9 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
         untagSelectedText:
           () =>
           async ({
-            editor,
             state,
             commands,
           }: {
-            editor: Editor;
             state: EditorState;
             commands: any;
           }) => {
@@ -704,7 +702,7 @@ export const applyColorStylingFromConfigurationToEditor = (
           : "0";
       const appearance = configurationItem.tagColor
         ? `background-color: ${configurationItem.tagColor};
-           color: #fff;`
+           color: var(--color-text-on-accent);`
         : `background-color: var(--color-accent-light);
            color: var(--color-text-body);
            box-shadow: inset 0 0 0 1px var(--color-accent-accent);

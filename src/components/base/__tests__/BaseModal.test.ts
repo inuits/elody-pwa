@@ -263,14 +263,14 @@ describe("BaseModal", () => {
       await wrapper.vm.$nextTick();
       const dialog = wrapper.find('[data-testid="modal-dialog"]');
       const classes = dialog.attributes("class");
-      expect(classes).toContain("rounded-xl");
+      expect(classes).toContain("rounded-overlay");
 
       wrapper = createWrapper({}, { modalStyle: ModalStyle.CenterWide });
 
       await wrapper.vm.$nextTick();
       const dialogCenterWide = wrapper.find('[data-testid="modal-dialog"]');
       const centerWideClasses = dialogCenterWide.attributes("class");
-      expect(centerWideClasses).toContain("rounded-xl");
+      expect(centerWideClasses).toContain("rounded-overlay");
     });
 
     it("should handle custom modal height style", async () => {
@@ -304,11 +304,11 @@ describe("BaseModal", () => {
       },
       {
         style: ModalStyle.Center,
-        expectedClasses: ["rounded-xl", "max-h-[75vh]", "my-[12.5vh]"],
+        expectedClasses: ["rounded-overlay", "max-h-[75vh]", "my-[12.5vh]"],
       },
       {
         style: ModalStyle.CenterWide,
-        expectedClasses: ["rounded-xl"],
+        expectedClasses: ["rounded-overlay"],
       },
     ];
 

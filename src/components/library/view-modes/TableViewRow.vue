@@ -262,7 +262,7 @@ const isSeen = computed<boolean>(
 );
 
 const wrapperClasses = computed(() => [
-  "flex items-center gap-2 p-1.5 border rounded bg-background-light border-accent-highlight cursor-pointer list-none mt-1",
+  "flex items-center gap-2 p-1.5 border rounded bg-background-light border-border-subtle cursor-pointer list-none mt-1",
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled || isSeen.value,
     "animate-pulse": props.loading,

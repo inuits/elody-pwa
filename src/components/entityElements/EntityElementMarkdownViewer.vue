@@ -6,7 +6,7 @@
     <template v-slot:content>
       <div
         v-if="element.markdownContent"
-        class="h-full bg-accent-highlight p-4"
+        class="h-full bg-surface-muted p-4"
       >
         <vue-markdown class="md" :source="element.markdownContent" />
       </div>

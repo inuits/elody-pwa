@@ -6,7 +6,7 @@
     <div v-if="hasOverflowActions">
       <div
         @click.stop.prevent="openContextMenu"
-        class="cursor-pointer rounded-md p-1 hover:bg-accent-highlight"
+        class="cursor-pointer rounded-md p-1 hover:bg-accent-wash"
       >
         <unicon :name="Unicons.EllipsisVThinline.name" />
       </div>

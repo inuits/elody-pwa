@@ -9,7 +9,7 @@
         :class="
           useExtendedBulkOperations && itemsSelected
             ? `text-neutral-white bg-accent-normal`
-            : `text-text-body bg-accent-highlight`
+            : `text-text-body bg-chip-neutral-bg`
         "
       >
         <span>

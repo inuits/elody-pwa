@@ -3,7 +3,7 @@
     <div
       v-for="index in amountRef"
       :key="`skeleton-${index}`"
-      class="border rounded cursor-pointer list-none z-[-1] flex items-center gap-2 p-1.5 mb-2 bg-background-light border-accent-highlight"
+      class="border rounded cursor-pointer list-none z-[-1] flex items-center gap-2 p-1.5 mb-2 bg-background-light border-border-subtle"
     >
       <div class="w-10 h-10 flex justify-center items-center">
         <div class="w-4 h-4 bg-gray-300 animate-pulse"></div>

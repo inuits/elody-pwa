@@ -110,7 +110,7 @@ const defaultWithBorderInput: Input = {
 };
 const defaultWithDarkBackgroundInput: Input = {
   textColor: defaultInput.textColor,
-  bgColor: "bg-accent-highlight",
+  bgColor: "bg-accent-tint",
   borderColor: defaultInput.borderColor,
   disabledStyle: {
     textColor: defaultInput.disabledStyle.textColor,

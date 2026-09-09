@@ -5,9 +5,9 @@
     >
       <div
         :class="[
-          'flex justify-center items-center bg-accent-highlight h-full',
-          { 'rounded-t-xl rounded-br-xl': showHistory },
-          { 'rounded-xl': !showHistory },
+          'flex justify-center items-center bg-accent-wash h-full',
+          { 'rounded-t-pill rounded-br-pill': showHistory },
+          { 'rounded-pill': !showHistory },
         ]"
       >
         <div
@@ -59,7 +59,7 @@
     </div>
     <div
       v-if="showHistory"
-      class="absolute bg-accent-highlight rounded-b-md z-notification"
+      class="absolute bg-accent-wash rounded-b-md z-notification"
     >
       <ul>
         <li

@@ -14,7 +14,7 @@
         v-for="(branch, index) in branches"
         :key="index"
         data-testid="repetitive-overview-row"
-        class="flex items-center gap-2 p-1.5 mb-2 border border-accent-highlight rounded bg-background-light"
+        class="flex items-center gap-2 p-1.5 mb-2 border border-border-subtle rounded bg-background-light"
       >
         <span
           class="flex items-center justify-center w-8 h-8 rounded-full bg-accent-light text-accent-accent font-bold shrink-0"
@@ -89,7 +89,7 @@ import {
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
 
-const props = defineProps<{
+defineProps<{
   branches: RepetitiveBranch[];
   steps: RepetitiveStep[];
   repeatable: boolean;
