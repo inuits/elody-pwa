@@ -465,6 +465,8 @@ export const useBulkOperationsActionsBar = (
       {
         parentEntity: parentEntity,
         formQueries: bulkOperationModalConfig.formQueries || undefined,
+        survivorSuggestion:
+          bulkOperationModalConfig.survivorSuggestion || undefined,
       },
     );
   };
