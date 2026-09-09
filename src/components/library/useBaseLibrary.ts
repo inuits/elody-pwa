@@ -38,6 +38,13 @@ export const useBaseLibrary = (
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
   const totalEntityCount = ref<number>(0);
   const fetchSequence = ref<number>(0);
+  // What the server last said, kept so an optimistic change to the list can be
+  // expressed as a *difference* from it rather than as an increment of the
+  // running count. Incrementing drifts: every entities change the component
+  // does not recognise as a fetch adds the whole page again, and the count is
+  // wrong until the next reload. See BaseLibrary's syncTotalCountWithOptimisticChange.
+  const serverEntityCount = ref<number>(0);
+  const serverPageLength = ref<number>(0);
   const exactTotalCount = ref<number | null>(null);
   const exactCountLoading = ref<boolean>(false);
   let listingGeneration = 0;
@@ -280,6 +287,8 @@ export const useBaseLibrary = (
       if (limitForEntityPicker) return fetchedEntities;
 
       totalEntityCount.value = fetchedEntities?.count || 0;
+      serverEntityCount.value = fetchedEntities?.count || 0;
+      serverPageLength.value = fetchedEntities?.results?.length ?? 0;
       facets.value = fetchedEntities.facets || [];
       fetchSequence.value += 1;
       if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
@@ -415,6 +424,8 @@ export const useBaseLibrary = (
     resetQueryVariablesForNewPath,
     totalEntityCount,
     fetchSequence,
+    serverEntityCount,
+    serverPageLength,
     exactTotalCount,
     exactCountLoading,
     revealExactCount,

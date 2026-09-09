@@ -632,16 +632,19 @@ const entitiesLoadingWithoutData = computed(
     (isInitialLoading.value || !entities.value?.length),
 );
 
-const syncTotalCountWithOptimisticChange = (
-  newEntities: Entity[],
-  oldEntities: Entity[],
-  newCount: number,
-  oldCount: number,
-) => {
-  const entityDelta = newEntities.length - (oldEntities?.length ?? 0);
-  const isOptimisticChange = newCount === oldCount && entityDelta !== 0;
-  if (isOptimisticChange)
-    totalEntityCount.value = Math.max(0, newCount + entityDelta);
+// An optimistic add or removal changes the list before the server knows about
+// it, and the total has to follow so the results bar and the pagination do not
+// contradict the rows on screen.
+//
+// It is expressed as a difference from the last page the server actually sent,
+// never as an increment of the current total. Adding a delta to the running
+// count is not idempotent: any change to `entities` that this component does
+// not recognise as a fetch adds the whole page on top of the count again --
+// a six-component panel reading twelve -- and nothing brings it back except a
+// reload. Deriving it cannot drift, however often the list is re-assigned.
+const syncTotalCountWithOptimisticChange = (entityCount: number) => {
+  const optimisticDelta = entityCount - serverPageLength.value;
+  totalEntityCount.value = Math.max(0, serverEntityCount.value + optimisticDelta);
 };
 
 const primaryMediafileId = computed(() => {
@@ -697,6 +700,8 @@ const {
   resetQueryVariablesForNewPath,
   totalEntityCount,
   fetchSequence,
+  serverEntityCount,
+  serverPageLength,
   exactTotalCount,
   exactCountLoading,
   revealExactCount,
@@ -1206,17 +1211,14 @@ watch(
 watch(
   [() => entities.value, totalEntityCount, fetchSequence],
   (
-    [newEntities, newCount, newFetchSequence],
-    [oldEntities, oldCount, oldFetchSequence],
+    [newEntities, , newFetchSequence],
+    [, , oldFetchSequence],
   ) => {
+    // A fetch is authoritative: it has just set the total and the baseline
+    // together, so there is nothing to reconcile.
     const wasFetch = newFetchSequence !== oldFetchSequence;
     if (!wasFetch)
-      syncTotalCountWithOptimisticChange(
-        newEntities as Entity[],
-        oldEntities as Entity[],
-        newCount as number,
-        oldCount as number,
-      );
+      syncTotalCountWithOptimisticChange((newEntities as Entity[]).length);
     emit("entitiesUpdated", (newEntities as Entity[]).length);
     paginationStore.updateTotalAmount(totalEntityCount.value);
     if (props.selectInputFieldType) {

@@ -15,6 +15,8 @@ const mocks = vi.hoisted(() => ({
 // vi.hoisted() because ref() is not available before imports are resolved.
 const libEntities = ref<any[]>([]);
 const libTotalEntityCount = ref(0);
+const libServerEntityCount = ref(0);
+const libServerPageLength = ref(0);
 const libFetchSequence = ref(0);
 const libGetEntities = vi.fn().mockResolvedValue([]);
 const libEntitiesLoading = ref(false);
@@ -77,6 +79,8 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     resetQueryVariablesForNewPath: vi.fn(),
     totalEntityCount: libTotalEntityCount,
     fetchSequence: libFetchSequence,
+    serverEntityCount: libServerEntityCount,
+    serverPageLength: libServerPageLength,
     exactTotalCount: ref(null),
     exactCountLoading: ref(false),
     revealExactCount: vi.fn().mockResolvedValue(undefined),
@@ -161,6 +165,9 @@ vi.mock("@/composables/useEntityPickerModal", () => ({
     setCropMode: vi.fn(),
     setCropCoordinatesKey: vi.fn(),
     setActionsOnResult: vi.fn(),
+    // BaseLibrary calls this in its template (the port picker's scoped filter
+    // variable); without it every test in this file dies on mount.
+    getAdditionalFilterVariables: vi.fn(() => ({})),
   }),
 }));
 
@@ -348,6 +355,8 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
     mocks.addMutationCallback = vi.fn();
     libEntities.value = [];
     libTotalEntityCount.value = 0;
+    libServerEntityCount.value = 0;
+    libServerPageLength.value = 0;
     libFetchSequence.value = 0;
   });
 
@@ -356,9 +365,48 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
     wrapper = null;
   });
 
-  it("adjusts totalEntityCount when entities are removed optimistically", async () => {
+  const serverSent = (entities: Entity[], count: number) => {
+    // What a fetch leaves behind: the page, the total, and the baseline the
+    // optimistic difference is measured from.
+    libEntities.value = entities;
+    libTotalEntityCount.value = count;
+    libServerEntityCount.value = count;
+    libServerPageLength.value = entities.length;
+    libFetchSequence.value += 1;
+  };
+
+  it("does not grow the count when the same page is re-assigned", async () => {
+    // The doubling: a panel showing six of six components reported twelve.
+    // Any re-assignment of `entities` that is not recognised as a fetch used
+    // to add the page on top of the count, and nothing but a reload undid it.
+    serverSent([makeEntity("a"), makeEntity("b"), makeEntity("c")], 3);
+    wrapper = getWrapper();
+    await flushPromises();
+
     libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
-    libTotalEntityCount.value = 10;
+    await flushPromises();
+    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(3);
+  });
+
+  it("keeps an optimistic removal at one page's worth below the total", async () => {
+    serverSent([makeEntity("a"), makeEntity("b"), makeEntity("c")], 45);
+    wrapper = getWrapper();
+    await flushPromises();
+
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    await flushPromises();
+    // re-rendered, not re-fetched: the removal must not be counted twice
+    libEntities.value = [makeEntity("a"), makeEntity("b")];
+    await flushPromises();
+
+    expect(libTotalEntityCount.value).toBe(44);
+  });
+
+  it("adjusts totalEntityCount when entities are removed optimistically", async () => {
+    serverSent([makeEntity("a"), makeEntity("b"), makeEntity("c")], 10);
     wrapper = getWrapper();
     await flushPromises();
 
@@ -369,8 +417,7 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
   });
 
   it("adjusts totalEntityCount when entities are added optimistically", async () => {
-    libEntities.value = [makeEntity("a")];
-    libTotalEntityCount.value = 5;
+    serverSent([makeEntity("a")], 5);
     wrapper = getWrapper();
     await flushPromises();
 
@@ -381,21 +428,18 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
   });
 
   it("does not double-adjust when server updates both entities and totalEntityCount", async () => {
-    libEntities.value = [makeEntity("a"), makeEntity("b")];
-    libTotalEntityCount.value = 20;
+    serverSent([makeEntity("a"), makeEntity("b")], 20);
     wrapper = getWrapper();
     await flushPromises();
 
-    libEntities.value = [makeEntity("c"), makeEntity("d"), makeEntity("e")];
-    libTotalEntityCount.value = 30;
+    serverSent([makeEntity("c"), makeEntity("d"), makeEntity("e")], 30);
     await flushPromises();
 
     expect(libTotalEntityCount.value).toBe(30);
   });
 
   it("never sets totalEntityCount below zero", async () => {
-    libEntities.value = [makeEntity("a"), makeEntity("b")];
-    libTotalEntityCount.value = 1;
+    serverSent([makeEntity("a"), makeEntity("b")], 1);
     wrapper = getWrapper();
     await flushPromises();
 
@@ -406,17 +450,14 @@ describe("BaseLibrary.vue syncTotalCountWithOptimisticChange", () => {
   });
 
   it("does not adjust totalEntityCount when entities change due to a page fetch", async () => {
-    libEntities.value = [makeEntity("a"), makeEntity("b"), makeEntity("c")];
-    libTotalEntityCount.value = 45;
+    serverSent([makeEntity("a"), makeEntity("b"), makeEntity("c")], 45);
     wrapper = getWrapper();
     await flushPromises();
 
     libEntitiesLoading.value = true;
     await flushPromises();
-    libEntities.value = [makeEntity("d"), makeEntity("e")];
-    libTotalEntityCount.value = 45;
+    serverSent([makeEntity("d"), makeEntity("e")], 45);
     libEntitiesLoading.value = false;
-    libFetchSequence.value += 1;
     await flushPromises();
 
     expect(libTotalEntityCount.value).toBe(45);
@@ -464,6 +505,8 @@ describe("BaseLibrary.vue route navigation triggers refetch", () => {
     mocks.addMutationCallback = vi.fn();
     libEntities.value = [];
     libTotalEntityCount.value = 0;
+    libServerEntityCount.value = 0;
+    libServerPageLength.value = 0;
   });
 
   afterEach(() => {
