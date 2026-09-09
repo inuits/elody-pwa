@@ -9,6 +9,7 @@ import {
   hintForEvaluation,
   isSurvivorBlocked,
   pickRecommendedId,
+  suggestionLabelKey,
 } from "../useMergeSurvivorSuggestion";
 
 const CANONICAL = "NO-2IL216T37";
@@ -27,12 +28,9 @@ const evaluation = (
   details: expectedId ? { expected_id: expectedId } : {},
 });
 
-const config = {
-  strategy: MergeSurvivorStrategy.IdentifierIntegrity,
-  recommendedLabel: "merge.recommended",
-  invalidLabel: "merge.invalid",
-  unknownLabel: "merge.unknown",
-};
+const config = { strategy: MergeSurvivorStrategy.IdentifierIntegrity };
+
+const ROOT = "bulk-operations.merge-modal.identifier-integrity";
 
 describe("pickRecommendedId", () => {
   it("recommends the record that holds its generated identifier", () => {
@@ -112,28 +110,25 @@ describe("expectedIdOf", () => {
 });
 
 describe("hintForEvaluation", () => {
-  it("labels the valid record as the recommended one", () => {
+  it("derives the label from the strategy, so no client has to configure it", () => {
     expect(
       hintForEvaluation(
         evaluation(CANONICAL, MergeEvaluationStatus.Valid),
         config,
       ),
     ).toEqual({
-      label: "merge.recommended",
+      label: `${ROOT}.recommended`,
       values: { expectedId: CANONICAL },
     });
   });
 
-  it("labels a stale record with the identifier its content generates", () => {
+  it("labels a stale record under the same strategy", () => {
     expect(
       hintForEvaluation(
         evaluation(STALE, MergeEvaluationStatus.Invalid),
         config,
       ),
-    ).toEqual({
-      label: "merge.invalid",
-      values: { expectedId: CANONICAL },
-    });
+    ).toEqual({ label: `${ROOT}.invalid`, values: { expectedId: CANONICAL } });
   });
 
   it("labels an unjudgeable record without claiming an identifier", () => {
@@ -142,19 +137,60 @@ describe("hintForEvaluation", () => {
         evaluation("W-1", MergeEvaluationStatus.Unknown, 0, null),
         config,
       ),
-    ).toEqual({ label: "merge.unknown", values: { expectedId: "" } });
+    ).toEqual({ label: `${ROOT}.unknown`, values: { expectedId: "" } });
+  });
+
+  it("says nothing about a verdict the client chose to hide", () => {
+    expect(
+      hintForEvaluation(evaluation(STALE, MergeEvaluationStatus.Invalid), {
+        ...config,
+        hiddenVerdicts: [MergeEvaluationStatus.Invalid],
+      }),
+    ).toBeUndefined();
+  });
+
+  it("still labels the verdicts the client did not hide", () => {
+    expect(
+      hintForEvaluation(evaluation(CANONICAL, MergeEvaluationStatus.Valid), {
+        ...config,
+        hiddenVerdicts: [MergeEvaluationStatus.Invalid],
+      }),
+    ).toBeDefined();
   });
 
   it("has nothing to say without an evaluation", () => {
     expect(hintForEvaluation(undefined, config)).toBeUndefined();
   });
 
-  it("has nothing to say when the configuration provides no label", () => {
+  it("has nothing to say without a suggestion configured", () => {
     expect(
-      hintForEvaluation(evaluation(CANONICAL, MergeEvaluationStatus.Valid), {
-        strategy: MergeSurvivorStrategy.IdentifierIntegrity,
-      }),
+      hintForEvaluation(
+        evaluation(CANONICAL, MergeEvaluationStatus.Valid),
+        undefined,
+      ),
     ).toBeUndefined();
+  });
+});
+
+describe("suggestionLabelKey", () => {
+  it("namespaces every label under the strategy, in kebab-case", () => {
+    expect(
+      suggestionLabelKey(
+        MergeSurvivorStrategy.IdentifierIntegrity,
+        "no-recommendation",
+      ),
+    ).toBe(`${ROOT}.no-recommendation`);
+  });
+
+  it("keeps the merge-modal prefix so translations stay together", () => {
+    expect(
+      suggestionLabelKey(
+        MergeSurvivorStrategy.IdentifierIntegrity,
+        "must-keep-recommended",
+      ),
+    ).toBe(
+      "bulk-operations.merge-modal.identifier-integrity.must-keep-recommended",
+    );
   });
 });
 

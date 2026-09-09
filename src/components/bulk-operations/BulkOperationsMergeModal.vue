@@ -131,6 +131,7 @@ import {
   hintForEvaluation,
   isSurvivorBlocked,
   pickRecommendedId,
+  suggestionLabelKey,
 } from "@/composables/useMergeSurvivorSuggestion";
 import { getEntityTitle, goToEntityPage } from "@/helpers";
 import {
@@ -195,24 +196,28 @@ const isRecommended = (item: InBulkProcessableItem | undefined) =>
   !!recommendedId.value && recommendedId.value === item?.id;
 
 const noRecommendationHint = computed(() => {
-  const label = suggestionConfig.value?.noRecommendationLabel;
-  if (!label || evaluations.value.length === 0 || recommendedId.value)
+  const strategy = suggestionConfig.value?.strategy;
+  if (!strategy || evaluations.value.length === 0 || recommendedId.value)
     return undefined;
   return {
-    label,
+    label: suggestionLabelKey(strategy, "no-recommendation"),
     values: { expectedId: expectedIdOf(evaluations.value) ?? "" },
   };
 });
 
-const blockedReason = computed(() =>
-  isSurvivorBlocked(
-    suggestionConfig.value,
-    recommendedId.value,
-    survivor.value?.id,
+const blockedReason = computed(() => {
+  const strategy = suggestionConfig.value?.strategy;
+  if (
+    !strategy ||
+    !isSurvivorBlocked(
+      suggestionConfig.value,
+      recommendedId.value,
+      survivor.value?.id,
+    )
   )
-    ? "bulk-operations.merge-modal.must-keep-recommended"
-    : undefined,
-);
+    return undefined;
+  return suggestionLabelKey(strategy, "must-keep-recommended");
+});
 
 const entityFor = (item: InBulkProcessableItem | undefined) =>
   item ? loadedEntities.value[item.id] : undefined;

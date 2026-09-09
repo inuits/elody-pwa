@@ -1,6 +1,7 @@
 import {
   MergeEvaluationStatus,
   type MergeEvaluation,
+  type MergeSurvivorStrategy,
   type MergeSurvivorSuggestionConfig,
 } from "@/generated-types/queries";
 
@@ -8,6 +9,29 @@ export type MergeHint = {
   label: string;
   values: { expectedId: string };
 };
+
+export type MergeLabelSlot =
+  | "recommended"
+  | "invalid"
+  | "unknown"
+  | "no-recommendation"
+  | "must-keep-recommended";
+
+const LABEL_ROOT = "bulk-operations.merge-modal";
+
+const SLOT_PER_STATUS: Record<MergeEvaluationStatus, MergeLabelSlot> = {
+  [MergeEvaluationStatus.Valid]: "recommended",
+  [MergeEvaluationStatus.Invalid]: "invalid",
+  [MergeEvaluationStatus.Unknown]: "unknown",
+};
+
+const toKebabCase = (value: string): string =>
+  value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+
+export const suggestionLabelKey = (
+  strategy: MergeSurvivorStrategy,
+  slot: MergeLabelSlot,
+): string => `${LABEL_ROOT}.${toKebabCase(strategy)}.${slot}`;
 
 export const expectedIdOf = (
   evaluations: MergeEvaluation[],
@@ -35,26 +59,17 @@ export const pickRecommendedId = (
   return best.length === 1 ? best[0].id : undefined;
 };
 
-const labelKeyFor = (
-  status: MergeEvaluationStatus,
-  config: MergeSurvivorSuggestionConfig,
-): string | undefined => {
-  if (status === MergeEvaluationStatus.Valid)
-    return config.recommendedLabel ?? undefined;
-  if (status === MergeEvaluationStatus.Invalid)
-    return config.invalidLabel ?? undefined;
-  return config.unknownLabel ?? undefined;
-};
-
 export const hintForEvaluation = (
   evaluation: MergeEvaluation | undefined,
   config: MergeSurvivorSuggestionConfig | undefined,
 ): MergeHint | undefined => {
   if (!evaluation || !config) return undefined;
-  const label = labelKeyFor(evaluation.status, config);
-  if (!label) return undefined;
+  if (config.hiddenVerdicts?.includes(evaluation.status)) return undefined;
   return {
-    label,
+    label: suggestionLabelKey(
+      config.strategy,
+      SLOT_PER_STATUS[evaluation.status],
+    ),
     values: { expectedId: evaluation.details?.expected_id ?? "" },
   };
 };

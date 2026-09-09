@@ -2363,12 +2363,9 @@ export enum MergeSurvivorStrategy {
 export type MergeSurvivorSuggestionConfig = {
   __typename?: 'MergeSurvivorSuggestionConfig';
   autoSelect?: Maybe<Scalars['Boolean']>;
-  invalidLabel?: Maybe<Scalars['String']>;
-  noRecommendationLabel?: Maybe<Scalars['String']>;
-  recommendedLabel?: Maybe<Scalars['String']>;
+  hiddenVerdicts?: Maybe<Array<MergeEvaluationStatus>>;
   requireRecommendedSurvivor?: Maybe<Scalars['Boolean']>;
   strategy: MergeSurvivorStrategy;
-  unknownLabel?: Maybe<Scalars['String']>;
 };
 
 export type Metadata = {
