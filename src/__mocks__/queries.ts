@@ -2341,6 +2341,33 @@ export type MenuWrapper = {
   menu: Menu;
 };
 
+export type MergeEvaluation = {
+  __typename?: 'MergeEvaluation';
+  details?: Maybe<Scalars['JSON']>;
+  id: Scalars['String'];
+  score: Scalars['Int'];
+  status: MergeEvaluationStatus;
+  strategy: MergeSurvivorStrategy;
+};
+
+export enum MergeEvaluationStatus {
+  Invalid = 'invalid',
+  Unknown = 'unknown',
+  Valid = 'valid'
+}
+
+export enum MergeSurvivorStrategy {
+  IdentifierIntegrity = 'identifierIntegrity'
+}
+
+export type MergeSurvivorSuggestionConfig = {
+  __typename?: 'MergeSurvivorSuggestionConfig';
+  autoSelect?: Maybe<Scalars['Boolean']>;
+  hiddenVerdicts?: Maybe<Array<MergeEvaluationStatus>>;
+  requireRecommendedSurvivor?: Maybe<Scalars['Boolean']>;
+  strategy: MergeSurvivorStrategy;
+};
+
 export type Metadata = {
   __typename?: 'Metadata';
   immutable?: Maybe<Scalars['Boolean']>;

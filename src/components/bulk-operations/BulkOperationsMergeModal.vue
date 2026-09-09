@@ -18,18 +18,39 @@
         <label
           v-for="(item, index) in selectedItems"
           :key="item.id"
-          class="mr-6 cursor-pointer"
+          class="flex items-center gap-2 py-1 cursor-pointer"
         >
           <input
             type="radio"
             name="merge-survivor"
+            :class="isRecommended(item) ? 'accent-green-default' : undefined"
             :checked="survivorIndex === index"
             :data-testid="`survivor-${index}`"
             @change="survivorIndex = index"
           />
-          {{ sideInfoFor(item).label }}
+          <span>{{ sideInfoFor(item).label }}</span>
+          <span
+            v-if="hintFor(item)"
+            :data-testid="`survivor-hint-${index}`"
+            class="rounded-md px-2 py-0.5 text-sm"
+            :class="
+              isRecommended(item)
+                ? 'text-green-default bg-green-light'
+                : 'text-text-body bg-neutral-30'
+            "
+          >
+            {{ t(hintFor(item)!.label, hintFor(item)!.values) }}
+          </span>
         </label>
       </fieldset>
+
+      <p
+        v-if="noRecommendationHint"
+        data-testid="no-recommendation"
+        class="pt-2 text-orange-default"
+      >
+        {{ t(noRecommendationHint.label, noRecommendationHint.values) }}
+      </p>
 
       <div class="flex-1 overflow-y-auto pt-4">
         <MergeDiffTable
@@ -54,13 +75,22 @@
     </template>
 
     <div class="flex justify-between gap-4 mt-4">
-      <BaseButtonNew
-        :disabled="isLoading || isMerging"
-        :label="t('bulk-operations.merge-modal.confirm')"
-        button-style="accentNormal"
-        button-size="small"
-        @click="submitMerge"
-      />
+      <div class="flex flex-col gap-1">
+        <BaseButtonNew
+          :disabled="isLoading || isMerging || !!blockedReason"
+          :label="t('bulk-operations.merge-modal.confirm')"
+          button-style="accentNormal"
+          button-size="small"
+          @click="submitMerge"
+        />
+        <p
+          v-if="blockedReason"
+          data-testid="blocked-reason"
+          class="text-sm text-red-default"
+        >
+          {{ t(blockedReason) }}
+        </p>
+      </div>
       <BaseButtonNew
         :disabled="isMerging"
         :label="t('bulk-operations.merge-modal.cancel')"
@@ -96,13 +126,23 @@ import {
   type MergeChoices,
 } from "@/composables/useMergeDiff";
 import { collectMergeFields } from "@/composables/useMergeFields";
+import {
+  expectedIdOf,
+  hintForEvaluation,
+  isSurvivorBlocked,
+  pickRecommendedId,
+  suggestionLabelKey,
+} from "@/composables/useMergeSurvivorSuggestion";
 import { getEntityTitle, goToEntityPage } from "@/helpers";
 import {
   Collection,
   GetEntityByIdDocument,
+  GetMergeEvaluationsDocument,
   GetMergePreviewDocument,
   MergeEntitiesDocument,
   TypeModals,
+  type MergeEvaluation,
+  type MergeSurvivorSuggestionConfig,
 } from "@/generated-types/queries";
 
 const { t } = useI18n();
@@ -118,6 +158,7 @@ const survivorIndex = ref<number>(0);
 const choices = ref<MergeChoices>({});
 const loadedEntities = ref<Record<string, any>>({});
 const inboundReferenceCount = ref<number>(0);
+const evaluations = ref<MergeEvaluation[]>([]);
 const isLoading = ref<boolean>(false);
 const isMerging = ref<boolean>(false);
 
@@ -136,6 +177,47 @@ const survivor = computed(() => selectedItems.value[survivorIndex.value]);
 const victim = computed(
   () => selectedItems.value[survivorIndex.value === 0 ? 1 : 0],
 );
+
+const suggestionConfig = computed(
+  (): MergeSurvivorSuggestionConfig | undefined =>
+    getModalInfo(TypeModals.BulkOperationsMerge).survivorSuggestion ??
+    undefined,
+);
+
+const recommendedId = computed(() => pickRecommendedId(evaluations.value));
+
+const evaluationFor = (item: InBulkProcessableItem | undefined) =>
+  evaluations.value.find((evaluation) => evaluation.id === item?.id);
+
+const hintFor = (item: InBulkProcessableItem | undefined) =>
+  hintForEvaluation(evaluationFor(item), suggestionConfig.value);
+
+const isRecommended = (item: InBulkProcessableItem | undefined) =>
+  !!recommendedId.value && recommendedId.value === item?.id;
+
+const noRecommendationHint = computed(() => {
+  const strategy = suggestionConfig.value?.strategy;
+  if (!strategy || evaluations.value.length === 0 || recommendedId.value)
+    return undefined;
+  return {
+    label: suggestionLabelKey(strategy, "no-recommendation"),
+    values: { expectedId: expectedIdOf(evaluations.value) ?? "" },
+  };
+});
+
+const blockedReason = computed(() => {
+  const strategy = suggestionConfig.value?.strategy;
+  if (
+    !strategy ||
+    !isSurvivorBlocked(
+      suggestionConfig.value,
+      recommendedId.value,
+      survivor.value?.id,
+    )
+  )
+    return undefined;
+  return suggestionLabelKey(strategy, "must-keep-recommended");
+});
 
 const entityFor = (item: InBulkProcessableItem | undefined) =>
   item ? loadedEntities.value[item.id] : undefined;
@@ -184,15 +266,45 @@ const fetchMergePreview = async (id: string) => {
   return data?.mergePreview;
 };
 
+const fetchMergeEvaluations = async (strategy: string) => {
+  const { data } = await apolloClient.query({
+    query: GetMergeEvaluationsDocument,
+    variables: {
+      ids: selectedItems.value.map((item) => item.id),
+      collection: Collection.Entities,
+      strategy,
+    },
+    fetchPolicy: "no-cache",
+  });
+  return (data?.mergeEvaluations ?? []) as MergeEvaluation[];
+};
+
+const preselectRecommendedSurvivor = () => {
+  if (!suggestionConfig.value?.autoSelect || !recommendedId.value) return;
+  const index = selectedItems.value.findIndex(
+    (item) => item.id === recommendedId.value,
+  );
+  if (index >= 0) survivorIndex.value = index;
+};
+
 const loadComparison = async () => {
   if (selectedItems.value.length < 2) return;
   isLoading.value = true;
   choices.value = {};
+  evaluations.value = [];
   try {
-    const entities = await Promise.all(selectedItems.value.map(fetchEntity));
+    const strategy = suggestionConfig.value?.strategy;
+    const [entities, loadedEvaluations] = await Promise.all([
+      Promise.all(selectedItems.value.map(fetchEntity)),
+      strategy
+        ? fetchMergeEvaluations(strategy).catch(() => [])
+        : Promise.resolve([]),
+    ]);
     loadedEntities.value = Object.fromEntries(
       selectedItems.value.map((item, index) => [item.id, entities[index]]),
     );
+    evaluations.value = loadedEvaluations;
+    preselectRecommendedSurvivor();
   } catch (error) {
     // Without both records there is nothing to compare, and an empty table
     // would read as "these two are identical".
