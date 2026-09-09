@@ -150,7 +150,8 @@ const primaryButton: Button = {
     bgColor: "active:bg-accent-hover",
   },
   disabledStyle: defaultButton.disabledStyle,
-  extra: "hover:shadow-[0_2px_6px_rgba(59,166,203,0.4)]",
+  extra:
+    "hover:shadow-[0_2px_6px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]",
 };
 const redDefaultButton: Button = {
   textColor: accentAccentButton.textColor,

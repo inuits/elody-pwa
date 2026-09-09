@@ -304,7 +304,7 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: var(--radius-overlay);
   box-shadow: var(--shadow-toast);
   color: var(--color-text-on-inverted) !important;
-  font-size: 12.5px;
+  font-size: var(--text-table);
   margin: 0 0 8px 10px;
   padding: 10px 14px;
 }
@@ -324,16 +324,16 @@ input[type="number"]::-webkit-inner-spin-button {
   button,
   [role="button"] {
     transition:
-      background-color 0.13s ease,
-      color 0.13s ease,
-      border-color 0.13s ease,
-      box-shadow 0.13s ease,
-      transform 0.13s ease;
+      background-color var(--transition-duration-ui) var(--ease-ui),
+      color var(--transition-duration-ui) var(--ease-ui),
+      border-color var(--transition-duration-ui) var(--ease-ui),
+      box-shadow var(--transition-duration-ui) var(--ease-ui),
+      transform var(--transition-duration-ui) var(--ease-ui);
   }
 
   button:active:not(:disabled),
   [role="button"]:active {
-    transform: scale(0.97);
+    transform: scale(var(--scale-press));
   }
 
   button:focus-visible,
@@ -380,7 +380,7 @@ input[type="number"]::-webkit-inner-spin-button {
   color: var(--color-text-body);
 }
 @utility subtitle {
-  font-size: 15px;
+  font-size: var(--text-heading);
   font-weight: bold;
   color: var(--color-text-subtitle);
 }
