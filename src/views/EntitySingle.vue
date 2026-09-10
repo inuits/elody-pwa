@@ -1,6 +1,9 @@
 <template>
-  <div class="relative h-full">
-    <entity-navigation-arrows class="px-6" />
+  <div
+    class="relative"
+    :class="showNavigationArrows ? 'h-[calc(100%-38px)]' : 'h-full'"
+  >
+    <entity-navigation-arrows class="px-6 pb-2" />
     <div
       v-if="showSavingSpinner"
       class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
@@ -82,7 +85,8 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const { trackSeen, jobStatusPolling } = useEntityPageConfig();
+const { trackSeen, jobStatusPolling, showNavigationArrows } =
+  useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
@@ -225,7 +229,12 @@ watch(
   () => {
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value || !entity.value.intialValues) return;
-    if (trackSeen.value && !getModalInfo(TypeModals.EntityDetailModal).open && entity.value.id) markAsSeen(entity.value.id);
+    if (
+      trackSeen.value &&
+      !getModalInfo(TypeModals.EntityDetailModal).open &&
+      entity.value.id
+    )
+      markAsSeen(entity.value.id);
     useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     useEntitySingle().setEntityType(entityType.value);
