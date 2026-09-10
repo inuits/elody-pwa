@@ -1,7 +1,7 @@
 <template>
   <span
     role="status"
-    class="inline-block shrink-0 animate-[spin_.8s_linear_infinite] rounded-full"
+    class="inline-block shrink-0 animate-[spin_var(--spinner-duration)_linear_infinite] rounded-full"
     :class="trackClass"
     :style="{
       width: `${sizePx}px`,

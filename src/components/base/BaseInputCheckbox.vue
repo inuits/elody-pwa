@@ -10,7 +10,7 @@
     >
       <input
         :id="checkboxId"
-        class="rounded border-[1.5px] focus:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-ring"
+        class="rounded border-[length:var(--border-width-control)] focus:ring-0"
         :class="[
           { 'cursor-pointer': !disabled },
           { [selectedInputStyle.disabledStyle.textColor]: disabled },

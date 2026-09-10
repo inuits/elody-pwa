@@ -4,7 +4,7 @@
     type="button"
     :disabled="disabled || loading"
     :aria-label="ariaLabel"
-    class="flex justify-center items-center whitespace-nowrap w-full rounded-md font-bold cursor-pointer disabled:cursor-auto focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus-ring"
+    class="flex justify-center items-center whitespace-nowrap w-full rounded-md font-bold cursor-pointer disabled:cursor-auto"
     :class="[
       label ? `pl-1.5` : ``,
       `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
@@ -150,8 +150,7 @@ const primaryButton: Button = {
     bgColor: "active:bg-accent-hover",
   },
   disabledStyle: defaultButton.disabledStyle,
-  extra:
-    "hover:shadow-[0_2px_6px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]",
+  extra: "hover:shadow-[var(--shadow-accent-hover)]",
 };
 const redDefaultButton: Button = {
   textColor: accentAccentButton.textColor,

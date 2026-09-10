@@ -1,4 +1,8 @@
 /* src/main.css */
+/* Lato 400/700/900 — the only family elody uses (--font-sans below). Was
+   declared in the token but never actually loaded; the app has been
+   rendering in Tailwind's default system-ui stack instead. */
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -206,6 +210,7 @@
   --color-text-accent-strong: var(--color-accent-dark);
   --color-text-on-inverted: #FFFFFF;
   --color-text-link: var(--color-text-light);
+  --color-accent-on-inverted: #7DE3EA;
 
   /* Borders */
   --color-border-default: #DFE1E6;
@@ -213,6 +218,7 @@
   --color-border-faint: #F4F5F7;
   --color-border-panel: var(--color-accent-light-strong);
   --color-border-dashed: #B3BAC5;
+  --color-border-note: #F1E3BC;
 
   /* Commit / focus (platform-fixed, never themed) */
   --color-commit: var(--color-accent-accent);
@@ -253,6 +259,10 @@
   --color-scrim: rgba(9, 30, 66, 0.45);
 
   /* Type scale additions (text-base kept at Tailwind's default) */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --weight-regular: 400;
+  --weight-bold: 700;
+  --weight-black: 900;
   --text-micro: 10.5px;
   --text-hint: 11px;
   --text-label: 11.5px;
@@ -260,6 +270,11 @@
   --text-table: 12.5px;
   --text-value: 13px;
   --text-heading: 15px;
+  --text-title: 24px;
+  --leading-tight: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+  --eyebrow-tracking: 0.4px;
 
   /* Radii: pill starts (safe/reversible), rectangle executes immediately */
   --radius-chip: 4px;
@@ -268,18 +283,47 @@
   --radius-card: 8px;
   --radius-overlay: 10px;
   --radius-pill: 14px;
+  --radius-round: 50%;
+  --border-width: 1px;
+  --border-width-control: 1.5px;
 
   /* Elevation: cards get a 1px border and no shadow; only overlays float */
+  --shadow-card: none;
   --shadow-overlay: 0 8px 24px rgba(9, 30, 66, 0.15);
   --shadow-popover: 0 12px 32px rgba(9, 30, 66, 0.2);
   --shadow-modal: 0 24px 64px rgba(9, 30, 66, 0.4);
   --shadow-toast: 0 12px 32px rgba(9, 30, 66, 0.35);
+  --shadow-accent-hover: 0 2px 6px rgba(59, 166, 203, 0.4);
+  --shadow-accent-row: 0 1px 4px rgba(59, 166, 203, 0.25);
+  --shadow-commit-hover: 0 2px 8px rgba(12, 178, 188, 0.35);
+  --opacity-empty: 0.45;
 
   /* Motion: one duration, one easing, one press */
   --transition-duration-ui: 0.13s;
   --ease-ui: ease;
   --scale-press: 0.97;
   --scale-press-tight: 0.92;
+  --spinner-duration: 0.8s;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 1px;
+
+  /* Spacing: dense 2px steps below 12px (rows are tuned in 1-2px) */
+  --spacing-0: 0;
+
+  /* Composite rhythm + layout constants (not part of the auto-generated
+     spacing scale; referenced directly, e.g. p-[var(--panel-header-pad)]) */
+  --panel-header-pad: 10px 16px;
+  --panel-body-pad: 6px 16px 14px;
+  --field-row-pad: 4px 6px;
+  --table-row-pad: 7px 0;
+  --gutter-panels: 14px;
+  --gutter-field-grid: 4px 18px;
+  --page-pad: 14px 18px 60px;
+  --nav-rail-width: 52px;
+  --filter-panel-width: 250px;
+  --touch-target-min: 44px;
+  --field-grid-breakpoint-2col: 1100px;
+  --field-grid-breakpoint-1col: 800px;
 }
 
 
@@ -321,6 +365,27 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Interaction polish (redesign): every button animates its surface and
    presses down slightly on :active; keyboard focus is always visible. */
 @layer base {
+  /* --text-base stays Tailwind's default on purpose (redefining it here
+     would redefine the text-base utility app-wide); 14px is the design
+     system's literal "app base" value, applied directly. */
+  body {
+    background: var(--color-surface-app);
+    color: var(--color-text-body);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-text-link);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-text-link-hover);
+    text-decoration: underline;
+  }
+
   button,
   [role="button"] {
     transition:
@@ -338,9 +403,11 @@ input[type="number"]::-webkit-inner-spin-button {
 
   button:focus-visible,
   [role="button"]:focus-visible,
-  a:focus-visible {
-    outline: 2px solid var(--color-focus-ring);
-    outline-offset: 1px;
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 }
 
@@ -375,7 +442,7 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /* Text utilities */
 @utility title {
-  font-size: 24px;
+  font-size: var(--text-title);
   font-weight: bold;
   color: var(--color-text-body);
 }
@@ -434,9 +501,10 @@ input[type="number"]::-webkit-inner-spin-button {
 /* ── Client theme scopes (canonical — audit round 2). Apply on <body
       data-elody-client="…">. Each scope overrides the accent set AND
       re-declares the accent-derived aliases (var() resolves where defined). ── */
+[data-elody-client="vlacc"]{--color-accent-light:#DEF1FA;--color-accent-light-strong:#C8EAF7;--color-accent:#3BA6CB;--color-accent-hover:#1D8FB8;--color-accent-ink:#1D5C7A;--color-accent-wash:#EAF6FB;--color-accent-tint:#EDF7FC}
 [data-elody-client="pza"]{--color-accent-light:#DCF4F9;--color-accent-light-strong:#B9E4F1;--color-accent:#2A97E2;--color-accent-hover:#0057B7;--color-accent-ink:#0B5F87;--color-accent-wash:#E9F5FC;--color-accent-tint:#EDF7FD;--color-text-accent-strong:#0B5F87}
 [data-elody-client="podiumnet"]{--color-accent-light:#164C85;--color-accent-light-strong:#164C85;--color-accent:#0057b1;--color-accent-hover:#004690;--color-accent-ink:#FFFFFF;--color-accent-wash:#E8F0F9;--color-accent-tint:#EBF3FA;--color-text-accent-strong:#004690}
 [data-elody-client="damsv2"]{--color-accent-light:#164C85;--color-accent-light-strong:#164C85;--color-accent:#0057b1;--color-accent-hover:#004690;--color-accent-ink:#FFFFFF;--color-accent-wash:#E8F0F9;--color-accent-tint:#EBF3FA;--color-text-accent-strong:#004690}
 [data-elody-client="vliz"]{--color-accent-light:#465DAA;--color-accent-light-strong:#465DAA;--color-accent:#354D9B;--color-accent-hover:#2A3E80;--color-accent-ink:#FFFFFF;--color-accent-wash:#EDF0F8;--color-accent-tint:#F0F2F9;--color-text-accent-strong:#2A3E80}
-[data-elody-client="aicap"]{--color-accent-light:#F2EFEC;--color-accent-light-strong:#E5DECF;--color-accent:#9F8332;--color-accent-hover:#846C28;--color-accent-ink:#6E5A22;--color-accent-wash:#F5F1E8;--color-accent-tint:#F7F4ED;--color-text-accent-strong:#6E5A22;--color-surface-app:#FAF8F4;--color-surface:#FFFEFE;--color-text-body:#343a40;--color-text-field-label:#9F8332;--color-text-link:#C2A169}
+[data-elody-client="aicap"]{--color-accent-light:#F2EFEC;--color-accent-light-strong:#E5DECF;--color-accent:#9F8332;--color-accent-hover:#846C28;--color-accent-ink:#6E5A22;--color-accent-wash:#F5F1E8;--color-accent-tint:#F7F4ED;--color-text-accent-strong:#6E5A22;--color-surface-app:#FAF8F4;--color-surface:#FFFEFE;--color-text-body:#343a40;--color-text-field-label:#9F8332;--color-text-link:#C2A169;--color-highlight-bg:#BA9863}
 [data-elody-client]{--color-surface-panel-header:var(--color-accent-light);--color-surface-section-header:var(--color-accent);--color-surface-editable-hover:var(--color-accent-wash);--color-surface-group-tint:var(--color-accent-tint);--color-text-panel-header:var(--color-accent-ink);--color-text-link-hover:var(--color-accent);--color-border-panel:var(--color-accent-light-strong)}

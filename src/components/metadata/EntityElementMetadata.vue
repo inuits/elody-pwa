@@ -45,7 +45,7 @@
         v-else
         data-cy="metadata-value"
         class="whitespace-pre-line"
-        :class="{ 'opacity-45': readableValue === '' }"
+        :class="{ 'opacity-[var(--opacity-empty)]': readableValue === '' }"
       >
         {{ processedDisplayValue }}
       </p>
