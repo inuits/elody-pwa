@@ -1028,7 +1028,7 @@ const useUpload = (config: any = {}) => {
     errorList.classList.add("list-disc");
     errors.forEach((error: string) => {
       const errorNode = document.createElement("li");
-      const htmlLinkElement = checkErrorMessageForLinks(error);
+      const htmlLinkElement = checkMessageForLinks(error);
       if (htmlLinkElement) {
         errorNode.appendChild(htmlLinkElement);
       } else {
@@ -1062,7 +1062,12 @@ const useUpload = (config: any = {}) => {
     warningList.classList.add("list-disc");
     warnings.forEach((warning: string) => {
       const warningNode = document.createElement("li");
-      warningNode.innerHTML = warning;
+      const htmlLinkElement = checkMessageForLinks(warning);
+      if (htmlLinkElement) {
+        warningNode.appendChild(htmlLinkElement);
+      } else {
+        warningNode.innerHTML = warning;
+      }
       warningList.appendChild(warningNode);
     });
     warningContainer.appendChild(warningList);
@@ -1120,7 +1125,7 @@ const useUpload = (config: any = {}) => {
     return undefined;
   };
 
-  const checkErrorMessageForLinks = (
+  const checkMessageForLinks = (
     error: string,
   ): HTMLAnchorElement | undefined => {
     const linkContent = extractLinkContent(error);
