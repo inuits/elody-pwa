@@ -58,6 +58,7 @@
           :left-side-info="sideInfoFor(survivor)"
           :right-side-info="sideInfoFor(victim)"
           :choices="choices"
+          :locked-fields="lockedFields"
           @update:choices="choices = $event"
         />
       </div>
@@ -127,9 +128,10 @@ import {
 } from "@/composables/useMergeDiff";
 import { collectMergeFields } from "@/composables/useMergeFields";
 import {
-  expectedIdOf,
   hintForEvaluation,
   isSurvivorBlocked,
+  lockedFieldsOf,
+  noRecommendationHintOf,
   pickRecommendedId,
   suggestionLabelKey,
 } from "@/composables/useMergeSurvivorSuggestion";
@@ -186,6 +188,8 @@ const suggestionConfig = computed(
 
 const recommendedId = computed(() => pickRecommendedId(evaluations.value));
 
+const lockedFields = computed(() => lockedFieldsOf(evaluations.value));
+
 const evaluationFor = (item: InBulkProcessableItem | undefined) =>
   evaluations.value.find((evaluation) => evaluation.id === item?.id);
 
@@ -195,15 +199,16 @@ const hintFor = (item: InBulkProcessableItem | undefined) =>
 const isRecommended = (item: InBulkProcessableItem | undefined) =>
   !!recommendedId.value && recommendedId.value === item?.id;
 
-const noRecommendationHint = computed(() => {
-  const strategy = suggestionConfig.value?.strategy;
-  if (!strategy || evaluations.value.length === 0 || recommendedId.value)
-    return undefined;
-  return {
-    label: suggestionLabelKey(strategy, "no-recommendation"),
-    values: { expectedId: expectedIdOf(evaluations.value) ?? "" },
-  };
-});
+const hasLabel = (key: string) => t(key) !== key;
+
+const noRecommendationHint = computed(() =>
+  noRecommendationHintOf(
+    evaluations.value,
+    suggestionConfig.value,
+    recommendedId.value,
+    hasLabel,
+  ),
+);
 
 const blockedReason = computed(() => {
   const strategy = suggestionConfig.value?.strategy;
@@ -347,7 +352,11 @@ const submitMerge = async () => {
   if (!survivor.value || !victim.value) return;
   isMerging.value = true;
   try {
-    const metadataValues = buildMergedValues(rows.value, choices.value);
+    const metadataValues = buildMergedValues(
+      rows.value,
+      choices.value,
+      lockedFields.value,
+    );
     await apolloClient.mutate({
       mutation: MergeEntitiesDocument,
       variables: {

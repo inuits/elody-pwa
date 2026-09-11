@@ -14,7 +14,12 @@ import type { MergeRow } from "@/composables/useMergeDiff";
 
 const rows: MergeRow[] = [
   { key: "name", label: "Name", leftValue: "A", rightValue: "B" },
-  { key: "birth_year", label: "Birth year", leftValue: 1920, rightValue: undefined },
+  {
+    key: "birth_year",
+    label: "Birth year",
+    leftValue: 1920,
+    rightValue: undefined,
+  },
 ];
 
 const mountTable = (props = {}) =>
@@ -116,10 +121,63 @@ describe("MergeDiffTable", () => {
     );
   });
 
+  it("still shows a locked field, so the difference stays visible", () => {
+    const table = mountTable({ lockedFields: ["name"] });
+
+    expect(table.findAll("tbody tr")).toHaveLength(2);
+    expect(table.text()).toContain("A");
+    expect(table.text()).toContain("B");
+  });
+
+  it("offers no choice on a locked field", () => {
+    const table = mountTable({ lockedFields: ["name"] });
+
+    expect(
+      table.get('[data-testid="choice-name-left"]').attributes("disabled"),
+    ).toBeDefined();
+    expect(
+      table.get('[data-testid="choice-name-right"]').attributes("disabled"),
+    ).toBeDefined();
+  });
+
+  it("explains a locked field with the standard lock indicator", () => {
+    const table = mountTable({ lockedFields: ["name"] });
+
+    expect(table.find('[data-testid="locked-field-indicator"]').exists()).toBe(
+      true,
+    );
+  });
+
+  it("leaves an unlocked field choosable", () => {
+    const table = mountTable({ lockedFields: ["name"] });
+
+    expect(
+      table
+        .get('[data-testid="choice-birth_year-left"]')
+        .attributes("disabled"),
+    ).toBeUndefined();
+    expect(
+      table.findAll('[data-testid="locked-field-indicator"]'),
+    ).toHaveLength(1);
+  });
+
+  it("locks nothing by default", () => {
+    const table = mountTable();
+
+    expect(table.find('[data-testid="locked-field-indicator"]').exists()).toBe(
+      false,
+    );
+  });
+
   it("renders list values as a readable list", () => {
     const table = mountTable({
       rows: [
-        { key: "aliases", label: "Aliases", leftValue: ["a", "b"], rightValue: [] },
+        {
+          key: "aliases",
+          label: "Aliases",
+          leftValue: ["a", "b"],
+          rightValue: [],
+        },
       ],
     });
 

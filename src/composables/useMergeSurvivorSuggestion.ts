@@ -44,6 +44,34 @@ export const expectedIdOf = (
   return expectedIds.size === 1 ? [...expectedIds][0] : undefined;
 };
 
+const isUnknown = (identity: string | null | undefined): boolean =>
+  identity === null || identity === undefined;
+
+const identityValuesFor = (
+  evaluations: MergeEvaluation[],
+  key: string,
+): (string | null | undefined)[] =>
+  evaluations.map(
+    (evaluation) =>
+      evaluation.immutableFields.find((field) => field.key === key)
+        ?.identityValue,
+  );
+
+export const lockedFieldsOf = (evaluations: MergeEvaluation[]): string[] => {
+  const keys = new Set(
+    evaluations.flatMap((evaluation) =>
+      evaluation.immutableFields.map((field) => field.key),
+    ),
+  );
+
+  const result = [...keys].filter((key) => {
+    const identities = identityValuesFor(evaluations, key);
+    if (identities.some(isUnknown)) return false;
+    return new Set(identities).size > 1;
+  });
+  return result;
+};
+
 export const pickRecommendedId = (
   evaluations: MergeEvaluation[],
 ): string | undefined => {
@@ -72,6 +100,19 @@ export const hintForEvaluation = (
     ),
     values: { expectedId: evaluation.details?.expected_id ?? "" },
   };
+};
+
+export const noRecommendationHintOf = (
+  evaluations: MergeEvaluation[],
+  config: MergeSurvivorSuggestionConfig | undefined,
+  recommendedId: string | undefined,
+  hasLabel: (key: string) => boolean,
+): MergeHint | undefined => {
+  if (!config?.strategy || evaluations.length === 0 || recommendedId)
+    return undefined;
+  const label = suggestionLabelKey(config.strategy, "no-recommendation");
+  if (!hasLabel(label)) return undefined;
+  return { label, values: { expectedId: expectedIdOf(evaluations) ?? "" } };
 };
 
 export const isSurvivorBlocked = (

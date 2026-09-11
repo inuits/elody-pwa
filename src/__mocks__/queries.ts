@@ -2345,9 +2345,16 @@ export type MergeEvaluation = {
   __typename?: 'MergeEvaluation';
   details?: Maybe<Scalars['JSON']>;
   id: Scalars['String'];
+  immutableFields: Array<MergeImmutableField>;
   score: Scalars['Int'];
   status: MergeEvaluationStatus;
   strategy: MergeSurvivorStrategy;
+};
+
+export type MergeImmutableField = {
+  __typename?: 'MergeImmutableField';
+  identityValue?: Maybe<Scalars['String']>;
+  key: Scalars['String'];
 };
 
 export enum MergeEvaluationStatus {

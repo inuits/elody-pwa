@@ -39,11 +39,14 @@ export const buildMergeRows = (
 export const buildMergedValues = (
   rows: MergeRow[],
   choices: MergeChoices,
+  lockedFields: string[] = [],
 ): Record<string, unknown> =>
   Object.fromEntries(
-    rows.map((row) => {
-      const value =
-        choices[row.key] === "right" ? row.rightValue : row.leftValue;
-      return [row.key, isEmpty(value) ? "" : value];
-    }),
+    rows
+      .filter((row) => !lockedFields.includes(row.key))
+      .map((row) => {
+        const value =
+          choices[row.key] === "right" ? row.rightValue : row.leftValue;
+        return [row.key, isEmpty(value) ? "" : value];
+      }),
   );

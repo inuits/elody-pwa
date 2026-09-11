@@ -8,6 +8,8 @@ import {
   expectedIdOf,
   hintForEvaluation,
   isSurvivorBlocked,
+  lockedFieldsOf,
+  noRecommendationHintOf,
   pickRecommendedId,
   suggestionLabelKey,
 } from "../useMergeSurvivorSuggestion";
@@ -26,6 +28,17 @@ const evaluation = (
   status,
   score,
   details: expectedId ? { expected_id: expectedId } : {},
+  immutableFields: [],
+});
+
+const withImmutable = (
+  one: MergeEvaluation,
+  immutableFields: Record<string, string | null>,
+): MergeEvaluation => ({
+  ...one,
+  immutableFields: Object.entries(immutableFields).map(
+    ([key, identityValue]) => ({ key, identityValue }),
+  ),
 });
 
 const config = { strategy: MergeSurvivorStrategy.IdentifierIntegrity };
@@ -172,6 +185,48 @@ describe("hintForEvaluation", () => {
   });
 });
 
+describe("noRecommendationHintOf", () => {
+  const undecided = [
+    evaluation(STALE, MergeEvaluationStatus.Invalid),
+    evaluation("NO-OTHER", MergeEvaluationStatus.Invalid),
+  ];
+  const everyLabel = () => true;
+  const noLabel = () => false;
+
+  it("explains why no record is recommended when the client wrote that label", () => {
+    expect(
+      noRecommendationHintOf(undecided, config, undefined, everyLabel),
+    ).toEqual({
+      label: `${ROOT}.no-recommendation`,
+      values: { expectedId: CANONICAL },
+    });
+  });
+
+  it("stays silent when the strategy has no such label configured", () => {
+    expect(
+      noRecommendationHintOf(undecided, config, undefined, noLabel),
+    ).toBeUndefined();
+  });
+
+  it("stays silent once a record is recommended", () => {
+    expect(
+      noRecommendationHintOf(undecided, config, CANONICAL, everyLabel),
+    ).toBeUndefined();
+  });
+
+  it("stays silent without a suggestion configured", () => {
+    expect(
+      noRecommendationHintOf(undecided, undefined, undefined, everyLabel),
+    ).toBeUndefined();
+  });
+
+  it("stays silent before the evaluations are loaded", () => {
+    expect(
+      noRecommendationHintOf([], config, undefined, everyLabel),
+    ).toBeUndefined();
+  });
+});
+
 describe("suggestionLabelKey", () => {
   it("namespaces every label under the strategy, in kebab-case", () => {
     expect(
@@ -227,5 +282,84 @@ describe("isSurvivorBlocked", () => {
 
   it("allows the merge when no suggestion is configured", () => {
     expect(isSurvivorBlocked(undefined, CANONICAL, STALE)).toBe(false);
+  });
+});
+
+describe("lockedFieldsOf", () => {
+  const stale = (immutable: Record<string, string | null>) =>
+    withImmutable(evaluation(STALE, MergeEvaluationStatus.Invalid), immutable);
+  const canonical = (immutable: Record<string, string | null>) =>
+    withImmutable(
+      evaluation(CANONICAL, MergeEvaluationStatus.Valid),
+      immutable,
+    );
+
+  it("locks a field whose value carries a different identity on each record", () => {
+    expect(
+      lockedFieldsOf([
+        stale({ vlacc_number: "465088" }),
+        canonical({ vlacc_number: "568924" }),
+      ]),
+    ).toEqual(["vlacc_number"]);
+  });
+
+  it("leaves a field free when both records mean the same identity", () => {
+    // "Voedingsleer" and "voedingsleer" both seed the same id, so recasing the
+    // survivor cannot move it.
+    expect(
+      lockedFieldsOf([
+        stale({ title: "voedingsleer" }),
+        canonical({ title: "voedingsleer" }),
+      ]),
+    ).toEqual([]);
+  });
+
+  it("leaves an immutable field free when it carries no identity at all", () => {
+    expect(
+      lockedFieldsOf([
+        stale({ internal_memo: null }),
+        canonical({ internal_memo: null }),
+      ]),
+    ).toEqual([]);
+  });
+
+  it("locks a field one record leaves empty and the other fills", () => {
+    // An absent property seeds the empty string, so T-VYN604CEEB would become
+    // T-D721R2JENA if it took the other record's subtitle.
+    expect(
+      lockedFieldsOf([
+        stale({ subtitle: "" }),
+        canonical({ subtitle: "de waanzinnige planeet" }),
+      ]),
+    ).toEqual(["subtitle"]);
+  });
+
+  it("leaves a field free when both records leave it empty", () => {
+    expect(
+      lockedFieldsOf([stale({ subtitle: "" }), canonical({ subtitle: "" })]),
+    ).toEqual([]);
+  });
+
+  it("judges each field on its own", () => {
+    expect(
+      lockedFieldsOf([
+        stale({ title: "voedingsleer", audience_type: "jeugd" }),
+        canonical({ title: "voedingsleer", audience_type: "volwassenen" }),
+      ]),
+    ).toEqual(["audience_type"]);
+  });
+
+  it("leaves a field free when only one record calls it immutable", () => {
+    expect(
+      lockedFieldsOf([stale({ title: "voedingsleer" }), canonical({})]),
+    ).toEqual([]);
+  });
+
+  it("reports nothing when no field is immutable", () => {
+    expect(lockedFieldsOf([stale({}), canonical({})])).toEqual([]);
+  });
+
+  it("reports nothing when there are no evaluations to read", () => {
+    expect(lockedFieldsOf([])).toEqual([]);
   });
 });
