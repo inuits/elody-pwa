@@ -257,3 +257,46 @@ describe("useBaseLibrary – exact count on demand", () => {
     expect(exactCountLoading.value).toBe(false);
   });
 });
+
+describe("useBaseLibrary – coalesced fetches", () => {
+  const mockRoute = { name: "TestRoute", meta: {}, params: {} } as any;
+  const listingResult = (results: any[]) => ({
+    data: { Entities: { results, count: results.length, facets: [] } },
+  });
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it("does not replay a coalesced fetch whose changes the in-flight request already carried", async () => {
+    const query = vi.fn().mockResolvedValue(listingResult([{ id: "a" }]));
+    const library = useBaseLibrary({ query } as any);
+    const filters = [{ key: "title", value: "x" }] as any;
+
+    library.enqueuePromise(async () => {
+      await library.setAdvancedFilters(filters, false, true, mockRoute);
+    });
+    await library.getEntities(mockRoute);
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query.mock.calls[0][0].variables.advancedFilterInputs).toEqual(
+      filters,
+    );
+  });
+
+  it("replays a coalesced fetch whose change landed after the request went out", async () => {
+    let resolveFirst: (value: unknown) => void;
+    const firstResponse = new Promise((resolve) => (resolveFirst = resolve));
+    const query = vi
+      .fn()
+      .mockReturnValueOnce(firstResponse)
+      .mockResolvedValueOnce(listingResult([{ id: "b" }]));
+    const library = useBaseLibrary({ query } as any);
+
+    const fetch = library.getEntities(mockRoute);
+    await tick();
+    library.setSkip(2, true);
+    resolveFirst!(listingResult([{ id: "a" }]));
+    await fetch;
+
+    expect(query).toHaveBeenCalledTimes(2);
+    expect(query.mock.calls[1][0].variables.skip).toBe(2);
+  });
+});

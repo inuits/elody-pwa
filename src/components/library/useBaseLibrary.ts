@@ -251,6 +251,17 @@ export const useBaseLibrary = (
     }
   };
 
+  const getStoredQueryVariables = (
+    route: RouteLocationNormalizedLoaded | undefined,
+  ): GetEntitiesQueryVariables | undefined =>
+    (shouldUseStateForRoute &&
+      route?.name !== "SingleEntity" &&
+      getStateForRoute(route)?.queryVariables) ||
+    undefined;
+
+  const snapshotVariables = (variables: GetEntitiesQueryVariables) =>
+    JSON.parse(JSON.stringify(variables));
+
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
     signal?: AbortSignal,
@@ -272,27 +283,22 @@ export const useBaseLibrary = (
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
 
     _route = route;
-    let variables =
-      shouldUseStateForRoute &&
-      _route?.name !== "SingleEntity" &&
-      getStateForRoute(_route)?.queryVariables;
+    let variables = getStoredQueryVariables(_route);
     if (variables) queryVariables = variables;
-    else if (!variables && shouldUseStateForRoute)
+    else if (shouldUseStateForRoute)
       updateStateForRoute(_route, { queryVariables });
-    if (
-      !variables ||
-      _route?.name === "SingleEntity" ||
-      !shouldUseStateForRoute
-    )
-      variables = queryVariables;
+    if (!variables) variables = queryVariables;
     if (limitForEntityPicker) variables.limit = limitForEntityPicker;
+    let sentVariables: GetEntitiesQueryVariables | undefined;
 
     try {
+      const entitiesQuery = await determineEntitiesQuery(
+        _route,
+        manipulationQuery.value?.document,
+      );
+      sentVariables = snapshotVariables(variables);
       const result = await apolloClient.query({
-        query: await determineEntitiesQuery(
-          _route,
-          manipulationQuery.value?.document,
-        ),
+        query: entitiesQuery,
         variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
@@ -334,17 +340,17 @@ export const useBaseLibrary = (
       hasPendingFetch = false;
       const nextRoute = pendingFetchRoute ?? route;
       pendingFetchRoute = undefined;
-      await getEntities(nextRoute);
+      const pendingVariables = snapshotVariables(
+        getStoredQueryVariables(nextRoute) ?? queryVariables,
+      );
+      if (!sentVariables || !isEqual(sentVariables, pendingVariables))
+        await getEntities(nextRoute);
     }
   };
 
   const revealExactCount = async (): Promise<void> => {
     const { loadDocument } = useImport();
-    const variables =
-      (shouldUseStateForRoute &&
-        _route?.name !== "SingleEntity" &&
-        getStateForRoute(_route)?.queryVariables) ||
-      queryVariables;
+    const variables = getStoredQueryVariables(_route) ?? queryVariables;
     const generation = listingGeneration;
 
     exactCountLoading.value = true;
