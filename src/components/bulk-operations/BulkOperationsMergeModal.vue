@@ -18,7 +18,7 @@
         <label
           v-for="(item, index) in selectedItems"
           :key="item.id"
-          class="flex items-center gap-2 py-1 cursor-pointer"
+          class="flex items-center gap-2 py-1 cursor-pointer w-fit"
         >
           <input
             type="radio"
