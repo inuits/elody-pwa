@@ -10,6 +10,7 @@ import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 export type GetVeeValidateKeyParams = {
   metadata: FieldMetadata;
   linkedEntityId?: string;
+  relationType?: string;
   isEdit?: boolean;
   repeatablePanelConfig?: PanelRepetitionProps;
 };
@@ -60,6 +61,7 @@ export const useVeeValidate = (): {
   const getVeeValidateKey = ({
     metadata,
     linkedEntityId,
+    relationType,
     isEdit,
     repeatablePanelConfig,
   }: GetVeeValidateKeyParams): string => {
@@ -83,13 +85,18 @@ export const useVeeValidate = (): {
     )
       return `${ValidationFields.IntialValues}.${baseFieldKey}`;
 
+    const relationKey =
+      relationType && linkedEntityId
+        ? `${baseFieldKey}@${relationType}`
+        : baseFieldKey;
+
     // Needs to be saved as metadata on a relation
     if (fieldKind === "PanelRelationMetaData")
-      return `${ValidationFields.RelationMetadata}.${baseFieldKey}`;
+      return `${ValidationFields.RelationMetadata}.${relationKey}`;
 
     // Needs to be saved as root data on a relation
     if (fieldKind === "PanelRelationRootData")
-      return `${ValidationFields.RelationRootdata}.${baseFieldKey}`;
+      return `${ValidationFields.RelationRootdata}.${relationKey}`;
 
     const requiredRelations = isValidationRulePresentOnField({
       metadata,

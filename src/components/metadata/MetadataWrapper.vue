@@ -331,6 +331,7 @@ export type MetadataWrapperProps = {
   formId: string;
   metadata: PanelMetaData | PanelRelationMetaData | PanelRelationRootData;
   linkedEntityId?: string;
+  relationType?: string;
   baseLibraryMode?: BaseLibraryModes;
   formFlow?: "edit" | "create";
   showErrors?: boolean;

@@ -53,6 +53,7 @@
                 :metadata="(localizedMetadata || metadataItem) as MetadataField"
                 :is-edit="useEditHelper.isEdit"
                 :linked-entity-id="intialValues?.id || itemId"
+                :relation-type="relationTypeOfListing"
                 :should-hide="true"
                 :entity-type="entityTypename"
               />
@@ -181,6 +182,7 @@
               :metadata="(localizedMetadata || metadataItem) as MetadataField"
               :is-edit="useEditHelper.isEdit"
               :linked-entity-id="intialValues?.id || itemId"
+              :relation-type="relationTypeOfListing"
               :entity-type="entityTypename"
               :list-item-entity="listItemEntity"
               :show-errors="useEditHelper.showErrors"
@@ -405,6 +407,9 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
+const relationTypeOfListing = computed(() =>
+  props.relationType === "no-relation-found" ? undefined : props.relationType,
+);
 const useEditHelper = useEditMode(
   getEntityUuid() || asString(router.currentRoute.value.params.id),
 );

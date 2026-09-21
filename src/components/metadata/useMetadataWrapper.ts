@@ -105,6 +105,7 @@ export const useMetadataWrapper = (
     return getVeeValidateKey({
       metadata: props.metadata,
       linkedEntityId: props.linkedEntityId,
+      relationType: props.relationType,
       isEdit: props.isEdit,
       repeatablePanelConfig: props.repeatablePanelConfig,
     });
@@ -226,6 +227,10 @@ export const useMetadataWrapper = (
 
     if (multiSelectTypes.includes(fieldType.value) && newValue === "") {
       newValue = [];
+    }
+
+    if (fieldType.value === InputFieldTypes.Checkbox && newValue === "") {
+      newValue = false;
     }
 
     // Fields bound to relationValues (relation tables and relation dropdowns)

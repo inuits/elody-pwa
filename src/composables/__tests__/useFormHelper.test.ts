@@ -627,3 +627,38 @@ describe("parseInheritedRelationValuesFromFormSubmit", () => {
     ]);
   });
 });
+
+describe("parseRelationMetadataForFormSubmit", () => {
+  const { parseRelationMetadataForFormSubmit, addEditableMetadataKeys } =
+    useFormHelper();
+
+  const relationsOfProduction = (): BaseRelationValuesInput[] => [
+    { key: "ORG-000004", type: "refCompanies" } as BaseRelationValuesInput,
+    { key: "ORG-000004", type: "refVenues" } as BaseRelationValuesInput,
+  ];
+
+  it("only writes the value on the relation of the listed type", () => {
+    addEditableMetadataKeys(["noop"], "PR-000004");
+    const relations = parseRelationMetadataForFormSubmit(
+      { "past-ORG-000004@refVenues": true } as any,
+      relationsOfProduction(),
+      "PR-000004",
+    );
+
+    expect(relations[0].metadata).toBeUndefined();
+    expect(relations[1].metadata).toEqual([{ key: "past", value: true }]);
+    expect(relations[1].editStatus).toBe(EditStatus.Changed);
+  });
+
+  it("falls back to matching on key alone when no type is encoded", () => {
+    addEditableMetadataKeys(["noop"], "PR-000004");
+    const relations = parseRelationMetadataForFormSubmit(
+      { "past-ORG-000004": true } as any,
+      relationsOfProduction(),
+      "PR-000004",
+    );
+
+    expect(relations[0].metadata).toEqual([{ key: "past", value: true }]);
+    expect(relations[1].metadata).toEqual([{ key: "past", value: true }]);
+  });
+});

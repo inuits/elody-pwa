@@ -436,3 +436,35 @@ describe("useMetadataWrapper — multi-select empty string initialization", () =
     expect(capturedFieldValueProxy!.value).toBe("");
   });
 });
+
+describe("useMetadataWrapper — checkbox empty string initialization", () => {
+  const mountCheckboxWithValue = async (value: any) => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeMultiSelectProps(InputFieldTypes.Checkbox, value) as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+    return capturedFieldValueProxy!;
+  };
+
+  it("initializes an empty string value as false", async () => {
+    expect((await mountCheckboxWithValue("")).value).toBe(false);
+  });
+
+  it("preserves a true value", async () => {
+    expect((await mountCheckboxWithValue(true)).value).toBe(true);
+  });
+});

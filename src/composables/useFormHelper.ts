@@ -445,8 +445,9 @@ const useFormHelper = () => {
   };
 
   const __linkedEntityId = (key: string) => {
-    return key.slice(key.indexOf("-") + 1, key.length);
+    return key.slice(key.indexOf("-") + 1, key.length).split("@")[0];
   };
+  const __relationTypeFromKey = (key: string) => key.split("@")[1];
   const __fieldKeyWithoutId = (key: string) => {
     return key.slice(0, key.indexOf("-"));
   };
@@ -465,8 +466,10 @@ const useFormHelper = () => {
       const fieldValue: any = entry[1];
 
       const id = __linkedEntityId(entry[0]);
+      const relationType = __relationTypeFromKey(entry[0]);
       for (let i = 0; i < relations.length; i++) {
         const relation = relations[i];
+        if (relationType && relation.type !== relationType) continue;
         if (relation.key === id) {
           if (!relation.metadata || !Array.isArray(relation.metadata))
             relation.metadata = [];
@@ -501,8 +504,10 @@ const useFormHelper = () => {
       const fieldValue: any = entry[1];
 
       const id = __linkedEntityId(entry[0]);
+      const relationType = __relationTypeFromKey(entry[0]);
       for (let i = 0; i < relations.length; i++) {
         const relation = relations[i];
+        if (relationType && relation.type !== relationType) continue;
         if (relation.key === id) {
           relation[fieldKey] = fieldValue;
           if (relation.editStatus !== EditStatus.Deleted)
