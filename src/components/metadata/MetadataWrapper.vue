@@ -453,21 +453,9 @@ const autoCompleteType = computed<
   return undefined;
 });
 
-<<<<<<< HEAD
 const pillTranslationKey = computed<string | undefined>(() =>
   resolveValueTranslationKey(props.metadata),
 );
-=======
-const pillTranslationKey = computed<string | undefined>(() => {
-  if (props.metadata.valueTranslationKey)
-    return props.metadata.valueTranslationKey;
-  const value = (resolvedMetadataValue.value as any)?.label;
-  const options = (props.metadata.inputField as any)?.options;
-  if (!value || !options?.length) return undefined;
-  const match = options.find((opt: any) => opt.value === value);
-  return match?.label;
-});
->>>>>>> fae41337 (add repeptitive fields to history diff)
 
 const showTooltip = ref<boolean>(false);
 const imageLoadError = ref<boolean>(false);
