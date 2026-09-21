@@ -254,8 +254,7 @@ const searchable = computed<boolean>(() => {
 const shouldShowTypingHint = computed(() => {
   const isReachedOptionsLimit = props.options && props.options.length >= 20;
   const isSearchValueEmpty = !searchValue.value?.trim();
-  const hasSelectedValue = inputValue.value && inputValue.value.length > 0;
-  return isReachedOptionsLimit && isSearchValueEmpty && hasSelectedValue;
+  return isReachedOptionsLimit && isSearchValueEmpty;
 });
 
 const classes = computed(() => {
