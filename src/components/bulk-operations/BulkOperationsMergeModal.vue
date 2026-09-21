@@ -115,6 +115,7 @@ import MergeDiffTable, {
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import {
   useBulkOperations,
   type Context,
@@ -155,6 +156,7 @@ const { displaySuccessNotification, displayErrorNotification } =
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
 const { getCallbackFunctions } = useModalActions();
+const { startBlocking, stopBlocking } = useBlockingLoader();
 
 const survivorIndex = ref<number>(0);
 const choices = ref<MergeChoices>({});
@@ -351,6 +353,8 @@ watch(survivorIndex, () => {
 const submitMerge = async () => {
   if (!survivor.value || !victim.value) return;
   isMerging.value = true;
+  startBlocking(t("modals.mergingEntities"));
+  let isMerged = false;
   try {
     const metadataValues = buildMergedValues(
       rows.value,
@@ -376,17 +380,7 @@ const submitMerge = async () => {
         },
       },
     });
-
-    displaySuccessNotification(
-      t("notifications.success.merge-entities.title"),
-      t("notifications.success.merge-entities.description"),
-    );
-    closeModal(TypeModals.BulkOperationsMerge);
-    dequeueAllItemsForBulkProcessing(context.value);
-    for (const callback of getCallbackFunctions() ?? []) callback();
-    // The same route a row click produces, so the id/slug handling stays in
-    // one place.
-    goToEntityPage(entityFor(survivor.value), "SingleEntity", router);
+    isMerged = true;
   } catch (error) {
     displayErrorNotification(
       t("notifications.errors.merge-entities.title"),
@@ -394,6 +388,20 @@ const submitMerge = async () => {
     );
   } finally {
     isMerging.value = false;
+    stopBlocking();
   }
+
+  if (!isMerged) return;
+
+  displaySuccessNotification(
+    t("notifications.success.merge-entities.title"),
+    t("notifications.success.merge-entities.description"),
+  );
+  closeModal(TypeModals.BulkOperationsMerge);
+  dequeueAllItemsForBulkProcessing(context.value);
+  for (const callback of getCallbackFunctions() ?? []) callback();
+  // The same route a row click produces, so the id/slug handling stays in
+  // one place.
+  goToEntityPage(entityFor(survivor.value), "SingleEntity", router);
 };
 </script>
