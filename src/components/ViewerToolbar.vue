@@ -87,52 +87,6 @@
         </span>
       </BaseTooltip>
 
-      <BaseTooltip v-if="hasCropData" position="top" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
-            <button
-              data-testid="toggle-crop-view"
-              @click="$emit('toggle-crop-view')"
-              class="ml-2 rounded-lg transition cursor-pointer"
-            >
-              <unicon
-                :name="(showingCropped ? Unicons.EyeSlash : Unicons.Eye).name"
-                height="20"
-                class="text-neutral-700"
-              />
-            </button>
-          </div>
-        </template>
-        <span class="text-sm text-text-placeholder">
-          {{
-            showingCropped
-              ? $t("tooltip.media-viewer.show-original")
-              : $t("tooltip.media-viewer.show-cropped")
-          }}
-        </span>
-      </BaseTooltip>
-
-      <BaseTooltip v-if="canRecrop" position="top" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
-            <button
-              data-testid="open-recrop-modal"
-              @click="$emit('open-recrop-modal')"
-              class="ml-2 rounded-lg transition cursor-pointer"
-            >
-              <unicon
-                :name="Unicons.EditAlt.name"
-                height="20"
-                class="text-neutral-700"
-              />
-            </button>
-          </div>
-        </template>
-        <span class="text-sm text-text-placeholder">
-          {{ $t("tooltip.media-viewer.recrop") }}
-        </span>
-      </BaseTooltip>
-
       <button
         v-if="mediafileId && !downloadImageLoadingRef"
         @click="downloadImage"
@@ -149,6 +103,40 @@
         theme="accent"
         :dimensions="5"
       />
+
+      <BaseTooltip v-if="canRecrop" position="top" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <button
+              data-testid="open-recrop-modal"
+              @click="$emit('open-recrop-modal')"
+              class="ml-2 rounded-lg transition cursor-pointer"
+            >
+              <unicon
+                :name="Unicons.Crop.name"
+                height="20"
+                class="text-neutral-700"
+              />
+            </button>
+          </div>
+        </template>
+        <span class="text-sm text-text-placeholder">
+          {{ $t("tooltip.media-viewer.recrop") }}
+        </span>
+      </BaseTooltip>
+
+      <button
+        v-if="hasCropData"
+        data-testid="toggle-crop-view"
+        @click="$emit('toggle-crop-view')"
+        class="ml-2 flex items-center h-5 text-sm text-neutral-700 cursor-pointer"
+      >
+        {{
+          showingCropped
+            ? $t("tooltip.media-viewer.show-original")
+            : $t("tooltip.media-viewer.show-cropped")
+        }}
+      </button>
     </div>
     <div class="flex">
       <BaseTooltip position="top-end" :tooltip-offset="8">

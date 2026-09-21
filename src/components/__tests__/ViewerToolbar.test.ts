@@ -47,7 +47,10 @@ const getWrapper = (props = getDefaultProps()) =>
           template: '<div><slot name="activator" :on="{}" /></div>',
         },
         SpinnerLoader: { template: "<div />" },
-        unicon: { template: "<span />", props: ["name", "height"] },
+        unicon: {
+          template: "<span :data-icon-name=\"name\" />",
+          props: ["name", "height"],
+        },
       },
     },
   });
@@ -148,6 +151,28 @@ describe("ViewerToolbar - toggle original/cropped view button", () => {
     await wrapper.find('[data-testid="toggle-crop-view"]').trigger("click");
     expect(wrapper.emitted("toggle-crop-view")).toHaveLength(1);
   });
+
+  it("renders as a text button showing show-original when currently showing the crop", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      hasCropData: true,
+      showingCropped: true,
+    });
+    expect(wrapper.find('[data-testid="toggle-crop-view"]').text()).toBe(
+      "tooltip.media-viewer.show-original",
+    );
+  });
+
+  it("renders as a text button showing show-cropped when currently showing the original", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      hasCropData: true,
+      showingCropped: false,
+    });
+    expect(wrapper.find('[data-testid="toggle-crop-view"]').text()).toBe(
+      "tooltip.media-viewer.show-cropped",
+    );
+  });
 });
 
 describe("ViewerToolbar - open recrop modal button", () => {
@@ -173,6 +198,24 @@ describe("ViewerToolbar - open recrop modal button", () => {
     const wrapper = getWrapper({ ...getDefaultProps(), canRecrop: true });
     await wrapper.find('[data-testid="open-recrop-modal"]').trigger("click");
     expect(wrapper.emitted("open-recrop-modal")).toHaveLength(1);
+  });
+
+  it("uses the same crop icon as the draw-crop-selection button", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      canRecrop: true,
+      enableSelection: true,
+    });
+    const drawIcon = wrapper.find(
+      '[data-testid="draw-crop-selection"] [data-icon-name]',
+    );
+    const recropIcon = wrapper.find(
+      '[data-testid="open-recrop-modal"] [data-icon-name]',
+    );
+    expect(recropIcon.attributes("data-icon-name")).toBe("Crop");
+    expect(recropIcon.attributes("data-icon-name")).toBe(
+      drawIcon.attributes("data-icon-name"),
+    );
   });
 });
 
