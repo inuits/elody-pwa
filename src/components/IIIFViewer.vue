@@ -69,9 +69,6 @@ const emit = defineEmits<{
   (e: "open-recrop-modal"): void;
 }>();
 
-// showCropped defaults to true so callers that don't care about the
-// original/cropped toggle (e.g. the add-flow's entity-picker preview) don't
-// need to pass it.
 const isShowingCropped = computed(
   () => Boolean(props.cropSizes) && props.showCropped,
 );
@@ -92,9 +89,6 @@ const buildCropUrl = (filename: string, { x, y, w, h }: CropAreaCoordinates) =>
   `/api/iiif/3/${filename}/${x},${y},${w},${h}/${w},${h}/0/default.jpg`;
 
 const initViewer = () => {
-  // Recreating the viewer without disposing the old one leaves its render
-  // loop, event listeners and selection-plugin canvases running against a
-  // torn-down DOM, which eventually throws on stale shape references.
   if (viewer) {
     viewer.destroy();
     viewer = null;
@@ -144,9 +138,6 @@ const startSelection = () => {
   selectionObj = viewer.selection({
     onSelection: (rect: any) => {
       isSelecting.value = false;
-      // A click without drag (or a negligible drag) yields a zero-area rect.
-      // Saving that as a crop requests an invalid 0x0 IIIF region, which the
-      // image server rejects and leaves the viewer blank - ignore it instead.
       if (!rect.width || !rect.height) return;
 
       const selection: Selection = { overlay: null };
@@ -175,9 +166,6 @@ const startSelection = () => {
   });
 
   viewer.initSelection();
-  // The plugin's windowToImageCoordinates uses an offsetParent walk, which
-  // misses the position of a relative <dialog> in Chrome's top layer. Keep
-  // both mouse and element positions in client coordinates instead.
   const selectionViewer = viewer;
   viewer.selectionHandler.frontCanvas.getCoordsFromMouseEvent = (event) => {
     const { left, top } = selectionViewer.element.getBoundingClientRect();
@@ -200,9 +188,6 @@ const undoLastSelection = () => {
   if (lastSelection?.overlay && viewer) {
     viewer.removeOverlay(lastSelection.overlay);
   }
-  // Lets a consumer (e.g. the recrop modal's "save" button) know the drawn
-  // selection it was tracking no longer exists, so it doesn't try to save
-  // coordinates for a rectangle that was just undone.
   emit("clear-selection");
 };
 

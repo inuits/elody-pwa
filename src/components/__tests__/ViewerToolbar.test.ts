@@ -197,9 +197,6 @@ describe("ViewerToolbar - existing crop/cancel buttons, and the isRecropModal by
   });
 
   it("enables the draw/cancel crop buttons when isRecropModal is true, even when the mediafile isn't enqueued in the add-flow picker", () => {
-    // isSelectable (the add-flow's bulk-operations enqueued check) stays
-    // false here on purpose: the dedicated recrop modal never goes through
-    // the entity-picker's bulk operations, so that check must not gate it.
     mocks.isSelectable.mockReturnValue(false);
 
     const wrapper = getWrapper({

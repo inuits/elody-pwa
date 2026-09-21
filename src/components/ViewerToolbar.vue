@@ -227,9 +227,6 @@ const homeRef = ref<HTMLDivElement>();
 const { openModal } = useBaseModal();
 
 const { isSelectable } = useMediafileCrop();
-// isSelectable checks the add-flow's bulk-operations enqueued state, which is
-// meaningless inside the dedicated recrop modal (no entity-picker involved) -
-// recropping is always drawable once enabled.
 const canCrop = computed(() =>
   Boolean(
     props.isRecropModal ||

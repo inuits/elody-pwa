@@ -89,7 +89,6 @@ const onSave = () => {
   emit("save", pendingCoordinates.value, props.mediafileId);
 };
 
-// Lock background scrolling while the dialog is open, matching BaseModal.
 watch(
   () => props.open,
   (isOpen) => {

@@ -34,12 +34,6 @@ export const useMediafileRecrop = (props?: {
     isRecropModalOpen.value = false;
   };
 
-  // Fetched fresh (not read from the parent's edit form, which isn't
-  // necessarily mounted here) so updateRelationDirect can build the mutation
-  // with every sibling relation included. The relations PATCH endpoint this
-  // ultimately calls does not merge safely when handed a single relation -
-  // it drops the entity's other relations - so the full, current relation
-  // set must always be sent.
   const fetchParentEntity = async (): Promise<Entity> => {
     const variables: GetEntityByIdQueryVariables = {
       id: props!.parentEntityId!,

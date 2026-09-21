@@ -287,14 +287,9 @@ const {
   cropMediafileCoordinatesKey: props.cropMediafileCoordinatesKey,
 });
 
-// Whether the main viewer currently renders the saved crop or the original
-// image - a view-only toggle, not persisted. Defaults to showing the crop
-// whenever one exists.
 const showCropped = ref(true);
 const savingRecrop = ref(false);
 
-// A just-saved recrop's coordinates, so the viewer reflects the change
-// immediately without waiting on a refetch of the parent entity's relations.
 const recropOverride = ref<CropAreaCoordinates>();
 
 const displayedCropSizes = computed<CropAreaCoordinates | undefined>(
@@ -319,8 +314,6 @@ const onSaveRecrop = (coordinates: CropAreaCoordinates, id: string) => {
   savingRecrop.value = true;
   saveRecrop(coordinates, id)
     .then(async () => {
-      // Optimistic patch gives instant feedback; the refetch makes the
-      // saved relation metadata the source of truth once it lands.
       recropOverride.value = coordinates;
       showCropped.value = true;
       await props.refetchEntities?.();

@@ -112,7 +112,6 @@ describe("IIIFViewer - crop vs original tile source", () => {
     await wrapper.setProps({ cropSizes });
 
     expect(mocks.openSeadragonInstance.destroy).toHaveBeenCalledOnce();
-    // destroy must run before the replacement instance is constructed
     const destroyOrder =
       mocks.openSeadragonInstance.destroy.mock.invocationCallOrder[0];
     const secondCreateOrder =
@@ -295,8 +294,6 @@ describe("IIIFViewer - selection coordinates in a modal", () => {
   it("uses client coordinates and remeasures the viewer after layout changes", async () => {
     const wrapper = getWrapper({ enableSelection: true });
     const instance = mocks.openSeadragonInstance;
-    // A top-layer dialog has no offsetParent in Chrome. Its rendered
-    // position still needs subtracting from the pointer coordinates.
     expect(instance.element.offsetParent).toBeNull();
     const bounds = vi.spyOn(instance.element, "getBoundingClientRect");
     bounds.mockReturnValue({ left: 80.5, top: 120.25 } as DOMRect);
@@ -311,8 +308,6 @@ describe("IIIFViewer - selection coordinates in a modal", () => {
 
     const getCoords =
       instance.selectionHandler.frontCanvas.getCoordsFromMouseEvent;
-    // Page coordinates deliberately include a scroll offset; they must not
-    // be mixed with the client-relative bounding rectangle.
     const event = {
       clientX: 180.5,
       clientY: 270.25,

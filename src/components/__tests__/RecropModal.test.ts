@@ -28,7 +28,6 @@ vi.mock("@/composables/useBaseModal", () => ({
 
 vi.mock("@/components/IIIFViewer.vue", () => ({ default: mocks.IIIFViewer }));
 
-// jsdom does not implement <dialog>.showModal/close - provide no-op stubs.
 beforeEach(() => {
   vi.clearAllMocks();
   HTMLDialogElement.prototype.showModal = vi.fn();
@@ -155,7 +154,6 @@ describe("RecropModal", () => {
 });
 
 describe("RecropModal - page scroll lock", () => {
-  // Keep background scrolling locked while the modal is open.
   afterEach(() => {
     document.body.classList.remove("overflow-hidden");
   });
