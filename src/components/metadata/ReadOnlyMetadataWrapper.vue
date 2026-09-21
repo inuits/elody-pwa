@@ -32,6 +32,31 @@
                 :value-options="refMetadata.inputField?.options"
                 :entity="{ type: entityType }"
               />
+              <span
+                v-else-if="fieldType === InputFieldTypes.Checkbox"
+                data-cy="metadata-checkbox-value"
+                class="flex items-center gap-1 text-sm"
+              >
+                <unicon
+                  :name="
+                    refMetadata.value
+                      ? Unicons.Check.name
+                      : Unicons.Cross.name
+                  "
+                  class="-mx-1"
+                  :class="
+                    refMetadata.value
+                      ? 'text-green-600'
+                      : 'text-gray-600'
+                  "
+                  height="18"
+                />
+                {{
+                  refMetadata.value
+                    ? t("metadata.labels.yes")
+                    : t("metadata.labels.no")
+                }}
+              </span>
               <entity-element-metadata
                 v-else
                 :label="refMetadata.label as string"
@@ -91,6 +116,7 @@ import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
   type PanelMetaData,
+  InputFieldTypes,
   type PanelRelationMetaData,
   type PanelRelationRootData,
   type Entitytyping,
@@ -99,6 +125,7 @@ import { computed, watch, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -142,6 +169,10 @@ const metadataValueToDisplayOnTooltip = computed(
 
 const pillTranslationKey = computed<string | undefined>(() =>
   resolveValueTranslationKey(refMetadata.value),
+);
+
+const fieldType = computed<InputFieldTypes | undefined>(
+  () => refMetadata.value.inputField?.type as InputFieldTypes,
 );
 
 const label = computed(() =>
