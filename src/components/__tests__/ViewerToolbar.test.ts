@@ -120,8 +120,119 @@ describe("ViewerToolbar - logo", () => {
     const firstControl = wrapper
       .findAll("button, a[data-testid='viewer-toolbar-logo']")
       .at(0);
-    expect(firstControl?.attributes("data-testid")).toBe(
-      "viewer-toolbar-logo",
+    expect(firstControl?.attributes("data-testid")).toBe("viewer-toolbar-logo");
+  });
+});
+
+describe("ViewerToolbar - toggle original/cropped view button", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("does not render the toggle button when hasCropData is false", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), hasCropData: false });
+    expect(wrapper.find('[data-testid="toggle-crop-view"]').exists()).toBe(
+      false,
     );
+  });
+
+  it("renders the toggle button when hasCropData is true", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), hasCropData: true });
+    expect(wrapper.find('[data-testid="toggle-crop-view"]').exists()).toBe(
+      true,
+    );
+  });
+
+  it("emits toggle-crop-view when clicked", async () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), hasCropData: true });
+    await wrapper.find('[data-testid="toggle-crop-view"]').trigger("click");
+    expect(wrapper.emitted("toggle-crop-view")).toHaveLength(1);
+  });
+});
+
+describe("ViewerToolbar - open recrop modal button", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("does not render the recrop button when canRecrop is false", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), canRecrop: false });
+    expect(wrapper.find('[data-testid="open-recrop-modal"]').exists()).toBe(
+      false,
+    );
+  });
+
+  it("renders the recrop button when canRecrop is true", () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), canRecrop: true });
+    expect(wrapper.find('[data-testid="open-recrop-modal"]').exists()).toBe(
+      true,
+    );
+  });
+
+  it("emits open-recrop-modal when clicked", async () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), canRecrop: true });
+    await wrapper.find('[data-testid="open-recrop-modal"]').trigger("click");
+    expect(wrapper.emitted("open-recrop-modal")).toHaveLength(1);
+  });
+});
+
+describe("ViewerToolbar - existing crop/cancel buttons, and the isRecropModal bypass", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("still gates the existing crop/cancel buttons on enableSelection only", () => {
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      enableSelection: true,
+      hasCropData: true,
+      canRecrop: true,
+    });
+    expect(wrapper.find('[data-testid="draw-crop-selection"]').exists()).toBe(
+      true,
+    );
+    expect(wrapper.find('[data-testid="cancel-crop-selection"]').exists()).toBe(
+      true,
+    );
+  });
+
+  it("enables the draw/cancel crop buttons when isRecropModal is true, even when the mediafile isn't enqueued in the add-flow picker", () => {
+    // isSelectable (the add-flow's bulk-operations enqueued check) stays
+    // false here on purpose: the dedicated recrop modal never goes through
+    // the entity-picker's bulk operations, so that check must not gate it.
+    mocks.isSelectable.mockReturnValue(false);
+
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      enableSelection: true,
+      isRecropModal: true,
+    });
+
+    expect(
+      wrapper
+        .find('[data-testid="draw-crop-selection"]')
+        .attributes("disabled"),
+    ).toBeUndefined();
+    expect(
+      wrapper
+        .find('[data-testid="cancel-crop-selection"]')
+        .attributes("disabled"),
+    ).toBeUndefined();
+  });
+
+  it("still disables the draw/cancel crop buttons outside of the recrop modal when the mediafile isn't enqueued (add-flow behavior unchanged)", () => {
+    mocks.isSelectable.mockReturnValue(false);
+
+    const wrapper = getWrapper({
+      ...getDefaultProps(),
+      enableSelection: true,
+      isRecropModal: false,
+    });
+
+    expect(
+      wrapper
+        .find('[data-testid="draw-crop-selection"]')
+        .attributes("disabled"),
+    ).toBeDefined();
   });
 });

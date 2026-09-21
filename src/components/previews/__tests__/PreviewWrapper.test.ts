@@ -1,10 +1,7 @@
 import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import PreviewWrapper from "../PreviewWrapper.vue";
-import {
-  ListItemCoverageTypes,
-  PreviewTypes,
-} from "@/generated-types/queries";
+import { ListItemCoverageTypes, PreviewTypes } from "@/generated-types/queries";
 import { apolloClient, router } from "@/main";
 
 const { mockGoToEntityPage } = vi.hoisted(() => ({
@@ -213,5 +210,106 @@ describe("PreviewWrapper initial loading", () => {
     const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
     await flushPromises();
     expect(wrapper.find(LOADING_SELECTOR).exists()).toBe(false);
+  });
+});
+
+describe("PreviewWrapper forwarding relationType/parentEntityId for recrop", () => {
+  const MediaViewerPreviewStub = {
+    props: [
+      "currentMediafile",
+      "mediafiles",
+      "mediafilesLoading",
+      "entityId",
+      "cropMediafileCoordinatesKey",
+      "parentEntityId",
+      "parentEntityType",
+      "relationType",
+      "refetchEntities",
+    ],
+    template: '<div class="media-stub" />',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("forwards relationType and the first parentIds entry to MediaViewerPreview as relationType/parentEntityId", async () => {
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          type: PreviewTypes.MediaViewer,
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+        },
+        entityType: "asset",
+        entities: [{ id: "e1" }],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: ["parent-1", "parent-2"],
+        cropMediafileCoordinatesKey: "coordinates",
+        relationType: "refMediafiles",
+      },
+      global: {
+        stubs: { ...stubs, MediaViewerPreview: MediaViewerPreviewStub },
+      },
+    });
+    await flushPromises();
+
+    const mediaViewerPreview = wrapper.findComponent(MediaViewerPreviewStub);
+    expect(mediaViewerPreview.props("relationType")).toBe("refMediafiles");
+    expect(mediaViewerPreview.props("parentEntityId")).toBe("parent-1");
+  });
+
+  it("forwards refetchEntities to MediaViewerPreview when provided", async () => {
+    const refetchEntities = vi.fn().mockResolvedValue(undefined);
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          type: PreviewTypes.MediaViewer,
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+        },
+        entityType: "asset",
+        entities: [{ id: "e1" }],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: ["parent-1"],
+        cropMediafileCoordinatesKey: "coordinates",
+        refetchEntities,
+      },
+      global: {
+        stubs: { ...stubs, MediaViewerPreview: MediaViewerPreviewStub },
+      },
+    });
+    await flushPromises();
+
+    const mediaViewerPreview = wrapper.findComponent(MediaViewerPreviewStub);
+    expect(mediaViewerPreview.props("refetchEntities")).toBe(refetchEntities);
+  });
+
+  it("forwards parentEntityType to MediaViewerPreview when provided", async () => {
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          type: PreviewTypes.MediaViewer,
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+        },
+        entityType: "asset",
+        entities: [{ id: "e1" }],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: ["parent-1"],
+        cropMediafileCoordinatesKey: "coordinates",
+        parentEntityType: "inscription",
+      },
+      global: {
+        stubs: { ...stubs, MediaViewerPreview: MediaViewerPreviewStub },
+      },
+    });
+    await flushPromises();
+
+    const mediaViewerPreview = wrapper.findComponent(MediaViewerPreviewStub);
+    expect(mediaViewerPreview.props("parentEntityType")).toBe("inscription");
   });
 });
