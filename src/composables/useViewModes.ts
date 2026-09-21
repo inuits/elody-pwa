@@ -23,6 +23,7 @@ export type UseViewModesOptions = {
   route?: RouteLocationNormalizedLoaded;
   baseLibraryMode?: BaseLibraryModes;
   persistPreferences?: boolean;
+  forceListView?: boolean;
   // Only the top-level overview library should read/write the shared
   // cross-route `expandFilters` preference — nested/detail-page instances
   // (relation lists, pickers, modals) keep their own in-memory-only state.
@@ -58,6 +59,18 @@ export const useViewModes = (options: UseViewModesOptions) => {
         {},
       ) ?? {}
     );
+  });
+
+  const hasMixedTeaserMetadata = computed<boolean>(() => {
+    const rawEntities = toRaw(options.entities.value);
+    if (rawEntities.length <= 1) return false;
+    const teaserKeys = (entity: Entity): string =>
+      Object.keys((entity.teaserMetadata as Record<string, unknown>) ?? {})
+        .filter((key) => key !== "__typename")
+        .sort()
+        .join(",");
+    const firstKeys = teaserKeys(rawEntities[0]);
+    return rawEntities.some((entity) => teaserKeys(entity) !== firstKeys);
   });
 
   const viewModesIncludeViewModesMedia = computed<boolean>(() => {
@@ -106,17 +119,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
           iconOff: DamsIcons.Apps,
         });
       } else if (viewMode === ViewModes.Table) {
-        const teaserKeys = (e: Entity): string =>
-          Object.keys((e.teaserMetadata as Record<string, unknown>) ?? {})
-            .filter((k) => k !== "__typename")
-            .sort()
-            .join(",");
-        const entities = options.entities.value;
-        const firstKeys = entities.length > 0 ? teaserKeys(entities[0]) : "";
-        const hasMixedTeaserMetadata = entities.some(
-          (e) => teaserKeys(e) !== firstKeys,
-        );
-        if (hasMixedTeaserMetadata) {
+        if (hasMixedTeaserMetadata.value) {
           console.error(
             `[BaseLibrary] Table view requires all entities to share the same teaserMetadata columns. Table view will not be shown.`,
           );
@@ -155,8 +158,21 @@ export const useViewModes = (options: UseViewModesOptions) => {
    * Formerly named `getDisplayPreferences` in BaseLibrary.vue.
    */
   const getUserPreferredViewModeConfiguration = (viewModes: string[] = []): void => {
+    if (options.forceListView) {
+      resetToListView();
+      return;
+    }
+
     const displayPreferences = getGlobalState("_displayPreferences");
     if (!displayPreferences) return;
+
+    const availableViewModes = hasMixedTeaserMetadata.value
+      ? viewModes.filter((viewMode) => viewMode !== ViewModes.Table)
+      : viewModes;
+    const configuredViewModes = Object.keys(configPerViewMode.value).filter(
+      (viewMode) =>
+        !hasMixedTeaserMetadata.value || viewMode !== ViewModes.Table,
+    );
 
     expandFilters.value =
       options.enableAdvancedFilters && options.persistExpandFilters
@@ -166,20 +182,19 @@ export const useViewModes = (options: UseViewModesOptions) => {
     if (
       !displayPreview.value &&
       !displayMap.value &&
-      Object.keys(configPerViewMode.value).length === 1
+      configuredViewModes.length === 1
     ) {
-      const keys = Object.keys(configPerViewMode.value);
-      displayList.value = keys.includes(ViewModes.ViewModesList);
-      displayGrid.value = keys.includes(ViewModes.ViewModesGrid);
-      displayTable.value = keys.includes(ViewModes.Table);
+      displayList.value = configuredViewModes.includes(ViewModes.ViewModesList);
+      displayGrid.value = configuredViewModes.includes(ViewModes.ViewModesGrid);
+      displayTable.value = configuredViewModes.includes(ViewModes.Table);
       return;
     }
 
-    if (!displayPreview.value && displayPreferences.table && viewModes.includes(ViewModes.Table)) {
+    if (!displayPreview.value && displayPreferences.table && availableViewModes.includes(ViewModes.Table)) {
       displayTable.value = displayPreferences.table;
     }
 
-    if (!displayPreview.value && displayPreferences.grid && viewModes.includes(ViewModes.ViewModesGrid)) {
+    if (!displayPreview.value && displayPreferences.grid && availableViewModes.includes(ViewModes.ViewModesGrid)) {
       displayGrid.value = displayPreferences.grid;
     }
 
@@ -198,6 +213,14 @@ export const useViewModes = (options: UseViewModesOptions) => {
     displayTable.value = false;
     displayList.value = true;
   };
+
+  // ── Mixed teaserMetadata watcher ──────────────────────────────────────────
+
+  watch(hasMixedTeaserMetadata, (isMixed) => {
+    if (!isMixed || !displayTable.value) return;
+    displayTable.value = false;
+    displayList.value = !displayGrid.value && !displayMap.value;
+  });
 
   // ── Persist watcher ───────────────────────────────────────────────────────
 
@@ -229,6 +252,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
     expandFilters,
     toggles,
     configPerViewMode,
+    hasMixedTeaserMetadata,
     viewModesIncludeViewModesMedia,
     showViewModesList,
     determineViewModes,

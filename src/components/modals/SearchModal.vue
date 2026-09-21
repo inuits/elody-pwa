@@ -26,6 +26,7 @@
           :filters="filters"
           :should-use-state-for-route="false"
           :is-search-library="true"
+          :force-list-view="true"
           :entity-type="
             filters.find((filter) => filter.type === AdvancedFilterTypes.Type)
               ?.value || Entitytyping.BaseEntity

@@ -454,6 +454,7 @@ export type BaseLibraryProps = {
   hasStickyBars?: boolean;
   filters?: AdvancedFilterInput[];
   isSearchLibrary?: boolean;
+  forceListView?: boolean;
   useOtherQuery?: object;
   selectInputFieldType?: "multi" | "single";
   selectInputFieldValue?: string[];
@@ -500,6 +501,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   hasStickyBars: true,
   filters: () => [],
   isSearchLibrary: false,
+  forceListView: false,
   useOtherQuery: undefined,
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -785,6 +787,7 @@ const {
   route,
   baseLibraryMode: props.baseLibraryMode,
   persistPreferences: props.saveViewPreferences !== false,
+  forceListView: props.forceListView,
   persistExpandFilters: props.persistExpandFilters,
 });
 

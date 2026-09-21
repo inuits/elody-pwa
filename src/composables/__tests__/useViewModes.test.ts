@@ -385,6 +385,56 @@ describe("useViewModes", () => {
       expect(expandFilters.value).toBe(true);
     });
 
+    it("does not restore the table preference when entities have different teaserMetadata columns", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: true,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table, ViewModes.ViewModesList], {
+          title: {},
+        }),
+        makeEntity("mediafile", [ViewModes.Table, ViewModes.ViewModesList], {
+          filename: {},
+        }),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayTable,
+        displayList,
+      } = useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.Table,
+        ViewModes.ViewModesList,
+      ]);
+
+      expect(displayTable.value).toBe(false);
+      expect(displayList.value).toBe(true);
+    });
+
+    it("does not use the single configured view mode when it is Table and teaserMetadata columns differ", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table], { title: {} }),
+        makeEntity("mediafile", [ViewModes.Table], { filename: {} }),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayTable,
+        displayList,
+      } = useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([ViewModes.Table]);
+
+      expect(displayTable.value).toBe(false);
+      expect(displayList.value).toBe(true);
+    });
     it("uses config keys (not stored preferences) when only one view mode is configured", () => {
       mockGetGlobalState.mockReturnValue({
         grid: true,
@@ -774,6 +824,118 @@ describe("useViewModes", () => {
         "_displayPreferences",
         expect.objectContaining({ table: true }),
       );
+    });
+  });
+  // ── mixed teaserMetadata watcher ──────────────────────────────────────────
+
+  describe("mixed teaserMetadata watcher", () => {
+    it("falls back to list view when a new result set has different teaserMetadata columns", async () => {
+      const sharedMeta = { title: {}, date: {} };
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+      ]);
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { determineViewModes, displayTable, displayList } = useViewModes({
+        entities,
+      });
+
+      determineViewModes([ViewModes.Table]);
+      displayTable.value = true;
+      await nextTick();
+
+      entities.value = [
+        makeEntity("production", [ViewModes.Table], { title: {} }),
+        makeEntity("mediafile", [ViewModes.Table], { filename: {} }),
+      ];
+      await nextTick();
+
+      expect(displayTable.value).toBe(false);
+      expect(displayList.value).toBe(true);
+    });
+
+    it("keeps table view when a new result set keeps the same teaserMetadata columns", async () => {
+      const sharedMeta = { title: {}, date: {} };
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+      ]);
+      const { determineViewModes, displayTable } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.Table]);
+      displayTable.value = true;
+      await nextTick();
+
+      entities.value = [
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+        makeEntity("mediafile", [ViewModes.Table], sharedMeta),
+      ];
+      await nextTick();
+
+      expect(displayTable.value).toBe(true);
+    });
+  });
+  // ── forceListView ─────────────────────────────────────────────────────────
+
+  describe("forceListView", () => {
+    it("keeps list view when a grid preference is stored", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: true,
+        table: false,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.ViewModesGrid, ViewModes.Table]),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayList,
+        displayGrid,
+      } = useViewModes({ entities, forceListView: true });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesGrid,
+        ViewModes.Table,
+      ]);
+
+      expect(displayList.value).toBe(true);
+      expect(displayGrid.value).toBe(false);
+    });
+
+    it("keeps list view when only Grid is configured", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.ViewModesGrid]),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayList,
+        displayGrid,
+      } = useViewModes({ entities, forceListView: true });
+
+      getUserPreferredViewModeConfiguration([ViewModes.ViewModesGrid]);
+
+      expect(displayList.value).toBe(true);
+      expect(displayGrid.value).toBe(false);
+    });
+
+    it("keeps list view when no preferences are stored", () => {
+      mockGetGlobalState.mockReturnValue(null);
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.ViewModesGrid, ViewModes.Table]),
+      ]);
+      const { getUserPreferredViewModeConfiguration, displayList } =
+        useViewModes({ entities, forceListView: true });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesGrid,
+        ViewModes.Table,
+      ]);
+
+      expect(displayList.value).toBe(true);
     });
   });
 });
