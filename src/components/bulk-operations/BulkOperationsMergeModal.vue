@@ -398,10 +398,8 @@ const submitMerge = async () => {
     t("notifications.success.merge-entities.description"),
   );
   closeModal(TypeModals.BulkOperationsMerge);
+  goToEntityPage(entityFor(survivor.value), "SingleEntity", router);
   dequeueAllItemsForBulkProcessing(context.value);
   for (const callback of getCallbackFunctions() ?? []) callback();
-  // The same route a row click produces, so the id/slug handling stays in
-  // one place.
-  goToEntityPage(entityFor(survivor.value), "SingleEntity", router);
 };
 </script>
