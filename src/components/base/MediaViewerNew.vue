@@ -52,9 +52,28 @@
           )
         "
         :dimensions="dimensions"
-        @select-area="addMediafileCropCoordinates"
+        @select-area="onSelectArea"
+        @toggle-crop-view="toggleCropView"
+        @open-recrop-modal="openRecropModal"
         :enable-selection="isCropModeEnabled"
-        :crop-sizes="cropSizes"
+        :crop-sizes="displayedCropSizes"
+        :show-cropped="showCropped"
+        :can-recrop="canRecrop"
+      />
+      <RecropModal
+        v-if="canRecrop"
+        :open="isRecropModalOpen"
+        :image-filename="
+          getValueOfMediafile(mediafileViewerContext, 'display_filename') || ''
+        "
+        :original-filename="
+          getValueOfMediafile(mediafileViewerContext, 'original_filename')
+        "
+        :mediafile-id="mediafileId"
+        :dimensions="dimensions"
+        :saving="savingRecrop"
+        @close="closeRecropModal"
+        @save="onSaveRecrop"
       />
       <div
         v-if="displayProcessingImage"
@@ -172,17 +191,30 @@
 import {
   ElodyViewers,
   type Entity,
+  type Entitytyping,
   KeyValueSource,
   type MediaFileEntity,
 } from "@/generated-types/queries";
 import IIIFViewer from "@/components/IIIFViewer.vue";
+import RecropModal from "@/components/RecropModal.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
-import { computed, toRefs, watch, inject, defineAsyncComponent } from "vue";
+import {
+  computed,
+  ref,
+  toRefs,
+  watch,
+  inject,
+  defineAsyncComponent,
+} from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { useMediafileCrop } from "@/composables/useMediafileCrop";
+import {
+  useMediafileCrop,
+  type CropAreaCoordinates,
+} from "@/composables/useMediafileCrop";
+import { useMediafileRecrop } from "@/composables/useMediafileRecrop";
 import AudioAndVideoPlayer from "@/components/base/AudioAndVideoPlayer.vue";
 import { useMediafileDownload } from "@/composables/useMediafileDownload";
 import { getEmbeddableUrl, getExternalHttpUrl } from "@/utils/embeddableUrl";
@@ -197,6 +229,10 @@ const props = defineProps<{
   mediafiles?: MediaFileEntity[];
   loading?: boolean;
   cropMediafileCoordinatesKey: string;
+  parentEntityId?: string;
+  parentEntityType?: Entitytyping;
+  relationType?: string;
+  refetchEntities?: () => Promise<void>;
 }>();
 
 const emit = defineEmits<{
@@ -237,6 +273,58 @@ const mediafileId = computed<string | undefined>(() =>
     KeyValueSource.Root,
   ),
 );
+
+const {
+  isRecropModalOpen,
+  canRecrop,
+  openRecropModal,
+  closeRecropModal,
+  saveRecrop,
+} = useMediafileRecrop({
+  parentEntityId: props.parentEntityId,
+  parentEntityType: props.parentEntityType,
+  relationType: props.relationType,
+  cropMediafileCoordinatesKey: props.cropMediafileCoordinatesKey,
+});
+
+const showCropped = ref(true);
+const savingRecrop = ref(false);
+
+const recropOverride = ref<CropAreaCoordinates>();
+
+const displayedCropSizes = computed<CropAreaCoordinates | undefined>(
+  () => recropOverride.value ?? cropSizes.value,
+);
+
+watch(mediafileId, () => {
+  showCropped.value = true;
+  recropOverride.value = undefined;
+});
+
+const toggleCropView = () => {
+  showCropped.value = !showCropped.value;
+};
+
+const onSelectArea = (coordinates: CropAreaCoordinates, id: string) => {
+  if (!isCropModeEnabled.value) return;
+  addMediafileCropCoordinates(coordinates, id);
+};
+
+const onSaveRecrop = (coordinates: CropAreaCoordinates, id: string) => {
+  savingRecrop.value = true;
+  saveRecrop(coordinates, id)
+    .then(async () => {
+      recropOverride.value = coordinates;
+      showCropped.value = true;
+      await props.refetchEntities?.();
+    })
+    .catch((error) => {
+      console.error("Failed to save the recropped area", error);
+    })
+    .finally(() => {
+      savingRecrop.value = false;
+    });
+};
 const originalFilename = computed<string | undefined>(() =>
   getValueOfMediafile(
     mediafileViewerContext,

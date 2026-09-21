@@ -39,7 +39,7 @@
         <template #activator="{ on }">
           <div v-on="on">
             <button
-              ref="cropRef"
+              data-testid="draw-crop-selection"
               :disabled="!canCrop"
               @click="$emit('toggle-selection')"
               class="ml-2 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
@@ -65,7 +65,7 @@
         <template #activator="{ on }">
           <div v-on="on">
             <button
-              ref="cancelRef"
+              data-testid="cancel-crop-selection"
               :disabled="!canCrop"
               @click="$emit('cancel-selection')"
               class="ml-2 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
@@ -103,6 +103,40 @@
         theme="accent"
         :dimensions="5"
       />
+
+      <BaseTooltip v-if="canRecrop" position="top" :tooltip-offset="8">
+        <template #activator="{ on }">
+          <div v-on="on">
+            <button
+              data-testid="open-recrop-modal"
+              @click="$emit('open-recrop-modal')"
+              class="ml-2 rounded-lg transition cursor-pointer"
+            >
+              <unicon
+                :name="Unicons.Crop.name"
+                height="20"
+                class="text-neutral-700"
+              />
+            </button>
+          </div>
+        </template>
+        <span class="text-sm text-text-placeholder">
+          {{ $t("tooltip.media-viewer.recrop") }}
+        </span>
+      </BaseTooltip>
+
+      <button
+        v-if="hasCropData"
+        data-testid="toggle-crop-view"
+        @click="$emit('toggle-crop-view')"
+        class="ml-2 flex items-center h-5 text-sm text-neutral-700 cursor-pointer"
+      >
+        {{
+          showingCropped
+            ? $t("tooltip.media-viewer.show-original")
+            : $t("tooltip.media-viewer.show-cropped")
+        }}
+      </button>
     </div>
     <div class="flex">
       <BaseTooltip position="top-end" :tooltip-offset="8">
@@ -155,6 +189,10 @@ const props = defineProps<{
   imageFilename?: string;
   dimensions?: Record<string, any>;
   enableSelection?: boolean;
+  hasCropData?: boolean;
+  showingCropped?: boolean;
+  canRecrop?: boolean;
+  isRecropModal?: boolean;
   logo?: { src: string; href: string; alt?: string };
 }>();
 
@@ -163,27 +201,26 @@ const emit = defineEmits<{
   (event: "update:zoomOut", value: HTMLDivElement | undefined): void;
   (event: "update:fullPage", value: HTMLDivElement | undefined): void;
   (event: "update:home", value: HTMLDivElement | undefined): void;
-  (event: "update:crop", value: HTMLDivElement | undefined): void;
-  (event: "update:cancel", value: HTMLDivElement | undefined): void;
   (event: "toggle-selection"): void;
   (event: "cancel-selection"): void;
+  (event: "toggle-crop-view"): void;
+  (event: "open-recrop-modal"): void;
 }>();
 
 const zoomInRef = ref<HTMLDivElement>();
 const zoomOutRef = ref<HTMLDivElement>();
 const fullPageRef = ref<HTMLDivElement>();
 const homeRef = ref<HTMLDivElement>();
-const cropRef = ref<HTMLDivElement>();
-const cancelRef = ref<HTMLDivElement>();
 
 const { openModal } = useBaseModal();
 
 const { isSelectable } = useMediafileCrop();
 const canCrop = computed(() =>
   Boolean(
-    props.mediafileId &&
-    isSelectable(props.mediafileId) &&
-    props.enableSelection,
+    props.isRecropModal ||
+    (props.mediafileId &&
+      isSelectable(props.mediafileId) &&
+      props.enableSelection),
   ),
 );
 
@@ -195,8 +232,6 @@ onMounted(() => {
   emit("update:zoomOut", zoomOutRef.value);
   emit("update:fullPage", fullPageRef.value);
   emit("update:home", homeRef.value);
-  emit("update:crop", cropRef.value);
-  emit("update:cancel", cancelRef.value);
 });
 
 const downloadImage = () => {

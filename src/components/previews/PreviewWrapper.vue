@@ -95,6 +95,10 @@
       :mediafiles-loading="entitiesLoading"
       :entity-id="entityId"
       :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+      :parent-entity-id="parentIds?.[0]"
+      :parent-entity-type="parentEntityType"
+      :relation-type="relationType"
+      :refetch-entities="refetchEntities"
       @toggle-preview-component="
         (id: string) => emit('togglePreviewComponent', id)
       "
@@ -176,6 +180,9 @@ const props = withDefaults(
     entityId: string | undefined;
     parentIds: string[];
     cropMediafileCoordinatesKey: string;
+    relationType?: string;
+    parentEntityType?: Entitytyping;
+    refetchEntities?: () => Promise<void>;
   }>(),
   {},
 );

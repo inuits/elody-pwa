@@ -105,6 +105,9 @@
           :entity-id="previewForEntity"
           :parent-ids="parentEntityIdentifiers"
           :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+          :relation-type="relationType"
+          :parent-entity-type="parentEntityType"
+          :refetch-entities="refetchEntities"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -148,6 +151,7 @@ const props = withDefaults(
     openEntityInDetailModal?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
+    parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
     relationType?: string;
     enableSelection: boolean;
