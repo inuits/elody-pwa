@@ -17,6 +17,7 @@ import {
   downloadFile,
   findPanelMetadata,
   getFromExpressEndpoint,
+  formatTeaserMetadata,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -810,5 +811,40 @@ describe("getFromExpressEndpoint", () => {
 
     expect(fetchSpy.mock.calls[0][1].headers).toEqual({ "X-Tenant-ID": "" });
     vi.unstubAllGlobals();
+  });
+});
+
+describe("formatTeaserMetadata", () => {
+  const intialValues = { email: "a@b.c", last_seen_time: "2026-09-01" };
+
+  it("keeps columns the graphql layer did not gate", () => {
+    const columns = formatTeaserMetadata(
+      {
+        email: { label: "Email", key: "email" },
+        last_seen_time: { label: "Last seen", key: "last_seen_time" },
+      } as any,
+      intialValues as any,
+    ) as any[];
+
+    expect(columns.map((column) => column.key)).toEqual([
+      "email",
+      "last_seen_time",
+    ]);
+  });
+
+  it("drops columns the graphql layer reported as not permitted", () => {
+    const columns = formatTeaserMetadata(
+      {
+        email: { label: "Email", key: "email" },
+        last_seen_time: {
+          label: "Last seen",
+          key: "last_seen_time",
+          permitted: false,
+        },
+      } as any,
+      intialValues as any,
+    ) as any[];
+
+    expect(columns.map((column) => column.key)).toEqual(["email"]);
   });
 });

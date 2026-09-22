@@ -401,6 +401,7 @@ export const formatTeaserMetadata = (
 ): object => {
   const formatted = [];
   for (const key in teaserMetadata) {
+    if (teaserMetadata[key]?.permitted === false) continue;
     if (key !== "__typename" && intialValues && teaserMetadata[key].label) {
       const newTeaserMetadata = {
         ...teaserMetadata[key],
