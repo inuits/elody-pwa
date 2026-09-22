@@ -248,6 +248,37 @@ describe("useErrorCodes", () => {
         );
       },
     );
+
+    it("shows the backend message when the body carries no error code", async () => {
+      const response = createMockHttpResponse("/entities/PR-000064/mediafiles", 400, {
+        extensions: {
+          response: {
+            body: {
+              message:
+                "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.",
+            },
+          },
+        },
+      });
+
+      await errorCodes.handleHttpError(response);
+
+      expect(sharedMocks.displayErrorNotification).toHaveBeenCalledWith(
+        "Error",
+        "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.",
+      );
+    });
+
+    it("falls back to the status text when the body carries no message", async () => {
+      const response = createMockHttpResponse("/entities", 400, {});
+
+      await errorCodes.handleHttpError(response);
+
+      expect(sharedMocks.displayErrorNotification).toHaveBeenCalledWith(
+        "Error",
+        "Bad Request",
+      );
+    });
   });
 
   describe("Auth Handlers", () => {

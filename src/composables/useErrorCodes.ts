@@ -368,7 +368,11 @@ export const useErrorCodes = (): {
         "http",
         httpResponse,
       );
-      fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
+      fallbackOnRequestStatusCode(
+        statusCode,
+        ErrorCodeType.Read,
+        httpErrorMessage || message,
+      );
       return "";
     }
 
