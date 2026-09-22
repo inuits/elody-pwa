@@ -56,6 +56,7 @@
         :enable-advanced-filters="true"
         :entity-picker-mode="EntityPickerMode.Emit"
         :should-use-state-for-route="false"
+        :force-list-view="true"
         :selection-limit="step.maxSelection ?? undefined"
         base-library-height="max-h-[55vh]"
         :search-mode="step.entityPickerSearchConfig?.mode ?? undefined"

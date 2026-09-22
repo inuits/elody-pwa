@@ -40,6 +40,20 @@ export function useSimpleSearch() {
   const buildFilters = (searchTerm: string): AdvancedFilterInput[] => {
     const filters: AdvancedFilterInput[] = [...entityTypeFilters.value];
     const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
+    const relationKeys = config.features.simpleSearch.relationKeys;
+    if (relationKeys?.length) {
+      filters.push({
+        key: metadataKeys.flatMap((metadataKey: string | object) =>
+          createKeyBasedOnFormat(metadataKey),
+        ),
+        value: searchTerm,
+        type: AdvancedFilterTypes.Text,
+        operator: Operator.Or,
+        match_exact: false,
+        relation_keys: relationKeys,
+      });
+      return filters;
+    }
     for (const index in metadataKeys) {
       filters.push({
         key: createKeyBasedOnFormat(metadataKeys[index]),

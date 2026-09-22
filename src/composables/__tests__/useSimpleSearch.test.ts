@@ -141,3 +141,58 @@ describe("useSimpleSearch", () => {
     });
   });
 });
+
+describe("useSimpleSearch — relation keys", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("collapses the metadata keys into one filter carrying the relation keys", () => {
+    // One filter is what lets the backend match a token against the entity's
+    // own metadata OR its relations; separate filters per key would be ANDed.
+    mockConfig = makeConfig({
+      simpleSearchMetadataKey: ["title", "description"],
+      relationKeys: ["vlacc:1|properties.ref_authors.value"],
+    });
+
+    const textFilters = useSimpleSearch()
+      .buildFilters("rowling")
+      .filter((f) => f.type === AdvancedFilterTypes.Text);
+
+    expect(textFilters).toHaveLength(1);
+    expect(textFilters[0].key).toEqual([
+      "elody:1|metadata.title.value",
+      "elody:1|metadata.description.value",
+    ]);
+    expect((textFilters[0] as any).relation_keys).toEqual([
+      "vlacc:1|properties.ref_authors.value",
+    ]);
+    expect(textFilters[0].operator).toBe(Operator.Or);
+  });
+
+  it("keeps one filter per metadata key when no relation keys are configured", () => {
+    mockConfig = makeConfig({
+      simpleSearchMetadataKey: ["title", "description"],
+    });
+
+    const textFilters = useSimpleSearch()
+      .buildFilters("rowling")
+      .filter((f) => f.type === AdvancedFilterTypes.Text);
+
+    expect(textFilters).toHaveLength(2);
+    expect((textFilters[0] as any).relation_keys).toBeUndefined();
+  });
+
+  it("an empty relation key list keeps the existing shape", () => {
+    mockConfig = makeConfig({
+      simpleSearchMetadataKey: ["title"],
+      relationKeys: [],
+    });
+
+    const textFilters = useSimpleSearch()
+      .buildFilters("rowling")
+      .filter((f) => f.type === AdvancedFilterTypes.Text);
+
+    expect((textFilters[0] as any).relation_keys).toBeUndefined();
+  });
+});

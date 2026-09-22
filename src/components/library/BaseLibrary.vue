@@ -569,6 +569,12 @@ const simpleSearchTerm = ref<string>("");
 const simpleSearchKeys = computed<string[]>(
   () => (route.meta as any)?.simpleSearch?.keys ?? [],
 );
+const simpleSearchRelationKeys = computed<string[]>(
+  () =>
+    (route.meta as any)?.simpleSearch?.relationKeys ??
+    config?.features?.simpleSearch?.relationKeys ??
+    [],
+);
 const isFiltersPanelExpanded = computed<boolean>(
   () => expandFilters.value && !simpleSearchTerm.value,
 );
@@ -722,6 +728,9 @@ const handleSetSimpleSearch = async (value: string) => {
           type: AdvancedFilterTypes.Text,
           operator: Operator.Or,
           match_exact: false,
+          ...(simpleSearchRelationKeys.value.length
+            ? { relation_keys: simpleSearchRelationKeys.value }
+            : {}),
         },
       ]
     : (filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? []);
