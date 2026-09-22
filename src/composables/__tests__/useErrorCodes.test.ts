@@ -385,6 +385,17 @@ describe("useErrorCodes", () => {
           "No metadata available for item with id 999",
         );
       });
+
+      it("falls back to the backend text when the code has no translation", async () => {
+        const result = await errorCodes.getMessageAndCodeFromErrorString(
+          "W4012 - This production has no mediafiles to download",
+        );
+
+        expect(result.code).toBe("W4012");
+        expect(result.message).toBe(
+          "This production has no mediafiles to download",
+        );
+      });
     });
     describe("getMessageAndCodeFromErrorString", () => {
       it("should extract message from error string", async () => {

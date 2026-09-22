@@ -9,10 +9,17 @@ const mocks = vi.hoisted(() => ({
   displaySuccessNotification: vi.fn(),
   displayWarningNotification: vi.fn(),
   displayErrorNotification: vi.fn(),
+  getMessageAndCodeFromErrorString: vi.fn(),
 }));
 
 vi.mock("@vue/apollo-composable", () => ({
   useQuery: mocks.useQuery,
+}));
+
+vi.mock("@/composables/useErrorCodes", () => ({
+  useErrorCodes: () => ({
+    getMessageAndCodeFromErrorString: mocks.getMessageAndCodeFromErrorString,
+  }),
 }));
 
 vi.mock("@/composables/useBaseNotification", () => ({
@@ -24,6 +31,13 @@ vi.mock("@/composables/useBaseNotification", () => ({
     displayErrorNotification: mocks.displayErrorNotification,
   }),
 }));
+
+// The watcher resolves the job info asynchronously; nextTick alone does not
+// drain those microtasks.
+const flush = async () => {
+  await nextTick();
+  await nextTick();
+};
 
 const setup = (jobPollResult: unknown = null) => {
   const result = ref(
@@ -47,6 +61,9 @@ describe("useJobStatusPolling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(Date, "now").mockReturnValue(42);
+    mocks.getMessageAndCodeFromErrorString.mockImplementation(
+      async (info: string) => ({ code: "W4012", message: `translated:${info}` }),
+    );
   });
 
   it("passes id and type as query variables", () => {
@@ -161,5 +178,82 @@ describe("useJobStatusPolling", () => {
     expect(mocks.displaySuccessNotification).not.toHaveBeenCalled();
     expect(options.onJobCompleted).not.toHaveBeenCalled();
     expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("stays silent when a warning was already terminal on the very first check", async () => {
+    const { result, options } = setup();
+    result.value = {
+      jobStatusForEntity: {
+        hasJob: true,
+        jobId: "job-1",
+        status: "warning",
+        info: "Some items were skipped",
+      },
+    };
+    await flush();
+
+    expect(mocks.displayWarningNotification).not.toHaveBeenCalled();
+    expect(options.onJobCompleted).not.toHaveBeenCalled();
+  });
+
+  it("still reports a failure that was already terminal on the very first check", async () => {
+    const { result, stop } = setup();
+    result.value = {
+      jobStatusForEntity: {
+        hasJob: true,
+        jobId: "job-1",
+        status: "failed",
+        info: "W4012 - No mediafiles",
+      },
+    };
+    await flush();
+
+    expect(mocks.displayErrorNotification).toHaveBeenCalledWith(
+      "job-status-polling.failed-title",
+      "translated:W4012 - No mediafiles",
+    );
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("uses the job info as the failure description", async () => {
+    const { result } = setup();
+    result.value = { jobStatusForEntity: { hasJob: true, jobId: "job-1", status: "running" } };
+    await nextTick();
+
+    result.value = {
+      jobStatusForEntity: {
+        hasJob: true,
+        jobId: "job-1",
+        status: "failed",
+        info: "W4013 - Nothing downloadable",
+      },
+    };
+    await flush();
+
+    expect(mocks.displayErrorNotification).toHaveBeenCalledWith(
+      "job-status-polling.failed-title",
+      "translated:W4013 - Nothing downloadable",
+    );
+  });
+
+  it("uses the job info as the warning description", async () => {
+    const { result } = setup();
+    result.value = { jobStatusForEntity: { hasJob: true, jobId: "job-1", status: "running" } };
+    await nextTick();
+
+    result.value = {
+      jobStatusForEntity: {
+        hasJob: true,
+        jobId: "job-1",
+        status: "warning",
+        info: "Some items were skipped",
+      },
+    };
+    await flush();
+
+    expect(mocks.displayWarningNotification).toHaveBeenCalledWith(
+      "job-status-polling.warning-title",
+      "translated:Some items were skipped",
+    );
   });
 });

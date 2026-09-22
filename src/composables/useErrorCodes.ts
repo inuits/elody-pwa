@@ -115,7 +115,7 @@ export const useErrorCodes = (): {
       const message: string = messageParts[1] ? messageParts[1].trim() : "";
       const translatedMessage = await getTranslatedErrorMessageForCode(
         errorCode,
-        message,
+        message || errorMessage,
         variableObjects,
       );
 
@@ -135,7 +135,9 @@ export const useErrorCodes = (): {
     variables: Record<string, string> | undefined,
   ): Promise<string> => {
     if (!code) return defaultMessage;
-    return getTranslatedMessage(`error-codes.${code}`, variables);
+    const translationKey = `error-codes.${code}`;
+    const translated = getTranslatedMessage(translationKey, variables) as string;
+    return translated !== translationKey ? translated : defaultMessage;
   };
 
   const handleUnauthorized = async () => {
