@@ -186,6 +186,7 @@ watch(route, () => {
 watch(
   () => getModalInfo(TypeModals.BulkOperations).open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
+    if (props.ignoreBulkOperations) return;
     if (isBulkOperationsModalOpen)
       inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
   },
