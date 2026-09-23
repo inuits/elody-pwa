@@ -108,7 +108,7 @@
         </div>
       </div>
 
-      <div v-if="expandFilters && matchers.length > 0">
+      <div v-if="matchers.length > 0" v-show="expandFilters">
         <FiltersListItem
           v-for="filter in displayedFilters"
           :key="filter.advancedFilter.key || ''"
