@@ -313,3 +313,41 @@ describe("PreviewWrapper forwarding relationType/parentEntityId for recrop", () 
     expect(mediaViewerPreview.props("parentEntityType")).toBe("inscription");
   });
 });
+
+describe("PreviewWrapper parent entity provide", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("provides the previewed entity so filters can resolve $entity references", async () => {
+    const entity = { id: "e1", relationValues: { refProduction: [{ key: "PR-1" }] } };
+    const injector = {
+      inject: { parentEntity: { from: "ParentEntityProvider", default: undefined } },
+      template: '<div class="injector-stub" />',
+    };
+    vi.mocked(apolloClient.query).mockResolvedValue({
+      data: { PreviewElement: PRIMARY_PREVIEW_ELEMENT },
+    });
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+          type: PreviewTypes.ColumnList,
+          metadataPreviewQuery: "GetMetadataPreviewForNotification",
+        },
+        entityType: "notification",
+        entities: [entity],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: [],
+        cropMediafileCoordinatesKey: "",
+      },
+      global: { stubs: { ...stubs, EntityColumn: injector } },
+    });
+    await flushPromises();
+
+    const injected = wrapper.findComponent(injector).vm.parentEntity;
+    expect(injected?.value ?? injected).toEqual(entity);
+  });
+});

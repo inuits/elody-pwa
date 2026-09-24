@@ -197,6 +197,11 @@ provide(
   "showCurrentPreviewFlow",
   props.previewComponent.showCurrentPreviewFlow,
 );
+const previewedEntity = computed<Entity | undefined>(() =>
+  props.entities.find((entity) => entity.id === props.entityId),
+);
+provide("ParentEntityProvider", previewedEntity);
+
 const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
 const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
 const previewLoading = ref<boolean>(false);

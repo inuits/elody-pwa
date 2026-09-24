@@ -121,7 +121,10 @@
               :set-sort-order="setSortOrder"
               :simple-search-value="simpleSearchTerm"
               :set-simple-search="
-                isSearchLibrary ? undefined : handleSetSimpleSearch
+                isSearchLibrary ||
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+                  ? undefined
+                  : handleSetSimpleSearch
               "
               @pagination-limit-options-promise="
                 (promise) => (paginationLimitOptionsPromise = promise)

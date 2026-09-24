@@ -222,6 +222,7 @@ vi.mock("vue-router", () => ({
 
 import BaseLibrary from "../BaseLibrary.vue";
 import ViewModesList from "../view-modes/ViewModesList.vue";
+import LibraryBar from "../LibraryBar.vue";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
 // --- Props / wrapper factories ------------------------------------------------
@@ -946,5 +947,39 @@ describe("BaseLibrary.vue additional default filters for picker libraries", () =
     await flushPromises();
     const filters = wrapper.findComponent({ name: "FiltersBase" });
     expect(filters.props("additionalDefaultFiltersEnabled")).toBeTruthy();
+  });
+});
+
+describe("BaseLibrary.vue simple search in a preview", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const setSimpleSearchOf = (wrapper: ReturnType<typeof getWrapper>) =>
+    wrapper.findComponent(LibraryBar).props("setSimpleSearch");
+
+  it("keeps the simple search in a normal library", () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    expect(setSimpleSearchOf(wrapper)).toBeTypeOf("function");
+  });
+
+  it("drops the simple search in a preview library", () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
+    });
+    expect(setSimpleSearchOf(wrapper)).toBeUndefined();
   });
 });
