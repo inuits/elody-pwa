@@ -36,7 +36,7 @@ import { useI18n } from "vue-i18n";
 const props = withDefaults(
   defineProps<{
     formatter: string;
-    label: string | string[];
+    label: string | string[] | { label: string; values: string[] }[];
     link?: string;
     entity?: any;
     translationKey?: string;
@@ -58,7 +58,10 @@ const formatterType = computed(() => {
   return type;
 });
 
-const translateArrayValuesAndJoin = (values: string[], translationKey: string): string =>
+const translateArrayValuesAndJoin = (
+  values: string[],
+  translationKey: string,
+): string =>
   values
     .map((item) => {
       const key = translationKey.replace("$value", item);
@@ -74,11 +77,16 @@ const hasLabel = computed(() =>
 const readableLabel = computed(() => {
   if (Array.isArray(props.label)) {
     if (props.label.length === 0) return "-";
-    if (props.translationKey) return translateArrayValuesAndJoin(props.label, props.translationKey);
-    return props.label.join(", ");
+    const values = props.label as string[];
+    if (props.translationKey)
+      return translateArrayValuesAndJoin(values, props.translationKey);
+    return values.join(", ");
   }
   return props.label
-    ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
+    ? convertUnitToReadbleFormat(
+        props.unit as Unit,
+        (props.label as string) ?? "",
+      )
     : "-";
 });
 </script>

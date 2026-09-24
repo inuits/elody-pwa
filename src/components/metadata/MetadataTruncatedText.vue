@@ -56,7 +56,7 @@ watch(() => [props.lineClamp, props.disabled], checkOverflow);
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 .text-container.line-clamp {
   line-clamp: var(--line-clamp);

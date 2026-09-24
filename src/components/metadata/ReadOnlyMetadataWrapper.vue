@@ -39,15 +39,11 @@
               >
                 <unicon
                   :name="
-                    refMetadata.value
-                      ? Unicons.Check.name
-                      : Unicons.Cross.name
+                    refMetadata.value ? Unicons.Check.name : Unicons.Cross.name
                   "
                   class="-mx-1"
                   :class="
-                    refMetadata.value
-                      ? 'text-green-600'
-                      : 'text-gray-600'
+                    refMetadata.value ? 'text-green-600' : 'text-gray-600'
                   "
                   height="18"
                 />
@@ -163,9 +159,18 @@ const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
 };
 
-const metadataValueToDisplayOnTooltip = computed(
-  () => refMetadata.value?.value?.label || refMetadata.value?.value,
-);
+const metadataValueToDisplayOnTooltip = computed(() => {
+  const label = refMetadata.value?.value?.label;
+  if (Array.isArray(label) && label.some((entry: any) => entry?.values))
+    return label
+      .map((entry: any) =>
+        entry.values?.length
+          ? `${entry.label} (${entry.values.join(", ")})`
+          : entry.label,
+      )
+      .join(", ");
+  return label || refMetadata.value?.value;
+});
 
 const pillTranslationKey = computed<string | undefined>(() =>
   resolveValueTranslationKey(refMetadata.value),
