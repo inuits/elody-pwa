@@ -6,6 +6,16 @@
       :element="composerElement"
       :display-inline="true"
     />
+    <div v-if="createFields.length" class="flex flex-col gap-2">
+      <metadata-wrapper
+        v-for="field in createFields"
+        :key="`${scratchFormId}-${field.key}-${resetCount}`"
+        :form-id="scratchFormId"
+        :metadata="field"
+        :is-edit="true"
+        form-flow="create"
+      />
+    </div>
     <div class="flex items-center justify-end gap-2">
       <button
         v-if="cancellable"
@@ -18,7 +28,7 @@
         :label="submitLabel"
         :icon="DamsIcons.Check"
         button-style="accentAccent"
-        :disabled="!hasContent || isSubmitting"
+        :disabled="!canSubmit"
         @click="submit"
       />
     </div>
@@ -30,13 +40,19 @@ import { computed, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
-import { extractTaggedRelations } from "@/composables/useComments";
+import {
+  createFieldMetadataFrom,
+  extractTaggedRelations,
+} from "@/composables/useComments";
 import {
   DamsIcons,
   ValidationFields,
   type BaseRelationValuesInput,
+  type MetadataValuesInput,
+  type PanelMetaData,
   type WysiwygElement,
 } from "@/generated-types/queries";
 
@@ -47,14 +63,17 @@ const props = withDefaults(
     initialBody?: string;
     submitLabel: string;
     cancellable?: boolean;
+    createFields?: PanelMetaData[];
     onSubmit: (
       body: string,
       taggedRelations: BaseRelationValuesInput[],
+      metadata: MetadataValuesInput[],
     ) => unknown;
   }>(),
   {
     initialBody: "",
     cancellable: false,
+    createFields: () => [],
   },
 );
 
@@ -71,9 +90,12 @@ const bodyKey = computed<string>(() => props.composer.metadataKey);
 
 const composerElement = computed<WysiwygElement>(() => props.composer);
 
+const currentValues = computed<Record<string, any>>(
+  () => getForm(props.scratchFormId)?.values?.intialValues ?? {},
+);
+
 const currentBody = computed<string>(
-  () =>
-    getForm(props.scratchFormId)?.values?.intialValues?.[bodyKey.value] ?? "",
+  () => currentValues.value[bodyKey.value] ?? "",
 );
 
 const hasContent = computed<boolean>(() => {
@@ -87,18 +109,26 @@ const hasContent = computed<boolean>(() => {
   return text.length > 0 || currentBody.value.includes("data-entity-id");
 });
 
+const isFormValid = computed<boolean>(
+  () => getForm(props.scratchFormId)?.meta?.valid !== false,
+);
+
+const canSubmit = computed<boolean>(
+  () => hasContent.value && isFormValid.value && !isSubmitting.value,
+);
+
 const resetCount = ref<number>(0);
 
 const clear = () => {
-  getForm(props.scratchFormId)?.setFieldValue(
-    `${ValidationFields.IntialValues}.${bodyKey.value}`,
-    "",
+  const form = getForm(props.scratchFormId);
+  [bodyKey.value, ...props.createFields.map((field) => field.key)].forEach(
+    (key) => form?.setFieldValue(`${ValidationFields.IntialValues}.${key}`, ""),
   );
   resetCount.value += 1;
 };
 
 const submit = async () => {
-  if (!hasContent.value || isSubmitting.value) return;
+  if (!canSubmit.value) return;
   isSubmitting.value = true;
   try {
     const body = currentBody.value;
@@ -108,6 +138,7 @@ const submit = async () => {
         body,
         props.composer.taggingConfiguration?.taggableEntityConfiguration ?? [],
       ),
+      createFieldMetadataFrom(props.createFields, currentValues.value),
     );
     if (!props.initialBody) clear();
   } finally {
@@ -116,7 +147,10 @@ const submit = async () => {
 };
 
 createForm(props.scratchFormId, {
-  intialValues: { [bodyKey.value]: props.initialBody },
+  intialValues: {
+    [bodyKey.value]: props.initialBody,
+    ...Object.fromEntries(props.createFields.map((field) => [field.key, ""])),
+  },
   relationValues: {},
 } as any);
 editHelper.enableEdit();

@@ -7,6 +7,10 @@ import {
   GetEntitiesDocument,
   SearchInputType,
   type BaseRelationValuesInput,
+  type CommentCreateFields,
+  type DropdownOption,
+  type MetadataValuesInput,
+  type PanelMetaData,
   type TaggableEntityConfiguration,
 } from "@/generated-types/queries";
 import { useManageEntities } from "@/composables/useManageEntities";
@@ -25,6 +29,7 @@ export type Comment = {
     created_at?: string;
     created_by?: string;
     updated_at?: string;
+    [key: string]: any;
   };
   relationValues?: Record<string, { key: string; type?: string }[]>;
 };
@@ -140,6 +145,53 @@ export const flattenRelationsExceptTags = (
       editStatus: EditStatus.Unchanged,
     }));
 
+export const createFieldsOf = (
+  createFields: CommentCreateFields | null | undefined,
+): PanelMetaData[] =>
+  Object.values(createFields ?? {}).filter(
+    (field: any) => field?.__typename === "PanelMetaData",
+  ) as PanelMetaData[];
+
+const isEmptyValue = (value: unknown): boolean =>
+  value === undefined ||
+  value === null ||
+  value === "" ||
+  (Array.isArray(value) && value.length === 0);
+
+export const createFieldMetadataFrom = (
+  fields: PanelMetaData[],
+  values: Record<string, unknown>,
+): MetadataValuesInput[] =>
+  fields
+    .filter((field) => !isEmptyValue(values[field.key]))
+    .map((field) => ({ key: field.key, value: values[field.key] }));
+
+export type CreateFieldDisplayValue = {
+  key: string;
+  value: unknown;
+  formatter?: string;
+  options: (DropdownOption | null)[];
+};
+
+const unwrapFormattedValue = (
+  stored: any,
+): { value: unknown; formatter?: string } =>
+  stored && typeof stored === "object" && "formatter" in stored
+    ? { value: stored.label, formatter: stored.formatter }
+    : { value: stored, formatter: undefined };
+
+export const createFieldDisplayValuesOf = (
+  fields: PanelMetaData[],
+  comment: Comment,
+): CreateFieldDisplayValue[] =>
+  fields
+    .map((field) => ({
+      key: field.key,
+      ...unwrapFormattedValue(comment.intialValues?.[field.key]),
+      options: field.inputField?.options ?? [],
+    }))
+    .filter((displayValue) => !isEmptyValue(displayValue.value));
+
 const commentsByParentEntity = ref<Record<string, Comment[]>>({});
 const loadingParentEntities = ref<string[]>([]);
 /**
@@ -216,11 +268,13 @@ export const useComments = () => {
     subjectId,
     body,
     taggedRelations = [],
+    metadata = [],
   }: {
     entityId: string;
     subjectId?: string;
     body: string;
     taggedRelations?: BaseRelationValuesInput[];
+    metadata?: MetadataValuesInput[];
   }): Promise<void> => {
     await createEntity({
       entityType: Entitytyping.Comment,
@@ -228,6 +282,7 @@ export const useComments = () => {
         { key: "body", value: body },
         { key: "author_name", value: getUserName() ?? "" },
         ...(subjectId ? [] : [{ key: "status", value: "open" }]),
+        ...metadata,
       ],
       relations: [
         {

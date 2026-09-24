@@ -45,6 +45,7 @@
             v-if="editingCommentId !== thread.subject.id"
             :comment="thread.subject"
             :taggable-entity-configuration="taggableEntityConfiguration"
+            :create-fields="createFields"
             :status="thread.status"
             :can-edit="canEditComment(thread.subject)"
             @edit="editingCommentId = thread.subject.id"
@@ -130,6 +131,7 @@ import {
   ModalStyle,
   TypeModals,
   type BaseRelationValuesInput,
+  type PanelMetaData,
   type WysiwygElement,
 } from "@/generated-types/queries";
 
@@ -151,6 +153,9 @@ const parentEntityId = computed<string | undefined>(
 const canPost = computed<boolean>(() => !!modalInfo.value.canPost);
 const composer = computed<WysiwygElement | undefined>(
   () => modalInfo.value.composer,
+);
+const createFields = computed<PanelMetaData[]>(
+  () => modalInfo.value.createFields ?? [],
 );
 const taggableEntityConfiguration = computed(
   () => composer.value?.taggingConfiguration?.taggableEntityConfiguration ?? [],

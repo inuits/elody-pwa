@@ -26,6 +26,7 @@
               <comment-composer
                 :scratch-form-id="`comment-new-${id}`"
                 :composer="element.composer"
+                :create-fields="createFields"
                 :submit-label="t('comments.post')"
                 :cancellable="true"
                 @submit="postSubject"
@@ -50,6 +51,7 @@
               :key="thread.subject.id"
               :comment="thread.subject"
               :taggable-entity-configuration="taggableEntityConfiguration"
+              :create-fields="createFields"
               :status="thread.status"
               :reply-count="thread.replyCount"
               :clickable="true"
@@ -70,7 +72,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
-import { useComments } from "@/composables/useComments";
+import { createFieldsOf, useComments } from "@/composables/useComments";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type CommentsElement,
@@ -79,6 +81,8 @@ import {
   ModalStyle,
   TypeModals,
   type BaseRelationValuesInput,
+  type MetadataValuesInput,
+  type PanelMetaData,
 } from "@/generated-types/queries";
 
 const props = defineProps<{
@@ -103,6 +107,10 @@ const taggableEntityConfiguration = computed(
     [],
 );
 
+const createFields = computed<PanelMetaData[]>(() =>
+  createFieldsOf(props.element.createFields),
+);
+
 const openThread = (subjectId: string) => {
   openModal(
     TypeModals.CommentThread,
@@ -115,6 +123,7 @@ const openThread = (subjectId: string) => {
       subjectId,
       parentEntityId: props.id,
       composer: props.element.composer,
+      createFields: createFields.value,
       canPost: canPost.value,
     },
   );
@@ -135,8 +144,14 @@ const openTaggedEntity = (entityId: string, entityType: Entitytyping) => {
 const postSubject = async (
   body: string,
   relations: BaseRelationValuesInput[],
+  metadata: MetadataValuesInput[],
 ) => {
-  await post({ entityId: props.id, body, taggedRelations: relations });
+  await post({
+    entityId: props.id,
+    body,
+    taggedRelations: relations,
+    metadata,
+  });
   isComposerOpen.value = false;
 };
 

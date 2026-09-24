@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+const createEntity = vi.hoisted(() => vi.fn());
+
 vi.mock("@/main", () => ({ apolloClient: {} }));
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
-    createEntity: vi.fn(),
+    createEntity,
     saveEntityValues: vi.fn(),
     addRelations: vi.fn(),
   }),
@@ -18,6 +20,10 @@ const {
   flattenRelationsExceptTags,
   tagElementName,
   tagRelationTypesOf,
+  createFieldsOf,
+  createFieldMetadataFrom,
+  createFieldDisplayValuesOf,
+  useComments,
 } = await import("../useComments");
 
 const comment = (
@@ -212,5 +218,127 @@ describe("extractTaggedRelations", () => {
   it("returns nothing when there is no body or no configuration", () => {
     expect(extractTaggedRelations("", configurations)).toEqual([]);
     expect(extractTaggedRelations("<p>x</p>", [])).toEqual([]);
+  });
+});
+
+const categoryField: any = {
+  __typename: "PanelMetaData",
+  label: "element-labels.comment-category",
+  key: "category",
+  inputField: {
+    type: "dropdownSingleselectMetadata",
+    options: [
+      { label: "dropdown-labels.comment-category-fiction", value: "Fictie" },
+      { label: "dropdown-labels.comment-category-music", value: "Muziek" },
+    ],
+  },
+};
+
+const priorityField: any = {
+  __typename: "PanelMetaData",
+  label: "priority",
+  key: "priority",
+  inputField: { type: "text" },
+};
+
+describe("createFieldsOf", () => {
+  it("lists every aliased metadata field of the configuration", () => {
+    expect(
+      createFieldsOf({
+        __typename: "CommentCreateFields",
+        category: categoryField,
+        priority: priorityField,
+      } as any),
+    ).toEqual([categoryField, priorityField]);
+  });
+
+  it("returns nothing when no create fields are configured", () => {
+    expect(createFieldsOf(undefined)).toEqual([]);
+    expect(createFieldsOf(null)).toEqual([]);
+  });
+});
+
+describe("createFieldMetadataFrom", () => {
+  it("turns the filled in create fields into metadata", () => {
+    expect(
+      createFieldMetadataFrom([categoryField, priorityField], {
+        body: "<p>x</p>",
+        category: "Fictie",
+        priority: "high",
+      }),
+    ).toEqual([
+      { key: "category", value: "Fictie" },
+      { key: "priority", value: "high" },
+    ]);
+  });
+
+  it("leaves out create fields that were left empty", () => {
+    expect(
+      createFieldMetadataFrom([categoryField, priorityField], {
+        category: "",
+      }),
+    ).toEqual([]);
+  });
+
+  it("never picks up form values that are not a configured create field", () => {
+    expect(
+      createFieldMetadataFrom([categoryField], {
+        body: "<p>x</p>",
+        category: "Muziek",
+      }),
+    ).toEqual([{ key: "category", value: "Muziek" }]);
+  });
+});
+
+describe("createFieldDisplayValuesOf", () => {
+  it("returns the stored value with the formatter it was fetched with", () => {
+    expect(
+      createFieldDisplayValuesOf([categoryField], {
+        intialValues: { category: { formatter: "pill|auto", label: "Muziek" } },
+      } as any),
+    ).toEqual([
+      {
+        key: "category",
+        value: "Muziek",
+        formatter: "pill|auto",
+        options: categoryField.inputField.options,
+      },
+    ]);
+  });
+
+  it("keeps a plain stored value without a formatter", () => {
+    expect(
+      createFieldDisplayValuesOf([priorityField], {
+        intialValues: { priority: "high" },
+      } as any),
+    ).toEqual([
+      { key: "priority", value: "high", formatter: undefined, options: [] },
+    ]);
+  });
+
+  it("skips create fields the comment has no value for", () => {
+    expect(
+      createFieldDisplayValuesOf([categoryField, priorityField], {
+        intialValues: { category: { formatter: "pill|auto", label: "" } },
+      } as any),
+    ).toEqual([]);
+  });
+});
+
+describe("useComments.post", () => {
+  it("adds the create field metadata to a new comment", async () => {
+    createEntity.mockClear();
+    await useComments().post({
+      entityId: "W-1",
+      body: "<p>hi</p>",
+      metadata: [{ key: "category", value: "Fictie" }],
+    });
+
+    expect(createEntity.mock.calls[0][0].metadata).toEqual([
+      { key: "body", value: "<p>hi</p>" },
+      { key: "author_name", value: "Tester" },
+      { key: "status", value: "open" },
+      { key: "category", value: "Fictie" },
+    ]);
   });
 });
