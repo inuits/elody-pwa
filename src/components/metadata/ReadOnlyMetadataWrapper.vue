@@ -165,7 +165,9 @@ const metadataValueToDisplayOnTooltip = computed(() => {
     return label
       .map((entry: any) =>
         entry.values?.length
-          ? `${entry.label} (${entry.values.join(", ")})`
+          ? `${entry.label} (${entry.values
+              .map((nested: any) => nested?.value ?? nested)
+              .join(", ")})`
           : entry.label,
       )
       .join(", ");

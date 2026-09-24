@@ -37,14 +37,15 @@
       }}</span>
       <span
         v-for="nestedValue in entry.values"
-        :key="nestedValue"
+        :key="nestedValue.value"
+        :title="nestedTitle(nestedValue)"
         class="inline-flex items-center rounded-full border border-black/10 bg-white px-1.5 py-px text-xs font-normal text-slate-700 shadow-sm"
         :style="{
-          background: nestedSettingsFor(nestedValue)?.background,
-          color: nestedSettingsFor(nestedValue)?.text,
+          background: nestedSettingsFor(nestedValue.value)?.background,
+          color: nestedSettingsFor(nestedValue.value)?.text,
         }"
       >
-        {{ displayValue(nestedValue) }}
+        {{ displayValue(nestedValue.value) }}
       </span>
     </div>
   </div>
@@ -57,7 +58,11 @@ import { useI18n } from "vue-i18n";
 import { resolveOptionLabel } from "@/components/metadata/useValueTranslationKey";
 import { Unicons } from "@/types";
 
-type NestedPillEntry = { label: string; values: string[] };
+type NestedPillValue = { key: string; value: string };
+type NestedPillEntry = {
+  label: string;
+  values: (NestedPillValue | string)[];
+};
 
 const props = withDefaults(
   defineProps<{
@@ -75,14 +80,23 @@ const props = withDefaults(
 
 const { t } = useI18n();
 
+const toNestedValue = (value: NestedPillValue | string): NestedPillValue =>
+  typeof value === "object" ? value : { key: "", value };
+
 // Every value gets its own pill: one pill cannot carry two colours, and a
 // joined string has no entry in formattersSettings to look up.
-const entries = computed<(NestedPillEntry & { nested: boolean })[]>(() =>
+const entries = computed<
+  { label: string; values: NestedPillValue[]; nested: boolean }[]
+>(() =>
   (Array.isArray(props.label) ? props.label : [props.label])
     .filter(Boolean)
     .map((value) =>
       typeof value === "object"
-        ? { ...value, values: value.values ?? [], nested: true }
+        ? {
+            label: value.label,
+            values: (value.values ?? []).map(toNestedValue),
+            nested: true,
+          }
         : { label: value, values: [], nested: false },
     ),
 );
@@ -107,6 +121,16 @@ const nestedSettingsFor = (value: string): any => {
 };
 
 const iconFor = (value: string) => Unicons[settingsFor(value)?.icon];
+
+// Names what the chip is, since a value like "programmer" does not say by
+// itself that it is a function rather than a role.
+const nestedTitle = ({ key, value }: NestedPillValue): string | undefined => {
+  if (!key) return undefined;
+  const keyTranslation = t(`metadata.labels.${key}`);
+  const name =
+    keyTranslation === `metadata.labels.${key}` ? key : keyTranslation;
+  return `${name}: ${displayValue(value)}`;
+};
 
 const displayValue = (value: string): string => {
   const key = props.translationKey

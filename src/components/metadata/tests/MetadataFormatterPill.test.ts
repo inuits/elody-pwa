@@ -184,7 +184,13 @@ describe("MetadataFormatterPill — configured icon", () => {
 
 describe("MetadataFormatterPill — nested relation metadata", () => {
   const organizationsWithFunctions = [
-    { label: "Org A", values: ["programmer", "technician"] },
+    {
+      label: "Org A",
+      values: [
+        { key: "function", value: "programmer" },
+        { key: "function", value: "technician" },
+      ],
+    },
     { label: "Org B", values: [] },
   ];
 
@@ -214,7 +220,12 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
     const wrapper = mount(MetadataFormatterPill, {
       props: {
         formatter: "pill|organization",
-        label: [{ label: "Org A", values: ["programmer"] }],
+        label: [
+          {
+            label: "Org A",
+            values: [{ key: "function", value: "programmer" }],
+          },
+        ],
         translationKey: "metadata.labels.user-function.$value",
       },
     });
@@ -232,7 +243,12 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
     const wrapper = mount(MetadataFormatterPill, {
       props: {
         formatter: "pill|organization",
-        label: [{ label: "Org A", values: ["programmer"] }],
+        label: [
+          {
+            label: "Org A",
+            values: [{ key: "function", value: "programmer" }],
+          },
+        ],
       },
     });
     await nextTick();
@@ -280,7 +296,15 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
     const wrapper = mount(MetadataFormatterPill, {
       props: {
         formatter: "pill|concept",
-        label: [{ label: "Org A", values: ["finished", "programmer"] }],
+        label: [
+          {
+            label: "Org A",
+            values: [
+              { key: "function", value: "finished" },
+              { key: "function", value: "programmer" },
+            ],
+          },
+        ],
       },
     });
     await nextTick();
@@ -289,7 +313,9 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
     const configured = spans.find((span) => span.text() === "finished");
     const unconfigured = spans.find((span) => span.text() === "programmer");
     expect(configured?.attributes("style")).toContain("rgb(221, 255, 221)");
-    expect(unconfigured?.attributes("style") ?? "").not.toContain("rgb(170, 170, 170)");
+    expect(unconfigured?.attributes("style") ?? "").not.toContain(
+      "rgb(170, 170, 170)",
+    );
   });
 
   it("colours each relation by its own name when no pill type is configured", async () => {
@@ -308,6 +334,54 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
     const [configured, fallback] = wrapper.element.children;
     expect(configured.getAttribute("style")).toContain("rgb(170, 170, 170)");
     expect(fallback.getAttribute("style")).toContain("rgb(214, 226, 240)");
+  });
+
+  it("titles each nested value with the metadata it came from", async () => {
+    mocks.t.mockImplementation(
+      (key: string) =>
+        ({
+          "metadata.labels.function": "Functie",
+          "metadata.labels.user-function.programmer": "Programmator",
+        })[key] ?? key,
+    );
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill|organization",
+        label: [
+          {
+            label: "Org A",
+            values: [
+              { key: "function", value: "programmer" },
+              { key: "roles", value: "admin" },
+            ],
+          },
+        ],
+        translationKey: "metadata.labels.user-function.$value",
+      },
+    });
+    await nextTick();
+
+    const spans = wrapper.findAll("span");
+    expect(
+      spans.find((span) => span.text() === "Programmator")?.attributes("title"),
+    ).toBe("Functie: Programmator");
+    // no translation for the key, so the raw key names it rather than nothing
+    expect(
+      spans.find((span) => span.text() === "admin")?.attributes("title"),
+    ).toBe("roles: admin");
+  });
+
+  it("still renders nested values given as plain strings", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill|organization",
+        label: [{ label: "Org A", values: ["programmer"] }],
+      },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).toContain("programmer");
   });
 
   it("renders a bare pill for an entry without values", async () => {
