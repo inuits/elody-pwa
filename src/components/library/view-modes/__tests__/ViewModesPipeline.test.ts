@@ -149,6 +149,21 @@ describe("ViewModesPipeline", () => {
     ).toBe(true);
   });
 
+  it("keeps the start of the flow in view: the canvas focuses the first root card", () => {
+    const wrapper = mountPipeline(wemiFamily(), { config: WEMI_CONFIG });
+
+    const root = wrapper
+      .findAll("[data-pipeline-node]")
+      .find((node) => node.find(".list-item-stub").exists())!;
+    const left = parseFloat(root.attributes("style")!.split("left:")[1]);
+    const top = parseFloat(root.attributes("style")!.split("top:")[1]);
+    const focus = wrapper
+      .findComponent({ name: "PipelineCanvas" })
+      .props("focus") as { x: number; y: number };
+    expect(focus.x).toBeGreaterThan(left);
+    expect(focus.y).toBeGreaterThan(top);
+  });
+
   it("does not navigate on a card click: the corner actions menu is the interaction", async () => {
     const wrapper = mountPipeline([makeEntity("a")], {
       openEntityInDetailModal: true,

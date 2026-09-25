@@ -15,6 +15,7 @@
       :content-width="layout.contentWidth"
       :content-height="layout.contentHeight"
       :edges="canvasEdges"
+      :focus="flowStart"
     >
       <PipelineNode
         v-for="item in processedEntities"
@@ -188,6 +189,20 @@ const layout = computed(() =>
     })),
   ),
 );
+
+// The first card of the first column: where a reader starts following the
+// flow, and what the canvas keeps in view when everything does not fit.
+const flowStart = computed(() => {
+  const root = graph.value.nodes.find(
+    (node) => layout.value.positions[node.id]?.col === 0,
+  );
+  const position = root && layout.value.positions[root.id];
+  if (!root || !position) return undefined;
+  return {
+    x: position.x + cardWidth / 2,
+    y: position.y + heightOf(root.id) / 2,
+  };
+});
 
 const portCentreY = (
   nodeId: string,
