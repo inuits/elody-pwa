@@ -168,7 +168,7 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap"
+            :show-pagination="!displayMap && !displayPipeline"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -252,7 +252,9 @@
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ListItemSkeleton
-            v-show="entitiesLoadingWithoutData && !displayMap"
+            v-show="
+              entitiesLoadingWithoutData && !displayMap && !displayPipeline
+            "
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
@@ -326,6 +328,23 @@
             :entities-loading="entitiesLoading"
             :config="configPerViewMode[ViewModes.ViewModesMedia]"
           />
+          <ViewModesPipeline
+            v-if="displayPipeline"
+            :entities="entities as Entity[]"
+            :entities-loading="entitiesLoading"
+            :bulk-operations-context="bulkOperationsContext"
+            :list-item-route-name="listItemRouteName"
+            :open-entity-in-detail-modal="openEntityInDetailModal"
+            :enable-navigation="enableNavigation"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            :relation-type="relationType"
+            :enable-selection="enableSelection"
+            :base-library-mode="baseLibraryMode"
+            :allowed-actions-on-relations="allowedActionsOnRelations"
+            :config="configPerViewMode[ViewModes.ViewModesPipeline]"
+            :refetch-entities="refetchEntities"
+            :set-pagination-limit="setPaginationLimit"
+          />
           <ViewModesMap
             v-if="displayMap"
             :map-type="
@@ -360,6 +379,7 @@ import LibraryBar from "@/components/library/LibraryBar.vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
+import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
 import { UploadStatus } from "@/composables/upload/types";
@@ -608,6 +628,14 @@ const isPickerLibrary = computed(() => {
       BulkOperationsContextEnum.GuidedFlowStepPicker
   );
 });
+
+// A pipeline layout has no place inside a picker — selection is the task
+// there — so the mode is stripped before the toggles are built.
+const viewModesForContext = (viewModes: string[]): string[] =>
+  isPickerLibrary.value
+    ? viewModes.filter((vm) => vm !== ViewModes.ViewModesPipeline)
+    : viewModes;
+
 const additionalDefaultFiltersEnabled = computed(() => {
   return (
     props.enableAdvancedFilters &&
@@ -783,6 +811,7 @@ const {
   displayTable,
   displayPreview,
   displayMap,
+  displayPipeline,
   expandFilters,
   toggles,
   configPerViewMode,
@@ -807,6 +836,7 @@ const showBasicModePagination = computed(
   () =>
     !props.predefinedEntities &&
     !displayMap.value &&
+    !displayPipeline.value &&
     (props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder) &&
     paginationStore.totalPages.value > 1,
@@ -1094,7 +1124,7 @@ onUnmounted(() => {
 });
 
 const resetMapPaginationLimit = () => {
-  if (displayMap.value) setPaginationLimit(0);
+  if (displayMap.value || displayPipeline.value) setPaginationLimit(0);
 };
 
 const isMounted = ref<boolean>(true);
@@ -1156,7 +1186,7 @@ watch(
           (viewModeWithConfig: ViewModesWithConfig) =>
             viewModeWithConfig.viewMode,
         );
-      determineViewModes(viewModes);
+      determineViewModes(viewModesForContext(viewModes));
       isInitialLoading.value = false;
     }
   },
@@ -1201,8 +1231,8 @@ watch(
       const viewModes = newEntities[0].allowedViewModes.viewModes.map(
         (vm) => vm.viewMode,
       );
-      determineViewModes(viewModes);
-      getUserPreferredViewModeConfiguration(viewModes);
+      determineViewModes(viewModesForContext(viewModes));
+      getUserPreferredViewModeConfiguration(viewModesForContext(viewModes));
       lastProcessedEntityType.value = entityType.value;
       hasRestoredViewModesAfterFetch.value = true;
     }
@@ -1239,8 +1269,8 @@ watch(entitiesLoading, (loading, wasLoading) => {
     firstEntity.allowedViewModes.viewModes?.map(
       (vm: ViewModesWithConfig) => vm.viewMode,
     ) ?? [];
-  determineViewModes(viewModes);
-  getUserPreferredViewModeConfiguration(viewModes);
+  determineViewModes(viewModesForContext(viewModes));
+  getUserPreferredViewModeConfiguration(viewModesForContext(viewModes));
   lastProcessedEntityType.value = entityType.value;
   hasRestoredViewModesAfterFetch.value = true;
 });

@@ -1,5 +1,20 @@
 <template>
-  <li data-cy="list-item" :class="wrapperClasses">
+  <!-- the pipeline card is its own component; ListItem stays the single
+       entry point for every view mode but owns only list and grid -->
+  <PipelineListItemCard
+    v-if="isPipelineMode"
+    :bulk-operations-context="bulkOperationsContext"
+    :context-menu-actions="contextMenuActions"
+    :item-id="itemId"
+    :entity-typename="entityTypename"
+    :loading="loading"
+    :teaser-metadata="teaserMetadata"
+    :intial-values="intialValues"
+    :relation="relation"
+    :is-disabled="isDisabled"
+    :refetch-entities="refetchEntities"
+  />
+  <li v-else data-cy="list-item" :class="wrapperClasses">
     <div
       v-if="isGridMode && !isPreviewElement"
       class="flex justify-between items-center pb-2"
@@ -317,6 +332,7 @@ import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
+import PipelineListItemCard from "@/components/library/view-modes/pipeline/PipelineListItemCard.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -345,7 +361,7 @@ const props = withDefaults(
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
-    viewMode?: "list" | "grid";
+    viewMode?: "list" | "grid" | "pipeline";
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
     previewComponentCurrentActive: boolean;
@@ -480,6 +496,7 @@ const onlyEditableTeaserMetadata = computed(() =>
 
 const isGridMode = computed(() => props.viewMode === "grid");
 const isListMode = computed(() => props.viewMode === "list");
+const isPipelineMode = computed(() => props.viewMode === "pipeline");
 
 const wrapperClasses = computed(() => {
   return [
