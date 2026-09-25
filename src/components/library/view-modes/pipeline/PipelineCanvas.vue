@@ -68,7 +68,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 type CanvasEdge = {
@@ -87,6 +87,9 @@ const props = defineProps<{
   contentWidth: number;
   contentHeight: number;
   edges: CanvasEdge[];
+  // content point to keep in view when the content outgrows the viewport,
+  // typically the start of the flow
+  focus?: { x: number; y: number };
 }>();
 
 const { t } = useI18n();
@@ -128,20 +131,29 @@ const fit = (fromResetButton = false) => {
     0,
     (viewportWidth - props.contentWidth * zoom.value) / 2,
   );
-  translateY.value = Math.max(
-    0,
-    (viewportHeight - props.contentHeight * zoom.value) / 2,
-  );
+  const scaledHeight = props.contentHeight * zoom.value;
+  if (scaledHeight <= viewportHeight) {
+    translateY.value = (viewportHeight - scaledHeight) / 2;
+  } else {
+    // too tall to fit: centre the focus point, without scrolling past the
+    // top or bottom of the content
+    const focusY = (props.focus?.y ?? 0) * zoom.value;
+    translateY.value = Math.min(
+      0,
+      Math.max(viewportHeight - scaledHeight, viewportHeight / 2 - focusY),
+    );
+  }
 };
 
-// One fit pass, keyed on the measured content box so it settles instead of
-// looping; manual pan/zoom stops the automatic re-fit.
+// Fit once mounted, then again whenever the measured content box changes,
+// so it settles instead of looping; manual pan/zoom stops the re-fit.
+onMounted(() => fit());
 watch(
   () => [props.contentWidth, props.contentHeight],
   () => {
     if (!userInteracted.value) fit();
   },
-  { immediate: true, flush: "post" },
+  { flush: "post" },
 );
 
 let panning = false;
