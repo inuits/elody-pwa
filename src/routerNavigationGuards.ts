@@ -29,6 +29,32 @@ const collectRouteVerdicts = (
   return verdicts;
 };
 
+type LandingRoutes = { [routeKey: string]: string };
+
+const collectLandingRoutes = (
+  routes: any[] | undefined,
+  landingRoutes: LandingRoutes = {},
+): LandingRoutes => {
+  for (const route of routes ?? []) {
+    if (typeof route?.meta?.landingRoute === "string")
+      landingRoutes[routeKey(route)] = route.meta.landingRoute;
+    if (route?.children) collectLandingRoutes(route.children, landingRoutes);
+  }
+  return landingRoutes;
+};
+
+const checkLandingRoute = (
+  to: RouteLocationNormalized,
+  landingRoutes: LandingRoutes,
+): RouteLocationRaw | null => {
+  const toData = to.matched[to.matched.length - 1];
+  const landingRoute = landingRoutes[routeKey(toData ?? {})];
+
+  if (!landingRoute || to.path === landingRoute) return null;
+
+  return landingRoute;
+};
+
 const checkAlternativeRoutes = (
   to: RouteLocationNormalized,
   routeVerdicts: RouteVerdicts,
@@ -155,6 +181,7 @@ const checkForNewVersion = async (): Promise<void> => {
 
 export const addRouterNavigationGuards = (router: Router, config: any) => {
   const routeVerdicts = collectRouteVerdicts(config?.routerConfig);
+  const landingRoutes = collectLandingRoutes(config?.routerConfig);
 
   router.afterEach(() => {
     handleRequiredAuthentication(router);
@@ -173,6 +200,9 @@ export const addRouterNavigationGuards = (router: Router, config: any) => {
 
       const alternativeRedirect = checkAlternativeRoutes(to, routeVerdicts);
       if (alternativeRedirect) return next(alternativeRedirect);
+
+      const landingRedirect = checkLandingRoute(to, landingRoutes);
+      if (landingRedirect) return next(landingRedirect);
 
       const authRedirect = checkRequiresAuthFromOverview(to, config);
       if (authRedirect) return next(authRedirect);

@@ -145,3 +145,94 @@ describe("addRouterNavigationGuards route permissions", () => {
     expect(next).toHaveBeenCalledWith("/ops");
   });
 });
+
+// The landing route is resolved server-side and shipped on the config, the same
+// way route verdicts are. Only the record it is configured on carries it, so a
+// child route never redirects onto itself.
+const navigateFromConfig = async (
+  config: any,
+  to: { name: string; path: string; matchedNames: string[] },
+) => {
+  let guard: any;
+  const router = {
+    afterEach: vi.fn(),
+    beforeEach: (fn: any) => (guard = fn),
+    currentRoute: { value: { meta: {} } },
+  } as any;
+
+  addRouterNavigationGuards(router, config);
+
+  const next = vi.fn();
+  await guard(
+    {
+      name: to.name,
+      fullPath: to.path,
+      path: to.path,
+      params: {},
+      query: {},
+      matched: to.matchedNames.map((name) => ({ name, path: "/", meta: {} })),
+    },
+    {},
+    next,
+  );
+  return next;
+};
+
+const configWithLandingRoute = {
+  routerConfig: [
+    {
+      path: "/",
+      name: "Home",
+      meta: { landingRoute: "/notifications" },
+      children: [
+        { path: "/productions", name: "Productions", meta: {} },
+        { path: "/notifications", name: "Notifications", meta: {} },
+      ],
+    },
+  ],
+};
+
+describe("addRouterNavigationGuards landing route", () => {
+  beforeEach(() => {
+    mocks.user.value = undefined;
+  });
+
+  it("sends the landing route's own record to the configured route", async () => {
+    const next = await navigateFromConfig(configWithLandingRoute, {
+      name: "Home",
+      path: "/",
+      matchedNames: ["Home"],
+    });
+
+    expect(next).toHaveBeenCalledWith("/notifications");
+  });
+
+  it("leaves a child route alone, so the redirect cannot loop", async () => {
+    const next = await navigateFromConfig(configWithLandingRoute, {
+      name: "Notifications",
+      path: "/notifications",
+      matchedNames: ["Home", "Notifications"],
+    });
+
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it("does not redirect onto the route it is already on", async () => {
+    const next = await navigateFromConfig(configWithLandingRoute, {
+      name: "Home",
+      path: "/notifications",
+      matchedNames: ["Home"],
+    });
+
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it("leaves a config without a landing route untouched", async () => {
+    const next = await navigateFromConfig(
+      { routerConfig: [{ path: "/", name: "Home", meta: {} }] },
+      { name: "Home", path: "/", matchedNames: ["Home"] },
+    );
+
+    expect(next).toHaveBeenCalledWith();
+  });
+});
