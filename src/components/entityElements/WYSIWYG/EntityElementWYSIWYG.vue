@@ -376,6 +376,7 @@ if (multilingual) {
 
 .tiptap p {
   @apply block m-0;
+  unicode-bidi: plaintext;
 }
 </style>
 
