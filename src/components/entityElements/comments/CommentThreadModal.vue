@@ -97,6 +97,7 @@
           class="border-t border-neutral-30 pt-3"
         >
           <comment-composer
+            :key="`comment-reply-${thread.subject.id}`"
             :scratch-form-id="`comment-reply-${thread.subject.id}`"
             :composer="composer"
             :submit-label="t('comments.reply')"
