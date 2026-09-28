@@ -23,6 +23,7 @@ export const useFilterBasic = () => {
     return {
       type: input.type,
       key: input.key,
+      relationKeys: input.relation_keys,
       isDisplayedByDefault: true,
       defaultValue: input.value,
       defaultValueMapping: input.defaultValueMapping,

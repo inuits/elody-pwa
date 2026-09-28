@@ -1537,4 +1537,39 @@ describe("getNormalizedFiltersForApi — never emits a filter without a value", 
     })) as any;
     expect(getNormalizedFiltersForApi()).toHaveLength(3);
   });
+
+  it("forwards relation keys of a filter to the api", () => {
+    const { filters, getNormalizedFiltersForApi } = useFiltersBaseNew();
+
+    filters.value = [
+      {
+        isActive: true,
+        isDisplayed: true,
+        advancedFilter: {
+          type: "text",
+          key: ["elody:1|metadata.title.value"],
+          relationKeys: ["vlacc:1|properties.ref_authors.value"],
+          isDisplayedByDefault: true,
+          hidden: true,
+          __typename: "AdvancedFilter",
+        },
+        inputFromState: {
+          type: "text",
+          key: ["elody:1|metadata.title.value"],
+          value: "tolkien",
+          match_exact: false,
+        },
+      },
+    ] as any;
+
+    expect(getNormalizedFiltersForApi()).toEqual([
+      {
+        type: "text",
+        key: ["elody:1|metadata.title.value"],
+        relation_keys: ["vlacc:1|properties.ref_authors.value"],
+        value: "tolkien",
+        match_exact: false,
+      },
+    ]);
+  });
 });

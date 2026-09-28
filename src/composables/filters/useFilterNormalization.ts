@@ -17,6 +17,7 @@ export const useFilterNormalization = () => {
       type: filter.advancedFilter.type,
       parent_key: filter.advancedFilter.parentKey,
       key: filter.advancedFilter.key,
+      relation_keys: filter.advancedFilter.relationKeys ?? undefined,
       value: filter.inputFromState?.value ?? undefined,
       match_exact: ignoreFacets
         ? (filter.inputFromState?.match_exact ?? undefined)
