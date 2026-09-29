@@ -29,6 +29,7 @@ export type Comment = {
     created_at?: string;
     created_by?: string;
     updated_at?: string;
+    edited_at?: string;
     [key: string]: any;
   };
   relationValues?: Record<string, { key: string; type?: string }[]>;
@@ -161,10 +162,14 @@ const isEmptyValue = (value: unknown): boolean =>
 export const createFieldMetadataFrom = (
   fields: PanelMetaData[],
   values: Record<string, unknown>,
+  { keepEmpty = false }: { keepEmpty?: boolean } = {},
 ): MetadataValuesInput[] =>
   fields
-    .filter((field) => !isEmptyValue(values[field.key]))
-    .map((field) => ({ key: field.key, value: values[field.key] }));
+    .filter((field) => keepEmpty || !isEmptyValue(values[field.key]))
+    .map((field) => ({
+      key: field.key,
+      value: isEmptyValue(values[field.key]) ? "" : values[field.key],
+    }));
 
 export type CreateFieldDisplayValue = {
   key: string;
@@ -191,6 +196,30 @@ export const createFieldDisplayValuesOf = (
       options: field.inputField?.options ?? [],
     }))
     .filter((displayValue) => !isEmptyValue(displayValue.value));
+
+export const createFieldValuesOf = (
+  fields: PanelMetaData[],
+  comment: Comment,
+): Record<string, unknown> =>
+  Object.fromEntries(
+    fields.map((field) => {
+      const { value } = unwrapFormattedValue(comment.intialValues?.[field.key]);
+      return [field.key, isEmptyValue(value) ? "" : value];
+    }),
+  );
+
+export const isOwnComment = (
+  comment: Comment,
+  identities: (string | null | undefined)[],
+): boolean => {
+  const author = String(comment.intialValues?.created_by ?? "").toLowerCase();
+  return (
+    !!author &&
+    identities.some(
+      (identity) => !!identity && identity.toLowerCase() === author,
+    )
+  );
+};
 
 const commentsByParentEntity = ref<Record<string, Comment[]>>({});
 const loadingParentEntities = ref<string[]>([]);
@@ -309,15 +338,17 @@ export const useComments = () => {
     comment,
     body,
     taggedRelations = [],
+    metadata = [],
     configurations,
   }: {
     comment: Comment;
     body: string;
     taggedRelations?: BaseRelationValuesInput[];
+    metadata?: MetadataValuesInput[];
     configurations: TaggableEntityConfiguration[];
   }): Promise<void> => {
     await saveEntityValues(comment.id, {
-      metadata: [{ key: "body", value: body }],
+      metadata: [{ key: "body", value: body }, ...metadata],
       relations: [
         ...flattenRelationsExceptTags(
           comment,

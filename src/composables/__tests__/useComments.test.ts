@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
 const createEntity = vi.hoisted(() => vi.fn());
+const saveEntityValues = vi.hoisted(() => vi.fn());
 
 vi.mock("@/main", () => ({ apolloClient: {} }));
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
     createEntity,
-    saveEntityValues: vi.fn(),
+    saveEntityValues,
     addRelations: vi.fn(),
   }),
 }));
@@ -23,6 +24,8 @@ const {
   createFieldsOf,
   createFieldMetadataFrom,
   createFieldDisplayValuesOf,
+  createFieldValuesOf,
+  isOwnComment,
   useComments,
 } = await import("../useComments");
 
@@ -280,6 +283,19 @@ describe("createFieldMetadataFrom", () => {
     ).toEqual([]);
   });
 
+  it("clears emptied create fields when asked to keep them", () => {
+    expect(
+      createFieldMetadataFrom(
+        [categoryField, priorityField],
+        { category: "", priority: "high" },
+        { keepEmpty: true },
+      ),
+    ).toEqual([
+      { key: "category", value: "" },
+      { key: "priority", value: "high" },
+    ]);
+  });
+
   it("never picks up form values that are not a configured create field", () => {
     expect(
       createFieldMetadataFrom([categoryField], {
@@ -339,6 +355,72 @@ describe("useComments.post", () => {
       { key: "author_name", value: "Tester" },
       { key: "status", value: "open" },
       { key: "category", value: "Fictie" },
+    ]);
+  });
+});
+
+describe("createFieldValuesOf", () => {
+  it("returns the stored value of every create field, unwrapped from its formatter", () => {
+    expect(
+      createFieldValuesOf([categoryField, priorityField], {
+        intialValues: {
+          category: { formatter: "pill|auto", label: "Muziek" },
+          priority: "high",
+        },
+      } as any),
+    ).toEqual({ category: "Muziek", priority: "high" });
+  });
+
+  it("seeds an empty value for a create field the comment has no value for", () => {
+    expect(
+      createFieldValuesOf([categoryField], { intialValues: {} } as any),
+    ).toEqual({ category: "" });
+  });
+});
+
+describe("isOwnComment", () => {
+  const authoredBy = (createdBy?: string): any => ({
+    id: "CMT-1",
+    intialValues: { created_by: createdBy },
+  });
+
+  it("recognises the author by any of their identities", () => {
+    expect(
+      isOwnComment(authoredBy("ann@inuits.eu"), ["U-1", "ann@inuits.eu"]),
+    ).toBe(true);
+  });
+
+  it("compares identities case-insensitively", () => {
+    expect(isOwnComment(authoredBy("Ann@Inuits.eu"), ["ann@inuits.eu"])).toBe(
+      true,
+    );
+  });
+
+  it("does not recognise someone else", () => {
+    expect(isOwnComment(authoredBy("bob@inuits.eu"), ["ann@inuits.eu"])).toBe(
+      false,
+    );
+  });
+
+  it("never matches when the author or the identities are unknown", () => {
+    expect(isOwnComment(authoredBy(undefined), ["ann@inuits.eu"])).toBe(false);
+    expect(isOwnComment(authoredBy(""), [undefined, null, ""])).toBe(false);
+  });
+});
+
+describe("useComments.edit", () => {
+  it("saves the body together with the edited create fields", async () => {
+    saveEntityValues.mockClear();
+    await useComments().edit({
+      comment: comment("CMT-1"),
+      body: "<p>new</p>",
+      metadata: [{ key: "category", value: "" }],
+      configurations: [],
+    });
+
+    expect(saveEntityValues.mock.calls[0][1].metadata).toEqual([
+      { key: "body", value: "<p>new</p>" },
+      { key: "category", value: "" },
     ]);
   });
 });

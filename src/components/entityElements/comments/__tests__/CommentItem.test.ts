@@ -108,3 +108,19 @@ describe("CommentItem create fields", () => {
     );
   });
 });
+
+describe("CommentItem edited marker", () => {
+  it("marks a comment whose body was edited", () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({ edited_at: "2026-09-28T12:00:00+00:00" }) },
+    });
+    expect(wrapper.find("[data-testid='comment-edited']").text()).toBe(
+      "t:comments.edited",
+    );
+  });
+
+  it("shows no marker on a comment that was never edited", () => {
+    const wrapper = mount(CommentItem, { props: { comment: comment({}) } });
+    expect(wrapper.find("[data-testid='comment-edited']").exists()).toBe(false);
+  });
+});

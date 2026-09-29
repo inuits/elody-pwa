@@ -6,10 +6,14 @@ vi.mock("@/main", () => ({ apolloClient: {} }));
 
 vi.mock("@/composables/useComments", () => ({
   extractTaggedRelations: () => [],
-  createFieldMetadataFrom: (fields: any[], values: Record<string, any>) =>
+  createFieldMetadataFrom: (
+    fields: any[],
+    values: Record<string, any>,
+    { keepEmpty = false }: { keepEmpty?: boolean } = {},
+  ) =>
     fields
-      .filter((field) => values[field.key])
-      .map((field) => ({ key: field.key, value: values[field.key] })),
+      .filter((field) => keepEmpty || values[field.key])
+      .map((field) => ({ key: field.key, value: values[field.key] ?? "" })),
 }));
 
 const createdForms: string[] = [];
@@ -252,6 +256,77 @@ describe("CommentComposer", () => {
       expect(form.setFieldValue).toHaveBeenCalledWith(
         "intialValues.category",
         "",
+      );
+
+      wrapper.unmount();
+    });
+
+    it("seeds an edit form with the comment's own create field values", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-edit-CMT-5",
+        initialBody: "<p>existing</p>",
+        createFields: [categoryField],
+        initialCreateFieldValues: { category: "Fictie" },
+      });
+      expect(formStore.get("comment-edit-CMT-5").values.intialValues).toEqual({
+        body: "<p>existing</p>",
+        category: "Fictie",
+      });
+      wrapper.unmount();
+    });
+
+    it("hands each create field its initial value, since the field writes it into the form on mount", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-edit-CMT-8",
+        initialBody: "<p>existing</p>",
+        createFields: [categoryField],
+        initialCreateFieldValues: { category: "Fictie" },
+      });
+
+      const [field] = wrapper.findAllComponents({ name: "MetadataWrapper" });
+      expect(field.props("metadata")).toEqual({
+        ...categoryField,
+        value: "Fictie",
+      });
+
+      wrapper.unmount();
+    });
+
+    it("hands a new comment's create fields an empty value", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-new-W-9",
+        createFields: [categoryField],
+      });
+
+      const [field] = wrapper.findAllComponents({ name: "MetadataWrapper" });
+      expect(field.props("metadata").value).toBe("");
+
+      wrapper.unmount();
+    });
+
+    it("submits an emptied create field while editing, so it gets cleared", async () => {
+      formStore.clear();
+      const onSubmit = vi.fn(() => Promise.resolve());
+      const wrapper = mountComposer({
+        scratchFormId: "comment-edit-CMT-6",
+        initialBody: "<p>existing</p>",
+        createFields: [categoryField],
+        initialCreateFieldValues: { category: "Fictie" },
+        onSubmit,
+      });
+      formStore.get("comment-edit-CMT-6").values.intialValues.category = "";
+      await wrapper.vm.$nextTick();
+
+      await wrapper.find("button").trigger("click");
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        "<p>existing</p>",
+        [],
+        [{ key: "category", value: "" }],
       );
 
       wrapper.unmount();

@@ -11,7 +11,10 @@
         v-for="field in createFields"
         :key="`${scratchFormId}-${field.key}-${resetCount}`"
         :form-id="scratchFormId"
-        :metadata="field"
+        :metadata="{
+          ...field,
+          value: initialCreateFieldValues?.[field.key] ?? '',
+        }"
         :is-edit="true"
         form-flow="create"
       />
@@ -64,6 +67,7 @@ const props = withDefaults(
     submitLabel: string;
     cancellable?: boolean;
     createFields?: PanelMetaData[];
+    initialCreateFieldValues?: Record<string, unknown>;
     onSubmit: (
       body: string,
       taggedRelations: BaseRelationValuesInput[],
@@ -138,7 +142,9 @@ const submit = async () => {
         body,
         props.composer.taggingConfiguration?.taggableEntityConfiguration ?? [],
       ),
-      createFieldMetadataFrom(props.createFields, currentValues.value),
+      createFieldMetadataFrom(props.createFields, currentValues.value, {
+        keepEmpty: props.initialCreateFieldValues !== undefined,
+      }),
     );
     if (!props.initialBody) clear();
   } finally {
@@ -149,7 +155,12 @@ const submit = async () => {
 createForm(props.scratchFormId, {
   intialValues: {
     [bodyKey.value]: props.initialBody,
-    ...Object.fromEntries(props.createFields.map((field) => [field.key, ""])),
+    ...Object.fromEntries(
+      props.createFields.map((field) => [
+        field.key,
+        props.initialCreateFieldValues?.[field.key] ?? "",
+      ]),
+    ),
   },
   relationValues: {},
 } as any);

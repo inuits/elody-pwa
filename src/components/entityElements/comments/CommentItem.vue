@@ -19,6 +19,13 @@
         <span class="text-sm text-text-placeholder shrink-0">
           {{ formattedDate }}
         </span>
+        <span
+          v-if="comment.intialValues?.edited_at"
+          data-testid="comment-edited"
+          class="text-sm italic text-text-placeholder shrink-0"
+        >
+          {{ t("comments.edited") }}
+        </span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <div

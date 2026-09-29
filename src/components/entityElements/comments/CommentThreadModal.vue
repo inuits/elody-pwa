@@ -56,10 +56,15 @@
             :scratch-form-id="`comment-edit-${thread.subject.id}`"
             :composer="composer"
             :initial-body="thread.subject.intialValues?.body ?? ''"
+            :create-fields="createFields"
+            :initial-create-field-values="
+              createFieldValuesOf(createFields, thread.subject)
+            "
             :submit-label="t('comments.save')"
             :cancellable="true"
             @submit="
-              (body, relations) => saveEdit(thread.subject, body, relations)
+              (body, relations, metadata) =>
+                saveEdit(thread.subject, body, relations, metadata)
             "
             @cancel="editingCommentId = undefined"
           />
@@ -123,7 +128,12 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { useComments, type Comment } from "@/composables/useComments";
+import {
+  createFieldValuesOf,
+  isOwnComment,
+  useComments,
+  type Comment,
+} from "@/composables/useComments";
 import { useAuth } from "@/composables/useAuth";
 import { Unicons } from "@/types";
 import {
@@ -132,13 +142,14 @@ import {
   ModalStyle,
   TypeModals,
   type BaseRelationValuesInput,
+  type MetadataValuesInput,
   type PanelMetaData,
   type WysiwygElement,
 } from "@/generated-types/queries";
 
 const { closeModal, getModalInfo, openModal } = useBaseModal();
 const { threadFor, post, edit, setStatus } = useComments();
-const { elodyUser } = useAuth();
+const { elodyUser, getUserEmail } = useAuth();
 const { t } = useI18n();
 
 const isWorking = ref<boolean>(false);
@@ -168,11 +179,23 @@ const thread = computed(() =>
 
 // Stale edit state must not survive into the next thread the user opens.
 watch(subjectId, () => (editingCommentId.value = undefined));
+watch(
+  () => thread.value?.status,
+  (status) => {
+    if (status === "resolved") editingCommentId.value = undefined;
+  },
+);
+
+const userIdentities = computed<(string | undefined)[]>(() => [
+  elodyUser.value?.id,
+  (elodyUser.value as any)?.intialValues?.email,
+  getUserEmail(),
+]);
 
 const canEditComment = (comment: Comment): boolean =>
   canPost.value &&
-  !!elodyUser.value?.id &&
-  comment.intialValues?.created_by === elodyUser.value.id;
+  thread.value?.status !== "resolved" &&
+  isOwnComment(comment, userIdentities.value);
 
 const withWorking = async (action: () => Promise<void>) => {
   isWorking.value = true;
@@ -198,6 +221,7 @@ const saveEdit = (
   comment: Comment,
   body: string,
   relations: BaseRelationValuesInput[],
+  metadata: MetadataValuesInput[] = [],
 ) =>
   withWorking(async () => {
     // The configuration, not the surviving relations, decides which relation types are
@@ -206,6 +230,7 @@ const saveEdit = (
       comment,
       body,
       taggedRelations: relations,
+      metadata,
       configurations: taggableEntityConfiguration.value,
     });
     editingCommentId.value = undefined;
