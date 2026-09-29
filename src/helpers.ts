@@ -1036,3 +1036,16 @@ export const graphqlErrorInterceptor = onError(
     }
   },
 );
+
+export const tagMultilingualMetadata = <T extends { key: string }>(
+  metadata: T[],
+  fields: { key?: string | null; isMultilingual?: boolean | null }[],
+  locale: string,
+): (T & { lang?: string })[] => {
+  const multilingualKeys = new Set(
+    fields.filter((field) => field.isMultilingual).map((field) => field.key),
+  );
+  return metadata.map((item) =>
+    multilingualKeys.has(item.key) ? { ...item, lang: locale } : item,
+  );
+};

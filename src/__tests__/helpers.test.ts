@@ -18,6 +18,7 @@ import {
   findPanelMetadata,
   getFromExpressEndpoint,
   formatTeaserMetadata,
+  tagMultilingualMetadata,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -846,5 +847,36 @@ describe("formatTeaserMetadata", () => {
     ) as any[];
 
     expect(columns.map((column) => column.key)).toEqual(["email"]);
+  });
+});
+
+describe("tagMultilingualMetadata", () => {
+  const fields = [
+    { key: "name", isMultilingual: true },
+    { key: "period" },
+    { key: "description", isMultilingual: false },
+  ];
+
+  it("adds the locale to values of multilingual fields only", () => {
+    expect(
+      tagMultilingualMetadata(
+        [
+          { key: "name", value: "Theme" },
+          { key: "period", value: "1st c." },
+          { key: "description", value: "Text" },
+        ],
+        fields,
+        "ar",
+      ),
+    ).toEqual([
+      { key: "name", value: "Theme", lang: "ar" },
+      { key: "period", value: "1st c." },
+      { key: "description", value: "Text" },
+    ]);
+  });
+
+  it("returns the metadata unchanged without multilingual fields", () => {
+    const metadata = [{ key: "name", value: "Theme" }];
+    expect(tagMultilingualMetadata(metadata, [], "en")).toEqual(metadata);
   });
 });

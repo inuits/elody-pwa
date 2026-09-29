@@ -314,6 +314,7 @@ import {
   calculateFutureDate,
   goToEntityPage,
   goToEntityPageById,
+  tagMultilingualMetadata,
 } from "@/helpers";
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
@@ -827,14 +828,21 @@ const getMetadataKeysToInclude = (
 const extractMetadataFromValues = (
   initialValues: Record<string, any>,
   keys: string[],
-): MetadataInput[] =>
-  keys
+): MetadataInput[] => {
+  const metadata = keys
     .map((key) =>
       key === "ttl"
         ? { key, value: calculateFutureDate(initialValues[key]) }
         : { key, value: initialValues[key] },
     )
     .filter((item: MetadataInput) => item.value);
+  if (!config?.features?.supportsMultilingualMetadataEditing) return metadata;
+  return tagMultilingualMetadata(
+    metadata,
+    getFieldArray.value as PanelMetaData[],
+    config.locale || "en",
+  );
+};
 
 const buildEntityRelations = async (
   baseRelations?: BaseRelationValuesInput[],
