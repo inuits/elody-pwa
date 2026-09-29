@@ -13,9 +13,18 @@ import { type FilterListItem } from "@/composables/useStateManagement";
 import { extractValueFromObject } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 
+export const usableFilters = (
+  advancedFilters: AdvancedFilters,
+): AdvancedFilter[] =>
+  Object.values(advancedFilters ?? {}).filter(
+    (filter): filter is AdvancedFilter =>
+      !!filter && typeof filter !== "string",
+  );
+
 export const useFilterState = () => {
   const { variables, setVariables } = useFilterVariables();
-  const { normalizeFilterValue, shouldMatchExact, shouldMatchNot } = useFilterNormalization();
+  const { normalizeFilterValue, shouldMatchExact, shouldMatchNot } =
+    useFilterNormalization();
   const filters = ref<FilterListItem[]>([]);
 
   const activeFilterCount = computed(
@@ -95,10 +104,9 @@ export const useFilterState = () => {
   };
 
   const initializeNewAdvancedFilters = (advancedFilters: AdvancedFilters) => {
-    Object.values(advancedFilters).forEach((filter) => {
-      if (typeof filter === "string") return;
-      addFilterToList(filter, createFilterInput(filter));
-    });
+    usableFilters(advancedFilters).forEach((filter) =>
+      addFilterToList(filter, createFilterInput(filter)),
+    );
   };
 
   const addFilterToList = (
@@ -154,14 +162,21 @@ export const useFilterState = () => {
     return value;
   };
 
-  const resolveAllVariables = (rawValue: string, defaultValueMapping: ValueMapping[] = undefined) => {
+  const resolveAllVariables = (
+    rawValue: string,
+    defaultValueMapping: ValueMapping[] = undefined,
+  ) => {
     return rawValue.replace(/\$([\w.]+)/g, (match, path) => {
       const resolved = extractValueFromObject(variables.value, path);
       if (defaultValueMapping && resolved !== undefined) {
-        const resolvedValue = Array.isArray(resolved) ? JSON.stringify(resolved) : String(resolved);
+        const resolvedValue = Array.isArray(resolved)
+          ? JSON.stringify(resolved)
+          : String(resolved);
         for (const valueMapping of defaultValueMapping) {
-          const stringValue = Array.isArray(valueMapping.value) ? JSON.stringify(valueMapping.value) : String(valueMapping.value);
-          if (stringValue == resolvedValue) return valueMapping.mapping
+          const stringValue = Array.isArray(valueMapping.value)
+            ? JSON.stringify(valueMapping.value)
+            : String(valueMapping.value);
+          if (stringValue == resolvedValue) return valueMapping.mapping;
         }
         return defaultValueMapping[0].mapping;
       }

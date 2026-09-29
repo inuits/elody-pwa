@@ -179,6 +179,7 @@ import {
 } from "@/composables/useSaveSearchHepler";
 import { auth } from "@/main";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
+import { usableFilters } from "@/composables/filters/useFilterState";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useImport } from "@/composables/useImport";
@@ -543,8 +544,7 @@ const getFiltersFromState = (shouldUseState: boolean) => {
       item,
     ]),
   );
-  const filtersToUse = Object.values(rawFilters.value)
-    .filter((filter): filter is AdvancedFilter => typeof filter !== "string")
+  const filtersToUse = usableFilters(rawFilters.value)
     .map((filter) => {
       const cached = cachedByKey.get(JSON.stringify(filter.key));
       return cached
@@ -601,7 +601,7 @@ const initializeAndActivateNewFilter = (
   value: any,
 ) => {
   initializeNewAdvancedFilters(advancedFilters);
-  Object.values(advancedFilters).forEach((advancedFilter: AdvancedFilter) => {
+  usableFilters(advancedFilters).forEach((advancedFilter) => {
     activateFilter(advancedFilter.key, value);
   });
   applyFilters(false);
