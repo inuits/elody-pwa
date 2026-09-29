@@ -76,27 +76,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { usePermissions } from "@/composables/usePermissions";
-import useEntitySingle from "@/composables/useEntitySingle";
 import {
   DisplayCondition,
   Orientations,
-  Permission,
   WindowElementLayout,
   type WindowElement,
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import EntityHistoryWindowPanel from "@/components/history/EntityHistoryWindowPanel.vue";
 import BaseExpandButton from "@/components/base/BaseExpandButton.vue";
-import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
-import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 import type {
   RelationDiff,
   WysiwygDiff,
@@ -119,27 +112,11 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { fetchAdvancedPermissions, fetchUpdateAndDeletePermission } =
-  usePermissions();
-const { getForm } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
-
-const permissionResults = ref<Record<string, boolean>>({});
-const entityDetailPermissions = ref<Map<Permission, boolean> | null>(null);
-const isCheckingPermissions = ref(true);
 
 const computedIsEdit = computed(
   () => props.isEditOverwrite || useEditHelper.isEdit,
 );
-
-const showEditMetadataButton = computed(() => {
-  const key = props.element.editMetadataButton?.hideIfMetadataNotPresent;
-  if (!key) return true;
-  const form = getForm(props.formId);
-  if (!form) return true;
-  const value = form.values.intialValues?.[key];
-  return value !== undefined && value !== null && value !== "";
-});
 
 const resizeColumn = (toggled: boolean) => {
   emit("resizeColumn", toggled);
@@ -152,55 +129,6 @@ const allPanels = computed<WindowElementPanel[]>(() => {
   );
 });
 
-const resolvePanelPermissions = async () => {
-  isCheckingPermissions.value = true;
-
-  const uniquePermissions = [
-    ...new Set(
-      allPanels.value
-        .flatMap((panel) => panel.can || [])
-        .filter((p): p is string => !!p),
-    ),
-  ];
-
-  const entityId = useEntitySingle().getEntityUuid();
-  const entityType = useEntitySingle().getEntityType();
-
-  const advancedPromise =
-    uniquePermissions.length > 0
-      ? fetchAdvancedPermissions(uniquePermissions)
-      : Promise.resolve<Record<string, boolean>>({});
-  const detailPromise =
-    entityId && entityType
-      ? fetchUpdateAndDeletePermission(entityId, entityType) ??
-        Promise.resolve(null)
-      : Promise.resolve(null);
-
-  const [advancedResults, detailResults] = await Promise.all([
-    advancedPromise,
-    detailPromise,
-  ]);
-  permissionResults.value = advancedResults;
-  entityDetailPermissions.value = detailResults ?? null;
-
-  isCheckingPermissions.value = false;
-};
-
-const isPanelPermitted = (panelCan: string): boolean => {
-  if (permissionResults.value[panelCan]) return true;
-
-  const [action, targetEntityType] = panelCan.split(":");
-  const currentEntityType = useEntitySingle().getEntityType();
-  if (!targetEntityType || targetEntityType !== currentEntityType) return false;
-
-  const detail = entityDetailPermissions.value;
-  if (!detail) return false;
-  if (action === "update") return !!detail.get(Permission.Canupdate);
-  if (action === "delete") return !!detail.get(Permission.Candelete);
-  if (action === "read") return !!detail.get(Permission.Canread);
-  return false;
-};
-
 const getPanelsAllowedToDisplay = (): WindowElementPanel[] => {
   return allPanels.value.filter((panel) => {
     if (panel.__typename !== 'WindowElementPanel') return true;
@@ -211,26 +139,17 @@ const getPanelsAllowedToDisplay = (): WindowElementPanel[] => {
   })
 };
 
-const filteredPanels = computed<WindowElementPanel[]>(() => {
-  if (isCheckingPermissions.value) return [];
-
-  const allowedDisplayPanels = getPanelsAllowedToDisplay();
-  return allowedDisplayPanels.filter((panel) => {
-    const requiredPerms = (panel.can && [panel.can]) || [];
-    if (requiredPerms.length === 0) return true;
-
-    return requiredPerms.some((p) => isPanelPermitted(p));
-  });
-});
+const filteredPanels = computed<WindowElementPanel[]>(() =>
+  getPanelsAllowedToDisplay(),
+);
 
 const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
   computed(() => props.element.windowElementStatus),
   props.formId,
-  computed(() => props.isEdit),
+  computedIsEdit,
 );
 
 onMounted(() => {
-  resolvePanelPermissions();
   registerEditableKey();
 });
 </script>
