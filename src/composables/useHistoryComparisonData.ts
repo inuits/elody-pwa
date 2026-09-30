@@ -174,6 +174,7 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
       GetEntityHistoryVersionDetailQueryVariables
     >(GetEntityHistoryVersionDetailDocument, variables, () => ({
       enabled: versionId.value !== null && versionId.value !== LIVE_VERSION_ID,
+      fetchPolicy: "no-cache",
     }));
   };
 
@@ -248,13 +249,19 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
   const leftVersionEntity = computed<Record<string, any> | null>(() => {
     const diffed = scalarDiff.value?.selectedVersion;
     if (!diffed) return null;
-    return withDiffedIntialValues(leftVersion.value, diffed);
+    return {
+      ...withDiffedIntialValues(leftVersion.value, diffed),
+      id: `${diffed.id}-${leftVersionId.value}`,
+    };
   });
 
   const rightVersionEntity = computed<Record<string, any> | null>(() => {
     const diffed = scalarDiff.value?.previousVersion as Record<string, any>;
     if (!diffed || Object.keys(diffed).length === 0) return null;
-    return withDiffedIntialValues(rightVersion.value, diffed);
+    return {
+      ...withDiffedIntialValues(rightVersion.value, diffed),
+      id: `${diffed.id}-${rightVersionId.value}`,
+    };
   });
 
   // The backend can assemble entityView's nested field maps in a different

@@ -4,6 +4,7 @@ import { ref } from "vue";
 
 const mocks = vi.hoisted(() => ({
   createdHelpers: [] as { name: string; helper: any }[],
+  relatedOptions: [] as any[],
 }));
 
 vi.mock("@/composables/useGetDropdownOptions", () => ({
@@ -15,6 +16,10 @@ vi.mock("@/composables/useGetDropdownOptions", () => ({
       entitiesLoading: ref(false),
       getFormWithRelationFieldCheck: vi.fn(),
     };
+    if (name.includes("fetchRelations"))
+      helper.initialize.mockImplementation(async () => {
+        helper.entityDropdownOptions.value = mocks.relatedOptions;
+      });
     mocks.createdHelpers.push({ name, helper });
     return helper;
   }),
@@ -112,4 +117,74 @@ describe("ViewModesAutocompleteRelations prefetch on mount", () => {
 
     expect(helperInitializeCalls("fetchAll")).toBe(1);
   });
+});
+
+
+describe("ViewModesAutocompleteRelations read-only fallback to related options", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [];
+    vi.clearAllMocks();
+  });
+
+  it("hands the autocomplete the related options as a plain array, not as a ref", async () => {
+    mocks.relatedOptions = [
+      { label: "Engels", value: "TAAL-1", __typename: "DropdownOption" },
+    ];
+
+    const wrapper = shallowMount(ViewModesAutocompleteRelations, {
+      props: {
+        ...getDefaultProps(),
+        mode: "edit",
+        isReadOnly: true,
+        disabled: true,
+        relationType: "refLanguages",
+      },
+      global: {
+        stubs: {
+          BaseInputAutocomplete: {
+            name: "BaseInputAutocomplete",
+            props: ["options"],
+            template: "<div />",
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    const options = wrapper
+      .findComponent({ name: "BaseInputAutocomplete" })
+      .props("options");
+    expect(Array.isArray(options)).toBe(true);
+    expect(options).toEqual(mocks.relatedOptions);
+  });
+
+
+  it("never hands the autocomplete a ref when the related options helper is set up without results", async () => {
+    const wrapper = shallowMount(ViewModesAutocompleteRelations, {
+      props: {
+        ...getDefaultProps(),
+        mode: "edit",
+        isReadOnly: true,
+        disabled: true,
+        relationType: "refLanguages",
+      },
+      global: {
+        stubs: {
+          BaseInputAutocomplete: {
+            name: "BaseInputAutocomplete",
+            props: ["options"],
+            template: "<div />",
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    const options = wrapper
+      .findComponent({ name: "BaseInputAutocomplete" })
+      .props("options");
+    expect(Array.isArray(options)).toBe(true);
+  });
+
 });

@@ -649,8 +649,8 @@ describe("useHistoryComparisonData merged entities", () => {
       useHistoryComparisonData("entity-1", "inscription");
     await flushPromises();
 
-    expect(leftVersionEntity.value?.id).toBe("entity-1_selected");
-    expect(rightVersionEntity.value?.id).toBe("history-1_previous");
+    expect(leftVersionEntity.value?.id).toMatch(/^entity-1_selected-/);
+    expect(rightVersionEntity.value?.id).toMatch(/^history-1_previous-/);
   });
 
   it("leaves the compared fields untagged when there is no historical version, without dropping any field", async () => {
@@ -983,6 +983,19 @@ describe("useHistoryComparisonData versions query", () => {
       type: "inscription",
     });
   });
+
+  it("bypasses the apollo cache for both version detail queries, since every version shares the live entity's cache id", () => {
+    useHistoryComparisonData("entity-1", "inscription");
+
+    const detailCalls = mocks.useQueryCalls.filter(
+      (call) => unref(call.variables)?.versionId !== undefined,
+    );
+
+    expect(detailCalls).toHaveLength(2);
+    detailCalls.forEach((call) => {
+      expect(call.options().fetchPolicy).toBe("no-cache");
+    });
+  });
 });
 
 describe("useHistoryComparisonData edit-state isolation", () => {
@@ -1033,10 +1046,13 @@ describe("useHistoryComparisonData edit-state isolation", () => {
   });
 });
 
+let detailIdOverride: string | undefined;
+
 describe("useHistoryComparisonData left/right version selection", () => {
   beforeEach(() => {
     mocks.useQueryCalls.length = 0;
     mocks.queryResults = [];
+    detailIdOverride = undefined;
   });
 
   const withResult = (value: any) => ({
@@ -1097,17 +1113,39 @@ describe("useHistoryComparisonData left/right version selection", () => {
     };
     // Function specs, so each side's detail query reactively re-resolves
     // whenever that side's own version id changes.
-    const detailSpec = (variables: any) => ({
-      result: {
-        EntityHistoryVersionDetail:
-          detailByVersionId[variables.versionId] ?? null,
-      },
-    });
+    const detailSpec = (variables: any) => {
+      const detail = detailByVersionId[variables.versionId] ?? null;
+      return {
+        result: {
+          EntityHistoryVersionDetail:
+            detail && detailIdOverride
+              ? { ...detail, id: detailIdOverride }
+              : detail,
+        },
+      };
+    };
     mocks.queryResults[2] = detailSpec;
     mocks.queryResults[3] = detailSpec;
 
     return useHistoryComparisonData("entity-1", "inscription");
   };
+
+  it("gives every shown version its own form id, even though all history snapshots share the live entity id", async () => {
+    detailIdOverride = "entity-1";
+    const { rightVersionId, rightVersionEntity, leftVersionId, leftVersionEntity } = setup();
+    await flushPromises();
+
+    const rightNewId = rightVersionEntity.value?.id;
+    rightVersionId.value = "hist-old";
+    await flushPromises();
+    const rightOldId = rightVersionEntity.value?.id;
+
+    leftVersionId.value = "hist-old";
+    await flushPromises();
+
+    expect(rightNewId).not.toBe(rightOldId);
+    expect(leftVersionEntity.value?.id).not.toBe(rightOldId);
+  });
 
   it("defaults leftVersionId to the live sentinel and rightVersionId to the most recent historical version", async () => {
     const { leftVersionId, rightVersionId } = setup();
@@ -1121,8 +1159,8 @@ describe("useHistoryComparisonData left/right version selection", () => {
     const { leftVersionEntity, rightVersionEntity } = setup();
     await flushPromises();
 
-    expect(leftVersionEntity.value?.id).toBe("entity-1_selected");
-    expect(rightVersionEntity.value?.id).toBe("hist-new_previous");
+    expect(leftVersionEntity.value?.id).toBe(`entity-1_selected-${LIVE_VERSION_ID}`);
+    expect(rightVersionEntity.value?.id).toBe("hist-new_previous-hist-new");
   });
 
   it("switching leftVersionId to a historical version updates leftVersionEntity without affecting rightVersionEntity", async () => {
@@ -1133,7 +1171,7 @@ describe("useHistoryComparisonData left/right version selection", () => {
     leftVersionId.value = "hist-old";
     await flushPromises();
 
-    expect(leftVersionEntity.value?.id).toBe("hist-old_selected");
+    expect(leftVersionEntity.value?.id).toBe("hist-old_selected-hist-old");
     expect(rightVersionEntity.value?.id).toBe(rightIdBeforeSwitch);
   });
 
@@ -1145,7 +1183,7 @@ describe("useHistoryComparisonData left/right version selection", () => {
     rightVersionId.value = "hist-old";
     await flushPromises();
 
-    expect(rightVersionEntity.value?.id).toBe("hist-old_previous");
+    expect(rightVersionEntity.value?.id).toBe("hist-old_previous-hist-old");
     expect(leftVersionEntity.value?.id).toBe(leftIdBeforeSwitch);
   });
 
@@ -1191,7 +1229,7 @@ describe("useHistoryComparisonData left/right version selection", () => {
 
     leftVersionId.value = "hist-old";
     await flushPromises();
-    expect(leftVersionEntity.value?.id).toBe("hist-old_selected");
+    expect(leftVersionEntity.value?.id).toBe("hist-old_selected-hist-old");
   });
 });
 
