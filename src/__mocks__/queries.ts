@@ -495,6 +495,7 @@ export enum BulkOperationTypes {
   DeleteEntities = 'deleteEntities',
   DeleteRelations = 'deleteRelations',
   DownloadMediafiles = 'downloadMediafiles',
+  DownloadMediafilesDirectly = 'downloadMediafilesDirectly',
   Edit = 'edit',
   ExportCsv = 'exportCsv',
   ExportCsvOfMediafilesFromAsset = 'exportCsvOfMediafilesFromAsset',

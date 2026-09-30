@@ -16,9 +16,25 @@ import {
 
 vi.mock("@/main", () => ({
   apolloClient: {
-    query: vi.fn(),
+    query: vi.fn(() => Promise.resolve({})),
   },
+  typeUrlMapping: { mapping: {}, reverseMapping: {} },
 }));
+
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t: (key: string, params?: Record<string, string>) =>
+      params?.title ? `${key}(${params.title})` : key,
+  }),
+}));
+
+vi.mock("@/composables/useFormHelper", () => ({
+  useFormHelper: () => ({
+    getForm: () => ({ values: { intialValues: { title: "Hamlet" } } }),
+  }),
+}));
+
+const mockRouter = vi.hoisted(() => ({ push: vi.fn() }));
 
 vi.mock("@vue/apollo-composable", () => ({
   useQuery: vi.fn(() => ({
@@ -49,6 +65,12 @@ const mockModalActions = {
   setCallbackFunctions: vi.fn(),
   setLibraryEntities: vi.fn(),
   resetAllProperties: vi.fn(),
+  extractActionArguments: vi.fn(() => ({
+    relations: [{ key: "1", type: "ref_mediafiles", editStatus: "new" }],
+    entities: [],
+    mediafiles: ["1"],
+    includeAssetCsv: true,
+  })),
 };
 
 vi.mock("@/composables/useModalActions", () => ({
@@ -111,7 +133,7 @@ vi.mock("@/composables/useBaseModal", () => ({
 
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({
-    loadDocument: vi.fn(),
+    loadDocument: vi.fn((name: string) => Promise.resolve(`document:${name}`)),
   }),
 }));
 
@@ -135,6 +157,7 @@ vi.mock("vue-router", () => ({
     params: { id: "route-entity-456" },
     query: {},
   }),
+  useRouter: () => mockRouter,
 }));
 
 describe("useBulkOperationsActionsBar", () => {
@@ -655,6 +678,68 @@ describe("useBulkOperationsActionsBar", () => {
       expect(
         mockModalActions.initializeGeneralProperties,
       ).not.toHaveBeenCalled();
+    });
+
+    it("creates the download without a modal for downloadMediafilesDirectly", async () => {
+      const { apolloClient } = await import("@/main");
+      vi.mocked(apolloClient.query).mockResolvedValueOnce({
+        data: {
+          DownloadItemsInZip: {
+            __typename: "Download",
+            id: "DL-1",
+            uuid: "DL-1",
+            type: "download",
+          },
+        },
+      } as any);
+      const props = createMockProps({ parentEntityId: "production-1" });
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(props, createMockEmit());
+
+      selectedBulkOperation.value = {
+        value: BulkOperationTypes.DownloadMediafilesDirectly,
+        bulkOperationModal: {
+          typeModal: "DynamicForm",
+          formRelationType: "ref_mediafiles",
+        },
+      } as any;
+
+      handleSelectedBulkOperation();
+      await flushPromises();
+
+      expect(mockBaseModal.openModal).not.toHaveBeenCalled();
+      expect(
+        mockModalActions.initializePropertiesForDownload,
+      ).toHaveBeenCalled();
+      expect(apolloClient.query).toHaveBeenCalledWith({
+        query: "document:GetDownloadItemsInZip",
+        variables: {
+          entities: [],
+          mediafiles: ["1"],
+          includeAssetCsv: true,
+          basicCsv: false,
+          downloadEntity: {
+            type: "download",
+            metadata: [
+              {
+                key: "title",
+                value: "bulk-operations.download-title(Hamlet)",
+              },
+              { key: "status", value: "Queued" },
+            ],
+            relations: [{ key: "1", type: "ref_mediafiles", editStatus: "new" }],
+          },
+        },
+      });
+      expect(
+        mockBulkOperations.dequeueAllItemsForBulkProcessing,
+      ).toHaveBeenCalledWith(props.context);
+      expect(mockNotification.displaySuccessNotification).toHaveBeenCalled();
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        name: RouteNames.SingleEntity,
+        params: { id: "DL-1", type: "download" },
+      });
+      expect(selectedBulkOperation.value).toBeUndefined();
     });
 
     it("should execute complete bulk operation flow", () => {

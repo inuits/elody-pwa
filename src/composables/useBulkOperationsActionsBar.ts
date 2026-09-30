@@ -1,5 +1,5 @@
 import { computed, inject, onMounted, ref, type Ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import {
   type PaginationStore,
@@ -25,21 +25,22 @@ import { useI18n } from "vue-i18n";
 import { useModalActions } from "@/composables/useModalActions";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import { useStateManagement } from "@/composables/useStateManagement";
-import type { Entitytyping } from "@/generated-types/queries";
 import {
   ActionContextEntitiesSelectionType,
   ActionContextViewModeTypes,
+  ActionType,
   BulkNavigationPages,
   type BulkOperationModal,
   BulkOperationTypes,
   type DropdownOption,
+  Entitytyping,
   ModalStyle,
   PanelType,
   RouteNames,
   TypeModals,
   type Entity,
 } from "@/generated-types/queries";
-import { getValueForPanelMetadata } from "@/helpers";
+import { getValueForPanelMetadata, goToEntityPage } from "@/helpers";
 import { apolloClient } from "@/main";
 
 export interface BulkOperationsActionsBarProps {
@@ -96,6 +97,7 @@ export const useBulkOperationsActionsBar = (
   const libraryEntities = inject<Ref<Entity[]>>("libraryEntities");
   const paginationStore: PaginationStore = inject(PaginationStoreKey);
   const route = useRoute();
+  const router = useRouter();
   const { getStateForRoute } = useStateManagement();
   const { loadDocument } = useImport();
 
@@ -115,6 +117,7 @@ export const useBulkOperationsActionsBar = (
     setCallbackFunctions,
     setLibraryEntities,
     resetAllProperties,
+    extractActionArguments,
   } = useModalActions();
 
   const { setReplaceExistingRelations, setSelectionLimit } =
@@ -320,6 +323,40 @@ export const useBulkOperationsActionsBar = (
     setCallbackFunctions(getRefetchCallbacks());
   };
 
+  const createDownloadWithoutModal = async () => {
+    selectedBulkOperation.value = undefined;
+    const parentIntialValues =
+      useFormHelper().getForm(props.parentEntityId)?.values?.intialValues ?? {};
+    const { relations, ...variables } = extractActionArguments(
+      ActionType.Download,
+    );
+    const result = await apolloClient.query({
+      query: await loadDocument("GetDownloadItemsInZip"),
+      variables: {
+        ...variables,
+        basicCsv: false,
+        downloadEntity: {
+          type: Entitytyping.Download,
+          metadata: [
+            { key: "title", value: t("bulk-operations.download-title", parentIntialValues) },
+            { key: "status", value: "Queued" },
+          ],
+          relations,
+        },
+      },
+    });
+    dequeueAllItemsForBulkProcessing(props.context);
+    displaySuccessNotification(
+      t("notifications.success.downloadEntityCreated.title"),
+      t("notifications.success.downloadEntityCreated.description"),
+    );
+    goToEntityPage(
+      result.data.DownloadItemsInZip,
+      RouteNames.SingleEntity,
+      router,
+    );
+  };
+
   const handleSeenOperation = (operationType: string) => {
     const selectedItemIds = getEnqueuedItems(props.context)
       .map((item: InBulkProcessableItem) => item.id)
@@ -356,6 +393,8 @@ export const useBulkOperationsActionsBar = (
   ) => {
     const operationInitializers: Record<string, () => void> = {
       [BulkOperationTypes.DownloadMediafiles]: initializeDownloadOperation,
+      [BulkOperationTypes.DownloadMediafilesDirectly]:
+        initializeDownloadOperation,
       [BulkOperationTypes.AddRelation]: () =>
         initializeAddRelationOperation(bulkOperationModalConfig),
       [BulkOperationTypes.CreateEntity]: () =>
@@ -461,6 +500,11 @@ export const useBulkOperationsActionsBar = (
       operationType,
       bulkOperationModalConfig,
     );
+
+    if (operationType === BulkOperationTypes.DownloadMediafilesDirectly) {
+      createDownloadWithoutModal().catch(() => undefined);
+      return;
+    }
 
     openModal(
       bulkOperationModalConfig.typeModal,

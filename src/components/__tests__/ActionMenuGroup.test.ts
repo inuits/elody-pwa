@@ -102,4 +102,80 @@ describe("ActionMenuGroup", () => {
 
     expect(wrapper.vm.availableOptions.length).toBe(2);
   });
+
+  describe("primaryFallback", () => {
+    const create: DropdownOption = {
+      label: "bulk-operations.create",
+      value: "createEntity",
+      primary: true,
+      actionContext: {
+        entitiesSelectionType: ActionContextEntitiesSelectionType.NoneSelected,
+      },
+    };
+    const download: DropdownOption = {
+      label: "bulk-operations.download",
+      value: "downloadMediafiles",
+      primaryFallback: true,
+      actionContext: {
+        entitiesSelectionType: ActionContextEntitiesSelectionType.SomeSelected,
+      },
+    };
+    const exportCsv: DropdownOption = {
+      label: "bulk-operations.export",
+      value: "exportCsv",
+      primaryFallback: true,
+    };
+
+    const mountSelecting = (options: DropdownOption[], itemsSelected: boolean) =>
+      mount(ActionMenuGroup, {
+        props: {
+          options,
+          itemsSelected,
+          entityType: "Entitytyping" as Entitytyping,
+          clearSubDropdownOptions: () => {},
+        },
+      });
+
+    const values = (options: DropdownOption[]) =>
+      options.map((option) => option.value);
+
+    it("keeps an active primary and leaves the fallback in the menu", async () => {
+      const wrapper = mountSelecting([create, download], false);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["createEntity"]);
+      expect(values(wrapper.vm.secondaryOptions)).toEqual([
+        "downloadMediafiles",
+      ]);
+    });
+
+    it("promotes the fallback when the primary is unavailable", async () => {
+      const wrapper = mountSelecting([create, download], true);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["downloadMediafiles"]);
+      expect(values(wrapper.vm.secondaryOptions)).toEqual(["createEntity"]);
+    });
+
+    it("skips an unavailable fallback for the next one in declaration order", async () => {
+      const addExisting: DropdownOption = {
+        ...create,
+        value: "addRelation",
+        primary: false,
+        primaryFallback: true,
+      };
+      const wrapper = mountSelecting([create, addExisting, exportCsv], true);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["exportCsv"]);
+    });
+
+    it("shows the disabled primary when no fallback is available", async () => {
+      const wrapper = mountSelecting([create, { ...download, primaryFallback: false }], true);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["createEntity"]);
+      expect(wrapper.vm.primaryOptions[0].active).toBe(false);
+    });
+  });
 });

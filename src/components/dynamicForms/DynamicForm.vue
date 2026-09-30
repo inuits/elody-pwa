@@ -312,6 +312,7 @@ import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/upload/useUpload";
 import {
   calculateFutureDate,
+  getEntityPageRoute,
   goToEntityPage,
   goToEntityPageById,
   tagMultilingualMetadata,
@@ -1210,7 +1211,7 @@ const downloadActionFunction = async (field: FormAction) => {
       field.creationType,
       variables.relations,
     );
-    await performDownloadAction(
+    const result = await performDownloadAction(
       document,
       variables,
       entityInput,
@@ -1220,7 +1221,12 @@ const downloadActionFunction = async (field: FormAction) => {
       t("notifications.success.downloadEntityCreated.title"),
       t("notifications.success.downloadEntityCreated.description"),
     );
-    await props.router.replace({ name: RouteNames.Downloads });
+    await props.router.replace(
+      getEntityPageRoute(
+        result.data.DownloadItemsInZip,
+        RouteNames.SingleEntity,
+      ),
+    );
     closeAndDeleteForm();
   } catch (e) {
     submitErrors.value = e.message;
