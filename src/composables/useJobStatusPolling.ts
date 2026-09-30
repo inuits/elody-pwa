@@ -105,6 +105,7 @@ export const useJobStatusPolling = (options: {
             "job-status-polling.failed-description",
           ),
         );
+        options.onJobCompleted();
       }
     },
   );

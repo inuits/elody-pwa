@@ -126,7 +126,7 @@ describe("useJobStatusPolling", () => {
     expect(stop).toHaveBeenCalledOnce();
   });
 
-  it("shows an error toast and stops polling without calling onJobCompleted when failed", async () => {
+  it("shows an error toast, stops polling and calls onJobCompleted when failed", async () => {
     const { result, stop, options } = setup();
     result.value = { jobStatusForEntity: { hasJob: true, jobId: "job-1", status: "running" } };
     await nextTick();
@@ -138,7 +138,7 @@ describe("useJobStatusPolling", () => {
       "job-status-polling.failed-title",
       "job-status-polling.failed-description",
     );
-    expect(options.onJobCompleted).not.toHaveBeenCalled();
+    expect(options.onJobCompleted).toHaveBeenCalledOnce();
     expect(stop).toHaveBeenCalledOnce();
   });
 
@@ -197,7 +197,7 @@ describe("useJobStatusPolling", () => {
   });
 
   it("still reports a failure that was already terminal on the very first check", async () => {
-    const { result, stop } = setup();
+    const { result, stop, options } = setup();
     result.value = {
       jobStatusForEntity: {
         hasJob: true,
@@ -212,6 +212,7 @@ describe("useJobStatusPolling", () => {
       "job-status-polling.failed-title",
       "translated:W4012 - No mediafiles",
     );
+    expect(options.onJobCompleted).toHaveBeenCalledOnce();
     expect(stop).toHaveBeenCalledOnce();
   });
 
