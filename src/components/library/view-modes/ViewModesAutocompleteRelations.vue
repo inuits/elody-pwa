@@ -79,6 +79,8 @@ import {
   onMounted,
   ref,
   shallowRef,
+  unref,
+  type Ref,
   watch,
 } from "vue";
 import {
@@ -316,10 +318,16 @@ const populateTagInputValuesFromForm = () => {
   }
 };
 
-const populateSelectedOptions = (options: DropdownOption[]) => {
-  if (options.length === 0 && selectedDropdownOptions.value?.length === 0)
+const populateSelectedOptions = (
+  options: DropdownOption[] | Ref<DropdownOption[]>,
+) => {
+  const resolvedOptions = unref(options) ?? [];
+  if (
+    resolvedOptions.length === 0 &&
+    selectedDropdownOptions.value?.length === 0
+  )
     return;
-  selectedDropdownOptions.value = options;
+  selectedDropdownOptions.value = resolvedOptions;
 };
 
 const handleSelect = (

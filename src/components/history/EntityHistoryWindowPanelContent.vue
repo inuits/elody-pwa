@@ -34,7 +34,6 @@
     >
       <template
         v-for="(metadata, index) in metadatafields"
-        v-show="itemMustBeShown(metadata.value)"
         :key="metadata.key"
       >
         <MultilingualWrapper
@@ -108,11 +107,9 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   PanelType,
-  BaseLibraryModes,
   Unit,
   type PanelRelation,
   type MetadataField,
@@ -153,13 +150,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const config = inject("config") as any;
 const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
-
-const itemMustBeShown = (value: any): boolean => {
-  if (config.customization.hideEmptyFields === true && !value) return false;
-  return true;
-};
 
 const wysiwygDiffFor = (metadata: any): WysiwygDiff | undefined =>
   props.wysiwygDiffs?.find((diff) => diff.key === metadata.metadataKey);

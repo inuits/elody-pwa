@@ -120,7 +120,7 @@ const { t } = useI18n();
 
 const editState = useEditMode(props.formId);
 const panelType = ref<PanelType>(props.panel.panelType);
-const isCollapsed = ref<boolean>(props.panel.isCollapsed);
+const isCollapsed = ref<boolean>(false);
 const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
 );
