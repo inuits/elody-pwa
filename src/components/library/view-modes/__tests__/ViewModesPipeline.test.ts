@@ -38,7 +38,7 @@ vi.mock(
       getLinkSettings: () => ({ tag: "div", path: undefined }),
       isEntityDisabled: () => false,
       entityWrapperHandler: mockEntityWrapperHandler,
-      getContextMenu: () => undefined,
+      getButtons: () => undefined,
     }),
   }),
 );

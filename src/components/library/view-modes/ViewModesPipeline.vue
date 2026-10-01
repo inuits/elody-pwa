@@ -32,7 +32,7 @@
           :item-id="item.id"
           :item-type="item.type"
           :bulk-operations-context="bulkOperationsContext"
-          :context-menu-actions="item.contextMenu"
+          :buttons="item.buttons"
           :entityTypename="item.entityTypename"
           :teaser-metadata="item.teaserMetadata"
           :intialValues="item.intialValues"
@@ -123,7 +123,7 @@ watch(
 );
 
 const { findRelation } = useFormHelper();
-const { isEntityDisabled, getContextMenu } = useEntityListHelpers(
+const { isEntityDisabled, getButtons } = useEntityListHelpers(
   props,
   refEntities,
   ref(false),
@@ -144,7 +144,7 @@ const processedEntities = computed(() => {
     originalEntity: entity,
     id: entity.id,
     type: entity.type,
-    contextMenu: getContextMenu(entity),
+    buttons: getButtons(entity),
     entityTypename: getMappedSlug(entity),
     teaserMetadata: formatTeaserMetadata(
       entity.teaserMetadata,

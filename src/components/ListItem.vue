@@ -4,7 +4,7 @@
   <PipelineListItemCard
     v-if="isPipelineMode"
     :bulk-operations-context="bulkOperationsContext"
-    :context-menu-actions="contextMenuActions"
+    :context-menu-actions="buttons?.contextMenu ?? undefined"
     :item-id="itemId"
     :entity-typename="entityTypename"
     :loading="loading"
@@ -32,13 +32,15 @@
         :bulk-operations-context="bulkOperationsContext"
         input-style="accentNormal"
       />
-      <BaseContextMenuActions
-        :context-menu-actions="contextMenuActions"
+      <EntityButtons
+        :buttons="buttons"
         :parent-entity-id="formId"
         :entity-id="itemId"
         :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
+        :intial-values="intialValues"
+        :relation-values="relationValues"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -221,14 +223,16 @@
     </div>
 
     <div v-if="isListMode" class="flex">
-      <BaseContextMenuActions
-        :context-menu-actions="contextMenuActions"
+      <EntityButtons
+        :buttons="buttons"
         :parent-entity-id="formId"
         :entity-id="itemId"
         :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :intial-values="intialValues"
+        :relation-values="relationValues"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -301,7 +305,7 @@ import type { Context } from "@/composables/useBulkOperations";
 import {
   BaseLibraryModes,
   type BaseRelationValuesInput,
-  type ContextMenuActions,
+  type Buttons,
   DamsIcons,
   type BaseEntity,
   type EntityListElement,
@@ -327,7 +331,7 @@ import { useSeenItems } from "@/composables/useSeenItems";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
-import BaseContextMenuActions from "./BaseContextMenuActions.vue";
+import EntityButtons from "./EntityButtons.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
@@ -337,7 +341,7 @@ import PipelineListItemCard from "@/components/library/view-modes/pipeline/Pipel
 const props = withDefaults(
   defineProps<{
     bulkOperationsContext: Context | undefined;
-    contextMenuActions?: ContextMenuActions;
+    buttons?: Buttons;
     listItemEntity?: BaseEntity;
     itemId?: string;
     itemType?: Entitytyping;
@@ -373,7 +377,7 @@ const props = withDefaults(
     multiLineColumns?: number;
   }>(),
   {
-    contextMenuActions: undefined,
+    buttons: undefined,
     itemId: "",
     itemType: undefined,
     entityTypename: undefined,

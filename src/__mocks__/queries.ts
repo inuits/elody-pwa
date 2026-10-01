@@ -4069,9 +4069,32 @@ export type RelationInput = {
   value?: InputMaybe<Scalars['String']>;
 };
 
+export enum ActionButtonResult {
+  DownloadFile = 'DownloadFile',
+  None = 'None',
+  RefetchParent = 'RefetchParent'
+}
+
+export type ActionButton = {
+  __typename?: 'ActionButton';
+  can?: Maybe<Array<Maybe<Scalars['String']>>>;
+  hideIf?: Maybe<Array<Maybe<Scalars['String']>>>;
+  icon: Scalars['String'];
+  label: Scalars['String'];
+  onResult: ActionButtonResult;
+  query?: Maybe<Scalars['String']>;
+  variables?: Maybe<Scalars['JSON']>;
+};
+
+export type Buttons = {
+  __typename?: 'Buttons';
+  button?: Maybe<ActionButton>;
+  contextMenu?: Maybe<ContextMenuActions>;
+};
+
 export type TeaserMetadata = {
   __typename?: 'teaserMetadata';
-  contextMenuActions?: Maybe<ContextMenuActions>;
+  buttons?: Maybe<Buttons>;
   link?: Maybe<PanelLink>;
   metaData?: Maybe<PanelMetaData>;
   relationMetaData?: Maybe<PanelRelationMetaData>;

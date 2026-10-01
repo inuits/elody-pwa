@@ -71,15 +71,21 @@
       </div>
     </div>
 
-    <div class="w-8 shrink-0 flex justify-center" @click.stop>
-      <BaseContextMenuActions
-        :context-menu-actions="contextMenuActions"
+    <div
+      class="shrink-0 flex justify-center"
+      :style="{ width: actionsColumnWidth }"
+      @click.stop
+    >
+      <EntityButtons
+        :buttons="buttons"
         :parent-entity-id="parentEntityId"
         :entity-id="itemId"
         :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :intial-values="intialValues"
+        :relation-values="relationValues"
       />
     </div>
 
@@ -126,7 +132,7 @@
 import {
   BaseLibraryModes,
   type BaseRelationValuesInput,
-  type ContextMenuActions,
+  type Buttons,
   type Entitytyping,
   type IntialValues,
   ListItemCoverageTypes,
@@ -135,7 +141,7 @@ import {
 } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
-import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
+import EntityButtons from "@/components/EntityButtons.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import ReadOnlyMetadataWrapper from "@/components/metadata/ReadOnlyMetadataWrapper.vue";
@@ -160,7 +166,8 @@ const props = withDefaults(
     thumbIcon?: string;
     isMediaType?: boolean;
     isDisabled?: boolean;
-    contextMenuActions?: ContextMenuActions;
+    buttons?: Buttons;
+    actionsColumnWidth?: string;
     relation:
       | { idx: number; relation: BaseRelationValuesInput }
       | "no-relation-found";
@@ -187,7 +194,8 @@ const props = withDefaults(
     thumbIcon: "",
     isMediaType: false,
     isDisabled: false,
-    contextMenuActions: undefined,
+    buttons: undefined,
+    actionsColumnWidth: "2rem",
     parentEntityId: undefined,
     relationType: undefined,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,

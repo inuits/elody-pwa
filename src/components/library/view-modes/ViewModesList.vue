@@ -80,7 +80,7 @@
             :item-id="entity.id"
             :item-type="entity.type"
             :bulk-operations-context="bulkOperationsContext"
-            :context-menu-actions="entity.contextMenu"
+            :buttons="entity.buttons"
             :entityTypename="entity.entityTypename"
             :teaser-metadata="entity.teaserMetadata"
             :intialValues="entity.intialValues"
@@ -257,7 +257,7 @@ const {
   getLinkSettings,
   isEntityDisabled,
   entityWrapperHandler,
-  getContextMenu,
+  getButtons,
   isPreviewElement,
 } = useEntityListHelpers(
   props,
@@ -317,7 +317,7 @@ const processedEntities = computed(() => {
     );
     const mediaFilename = getMediaFilenameFromEntity(entity);
     const thumbnail = getThumbnail(entity);
-    const contextMenu = getContextMenu(entity);
+    const buttons = getButtons(entity);
 
     const memoKey = [
       entity.intialValues,
@@ -340,7 +340,7 @@ const processedEntities = computed(() => {
       componentPath: linkSettings.path,
       forcedNavigationPath: forcedLinkSettings.path,
 
-      contextMenu,
+      buttons,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
       intialValues: entity.intialValues,
