@@ -9,6 +9,18 @@
             :clearable="false"
             style-type="defaultWithBorder"
           />
+          <p
+            v-if="leftVersionMeta?.editedBy"
+            data-test="history-version-author"
+            class="pt-1 text-sm text-text-body"
+          >
+            {{
+              t("history.edited-by", {
+                author: leftVersionMeta.editedBy,
+                date: leftVersionMeta.date,
+              })
+            }}
+          </p>
         </div>
         <div v-if="leftLoading" class="flex justify-center py-8">
           <spinner-loader theme="accent" />
@@ -33,6 +45,18 @@
             :disable="!hasVersions"
             style-type="defaultWithBorder"
           />
+          <p
+            v-if="rightVersionMeta?.editedBy"
+            data-test="history-version-author"
+            class="pt-1 text-sm text-text-body"
+          >
+            {{
+              t("history.edited-by", {
+                author: rightVersionMeta.editedBy,
+                date: rightVersionMeta.date,
+              })
+            }}
+          </p>
         </div>
         <div v-if="rightLoading" class="flex justify-center py-8">
           <spinner-loader theme="accent" />
@@ -87,6 +111,8 @@ const {
   rightWysiwygDiffs,
   leftRelationDiffs,
   rightRelationDiffs,
+  leftVersionMeta,
+  rightVersionMeta,
 } = useHistoryComparisonData(entityId, entityType);
 
 watch(
@@ -102,8 +128,9 @@ const hasVersions = computed(() => versionOptions.value.length > 0);
 const toDropdownOption = (option: {
   id: string;
   label: string;
+  editedBy?: string | null;
 }): DropdownOption => ({
-  label: option.label,
+  label: option.editedBy ? `${option.label} · ${option.editedBy}` : option.label,
   value: option.id,
   __typename: "DropdownOption",
 });

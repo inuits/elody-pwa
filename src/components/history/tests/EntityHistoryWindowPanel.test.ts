@@ -3,9 +3,6 @@ import { describe, it, expect, vi } from "vitest";
 import EntityHistoryWindowPanel from "../EntityHistoryWindowPanel.vue";
 
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (k: string) => k }) }));
-vi.mock("@/composables/useEdit", () => ({
-  useEditMode: () => ({ isEdit: false, showErrors: false }),
-}));
 vi.mock("@/composables/useRepeatableFields", () => ({
   useRepeatableFields: () => ({
     repeatAmount: { value: 1 },
@@ -31,7 +28,6 @@ const mountPanel = (isCollapsed: boolean) =>
         panelHeaderContent: { label: "Annotaties" },
       } as any,
       identifiers: [],
-      isEdit: false,
       formId: "1",
       wysiwygDiffs: [],
       relationDiffs: [],

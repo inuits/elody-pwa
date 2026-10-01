@@ -4,6 +4,9 @@ import { shallowMount, flushPromises } from "@vue/test-utils";
 import HistoryComparison from "../HistoryComparison.vue";
 
 const currentEntity = ref<any>(undefined);
+const versionOptions = ref<any[]>([]);
+const leftVersionMeta = ref<any>(null);
+const rightVersionMeta = ref<any>(null);
 
 const mocks = vi.hoisted(() => ({
   route: { params: { id: "entity-1", type: "inscription" } },
@@ -15,7 +18,10 @@ vi.mock("vue-router", () => ({
 }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({
+    t: (key: string, params?: Record<string, unknown>) =>
+      params ? `${key} ${JSON.stringify(params)}` : key,
+  }),
 }));
 
 vi.mock("@/components/history/EntityHistoryColumn.vue", () => ({
@@ -23,7 +29,11 @@ vi.mock("@/components/history/EntityHistoryColumn.vue", () => ({
 }));
 
 vi.mock("@/components/base/AdvancedDropdown.vue", () => ({
-  default: { name: "AdvancedDropdown", template: "<div />" },
+  default: {
+    name: "AdvancedDropdown",
+    props: ["options", "modelValue"],
+    template: "<div />",
+  },
 }));
 
 vi.mock("@/components/SpinnerLoader.vue", () => ({
@@ -34,7 +44,9 @@ vi.mock("@/composables/useHistoryComparisonData", () => ({
   LIVE_VERSION_ID: "__live__",
   useHistoryComparisonData: () => ({
     currentEntity,
-    versionOptions: ref([]),
+    versionOptions,
+    leftVersionMeta,
+    rightVersionMeta,
     leftVersionId: ref(null),
     rightVersionId: ref(null),
     leftLoading: ref(false),
@@ -66,6 +78,41 @@ describe("HistoryComparison", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     currentEntity.value = undefined;
+    versionOptions.value = [];
+    leftVersionMeta.value = null;
+    rightVersionMeta.value = null;
+  });
+
+  it("shows who made the version on each side and when", async () => {
+    leftVersionMeta.value = { editedBy: "bob@example.com", date: "2/1/2026" };
+    rightVersionMeta.value = { editedBy: "alice@example.com", date: "1/1/2026" };
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    const lines = wrapper.findAll('[data-test="history-version-author"]');
+    expect(lines).toHaveLength(2);
+    expect(lines[0].text()).toContain("bob@example.com");
+    expect(lines[0].text()).toContain("2/1/2026");
+    expect(lines[1].text()).toContain("alice@example.com");
+  });
+
+  it("shows no author line for a side without a known author", async () => {
+    rightVersionMeta.value = { editedBy: "alice@example.com", date: "1/1/2026" };
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.findAll('[data-test="history-version-author"]')).toHaveLength(1);
+  });
+
+  it("names the author in every version option", async () => {
+    versionOptions.value = [
+      { id: "v1", label: "Version 1 (1/1/2026)", editedBy: "alice@example.com" },
+    ];
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    const rightDropdown = wrapper.findAllComponents({ name: "AdvancedDropdown" })[1];
+    expect(rightDropdown.props("options")[0].label).toContain("alice@example.com");
   });
 
   it("determines breadcrumbs once the live entity loads", async () => {

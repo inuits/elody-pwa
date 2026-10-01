@@ -998,6 +998,69 @@ describe("useHistoryComparisonData versions query", () => {
   });
 });
 
+describe("useHistoryComparisonData version authors", () => {
+  const readableDate = (dateString: string) =>
+    convertDateToReadbleFormat(dateString, "DEFAULT", true);
+
+  beforeEach(() => {
+    mocks.useQueryCalls.length = 0;
+    mocks.queryResults = [];
+  });
+
+  const withResult = (value: any) => ({
+    result: { value },
+    loading: { value: false },
+    error: { value: null },
+  });
+
+  const setup = () => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult({
+      EntityHistoryVersions: [
+        { ...versionRow("v2", "2026-02-01T00:00:00Z"), editedBy: "bob@example.com" },
+        { ...versionRow("v1", "2026-01-01T00:00:00Z"), editedBy: "alice@example.com" },
+      ],
+    });
+    return useHistoryComparisonData("entity-1", "inscription");
+  };
+
+  it("carries the author of every version on its dropdown option", async () => {
+    const { versionOptions } = setup();
+    await flushPromises();
+
+    expect(versionOptions.value.map((option) => [option.id, option.editedBy])).toEqual([
+      ["v1", "alice@example.com"],
+      ["v2", "bob@example.com"],
+    ]);
+  });
+
+  it("describes who made each shown version and when, taking the newest version for the live side", async () => {
+    const { leftVersionMeta, rightVersionMeta, rightVersionId } = setup();
+    await flushPromises();
+
+    expect(leftVersionMeta.value?.editedBy).toBe("bob@example.com");
+    expect(leftVersionMeta.value?.date).toBe(readableDate("2026-02-01T00:00:00Z"));
+
+    rightVersionId.value = "v1";
+    await flushPromises();
+    expect(rightVersionMeta.value?.editedBy).toBe("alice@example.com");
+    expect(rightVersionMeta.value?.date).toBe(readableDate("2026-01-01T00:00:00Z"));
+  });
+
+  it("has no author to show when there is no history", async () => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult({ EntityHistoryVersions: [] });
+    const { leftVersionMeta, rightVersionMeta } = useHistoryComparisonData(
+      "entity-1",
+      "inscription",
+    );
+    await flushPromises();
+
+    expect(leftVersionMeta.value).toBeNull();
+    expect(rightVersionMeta.value).toBeNull();
+  });
+});
+
 describe("useHistoryComparisonData edit-state isolation", () => {
   const mountHost = (entityId: string, entityType = "inscription") =>
     mount(

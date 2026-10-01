@@ -1,13 +1,5 @@
 <template>
-  <div
-    :class="[
-      {
-        'flex items-end':
-          repeatablePanelConfig?.repeatableFieldsHelper
-            .repetitionDeleteIsAvailable.value,
-      },
-    ]"
-  >
+  <div>
     <div v-if="panelType === PanelType.Relation && relationArray.length">
       <div class="pl-2 rounded-sm bg-accent-light">
         <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
@@ -37,11 +29,9 @@
         :key="metadata.key"
       >
         <MultilingualWrapper
+          v-if="itemMustBeShown(metadata)"
           :metadata="metadatafields[index]"
           :form-id="formId"
-          @update:metadata="
-            (updatedMetadata) => (metadatafields[index] = updatedMetadata)
-          "
         >
           <template #default="{ localizedMetadata }">
             <metadata-wrapper
@@ -52,10 +42,10 @@
               "
               class="py-2 px-2"
               :form-id="formId"
-              :is-edit="isEdit"
+              :is-edit="false"
               :repeatablePanelConfig="repeatablePanelConfig"
               :metadata="localizedMetadata || metadatafields[index]"
-              :show-errors="editState.showErrors"
+              :show-errors="false"
               :base-library-mode="metadata.baseLibraryMode"
             />
 
@@ -91,37 +81,25 @@
         </MultilingualWrapper>
       </template>
     </div>
-    <div
-      class="pb-2"
-      v-if="
-        repeatablePanelConfig?.repeatableFieldsHelper
-          .repetitionDeleteIsAvailable.value && isEdit
-      "
-    >
-      <base-button-new
-        :icon="DamsIcons.Trash"
-        @click="emit('decreaseRepeatedFieldAmount')"
-      />
-    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   PanelType,
   Unit,
   type PanelRelation,
   type MetadataField,
-  DamsIcons,
 } from "@/generated-types/queries";
 import HistoryRelationDiff from "@/components/history/HistoryRelationDiff.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
 import WysiwygReadOnly from "@/components/history/WysiwygReadOnly.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
+import { useFormHelper } from "@/composables/useFormHelper";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import {
   hasRelationDiff,
@@ -130,18 +108,12 @@ import {
   type WysiwygDiff,
 } from "@/composables/useHistoryComparisonData";
 
-const emit = defineEmits<{
-  (event: "decreaseRepeatedFieldAmount"): void;
-}>();
-
 const props = defineProps<{
   panelType: PanelType;
   relationArray: PanelRelation[];
   metadatafields: MetadataField[];
   canBeMultipleColumns: boolean;
   formId: string;
-  isEdit: boolean;
-  editState: any;
   identifiers: string[];
   parentIsListItem: boolean;
   repeatablePanelConfig?: PanelRepetitionProps;
@@ -150,7 +122,25 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const config = inject("config") as any;
+const { getForm } = useFormHelper();
 const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
+
+const isEmptyValue = (value: unknown): boolean =>
+  value === undefined ||
+  value === null ||
+  value === "" ||
+  (Array.isArray(value) && value.length === 0);
+
+const itemMustBeShown = (metadata: MetadataField): boolean => {
+  if (config?.customization?.hideEmptyFields !== true) return true;
+  if (nonStandardFieldTypes.includes(metadata.__typename as string)) return true;
+  const key = (metadata as any).key ?? (metadata as any).metadataKey;
+  const diffedValue = key
+    ? getForm(props.formId)?.values?.intialValues?.[key]
+    : undefined;
+  return !isEmptyValue(diffedValue ?? metadata.value);
+};
 
 const wysiwygDiffFor = (metadata: any): WysiwygDiff | undefined =>
   props.wysiwygDiffs?.find((diff) => diff.key === metadata.metadataKey);
