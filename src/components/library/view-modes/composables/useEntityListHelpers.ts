@@ -25,7 +25,7 @@ export const useEntityListHelpers = (
   props: EntityListHelpersProps,
   refEntities: Ref<Entity[]>,
   previewComponentEnabled: Ref<boolean>,
-  togglePreviewComponent: (entityId: string) => void,
+  openPreviewComponent: (entityId: string) => void,
 ) => {
   const mediafileViewerContext: any = inject("mediafileViewerContext");
   const isPreviewElement: boolean = inject("IsPreviewElement", false);
@@ -62,7 +62,7 @@ export const useEntityListHelpers = (
 
   const entityWrapperHandler = (entity: Entity) => {
     if (previewComponentEnabled.value)
-      togglePreviewComponent(entity.id || entity.uuid);
+      openPreviewComponent(entity.id || entity.uuid);
     if (isEntityDisabled(entity) || !props.enableNavigation) return;
     updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
   };
