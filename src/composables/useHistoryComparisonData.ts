@@ -50,6 +50,7 @@ export type WysiwygDiff = {
 export type HistoryVersionRow = {
   id: string;
   intialValues: { updated_at?: any };
+  editedBy?: string | null;
   [key: string]: any;
 };
 
@@ -57,6 +58,12 @@ export type VersionOption = {
   id: string;
   label: string;
   date: any;
+  editedBy?: string | null;
+};
+
+export type VersionMeta = {
+  editedBy: string | null;
+  date: string | null;
 };
 
 export const LIVE_VERSION_ID = "__live__";
@@ -96,7 +103,7 @@ export const buildVersionOptions = (
     const label = date
       ? `Version ${index + 1} (${convertDateToReadbleFormat(date, "DEFAULT", true)})`
       : `Version ${index + 1}`;
-    return { id: version.id, label, date };
+    return { id: version.id, label, date, editedBy: version.editedBy };
   });
 
 export function useHistoryComparisonData(entityId: string, entityType: string) {
@@ -141,6 +148,7 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     versions.value.map((version) => ({
       id: version.versionId,
       intialValues: { updated_at: version.timestamp },
+      editedBy: version.editedBy,
     })),
   );
 
@@ -149,6 +157,26 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
   );
 
   const loading = versionsLoading;
+
+  const versionMetaFor = (versionId: string | null): VersionMeta | null => {
+    const options = versionOptions.value;
+    const option =
+      versionId === LIVE_VERSION_ID
+        ? options[options.length - 1]
+        : options.find((candidate) => candidate.id === versionId);
+    if (!option) return null;
+    return {
+      editedBy: option.editedBy ?? null,
+      date: option.date
+        ? convertDateToReadbleFormat(option.date, "DEFAULT", true)
+        : null,
+    };
+  };
+
+  const leftVersionMeta = computed(() => versionMetaFor(leftVersionId.value));
+  const rightVersionMeta = computed(() =>
+    versionMetaFor(rightVersionId.value),
+  );
 
   watch(
     versionOptions,
@@ -465,6 +493,8 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     relationDiffs,
     leftRelationDiffs,
     rightRelationDiffs,
+    leftVersionMeta,
+    rightVersionMeta,
     loading,
   };
 }

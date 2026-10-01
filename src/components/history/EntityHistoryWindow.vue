@@ -30,7 +30,7 @@
             class="w-full"
             :metadata="getStatusMetadata()"
             :form-id="formId"
-            :isEdit="computedIsEdit"
+            :is-edit="false"
           />
         </div>
       </div>
@@ -56,7 +56,6 @@
           <entity-history-window-panel
             :panel="panel"
             :identifiers="identifiers"
-            :is-edit="computedIsEdit"
             :form-id="formId"
             :wysiwyg-diffs="wysiwygDiffs"
             :relation-diffs="relationDiffs"
@@ -76,9 +75,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useEditMode } from "@/composables/useEdit";
 import {
   DisplayCondition,
   Orientations,
@@ -98,7 +96,6 @@ import type {
 const props = defineProps<{
   element: WindowElement;
   identifiers: string[];
-  isEditOverwrite?: boolean;
   formId: string;
   previewLabel?: string;
   entityMetadata?: Record<string, any>;
@@ -112,12 +109,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const useEditHelper = useEditMode(props.formId);
-
-const computedIsEdit = computed(
-  () => props.isEditOverwrite || useEditHelper.isEdit,
-);
-
 const resizeColumn = (toggled: boolean) => {
   emit("resizeColumn", toggled);
 };
@@ -143,13 +134,8 @@ const filteredPanels = computed<WindowElementPanel[]>(() =>
   getPanelsAllowedToDisplay(),
 );
 
-const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
+const { getStatusMetadata } = useWindowOrPanelStatus(
   computed(() => props.element.windowElementStatus),
   props.formId,
-  computedIsEdit,
 );
-
-onMounted(() => {
-  registerEditableKey();
-});
 </script>

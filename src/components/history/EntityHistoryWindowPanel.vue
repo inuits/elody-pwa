@@ -12,25 +12,10 @@
           v-if="panel.panelHeaderContent.panelStatus"
           :metadata="getStatusMetadata()"
           :form-id="formId"
-          :isEdit="isEdit"
+          :is-edit="false"
         />
       </div>
       <div class="flex justify-end gap-4">
-        <div v-if="repeatablePanel && isEdit">
-          <base-button-new
-            :label="t('Add more')"
-            :icon="DamsIcons.Plus"
-            button-size="small"
-            button-style="accentAccent"
-            @click.stop
-            @click="
-              () => {
-                repeatableFieldsHelper.increaseFieldRepeatAmount();
-                expandPanel();
-              }
-            "
-          ></base-button-new>
-        </div>
         <unicon
           :name="
             !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
@@ -53,8 +38,6 @@
             "
             :can-be-multiple-columns="canBeMultipleColumns"
             :form-id="formId"
-            :is-edit="isEdit"
-            :edit-state="editState"
             :identifiers="identifiers"
             :parent-is-list-item="parentIsListItem"
             :wysiwyg-diffs="wysiwygDiffs"
@@ -65,9 +48,6 @@
               index: idx - 1,
               repeatableFieldsHelper,
             }"
-            @decreaseRepeatedFieldAmount="
-              repeatableFieldsHelper.decreaseFieldRepeatAmount(idx - 1)
-            "
           />
           <hr
             class="my-4 border-neutral-30"
@@ -89,12 +69,9 @@ import { Unicons } from "@/types";
 import EntityHistoryWindowPanelContent from "@/components/history/EntityHistoryWindowPanelContent.vue";
 import { getMetadataFields } from "@/helpers";
 import { useRepeatableFields } from "@/composables/useRepeatableFields";
-import { useEditMode } from "@/composables/useEdit";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   type WindowElementPanel,
   type PanelType,
-  DamsIcons,
   type PanelRelation,
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
@@ -108,7 +85,6 @@ const props = withDefaults(
   defineProps<{
     panel: WindowElementPanel;
     identifiers: string[];
-    isEdit: boolean;
     formId: string;
     parentIsListItem?: boolean;
     wysiwygDiffs: WysiwygDiff[];
@@ -118,7 +94,6 @@ const props = withDefaults(
 );
 const { t } = useI18n();
 
-const editState = useEditMode(props.formId);
 const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(false);
 const canBeMultipleColumns = ref<boolean>(
@@ -130,10 +105,9 @@ const repeatableFieldsHelper = useRepeatableFields(
   panelId.value!,
   props.formId,
 );
-const { getStatusMetadata, registerEditableKey } = useWindowOrPanelStatus(
+const { getStatusMetadata } = useWindowOrPanelStatus(
   computed(() => props.panel.panelHeaderContent?.panelStatus),
   props.formId,
-  computed(() => props.isEdit),
 );
 
 const toggleIsCollapsed = () => {
@@ -162,15 +136,10 @@ const relationArray = computed((): PanelRelation[] => {
   return returnArray;
 });
 
-const expandPanel = () => {
-  isCollapsed.value = false;
-};
-
 watchEffect(() => {
   if (repeatablePanel.value) {
     repeatableFieldsHelper.init();
   }
-  registerEditableKey();
 });
 </script>
 
