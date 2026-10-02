@@ -1,5 +1,12 @@
 <template>
   <div class="h-full w-full flex flex-col gap-4 p-4">
+    <p
+      v-if="versionsError"
+      data-test="history-message"
+      class="p-4 rounded-md border-2 border-solid border-neutral-30 bg-background-light text-text-body"
+    >
+      {{ t("history.versions-load-error") }}
+    </p>
     <div class="flex-1 grid grid-cols-2 gap-4 overflow-y-auto">
       <div>
         <div class="sticky top-0 z-10 bg-background-normal px-5 pb-2">
@@ -25,6 +32,13 @@
         <div v-if="leftLoading" class="flex justify-center py-8">
           <spinner-loader theme="accent" />
         </div>
+        <p
+          v-else-if="leftVersionError"
+          data-test="history-message"
+          class="mx-5 p-4 rounded-md border-2 border-solid border-neutral-30 bg-background-light text-text-body"
+        >
+          {{ t("history.version-load-error") }}
+        </p>
         <entity-history-column
           v-else-if="leftVersionEntity"
           :key="leftVersionId"
@@ -61,6 +75,20 @@
         <div v-if="rightLoading" class="flex justify-center py-8">
           <spinner-loader theme="accent" />
         </div>
+        <p
+          v-else-if="rightVersionError"
+          data-test="history-message"
+          class="mx-5 p-4 rounded-md border-2 border-solid border-neutral-30 bg-background-light text-text-body"
+        >
+          {{ t("history.version-load-error") }}
+        </p>
+        <p
+          v-else-if="hasNoHistory"
+          data-test="history-message"
+          class="mx-5 p-4 rounded-md border-2 border-solid border-neutral-30 bg-background-light text-text-body"
+        >
+          {{ t("history.no-history") }}
+        </p>
         <entity-history-column
           v-else-if="rightVersionEntity"
           :key="rightVersionId"
@@ -113,6 +141,10 @@ const {
   rightRelationDiffs,
   leftVersionMeta,
   rightVersionMeta,
+  hasNoHistory,
+  versionsError,
+  leftVersionError,
+  rightVersionError,
 } = useHistoryComparisonData(entityId, entityType);
 
 watch(

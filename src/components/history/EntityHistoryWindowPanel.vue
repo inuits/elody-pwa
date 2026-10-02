@@ -114,27 +114,11 @@ const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
-const relationArray = computed((): PanelRelation[] => {
-  let returnArray: PanelRelation[] = [];
-
-  Object.values(props.panel).forEach((value) => {
-    if (typeof value === "object") {
-      const relationList = value as [PanelRelation];
-
-      try {
-        if (!relationList.length) {
-          throw Error("Value can not be spread");
-        }
-
-        returnArray.push(...relationList);
-      } catch {
-        returnArray = relationList;
-      }
-    }
-  });
-
-  return returnArray;
-});
+const relationArray = computed((): PanelRelation[] =>
+  Object.values(props.panel).flatMap((value) =>
+    Array.isArray(value) ? (value as PanelRelation[]) : [],
+  ),
+);
 
 watchEffect(() => {
   if (repeatablePanel.value) {
