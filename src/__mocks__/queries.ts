@@ -5655,3 +5655,12 @@ export type GetEntityHistoryVersionDetailQueryVariables = Exact<{
 export type GetEntityHistoryVersionDetailQuery = { __typename?: 'Query', EntityHistoryVersionDetail?: any };
 
 export const GetEntityHistoryVersionDetailDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetEntityHistoryVersionDetailQuery, GetEntityHistoryVersionDetailQueryVariables>;
+export type GetRelationLabelsForIdsQueryVariables = Exact<{
+  ids: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  types: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  historyKeys?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  metadataKeyAsLabel?: InputMaybe<Scalars['String']['input']>;
+  rootKeyAsLabel?: InputMaybe<Scalars['String']['input']>;
+}>;
+export type GetRelationLabelsForIdsQuery = { __typename?: 'Query', RelationLabelsForIds: Array<{ __typename?: 'KeyAndValue', key: string, value: string }> };
+export const GetRelationLabelsForIdsDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetRelationLabelsForIdsQuery, GetRelationLabelsForIdsQueryVariables>;
