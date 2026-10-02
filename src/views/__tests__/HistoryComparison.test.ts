@@ -7,6 +7,10 @@ const currentEntity = ref<any>(undefined);
 const versionOptions = ref<any[]>([]);
 const leftVersionMeta = ref<any>(null);
 const rightVersionMeta = ref<any>(null);
+const hasNoHistory = ref(false);
+const versionsError = ref<any>(null);
+const leftVersionError = ref(false);
+const rightVersionError = ref(false);
 
 const mocks = vi.hoisted(() => ({
   route: { params: { id: "entity-1", type: "inscription" } },
@@ -47,6 +51,10 @@ vi.mock("@/composables/useHistoryComparisonData", () => ({
     versionOptions,
     leftVersionMeta,
     rightVersionMeta,
+    hasNoHistory,
+    versionsError,
+    leftVersionError,
+    rightVersionError,
     leftVersionId: ref(null),
     rightVersionId: ref(null),
     leftLoading: ref(false),
@@ -81,6 +89,46 @@ describe("HistoryComparison", () => {
     versionOptions.value = [];
     leftVersionMeta.value = null;
     rightVersionMeta.value = null;
+    hasNoHistory.value = false;
+    versionsError.value = null;
+    leftVersionError.value = false;
+    rightVersionError.value = false;
+  });
+
+  const messageKeys = (wrapper: ReturnType<typeof getWrapper>) =>
+    wrapper
+      .findAll('[data-test="history-message"]')
+      .map((message) => message.text());
+
+  it("tells the user when the entity has no history yet", async () => {
+    hasNoHistory.value = true;
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(messageKeys(wrapper)).toEqual(["history.no-history"]);
+  });
+
+  it("tells the user when the history could not be loaded", async () => {
+    versionsError.value = new Error("down");
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(messageKeys(wrapper)).toEqual(["history.versions-load-error"]);
+  });
+
+  it("tells the user on the right side when that version could not be loaded", async () => {
+    rightVersionError.value = true;
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(messageKeys(wrapper)).toEqual(["history.version-load-error"]);
+  });
+
+  it("shows no message when the history loaded normally", async () => {
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(messageKeys(wrapper)).toEqual([]);
   });
 
   it("shows who made the version on each side and when", async () => {

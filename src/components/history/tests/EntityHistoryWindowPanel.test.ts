@@ -36,6 +36,7 @@ const mountPanel = (isCollapsed: boolean) =>
       stubs: {
         EntityHistoryWindowPanelContent: {
           name: "EntityHistoryWindowPanelContent",
+          props: ["relationArray"],
           template: '<div data-test="panel-content" />',
         },
         MetadataWrapper: true,
@@ -58,5 +59,42 @@ describe("EntityHistoryWindowPanel", () => {
     await wrapper.find(".cursor-pointer").trigger("click");
 
     expect(wrapper.find('[data-test="panel-content"]').isVisible()).toBe(false);
+  });
+
+  it("hands its content only the panel's relations, never one of its config objects", () => {
+    const relations = [{ __typename: "PanelRelation", label: "Lewis" }];
+    const wrapper = mount(EntityHistoryWindowPanel, {
+      props: {
+        panel: {
+          __typename: "WindowElementPanel",
+          panelType: "relation",
+          isCollapsed: false,
+          relations,
+          panelHeaderContent: { label: "Relaties" },
+          displayCondition: { key: "status" },
+        } as any,
+        identifiers: [],
+        formId: "1",
+        wysiwygDiffs: [],
+        relationDiffs: [],
+      },
+      global: {
+        stubs: {
+          EntityHistoryWindowPanelContent: {
+            name: "EntityHistoryWindowPanelContent",
+            props: ["relationArray"],
+            template: "<div />",
+          },
+          MetadataWrapper: true,
+          unicon: true,
+        },
+      },
+    });
+
+    const relationArray = wrapper
+      .findComponent({ name: "EntityHistoryWindowPanelContent" })
+      .props("relationArray");
+    expect(Array.isArray(relationArray)).toBe(true);
+    expect(relationArray).toEqual(relations);
   });
 });

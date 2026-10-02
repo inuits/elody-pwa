@@ -2,10 +2,6 @@ import { mount } from "@vue/test-utils";
 import { describe, it, expect, vi } from "vitest";
 import EntityHistoryElement from "../EntityHistoryElement.vue";
 
-vi.mock("vue-router", () => ({
-  useRoute: () => ({ params: { id: "route-entity-id" } }),
-}));
-
 vi.mock("@/components/history/EntityHistoryWindow.vue", () => ({
   default: {
     name: "EntityHistoryWindow",

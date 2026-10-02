@@ -8,13 +8,15 @@ import {
   convertDateToReadbleFormat,
 } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
+import { GetEntityHistoryVersionDetailDocument } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {
-  buildVersionOptions,
+  buildVersionOptions as buildVersionOptionsWith,
   sortHistoryVersionsByDate,
   useHistoryComparisonData,
   LIVE_VERSION_ID,
   type HistoryVersionRow,
+  type RelationDiff,
 } from "../useHistoryComparisonData";
 
 const mocks = vi.hoisted(() => ({
@@ -125,6 +127,17 @@ describe("sortHistoryVersionsByDate", () => {
 describe("buildVersionOptions", () => {
   const readableDate = (dateString: string) =>
     convertDateToReadbleFormat(dateString, "DEFAULT", true);
+  const englishLabel = (number: number, date?: string) =>
+    date ? `Version ${number} (${date})` : `Version ${number}`;
+  const buildVersionOptions = (rows: HistoryVersionRow[]) =>
+    buildVersionOptionsWith(rows, englishLabel);
+
+  it("labels every version through the given formatter with its number and readable date", () => {
+    const formatter = vi.fn(() => "label");
+    buildVersionOptionsWith([row("only", "2026-01-01T00:00:00Z")], formatter);
+
+    expect(formatter).toHaveBeenCalledWith(1, readableDate("2026-01-01T00:00:00Z"));
+  });
 
   it("labels versions from oldest to newest regardless of input order, including a human-readable date", () => {
     const rows = [
@@ -1058,6 +1071,217 @@ describe("useHistoryComparisonData version authors", () => {
 
     expect(leftVersionMeta.value).toBeNull();
     expect(rightVersionMeta.value).toBeNull();
+  });
+});
+
+describe("useHistoryComparisonData historical relation labels", () => {
+  beforeEach(() => {
+    mocks.useQueryCalls.length = 0;
+    mocks.queryResults = [];
+    mocks.apolloQueryMock.mockClear();
+  });
+
+  const withResult = (value: any) => ({
+    result: { value },
+    loading: { value: false },
+    error: { value: null },
+  });
+
+  const entityView = {
+    column: {
+      elements: {
+        authors: {
+          __typename: "EntityListElement",
+          relationType: "refAuthors",
+          label: "Authors",
+          entityTypes: ["person"],
+        },
+      },
+    },
+  };
+
+  const setup = (historicalAuthor: Record<string, any>, historicalTitle: any) => {
+    mocks.apolloQueryMock.mockImplementation(({ query }: any) =>
+      Promise.resolve({
+        data:
+          query === GetEntityHistoryVersionDetailDocument
+            ? { EntityHistoryVersionDetail: historicalTitle }
+            : { Entity: { id: "PERS-1", intialValues: { name: "New name" } } },
+      }),
+    );
+    mocks.queryResults[0] = withResult({
+      Entity: {
+        id: "entity-1",
+        entityView,
+        relationValues: { refAuthors: [{ key: "PERS-1" }] },
+        intialValues: {},
+      },
+    });
+    mocks.queryResults[1] = withResult({
+      EntityHistoryVersions: [versionRow("v1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[3] = withResult({
+      EntityHistoryVersionDetail: {
+        id: "entity-1",
+        entityView,
+        relationValues: { refAuthors: [historicalAuthor] },
+        intialValues: { updated_at: "2026-01-01T00:00:00Z" },
+      },
+    });
+    return useHistoryComparisonData("entity-1", "work_word");
+  };
+
+  const labelOf = (diffs: RelationDiff[], key: string) =>
+    diffs
+      .find((diff) => diff.relationType === "refAuthors")
+      ?.items.find((item) => item.key === key)?.label;
+
+  const historicalCalls = () =>
+    mocks.apolloQueryMock.mock.calls.filter(
+      ([options]: any) => options.query === GetEntityHistoryVersionDetailDocument,
+    );
+
+  it("names a related entity as it was at the time of a historical version, and as it is now on the live side", async () => {
+    const { leftRelationDiffs, rightRelationDiffs } = setup(
+      { key: "PERS-1", historyKey: "hist-pers-1" },
+      { id: "PERS-1", intialValues: { name: "Old name" } },
+    );
+    await flushPromises();
+    await flushPromises();
+
+    expect(labelOf(leftRelationDiffs.value, "PERS-1")).toBe("New name");
+    expect(labelOf(rightRelationDiffs.value, "PERS-1")).toBe("Old name");
+    expect(historicalCalls()[0][0].variables).toEqual({
+      id: "PERS-1",
+      type: "person",
+      versionId: "v1",
+    });
+  });
+
+  const itemOf = (diffs: RelationDiff[], key: string) =>
+    diffs
+      .find((diff) => diff.relationType === "refAuthors")
+      ?.items.find((item) => item.key === key);
+
+  it("marks a relation kept on both sides but renamed since: current name on the left, previous name on the right", async () => {
+    const { leftRelationDiffs, rightRelationDiffs } = setup(
+      { key: "PERS-1", historyKey: "hist-pers-1" },
+      { id: "PERS-1", intialValues: { name: "Old name" } },
+    );
+    await flushPromises();
+    await flushPromises();
+
+    expect(itemOf(leftRelationDiffs.value, "PERS-1")).toMatchObject({
+      status: "renamed",
+      variant: "current",
+      label: "New name",
+    });
+    expect(itemOf(rightRelationDiffs.value, "PERS-1")).toMatchObject({
+      status: "renamed",
+      variant: "previous",
+      label: "Old name",
+    });
+  });
+
+  it("keeps a relation unchanged when its name is the same on both sides", async () => {
+    const { leftRelationDiffs, rightRelationDiffs } = setup(
+      { key: "PERS-1", historyKey: "PERS-1" },
+      null,
+    );
+    await flushPromises();
+    await flushPromises();
+
+    expect(itemOf(leftRelationDiffs.value, "PERS-1")?.status).toBe("unchanged");
+    expect(itemOf(rightRelationDiffs.value, "PERS-1")?.status).toBe("unchanged");
+  });
+
+  it("uses the live name without an extra lookup when the related entity had no history version yet", async () => {
+    const { rightRelationDiffs } = setup(
+      { key: "PERS-1", historyKey: "PERS-1" },
+      { id: "PERS-1", intialValues: { name: "Old name" } },
+    );
+    await flushPromises();
+    await flushPromises();
+
+    expect(labelOf(rightRelationDiffs.value, "PERS-1")).toBe("New name");
+    expect(historicalCalls()).toHaveLength(0);
+  });
+
+  it("falls back to the live name when the historical version cannot be found", async () => {
+    const { rightRelationDiffs } = setup(
+      { key: "PERS-1", historyKey: "hist-pers-1" },
+      null,
+    );
+    await flushPromises();
+    await flushPromises();
+
+    expect(labelOf(rightRelationDiffs.value, "PERS-1")).toBe("New name");
+  });
+});
+
+describe("useHistoryComparisonData empty and error states", () => {
+  beforeEach(() => {
+    mocks.useQueryCalls.length = 0;
+    mocks.queryResults = [];
+  });
+
+  const withResult = (value: any, extra: Record<string, any> = {}) => ({
+    result: { value },
+    loading: { value: false },
+    error: { value: null },
+    ...extra,
+  });
+
+  it("reports that an entity has no history once its versions loaded empty", async () => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult({ EntityHistoryVersions: [] });
+    const { hasNoHistory } = useHistoryComparisonData("entity-1", "inscription");
+    await flushPromises();
+
+    expect(hasNoHistory.value).toBe(true);
+  });
+
+  it("does not claim there is no history while the versions are still loading", async () => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult(undefined, { loading: { value: true } });
+    const { hasNoHistory } = useHistoryComparisonData("entity-1", "inscription");
+    await flushPromises();
+
+    expect(hasNoHistory.value).toBe(false);
+  });
+
+  it("exposes a failing version list, without claiming there is no history", async () => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult(undefined, {
+      error: { value: new Error("history service down") },
+    });
+    const { versionsError, hasNoHistory } = useHistoryComparisonData(
+      "entity-1",
+      "inscription",
+    );
+    await flushPromises();
+
+    expect(versionsError.value).toBeTruthy();
+    expect(hasNoHistory.value).toBe(false);
+  });
+
+  it("exposes a version that failed to load on its own side only", async () => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult({
+      EntityHistoryVersions: [versionRow("v1", "2026-01-01T00:00:00Z")],
+    });
+    mocks.queryResults[2] = withResult(undefined);
+    mocks.queryResults[3] = withResult(undefined, {
+      error: { value: new Error("not found") },
+    });
+    const { leftVersionError, rightVersionError } = useHistoryComparisonData(
+      "entity-1",
+      "inscription",
+    );
+    await flushPromises();
+
+    expect(leftVersionError.value).toBeFalsy();
+    expect(rightVersionError.value).toBeTruthy();
   });
 });
 

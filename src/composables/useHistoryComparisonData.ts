@@ -1,5 +1,6 @@
 import { computed, onUnmounted, ref, watch, type Ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import { useI18n } from "vue-i18n";
 import { dequal as isEqual } from "dequal";
 import { apolloClient } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
@@ -31,7 +32,8 @@ import {
 export type RelationDiffItem = {
   key: string;
   label: string;
-  status: "added" | "removed" | "unchanged";
+  status: "added" | "removed" | "unchanged" | "renamed";
+  variant?: "current" | "previous";
 };
 
 export type RelationDiff = {
@@ -95,14 +97,21 @@ export const sortHistoryVersionsByDate = <T extends HistoryVersionRow>(
       toTimestamp(b?.intialValues?.updated_at),
   );
 
+export type VersionLabelFormatter = (
+  number: number,
+  readableDate?: string,
+) => string;
+
 export const buildVersionOptions = (
   historyRows: HistoryVersionRow[],
+  formatLabel: VersionLabelFormatter,
 ): VersionOption[] =>
   sortHistoryVersionsByDate(historyRows).map((version, index) => {
     const date = version?.intialValues?.updated_at;
-    const label = date
-      ? `Version ${index + 1} (${convertDateToReadbleFormat(date, "DEFAULT", true)})`
-      : `Version ${index + 1}`;
+    const label = formatLabel(
+      index + 1,
+      date ? convertDateToReadbleFormat(date, "DEFAULT", true) : undefined,
+    );
     return { id: version.id, label, date, editedBy: version.editedBy };
   });
 
@@ -139,7 +148,17 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
 
   // Lightweight version metadata only (no entityView/intialValues/relationValues) —
   // replaces bulk-fetching every historical snapshot just to populate the picker.
-  const { versions, loading: versionsLoading } = useEntityHistoryVersions(
+  const { t } = useI18n();
+  const formatVersionLabel: VersionLabelFormatter = (number, readableDate) =>
+    readableDate
+      ? t("history.version-label", { number, date: readableDate })
+      : t("history.version-label-undated", { number });
+
+  const {
+    versions,
+    loading: versionsLoading,
+    error: versionsError,
+  } = useEntityHistoryVersions(
     entityId,
     entityType,
   );
@@ -153,10 +172,17 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
   );
 
   const versionOptions = computed<VersionOption[]>(() =>
-    buildVersionOptions(historyVersionRows.value),
+    buildVersionOptions(historyVersionRows.value, formatVersionLabel),
   );
 
   const loading = versionsLoading;
+
+  const hasNoHistory = computed(
+    () =>
+      !versionsLoading.value &&
+      !versionsError.value &&
+      versionOptions.value.length === 0,
+  );
 
   const versionMetaFor = (versionId: string | null): VersionMeta | null => {
     const options = versionOptions.value;
@@ -206,10 +232,25 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     }));
   };
 
-  const { result: leftDetailResult, loading: leftDetailLoading } =
+  const {
+    result: leftDetailResult,
+    loading: leftDetailLoading,
+    error: leftDetailError,
+  } =
     useVersionDetail(leftVersionId);
-  const { result: rightDetailResult, loading: rightDetailLoading } =
+  const {
+    result: rightDetailResult,
+    loading: rightDetailLoading,
+    error: rightDetailError,
+  } =
     useVersionDetail(rightVersionId);
+
+  const leftVersionError = computed(
+    () => leftVersionId.value !== LIVE_VERSION_ID && !!leftDetailError.value,
+  );
+  const rightVersionError = computed(
+    () => rightVersionId.value !== LIVE_VERSION_ID && !!rightDetailError.value,
+  );
 
   const resolveVersion = (
     id: string | null,
@@ -377,79 +418,161 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
       ),
   );
 
-  const idsToLabel = (relationType: string): string[] => {
-    const diff = relationListDiffs.value[relationType];
-    if (!diff) return [];
-    return [...diff.addedIds, ...diff.removedIds, ...diff.unchangedIds];
+  type LabelRequest = {
+    cacheKey: string;
+    liveCacheKey: string;
+    id: string;
+    entityType: string;
+    versionId: string | null;
   };
 
-  // Which relation types need a label lookup right now, and against which
-  // entity type. Derived from the panels actually present in the entityView,
-  // so it covers any relation type for any client/entity type — not just a
-  // hardcoded list. A panel without a resolvable entityType (or with nothing
-  // to label yet) is skipped; its items simply fall back to the raw id.
-  const relationLabelQueries = computed(() =>
-    relationPanels.value
-      .map((panel) => ({
-        relationType: panel.relationType as string,
-        entityType: panel.entityTypes?.[0] ?? null,
-        ids: idsToLabel(panel.relationType),
-      }))
-      .filter((query) => query.entityType && query.ids.length > 0),
+  const liveCacheKeyFor = (entityType: string, id: string) =>
+    `${entityType}|${id}|${LIVE_VERSION_ID}`;
+
+  const labelRequestsFor = (
+    version: any,
+    versionId: string | null,
+  ): Record<string, LabelRequest[]> =>
+    Object.fromEntries(
+      relationPanels.value
+        .filter((panel) => panel.entityTypes?.[0])
+        .map((panel) => {
+          const entityType = panel.entityTypes[0] as string;
+          const relations: any[] =
+            version?.relationValues?.[panel.relationType] ?? [];
+          const requests = relations
+            .filter((relation) => relation?.key)
+            .map((relation): LabelRequest => {
+              const isHistorical =
+                versionId !== null &&
+                versionId !== LIVE_VERSION_ID &&
+                !!relation.historyKey &&
+                relation.historyKey !== relation.key;
+              const liveCacheKey = liveCacheKeyFor(entityType, relation.key);
+              return {
+                cacheKey: isHistorical
+                  ? `${entityType}|${relation.key}|${versionId}`
+                  : liveCacheKey,
+                liveCacheKey,
+                id: relation.key,
+                entityType,
+                versionId: isHistorical ? versionId : null,
+              };
+            });
+          return [panel.relationType, requests];
+        }),
+    );
+
+  const leftLabelRequests = computed(() =>
+    labelRequestsFor(leftVersion.value, leftVersionId.value),
+  );
+  const rightLabelRequests = computed(() =>
+    labelRequestsFor(rightVersion.value, rightVersionId.value),
   );
 
-  const relationLabels = ref<Record<string, { key: string; value: string }[]>>(
-    {},
-  );
+  const relationLabels = ref<Record<string, string>>({});
   const relationLabelsLoading = ref(false);
+  const pendingLabels = new Map<string, Promise<void>>();
+
+  const fetchLiveLabel = async (entityType: string, id: string) => {
+    try {
+      const { data } = await apolloClient.query<
+        GetEntityByIdQuery,
+        GetEntityByIdQueryVariables
+      >({
+        query: GetEntityByIdDocument,
+        variables: { id, type: entityType as any },
+        fetchPolicy: "no-cache",
+      });
+      const entity = data?.Entity as Entity | undefined;
+      return entity ? getEntityTitle(entity as any) : id;
+    } catch {
+      return id;
+    }
+  };
+
+  const fetchHistoricalLabel = async (
+    entityType: string,
+    id: string,
+    versionId: string,
+  ): Promise<string | null> => {
+    try {
+      const { data } = await apolloClient.query<
+        GetEntityHistoryVersionDetailQuery,
+        GetEntityHistoryVersionDetailQueryVariables
+      >({
+        query: GetEntityHistoryVersionDetailDocument,
+        variables: { id, type: entityType, versionId },
+        fetchPolicy: "no-cache",
+      });
+      const entity = data?.EntityHistoryVersionDetail as Entity | undefined;
+      return entity ? getEntityTitle(entity as any) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const resolveLabel = (request: LabelRequest): Promise<void> => {
+    if (request.cacheKey in relationLabels.value) return Promise.resolve();
+    const pending = pendingLabels.get(request.cacheKey);
+    if (pending) return pending;
+
+    const work = (async () => {
+      const historical = request.versionId
+        ? await fetchHistoricalLabel(
+            request.entityType,
+            request.id,
+            request.versionId,
+          )
+        : null;
+      relationLabels.value[request.cacheKey] =
+        historical ?? (await fetchLiveLabel(request.entityType, request.id));
+    })();
+    pendingLabels.set(request.cacheKey, work);
+    return work.finally(() => pendingLabels.delete(request.cacheKey));
+  };
 
   // Titles related entities the same way the live entity picker/list UI
-  // already does (BaseLibrary.vue), via the generic getEntityTitle helper
-  // over the same GetEntityById query used for the current entity above —
-  // no per-relation-type or per-client label configuration needed.
+  // already does (BaseLibrary.vue), via the generic getEntityTitle helper.
+  // A historical side asks for the related entity as it was at that
+  // version, so a renamed person keeps the name it had back then.
   watch(
-    relationLabelQueries,
-    async (queries) => {
-      if (queries.length === 0) return;
+    [leftLabelRequests, rightLabelRequests],
+    async ([left, right]) => {
+      const requests = [...Object.values(left), ...Object.values(right)].flat();
+      if (requests.length === 0) return;
 
       relationLabelsLoading.value = true;
-      await Promise.all(
-        queries.map(async (query) => {
-          const labels = await Promise.all(
-            query.ids.map(async (id) => {
-              try {
-                const { data } = await apolloClient.query<
-                  GetEntityByIdQuery,
-                  GetEntityByIdQueryVariables
-                >({
-                  query: GetEntityByIdDocument,
-                  variables: { id, type: query.entityType as any },
-                  fetchPolicy: "no-cache",
-                });
-                const entity = data?.Entity as Entity | undefined;
-                return { key: id, value: entity ? getEntityTitle(entity as any) : id };
-              } catch {
-                return { key: id, value: id };
-              }
-            }),
-          );
-          relationLabels.value[query.relationType] = labels;
-        }),
-      );
+      await Promise.all(requests.map(resolveLabel));
       relationLabelsLoading.value = false;
     },
     { immediate: true },
   );
 
-  const relationDiffs = computed<RelationDiff[]>(() =>
+  const labelFromRequests = (
+    requests: Record<string, LabelRequest[]>,
+    relationType: string,
+    id: string,
+  ): string | undefined => {
+    const request = requests[relationType]?.find((item) => item.id === id);
+    if (!request) return undefined;
+    return (
+      relationLabels.value[request.cacheKey] ??
+      relationLabels.value[request.liveCacheKey]
+    );
+  };
+
+  const buildRelationDiffs = (
+    labelFor: (relationType: string, id: string) => string,
+  ): RelationDiff[] =>
     relationPanels.value.map((panel): RelationDiff => {
       const diff = relationListDiffs.value[panel.relationType];
-      const labels = relationLabels.value[panel.relationType] ?? [];
-      const labelFor = (id: string) =>
-        labels.find((label) => label.key === id)?.value ?? id;
-
       const itemsFor = (ids: string[], status: RelationDiffItem["status"]) =>
-        ids.map((id) => ({ key: id, label: labelFor(id), status }));
+        ids.map((id) => ({
+          key: id,
+          label: labelFor(panel.relationType, id),
+          status,
+        }));
 
       return {
         relationType: panel.relationType,
@@ -460,21 +583,60 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
           ...itemsFor(diff.unchangedIds, "unchanged"),
         ],
       };
-    }),
+    });
+
+  const leftLabelFor = (relationType: string, id: string) =>
+    labelFromRequests(leftLabelRequests.value, relationType, id) ??
+    labelFromRequests(rightLabelRequests.value, relationType, id) ??
+    id;
+
+  const rightLabelFor = (relationType: string, id: string) =>
+    labelFromRequests(rightLabelRequests.value, relationType, id) ??
+    labelFromRequests(leftLabelRequests.value, relationType, id) ??
+    id;
+
+  const relationDiffs = computed<RelationDiff[]>(() =>
+    buildRelationDiffs(leftLabelFor),
   );
 
-  const leftRelationDiffs = computed<RelationDiff[]>(() =>
-    relationDiffs.value.map((diff) => ({
+  const isRenamed = (relationType: string, id: string): boolean => {
+    const leftLabel = labelFromRequests(leftLabelRequests.value, relationType, id);
+    const rightLabel = labelFromRequests(
+      rightLabelRequests.value,
+      relationType,
+      id,
+    );
+    return (
+      !!leftLabel &&
+      !!rightLabel &&
+      leftLabel !== id &&
+      rightLabel !== id &&
+      leftLabel !== rightLabel
+    );
+  };
+
+  const sideRelationDiffs = (
+    labelFor: (relationType: string, id: string) => string,
+    hiddenStatus: RelationDiffItem["status"],
+    variant: NonNullable<RelationDiffItem["variant"]>,
+  ): RelationDiff[] =>
+    buildRelationDiffs(labelFor).map((diff) => ({
       ...diff,
-      items: diff.items.filter((item) => item.status !== "removed"),
-    })),
+      items: diff.items
+        .filter((item) => item.status !== hiddenStatus)
+        .map((item) =>
+          item.status === "unchanged" && isRenamed(diff.relationType, item.key)
+            ? { ...item, status: "renamed" as const, variant }
+            : item,
+        ),
+    }));
+
+  const leftRelationDiffs = computed<RelationDiff[]>(() =>
+    sideRelationDiffs(leftLabelFor, "removed", "current"),
   );
 
   const rightRelationDiffs = computed<RelationDiff[]>(() =>
-    relationDiffs.value.map((diff) => ({
-      ...diff,
-      items: diff.items.filter((item) => item.status !== "added"),
-    })),
+    sideRelationDiffs(rightLabelFor, "added", "previous"),
   );
 
   return {
@@ -495,6 +657,10 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     rightRelationDiffs,
     leftVersionMeta,
     rightVersionMeta,
+    hasNoHistory,
+    versionsError,
+    leftVersionError,
+    rightVersionError,
     loading,
   };
 }

@@ -33,7 +33,6 @@ import {
   type RelationDiff,
   type WysiwygDiff,
 } from "@/composables/useHistoryComparisonData";
-import { useRoute } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -65,10 +64,7 @@ const elementList = computed(() => {
     .filter(({ value }) => value && typeof value === "object");
 });
 
-const route = useRoute();
-
 const identifiers = computed<string[]>(() => {
-  return [route.params.id];
   if (props.entity.intialValues?.identifiers)
     return props.entity.intialValues.identifiers;
   return [props.entity.uuid, props.entity.id];
