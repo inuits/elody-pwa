@@ -38,7 +38,9 @@ export type QueryActionConfig = BaseAction & {
   type: "query";
   query: string;
   refreshAfterAction?: boolean;
+  navigateToCreatedEntity?: boolean;
   relationTypesToExtract?: string[];
+  showAsButton?: boolean;
 };
 
 export type LinkActionConfig = BaseAction & {

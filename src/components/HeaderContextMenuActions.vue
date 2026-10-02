@@ -33,6 +33,17 @@
           :open-in-new-tab="action.openInNewTab"
           :as-button="true"
         />
+        <query-action
+          v-else-if="action.type === 'query'"
+          :label="action.label"
+          :icon="action.icon"
+          :query="action.query"
+          :refresh-after-action="action.refreshAfterAction"
+          :navigate-to-created-entity="action.navigateToCreatedEntity"
+          :relation-types-to-extract="action.relationTypesToExtract"
+          :entity-id="entityId"
+          :as-button="true"
+        />
       </template>
     </template>
     <template #overflow>

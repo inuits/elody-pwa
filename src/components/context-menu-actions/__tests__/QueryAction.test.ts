@@ -81,6 +81,13 @@ describe("QueryAction", () => {
     mockRefetchParentEntity.mockResolvedValue(undefined);
   });
 
+  it("renders as a button when asButton is true", () => {
+    const wrapper = mountComponent({ asButton: true });
+    expect(
+      wrapper.findComponent({ name: "BaseContextMenuItem" }).props("asButton"),
+    ).toBe(true);
+  });
+
   it("executes query with entity id", async () => {
     const wrapper = mountComponent();
     await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
