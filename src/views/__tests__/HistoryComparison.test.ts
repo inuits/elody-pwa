@@ -8,6 +8,8 @@ const versionOptions = ref<any[]>([]);
 const leftVersionMeta = ref<any>(null);
 const rightVersionMeta = ref<any>(null);
 const hasNoHistory = ref(false);
+const hasNoPreviousVersions = ref(false);
+const currentVersionNumber = ref<number | null>(null);
 const versionsError = ref<any>(null);
 const leftVersionError = ref(false);
 const rightVersionError = ref(false);
@@ -52,6 +54,8 @@ vi.mock("@/composables/useHistoryComparisonData", () => ({
     leftVersionMeta,
     rightVersionMeta,
     hasNoHistory,
+    hasNoPreviousVersions,
+    currentVersionNumber,
     versionsError,
     leftVersionError,
     rightVersionError,
@@ -90,6 +94,8 @@ describe("HistoryComparison", () => {
     leftVersionMeta.value = null;
     rightVersionMeta.value = null;
     hasNoHistory.value = false;
+    hasNoPreviousVersions.value = false;
+    currentVersionNumber.value = null;
     versionsError.value = null;
     leftVersionError.value = false;
     rightVersionError.value = false;
@@ -124,6 +130,14 @@ describe("HistoryComparison", () => {
     expect(messageKeys(wrapper)).toEqual(["history.version-load-error"]);
   });
 
+  it("tells the user on the right side when there is no earlier version to compare with", async () => {
+    hasNoPreviousVersions.value = true;
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(messageKeys(wrapper)).toEqual(["history.no-previous-versions"]);
+  });
+
   it("shows no message when the history loaded normally", async () => {
     const wrapper = getWrapper();
     await flushPromises();
@@ -150,6 +164,25 @@ describe("HistoryComparison", () => {
     await flushPromises();
 
     expect(wrapper.findAll('[data-test="history-version-author"]')).toHaveLength(1);
+  });
+
+  it("names the current version together with its version number", async () => {
+    currentVersionNumber.value = 3;
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    const leftDropdown = wrapper.findAllComponents({ name: "AdvancedDropdown" })[0];
+    expect(leftDropdown.props("options")[0].label).toBe(
+      'history.current-version-number {"number":3}',
+    );
+  });
+
+  it("names the current version without a number when there is no history", async () => {
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    const leftDropdown = wrapper.findAllComponents({ name: "AdvancedDropdown" })[0];
+    expect(leftDropdown.props("options")[0].label).toBe("history.current-version");
   });
 
   it("names the author in every version option", async () => {

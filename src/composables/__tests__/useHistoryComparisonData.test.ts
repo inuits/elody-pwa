@@ -8,7 +8,7 @@ import {
   convertDateToReadbleFormat,
 } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
-import { GetEntityHistoryVersionDetailDocument } from "@/generated-types/queries";
+import { GetRelationLabelsForIdsDocument } from "@/generated-types/queries";
 import useEntitySingle from "@/composables/useEntitySingle";
 import {
   buildVersionOptions as buildVersionOptionsWith,
@@ -358,10 +358,10 @@ describe("useHistoryComparisonData relationDiffs", () => {
     mocks.apolloQueryMock.mockImplementation(({ variables }: any) =>
       Promise.resolve({
         data: {
-          Entity:
-            variables.id === "genre-1"
-              ? { id: "genre-1", intialValues: { title: "Fiction" } }
-              : null,
+          RelationLabelsForIds: variables.ids.map((id: string) => ({
+            key: id,
+            value: id === "genre-1" ? "Fiction" : id,
+          })),
         },
       }),
     );
@@ -394,7 +394,11 @@ describe("useHistoryComparisonData relationDiffs", () => {
 
     expect(mocks.apolloQueryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        variables: { id: "genre-1", type: "genre" },
+        query: GetRelationLabelsForIdsDocument,
+        variables: expect.objectContaining({
+          ids: ["genre-1"],
+          types: ["genre", "person"],
+        }),
       }),
     );
 
@@ -1037,13 +1041,12 @@ describe("useHistoryComparisonData version authors", () => {
     return useHistoryComparisonData("entity-1", "inscription");
   };
 
-  it("carries the author of every version on its dropdown option", async () => {
+  it("carries the author of every selectable version on its dropdown option", async () => {
     const { versionOptions } = setup();
     await flushPromises();
 
     expect(versionOptions.value.map((option) => [option.id, option.editedBy])).toEqual([
       ["v1", "alice@example.com"],
-      ["v2", "bob@example.com"],
     ]);
   });
 
@@ -1100,13 +1103,21 @@ describe("useHistoryComparisonData historical relation labels", () => {
     },
   };
 
-  const setup = (historicalAuthor: Record<string, any>, historicalTitle: any) => {
-    mocks.apolloQueryMock.mockImplementation(({ query }: any) =>
+  const setup = (
+    historicalAuthor: Record<string, any>,
+    historicalName: string | null,
+  ) => {
+    mocks.apolloQueryMock.mockImplementation(({ variables }: any) =>
       Promise.resolve({
-        data:
-          query === GetEntityHistoryVersionDetailDocument
-            ? { EntityHistoryVersionDetail: historicalTitle }
-            : { Entity: { id: "PERS-1", intialValues: { name: "New name" } } },
+        data: {
+          RelationLabelsForIds: variables.ids.map((id: string) => ({
+            key: id,
+            value:
+              variables.historyKeys?.length && historicalName
+                ? historicalName
+                : "New name",
+          })),
+        },
       }),
     );
     mocks.queryResults[0] = withResult({
@@ -1118,7 +1129,10 @@ describe("useHistoryComparisonData historical relation labels", () => {
       },
     });
     mocks.queryResults[1] = withResult({
-      EntityHistoryVersions: [versionRow("v1", "2026-01-01T00:00:00Z")],
+      EntityHistoryVersions: [
+        versionRow("v1", "2026-01-01T00:00:00Z"),
+        versionRow("v2", "2026-02-01T00:00:00Z"),
+      ],
     });
     mocks.queryResults[3] = withResult({
       EntityHistoryVersionDetail: {
@@ -1138,23 +1152,24 @@ describe("useHistoryComparisonData historical relation labels", () => {
 
   const historicalCalls = () =>
     mocks.apolloQueryMock.mock.calls.filter(
-      ([options]: any) => options.query === GetEntityHistoryVersionDetailDocument,
+      ([options]: any) => options.variables.historyKeys?.length > 0,
     );
 
   it("names a related entity as it was at the time of a historical version, and as it is now on the live side", async () => {
     const { leftRelationDiffs, rightRelationDiffs } = setup(
       { key: "PERS-1", historyKey: "hist-pers-1" },
-      { id: "PERS-1", intialValues: { name: "Old name" } },
+      "Old name",
     );
     await flushPromises();
     await flushPromises();
 
     expect(labelOf(leftRelationDiffs.value, "PERS-1")).toBe("New name");
     expect(labelOf(rightRelationDiffs.value, "PERS-1")).toBe("Old name");
+    expect(historicalCalls()).toHaveLength(1);
     expect(historicalCalls()[0][0].variables).toEqual({
-      id: "PERS-1",
-      type: "person",
-      versionId: "v1",
+      ids: ["PERS-1"],
+      types: ["person"],
+      historyKeys: ["hist-pers-1"],
     });
   });
 
@@ -1166,7 +1181,7 @@ describe("useHistoryComparisonData historical relation labels", () => {
   it("marks a relation kept on both sides but renamed since: current name on the left, previous name on the right", async () => {
     const { leftRelationDiffs, rightRelationDiffs } = setup(
       { key: "PERS-1", historyKey: "hist-pers-1" },
-      { id: "PERS-1", intialValues: { name: "Old name" } },
+      "Old name",
     );
     await flushPromises();
     await flushPromises();
@@ -1198,7 +1213,7 @@ describe("useHistoryComparisonData historical relation labels", () => {
   it("uses the live name without an extra lookup when the related entity had no history version yet", async () => {
     const { rightRelationDiffs } = setup(
       { key: "PERS-1", historyKey: "PERS-1" },
-      { id: "PERS-1", intialValues: { name: "Old name" } },
+      "Old name",
     );
     await flushPromises();
     await flushPromises();
@@ -1216,6 +1231,97 @@ describe("useHistoryComparisonData historical relation labels", () => {
     await flushPromises();
 
     expect(labelOf(rightRelationDiffs.value, "PERS-1")).toBe("New name");
+  });
+});
+
+describe("useHistoryComparisonData newest snapshot is the current version", () => {
+  beforeEach(() => {
+    mocks.useQueryCalls.length = 0;
+    mocks.queryResults = [];
+  });
+
+  const withResult = (value: any) => ({
+    result: { value },
+    loading: { value: false },
+    error: { value: null },
+  });
+
+  const setup = (versions: any[]) => {
+    mocks.queryResults[0] = withResult({ Entity: { id: "entity-1" } });
+    mocks.queryResults[1] = withResult({ EntityHistoryVersions: versions });
+    return useHistoryComparisonData("entity-1", "inscription");
+  };
+
+  const threeVersions = [
+    { ...versionRow("v1", "2026-01-01T00:00:00Z"), editedBy: "alice@example.com" },
+    { ...versionRow("v2", "2026-02-01T00:00:00Z"), editedBy: "bob@example.com" },
+    { ...versionRow("v3", "2026-03-01T00:00:00Z"), editedBy: "carol@example.com" },
+  ];
+
+  it("leaves the newest snapshot out of the selectable versions, since 'current version' already shows it", async () => {
+    const { versionOptions } = setup(threeVersions);
+    await flushPromises();
+
+    expect(versionOptions.value.map((option) => option.id)).toEqual(["v1", "v2"]);
+  });
+
+  it("keeps every older version numbered as it was, so a number always means the same version", async () => {
+    const { versionOptions } = setup(threeVersions);
+    await flushPromises();
+
+    expect(versionOptions.value.map((option) => option.label)).toEqual([
+      expect.stringContaining("history.version-label"),
+      expect.stringContaining("history.version-label"),
+    ]);
+    expect(versionOptions.value).toHaveLength(2);
+  });
+
+  it("compares the current version with the previous one by default", async () => {
+    const { leftVersionId, rightVersionId } = setup(threeVersions);
+    await flushPromises();
+
+    expect(leftVersionId.value).toBe(LIVE_VERSION_ID);
+    expect(rightVersionId.value).toBe("v2");
+  });
+
+  it("numbers the current version after the newest snapshot it stands for", async () => {
+    const { currentVersionNumber } = setup(threeVersions);
+    await flushPromises();
+
+    expect(currentVersionNumber.value).toBe(3);
+  });
+
+  it("has no current version number when there is no history", async () => {
+    const { currentVersionNumber } = setup([]);
+    await flushPromises();
+
+    expect(currentVersionNumber.value).toBeNull();
+  });
+
+  it("still credits the current version to whoever made the newest snapshot", async () => {
+    const { leftVersionMeta } = setup(threeVersions);
+    await flushPromises();
+
+    expect(leftVersionMeta.value?.editedBy).toBe("carol@example.com");
+  });
+
+  it("reports that there is no earlier version when the entity was saved only once", async () => {
+    const { versionOptions, rightVersionId, hasNoPreviousVersions, hasNoHistory } =
+      setup([versionRow("v1", "2026-01-01T00:00:00Z")]);
+    await flushPromises();
+
+    expect(versionOptions.value).toEqual([]);
+    expect(rightVersionId.value).toBeNull();
+    expect(hasNoPreviousVersions.value).toBe(true);
+    expect(hasNoHistory.value).toBe(false);
+  });
+
+  it("does not report missing earlier versions when there is no history at all", async () => {
+    const { hasNoPreviousVersions, hasNoHistory } = setup([]);
+    await flushPromises();
+
+    expect(hasNoHistory.value).toBe(true);
+    expect(hasNoPreviousVersions.value).toBe(false);
   });
 });
 
@@ -1375,6 +1481,7 @@ describe("useHistoryComparisonData left/right version selection", () => {
       EntityHistoryVersions: [
         versionRow("hist-old", "2026-01-01T00:00:00Z"),
         versionRow("hist-new", "2026-02-01T00:00:00Z"),
+        versionRow("hist-current", "2026-03-01T00:00:00Z"),
       ],
     });
 
@@ -1434,7 +1541,7 @@ describe("useHistoryComparisonData left/right version selection", () => {
     expect(leftVersionEntity.value?.id).not.toBe(rightOldId);
   });
 
-  it("defaults leftVersionId to the live sentinel and rightVersionId to the most recent historical version", async () => {
+  it("defaults leftVersionId to the live sentinel and rightVersionId to the version before the current one", async () => {
     const { leftVersionId, rightVersionId } = setup();
     await flushPromises();
 
@@ -1442,7 +1549,7 @@ describe("useHistoryComparisonData left/right version selection", () => {
     expect(rightVersionId.value).toBe("hist-new");
   });
 
-  it("resolves the left side to the live entity and the right side to the most recent historical version by default", async () => {
+  it("resolves the left side to the live entity and the right side to the version before the current one by default", async () => {
     const { leftVersionEntity, rightVersionEntity } = setup();
     await flushPromises();
 

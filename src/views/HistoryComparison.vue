@@ -89,6 +89,13 @@
         >
           {{ t("history.no-history") }}
         </p>
+        <p
+          v-else-if="hasNoPreviousVersions"
+          data-test="history-message"
+          class="mx-5 p-4 rounded-md border-2 border-solid border-neutral-30 bg-background-light text-text-body"
+        >
+          {{ t("history.no-previous-versions") }}
+        </p>
         <entity-history-column
           v-else-if="rightVersionEntity"
           :key="rightVersionId"
@@ -142,6 +149,8 @@ const {
   leftVersionMeta,
   rightVersionMeta,
   hasNoHistory,
+  hasNoPreviousVersions,
+  currentVersionNumber,
   versionsError,
   leftVersionError,
   rightVersionError,
@@ -169,7 +178,12 @@ const toDropdownOption = (option: {
 
 const leftDropdownOptions = computed<DropdownOption[]>(() => [
   {
-    label: t("history.current-version"),
+    label:
+      currentVersionNumber.value !== null
+        ? t("history.current-version-number", {
+            number: currentVersionNumber.value,
+          })
+        : t("history.current-version"),
     value: LIVE_VERSION_ID,
     __typename: "DropdownOption",
   },
