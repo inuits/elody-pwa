@@ -12,7 +12,9 @@
       </div>
 
       <div v-else-if="entity && metadataFields.length > 0">
-        <h2 class="title m-0 pb-4">{{ t(formTitle) || t("modals.entityEdit.title") }}</h2>
+        <h2 class="title m-0 pb-4">
+          {{ t(formTitle) || t("modals.entityEdit.title") }}
+        </h2>
 
         <div class="space-y-2 mb-6">
           <metadata-wrapper
@@ -35,7 +37,7 @@
             icon="Save"
             :loading="isSaving"
             :disabled="!isFormValid || isSaving"
-            button-style="accentAccent"
+            button-style="commit"
             button-size="small"
             @click="onSave"
           />
@@ -116,7 +118,7 @@ const onSave = async ({
     );
     if (success) handleCloseModal();
   } finally {
-    handleCloseModal()
+    handleCloseModal();
   }
 };
 

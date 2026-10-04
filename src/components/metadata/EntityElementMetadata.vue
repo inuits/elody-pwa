@@ -67,6 +67,7 @@ import {
 } from "@/helpers";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
@@ -80,7 +81,6 @@ const props = withDefaults(
     customValue?: string;
     linkIcon?: string;
     baseLibraryMode?: BaseLibraryModes;
-    emptyAsDash?: boolean;
     translationKey?: string;
     highlight?: boolean;
     breakWords?: boolean;
@@ -88,13 +88,12 @@ const props = withDefaults(
   {
     linkText: "",
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
-    emptyAsDash: false,
     highlight: false,
     breakWords: false,
   },
 );
 
-const { t, te } = useI18n();
+const { t } = useI18n();
 
 const isCoordinates = computed(() => {
   return (
@@ -126,12 +125,7 @@ const processedDisplayValue = computed<string>(() =>
 
 // In list/table cells an empty value is a dimmed dash; the "No value"
 // copy belongs to field rows only.
-const emptyDisplayValue = computed<string>(() => {
-  if (props.emptyAsDash) return "—";
-  return te("metadata.labels.no-value")
-    ? t("metadata.labels.no-value")
-    : "No value";
-});
+const emptyDisplayValue = useEmptyValueLabel();
 
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;

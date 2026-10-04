@@ -15,7 +15,6 @@
           type: itemType,
         }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
     </div>
 
@@ -95,8 +94,8 @@
         position="top-right"
         :tooltip-offset="8"
       >
-        <template #activator="{ on }">
-          <div v-on="on" class="flex">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <unicon
               v-if="previewComponentFeatureEnabled"
               :name="Unicons.Eye.name"
@@ -109,7 +108,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             {{
               previewComponentCurrentActive
                 ? t("preview-component.close")

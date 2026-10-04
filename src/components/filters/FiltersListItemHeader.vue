@@ -10,12 +10,12 @@
     </span>
     <div class="flex gap-x-2">
       <BaseTooltip v-if="tooltip" position="top-end" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <Unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{ tooltipText }}
         </span>
       </BaseTooltip>

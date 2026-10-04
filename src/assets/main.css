@@ -238,6 +238,8 @@
   --color-warning-chip: #F2994A;
   --color-info: #355BA9;
   --color-info-bg: #C8EAF7;
+  /* Search-hit <mark> in sanitized values (platform-fixed) */
+  --color-search-mark: #FFFF00;
 
   /* Entity badges: generic 3-tone concept, assigned per entity type in config
      order. vlacc maps W->tone1, E->tone2, M->tone3. */

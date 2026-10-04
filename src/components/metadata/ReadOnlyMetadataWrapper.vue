@@ -4,16 +4,21 @@
     v-if="!refMetadata.showOnlyInEditMode && isPermitted"
     :key="label"
   >
-    <metadata-title v-if="!hideLabel" :metadata="refMetadata" :is-field-required="false" />
+    <metadata-title
+      v-if="!hideLabel"
+      :metadata="refMetadata"
+      :is-field-required="false"
+    />
     <div class="flex gap-2">
       <base-tooltip
         class="w-full basis-[fit-content]"
         position="right-end"
         :tooltip-offset="8"
       >
-        <template #activator="{ on }">
+        <template #activator="{ on, describedBy }">
           <div
             v-on="showTooltip ? on : {}"
+            :aria-describedby="showTooltip ? describedBy : undefined"
             class="flex column gap-2 items-center"
           >
             <MetadataTruncatedText
@@ -38,7 +43,11 @@
                 :base-library-mode="baseLibraryMode"
                 :custom-value="refMetadata.customValue"
                 :translation-key="pillTranslationKey"
-                :highlight="(refMetadata.highlightIfPrimaryMediafile || refMetadata.highlightIfPrimaryThumbnail) && highlight"
+                :highlight="
+                  (refMetadata.highlightIfPrimaryMediafile ||
+                    refMetadata.highlightIfPrimaryThumbnail) &&
+                  highlight
+                "
                 :break-words="breakWords"
               />
             </MetadataTruncatedText>

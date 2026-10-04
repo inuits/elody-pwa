@@ -7,7 +7,6 @@
       :class="{ 'mb-2': option.isSelected }"
       :label="option.option.label"
       :item="{ id: option.option.value }"
-      input-style="accentNormal"
       :ignore-bulk-operations="true"
     />
   </div>

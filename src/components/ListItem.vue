@@ -15,7 +15,6 @@
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
       <BaseContextMenuActions
         :context-menu-actions="contextMenuActions"
@@ -80,7 +79,6 @@
           type: itemType,
         }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
     </div>
     <div
@@ -236,8 +234,8 @@
       @click.stop.prevent="emit('togglePreviewComponent', itemId)"
     >
       <base-tooltip position="top-right" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on" class="flex">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <unicon
               v-if="previewComponentFeatureEnabled"
               :name="Unicons.Eye.name"
@@ -250,7 +248,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             <div>
               {{
                 previewComponentCurrentActive

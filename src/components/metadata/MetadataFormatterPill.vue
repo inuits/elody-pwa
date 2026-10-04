@@ -7,7 +7,7 @@
         size === 'lg' ? 'text-lg' : 'text-sm',
         'inline-flex items-center gap-1',
         {
-          'rounded-md bg-slate-800 border border-transparent':
+          'rounded-chip bg-slate-800 border border-transparent':
             settingsFor(value),
           'py-0.25 px-1 mt-1': settingsFor(value) && size !== 'lg',
           'py-1 px-3': settingsFor(value) && size === 'lg',

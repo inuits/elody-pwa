@@ -8,22 +8,22 @@
         class="!w-auto"
         :icon="DamsIcons.Plus"
         :label="t('actions.labels.add-entry')"
-        button-style="accentNormal"
+        button-style="commit"
         button-size="verySmall"
         @click="addRow"
       />
     </div>
 
     <!-- Table -->
-    <div class="overflow-x-auto rounded-lg border border-[rgba(0,58,82,0.2)]">
+    <div class="overflow-x-auto rounded-lg border border-text-body/20">
       <div class="grid w-max min-w-full" :style="gridStyle">
         <!-- Header row -->
         <div
           v-for="(subField, index) in visibleSubFields"
           :key="`header-${subField.key}`"
-          class="flex items-center bg-background-normal px-2 py-1.5 text-xs font-medium text-text-body border-b border-[rgba(0,58,82,0.2)]"
+          class="flex items-center bg-background-normal px-2 py-1.5 text-xs font-medium text-text-body border-b border-text-body/20"
           :class="{
-            'border-r border-r-[rgba(0,58,82,0.2)]':
+            'border-r border-r-text-body/20':
               index < visibleSubFields.length - 1,
           }"
         >
@@ -31,14 +31,14 @@
         </div>
         <div
           v-if="!disabled"
-          class="bg-background-normal border-b border-[rgba(0,58,82,0.2)] border-l border-l-[rgba(0,58,82,0.2)]"
+          class="bg-background-normal border-b border-text-body/20 border-l border-l-text-body/20"
         />
         <!-- Data rows -->
         <TableRowInputField
           v-for="(fieldEntry, rowIndex) in fields"
           :key="fieldEntry.key"
           :row-index="rowIndex"
-          :item="(fieldEntry.value as Record<string, any>)"
+          :item="fieldEntry.value as Record<string, any>"
           :sub-fields="subFields"
           :form-id="formId"
           :parent-field-key="parentFieldKey"
@@ -76,7 +76,9 @@ const props = defineProps<{
   disabled?: boolean;
 }>();
 
-const { fields, push, remove, replace } = useFieldArray<Record<string, any>>(`${props.parentFieldKey}`);
+const { fields, push, remove, replace } = useFieldArray<Record<string, any>>(
+  `${props.parentFieldKey}`,
+);
 
 // Hidden sub-fields (e.g. a creation hint like entity_type) still travel as
 // relation metadata on submit, but are never rendered as a column.
@@ -102,11 +104,17 @@ const addRow = () => {
         key: sf.key,
         value: sf.inputField?.type === InputFieldTypes.Checkbox ? false : "",
       }));
-    push({ key: "", type: props.relationType, editStatus: EditStatus.New, metadata });
+    push({
+      key: "",
+      type: props.relationType,
+      editStatus: EditStatus.New,
+      metadata,
+    });
   } else {
     const emptyItem: Record<string, any> = {};
     for (const sf of props.subFields) {
-      emptyItem[sf.key] = sf.inputField?.type === InputFieldTypes.Checkbox ? false : "";
+      emptyItem[sf.key] =
+        sf.inputField?.type === InputFieldTypes.Checkbox ? false : "";
     }
     push(emptyItem);
   }
@@ -157,18 +165,22 @@ const isRelationRowNormalized = (item: Record<string, any>): boolean => {
   return aligned && noKeyless;
 };
 
-const serializeRelationRow = (item: Record<string, any>): Record<string, any> => {
+const serializeRelationRow = (
+  item: Record<string, any>,
+): Record<string, any> => {
   const keyField = relationKeySubField.value;
   if (!props.relationType || !keyField) return null;
 
   // A pre-filled value may be a plain label string (e.g. muziekweb genres arrive as
   // `["Jazz", ...]`); treat the string itself as the relation key so it shows as a
   // suggested row the user can resolve via the picker.
-  const relationKey =
-    typeof item === "string" ? item : item[keyField.key];
+  const relationKey = typeof item === "string" ? item : item[keyField.key];
   const metadata: MetadataInput[] = props.subFields
     .filter((sf) => sf.inputField?.isMetadataField === true)
-    .map((sf) => ({ key: sf.key, value: mapMetadataToCorrectFormat(sf, item) }));
+    .map((sf) => ({
+      key: sf.key,
+      value: mapMetadataToCorrectFormat(sf, item),
+    }));
   return {
     key: relationKey || "",
     type: props.relationType,
@@ -177,14 +189,17 @@ const serializeRelationRow = (item: Record<string, any>): Record<string, any> =>
   };
 };
 
-const mapMetadataToCorrectFormat = (subfield: SubField, item: Record<string, any>) => {
+const mapMetadataToCorrectFormat = (
+  subfield: SubField,
+  item: Record<string, any>,
+) => {
   if (subfield.inputField?.type === InputFieldTypes.Checkbox) {
     const value = item[subfield.key];
     if (!value) return false;
     return value;
   }
   return item[subfield.key] || "";
-}
+};
 
 watch(
   () => props.modelValue,

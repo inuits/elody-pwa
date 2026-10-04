@@ -9,11 +9,12 @@
       :tooltip-offset="8"
       @click="emit('closePreviewComponent')"
     >
-      <template #activator="{ on }">
+      <template #activator="{ on, describedBy }">
         <div
           class="flex items-center"
           data-cy="close-preview-component"
           v-on="on"
+          :aria-describedby="describedBy"
         >
           <unicon
             class="cursor-pointer mr-4 ml-2 flex justify-center items-center"
@@ -23,7 +24,7 @@
         </div>
       </template>
       <template #default>
-        <span class="text-sm text-text-placeholder">
+        <span>
           <div>
             {{ t("preview-component.close") }}
           </div>
@@ -51,7 +52,7 @@
     >
       <base-button-new
         button-size="small"
-        button-style="accentNormal"
+        button-style="primary"
         :label="t('metadata.labels.open-detail-page')"
         @click="openDetailPage"
       />

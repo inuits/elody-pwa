@@ -33,7 +33,7 @@
         <BaseButtonNew
           data-cy="copy-all-from-parent"
           :label="t(copyAllLabel)"
-          button-style="accentAccent"
+          button-style="commit"
           button-size="small"
           force-show-label
           @click="copyAllFromParent"
@@ -243,7 +243,7 @@
           "
           :loading="busyActionType === field.actionType"
           :icon="field.icon"
-          button-style="accentAccent"
+          button-style="commit"
           @click="performActionButtonClickEvent(field)"
         />
         <p
@@ -1078,9 +1078,8 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
         undefined,
         form,
       );
-      let entity: Entity;
-      entity = (await performSubmitAction(document, entityInput)).data
-        .CreateEntity;
+      const entity: Entity = (await performSubmitAction(document, entityInput))
+        .data.CreateEntity;
       setArgumentForSubmitAllFormTabs(
         entity["id"],
         props.allFormRelationTypes[formKeyIndex],
@@ -1186,13 +1185,13 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   closeAndDeleteForm();
 };
 
-const validateAndGoToNextFormTabActionFunction = async (field: FormAction) => {
+const validateAndGoToNextFormTabActionFunction = async () => {
   const valid = await isFormValid();
   if (!valid) return;
   tabs.selectedIndex++;
 };
 
-const goToPreviousFormTabActionFunction = async (field: FormAction) => {
+const goToPreviousFormTabActionFunction = async () => {
   tabs.selectedIndex--;
 };
 
@@ -1370,7 +1369,7 @@ const startOcrActionFunction = async (field: FormAction) => {
   }
 };
 
-const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
+const bulkUpdateMetadataActionFunction = async () => {
   const { startBlocking, stopBlocking } = useBlockingLoader();
   let isBlockingForBulkEdit = false;
   try {
@@ -1675,7 +1674,6 @@ const initializeForm = async (
   await getDynamicForm(document, props.tabName);
   await seedFormValues();
 };
-
 
 const seedFormValues = async () => {
   if (!form.value) return;

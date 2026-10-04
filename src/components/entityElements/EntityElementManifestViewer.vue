@@ -27,8 +27,12 @@
       </div>
       <div class="flex gap-x-2">
         <base-tooltip position="center" :tooltip-offset="20">
-          <template #activator="{ on }">
-            <div v-on="on" @click="navigateToManifestViewer()">
+          <template #activator="{ on, describedBy }">
+            <div
+              v-on="on"
+              :aria-describedby="describedBy"
+              @click="navigateToManifestViewer()"
+            >
               <unicon
                 class="unicon"
                 :name="Unicons.QuestionCircle.name"
@@ -37,7 +41,7 @@
             </div>
           </template>
           <template #default>
-            <span class="text-sm text-text-placeholder">
+            <span>
               <div>
                 {{ t(`tooltip.manifest-viewer-add-to-comparison`) }}
               </div>
@@ -90,7 +94,7 @@ const {
 const router = useRouter();
 const context = BulkOperationsContextEnum.ManifestCollection;
 const isInManifestCollection = computed(() =>
-  isEnqueued(context, props.element.manifestUrl)
+  isEnqueued(context, props.element.manifestUrl),
 );
 const availableViewers = computed(() => {
   const viewers: string[] = ["tify", "mirador"];

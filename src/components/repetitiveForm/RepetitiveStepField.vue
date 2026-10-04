@@ -32,7 +32,7 @@
             data-testid="repetitive-step-terminal"
             :label="$t(step.terminalActionLabel)"
             :icon="DamsIcons.Check"
-            button-style="accentAccent"
+            button-style="commit"
             button-size="small"
             :disabled="!hasSelection"
             @click="onTerminalAction"
@@ -48,10 +48,18 @@
         :accepted-types="acceptedTypes"
         :custom-query="step.pickerQuery ?? ''"
         :custom-filters-query="step.pickerFiltersQuery ?? undefined"
-        :force-show-filters="step.pickerFiltersCollapsed !== undefined ? !step.pickerFiltersCollapsed : false"
+        :force-show-filters="
+          step.pickerFiltersCollapsed !== undefined
+            ? !step.pickerFiltersCollapsed
+            : false
+        "
         :computed-filters="computedFilters"
         :show-button="true"
-        :selection-enabled="!step.maxSelection || step.maxSelection === -1 || step.maxSelection >= 1"
+        :selection-enabled="
+          !step.maxSelection ||
+          step.maxSelection === -1 ||
+          step.maxSelection >= 1
+        "
         :enable-bulk-operations="true"
         :enable-advanced-filters="true"
         :entity-picker-mode="EntityPickerMode.Emit"
@@ -59,9 +67,15 @@
         :selection-limit="step.maxSelection ?? undefined"
         base-library-height="max-h-[55vh]"
         :search-mode="step.entityPickerSearchConfig?.mode ?? undefined"
-        :search-metadata-keys="step.entityPickerSearchConfig?.metadataKeys ?? undefined"
-        :search-accepted-types="step.entityPickerSearchConfig?.acceptedTypes ?? undefined"
-        :search-static-filters="step.entityPickerSearchConfig?.staticFilters ?? undefined"
+        :search-metadata-keys="
+          step.entityPickerSearchConfig?.metadataKeys ?? undefined
+        "
+        :search-accepted-types="
+          step.entityPickerSearchConfig?.acceptedTypes ?? undefined
+        "
+        :search-static-filters="
+          step.entityPickerSearchConfig?.staticFilters ?? undefined
+        "
         @entities-selected="onPicked"
       />
     </div>
@@ -74,7 +88,7 @@
             data-testid="repetitive-step-back-to-search"
             :label="$t(backLabel)"
             :icon="DamsIcons.AngleLeft"
-            button-style="accentAccent"
+            button-style="commit"
             button-size="small"
             @click="goBackFromCreate"
           />

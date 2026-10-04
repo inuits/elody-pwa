@@ -30,7 +30,7 @@
             :label="t('Add more')"
             :icon="DamsIcons.Plus"
             button-size="small"
-            button-style="accentAccent"
+            button-style="commit"
             @click.stop
             @click="
               () => {

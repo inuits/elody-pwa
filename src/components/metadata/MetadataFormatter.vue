@@ -19,7 +19,7 @@
     :formatter="formatter"
     :label="readableLabel"
   />
-  <label v-if="!hasLabel">
+  <label v-if="!hasLabel" class="opacity-[var(--opacity-empty)]">
     {{ readableLabel }}
   </label>
 </template>
@@ -32,6 +32,7 @@ import MetadataRegexpFormatter from "./MetadataRegexpFormatter.vue";
 import { computed } from "vue";
 import { convertUnitToReadbleFormat } from "@/helpers";
 import { useI18n } from "vue-i18n";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 
 const props = withDefaults(
   defineProps<{
@@ -52,6 +53,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
+const emptyValueLabel = useEmptyValueLabel();
 
 const formatterType = computed(() => {
   const [type] = props.formatter.split("|");
@@ -73,12 +75,12 @@ const hasLabel = computed(() =>
 
 const readableLabel = computed(() => {
   if (Array.isArray(props.label)) {
-    if (props.label.length === 0) return "-";
+    if (props.label.length === 0) return emptyValueLabel.value;
     if (props.translationKey) return translateArrayValuesAndJoin(props.label, props.translationKey);
     return props.label.join(", ");
   }
   return props.label
     ? convertUnitToReadbleFormat(props.unit as Unit, props.label ?? "")
-    : "-";
+    : emptyValueLabel.value;
 });
 </script>

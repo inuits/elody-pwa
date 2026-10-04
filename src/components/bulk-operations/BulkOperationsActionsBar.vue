@@ -39,12 +39,16 @@
         position="top-end"
         :tooltip-offset="8"
       >
-        <template #activator="{ on }">
-          <div v-on="on" class="flex items-center ml-1">
+        <template #activator="{ on, describedBy }">
+          <div
+            v-on="on"
+            :aria-describedby="describedBy"
+            class="flex items-center ml-1"
+          >
             <Unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{ $t("bulk-operations.capped-items-tooltip") }}
         </span>
       </BaseTooltip>
@@ -91,7 +95,7 @@
         <BaseButtonNew
           :label="$t('bulk-operations.confirm-selection')"
           :icon="DamsIcons.Check"
-          button-style="accentAccent"
+          button-style="commit"
           :disabled="!itemsSelected"
           button-size="small"
           @click="emit('confirmSelection', getEnqueuedItems(context))"

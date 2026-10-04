@@ -320,7 +320,7 @@ div.menu-option:hover {
 .vue-advanced-select--bordered .vue-select,
 .vue-advanced-select--bordered .control {
   --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid rgba(0, 58, 82, 0.6);
+  --vs-border: 1px solid color-mix(in srgb, var(--color-text-body) 60%, transparent);
 }
 
 .vue-advanced-select .control.focused {

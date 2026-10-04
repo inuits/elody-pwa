@@ -22,7 +22,7 @@ export const defaultInput: Input = {
 export const defaultWithBorderInput: Input = {
   textColor: defaultInput.textColor,
   bgColor: defaultInput.bgColor,
-  borderColor: "border-[rgba(0,58,82,0.6)] focus:border-[rgba(0,58,82,0.6)]",
+  borderColor: "border-text-body/60 focus:border-text-body/60",
   disabledStyle: {
     textColor: defaultInput.disabledStyle.textColor,
     bgColor: defaultInput.disabledStyle.bgColor,

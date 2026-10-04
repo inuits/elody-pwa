@@ -13,10 +13,10 @@ vi.mock("@/helpers", () => ({
   stringIsHtml: vi.fn().mockReturnValue(false),
 }));
 
-const mocks = vi.hoisted(() => ({ t: vi.fn() }));
+const mocks = vi.hoisted(() => ({ t: vi.fn(), te: vi.fn(() => false) }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: mocks.t }),
+  useI18n: () => ({ t: mocks.t, te: mocks.te }),
 }));
 
 describe("MetadataFormatter", () => {
@@ -84,7 +84,7 @@ describe("MetadataFormatter", () => {
       expect(pill.props("translationKey")).toBe("metadata.labels.user-function.$value");
     });
 
-    it("returns dash for empty array", async () => {
+    it("shows the empty-value label for an empty array", async () => {
       const wrapper = mount(MetadataFormatter, {
         props: {
           formatter: "pill",
@@ -93,7 +93,7 @@ describe("MetadataFormatter", () => {
         },
       });
       await nextTick();
-      expect(wrapper.text()).toBe("-");
+      expect(wrapper.text()).toBe("No value");
     });
 
     // The colour lookup keys on the raw value, so a translated display value

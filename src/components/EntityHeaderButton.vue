@@ -3,7 +3,7 @@
     <BaseButtonNew
       :label="t(activeConfig.label)"
       :icon="activeConfig.icon ? DamsIcons[activeConfig.icon] : undefined"
-      button-style="default"
+      button-style="secondary"
       button-size="small"
       :loading="isLoading"
       :style="{

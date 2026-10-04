@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="pendingConfirm"
-    class="h-full flex flex-col justify-between p-4"
-  >
+  <div v-if="pendingConfirm" class="h-full flex flex-col justify-between p-4">
     <div>
       <div class="title">{{ pendingConfirm.options.title }}</div>
       <div v-if="pendingConfirm.options.message" class="pt-4">
@@ -14,14 +11,18 @@
         <div class="flex items-center gap-4">
           <BaseButtonNew
             :label="pendingConfirm.options.confirmLabel"
-            :button-style="pendingConfirm.options.confirmButtonStyle ?? 'redDefault'"
+            :button-style="
+              pendingConfirm.options.confirmButtonStyle ?? 'danger'
+            "
             :button-size="pendingConfirm.options.confirmButtonSize ?? 'small'"
             @click="resolveConfirm('confirm')"
           />
           <BaseButtonNew
             v-if="pendingConfirm.options.secondaryLabel"
             :label="pendingConfirm.options.secondaryLabel"
-            :button-style="pendingConfirm.options.secondaryButtonStyle ?? 'redDefault'"
+            :button-style="
+              pendingConfirm.options.secondaryButtonStyle ?? 'danger'
+            "
             :button-size="pendingConfirm.options.secondaryButtonSize ?? 'small'"
             @click="resolveConfirm('secondary')"
           />
@@ -30,7 +31,9 @@
       <div class="flex items-center">
         <BaseButtonNew
           :label="pendingConfirm.options.cancelLabel"
-          :button-style="pendingConfirm.options.cancelButtonStyle ?? 'default'"
+          :button-style="
+            pendingConfirm.options.cancelButtonStyle ?? 'secondary'
+          "
           :button-size="pendingConfirm.options.cancelButtonSize ?? 'small'"
           @click="resolveConfirm('cancel')"
         />

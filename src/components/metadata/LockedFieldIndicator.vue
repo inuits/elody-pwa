@@ -8,13 +8,13 @@
     ]"
   >
     <base-tooltip position="top-right" :tooltip-offset="8">
-      <template #activator="{ on }">
-        <div v-on="on" class="text-text-light">
+      <template #activator="{ on, describedBy }">
+        <div v-on="on" :aria-describedby="describedBy" class="text-text-light">
           <unicon :name="Unicons.Lock.name" height="18" />
         </div>
       </template>
       <template #default>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{ t(tooltip || "metadata.tooltips.locked-field") }}
         </span>
       </template>

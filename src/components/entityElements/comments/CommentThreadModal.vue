@@ -27,7 +27,7 @@
               :icon="
                 thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check
               "
-              button-style="accentNormal"
+              button-style="commit"
               :disabled="isWorking"
               @click="toggleStatus"
             />

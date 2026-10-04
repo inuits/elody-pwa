@@ -156,8 +156,8 @@
       {{ t(labelForFlow(configurationItem)) }}
     </button>
     <base-tooltip v-if="showTagButton" position="top-right" :tooltip-offset="8">
-      <template #activator="{ on }">
-        <div v-on="on">
+      <template #activator="{ on, describedBy }">
+        <div v-on="on" :aria-describedby="describedBy">
           <button
             :class="[{ 'opacity-30': tagButtonDisabled }]"
             :disabled="buttonsDisabled || tagButtonDisabled"
@@ -169,10 +169,7 @@
         </div>
       </template>
       <template #default>
-        <span
-          v-if="isInNeedOfConfigurationEntities"
-          class="text-sm text-text-placeholder"
-        >
+        <span v-if="isInNeedOfConfigurationEntities">
           <div>
             {{
               t("tagging.configuration-entity-required", {
@@ -271,15 +268,6 @@ button {
 }
 
 .transparent-bg {
-  background-color: rgba(255, 255, 255, 0.95);
-}
-
-.is-active {
-  background-color: var(--color-accent-normal);
-  color: var(--color-white);
-}
-
-.transparent-bg {
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: color-mix(in srgb, var(--color-white) 95%, transparent);
 }
 </style>

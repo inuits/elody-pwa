@@ -7,8 +7,8 @@
     :enable-auto-placement="false"
     v-if="canBeShownForPreviewType || canBeShownForPlaneType"
   >
-    <template #activator="{ on }">
-      <div v-on="on" class="flex">
+    <template #activator="{ on, describedBy }">
+      <div v-on="on" :aria-describedby="describedBy" class="flex">
         <unicon :name="Unicons.InfoCircle.name" height="20" />
       </div>
     </template>

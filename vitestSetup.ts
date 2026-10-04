@@ -4,6 +4,7 @@ import { ref } from "vue";
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string) => key,
+    te: () => false,
   }),
 }));
 

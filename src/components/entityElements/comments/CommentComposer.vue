@@ -17,7 +17,7 @@
       <base-button-new
         :label="submitLabel"
         :icon="DamsIcons.Check"
-        button-style="accentAccent"
+        button-style="commit"
         :disabled="!hasContent || isSubmitting"
         @click="submit"
       />

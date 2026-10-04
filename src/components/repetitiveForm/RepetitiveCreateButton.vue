@@ -4,7 +4,7 @@
       data-testid="repetitive-step-create-new"
       :label="$t(label)"
       :icon="DamsIcons.Plus"
-      button-style="accentAccent"
+      button-style="commit"
       button-size="small"
       @click.stop="onClick"
     />

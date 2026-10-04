@@ -15,7 +15,7 @@
       v-bind="
         asButton
           ? {
-              buttonStyle: 'accentNormal',
+              buttonStyle: 'commit',
               buttonSize: 'small',
               disabled: disable,
             }
@@ -31,13 +31,13 @@
 
     <div v-if="disable && tooltipLabel" class="mr-3">
       <base-tooltip position="top-right" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             <div>
               {{ t(tooltipLabel) }}
             </div>

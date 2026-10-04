@@ -22,7 +22,7 @@
         :icon="DamsIcons.Cross"
         :icon-height="22"
         :disabled="!selectedMatcher"
-        button-style="accentNormal"
+        button-style="commit"
         button-size="small"
         @click="$emit('reset')"
       />

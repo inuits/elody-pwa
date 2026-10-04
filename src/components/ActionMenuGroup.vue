@@ -9,7 +9,7 @@
         :key="primaryOption"
         class="pl-4 pr-6 my-1"
         :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
-        button-style="accentNormal"
+        button-style="commit"
         button-size="small"
         :disabled="isMainActionDisabled || !primaryOption.active"
         :label="t(primaryOption.label, [entityTypeLabel])"
@@ -121,7 +121,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     parentEntityId?: string | undefined;
     subDropdownOptions?: DropdownOption[];
-    clearSubDropdownOptions: Function;
+    clearSubDropdownOptions: () => void;
   }>(),
   {
     isMainActionDisabled: false,

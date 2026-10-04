@@ -12,11 +12,12 @@
         :id="checkboxId"
         class="rounded border-[length:var(--border-width-control)] focus:ring-0"
         :class="[
-          { 'cursor-pointer': !disabled },
-          { [selectedInputStyle.disabledStyle.textColor]: disabled },
-          { [selectedInputStyle.disabledStyle.bgColor]: disabled },
-          { [selectedInputStyle.disabledStyle.borderColor]: disabled },
-          `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor} `,
+          'text-commit accent-commit border-neutral-60 checked:border-commit',
+          {
+            'cursor-pointer': !disabled,
+            'disabled:text-text-light disabled:accent-neutral-white disabled:border-border-subtle':
+              disabled,
+          },
         ]"
         v-model="inputValue"
         type="checkbox"
@@ -65,7 +66,6 @@ const props = withDefaults(
     label?: string;
     item: InBulkProcessableItem;
     bulkOperationsContext: Context | undefined;
-    inputStyle: InputStyle;
     disabled?: boolean;
     ignoreBulkOperations?: boolean;
     required?: boolean;
@@ -94,33 +94,6 @@ const inputValue = computed<boolean>({
   },
 });
 
-type PseudoStyle = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-};
-type Input = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-  disabledStyle: PseudoStyle;
-};
-const accentNormalInput: Input = {
-  textColor: "text-accent-accent",
-  bgColor: "accent-accent-accent",
-  borderColor: "border-neutral-60 checked:border-accent-accent",
-  disabledStyle: {
-    textColor: "disabled:text-text-light",
-    bgColor: "disabled:accent-neutral-white",
-    borderColor: "disabled:border-border-subtle",
-  },
-};
-
-type InputStyle = "accentNormal";
-const inputStyles: Record<InputStyle, Input> = {
-  accentNormal: accentNormalInput,
-};
-
 const {
   contextWhereSelectionEventIsTriggered,
   enqueueItemForBulkProcessing,
@@ -148,7 +121,6 @@ const handleItemSelection = () => {
   inputValue.value = !inputValue.value;
 };
 
-const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 const checkboxId = `base-checkbox-${useId()}`;
 const isDisabledByContextLimit = computed<boolean>(() => {
   if (props.ignoreBulkOperations) return false;

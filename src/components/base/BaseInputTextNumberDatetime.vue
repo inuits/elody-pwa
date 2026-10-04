@@ -16,12 +16,11 @@
         type !== 'date'
       "
       :class="[
-        'border rounded-lg focus:ring-0',
+        fieldClasses,
         { 'w-full h-full': type !== 'color' },
         { 'w-10 h-6 mt-2': type === 'color' },
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
       ]"
+      v-bind="a11yAttrs"
       v-model="inputValue"
       :type="type"
       :step="step"
@@ -49,11 +48,9 @@
     <textarea
       data-cy="base-input-text-area"
       v-else-if="type === 'textarea'"
-      class="w-full h-full border rounded-lg focus:ring-0"
-      :class="[
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-      ]"
+      class="w-full h-full resize-y"
+      :class="fieldClasses"
+      v-bind="a11yAttrs"
       v-model="inputValue"
       :disabled="disabled"
       :placeholder="placeholder"
@@ -64,10 +61,8 @@
     <BaseResizableTextarea
       v-else
       v-model="inputValue"
-      :class="[
-        `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor}`,
-        `${selectedInputStyle.disabledStyle.textColor} ${selectedInputStyle.disabledStyle.bgColor} ${selectedInputStyle.disabledStyle.borderColor}`,
-      ]"
+      :class="fieldClasses"
+      v-bind="a11yAttrs"
     ></BaseResizableTextarea>
   </div>
 </template>
@@ -101,7 +96,7 @@ const defaultInput: Input = {
 const defaultWithBorderInput: Input = {
   textColor: defaultInput.textColor,
   bgColor: defaultInput.bgColor,
-  borderColor: "border-[rgba(0,58,82,0.6)] focus:border-[rgba(0,58,82,0.6)]",
+  borderColor: "border-border-default hover:border-border-dashed",
   disabledStyle: {
     textColor: defaultInput.disabledStyle.textColor,
     bgColor: defaultInput.disabledStyle.bgColor,
@@ -138,6 +133,9 @@ const props = withDefaults(
     min?: number;
     max?: number;
     disabled?: boolean;
+    invalid?: boolean;
+    describedBy?: string;
+    ariaLabel?: string;
     isValidPredicate?: (
       value: string | number | boolean | undefined,
     ) => boolean;
@@ -147,6 +145,9 @@ const props = withDefaults(
     type: "text",
     step: 1,
     disabled: false,
+    invalid: false,
+    describedBy: undefined,
+    ariaLabel: undefined,
     isValidPredicate: () => true,
   },
 );
@@ -169,6 +170,27 @@ const inputValue = computed<string | number | boolean | undefined>({
 });
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
+
+// Design-system input: 5px radius, 13px value, 5/8px padding; focus is the
+// global :focus-visible ring, so the forms-plugin ring is suppressed here.
+const fieldClasses = computed<string[]>(() => {
+  const style = selectedInputStyle.value;
+  return [
+    "border rounded-input text-value py-[5px] px-2 placeholder:text-text-placeholder focus:ring-0",
+    style.textColor,
+    style.bgColor,
+    props.invalid ? "border-danger hover:border-danger" : style.borderColor,
+    style.disabledStyle.textColor,
+    style.disabledStyle.bgColor,
+    style.disabledStyle.borderColor,
+  ];
+});
+
+const a11yAttrs = computed(() => ({
+  "aria-invalid": props.invalid ? "true" : undefined,
+  "aria-describedby": props.describedBy,
+  "aria-label": props.ariaLabel,
+}));
 
 const handleBadNumberInput = (event: Event) => {
   if (props.type !== "number") return;

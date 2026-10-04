@@ -4,7 +4,7 @@
     type="button"
     :disabled="disabled || loading"
     :aria-label="ariaLabel"
-    class="flex justify-center items-center whitespace-nowrap w-full rounded-md font-bold cursor-pointer disabled:cursor-auto"
+    class="flex justify-center items-center whitespace-nowrap w-full rounded-button font-bold cursor-pointer transition-transform active:scale-[.97] disabled:cursor-auto disabled:active:scale-100"
     :class="[
       label ? `pl-1.5` : ``,
       `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
@@ -43,13 +43,13 @@
 
     <div v-if="disabled && tooltipLabel" class="ml-2 -mb-2 text-black">
       <base-tooltip position="top-right" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
         <template #default>
-          <span class="text-value text-text-placeholder">
+          <span>
             <div>
               {{ t(tooltipLabel) }}
             </div>
@@ -80,64 +80,11 @@ type Button = {
   disabledStyle: PseudoStyle;
   extra?: string;
 };
-const defaultButton: Button = {
-  textColor: "text-text-body",
-  bgColor: "bg-background-normal",
-  hoverStyle: {
-    textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-accent-wash",
-  },
-  activeStyle: {
-    textColor: "active:text-accent-accent",
-    bgColor: "active:bg-accent-light",
-  },
-  disabledStyle: {
-    textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-background-normal",
-  },
+const disabledStyle: PseudoStyle = {
+  textColor: "disabled:text-text-disabled",
+  bgColor: "disabled:bg-background-normal",
 };
-const accentAccentButton: Button = {
-  textColor: "text-neutral-white",
-  bgColor: "bg-accent-accent",
-  hoverStyle: {
-    textColor: "hover:text-neutral-white",
-    bgColor: "hover:bg-commit-hover",
-  },
-  activeStyle: {
-    textColor: "active:text-neutral-white",
-    bgColor: "active:bg-commit-strong-hover",
-  },
-  disabledStyle: defaultButton.disabledStyle,
-};
-// Design-system secondary: white surface, 1px border, body ink.
-const secondaryButton: Button = {
-  textColor: "text-text-body",
-  bgColor: "bg-neutral-white border border-neutral-40",
-  hoverStyle: {
-    textColor: "hover:text-text-body",
-    bgColor: "hover:bg-accent-wash",
-  },
-  activeStyle: {
-    textColor: "active:text-text-body",
-    bgColor: "active:bg-accent-light",
-  },
-  disabledStyle: defaultButton.disabledStyle,
-};
-// Design-system ghost: borderless, label-blue ink.
-const ghostButton: Button = {
-  textColor: "text-text-light",
-  bgColor: "bg-transparent",
-  hoverStyle: {
-    textColor: "hover:text-accent-dark",
-    bgColor: "hover:bg-accent-wash",
-  },
-  activeStyle: {
-    textColor: "active:text-accent-dark",
-    bgColor: "active:bg-accent-light",
-  },
-  disabledStyle: defaultButton.disabledStyle,
-};
-// Design-system primary: accent fill, white ink, darker accent on hover.
+// Primary: client accent fill, white ink, darker accent + accent shadow on hover.
 const primaryButton: Button = {
   textColor: "text-neutral-white",
   bgColor: "bg-accent",
@@ -149,12 +96,55 @@ const primaryButton: Button = {
     textColor: "active:text-neutral-white",
     bgColor: "active:bg-accent-hover",
   },
-  disabledStyle: defaultButton.disabledStyle,
+  disabledStyle,
   extra: "hover:shadow-[var(--shadow-accent-hover)]",
 };
-const redDefaultButton: Button = {
-  textColor: accentAccentButton.textColor,
-  bgColor: "bg-red-default",
+// Secondary: white surface, 1px border, body ink.
+const secondaryButton: Button = {
+  textColor: "text-text-body",
+  bgColor: "bg-neutral-white border border-neutral-40",
+  hoverStyle: {
+    textColor: "hover:text-text-body",
+    bgColor: "hover:bg-accent-wash",
+  },
+  activeStyle: {
+    textColor: "active:text-text-body",
+    bgColor: "active:bg-accent-light",
+  },
+  disabledStyle,
+};
+// Ghost: borderless, label-blue ink.
+const ghostButton: Button = {
+  textColor: "text-text-light",
+  bgColor: "bg-transparent",
+  hoverStyle: {
+    textColor: "hover:text-accent-dark",
+    bgColor: "hover:bg-accent-wash",
+  },
+  activeStyle: {
+    textColor: "active:text-accent-dark",
+    bgColor: "active:bg-accent-light",
+  },
+  disabledStyle,
+};
+// Commit: platform-fixed teal (Bewaar, confirm); never client-themed.
+const commitButton: Button = {
+  textColor: "text-neutral-white",
+  bgColor: "bg-commit",
+  hoverStyle: {
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-commit-strong-hover",
+  },
+  activeStyle: {
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-commit-strong-hover",
+  },
+  disabledStyle,
+};
+// Danger: destructive actions.
+const dangerButton: Button = {
+  textColor: "text-neutral-white",
+  bgColor: "bg-danger",
   hoverStyle: {
     textColor: "hover:text-neutral-white",
     bgColor: "hover:bg-red-dark",
@@ -163,28 +153,21 @@ const redDefaultButton: Button = {
     textColor: "active:text-neutral-white",
     bgColor: "active:bg-red-dark",
   },
-  disabledStyle: defaultButton.disabledStyle,
+  disabledStyle,
 };
 
 export type ButtonStyle =
-  | "default"
   | "primary"
   | "secondary"
   | "ghost"
-  | "accentAccent"
-  | "accentNormal"
-  | "redDefault";
-// Deprecations (design system): the grey `default` variant renders as
-// secondary, the mint `accentNormal` as commit. The names remain accepted
-// so config-driven call sites keep working.
+  | "commit"
+  | "danger";
 const buttonStyles: Record<ButtonStyle, Button> = {
-  default: secondaryButton,
   primary: primaryButton,
   secondary: secondaryButton,
   ghost: ghostButton,
-  accentAccent: accentAccentButton,
-  accentNormal: accentAccentButton,
-  redDefault: redDefaultButton,
+  commit: commitButton,
+  danger: dangerButton,
 };
 
 export type ButtonSize = "normal" | "small" | "verySmall";
@@ -204,7 +187,7 @@ const props = withDefaults(
   }>(),
   {
     icon: DamsIcons.NoIcon,
-    buttonStyle: "default",
+    buttonStyle: "secondary",
     buttonSize: "normal",
     disabled: false,
     iconHeight: 14,

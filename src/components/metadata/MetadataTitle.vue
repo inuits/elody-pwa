@@ -12,13 +12,13 @@
       position="top-right"
       :tooltip-offset="8"
     >
-      <template #activator="{ on }">
-        <div v-on="on" class="pl-1">
+      <template #activator="{ on, describedBy }">
+        <div v-on="on" :aria-describedby="describedBy" class="pl-1">
           <unicon :name="Unicons.QuestionCircle.name" height="20" />
         </div>
       </template>
       <template #default>
-        <span class="text-sm text-text-placeholder">
+        <span>
           <div>
             {{ t(`${metadata.tooltip}`) }}
           </div>

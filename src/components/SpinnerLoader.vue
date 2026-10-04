@@ -1,6 +1,6 @@
 <template>
   <span
-    role="status"
+    aria-hidden="true"
     class="inline-block shrink-0 animate-[spin_var(--spinner-duration)_linear_infinite] rounded-full"
     :class="trackClass"
     :style="{
@@ -28,7 +28,7 @@ const props = withDefaults(
 
 const trackClass = computed(() =>
   props.theme === "accent"
-    ? "border-accent-light !border-t-accent-accent"
+    ? "border-accent-light !border-t-commit"
     : "border-neutral-30 !border-t-current",
 );
 

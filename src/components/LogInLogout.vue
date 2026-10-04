@@ -30,9 +30,9 @@
           position="top-right"
           :tooltip-offset="8"
         >
-          <template #activator="{ on }">
+          <template #activator="{ on, describedBy }">
             <router-link :to="`/user/${elodyUser.id}`"
-              ><div v-on="on">
+              ><div v-on="on" :aria-describedby="describedBy">
                 <unicon
                   :name="Unicons.UserCircle.name"
                   height="20"
@@ -66,8 +66,8 @@
           position="top-right"
           :tooltip-offset="8"
         >
-          <template #activator="{ on }">
-            <div v-on="on">
+          <template #activator="{ on, describedBy }">
+            <div v-on="on" :aria-describedby="describedBy">
               <unicon
                 @click="openConfirmationModal"
                 :name="Unicons.SignOut.name"
@@ -104,7 +104,6 @@
 </template>
 
 <script lang="ts" setup>
-import { TypeModals } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -131,4 +130,3 @@ const openConfirmationModal = async () => {
   performLogout();
 };
 </script>
-

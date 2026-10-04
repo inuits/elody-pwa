@@ -6,13 +6,13 @@
     <div class="flex items-center">
       <div v-if="disabled" class="h-auto mt-1">
         <base-tooltip position="top-right" :tooltip-offset="8">
-          <template #activator="{ on }">
-            <div v-on="on">
+          <template #activator="{ on, describedBy }">
+            <div v-on="on" :aria-describedby="describedBy">
               <unicon :name="Unicons.QuestionCircle.name" height="20" />
             </div>
           </template>
           <template #default>
-            <span class="text-sm text-text-placeholder">
+            <span>
               <div>
                 {{ t(`tooltip.buttons.disabled-${tooltipLabel}-button`) }}
               </div>
@@ -32,7 +32,7 @@
           :icon="buttonIcon"
           :disabled="disabled"
           :loading="loading"
-          button-style="accentAccent"
+          button-style="commit"
           button-size="small"
           @click="() => emit('submit')"
         />

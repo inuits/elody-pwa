@@ -44,7 +44,7 @@
           <BaseButtonNew
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
-            button-style="redDefault"
+            button-style="danger"
             button-size="small"
             @click="emit('remove', index)"
           />
@@ -58,7 +58,7 @@
           data-testid="repetitive-overview-add"
           :label="$t('repetitiveForm.add-another')"
           :icon="DamsIcons.Plus"
-          button-style="accentAccent"
+          button-style="commit"
           button-size="small"
           @click="emit('add-another')"
         />
@@ -68,7 +68,7 @@
           data-testid="repetitive-overview-finish"
           :label="$t('repetitiveForm.finish')"
           :icon="DamsIcons.Check"
-          button-style="accentAccent"
+          button-style="commit"
           button-size="small"
           :disabled="branches.length === 0"
           :loading="finishing"

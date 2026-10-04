@@ -8,7 +8,6 @@
         :disabled="isDisabled(option)"
         :label="getTranslatedLabel(option.value)"
         ignoreBulkOperations
-        input-style="accentNormal"
       />
     </div>
   </div>

@@ -17,7 +17,7 @@
           : t('metadata.labels.edit-metadata')
       "
       :icon="DamsIcons.Edit"
-      button-style="accentNormal"
+      button-style="commit"
       @click="() => editModeHelper.enableEdit()"
     />
     <base-button-new

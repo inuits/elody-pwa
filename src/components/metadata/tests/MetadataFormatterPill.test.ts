@@ -10,6 +10,7 @@ vi.mock("@/main", () => ({
       concept: { background: "#aaa", text: "#fff" },
       queued: { background: "#eee", text: "#444", icon: "Process", spin: true },
       finished: { background: "#dfd", text: "#0b8" },
+      work: { tone: "tone1" },
     },
   },
 }));
@@ -179,5 +180,29 @@ describe("MetadataFormatterPill — configured icon", () => {
     await nextTick();
 
     expect(wrapper.find("unicon-stub").exists()).toBe(false);
+  });
+});
+
+describe("MetadataFormatterPill — design-system badge", () => {
+  const pill = (props: Record<string, unknown>) =>
+    mount(MetadataFormatterPill, { props }).find(".inline-flex");
+
+  it("uses the chip radius token", () => {
+    expect(pill({ formatter: "pill", label: "concept" }).classes()).toContain(
+      "rounded-chip",
+    );
+  });
+
+  it("resolves a configured tone to the badge tone tokens", () => {
+    const style = pill({ formatter: "pill", label: "work" }).attributes("style");
+    expect(style).toContain("var(--color-badge-tone1-bg)");
+    expect(style).toContain("var(--color-badge-tone1-text)");
+  });
+
+  it("renders an auto pill as a relation chip", () => {
+    const style = pill({ formatter: "pill|auto", label: "anything" }).attributes(
+      "style",
+    );
+    expect(style).toContain("var(--color-chip-relation-bg)");
   });
 });

@@ -40,7 +40,7 @@
               >
                 <div>
                   <p class="font-bold">{{ t(item.label) }}</p>
-                  <p>{{ featureResult.Entity.intialValues[item.key] || "-" }}</p>
+                  <p>{{ featureResult.Entity.intialValues[item.key] || emptyValueLabel }}</p>
                 </div>
               </div>
               <router-link
@@ -106,6 +106,8 @@ import { useMaps } from "@/composables/useMaps";
 import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 import { useQuery } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
+import { readCssToken } from "@/utils/cssToken";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 import { Unicons } from "@/types";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import {
@@ -151,6 +153,7 @@ const {
 } = useMaps();
 
 const { t } = useI18n();
+const emptyValueLabel = useEmptyValueLabel();
 const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
   useHeatMapDetailPopUp();
 
@@ -201,13 +204,16 @@ const clusterStyle = (feature: any) => {
     clusterStyleCache[size] = new Style({
       image: new CircleStyle({
         radius: 16,
-        fill: new Fill({ color: "#3b82f6" }),
-        stroke: new Stroke({ color: "#ffffff", width: 2 }),
+        fill: new Fill({ color: readCssToken("--color-accent", "black") }),
+        stroke: new Stroke({
+          color: readCssToken("--color-white", "white"),
+          width: 2,
+        }),
       }),
       text: new Text({
         text: String(size),
-        fill: new Fill({ color: "#ffffff" }),
-        font: "bold 12px Arial",
+        fill: new Fill({ color: readCssToken("--color-white", "white") }),
+        font: `bold ${readCssToken("--text-ui", "12px")} ${readCssToken("--font-sans", "sans-serif")}`,
       }),
     });
   }

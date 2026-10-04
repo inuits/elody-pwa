@@ -2,14 +2,14 @@
   <div class="flex justify-between pt-8">
     <BaseButtonNew
       :label="confirmLabel"
-      :button-style="confirmButtonStyle ?? 'redDefault'"
+      :button-style="confirmButtonStyle ?? 'danger'"
       :button-size="confirmButtonSize ?? 'small'"
       :loading="confirmLoading"
       @click="emit('confirm')"
     />
     <BaseButtonNew
       :label="cancelLabel"
-      :button-style="cancelButtonStyle ?? 'default'"
+      :button-style="cancelButtonStyle ?? 'secondary'"
       :button-size="cancelButtonSize ?? 'small'"
       :disabled="confirmLoading"
       @click="emit('cancel')"

@@ -78,7 +78,7 @@
       <div>
         <base-button-new
           :label="t('iiif-operations-modal.get-resized-image')"
-          button-style="accentAccent"
+          button-style="commit"
           :loading="isDownloading"
           @click="downLoadImage"
         />

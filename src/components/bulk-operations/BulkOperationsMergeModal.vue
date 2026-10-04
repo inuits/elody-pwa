@@ -57,14 +57,14 @@
       <BaseButtonNew
         :disabled="isLoading || isMerging"
         :label="t('bulk-operations.merge-modal.confirm')"
-        button-style="accentNormal"
+        button-style="commit"
         button-size="small"
         @click="submitMerge"
       />
       <BaseButtonNew
         :disabled="isMerging"
         :label="t('bulk-operations.merge-modal.cancel')"
-        button-style="default"
+        button-style="secondary"
         button-size="small"
         @click="closeModal(TypeModals.BulkOperationsMerge)"
       />

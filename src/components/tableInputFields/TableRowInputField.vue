@@ -2,9 +2,9 @@
   <div
     v-for="(subField, colIndex) in visibleSubFields"
     :key="subField.key"
-    class="flex items-center px-2 py-1 border-b border-[rgba(0,58,82,0.08)]"
+    class="flex items-center px-2 py-1 border-b border-text-body/8"
     :class="{
-      'border-r border-r-[rgba(0,58,82,0.15)]':
+      'border-r border-r-text-body/15':
         colIndex < visibleSubFields.length - 1,
     }"
   >
@@ -32,12 +32,12 @@
   </div>
   <div
     v-if="!disabled"
-    class="flex items-center justify-center px-1 py-1 border-b border-[rgba(0,58,82,0.08)] border-l border-l-[rgba(0,58,82,0.2)]"
+    class="flex items-center justify-center px-1 py-1 border-b border-text-body/8 border-l border-l-text-body/20"
   >
     <BaseButtonNew
       class="!w-auto"
       :icon="DamsIcons.Trash"
-      button-style="redDefault"
+      button-style="danger"
       button-size="verySmall"
       @click="emit('remove-row', rowIndex)"
     />
@@ -90,7 +90,9 @@ const getCellFieldKey = (subField: SubField): string => {
   if (!subField.inputField?.isMetadataField) {
     return `${props.parentFieldKey}[${props.rowIndex}].key`;
   }
-  const metaIdx = metadataSubFields.value.findIndex((sf) => sf.key === subField.key);
+  const metaIdx = metadataSubFields.value.findIndex(
+    (sf) => sf.key === subField.key,
+  );
   return `${props.parentFieldKey}[${props.rowIndex}].metadata[${metaIdx}].value`;
 };
 
@@ -101,7 +103,9 @@ const getCellModelValue = (subField: SubField): any => {
   if (!subField.inputField?.isMetadataField) {
     return props.item.key;
   }
-  const metaIdx = metadataSubFields.value.findIndex((sf) => sf.key === subField.key);
+  const metaIdx = metadataSubFields.value.findIndex(
+    (sf) => sf.key === subField.key,
+  );
   return props.item.metadata?.[metaIdx]?.value;
 };
 

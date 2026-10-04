@@ -58,8 +58,7 @@
         'w-full rounded-b bg-background-light',
         { hidden: !expandFilters },
         {
-          'scrollable border-x border-b-2 border-border-panel':
-            expandFilters,
+          'scrollable border-x border-b-2 border-border-panel': expandFilters,
         },
       ]"
     >
@@ -71,13 +70,13 @@
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
             :icon-height="22"
-            button-style="default"
+            button-style="secondary"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew
             data-cy="filters-search-button"
             :label="t('filters.apply')"
-            button-style="accentNormal"
+            button-style="commit"
             @click="applyFilters(true)"
           />
           <BaseButtonNew
