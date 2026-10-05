@@ -38,7 +38,7 @@
           <base-button-new
             :label="t('Add more')"
             :icon="DamsIcons.Plus"
-            button-size="small"
+            button-size="sm"
             button-style="commit"
             @click.stop
             @click="

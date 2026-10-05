@@ -18,7 +18,7 @@
           :label="t('confirm.delete-relations.confirm')"
           :icon="DamsIcons.Trash"
           button-style="danger"
-          button-size="small"
+          button-size="sm"
           :loading="isDeleting"
           @click="deleteSelectedRelations"
         />
@@ -28,7 +28,7 @@
         <BaseButtonNew
           :label="t('confirm.delete-relations.cancel')"
           button-style="secondary"
-          button-size="small"
+          button-size="sm"
           :disabled="isDeleting"
           @click="closeModal(TypeModals.BulkOperationsDeleteRelations)"
         />

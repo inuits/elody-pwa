@@ -4,7 +4,7 @@
       :label="t('bulk-operations.delete')"
       :icon="DamsIcons.Trash"
       button-style="danger"
-      button-size="small"
+      button-size="sm"
       :loading="isDeleting"
       @click="openDeleteModal()"
     />

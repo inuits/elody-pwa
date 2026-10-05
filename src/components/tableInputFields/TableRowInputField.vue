@@ -38,7 +38,7 @@
       class="!w-auto"
       :icon="DamsIcons.Trash"
       button-style="danger"
-      button-size="verySmall"
+      button-size="sm"
       @click="emit('remove-row', rowIndex)"
     />
   </div>

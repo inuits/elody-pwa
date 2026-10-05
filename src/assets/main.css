@@ -324,6 +324,19 @@
   --touch-target-min: 44px;
   --field-grid-breakpoint-2col: 1100px;
   --field-grid-breakpoint-1col: 800px;
+
+  /* ── Component tokens ─────────────────────────────────────────────
+     One decision per component; components read these and role tokens
+     only. Documented in docs/design-system/components/. */
+
+  /* Button (components/button.md) */
+  --text-button-sm: var(--text-label);
+  --text-button-md: var(--text-ui);
+  --button-sm-padding: 4px 10px;
+  --button-md-padding: 6px 14px;
+  --button-sm-padding-icon: 4px;
+  --button-md-padding-icon: 6px;
+  --button-gap: 6px;
 }
 
 

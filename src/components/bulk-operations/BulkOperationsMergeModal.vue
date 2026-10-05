@@ -81,7 +81,7 @@
           :disabled="isLoading || isMerging || !!blockedReason"
           :label="t('bulk-operations.merge-modal.confirm')"
           button-style="commit"
-          button-size="small"
+          button-size="sm"
           @click="submitMerge"
         />
         <p
@@ -96,7 +96,7 @@
         :disabled="isMerging"
         :label="t('bulk-operations.merge-modal.cancel')"
         button-style="secondary"
-        button-size="small"
+        button-size="sm"
         @click="closeModal(TypeModals.BulkOperationsMerge)"
       />
     </div>

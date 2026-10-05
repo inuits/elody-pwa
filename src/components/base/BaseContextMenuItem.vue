@@ -17,7 +17,7 @@
           ? {
               buttonStyle: 'commit',
               icon: buttonIcon,
-              buttonSize: 'small',
+              buttonSize: 'sm',
               disabled: disable,
             }
           : {

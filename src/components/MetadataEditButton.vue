@@ -52,7 +52,7 @@ const props = withDefaults(
     editmodeLabel?: string;
   }>(),
   {
-    buttonSize: "small",
+    buttonSize: "sm",
     readmodeLabel: "",
     editmodeLabel: "",
   },

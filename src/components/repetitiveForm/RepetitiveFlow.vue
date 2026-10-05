@@ -79,7 +79,7 @@
                 "
                 :icon="DamsIcons.AngleLeft"
                 button-style="commit"
-                button-size="small"
+                button-size="sm"
                 @click="goBack"
               />
             </div>
@@ -94,7 +94,7 @@
             :label="$t('repetitiveForm.back-to-overview')"
             :icon="DamsIcons.AngleLeft"
             button-style="commit"
-            button-size="small"
+            button-size="sm"
             @click="view = 'overview'"
           />
         </div>

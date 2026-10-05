@@ -38,7 +38,7 @@
             :loading="isSaving"
             :disabled="!isFormValid || isSaving"
             button-style="commit"
-            button-size="small"
+            button-size="sm"
             @click="onSave"
           />
         </div>

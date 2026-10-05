@@ -14,7 +14,7 @@
             :button-style="
               pendingConfirm.options.confirmButtonStyle ?? 'danger'
             "
-            :button-size="pendingConfirm.options.confirmButtonSize ?? 'small'"
+            :button-size="pendingConfirm.options.confirmButtonSize ?? 'sm'"
             @click="resolveConfirm('confirm')"
           />
           <BaseButtonNew
@@ -23,7 +23,7 @@
             :button-style="
               pendingConfirm.options.secondaryButtonStyle ?? 'danger'
             "
-            :button-size="pendingConfirm.options.secondaryButtonSize ?? 'small'"
+            :button-size="pendingConfirm.options.secondaryButtonSize ?? 'sm'"
             @click="resolveConfirm('secondary')"
           />
         </div>
@@ -34,7 +34,7 @@
           :button-style="
             pendingConfirm.options.cancelButtonStyle ?? 'secondary'
           "
-          :button-size="pendingConfirm.options.cancelButtonSize ?? 'small'"
+          :button-size="pendingConfirm.options.cancelButtonSize ?? 'sm'"
           @click="resolveConfirm('cancel')"
         />
       </div>

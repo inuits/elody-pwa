@@ -9,7 +9,7 @@
         :icon="DamsIcons.Plus"
         :label="t('actions.labels.add-entry')"
         button-style="commit"
-        button-size="verySmall"
+        button-size="sm"
         @click="addRow"
       />
     </div>

@@ -5,7 +5,7 @@
       :label="$t(label)"
       :icon="DamsIcons.Plus"
       button-style="commit"
-      button-size="small"
+      button-size="sm"
       @click.stop="onClick"
     />
     <!-- Mounted only after this component is mounted so the Teleport target

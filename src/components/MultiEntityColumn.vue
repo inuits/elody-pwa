@@ -42,7 +42,7 @@
             (editHelper.editMode === 'edit' ||
               editHelper.editMode === 'edit-delete')
           "
-          button-size="small"
+          button-size="sm"
           :label="t('metadata.labels.edit-metadata')"
           :icon="DamsIcons.Edit"
           button-style="commit"
@@ -50,7 +50,7 @@
         />
         <template v-if="editHelper.isEdit">
           <base-button-new
-            button-size="small"
+            button-size="sm"
             :label="t('bulk-operations.save')"
             :icon="DamsIcons.Save"
             button-style="commit"
@@ -58,7 +58,7 @@
             @click="saveEdit"
           />
           <base-button-new
-            button-size="small"
+            button-size="sm"
             :label="t('bulk-operations.cancel')"
             :icon="DamsIcons.Times"
             button-style="commit"

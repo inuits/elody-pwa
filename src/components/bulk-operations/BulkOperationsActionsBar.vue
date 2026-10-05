@@ -97,7 +97,7 @@
           :icon="DamsIcons.Check"
           button-style="commit"
           :disabled="!itemsSelected"
-          button-size="small"
+          button-size="sm"
           @click="emit('confirmSelection', getEnqueuedItems(context))"
         />
       </div>

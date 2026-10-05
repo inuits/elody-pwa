@@ -51,7 +51,7 @@
       class="px-2"
     >
       <base-button-new
-        button-size="small"
+        button-size="sm"
         button-style="primary"
         :label="t('metadata.labels.open-detail-page')"
         @click="openDetailPage"

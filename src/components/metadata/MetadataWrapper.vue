@@ -80,7 +80,7 @@
           data-cy="copy-from-parent"
           :label="t(copyFromParentButton.label)"
           button-style="commit"
-          button-size="small"
+          button-size="sm"
           force-show-label
           @click="copyFromParentButton.copy()"
         />

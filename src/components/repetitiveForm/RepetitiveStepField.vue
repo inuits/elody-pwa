@@ -33,7 +33,7 @@
             :label="$t(step.terminalActionLabel)"
             :icon="DamsIcons.Check"
             button-style="commit"
-            button-size="small"
+            button-size="sm"
             :disabled="!hasSelection"
             @click="onTerminalAction"
           />
@@ -90,7 +90,7 @@
             :label="$t(backLabel)"
             :icon="DamsIcons.AngleLeft"
             button-style="commit"
-            button-size="small"
+            button-size="sm"
             @click="goBackFromCreate"
           />
         </div>

@@ -66,10 +66,23 @@ Both sources claim "all badge text/background pairs ≥ 4.5:1". Measured:
 
 ## 2. Primitives
 
-_Next step. Rows will be added per component: Button → Checkbox → Input →
-Tooltip → Spinner → Badge/Pill → Dropdown._
+Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → Dropdown.
 
-## 3. Filters
+### 2.1 Button: [final page](../components/button.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| B0 | Variants | primary/secondary/ghost/commit/danger; grey + mint deprecated | 7 incl. mint | handoff set, old names still accepted | handoff set, old names removed | **done:** handoff |
+| B1 | Sizes | sm + md | sm/md/lg | normal/small/verySmall | normal/small/verySmall | **done:** sm + md; call sites codemodded |
+| B2 | Radius | by variant: secondary 5px, others 6px | by size | 6px all | 6px all | **done:** handoff |
+| B3 | md metrics | 12px, 6px 14px, gap 6px | 12px, 5px 11px, gap 5px | 13px/12px pad | 13px, 12px pad | **done:** handoff; sm 11.5px, 4px 10px |
+| B4 | Loading width | unchanged | changes | changes | changes without icon | **done:** handoff |
+| B5 | Danger hover | not specified | #9b0000 | red-dark | red-dark | **done:** red-dark |
+
+Scope note: this branch is subtask 1 of the epic (tokens + primitives). The
+Filters section below belongs to a later subtask.
+
+## 3. Filters (later subtask)
 
 Already discussed:
 

@@ -4,7 +4,7 @@
       :label="t(activeConfig.label)"
       :icon="activeConfig.icon ? DamsIcons[activeConfig.icon] : undefined"
       button-style="secondary"
-      button-size="small"
+      button-size="sm"
       :loading="isLoading"
       :style="{
         backgroundColor: activeConfig.style?.background,

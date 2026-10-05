@@ -34,7 +34,7 @@
           data-cy="copy-all-from-parent"
           :label="t(copyAllLabel)"
           button-style="commit"
-          button-size="small"
+          button-size="sm"
           force-show-label
           @click="copyAllFromParent"
         />

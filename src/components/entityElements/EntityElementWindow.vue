@@ -41,7 +41,7 @@
             element.editMetadataButton?.hasButton &&
             showEditMetadataButton
           "
-          button-size="small"
+          button-size="sm"
           :readmode-label="element.editMetadataButton.readmodeLabel"
           :editmode-label="element.editMetadataButton.editmodeLabel"
         />
@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";

@@ -33,7 +33,7 @@
           :disabled="disabled"
           :loading="loading"
           button-style="commit"
-          button-size="small"
+          button-size="sm"
           @click="() => emit('submit')"
         />
       </div>

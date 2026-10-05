@@ -23,7 +23,7 @@
         :icon-height="16"
         :disabled="!selectedMatcher"
         button-style="commit"
-        button-size="small"
+        button-size="sm"
         @click="$emit('reset')"
       />
     </div>

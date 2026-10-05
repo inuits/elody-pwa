@@ -9,7 +9,7 @@
       :data-cy="`bulk-edit-clear-${fieldKey}`"
       :icon="cleared ? DamsIcons.ArrowCircleLeft : DamsIcons.Trash"
       :button-style="cleared ? 'commit' : 'secondary'"
-      button-size="verySmall"
+      button-size="sm"
       @click="() => emit('toggle')"
     />
   </div>

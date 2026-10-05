@@ -38,7 +38,7 @@
           "
           :icon="DamsIcons.Trash"
           button-style="danger"
-          button-size="small"
+          button-size="sm"
           @click="deleteSelectedItems"
         />
       </div>
@@ -48,7 +48,7 @@
           :disabled="isDeleting"
           :label="t('confirm.delete-entities.cancel')"
           button-style="secondary"
-          button-size="small"
+          button-size="sm"
           @click="closeModal(TypeModals.BulkOperationsDeleteEntities)"
         />
       </div>

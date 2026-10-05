@@ -41,7 +41,8 @@ To change what a role means everywhere, change the role token.
   - [Tokens](foundations/tokens.md)
   - [Client theming](foundations/theming.md)
   - [Accessibility](foundations/accessibility.md)
-- `components/`: one page per component
+- `components/`
+  - [Button](components/button.md)
 - `patterns/`: per-field editing, filters, lists and other multi-component patterns
 
 ## Page template (components)
