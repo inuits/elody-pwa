@@ -256,6 +256,9 @@
   /* Relation chips + scrim */
   --color-chip-relation-bg: #6DBBDE;
   --color-chip-relation-text: var(--color-text-body); /* white was 2.14:1 */
+  /* Chosen values (not links): follow the client accent */
+  --color-chip-value-bg: var(--color-accent-light);
+  --color-chip-value-text: var(--color-accent-ink);
   --color-chip-neutral-bg: #E8EEF0;
   --color-chip-neutral-text: #003A52;
   --color-chip-count-bg: #F4F5F7;
@@ -562,5 +565,7 @@ body {
   --color-commit: var(--color-accent-accent);
   --color-focus-ring: var(--color-accent-accent);
   --color-chip-relation-text: var(--color-text-body);
+  --color-chip-value-bg: var(--color-accent-light);
+  --color-chip-value-text: var(--color-accent-ink);
   --color-input-border-hover: var(--color-neutral-50);
 }

@@ -103,6 +103,7 @@ listboxes), `-faint` (separators inside panels), `-panel` (panel outlines),
 | `--color-badge-tone{1,2,3}-{bg,text}` | entity badges, see below |
 | `--color-badge-subtype-{bg,text}` | subtype chip |
 | `--color-chip-relation-{bg,text}`, `-neutral-*`, `-count-bg` | chips |
+| `--color-chip-value-{bg,text}` | value chips (derived from the accent, so they follow the theme) |
 | `--color-scrim` | modal backdrop |
 
 ### Entity badges

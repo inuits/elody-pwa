@@ -24,12 +24,16 @@ vi.mock("@/components/base/BaseInputTextNumberDatetime.vue", () => ({
   default: { template: "<div />" },
 }));
 
-const classesFor = (autocompleteStyle: string) =>
+const classesFor = (
+  autocompleteStyle: string,
+  extraProps: Record<string, unknown> = {},
+) =>
   mount(BaseInputAutocomplete, {
     props: {
       modelValue: [{ label: "A", value: "a" }],
       options: [{ label: "A", value: "a" }],
       autocompleteStyle,
+      ...extraProps,
     } as any,
   })
     .findComponent({ name: "MockMultiselect" })
@@ -49,9 +53,23 @@ describe("BaseInputAutocomplete — design-system styling", () => {
     );
   });
 
-  it("renders tags as relation chips with the chip radius", () => {
-    const tag = classesFor("default").tag;
+  it("renders related entities as relation chips", () => {
+    const tag = classesFor("default", { relationType: "hasCreator" }).tag;
     expect(tag).toContain("!bg-chip-relation-bg");
-    expect(tag).toContain("!rounded-chip");
+    expect(tag).toContain("!text-chip-relation-text");
+  });
+
+  it("renders chosen values as theme-following value chips", () => {
+    const tag = classesFor("default").tag;
+    expect(tag).toContain("!bg-chip-value-bg");
+    expect(tag).toContain("!text-chip-value-text");
+    expect(tag).not.toContain("chip-relation");
+  });
+
+  it("uses the chip radius for both kinds", () => {
+    expect(classesFor("default").tag).toContain("!rounded-chip");
+    expect(
+      classesFor("default", { relationType: "hasCreator" }).tag,
+    ).toContain("!rounded-chip");
   });
 });

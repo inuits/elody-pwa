@@ -11,6 +11,8 @@ use the same tokens.
 - **Badge:** an entity type shown as one letter (W, E, M), always with its
   full name available to screen readers.
 - **Relation chip:** a linked entity. Clicking it navigates.
+- **Value chip:** a chosen value of a dropdown field (publication status,
+  yes/no) shown in the autocomplete tag input. Not a link.
 - Not for actions. A chip never triggers a change by itself.
 
 ## Anatomy
@@ -28,7 +30,8 @@ use the same tokens.
 | `--radius-chip` | all shapes |
 | `--color-badge-tone{1,2,3}-{bg,text}`, `--color-badge-subtype-*` | tones |
 | `--color-chip-neutral-{bg,text}` | fallback when config gives no colours, and default relation pills |
-| `--color-chip-relation-{bg,text}` | relation chips, selected-value chips |
+| `--color-chip-relation-{bg,text}` | relation chips (platform blue, same on every client) |
+| `--color-chip-value-{bg,text}` | value chips; derived from accent-light / accent-ink, so they follow the client theme |
 
 ## Configuration
 A value's chip is looked up by its **raw** value, never its translation:

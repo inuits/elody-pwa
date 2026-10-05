@@ -51,9 +51,9 @@ follow.
 |---|---|
 | `--color-accent` | section-header band, primary buttons, active markers, link hover |
 | `--color-accent-hover` | hover on primary buttons and accent-filled controls |
-| `--color-accent-light` | panel-header band; also the legacy accent background used by older components |
+| `--color-accent-light` | panel-header band, value chips (chosen dropdown values); also the legacy accent background used by older components |
 | `--color-accent-light-strong` | panel borders |
-| `--color-accent-ink` | text on the panel-header band |
+| `--color-accent-ink` | text on the panel-header band and on value chips |
 | `--color-accent-wash` | hover fill on rows, options, editable values, secondary buttons |
 | `--color-accent-tint` | background of interdependent field groups |
 | `--color-text-accent-strong` | strong accent text on white (keep it dark enough for 4.5:1) |

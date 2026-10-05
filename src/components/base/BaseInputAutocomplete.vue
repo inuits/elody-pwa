@@ -275,7 +275,11 @@ const classes = computed(() => {
     container: `${defaultContainerStyles} border-none`,
     containerActive: "outline-2 outline-focus-ring outline-offset-1",
     tagsSearch: "multiselect-tags-search !border-none focus:ring-0 p-0",
-    tag: "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded-chip !font-bold !opacity-100",
+    // Related entities are relation chips (clicking navigates); chosen
+    // values are value chips that follow the client accent.
+    tag: props.relationType
+      ? "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded-chip !font-bold !opacity-100"
+      : "multiselect-tag !bg-chip-value-bg !text-chip-value-text !rounded-chip !font-bold !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",
     ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
   };
