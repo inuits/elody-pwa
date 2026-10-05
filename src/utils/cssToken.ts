@@ -1,6 +1,6 @@
 // For third-party renderers (OpenLayers canvas, Mirador's MUI theme) that need
 // a resolved colour string instead of a CSS class. Reads from <body> so the
-// active [data-elody-client] scope applies.
+// client theme set at boot (src/utils/clientTheme.ts) applies.
 export const readCssToken = (
   name: string,
   fallback: string,

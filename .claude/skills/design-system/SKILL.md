@@ -38,7 +38,13 @@ holds the rules; it never restates values.
    mutating action.
 7. **One focus ring**, set globally on `:focus-visible`. Never add or remove
    focus outlines per component.
-8. **Commit teal is platform-fixed.** Client themes change only the accent roles.
+8. **No client data in the PWA.** Client colours live in the client's app
+   config (`customization.theme`) and are applied at runtime. Never add a
+   client scope, client name or client colour to `main.css` or the docs.
+   If you add a colour alias (`--color-x: var(--color-y)`) to `@theme`,
+   re-declare it in the `body` block too (guarded by `mainCss.test.ts`).
+9. **Commit teal is platform-fixed** by default. See
+   `foundations/theming.md` for what a theme may change.
 
 ## Which component
 

@@ -30,7 +30,7 @@ the namespace (`--color-*` gives colours, `--text-*` gives font sizes).
 | F1 | `--color-text-link` | #355BA9 (= label blue) | #1D4ED8 | #355BA9 | #355BA9 | **done:** #355BA9; legacy #1D4ED8 removed |
 | F2 | Layout tokens (`--filter-panel-width`, `--nav-rail-width`, `--touch-target-min`, `--page-pad`, gutters) | not defined | defined | not defined | defined | **done:** already defined (composite tokens) |
 | F3 | Font-weight tokens (`--weight-regular/bold/black`), `--font-mono` | not defined | defined | not defined | defined | **done:** keep |
-| F4 | vlacc badge aliases (`--badge-work/expression/manifestation`) | no (tones only; W/E/M is vlacc's mapping) | yes | no | no | **done:** no aliases; mapping lives in config |
+| F4 | Entity-named badge aliases (`--badge-work/expression/manifestation`) | no (tones only; the mapping is client config) | yes | no | no | **done:** no aliases; mapping lives in config |
 | F5 | Spacing scale `--spacing-*` | defined (2px steps) | defined | not imported (would override Tailwind `p-1`, `gap-2`…) | not imported | **done:** not imported; exact spacing via component tokens |
 | F6 | `--color-commit-hover` | mint #6BC6B3 in tokens, #0A9AA3 in specimen | #0A9AA3 | n/a | buttons use #0A9AA3 | **done:** #0A9AA3; `--color-commit-strong-hover` merged into it |
 
@@ -148,7 +148,7 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | # | Item | Decision |
 |---|---|---|
 | R1 | Translations for the primitives' copy | **done:** `modules/baseGraphql` branch `feat-165138-redesign` (nl + en) |
-| R2 | Client theming wiring | **done for aicap:** baseGraphql passes `customization.clientTheme`; aicap config sets `"aicap"` (branch `feat-165138-redesign` in both). Other clients follow later |
+| R2 | Client theming wiring | **done:** runtime theme. Colour tokens in each client's app config (`customization.theme`), passed through baseGraphql, applied on `<body>`. No client scopes or names in the PWA. First client migrated; others follow |
 | R3 | AI rules | **done:** `.claude/skills/design-system/SKILL.md` + CLAUDE.md pointer |
 
 Scope note: this branch is DS 1 (tokens, client theming, primitives).

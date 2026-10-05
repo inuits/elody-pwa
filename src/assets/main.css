@@ -192,6 +192,8 @@
   --color-surface-sunken: #EBECF0;
   --color-surface-panel-header: var(--color-accent-light);
   --color-surface-section-header: var(--color-accent);
+  --color-surface-editable-hover: var(--color-accent-wash);
+  --color-surface-group-tint: var(--color-accent-tint);
   --color-surface-group-form: #F6FCFE;
   --color-surface-row-hover: #F6FBFE;
   --color-surface-repeat-row: #F6FCFD;
@@ -209,6 +211,7 @@
   --color-text-accent-strong: var(--color-accent-dark);
   --color-text-on-inverted: #FFFFFF;
   --color-text-link: var(--color-text-light);
+  --color-text-link-hover: var(--color-accent);
   --color-accent-on-inverted: #7DE3EA;
 
   /* Borders */
@@ -240,7 +243,7 @@
   --color-search-mark: #FFFF00;
 
   /* Entity badges: generic 3-tone concept, assigned per entity type in config
-     order. vlacc maps W->tone1, E->tone2, M->tone3. */
+     order. Each client maps its own entity types onto the tones. */
   --color-badge-tone1-bg: #DAF1DC;
   --color-badge-tone1-text: #166534;
   --color-badge-tone2-bg: #C8EAF7;
@@ -536,13 +539,28 @@ input[type="number"]::-webkit-inner-spin-button {
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
-/* ── Client theme scopes (canonical — audit round 2). Apply on <body
-      data-elody-client="…">. Each scope overrides the accent set AND
-      re-declares the accent-derived aliases (var() resolves where defined). ── */
-[data-elody-client="vlacc"]{--color-accent-light:#DEF1FA;--color-accent-light-strong:#C8EAF7;--color-accent:#3BA6CB;--color-accent-hover:#1D8FB8;--color-accent-ink:#1D5C7A;--color-accent-wash:#EAF6FB;--color-accent-tint:#EDF7FC}
-[data-elody-client="pza"]{--color-accent-light:#DCF4F9;--color-accent-light-strong:#B9E4F1;--color-accent:#2A97E2;--color-accent-hover:#0057B7;--color-accent-ink:#0B5F87;--color-accent-wash:#E9F5FC;--color-accent-tint:#EDF7FD;--color-text-accent-strong:#0B5F87}
-[data-elody-client="podiumnet"]{--color-accent-light:#164C85;--color-accent-light-strong:#164C85;--color-accent:#0057b1;--color-accent-hover:#004690;--color-accent-ink:#FFFFFF;--color-accent-wash:#E8F0F9;--color-accent-tint:#EBF3FA;--color-text-accent-strong:#004690}
-[data-elody-client="damsv2"]{--color-accent-light:#164C85;--color-accent-light-strong:#164C85;--color-accent:#0057b1;--color-accent-hover:#004690;--color-accent-ink:#FFFFFF;--color-accent-wash:#E8F0F9;--color-accent-tint:#EBF3FA;--color-text-accent-strong:#004690}
-[data-elody-client="vliz"]{--color-accent-light:#465DAA;--color-accent-light-strong:#465DAA;--color-accent:#354D9B;--color-accent-hover:#2A3E80;--color-accent-ink:#FFFFFF;--color-accent-wash:#EDF0F8;--color-accent-tint:#F0F2F9;--color-text-accent-strong:#2A3E80}
-[data-elody-client="aicap"]{--color-accent-light:#F2EFEC;--color-accent-light-strong:#E5DECF;--color-accent:#9F8332;--color-accent-hover:#846C28;--color-accent-ink:#6E5A22;--color-accent-wash:#F5F1E8;--color-accent-tint:#F7F4ED;--color-text-accent-strong:#6E5A22;--color-surface-app:#FAF8F4;--color-surface:#FFFEFE;--color-text-body:#343a40;--color-text-field-label:#9F8332;--color-text-link:#C2A169;--color-highlight-bg:#BA9863}
-[data-elody-client]{--color-surface-panel-header:var(--color-accent-light);--color-surface-section-header:var(--color-accent);--color-surface-editable-hover:var(--color-accent-wash);--color-surface-group-tint:var(--color-accent-tint);--color-text-panel-header:var(--color-accent-ink);--color-text-link-hover:var(--color-accent);--color-border-panel:var(--color-accent-light-strong)}
+/* ── Client theming ───────────────────────────────────────────────────
+   A deployment's colours arrive at boot via customization.theme and are set
+   on <body> (src/utils/clientTheme.ts). CSS custom properties resolve var()
+   where they are declared, so every derived colour alias is re-declared on
+   body: an accent override then reaches the aliases too. Keep in sync with the
+   @theme blocks (guarded by src/assets/__tests__/mainCss.test.ts).
+   No client values live in this file. ── */
+body {
+  --color-text-subtitle: var(--color-text-body);
+  --color-accent-ink: var(--color-accent-dark);
+  --color-surface-panel-header: var(--color-accent-light);
+  --color-surface-section-header: var(--color-accent);
+  --color-surface-editable-hover: var(--color-accent-wash);
+  --color-surface-group-tint: var(--color-accent-tint);
+  --color-text-field-label: var(--color-text-light);
+  --color-text-panel-header: var(--color-accent-ink);
+  --color-text-accent-strong: var(--color-accent-dark);
+  --color-text-link: var(--color-text-light);
+  --color-text-link-hover: var(--color-accent);
+  --color-border-panel: var(--color-accent-light-strong);
+  --color-commit: var(--color-accent-accent);
+  --color-focus-ring: var(--color-accent-accent);
+  --color-chip-relation-text: var(--color-text-body);
+  --color-input-border-hover: var(--color-neutral-50);
+}

@@ -108,8 +108,8 @@ listboxes), `-faint` (separators inside panels), `-panel` (panel outlines),
 ### Entity badges
 Three generic tones plus a grey subtype chip. A client's config assigns a tone
 to each entity type, in config order, and never reshuffles them. Badge colours
-are not named after entity types: vlacc's Work/Expression/Manifestation
-mapping is configuration, not tokens. Never add a fourth tone.
+are not named after entity types: which type gets which tone is client
+configuration, not tokens. Never add a fourth tone.
 
 ## Type scale
 
@@ -179,6 +179,7 @@ One duration (`--transition-duration-ui`), one easing (`--ease-ui`), one press
 ## Changing a token
 
 1. Change the value in `main.css`, in its role or component section.
-2. If it's a role, check the client scopes in [theming](./theming.md), since accent
-   roles are re-declared per client.
+2. If it's a colour alias (`var(--color-…)`), also re-declare it in the
+   `body` block of `main.css` so client themes reach it (see
+   [theming](./theming.md)). A unit test fails if you forget.
 3. Update the page that documents it, if its meaning changed.

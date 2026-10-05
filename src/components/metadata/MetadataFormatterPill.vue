@@ -94,7 +94,7 @@ const entries = computed<
 );
 
 // Design-system badge tones: a client config may reference a tone instead of
-// raw hex values ({ tone: "tone1" }); vlacc maps W->tone1, E->tone2, M->tone3.
+// raw hex values ({ tone: "tone1" }); each client maps its types onto them.
 const toneSettings: Record<string, { background: string; text: string }> = {
   tone1: {
     background: "var(--color-badge-tone1-bg)",
