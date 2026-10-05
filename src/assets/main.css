@@ -252,7 +252,7 @@
 
   /* Relation chips + scrim */
   --color-chip-relation-bg: #6DBBDE;
-  --color-chip-relation-text: #FFFFFF;
+  --color-chip-relation-text: var(--color-text-body); /* white was 2.14:1 */
   --color-chip-neutral-bg: #E8EEF0;
   --color-chip-neutral-text: #003A52;
   --color-chip-count-bg: #F4F5F7;
@@ -353,6 +353,15 @@
   --text-tooltip: var(--text-label);
   --tooltip-padding: 4px 8px;
   --radius-tooltip: var(--radius-button);
+
+  /* Chip and badge (components/chip-and-badge.md) */
+  --text-chip: var(--text-label);
+  --chip-padding: 2px 8px;
+  --text-chip-lg: 1.125rem;
+  --chip-padding-lg: 4px 12px;
+  --text-badge: var(--text-micro);
+  --badge-size: 17px;
+  --badge-padding-x: 4px;
 }
 
 

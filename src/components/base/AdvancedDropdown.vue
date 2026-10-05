@@ -62,15 +62,16 @@
       </template>
       <template #tag="{ option }">
         <div
-          class="m-0.5 flex items-center rounded bg-chip-relation-bg text-chip-relation-text"
+          data-cy="dropdown-chip"
+          class="m-0.5 flex items-center rounded-chip bg-chip-relation-bg text-chip-relation-text"
         >
-          <div class="px-2 py-0.5 text-label font-bold">
+          <div class="p-(--chip-padding) text-chip font-bold">
             {{ stripHighlightTags(t(option.label)) }}
           </div>
           <button
-            class="cursor-pointer rounded-r border-none bg-transparent px-1.5 text-chip-relation-text hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-accent-accent"
+            class="cursor-pointer rounded-r-chip border-none bg-transparent px-1.5 text-chip-relation-text hover:bg-text-body/10"
             type="button"
-            :aria-label="stripHighlightTags(t(option.label))"
+            :aria-label="`${removeChipLabel} ${stripHighlightTags(t(option.label))}`"
             @click="() => removeOptionFromListOfOptions(option)"
           >
             &times;
@@ -141,7 +142,10 @@ const emit = defineEmits<{
 }>();
 
 const route = useRoute();
-const { t } = useI18n();
+const { t, te } = useI18n();
+const removeChipLabel = computed<string>(() =>
+  te("autocomplete.remove-chip") ? t("autocomplete.remove-chip") : "Remove",
+);
 const entityFormData: any = inject("entityFormData");
 const entityId = computed<string>(() => entityFormData?.id || route.params.id);
 const { isEdit } = useEditMode(entityId.value);
