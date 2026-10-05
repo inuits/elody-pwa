@@ -133,11 +133,11 @@ const commitButton: Button = {
   bgColor: "bg-commit",
   hoverStyle: {
     textColor: "hover:text-neutral-white",
-    bgColor: "hover:bg-commit-strong-hover",
+    bgColor: "hover:bg-commit-hover",
   },
   activeStyle: {
     textColor: "active:text-neutral-white",
-    bgColor: "active:bg-commit-strong-hover",
+    bgColor: "active:bg-commit-hover",
   },
   disabledStyle,
 };

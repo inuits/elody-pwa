@@ -28,7 +28,7 @@ describe("BaseButtonNew", () => {
 
   it("darkens the commit variant on hover", () => {
     expect(classesOf({ buttonStyle: "commit" })).toContain(
-      "hover:bg-commit-strong-hover",
+      "hover:bg-commit-hover",
     );
   });
 

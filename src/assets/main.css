@@ -33,7 +33,6 @@
      light/accent-light surface now, so subtitles read in body ink. */
   --color-text-subtitle: var(--color-text-body);
   --color-text-placeholder: #9CA3AF;
-  --color-text-link: #1D4ED8;
 
   --color-background-normal: #F2F7F8;
   --color-background-light: #FFFFFF;
@@ -222,8 +221,7 @@
 
   /* Commit / focus (platform-fixed, never themed) */
   --color-commit: var(--color-accent-accent);
-  --color-commit-hover: var(--color-accent-normal);
-  --color-commit-strong-hover: #0A9AA3;
+  --color-commit-hover: #0A9AA3;
   --color-focus-ring: var(--color-accent-accent);
 
   /* Semantic (platform-fixed) */
@@ -244,11 +242,11 @@
   /* Entity badges: generic 3-tone concept, assigned per entity type in config
      order. vlacc maps W->tone1, E->tone2, M->tone3. */
   --color-badge-tone1-bg: #DAF1DC;
-  --color-badge-tone1-text: #15803d;
+  --color-badge-tone1-text: #166534;
   --color-badge-tone2-bg: #C8EAF7;
   --color-badge-tone2-text: #355BA9;
   --color-badge-tone3-bg: #FDEBD7;
-  --color-badge-tone3-text: #B95000;
+  --color-badge-tone3-text: #9A4300;
   --color-badge-subtype-bg: #E8EEF0;
   --color-badge-subtype-text: #505F79;
 
