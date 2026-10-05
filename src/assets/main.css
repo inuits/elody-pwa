@@ -341,6 +341,12 @@
   /* Checkbox (components/checkbox.md) */
   --checkbox-hit-area: var(--touch-target-min);
   --checkbox-hit-area-compact: 24px;
+
+  /* Input (components/input.md) */
+  --text-input: var(--text-value);
+  --input-padding: 5px 8px;
+  --color-input-border-hover: var(--color-neutral-50); /* one step darker */
+  --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
 }
 
 

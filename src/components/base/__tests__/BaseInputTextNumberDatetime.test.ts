@@ -84,8 +84,12 @@ describe("BaseInputTextNumberDatetime", () => {
       expect(textInput().classes()).toContain("rounded-input");
     });
 
-    it("renders the value at the value text size", () => {
-      expect(textInput().classes()).toContain("text-value");
+    it("renders the value at the input text size", () => {
+      expect(textInput().classes()).toContain("text-input");
+    });
+
+    it("pads with the input padding token", () => {
+      expect(textInput().classes()).toContain("p-(--input-padding)");
     });
 
     it("draws the default border when bordered", () => {
@@ -93,7 +97,9 @@ describe("BaseInputTextNumberDatetime", () => {
     });
 
     it("darkens the border one step on hover", () => {
-      expect(textInput().classes()).toContain("hover:border-border-dashed");
+      expect(textInput().classes()).toContain(
+        "hover:border-input-border-hover",
+      );
     });
 
     it("marks itself invalid for assistive tech", () => {
@@ -120,6 +126,73 @@ describe("BaseInputTextNumberDatetime", () => {
       expect(textInput({ ariaLabel: "Jaar" }).attributes("aria-label")).toBe(
         "Jaar",
       );
+    });
+
+    it("uses the muted surface and disabled ink when disabled", () => {
+      expect(textInput({ disabled: true }).classes()).toEqual(
+        expect.arrayContaining([
+          "disabled:bg-surface-muted",
+          "disabled:text-text-disabled",
+        ]),
+      );
+    });
+
+    describe("read-only", () => {
+      it("is read-only for the browser", () => {
+        expect(textInput({ readonly: true }).attributes("readonly")).toBeDefined();
+      });
+
+      it("shows a plain value without border or fill", () => {
+        expect(textInput({ readonly: true }).classes()).toEqual(
+          expect.arrayContaining(["border-transparent", "bg-transparent"]),
+        );
+      });
+    });
+
+    describe("error message", () => {
+      const withError = (props: Record<string, unknown> = {}) =>
+        mountComponent({ type: "text", errorMessage: "ISBN is ongeldig", ...props });
+
+      it("renders the message below the input as an alert", () => {
+        const alert = withError().find('[role="alert"]');
+        expect(alert.text()).toBe("ISBN is ongeldig");
+      });
+
+      it("links the message to the input", () => {
+        const wrapper = withError();
+        expect(
+          wrapper.find('[data-cy="base-input-text"]').attributes("aria-describedby"),
+        ).toBe(wrapper.find('[role="alert"]').attributes("id"));
+      });
+
+      it("marks the input invalid with a danger border", () => {
+        const input = withError().find('[data-cy="base-input-text"]');
+        expect(input.attributes("aria-invalid")).toBe("true");
+        expect(input.classes()).toContain("border-danger");
+      });
+
+      it("keeps an external describedBy alongside its own message", () => {
+        const wrapper = withError({ describedBy: "isbn-hint" });
+        const ids = wrapper
+          .find('[data-cy="base-input-text"]')
+          .attributes("aria-describedby")
+          ?.split(" ");
+        expect(ids).toEqual([
+          "isbn-hint",
+          wrapper.find('[role="alert"]').attributes("id"),
+        ]);
+      });
+
+      it("renders no alert without a message", () => {
+        expect(mountComponent({ type: "text" }).find('[role="alert"]').exists()).toBe(false);
+      });
+    });
+
+    it("keeps the textarea at least three rows high", () => {
+      const textarea = mountComponent({ type: "textarea" }).find(
+        '[data-cy="base-input-text-area"]',
+      );
+      expect(textarea.classes()).toContain("min-h-(--textarea-min-height)");
     });
 
     it("lets the textarea resize vertically only", () => {

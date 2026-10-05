@@ -88,6 +88,19 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | C2 | Indeterminate | not specified | yes | no | no | **done:** later, with "Selecteer pagina" |
 | C3 | Label size | not specified | 12.5px | inherits | inherits | **done:** inherits from context |
 
+### 2.3 Input: [final page](../components/input.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| I1 | Hover border | one step darker | #B3BAC5 | n/a | #B3BAC5 | **done:** neutral-50 #C1C7D0 via `--color-input-border-hover` |
+| I2 | Disabled | muted surface + disabled ink | ink unchanged | legacy bg | legacy bg | **done:** handoff |
+| I3 | Read-only | no border, plain value | yes | no | no | **done:** `readonly` prop |
+| I4 | Error message | message below, aria-describedby | role=alert, not linked | caller-rendered | caller-rendered | **done:** `errorMessage` prop, auto-linked |
+| I5 | Textarea minimum | 3 rows | free | rows=3 | rows=3 | **done:** `--textarea-min-height` |
+| I6 | Variants | one bordered | one | three | three | **done:** keep three on tokens; revisit in filters subtask |
+| I7 | Component tokens | — | — | — | literals | **done:** `--text-input`, `--input-padding` |
+| I8 | `src/inputStyles.ts` | — | — | — | unused copy | **done:** deleted |
+
 Scope note: this branch is subtask 1 of the epic (tokens + primitives). The
 Filters section below belongs to a later subtask.
 

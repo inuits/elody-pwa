@@ -27,11 +27,9 @@
       :min="min"
       :max="max"
       :disabled="disabled"
+      :readonly="readonly"
       :placeholder="placeholder"
-      @keydown="handleKeydown"
-      @focus="disableVirtualKeyboard"
       @change.stop
-      @click="openCalendar"
       @input="handleBadNumberInput"
     />
     <input
@@ -48,11 +46,12 @@
     <textarea
       data-cy="base-input-text-area"
       v-else-if="type === 'textarea'"
-      class="w-full h-full resize-y"
+      class="w-full h-full resize-y min-h-(--textarea-min-height)"
       :class="fieldClasses"
       v-bind="a11yAttrs"
       v-model="inputValue"
       :disabled="disabled"
+      :readonly="readonly"
       :placeholder="placeholder"
       @change.stop
       @click.stop
@@ -64,11 +63,19 @@
       :class="fieldClasses"
       v-bind="a11yAttrs"
     ></BaseResizableTextarea>
+    <p
+      v-if="errorMessage"
+      :id="errorId"
+      role="alert"
+      class="mt-0.5 text-hint text-danger"
+    >
+      {{ errorMessage }}
+    </p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import BaseDatePicker from "./BaseDatePicker.vue";
 import BaseResizableTextarea from "./BaseResizableTextarea.vue";
 
@@ -83,35 +90,30 @@ type Input = {
   borderColor: string;
   disabledStyle: PseudoStyle;
 };
+const disabledStyle: PseudoStyle = {
+  textColor: "disabled:text-text-disabled",
+  bgColor: "disabled:bg-surface-muted",
+  borderColor: "disabled:border-border-subtle",
+};
+// Borderless field on the light surface (filters, pagination).
 const defaultInput: Input = {
   textColor: "text-text-body",
-  bgColor: "bg-background-light",
-  borderColor: "border-none",
-  disabledStyle: {
-    textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-background-normal",
-    borderColor: "disabled:border-none",
-  },
+  bgColor: "bg-surface",
+  borderColor: "border-transparent",
+  disabledStyle: { ...disabledStyle, borderColor: "disabled:border-transparent" },
 };
+// The design-system input: 1px default border, one step darker on hover.
 const defaultWithBorderInput: Input = {
-  textColor: defaultInput.textColor,
-  bgColor: defaultInput.bgColor,
-  borderColor: "border-border-default hover:border-border-dashed",
-  disabledStyle: {
-    textColor: defaultInput.disabledStyle.textColor,
-    bgColor: defaultInput.disabledStyle.bgColor,
-    borderColor: "disabled:border-text-disabled",
-  },
+  textColor: "text-text-body",
+  bgColor: "bg-surface",
+  borderColor: "border-border-default hover:border-input-border-hover",
+  disabledStyle,
 };
 const defaultWithDarkBackgroundInput: Input = {
-  textColor: defaultInput.textColor,
+  textColor: "text-text-body",
   bgColor: "bg-accent-tint",
-  borderColor: defaultInput.borderColor,
-  disabledStyle: {
-    textColor: defaultInput.disabledStyle.textColor,
-    bgColor: defaultInput.disabledStyle.bgColor,
-    borderColor: defaultInput.disabledStyle.borderColor,
-  },
+  borderColor: "border-transparent",
+  disabledStyle: { ...disabledStyle, borderColor: "disabled:border-transparent" },
 };
 
 type InputStyle =
@@ -133,7 +135,11 @@ const props = withDefaults(
     min?: number;
     max?: number;
     disabled?: boolean;
+    readonly?: boolean;
     invalid?: boolean;
+    // Rendered below the field as role="alert" and linked automatically.
+    errorMessage?: string;
+    // An external hint or message; kept alongside errorMessage.
     describedBy?: string;
     ariaLabel?: string;
     isValidPredicate?: (
@@ -145,7 +151,9 @@ const props = withDefaults(
     type: "text",
     step: 1,
     disabled: false,
+    readonly: false,
     invalid: false,
+    errorMessage: undefined,
     describedBy: undefined,
     ariaLabel: undefined,
     isValidPredicate: () => true,
@@ -171,24 +179,36 @@ const inputValue = computed<string | number | boolean | undefined>({
 
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 
-// Design-system input: 5px radius, 13px value, 5/8px padding; focus is the
-// global :focus-visible ring, so the forms-plugin ring is suppressed here.
+const errorId = `input-error-${useId()}`;
+const isInvalid = computed<boolean>(() => props.invalid || !!props.errorMessage);
+
+// Design-system input; values come from the input component tokens. Focus is
+// the global :focus-visible ring, so the forms-plugin ring is suppressed.
 const fieldClasses = computed<string[]>(() => {
   const style = selectedInputStyle.value;
+  const shape =
+    "border rounded-input text-input p-(--input-padding) placeholder:text-text-placeholder focus:ring-0";
+  if (props.readonly)
+    return [shape, style.textColor, "bg-transparent border-transparent"];
   return [
-    "border rounded-input text-value py-[5px] px-2 placeholder:text-text-placeholder focus:ring-0",
+    shape,
     style.textColor,
     style.bgColor,
-    props.invalid ? "border-danger hover:border-danger" : style.borderColor,
+    isInvalid.value ? "border-danger hover:border-danger" : style.borderColor,
     style.disabledStyle.textColor,
     style.disabledStyle.bgColor,
     style.disabledStyle.borderColor,
   ];
 });
 
+const describedByIds = computed<string | undefined>(() => {
+  const ids = [props.describedBy, props.errorMessage ? errorId : undefined];
+  return ids.filter(Boolean).join(" ") || undefined;
+});
+
 const a11yAttrs = computed(() => ({
-  "aria-invalid": props.invalid ? "true" : undefined,
-  "aria-describedby": props.describedBy,
+  "aria-invalid": isInvalid.value ? "true" : undefined,
+  "aria-describedby": describedByIds.value,
   "aria-label": props.ariaLabel,
 }));
 
