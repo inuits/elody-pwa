@@ -64,7 +64,6 @@
       :clearable="!isFieldRequired"
       :multiple="field.multiple || false"
       :disable="fieldEditIsDisabled"
-      :show-menu-header="false"
       style-type="defaultWithBorder"
     />
     <TableInputField

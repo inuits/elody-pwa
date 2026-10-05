@@ -128,7 +128,20 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | P4 | Fallback colour | — | — | slate-800 | slate-800 | **done:** neutral chip tokens |
 | P5 | Default relation pill | neutral chip | — | — | hex #d6e2f0/#1f3a5f | **done:** neutral chip tokens |
 | P6 | Tone + icon config | — | — | tone replaced the whole config entry | same (bug) | **done:** merged; icon/shape/letter kept |
-| P7 | Dropdown chip remove name | "Verwijder {waarde}" | same | value only | value only | **done:** `autocomplete.remove-chip` + value |
+| P7 | Dropdown chip remove name | "Verwijder {waarde}" | same | value only | value only | **superseded** by D4 (multi select shows a count, no chips) |
+
+### 2.7 Dropdown: [final page](../components/dropdown.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| D0 | Trigger, popup, option visuals | 5px / 8px + overlay / 12.5px + hover wash | same, popup padding 4px | — | handoff (earlier commit) | **done:** handoff |
+| D1 | Search | above 10 options | above 10 | always | always | **done:** library search, only above 10 |
+| D2 | "— Geen waarde" | first option in non-required single selects | opt-in | via ✕ only | ✕ only | **done:** leading option when `clearable` |
+| D3 | Loading | 3 skeleton rows, aria-busy | same | none | none | **done:** `loading` prop |
+| D4 | Multi trigger | "{n} gekozen" + checkboxes | checkboxes | chips | chips | **done:** handoff |
+| D5 | Selected option | check, wash on hover only | wash | wash | wash + bold | **done:** check only |
+| D6 | Empty list | "Geen opties" | same | library default | library default | **done:** `dropdown.no-options` |
+| D7 | Cleanup | — | — | — | console.log, unused `showMenuHeader` | **done:** removed |
 
 Scope note: this branch is DS 1 (tokens, client theming, primitives).
 Later subtasks:

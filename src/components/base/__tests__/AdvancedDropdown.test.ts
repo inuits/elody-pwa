@@ -35,10 +35,26 @@ vi.mock("@/components/SanitizedHtml.vue", () => ({
 vi.mock("vue3-select-component", () => ({
   default: {
     name: "VueSelect",
-    props: ["classes"],
-    template: `<div><slot name="tag" :option="{ label: 'Monografie', value: 'monograph' }" /></div>`,
+    props: [
+      "classes",
+      "options",
+      "isSearchable",
+      "isLoading",
+      "isMulti",
+      "closeOnSelect",
+      "hideSelectedOptions",
+    ],
+    template: `<div>
+      <slot name="tag" :option="{ label: 'Monografie', value: 'monograph' }" />
+      <slot name="tag" :option="{ label: 'Tijdschrift', value: 'journal' }" />
+      <div v-for="(option, index) in options" :key="option.value" data-cy="option">
+        <slot name="option" :option="option" :index="index" :is-selected="option.value === 'monograph'" :is-focused="false" :is-disabled="false" />
+      </div>
+      <div data-cy="no-options"><slot name="no-options" /></div>
+    </div>`,
   },
 }));
+
 
 const getSelect = (props: Record<string, unknown> = {}) =>
   shallowMount(AdvancedDropdown, {
@@ -71,34 +87,97 @@ describe("AdvancedDropdown", () => {
   });
 });
 
-describe("AdvancedDropdown — selected-value chips", () => {
-  const tag = () =>
-    mount(AdvancedDropdown, {
-      global: { stubs: { unicon: true } },
-      props: {
-        modelValue: ["monograph"],
-        options: [{ label: "Monografie", value: "monograph" }],
-        multiple: true,
-      },
-    });
+const options = (n: number) =>
+  Array.from({ length: n }, (_, i) => ({ label: `Optie ${i}`, value: `o${i}` }));
 
-  it("renders as a relation chip with the chip tokens", () => {
-    const chip = tag().find('[data-cy="dropdown-chip"]');
-    expect(chip.classes()).toEqual(
-      expect.arrayContaining(["rounded-chip", "bg-chip-relation-bg"]),
-    );
-    expect(chip.find("div").classes()).toEqual(
-      expect.arrayContaining(["text-chip", "font-bold", "p-(--chip-padding)"]),
-    );
+const mountDropdown = (props: Record<string, unknown> = {}) =>
+  mount(AdvancedDropdown, {
+    props: { modelValue: undefined, options: options(3), ...props },
+    global: { stubs: { unicon: true } },
   });
 
-  it("names the remove button as a removal", () => {
-    expect(tag().find("button").attributes("aria-label")).toBe(
-      "Remove Monografie",
-    );
+const select = (props: Record<string, unknown> = {}) =>
+  mountDropdown(props).findComponent({ name: "VueSelect" });
+
+describe("AdvancedDropdown — search", () => {
+  it("offers search above ten options", () => {
+    expect(select({ options: options(11) }).props("isSearchable")).toBe(true);
   });
 
-  it("hovers the remove button with a body-ink wash", () => {
-    expect(tag().find("button").classes()).toContain("hover:bg-text-body/10");
+  it("hides search for ten options or fewer", () => {
+    expect(select({ options: options(10) }).props("isSearchable")).toBe(false);
+  });
+});
+
+describe("AdvancedDropdown — empty choice", () => {
+  it("starts a non-required single select with the empty-value option", () => {
+    const first = select().props("options")[0];
+    expect(first.label).toBe("No value");
+  });
+
+  it("has no empty-value option when a value is required", () => {
+    expect(select({ clearable: false }).props("options")).toHaveLength(3);
+  });
+
+  it("has no empty-value option in a multi select", () => {
+    expect(select({ multiple: true }).props("options")).toHaveLength(3);
+  });
+
+  it("clears the value when the empty-value option is picked", async () => {
+    const wrapper = mountDropdown({ modelValue: "o1" });
+    const vueSelect = wrapper.findComponent({ name: "VueSelect" });
+    const none = vueSelect.props("options")[0].value;
+    await vueSelect.vm.$emit("update:modelValue", none);
+    expect(wrapper.emitted("update:modelValue")?.at(-1)).toEqual([""]);
+  });
+});
+
+describe("AdvancedDropdown — loading and empty", () => {
+  it("shows three option-shaped skeletons while loading", () => {
+    const skeletons = mountDropdown({ loading: true, options: [] }).findAll(
+      '[data-cy="option-skeleton"]',
+    );
+    expect(skeletons).toHaveLength(3);
+  });
+
+  it("marks itself busy while loading", () => {
+    expect(
+      mountDropdown({ loading: true }).find('[data-cy="base-dropdown-new"]').attributes("aria-busy"),
+    ).toBe("true");
+  });
+
+  it("says there are no options when the list is empty", () => {
+    expect(
+      mountDropdown({ options: [] }).find('[data-cy="no-options"]').text(),
+    ).toBe("No options");
+  });
+});
+
+describe("AdvancedDropdown — multi select", () => {
+  const multi = () =>
+    mountDropdown({ multiple: true, modelValue: ["monograph", "journal"] });
+
+  it("summarises the selection as a count in the trigger", () => {
+    const counts = multi().findAll('[data-cy="dropdown-count"]');
+    expect(counts).toHaveLength(1);
+    expect(counts[0].text()).toBe("2 selected");
+  });
+
+  it("renders a checkbox in each option", () => {
+    expect(multi().findAll('[data-cy="option"] input[type="checkbox"]')).toHaveLength(3);
+  });
+
+  it("keeps the menu open and the selected options listed", () => {
+    const vueSelect = multi().findComponent({ name: "VueSelect" });
+    expect(vueSelect.props("closeOnSelect")).toBe(false);
+    expect(vueSelect.props("hideSelectedOptions")).toBe(false);
+  });
+});
+
+describe("AdvancedDropdown — selected option", () => {
+  it("marks the selected option with a check", () => {
+    const optionEls = mountDropdown({ options: [{ label: "Monografie", value: "monograph" }], clearable: false })
+      .findAll('[data-cy="option"]');
+    expect(optionEls[0].find('[data-cy="option-check"]').exists()).toBe(true);
   });
 });

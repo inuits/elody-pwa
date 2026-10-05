@@ -48,6 +48,7 @@ To change what a role means everywhere, change the role token.
   - [Tooltip](components/tooltip.md)
   - [Spinner](components/spinner.md)
   - [Chip and badge](components/chip-and-badge.md)
+  - [Dropdown](components/dropdown.md)
 - `patterns/`: per-field editing, filters, lists and other multi-component patterns
 
 ## Page template (components)
