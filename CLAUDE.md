@@ -11,3 +11,9 @@ Vue 3 PWA frontend. See the repo-root `../CLAUDE.md` for monorepo-wide stack, ar
 - Flag any section inferred (not verified against source) with a `⚠️` note so it can be tightened later.
 
 Currently documented: Dynamic Forms (`.claude/features/dynamicForm.md`).
+
+## Design System
+
+- Any UI or styling change: load the `design-system` skill first (`.claude/skills/design-system/`).
+- Token values live only in `src/assets/main.css`; component pages are in `docs/design-system/`.
+- No hex/px literals in components. Use role tokens and per-component tokens.

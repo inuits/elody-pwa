@@ -27,10 +27,15 @@ panel-header text through `--color-accent-ink`.
 surfaces, its own body ink, field-label and link colours, and its own
 highlight background.
 
-> **Not yet active.** `customization.clientTheme` is not passed through the
-> app-config endpoint and no client sets it yet. Until then every client gets
-> the `:root` defaults, plus the legacy colour rewrite from its
-> `theme.txt` at build time. Wiring this is a separate task.
+`customization.clientTheme` is set in each client's app config
+(for example `clientTheme: "aicap"` in `aicapAppConfig.ts`) and passed through
+baseGraphql's app-config endpoint. **Active so far: aicap.** Clients without
+a `clientTheme` get the `:root` defaults.
+
+Each client's `theme.txt` still rewrites the legacy colour variables in
+`main.css` at build time (see the client's Dockerfile). The scope and
+`theme.txt` must agree. Retiring `theme.txt` in favour of the scopes is a
+later step.
 
 ## Rules
 - Derive hover as a darkened accent.

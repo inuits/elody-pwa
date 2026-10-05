@@ -143,6 +143,14 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | D6 | Empty list | "Geen opties" | same | library default | library default | **done:** `dropdown.no-options` |
 | D7 | Cleanup | — | — | — | console.log, unused `showMenuHeader` | **done:** removed |
 
+## 4. Remaining DS 1 items
+
+| # | Item | Decision |
+|---|---|---|
+| R1 | Translations for the primitives' copy | **done:** `modules/baseGraphql` branch `feat-165138-redesign` (nl + en) |
+| R2 | Client theming wiring | **done for aicap:** baseGraphql passes `customization.clientTheme`; aicap config sets `"aicap"` (branch `feat-165138-redesign` in both). Other clients follow later |
+| R3 | AI rules | **done:** `.claude/skills/design-system/SKILL.md` + CLAUDE.md pointer |
+
 Scope note: this branch is DS 1 (tokens, client theming, primitives).
 Later subtasks:
 
