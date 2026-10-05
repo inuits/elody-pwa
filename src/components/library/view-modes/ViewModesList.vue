@@ -80,7 +80,7 @@
             :item-id="entity.id"
             :item-type="entity.type"
             :bulk-operations-context="bulkOperationsContext"
-            :context-menu-actions="entity.contextMenu"
+            :buttons="entity.buttons"
             :entityTypename="entity.entityTypename"
             :teaser-metadata="entity.teaserMetadata"
             :intialValues="entity.intialValues"
@@ -140,6 +140,9 @@
           :entity-id="previewForEntity"
           :parent-ids="parentEntityIdentifiers"
           :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+          :relation-type="relationType"
+          :parent-entity-type="parentEntityType"
+          :refetch-entities="refetchEntities"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -189,6 +192,7 @@ const props = withDefaults(
     openEntityInDetailModal?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
+    parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
     relationType?: string;
     enableSelection: boolean;
@@ -244,6 +248,7 @@ const {
   previewComponentEnabled,
   previewForEntity,
   togglePreviewComponent,
+  openPreviewComponent,
   closePreviewComponent,
   isPreviewComponentEnabledForListItem,
 } = usePreviewComponent(props, refEntities);
@@ -252,13 +257,13 @@ const {
   getLinkSettings,
   isEntityDisabled,
   entityWrapperHandler,
-  getContextMenu,
+  getButtons,
   isPreviewElement,
 } = useEntityListHelpers(
   props,
   refEntities,
   previewComponentEnabled,
-  togglePreviewComponent,
+  openPreviewComponent,
 );
 
 const { trackSeen } = useEntityPageConfig();
@@ -312,7 +317,7 @@ const processedEntities = computed(() => {
     );
     const mediaFilename = getMediaFilenameFromEntity(entity);
     const thumbnail = getThumbnail(entity);
-    const contextMenu = getContextMenu(entity);
+    const buttons = getButtons(entity);
 
     const memoKey = [
       entity.intialValues,
@@ -335,7 +340,7 @@ const processedEntities = computed(() => {
       componentPath: linkSettings.path,
       forcedNavigationPath: forcedLinkSettings.path,
 
-      contextMenu,
+      buttons,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
       intialValues: entity.intialValues,

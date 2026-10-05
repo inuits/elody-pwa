@@ -69,7 +69,7 @@
               v-model:value="metadata.value"
               :input-field="metadata.inputField"
               :entity-uuid="formId"
-              :can="metadata.can"
+              :permitted="metadata.permitted"
             />
 
             <entity-element-list

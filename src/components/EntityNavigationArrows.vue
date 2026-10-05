@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -68,8 +68,11 @@ const nextEntity = computed<Entity | undefined>(() =>
   isSingleEntityPage.value ? getNextEntity(entityId.value) : undefined,
 );
 
+const ownsRouteState: boolean = inject("OwnsRouteState", true);
+
 const visible = computed(
   () =>
+    ownsRouteState &&
     isSingleEntityPage.value &&
     showNavigationArrows.value &&
     hasNavigationEntities(),

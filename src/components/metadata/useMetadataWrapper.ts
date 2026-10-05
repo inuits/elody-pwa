@@ -20,7 +20,6 @@ import {
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
-import { usePermissions } from "@/composables/usePermissions";
 import { getTranslatedMessage } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useFieldLock } from "@/composables/useFieldLock";
@@ -106,6 +105,7 @@ export const useMetadataWrapper = (
     return getVeeValidateKey({
       metadata: props.metadata,
       linkedEntityId: props.linkedEntityId,
+      relationType: props.relationType,
       isEdit: props.isEdit,
       repeatablePanelConfig: props.repeatablePanelConfig,
     });
@@ -116,45 +116,12 @@ export const useMetadataWrapper = (
     () => metadataKey,
   );
 
-  const { setExtraVariables, fetchAdvancedPermissions } = usePermissions();
-
   const determineFieldPermissions = async (): Promise<void> => {
-    const {
-      can: viewPermissions = [],
-      canEdit: editPermissions = [],
-      key: fieldKey,
-    } = props.metadata;
+    fieldIsEditableByUser.value = !props.metadata.readOnly;
+    if (!fieldIsEditableByUser.value)
+      removeFieldFromEditableList(props.metadata.key);
 
-    const hasViewPermissions = viewPermissions.length > 0;
-    const hasEditPermissions = editPermissions.length > 0;
-
-    if (!hasViewPermissions && !hasEditPermissions) {
-      fieldIsPermittedToBeSeenByUser.value = true;
-      fieldIsEditableByUser.value = true;
-      return;
-    }
-
-    const requiredPermissions = [
-      ...new Set([...viewPermissions, ...editPermissions]),
-    ];
-
-    const permissionResults =
-      await fetchAdvancedPermissions(requiredPermissions);
-
-    const isPermitted = (permissions: string[]): boolean =>
-      permissions.some((permission) => permissionResults[permission]);
-
-    fieldIsPermittedToBeSeenByUser.value = !hasViewPermissions
-      ? true
-      : isPermitted(viewPermissions);
-
-    fieldIsEditableByUser.value = !hasEditPermissions
-      ? true
-      : isPermitted(editPermissions);
-
-    if (!fieldIsEditableByUser.value) {
-      removeFieldFromEditableList(fieldKey);
-    }
+    fieldIsPermittedToBeSeenByUser.value = props.metadata.permitted !== false;
   };
 
   const removeFieldFromEditableList = (fieldKey: string): void => {
@@ -242,16 +209,6 @@ export const useMetadataWrapper = (
     },
   });
 
-  watch(
-    () => props.formId,
-    () =>
-      setExtraVariables({
-        parentEntityId: props.formId,
-        childEntityId: "",
-      }),
-    { immediate: true },
-  );
-
   const multiSelectTypes = [
     InputFieldTypes.DropdownMultiselectMetadata,
     InputFieldTypes.DropdownMultiselectRelations,
@@ -270,6 +227,10 @@ export const useMetadataWrapper = (
 
     if (multiSelectTypes.includes(fieldType.value) && newValue === "") {
       newValue = [];
+    }
+
+    if (fieldType.value === InputFieldTypes.Checkbox && newValue === "") {
+      newValue = false;
     }
 
     // Fields bound to relationValues (relation tables and relation dropdowns)

@@ -495,6 +495,7 @@ export enum BulkOperationTypes {
   DeleteEntities = 'deleteEntities',
   DeleteRelations = 'deleteRelations',
   DownloadMediafiles = 'downloadMediafiles',
+  DownloadMediafilesDirectly = 'downloadMediafilesDirectly',
   Edit = 'edit',
   ExportCsv = 'exportCsv',
   ExportCsvOfMediafilesFromAsset = 'exportCsvOfMediafilesFromAsset',
@@ -822,6 +823,7 @@ export enum DamsIcons {
   SquareFull = 'SquareFull',
   Swatchbook = 'Swatchbook',
   Tag = 'Tag',
+  Sitemap = 'Sitemap',
   Table = 'Table',
   Text = 'Text',
   Trash = 'Trash',
@@ -2341,6 +2343,40 @@ export type MenuWrapper = {
   menu: Menu;
 };
 
+export type MergeEvaluation = {
+  __typename?: 'MergeEvaluation';
+  details?: Maybe<Scalars['JSON']>;
+  id: Scalars['String'];
+  immutableFields: Array<MergeImmutableField>;
+  score: Scalars['Int'];
+  status: MergeEvaluationStatus;
+  strategy: MergeSurvivorStrategy;
+};
+
+export type MergeImmutableField = {
+  __typename?: 'MergeImmutableField';
+  identityValue?: Maybe<Scalars['String']>;
+  key: Scalars['String'];
+};
+
+export enum MergeEvaluationStatus {
+  Invalid = 'invalid',
+  Unknown = 'unknown',
+  Valid = 'valid'
+}
+
+export enum MergeSurvivorStrategy {
+  IdentifierIntegrity = 'identifierIntegrity'
+}
+
+export type MergeSurvivorSuggestionConfig = {
+  __typename?: 'MergeSurvivorSuggestionConfig';
+  autoSelect?: Maybe<Scalars['Boolean']>;
+  hiddenVerdicts?: Maybe<Array<MergeEvaluationStatus>>;
+  requireRecommendedSurvivor?: Maybe<Scalars['Boolean']>;
+  strategy: MergeSurvivorStrategy;
+};
+
 export type Metadata = {
   __typename?: 'Metadata';
   immutable?: Maybe<Scalars['Boolean']>;
@@ -3858,6 +3894,7 @@ export enum ViewModes {
   ViewModesGrid = 'ViewModesGrid',
   ViewModesList = 'ViewModesList',
   ViewModesMap = 'ViewModesMap',
+  ViewModesPipeline = 'ViewModesPipeline',
   /** @deprecated We use the new mediaviewer integrated in previews */
   ViewModesMedia = 'ViewModesMedia'
 }
@@ -4032,9 +4069,32 @@ export type RelationInput = {
   value?: InputMaybe<Scalars['String']>;
 };
 
+export enum ActionButtonResult {
+  DownloadFile = 'DownloadFile',
+  None = 'None',
+  RefetchParent = 'RefetchParent'
+}
+
+export type ActionButton = {
+  __typename?: 'ActionButton';
+  can?: Maybe<Array<Maybe<Scalars['String']>>>;
+  hideIf?: Maybe<Array<Maybe<Scalars['String']>>>;
+  icon: Scalars['String'];
+  label: Scalars['String'];
+  onResult: ActionButtonResult;
+  query?: Maybe<Scalars['String']>;
+  variables?: Maybe<Scalars['JSON']>;
+};
+
+export type Buttons = {
+  __typename?: 'Buttons';
+  button?: Maybe<ActionButton>;
+  contextMenu?: Maybe<ContextMenuActions>;
+};
+
 export type TeaserMetadata = {
   __typename?: 'teaserMetadata';
-  contextMenuActions?: Maybe<ContextMenuActions>;
+  buttons?: Maybe<Buttons>;
   link?: Maybe<PanelLink>;
   metaData?: Maybe<PanelMetaData>;
   relationMetaData?: Maybe<PanelRelationMetaData>;
@@ -5466,7 +5526,7 @@ export type JobStatusForEntityQueryVariables = {
   type: string;
 };
 
-export const JobStatusForEntityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"JobStatusForEntity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobStatusForEntity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasJob"}},{"kind":"Field","name":{"kind":"Name","value":"jobId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<JobStatusForEntityQuery, JobStatusForEntityQueryVariables>;
+export const JobStatusForEntityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"JobStatusForEntity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"jobStatusForEntity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasJob"}},{"kind":"Field","name":{"kind":"Name","value":"jobId"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"info"}}]}}]}}]} as unknown as DocumentNode<JobStatusForEntityQuery, JobStatusForEntityQueryVariables>;
 export const GetEntityByIdDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getEntityById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"type"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Entity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"type"},"value":{"kind":"Variable","name":{"kind":"Name","value":"type"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"fullEntity"}}]}}]}},...FullEntityFragmentDoc.definitions,...FullAssetFragmentDoc.definitions,...EditMetadataButtonFragmentDoc.definitions,...ValidationFragmentDoc.definitions,...InputfieldFragmentDoc.definitions,...FullAssetPartFragmentDoc.definitions,...FullSetFragmentDoc.definitions,...FullMediafileFragmentDoc.definitions,...FullPersonFragmentDoc.definitions,...FullPhotographerFragmentDoc.definitions,...FullCreatorFragmentDoc.definitions,...FullLanguageFragmentDoc.definitions,...FullLicenseFragmentDoc.definitions,...FullTagFragmentDoc.definitions,...FullUserFragmentDoc.definitions,...FullTypeFragmentDoc.definitions,...FullCollectionFormFragmentDoc.definitions,...FullInstitutionFragmentDoc.definitions,...FullTripleFragmentDoc.definitions,...FullExternalRecordFragmentDoc.definitions,...FullDownloadFragmentDoc.definitions,...FullSavedSearchFragmentDoc.definitions,...FullJobFragmentDoc.definitions]} as unknown as DocumentNode<GetEntityByIdQuery, GetEntityByIdQueryVariables>;
 export const GetDirectoriesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getDirectories"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"dir"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Directories"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"dir"},"value":{"kind":"Variable","name":{"kind":"Name","value":"dir"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"dir"}},{"kind":"Field","name":{"kind":"Name","value":"has_subdirs"}},{"kind":"Field","name":{"kind":"Name","value":"parent"}}]}}]}}]} as unknown as DocumentNode<GetDirectoriesQuery, GetDirectoriesQueryVariables>;
 export const GetPreviewComponentsDocument = {"kind":"Document", "definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"getPreviewComponents"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"entityType"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"PreviewComponents"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"entityType"},"value":{"kind":"Variable","name":{"kind":"Name","value":"entityType"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Asset"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"previewForAsset"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MediaFileEntity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"previewForMediafile"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"MyMedia"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"previewForMyMedia"}}]}}]}}]}},...PreviewForAssetFragmentDoc.definitions,...PreviewForMediafileFragmentDoc.definitions,...PreviewForMyMediaFragmentDoc.definitions]} as unknown as DocumentNode<GetPreviewComponentsQuery, GetPreviewComponentsQueryVariables>;

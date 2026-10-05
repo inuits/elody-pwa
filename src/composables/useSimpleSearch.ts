@@ -2,20 +2,14 @@ import { computed, inject } from "vue";
 import {
   type AdvancedFilterInput,
   AdvancedFilterTypes,
-  Entitytyping,
   Operator,
-  Permission,
 } from "@/generated-types/queries";
-import { usePermissions } from "@/composables/usePermissions";
 
 export function useSimpleSearch() {
   const config = inject("config") as any;
-  const { can } = usePermissions();
 
   const entityTypeFilters = computed<AdvancedFilterInput[]>(() => {
-    const allowedTypes = config.features.simpleSearch.itemTypes?.filter(
-      (type: string) => !!can(Permission.Canread, type as Entitytyping),
-    );
+    const allowedTypes = config.features.simpleSearch.itemTypes;
     if (!allowedTypes || allowedTypes.length === 0) return [];
     return [
       {
@@ -28,7 +22,10 @@ export function useSimpleSearch() {
   });
 
   const createKeyBasedOnFormat = (metadataKey: string | object): string[] => {
-    if (typeof metadataKey === "object" && (metadataKey as any)?.preConfigured) {
+    if (
+      typeof metadataKey === "object" &&
+      (metadataKey as any)?.preConfigured
+    ) {
       return (metadataKey as any).key;
     }
     const clientKeyFormat = config.features.simpleSearch.clientKeyFormat;
@@ -43,6 +40,20 @@ export function useSimpleSearch() {
   const buildFilters = (searchTerm: string): AdvancedFilterInput[] => {
     const filters: AdvancedFilterInput[] = [...entityTypeFilters.value];
     const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
+    const relationKeys = config.features.simpleSearch.relationKeys;
+    if (relationKeys?.length) {
+      filters.push({
+        key: metadataKeys.flatMap((metadataKey: string | object) =>
+          createKeyBasedOnFormat(metadataKey),
+        ),
+        value: searchTerm,
+        type: AdvancedFilterTypes.Text,
+        operator: Operator.Or,
+        match_exact: false,
+        relation_keys: relationKeys,
+      });
+      return filters;
+    }
     for (const index in metadataKeys) {
       filters.push({
         key: createKeyBasedOnFormat(metadataKeys[index]),

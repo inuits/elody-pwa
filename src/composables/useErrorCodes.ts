@@ -7,7 +7,6 @@ import { ErrorCodeType, PageStatus } from "@/generated-types/queries";
 import type { ApolloError } from "@apollo/client/core";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { getTranslatedMessage, isAbortError } from "@/helpers";
-import { resetAdvancedPermissions } from "@/composables/usePermissions";
 import { usePageStatus } from "@/composables/usePageStatus";
 
 export type MessageSeverity = "error" | "warning";
@@ -116,7 +115,7 @@ export const useErrorCodes = (): {
       const message: string = messageParts[1] ? messageParts[1].trim() : "";
       const translatedMessage = await getTranslatedErrorMessageForCode(
         errorCode,
-        message,
+        message || errorMessage,
         variableObjects,
       );
 
@@ -136,7 +135,9 @@ export const useErrorCodes = (): {
     variables: Record<string, string> | undefined,
   ): Promise<string> => {
     if (!code) return defaultMessage;
-    return getTranslatedMessage(`error-codes.${code}`, variables);
+    const translationKey = `error-codes.${code}`;
+    const translated = getTranslatedMessage(translationKey, variables) as string;
+    return translated !== translationKey ? translated : defaultMessage;
   };
 
   const handleUnauthorized = async () => {
@@ -144,7 +145,6 @@ export const useErrorCodes = (): {
     const { closeAllModals } = useBaseModal();
 
     await auth.logout();
-    resetAdvancedPermissions();
     useStateManagement().clearStorage();
     setTenantInSessionStorage("");
     closeAllModals();
@@ -368,7 +368,11 @@ export const useErrorCodes = (): {
         "http",
         httpResponse,
       );
-      fallbackOnRequestStatusCode(statusCode, ErrorCodeType.Read, message);
+      fallbackOnRequestStatusCode(
+        statusCode,
+        ErrorCodeType.Read,
+        httpErrorMessage || message,
+      );
       return "";
     }
 

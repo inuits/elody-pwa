@@ -37,19 +37,36 @@
             class="border-b border-neutral-30"
           >
             <td class="p-2 font-bold align-top">{{ t(row.label) }}</td>
-            <td v-for="side in sides" :key="side.name" class="p-2 align-top">
-              <label class="flex gap-2 cursor-pointer items-start">
+            <td
+              v-for="side in sides"
+              :key="side.name"
+              class="relative p-2 align-top"
+              :class="{ 'bg-background-normal/70': isLocked(row.key) }"
+            >
+              <label
+                class="flex gap-2 items-start"
+                :class="isLocked(row.key) ? 'cursor-default' : 'cursor-pointer'"
+              >
                 <input
                   type="radio"
                   class="mt-1"
                   :name="`merge-${row.key}`"
                   :value="side.name"
                   :checked="choiceFor(row.key) === side.name"
+                  :disabled="isLocked(row.key)"
                   :data-testid="`choice-${row.key}-${side.name}`"
                   @change="choose(row.key, side.name)"
                 />
-                <span>{{ displayValue(valueFor(row, side.name)) }}</span>
+                <span :class="{ 'pr-6': isLocked(row.key) }">
+                  {{ displayValue(valueFor(row, side.name)) }}
+                </span>
               </label>
+              <locked-field-indicator
+                v-if="isLocked(row.key) && side.name === 'right'"
+                :is-locked="true"
+                position="middle-right"
+                tooltip="metadata.tooltips.immutable-field"
+              />
             </td>
           </tr>
         </tbody>
@@ -66,6 +83,7 @@ import type {
   MergeRow,
   MergeSide,
 } from "@/composables/useMergeDiff";
+import LockedFieldIndicator from "@/components/metadata/LockedFieldIndicator.vue";
 import { Unicons } from "@/types";
 import { getRouterLinkForEntityDetailPage } from "@/helpers";
 
@@ -81,8 +99,12 @@ const props = withDefaults(
     leftSideInfo: SideInfo;
     rightSideInfo: SideInfo;
     choices?: MergeChoices;
+    lockedFields?: string[];
   }>(),
-  { choices: () => ({}) },
+  {
+    choices: () => ({}),
+    lockedFields: () => []
+  },
 );
 
 const emit = defineEmits<{
@@ -104,6 +126,8 @@ const sides = computed<(SideInfo & { name: MergeSide; link: any })[]>(() =>
   })),
 );
 
+const isLocked = (key: string): boolean => props.lockedFields.includes(key);
+
 const choiceFor = (key: string): MergeSide => props.choices[key] ?? "left";
 
 const valueFor = (row: MergeRow, side: MergeSide): unknown =>
@@ -117,6 +141,7 @@ const displayValue = (value: unknown): string => {
 };
 
 const choose = (key: string, side: MergeSide) => {
+  if (isLocked(key)) return;
   emit("update:choices", { ...props.choices, [key]: side });
 };
 </script>

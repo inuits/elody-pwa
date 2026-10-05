@@ -3,6 +3,7 @@
     @clicked="doAction"
     :label="$t(label)"
     :icon="Unicons[icon].name"
+    :as-button="asButton"
   />
 </template>
 
@@ -27,6 +28,7 @@ const props = defineProps<{
   navigateToCreatedEntity?: boolean;
   entityId: string;
   relationTypesToExtract?: string[];
+  asButton?: boolean;
 }>();
 
 const { t } = useI18n();

@@ -15,6 +15,10 @@ import {
   deepToRaw,
   getEnvironmentLabel,
   downloadFile,
+  findPanelMetadata,
+  getFromExpressEndpoint,
+  formatTeaserMetadata,
+  tagMultilingualMetadata,
 } from "@/helpers";
 import { reactive } from "vue";
 import {
@@ -756,5 +760,123 @@ describe("getEnvironmentLabel", () => {
   it("returns an uppercased label for non-production environments", () => {
     expect(getEnvironmentLabel("uat")).toBe("UAT");
     expect(getEnvironmentLabel(" dev ")).toBe("DEV");
+  });
+});
+
+describe("findPanelMetadata", () => {
+  // GraphQL leaves out a panel the user has no permission for, so the walker
+  // that collects editable metadata keys meets nulls in the element tree.
+  it("walks past a panel the graphql layer left out", () => {
+    const windowElement = {
+      __typename: "WindowElement",
+      hidden: null,
+      shown: {
+        __typename: "WindowElementPanel",
+        isEditable: true,
+        title: { __typename: "PanelMetaData", key: "title" },
+      },
+    };
+
+    const found = findPanelMetadata(windowElement);
+
+    expect(found.map((field) => field.key)).toEqual(["title"]);
+  });
+});
+
+describe("getFromExpressEndpoint", () => {
+  // The express config endpoint resolves permissions server-side, and on a
+  // client with tenant select those verdicts are tenant-scoped.
+  it("names the active tenant so the config is resolved for it", async () => {
+    sessionStorage.setItem("active_tenant_id", "TENANT-1");
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue({ json: async () => ({ config: {} }) });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await getFromExpressEndpoint("app-configs");
+
+    expect(fetchSpy.mock.calls[0][1].headers).toEqual({
+      "X-Tenant-ID": "TENANT-1",
+    });
+    sessionStorage.removeItem("active_tenant_id");
+    vi.unstubAllGlobals();
+  });
+
+  it("sends an empty tenant when none is selected", async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue({ json: async () => ({ config: {} }) });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    await getFromExpressEndpoint("app-configs");
+
+    expect(fetchSpy.mock.calls[0][1].headers).toEqual({ "X-Tenant-ID": "" });
+    vi.unstubAllGlobals();
+  });
+});
+
+describe("formatTeaserMetadata", () => {
+  const intialValues = { email: "a@b.c", last_seen_time: "2026-09-01" };
+
+  it("keeps columns the graphql layer did not gate", () => {
+    const columns = formatTeaserMetadata(
+      {
+        email: { label: "Email", key: "email" },
+        last_seen_time: { label: "Last seen", key: "last_seen_time" },
+      } as any,
+      intialValues as any,
+    ) as any[];
+
+    expect(columns.map((column) => column.key)).toEqual([
+      "email",
+      "last_seen_time",
+    ]);
+  });
+
+  it("drops columns the graphql layer reported as not permitted", () => {
+    const columns = formatTeaserMetadata(
+      {
+        email: { label: "Email", key: "email" },
+        last_seen_time: {
+          label: "Last seen",
+          key: "last_seen_time",
+          permitted: false,
+        },
+      } as any,
+      intialValues as any,
+    ) as any[];
+
+    expect(columns.map((column) => column.key)).toEqual(["email"]);
+  });
+});
+
+describe("tagMultilingualMetadata", () => {
+  const fields = [
+    { key: "name", isMultilingual: true },
+    { key: "period" },
+    { key: "description", isMultilingual: false },
+  ];
+
+  it("adds the locale to values of multilingual fields only", () => {
+    expect(
+      tagMultilingualMetadata(
+        [
+          { key: "name", value: "Theme" },
+          { key: "period", value: "1st c." },
+          { key: "description", value: "Text" },
+        ],
+        fields,
+        "ar",
+      ),
+    ).toEqual([
+      { key: "name", value: "Theme", lang: "ar" },
+      { key: "period", value: "1st c." },
+      { key: "description", value: "Text" },
+    ]);
+  });
+
+  it("returns the metadata unchanged without multilingual fields", () => {
+    const metadata = [{ key: "name", value: "Theme" }];
+    expect(tagMultilingualMetadata(metadata, [], "en")).toEqual(metadata);
   });
 });

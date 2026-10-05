@@ -228,4 +228,35 @@ describe("useFiltersBaseNew - Integration", () => {
     expect(filters.value[0].isDisplayed).toBe(true);
     expect(filters.value[0].isActive).toBe(false);
   });
+
+  it("keeps the relation keys of predefined filters when they are transformed and normalized again", async () => {
+    const {
+      transformFilterInputIntoAdvancedFilters,
+      initializeFilters,
+      getNormalizedFiltersForApi,
+    } = useFiltersBaseNew();
+
+    await initializeFilters({
+      advancedFilters: transformFilterInputIntoAdvancedFilters([
+        {
+          type: "text",
+          key: ["elody:1|metadata.title.value"],
+          value: "tolkien",
+          operator: "or",
+          match_exact: false,
+          relation_keys: ["vlacc:1|properties.ref_authors.value"],
+        },
+      ] as any),
+      fromState: false,
+    });
+
+    expect(getNormalizedFiltersForApi()).toEqual([
+      expect.objectContaining({
+        type: "text",
+        key: ["elody:1|metadata.title.value"],
+        value: "tolkien",
+        relation_keys: ["vlacc:1|properties.ref_authors.value"],
+      }),
+    ]);
+  });
 });

@@ -68,17 +68,56 @@ describe("EntityElementMetadata", () => {
       );
     });
 
-    it("should return initial value if it's an array and when translationKey is provided", async () => {
-      mocks.t.mockReturnValue("Positive");
+    it("should translate every item of an array value when translationKey is provided", async () => {
+      mocks.t.mockImplementation((key: string) =>
+        ({
+          "translated.keys.description": "Beschrijving",
+          "translated.keys.title": "Titel",
+        })[key] ?? key,
+      );
       const wrapper = mount(EntityElementMetadata, {
-        props: { value: [1, 2], translationKey: "translated.booleans.$value" },
+        props: {
+          value: ["description", "title"],
+          translationKey: "translated.keys.$value",
+        },
       });
       await nextTick();
       expect(
         wrapper
           .findAll('[data-cy="metadata-value"]')
           .map((item) => item.text()),
-      ).toStrictEqual(["1", "2"]);
+      ).toStrictEqual(["Beschrijving", "Titel"]);
+    });
+
+    it("should fallback per array item when its translation is not found", async () => {
+      mocks.t.mockImplementation((key: string) =>
+        key === "translated.keys.title" ? "Titel" : key,
+      );
+      const wrapper = mount(EntityElementMetadata, {
+        props: {
+          value: ["unknown", "title"],
+          translationKey: "translated.keys.$value",
+        },
+      });
+      await nextTick();
+      expect(
+        wrapper
+          .findAll('[data-cy="metadata-value"]')
+          .map((item) => item.text()),
+      ).toStrictEqual(["unknown", "Titel"]);
+    });
+
+    it("should not translate the lines of a multiline string value", async () => {
+      mocks.t.mockReturnValue("Translated");
+      const wrapper = mount(EntityElementMetadata, {
+        props: { value: "first\nsecond", translationKey: "translated.$value" },
+      });
+      await nextTick();
+      expect(
+        wrapper
+          .findAll('[data-cy="metadata-value"]')
+          .map((item) => item.text()),
+      ).toStrictEqual(["first", "second"]);
     });
 
     it("should fallback to readableValue when translation is not found", async () => {

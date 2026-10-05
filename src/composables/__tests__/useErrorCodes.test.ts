@@ -12,7 +12,6 @@ const sharedMocks = vi.hoisted(() => ({
 
   logout: vi.fn(),
   setTenantInSessionStorage: vi.fn(),
-  resetAdvancedPermissions: vi.fn(),
 }));
 
 vi.mock("@/composables/useStateManagement", () => ({
@@ -47,10 +46,6 @@ vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: vi.fn(() => ({
     closeAllModals: sharedMocks.closeAllModals,
   })),
-}));
-
-vi.mock("@/composables/usePermissions", () => ({
-  resetAdvancedPermissions: sharedMocks.resetAdvancedPermissions,
 }));
 
 vi.mock("@/helpers", () => ({
@@ -253,6 +248,37 @@ describe("useErrorCodes", () => {
         );
       },
     );
+
+    it("shows the backend message when the body carries no error code", async () => {
+      const response = createMockHttpResponse("/entities/PR-000064/mediafiles", 400, {
+        extensions: {
+          response: {
+            body: {
+              message:
+                "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.",
+            },
+          },
+        },
+      });
+
+      await errorCodes.handleHttpError(response);
+
+      expect(sharedMocks.displayErrorNotification).toHaveBeenCalledWith(
+        "Error",
+        "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.",
+      );
+    });
+
+    it("falls back to the status text when the body carries no message", async () => {
+      const response = createMockHttpResponse("/entities", 400, {});
+
+      await errorCodes.handleHttpError(response);
+
+      expect(sharedMocks.displayErrorNotification).toHaveBeenCalledWith(
+        "Error",
+        "Bad Request",
+      );
+    });
   });
 
   describe("Auth Handlers", () => {
@@ -265,7 +291,6 @@ describe("useErrorCodes", () => {
 
         expect(sharedMocks.logout).toHaveBeenCalledTimes(1);
         expect(sharedMocks.clearStorage).toHaveBeenCalled();
-        expect(sharedMocks.resetAdvancedPermissions).toHaveBeenCalled();
         expect(sharedMocks.setPageStatus).toHaveBeenCalledWith(
           PageStatus.Unauthorized,
         );
@@ -389,6 +414,17 @@ describe("useErrorCodes", () => {
         expect(result.code).toBe("W5014");
         expect(result.message).toBe(
           "No metadata available for item with id 999",
+        );
+      });
+
+      it("falls back to the backend text when the code has no translation", async () => {
+        const result = await errorCodes.getMessageAndCodeFromErrorString(
+          "W4012 - This production has no mediafiles to download",
+        );
+
+        expect(result.code).toBe("W4012");
+        expect(result.message).toBe(
+          "This production has no mediafiles to download",
         );
       });
     });

@@ -121,7 +121,10 @@
               :set-sort-order="setSortOrder"
               :simple-search-value="simpleSearchTerm"
               :set-simple-search="
-                isSearchLibrary ? undefined : handleSetSimpleSearch
+                isSearchLibrary ||
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+                  ? undefined
+                  : handleSetSimpleSearch
               "
               @pagination-limit-options-promise="
                 (promise) => (paginationLimitOptionsPromise = promise)
@@ -165,7 +168,7 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap"
+            :show-pagination="!displayMap && !displayPipeline"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -249,7 +252,9 @@
           @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
         >
           <ListItemSkeleton
-            v-show="entitiesLoadingWithoutData && !displayMap"
+            v-show="
+              entitiesLoadingWithoutData && !displayMap && !displayPipeline
+            "
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
@@ -267,6 +272,7 @@
             :open-entity-in-detail-modal="openEntityInDetailModal"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
+            :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             :relation-type="relationType"
             :enable-selection="enableSelection"
@@ -304,6 +310,7 @@
             :open-entity-in-detail-modal="openEntityInDetailModal"
             :enable-navigation="enableNavigation"
             :parent-entity-identifiers="parentEntityIdentifiers"
+            :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
             :relation-type="relationType"
             :enable-selection="enableSelection"
@@ -320,6 +327,23 @@
             :entities="entities as Entity[]"
             :entities-loading="entitiesLoading"
             :config="configPerViewMode[ViewModes.ViewModesMedia]"
+          />
+          <ViewModesPipeline
+            v-if="displayPipeline"
+            :entities="entities as Entity[]"
+            :entities-loading="entitiesLoading"
+            :bulk-operations-context="bulkOperationsContext"
+            :list-item-route-name="listItemRouteName"
+            :open-entity-in-detail-modal="openEntityInDetailModal"
+            :enable-navigation="enableNavigation"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            :relation-type="relationType"
+            :enable-selection="enableSelection"
+            :base-library-mode="baseLibraryMode"
+            :allowed-actions-on-relations="allowedActionsOnRelations"
+            :config="configPerViewMode[ViewModes.ViewModesPipeline]"
+            :refetch-entities="refetchEntities"
+            :set-pagination-limit="setPaginationLimit"
           />
           <ViewModesMap
             v-if="displayMap"
@@ -355,6 +379,7 @@ import LibraryBar from "@/components/library/LibraryBar.vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
+import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
 import { UploadStatus } from "@/composables/upload/types";
@@ -452,6 +477,7 @@ export type BaseLibraryProps = {
   hasStickyBars?: boolean;
   filters?: AdvancedFilterInput[];
   isSearchLibrary?: boolean;
+  forceListView?: boolean;
   useOtherQuery?: object;
   selectInputFieldType?: "multi" | "single";
   selectInputFieldValue?: string[];
@@ -498,6 +524,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   hasStickyBars: true,
   filters: () => [],
   isSearchLibrary: false,
+  forceListView: false,
   useOtherQuery: undefined,
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -565,6 +592,12 @@ const simpleSearchTerm = ref<string>("");
 const simpleSearchKeys = computed<string[]>(
   () => (route.meta as any)?.simpleSearch?.keys ?? [],
 );
+const simpleSearchRelationKeys = computed<string[]>(
+  () =>
+    (route.meta as any)?.simpleSearch?.relationKeys ??
+    config?.features?.simpleSearch?.relationKeys ??
+    [],
+);
 const isFiltersPanelExpanded = computed<boolean>(
   () => expandFilters.value && !simpleSearchTerm.value,
 );
@@ -595,6 +628,14 @@ const isPickerLibrary = computed(() => {
       BulkOperationsContextEnum.GuidedFlowStepPicker
   );
 });
+
+// A pipeline layout has no place inside a picker — selection is the task
+// there — so the mode is stripped before the toggles are built.
+const viewModesForContext = (viewModes: string[]): string[] =>
+  isPickerLibrary.value
+    ? viewModes.filter((vm) => vm !== ViewModes.ViewModesPipeline)
+    : viewModes;
+
 const additionalDefaultFiltersEnabled = computed(() => {
   return (
     props.enableAdvancedFilters &&
@@ -666,6 +707,7 @@ const {
   setLimit,
   setManipulationOfQuery,
   setParentEntityIdentifiers,
+  setParentEntityId,
   setsearchInputType,
   setSkip,
   setLocale,
@@ -717,6 +759,9 @@ const handleSetSimpleSearch = async (value: string) => {
           type: AdvancedFilterTypes.Text,
           operator: Operator.Or,
           match_exact: false,
+          ...(simpleSearchRelationKeys.value.length
+            ? { relation_keys: simpleSearchRelationKeys.value }
+            : {}),
         },
       ]
     : (filtersBaseAPI.value?.getNormalizedFiltersForApi() ?? []);
@@ -766,6 +811,7 @@ const {
   displayTable,
   displayPreview,
   displayMap,
+  displayPipeline,
   expandFilters,
   toggles,
   configPerViewMode,
@@ -782,6 +828,7 @@ const {
   route,
   baseLibraryMode: props.baseLibraryMode,
   persistPreferences: props.saveViewPreferences !== false,
+  forceListView: props.forceListView,
   persistExpandFilters: props.persistExpandFilters,
 });
 
@@ -789,6 +836,7 @@ const showBasicModePagination = computed(
   () =>
     !props.predefinedEntities &&
     !displayMap.value &&
+    !displayPipeline.value &&
     (props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder) &&
     paginationStore.totalPages.value > 1,
@@ -873,6 +921,8 @@ const mapDropdownOptionsToBulkProcessableItem = (
 };
 
 const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
+
+setParentEntityId(props.parentEntityIdentifiers?.[0]);
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);
@@ -1074,7 +1124,7 @@ onUnmounted(() => {
 });
 
 const resetMapPaginationLimit = () => {
-  if (displayMap.value) setPaginationLimit(0);
+  if (displayMap.value || displayPipeline.value) setPaginationLimit(0);
 };
 
 const isMounted = ref<boolean>(true);
@@ -1136,7 +1186,7 @@ watch(
           (viewModeWithConfig: ViewModesWithConfig) =>
             viewModeWithConfig.viewMode,
         );
-      determineViewModes(viewModes);
+      determineViewModes(viewModesForContext(viewModes));
       isInitialLoading.value = false;
     }
   },
@@ -1181,8 +1231,8 @@ watch(
       const viewModes = newEntities[0].allowedViewModes.viewModes.map(
         (vm) => vm.viewMode,
       );
-      determineViewModes(viewModes);
-      getUserPreferredViewModeConfiguration(viewModes);
+      determineViewModes(viewModesForContext(viewModes));
+      getUserPreferredViewModeConfiguration(viewModesForContext(viewModes));
       lastProcessedEntityType.value = entityType.value;
       hasRestoredViewModesAfterFetch.value = true;
     }
@@ -1219,8 +1269,8 @@ watch(entitiesLoading, (loading, wasLoading) => {
     firstEntity.allowedViewModes.viewModes?.map(
       (vm: ViewModesWithConfig) => vm.viewMode,
     ) ?? [];
-  determineViewModes(viewModes);
-  getUserPreferredViewModeConfiguration(viewModes);
+  determineViewModes(viewModesForContext(viewModes));
+  getUserPreferredViewModeConfiguration(viewModesForContext(viewModes));
   lastProcessedEntityType.value = entityType.value;
   hasRestoredViewModesAfterFetch.value = true;
 });

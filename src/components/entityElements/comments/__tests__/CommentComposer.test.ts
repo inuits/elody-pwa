@@ -6,6 +6,14 @@ vi.mock("@/main", () => ({ apolloClient: {} }));
 
 vi.mock("@/composables/useComments", () => ({
   extractTaggedRelations: () => [],
+  createFieldMetadataFrom: (
+    fields: any[],
+    values: Record<string, any>,
+    { keepEmpty = false }: { keepEmpty?: boolean } = {},
+  ) =>
+    fields
+      .filter((field) => keepEmpty || values[field.key])
+      .map((field) => ({ key: field.key, value: values[field.key] ?? "" })),
 }));
 
 const createdForms: string[] = [];
@@ -18,7 +26,7 @@ vi.mock("@/composables/useFormHelper", () => ({
       const form = reactive({
         values,
         setFieldValue: vi.fn(),
-        meta: { initialValues: values },
+        meta: { initialValues: values, valid: true },
       });
       formStore.set(key, form);
       return form;
@@ -46,6 +54,14 @@ vi.mock("@/components/base/BaseButtonNew.vue", () => ({
     name: "BaseButtonNew",
     props: ["label", "icon", "buttonStyle", "disabled"],
     template: "<button :disabled='disabled'>{{ label }}</button>",
+  },
+}));
+
+vi.mock("@/components/metadata/MetadataWrapper.vue", () => ({
+  default: {
+    name: "MetadataWrapper",
+    props: ["formId", "metadata", "isEdit", "formFlow"],
+    template: "<div class='mock-create-field' />",
   },
 }));
 
@@ -128,7 +144,7 @@ describe("CommentComposer", () => {
     await wrapper.vm.$nextTick();
 
     await wrapper.find("button").trigger("click");
-    expect(onSubmit).toHaveBeenCalledWith("<p>hello</p>", []);
+    expect(onSubmit).toHaveBeenCalledWith("<p>hello</p>", [], []);
     // Clearing here would throw the author's text away if the request then failed.
     expect(form.setFieldValue).not.toHaveBeenCalled();
 
@@ -167,5 +183,173 @@ describe("CommentComposer", () => {
 
     wrapper.unmount();
     expect(formStore.has("comment-reply-CMT-1")).toBe(false);
+  });
+
+  describe("create fields", () => {
+    const categoryField: any = {
+      __typename: "PanelMetaData",
+      label: "element-labels.comment-category",
+      key: "category",
+      inputField: { type: "dropdownSingleselectMetadata", options: [] },
+    };
+
+    it("renders an editable field per configured create field in its own form", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-new-W-3",
+        createFields: [categoryField],
+      });
+
+      const fields = wrapper.findAllComponents({ name: "MetadataWrapper" });
+      expect(fields).toHaveLength(1);
+      expect(fields[0].props()).toMatchObject({
+        formId: "comment-new-W-3",
+        metadata: categoryField,
+        isEdit: true,
+        formFlow: "create",
+      });
+
+      wrapper.unmount();
+    });
+
+    it("renders no create fields when none are configured", () => {
+      formStore.clear();
+      const wrapper = mountComposer({ scratchFormId: "comment-new-W-4" });
+      expect(wrapper.findAll(".mock-create-field")).toHaveLength(0);
+      wrapper.unmount();
+    });
+
+    it("seeds an empty value per create field so the form knows the field", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-new-W-5",
+        createFields: [categoryField],
+      });
+      expect(formStore.get("comment-new-W-5").values.intialValues).toEqual({
+        body: "",
+        category: "",
+      });
+      wrapper.unmount();
+    });
+
+    it("submits the filled in create fields as metadata and clears them", async () => {
+      formStore.clear();
+      const onSubmit = vi.fn(() => Promise.resolve());
+      const wrapper = mountComposer({
+        scratchFormId: "comment-new-W-6",
+        createFields: [categoryField],
+        onSubmit,
+      });
+      const form = formStore.get("comment-new-W-6");
+      form.values.intialValues.body = "<p>hello</p>";
+      form.values.intialValues.category = "Fictie";
+      await wrapper.vm.$nextTick();
+
+      await wrapper.find("button").trigger("click");
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        "<p>hello</p>",
+        [],
+        [{ key: "category", value: "Fictie" }],
+      );
+      expect(form.setFieldValue).toHaveBeenCalledWith(
+        "intialValues.category",
+        "",
+      );
+
+      wrapper.unmount();
+    });
+
+    it("seeds an edit form with the comment's own create field values", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-edit-CMT-5",
+        initialBody: "<p>existing</p>",
+        createFields: [categoryField],
+        initialCreateFieldValues: { category: "Fictie" },
+      });
+      expect(formStore.get("comment-edit-CMT-5").values.intialValues).toEqual({
+        body: "<p>existing</p>",
+        category: "Fictie",
+      });
+      wrapper.unmount();
+    });
+
+    it("hands each create field its initial value, since the field writes it into the form on mount", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-edit-CMT-8",
+        initialBody: "<p>existing</p>",
+        createFields: [categoryField],
+        initialCreateFieldValues: { category: "Fictie" },
+      });
+
+      const [field] = wrapper.findAllComponents({ name: "MetadataWrapper" });
+      expect(field.props("metadata")).toEqual({
+        ...categoryField,
+        value: "Fictie",
+      });
+
+      wrapper.unmount();
+    });
+
+    it("hands a new comment's create fields an empty value", () => {
+      formStore.clear();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-new-W-9",
+        createFields: [categoryField],
+      });
+
+      const [field] = wrapper.findAllComponents({ name: "MetadataWrapper" });
+      expect(field.props("metadata").value).toBe("");
+
+      wrapper.unmount();
+    });
+
+    it("submits an emptied create field while editing, so it gets cleared", async () => {
+      formStore.clear();
+      const onSubmit = vi.fn(() => Promise.resolve());
+      const wrapper = mountComposer({
+        scratchFormId: "comment-edit-CMT-6",
+        initialBody: "<p>existing</p>",
+        createFields: [categoryField],
+        initialCreateFieldValues: { category: "Fictie" },
+        onSubmit,
+      });
+      formStore.get("comment-edit-CMT-6").values.intialValues.category = "";
+      await wrapper.vm.$nextTick();
+
+      await wrapper.find("button").trigger("click");
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        "<p>existing</p>",
+        [],
+        [{ key: "category", value: "" }],
+      );
+
+      wrapper.unmount();
+    });
+
+    it("blocks posting while the form is invalid, e.g. a required create field is empty", async () => {
+      formStore.clear();
+      const onSubmit = vi.fn();
+      const wrapper = mountComposer({
+        scratchFormId: "comment-new-W-7",
+        createFields: [categoryField],
+        onSubmit,
+      });
+      const form = formStore.get("comment-new-W-7");
+      form.values.intialValues.body = "<p>hello</p>";
+      form.meta.valid = false;
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find("button").attributes("disabled")).toBeDefined();
+      await wrapper.find("button").trigger("click");
+      expect(onSubmit).not.toHaveBeenCalled();
+
+      wrapper.unmount();
+    });
   });
 });

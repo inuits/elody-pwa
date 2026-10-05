@@ -9,11 +9,9 @@ import {
 import { useBaseModal } from "@/composables/useBaseModal";
 import { reactive, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
-import { usePermissions } from "@/composables/usePermissions";
 import useTenant from "./useTenant";
 
 const { openModal } = useBaseModal();
-const { extractMenuPermissions, fetchAdvancedPermissions } = usePermissions();
 
 const selectedMenuItem = ref<MenuItem | undefined>(undefined);
 const selectedMenuItemPath = ref<string>(undefined);
@@ -86,9 +84,6 @@ export const useMenuHelper = () => {
       const menu = Object.values(value.data?.Menu?.menu || {}).filter(
         (menu) => menu?.typeLink,
       );
-      const extractedPermissions = await extractMenuPermissions(menu);
-      if (extractedPermissions.length !== 0)
-        await fetchAdvancedPermissions(extractedPermissions);
 
       menuItems.value = menu;
       setSelectedMenuItem(menuItems.value[0]);
@@ -105,8 +100,8 @@ export const useMenuHelper = () => {
         const entries = Object.entries(menuItem.subMenu);
         for (let i = 2; i < entries.length; i += 1) {
           const [, objectValue] = entries[i];
-          if (!objectValue.typeLink.route) return;
-          const destination = objectValue?.typeLink?.route.destination;
+          if (!objectValue?.typeLink?.route) continue;
+          const destination = objectValue.typeLink.route.destination;
           if (destination)
             menuDestinations.value.push({
               entityType: objectValue.entityType,
@@ -114,7 +109,7 @@ export const useMenuHelper = () => {
             });
         }
       } else {
-        const destination = menuItem.typeLink.route?.destination;
+        const destination = menuItem.typeLink?.route?.destination;
         if (destination)
           menuDestinations.value.push({
             entityType: menuItem.entityType,

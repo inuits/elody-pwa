@@ -6,7 +6,7 @@
     <div
       class="flex-none flex items-center justify-center w-10 h-10 box-border"
       :class="[{ 'cursor-pointer': !disabled }]"
-      @click.prevent="handleItemSelection"
+      @click.prevent.stop="handleItemSelection"
     >
       <input
         :id="checkboxId"
@@ -33,7 +33,7 @@
       :for="checkboxId"
       class="flex flex-row select-none cursor-pointer"
       :class="{ 'ml-2': inputValue }"
-      @click.prevent="handleItemSelection"
+      @click.prevent.stop="handleItemSelection"
     >
       {{ label }}
       <span v-if="required" class="pl-2" :title="t(`tooltip.required`)">
@@ -155,6 +155,7 @@ watch(route, () => {
 watch(
   () => getModalInfo(TypeModals.BulkOperations).open,
   (isBulkOperationsModalOpen: boolean | undefined) => {
+    if (props.ignoreBulkOperations) return;
     if (isBulkOperationsModalOpen)
       inputValue.value = isEnqueued(props.bulkOperationsContext, props.item.id);
   },

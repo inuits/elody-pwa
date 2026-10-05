@@ -19,10 +19,38 @@
         <span class="text-sm text-text-placeholder shrink-0">
           {{ formattedDate }}
         </span>
+        <span
+          v-if="comment.intialValues?.edited_at"
+          data-testid="comment-edited"
+          class="text-sm italic text-text-placeholder shrink-0"
+        >
+          {{ t("comments.edited") }}
+        </span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
+        <div
+          v-if="createFieldDisplayValues.length"
+          data-testid="comment-create-fields"
+          class="flex flex-wrap items-center gap-2"
+        >
+          <template
+            v-for="createField in createFieldDisplayValues"
+            :key="createField.key"
+          >
+            <metadata-formatter
+              v-if="createField.formatter"
+              :formatter="createField.formatter"
+              :label="createField.value"
+              :value-options="createField.options"
+            />
+            <span v-else class="text-sm text-text-body">
+              {{ plainLabelOf(createField) }}
+            </span>
+          </template>
+        </div>
         <span
           v-if="status"
+          data-testid="comment-status"
           :class="[
             'text-xs px-2 py-0.5 rounded-full',
             status === 'resolved'
@@ -64,7 +92,11 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
+import { resolveOptionLabel } from "@/components/metadata/useValueTranslationKey";
 import {
+  createFieldDisplayValuesOf,
+  type CreateFieldDisplayValue,
   tagElementName,
   type Comment,
   type CommentStatus,
@@ -72,6 +104,7 @@ import {
 import { convertDateToReadbleFormat } from "@/helpers";
 import {
   type Entitytyping,
+  type PanelMetaData,
   SanitizeMode,
   type TaggableEntityConfiguration,
 } from "@/generated-types/queries";
@@ -80,6 +113,7 @@ const props = withDefaults(
   defineProps<{
     comment: Comment;
     taggableEntityConfiguration?: TaggableEntityConfiguration[];
+    createFields?: PanelMetaData[];
     status?: CommentStatus;
     replyCount?: number;
     canEdit?: boolean;
@@ -88,6 +122,7 @@ const props = withDefaults(
   {
     canEdit: false,
     clickable: false,
+    createFields: () => [],
   },
 );
 
@@ -104,6 +139,15 @@ const allowedTagElements = computed<string[]>(() =>
     .filter((configuration) => configuration.tag)
     .map((configuration) => tagElementName(configuration.tag!)),
 );
+
+const createFieldDisplayValues = computed(() =>
+  createFieldDisplayValuesOf(props.createFields, props.comment),
+);
+
+const plainLabelOf = (createField: CreateFieldDisplayValue): string => {
+  const key = resolveOptionLabel(createField.value, createField.options);
+  return key ? t(key) : String(createField.value);
+};
 
 const formattedDate = computed<string>(() => {
   const createdAt = props.comment.intialValues?.created_at;

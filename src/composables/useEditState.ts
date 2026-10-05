@@ -15,18 +15,14 @@ const createCallbackRegistry = <T extends () => Promise<void> | void>() => {
   };
   return { fns: callbacks, add, perform, clear };
 };
-import { usePermissions } from "@/composables/usePermissions";
-import { type Entitytyping, Permission } from "@/generated-types/queries";
-import useEntitySingle from "@/composables/useEntitySingle";
-
 export type EditModes = "edit" | "no-edit" | "view" | "delete" | "edit-delete";
 export type Callback = (e?: Event | undefined) => Promise<unknown>;
-const { fetchUpdateAndDeletePermission } = usePermissions();
 
 export const useEditState = (editStateName: string) => {
   const buttonClicked = ref(false);
   const isDisabled = ref(false);
   const editMode = ref<EditModes>("no-edit");
+  const permittedEditMode = ref<EditModes>("no-edit");
   const submitFn = ref<Callback | undefined>();
   const refetchRegistry = createCallbackRegistry<() => void>();
   const mutationRegistry = createCallbackRegistry<() => Promise<void>>();
@@ -49,7 +45,7 @@ export const useEditState = (editStateName: string) => {
 
   const disableEdit = () => {
     isEdit.value = false;
-    applyPermittedEditMode();
+    setEditMode(permittedEditMode.value);
   };
 
   const setSubmitFunction = (editSubmitFn: Callback | undefined) => {
@@ -59,13 +55,15 @@ export const useEditState = (editStateName: string) => {
   const addRefetchFunction = (name: string, fn: () => void): void =>
     refetchRegistry.add(name, fn, false);
 
-  const performRefetchFunctions = (): Promise<void> => refetchRegistry.perform();
+  const performRefetchFunctions = (): Promise<void> =>
+    refetchRegistry.perform();
   const clearRefetchFunctions = (): void => refetchRegistry.clear();
 
   const addMutationCallback = (name: string, fn: () => Promise<void>): void =>
     mutationRegistry.add(name, fn);
 
-  const performMutationCallbacks = (): Promise<void> => mutationRegistry.perform();
+  const performMutationCallbacks = (): Promise<void> =>
+    mutationRegistry.perform();
   const clearMutationCallbacks = (): void => mutationRegistry.clear();
 
   const hideEditButton = () => setEditMode("no-edit");
@@ -108,22 +106,16 @@ export const useEditState = (editStateName: string) => {
     buttonClicked.value = false;
   };
 
-  const applyPermittedEditMode = () => {
-    const entityId: string = useEntitySingle().getEntityUuid() as string;
-    const entityType: Entitytyping =
-      useEntitySingle().getEntityType() as Entitytyping;
-    const mappings = fetchUpdateAndDeletePermission(entityId, entityType);
-    if (mappings) {
-      mappings.then((mappingResult) => {
-        const canEdit = mappingResult.get(Permission.Canupdate);
-        const canDelete = mappingResult.get(Permission.Candelete);
-
-        if (canEdit && canDelete) setEditMode("edit-delete");
-        else if (canEdit && !canDelete) setEditMode("edit");
-        else if (canDelete && !canEdit) setEditMode("delete");
-        else setEditMode("view");
-      });
-    } else setEditMode("view");
+  const setPermittedEditMode = (permissions: {
+    canUpdate?: boolean;
+    canDelete?: boolean;
+  }) => {
+    const { canUpdate, canDelete } = permissions;
+    if (canUpdate && canDelete) permittedEditMode.value = "edit-delete";
+    else if (canUpdate) permittedEditMode.value = "edit";
+    else if (canDelete) permittedEditMode.value = "delete";
+    else permittedEditMode.value = "no-edit";
+    setEditMode(permittedEditMode.value);
   };
 
   return {
@@ -132,6 +124,8 @@ export const useEditState = (editStateName: string) => {
     buttonClicked,
     isDisabled,
     editMode,
+    permittedEditMode,
+    setPermittedEditMode,
     submitFn,
     refetchFns,
     mutationCallbackFns,

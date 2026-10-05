@@ -128,7 +128,9 @@ export const useWYSIWYGEditor = (): {
   };
 
   const countLinesOfContent = (content: HTMLContent): number => {
-    return content.split("<br>").length;
+    const hardBreaks = content.match(/<br\s*\/?>/g)?.length ?? 0;
+    const paragraphs = content.match(/<p[\s>]/g)?.length ?? 0;
+    return hardBreaks + paragraphs;
   };
 
   return {

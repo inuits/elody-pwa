@@ -8,6 +8,7 @@ import type { Entity, MediaFileEntity } from "@/generated-types/queries";
 const mocks = vi.hoisted(() => {
   return {
     useMediafileCrop: vi.fn(),
+    useMediafileRecrop: vi.fn(),
     useEntityMediafileSelector: vi.fn(),
     IIIFViewer: {
       default: {},
@@ -15,12 +16,32 @@ const mocks = vi.hoisted(() => {
       props: [
         "enableSelection",
         "cropSizes",
+        "showCropped",
+        "canRecrop",
         "imageFilename",
         "originalFilename",
         "mediafileId",
         "dimensions",
       ],
-      emits: ["selectArea", "toggle-preview-component:entity-id"],
+      emits: [
+        "selectArea",
+        "toggle-preview-component:entity-id",
+        "toggle-crop-view",
+        "open-recrop-modal",
+      ],
+    },
+    RecropModal: {
+      default: {},
+      template: '<div class="recrop-modal"></div>',
+      props: [
+        "open",
+        "imageFilename",
+        "originalFilename",
+        "mediafileId",
+        "dimensions",
+        "saving",
+      ],
+      emits: ["close", "save"],
     },
     AudioAndVideoPlayer: {
       default: {},
@@ -51,11 +72,16 @@ vi.mock("@/composables/useMediafileCrop", () => ({
   useMediafileCrop: mocks.useMediafileCrop,
 }));
 
+vi.mock("@/composables/useMediafileRecrop", () => ({
+  useMediafileRecrop: mocks.useMediafileRecrop,
+}));
+
 vi.mock("@/composables/useEntityMediafileSelector", () => ({
   useEntityMediafileSelector: mocks.useEntityMediafileSelector,
 }));
 
 vi.mock("@/components/IIIFViewer.vue", () => mocks.IIIFViewer);
+vi.mock("@/components/RecropModal.vue", () => mocks.RecropModal);
 vi.mock(
   "@/components/base/AudioAndVideoPlayer.vue",
   () => mocks.AudioAndVideoPlayer,
@@ -73,6 +99,9 @@ vi.mock("openseadragon-select-plugin", () => ({}));
 
 describe("MediaViewerNew.vue - Cropping Functionality", () => {
   const mockAddMediafileCropCoordinates = vi.fn();
+  const mockOpenRecropModal = vi.fn();
+  const mockCloseRecropModal = vi.fn();
+  const mockSaveRecrop = vi.fn().mockResolvedValue(undefined);
   const mockGetValueOfMediafile = vi.fn();
   const mockSelectNextMediafile = vi.fn();
   const mockSelectPreviousMediafile = vi.fn();
@@ -85,12 +114,21 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSaveRecrop.mockResolvedValue(undefined);
 
     // Setup default mocks
     mocks.useMediafileCrop.mockReturnValue({
       cropSizes: computed(() => undefined),
       addMediafileCropCoordinates: mockAddMediafileCropCoordinates,
       isCropModeEnabled: computed(() => true),
+    });
+
+    mocks.useMediafileRecrop.mockReturnValue({
+      isRecropModalOpen: computed(() => false),
+      canRecrop: computed(() => false),
+      openRecropModal: mockOpenRecropModal,
+      closeRecropModal: mockCloseRecropModal,
+      saveRecrop: mockSaveRecrop,
     });
 
     mocks.useEntityMediafileSelector.mockReturnValue({
@@ -140,6 +178,7 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
         },
         stubs: {
           IIIFViewer: mocks.IIIFViewer,
+          RecropModal: mocks.RecropModal,
           AudioAndVideoPlayer: mocks.AudioAndVideoPlayer,
           PDFViewer: mocks.PDFViewer,
           TextViewer: mocks.TextViewer,
@@ -330,12 +369,12 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       const wrapper = createWrapper();
       await nextTick();
 
-      expect(
-        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
-      ).toBe(false);
-      expect(
-        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
-      ).toBe(false);
+      expect(wrapper.find('[data-testid="nav-prev-mediafile"]').exists()).toBe(
+        false,
+      );
+      expect(wrapper.find('[data-testid="nav-next-mediafile"]').exists()).toBe(
+        false,
+      );
     });
 
     it("should show navigation buttons when multiple mediafiles exist", async () => {
@@ -346,12 +385,12 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       const wrapper = createWrapper();
       await nextTick();
 
-      expect(
-        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
-      ).toBe(true);
-      expect(
-        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
-      ).toBe(true);
+      expect(wrapper.find('[data-testid="nav-prev-mediafile"]').exists()).toBe(
+        true,
+      );
+      expect(wrapper.find('[data-testid="nav-next-mediafile"]').exists()).toBe(
+        true,
+      );
     });
 
     it("should call selectNextMediafile and emit togglePreviewComponent when next clicked", async () => {
@@ -366,7 +405,9 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       await wrapper.find('[data-testid="nav-next-mediafile"]').trigger("click");
 
       expect(mockSelectNextMediafile).toHaveBeenCalledWith("default");
-      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["media2"]);
+      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual([
+        "media2",
+      ]);
     });
 
     it("should call selectPreviousMediafile and emit togglePreviewComponent when prev clicked", async () => {
@@ -381,7 +422,9 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       await wrapper.find('[data-testid="nav-prev-mediafile"]').trigger("click");
 
       expect(mockSelectPreviousMediafile).toHaveBeenCalledWith("default");
-      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["media1"]);
+      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual([
+        "media1",
+      ]);
     });
 
     it("should not emit togglePreviewComponent when selectNextMediafile returns undefined", async () => {
@@ -414,12 +457,12 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       const wrapper = createWrapper();
       await nextTick();
 
-      expect(
-        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
-      ).toBe(true);
-      expect(
-        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
-      ).toBe(true);
+      expect(wrapper.find('[data-testid="nav-prev-mediafile"]').exists()).toBe(
+        true,
+      );
+      expect(wrapper.find('[data-testid="nav-next-mediafile"]').exists()).toBe(
+        true,
+      );
     });
 
     it("should show navigation for PDF viewer with multiple mediafiles", async () => {
@@ -437,12 +480,12 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       const wrapper = createWrapper();
       await nextTick();
 
-      expect(
-        wrapper.find('[data-testid="nav-prev-mediafile"]').exists(),
-      ).toBe(true);
-      expect(
-        wrapper.find('[data-testid="nav-next-mediafile"]').exists(),
-      ).toBe(true);
+      expect(wrapper.find('[data-testid="nav-prev-mediafile"]').exists()).toBe(
+        true,
+      );
+      expect(wrapper.find('[data-testid="nav-next-mediafile"]').exists()).toBe(
+        true,
+      );
     });
   });
 
@@ -489,6 +532,305 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       expect(
         mockMediafileSelectionState.value.default.selectedMediafile,
       ).toEqual(currentMediafile);
+    });
+  });
+
+  describe("Recrop Functionality", () => {
+    it("initializes useMediafileRecrop with parentEntityId, parentEntityType, relationType and cropMediafileCoordinatesKey", () => {
+      createWrapper({
+        parentEntityId: "parent-1",
+        parentEntityType: "inscription",
+        relationType: "refMediafiles",
+      });
+
+      expect(mocks.useMediafileRecrop).toHaveBeenCalledWith({
+        parentEntityId: "parent-1",
+        parentEntityType: "inscription",
+        relationType: "refMediafiles",
+        cropMediafileCoordinatesKey: "test-crop-key",
+      });
+    });
+
+    it("enableSelection on the main viewer reflects only the add-flow crop mode, independent of canRecrop", async () => {
+      mocks.useMediafileCrop.mockReturnValue({
+        cropSizes: computed(() => undefined),
+        addMediafileCropCoordinates: mockAddMediafileCropCoordinates,
+        isCropModeEnabled: computed(() => false),
+      });
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => false),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(
+        wrapper.findComponent(mocks.IIIFViewer).props("enableSelection"),
+      ).toBe(false);
+    });
+
+    it("passes canRecrop through to the main IIIFViewer", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => false),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(wrapper.findComponent(mocks.IIIFViewer).props("canRecrop")).toBe(
+        true,
+      );
+    });
+
+    it("dispatches selectArea from the main viewer to addMediafileCropCoordinates when add-flow crop mode is enabled", async () => {
+      mocks.useMediafileCrop.mockReturnValue({
+        cropSizes: computed(() => undefined),
+        addMediafileCropCoordinates: mockAddMediafileCropCoordinates,
+        isCropModeEnabled: computed(() => true),
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      const coordinates = { x: 1, y: 2, w: 3, h: 4 };
+      wrapper
+        .findComponent(mocks.IIIFViewer)
+        .vm.$emit("selectArea", coordinates, "test-mediafile-123");
+
+      expect(mockAddMediafileCropCoordinates).toHaveBeenCalledWith(
+        coordinates,
+        "test-mediafile-123",
+      );
+    });
+
+    it("ignores selectArea from the main viewer when add-flow crop mode is not enabled", async () => {
+      mocks.useMediafileCrop.mockReturnValue({
+        cropSizes: computed(() => undefined),
+        addMediafileCropCoordinates: mockAddMediafileCropCoordinates,
+        isCropModeEnabled: computed(() => false),
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      wrapper
+        .findComponent(mocks.IIIFViewer)
+        .vm.$emit(
+          "selectArea",
+          { x: 1, y: 2, w: 3, h: 4 },
+          "test-mediafile-123",
+        );
+
+      expect(mockAddMediafileCropCoordinates).not.toHaveBeenCalled();
+    });
+
+    it("calls openRecropModal when the main IIIFViewer emits open-recrop-modal", async () => {
+      const wrapper = createWrapper();
+      await nextTick();
+
+      wrapper.findComponent(mocks.IIIFViewer).vm.$emit("open-recrop-modal");
+
+      expect(mockOpenRecropModal).toHaveBeenCalledOnce();
+    });
+
+    it("toggles show-cropped on the main viewer when it emits toggle-crop-view", async () => {
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(wrapper.findComponent(mocks.IIIFViewer).props("showCropped")).toBe(
+        true,
+      );
+
+      wrapper.findComponent(mocks.IIIFViewer).vm.$emit("toggle-crop-view");
+      await nextTick();
+
+      expect(wrapper.findComponent(mocks.IIIFViewer).props("showCropped")).toBe(
+        false,
+      );
+
+      wrapper.findComponent(mocks.IIIFViewer).vm.$emit("toggle-crop-view");
+      await nextTick();
+
+      expect(wrapper.findComponent(mocks.IIIFViewer).props("showCropped")).toBe(
+        true,
+      );
+    });
+
+    it("passes isRecropModalOpen and the current mediafile's info through to RecropModal", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      const modal = wrapper.findComponent(mocks.RecropModal);
+      expect(modal.props("open")).toBe(true);
+      expect(modal.props("imageFilename")).toBe("test-image-transcoded.jpg");
+      expect(modal.props("originalFilename")).toBe("original-test-image.jpg");
+      expect(modal.props("mediafileId")).toBe("test-mediafile-123");
+    });
+
+    it("calls closeRecropModal when RecropModal emits close", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      wrapper.findComponent(mocks.RecropModal).vm.$emit("close");
+
+      expect(mockCloseRecropModal).toHaveBeenCalledOnce();
+    });
+
+    it("calls saveRecrop when RecropModal emits save, and applies the crop optimistically once it resolves", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      const coordinates = { x: 5, y: 6, w: 7, h: 8 };
+      wrapper
+        .findComponent(mocks.RecropModal)
+        .vm.$emit("save", coordinates, "test-mediafile-123");
+      await flushPromises();
+
+      expect(mockSaveRecrop).toHaveBeenCalledWith(
+        coordinates,
+        "test-mediafile-123",
+      );
+      expect(
+        wrapper.findComponent(mocks.IIIFViewer).props("cropSizes"),
+      ).toEqual(coordinates);
+      expect(wrapper.findComponent(mocks.IIIFViewer).props("showCropped")).toBe(
+        true,
+      );
+    });
+
+    it("marks RecropModal as saving while the save is in flight, and clears it afterwards", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+      let resolveSave: () => void = () => {};
+      mockSaveRecrop.mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveSave = resolve;
+        }),
+      );
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      wrapper
+        .findComponent(mocks.RecropModal)
+        .vm.$emit("save", { x: 1, y: 2, w: 3, h: 4 }, "test-mediafile-123");
+      await nextTick();
+
+      expect(wrapper.findComponent(mocks.RecropModal).props("saving")).toBe(
+        true,
+      );
+
+      resolveSave();
+      await flushPromises();
+
+      expect(wrapper.findComponent(mocks.RecropModal).props("saving")).toBe(
+        false,
+      );
+    });
+
+    it("refetches entities after a successful recrop save, so the saved crop is the source of truth", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+      const mockRefetchEntities = vi.fn().mockResolvedValue(undefined);
+
+      const wrapper = createWrapper({ refetchEntities: mockRefetchEntities });
+      await nextTick();
+
+      wrapper
+        .findComponent(mocks.RecropModal)
+        .vm.$emit("save", { x: 5, y: 6, w: 7, h: 8 }, "test-mediafile-123");
+      await flushPromises();
+
+      expect(mockRefetchEntities).toHaveBeenCalledOnce();
+    });
+
+    it("does not apply the optimistic crop override when saveRecrop rejects", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+      mockSaveRecrop.mockRejectedValueOnce(new Error("network error"));
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const wrapper = createWrapper();
+      await nextTick();
+
+      const coordinates = { x: 5, y: 6, w: 7, h: 8 };
+      wrapper
+        .findComponent(mocks.RecropModal)
+        .vm.$emit("save", coordinates, "test-mediafile-123");
+      await flushPromises();
+
+      const iiifViewer = wrapper.findComponent(mocks.IIIFViewer);
+      expect(iiifViewer.props("cropSizes")).toBeUndefined();
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it("does not fail when no refetchEntities function is provided", async () => {
+      mocks.useMediafileRecrop.mockReturnValue({
+        isRecropModalOpen: computed(() => true),
+        canRecrop: computed(() => true),
+        openRecropModal: mockOpenRecropModal,
+        closeRecropModal: mockCloseRecropModal,
+        saveRecrop: mockSaveRecrop,
+      });
+      const wrapper = createWrapper();
+      await nextTick();
+
+      wrapper
+        .findComponent(mocks.RecropModal)
+        .vm.$emit("save", { x: 5, y: 6, w: 7, h: 8 }, "test-mediafile-123");
+
+      await expect(flushPromises()).resolves.not.toThrow();
     });
   });
 });

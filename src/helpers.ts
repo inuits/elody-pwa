@@ -377,8 +377,7 @@ export const getMetadataFields = (
         lineClamp: (value as PanelMetaData).lineClamp,
         valueTranslationKey: (value as PanelMetaData).valueTranslationKey,
         onlyForEntityTypes: (value as PanelMetaData).onlyForEntityTypes,
-        can: (value as PanelMetaData).can,
-        canEdit: (value as PanelMetaData).canEdit,
+        readOnly: (value as PanelMetaData).readOnly,
         copyToClipboard: (value as PanelMetaData).copyToClipboard,
         defaultValue: (value as PanelMetaData).defaultValue,
         disabled: (value as PanelMetaData).disabled,
@@ -402,6 +401,7 @@ export const formatTeaserMetadata = (
 ): object => {
   const formatted = [];
   for (const key in teaserMetadata) {
+    if (teaserMetadata[key]?.permitted === false) continue;
     if (key !== "__typename" && intialValues && teaserMetadata[key].label) {
       const newTeaserMetadata = {
         ...teaserMetadata[key],
@@ -564,7 +564,12 @@ export const getFromExpressEndpoint = async (
     import.meta.env.VUE_APP_CONFIG_URL
       ? import.meta.env.VUE_APP_CONFIG_URL
       : `/api/${endpoint}`,
-    { cache: "no-store" },
+    {
+      cache: "no-store",
+      headers: {
+        "X-Tenant-ID": sessionStorage.getItem("active_tenant_id") || "",
+      },
+    },
   );
   return await response.json();
 };
@@ -1031,3 +1036,16 @@ export const graphqlErrorInterceptor = onError(
     }
   },
 );
+
+export const tagMultilingualMetadata = <T extends { key: string }>(
+  metadata: T[],
+  fields: { key?: string | null; isMultilingual?: boolean | null }[],
+  locale: string,
+): (T & { lang?: string })[] => {
+  const multilingualKeys = new Set(
+    fields.filter((field) => field.isMultilingual).map((field) => field.key),
+  );
+  return metadata.map((item) =>
+    multilingualKeys.has(item.key) ? { ...item, lang: locale } : item,
+  );
+};

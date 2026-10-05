@@ -312,8 +312,10 @@ import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/upload/useUpload";
 import {
   calculateFutureDate,
+  getEntityPageRoute,
   goToEntityPage,
   goToEntityPageById,
+  tagMultilingualMetadata,
 } from "@/helpers";
 import { type Router, useRoute } from "vue-router";
 import DynamicFormUploadButton from "@/components/dynamicForms/DynamicFormUploadButton.vue";
@@ -712,9 +714,6 @@ const selectedRelationMode = computed<BulkEditModes>({
     ),
 });
 
-// A bulk-edit form is applied to entities it never loaded, so its own field keys
-// are the editable set. Seeding them here lets MetadataWrapper strip back the
-// ones the user has no canEdit permission for, before anything is submitted.
 watch(
   () => getFieldArray.value,
   (fields: any[]) => {
@@ -830,14 +829,21 @@ const getMetadataKeysToInclude = (
 const extractMetadataFromValues = (
   initialValues: Record<string, any>,
   keys: string[],
-): MetadataInput[] =>
-  keys
+): MetadataInput[] => {
+  const metadata = keys
     .map((key) =>
       key === "ttl"
         ? { key, value: calculateFutureDate(initialValues[key]) }
         : { key, value: initialValues[key] },
     )
     .filter((item: MetadataInput) => item.value);
+  if (!config?.features?.supportsMultilingualMetadataEditing) return metadata;
+  return tagMultilingualMetadata(
+    metadata,
+    getFieldArray.value as PanelMetaData[],
+    config.locale || "en",
+  );
+};
 
 const buildEntityRelations = async (
   baseRelations?: BaseRelationValuesInput[],
@@ -1204,7 +1210,7 @@ const downloadActionFunction = async (field: FormAction) => {
       field.creationType,
       variables.relations,
     );
-    await performDownloadAction(
+    const result = await performDownloadAction(
       document,
       variables,
       entityInput,
@@ -1214,7 +1220,12 @@ const downloadActionFunction = async (field: FormAction) => {
       t("notifications.success.downloadEntityCreated.title"),
       t("notifications.success.downloadEntityCreated.description"),
     );
-    await props.router.replace({ name: RouteNames.Downloads });
+    await props.router.replace(
+      getEntityPageRoute(
+        result.data.DownloadItemsInZip,
+        RouteNames.SingleEntity,
+      ),
+    );
     closeAndDeleteForm();
   } catch (e) {
     submitErrors.value = e.message;

@@ -248,6 +248,65 @@ describe("useViewModes", () => {
       expect(toggles.value[0].isOn).toBe(true);
     });
 
+    it("adds a pipeline toggle with the sitemap glyph when ViewModesPipeline is allowed", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, toggles } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.ViewModesList, ViewModes.ViewModesPipeline]);
+
+      expect(toggles.value).toHaveLength(2);
+      expect(toggles.value[1].iconOn).toBe(DamsIcons.Sitemap);
+    });
+
+    it("does not require shared teaserMetadata columns for the pipeline toggle", () => {
+      // unlike Table: mixed entity types are normal in a pipeline
+      const entities = ref<Entity[]>([
+        makeEntity("dataset", [], { title: {} }),
+        makeEntity("component", [], { name: {} }),
+      ]);
+      const { determineViewModes, toggles } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.ViewModesPipeline]);
+
+      expect(toggles.value).toHaveLength(1);
+      expect(toggles.value[0].iconOn).toBe(DamsIcons.Sitemap);
+    });
+
+    it("sets displayPipeline to false when ViewModesPipeline is not in viewModes", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, displayPipeline } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      determineViewModes([ViewModes.Table]);
+
+      expect(displayPipeline.value).toBe(false);
+    });
+
+    it("does not reset displayPipeline when ViewModesPipeline is in viewModes", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, displayPipeline } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      determineViewModes([ViewModes.ViewModesPipeline]);
+
+      expect(displayPipeline.value).toBe(true);
+    });
+
+    it("binds displayPipeline ref to the pipeline toggle's isOn", () => {
+      const entities = ref<Entity[]>([makeEntity("pipeline")]);
+      const { determineViewModes, toggles, displayPipeline } = useViewModes({
+        entities,
+      });
+
+      determineViewModes([ViewModes.ViewModesPipeline]);
+
+      displayPipeline.value = true;
+      expect(toggles.value[0].isOn).toBe(true);
+
+      displayPipeline.value = false;
+      expect(toggles.value[0].isOn).toBe(false);
+    });
+
     it("ignores unknown view mode names", () => {
       const entities = ref<Entity[]>([makeEntity("production")]);
       const { determineViewModes, toggles } = useViewModes({ entities });
@@ -385,6 +444,56 @@ describe("useViewModes", () => {
       expect(expandFilters.value).toBe(true);
     });
 
+    it("does not restore the table preference when entities have different teaserMetadata columns", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: true,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table, ViewModes.ViewModesList], {
+          title: {},
+        }),
+        makeEntity("mediafile", [ViewModes.Table, ViewModes.ViewModesList], {
+          filename: {},
+        }),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayTable,
+        displayList,
+      } = useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.Table,
+        ViewModes.ViewModesList,
+      ]);
+
+      expect(displayTable.value).toBe(false);
+      expect(displayList.value).toBe(true);
+    });
+
+    it("does not use the single configured view mode when it is Table and teaserMetadata columns differ", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table], { title: {} }),
+        makeEntity("mediafile", [ViewModes.Table], { filename: {} }),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayTable,
+        displayList,
+      } = useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([ViewModes.Table]);
+
+      expect(displayTable.value).toBe(false);
+      expect(displayList.value).toBe(true);
+    });
     it("uses config keys (not stored preferences) when only one view mode is configured", () => {
       mockGetGlobalState.mockReturnValue({
         grid: true,
@@ -421,7 +530,6 @@ describe("useViewModes", () => {
         getUserPreferredViewModeConfiguration,
         displayGrid,
         displayTable,
-        displayPreview,
       } = useViewModes({
         entities,
         enablePreview: true,
@@ -461,6 +569,91 @@ describe("useViewModes", () => {
       // displayMap only affects the single-mode early-return path, not the general preference restoration
       expect(displayGrid.value).toBe(true);
       expect(displayTable.value).toBe(true);
+    });
+  });
+
+  describe("pipeline persistence and exclusivity", () => {
+    it("restores the pipeline preference when stored and allowed", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        pipeline: true,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("pipeline", [
+          ViewModes.ViewModesList,
+          ViewModes.ViewModesPipeline,
+        ]),
+      ]);
+      const { getUserPreferredViewModeConfiguration, displayPipeline } =
+        useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesList,
+        ViewModes.ViewModesPipeline,
+      ]);
+
+      expect(displayPipeline.value).toBe(true);
+    });
+
+    it("does not restore the pipeline preference when the mode is not allowed", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        pipeline: true,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("pipeline", [ViewModes.ViewModesList, ViewModes.ViewModesGrid]),
+      ]);
+      const { getUserPreferredViewModeConfiguration, displayPipeline } =
+        useViewModes({ entities });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesList,
+        ViewModes.ViewModesGrid,
+      ]);
+
+      expect(displayPipeline.value).toBe(false);
+    });
+
+    it("persists the pipeline preference when displayPipeline changes", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayPipeline } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      await nextTick();
+
+      expect(mockUpdateGlobalState).toHaveBeenCalledWith(
+        "_displayPreferences",
+        expect.objectContaining({ pipeline: true }),
+      );
+    });
+
+    it("turns displayList off while displayPipeline is on, and back on after", async () => {
+      const entities = ref<Entity[]>([]);
+      const { displayPipeline, displayList } = useViewModes({ entities });
+
+      displayPipeline.value = true;
+      await nextTick();
+      expect(displayList.value).toBe(false);
+
+      displayPipeline.value = false;
+      await nextTick();
+      expect(displayList.value).toBe(true);
+    });
+
+    it("makes showViewModesList false while displayPipeline is on", () => {
+      const entities = ref<Entity[]>([]);
+      const { showViewModesList, displayList, displayPipeline } = useViewModes({
+        entities,
+      });
+
+      displayList.value = true;
+      displayPipeline.value = true;
+
+      expect(showViewModesList.value).toBe(false);
     });
   });
 
@@ -678,7 +871,7 @@ describe("useViewModes", () => {
 
     it("saves grid as false when displayPreview is active even if displayGrid is true", async () => {
       const entities = ref<Entity[]>([]);
-      const { displayGrid, displayPreview } = useViewModes({
+      const { displayGrid } = useViewModes({
         entities,
         enablePreview: true,
       });
@@ -694,7 +887,7 @@ describe("useViewModes", () => {
 
     it("sets displayList to true when all view modes are turned off", async () => {
       const entities = ref<Entity[]>([]);
-      const { displayGrid, displayTable, displayList } = useViewModes({
+      const { displayGrid, displayList } = useViewModes({
         entities,
       });
 
@@ -774,6 +967,118 @@ describe("useViewModes", () => {
         "_displayPreferences",
         expect.objectContaining({ table: true }),
       );
+    });
+  });
+  // ── mixed teaserMetadata watcher ──────────────────────────────────────────
+
+  describe("mixed teaserMetadata watcher", () => {
+    it("falls back to list view when a new result set has different teaserMetadata columns", async () => {
+      const sharedMeta = { title: {}, date: {} };
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+      ]);
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { determineViewModes, displayTable, displayList } = useViewModes({
+        entities,
+      });
+
+      determineViewModes([ViewModes.Table]);
+      displayTable.value = true;
+      await nextTick();
+
+      entities.value = [
+        makeEntity("production", [ViewModes.Table], { title: {} }),
+        makeEntity("mediafile", [ViewModes.Table], { filename: {} }),
+      ];
+      await nextTick();
+
+      expect(displayTable.value).toBe(false);
+      expect(displayList.value).toBe(true);
+    });
+
+    it("keeps table view when a new result set keeps the same teaserMetadata columns", async () => {
+      const sharedMeta = { title: {}, date: {} };
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+      ]);
+      const { determineViewModes, displayTable } = useViewModes({ entities });
+
+      determineViewModes([ViewModes.Table]);
+      displayTable.value = true;
+      await nextTick();
+
+      entities.value = [
+        makeEntity("production", [ViewModes.Table], sharedMeta),
+        makeEntity("mediafile", [ViewModes.Table], sharedMeta),
+      ];
+      await nextTick();
+
+      expect(displayTable.value).toBe(true);
+    });
+  });
+  // ── forceListView ─────────────────────────────────────────────────────────
+
+  describe("forceListView", () => {
+    it("keeps list view when a grid preference is stored", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: true,
+        table: false,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.ViewModesGrid, ViewModes.Table]),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayList,
+        displayGrid,
+      } = useViewModes({ entities, forceListView: true });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesGrid,
+        ViewModes.Table,
+      ]);
+
+      expect(displayList.value).toBe(true);
+      expect(displayGrid.value).toBe(false);
+    });
+
+    it("keeps list view when only Grid is configured", () => {
+      mockGetGlobalState.mockReturnValue({
+        grid: false,
+        table: false,
+        expandFilters: false,
+      });
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.ViewModesGrid]),
+      ]);
+      const {
+        getUserPreferredViewModeConfiguration,
+        displayList,
+        displayGrid,
+      } = useViewModes({ entities, forceListView: true });
+
+      getUserPreferredViewModeConfiguration([ViewModes.ViewModesGrid]);
+
+      expect(displayList.value).toBe(true);
+      expect(displayGrid.value).toBe(false);
+    });
+
+    it("keeps list view when no preferences are stored", () => {
+      mockGetGlobalState.mockReturnValue(null);
+      const entities = ref<Entity[]>([
+        makeEntity("production", [ViewModes.ViewModesGrid, ViewModes.Table]),
+      ]);
+      const { getUserPreferredViewModeConfiguration, displayList } =
+        useViewModes({ entities, forceListView: true });
+
+      getUserPreferredViewModeConfiguration([
+        ViewModes.ViewModesGrid,
+        ViewModes.Table,
+      ]);
+
+      expect(displayList.value).toBe(true);
     });
   });
 });

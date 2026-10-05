@@ -33,6 +33,27 @@
                 :value-options="refMetadata.inputField?.options"
                 :entity="{ type: entityType }"
               />
+              <span
+                v-else-if="fieldType === InputFieldTypes.Checkbox"
+                data-cy="metadata-checkbox-value"
+                class="flex items-center gap-1 text-sm"
+              >
+                <unicon
+                  :name="
+                    refMetadata.value ? Unicons.Check.name : Unicons.Cross.name
+                  "
+                  class="-mx-1"
+                  :class="
+                    refMetadata.value ? 'text-green-600' : 'text-gray-600'
+                  "
+                  height="18"
+                />
+                {{
+                  refMetadata.value
+                    ? t("metadata.labels.yes")
+                    : t("metadata.labels.no")
+                }}
+              </span>
               <entity-element-metadata
                 v-else
                 :label="refMetadata.label as string"
@@ -92,15 +113,16 @@ import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
   BaseLibraryModes,
   type PanelMetaData,
+  InputFieldTypes,
   type PanelRelationMetaData,
   type PanelRelationRootData,
   type Entitytyping,
 } from "@/generated-types/queries";
-import { computed, onMounted, watch, ref } from "vue";
+import { computed, watch, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
-import { usePermissions } from "@/composables/usePermissions";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -126,11 +148,10 @@ const props = withDefaults(
   },
 );
 
-const { fetchAdvancedPermission, setExtraVariables } = usePermissions();
 const { t } = useI18n();
 
 const showTooltip = ref<boolean>(false);
-const isPermitted = ref<boolean>(false);
+const isPermitted = computed(() => refMetadata.value.permitted !== false);
 const refMetadata = ref<
   PanelMetaData | PanelRelationMetaData | PanelRelationRootData
 >(props.metadata);
@@ -139,12 +160,27 @@ const handleOverflowStatus = (status: boolean) => {
   showTooltip.value = status;
 };
 
-const metadataValueToDisplayOnTooltip = computed(
-  () => refMetadata.value?.value?.label || refMetadata.value?.value,
-);
+const metadataValueToDisplayOnTooltip = computed(() => {
+  const label = refMetadata.value?.value?.label;
+  if (Array.isArray(label) && label.some((entry: any) => entry?.values))
+    return label
+      .map((entry: any) =>
+        entry.values?.length
+          ? `${entry.label} (${entry.values
+              .map((nested: any) => nested?.value ?? nested)
+              .join(", ")})`
+          : entry.label,
+      )
+      .join(", ");
+  return label || refMetadata.value?.value;
+});
 
 const pillTranslationKey = computed<string | undefined>(() =>
   resolveValueTranslationKey(refMetadata.value),
+);
+
+const fieldType = computed<InputFieldTypes | undefined>(
+  () => refMetadata.value.inputField?.type as InputFieldTypes,
 );
 
 const label = computed(() =>
@@ -153,40 +189,10 @@ const label = computed(() =>
     : t("metadata.no-label"),
 );
 
-const updatePermissionVariables = () => {
-  setExtraVariables({
-    parentEntityId: props.formId,
-    childEntityId: "",
-  });
-};
-
-const isPermittedToDisplay = async () => {
-  const permissions = refMetadata.value.can;
-  const hasPermissionsToCheck = permissions && permissions?.length > 0;
-
-  if (!hasPermissionsToCheck) {
-    isPermitted.value = true;
-    return;
-  }
-  isPermitted.value = await fetchAdvancedPermission(permissions);
-};
-
 watch(
   () => props.metadata,
   (newValue) => {
     refMetadata.value = newValue;
   },
 );
-
-watch(
-  () => props.formId,
-  () => {
-    updatePermissionVariables();
-  },
-  { immediate: true },
-);
-
-onMounted(async () => {
-  await isPermittedToDisplay();
-});
 </script>

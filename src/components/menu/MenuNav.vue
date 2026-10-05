@@ -3,12 +3,12 @@
     data-cy="menu-nav"
     ref="navigation"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen align-center pt-10 bg-background-light px-5 pb-16 z-navigation',
+      'navbar fixed left-0 top-0 w-24 h-screen flex flex-col bg-background-light z-navigation',
       { 'w-80': isExpanded },
     ]"
     @click.self="changeExpandedStateOfMenu(true)"
   >
-    <div>
+    <div class="shrink-0 px-5 pt-10">
       <router-link
         :to="{ path: '/' }"
         @click="setSelectedMenuItem(menuItems[0])"
@@ -27,6 +27,12 @@
           {{ environmentLabel }}
         </span>
       </div>
+    </div>
+    <div
+      data-cy="menu-nav-items"
+      class="navbar-items flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-5 pb-4"
+      @click.self="changeExpandedStateOfMenu(true)"
+    >
       <div
         v-for="menuItem in menuItems"
         :key="menuItem.label"
@@ -44,10 +50,7 @@
         />
       </div>
     </div>
-    <LogInLogout
-      :is-expanded="isExpanded"
-      :class="['fixed bg-white pb-8 bottom-0 left-0 pl-4']"
-    />
+    <LogInLogout :is-expanded="isExpanded" class="shrink-0 pt-4 pb-8 pl-4" />
   </nav>
 </template>
 
@@ -58,7 +61,6 @@ import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { ref, onMounted, onUnmounted, inject } from "vue";
 import { getEnvironmentLabel } from "@/helpers";
-import { RouterLink } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useRouter } from "vue-router";
 
@@ -126,5 +128,19 @@ router.afterEach(() => {
 }
 .navbar:hover .router-link {
   justify-content: flex-start;
+}
+.navbar-items {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-40) transparent;
+}
+.navbar-items::-webkit-scrollbar {
+  width: 4px;
+}
+.navbar-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+.navbar-items::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-40);
+  border-radius: 9999px;
 }
 </style>

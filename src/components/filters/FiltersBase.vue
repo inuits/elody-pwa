@@ -82,7 +82,6 @@
           <BaseButtonNew
             v-if="
               hasSavedSearch &&
-              canUseSavedSearches &&
               enableSaveSearchFilters &&
               auth.isAuthenticated.value === true
             "
@@ -108,7 +107,7 @@
         </div>
       </div>
 
-      <div v-if="expandFilters && matchers.length > 0">
+      <div v-if="matchers.length > 0" v-show="expandFilters">
         <FiltersListItem
           v-for="filter in displayedFilters"
           :key="filter.advancedFilter.key || ''"
@@ -161,7 +160,6 @@ import {
   DamsIcons,
   GetFilterMatcherMappingDocument,
 } from "@/generated-types/queries";
-import { usePermissions } from "@/composables/usePermissions";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
@@ -180,6 +178,7 @@ import {
 } from "@/composables/useSaveSearchHepler";
 import { auth } from "@/main";
 import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
+import { usableFilters } from "@/composables/filters/useFilterState";
 import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useImport } from "@/composables/useImport";
@@ -321,10 +320,7 @@ const handleActivateFilter = (
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider", undefined);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
-const savedSearchConfig = config.features.savedSearch ?? {};
-const hasSavedSearch = savedSearchConfig.enabled ?? false;
-const canUseSavedSearches = ref(false);
-const { fetchAdvancedPermission } = usePermissions();
+const hasSavedSearch = config.features.savedSearch?.enabled ?? false;
 
 const addFilterOptions = computed(() =>
   filters.value
@@ -547,8 +543,7 @@ const getFiltersFromState = (shouldUseState: boolean) => {
       item,
     ]),
   );
-  const filtersToUse = Object.values(rawFilters.value)
-    .filter((filter): filter is AdvancedFilter => typeof filter !== "string")
+  const filtersToUse = usableFilters(rawFilters.value)
     .map((filter) => {
       const cached = cachedByKey.get(JSON.stringify(filter.key));
       return cached
@@ -605,7 +600,7 @@ const initializeAndActivateNewFilter = (
   value: any,
 ) => {
   initializeNewAdvancedFilters(advancedFilters);
-  Object.values(advancedFilters).forEach((advancedFilter: AdvancedFilter) => {
+  usableFilters(advancedFilters).forEach((advancedFilter) => {
     activateFilter(advancedFilter.key, value);
   });
   applyFilters(false);
@@ -624,12 +619,6 @@ onMounted(async () => {
   emit("advancedFiltersPromise", advancedFiltersPromise);
   lastActiveFilter.value = getLastUsedFilterForRoute(props.route);
   updateFilterVariables();
-  if (hasSavedSearch) {
-    const permissionKeys: string[] = savedSearchConfig.permission ?? [];
-    canUseSavedSearches.value = permissionKeys.length
-      ? await fetchAdvancedPermission(permissionKeys)
-      : true;
-  }
 });
 
 const updateFilterVariables = () => {

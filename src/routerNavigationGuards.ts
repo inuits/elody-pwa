@@ -9,26 +9,66 @@ import { getFromExpressEndpoint } from "@/helpers";
 import { ElodyServices, RouteNames } from "@/generated-types/queries";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
-import { usePermissions } from "@/composables/usePermissions";
 import type { OpenIdConnectClient } from "session-vue-3-oidc-library";
 import { usePageStatus } from "@/composables/usePageStatus";
 
-const checkAlternativeRoutes = async (
+type RouteVerdicts = { [routeKey: string]: boolean };
+
+const routeKey = (route: { name?: unknown; path?: string }): string =>
+  String(route.name ?? route.path ?? "");
+
+const collectRouteVerdicts = (
+  routes: any[] | undefined,
+  verdicts: RouteVerdicts = {},
+): RouteVerdicts => {
+  for (const route of routes ?? []) {
+    if (typeof route?.meta?.permitted === "boolean")
+      verdicts[routeKey(route)] = route.meta.permitted;
+    if (route?.children) collectRouteVerdicts(route.children, verdicts);
+  }
+  return verdicts;
+};
+
+type LandingRoutes = { [routeKey: string]: string };
+
+const collectLandingRoutes = (
+  routes: any[] | undefined,
+  landingRoutes: LandingRoutes = {},
+): LandingRoutes => {
+  for (const route of routes ?? []) {
+    if (typeof route?.meta?.landingRoute === "string")
+      landingRoutes[routeKey(route)] = route.meta.landingRoute;
+    if (route?.children) collectLandingRoutes(route.children, landingRoutes);
+  }
+  return landingRoutes;
+};
+
+const checkLandingRoute = (
   to: RouteLocationNormalized,
-): Promise<RouteLocationRaw | null> => {
+  landingRoutes: LandingRoutes,
+): RouteLocationRaw | null => {
+  const toData = to.matched[to.matched.length - 1];
+  const landingRoute = landingRoutes[routeKey(toData ?? {})];
+
+  if (!landingRoute || to.path === landingRoute) return null;
+
+  return landingRoute;
+};
+
+const checkAlternativeRoutes = (
+  to: RouteLocationNormalized,
+  routeVerdicts: RouteVerdicts,
+): RouteLocationRaw | null => {
   const toData = to.matched[to.matched.length - 1];
   const toMeta = toData?.meta || {};
-  const permission = toMeta.can as string[] | undefined;
 
-  if (!permission) return null;
+  if (routeVerdicts[routeKey(toData ?? {})] !== false) return null;
 
-  const { fetchAdvancedPermission } = usePermissions();
-  const isPermitted = await fetchAdvancedPermission(permission);
   const alternativeRoutes = toMeta.alternativeRoutes as
     | { [role: string]: string }
     | undefined;
 
-  if (isPermitted || !alternativeRoutes) return null;
+  if (!alternativeRoutes) return null;
 
   const authManager = auth as unknown as OpenIdConnectClient;
   const userRole = authManager.user?.role || "fallback";
@@ -140,6 +180,9 @@ const checkForNewVersion = async (): Promise<void> => {
 };
 
 export const addRouterNavigationGuards = (router: Router, config: any) => {
+  const routeVerdicts = collectRouteVerdicts(config?.routerConfig);
+  const landingRoutes = collectLandingRoutes(config?.routerConfig);
+
   router.afterEach(() => {
     handleRequiredAuthentication(router);
     const authManager = auth as unknown as OpenIdConnectClient;
@@ -155,8 +198,11 @@ export const addRouterNavigationGuards = (router: Router, config: any) => {
       const { resetPageStatus } = usePageStatus();
       resetPageStatus();
 
-      const alternativeRedirect = await checkAlternativeRoutes(to);
+      const alternativeRedirect = checkAlternativeRoutes(to, routeVerdicts);
       if (alternativeRedirect) return next(alternativeRedirect);
+
+      const landingRedirect = checkLandingRoute(to, landingRoutes);
+      if (landingRedirect) return next(landingRedirect);
 
       const authRedirect = checkRequiresAuthFromOverview(to, config);
       if (authRedirect) return next(authRedirect);

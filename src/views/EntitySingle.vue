@@ -1,6 +1,9 @@
 <template>
-  <div class="relative h-full">
-    <entity-navigation-arrows class="px-6" />
+  <div
+    class="relative"
+    :class="showNavigationArrows ? 'h-[calc(100%-38px)]' : 'h-full'"
+  >
+    <entity-navigation-arrows class="px-6 pb-2" />
     <div
       v-if="showSavingSpinner"
       class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
@@ -34,7 +37,6 @@
 <script lang="ts" setup>
 import {
   GetEntityByIdDocument,
-  Permission,
   type ColumnList,
   type GetEntityByIdQueryVariables,
   type GetEntityByIdQuery,
@@ -68,7 +70,6 @@ import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSele
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { usePermissions } from "@/composables/usePermissions";
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
@@ -84,11 +85,11 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const { trackSeen, jobStatusPolling } = useEntityPageConfig();
+const { trackSeen, jobStatusPolling, showNavigationArrows } =
+  useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
-const { fetchUpdateAndDeletePermission } = usePermissions();
 const {
   clearBreadcrumbPath,
   getRouteBreadcrumbsOfEntity,
@@ -156,8 +157,6 @@ useJobStatusPolling({
 });
 
 const columnList = ref<ColumnList | "no-values">("no-values");
-const permissionToEdit = ref<boolean>();
-const permissionToDelete = ref<boolean>();
 const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
 provide("RefetchParentEntity", refetch);
@@ -230,7 +229,12 @@ watch(
   () => {
     entity.value = result.value?.Entity as BaseEntity;
     if (!entity.value || !entity.value.intialValues) return;
-    if (trackSeen.value && !getModalInfo(TypeModals.EntityDetailModal).open && entity.value.id) markAsSeen(entity.value.id);
+    if (
+      trackSeen.value &&
+      !getModalInfo(TypeModals.EntityDetailModal).open &&
+      entity.value.id
+    )
+      markAsSeen(entity.value.id);
     useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     useEntitySingle().setEntityType(entityType.value);
@@ -257,31 +261,15 @@ watch(
       ].selectedMediafile = entity.value as MediaFileEntity;
     }
 
-    const mappings = fetchUpdateAndDeletePermission(
-      entity.value.id,
-      entity.value.type,
-    );
-    if (mappings) {
-      mappings.then((result) => {
-        permissionToEdit.value = result.get(Permission.Canupdate);
-        permissionToDelete.value = result.get(Permission.Candelete);
+    const { canUpdate, canDelete } = entity.value.intialValues;
+    if (
+      !props.viewOnly &&
+      auth.isAuthenticated.value &&
+      (canUpdate || canDelete)
+    )
+      useEditHelper.value.setPermittedEditMode({ canUpdate, canDelete });
+    else useEditHelper.value.hideEditButton();
 
-        if (props.viewOnly) {
-          useEditHelper.value.hideEditButton();
-          return;
-        }
-
-        if (auth.isAuthenticated.value) {
-          if (permissionToEdit.value && permissionToDelete.value) {
-            useEditHelper.value.setEditMode("edit-delete");
-          } else if (permissionToEdit.value && !permissionToDelete.value) {
-            useEditHelper.value.setEditMode("edit");
-          } else if (permissionToDelete.value && !permissionToEdit.value) {
-            useEditHelper.value.setEditMode("delete");
-          } else useEditHelper.value.hideEditButton();
-        } else useEditHelper.value.hideEditButton();
-      });
-    }
     loading.value = false;
   },
 );

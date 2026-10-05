@@ -8,7 +8,7 @@
         v-for="primaryOption in primaryOptions"
         :key="primaryOption"
         class="pl-4 pr-6 my-1"
-        :class="{ '-mr-4': filterSecondaryDropdownOptions.length > 0 }"
+        :class="{ '-mr-4': secondaryOptions.length > 0 }"
         button-style="commit"
         button-size="small"
         :disabled="isMainActionDisabled || !primaryOption.active"
@@ -69,7 +69,7 @@
         :direction="ContextMenuDirection.Left"
       >
         <BaseContextMenuItem
-          v-for="(option, idx) in filterSecondaryDropdownOptions"
+          v-for="(option, idx) in secondaryOptions"
           :key="idx"
           :label="t(option?.label, [entityTypeLabel])"
           :tooltip-label="tooltipFor(option)"
@@ -96,20 +96,11 @@ import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { auth } from "@/main";
-import {
-  usePermissions,
-  advancedPermissions,
-} from "@/composables/usePermissions";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
 import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
 
 const emit = defineEmits(["update:modelValue"]);
-const {
-  fetchPermissionsForDropdownOptions,
-  setExtraVariables,
-  createPermissionCacheKey,
-} = usePermissions();
 
 const props = withDefaults(
   defineProps<{
@@ -152,48 +143,37 @@ const tooltipFor = (option: DropdownOption): string | undefined => {
 const entityTypeLabel = computed(() =>
   t(`entity-translations.${props.entityType?.toLowerCase()}`, 2),
 );
-const primaryOptions = computed(() => {
-  let options = availableOptions.value.filter(
-    (item: DropdownOption) => item.primary,
-  );
-  if (options) {
-    options = options.map((option) => {
-      return {
-        ...option,
-        active: determineActiveState(
-          option,
-          props.parentEntityId,
-          props.itemsSelected,
-          props.selectedItems,
-        ),
-      };
-    });
-  }
-  return options;
-});
-
-const secondaryOptions = computed(() => {
-  return (
-    availableOptions.value
-      .filter((item: DropdownOption) => !item?.primary)
-      .map((item: DropdownOption) => ({ ...item, active: true })) || []
-  );
-});
-
-const filterSecondaryDropdownOptions = computed<DropdownOption[]>(() => {
-  return secondaryOptions.value.map((dropdownOption) => {
-    dropdownOption.active = determineActiveState(
-      dropdownOption,
+const optionsWithActiveState = computed<DropdownOption[]>(() =>
+  availableOptions.value.map((option) => ({
+    ...option,
+    active: determineActiveState(
+      option,
       props.parentEntityId,
       props.itemsSelected,
       props.selectedItems,
-    );
-    return dropdownOption;
-  });
+    ),
+  })),
+);
+
+const primaryOptions = computed<DropdownOption[]>(() => {
+  const primaries = optionsWithActiveState.value.filter(
+    (option) => option.primary,
+  );
+  if (primaries.some((option) => option.active)) return primaries;
+  const fallback = optionsWithActiveState.value.find(
+    (option) => option.primaryFallback && option.active,
+  );
+  return fallback ? [fallback] : primaries;
 });
 
+const secondaryOptions = computed<DropdownOption[]>(() =>
+  optionsWithActiveState.value.filter(
+    (option) => !primaryOptions.value.includes(option),
+  ),
+);
+
 const hasSecondaryOptions = computed(() => {
-  return filterSecondaryDropdownOptions.value.length > 0;
+  return secondaryOptions.value.length > 0;
 });
 
 const hasSubDropdownOptions = computed(() => {
@@ -204,46 +184,13 @@ const handleEmit = (action: DropdownOption) => {
   emit("update:modelValue", action);
 };
 
-const getAvailableOptions = () => {
-  const permittedOptions = props.options.filter((item: DropdownOption) => {
-    return (
-      !item.can ||
-      (item.can &&
-        item.can.length > 0 &&
-        advancedPermissions[
-          createPermissionCacheKey({
-            permission: item.can[0],
-            parentEntityId: props.parentEntityId,
-          })
-        ])
-    );
-  });
-
-  availableOptions.value = permittedOptions.filter((item: DropdownOption) => {
-    return (
-      !item?.requiresAuth ||
-      (item?.requiresAuth && auth.isAuthenticated.value === true) ||
-      (item.can &&
-        item.can.length > 0 &&
-        advancedPermissions[
-          createPermissionCacheKey({
-            permission: item.can[0],
-            parentEntityId: props.parentEntityId,
-          })
-        ])
-    );
-  });
-};
-
 watch(
   () => props.options,
-  async () => {
-    setExtraVariables({
-      parentEntityId: props.parentEntityId,
-      childEntityId: "",
-    });
-    await fetchPermissionsForDropdownOptions(props.options);
-    getAvailableOptions();
+  () => {
+    availableOptions.value = props.options.filter(
+      (item: DropdownOption) =>
+        !item?.requiresAuth || auth.isAuthenticated.value === true,
+    );
   },
   { deep: true, immediate: true },
 );

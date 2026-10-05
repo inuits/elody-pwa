@@ -34,7 +34,7 @@
             </div>
           </div>
 
-          <div class="w-8 shrink-0" />
+          <div class="shrink-0" :style="{ width: actionsColumnWidth }" />
 
           <div class="w-8 shrink-0" />
         </div>
@@ -58,7 +58,8 @@
             :item-id="entity.id"
             :item-type="entity.type"
             :bulk-operations-context="bulkOperationsContext"
-            :context-menu-actions="entity.contextMenu"
+            :buttons="entity.buttons"
+            :actions-column-width="actionsColumnWidth"
             :entityTypename="entity.entityTypename"
             :teaser-metadata="entity.teaserMetadata"
             :intialValues="entity.intialValues"
@@ -105,6 +106,9 @@
           :entity-id="previewForEntity"
           :parent-ids="parentEntityIdentifiers"
           :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+          :relation-type="relationType"
+          :parent-entity-type="parentEntityType"
+          :refetch-entities="refetchEntities"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -148,6 +152,7 @@ const props = withDefaults(
     openEntityInDetailModal?: boolean;
     enableNavigation?: boolean;
     parentEntityIdentifiers?: string[];
+    parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
     relationType?: string;
     enableSelection: boolean;
@@ -187,6 +192,7 @@ const {
   previewComponentEnabled,
   previewForEntity,
   togglePreviewComponent,
+  openPreviewComponent,
   closePreviewComponent,
   isPreviewComponentEnabledForListItem,
 } = usePreviewComponent(props, refEntities);
@@ -196,13 +202,13 @@ const {
   getLinkSettings,
   isEntityDisabled,
   entityWrapperHandler,
-  getContextMenu,
+  getButtons,
   isPreviewElement,
 } = useEntityListHelpers(
   props,
   refEntities,
   previewComponentEnabled,
-  togglePreviewComponent,
+  openPreviewComponent,
 );
 
 const { trackSeen } = useEntityPageConfig();
@@ -275,6 +281,19 @@ const headerColumnClass = (idx: number): string => {
   return `${base} ${pos} ${widths[amount]}`;
 };
 
+const actionsColumnWidth = computed(() => {
+  const mostButtonsOnARow = Math.max(
+    1,
+    ...refEntities.value.map(
+      (entity) =>
+        Object.entries(getButtons(entity) ?? {}).filter(
+          ([key, value]) => key !== "__typename" && value,
+        ).length,
+    ),
+  );
+  return `${mostButtonsOnARow * 2}rem`;
+});
+
 const processedEntities = computed(() => {
   const previewEnabled = previewComponentEnabled.value;
   const parentId = props.parentEntityIdentifiers[0];
@@ -299,7 +318,7 @@ const processedEntities = computed(() => {
     );
     const mediaFilename = getMediaFilenameFromEntity(entity);
     const thumbnail = getThumbnail(entity);
-    const contextMenu = getContextMenu(entity);
+    const buttons = getButtons(entity);
 
     const memoKey = [
       entity.intialValues,
@@ -311,6 +330,7 @@ const processedEntities = computed(() => {
       isSeen,
       previewEnabled,
       props.entitiesLoading,
+      actionsColumnWidth.value,
     ];
 
     return {
@@ -320,7 +340,7 @@ const processedEntities = computed(() => {
       componentTag: linkSettings.tag,
       componentPath: linkSettings.path,
       forcedNavigationPath: forcedLinkSettings.path,
-      contextMenu,
+      buttons,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
       intialValues: entity.intialValues,

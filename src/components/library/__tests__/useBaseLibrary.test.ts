@@ -20,6 +20,7 @@ vi.mock("@/composables/useImport", () => ({
 }));
 
 import { useBaseLibrary } from "../useBaseLibrary";
+import useEntitySingle from "@/composables/useEntitySingle";
 
 const mockApolloClient = {} as any;
 
@@ -111,6 +112,40 @@ describe("useBaseLibrary – getEntities count reconciliation", () => {
     expect(fetchSequence.value).toBe(1);
     await getEntities(mockRoute);
     expect(fetchSequence.value).toBe(2);
+  });
+});
+
+describe("useBaseLibrary – parent entity header", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+  const mockQueryResult = (results: any[]) => ({
+    data: { Entities: { results, count: results.length, facets: [] } },
+  });
+
+  it("names the entity this listing hangs off so the graphql layer can resolve its relations' permissions", async () => {
+    const query = vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }]));
+    const { getEntities, setParentEntityId } = useBaseLibrary({ query } as any);
+    setParentEntityId("PROD-1");
+
+    await getEntities(mockRoute);
+
+    expect(query.mock.calls[0][0].context.headers).toEqual({
+      "X-Parent-Entity-Id": "PROD-1",
+    });
+  });
+
+  it("sends an empty parent for a listing with no parent, whatever entity was last opened", async () => {
+    // The globally remembered "entity currently open" is not cleared by every
+    // navigation, so a top-level listing must not inherit it.
+    useEntitySingle().setEntityUuid("STALE-1");
+    const query = vi.fn().mockResolvedValue(mockQueryResult([{ id: "a" }]));
+    const { getEntities, setParentEntityId } = useBaseLibrary({ query } as any);
+    setParentEntityId(undefined);
+
+    await getEntities(mockRoute);
+
+    expect(query.mock.calls[0][0].context.headers).toEqual({
+      "X-Parent-Entity-Id": "",
+    });
   });
 });
 
@@ -220,5 +255,48 @@ describe("useBaseLibrary – exact count on demand", () => {
     // It must not resurrect an exact total for a listing that's no longer current.
     expect(exactTotalCount.value).toBeNull();
     expect(exactCountLoading.value).toBe(false);
+  });
+});
+
+describe("useBaseLibrary – coalesced fetches", () => {
+  const mockRoute = { name: "TestRoute", meta: {}, params: {} } as any;
+  const listingResult = (results: any[]) => ({
+    data: { Entities: { results, count: results.length, facets: [] } },
+  });
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it("does not replay a coalesced fetch whose changes the in-flight request already carried", async () => {
+    const query = vi.fn().mockResolvedValue(listingResult([{ id: "a" }]));
+    const library = useBaseLibrary({ query } as any);
+    const filters = [{ key: "title", value: "x" }] as any;
+
+    library.enqueuePromise(async () => {
+      await library.setAdvancedFilters(filters, false, true, mockRoute);
+    });
+    await library.getEntities(mockRoute);
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(query.mock.calls[0][0].variables.advancedFilterInputs).toEqual(
+      filters,
+    );
+  });
+
+  it("replays a coalesced fetch whose change landed after the request went out", async () => {
+    let resolveFirst: (value: unknown) => void;
+    const firstResponse = new Promise((resolve) => (resolveFirst = resolve));
+    const query = vi
+      .fn()
+      .mockReturnValueOnce(firstResponse)
+      .mockResolvedValueOnce(listingResult([{ id: "b" }]));
+    const library = useBaseLibrary({ query } as any);
+
+    const fetch = library.getEntities(mockRoute);
+    await tick();
+    library.setSkip(2, true);
+    resolveFirst!(listingResult([{ id: "a" }]));
+    await fetch;
+
+    expect(query).toHaveBeenCalledTimes(2);
+    expect(query.mock.calls[1][0].variables.skip).toBe(2);
   });
 });

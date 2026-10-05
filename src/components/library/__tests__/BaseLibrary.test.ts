@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import { ref, reactive, watch } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
+import { ViewModes } from "@/generated-types/queries";
 
 // --- Hoisted mutable state (changes between tests) ---------------------------
 const mocks = vi.hoisted(() => ({
@@ -72,6 +73,7 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     setLimit: vi.fn(),
     setManipulationOfQuery: vi.fn(),
     setParentEntityIdentifiers: vi.fn(),
+    setParentEntityId: vi.fn(),
     setsearchInputType: vi.fn(),
     setSkip: vi.fn(),
     setLocale: vi.fn(),
@@ -175,6 +177,7 @@ vi.mock("@/composables/useViewModes", () => ({
     displayTable: ref(false),
     displayPreview: ref(false),
     displayMap: ref(false),
+    displayPipeline: ref(false),
     expandFilters: ref(false),
     toggles: ref([]),
     configPerViewMode: ref({}),
@@ -221,6 +224,7 @@ vi.mock("vue-router", () => ({
 
 import BaseLibrary from "../BaseLibrary.vue";
 import ViewModesList from "../view-modes/ViewModesList.vue";
+import LibraryBar from "../LibraryBar.vue";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
 // --- Props / wrapper factories ------------------------------------------------
@@ -595,6 +599,50 @@ describe("BaseLibrary.vue predefinedEntities initialization", () => {
     expect((wrapper.vm as any).entities).toEqual(predefined);
   });
 
+  it("passes ViewModesPipeline through to determineViewModes outside the entity picker", async () => {
+    const predefined = [
+      {
+        ...makePredefined("e1"),
+        allowedViewModes: {
+          viewModes: [
+            { viewMode: ViewModes.ViewModesList, config: null },
+            { viewMode: ViewModes.ViewModesPipeline, config: null },
+          ],
+        },
+      },
+    ];
+    wrapper = getWrapper({ predefinedEntities: predefined });
+    await flushPromises();
+
+    expect(libDetermineViewModes).toHaveBeenCalledWith([
+      ViewModes.ViewModesList,
+      ViewModes.ViewModesPipeline,
+    ]);
+  });
+
+  it("strips ViewModesPipeline from the view modes inside the entity picker", async () => {
+    const predefined = [
+      {
+        ...makePredefined("e1"),
+        allowedViewModes: {
+          viewModes: [
+            { viewMode: ViewModes.ViewModesList, config: null },
+            { viewMode: ViewModes.ViewModesPipeline, config: null },
+          ],
+        },
+      },
+    ];
+    wrapper = getWrapper({
+      predefinedEntities: predefined,
+      bulkOperationsContext: "EntityElementListEntityPickerModal",
+    });
+    await flushPromises();
+
+    expect(libDetermineViewModes).toHaveBeenCalledWith([
+      ViewModes.ViewModesList,
+    ]);
+  });
+
   it("reflects predefinedEntities in entities when they are provided after mount", async () => {
     wrapper = getWrapper();
     await flushPromises();
@@ -945,5 +993,39 @@ describe("BaseLibrary.vue additional default filters for picker libraries", () =
     await flushPromises();
     const filters = wrapper.findComponent({ name: "FiltersBase" });
     expect(filters.props("additionalDefaultFiltersEnabled")).toBeTruthy();
+  });
+});
+
+describe("BaseLibrary.vue simple search in a preview", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.entityUuid = "entity-123";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const setSimpleSearchOf = (wrapper: ReturnType<typeof getWrapper>) =>
+    wrapper.findComponent(LibraryBar).props("setSimpleSearch");
+
+  it("keeps the simple search in a normal library", () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    expect(setSimpleSearchOf(wrapper)).toBeTypeOf("function");
+  });
+
+  it("drops the simple search in a preview library", () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
+    });
+    expect(setSimpleSearchOf(wrapper)).toBeUndefined();
   });
 });

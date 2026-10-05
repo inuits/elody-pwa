@@ -26,7 +26,12 @@ describe("buildMergeRows", () => {
     );
 
     expect(rows).toEqual([
-      { key: "birth_year", label: "Birth year", leftValue: 1920, rightValue: 1921 },
+      {
+        key: "birth_year",
+        label: "Birth year",
+        leftValue: 1920,
+        rightValue: 1921,
+      },
     ]);
   });
 
@@ -34,7 +39,12 @@ describe("buildMergeRows", () => {
     const rows = buildMergeRows(fields, { name: "Herbert" }, {});
 
     expect(rows).toEqual([
-      { key: "name", label: "Name", leftValue: "Herbert", rightValue: undefined },
+      {
+        key: "name",
+        label: "Name",
+        leftValue: "Herbert",
+        rightValue: undefined,
+      },
     ]);
   });
 
@@ -77,13 +87,34 @@ describe("buildMergeRows", () => {
 });
 
 describe("buildMergedValues", () => {
+  it("omits a locked field, which the backend would discard anyway", () => {
+    const rows = buildMergeRows(
+      fields,
+      { name: "Herbert", birth_year: 1920 },
+      { name: "Herbert Jr", birth_year: 1921 },
+    );
+
+    const values = buildMergedValues(rows, { name: "right" }, ["name"]);
+
+    expect(values).not.toHaveProperty("name");
+    expect(values).toHaveProperty("birth_year");
+  });
+
+  it("sends every field when nothing is locked", () => {
+    const rows = buildMergeRows(fields, { name: "Herbert" }, { name: "Bert" });
+
+    expect(buildMergedValues(rows, {})).toHaveProperty("name");
+  });
+
   const rows = [
     { key: "name", label: "Name", leftValue: "A", rightValue: "B" },
     { key: "birth_year", label: "Birth year", leftValue: 1, rightValue: 2 },
   ];
 
   it("takes each field from the side that was chosen for it", () => {
-    expect(buildMergedValues(rows, { name: "left", birth_year: "right" })).toEqual({
+    expect(
+      buildMergedValues(rows, { name: "left", birth_year: "right" }),
+    ).toEqual({
       name: "A",
       birth_year: 2,
     });
@@ -103,6 +134,8 @@ describe("buildMergedValues", () => {
       { key: "name", label: "Name", leftValue: "A", rightValue: undefined },
     ];
 
-    expect(buildMergedValues(emptyRows, { name: "right" })).toEqual({ name: "" });
+    expect(buildMergedValues(emptyRows, { name: "right" })).toEqual({
+      name: "",
+    });
   });
 });

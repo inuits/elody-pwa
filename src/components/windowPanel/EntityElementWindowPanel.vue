@@ -7,14 +7,23 @@
     >
       <div class="flex gap-4 w-2/3 items-center">
         <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
-        <span
-          v-if="libraryDataValue !== undefined"
-          data-cy="panel-header-library-data"
-          class="px-2 py-0.5 rounded-full text-sm text-text-body whitespace-nowrap"
-          :class="libraryDataValue ? 'bg-accent-normal' : 'bg-neutral-30'"
+        <div
+          v-if="panel.panelHeaderContent.libraryData"
+          class="grid transition-[grid-template-columns,opacity] duration-300 ease-out"
+          :class="
+            libraryDataValue !== undefined
+              ? 'grid-cols-[1fr] opacity-100'
+              : 'grid-cols-[0fr] opacity-0'
+          "
         >
-          {{ libraryDataLabel }}
-        </span>
+          <span
+            data-cy="panel-header-library-data"
+            class="overflow-hidden px-2 py-0.5 rounded-full text-sm text-text-body whitespace-nowrap"
+            :class="libraryDataValue ? 'bg-accent-normal' : 'bg-neutral-30'"
+          >
+            {{ libraryDataLabel }}
+          </span>
+        </div>
         <MetadataWrapper
           class="w-full max-w-[50%]"
           v-if="panel.panelHeaderContent.panelStatus"

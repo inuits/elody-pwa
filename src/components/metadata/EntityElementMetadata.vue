@@ -107,8 +107,19 @@ const readableValue = computed(() => {
   return convertUnitToReadbleFormat(props.unit as Unit, props.value ?? "");
 });
 
+const translateValue = (value: unknown) => {
+  if (!props.translationKey) return value;
+  const normalizedTranslationKey = props.translationKey.replace(
+    "$value",
+    String(value),
+  );
+  const translated = t(normalizedTranslationKey);
+  return translated !== normalizedTranslationKey ? translated : value;
+};
+
 const linesToRender = computed<string[] | null>(() => {
-  if (Array.isArray(readableValue.value)) return readableValue.value;
+  if (Array.isArray(readableValue.value))
+    return readableValue.value.map(translateValue);
   if (typeof readableValue.value === "string") {
     const lines = readableValue.value
       .split(/\r?\n/)
@@ -133,16 +144,6 @@ const displayValue = computed(() => {
   if (readableValue.value === "") return emptyDisplayValue.value;
   if (Array.isArray(readableValue.value)) return readableValue.value;
 
-  if (props.translationKey) {
-    const key = props.translationKey;
-    const normalizedTranslationKey = key.replace(
-      "$value",
-      String(readableValue.value),
-    );
-    const translated = t(normalizedTranslationKey);
-    if (translated !== normalizedTranslationKey) return translated;
-  }
-
-  return readableValue.value;
+  return translateValue(readableValue.value);
 });
 </script>

@@ -16,6 +16,7 @@
         asButton
           ? {
               buttonStyle: 'commit',
+              icon: buttonIcon,
               buttonSize: 'small',
               disabled: disable,
             }
@@ -54,6 +55,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
+import { computed } from "vue";
 
 const { t } = useI18n();
 const emit = defineEmits(["clicked"]);
@@ -81,6 +83,12 @@ const props = withDefaults(
       return false;
     },
   },
+);
+
+const buttonIcon = computed(() =>
+  Object.keys(Unicons).find(
+    (iconKey) => Unicons[iconKey as keyof typeof Unicons].name === props.icon,
+  ),
 );
 
 const clicked = () => {

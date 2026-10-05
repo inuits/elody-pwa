@@ -1,11 +1,7 @@
 import { mount } from "@vue/test-utils";
 import MenuItemComponent from "../MenuItem.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import type {
-  Entitytyping,
-  MenuItem,
-  DamsIcons,
-} from "@/generated-types/queries";
+import type { MenuItem, DamsIcons } from "@/generated-types/queries";
 import { flushPromises } from "@vue/test-utils";
 import { ref } from "vue";
 
@@ -45,6 +41,7 @@ vi.mock("@/types", () => ({
   Unicons: {
     Plus: { name: "plus" },
     AngleRight: { name: "angel-right" },
+    AngleDown: { name: "angel-down" },
   },
 }));
 
@@ -63,130 +60,96 @@ vi.mock("@/composables/useMenuHelper", () => ({
   },
 }));
 
-const mocks = vi.hoisted(() => {
-  return {
-    fetchAdvancedPermissions: vi.fn(),
-    can: vi.fn(),
-  };
-});
+const mountMenuItem = (menuitem: MenuItem) =>
+  mount(MenuItemComponent, {
+    props: {
+      menuitem,
+      icon: "Test" as DamsIcons,
+      isExpanded: true,
+      isBeingHovered: true,
+    },
+  });
 
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: mocks.fetchAdvancedPermissions,
-    fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
-    setExtraVariables: vi.fn(),
-  }),
-  ignorePermissions: { value: false },
-}));
+const routeTo = (destination: string) => ({
+  route: { destination },
+});
 
 describe("MenuItem", () => {
   afterEach(() => {
     vi.clearAllMocks();
-    vi.resetAllMocks();
   });
 
-  const menuItemProps: MenuItem = {
-    label: "Test Menu Item",
-    typeLink: {
-      route: {
-        destination: "some-path",
-      },
-    },
-    can: ["test-permission"],
-    subMenu: null,
-    isLoggedIn: true,
-  };
-
-  it("renders the component if permission is granted", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
-
-    const wrapper = mount(MenuItemComponent, {
-      props: {
-        menuitem: menuItemProps,
-        icon: "Test" as DamsIcons,
-        isExpanded: false,
-        isBeingHovered: false,
-      },
-    });
+  it("renders an item whose config GraphQL returned", async () => {
+    const wrapper = mountMenuItem({
+      label: "Test Menu Item",
+      typeLink: routeTo("some-path"),
+      subMenu: null,
+      isLoggedIn: true,
+    } as MenuItem);
 
     await flushPromises();
 
-    const menuItem = await wrapper.find('[data-test="menu-item-component"]');
-    expect(menuItem.exists()).toBe(true);
+    expect(
+      wrapper.find('[data-test="menu-item-component"]').isVisible(),
+    ).toBe(true);
   });
 
-  it("hides the component if permission is not granted", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(false);
-
-    const wrapper = mount(MenuItemComponent, {
-      props: {
-        menuitem: menuItemProps,
-        icon: "Test" as DamsIcons,
-        isExpanded: false,
-        isBeingHovered: false,
+  it("hides a group whose children were all left out", async () => {
+    const wrapper = mountMenuItem({
+      label: "Organizations",
+      typeLink: routeTo("venues"),
+      subMenu: {
+        name: "sub-menu-organizations",
+        venues: null,
+        companies: null,
       },
-    });
+      isLoggedIn: true,
+    } as unknown as MenuItem);
 
     await flushPromises();
 
-    const menuItem = await wrapper.find('[data-test="menu-item-component"]');
-    expect(menuItem.isVisible()).toBe(false);
+    expect(
+      wrapper.find('[data-test="menu-item-component"]').isVisible(),
+    ).toBe(false);
   });
 
-  it("renders the component if permission is not provided", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
-    mocks.can.mockReturnValue(true);
-
-    const wrapper = mount(MenuItemComponent, {
-      props: {
-        menuitem: {
-          label: "Test Menu Item",
-          typeLink: {
-            route: {
-              destination: "some-path",
-            },
-          },
-          entityType: "entityType" as Entitytyping,
-          subMenu: null,
-          isLoggedIn: true,
+  it("renders a group next to the one child that survived", async () => {
+    const wrapper = mountMenuItem({
+      label: "Organizations",
+      typeLink: routeTo("venues"),
+      subMenu: {
+        name: "sub-menu-organizations",
+        venues: null,
+        companies: {
+          label: "navigation.companies",
+          typeLink: routeTo("companies"),
         },
-        icon: "Test" as DamsIcons,
-        isExpanded: false,
-        isBeingHovered: false,
       },
-    });
+      isLoggedIn: true,
+    } as unknown as MenuItem);
 
     await flushPromises();
 
-    const menuItem = await wrapper.find('[data-test="menu-item-component"]');
-    expect(menuItem.exists()).toBe(true);
+    expect(
+      wrapper.find('[data-test="menu-item-component"]').isVisible(),
+    ).toBe(true);
+    const subItems = wrapper.findAll('[data-cy="menu-sub-item"]');
+    expect(subItems).toHaveLength(1);
+    expect(subItems[0].text()).toContain("navigation.companies");
   });
 
-  it("hides the component if permission is not provided and no permissions for the entity type", async () => {
-    mocks.can.mockReturnValue(false);
-
-    const wrapper = mount(MenuItemComponent, {
-      props: {
-        menuitem: {
-          label: "Test Menu Item",
-          typeLink: {
-            route: {
-              destination: "some-path",
-            },
-          },
-          entityType: "Hidden" as Entitytyping,
-          subMenu: null,
-          isLoggedIn: true,
-        },
-        icon: "Test" as DamsIcons,
-        isExpanded: false,
-        isBeingHovered: false,
-      },
-    });
+  it("renders a plain item that has no submenu at all", async () => {
+    const wrapper = mountMenuItem({
+      label: "Productions",
+      typeLink: routeTo("productions"),
+      isLoggedIn: true,
+    } as MenuItem);
 
     await flushPromises();
 
-    const menuItem = await wrapper.find('[data-test="menu-item-component"]');
-    expect(menuItem.isVisible()).toBe(false);
+    expect(
+      wrapper.find('[data-test="menu-item-component"]').isVisible(),
+    ).toBe(true);
+    expect(wrapper.findAll('[data-cy="menu-sub-item"]')).toHaveLength(0);
   });
 });

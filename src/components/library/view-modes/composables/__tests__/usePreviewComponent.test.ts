@@ -68,6 +68,26 @@ describe("usePreviewComponent", () => {
     vi.resetAllMocks();
   });
 
+  describe("openPreviewComponent", () => {
+    it("keeps the preview open when the active item is opened again", async () => {
+      const { openPreviewComponent, previewComponentEnabled, previewForEntity } =
+        await setup();
+      openPreviewComponent("entity-1");
+      openPreviewComponent("entity-1");
+      expect(previewComponentEnabled.value).toBe(true);
+      expect(previewForEntity.value).toBe("entity-1");
+    });
+
+    it("keeps the preview open for AllListItems coverage", async () => {
+      const { openPreviewComponent, previewComponentEnabled, previewForEntity } =
+        await setup({ listItemsCoverage: ListItemCoverageTypes.AllListItems });
+      openPreviewComponent("entity-1");
+      openPreviewComponent("entity-2");
+      expect(previewComponentEnabled.value).toBe(true);
+      expect(previewForEntity.value).toBe("entity-2");
+    });
+  });
+
   describe("togglePreviewComponent — OneListItem coverage", () => {
     it("enables the preview panel for the toggled entity", async () => {
       const {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useSimpleSearch } from "@/composables/useSimpleSearch";
-import { AdvancedFilterTypes, Operator, Permission } from "@/generated-types/queries";
+import { AdvancedFilterTypes, Operator } from "@/generated-types/queries";
 
 let mockConfig: any;
 
@@ -11,11 +11,6 @@ vi.mock("vue", async (importOriginal) => {
     inject: vi.fn(() => mockConfig),
   };
 });
-
-const mockCan = vi.fn();
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({ can: mockCan }),
-}));
 
 const makeConfig = (overrides: Record<string, any> = {}) => ({
   features: {
@@ -32,11 +27,10 @@ describe("useSimpleSearch", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockConfig = makeConfig();
-    mockCan.mockReturnValue(true);
   });
 
   describe("buildFilters — entity type filter", () => {
-    it("prepends entity type filter when all types are permitted", () => {
+    it("prepends entity type filter for the types the config offers", () => {
       const { buildFilters } = useSimpleSearch();
       const filters = buildFilters("venice");
       const typeFilter = filters.find((f) => f.type === AdvancedFilterTypes.Selection);
@@ -46,21 +40,14 @@ describe("useSimpleSearch", () => {
       expect(typeFilter?.match_exact).toBe(true);
     });
 
-    it("excludes types the user has no permission for", () => {
-      mockCan.mockImplementation(
-        (_permission: string, type: string) => type === "production",
-      );
+    // The graphql layer already left out every type the user may not read, so
+    // whatever arrives here is searched as-is.
+    it("searches exactly the types it was handed", () => {
+      mockConfig = makeConfig({ itemTypes: ["production"] });
       const { buildFilters } = useSimpleSearch();
       const filters = buildFilters("venice");
       const typeFilter = filters.find((f) => f.type === AdvancedFilterTypes.Selection);
       expect(typeFilter?.value).toEqual(["production"]);
-    });
-
-    it("omits entity type filter when no types are permitted", () => {
-      mockCan.mockReturnValue(false);
-      const { buildFilters } = useSimpleSearch();
-      const filters = buildFilters("venice");
-      expect(filters.every((f) => f.type !== AdvancedFilterTypes.Selection)).toBe(true);
     });
 
     it("omits entity type filter when itemTypes is empty", () => {
@@ -152,5 +139,60 @@ describe("useSimpleSearch", () => {
       );
       expect(textFilter?.key).toEqual(["custom:key"]);
     });
+  });
+});
+
+describe("useSimpleSearch — relation keys", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("collapses the metadata keys into one filter carrying the relation keys", () => {
+    // One filter is what lets the backend match a token against the entity's
+    // own metadata OR its relations; separate filters per key would be ANDed.
+    mockConfig = makeConfig({
+      simpleSearchMetadataKey: ["title", "description"],
+      relationKeys: ["vlacc:1|properties.ref_authors.value"],
+    });
+
+    const textFilters = useSimpleSearch()
+      .buildFilters("rowling")
+      .filter((f) => f.type === AdvancedFilterTypes.Text);
+
+    expect(textFilters).toHaveLength(1);
+    expect(textFilters[0].key).toEqual([
+      "elody:1|metadata.title.value",
+      "elody:1|metadata.description.value",
+    ]);
+    expect((textFilters[0] as any).relation_keys).toEqual([
+      "vlacc:1|properties.ref_authors.value",
+    ]);
+    expect(textFilters[0].operator).toBe(Operator.Or);
+  });
+
+  it("keeps one filter per metadata key when no relation keys are configured", () => {
+    mockConfig = makeConfig({
+      simpleSearchMetadataKey: ["title", "description"],
+    });
+
+    const textFilters = useSimpleSearch()
+      .buildFilters("rowling")
+      .filter((f) => f.type === AdvancedFilterTypes.Text);
+
+    expect(textFilters).toHaveLength(2);
+    expect((textFilters[0] as any).relation_keys).toBeUndefined();
+  });
+
+  it("an empty relation key list keeps the existing shape", () => {
+    mockConfig = makeConfig({
+      simpleSearchMetadataKey: ["title"],
+      relationKeys: [],
+    });
+
+    const textFilters = useSimpleSearch()
+      .buildFilters("rowling")
+      .filter((f) => f.type === AdvancedFilterTypes.Text);
+
+    expect((textFilters[0] as any).relation_keys).toBeUndefined();
   });
 });

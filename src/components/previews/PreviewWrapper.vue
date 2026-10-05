@@ -96,6 +96,10 @@
       :mediafiles-loading="entitiesLoading"
       :entity-id="entityId"
       :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+      :parent-entity-id="parentIds?.[0]"
+      :parent-entity-type="parentEntityType"
+      :relation-type="relationType"
+      :refetch-entities="refetchEntities"
       @toggle-preview-component="
         (id: string) => emit('togglePreviewComponent', id)
       "
@@ -177,6 +181,9 @@ const props = withDefaults(
     entityId: string | undefined;
     parentIds: string[];
     cropMediafileCoordinatesKey: string;
+    relationType?: string;
+    parentEntityType?: Entitytyping;
+    refetchEntities?: () => Promise<void>;
   }>(),
   {},
 );
@@ -191,6 +198,11 @@ provide(
   "showCurrentPreviewFlow",
   props.previewComponent.showCurrentPreviewFlow,
 );
+const previewedEntity = computed<Entity | undefined>(() =>
+  props.entities.find((entity) => entity.id === props.entityId),
+);
+provide("ParentEntityProvider", previewedEntity);
+
 const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
 const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
 const previewLoading = ref<boolean>(false);

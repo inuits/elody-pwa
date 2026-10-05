@@ -28,33 +28,6 @@ vi.mock("session-vue-3-oidc-library", () => ({
   }),
 }));
 
-const mocks = vi.hoisted(() => {
-  return {
-    advancedPermissions: {} as Record<string, boolean>,
-  };
-});
-
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: vi.fn(),
-    fetchAdvancedPermission: vi.fn(),
-    fetchPermissionsForDropdownOptions: vi.fn(),
-    setExtraVariables: vi.fn(),
-    createPermissionCacheKey: vi.fn((options) => {
-      let key = options.permission;
-      if (options.parentEntityId) {
-        key += `|parent:${options.parentEntityId}`;
-      }
-      if (options.childEntityId) {
-        key += `|child:${options.childEntityId}`;
-      }
-      return key;
-    }),
-  }),
-  ignorePermissions: { value: false },
-  advancedPermissions: mocks.advancedPermissions,
-}));
-
 describe("ActionMenuGroup", () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -82,96 +55,127 @@ describe("ActionMenuGroup", () => {
     can: ["can_do_whatever_you_want"],
   };
 
-  it("contains the option if permission is granted", async () => {
-    mocks.advancedPermissions["can_do_whatever_you_want"] = true;
-
-    const wrapper = mount(ActionMenuGroup, {
+  const mountWith = (options: DropdownOption[]) =>
+    mount(ActionMenuGroup, {
       props: {
-        options: [bulkOption],
+        options,
         isMainActionDisabled: false,
         entityType: "Entitytyping" as Entitytyping,
       },
     });
 
-    await flushPromises();
-
-    expect(wrapper.vm.availableOptions.length).toBe(1);
-  });
-
-  it("has no option if permission is not granted", async () => {
-    mocks.advancedPermissions["can_do_whatever_you_want"] = false;
-
-    const wrapper = mount(ActionMenuGroup, {
-      props: {
-        options: [bulkOption],
-        isMainActionDisabled: false,
-        entityType: "Entitytyping" as Entitytyping,
-      },
-    });
-
-    await flushPromises();
-
-    expect(wrapper.vm.availableOptions.length).toBe(0);
-  });
-
-  it("contains the option to render if permission is not provided", async () => {
-    const wrapper = mount(ActionMenuGroup, {
-      props: {
-        options: [
-          { ...bulkOption, can: undefined },
-          { ...bulkOption, can: undefined },
-        ],
-        isMainActionDisabled: false,
-        entityType: "Entitytyping" as Entitytyping,
-      },
-    });
+  it("renders every option graphql returned", async () => {
+    const wrapper = mountWith([bulkOption, { ...bulkOption, can: undefined }]);
 
     await flushPromises();
 
     expect(wrapper.vm.availableOptions.length).toBe(2);
   });
 
-  it("contains only permitted options", async () => {
-    mocks.advancedPermissions["can_do_whatever_you_want"] = true;
-    mocks.advancedPermissions["take_whats_mine"] = false;
+  it("hides an option that requires a login from an anonymous visitor", async () => {
+    const { auth } = await import("@/main");
+    // @ts-expect-error the global test mock hands out a plain ref
+    auth.isAuthenticated.value = false;
 
-    const wrapper = mount(ActionMenuGroup, {
-      props: {
-        options: [bulkOption, { ...bulkOption, can: ["take_whats_mine"] }],
-        isMainActionDisabled: false,
-        entityType: "Entitytyping" as Entitytyping,
-      },
-    });
-
+    const wrapper = mountWith([
+      { ...bulkOption, requiresAuth: true },
+      { ...bulkOption, requiresAuth: false },
+    ]);
     await flushPromises();
 
     expect(wrapper.vm.availableOptions.length).toBe(1);
+
+    // @ts-expect-error see above
+    auth.isAuthenticated.value = true;
   });
 
-  it("contains the option to render if options were provided with delay", async () => {
-    const wrapper = mount(ActionMenuGroup, {
-      props: {
-        options: [],
-        isMainActionDisabled: false,
-        entityType: "Entitytyping" as Entitytyping,
-      },
-    });
-
+  it("picks up options that arrive after mount", async () => {
+    const wrapper = mountWith([]);
     await flushPromises();
 
     expect(wrapper.vm.availableOptions.length).toBe(0);
 
-    mocks.advancedPermissions["no_way"] = true;
-    mocks.advancedPermissions["different_no_way"] = false;
     await wrapper.setProps({
-      options: [
-        { ...bulkOption, can: ["no_way"] },
-        { ...bulkOption, can: undefined },
-        { ...bulkOption, can: ["different_no_way"] },
-      ],
+      options: [bulkOption, { ...bulkOption, can: undefined }],
     });
     await flushPromises();
 
     expect(wrapper.vm.availableOptions.length).toBe(2);
+  });
+
+  describe("primaryFallback", () => {
+    const create: DropdownOption = {
+      label: "bulk-operations.create",
+      value: "createEntity",
+      primary: true,
+      actionContext: {
+        entitiesSelectionType: ActionContextEntitiesSelectionType.NoneSelected,
+      },
+    };
+    const download: DropdownOption = {
+      label: "bulk-operations.download",
+      value: "downloadMediafiles",
+      primaryFallback: true,
+      actionContext: {
+        entitiesSelectionType: ActionContextEntitiesSelectionType.SomeSelected,
+      },
+    };
+    const exportCsv: DropdownOption = {
+      label: "bulk-operations.export",
+      value: "exportCsv",
+      primaryFallback: true,
+    };
+
+    const mountSelecting = (options: DropdownOption[], itemsSelected: boolean) =>
+      mount(ActionMenuGroup, {
+        props: {
+          options,
+          itemsSelected,
+          entityType: "Entitytyping" as Entitytyping,
+          clearSubDropdownOptions: () => {},
+        },
+      });
+
+    const values = (options: DropdownOption[]) =>
+      options.map((option) => option.value);
+
+    it("keeps an active primary and leaves the fallback in the menu", async () => {
+      const wrapper = mountSelecting([create, download], false);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["createEntity"]);
+      expect(values(wrapper.vm.secondaryOptions)).toEqual([
+        "downloadMediafiles",
+      ]);
+    });
+
+    it("promotes the fallback when the primary is unavailable", async () => {
+      const wrapper = mountSelecting([create, download], true);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["downloadMediafiles"]);
+      expect(values(wrapper.vm.secondaryOptions)).toEqual(["createEntity"]);
+    });
+
+    it("skips an unavailable fallback for the next one in declaration order", async () => {
+      const addExisting: DropdownOption = {
+        ...create,
+        value: "addRelation",
+        primary: false,
+        primaryFallback: true,
+      };
+      const wrapper = mountSelecting([create, addExisting, exportCsv], true);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["exportCsv"]);
+    });
+
+    it("shows the disabled primary when no fallback is available", async () => {
+      const wrapper = mountSelecting([create, { ...download, primaryFallback: false }], true);
+      await flushPromises();
+
+      expect(values(wrapper.vm.primaryOptions)).toEqual(["createEntity"]);
+      expect(wrapper.vm.primaryOptions[0].active).toBe(false);
+    });
   });
 });

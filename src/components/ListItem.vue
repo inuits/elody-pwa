@@ -1,5 +1,20 @@
 <template>
-  <li data-cy="list-item" :class="wrapperClasses">
+  <!-- the pipeline card is its own component; ListItem stays the single
+       entry point for every view mode but owns only list and grid -->
+  <PipelineListItemCard
+    v-if="isPipelineMode"
+    :bulk-operations-context="bulkOperationsContext"
+    :context-menu-actions="buttons?.contextMenu ?? undefined"
+    :item-id="itemId"
+    :entity-typename="entityTypename"
+    :loading="loading"
+    :teaser-metadata="teaserMetadata"
+    :intial-values="intialValues"
+    :relation="relation"
+    :is-disabled="isDisabled"
+    :refetch-entities="refetchEntities"
+  />
+  <li v-else data-cy="list-item" :class="wrapperClasses">
     <div
       v-if="isGridMode && !isPreviewElement"
       class="flex justify-between items-center pb-2"
@@ -16,13 +31,15 @@
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
       />
-      <BaseContextMenuActions
-        :context-menu-actions="contextMenuActions"
+      <EntityButtons
+        :buttons="buttons"
         :parent-entity-id="formId"
         :entity-id="itemId"
         :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
+        :intial-values="intialValues"
+        :relation-values="relationValues"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -52,6 +69,7 @@
                 :metadata="(localizedMetadata || metadataItem) as MetadataField"
                 :is-edit="useEditHelper.isEdit"
                 :linked-entity-id="intialValues?.id || itemId"
+                :relation-type="relationTypeOfListing"
                 :should-hide="true"
                 :entity-type="entityTypename"
               />
@@ -179,6 +197,7 @@
               :metadata="(localizedMetadata || metadataItem) as MetadataField"
               :is-edit="useEditHelper.isEdit"
               :linked-entity-id="intialValues?.id || itemId"
+              :relation-type="relationTypeOfListing"
               :entity-type="entityTypename"
               :list-item-entity="listItemEntity"
               :show-errors="useEditHelper.showErrors"
@@ -202,14 +221,16 @@
     </div>
 
     <div v-if="isListMode" class="flex">
-      <BaseContextMenuActions
-        :context-menu-actions="contextMenuActions"
+      <EntityButtons
+        :buttons="buttons"
         :parent-entity-id="formId"
         :entity-id="itemId"
         :entity-type="entityTypename"
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :intial-values="intialValues"
+        :relation-values="relationValues"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -282,7 +303,7 @@ import type { Context } from "@/composables/useBulkOperations";
 import {
   BaseLibraryModes,
   type BaseRelationValuesInput,
-  type ContextMenuActions,
+  type Buttons,
   DamsIcons,
   type BaseEntity,
   type EntityListElement,
@@ -308,16 +329,17 @@ import { useSeenItems } from "@/composables/useSeenItems";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
-import BaseContextMenuActions from "./BaseContextMenuActions.vue";
+import EntityButtons from "./EntityButtons.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
+import PipelineListItemCard from "@/components/library/view-modes/pipeline/PipelineListItemCard.vue";
 
 const props = withDefaults(
   defineProps<{
     bulkOperationsContext: Context | undefined;
-    contextMenuActions?: ContextMenuActions;
+    buttons?: Buttons;
     listItemEntity?: BaseEntity;
     itemId?: string;
     itemType?: Entitytyping;
@@ -341,7 +363,7 @@ const props = withDefaults(
     isMediaType?: boolean;
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
-    viewMode?: "list" | "grid";
+    viewMode?: "list" | "grid" | "pipeline";
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
     previewComponentCurrentActive: boolean;
@@ -353,7 +375,7 @@ const props = withDefaults(
     multiLineColumns?: number;
   }>(),
   {
-    contextMenuActions: undefined,
+    buttons: undefined,
     itemId: "",
     itemType: undefined,
     entityTypename: undefined,
@@ -403,6 +425,9 @@ const isMarkedAsToBeDeleted = ref<boolean>(false);
 const isChecked = ref<boolean>(false);
 const imageSrcError = ref<boolean>(false);
 const formId = computed(() => getEntityUuid());
+const relationTypeOfListing = computed(() =>
+  props.relationType === "no-relation-found" ? undefined : props.relationType,
+);
 const useEditHelper = useEditMode(
   getEntityUuid() || asString(router.currentRoute.value.params.id),
 );
@@ -473,6 +498,7 @@ const onlyEditableTeaserMetadata = computed(() =>
 
 const isGridMode = computed(() => props.viewMode === "grid");
 const isListMode = computed(() => props.viewMode === "list");
+const isPipelineMode = computed(() => props.viewMode === "pipeline");
 
 const wrapperClasses = computed(() => {
   return [

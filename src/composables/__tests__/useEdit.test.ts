@@ -1,19 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { useEditMode } from "@/composables/useEdit";
 
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    fetchUpdateAndDeletePermission: vi.fn(),
-  }),
-}));
-
-vi.mock("@/composables/useEntitySingle", () => ({
-  default: () => ({
-    getEntityUuid: () => "mock-uuid",
-    getEntityType: () => "mock-type",
-  }),
-}));
-
 /**
  * `useEditMode` keeps its states in module-level state, so isolation used to be done
  * with `vi.resetModules()` plus a dynamic re-import in `beforeEach`. That re-imported

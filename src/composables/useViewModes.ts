@@ -23,6 +23,7 @@ export type UseViewModesOptions = {
   route?: RouteLocationNormalizedLoaded;
   baseLibraryMode?: BaseLibraryModes;
   persistPreferences?: boolean;
+  forceListView?: boolean;
   // Only the top-level overview library should read/write the shared
   // cross-route `expandFilters` preference — nested/detail-page instances
   // (relation lists, pickers, modals) keep their own in-memory-only state.
@@ -39,6 +40,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
   const displayTable = ref<boolean>(false);
   const displayPreview = ref<boolean>(options.enablePreview ?? false);
   const displayMap = ref<boolean>(false);
+  const displayPipeline = ref<boolean>(false);
   const expandFilters = ref<boolean>(false);
 
   const toggles = ref<ViewModeToggle[]>([]);
@@ -60,6 +62,18 @@ export const useViewModes = (options: UseViewModesOptions) => {
     );
   });
 
+  const hasMixedTeaserMetadata = computed<boolean>(() => {
+    const rawEntities = toRaw(options.entities.value);
+    if (rawEntities.length <= 1) return false;
+    const teaserKeys = (entity: Entity): string =>
+      Object.keys((entity.teaserMetadata as Record<string, unknown>) ?? {})
+        .filter((key) => key !== "__typename")
+        .sort()
+        .join(",");
+    const firstKeys = teaserKeys(rawEntities[0]);
+    return rawEntities.some((entity) => teaserKeys(entity) !== firstKeys);
+  });
+
   const viewModesIncludeViewModesMedia = computed<boolean>(() => {
     const rawEntities = toRaw(options.entities.value);
     if (rawEntities.length <= 0) return false;
@@ -72,12 +86,13 @@ export const useViewModes = (options: UseViewModesOptions) => {
   });
 
   const showViewModesList = computed<boolean>(() => {
-    if (displayTable.value) return false;
+    if (displayTable.value || displayPipeline.value) return false;
     return (
       displayList.value ||
       displayGrid.value ||
       ((options.entitiesLoading?.value ?? false) &&
         !displayMap.value &&
+        !displayPipeline.value &&
         (options.route?.name !== "SingleEntity" ||
           options.baseLibraryMode !== BaseLibraryModes.NormalBaseLibrary))
     );
@@ -106,17 +121,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
           iconOff: DamsIcons.Apps,
         });
       } else if (viewMode === ViewModes.Table) {
-        const teaserKeys = (e: Entity): string =>
-          Object.keys((e.teaserMetadata as Record<string, unknown>) ?? {})
-            .filter((k) => k !== "__typename")
-            .sort()
-            .join(",");
-        const entities = options.entities.value;
-        const firstKeys = entities.length > 0 ? teaserKeys(entities[0]) : "";
-        const hasMixedTeaserMetadata = entities.some(
-          (e) => teaserKeys(e) !== firstKeys,
-        );
-        if (hasMixedTeaserMetadata) {
+        if (hasMixedTeaserMetadata.value) {
           console.error(
             `[BaseLibrary] Table view requires all entities to share the same teaserMetadata columns. Table view will not be shown.`,
           );
@@ -141,11 +146,21 @@ export const useViewModes = (options: UseViewModesOptions) => {
           iconOn: DamsIcons.Map,
           iconOff: DamsIcons.Map,
         });
+      } else if (viewMode === ViewModes.ViewModesPipeline) {
+        // No shared-teaser-metadata precondition here (unlike Table): mixed
+        // entity types are normal in a pipeline.
+        newToggles.push({
+          isOn: displayPipeline,
+          iconOn: DamsIcons.Sitemap,
+          iconOff: DamsIcons.Sitemap,
+        });
       }
     }
 
     if (!viewModes.includes(ViewModes.Table)) displayTable.value = false;
     if (!viewModes.includes(ViewModes.ViewModesMap)) displayMap.value = false;
+    if (!viewModes.includes(ViewModes.ViewModesPipeline))
+      displayPipeline.value = false;
 
     toggles.value = newToggles;
   };
@@ -155,8 +170,21 @@ export const useViewModes = (options: UseViewModesOptions) => {
    * Formerly named `getDisplayPreferences` in BaseLibrary.vue.
    */
   const getUserPreferredViewModeConfiguration = (viewModes: string[] = []): void => {
+    if (options.forceListView) {
+      resetToListView();
+      return;
+    }
+
     const displayPreferences = getGlobalState("_displayPreferences");
     if (!displayPreferences) return;
+
+    const availableViewModes = hasMixedTeaserMetadata.value
+      ? viewModes.filter((viewMode) => viewMode !== ViewModes.Table)
+      : viewModes;
+    const configuredViewModes = Object.keys(configPerViewMode.value).filter(
+      (viewMode) =>
+        !hasMixedTeaserMetadata.value || viewMode !== ViewModes.Table,
+    );
 
     expandFilters.value =
       options.enableAdvancedFilters && options.persistExpandFilters
@@ -166,27 +194,38 @@ export const useViewModes = (options: UseViewModesOptions) => {
     if (
       !displayPreview.value &&
       !displayMap.value &&
-      Object.keys(configPerViewMode.value).length === 1
+      configuredViewModes.length === 1
     ) {
-      const keys = Object.keys(configPerViewMode.value);
-      displayList.value = keys.includes(ViewModes.ViewModesList);
-      displayGrid.value = keys.includes(ViewModes.ViewModesGrid);
-      displayTable.value = keys.includes(ViewModes.Table);
+      displayList.value = configuredViewModes.includes(ViewModes.ViewModesList);
+      displayGrid.value = configuredViewModes.includes(ViewModes.ViewModesGrid);
+      displayTable.value = configuredViewModes.includes(ViewModes.Table);
+      displayPipeline.value = configuredViewModes.includes(
+        ViewModes.ViewModesPipeline,
+      );
       return;
     }
 
-    if (!displayPreview.value && displayPreferences.table && viewModes.includes(ViewModes.Table)) {
+    if (!displayPreview.value && displayPreferences.table && availableViewModes.includes(ViewModes.Table)) {
       displayTable.value = displayPreferences.table;
     }
 
-    if (!displayPreview.value && displayPreferences.grid && viewModes.includes(ViewModes.ViewModesGrid)) {
+    if (!displayPreview.value && displayPreferences.grid && availableViewModes.includes(ViewModes.ViewModesGrid)) {
       displayGrid.value = displayPreferences.grid;
+    }
+
+    if (
+      !displayPreview.value &&
+      displayPreferences.pipeline &&
+      viewModes.includes(ViewModes.ViewModesPipeline)
+    ) {
+      displayPipeline.value = displayPreferences.pipeline;
     }
 
     if (
       displayGrid.value === false &&
       !displayMap.value &&
-      !displayTable.value
+      !displayTable.value &&
+      !displayPipeline.value
     ) {
       displayList.value = true;
     }
@@ -196,23 +235,36 @@ export const useViewModes = (options: UseViewModesOptions) => {
     displayMap.value = false;
     displayGrid.value = false;
     displayTable.value = false;
+    displayPipeline.value = false;
     displayList.value = true;
   };
 
+  // ── Mixed teaserMetadata watcher ──────────────────────────────────────────
+
+  watch(hasMixedTeaserMetadata, (isMixed) => {
+    if (!isMixed || !displayTable.value) return;
+    displayTable.value = false;
+    displayList.value = !displayGrid.value && !displayMap.value;
+  });
+
   // ── Persist watcher ───────────────────────────────────────────────────────
 
-  watch([displayGrid, displayTable, expandFilters], () => {
+  watch([displayGrid, displayTable, displayPipeline, expandFilters], () => {
     const _expandFilters = options.persistExpandFilters
       ? expandFilters.value
       : getGlobalState("_displayPreferences")?.expandFilters;
 
     displayList.value =
-      !displayGrid.value && !displayMap.value && !displayTable.value;
+      !displayGrid.value &&
+      !displayMap.value &&
+      !displayTable.value &&
+      !displayPipeline.value;
 
     if (options.persistPreferences !== false) {
       updateGlobalState("_displayPreferences", {
         grid: displayPreview.value ? false : displayGrid.value,
         table: displayTable.value,
+        pipeline: displayPreview.value ? false : displayPipeline.value,
         expandFilters: _expandFilters,
       });
     }
@@ -226,9 +278,11 @@ export const useViewModes = (options: UseViewModesOptions) => {
     displayTable,
     displayPreview,
     displayMap,
+    displayPipeline,
     expandFilters,
     toggles,
     configPerViewMode,
+    hasMixedTeaserMetadata,
     viewModesIncludeViewModesMedia,
     showViewModesList,
     determineViewModes,

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { shallowMount } from "@vue/test-utils";
+import { flushPromises, mount, shallowMount } from "@vue/test-utils";
 import { ref } from "vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 
@@ -19,9 +19,18 @@ vi.mock("@/generated-types/queries", () => ({
   TypeModals: { BulkOperations: "BulkOperations" },
 }));
 
-vi.mock("@/composables/useBaseModal", () => ({
-  useBaseModal: () => ({ getModalInfo: () => ({ open: false }) }),
-}));
+const modalState = vi.hoisted(() => ({ BulkOperations: { open: false } }));
+
+vi.mock("@/composables/useBaseModal", async () => {
+  const { reactive } = await import("vue");
+  const state = reactive(modalState);
+  return {
+    useBaseModal: () => ({
+      getModalInfo: (type: keyof typeof modalState) => state[type],
+    }),
+    modalStateForTest: state,
+  };
+});
 
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({
@@ -74,5 +83,43 @@ describe("BaseInputCheckbox", () => {
     expect(wrapper.find("label").attributes("for")).toBe(
       wrapper.find("input").attributes("id"),
     );
+  });
+
+  it("keeps its click from reaching the parent row", async () => {
+    const parentClick = vi.fn();
+    const wrapper = mount(
+      {
+        components: { BaseInputCheckbox },
+        template: `<div @click="parentClick"><BaseInputCheckbox :model-value="false" :item="{ id: '1' }" :bulk-operations-context="undefined" ignore-bulk-operations /></div>`,
+        methods: { parentClick },
+      },
+      { global: { stubs: { unicon: true } } },
+    );
+    await wrapper.find(".w-10").trigger("click");
+    expect(parentClick).not.toHaveBeenCalled();
+  });
+
+  // a plain form/filter checkbox (BooleanFilter.vue) passes no item
+  it("survives the bulk operations modal opening without an item", async () => {
+    const errors: unknown[] = [];
+    shallowMount(BaseInputCheckbox, {
+      props: {
+        modelValue: false,
+        bulkOperationsContext: undefined,
+        ignoreBulkOperations: true,
+      } as any,
+      global: {
+        stubs: { unicon: true },
+        config: { errorHandler: (error: unknown) => errors.push(error) },
+      },
+    });
+
+    const { modalStateForTest } = (await import(
+      "@/composables/useBaseModal"
+    )) as any;
+    modalStateForTest.BulkOperations.open = true;
+    await flushPromises();
+
+    expect(errors).toEqual([]);
   });
 });

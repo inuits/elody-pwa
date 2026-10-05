@@ -15,42 +15,63 @@
       :image-filename="imageFilename"
       :dimensions="dimensions"
       :enable-selection="enableSelection"
+      :has-crop-data="!!cropSizes"
+      :showing-cropped="isShowingCropped"
+      :can-recrop="canRecrop"
+      :is-recrop-modal="isRecropModal"
       :logo="logo"
       @toggle-selection="toggleSelection"
       @cancel-selection="undoLastSelection"
+      @toggle-crop-view="$emit('toggle-crop-view')"
+      @open-recrop-modal="$emit('open-recrop-modal')"
     />
 
-    <div ref="OpenSeadragonDiv" class="w-full h-full z-0" />
+    <div
+      ref="OpenSeadragonDiv"
+      class="w-full h-full z-0"
+      data-testid="openseadragon-container"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import OpenSeadragon from "openseadragon";
 import { ShapeNames } from "openseadragon-select-plugin";
 import ViewerToolbar from "./ViewerToolbar.vue";
 import { CropAreaCoordinates } from "@/composables/useMediafileCrop";
 
 interface Selection {
-  rect: any;
-  shape: string;
   overlay: any;
 }
 
-const props = defineProps<{
-  imageFilename: string;
-  isPublic?: boolean;
-  originalFilename?: string;
-  mediafileId?: string;
-  dimensions?: Record<string, any>;
-  enableSelection?: boolean;
-  cropSizes?: CropAreaCoordinates;
-  logo?: { src: string; href: string; alt?: string };
-}>();
+const props = withDefaults(
+  defineProps<{
+    imageFilename: string;
+    isPublic?: boolean;
+    originalFilename?: string;
+    mediafileId?: string;
+    dimensions?: Record<string, any>;
+    enableSelection?: boolean;
+    cropSizes?: CropAreaCoordinates;
+    showCropped?: boolean;
+    canRecrop?: boolean;
+    isRecropModal?: boolean;
+    logo?: { src: string; href: string; alt?: string };
+  }>(),
+  { showCropped: true },
+);
 
 const emit = defineEmits<{
   (e: "selectArea", size: CropAreaCoordinates, mediafileId: string): void;
+  (e: "clear-selection"): void;
+  (e: "toggle-crop-view"): void;
+  (e: "open-recrop-modal"): void;
 }>();
+
+const isShowingCropped = computed(
+  () => Boolean(props.cropSizes) && props.showCropped,
+);
 
 const OpenSeadragonDiv = ref<HTMLDivElement>();
 const OpenSeadragonToolbar = ref<HTMLDivElement>();
@@ -61,15 +82,21 @@ const homeDiv = ref<string>();
 
 let viewer: OpenSeadragon.Viewer | null = null;
 let selectionObj: any = null;
-const loading = ref(true);
 
 const isSelecting = ref(false);
 const selections = ref<Selection[]>([]);
-
 const buildCropUrl = (filename: string, { x, y, w, h }: CropAreaCoordinates) =>
   `/api/iiif/3/${filename}/${x},${y},${w},${h}/${w},${h}/0/default.jpg`;
 
 const initViewer = () => {
+  if (viewer) {
+    viewer.destroy();
+    viewer = null;
+  }
+  selectionObj = null;
+  selections.value = [];
+  isSelecting.value = false;
+
   const dragonOption: OpenSeadragon.Options = {
     element: OpenSeadragonDiv.value!,
     prefixUrl: "/static/openseadragon/images/",
@@ -84,8 +111,8 @@ const initViewer = () => {
     dragonOption.fullPageButton = fullPageButtonDiv.value;
   if (homeDiv.value) dragonOption.homeButton = homeDiv.value;
 
-  if (props.cropSizes) {
-    const url = buildCropUrl(props.imageFilename, props.cropSizes);
+  if (isShowingCropped.value) {
+    const url = buildCropUrl(props.imageFilename, props.cropSizes!);
     dragonOption.tileSources = { type: "image", url };
   }
 
@@ -109,8 +136,11 @@ const startSelection = () => {
   if (selectionObj?.isEnabled) return;
 
   selectionObj = viewer.selection({
-    onSelection: (rect: any, shape: string) => {
-      const selection: Selection = { rect, shape, overlay: null };
+    onSelection: (rect: any) => {
+      isSelecting.value = false;
+      if (!rect.width || !rect.height) return;
+
+      const selection: Selection = { overlay: null };
 
       if (viewer) {
         selection.overlay = viewer.addOverlay({
@@ -131,12 +161,18 @@ const startSelection = () => {
 
         emit("selectArea", size, props.mediafileId!);
       }
-      isSelecting.value = false;
     },
     keep: true,
   });
 
   viewer.initSelection();
+  const selectionViewer = viewer;
+  viewer.selectionHandler.frontCanvas.getCoordsFromMouseEvent = (event) => {
+    const { left, top } = selectionViewer.element.getBoundingClientRect();
+    return selectionViewer.viewport.viewerElementToImageCoordinates(
+      new OpenSeadragon.Point(event.clientX - left, event.clientY - top),
+    );
+  };
   viewer.selectionHandler.frontCanvas.drawer.setDrawerShape(
     ShapeNames.RectShape,
   );
@@ -152,6 +188,7 @@ const undoLastSelection = () => {
   if (lastSelection?.overlay && viewer) {
     viewer.removeOverlay(lastSelection.overlay);
   }
+  emit("clear-selection");
 };
 
 onMounted(() => {
@@ -159,14 +196,17 @@ onMounted(() => {
     initViewer();
 
     watch(
-      () => props.imageFilename,
-      (value) => {
-        if (value && viewer) {
+      [
+        () => props.imageFilename,
+        () => props.cropSizes,
+        () => props.showCropped,
+      ],
+      ([imageFilename]) => {
+        if (imageFilename && viewer) {
           try {
-            loading.value = true;
             initViewer();
-          } catch {
-            loading.value = false;
+          } catch (error) {
+            console.error("Failed to initialize the image viewer", error);
           }
         }
       },

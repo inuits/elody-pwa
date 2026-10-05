@@ -56,6 +56,7 @@ export const useBaseLibrary = (
   const placeholderEntitiesAmount = ref<number>(0);
   const entitiesLoading = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
+  const parentEntityId = ref<string>();
   const manipulateQuery = ref<boolean>(false);
   const manipulationQuery = ref<object>();
   const promiseQueue = ref<((entityType: Entitytyping) => Promise<void>)[]>([]);
@@ -99,6 +100,10 @@ export const useBaseLibrary = (
 
   const setParentEntityIdentifiers = (identifiers: string[]) => {
     queryVariables.userUuid = identifiers[0];
+  };
+
+  const setParentEntityId = (identifier: string | undefined) => {
+    parentEntityId.value = identifier;
   };
 
   const setIsSearchLibrary = (searchLibrary: boolean): void => {
@@ -246,6 +251,17 @@ export const useBaseLibrary = (
     }
   };
 
+  const getStoredQueryVariables = (
+    route: RouteLocationNormalizedLoaded | undefined,
+  ): GetEntitiesQueryVariables | undefined =>
+    (shouldUseStateForRoute &&
+      route?.name !== "SingleEntity" &&
+      getStateForRoute(route)?.queryVariables) ||
+    undefined;
+
+  const snapshotVariables = (variables: GetEntitiesQueryVariables) =>
+    JSON.parse(JSON.stringify(variables));
+
   const getEntities = async (
     route: RouteLocationNormalizedLoaded | undefined,
     signal?: AbortSignal,
@@ -267,31 +283,27 @@ export const useBaseLibrary = (
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
 
     _route = route;
-    let variables =
-      shouldUseStateForRoute &&
-      _route?.name !== "SingleEntity" &&
-      getStateForRoute(_route)?.queryVariables;
+    let variables = getStoredQueryVariables(_route);
     if (variables) queryVariables = variables;
-    else if (!variables && shouldUseStateForRoute)
+    else if (shouldUseStateForRoute)
       updateStateForRoute(_route, { queryVariables });
-    if (
-      !variables ||
-      _route?.name === "SingleEntity" ||
-      !shouldUseStateForRoute
-    )
-      variables = queryVariables;
+    if (!variables) variables = queryVariables;
     if (limitForEntityPicker) variables.limit = limitForEntityPicker;
+    let sentVariables: GetEntitiesQueryVariables | undefined;
 
     try {
+      const entitiesQuery = await determineEntitiesQuery(
+        _route,
+        manipulationQuery.value?.document,
+      );
+      sentVariables = snapshotVariables(variables);
       const result = await apolloClient.query({
-        query: await determineEntitiesQuery(
-          _route,
-          manipulationQuery.value?.document,
-        ),
+        query: entitiesQuery,
         variables,
         fetchPolicy: "no-cache",
         notifyOnNetworkStatusChange: true,
         context: {
+          headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
           fetchOptions: {
             signal,
           },
@@ -328,17 +340,17 @@ export const useBaseLibrary = (
       hasPendingFetch = false;
       const nextRoute = pendingFetchRoute ?? route;
       pendingFetchRoute = undefined;
-      await getEntities(nextRoute);
+      const pendingVariables = snapshotVariables(
+        getStoredQueryVariables(nextRoute) ?? queryVariables,
+      );
+      if (!sentVariables || !isEqual(sentVariables, pendingVariables))
+        await getEntities(nextRoute);
     }
   };
 
   const revealExactCount = async (): Promise<void> => {
     const { loadDocument } = useImport();
-    const variables =
-      (shouldUseStateForRoute &&
-        _route?.name !== "SingleEntity" &&
-        getStateForRoute(_route)?.queryVariables) ||
-      queryVariables;
+    const variables = getStoredQueryVariables(_route) ?? queryVariables;
     const generation = listingGeneration;
 
     exactCountLoading.value = true;
@@ -438,6 +450,7 @@ export const useBaseLibrary = (
     setLimit,
     setManipulationOfQuery,
     setParentEntityIdentifiers,
+    setParentEntityId,
     setsearchInputType,
     setSkip,
     setSortKey,

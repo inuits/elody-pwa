@@ -43,7 +43,6 @@
         :allowed-actions-on-relations="element.allowedActionsOnRelations"
         :fetch-deep-relations="element.fetchDeepRelations"
         :entity-type="entityType"
-        :can="element.can"
         :id="id"
         :preview-label="previewLabel"
         :cropMediafileCoordinatesKey="element.cropMediafileCoordinatesKey"
@@ -114,13 +113,11 @@
         v-if="element.__typename === 'HierarchyListElement'"
         :element="element"
         :entity-id="id"
-        :can="element.can"
       />
       <entity-element-comments
         v-if="element.__typename === 'CommentsElement'"
         :element="element"
         :id="id"
-        :entity-type="entityType"
       />
     </div>
   </div>

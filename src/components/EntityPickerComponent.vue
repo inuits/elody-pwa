@@ -48,6 +48,7 @@
         (numberOfEntities) => emitUpdatedEntities(numberOfEntities)
       "
       :should-use-state-for-route="shouldUseStateForRoute"
+      :force-list-view="forceListView"
       :save-view-preferences="false"
       :force-show-filters="forceShowFilters"
       @confirm-selection="saveRelations"
@@ -136,9 +137,11 @@ const props = withDefaults(
     searchStaticFilters?: AdvancedFilterInput[];
     filterParentEntity?: any;
     forceShowFilters?: boolean;
+    forceListView?: boolean;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
+    forceListView: false,
     baseLibraryHeight: "h-[95vh]",
     enableNonSelectableEntities: true,
     context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,

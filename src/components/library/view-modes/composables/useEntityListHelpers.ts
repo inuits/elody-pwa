@@ -1,6 +1,7 @@
 import { computed, inject } from "vue";
 import type { Ref } from "vue";
 import {
+  type Buttons,
   type Entity,
   Entitytyping,
   RelationActions,
@@ -25,7 +26,7 @@ export const useEntityListHelpers = (
   props: EntityListHelpersProps,
   refEntities: Ref<Entity[]>,
   previewComponentEnabled: Ref<boolean>,
-  togglePreviewComponent: (entityId: string) => void,
+  openPreviewComponent: (entityId: string) => void,
 ) => {
   const mediafileViewerContext: any = inject("mediafileViewerContext");
   const isPreviewElement: boolean = inject("IsPreviewElement", false);
@@ -62,17 +63,20 @@ export const useEntityListHelpers = (
 
   const entityWrapperHandler = (entity: Entity) => {
     if (previewComponentEnabled.value)
-      togglePreviewComponent(entity.id || entity.uuid);
+      openPreviewComponent(entity.id || entity.uuid);
     if (isEntityDisabled(entity) || !props.enableNavigation) return;
     updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
   };
 
-  const getContextMenu = (entity: Entity) => {
-    if (entity.teaserMetadata?.forceShowContextMenuActions)
-      return entity.teaserMetadata?.contextMenuActions;
-    if ((props.parentEntityIdentifiers?.length ?? 0) > 0)
-      return entity.teaserMetadata?.contextMenuActions;
-    return undefined;
+  const getButtons = (entity: Entity): Buttons | undefined => {
+    const buttons = entity.teaserMetadata?.buttons;
+    if (!buttons) return undefined;
+    const showContextMenu =
+      entity.teaserMetadata?.forceShowContextMenuActions ||
+      (props.parentEntityIdentifiers?.length ?? 0) > 0;
+    if (showContextMenu) return buttons;
+    const { contextMenu, ...regularButtons } = buttons;
+    return regularButtons;
   };
 
   EventBus.on("orderList_changed", (orderItems: OrderItem[]) => {
@@ -98,7 +102,7 @@ export const useEntityListHelpers = (
     getLinkSettings,
     isEntityDisabled,
     entityWrapperHandler,
-    getContextMenu,
+    getButtons,
     isPreviewElement,
     mediafileViewerContext,
   };

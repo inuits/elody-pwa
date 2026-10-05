@@ -43,20 +43,6 @@ vi.mock("@/types", () => ({
   },
 }));
 
-const mocks = vi.hoisted(() => {
-  return {
-    fetchAdvancedPermissions: vi.fn(),
-  };
-});
-
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: vi.fn(() => true),
-    fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
-    setExtraVariables: vi.fn(),
-  }),
-}));
-
 describe("MenuSubItem", () => {
   afterEach(() => {
     vi.clearAllMocks();
@@ -72,9 +58,7 @@ describe("MenuSubItem", () => {
     can: ["read-real-device"],
   };
 
-  it("renders the component if permission is granted", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(true);
-
+  it("renders an item whose config GraphQL returned", async () => {
     const wrapper = mount(MenuSubItem, {
       props: {
         show: true,
@@ -87,23 +71,7 @@ describe("MenuSubItem", () => {
     expect(menuItem.exists()).toBe(true);
   });
 
-  it("hides the component if permission is not granted", async () => {
-    mocks.fetchAdvancedPermissions.mockReturnValue(false);
-
-    const wrapper = mount(MenuSubItem, {
-      props: {
-        show: true,
-        subMenuItem,
-      },
-    });
-
-    await flushPromises();
-
-    const menuItem = wrapper.find('[data-cy="menu-sub-item"]');
-    expect(menuItem.exists()).toBe(false);
-  });
-
-  it("renders the component if no advanced permission provided and if 'show' is true", async () => {
+  it("renders an item that carries no advanced permission when 'show' is true", async () => {
     const wrapper = mount(MenuSubItem, {
       props: {
         show: true,
@@ -123,7 +91,7 @@ describe("MenuSubItem", () => {
     expect(menuItem.exists()).toBe(true);
   });
 
-  it("hides the component if no advanced permission provided and if 'show' is false", async () => {
+  it("hides the item when 'show' is false", async () => {
     const wrapper = mount(MenuSubItem, {
       props: {
         show: false,

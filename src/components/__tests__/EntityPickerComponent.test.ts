@@ -220,6 +220,26 @@ describe("EntityPickerComponent", () => {
     expect(library.props("enableAdvancedFilters")).toBe(true);
   });
 
+  it("forwards forceListView to BaseLibrary", async () => {
+    // A picker that can return several entity types has no shared teaser
+    // metadata, so the grid and table modes cannot lay the results out.
+    const wrapper = shallowMount(EntityPickerComponent, {
+      props: { ...defaultProps, forceListView: true },
+      global: globalConfig,
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(BaseLibrary).props("forceListView")).toBe(true);
+  });
+
+  it("leaves the view mode to the user by default", async () => {
+    const wrapper = shallowMount(EntityPickerComponent, {
+      props: { ...defaultProps },
+      global: globalConfig,
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(BaseLibrary).props("forceListView")).toBe(false);
+  });
+
   it("SearchBar stub appears before BaseLibrary stub in template", async () => {
     const wrapper = shallowMount(EntityPickerComponent, {
       props: { ...defaultProps, searchMode: "Search" as any },
