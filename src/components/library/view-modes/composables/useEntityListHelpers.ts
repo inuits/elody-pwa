@@ -4,6 +4,7 @@ import {
   type Buttons,
   type Entity,
   Entitytyping,
+  type PreviewComponent,
   RelationActions,
 } from "@/generated-types/queries";
 import {
@@ -27,6 +28,7 @@ export const useEntityListHelpers = (
   refEntities: Ref<Entity[]>,
   previewComponentEnabled: Ref<boolean>,
   openPreviewComponent: (entityId: string) => void,
+  previewComponent?: Ref<PreviewComponent | undefined>,
 ) => {
   const mediafileViewerContext: any = inject("mediafileViewerContext");
   const isPreviewElement: boolean = inject("IsPreviewElement", false);
@@ -62,7 +64,10 @@ export const useEntityListHelpers = (
     (props.idsOfNonSelectableEntities ?? []).includes(entity.uuid);
 
   const entityWrapperHandler = (entity: Entity) => {
-    if (previewComponentEnabled.value)
+    if (
+      previewComponentEnabled.value ||
+      (!props.enableNavigation && previewComponent?.value)
+    )
       openPreviewComponent(entity.id || entity.uuid);
     if (isEntityDisabled(entity) || !props.enableNavigation) return;
     updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);

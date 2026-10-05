@@ -65,3 +65,34 @@ describe("useEntityListHelpers.getButtons", () => {
     expect(getButtonsFor(makeEntity({}))).toBeUndefined();
   });
 });
+
+describe("useEntityListHelpers.entityWrapperHandler", () => {
+  const entity = { id: "MF-1", type: "mediafile" } as unknown as Entity;
+
+  const clickWith = (
+    enableNavigation: boolean,
+    previewComponent: object | undefined,
+  ) => {
+    const openPreviewComponent = vi.fn();
+    useEntityListHelpers(
+      { enableNavigation },
+      ref([]),
+      ref(false),
+      openPreviewComponent,
+      ref(previewComponent) as any,
+    ).entityWrapperHandler(entity);
+    return openPreviewComponent;
+  };
+
+  it("opens the preview when navigation is disabled and a preview is configured", () => {
+    expect(clickWith(false, { title: "preview" })).toHaveBeenCalledWith("MF-1");
+  });
+
+  it("does nothing when navigation is disabled and no preview is configured", () => {
+    expect(clickWith(false, undefined)).not.toHaveBeenCalled();
+  });
+
+  it("does not open a closed preview when navigation is enabled", () => {
+    expect(clickWith(true, { title: "preview" })).not.toHaveBeenCalled();
+  });
+});

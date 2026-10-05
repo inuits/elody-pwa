@@ -264,6 +264,7 @@ const {
   refEntities,
   previewComponentEnabled,
   openPreviewComponent,
+  previewComponent,
 );
 
 const { trackSeen } = useEntityPageConfig();
