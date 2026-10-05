@@ -148,7 +148,7 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | # | Item | Decision |
 |---|---|---|
 | R1 | Translations for the primitives' copy | **done:** `modules/baseGraphql` branch `feat-165138-redesign` (nl + en) |
-| R2 | Client theming wiring | **done:** runtime theme. Colour tokens in each client's app config (`customization.theme`), passed through baseGraphql, applied on `<body>`. No client scopes or names in the PWA. First client migrated; others follow |
+| R2 | Client theming wiring | **done:** runtime theme. Colour tokens in each client's app config (`customization.theme`), passed through baseGraphql, applied on `<body>`. No client scopes or names in the PWA. First client migrated; the others move one by one in later phases |
 | R3 | AI rules | **done:** `.claude/skills/design-system/SKILL.md` + CLAUDE.md pointer |
 
 Scope note: this branch is DS 1 (tokens, client theming, primitives).
