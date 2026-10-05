@@ -85,14 +85,23 @@ describe("BaseInputCheckbox", () => {
     );
   });
 
-  it("keeps the 40px touch hit area by default", () => {
-    expect(getWrapper().find(".w-10").exists()).toBe(true);
+  it("uses the touch-target hit area by default", () => {
+    expect(getWrapper().find('[data-cy="checkbox-hit-area"]').classes()).toEqual(
+      expect.arrayContaining([
+        "w-(--checkbox-hit-area)",
+        "h-(--checkbox-hit-area)",
+      ]),
+    );
   });
 
   it("shrinks the hit area in compact lists", () => {
     const wrapper = getWrapper({ size: "compact" });
-    expect(wrapper.find(".w-10").exists()).toBe(false);
-    expect(wrapper.find(".w-6").exists()).toBe(true);
+    expect(wrapper.find('[data-cy="checkbox-hit-area"]').classes()).toEqual(
+      expect.arrayContaining([
+        "w-(--checkbox-hit-area-compact)",
+        "h-(--checkbox-hit-area-compact)",
+      ]),
+    );
   });
 
   it("keeps a steady label gap in compact lists, checked or not", () => {
@@ -114,7 +123,7 @@ describe("BaseInputCheckbox", () => {
       },
       { global: { stubs: { unicon: true } } },
     );
-    await wrapper.find(".w-10").trigger("click");
+    await wrapper.find('[data-cy="checkbox-hit-area"]').trigger("click");
     expect(parentClick).not.toHaveBeenCalled();
   });
 

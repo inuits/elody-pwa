@@ -1,12 +1,15 @@
 <template>
   <!-- Design-system checkbox: commit-teal check, visible keyboard focus, a
-       real label. The 40px hit area stays for touch targets but is no longer
+       real label. The hit area meets the touch-target minimum but is no longer
        painted when selected. -->
   <div data-cy="base-input-checkbox" class="flex items-center">
     <div
+      data-cy="checkbox-hit-area"
       class="flex-none flex items-center justify-center box-border"
       :class="[
-        size === 'compact' ? 'w-6 h-6' : 'w-10 h-10',
+        size === 'compact'
+          ? 'w-(--checkbox-hit-area-compact) h-(--checkbox-hit-area-compact)'
+          : 'w-(--checkbox-hit-area) h-(--checkbox-hit-area)',
         { 'cursor-pointer': !disabled },
       ]"
       @click.prevent.stop="handleItemSelection"

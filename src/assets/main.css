@@ -337,6 +337,10 @@
   --button-sm-padding-icon: 4px;
   --button-md-padding-icon: 6px;
   --button-gap: 6px;
+
+  /* Checkbox (components/checkbox.md) */
+  --checkbox-hit-area: var(--touch-target-min);
+  --checkbox-hit-area-compact: 24px;
 }
 
 

@@ -79,6 +79,15 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | B4 | Loading width | unchanged | changes | changes | changes without icon | **done:** handoff |
 | B5 | Danger hover | not specified | #9b0000 | red-dark | red-dark | **done:** red-dark |
 
+### 2.2 Checkbox: [final page](../components/checkbox.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| C0 | Element and colour | real input, commit teal, 1.5px border | button role=checkbox, accent blue | handoff | handoff | **done:** handoff |
+| C1 | Hit area | 44px minimum on tablet | n/a | 40px | 40px (+24px compact) | **done:** `--checkbox-hit-area` = touch-target min; compact kept |
+| C2 | Indeterminate | not specified | yes | no | no | **done:** later, with "Selecteer pagina" |
+| C3 | Label size | not specified | 12.5px | inherits | inherits | **done:** inherits from context |
+
 Scope note: this branch is subtask 1 of the epic (tokens + primitives). The
 Filters section below belongs to a later subtask.
 
