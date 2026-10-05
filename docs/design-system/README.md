@@ -45,6 +45,8 @@ To change what a role means everywhere, change the role token.
   - [Button](components/button.md)
   - [Checkbox](components/checkbox.md)
   - [Input](components/input.md)
+  - [Tooltip](components/tooltip.md)
+  - [Spinner](components/spinner.md)
 - `patterns/`: per-field editing, filters, lists and other multi-component patterns
 
 ## Page template (components)

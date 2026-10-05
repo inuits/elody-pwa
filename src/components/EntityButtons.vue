@@ -29,7 +29,7 @@
           </button>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             {{ t((value as ActionButton).label) }}
           </span>
         </template>

@@ -347,6 +347,12 @@
   --input-padding: 5px 8px;
   --color-input-border-hover: var(--color-neutral-50); /* one step darker */
   --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
+
+  /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
+     in BaseTooltip.vue */
+  --text-tooltip: var(--text-label);
+  --tooltip-padding: 4px 8px;
+  --radius-tooltip: var(--radius-button);
 }
 
 

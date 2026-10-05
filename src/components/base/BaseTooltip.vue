@@ -24,7 +24,7 @@
           v-if="hasContent && hover"
           :id="tooltipId"
           role="tooltip"
-          class="shadow-overlay rounded-button bg-surface-inverted text-neutral-white text-label px-2 py-1 z-tooltip"
+          class="rounded-tooltip bg-surface-inverted text-neutral-white text-tooltip p-(--tooltip-padding) z-tooltip"
           :style="{ maxWidth: maxWidth, ...floatingStyles }"
         >
           <slot> </slot>

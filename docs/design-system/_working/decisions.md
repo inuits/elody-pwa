@@ -101,6 +101,23 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | I7 | Component tokens | — | — | — | literals | **done:** `--text-input`, `--input-padding` |
 | I8 | `src/inputStyles.ts` | — | — | — | unused copy | **done:** deleted |
 
+### 2.4 Tooltip: [final page](../components/tooltip.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| T0 | Surface, delay, a11y | inverted, 300ms, hover+focus, Escape, role=tooltip + describedby | same + shadow | light surface, no delay, no aria | handoff | **done:** handoff |
+| T1 | Shadow | none | overlay | overlay | overlay | **done:** removed |
+| T2 | Component tokens | — | — | — | literals | **done:** `--text-tooltip`, `--tooltip-padding`, `--radius-tooltip`; delay stays a JS constant |
+| T3 | Max width, placement | not specified | top/bottom | auto | 14rem, auto | **done:** keep |
+
+### 2.5 Spinner: [final page](../components/spinner.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| S0 | Rotation, colour, a11y | .8s, commit teal, container announces | .8s, teal, self role=status | self role=status | handoff | **done:** handoff |
+| S1 | On filled buttons | not specified | white track | n/a | current colour | **done:** current colour |
+| S2 | Sizes | not specified | 15px default | `dimensions` | `dimensions` | **done:** keep |
+
 Scope note: this branch is DS 1 (tokens, client theming, primitives).
 Later subtasks:
 

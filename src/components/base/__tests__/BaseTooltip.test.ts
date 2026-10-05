@@ -103,9 +103,15 @@ describe("BaseTooltip", () => {
     expect(tooltip()?.className).toContain("text-neutral-white");
   });
 
-  it("uses the label text size and button radius", async () => {
+  it("takes its size, padding and radius from the tooltip tokens", async () => {
     await showByHover();
-    expect(tooltip()?.className).toContain("text-label");
-    expect(tooltip()?.className).toContain("rounded-button");
+    expect(tooltip()?.className).toContain("text-tooltip");
+    expect(tooltip()?.className).toContain("p-(--tooltip-padding)");
+    expect(tooltip()?.className).toContain("rounded-tooltip");
+  });
+
+  it("casts no shadow", async () => {
+    await showByHover();
+    expect(tooltip()?.className).not.toMatch(/shadow-/);
   });
 });
