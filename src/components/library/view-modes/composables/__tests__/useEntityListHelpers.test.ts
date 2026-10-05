@@ -69,30 +69,43 @@ describe("useEntityListHelpers.getButtons", () => {
 describe("useEntityListHelpers.entityWrapperHandler", () => {
   const entity = { id: "MF-1", type: "mediafile" } as unknown as Entity;
 
-  const clickWith = (
-    enableNavigation: boolean,
-    previewComponent: object | undefined,
-  ) => {
+  const clickWith = (enableNavigation: boolean, previewOpen: boolean) => {
     const openPreviewComponent = vi.fn();
+    const togglePreviewForListItem = vi.fn();
     useEntityListHelpers(
       { enableNavigation },
       ref([]),
-      ref(false),
+      ref(previewOpen),
       openPreviewComponent,
-      ref(previewComponent) as any,
+      togglePreviewForListItem,
     ).entityWrapperHandler(entity);
-    return openPreviewComponent;
+    return { openPreviewComponent, togglePreviewForListItem };
   };
 
-  it("opens the preview when navigation is disabled and a preview is configured", () => {
-    expect(clickWith(false, { title: "preview" })).toHaveBeenCalledWith("MF-1");
+  it("toggles the preview when navigation is disabled", () => {
+    const { togglePreviewForListItem, openPreviewComponent } = clickWith(
+      false,
+      true,
+    );
+    expect(togglePreviewForListItem).toHaveBeenCalledWith("MF-1");
+    expect(openPreviewComponent).not.toHaveBeenCalled();
   });
 
-  it("does nothing when navigation is disabled and no preview is configured", () => {
-    expect(clickWith(false, undefined)).not.toHaveBeenCalled();
+  it("keeps an open preview open when navigation is enabled", () => {
+    const { togglePreviewForListItem, openPreviewComponent } = clickWith(
+      true,
+      true,
+    );
+    expect(openPreviewComponent).toHaveBeenCalledWith("MF-1");
+    expect(togglePreviewForListItem).not.toHaveBeenCalled();
   });
 
   it("does not open a closed preview when navigation is enabled", () => {
-    expect(clickWith(true, { title: "preview" })).not.toHaveBeenCalled();
+    const { togglePreviewForListItem, openPreviewComponent } = clickWith(
+      true,
+      false,
+    );
+    expect(openPreviewComponent).not.toHaveBeenCalled();
+    expect(togglePreviewForListItem).not.toHaveBeenCalled();
   });
 });

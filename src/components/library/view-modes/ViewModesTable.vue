@@ -194,6 +194,7 @@ const {
   togglePreviewComponent,
   openPreviewComponent,
   closePreviewComponent,
+  togglePreviewForListItem,
   isPreviewComponentEnabledForListItem,
 } = usePreviewComponent(props, refEntities);
 
@@ -209,7 +210,7 @@ const {
   refEntities,
   previewComponentEnabled,
   openPreviewComponent,
-  previewComponent,
+  togglePreviewForListItem,
 );
 
 const { trackSeen } = useEntityPageConfig();
