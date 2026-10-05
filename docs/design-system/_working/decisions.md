@@ -101,10 +101,19 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | I7 | Component tokens | — | — | — | literals | **done:** `--text-input`, `--input-padding` |
 | I8 | `src/inputStyles.ts` | — | — | — | unused copy | **done:** deleted |
 
-Scope note: this branch is subtask 1 of the epic (tokens + primitives). The
-Filters section below belongs to a later subtask.
+Scope note: this branch is DS 1 (tokens, client theming, primitives).
+Later subtasks:
 
-## 3. Filters (later subtask)
+| Task | Scope | Rows waiting here |
+|---|---|---|
+| DS 2 | per-field editing | field-row copy affordance + truncation tooltip, "— Geen waarde" in inline selects, NL keys ("Save block", "Undo") |
+| DS 3 | action discovery | split button, overflow menu, selection bar |
+| DS 4 | lists, panels, filters, navigation | FL1–FL3 (stashed filter header), panel/section header size, breadcrumb, nav rail, record stepper; input variants (I6) |
+| DS 5 | viewers and flows | media viewport, ViewerToolbar, upload, guided flow |
+| DS 6 | backend support | filter option counts (active-count chip), destructive-action flag |
+| DS 7 | Storybook + docs | stories, publishing these docs |
+
+## 3. Filters (DS 4)
 
 Already discussed:
 
