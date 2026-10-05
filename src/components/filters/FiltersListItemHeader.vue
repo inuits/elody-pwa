@@ -1,25 +1,25 @@
 <template>
   <div
     data-cy="filters-list-item"
-    class="flex relative items-center justify-between px-6 py-4 border-t-2 border-border-panel cursor-pointer select-none"
-    :class="{ 'bg-accent-normal text-neutral-white': isActive }"
+    class="flex relative items-center justify-between px-3 py-2 border-b border-border-faint cursor-pointer select-none"
+    :class="{ 'bg-accent-light text-accent-ink': isActive }"
     @click="$emit('toggle')"
   >
-    <span data-cy="filters-list-item-label" class="text-lg">
+    <span data-cy="filters-list-item-label" class="text-label font-bold">
       {{ label }}
     </span>
     <div class="flex gap-x-2">
       <BaseTooltip v-if="tooltip" position="top-end" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
           <div v-on="on" :aria-describedby="describedBy">
-            <Unicon :name="Unicons.QuestionCircle.name" height="20" />
+            <Unicon :name="Unicons.QuestionCircle.name" height="16" />
           </div>
         </template>
         <span>
           {{ tooltipText }}
         </span>
       </BaseTooltip>
-      <Unicon :name="icon" height="20" />
+      <Unicon :name="icon" height="16" />
     </div>
   </div>
 </template>

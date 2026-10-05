@@ -85,6 +85,25 @@ describe("BaseInputCheckbox", () => {
     );
   });
 
+  it("keeps the 40px touch hit area by default", () => {
+    expect(getWrapper().find(".w-10").exists()).toBe(true);
+  });
+
+  it("shrinks the hit area in compact lists", () => {
+    const wrapper = getWrapper({ size: "compact" });
+    expect(wrapper.find(".w-10").exists()).toBe(false);
+    expect(wrapper.find(".w-6").exists()).toBe(true);
+  });
+
+  it("keeps a steady label gap in compact lists, checked or not", () => {
+    const label = (modelValue: boolean) =>
+      getWrapper({ size: "compact", label: "BOEK", modelValue })
+        .find("label")
+        .classes();
+    expect(label(false)).toContain("ml-1.5");
+    expect(label(true)).toEqual(label(false));
+  });
+
   it("keeps its click from reaching the parent row", async () => {
     const parentClick = vi.fn();
     const wrapper = mount(

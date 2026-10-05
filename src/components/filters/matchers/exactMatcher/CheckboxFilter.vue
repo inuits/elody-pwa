@@ -1,13 +1,13 @@
 <template>
-  <div>
+  <div class="text-table">
     <BaseInputCheckbox
       v-for="option in filterOptions"
       :key="option.option.value"
       v-model="option.isSelected"
-      :class="{ 'mb-2': option.isSelected }"
       :label="option.option.label"
       :item="{ id: option.option.value }"
       :ignore-bulk-operations="true"
+      size="compact"
     />
   </div>
 </template>

@@ -273,20 +273,20 @@ const classes = computed(() => {
   const defaultContainerStyles = "multiselect rounded-input items-stretch";
   const result: Record<string, string> = {
     container: `${defaultContainerStyles} border-none`,
-    containerActive: "outline-1 outline-accent-normal outline-offset-0",
+    containerActive: "outline-2 outline-focus-ring outline-offset-1",
     tagsSearch: "multiselect-tags-search !border-none focus:ring-0 p-0",
-    tag: "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded !font-bold !opacity-100",
+    tag: "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded-chip !font-bold !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",
     ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
   };
 
   if (props.autocompleteStyle === "defaultWithBorder") {
     result["container"] =
-      `${defaultContainerStyles} !border-neutral-40 !rounded-input`;
+      `${defaultContainerStyles} !border-border-default hover:!border-border-dashed !rounded-input`;
   }
 
   if (props.autocompleteStyle === "readOnly") {
-    result["container"] = "multiselect border-none !bg-white";
+    result["container"] = "multiselect border-none !bg-surface";
     result["tags"] =
       "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }

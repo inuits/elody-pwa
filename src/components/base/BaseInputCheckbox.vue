@@ -4,8 +4,11 @@
        painted when selected. -->
   <div data-cy="base-input-checkbox" class="flex items-center">
     <div
-      class="flex-none flex items-center justify-center w-10 h-10 box-border"
-      :class="[{ 'cursor-pointer': !disabled }]"
+      class="flex-none flex items-center justify-center box-border"
+      :class="[
+        size === 'compact' ? 'w-6 h-6' : 'w-10 h-10',
+        { 'cursor-pointer': !disabled },
+      ]"
       @click.prevent.stop="handleItemSelection"
     >
       <input
@@ -32,7 +35,7 @@
       v-if="label"
       :for="checkboxId"
       class="flex flex-row select-none cursor-pointer"
-      :class="{ 'ml-2': inputValue }"
+      :class="size === 'compact' ? 'ml-1.5' : { 'ml-2': inputValue }"
       @click.prevent.stop="handleItemSelection"
     >
       {{ label }}
@@ -70,6 +73,8 @@ const props = withDefaults(
     ignoreBulkOperations?: boolean;
     required?: boolean;
     ariaLabel?: string;
+    // compact: dense option lists (filters); default keeps the 40px touch target
+    size?: "default" | "compact";
   }>(),
   {
     modelValue: false,
@@ -78,6 +83,7 @@ const props = withDefaults(
     ignoreBulkOperations: false,
     required: false,
     ariaLabel: undefined,
+    size: "default",
   },
 );
 

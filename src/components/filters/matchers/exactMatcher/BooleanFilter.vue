@@ -1,5 +1,5 @@
 <template>
-  <div class="grow">
+  <div class="grow text-table">
     <div class="flex gap-2">
       <BaseInputCheckbox
         v-for="(option, idx) in options"
@@ -8,6 +8,7 @@
         :disabled="isDisabled(option)"
         :label="getTranslatedLabel(option.value)"
         ignoreBulkOperations
+        size="compact"
       />
     </div>
   </div>

@@ -11,7 +11,7 @@
     }"
   >
     <VueSelect
-      class="!text-text-body !bg-background-light border-none !rounded-lg flex-1 min-w-0"
+      class="!text-text-body !bg-background-light border-none !rounded-input text-value flex-1 min-w-0"
       v-model="selectedItem"
       :teleport="someModalIsOpened ? modalTeleportTarget() : 'body'"
       :options="filterDropdownOptions"
@@ -23,7 +23,7 @@
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
-        menuContainer: `border border-neutral-30 rounded-card shadow-overlay !mt-0 !z-header`,
+        menuContainer: `border border-border-subtle rounded-card shadow-overlay !mt-0 !z-header`,
       }"
     >
       <template #option="{ option }">
@@ -273,10 +273,46 @@ watch(
 </script>
 
 <style>
-@reference "@/assets/main.css"
+@reference "@/assets/main.css";
 
-:deep(.vue-select) {
-  --vs-border-radius: 10px;
+/* Design-system theme for vue3-select-component. The library declares its
+   defaults on :root; re-declaring them on body wins by inheritance whatever
+   the stylesheet order, and also reaches the teleported menu. */
+body {
+  --vs-font-family: var(--font-sans);
+  --vs-font-size: var(--text-value);
+  --vs-line-height: 1.375;
+  --vs-text-color: var(--color-text-body);
+  --vs-placeholder-color: var(--color-text-placeholder);
+  --vs-background-color: var(--color-surface);
+  --vs-disabled-background-color: var(--color-surface-muted);
+  --vs-border: 1px solid var(--color-border-default);
+  --vs-border-radius: var(--radius-input);
+  --vs-padding: 5px 8px;
+  --vs-min-height: 32px;
+  --vs-outline-width: var(--focus-ring-width);
+  --vs-outline-color: var(--color-focus-ring);
+  --vs-indicator-icon-color: var(--color-text-secondary);
+  --vs-indicator-icon-size: 16px;
+  --vs-spinner-color: var(--color-commit);
+  --vs-menu-border: 1px solid var(--color-border-subtle);
+  --vs-menu-box-shadow: var(--shadow-overlay);
+  --vs-menu-offset-top: 4px;
+  --vs-option-font-size: var(--text-table);
+  --vs-option-padding: 5px 10px;
+  --vs-option-text-color: var(--color-text-body);
+  --vs-option-hover-background-color: var(--color-accent-wash);
+  --vs-option-hover-text-color: var(--color-text-body);
+  --vs-option-focused-background-color: var(--color-accent-wash);
+  --vs-option-focused-text-color: var(--color-text-body);
+  --vs-option-selected-background-color: var(--color-accent-wash);
+  --vs-option-selected-text-color: var(--color-text-body);
+  --vs-option-disabled-background-color: transparent;
+  --vs-option-disabled-text-color: var(--color-text-disabled);
+  --vs-multi-value-background-color: var(--color-chip-relation-bg);
+  --vs-multi-value-label-text-color: var(--color-chip-relation-text);
+  --vs-multi-value-border-radius: var(--radius-chip);
+  --vs-multi-value-label-font-size: var(--text-label);
 }
 
 body > .menu {
@@ -284,66 +320,39 @@ body > .menu {
 }
 
 div.menu-option.selected {
-  background-color: var(--color-accent-wash) !important;
+  font-weight: bold;
 }
 
-div.menu-option {
-  line-height: 1.375;
+.vue-advanced-select .search-input:focus {
+  outline: none !important;
+  box-shadow: none;
 }
 
-div.menu-option:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--color-accent-wash) 30%,
-    transparent
-  ) !important;
-}
-
-.vue-advanced-select .search-input {
-  &:focus {
-    outline: none !important;
-    box-shadow: none;
-  }
-}
-
+/* default: borderless field on the light surface */
 .vue-advanced-select .vue-select,
 .vue-advanced-select .control {
-  --vs-border-radius: 0.5rem;
   --vs-border: none;
-  --vs-line-height: 1.375;
-}
-
-.vue-advanced-select .control.focused {
-  --vs-outline-color: none;
 }
 
 .vue-advanced-select--bordered .vue-select,
 .vue-advanced-select--bordered .control {
-  --vs-border-radius: 0.5rem;
-  --vs-border: 1px solid color-mix(in srgb, var(--color-text-body) 60%, transparent);
+  --vs-border: 1px solid var(--color-border-default);
 }
 
-.vue-advanced-select .control.focused {
-  --vs-outline-color: none;
+.vue-advanced-select--bordered .control:hover:not(.focused) {
+  --vs-border: 1px solid var(--color-border-dashed);
 }
 
 .vue-advanced-select--light-bordered .vue-select,
 .vue-advanced-select--light-bordered .control {
-  --vs-border-radius: 0.5rem;
   --vs-border: 1px solid var(--color-border-subtle);
-  --vs-line-height: 1.375;
 }
 
-.vue-advanced-select--light-bordered .control.focused {
-  --vs-outline-color: var(--color-focus-ring);
+.vue-advanced-select .control.focused {
   box-shadow: none !important;
 }
 
 .vue-advanced-select .selectedOption {
-  @apply text-text-body;
-}
-
-.vue-advanced-select--bordered .selectedOption {
-  @apply text-black;
+  color: var(--color-text-body);
 }
 </style>
