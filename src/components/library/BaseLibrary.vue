@@ -214,6 +214,9 @@
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
             -
           </div>
+          <div v-else-if="accessDenied">
+            {{ t("error-pages.access-denied.title") }}
+          </div>
           <div v-else>
             <div>{{ noResultTranslations.noResult }}</div>
             <div class="text-sm">
@@ -696,6 +699,7 @@ const {
   placeholderEntities,
   placeholderEntitiesAmount,
   entitiesLoading,
+  accessDenied,
   getCustomBulkOperations,
   fetchAllPromises,
   getEntities,

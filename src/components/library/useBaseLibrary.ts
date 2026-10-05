@@ -28,6 +28,15 @@ import { useI18n } from "vue-i18n";
 import { isAbortError } from "@/helpers";
 import { useImport } from "@/composables/useImport";
 
+const isForbidden = (error: any): boolean =>
+  (error?.graphQLErrors ?? []).some(
+    (graphQLError: any) =>
+      Number(
+        graphQLError.extensions?.response?.status ||
+          graphQLError.extensions?.statusCode,
+      ) === 403,
+  );
+
 const registeredLibraryData = shallowReactive<
   Record<string, { count: Ref<number>; fetchSequence: Ref<number> }>
 >({});
@@ -55,6 +64,7 @@ export const useBaseLibrary = (
   const placeholderEntities = shallowRef<Entity[]>([]);
   const placeholderEntitiesAmount = ref<number>(0);
   const entitiesLoading = ref<boolean>(false);
+  const accessDenied = ref<boolean>(false);
   const isSearchLibrary = ref<boolean>(false);
   const parentEntityId = ref<string>();
   const manipulateQuery = ref<boolean>(false);
@@ -304,6 +314,7 @@ export const useBaseLibrary = (
         notifyOnNetworkStatusChange: true,
         context: {
           headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
+          locallyHandledStatusCodes: [403],
           fetchOptions: {
             signal,
           },
@@ -314,6 +325,7 @@ export const useBaseLibrary = (
         result.data.Entities || result.data.EntitiesHistory;
       if (limitForEntityPicker) return fetchedEntities;
 
+      accessDenied.value = false;
       totalEntityCount.value = fetchedEntities?.count || 0;
       facets.value = fetchedEntities.facets || [];
       fetchSequence.value += 1;
@@ -327,9 +339,11 @@ export const useBaseLibrary = (
         });
       }
     } catch (error: any) {
-      const isAborted = isAbortError(error);
-
-      if (!isAborted) {
+      if (isForbidden(error)) {
+        accessDenied.value = true;
+        entities.value = [];
+        totalEntityCount.value = 0;
+      } else if (!isAbortError(error)) {
         console.error("Failed to get entities:", error);
       }
     } finally {
@@ -439,6 +453,7 @@ export const useBaseLibrary = (
     placeholderEntities,
     placeholderEntitiesAmount,
     entitiesLoading,
+    accessDenied,
     getCustomBulkOperations,
     fetchAllPromises,
     getEntities,

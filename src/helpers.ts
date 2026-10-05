@@ -1008,6 +1008,7 @@ export const graphqlErrorInterceptor = onError(
     const { handleGraphqlError } = useErrorCodes();
     const context = operation.getContext() as {
       skipGlobalErrorHandling?: boolean;
+      locallyHandledStatusCodes?: number[];
     };
 
     if (graphQLErrors) {
@@ -1024,7 +1025,10 @@ export const graphqlErrorInterceptor = onError(
           return;
         }
 
-        if (context.skipGlobalErrorHandling) {
+        if (
+          context.skipGlobalErrorHandling ||
+          context.locallyHandledStatusCodes?.includes(status)
+        ) {
           continue;
         }
 
