@@ -76,13 +76,19 @@ const enableTimePicker = computed<boolean>(() => {
 }
 
 .base-date-picker .dp__input {
-  @apply border border-text-body/60 rounded-[0.5rem] focus:border-text-body/60!;
+  border: 1px solid color-mix(in srgb, var(--color-text-body) 60%, transparent);
+  border-radius: 0.5rem;
 }
 
 .base-date-picker .dp__input:focus,
 .base-date-picker .dp__input:hover,
 .base-date-picker .dp__input_focus {
-  @apply border-text-body/60! outline-none!;
+  border-color: color-mix(
+    in srgb,
+    var(--color-text-body) 60%,
+    transparent
+  ) !important;
+  outline: none !important;
   box-shadow: none !important;
 }
 
