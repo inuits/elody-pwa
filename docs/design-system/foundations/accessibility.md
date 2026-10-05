@@ -32,7 +32,7 @@ non-text UI. Measured pairs:
 | Body text on surface | 12.2:1 |
 | Field label / link on surface | 6.5:1 |
 | Badge tone1 / tone2 / tone3 / subtype | 5.97 / 5.14 / 5.68 / 5.51 |
-| Relation chip (white on chip blue) | **2.14, failing, fix pending** |
+| Relation chip (body text on chip blue) | 5.68:1 |
 
 Placeholder text (`--color-text-placeholder`) is below 4.5:1 by design, so a
 placeholder is an example, never the label. Disabled text is exempt.

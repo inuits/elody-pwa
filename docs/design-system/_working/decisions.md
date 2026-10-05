@@ -27,12 +27,12 @@ the namespace (`--color-*` gives colours, `--text-*` gives font sizes).
 
 | # | Item | Handoff | Catalogue | POC | Now | Decision |
 |---|---|---|---|---|---|---|
-| F1 | `--color-text-link` | #355BA9 (= label blue) | #1D4ED8 | #355BA9 | #355BA9 || **done:** #355BA9; legacy #1D4ED8 removed |
-| F2 | Layout tokens (`--filter-panel-width`, `--nav-rail-width`, `--touch-target-min`, `--page-pad`, gutters) | not defined | defined | not defined | defined || **done:** already defined (composite tokens) |
-| F3 | Font-weight tokens (`--weight-regular/bold/black`), `--font-mono` | not defined | defined | not defined | defined || **done:** keep |
-| F4 | vlacc badge aliases (`--badge-work/expression/manifestation`) | no (tones only; W/E/M is vlacc's mapping) | yes | no | no || **done:** no aliases; mapping lives in config |
-| F5 | Spacing scale `--spacing-*` | defined (2px steps) | defined | not imported (would override Tailwind `p-1`, `gap-2`…) | not imported || **done:** not imported; exact spacing via component tokens |
-| F6 | `--color-commit-hover` | mint #6BC6B3 in tokens, #0A9AA3 in specimen | #0A9AA3 | n/a | buttons use #0A9AA3 || **done:** #0A9AA3; `--color-commit-strong-hover` merged into it |
+| F1 | `--color-text-link` | #355BA9 (= label blue) | #1D4ED8 | #355BA9 | #355BA9 | **done:** #355BA9; legacy #1D4ED8 removed |
+| F2 | Layout tokens (`--filter-panel-width`, `--nav-rail-width`, `--touch-target-min`, `--page-pad`, gutters) | not defined | defined | not defined | defined | **done:** already defined (composite tokens) |
+| F3 | Font-weight tokens (`--weight-regular/bold/black`), `--font-mono` | not defined | defined | not defined | defined | **done:** keep |
+| F4 | vlacc badge aliases (`--badge-work/expression/manifestation`) | no (tones only; W/E/M is vlacc's mapping) | yes | no | no | **done:** no aliases; mapping lives in config |
+| F5 | Spacing scale `--spacing-*` | defined (2px steps) | defined | not imported (would override Tailwind `p-1`, `gap-2`…) | not imported | **done:** not imported; exact spacing via component tokens |
+| F6 | `--color-commit-hover` | mint #6BC6B3 in tokens, #0A9AA3 in specimen | #0A9AA3 | n/a | buttons use #0A9AA3 | **done:** #0A9AA3; `--color-commit-strong-hover` merged into it |
 
 ### 1.2 Contrast (WCAG AA, 4.5:1 for text)
 
@@ -40,9 +40,9 @@ Both sources claim "all badge text/background pairs ≥ 4.5:1". Measured:
 
 | # | Pair | Ratio | Passes | Proposal | Decision |
 |---|---|---|---|---|---|
-| F7 | Badge tone1 #15803d on #DAF1DC | 4.20 | no | text #166534 → 5.97 || **done:** #166534 |
-| F8 | Badge tone3 #B95000 on #FDEBD7 | 4.28 | no | text #9A4300 → 5.68 || **done:** #9A4300 |
-| F9 | Relation chip white on #6DBBDE | 2.14 | **no** | darker chip bg, or dark text || **open:** compare both options in the browser |
+| F7 | Badge tone1 #15803d on #DAF1DC | 4.20 | no | text #166534 → 5.97 | **done:** #166534 |
+| F8 | Badge tone3 #B95000 on #FDEBD7 | 4.28 | no | text #9A4300 → 5.68 | **done:** #9A4300 |
+| F9 | Relation chip white on #6DBBDE | 2.14 | **no** | darker chip bg, or dark text | **done:** body text on the same blue, 5.68 |
 | — | Badge tone2 #355BA9 on #C8EAF7 | 5.14 | yes | — | |
 | — | Subtype #505F79 on #E8EEF0 | 5.51 | yes | — | |
 | — | Link #355BA9 on white | 6.52 | yes | — | |
@@ -52,10 +52,10 @@ Both sources claim "all badge text/background pairs ≥ 4.5:1". Measured:
 
 | # | Rule | Handoff | Catalogue | Decision |
 |---|---|---|---|---|
-| F10 | Fixed elements | exactly two: 52px rail + detail header | rail + white top bar (+ fixed toast) || **done:** handoff |
-| F11 | Pill radius | 14px only | "14–16px" (token 14px) || **done:** 14px |
-| F12 | Focus ring | 2px commit teal, 1px offset, `:focus-visible` | 1–2px, inset where flush || **done:** handoff (already built) |
-| F13 | Confirm dialogs | only for true unrecoverable loss | only for entity deletion || **done:** handoff |
+| F10 | Fixed elements | exactly two: 52px rail + detail header | rail + white top bar (+ fixed toast) | **done:** handoff |
+| F11 | Pill radius | 14px only | "14–16px" (token 14px) | **done:** 14px |
+| F12 | Focus ring | 2px commit teal, 1px offset, `:focus-visible` | 1–2px, inset where flush | **done:** handoff (already built) |
+| F13 | Confirm dialogs | only for true unrecoverable loss | only for entity deletion | **done:** handoff |
 | F14 | Client-swappable set | accent pair + derived roles | same | agree; handoff text names `--color-accent-accent`, a typo (it's commit teal) |
 | — | Two elevation levels, card = border no shadow | yes | yes (but some catalogue components add shadows) | agree |
 | — | Pill starts / rectangle executes | yes | yes | agree |
@@ -117,6 +117,18 @@ Order: Button → Checkbox → Input → Tooltip → Spinner → Badge/Pill → 
 | S0 | Rotation, colour, a11y | .8s, commit teal, container announces | .8s, teal, self role=status | self role=status | handoff | **done:** handoff |
 | S1 | On filled buttons | not specified | white track | n/a | current colour | **done:** current colour |
 | S2 | Sizes | not specified | 15px default | `dimensions` | `dimensions` | **done:** keep |
+
+### 2.6 Chip and badge: [final page](../components/chip-and-badge.md)
+
+| # | Item | Handoff | Catalogue | POC | Before | Decision |
+|---|---|---|---|---|---|---|
+| P1 | Chip metrics | 11.5px bold, 2px 8px, 4px | 11.5px bold, 2px 9px | 14px | 14px regular, ~1px 4px | **done:** handoff via `--text-chip`, `--chip-padding` |
+| P2 | `lg` size | none | none | yes | yes (comparison columns) | **done:** keep on tokens; revisit in DS 4 |
+| P3 | Letter badge | 17px, 10.5px/900, role=img + name | 26px fixed width | no | no | **done:** `shape: "badge"` in pill config |
+| P4 | Fallback colour | — | — | slate-800 | slate-800 | **done:** neutral chip tokens |
+| P5 | Default relation pill | neutral chip | — | — | hex #d6e2f0/#1f3a5f | **done:** neutral chip tokens |
+| P6 | Tone + icon config | — | — | tone replaced the whole config entry | same (bug) | **done:** merged; icon/shape/letter kept |
+| P7 | Dropdown chip remove name | "Verwijder {waarde}" | same | value only | value only | **done:** `autocomplete.remove-chip` + value |
 
 Scope note: this branch is DS 1 (tokens, client theming, primitives).
 Later subtasks:
