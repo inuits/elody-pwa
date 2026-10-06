@@ -65,3 +65,47 @@ describe("useEntityListHelpers.getButtons", () => {
     expect(getButtonsFor(makeEntity({}))).toBeUndefined();
   });
 });
+
+describe("useEntityListHelpers.entityWrapperHandler", () => {
+  const entity = { id: "MF-1", type: "mediafile" } as unknown as Entity;
+
+  const clickWith = (enableNavigation: boolean, previewOpen: boolean) => {
+    const openPreviewComponent = vi.fn();
+    const togglePreviewForListItem = vi.fn();
+    useEntityListHelpers(
+      { enableNavigation },
+      ref([]),
+      ref(previewOpen),
+      openPreviewComponent,
+      togglePreviewForListItem,
+    ).entityWrapperHandler(entity);
+    return { openPreviewComponent, togglePreviewForListItem };
+  };
+
+  it("toggles the preview when navigation is disabled", () => {
+    const { togglePreviewForListItem, openPreviewComponent } = clickWith(
+      false,
+      true,
+    );
+    expect(togglePreviewForListItem).toHaveBeenCalledWith("MF-1");
+    expect(openPreviewComponent).not.toHaveBeenCalled();
+  });
+
+  it("keeps an open preview open when navigation is enabled", () => {
+    const { togglePreviewForListItem, openPreviewComponent } = clickWith(
+      true,
+      true,
+    );
+    expect(openPreviewComponent).toHaveBeenCalledWith("MF-1");
+    expect(togglePreviewForListItem).not.toHaveBeenCalled();
+  });
+
+  it("does not open a closed preview when navigation is enabled", () => {
+    const { togglePreviewForListItem, openPreviewComponent } = clickWith(
+      true,
+      false,
+    );
+    expect(openPreviewComponent).not.toHaveBeenCalled();
+    expect(togglePreviewForListItem).not.toHaveBeenCalled();
+  });
+});

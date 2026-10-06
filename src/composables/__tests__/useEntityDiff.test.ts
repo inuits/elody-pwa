@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
-import { useEntityDiff } from "../useEntityDiff";
+import { useEntityDiff, computeEntityDiff } from "../useEntityDiff";
 import { getMetadataFields } from "@/helpers";
 
 vi.mock("@/helpers", () => ({
@@ -186,5 +186,157 @@ describe("useEntityDiff", () => {
     expect(
       resB.value?.selectedVersion.intialValues.updated.label,
     ).toStrictEqual(date3);
+  });
+});
+
+describe("computeEntityDiff - repeatable panel fields", () => {
+  const repeatableFields = [
+    {
+      repetitionKey: "parallel_title_group",
+      fieldKeys: ["parallel_title", "other_title_details"],
+    },
+  ];
+
+  it("pill-wraps only the sub-field that changed within a repetition item, leaving the rest of the item untouched", () => {
+    const current = {
+      id: "current",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "New title", other_title_details: "Same" },
+        ],
+      },
+    } as any;
+    const previous = {
+      id: "previous",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "Old title", other_title_details: "Same" },
+        ],
+      },
+    } as any;
+
+    const result = computeEntityDiff({
+      previousVersion: previous,
+      selectedVersion: current,
+      fields: [],
+      repeatableFields,
+    });
+
+    expect(
+      result.selectedVersion.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toEqual({ formatter: "pill|added", label: "New title" });
+    expect(
+      result.previousVersion.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toEqual({ formatter: "pill|modified", label: "Old title" });
+    expect(
+      result.selectedVersion.intialValues.parallel_title_group[0]
+        .other_title_details,
+    ).toBe("Same");
+    expect(
+      result.previousVersion.intialValues.parallel_title_group[0]
+        .other_title_details,
+    ).toBe("Same");
+  });
+
+  it("marks every sub-field of a repetition item added entirely on the current side as pill|added", () => {
+    const current = {
+      id: "current",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "First", other_title_details: "A" },
+          { parallel_title: "Second", other_title_details: "B" },
+        ],
+      },
+    } as any;
+    const previous = {
+      id: "previous",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "First", other_title_details: "A" },
+        ],
+      },
+    } as any;
+
+    const result = computeEntityDiff({
+      previousVersion: previous,
+      selectedVersion: current,
+      fields: [],
+      repeatableFields,
+    });
+
+    const currentArr = result.selectedVersion.intialValues.parallel_title_group;
+    expect(currentArr).toHaveLength(2);
+    expect(currentArr[0].parallel_title).toBe("First");
+    expect(currentArr[1].parallel_title).toEqual({
+      formatter: "pill|added",
+      label: "Second",
+    });
+
+    expect(
+      result.previousVersion.intialValues.parallel_title_group,
+    ).toHaveLength(1);
+  });
+
+  it("marks a repetition item only present on the previous side as pill|modified, without padding the current side", () => {
+    const current = {
+      id: "current",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "First", other_title_details: "A" },
+        ],
+      },
+    } as any;
+    const previous = {
+      id: "previous",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "First", other_title_details: "A" },
+          { parallel_title: "Removed", other_title_details: "B" },
+        ],
+      },
+    } as any;
+
+    const result = computeEntityDiff({
+      previousVersion: previous,
+      selectedVersion: current,
+      fields: [],
+      repeatableFields,
+    });
+
+    expect(
+      result.selectedVersion.intialValues.parallel_title_group,
+    ).toHaveLength(1);
+
+    const prevArr = result.previousVersion.intialValues.parallel_title_group;
+    expect(prevArr).toHaveLength(2);
+    expect(prevArr[1].parallel_title).toEqual({
+      formatter: "pill|modified",
+      label: "Removed",
+    });
+  });
+
+  it("leaves repeatable fields untouched when there is no previous version to diff against", () => {
+    const current = {
+      id: "current",
+      intialValues: {
+        parallel_title_group: [
+          { parallel_title: "First", other_title_details: "A" },
+        ],
+      },
+    } as any;
+
+    const result = computeEntityDiff({
+      previousVersion: null,
+      selectedVersion: current,
+      fields: [],
+      repeatableFields,
+    });
+
+    expect(
+      result.selectedVersion.intialValues.parallel_title_group[0]
+        .parallel_title,
+    ).toBe("First");
   });
 });

@@ -2,14 +2,26 @@
   <div
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
-    :class="[{ 'font-bold': highlight}, `text-value text-text-secondary ${breakWords ? 'break-words' : 'break-normal'}`]"
+    :class="[
+      { 'font-bold': highlight },
+      `text-value text-text-secondary ${breakWords ? 'break-words' : 'break-normal'}`,
+    ]"
   >
     <div v-if="linesToRender">
       <div v-for="(item, index) in linesToRender" :key="index">
-        <p data-cy="metadata-value" v-if="!stringIsUrl(item)">{{ item }}</p>
-        <a v-else class="underline" target="_blank" :href="item">{{
-          t(linkText) || item
-        }}</a>
+        <a
+          v-if="stringIsUrl(item)"
+          class="underline"
+          target="_blank"
+          :href="item"
+          >{{ t(linkText) || item }}</a
+        >
+        <SanitizedHtml
+          v-else-if="stringIsHtml(item)"
+          :mode="SanitizeMode.Html"
+          :content="String(item)"
+        />
+        <p v-else data-cy="metadata-value">{{ item }}</p>
       </div>
       <div v-if="linesToRender.length == 0">{{ emptyDisplayValue }}</div>
     </div>
@@ -32,7 +44,10 @@
           />
           <CustomIcon v-else-if="linkIcon" :icon="linkIcon" :size="12" />
         </div>
-        <SanitizedHtml :content="processedDisplayValue" :link-text="t(linkText)"></SanitizedHtml>
+        <SanitizedHtml
+          :content="processedDisplayValue"
+          :link-text="t(linkText)"
+        ></SanitizedHtml>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)">

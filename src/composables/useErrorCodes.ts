@@ -12,7 +12,11 @@ import { usePageStatus } from "@/composables/usePageStatus";
 export type MessageSeverity = "error" | "warning";
 
 export const useErrorCodes = (): {
-  handleErrorByCodeType: (code: string, message?: string) => void;
+  handleErrorByCodeType: (
+    code: string,
+    message?: string,
+    statusCode?: string | number,
+  ) => void;
   handleGraphqlError: (
     error: GraphQLError,
     skipErrorHandling?: boolean,
@@ -36,6 +40,7 @@ export const useErrorCodes = (): {
 
   const authHandlers: Record<string, (errorCodeType: ErrorCodeType) => void> = {
     "1001": () => handleUnauthorized(),
+    "1013": () => handleUnauthorized(),
     "1003": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
     "1004": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
     "1008": (errorCodeType: ErrorCodeType) => handleAccessDenied(errorCodeType),
@@ -200,6 +205,7 @@ export const useErrorCodes = (): {
   const handleErrorByCodeType = async (
     code: string,
     message: string = "",
+    statusCode?: string | number,
   ): Promise<void> => {
     const genericCodePart: string = code.substring(1);
     const actionCodePart: string = Array.from(code)[0];
@@ -209,6 +215,21 @@ export const useErrorCodes = (): {
       W: ErrorCodeType.Write,
     };
     const errorCodeType: ErrorCodeType = actionTypeMapper[actionCodePart];
+
+    const isCodeConfigured =
+      Object.keys(authHandlers).includes(genericCodePart) ||
+      Object.keys(readHandlers).includes(code) ||
+      Object.keys(writeHandlers).includes(code);
+    const statusCodeKey = statusCode?.toString();
+    if (
+      !isCodeConfigured &&
+      statusCodeKey &&
+      statusCodeKey !== "default" &&
+      Object.keys(statusCodeHandlers).includes(statusCodeKey)
+    ) {
+      statusCodeHandlers[statusCodeKey](errorCodeType, message);
+      return;
+    }
 
     if (Object.keys(authHandlers).includes(genericCodePart))
       handleAuthCodes(genericCodePart, errorCodeType);
@@ -347,7 +368,11 @@ export const useErrorCodes = (): {
       return message as string;
     }
 
-    handleErrorByCodeType(code, message);
+    const { statusCode } = __extractStatusCodeAndMessageFromResponse(
+      "graphql",
+      error,
+    );
+    handleErrorByCodeType(code, message, statusCode);
     return message as string;
   };
 
@@ -376,7 +401,7 @@ export const useErrorCodes = (): {
       return "";
     }
 
-    handleErrorByCodeType(code, message);
+    handleErrorByCodeType(code, message, httpResponse.status);
     return message as string;
   };
 

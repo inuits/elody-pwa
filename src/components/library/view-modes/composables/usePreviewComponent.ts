@@ -67,6 +67,13 @@ export const usePreviewComponent = (
     previewForEntity.value = undefined;
   };
 
+  const togglePreviewForListItem = (entityId: string) => {
+    if (!previewComponent.value) return;
+    if (previewComponentEnabled.value && previewForEntity.value === entityId)
+      closePreviewComponent();
+    else openPreviewComponent(entityId);
+  };
+
   const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
     if (previewComponentEnabled.value) {
       if (
@@ -131,6 +138,7 @@ export const usePreviewComponent = (
     togglePreviewComponent,
     openPreviewComponent,
     closePreviewComponent,
+    togglePreviewForListItem,
     isPreviewComponentEnabledForListItem,
   };
 };

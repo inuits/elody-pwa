@@ -300,3 +300,40 @@ describe("useBaseLibrary – coalesced fetches", () => {
     expect(query.mock.calls[1][0].variables.skip).toBe(2);
   });
 });
+
+describe("useBaseLibrary – access denied", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+  const forbidden = Object.assign(new Error("Forbidden"), {
+    graphQLErrors: [{ extensions: { statusCode: 403 } }],
+  });
+
+  it("handles a 403 itself instead of leaving it to the global error handler", async () => {
+    const query = vi.fn().mockRejectedValue(forbidden);
+    const { getEntities, accessDenied, entities } = useBaseLibrary({
+      query,
+    } as any);
+
+    await getEntities(mockRoute);
+
+    expect(query.mock.calls[0][0].context.locallyHandledStatusCodes).toEqual([
+      403,
+    ]);
+    expect(accessDenied.value).toBe(true);
+    expect(entities.value).toEqual([]);
+  });
+
+  it("clears the denial once a later fetch succeeds", async () => {
+    const query = vi
+      .fn()
+      .mockRejectedValueOnce(forbidden)
+      .mockResolvedValue({
+        data: { Entities: { results: [{ id: "a" }], count: 1, facets: [] } },
+      });
+    const { getEntities, accessDenied } = useBaseLibrary({ query } as any);
+
+    await getEntities(mockRoute);
+    await getEntities(mockRoute);
+
+    expect(accessDenied.value).toBe(false);
+  });
+});

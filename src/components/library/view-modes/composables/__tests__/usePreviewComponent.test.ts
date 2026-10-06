@@ -88,6 +88,43 @@ describe("usePreviewComponent", () => {
     });
   });
 
+  describe("togglePreviewForListItem", () => {
+    it("closes the preview when its own list item is clicked again", async () => {
+      const { togglePreviewForListItem, previewComponentEnabled } =
+        await setup({ listItemsCoverage: ListItemCoverageTypes.AllListItems });
+      togglePreviewForListItem("entity-1");
+      expect(previewComponentEnabled.value).toBe(true);
+      togglePreviewForListItem("entity-1");
+      expect(previewComponentEnabled.value).toBe(false);
+    });
+
+    it("switches to another list item without closing", async () => {
+      const { togglePreviewForListItem, previewComponentEnabled, previewForEntity } =
+        await setup({ listItemsCoverage: ListItemCoverageTypes.AllListItems });
+      togglePreviewForListItem("entity-1");
+      togglePreviewForListItem("entity-2");
+      expect(previewComponentEnabled.value).toBe(true);
+      expect(previewForEntity.value).toBe("entity-2");
+    });
+
+    it("does nothing when no preview is configured for the entity type", async () => {
+      vi.mocked(apolloClient.query).mockResolvedValue({
+        data: { PreviewComponents: { previewComponent: null } },
+      });
+      const { togglePreviewForListItem, previewComponentEnabled } =
+        usePreviewComponent(
+          reactive({
+            entityType: Entitytyping.Asset,
+            baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+          }),
+          ref([makeEntity("entity-1")]),
+        );
+      await flushPromises();
+      togglePreviewForListItem("entity-1");
+      expect(previewComponentEnabled.value).toBe(false);
+    });
+  });
+
   describe("togglePreviewComponent — OneListItem coverage", () => {
     it("enables the preview panel for the toggled entity", async () => {
       const {

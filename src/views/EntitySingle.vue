@@ -52,8 +52,6 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import EntityNavigationArrows from "@/components/EntityNavigationArrows.vue";
 import {
   asString,
-  getTitleOrNameFromEntity,
-  getMappedSlug,
   mapUrlToEntityType,
 } from "@/helpers";
 import {
@@ -90,12 +88,7 @@ const { trackSeen, jobStatusPolling, showNavigationArrows } =
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
-const {
-  clearBreadcrumbPath,
-  getRouteBreadcrumbsOfEntity,
-  setRootRoute,
-  iterateOverBreadcrumbs,
-} = useBreadcrumbs(config);
+const { determineBreadcrumbsForEntity } = useBreadcrumbs(config);
 
 const {
   mediafileSelectionState,
@@ -161,7 +154,6 @@ const entity = ref<BaseEntity>();
 provide("ParentEntityProvider", entity);
 provide("RefetchParentEntity", refetch);
 useEntitySingle().setRefetch(refetch);
-const entityForBreadcrumb = ref<Entity>();
 
 const setMutatedEntity = (mutatedEntity: Entity) => {
   entity.value = mutatedEntity;
@@ -238,8 +230,7 @@ watch(
     useEditHelper.value = useEditMode(entity.value.id);
     useEntitySingle().setEntityUuid(entity.value.uuid || entity.value.id);
     useEntitySingle().setEntityType(entityType.value);
-    entityForBreadcrumb.value = entity.value;
-    if (!props.viewOnly) determineBreadcrumbs();
+    if (!props.viewOnly) determineBreadcrumbsForEntity(entity.value);
 
     if (entity.value.intialValues?.identifiers)
       identifiers.value = entity.value.intialValues.identifiers;
@@ -273,27 +264,6 @@ watch(
     loading.value = false;
   },
 );
-
-const determineBreadcrumbs = async () => {
-  clearBreadcrumbPath();
-  setRootRoute(
-    entityForBreadcrumb.value.id,
-    getTitleOrNameFromEntity(entityForBreadcrumb.value),
-    entityForBreadcrumb.value.intialValues?.typePillLabel,
-  );
-  do {
-    const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
-      getMappedSlug(entityForBreadcrumb.value),
-    );
-    if (!routeBreadcrumbs) break;
-    entityForBreadcrumb.value = await iterateOverBreadcrumbs(
-      [entityForBreadcrumb.value.id],
-      routeBreadcrumbs,
-      true,
-      entityForBreadcrumb.value,
-    );
-  } while (entityForBreadcrumb.value);
-};
 
 watch(
   () => locale.value,

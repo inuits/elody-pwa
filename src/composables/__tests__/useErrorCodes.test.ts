@@ -282,7 +282,7 @@ describe("useErrorCodes", () => {
   });
 
   describe("Auth Handlers", () => {
-    it.each([["R1001"]])(
+    it.each([["R1001"], ["R1013"]])(
       "should trigger logout flow for code %s",
       async (code) => {
         const error = createMockGraphQLError(code);
@@ -354,6 +354,50 @@ describe("useErrorCodes", () => {
         expect(errorMessage).not.toBe("");
       },
     );
+
+    it("falls back to the status code handler for an unconfigured read code", async () => {
+      const error = createMockGraphQLError("R9999 - Not configured", 403);
+
+      await errorCodes.handleGraphqlError(error);
+
+      expect(sharedMocks.setPageStatus).toHaveBeenCalledWith(
+        PageStatus.Forbidden,
+      );
+    });
+
+    it("falls back to the status code handler for an unconfigured write code", async () => {
+      const error = createMockGraphQLError("W9999 - Not configured", 403);
+
+      await errorCodes.handleGraphqlError(error);
+
+      expect(sharedMocks.displayErrorNotification).toHaveBeenCalledWith(
+        "Forbidden",
+        "You do not have permission.",
+      );
+      expect(sharedMocks.setPageStatus).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the status code handler for an unconfigured code in an http error", async () => {
+      const response = createMockHttpResponse("/entities", 401, {
+        extensions: { response: { body: { message: "R9999 - Expired" } } },
+      });
+
+      await errorCodes.handleHttpError(response);
+
+      expect(sharedMocks.logout).toHaveBeenCalled();
+      expect(sharedMocks.setPageStatus).toHaveBeenCalledWith(
+        PageStatus.Unauthorized,
+      );
+    });
+
+    it("keeps an unconfigured read code silent when its status has no dedicated handler", async () => {
+      const error = createMockGraphQLError("R9999 - Not configured", 400);
+
+      await errorCodes.handleGraphqlError(error);
+
+      expect(sharedMocks.displayErrorNotification).not.toHaveBeenCalled();
+      expect(sharedMocks.setPageStatus).not.toHaveBeenCalled();
+    });
 
     it("should fallback to 401 handler (Unauthorized)", async () => {
       const error = createMockHttpResponse("/", 401, "", "Unauthorized");

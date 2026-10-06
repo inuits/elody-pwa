@@ -69,11 +69,12 @@ describe("EntityElementMetadata", () => {
     });
 
     it("should translate every item of an array value when translationKey is provided", async () => {
-      mocks.t.mockImplementation((key: string) =>
-        ({
-          "translated.keys.description": "Beschrijving",
-          "translated.keys.title": "Titel",
-        })[key] ?? key,
+      mocks.t.mockImplementation(
+        (key: string) =>
+          ({
+            "translated.keys.description": "Beschrijving",
+            "translated.keys.title": "Titel",
+          })[key] ?? key,
       );
       const wrapper = mount(EntityElementMetadata, {
         props: {
@@ -182,8 +183,9 @@ describe("EntityElementMetadata", () => {
 
   describe("Multiline text values", () => {
     it("should render each newline-separated URL as its own link", async () => {
-      stringIsUrl.mockImplementation((value: unknown) =>
-        typeof value === "string" && value.startsWith("https://"),
+      stringIsUrl.mockImplementation(
+        (value: unknown) =>
+          typeof value === "string" && value.startsWith("https://"),
       );
       const wrapper = mount(EntityElementMetadata, {
         props: {
@@ -203,8 +205,9 @@ describe("EntityElementMetadata", () => {
     });
 
     it("should render non-url lines as plain text alongside links", async () => {
-      stringIsUrl.mockImplementation((value: unknown) =>
-        typeof value === "string" && value.startsWith("https://"),
+      stringIsUrl.mockImplementation(
+        (value: unknown) =>
+          typeof value === "string" && value.startsWith("https://"),
       );
       const wrapper = mount(EntityElementMetadata, {
         props: {
@@ -217,6 +220,51 @@ describe("EntityElementMetadata", () => {
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe(
         "see also",
       );
+    });
+
+    it("should render highlight markup of each line as sanitized html", async () => {
+      stringIsHtml.mockImplementation(
+        (value: unknown) => typeof value === "string" && value.includes("<"),
+      );
+      const wrapper = mount(EntityElementMetadata, {
+        props: {
+          value:
+            "<mark>s</mark>¹ṭ | mʿ | ḏġbt | <mark>s</mark>¹nt\nʾḥdy | hnʾ<mark>s</mark>¹",
+        },
+      });
+      await nextTick();
+      const lines = wrapper.findAll('[data-cy="sanitized-value"]');
+      expect(lines.map((line) => line.html())).toStrictEqual([
+        expect.stringContaining(
+          "<mark>s</mark>¹ṭ | mʿ | ḏġbt | <mark>s</mark>¹nt",
+        ),
+        expect.stringContaining("ʾḥdy | hnʾ<mark>s</mark>¹"),
+      ]);
+    });
+
+    it("should render highlight markup of array items as sanitized html", async () => {
+      stringIsHtml.mockImplementation(
+        (value: unknown) => typeof value === "string" && value.includes("<"),
+      );
+      const wrapper = mount(EntityElementMetadata, {
+        props: { value: ["<mark>first</mark>", "second"] },
+      });
+      await nextTick();
+      expect(wrapper.find('[data-cy="sanitized-value"] mark').text()).toBe(
+        "first",
+      );
+      expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("second");
+    });
+
+    it("should not render markup of plain text lines as text", async () => {
+      stringIsHtml.mockImplementation(
+        (value: unknown) => typeof value === "string" && value.includes("<"),
+      );
+      const wrapper = mount(EntityElementMetadata, {
+        props: { value: "<mark>a</mark>\nb" },
+      });
+      await nextTick();
+      expect(wrapper.text()).not.toContain("<mark>");
     });
 
     it("should not split a single-line value into the multi-line renderer", async () => {

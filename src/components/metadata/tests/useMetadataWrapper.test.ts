@@ -437,6 +437,83 @@ describe("useMetadataWrapper — multi-select empty string initialization", () =
   });
 });
 
+const makeRepeatableProps = (metadataValue: any) => ({
+  formId: "M-REPEATABLE-TEST",
+  metadata: {
+    key: "parallel_title",
+    label: "metadata.labels.parallel-title",
+    value: metadataValue,
+    __typename: "PanelMetaData",
+  },
+  isEdit: false,
+  baseLibraryMode: "normalBaseLibrary",
+  formFlow: "edit",
+  showErrors: false,
+  repeatablePanelConfig: {
+    isRepeatable: true,
+    index: 0,
+    field: undefined,
+    repeatableFieldsHelper: { fieldKey: "parallel_title_group" } as any,
+  },
+});
+
+describe("useMetadataWrapper — repeatable panel fields", () => {
+  it("seeds fieldValueProxy by drilling into the repetition item by this field's own key", async () => {
+    let capturedFieldValueProxy: Ref<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { fieldValueProxy } = useMetadataWrapper(
+          makeRepeatableProps({
+            parallel_title: "par tit",
+            other_title_details: "other le",
+          }) as any,
+          () => undefined,
+        );
+        capturedFieldValueProxy = fieldValueProxy;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedFieldValueProxy!.value).toBe("par tit");
+  });
+
+  it("resolvedMetadataValue exposes this field's own (possibly diff-pill-wrapped) value, not the whole repetition item", async () => {
+    let capturedResolvedMetadataValue: ComputedRef<any>;
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+
+        const { resolvedMetadataValue } = useMetadataWrapper(
+          makeRepeatableProps({
+            parallel_title: { formatter: "pill|added", label: "New title" },
+            other_title_details: "Same",
+          }) as any,
+          () => undefined,
+        );
+        capturedResolvedMetadataValue = resolvedMetadataValue;
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await nextTick();
+
+    expect(capturedResolvedMetadataValue!.value).toEqual({
+      formatter: "pill|added",
+      label: "New title",
+    });
+  });
+});
+
 describe("useMetadataWrapper — checkbox empty string initialization", () => {
   const mountCheckboxWithValue = async (value: any) => {
     let capturedFieldValueProxy: Ref<any>;

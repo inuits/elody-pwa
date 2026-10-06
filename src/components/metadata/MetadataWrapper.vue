@@ -137,8 +137,8 @@
               :line-clamp="metadata.lineClamp || 1"
             >
               <MetadataFormatter
-                v-if="metadata.value?.formatter"
-                v-bind="metadata.value"
+                v-if="resolvedMetadataValue?.formatter"
+                v-bind="resolvedMetadataValue"
                 :translation-key="pillTranslationKey"
                 :value-options="metadata.inputField?.options"
                 :unit="metadata.unit"
@@ -385,6 +385,7 @@ const {
   isFieldRequired,
   fieldTooltipValue,
   fieldErrorMessage,
+  resolvedMetadataValue,
 } = useMetadataWrapper(props, () => emit("addRefetchFunctionToEditState"));
 
 const isMaskedField = computed(

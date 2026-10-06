@@ -5649,3 +5649,42 @@ export type GetRepetitiveFormQueryVariables = Exact<{
 export type GetRepetitiveFormQuery = { __typename?: 'Query', GetRepetitiveForm?: any };
 
 export const GetRepetitiveFormDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetRepetitiveFormQuery, GetRepetitiveFormQueryVariables>;
+
+export type GetEntityHistoryVersionsQueryVariables = Exact<{
+  id: Scalars['String'];
+  type: Scalars['String'];
+  limit?: InputMaybe<Scalars['Int']>;
+  skip?: InputMaybe<Scalars['Int']>;
+}>;
+
+export type GetEntityHistoryVersionsQuery = {
+  __typename?: 'Query',
+  EntityHistoryVersions: Array<{
+    __typename?: 'EntityHistoryVersion',
+    versionId: string,
+    documentVersion?: number | null,
+    timestamp?: string | null,
+    editedBy?: string | null,
+  }>,
+};
+
+export const GetEntityHistoryVersionsDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetEntityHistoryVersionsQuery, GetEntityHistoryVersionsQueryVariables>;
+
+export type GetEntityHistoryVersionDetailQueryVariables = Exact<{
+  id: Scalars['String'];
+  type: Scalars['String'];
+  versionId: Scalars['String'];
+}>;
+
+export type GetEntityHistoryVersionDetailQuery = { __typename?: 'Query', EntityHistoryVersionDetail?: any };
+
+export const GetEntityHistoryVersionDetailDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetEntityHistoryVersionDetailQuery, GetEntityHistoryVersionDetailQueryVariables>;
+export type GetRelationLabelsForIdsQueryVariables = Exact<{
+  ids: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  types: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  historyKeys?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  metadataKeyAsLabel?: InputMaybe<Scalars['String']['input']>;
+  rootKeyAsLabel?: InputMaybe<Scalars['String']['input']>;
+}>;
+export type GetRelationLabelsForIdsQuery = { __typename?: 'Query', RelationLabelsForIds: Array<{ __typename?: 'KeyAndValue', key: string, value: string }> };
+export const GetRelationLabelsForIdsDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetRelationLabelsForIdsQuery, GetRelationLabelsForIdsQueryVariables>;
