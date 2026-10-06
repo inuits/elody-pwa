@@ -2,6 +2,7 @@
   <div
     data-cy="entity-element-metadata"
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
+    dir="auto"
     :class="[
       { 'font-bold': highlight },
       `text-sm ${breakWords ? 'break-words' : 'break-normal'}`,
