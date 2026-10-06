@@ -410,7 +410,10 @@ export const useBulkOperationsActionsBar = (
     const initializerFunction = operationInitializers[operationType];
     if (initializerFunction) {
       initializerFunction();
-    } else if (bulkOperationModalConfig.formQueries?.length) {
+    } else if (
+      bulkOperationModalConfig.typeModal === TypeModals.Confirm &&
+      bulkOperationModalConfig.formQueries?.length
+    ) {
       initializeBulkMutationOperation(bulkOperationModalConfig);
     }
   };

@@ -12,6 +12,7 @@ import {
   RouteNames,
   Entitytyping,
   BulkNavigationPages,
+  TypeModals,
 } from "@/generated-types/queries";
 
 vi.mock("@/main", () => ({
@@ -780,6 +781,33 @@ describe("useBulkOperationsActionsBar", () => {
         props.context,
         { parentEntity: undefined, formQueries: ["test-query"] },
       );
+    });
+  });
+
+  describe("Bulk mutation fallback", () => {
+    const selectUnmappedOperation = (typeModal: TypeModals) => {
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(createMockProps(), createMockEmit());
+      selectedBulkOperation.value = {
+        value: "startOcr",
+        bulkOperationModal: { typeModal, formQueries: ["SomeQuery"] },
+      } as any;
+      handleSelectedBulkOperation();
+    };
+
+    it("does not ask for confirmation when the operation opens a form", () => {
+      selectUnmappedOperation(TypeModals.DynamicForm);
+
+      expect(mockConfirmModal.confirm).not.toHaveBeenCalled();
+    });
+
+    it("asks for confirmation when the operation is a Confirm modal", () => {
+      mockConfirmModal.confirm.mockImplementationOnce(() =>
+        Promise.resolve("cancel"),
+      );
+      selectUnmappedOperation(TypeModals.Confirm);
+
+      expect(mockConfirmModal.confirm).toHaveBeenCalled();
     });
   });
 
