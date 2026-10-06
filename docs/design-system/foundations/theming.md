@@ -54,7 +54,7 @@ follow.
 | `--color-accent-light` | panel-header band, value chips (chosen dropdown values); also the legacy accent background used by older components |
 | `--color-accent-light-strong` | panel borders |
 | `--color-accent-ink` | text on the panel-header band and on value chips |
-| `--color-accent-wash` | hover fill on rows, options, editable values, secondary buttons |
+| `--color-accent-wash` | selected rows; hover fill on options, editable values, secondary buttons |
 | `--color-accent-tint` | background of interdependent field groups |
 | `--color-text-accent-strong` | strong accent text on white (keep it dark enough for 4.5:1) |
 

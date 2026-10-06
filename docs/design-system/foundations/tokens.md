@@ -52,7 +52,7 @@ The only colours a client theme may change. See [theming](./theming.md).
 | `--color-accent-light` | panel-header fill |
 | `--color-accent-light-strong` | panel borders |
 | `--color-accent-ink` | text on accent-light surfaces |
-| `--color-accent-wash` | hover fill on editable values, rows, options |
+| `--color-accent-wash` | hover fill on editable values and options; selected rows |
 | `--color-accent-tint` | interdependent-group tint |
 
 ### Surfaces
@@ -65,7 +65,7 @@ The only colours a client theme may change. See [theming](./theming.md).
 | `--color-surface-panel-header` | panel header band |
 | `--color-surface-section-header` | section header band |
 | `--color-surface-group-form` | grouped-form card background |
-| `--color-surface-row-hover` | list/table row hover |
+| `--color-surface-row-hover` | list and table row hover (not selected) |
 | `--color-surface-repeat-row` | zebra rows in repeatable groups |
 | `--color-surface-note` | notes |
 | `--color-surface-inverted` | tooltips, toasts |
