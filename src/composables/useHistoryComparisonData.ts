@@ -314,14 +314,38 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     findRepeatablePanelFields(leftVersion.value?.entityView),
   );
 
+  const versionTime = (versionId: string | null): number => {
+    if (versionId === LIVE_VERSION_ID) return Number.POSITIVE_INFINITY;
+    const option = allVersionOptions.value.find(
+      (candidate) => candidate.id === versionId,
+    );
+    return option?.date ? new Date(option.date).getTime() : Number.NaN;
+  };
+
+  const leftIsOlder = computed<boolean>(
+    () =>
+      !!rightVersion.value &&
+      versionTime(leftVersionId.value) < versionTime(rightVersionId.value),
+  );
+
+  const newerVersion = computed<any>(() =>
+    leftIsOlder.value ? rightVersion.value : leftVersion.value,
+  );
+  const olderVersion = computed<any>(() =>
+    leftIsOlder.value ? leftVersion.value : rightVersion.value,
+  );
+
   const scalarDiff = computed(() => {
     if (!leftVersion.value) return null;
-    return useHistoryFieldDiff(
-      leftVersion.value,
-      rightVersion.value,
+    const diff = useHistoryFieldDiff(
+      newerVersion.value,
+      olderVersion.value,
       scalarComparisonFields.value,
       repeatableComparisonFields.value,
     );
+    return leftIsOlder.value
+      ? { left: diff.previousVersion, right: diff.selectedVersion }
+      : { left: diff.selectedVersion, right: diff.previousVersion };
   });
 
   const withDiffedIntialValues = (
@@ -336,20 +360,20 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
   });
 
   const leftVersionEntity = computed<Record<string, any> | null>(() => {
-    const diffed = scalarDiff.value?.selectedVersion;
+    const diffed = scalarDiff.value?.left as Record<string, any>;
     if (!diffed) return null;
     return {
       ...withDiffedIntialValues(leftVersion.value, diffed),
-      id: `${diffed.id}-${leftVersionId.value}`,
+      id: `${leftVersion.value?.id}_selected-${leftVersionId.value}`,
     };
   });
 
   const rightVersionEntity = computed<Record<string, any> | null>(() => {
-    const diffed = scalarDiff.value?.previousVersion as Record<string, any>;
+    const diffed = scalarDiff.value?.right as Record<string, any>;
     if (!diffed || Object.keys(diffed).length === 0) return null;
     return {
       ...withDiffedIntialValues(rightVersion.value, diffed),
-      id: `${diffed.id}-${rightVersionId.value}`,
+      id: `${rightVersion.value?.id}_previous-${rightVersionId.value}`,
     };
   });
 
@@ -399,8 +423,8 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
           changed:
             canDiff &&
             !isEqual(
-              leftVersion.value?.intialValues?.[field.metadataKey],
-              rightVersion.value?.intialValues?.[field.metadataKey],
+              newerVersion.value?.intialValues?.[field.metadataKey],
+              olderVersion.value?.intialValues?.[field.metadataKey],
             ),
         }),
       );
@@ -410,14 +434,14 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
   const leftWysiwygDiffs = computed<WysiwygDiff[]>(() =>
     wysiwygFieldChanges.value.map((diff) => ({
       ...diff,
-      colorVariant: "current",
+      colorVariant: leftIsOlder.value ? "previous" : "current",
     })),
   );
 
   const rightWysiwygDiffs = computed<WysiwygDiff[]>(() =>
     wysiwygFieldChanges.value.map((diff) => ({
       ...diff,
-      colorVariant: "previous",
+      colorVariant: leftIsOlder.value ? "current" : "previous",
     })),
   );
 
@@ -431,8 +455,8 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
         relationPanels.value.map((panel) => [
           panel.relationType,
           useRelationListDiff(
-            leftVersion.value?.relationValues?.[panel.relationType],
-            rightVersion.value?.relationValues?.[panel.relationType],
+            newerVersion.value?.relationValues?.[panel.relationType],
+            olderVersion.value?.relationValues?.[panel.relationType],
           ),
         ]),
       ),
@@ -653,11 +677,15 @@ export function useHistoryComparisonData(entityId: string, entityType: string) {
     }));
 
   const leftRelationDiffs = computed<RelationDiff[]>(() =>
-    sideRelationDiffs(leftLabelFor, "removed", "current"),
+    leftIsOlder.value
+      ? sideRelationDiffs(leftLabelFor, "added", "previous")
+      : sideRelationDiffs(leftLabelFor, "removed", "current"),
   );
 
   const rightRelationDiffs = computed<RelationDiff[]>(() =>
-    sideRelationDiffs(rightLabelFor, "added", "previous"),
+    leftIsOlder.value
+      ? sideRelationDiffs(rightLabelFor, "removed", "current")
+      : sideRelationDiffs(rightLabelFor, "added", "previous"),
   );
 
   return {

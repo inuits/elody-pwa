@@ -1856,3 +1856,153 @@ describe("useHistoryComparisonData per-side loading", () => {
     expect(rightLoading.value).toBe(false);
   });
 });
+
+describe("useHistoryComparisonData with the older version on the left", () => {
+  beforeEach(() => {
+    mocks.useQueryCalls.length = 0;
+    mocks.queryResults = [];
+    mocks.apolloQueryMock.mockClear();
+    mocks.apolloQueryMock.mockImplementation(() =>
+      Promise.resolve({ data: { Entity: null } }),
+    );
+  });
+
+  const withResult = (value: any) => ({
+    result: { value },
+    loading: { value: false },
+    error: { value: null },
+  });
+
+  const entityView = {
+    column: {
+      elements: {
+        windowElement: {
+          __typename: "WindowElement",
+          info: {
+            __typename: "WindowElementPanel",
+            significance: {
+              __typename: "PanelMetaData",
+              key: "significance",
+              label: "metadata.labels.significance",
+            },
+          },
+        },
+        reading: {
+          __typename: "WysiwygElement",
+          metadataKey: "reading",
+          label: "Reading",
+        },
+        words: {
+          __typename: "EntityListElement",
+          relationType: "refWords",
+          label: "Words",
+        },
+      },
+    },
+  };
+
+  const detailFor: Record<string, any> = {
+    v1: {
+      id: "entity-1",
+      entityView,
+      intialValues: {
+        significance: "old significance",
+        reading: "<p>Old reading</p>",
+      },
+      relationValues: { refWords: [{ key: "word-1" }] },
+    },
+    v2: {
+      id: "entity-1",
+      entityView,
+      intialValues: {
+        significance: "new significance",
+        reading: "<p>New reading</p>",
+      },
+      relationValues: { refWords: [{ key: "word-1" }, { key: "word-2" }] },
+    },
+  };
+
+  const detailQuery = (variables: any) => ({
+    result: { EntityHistoryVersionDetail: detailFor[variables.versionId] },
+  });
+
+  const compareOlderLeftWithNewerRight = async () => {
+    mocks.queryResults[0] = withResult({
+      Entity: { id: "entity-1", entityView, intialValues: {}, relationValues: {} },
+    });
+    mocks.queryResults[1] = withResult({
+      EntityHistoryVersions: [
+        versionRow("v1", "2026-01-01T00:00:00Z"),
+        versionRow("v2", "2026-02-01T00:00:00Z"),
+        versionRow("v3", "2026-03-01T00:00:00Z"),
+      ],
+    });
+    mocks.queryResults[2] = detailQuery;
+    mocks.queryResults[3] = detailQuery;
+
+    const comparison = useHistoryComparisonData("entity-1", "inscription");
+    comparison.leftVersionId.value = "v1";
+    comparison.rightVersionId.value = "v2";
+    await flushPromises();
+    return comparison;
+  };
+
+  it("marks a changed field as added on the newer right side and as replaced on the older left side", async () => {
+    const { leftVersionEntity, rightVersionEntity } =
+      await compareOlderLeftWithNewerRight();
+
+    expect(rightVersionEntity.value?.intialValues.significance).toEqual({
+      formatter: "pill|added",
+      label: "new significance",
+    });
+    expect(leftVersionEntity.value?.intialValues.significance).toEqual({
+      formatter: "pill|modified",
+      label: "old significance",
+    });
+  });
+
+  it("keeps each side's own form id whichever side holds the older version", async () => {
+    const { leftVersionEntity, rightVersionEntity } =
+      await compareOlderLeftWithNewerRight();
+
+    expect(leftVersionEntity.value?.id).toBe("entity-1_selected-v1");
+    expect(rightVersionEntity.value?.id).toBe("entity-1_previous-v2");
+  });
+
+  it("shows a relation that only the newer right side has as added there, and not on the older left side", async () => {
+    const { leftRelationDiffs, rightRelationDiffs } =
+      await compareOlderLeftWithNewerRight();
+
+    const statusesOf = (diffs: RelationDiff[]) =>
+      diffs
+        .find((diff) => diff.relationType === "refWords")!
+        .items.map((item) => [item.key, item.status]);
+
+    expect(statusesOf(rightRelationDiffs.value)).toEqual(
+      expect.arrayContaining([
+        ["word-1", "unchanged"],
+        ["word-2", "added"],
+      ]),
+    );
+    expect(statusesOf(leftRelationDiffs.value)).toEqual([
+      ["word-1", "unchanged"],
+    ]);
+  });
+
+  it("colours a changed wysiwyg field as current on the newer right side and as previous on the older left side", async () => {
+    const { leftWysiwygDiffs, rightWysiwygDiffs } =
+      await compareOlderLeftWithNewerRight();
+
+    const readingOf = (diffs: typeof leftWysiwygDiffs.value) =>
+      diffs.find((diff) => diff.key === "reading");
+
+    expect(readingOf(rightWysiwygDiffs.value)).toMatchObject({
+      changed: true,
+      colorVariant: "current",
+    });
+    expect(readingOf(leftWysiwygDiffs.value)).toMatchObject({
+      changed: true,
+      colorVariant: "previous",
+    });
+  });
+});
