@@ -25,7 +25,7 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { getEntityTitle, stripHighlightTags } from "@/helpers";
 import type { Ref } from "vue";
 import { apolloClient } from "@/main";
-import { DOMSerializer } from "prosemirror-model";
+import { DOMSerializer, type DOMOutputSpec } from "prosemirror-model";
 
 const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
@@ -126,6 +126,35 @@ const getNodeFromSelection = (
     : false;
 };
 
+// Tags are atoms holding plain text, so a line break inside one is stored as "\n"
+// and rendered back as <br>, which keeps the reading's line numbering intact.
+const LINE_BREAK = "\n";
+
+const getTextBetween = (state: EditorState, from: number, to: number): string =>
+  state.doc.textBetween(from, to, LINE_BREAK, (leafNode) =>
+    leafNode.type.name === "hardBreak" ? LINE_BREAK : "",
+  );
+
+const getTaggedTextFromElement = (element: HTMLElement): string =>
+  Array.from(element.childNodes)
+    .map((childNode) =>
+      childNode.nodeName === "BR" ? LINE_BREAK : childNode.textContent || "",
+    )
+    .join("");
+
+const renderTaggedText = (taggedText: string): DOMOutputSpec[] =>
+  taggedText
+    .split(LINE_BREAK)
+    .flatMap((line, index) => (index ? [["br"], line] : [line]));
+
+const taggedTextToContent = (taggedText: string) =>
+  taggedText
+    .split(LINE_BREAK)
+    .flatMap((line, index) => [
+      ...(index ? [{ type: "hardBreak" }] : []),
+      ...(line ? [{ type: "text", text: line }] : []),
+    ]);
+
 const getSelectionHTML = (state: EditorState): string => {
   const from = getAdjustedSelectionFrom(state);
   const { to } = state.selection;
@@ -214,7 +243,7 @@ export const createTipTapNodeExtension = (
         },
         taggedText: {
           default: "",
-          parseHTML: (element: HTMLElement) => element.textContent || "",
+          parseHTML: getTaggedTextFromElement,
           renderHTML: () => ({}),
         },
       };
@@ -251,7 +280,7 @@ export const createTipTapNodeExtension = (
               entityId: element.getAttribute("data-entity-id"),
               label: element.getAttribute("data-label"),
               entityType: element.getAttribute("data-entity-type"),
-              taggedText: element.textContent || "",
+              taggedText: getTaggedTextFromElement(element),
             };
 
             if (additionalAttributes) {
@@ -274,8 +303,31 @@ export const createTipTapNodeExtension = (
           ...HTMLAttributes,
           contenteditable: "false",
         },
-        node.attrs.taggedText || "",
+        ...renderTaggedText(node.attrs.taggedText || ""),
       ];
+    },
+    // Firefox misaligns RTL lines when the <br> sits inside the tag, so on screen
+    // each line becomes its own piece, keeping the <br> at paragraph level.
+    addNodeView() {
+      return ({ node, HTMLAttributes }) => {
+        const renderPiece = (text: string) =>
+          DOMSerializer.renderSpec(document, [
+            "elody-" + extensionConfiguration.tag,
+            { ...HTMLAttributes, contenteditable: "false" },
+            text,
+          ]).dom;
+        const lines = (node.attrs.taggedText || "").split(LINE_BREAK);
+        if (lines.length === 1) return { dom: renderPiece(lines[0]) };
+
+        const dom = document.createElement("span");
+        dom.style.display = "contents";
+        dom.contentEditable = "false";
+        lines.forEach((line: string, index: number) => {
+          if (index) dom.appendChild(document.createElement("br"));
+          dom.appendChild(renderPiece(line));
+        });
+        return { dom };
+      };
     },
   });
 };
@@ -391,7 +443,7 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
             const taggedText =
               from === to
                 ? stripHighlightTags(getEntityTitle(entity as any))
-                : state.doc.textBetween(from, to);
+                : getTextBetween(state, from, to);
 
             return commands.insertContentAt(
               { from, to },
@@ -460,7 +512,7 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
             const { selection } = state;
             const { to } = selection;
             const from = getAdjustedSelectionFrom(state);
-            const taggedText = state.doc.textBetween(from, to);
+            const taggedText = getTextBetween(state, from, to);
 
             const newNodeContent = {
               type: configurationItem.extensionName,
@@ -516,10 +568,10 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
             const nodeEnd = taggedPos + taggedNode.nodeSize;
 
             commands.deleteRange({ from: taggedPos, to: nodeEnd });
-            commands.insertContentAt(taggedPos, {
-              type: "text",
-              text: taggedText,
-            });
+            commands.insertContentAt(
+              taggedPos,
+              taggedTextToContent(taggedText),
+            );
             commands.setTextSelection(taggedPos + taggedText.length);
 
             const entityExtensionConfiguration =
