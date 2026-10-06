@@ -158,7 +158,7 @@ Later subtasks:
 |---|---|---|
 | DS 2 | per-field editing | field-row copy affordance + truncation tooltip, "— Geen waarde" in inline selects, NL keys ("Save block", "Undo") |
 | DS 3 | action discovery | split button, overflow menu, selection bar |
-| DS 4 | lists, panels, filters, navigation | list/table row states (hover = row-hover fill, selected = wash + accent row shadow, preview-active = 3px accent left border; today ListItem has no hover and a 4px dark border when active); FL1–FL3 (stashed filter header), panel/section header size, breadcrumb, nav rail, record stepper; input variants (I6) |
+| DS 4 | lists, panels, filters, navigation | list screen anatomy per `templates/elody-list-screen`: results in one white panel (surface, border-panel, card radius) with an accent-light header band (title, count chip, sort), flat rows separated by border-faint instead of separate cards, page on surface-app instead of the legacy background-normal; list/table row states (hover = row-hover fill, selected = wash + accent row shadow, preview-active = 3px accent left border; today ListItem has no hover and a 4px dark border when active); FL1–FL3 (stashed filter header), panel/section header size, breadcrumb, nav rail, record stepper; input variants (I6) |
 | DS 5 | viewers and flows | media viewport, ViewerToolbar, upload, guided flow |
 | DS 6 | backend support | filter option counts (active-count chip), destructive-action flag |
 | DS 7 | Storybook + docs | stories, publishing these docs |
