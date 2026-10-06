@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import EntityHistoryColumn from "../EntityHistoryColumn.vue";
 import { useEditMode } from "@/composables/useEdit";
+import { useFormHelper } from "@/composables/useFormHelper";
 
 vi.mock("@/components/history/EntityHistoryElement.vue", () => ({
   default: { name: "EntityHistoryElement", template: "<div />" },
@@ -137,6 +138,94 @@ describe("EntityHistoryColumn", () => {
       expect(receivedElements).toHaveLength(2);
       expect(receivedElements[0].marker).toBe("first");
       expect(receivedElements[1].marker).toBe("second");
+    });
+  });
+
+  describe("elements marked hideInHistory", () => {
+    it("leaves out elements configured with hideInHistory, keeping every other element", () => {
+      getWrapper({
+        ...getDefaultProps(),
+        entity: {
+          ...getDefaultProps().entity,
+          entityView: {
+            column: {
+              elements: {
+                history: {
+                  __typename: "EntityListElement",
+                  label: "panel-labels.history",
+                  relationType: null,
+                  hideInHistory: true,
+                },
+                customList: {
+                  __typename: "EntityListElement",
+                  label: "element-labels.custom-list",
+                  relationType: null,
+                  hideInHistory: null,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(receivedElements[0].history).toBeUndefined();
+      expect(receivedElements[0].customList).toEqual({
+        __typename: "EntityListElement",
+        label: "element-labels.custom-list",
+        relationType: null,
+        hideInHistory: null,
+      });
+    });
+
+    it("leaves out window elements configured with hideInHistory, keeping other window elements", () => {
+      getWrapper({
+        ...getDefaultProps(),
+        entity: {
+          ...getDefaultProps().entity,
+          entityView: {
+            column: {
+              elements: {
+                audit: {
+                  __typename: "WindowElement",
+                  label: "panel-labels.audit-panel",
+                  hideInHistory: true,
+                },
+                info: {
+                  __typename: "WindowElement",
+                  label: "panel-labels.info",
+                },
+              },
+            },
+          },
+        },
+      });
+
+      expect(receivedElements[0].audit).toBeUndefined();
+      expect(receivedElements[0].info).toEqual({
+        __typename: "WindowElement",
+        label: "panel-labels.info",
+      });
+    });
+  });
+
+  describe("form values", () => {
+    it("follows the entity's values when they change after mounting, so a diff that arrives later still shows", async () => {
+      const entity = {
+        ...getDefaultProps().entity,
+        id: "late-diff-entity",
+        intialValues: { name: "Current name" },
+      };
+      const wrapper = getWrapper({ ...getDefaultProps(), entity });
+
+      const diffed = { formatter: "pill|added", label: "Current name" };
+      await wrapper.setProps({
+        ...getDefaultProps(),
+        entity: { ...entity, intialValues: { name: diffed } },
+      });
+
+      expect(
+        useFormHelper().getForm("late-diff-entity")?.values.intialValues.name,
+      ).toEqual(diffed);
     });
   });
 });
