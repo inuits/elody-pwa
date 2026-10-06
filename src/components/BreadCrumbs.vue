@@ -209,7 +209,15 @@ const checkNavigationAvailable = (route: any) => {
 };
 
 const navigateToEntity = (route: any) => {
-  if (route.id) {
+  if (route.id && route.routeName) {
+    router.push({
+      name: route.routeName,
+      params: {
+        id: route.id,
+        type: Array.isArray(route.type) ? route.type[0] : route.type,
+      },
+    });
+  } else if (route.id) {
     router.replace({
       params: {
         id: route.id,

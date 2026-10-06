@@ -16,6 +16,7 @@ import {
   getTitleOrNameFromEntity,
   getMappedSlug,
   extractValueFromObject,
+  getTranslatedMessage,
 } from "@/helpers";
 import { currentLocale } from "@/helpers";
 
@@ -32,7 +33,19 @@ export interface VisitedRoute extends BaseRoute {
 export interface BreadcrumbRoute extends BaseRoute {
   title: string | TranslationEntry[];
   type: string;
+  routeName?: string;
 }
+export type RouteBreadcrumbConfig = {
+  current?: boolean;
+  entity?: boolean;
+  routeName?: string;
+  pillLabel?: string;
+  title?: string | { type?: string; key?: string };
+  overviewPage?: string;
+  entityType?: string;
+  relation?: string;
+};
+
 export type RootRoute = {
   rootId: string;
   rootTitle: string | TranslationEntry[];
@@ -138,6 +151,97 @@ const useBreadcrumbs = (config: any) => {
         current,
       );
     } while (current);
+  };
+
+  const findEntityByType = (
+    entities: Entity[],
+    type: string,
+  ): Entity | undefined => {
+    const wanted = type.toLowerCase();
+    return (
+      entities.find((entity) => entity.type?.toLowerCase() === wanted) ??
+      entities.find((entity) => entity.type?.toLowerCase().startsWith(wanted))
+    );
+  };
+
+  const setCurrentCrumbFromRouteConfig = (
+    currentConfig: RouteBreadcrumbConfig | undefined,
+    primaryEntity: Entity,
+    relatedEntities: Entity[],
+  ) => {
+    const configuredTitle = currentConfig?.title;
+    const titleEntity =
+      (typeof configuredTitle === "object" &&
+        configuredTitle?.type &&
+        findEntityByType(relatedEntities, configuredTitle.type)) ||
+      primaryEntity;
+    const title =
+      typeof configuredTitle === "string"
+        ? configuredTitle
+        : (configuredTitle?.key &&
+            (titleEntity as any)?.intialValues?.[configuredTitle.key]) ||
+          getTitleOrNameFromEntity(primaryEntity);
+
+    const pill = currentConfig?.pillLabel
+      ? {
+          formatter: "pill",
+          label: getTranslatedMessage(currentConfig.pillLabel),
+          translationKey: getTranslatedMessage(currentConfig.pillLabel),
+        }
+      : typeof configuredTitle === "string"
+        ? undefined
+        : primaryEntity.intialValues?.typePillLabel;
+
+    setRootRoute(primaryEntity.id, title, pill);
+  };
+
+  const determineBreadcrumbsFromRouteConfig = async (
+    breadcrumbsConfig: RouteBreadcrumbConfig[],
+    primaryEntity: Entity,
+    relatedEntities: Entity[] = [primaryEntity],
+  ): Promise<void> => {
+    clearBreadcrumbPath();
+    setCurrentCrumbFromRouteConfig(
+      breadcrumbsConfig.find((entry) => entry?.current),
+      primaryEntity,
+      relatedEntities,
+    );
+    const entityConfig = breadcrumbsConfig.find((entry) => entry?.entity);
+
+    let routeBreadcrumbs: any = breadcrumbsConfig.filter(
+      (entry) => !entry?.current && !entry?.entity,
+    );
+    if (!routeBreadcrumbs.length && entityConfig)
+      routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
+        getMappedSlug(primaryEntity),
+      );
+
+    let parentEntity: Entity | undefined = primaryEntity;
+    while (routeBreadcrumbs?.length && parentEntity) {
+      parentEntity = await iterateOverBreadcrumbs(
+        [parentEntity.id],
+        routeBreadcrumbs,
+        true,
+        parentEntity,
+      );
+      if (!parentEntity) break;
+      routeBreadcrumbs = getRouteBreadcrumbsOfEntity(
+        getMappedSlug(parentEntity),
+      );
+    }
+
+    if (!entityConfig) return;
+    breadcrumbRoutes.value = [
+      ...breadcrumbRoutes.value.map((crumb) =>
+        crumb.id ? { ...crumb, routeName: entityConfig.routeName } : crumb,
+      ),
+      {
+        id: primaryEntity.id,
+        type: primaryEntity.type,
+        title: getTitleOrNameFromEntity(primaryEntity),
+        routeName: entityConfig.routeName,
+      } as BreadcrumbRoute,
+    ];
   };
 
   const getFullBreadcrumbPath = (): BreadcrumbRoute[] => {
@@ -259,6 +363,7 @@ const useBreadcrumbs = (config: any) => {
     clearBreadcrumbPath,
     clearBreadcrumbPathAndAddOverviewPage,
     determineBreadcrumbsForEntity,
+    determineBreadcrumbsFromRouteConfig,
     getFullBreadcrumbPath,
     getRouteBreadcrumbsOfEntity,
     setRootRoute,

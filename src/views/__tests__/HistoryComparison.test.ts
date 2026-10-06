@@ -15,7 +15,11 @@ const leftVersionError = ref(false);
 const rightVersionError = ref(false);
 
 const mocks = vi.hoisted(() => ({
-  route: { params: { id: "entity-1", type: "inscription" } },
+  route: {
+    params: { id: "entity-1", type: "inscription" },
+    meta: {} as Record<string, any>,
+  },
+  determineBreadcrumbsFromRouteConfig: vi.fn(),
   determineBreadcrumbsForEntity: vi.fn(),
 }));
 
@@ -74,6 +78,8 @@ vi.mock("@/composables/useHistoryComparisonData", () => ({
 
 vi.mock("@/composables/useBreadcrumbs", () => ({
   useBreadcrumbs: () => ({
+    determineBreadcrumbsFromRouteConfig:
+      mocks.determineBreadcrumbsFromRouteConfig,
     determineBreadcrumbsForEntity: mocks.determineBreadcrumbsForEntity,
   }),
 }));
@@ -89,6 +95,7 @@ const getWrapper = () =>
 describe("HistoryComparison", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.route.meta = {};
     currentEntity.value = undefined;
     versionOptions.value = [];
     leftVersionMeta.value = null;
@@ -196,22 +203,42 @@ describe("HistoryComparison", () => {
     expect(rightDropdown.props("options")[0].label).toContain("alice@example.com");
   });
 
-  it("determines breadcrumbs once the live entity loads", async () => {
+  it("builds the breadcrumbs from the route's configuration once the entity loads", async () => {
+    const breadcrumbs = [
+      { current: true, title: "history.title" },
+      { entity: true, routeName: "SingleEntity" },
+    ];
+    mocks.route.meta = { breadcrumbs };
     getWrapper();
     await flushPromises();
-    expect(mocks.determineBreadcrumbsForEntity).not.toHaveBeenCalled();
+    expect(mocks.determineBreadcrumbsFromRouteConfig).not.toHaveBeenCalled();
 
     const entity = { id: "entity-1", type: "inscription" };
     currentEntity.value = entity;
     await flushPromises();
 
+    expect(mocks.determineBreadcrumbsFromRouteConfig).toHaveBeenCalledWith(
+      breadcrumbs,
+      entity,
+    );
+    expect(mocks.determineBreadcrumbsForEntity).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the entity's own breadcrumbs when the route configures none", async () => {
+    mocks.route.meta = {};
+    getWrapper();
+    const entity = { id: "entity-1", type: "inscription" };
+    currentEntity.value = entity;
+    await flushPromises();
+
     expect(mocks.determineBreadcrumbsForEntity).toHaveBeenCalledWith(entity);
+    expect(mocks.determineBreadcrumbsFromRouteConfig).not.toHaveBeenCalled();
   });
 
   it("does not determine breadcrumbs while the live entity is still loading", async () => {
     getWrapper();
     await flushPromises();
 
-    expect(mocks.determineBreadcrumbsForEntity).not.toHaveBeenCalled();
+    expect(mocks.determineBreadcrumbsFromRouteConfig).not.toHaveBeenCalled();
   });
 });

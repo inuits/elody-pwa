@@ -16,6 +16,9 @@ import type { TranslationEntry } from "@/composables/useMultilingualField";
 
 const mocks = vi.hoisted(() => ({
   locale: { value: "en" },
+  push: vi.fn(),
+  replace: vi.fn(),
+  apolloQuery: vi.fn(),
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -29,8 +32,8 @@ vi.mock("vue-router", () => ({
   useRouter: () => ({
     beforeEach: vi.fn(),
     afterEach: vi.fn(),
-    push: vi.fn(),
-    replace: vi.fn(),
+    push: mocks.push,
+    replace: mocks.replace,
   }),
 }));
 
@@ -52,6 +55,8 @@ vi.mock("@/composables/useConfirmModal", () => ({
 
 vi.mock("@/main", () => ({
   typeUrlMapping: { mapping: {}, reverseMapping: {} },
+  apolloClient: { query: mocks.apolloQuery },
+  i18n: { global: { t: (key: string) => key, locale: "en" } },
 }));
 
 const config = {
@@ -346,6 +351,181 @@ describe("useBreadcrumbs determineBreadcrumbsForEntity", () => {
     await useBreadcrumbs(breadcrumbConfig).determineBreadcrumbsForEntity(entity);
 
     expect(breadcrumbRoutes.value).toEqual([]);
+  });
+});
+
+describe("useBreadcrumbs determineBreadcrumbsFromRouteConfig", () => {
+  const routeConfig = {
+    features: { supportsMultilingualMetadataEditing: false },
+    routerConfig: [
+      {
+        name: RouteNames.Home,
+        children: [
+          {
+            name: "Works",
+            meta: {
+              entityType: "work",
+              breadcrumbs: [
+                { entityType: "collection", relation: "isIn" },
+                { overviewPage: "Works" },
+              ],
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  const entity = {
+    id: "W-1",
+    type: "work",
+    intialValues: { title: "Oasis", typePillLabel: "Work" },
+  } as any;
+
+  const historyBreadcrumbs = [
+    { current: true, title: "history.title" },
+    { entity: true, routeName: RouteNames.SingleEntity },
+  ];
+
+  beforeEach(() => {
+    rootRoute.value = {} as any;
+    breadcrumbRoutes.value = [];
+    mocks.apolloQuery.mockReset();
+    mocks.apolloQuery
+      .mockResolvedValueOnce({
+        data: {
+          Entities: {
+            results: [
+              {
+                id: "C-1",
+                type: "collection",
+                intialValues: { title: "Collection" },
+              },
+            ],
+          },
+        },
+      })
+      .mockResolvedValue({ data: { Entities: { results: [] } } });
+  });
+
+  it("adds the entity as the last crumb, leading to the configured route", async () => {
+    await useBreadcrumbs(routeConfig).determineBreadcrumbsFromRouteConfig(
+      historyBreadcrumbs,
+      entity,
+    );
+
+    expect(breadcrumbRoutes.value[breadcrumbRoutes.value.length - 1]).toEqual({
+      id: "W-1",
+      type: "work",
+      title: "Oasis",
+      routeName: RouteNames.SingleEntity,
+    });
+  });
+
+  it("follows the entity's own breadcrumb path and lets its parents lead to the configured route too", async () => {
+    await useBreadcrumbs(routeConfig).determineBreadcrumbsFromRouteConfig(
+      historyBreadcrumbs,
+      entity,
+    );
+
+    const parent = breadcrumbRoutes.value.find((crumb) => crumb.id === "C-1");
+    expect(parent?.routeName).toBe(RouteNames.SingleEntity);
+  });
+
+  it("uses a plain configured title for the current crumb, without the entity's type pill", async () => {
+    await useBreadcrumbs(routeConfig).determineBreadcrumbsFromRouteConfig(
+      historyBreadcrumbs,
+      entity,
+    );
+
+    expect(rootRoute.value.rootTitle).toBe("history.title");
+    expect(rootRoute.value.typePillLabel).toBeUndefined();
+  });
+
+  it("takes the current title from a related entity and shows the configured pill label", async () => {
+    const related = [
+      { id: "W-1", type: "work_word", intialValues: { title: "Work title" } },
+      {
+        id: "M-1",
+        type: "manifestation_word",
+        intialValues: { title: "Manifestation title" },
+      },
+    ] as any[];
+
+    await useBreadcrumbs(routeConfig).determineBreadcrumbsFromRouteConfig(
+      [
+        {
+          current: true,
+          pillLabel: "navigation.wem",
+          title: { type: "manifestation", key: "title" },
+        },
+        { overviewPage: "HomePage", title: "navigation.home" },
+      ],
+      related[1],
+      related,
+    );
+
+    expect(rootRoute.value.rootId).toBe("M-1");
+    expect(rootRoute.value.rootTitle).toBe("Manifestation title");
+    expect(rootRoute.value.typePillLabel).toEqual(
+      expect.objectContaining({ formatter: "pill" }),
+    );
+    expect(breadcrumbRoutes.value).toEqual([
+      { overviewPage: "HomePage", title: "navigation.home" },
+    ]);
+  });
+});
+
+describe("BreadCrumbs navigation", () => {
+  const mountBreadCrumbs = () =>
+    shallowMount(BreadCrumbs, {
+      global: {
+        provide: {
+          config: { features: { supportsMultilingualMetadataEditing: false } },
+        },
+        stubs: { unicon: true },
+      },
+    });
+
+  beforeEach(() => {
+    mocks.push.mockClear();
+    mocks.replace.mockClear();
+    rootRoute.value = { rootTitle: "history.title" } as any;
+  });
+
+  it("opens the route a crumb names, instead of swapping the ids of the current page", async () => {
+    breadcrumbRoutes.value = [
+      {
+        id: "W-1",
+        type: "work",
+        title: "Oasis",
+        overviewPage: "",
+        routeName: RouteNames.SingleEntity,
+      } as any,
+    ];
+    const wrapper = mountBreadCrumbs();
+
+    await wrapper.find("p.cursor-pointer").trigger("click");
+
+    expect(mocks.push).toHaveBeenCalledWith({
+      name: RouteNames.SingleEntity,
+      params: { id: "W-1", type: "work" },
+    });
+    expect(mocks.replace).not.toHaveBeenCalled();
+  });
+
+  it("keeps swapping the ids of the current page for a crumb without a route name", async () => {
+    breadcrumbRoutes.value = [
+      { id: "C-1", type: "collection", title: "Collection", overviewPage: "" },
+    ];
+    const wrapper = mountBreadCrumbs();
+
+    await wrapper.find("p.cursor-pointer").trigger("click");
+
+    expect(mocks.replace).toHaveBeenCalledWith({
+      params: { id: "C-1", type: "collection" },
+    });
+    expect(mocks.push).not.toHaveBeenCalled();
   });
 });
 
