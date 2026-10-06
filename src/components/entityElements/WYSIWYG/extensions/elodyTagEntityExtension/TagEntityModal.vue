@@ -58,7 +58,7 @@
               })
             "
             :icon="DamsIcons.Tag"
-            button-style="accentAccent"
+            button-style="commit"
             :disabled="!existingEntitySelected"
             @click="tagExistingEntityFlow()"
           />

@@ -5,9 +5,9 @@
     >
       <div
         :class="[
-          'flex justify-center items-center bg-accent-highlight h-full',
-          { 'rounded-t-xl rounded-br-xl': showHistory },
-          { 'rounded-xl': !showHistory },
+          'flex justify-center items-center bg-accent-wash h-full',
+          { 'rounded-t-pill rounded-br-pill': showHistory },
+          { 'rounded-pill': !showHistory },
         ]"
       >
         <div
@@ -30,7 +30,9 @@
             { 'max-w-[40vw] truncate': truncatePreviousRouteName },
           ]"
           @mouseenter="
-            truncatePreviousRouteName = resolveTitle(previousRoute.title).includes(' ')
+            truncatePreviousRouteName = resolveTitle(
+              previousRoute.title,
+            ).includes(' ')
           "
           @mouseleave="truncatePreviousRouteName = true"
           @click="checkNavigationAvailable(previousRoute)"
@@ -59,7 +61,7 @@
     </div>
     <div
       v-if="showHistory"
-      class="absolute bg-accent-highlight rounded-b-md z-notification"
+      class="absolute bg-accent-wash rounded-b-md z-notification"
     >
       <ul>
         <li
@@ -133,7 +135,9 @@ import type { TranslationEntry } from "@/composables/useMultilingualField";
 const { t, locale } = useI18n();
 const config: any = inject("config");
 
-const resolveTitle = (value: string | TranslationEntry[] | undefined): string => {
+const resolveTitle = (
+  value: string | TranslationEntry[] | undefined,
+): string => {
   if (!value) return "";
   if (Array.isArray(value)) {
     return (
@@ -160,7 +164,11 @@ const currentRouteTitle = ref<string>("");
 const typePillLabel = ref<any>(undefined);
 
 watch(
-  () => [locale.value, rootRoute.value?.rootTitle, rootRoute.value?.typePillLabel],
+  () => [
+    locale.value,
+    rootRoute.value?.rootTitle,
+    rootRoute.value?.typePillLabel,
+  ],
   () => {
     typePillLabel.value = rootRoute.value?.typePillLabel;
     currentRouteTitle.value = resolveTitle(rootRoute.value?.rootTitle);
@@ -188,7 +196,7 @@ const openDiscardModal = async (route: any) => {
     confirmLabel: t("confirm.discard-edit.confirm"),
     cancelLabel: t("confirm.discard-edit.cancel"),
     secondaryLabel: t("confirm.discard-edit.secondary-confirm"),
-    secondaryButtonStyle: "accentAccent",
+    secondaryButtonStyle: "commit",
   });
   if (choice === "secondary") {
     await useEditHelper.save();

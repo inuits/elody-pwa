@@ -3,8 +3,8 @@
     <BaseButtonNew
       :label="t('history.view-history')"
       :icon="DamsIcons.History"
-      button-style="accentNormal"
-      button-size="small"
+      button-style="secondary"
+      button-size="sm"
       @click="viewHistory"
     />
   </div>

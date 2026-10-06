@@ -4,9 +4,13 @@
       <slot
         name="activator"
         :on="{
-          mouseenter: handleMouseOver,
-          mouseleave: handleMouseLeave,
+          mouseenter: show,
+          mouseleave: hide,
+          focusin: show,
+          focusout: hide,
+          keydown: hideOnEscape,
         }"
+        :described-by="tooltipId"
       ></slot>
     </div>
 
@@ -18,7 +22,9 @@
         <div
           ref="defaultSlotRef"
           v-if="hasContent && hover"
-          class="shadow-lg rounded bg-background-light p-2 z-tooltip"
+          :id="tooltipId"
+          role="tooltip"
+          class="rounded-tooltip bg-surface-inverted text-neutral-white text-tooltip p-(--tooltip-padding) z-tooltip"
           :style="{ maxWidth: maxWidth, ...floatingStyles }"
         >
           <slot> </slot>
@@ -29,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useSlots, VNode } from "vue";
+import { computed, onBeforeUnmount, ref, useId, useSlots, VNode } from "vue";
 import {
   offset,
   useFloating,
@@ -96,13 +102,34 @@ const hasContent = computed(() => {
   return hasSlotContent(slots.default);
 });
 
-const handleMouseOver = () => {
-  hover.value = true;
+// Design system: inverted surface, shown after 300ms on hover and on focus,
+// dismissed on Escape; never interactive content.
+const SHOW_DELAY_MS = 300;
+const tooltipId = `tooltip-${useId()}`;
+let showTimer: ReturnType<typeof setTimeout> | undefined;
+
+const clearShowTimer = () => {
+  if (showTimer) clearTimeout(showTimer);
+  showTimer = undefined;
 };
 
-const handleMouseLeave = () => {
+const show = () => {
+  clearShowTimer();
+  showTimer = setTimeout(() => {
+    hover.value = true;
+  }, SHOW_DELAY_MS);
+};
+
+const hide = () => {
+  clearShowTimer();
   hover.value = false;
 };
+
+const hideOnEscape = (event: KeyboardEvent) => {
+  if (event.key === "Escape") hide();
+};
+
+onBeforeUnmount(clearShowTimer);
 </script>
 
 <style scoped>

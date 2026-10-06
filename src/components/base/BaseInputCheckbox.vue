@@ -1,47 +1,51 @@
 <template>
+  <!-- Design-system checkbox: commit-teal check, visible keyboard focus, a
+       real label. The hit area meets the touch-target minimum but is no longer
+       painted when selected. -->
   <div data-cy="base-input-checkbox" class="flex items-center">
     <div
-      class="flex-none flex items-center justify-center w-10 h-10 rounded-lg box-border"
+      data-cy="checkbox-hit-area"
+      class="flex-none flex items-center justify-center box-border"
       :class="[
-        inputValue ? `${divSelectedBgColor}` : '',
+        size === 'compact'
+          ? 'w-(--checkbox-hit-area-compact) h-(--checkbox-hit-area-compact)'
+          : 'w-(--checkbox-hit-area) h-(--checkbox-hit-area)',
         { 'cursor-pointer': !disabled },
       ]"
       @click.prevent.stop="handleItemSelection"
     >
       <input
-        class="border-2 focus:ring-0"
+        :id="checkboxId"
+        class="rounded border-[length:var(--border-width-control)] focus:ring-0"
         :class="[
-          { 'cursor-pointer': !disabled },
-          { rounded: !inputValue },
-          { [selectedInputStyle.disabledStyle.textColor]: disabled },
-          { [selectedInputStyle.disabledStyle.bgColor]: disabled },
-          { [selectedInputStyle.disabledStyle.borderColor]: disabled },
-          `${selectedInputStyle.textColor} ${selectedInputStyle.bgColor} ${selectedInputStyle.borderColor} `,
+          'text-commit accent-commit border-neutral-60 checked:border-commit',
+          {
+            'cursor-pointer': !disabled,
+            'disabled:text-text-light disabled:accent-neutral-white disabled:border-border-subtle':
+              disabled,
+          },
         ]"
         v-model="inputValue"
         type="checkbox"
         :checked="required"
         :disabled="disabled || isDisabledByContextLimit || required"
+        :aria-label="!label ? ariaLabel : undefined"
         @change.stop
         @click.stop="handleItemSelection"
       />
     </div>
-    <span
+    <label
       v-if="label"
+      :for="checkboxId"
       class="flex flex-row select-none cursor-pointer"
-      :class="{ 'ml-2': inputValue }"
-      @change.stop
-      @click.stop="handleItemSelection"
+      :class="size === 'compact' ? 'ml-1.5' : { 'ml-2': inputValue }"
+      @click.prevent.stop="handleItemSelection"
     >
       {{ label }}
-      <div class="pl-2" :title="t(`tooltip.required`)">
-        <unicon
-          v-if="required"
-          :name="Unicons.ExclamationTriangle.name"
-          height="20"
-        />
-      </div>
-    </span>
+      <span v-if="required" class="pl-2" :title="t(`tooltip.required`)">
+        <unicon :name="Unicons.ExclamationTriangle.name" height="20" />
+      </span>
+    </label>
   </div>
 </template>
 
@@ -52,7 +56,7 @@ import {
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, useId, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { TypeModals } from "@/generated-types/queries";
@@ -68,10 +72,12 @@ const props = withDefaults(
     label?: string;
     item: InBulkProcessableItem;
     bulkOperationsContext: Context | undefined;
-    inputStyle: InputStyle;
     disabled?: boolean;
     ignoreBulkOperations?: boolean;
     required?: boolean;
+    ariaLabel?: string;
+    // compact: dense option lists (filters); default keeps the 40px touch target
+    size?: "default" | "compact";
   }>(),
   {
     modelValue: false,
@@ -79,6 +85,8 @@ const props = withDefaults(
     disabled: false,
     ignoreBulkOperations: false,
     required: false,
+    ariaLabel: undefined,
+    size: "default",
   },
 );
 
@@ -94,33 +102,6 @@ const inputValue = computed<boolean>({
     emit("update:modelValue", props.required ? props.required : value);
   },
 });
-
-type PseudoStyle = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-};
-type Input = {
-  textColor: string;
-  bgColor: string;
-  borderColor: string;
-  disabledStyle: PseudoStyle;
-};
-const accentNormalInput: Input = {
-  textColor: "text-accent-normal",
-  bgColor: "accent-accent-normal",
-  borderColor: "border-text-light checked:border-neutral-white",
-  disabledStyle: {
-    textColor: "disabled:text-text-light",
-    bgColor: "disabled:accent-neutral-white",
-    borderColor: "disabled:border-accent-highlight",
-  },
-};
-
-type InputStyle = "accentNormal";
-const inputStyles: Record<InputStyle, Input> = {
-  accentNormal: accentNormalInput,
-};
 
 const {
   contextWhereSelectionEventIsTriggered,
@@ -149,10 +130,7 @@ const handleItemSelection = () => {
   inputValue.value = !inputValue.value;
 };
 
-const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
-const divSelectedBgColor = computed<string>(() =>
-  selectedInputStyle.value.textColor.replace(/^text/, "bg"),
-);
+const checkboxId = `base-checkbox-${useId()}`;
 const isDisabledByContextLimit = computed<boolean>(() => {
   if (props.ignoreBulkOperations) return false;
   return (

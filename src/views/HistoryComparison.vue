@@ -19,7 +19,7 @@
           <p
             v-if="leftVersionMeta?.editedBy"
             data-test="history-version-author"
-            class="pt-1 text-sm text-text-body"
+            class="pt-1 text-label text-text-muted"
           >
             {{
               t("history.edited-by", {
@@ -62,7 +62,7 @@
           <p
             v-if="rightVersionMeta?.editedBy"
             data-test="history-version-author"
-            class="pt-1 text-sm text-text-body"
+            class="pt-1 text-label text-text-muted"
           >
             {{
               t("history.edited-by", {

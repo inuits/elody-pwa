@@ -3,8 +3,8 @@
     <BaseButtonNew
       :label="t(activeConfig.label)"
       :icon="activeConfig.icon ? DamsIcons[activeConfig.icon] : undefined"
-      button-style="default"
-      button-size="small"
+      button-style="secondary"
+      button-size="sm"
       :loading="isLoading"
       :style="{
         backgroundColor: activeConfig.style?.background,

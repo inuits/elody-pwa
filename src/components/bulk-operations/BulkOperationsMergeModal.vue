@@ -80,8 +80,8 @@
         <BaseButtonNew
           :disabled="isLoading || isMerging || !!blockedReason"
           :label="t('bulk-operations.merge-modal.confirm')"
-          button-style="accentNormal"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           @click="submitMerge"
         />
         <p
@@ -95,8 +95,8 @@
       <BaseButtonNew
         :disabled="isMerging"
         :label="t('bulk-operations.merge-modal.cancel')"
-        button-style="default"
-        button-size="small"
+        button-style="secondary"
+        button-size="sm"
         @click="closeModal(TypeModals.BulkOperationsMerge)"
       />
     </div>

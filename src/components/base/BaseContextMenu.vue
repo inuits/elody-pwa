@@ -61,9 +61,9 @@ const getStyles = () => {
 .context-menu {
   position: fixed;
   z-index: var(--z-context-menu);
-  background-color: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-popover);
   min-width: 120px;
 }
 
@@ -79,6 +79,6 @@ const getStyles = () => {
 }
 
 .context-menu div:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-accent-wash);
 }
 </style>

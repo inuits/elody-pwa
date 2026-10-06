@@ -10,7 +10,7 @@
         'grid grid-rows-[max-content_1fr] base-modal--opened': getModalInfo(
           props.modalType,
         ).open,
-        'rounded-xl':
+        'rounded-overlay':
           currentModalStyle === ModalStyle.Center ||
           currentModalStyle === ModalStyle.CenterWide,
       },

@@ -78,8 +78,8 @@
                     : $t('repetitiveForm.back-to-overview')
                 "
                 :icon="DamsIcons.AngleLeft"
-                button-style="accentAccent"
-                button-size="small"
+                button-style="commit"
+                button-size="sm"
                 @click="goBack"
               />
             </div>
@@ -93,8 +93,8 @@
             data-testid="repetitive-flow-back-to-overview"
             :label="$t('repetitiveForm.back-to-overview')"
             :icon="DamsIcons.AngleLeft"
-            button-style="accentAccent"
-            button-size="small"
+            button-style="commit"
+            button-size="sm"
             @click="view = 'overview'"
           />
         </div>
@@ -253,7 +253,8 @@ const start = () => {
   hasStarted = true;
   store.initFlow(props.config);
   setEntityId(FLOW_ID);
-  hostEntityId.value = getEntityUuid() || asString(route.params.id) || undefined;
+  hostEntityId.value =
+    getEntityUuid() || asString(route.params.id) || undefined;
   view.value = store.opensOnFirstStep() ? "step" : "overview";
 };
 

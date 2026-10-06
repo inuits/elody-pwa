@@ -14,7 +14,7 @@
         v-for="(branch, index) in branches"
         :key="index"
         data-testid="repetitive-overview-row"
-        class="flex items-center gap-2 p-1.5 mb-2 border border-accent-highlight rounded bg-background-light"
+        class="flex items-center gap-2 p-1.5 mb-2 border border-border-subtle rounded bg-background-light"
       >
         <span
           class="flex items-center justify-center w-8 h-8 rounded-full bg-accent-light text-accent-accent font-bold shrink-0"
@@ -44,8 +44,8 @@
           <BaseButtonNew
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
-            button-style="redDefault"
-            button-size="small"
+            button-style="danger"
+            button-size="sm"
             @click="emit('remove', index)"
           />
         </div>
@@ -58,8 +58,8 @@
           data-testid="repetitive-overview-add"
           :label="$t('repetitiveForm.add-another')"
           :icon="DamsIcons.Plus"
-          button-style="accentAccent"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           @click="emit('add-another')"
         />
       </div>
@@ -68,8 +68,8 @@
           data-testid="repetitive-overview-finish"
           :label="$t('repetitiveForm.finish')"
           :icon="DamsIcons.Check"
-          button-style="accentAccent"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           :disabled="branches.length === 0"
           :loading="finishing"
           @click="emit('finish')"
@@ -89,7 +89,7 @@ import {
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
 
-const props = defineProps<{
+defineProps<{
   branches: RepetitiveBranch[];
   steps: RepetitiveStep[];
   repeatable: boolean;

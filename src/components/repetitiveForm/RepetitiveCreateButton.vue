@@ -4,8 +4,8 @@
       data-testid="repetitive-step-create-new"
       :label="$t(label)"
       :icon="DamsIcons.Plus"
-      button-style="accentAccent"
-      button-size="small"
+      button-style="commit"
+      button-size="sm"
       @click.stop="onClick"
     />
     <!-- Mounted only after this component is mounted so the Teleport target

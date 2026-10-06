@@ -30,7 +30,6 @@
         v-model="isChecked"
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
       <EntityButtons
         :buttons="buttons"
@@ -46,7 +45,7 @@
     </div>
     <div
       :class="[
-        'flex items-center rounded-2xl p-2 bg-accent-highlight',
+        'flex items-center rounded-2xl p-2 bg-accent-wash',
         { 'mb-4': isGridMode },
       ]"
       v-show="useEditHelper.isEdit"
@@ -98,7 +97,6 @@
           type: itemType,
         }"
         :bulk-operations-context="bulkOperationsContext"
-        input-style="accentNormal"
       />
     </div>
     <div
@@ -257,8 +255,8 @@
       @click.stop.prevent="emit('togglePreviewComponent', itemId)"
     >
       <base-tooltip position="top-right" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on" class="flex">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <unicon
               v-if="previewComponentFeatureEnabled"
               :name="Unicons.Eye.name"
@@ -271,7 +269,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             <div>
               {{
                 previewComponentCurrentActive
@@ -523,7 +521,7 @@ const wrapperClasses = computed(() => {
     },
     { "animate-pulse": loading.value },
     { "bg-background-light": !isActiveListItem.value },
-    { "border-accent-highlight": !isActiveListItem.value },
+    { "border-border-subtle": !isActiveListItem.value },
     {
       "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
     },

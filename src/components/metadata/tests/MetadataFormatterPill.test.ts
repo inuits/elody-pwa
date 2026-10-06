@@ -10,6 +10,10 @@ vi.mock("@/main", () => ({
       concept: { background: "#aaa", text: "#fff" },
       queued: { background: "#eee", text: "#444", icon: "Process", spin: true },
       finished: { background: "#dfd", text: "#0b8" },
+      work: { tone: "tone1" },
+      manifestation: { tone: "tone3", shape: "badge", letter: "M" },
+      draft: { tone: "tone2", icon: "Process" },
+      plain: { icon: "Process" },
     },
   },
 }));
@@ -182,6 +186,30 @@ describe("MetadataFormatterPill — configured icon", () => {
   });
 });
 
+describe("MetadataFormatterPill — design-system badge", () => {
+  const pill = (props: Record<string, unknown>) =>
+    mount(MetadataFormatterPill, { props }).find(".inline-flex");
+
+  it("uses the chip radius token", () => {
+    expect(pill({ formatter: "pill", label: "concept" }).classes()).toContain(
+      "rounded-chip",
+    );
+  });
+
+  it("resolves a configured tone to the badge tone tokens", () => {
+    const style = pill({ formatter: "pill", label: "work" }).attributes("style");
+    expect(style).toContain("var(--color-badge-tone1-bg)");
+    expect(style).toContain("var(--color-badge-tone1-text)");
+  });
+
+  it("renders an auto pill as a relation chip", () => {
+    const style = pill({ formatter: "pill|auto", label: "anything" }).attributes(
+      "style",
+    );
+    expect(style).toContain("var(--color-chip-relation-bg)");
+  });
+});
+
 describe("MetadataFormatterPill — nested relation metadata", () => {
   const organizationsWithFunctions = [
     {
@@ -333,7 +361,9 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
 
     const [configured, fallback] = wrapper.element.children;
     expect(configured.getAttribute("style")).toContain("rgb(170, 170, 170)");
-    expect(fallback.getAttribute("style")).toContain("rgb(214, 226, 240)");
+    expect(fallback.getAttribute("style")).toContain(
+      "var(--color-chip-neutral-bg)",
+    );
   });
 
   it("titles each nested value with the metadata it came from", async () => {
@@ -395,5 +425,89 @@ describe("MetadataFormatterPill — nested relation metadata", () => {
     await nextTick();
 
     expect(wrapper.text()).toBe("Org B");
+  });
+});
+
+describe("MetadataFormatterPill — chip and badge shapes", () => {
+  const firstPill = (props: Record<string, unknown>) =>
+    mount(MetadataFormatterPill, { props }).find(".inline-flex");
+
+  it("renders a configured value as a chip: label size, bold, chip padding", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    expect(firstPill({ formatter: "pill", label: "concept" }).classes()).toEqual(
+      expect.arrayContaining([
+        "text-chip",
+        "font-bold",
+        "p-(--chip-padding)",
+        "rounded-chip",
+      ]),
+    );
+  });
+
+  it("renders the large size from its own tokens", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    expect(
+      firstPill({ formatter: "pill", label: "concept", size: "lg" }).classes(),
+    ).toEqual(
+      expect.arrayContaining(["text-chip-lg", "p-(--chip-padding-lg)"]),
+    );
+  });
+
+  it("falls back to the neutral chip colours when config gives none", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    expect(firstPill({ formatter: "pill", label: "plain" }).classes()).toEqual(
+      expect.arrayContaining(["bg-chip-neutral-bg", "text-chip-neutral-text"]),
+    );
+  });
+
+  it("keeps the configured icon when a tone is set", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: { formatter: "pill", label: "draft" },
+      global: { stubs: { unicon: true } },
+    });
+    expect(wrapper.find("unicon-stub").attributes("name")).toBe(
+      Unicons.Process.name,
+    );
+  });
+
+  describe("badge shape", () => {
+    const badge = () => {
+      mocks.t.mockImplementation((key: string) =>
+        key === "entity-types.manifestation" ? "Manifestatie" : key,
+      );
+      return firstPill({
+        formatter: "pill",
+        label: "manifestation",
+        translationKey: "entity-types.$value",
+      });
+    };
+
+    it("shows the configured letter", () => {
+      expect(badge().text()).toBe("M");
+    });
+
+    it("is named by the full type name", () => {
+      expect(badge().attributes("role")).toBe("img");
+      expect(badge().attributes("aria-label")).toBe("Manifestatie");
+    });
+
+    it("uses the badge geometry tokens", () => {
+      expect(badge().classes()).toEqual(
+        expect.arrayContaining([
+          "text-badge",
+          "font-black",
+          "h-(--badge-size)",
+          "min-w-(--badge-size)",
+          "rounded-chip",
+        ]),
+      );
+    });
+
+    it("keeps its tone colours", () => {
+      expect(badge().attributes("style")).toContain(
+        "var(--color-badge-tone3-bg)",
+      );
+    });
   });
 });

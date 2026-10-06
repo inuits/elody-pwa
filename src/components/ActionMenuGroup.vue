@@ -9,8 +9,8 @@
         :key="primaryOption"
         class="pl-4 pr-6 my-1"
         :class="{ '-mr-4': secondaryOptions.length > 0 }"
-        button-style="accentNormal"
-        button-size="small"
+        button-style="commit"
+        button-size="sm"
         :disabled="isMainActionDisabled || !primaryOption.active"
         :label="t(primaryOption.label, [entityTypeLabel])"
         :tooltip-label="tooltipFor(primaryOption)"
@@ -30,7 +30,7 @@
     </div>
     <BaseButtonNew
       v-if="hasSecondaryOptions"
-      button-size="small"
+      button-size="sm"
       :icon="DamsIcons.EllipsisV"
       class="!w-max !p-2 ml-2"
       @click.stop="
@@ -112,7 +112,7 @@ const props = withDefaults(
     entityType: Entitytyping;
     parentEntityId?: string | undefined;
     subDropdownOptions?: DropdownOption[];
-    clearSubDropdownOptions: Function;
+    clearSubDropdownOptions: () => void;
   }>(),
   {
     isMainActionDisabled: false,

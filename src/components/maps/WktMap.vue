@@ -44,7 +44,7 @@
                 <div>
                   <p class="font-bold">{{ t(item.label) }}</p>
                   <p>
-                    {{ featureResult.Entity.intialValues[item.key] || "-" }}
+                    {{ featureResult.Entity.intialValues[item.key] || emptyValueLabel }}
                   </p>
                 </div>
               </div>
@@ -120,6 +120,8 @@ import { useQuery } from "@vue/apollo-composable";
 import { Unicons } from "@/types";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useI18n } from "vue-i18n";
+import { readCssToken, withAlpha } from "@/utils/cssToken";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 
 const props = withDefaults(
   defineProps<{
@@ -150,6 +152,7 @@ const {
 } = useMaps();
 
 const { t } = useI18n();
+const emptyValueLabel = useEmptyValueLabel();
 const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
   useHeatMapDetailPopUp();
 
@@ -200,9 +203,11 @@ const features = computed(() => {
   return [...wkt.value, point.value].filter((feature) => !!feature);
 });
 
+// Overlay features stay visually distinct from the entity's own geometry.
+const overlayColor = readCssToken("--color-warning-chip", "orange");
 const overlayStyle = new Style({
-  stroke: new Stroke({ color: "#f97316", width: 2 }),
-  fill: new Fill({ color: "rgba(249, 115, 22, 0.15)" }),
+  stroke: new Stroke({ color: overlayColor, width: 2 }),
+  fill: new Fill({ color: withAlpha(overlayColor, 0.15) }),
 });
 
 const overlayFeatures = computed(() => {

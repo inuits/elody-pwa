@@ -1,16 +1,17 @@
 <template>
   <div>
     <BaseTooltip position="top-end" :tooltip-offset="8">
-      <template #activator="{ on }">
+      <template #activator="{ on, describedBy }">
         <div
           v-on="on"
-          class="cursor-pointer rounded-md text-[#607d8b]"
+          :aria-describedby="describedBy"
+          class="cursor-pointer rounded-md text-text-muted"
           @click="toggleKeyboard"
         >
           <unicon :name="Unicons.Keyboard.name" />
         </div>
       </template>
-      <span class="text-sm text-text-placeholder">
+      <span>
         {{ t("metadata.labels.virtual-keyboard") }}
       </span>
     </BaseTooltip>

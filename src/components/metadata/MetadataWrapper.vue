@@ -79,8 +79,8 @@
         <base-button-new
           data-cy="copy-from-parent"
           :label="t(copyFromParentButton.label)"
-          button-style="accentAccent"
-          button-size="small"
+          button-style="commit"
+          button-size="sm"
           force-show-label
           @click="copyFromParentButton.copy()"
         />
@@ -116,9 +116,10 @@
         position="right-end"
         :tooltip-offset="8"
       >
-        <template #activator="{ on }">
+        <template #activator="{ on, describedBy }">
           <div
             v-on="showTooltip ? on : {}"
+            :aria-describedby="showTooltip ? describedBy : undefined"
             class="flex column gap-2 items-center"
           >
             <MetadataMaskedValue

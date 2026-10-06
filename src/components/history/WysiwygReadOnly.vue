@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'rounded-md border-2 border-solid p-2 flex flex-col gap-2',
+      'rounded-card border border-solid p-2 flex flex-col gap-2',
       changedClass,
     ]"
   >
@@ -30,10 +30,10 @@ const props = withDefaults(
 );
 
 const changedClass = computed(() => {
-  if (!props.changed) return "border-neutral-30 bg-background-light";
+  if (!props.changed) return "border-border-default bg-surface";
   return props.colorVariant === "previous"
-    ? "border-red-400 bg-red-50"
-    : "border-green-400 bg-green-50";
+    ? "border-diff-old-border bg-diff-old-bg"
+    : "border-diff-new-border bg-diff-new-bg";
 });
 
 const { getForm } = useFormHelper();

@@ -48,8 +48,9 @@
       mode !== 'create' &&
       !isLoading
     "
+    class="opacity-[var(--opacity-empty)]"
   >
-    {{ "-" }}
+    {{ emptyValueLabel }}
   </p>
 </template>
 
@@ -97,6 +98,7 @@ import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 
 defineOptions({ inheritAttrs: false });
 
@@ -145,6 +147,7 @@ const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
 const router = useRouter();
 const { confirm } = useConfirmModal();
+const emptyValueLabel = useEmptyValueLabel();
 const { t } = useI18n();
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const tagInputValues = ref<Map<string | number, string>>(new Map());
@@ -362,7 +365,7 @@ const handleCreatingFromTag = async (option: any) => {
     message: t("confirm.create-entity-from-dropdown.message", [option.label]),
     confirmLabel: t("confirm.create-entity-from-dropdown.confirm"),
     cancelLabel: t("confirm.create-entity-from-dropdown.cancel"),
-    confirmButtonStyle: "accentAccent",
+    confirmButtonStyle: "commit",
   });
   if (choice !== "confirm") return;
 

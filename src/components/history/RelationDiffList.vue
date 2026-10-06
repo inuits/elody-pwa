@@ -3,19 +3,12 @@
     <span
       v-for="item in visibleItems"
       :key="item.key"
-      :class="[
-        'rounded-full px-2 py-1 text-sm',
-        {
-          'bg-green-100 text-green-800':
-            item.status === 'added' ||
-            (item.status === 'renamed' && item.variant === 'current'),
-          'bg-red-100 text-red-800 line-through': item.status === 'removed',
-          'bg-red-100 text-red-800':
-            item.status === 'renamed' && item.variant === 'previous',
-          'bg-gray-100 text-gray-800': item.status === 'unchanged',
-        },
-      ]"
+      data-cy="relation-diff-chip"
+      :class="['rounded-chip text-chip p-(--chip-padding)', toneFor(item)]"
     >
+      <span v-if="announcementFor(item)" class="sr-only">{{
+        announcementFor(item)
+      }}</span>
       {{ item.label
       }}<template v-if="item.status === 'renamed'">
         · {{ t("history.renamed") }}</template
@@ -39,7 +32,29 @@ const props = defineProps<{
   items: RelationDiffListItem[];
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+// Semantic diff colours: green for new/added, red for old/removed.
+const toneFor = (item: RelationDiffListItem): string => {
+  if (
+    item.status === "added" ||
+    (item.status === "renamed" && item.variant === "current")
+  )
+    return "bg-diff-new-bg text-diff-new";
+  if (item.status === "removed" || item.status === "renamed")
+    return "bg-diff-old-bg text-diff-old";
+  return "bg-chip-neutral-bg text-chip-neutral-text";
+};
+
+// The change must not rely on colour alone.
+const translated = (key: string, fallback: string): string =>
+  te(key) ? t(key) : fallback;
+const announcementFor = (item: RelationDiffListItem): string | undefined => {
+  if (item.status === "added") return translated("history.added", "added");
+  if (item.status === "removed")
+    return translated("history.removed", "removed");
+  return undefined;
+};
 
 const hasNoResolvedLabel = (item: RelationDiffListItem) =>
   !item.label || item.label === item.key;

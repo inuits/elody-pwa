@@ -1,4 +1,8 @@
 /* src/main.css */
+/* Lato 400/700/900 — the only family elody uses (--font-sans below). Was
+   declared in the token but never actually loaded; the app has been
+   rendering in Tailwind's default system-ui stack instead. */
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -6,9 +10,10 @@
   --font-sans: "Lato", system-ui, sans-serif;
 
   /* Theme colors */
-  --color-accent-light: #DCF4F9;
+  --color-accent-light: #DEF1FA;
   --color-accent-normal: #6BC6B3;
   --color-accent-accent: #0CB2BC;
+  --color-accent-dark: #1d5c7a;
   --color-accent-highlight: #E8EEF0;
   --color-highlight-bg: #4169E1;
   --color-highlight-text: #FFFFFF;
@@ -24,9 +29,10 @@
   --color-text-disabled: #6795A2;
   --color-text-light: #355BA9;
   --color-text-body: #003A52;
-  --color-text-subtitle: #FFFFFF;
+  /* Was #FFFFFF for the pre-redesign dark header bar; every header is a
+     light/accent-light surface now, so subtitles read in body ink. */
+  --color-text-subtitle: var(--color-text-body);
   --color-text-placeholder: #9CA3AF;
-  --color-text-link: #1D4ED8;
 
   --color-background-normal: #F2F7F8;
   --color-background-light: #FFFFFF;
@@ -161,6 +167,304 @@
   --z-index-2: 2;
 }
 
+/* Design-system role tokens (elody design system handoff 2026-08-14).
+   Additive layer: every role references a legacy token or a fixed value;
+   nothing above is replaced. The design system's --spacing-* scale and
+   --text-base are deliberately NOT imported — they would redefine Tailwind's
+   numeric spacing utilities (p-1, gap-2, ...) and text-base across the app.
+   CLIENT THEMING RULE: a client theme may swap only the accent set
+   (--color-accent, --color-accent-light + derived -hover/-ink/-wash/-tint/
+   -light-strong); commit teal, focus ring, neutrals, semantic and badge
+   colours are platform-fixed. */
+@theme {
+  /* Accent roles (client-swappable set) */
+  --color-accent: #3BA6CB;
+  --color-accent-hover: #1D8FB8;
+  --color-accent-light-strong: #C8EAF7;
+  --color-accent-ink: var(--color-accent-dark);
+  --color-accent-wash: #EAF6FB;
+  --color-accent-tint: #EDF7FC;
+
+  /* Surfaces */
+  --color-surface: #FFFFFF;
+  --color-surface-app: #F2F7F8;
+  --color-surface-muted: #F4F5F7;
+  --color-surface-sunken: #EBECF0;
+  --color-surface-panel-header: var(--color-accent-light);
+  --color-surface-section-header: var(--color-accent);
+  --color-surface-editable-hover: var(--color-accent-wash);
+  --color-surface-group-tint: var(--color-accent-tint);
+  --color-surface-group-form: #F6FCFE;
+  --color-surface-row-hover: #F6FBFE;
+  --color-surface-repeat-row: #F6FCFD;
+  --color-surface-note: #FFF8E9;
+  --color-surface-inverted: #172B4D;
+
+  /* Text roles */
+  --color-text-strong: #172B4D;
+  --color-text-secondary: #505F79;
+  --color-text-muted: #6B778C;
+  --color-text-subtle: #97A0AF;
+  --color-text-field-label: var(--color-text-light);
+  --color-text-on-accent: #FFFFFF;
+  --color-text-panel-header: var(--color-accent-ink);
+  --color-text-accent-strong: var(--color-accent-dark);
+  --color-text-on-inverted: #FFFFFF;
+  --color-text-link: var(--color-text-light);
+  --color-text-link-hover: var(--color-accent);
+  --color-accent-on-inverted: #7DE3EA;
+
+  /* Borders */
+  --color-border-default: #DFE1E6;
+  --color-border-subtle: #EBECF0;
+  --color-border-faint: #F4F5F7;
+  --color-border-panel: var(--color-accent-light-strong);
+  --color-border-dashed: #B3BAC5;
+  --color-border-note: #F1E3BC;
+
+  /* Commit / focus (platform-fixed, never themed) */
+  --color-commit: var(--color-accent-accent);
+  --color-commit-hover: #0A9AA3;
+  --color-focus-ring: var(--color-accent-accent);
+
+  /* Semantic (platform-fixed) */
+  --color-danger: #D11800;
+  --color-danger-bg: #F9DCDC;
+  --color-danger-wash: #F8F2F2;
+  --color-danger-ink: var(--color-red-dark); /* danger text on danger-bg (6.8:1) */
+  --color-success: #16a34a;
+  --color-success-strong: #15803d;
+  --color-success-bg: #DAF1DC;
+  --color-success-ink: #166534; /* success text on success-bg (6.0:1) */
+  --color-warning: #B95000;
+  --color-warning-bg: #FDEBD7;
+  --color-warning-chip: #F2994A;
+  --color-info: #355BA9;
+  --color-info-bg: #C8EAF7;
+  /* Search-hit <mark> in sanitized values (platform-fixed) */
+  --color-search-mark: #FFFF00;
+
+  /* Entity badges: generic 3-tone concept, assigned per entity type in config
+     order. Each client maps its own entity types onto the tones. */
+  --color-badge-tone1-bg: #DAF1DC;
+  --color-badge-tone1-text: #166534;
+  --color-badge-tone2-bg: #C8EAF7;
+  --color-badge-tone2-text: #355BA9;
+  --color-badge-tone3-bg: #FDEBD7;
+  --color-badge-tone3-text: #9A4300;
+  --color-badge-subtype-bg: #E8EEF0;
+  --color-badge-subtype-text: #505F79;
+
+  /* Relation chips + scrim */
+  --color-chip-relation-bg: #6DBBDE;
+  --color-chip-relation-text: var(--color-text-body); /* white was 2.14:1 */
+  /* Chosen values (not links): follow the client accent */
+  --color-chip-value-bg: var(--color-accent-light);
+  --color-chip-value-text: var(--color-accent-ink);
+  --color-chip-neutral-bg: #E8EEF0;
+  --color-chip-neutral-text: #003A52;
+  --color-chip-count-bg: #F4F5F7;
+  --color-scrim: rgba(9, 30, 66, 0.45);
+
+  /* Type scale additions (text-base kept at Tailwind's default) */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --weight-regular: 400;
+  --weight-bold: 700;
+  --weight-black: 900;
+  --text-micro: 10.5px;
+  --text-hint: 11px;
+  --text-label: 11.5px;
+  --text-ui: 12px;
+  --text-table: 12.5px;
+  --text-value: 13px;
+  --text-heading: 15px;
+  --text-title: 24px;
+  --leading-tight: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+  --eyebrow-tracking: 0.4px;
+
+  /* Radii: pill starts (safe/reversible), rectangle executes immediately */
+  --radius-chip: 4px;
+  --radius-input: 5px;
+  --radius-button: 6px;
+  --radius-card: 8px;
+  --radius-overlay: 10px;
+  --radius-pill: 14px;
+  --radius-round: 50%;
+  --border-width: 1px;
+  --border-width-control: 1.5px;
+
+  /* Elevation: cards get a 1px border and no shadow; only overlays float */
+  --shadow-card: none;
+  --shadow-overlay: 0 8px 24px rgba(9, 30, 66, 0.15);
+  --shadow-popover: 0 12px 32px rgba(9, 30, 66, 0.2);
+  --shadow-modal: 0 24px 64px rgba(9, 30, 66, 0.4);
+  --shadow-toast: 0 12px 32px rgba(9, 30, 66, 0.35);
+  --shadow-accent-hover: 0 2px 6px rgba(59, 166, 203, 0.4);
+  --shadow-accent-row: 0 1px 4px rgba(59, 166, 203, 0.25);
+  --shadow-commit-hover: 0 2px 8px rgba(12, 178, 188, 0.35);
+  --opacity-empty: 0.45;
+
+  /* Motion: one duration, one easing, one press */
+  --transition-duration-ui: 0.13s;
+  --ease-ui: ease;
+  --scale-press: 0.97;
+  --scale-press-tight: 0.92;
+  --spinner-duration: 0.8s;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 1px;
+
+  /* Spacing: dense 2px steps below 12px (rows are tuned in 1-2px) */
+  --spacing-0: 0;
+
+  /* Composite rhythm + layout constants (not part of the auto-generated
+     spacing scale; referenced directly, e.g. p-[var(--panel-header-pad)]) */
+  --panel-header-pad: 10px 16px;
+  --panel-body-pad: 6px 16px 14px;
+  --field-row-pad: 4px 6px;
+  --table-row-pad: 7px 0;
+  --gutter-panels: 14px;
+  --gutter-field-grid: 4px 18px;
+  --page-pad: 14px 18px 60px;
+  --nav-rail-width: 52px;
+  --filter-panel-width: 250px;
+  --touch-target-min: 44px;
+  --field-grid-breakpoint-2col: 1100px;
+  --field-grid-breakpoint-1col: 800px;
+
+  /* ── Component tokens ─────────────────────────────────────────────
+     One decision per component; components read these and role tokens
+     only. Documented in docs/design-system/components/. */
+
+  /* Button (components/button.md) */
+  --text-button-sm: var(--text-label);
+  --text-button-md: var(--text-ui);
+  --button-sm-padding: 4px 10px;
+  --button-md-padding: 6px 14px;
+  --button-sm-padding-icon: 4px;
+  --button-md-padding-icon: 6px;
+  --button-gap: 6px;
+
+  /* Checkbox (components/checkbox.md) */
+  --checkbox-hit-area: var(--touch-target-min);
+  --checkbox-hit-area-compact: 24px;
+
+  /* Input (components/input.md) */
+  --text-input: var(--text-value);
+  --input-padding: 5px 8px;
+  --color-input-border-hover: var(--color-neutral-50); /* one step darker */
+  --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
+
+  /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
+     in BaseTooltip.vue */
+  --text-tooltip: var(--text-label);
+  --tooltip-padding: 4px 8px;
+  --radius-tooltip: var(--radius-button);
+
+  /* History diff (docs/design-system/components/history-diff.md): semantic
+     red for old/removed, green for new/added; no strike-through */
+  --color-diff-old: var(--color-danger-ink);
+  --color-diff-old-bg: var(--color-danger-bg);
+  --color-diff-old-border: var(--color-danger);
+  --color-diff-new: var(--color-success-ink);
+  --color-diff-new-bg: var(--color-success-bg);
+  --color-diff-new-border: var(--color-success);
+
+  /* Chip and badge (components/chip-and-badge.md) */
+  --text-chip: var(--text-label);
+  --chip-padding: 2px 8px;
+  --text-chip-lg: 1.125rem;
+  --chip-padding-lg: 4px 12px;
+  --text-badge: var(--text-micro);
+  --badge-size: 17px;
+  --badge-padding-x: 4px;
+}
+
+
+/* Design-system number inputs: right-aligned, no spinner chrome. */
+input[type="number"] {
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Design-system toasts (@kyvg/vue3-notification): inverted surface, white
+   12.5px ink, 10px radius, toast shadow. Status toasts are plain; warnings
+   and errors carry a semantic accent bar. */
+.vue-notification {
+  background: var(--color-surface-inverted) !important;
+  border: none !important;
+  border-radius: var(--radius-overlay);
+  box-shadow: var(--shadow-toast);
+  color: var(--color-text-on-inverted) !important;
+  font-size: var(--text-table);
+  margin: 0 0 8px 10px;
+  padding: 10px 14px;
+}
+.vue-notification .notification-title {
+  font-weight: 700;
+}
+.vue-notification.warn {
+  border-left: 3px solid var(--color-warning) !important;
+}
+.vue-notification.error {
+  border-left: 3px solid var(--color-danger) !important;
+}
+
+/* Interaction polish (redesign): every button animates its surface and
+   presses down slightly on :active; keyboard focus is always visible. */
+@layer base {
+  /* --text-base stays Tailwind's default on purpose (redefining it here
+     would redefine the text-base utility app-wide); 14px is the design
+     system's literal "app base" value, applied directly. */
+  body {
+    background: var(--color-surface-app);
+    color: var(--color-text-body);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-text-link);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-text-link-hover);
+    text-decoration: underline;
+  }
+
+  button,
+  [role="button"] {
+    transition:
+      background-color var(--transition-duration-ui) var(--ease-ui),
+      color var(--transition-duration-ui) var(--ease-ui),
+      border-color var(--transition-duration-ui) var(--ease-ui),
+      box-shadow var(--transition-duration-ui) var(--ease-ui),
+      transform var(--transition-duration-ui) var(--ease-ui);
+  }
+
+  button:active:not(:disabled),
+  [role="button"]:active {
+    transform: scale(var(--scale-press));
+  }
+
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
 
 /* Utilities */
 @utility w-1/10 {
@@ -193,12 +497,12 @@
 
 /* Text utilities */
 @utility title {
-  font-size: 24px;
+  font-size: var(--text-title);
   font-weight: bold;
   color: var(--color-text-body);
 }
 @utility subtitle {
-  font-size: 18px;
+  font-size: var(--text-heading);
   font-weight: bold;
   color: var(--color-text-subtitle);
 }
@@ -248,3 +552,38 @@
 
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
+
+/* ── Client theming ───────────────────────────────────────────────────
+   A deployment's colours arrive at boot via customization.theme and are set
+   on <body> (src/utils/clientTheme.ts). CSS custom properties resolve var()
+   where they are declared, so every derived colour alias is re-declared on
+   body: an accent override then reaches the aliases too. Keep in sync with the
+   @theme blocks (guarded by src/assets/__tests__/mainCss.test.ts).
+   No client values live in this file. ── */
+body {
+  --color-text-subtitle: var(--color-text-body);
+  --color-accent-ink: var(--color-accent-dark);
+  --color-surface-panel-header: var(--color-accent-light);
+  --color-surface-section-header: var(--color-accent);
+  --color-surface-editable-hover: var(--color-accent-wash);
+  --color-surface-group-tint: var(--color-accent-tint);
+  --color-text-field-label: var(--color-text-light);
+  --color-text-panel-header: var(--color-accent-ink);
+  --color-text-accent-strong: var(--color-accent-dark);
+  --color-text-link: var(--color-text-light);
+  --color-text-link-hover: var(--color-accent);
+  --color-border-panel: var(--color-accent-light-strong);
+  --color-commit: var(--color-accent-accent);
+  --color-focus-ring: var(--color-accent-accent);
+  --color-chip-relation-text: var(--color-text-body);
+  --color-chip-value-bg: var(--color-accent-light);
+  --color-chip-value-text: var(--color-accent-ink);
+  --color-input-border-hover: var(--color-neutral-50);
+  --color-danger-ink: var(--color-red-dark);
+  --color-diff-old: var(--color-danger-ink);
+  --color-diff-old-bg: var(--color-danger-bg);
+  --color-diff-old-border: var(--color-danger);
+  --color-diff-new: var(--color-success-ink);
+  --color-diff-new-bg: var(--color-success-bg);
+  --color-diff-new-border: var(--color-success);
+}

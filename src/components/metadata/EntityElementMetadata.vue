@@ -4,7 +4,7 @@
     v-if="baseLibraryMode === BaseLibraryModes.NormalBaseLibrary"
     :class="[
       { 'font-bold': highlight },
-      `text-sm ${breakWords ? 'break-words' : 'break-normal'}`,
+      `text-value text-text-secondary ${breakWords ? 'break-words' : 'break-normal'}`,
     ]"
   >
     <div v-if="linesToRender">
@@ -23,7 +23,7 @@
         />
         <p v-else data-cy="metadata-value">{{ item }}</p>
       </div>
-      <div v-if="linesToRender.length == 0">-</div>
+      <div v-if="linesToRender.length == 0">{{ emptyDisplayValue }}</div>
     </div>
     <div v-else-if="isCoordinates">
       {{ `(${value.latitude}, ${value.longitude})` }}
@@ -56,7 +56,12 @@
           :content="processedDisplayValue.toString()"
         ></SanitizedHtml>
       </p>
-      <p v-else data-cy="metadata-value" class="whitespace-pre-line">
+      <p
+        v-else
+        data-cy="metadata-value"
+        class="whitespace-pre-line"
+        :class="{ 'opacity-[var(--opacity-empty)]': readableValue === '' }"
+      >
         {{ processedDisplayValue }}
       </p>
     </div>
@@ -77,6 +82,7 @@ import {
 } from "@/helpers";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 import { Unicons } from "@/types";
 import CustomIcon from "@/components/CustomIcon.vue";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
@@ -143,10 +149,14 @@ const processedDisplayValue = computed<string>(() =>
   displayValue.value.toString(),
 );
 
+// In list/table cells an empty value is a dimmed dash; the "No value"
+// copy belongs to field rows only.
+const emptyDisplayValue = useEmptyValueLabel();
+
 const displayValue = computed(() => {
   if (isCoordinates.value) return readableValue.value;
 
-  if (readableValue.value === "") return "-";
+  if (readableValue.value === "") return emptyDisplayValue.value;
   if (Array.isArray(readableValue.value)) return readableValue.value;
 
   return translateValue(readableValue.value);

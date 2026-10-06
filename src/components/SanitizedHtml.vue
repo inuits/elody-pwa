@@ -18,7 +18,6 @@
 import { computed, watch } from "vue";
 import { sanitizeHtml } from "@/helpers";
 import { SanitizeMode } from "@/generated-types/queries";
-import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -40,8 +39,6 @@ const emit = defineEmits<{
   (e: "content-sanitized"): void;
 }>();
 
-const { t } = useI18n();
-
 const cleanContent = computed<string>(() =>
   sanitizeHtml(props.content, props.extraTags),
 );
@@ -59,7 +56,7 @@ watch(
 
 <style>
 [data-cy="sanitized-value"] mark {
-  background: #ffff00;
+  background: var(--color-search-mark);
   color: inherit;
   font-weight: bold;
 }

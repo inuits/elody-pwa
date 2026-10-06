@@ -3,8 +3,8 @@
     <BaseButtonNew
       :label="t('bulk-operations.delete')"
       :icon="DamsIcons.Trash"
-      button-style="redDefault"
-      button-size="small"
+      button-style="danger"
+      button-size="sm"
       :loading="isDeleting"
       @click="openDeleteModal()"
     />
@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
-import { inject, computed, ref, watch } from "vue";
+import { inject, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { DamsIcons, ModalStyle, TypeModals } from "@/generated-types/queries";
 import type { ApolloClient } from "@apollo/client/core";

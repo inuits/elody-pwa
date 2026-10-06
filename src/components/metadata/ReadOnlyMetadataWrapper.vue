@@ -15,9 +15,10 @@
         position="right-end"
         :tooltip-offset="8"
       >
-        <template #activator="{ on }">
+        <template #activator="{ on, describedBy }">
           <div
             v-on="showTooltip ? on : {}"
+            :aria-describedby="showTooltip ? describedBy : undefined"
             class="flex column gap-2 items-center"
           >
             <MetadataTruncatedText

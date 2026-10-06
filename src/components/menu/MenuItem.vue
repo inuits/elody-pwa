@@ -15,9 +15,10 @@
       ]"
     >
       <base-tooltip v-if="!isExpanded" position="right" :tooltip-offset="24">
-        <template #activator="{ on }">
+        <template #activator="{ on, describedBy }">
           <div
             v-on="on"
+            :aria-describedby="describedBy"
             :class="icon && Unicons[icon] ? 'h-[18px]' : 'h-[24px]'"
           >
             <unicon
@@ -30,7 +31,7 @@
           </div>
         </template>
         <template #default>
-          <span class="text-sm w-max font-bold">
+          <span class="w-max">
             <div class="w-max">
               {{ t(menuitem?.label) }}
             </div>

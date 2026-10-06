@@ -89,7 +89,7 @@ describe("WysiwygReadOnly", () => {
 
     expect(wrapper.text()).not.toContain("Unchanged");
     expect(wrapper.text()).not.toContain("Changed");
-    expect(wrapper.classes()).toContain("border-neutral-30");
+    expect(wrapper.classes()).toContain("border-border-default");
   });
 
   it("stays neutral regardless of colorVariant when changed is false", () => {
@@ -99,16 +99,18 @@ describe("WysiwygReadOnly", () => {
       colorVariant: "previous",
     });
 
-    expect(wrapper.classes()).toContain("border-neutral-30");
-    expect(wrapper.classes()).not.toContain("border-green-400");
-    expect(wrapper.classes()).not.toContain("border-red-400");
+    expect(wrapper.classes()).toContain("border-border-default");
+    expect(wrapper.classes()).not.toContain("border-diff-new-border");
+    expect(wrapper.classes()).not.toContain("border-diff-old-border");
   });
 
   it("shows the green/current styling when changed is true and colorVariant is current (or omitted)", () => {
     const wrapper = getWrapper({ ...getDefaultProps(), changed: true });
 
-    expect(wrapper.classes()).toContain("border-green-400");
-    expect(wrapper.classes()).not.toContain("border-red-400");
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining(["border-diff-new-border", "bg-diff-new-bg"]),
+    );
+    expect(wrapper.classes()).not.toContain("border-diff-old-border");
   });
 
   it("shows the red/previous styling when changed is true and colorVariant is previous", () => {
@@ -118,8 +120,10 @@ describe("WysiwygReadOnly", () => {
       colorVariant: "previous",
     });
 
-    expect(wrapper.classes()).toContain("border-red-400");
-    expect(wrapper.classes()).not.toContain("border-green-400");
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining(["border-diff-old-border", "bg-diff-old-bg"]),
+    );
+    expect(wrapper.classes()).not.toContain("border-diff-new-border");
   });
 
   it("defaults changed to false when not provided", () => {
@@ -130,7 +134,7 @@ describe("WysiwygReadOnly", () => {
       },
     });
 
-    expect(wrapper.classes()).toContain("border-neutral-30");
+    expect(wrapper.classes()).toContain("border-border-default");
   });
 
   it("resolves the entry matching the current locale when the field value is a multilingual translations array", () => {

@@ -1,9 +1,9 @@
 <template>
   <div
     data-cy="filters-list-item-panel"
-    class="flex flex-col gap-4 p-6 bg-accent-highlight"
+    class="flex flex-col gap-1.5 px-3 py-2 border-b border-border-faint bg-surface-group-form"
   >
-    <div class="flex w-full justify-start gap-4">
+    <div class="flex w-full justify-start gap-1.5">
       <AdvancedDropdown
         data-cy="filter-matcher-dropdown"
         class="max-h-9"
@@ -11,19 +11,18 @@
         :options="matchers"
         :label="defaultLabel"
         :clearable="false"
-        :show-menu-header="false"
         label-position="inline"
         @update:model-value="$emit('update:selected-matcher', $event)"
       />
       <div class="grow"></div>
       <BaseButtonNew
-        class="!w-9 h-9"
+        class="!w-8 h-8"
         label=""
         :icon="DamsIcons.Cross"
-        :icon-height="22"
+        :icon-height="16"
         :disabled="!selectedMatcher"
-        button-style="accentNormal"
-        button-size="small"
+        button-style="commit"
+        button-size="sm"
         @click="$emit('reset')"
       />
     </div>

@@ -8,7 +8,7 @@
     :style="{
       background: settings?.background,
       color: requiredAuthForThisEntity
-        ? '#000'
+        ? 'var(--color-text-body)'
         : settings?.text || 'var(--color-text-link)',
     }"
     @click.stop

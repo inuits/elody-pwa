@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => {
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: mocks.t,
+    te: () => false,
   }),
 }));
 
@@ -132,12 +133,14 @@ describe("EntityElementMetadata", () => {
       expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("opened");
     });
 
-    it('should show "-" when readableValue is empty and no translation exists', async () => {
+    it('should show "No value" when readableValue is empty and no translation exists', async () => {
       const wrapper = mount(EntityElementMetadata, {
         props: { value: "", translationKey: "some.key.$value" },
       });
       await nextTick();
-      expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe("-");
+      expect(wrapper.find('[data-cy="metadata-value"]').text()).toBe(
+        "No value",
+      );
     });
   });
 
@@ -171,10 +174,10 @@ describe("EntityElementMetadata", () => {
       );
     });
 
-    it('should show "-" when value is an empty array', async () => {
+    it('should show "No value" when value is an empty array', async () => {
       const wrapper = mount(EntityElementMetadata, { props: { value: [] } });
       await nextTick();
-      expect(wrapper.text()).toBe("-");
+      expect(wrapper.text()).toBe("No value");
     });
   });
 

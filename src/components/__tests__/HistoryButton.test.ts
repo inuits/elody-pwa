@@ -49,4 +49,10 @@ describe("HistoryButton", () => {
       "history.view-history",
     );
   });
+
+  it("is a small secondary button like the other header actions", () => {
+    const button = mountComponent().findComponent(BaseButtonNew);
+    expect(button.props("buttonStyle")).toBe("secondary");
+    expect(button.props("buttonSize")).toBe("sm");
+  });
 });

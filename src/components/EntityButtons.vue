@@ -13,9 +13,10 @@
         @toggle-loading="emit('toggleLoading')"
       />
       <BaseTooltip v-else position="top-right" :tooltip-offset="8">
-        <template #activator="{ on }">
+        <template #activator="{ on, describedBy }">
           <button
             v-on="on"
+            :aria-describedby="describedBy"
             type="button"
             class="flex mx-1 cursor-pointer"
             :aria-label="t((value as ActionButton).label)"
@@ -28,7 +29,7 @@
           </button>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             {{ t((value as ActionButton).label) }}
           </span>
         </template>

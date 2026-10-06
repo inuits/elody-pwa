@@ -2,15 +2,15 @@
   <div
     data-cy="filter-base"
     class="relative bg-background-light w-full"
-    :class="isExpanded ? 'rounded-t' : 'rounded-xl'"
+    :class="isExpanded ? 'rounded-t' : 'rounded-card'"
     @keydown.enter="applyFilters(true)"
   >
     <div
       class=""
       :class="[
         'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
-        { 'border-accent-highlight rounded-t': isExpanded },
-        { 'border-background-light rounded-xl': !isExpanded },
+        { 'border-border-panel rounded-t': isExpanded },
+        { 'border-background-light rounded-card': !isExpanded },
       ]"
       @click="() => emit('expandFilters', expandFilters)"
     >
@@ -38,7 +38,7 @@
               (selectedSavedFilter || lastActiveFilter) &&
               auth.isAuthenticated.value === true
             "
-            class="bg-accent-highlight border-accent-highlight rounded py-1 px-2 ml-2"
+            class="bg-chip-neutral-bg rounded-chip py-1 px-2 ml-2"
           >
             <span class="text-text-body">
               {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
@@ -58,8 +58,7 @@
         'w-full rounded-b bg-background-light',
         { hidden: !expandFilters },
         {
-          'scrollable border-x border-b-2 border-accent-highlight':
-            expandFilters,
+          'scrollable border-x border-b-2 border-border-panel': expandFilters,
         },
       ]"
     >
@@ -71,13 +70,13 @@
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
             :icon-height="22"
-            button-style="default"
+            button-style="secondary"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew
             data-cy="filters-search-button"
             :label="t('filters.apply')"
-            button-style="accentNormal"
+            button-style="commit"
             @click="applyFilters(true)"
           />
           <BaseButtonNew

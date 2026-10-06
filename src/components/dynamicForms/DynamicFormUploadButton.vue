@@ -16,14 +16,14 @@
           <base-button-new
             icon="Redo"
             :label="t('actions.labels.reset-upload')"
-            button-style="accentAccent"
+            button-style="commit"
             @click="resetUpload()"
           />
         </div>
         <div class="@6xl/modal:hidden">
           <base-button-new
             icon="Redo"
-            button-style="accentAccent"
+            button-style="commit"
             @click="resetUpload()"
           />
         </div>
@@ -31,14 +31,14 @@
           <base-button-new
             icon="CheckCircle"
             :label="t('actions.labels.complete')"
-            button-style="accentAccent"
+            button-style="commit"
             @click="emit('closeAndDeleteForm')"
           />
         </div>
         <div class="ml-5 @lg/modal:hidden">
           <base-button-new
             icon="CheckCircle"
-            button-style="accentAccent"
+            button-style="commit"
             @click="emit('closeAndDeleteForm')"
           />
         </div>
@@ -61,14 +61,14 @@
         <!--                          v-if="uploadStatus === UploadStatus.Uploading"-->
         <!--                          icon="Pause"-->
         <!--                          :label="t('actions.labels.pause-upload')"-->
-        <!--                          button-style="accentAccent"-->
+        <!--                          button-style="commit"-->
         <!--                          @click="pauseUpload()"-->
         <!--                        />-->
         <!--                        <base-button-new-->
         <!--                          v-if="uploadStatus === UploadStatus.Paused"-->
         <!--                          icon="Play"-->
         <!--                          :label="t('actions.labels.resume-upload')"-->
-        <!--                          button-style="accentAccent"-->
+        <!--                          button-style="commit"-->
         <!--                          @click="resumeUpload()"-->
         <!--                        />-->
         <!--                      </div>-->

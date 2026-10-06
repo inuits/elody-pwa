@@ -22,7 +22,6 @@
             :item="{ id: option.key.value }"
             :required="false"
             ignore-bulk-operations
-            input-style="accentNormal"
           />
         </div>
       </div>
@@ -38,8 +37,8 @@
             t('confirm.delete-entities.confirm', { type: getCurrentRouteTitle })
           "
           :icon="DamsIcons.Trash"
-          button-style="redDefault"
-          button-size="small"
+          button-style="danger"
+          button-size="sm"
           @click="deleteSelectedItems"
         />
       </div>
@@ -48,8 +47,8 @@
         <BaseButtonNew
           :disabled="isDeleting"
           :label="t('confirm.delete-entities.cancel')"
-          button-style="default"
-          button-size="small"
+          button-style="secondary"
+          button-size="sm"
           @click="closeModal(TypeModals.BulkOperationsDeleteEntities)"
         />
       </div>
@@ -179,7 +178,7 @@ const deleteSelectedItems = () =>
         if (callbacks && callbacks.length > 0)
           for (const callback of callbacks) callback();
       }
-    } catch (error) {
+    } catch {
       closeModal(TypeModals.BulkOperationsDeleteEntities);
       displayErrorNotification(
         t("notifications.errors.entityDeleted.title"),

@@ -1,9 +1,10 @@
 <template>
   <div v-if="visible" class="flex items-center justify-between w-full">
     <BaseTooltip position="bottom-start" :tooltip-offset="4">
-      <template #activator="{ on }">
+      <template #activator="{ on, describedBy }">
         <BaseButtonNew
           v-on="on"
+          :aria-describedby="describedBy"
           data-cy="entity-navigation-previous"
           class="!w-[30px] !h-[30px] !p-0"
           :icon="DamsIcons.ArrowCircleLeft"
@@ -12,14 +13,13 @@
           @click="navigateTo(previousEntity)"
         />
       </template>
-      <span class="text-sm text-text-placeholder">{{
-        t("entity-navigation.open-previous")
-      }}</span>
+      <span>{{ t("entity-navigation.open-previous") }}</span>
     </BaseTooltip>
     <BaseTooltip position="bottom-end" :tooltip-offset="4">
-      <template #activator="{ on }">
+      <template #activator="{ on, describedBy }">
         <BaseButtonNew
           v-on="on"
+          :aria-describedby="describedBy"
           data-cy="entity-navigation-next"
           class="!w-[30px] !h-[30px] !p-0"
           :icon="DamsIcons.ArrowCircleRight"
@@ -28,9 +28,7 @@
           @click="navigateTo(nextEntity)"
         />
       </template>
-      <span class="text-sm text-text-placeholder">{{
-        t("entity-navigation.open-next")
-      }}</span>
+      <span>{{ t("entity-navigation.open-next") }}</span>
     </BaseTooltip>
   </div>
 </template>
@@ -49,8 +47,12 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { showNavigationArrows } = useEntityPageConfig();
-const { getPreviousEntity, getNextEntity, getNavigationRoute, hasNavigationEntities } =
-  useEntityNavigation();
+const {
+  getPreviousEntity,
+  getNextEntity,
+  getNavigationRoute,
+  hasNavigationEntities,
+} = useEntityNavigation();
 
 const entityId = computed(() => String(route.params["id"] ?? ""));
 

@@ -31,6 +31,7 @@ import {
 } from "@/composables/useBulkOperations";
 import "tify/dist/tify.css";
 import "tify";
+import { readCssToken } from "@/utils/cssToken";
 
 const {
   getEnqueuedItems,
@@ -75,7 +76,7 @@ const initializeViewers = () => {
         palette: {
           type: "light",
           primary: {
-            main: "#DCF4F9",
+            main: readCssToken("--color-accent-light", "white"),
           },
         },
       },

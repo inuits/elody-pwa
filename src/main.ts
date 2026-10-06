@@ -35,6 +35,7 @@ import { setContext } from "@apollo/client/link/context";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
+import { applyClientTheme } from "@/utils/clientTheme";
 import { useApp } from "@/composables/useApp";
 
 export let auth: typeof OpenIdConnectClient | null;
@@ -53,13 +54,16 @@ export let typeUrlMapping:
 const applyCustomization = (rulesObject: any) => {
   if (rulesObject.applicationTitle)
     document.title = rulesObject.applicationTitle;
+  // Client theming: the deployment's colour tokens from the app config.
+  applyClientTheme(rulesObject.theme);
 };
 
 const start = async (): Promise<void> => {
   Unicon.add(Object.values(Unicons));
 
-  let { config, translations, version, urlMapping } =
-    await getApplicationDetails();
+  const applicationDetails = await getApplicationDetails();
+  const { translations, version, urlMapping } = applicationDetails;
+  let { config } = applicationDetails;
   i18n = setupI18n(translations, config.customization.applicationLocale);
 
   typeUrlMapping = urlMapping;

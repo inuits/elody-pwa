@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`BaseModal > Snapshot Tests > matches snapshot for center modal 1`] = `
-"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-xl min-w-[50vw] w-fit m-auto max-h-[75vh] my-[12.5vh] @container/modal relative">
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-overlay min-w-[50vw] w-fit m-auto max-h-[75vh] my-[12.5vh] @container/modal relative">
   <div data-v-5078ddf1="" class="flex justify-end p-2" data-testid="modal-header">
     <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
   </div>
@@ -11,7 +11,7 @@ exports[`BaseModal > Snapshot Tests > matches snapshot for center modal 1`] = `
 `;
 
 exports[`BaseModal > Snapshot Tests > matches snapshot for center wide modal 1`] = `
-"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-xl min-w-[80vw] w-fit m-auto max-h-[90vh] @container/modal relative">
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-overlay min-w-[80vw] w-fit m-auto max-h-[90vh] @container/modal relative">
   <div data-v-5078ddf1="" class="flex justify-end p-2" data-testid="modal-header">
     <div data-v-5078ddf1="" data-testid="modal-close-button" aria-label="multiply" height="18" class="cursor-pointer"></div>
   </div>

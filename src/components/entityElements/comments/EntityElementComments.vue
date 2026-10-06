@@ -14,8 +14,8 @@
             <base-button-new
               :label="t('comments.new-thread')"
               :icon="DamsIcons.PlusCircle"
-              button-style="accentAccent"
-              button-size="small"
+              button-style="commit"
+              button-size="sm"
               force-show-label
               @click="isComposerOpen = true"
             />

@@ -36,8 +36,8 @@
       </button>
 
       <BaseTooltip v-if="enableSelection" position="top" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <button
               data-testid="draw-crop-selection"
               :disabled="!canCrop"
@@ -52,7 +52,7 @@
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{
             canCrop
               ? $t("tooltip.media-viewer.selection")
@@ -62,8 +62,8 @@
       </BaseTooltip>
 
       <BaseTooltip v-if="enableSelection" position="top" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <button
               data-testid="cancel-crop-selection"
               :disabled="!canCrop"
@@ -78,7 +78,7 @@
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{
             canCrop
               ? $t("tooltip.media-viewer.remove-selected-area")
@@ -105,8 +105,8 @@
       />
 
       <BaseTooltip v-if="canRecrop" position="top" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <button
               data-testid="open-recrop-modal"
               @click="$emit('open-recrop-modal')"
@@ -140,8 +140,8 @@
     </div>
     <div class="flex">
       <BaseTooltip position="top-end" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <button
               class="mr-2 pt-[10px]"
               data-testid="open-iiif-operations-modal"
@@ -155,7 +155,7 @@
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
+        <span>
           {{ $t("iiif-operations-modal.title") }}
         </span>
       </BaseTooltip>

@@ -18,7 +18,7 @@
         >
           <template v-if="hasOverlay" #controls>
             <BaseButton
-              button-size="small"
+              button-size="sm"
               :label="
                 showOverlay && overlayConfig!.hideLabel
                   ? t(overlayConfig!.hideLabel)

@@ -3,27 +3,28 @@
     data-cy="base-button-new"
     type="button"
     :disabled="disabled || loading"
-    class="flex justify-center items-center whitespace-nowrap w-full rounded-md outline-none transition-colors duration-300 cursor-pointer disabled:cursor-auto"
+    :aria-label="ariaLabel"
+    :aria-busy="loading ? 'true' : undefined"
+    class="relative flex justify-center items-center gap-(--button-gap) whitespace-nowrap w-full font-bold cursor-pointer transition-transform active:scale-[.97] disabled:cursor-auto disabled:active:scale-100"
     :class="[
-      label ? `pl-1.5` : ``,
       `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
       `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
       `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
       `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
-      { 'text-base p-3': buttonSize === 'normal' },
-      { 'text-[0.925rem] p-1.5': buttonSize === 'small' },
-      { 'text-[0.750rem] p-1': buttonSize === 'verySmall' },
+      selectedButtonStyle.radius,
+      selectedButtonStyle.extra ?? '',
+      sizeClasses,
     ]"
   >
+    <!-- Loading keeps the width: the spinner takes the icon's place, or
+         overlays an invisible label when there is no icon. -->
     <spinner-loader
       v-if="loading"
-      theme="accent"
-      class="mr-2"
-      :dimensions="5"
+      :class="{ absolute: !hasIcon }"
+      :dimensions="iconHeight / 4"
     />
     <unicon
-      v-else-if="props.icon !== DamsIcons.NoIcon"
-      :class="[{ '-ml-1 ': label }]"
+      v-if="hasIcon && !loading"
       :name="Unicons[props.icon].name"
       :height="iconHeight"
     />
@@ -31,6 +32,7 @@
       v-if="label"
       class="leading-4 text-ellipsis"
       :class="[
+        { invisible: loading && !hasIcon },
         {
           '@max-xs/window:hidden @max-xl/wrapper-content:hidden':
             !forceShowLabel,
@@ -39,15 +41,15 @@
       >{{ label }}</span
     >
 
-    <div v-if="disabled && tooltipLabel" class="ml-2 -mb-2 text-black">
+    <div v-if="disabled && tooltipLabel" class="-mb-2 text-text-secondary">
       <base-tooltip position="top-right" :tooltip-offset="8">
-        <template #activator="{ on }">
-          <div v-on="on">
+        <template #activator="{ on, describedBy }">
+          <div v-on="on" :aria-describedby="describedBy">
             <unicon :name="Unicons.QuestionCircle.name" height="20" />
           </div>
         </template>
         <template #default>
-          <span class="text-sm text-text-placeholder">
+          <span>
             <div>
               {{ t(tooltipLabel) }}
             </div>
@@ -76,70 +78,106 @@ type Button = {
   hoverStyle: PseudoStyle;
   activeStyle: PseudoStyle;
   disabledStyle: PseudoStyle;
+  // Secondary is input-shaped (5px); everything else is a 6px rectangle.
+  radius: string;
+  extra?: string;
 };
-const defaultButton: Button = {
-  textColor: "text-text-body",
-  bgColor: "bg-background-normal",
+const disabledStyle: PseudoStyle = {
+  textColor: "disabled:text-text-disabled",
+  bgColor: "disabled:bg-background-normal",
+};
+// Primary: client accent fill, white ink, darker accent + accent shadow on hover.
+const primaryButton: Button = {
+  textColor: "text-neutral-white",
+  bgColor: "bg-accent",
   hoverStyle: {
-    textColor: "hover:text-accent-accent",
-    bgColor: "hover:bg-accent-highlight",
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-accent-hover",
   },
   activeStyle: {
-    textColor: "active:text-accent-accent",
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-accent-hover",
+  },
+  disabledStyle,
+  radius: "rounded-button",
+  extra: "hover:shadow-[var(--shadow-accent-hover)]",
+};
+// Secondary: white surface, 1px border, body ink.
+const secondaryButton: Button = {
+  textColor: "text-text-body",
+  bgColor: "bg-neutral-white border border-neutral-40",
+  hoverStyle: {
+    textColor: "hover:text-text-body",
+    bgColor: "hover:bg-accent-wash",
+  },
+  activeStyle: {
+    textColor: "active:text-text-body",
     bgColor: "active:bg-accent-light",
   },
-  disabledStyle: {
-    textColor: "disabled:text-text-disabled",
-    bgColor: "disabled:bg-background-normal",
-  },
+  disabledStyle,
+  radius: "rounded-input",
 };
-const accentAccentButton: Button = {
+// Ghost: borderless, label-blue ink.
+const ghostButton: Button = {
+  textColor: "text-text-light",
+  bgColor: "bg-transparent",
+  hoverStyle: {
+    textColor: "hover:text-accent-dark",
+    bgColor: "hover:bg-accent-wash",
+  },
+  activeStyle: {
+    textColor: "active:text-accent-dark",
+    bgColor: "active:bg-accent-light",
+  },
+  disabledStyle,
+  radius: "rounded-button",
+};
+// Commit: platform-fixed teal (Bewaar, confirm); never client-themed.
+const commitButton: Button = {
   textColor: "text-neutral-white",
-  bgColor: "bg-accent-accent",
-  hoverStyle: defaultButton.hoverStyle,
-  activeStyle: defaultButton.activeStyle,
-  disabledStyle: defaultButton.disabledStyle,
-};
-const accentNormalButton: Button = {
-  textColor: accentAccentButton.textColor,
-  bgColor: "bg-accent-normal",
+  bgColor: "bg-commit",
   hoverStyle: {
-    textColor: "hover:text-accent-normal",
-    bgColor: "hover:bg-background-normal",
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-commit-hover",
   },
   activeStyle: {
-    textColor: "active:text-accent-normal",
-    bgColor: defaultButton.activeStyle.bgColor,
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-commit-hover",
   },
-  disabledStyle: defaultButton.disabledStyle,
+  disabledStyle,
+  radius: "rounded-button",
 };
-const redDefaultButton: Button = {
-  textColor: accentAccentButton.textColor,
-  bgColor: "bg-red-default",
+// Danger: destructive actions.
+const dangerButton: Button = {
+  textColor: "text-neutral-white",
+  bgColor: "bg-danger",
   hoverStyle: {
-    textColor: "hover:text-red-default",
-    bgColor: "hover:bg-red-lightest",
+    textColor: "hover:text-neutral-white",
+    bgColor: "hover:bg-red-dark",
   },
   activeStyle: {
-    textColor: "active:text-red-default",
-    bgColor: "active:bg-red-light",
+    textColor: "active:text-neutral-white",
+    bgColor: "active:bg-red-dark",
   },
-  disabledStyle: defaultButton.disabledStyle,
+  disabledStyle,
+  radius: "rounded-button",
 };
 
 export type ButtonStyle =
-  | "default"
-  | "accentAccent"
-  | "accentNormal"
-  | "redDefault";
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "commit"
+  | "danger";
 const buttonStyles: Record<ButtonStyle, Button> = {
-  default: defaultButton,
-  accentAccent: accentAccentButton,
-  accentNormal: accentNormalButton,
-  redDefault: redDefaultButton,
+  primary: primaryButton,
+  secondary: secondaryButton,
+  ghost: ghostButton,
+  commit: commitButton,
+  danger: dangerButton,
 };
 
-export type ButtonSize = "normal" | "small" | "verySmall";
+export type ButtonSize = "sm" | "md";
 
 const props = withDefaults(
   defineProps<{
@@ -152,15 +190,17 @@ const props = withDefaults(
     loading?: boolean;
     tooltipLabel?: string;
     forceShowLabel?: boolean;
+    ariaLabel?: string;
   }>(),
   {
     icon: DamsIcons.NoIcon,
-    buttonStyle: "default",
-    buttonSize: "normal",
+    buttonStyle: "secondary",
+    buttonSize: "md",
     disabled: false,
-    iconHeight: 18,
+    iconHeight: 14,
     loading: false,
     forceShowLabel: false,
+    ariaLabel: undefined,
   },
 );
 
@@ -169,4 +209,17 @@ const { t } = useI18n();
 const selectedButtonStyle = computed<Button>(
   () => buttonStyles[props.buttonStyle],
 );
+
+const hasIcon = computed<boolean>(() => props.icon !== DamsIcons.NoIcon);
+
+const sizeClasses = computed<string>(() => {
+  const iconOnly = !props.label;
+  if (props.buttonSize === "sm")
+    return iconOnly
+      ? "text-button-sm p-(--button-sm-padding-icon)"
+      : "text-button-sm p-(--button-sm-padding)";
+  return iconOnly
+    ? "text-button-md p-(--button-md-padding-icon)"
+    : "text-button-md p-(--button-md-padding)";
+});
 </script>

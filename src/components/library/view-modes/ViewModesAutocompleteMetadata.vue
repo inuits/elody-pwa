@@ -15,8 +15,12 @@
     "
     @add-option="handleCreatingFromTag"
   />
-  <p v-else data-cy="metadata-value">
-    {{ "-" }}
+  <p
+    v-else
+    data-cy="metadata-value"
+    class="opacity-[var(--opacity-empty)]"
+  >
+    {{ emptyValueLabel }}
   </p>
 </template>
 
@@ -24,10 +28,12 @@
 import { type DropdownOption } from "@/generated-types/queries";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import { mapModelValueToDropdownOptions } from "@/helpers";
 
 const { t } = useI18n();
+const emptyValueLabel = useEmptyValueLabel();
 
 const emit = defineEmits<{
   (event: "update:modelValue", modelValue: number | number[]): void;
