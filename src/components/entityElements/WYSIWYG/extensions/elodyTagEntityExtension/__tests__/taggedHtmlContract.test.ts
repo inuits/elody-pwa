@@ -18,8 +18,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/main", () => ({ apolloClient: {} }));
+const { openModal } = vi.hoisted(() => ({ openModal: vi.fn() }));
 vi.mock("@/composables/useBaseModal", () => ({
-  useBaseModal: () => ({ openModal: vi.fn(), closeModal: vi.fn() }),
+  useBaseModal: () => ({ openModal, closeModal: vi.fn() }),
 }));
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({ dequeueAllItemsForBulkProcessing: vi.fn() }),
@@ -312,6 +313,24 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
 
       editor.destroy();
     });
+
+    it.each([
+      ["a hard break", "<p>عبد<br>الله</p>", 9],
+      ["two paragraphs", "<p>عبد</p><p>الله</p>", 10],
+    ])(
+      "hands the tag modal a <br> for a selection across %s",
+      async (_, content, to) => {
+        const editor = await buildTaggingEditor(content);
+        openModal.mockClear();
+
+        editor.commands.setTextSelection({ from: 1, to });
+        editor.commands.openTagModal();
+
+        expect(openModal.mock.calls[0][6].selectedText).toBe("عبد<br>الله");
+
+        editor.destroy();
+      },
+    );
 
     it("untagging restores the hard break", async () => {
       const editor = await buildTaggingEditor(

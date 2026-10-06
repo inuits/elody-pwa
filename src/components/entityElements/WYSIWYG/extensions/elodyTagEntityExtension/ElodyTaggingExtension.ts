@@ -174,7 +174,7 @@ const getSelectionHTML = (state: EditorState): string => {
     .map((node) =>
       node instanceof HTMLElement ? node.innerHTML : node.textContent || "",
     )
-    .join("");
+    .join("<br>");
 };
 
 export const createTipTapNodeExtension = (
