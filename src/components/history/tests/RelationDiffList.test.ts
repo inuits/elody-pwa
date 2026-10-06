@@ -14,17 +14,19 @@ describe("RelationDiffList", () => {
     });
     expect(wrapper.text()).toContain("Amun");
     expect(wrapper.text()).toContain("Ra");
-    expect(wrapper.findAll("span")).toHaveLength(2);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(2);
   });
 
-  it("applies the removed styling to removed items", () => {
+  it("applies the removed styling to removed items, without a strike-through", () => {
     const wrapper = mount(RelationDiffList, {
       props: {
         items: [{ key: "word-1", label: "Amun", status: "removed" }],
       },
     });
-    expect(wrapper.find("span").classes()).toContain("line-through");
-    expect(wrapper.find("span").classes()).toContain("bg-red-100");
+    expect(wrapper.find("span").classes()).toEqual(
+      expect.arrayContaining(["bg-diff-old-bg", "text-diff-old"]),
+    );
+    expect(wrapper.find("span").classes()).not.toContain("line-through");
   });
 
   it("applies the added styling to added items", () => {
@@ -33,7 +35,9 @@ describe("RelationDiffList", () => {
         items: [{ key: "word-2", label: "Ra", status: "added" }],
       },
     });
-    expect(wrapper.find("span").classes()).toContain("bg-green-100");
+    expect(wrapper.find("span").classes()).toEqual(
+      expect.arrayContaining(["bg-diff-new-bg", "text-diff-new"]),
+    );
   });
 
   it("shows a renamed relation in green with its current name", () => {
@@ -44,7 +48,7 @@ describe("RelationDiffList", () => {
         ],
       },
     });
-    expect(wrapper.find("span").classes()).toContain("bg-green-100");
+    expect(wrapper.find("span").classes()).toContain("text-diff-new");
     expect(wrapper.find("span").classes()).not.toContain("line-through");
   });
 
@@ -56,7 +60,7 @@ describe("RelationDiffList", () => {
         ],
       },
     });
-    expect(wrapper.find("span").classes()).toContain("bg-red-100");
+    expect(wrapper.find("span").classes()).toContain("text-diff-old");
     expect(wrapper.find("span").classes()).not.toContain("line-through");
   });
 
@@ -90,7 +94,7 @@ describe("RelationDiffList", () => {
 
   it("renders nothing when items is empty", () => {
     const wrapper = mount(RelationDiffList, { props: { items: [] } });
-    expect(wrapper.findAll("span")).toHaveLength(0);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(0);
   });
 
   it("does not render a chip for an unchanged item with an empty label", () => {
@@ -99,7 +103,7 @@ describe("RelationDiffList", () => {
         items: [{ key: "word-1", label: "", status: "unchanged" }],
       },
     });
-    expect(wrapper.findAll("span")).toHaveLength(0);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(0);
   });
 
   it("does not render a chip for an unchanged item whose label fell back to its own key", () => {
@@ -108,7 +112,7 @@ describe("RelationDiffList", () => {
         items: [{ key: "word-1", label: "word-1", status: "unchanged" }],
       },
     });
-    expect(wrapper.findAll("span")).toHaveLength(0);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(0);
   });
 
   it("still renders an unchanged item that has a real, resolved label", () => {
@@ -117,7 +121,7 @@ describe("RelationDiffList", () => {
         items: [{ key: "word-1", label: "Amun", status: "unchanged" }],
       },
     });
-    expect(wrapper.findAll("span")).toHaveLength(1);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(1);
     expect(wrapper.text()).toContain("Amun");
   });
 
@@ -127,7 +131,7 @@ describe("RelationDiffList", () => {
         items: [{ key: "word-1", label: "word-1", status: "added" }],
       },
     });
-    expect(wrapper.findAll("span")).toHaveLength(1);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(1);
   });
 
   it("still renders a removed item without a resolved label", () => {
@@ -136,6 +140,40 @@ describe("RelationDiffList", () => {
         items: [{ key: "word-1", label: "", status: "removed" }],
       },
     });
-    expect(wrapper.findAll("span")).toHaveLength(1);
+    expect(wrapper.findAll('[data-cy="relation-diff-chip"]')).toHaveLength(1);
+  });
+
+  describe("design-system diff mark-up", () => {
+    const chip = (status: string, variant?: string) =>
+      mount(RelationDiffList, {
+        props: { items: [{ key: "k", label: "Amun", status, variant }] },
+      }).find('[data-cy="relation-diff-chip"]');
+
+    it("uses the chip shape and size", () => {
+      expect(chip("unchanged").classes()).toEqual(
+        expect.arrayContaining(["rounded-chip", "text-chip", "p-(--chip-padding)"]),
+      );
+    });
+
+    it("shows unchanged relations as neutral chips", () => {
+      expect(chip("unchanged").classes()).toContain("bg-chip-neutral-bg");
+    });
+
+    it("uses no raw Tailwind palette colours", () => {
+      ["unchanged", "added", "removed"].forEach((status) =>
+        expect(chip(status).classes().join(" ")).not.toMatch(
+          /(red|green|gray)-[0-9]/,
+        ),
+      );
+    });
+
+    it("announces additions and removals in text, not only in colour", () => {
+      expect(chip("added").find(".sr-only").text()).toBe("added");
+      expect(chip("removed").find(".sr-only").text()).toBe("removed");
+    });
+
+    it("adds no announcement to unchanged relations", () => {
+      expect(chip("unchanged").find(".sr-only").exists()).toBe(false);
+    });
   });
 });

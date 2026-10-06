@@ -95,8 +95,9 @@ listboxes), `-faint` (separators inside panels), `-panel` (panel outlines),
 |---|---|
 | `--color-commit`, `--color-commit-hover` | commit teal: Bewaar, confirms, checks, spinners |
 | `--color-focus-ring` | the one focus ring |
-| `--color-danger`, `-bg`, `-wash` | destructive actions, errors |
-| `--color-success`, `-strong`, `-bg` | success feedback |
+| `--color-danger`, `-bg`, `-wash`, `-ink` | destructive actions, errors; `-ink` is danger text on `-bg` |
+| `--color-success`, `-strong`, `-bg`, `-ink` | success feedback; `-ink` is success text on `-bg` |
+| `--color-diff-{old,new}`, `-bg`, `-border` | history diff (see [history diff](../components/history-diff.md)) |
 | `--color-warning`, `-bg`, `-chip` | warnings |
 | `--color-info`, `-bg` | information |
 | `--color-search-mark` | search-hit highlight |

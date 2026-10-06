@@ -1,7 +1,7 @@
 <template>
   <history-element-wrapper :label="label">
     <relation-diff-list v-if="items.length" :items="items" />
-    <p v-else class="text-text-light text-sm">
+    <p v-else class="text-table text-text-muted">
       {{ $t("history.no-items") }}
     </p>
   </history-element-wrapper>

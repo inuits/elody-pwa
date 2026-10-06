@@ -231,9 +231,11 @@
   --color-danger: #D11800;
   --color-danger-bg: #F9DCDC;
   --color-danger-wash: #F8F2F2;
+  --color-danger-ink: var(--color-red-dark); /* danger text on danger-bg (6.8:1) */
   --color-success: #16a34a;
   --color-success-strong: #15803d;
   --color-success-bg: #DAF1DC;
+  --color-success-ink: #166534; /* success text on success-bg (6.0:1) */
   --color-warning: #B95000;
   --color-warning-bg: #FDEBD7;
   --color-warning-chip: #F2994A;
@@ -359,6 +361,15 @@
   --text-tooltip: var(--text-label);
   --tooltip-padding: 4px 8px;
   --radius-tooltip: var(--radius-button);
+
+  /* History diff (docs/design-system/components/history-diff.md): semantic
+     red for old/removed, green for new/added; no strike-through */
+  --color-diff-old: var(--color-danger-ink);
+  --color-diff-old-bg: var(--color-danger-bg);
+  --color-diff-old-border: var(--color-danger);
+  --color-diff-new: var(--color-success-ink);
+  --color-diff-new-bg: var(--color-success-bg);
+  --color-diff-new-border: var(--color-success);
 
   /* Chip and badge (components/chip-and-badge.md) */
   --text-chip: var(--text-label);
@@ -568,4 +579,11 @@ body {
   --color-chip-value-bg: var(--color-accent-light);
   --color-chip-value-text: var(--color-accent-ink);
   --color-input-border-hover: var(--color-neutral-50);
+  --color-danger-ink: var(--color-red-dark);
+  --color-diff-old: var(--color-danger-ink);
+  --color-diff-old-bg: var(--color-danger-bg);
+  --color-diff-old-border: var(--color-danger);
+  --color-diff-new: var(--color-success-ink);
+  --color-diff-new-bg: var(--color-success-bg);
+  --color-diff-new-border: var(--color-success);
 }

@@ -17,6 +17,8 @@ describe("WysiwygDiffFlag", () => {
 
   it("applies distinct styling for the changed state", () => {
     const wrapper = mount(WysiwygDiffFlag, { props: { label: "Reading", changed: true } });
-    expect(wrapper.findAll("span")[1].classes()).toContain("bg-green-100");
+    expect(wrapper.findAll("span")[1].classes()).toEqual(
+      expect.arrayContaining(["bg-diff-new-bg", "text-diff-new"]),
+    );
   });
 });
