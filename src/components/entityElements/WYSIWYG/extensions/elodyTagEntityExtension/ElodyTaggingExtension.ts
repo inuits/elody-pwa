@@ -155,27 +155,12 @@ const taggedTextToContent = (taggedText: string) =>
       ...(line ? [{ type: "text", text: line }] : []),
     ]);
 
-const getSelectionHTML = (state: EditorState): string => {
-  const from = getAdjustedSelectionFrom(state);
-  const { to } = state.selection;
-
-  if (from === to) {
-    return "";
-  }
-
-  const slice = state.doc.cut(from, to);
-
-  const serializer = DOMSerializer.fromSchema(state.schema);
-  const container = document.createElement("div");
-
-  container.appendChild(serializer.serializeFragment(slice.content));
-
-  return Array.from(container.childNodes)
-    .map((node) =>
-      node instanceof HTMLElement ? node.innerHTML : node.textContent || "",
-    )
-    .join("<br>");
-};
+const getSelectedText = (state: EditorState): string =>
+  getTextBetween(
+    state,
+    getAdjustedSelectionFrom(state),
+    state.selection.to,
+  ).replaceAll(LINE_BREAK, "<br>");
 
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
@@ -396,7 +381,7 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
         openTagModal:
           () =>
           ({ state, editor }: CommandProps) => {
-            const selectedText = getSelectionHTML(state);
+            const selectedText = getSelectedText(state);
 
             const { openModal } = useBaseModal();
             openModal(

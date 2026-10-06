@@ -24,7 +24,10 @@ export const configurationsByTrigger = (
   for (const configuration of configurations) {
     const character = configuration.inlineTrigger?.character;
     if (!character) continue;
-    byTrigger.set(character, [...(byTrigger.get(character) ?? []), configuration]);
+    byTrigger.set(character, [
+      ...(byTrigger.get(character) ?? []),
+      configuration,
+    ]);
   }
   return byTrigger;
 };
@@ -63,7 +66,6 @@ export const suggestionStateFor = (
     anchor: { left: coords.left, bottom: coords.bottom },
   };
 };
-
 
 export const isTaggedByTriggerOnly = (
   configurations: ResolvedTagConfiguration[],

@@ -332,6 +332,18 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
       },
     );
 
+    it("hands the tag modal literal angle brackets, not HTML entities", async () => {
+      const editor = await buildTaggingEditor("<p>mo&lt;x&gt;on</p>");
+      openModal.mockClear();
+
+      editor.commands.setTextSelection({ from: 1, to: 8 });
+      editor.commands.openTagModal();
+
+      expect(openModal.mock.calls[0][6].selectedText).toBe("mo<x>on");
+
+      editor.destroy();
+    });
+
     it("untagging restores the hard break", async () => {
       const editor = await buildTaggingEditor(
         '<p>a<elody-w type="person" data-entity-id="W-42" lemma="ktb">b=<br>c</elody-w>d</p>',

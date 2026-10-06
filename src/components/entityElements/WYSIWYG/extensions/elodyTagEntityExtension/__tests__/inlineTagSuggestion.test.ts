@@ -98,13 +98,21 @@ describe("isTaggedByTriggerOnly", () => {
 });
 
 describe("configurationForEntity", () => {
-  const user = { ...configurationWithTrigger("user", "@"), taggableEntityType: "user" };
-  const group = { ...configurationWithTrigger("group", "@"), taggableEntityType: "group" };
+  const user = {
+    ...configurationWithTrigger("user", "@"),
+    taggableEntityType: "user",
+  };
+  const group = {
+    ...configurationWithTrigger("group", "@"),
+    taggableEntityType: "group",
+  };
 
   it("picks the configuration matching the entity's own type", () => {
     // Decides which tag element is inserted, and so which relation the comment
     // carries: refTaggedUsers vs refTaggedGroups.
-    expect(configurationForEntity([user, group], { type: "group" })).toBe(group);
+    expect(configurationForEntity([user, group], { type: "group" })).toBe(
+      group,
+    );
     expect(configurationForEntity([user, group], { type: "user" })).toBe(user);
   });
 

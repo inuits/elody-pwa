@@ -41,9 +41,8 @@ vi.mock("@/composables/useImport", () => ({
 }));
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (key: string) => key }) }));
 
-const { default: InlineTagSuggestionDropdown } = await import(
-  "../InlineTagSuggestionDropdown.vue"
-);
+const { default: InlineTagSuggestionDropdown } =
+  await import("../InlineTagSuggestionDropdown.vue");
 
 const suggestion = {
   configurations: [
@@ -133,7 +132,12 @@ describe("two configurations sharing one trigger", () => {
 
     expect(sentVariables).toHaveLength(1);
     expect(sentVariables[0].advancedFilterInputs).toEqual([
-      { type: "selection", key: "type", value: ["user", "group"], match_exact: true },
+      {
+        type: "selection",
+        key: "type",
+        value: ["user", "group"],
+        match_exact: true,
+      },
       {
         type: "text",
         key: ["vlacc:1|properties.name.value"],
@@ -245,7 +249,9 @@ describe("inline suggestion dropdown keyboard selection", () => {
 describe("typesense search highlighting on the suggestions", () => {
   // Search results carry <mark> around the typed text. It has to render as markup in
   // the list, and must never end up in the tag that is written into the document.
-  const withHighlightedName = async (run: (wrapper: any) => void | Promise<void>) => {
+  const withHighlightedName = async (
+    run: (wrapper: any) => void | Promise<void>,
+  ) => {
     const original = entities[0].intialValues.name;
     entities[0].intialValues.name = "<mark>Ad</mark>a";
     const wrapper = await mountDropdown();

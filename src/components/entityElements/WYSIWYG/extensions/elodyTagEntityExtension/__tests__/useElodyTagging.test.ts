@@ -65,8 +65,7 @@ describe("useElodyTagging", () => {
       personTagging.getConfigurationForEntity({ type: "word" }),
     ).toBeUndefined();
     expect(
-      personTagging.getConfigurationForEntity({ type: "person" })
-        ?.relationType,
+      personTagging.getConfigurationForEntity({ type: "person" })?.relationType,
     ).toBe("ref_person");
 
     wordTagging.destroy();
@@ -101,9 +100,9 @@ describe("useElodyTagging", () => {
     // One node + one commands extension. Entity-derived configurations used to be
     // built twice, registering two node types that both parsed `elody-<tag>`.
     expect(tagging.extensions).toHaveLength(2);
-    expect(tagging.extensions.filter((e: any) => e.name === "word")).toHaveLength(
-      1,
-    );
+    expect(
+      tagging.extensions.filter((e: any) => e.name === "word"),
+    ).toHaveLength(1);
 
     tagging.destroy();
   });
@@ -152,7 +151,9 @@ describe("useElodyTagging", () => {
     configuration[0].tagColor = "#ff0000";
 
     const tagging = await useElodyTagging("instance-css", configuration);
-    expect(document.getElementById("elody-tagging-instance-css")).not.toBeNull();
+    expect(
+      document.getElementById("elody-tagging-instance-css"),
+    ).not.toBeNull();
 
     tagging.destroy();
     expect(document.getElementById("elody-tagging-instance-css")).toBeNull();
