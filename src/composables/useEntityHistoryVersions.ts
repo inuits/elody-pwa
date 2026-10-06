@@ -1,9 +1,9 @@
 import { computed } from "vue";
 import { useQuery } from "@vue/apollo-composable";
-import {
-  GetEntityHistoryVersionsDocument,
-  type GetEntityHistoryVersionsQuery,
-  type GetEntityHistoryVersionsQueryVariables,
+import { GetEntityHistoryVersionsDocument } from "@/queryLoader";
+import type {
+  GetEntityHistoryVersionsQuery,
+  GetEntityHistoryVersionsQueryVariables,
 } from "@/generated-types/queries";
 
 export function useEntityHistoryVersions(

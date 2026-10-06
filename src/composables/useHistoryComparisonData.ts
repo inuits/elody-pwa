@@ -10,7 +10,6 @@ import {
   GetEntityByIdDocument,
   type GetEntityByIdQuery,
   type GetEntityByIdQueryVariables,
-  GetEntityHistoryVersionDetailDocument,
   type GetEntityHistoryVersionDetailQuery,
   type GetEntityHistoryVersionDetailQueryVariables,
   GetRelationLabelsForIdsDocument,
@@ -18,6 +17,7 @@ import {
   type GetRelationLabelsForIdsQueryVariables,
   type Entity,
 } from "@/generated-types/queries";
+import { GetEntityHistoryVersionDetailDocument } from "@/queryLoader";
 import {
   findEntityListElement,
   findPanelMetadata,

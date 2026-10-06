@@ -25,3 +25,13 @@ export const FetchMediafilesOfEntityDocument =
   "FetchMediafilesOfEntityDocument" in GeneratedQueries
     ? (GeneratedQueries as any).FetchMediafilesOfEntityDocument
     : null;
+
+export const GetEntityHistoryVersionsDocument =
+  "GetEntityHistoryVersionsDocument" in GeneratedQueries
+    ? (GeneratedQueries as any).GetEntityHistoryVersionsDocument
+    : null;
+
+export const GetEntityHistoryVersionDetailDocument =
+  "GetEntityHistoryVersionDetailDocument" in GeneratedQueries
+    ? (GeneratedQueries as any).GetEntityHistoryVersionDetailDocument
+    : null;
