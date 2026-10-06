@@ -386,6 +386,9 @@ export const getMetadataFields = (
         defaultValue: (value as PanelMetaData).defaultValue,
         disabled: (value as PanelMetaData).disabled,
         isMultilingual: (value as PanelMetaData).isMultilingual,
+        // SHACL UI sh:languageIn (baseGraphql PanelMetaData.languageIn)
+        languageIn: (value as PanelMetaData & { languageIn?: string[] | null })
+          .languageIn,
         masked: (value as PanelMetaData).masked,
         revealQuery: (value as PanelMetaData).revealQuery,
         __typename: (value as PanelMetaData).__typename,

@@ -26,16 +26,38 @@ export type UseMultilingualFieldReturn = {
   localeOptions: ComputedRef<{ icon: undefined; label: string; value: string }[]>;
 };
 
+/**
+ * Basic filtering (RFC 4647 §3.3.1): a value tagged en-US matches the
+ * preferred language en.
+ */
+export const languageMatches = (tag: string | undefined, preferred: string): boolean => {
+  if (!tag) return false;
+  const t = tag.toLowerCase();
+  const p = preferred.toLowerCase();
+  return t === p || t.startsWith(`${p}-`);
+};
+
+/**
+ * @param languageIn SHACL 1.2 UI sh:languageIn of the field: values are
+ * preferred in this order, before the interface language, and the selector
+ * offers only these languages.
+ */
 export const useMultilingualField = (
   translations: Ref<TranslationEntry[]>,
   fieldKey: string,
+  languageIn: string[] = [],
 ): UseMultilingualFieldReturn => {
   const { availableLocales, locale, t } = useI18n();
 
-  const selectedLocale = ref<string>(locale.value);
+  const preferredLocale = (appLocale: string): string =>
+    [...languageIn, appLocale].find((preferred) =>
+      translations.value.some((entry) => languageMatches(entry.lang, preferred)),
+    ) ?? appLocale;
+
+  const selectedLocale = ref<string>(preferredLocale(locale.value));
 
   const localeOptions = computed(() =>
-    availableLocales.map((locale: string) => ({
+    (languageIn.length ? languageIn : availableLocales).map((locale: string) => ({
       icon: undefined,
       label: t("language." + locale),
       value: locale,
@@ -43,16 +65,18 @@ export const useMultilingualField = (
   );
 
   const hasTranslationForLocale = computed(() =>
-    translations.value.some(
-      (entry) => entry.lang === selectedLocale.value,
+    translations.value.some((entry) =>
+      languageMatches(entry.lang, selectedLocale.value),
     ),
   );
 
   const currentValue = computed({
     get: () => {
-      const entry = translations.value.find(
-        (entry) => entry.lang === selectedLocale.value,
-      );
+      const entry =
+        translations.value.find((entry) => entry.lang === selectedLocale.value) ??
+        translations.value.find((entry) =>
+          languageMatches(entry.lang, selectedLocale.value),
+        );
       return entry?.value ?? "";
     },
     set: (newValue: string) => {
@@ -72,7 +96,7 @@ export const useMultilingualField = (
   });
 
   watch(locale, (newLocale) => {
-    selectedLocale.value = newLocale;
+    selectedLocale.value = preferredLocale(newLocale);
   });
 
   return {

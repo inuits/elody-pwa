@@ -76,6 +76,7 @@ initTranslations();
 const { selectedLocale, currentValue, localeOptions } = useMultilingualField(
   translations,
   fieldKey.value,
+  props.metadata.languageIn ?? [],
 );
 
 const localizedMetadata = computed(() => ({

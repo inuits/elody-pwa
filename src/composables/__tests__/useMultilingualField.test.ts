@@ -150,4 +150,50 @@ describe("useMultilingualField", () => {
       expect(currentValue.value).toBe("Salut");
     });
   });
+
+  // SHACL 1.2 UI: implementations MUST prefer language-tagged values in the
+  // order of sh:languageIn, before the application's language.
+  describe("sh:languageIn", () => {
+    it("selects the first declared language that has a value, before the app locale", () => {
+      const translations = makeTranslations([
+        { key: "name", value: "Alice", lang: "en" },
+        { key: "name", value: "Alice (fr)", lang: "fr" },
+      ]);
+      const { selectedLocale, currentValue } = useMultilingualField(translations, "name", ["fr", "en"]);
+      expect(selectedLocale.value).toBe("fr");
+      expect(currentValue.value).toBe("Alice (fr)");
+    });
+
+    it("skips a declared language without a value", () => {
+      const translations = makeTranslations([{ key: "name", value: "Alice", lang: "en" }]);
+      const { selectedLocale } = useMultilingualField(translations, "name", ["fr", "en"]);
+      expect(selectedLocale.value).toBe("en");
+    });
+
+    it("falls back to the app locale when no declared language has a value", () => {
+      const translations = makeTranslations([{ key: "name", value: "Alice", lang: "en" }]);
+      const { selectedLocale } = useMultilingualField(translations, "name", ["de"]);
+      expect(selectedLocale.value).toBe("en");
+    });
+
+    it("matches language tags by basic filtering (en-US for en)", () => {
+      const translations = makeTranslations([{ key: "name", value: "Alice", lang: "en-US" }]);
+      const { selectedLocale, currentValue } = useMultilingualField(translations, "name", ["fr", "en"]);
+      expect(selectedLocale.value).toBe("en");
+      expect(currentValue.value).toBe("Alice");
+    });
+
+    it("offers only the declared languages in the selector", () => {
+      const translations = makeTranslations([]);
+      const { localeOptions } = useMultilingualField(translations, "name", ["fr", "en"]);
+      expect(localeOptions.value.map((option) => option.value)).toEqual(["fr", "en"]);
+    });
+
+    it("keeps today's behaviour without sh:languageIn", () => {
+      const translations = makeTranslations([{ key: "name", value: "Bonjour", lang: "fr" }]);
+      const { selectedLocale, localeOptions } = useMultilingualField(translations, "name");
+      expect(selectedLocale.value).toBe("en");
+      expect(localeOptions.value.map((option) => option.value)).toEqual(["en", "fr", "ar"]);
+    });
+  });
 });
