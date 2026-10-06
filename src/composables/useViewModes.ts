@@ -6,7 +6,12 @@ import {
   ViewModes,
   BaseLibraryModes,
 } from "@/generated-types/queries";
-import type { Entity, ViewModesWithConfig } from "@/generated-types/queries";
+import type {
+  Entity,
+  GroupByConfig,
+  Maybe,
+  ViewModesWithConfig,
+} from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 
 export type ViewModeToggle = {
@@ -55,6 +60,21 @@ export const useViewModes = (options: UseViewModesOptions) => {
       firstEntity.allowedViewModes?.viewModes?.reduce(
         (acc: Record<string, unknown>, vm: ViewModesWithConfig) => {
           if (vm.viewMode) acc[vm.viewMode] = vm.config;
+          return acc;
+        },
+        {},
+      ) ?? {}
+    );
+  });
+
+  const groupByPerViewMode = computed<Record<string, GroupByConfig>>(() => {
+    const rawEntities = toRaw(options.entities.value);
+    if (rawEntities.length <= 0) return {};
+    const firstEntity = toRaw(rawEntities[0]);
+    return (
+      firstEntity.allowedViewModes?.viewModes?.reduce(
+        (acc: Record<string, GroupByConfig>, vm: Maybe<ViewModesWithConfig>) => {
+          if (vm?.viewMode && vm.groupBy) acc[vm.viewMode] = vm.groupBy;
           return acc;
         },
         {},
@@ -282,6 +302,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
     expandFilters,
     toggles,
     configPerViewMode,
+    groupByPerViewMode,
     hasMixedTeaserMetadata,
     viewModesIncludeViewModesMedia,
     showViewModesList,

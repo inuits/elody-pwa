@@ -39,55 +39,92 @@
           <div class="w-8 shrink-0" />
         </div>
 
-        <component
-          v-for="entity in processedEntities"
-          :key="entity.id + '_table'"
-          :is="entity.componentTag"
-          :to="entity.componentPath"
-          class="list-item-table"
-          @click="
-            () => {
-              if (openEntityInDetailModal)
-                openEntityInModal(entity.id, entity.type);
-              else entityWrapperHandler(entity.originalEntity);
-            }
-          "
-          v-memo="entity.memoKey"
+        <div
+          v-for="{ key, row: entity, groupStart, groupEnd } in tableItems"
+          :key="key + '_table'"
+          v-memo="[
+            entity?.memoKey,
+            groupStart?.label,
+            groupStart?.count,
+            groupEnd?.hasMore,
+            groupEnd?.loading,
+          ]"
         >
-          <TableViewRow
-            :item-id="entity.id"
-            :item-type="entity.type"
-            :bulk-operations-context="bulkOperationsContext"
-            :buttons="entity.buttons"
-            :actions-column-width="actionsColumnWidth"
-            :entityTypename="entity.entityTypename"
-            :teaser-metadata="entity.teaserMetadata"
-            :intialValues="entity.intialValues"
-            :relationValues="entity.relationValues"
-            :media="entity.media"
-            :thumb-icon="entity.thumbIcon"
-            :is-media-type="entity.isMediaType"
-            :loading="entitiesLoading"
-            :is-disabled="entity.isDisabled"
-            :relation="entity.relation"
-            :parent-entity-id="parentEntityIdentifiers[0]"
-            :relation-type="relationType"
-            :has-selection="enableSelection"
-            :base-library-mode="baseLibraryMode"
-            :has-thumbnail="anyEntityHasThumbnail"
-            :col-min-widths="colMinWidths"
-            :refetch-entities="refetchEntities"
-            :preview-component-enabled="previewComponentEnabled"
-            :preview-component-current-active="entity.isPreviewActive"
-            :preview-component-feature-enabled="previewComponent !== undefined"
-            :preview-component-list-items-coverage="
-              previewComponent?.listItemsCoverage
+          <div
+            v-if="groupStart"
+            data-cy="view-modes-table-group-header"
+            class="flex items-center justify-between gap-2 px-3 py-2 mt-2 bg-accent-highlight text-text-body font-semibold text-sm"
+          >
+            <span>{{
+              groupStart.value === null ? t(groupStart.label) : groupStart.label
+            }}</span>
+            <span class="font-normal">{{ groupStart.count }}</span>
+          </div>
+          <component
+            v-if="entity"
+            :is="entity.componentTag"
+            :to="entity.componentPath"
+            class="list-item-table"
+            @click="
+              () => {
+                if (openEntityInDetailModal)
+                  openEntityInModal(entity.id, entity.type);
+                else entityWrapperHandler(entity.originalEntity);
+              }
             "
-            @toggle-preview-component="
-              (previewForEntityId) => togglePreviewComponent(previewForEntityId)
-            "
+          >
+            <TableViewRow
+              :item-id="entity.id"
+              :item-type="entity.type"
+              :bulk-operations-context="bulkOperationsContext"
+              :buttons="entity.buttons"
+              :actions-column-width="actionsColumnWidth"
+              :entityTypename="entity.entityTypename"
+              :teaser-metadata="entity.teaserMetadata"
+              :intialValues="entity.intialValues"
+              :relationValues="entity.relationValues"
+              :media="entity.media"
+              :thumb-icon="entity.thumbIcon"
+              :is-media-type="entity.isMediaType"
+              :loading="entitiesLoading"
+              :is-disabled="entity.isDisabled"
+              :relation="entity.relation"
+              :parent-entity-id="parentEntityIdentifiers[0]"
+              :relation-type="relationType"
+              :has-selection="enableSelection"
+              :base-library-mode="baseLibraryMode"
+              :has-thumbnail="anyEntityHasThumbnail"
+              :col-min-widths="colMinWidths"
+              :refetch-entities="refetchEntities"
+              :preview-component-enabled="previewComponentEnabled"
+              :preview-component-current-active="entity.isPreviewActive"
+              :preview-component-feature-enabled="previewComponent !== undefined"
+              :preview-component-list-items-coverage="
+                previewComponent?.listItemsCoverage
+              "
+              @toggle-preview-component="
+                (previewForEntityId) => togglePreviewComponent(previewForEntityId)
+              "
+            />
+          </component>
+          <div v-if="groupEnd?.hasMore" class="flex justify-center py-2">
+            <BaseButtonNew
+              data-cy="view-modes-table-load-more-in-group"
+              :label="t('library.load-more-in-group')"
+              button-size="small"
+              :loading="groupEnd.loading"
+              @click="emit('loadMoreInGroup', groupEnd.id)"
+            />
+          </div>
+        </div>
+        <div v-if="hasMoreGroups" class="flex justify-center py-3">
+          <BaseButtonNew
+            data-cy="view-modes-table-load-more-groups"
+            :label="t('library.load-more')"
+            :loading="groupsLoading"
+            @click="emit('loadMoreGroups')"
           />
-        </component>
+        </div>
       </div>
 
       <div
@@ -130,6 +167,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import TableViewRow from "@/components/library/view-modes/TableViewRow.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
@@ -142,6 +180,10 @@ import { useEntityListHelpers } from "@/components/library/view-modes/composable
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenItems } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
+import {
+  buildTableItems,
+  type EntityGroup,
+} from "@/components/library/view-modes/composables/useGroupedEntities";
 
 const props = withDefaults(
   defineProps<{
@@ -163,6 +205,9 @@ const props = withDefaults(
     showCurrentEntityFlow?: boolean;
     refetchEntities?: () => Promise<void>;
     cropMediafileCoordinatesKey?: string;
+    groups?: EntityGroup[];
+    hasMoreGroups?: boolean;
+    groupsLoading?: boolean;
   }>(),
   {
     openEntityInDetailModal: false,
@@ -175,8 +220,16 @@ const props = withDefaults(
     showCurrentEntityFlow: true,
     refetchEntities: undefined,
     cropMediafileCoordinatesKey: "",
+    groups: undefined,
+    hasMoreGroups: false,
+    groupsLoading: false,
   },
 );
+
+const emit = defineEmits<{
+  (event: "loadMoreInGroup", groupId: string): void;
+  (event: "loadMoreGroups"): void;
+}>();
 
 const { t } = useI18n();
 const { getMediaFilenameFromEntity } = useListItemHelper();
@@ -363,6 +416,10 @@ const processedEntities = computed(() => {
     };
   });
 });
+
+const tableItems = computed(() =>
+  buildTableItems(processedEntities.value, props.groups),
+);
 
 const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
   openModal(

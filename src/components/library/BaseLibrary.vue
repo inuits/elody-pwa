@@ -168,7 +168,7 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap && !displayPipeline"
+            :show-pagination="!displayMap && !displayPipeline && !isTableGrouped"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -306,7 +306,18 @@
               !isInitialLoading &&
               (!entitiesLoading || !!entities?.length)
             "
-            :entities="entities as Entity[]"
+            :entities="
+              (isTableGrouped
+                ? groupedEntities.entities.value
+                : entities) as Entity[]
+            "
+            :groups="isTableGrouped ? groupedEntities.groups.value : undefined"
+            :has-more-groups="
+              isTableGrouped && groupedEntities.hasMoreGroups.value
+            "
+            :groups-loading="groupedEntities.loading.value"
+            @load-more-in-group="groupedEntities.loadMoreInGroup"
+            @load-more-groups="groupedEntities.loadMoreGroups"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
@@ -385,6 +396,7 @@ import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
+import { useGroupedEntities } from "@/components/library/view-modes/composables/useGroupedEntities";
 import { UploadStatus } from "@/composables/upload/types";
 import useUpload from "@/composables/upload/useUpload";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -704,6 +716,8 @@ const {
   fetchAllPromises,
   getEntities,
   getEntityById,
+  getQueryVariables,
+  fetchEntitiesWithVariables,
   manipulationQuery,
   setAdvancedFilters,
   setEntityType,
@@ -819,6 +833,7 @@ const {
   expandFilters,
   toggles,
   configPerViewMode,
+  groupByPerViewMode,
   viewModesIncludeViewModesMedia,
   showViewModesList,
   determineViewModes,
@@ -834,6 +849,21 @@ const {
   persistPreferences: props.saveViewPreferences !== false,
   forceListView: props.forceListView,
   persistExpandFilters: props.persistExpandFilters,
+});
+
+const tableGroupBy = computed(
+  () => groupByPerViewMode.value[ViewModes.Table],
+);
+const groupedEntities = useGroupedEntities({
+  fetchEntities: fetchEntitiesWithVariables,
+  getBaseVariables: getQueryVariables,
+});
+const isTableGrouped = computed(
+  () => displayTable.value && tableGroupBy.value !== undefined,
+);
+watch([fetchSequence, isTableGrouped], () => {
+  if (isTableGrouped.value) groupedEntities.load(tableGroupBy.value!);
+  else groupedEntities.reset();
 });
 
 const showBasicModePagination = computed(

@@ -337,3 +337,58 @@ describe("useBaseLibrary – access denied", () => {
     expect(accessDenied.value).toBe(false);
   });
 });
+
+describe("useBaseLibrary – fetching with custom variables", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+
+  it("returns the current query variables as an independent copy", async () => {
+    const apolloClient = {
+      query: vi.fn().mockResolvedValue({
+        data: { Entities: { results: [], count: 0, facets: [] } },
+      }),
+    } as any;
+    const { getEntities, getQueryVariables, setSortKey } =
+      useBaseLibrary(apolloClient);
+    await getEntities(mockRoute);
+    await setSortKey("properties.status.value");
+
+    const variables = getQueryVariables();
+    variables.searchValue.order_by = "changed";
+
+    expect(getQueryVariables().searchValue.order_by).toBe(
+      "properties.status.value",
+    );
+  });
+
+  it("queries with the given variables without touching the library state", async () => {
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValueOnce({
+          data: { Entities: { results: [{ id: "a" }], count: 1, facets: [] } },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            Entities: {
+              results: [{ id: "x" }, { id: "y" }],
+              count: 7,
+              facets: [],
+            },
+          },
+        }),
+    } as any;
+    const { entities, totalEntityCount, getEntities, fetchEntitiesWithVariables } =
+      useBaseLibrary(apolloClient);
+    await getEntities(mockRoute);
+
+    const result = await fetchEntitiesWithVariables({ limit: 50 } as any);
+
+    expect(result).toEqual({ results: [{ id: "x" }, { id: "y" }], count: 7 });
+    expect(apolloClient.query.mock.calls[1][0]).toMatchObject({
+      variables: { limit: 50 },
+      fetchPolicy: "no-cache",
+    });
+    expect(entities.value).toEqual([{ id: "a" }]);
+    expect(totalEntityCount.value).toBe(1);
+  });
+});

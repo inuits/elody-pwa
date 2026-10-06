@@ -362,6 +362,32 @@ export const useBaseLibrary = (
     }
   };
 
+  const getQueryVariables = (): GetEntitiesQueryVariables =>
+    snapshotVariables(getStoredQueryVariables(_route) ?? queryVariables);
+
+  const fetchEntitiesWithVariables = async (
+    variables: GetEntitiesQueryVariables,
+  ): Promise<{ results: Entity[]; count: number }> => {
+    const entitiesQuery = await determineEntitiesQuery(
+      _route!,
+      manipulationQuery.value?.document,
+    );
+    const result = await apolloClient.query({
+      query: entitiesQuery,
+      variables,
+      fetchPolicy: "no-cache",
+      context: {
+        headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
+      },
+    });
+    const fetchedEntities =
+      result.data.Entities || result.data.EntitiesHistory;
+    return {
+      results: (fetchedEntities?.results ?? []) as Entity[],
+      count: fetchedEntities?.count ?? 0,
+    };
+  };
+
   const revealExactCount = async (): Promise<void> => {
     const { loadDocument } = useImport();
     const variables = getStoredQueryVariables(_route) ?? queryVariables;
@@ -458,6 +484,8 @@ export const useBaseLibrary = (
     fetchAllPromises,
     getEntities,
     getEntityById,
+    getQueryVariables,
+    fetchEntitiesWithVariables,
     manipulationQuery,
     setAdvancedFilters,
     setEntityType,
