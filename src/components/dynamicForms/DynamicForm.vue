@@ -43,7 +43,18 @@
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
+        :class="{
+          'pl-3 border-l-2 border-[rgba(0,58,82,0.15)]': (field as any)
+            .formSection,
+        }"
       >
+        <h2
+          v-if="sectionStartsAt(getSortedFieldArray, index)"
+          data-cy="form-section-label"
+          class="text-sm font-semibold text-text-body pt-1 pb-1"
+        >
+          {{ t((field as { formSection: { label: string } }).formSection.label) }}
+        </h2>
         <ImportWrapper
           v-if="
             field.inputField?.type ===
@@ -259,6 +270,10 @@
 
 <script setup lang="ts">
 import { useBaseModal } from "@/composables/useBaseModal";
+import {
+  flattenFormFields,
+  sectionStartsAt,
+} from "@/components/dynamicForms/formSections";
 import type {
   ActionProgress,
   ActionProgressStep,
@@ -531,9 +546,7 @@ const formFields = computed<FormFieldTypes[] | undefined>(() => {
 
   const normalizeFields = (formFields: FormObject[]) => {
     return formFields.flatMap((formTab) =>
-      Object.values(formTab.formFields).filter(
-        (value) => typeof value === "object",
-      ),
+      flattenFormFields(formTab.formFields) as FormFieldTypes[],
     );
   };
 
@@ -598,7 +611,7 @@ const formId = computed<string>(() => {
 });
 
 const normalizeModalFormFields = (formFields: FormFields) => {
-  return Object.values(formFields).filter((value) => typeof value === "object");
+  return flattenFormFields(formFields);
 };
 
 const fieldTypeMap = computed<Record<string, string[]>>(() => {
