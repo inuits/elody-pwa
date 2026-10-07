@@ -47,6 +47,7 @@ All of these must hold (`fieldEditability.ts`):
   - checkbox, dropdown;
   - metadata dropdowns;
   - relation dropdowns that save as the entity's own relations;
+  - coordinates (shown as "latitude, longitude");
 - the field isn't marked non-editable or read-only for the user;
 - it isn't locked or masked;
 - the user may update the entity;

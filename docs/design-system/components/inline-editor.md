@@ -27,6 +27,7 @@ Under the editor:
 | textarea, resizable textarea | input in textarea mode |
 | checkbox | [checkbox](./checkbox.md) |
 | dropdown, metadata single / multi select | [dropdown](./dropdown.md), clearable ("— Geen waarde") unless required, multiple for multi-selects |
+| coordinates | two number inputs, Latitude and Longitude; both or neither, latitude within -90…90, longitude within -180…180; emptying both clears the value |
 | relation single / multi select | the relation autocomplete, with its value inputs when the field has metadata on the relation (for example a page number) |
 
 Rich text has its own editor on the [WYSIWYG field](./wysiwyg-field.md).

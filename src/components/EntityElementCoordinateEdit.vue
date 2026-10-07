@@ -4,10 +4,12 @@
     v-if="inputField && isPermitted"
     class="text-text-light text-sm"
   >
-    <p data-cy="metadata-label">
-      {{ label ? t(label) : t("metadata.no-label") }}
-    </p>
-    <div data-cy="metadata-value" class="flex justify-between">
+    <MetadataTitle :metadata="{ label: label || 'metadata.no-label' } as any" />
+    <div
+      v-if="useEditHelper.isEdit"
+      data-cy="metadata-value"
+      class="flex justify-between"
+    >
       <div class="h-10 block">
         <BaseInputTextNumberDatetime
           v-model="computedLatitude"
@@ -31,22 +33,113 @@
         <p class="text-red-default">{{ errorMessage }}</p>
       </div>
     </div>
+    <!-- Per-field editing (field-row.md, inline-editor.md): the value reads
+         as text and opens its own inline editor. -->
+    <InlineFieldEditor
+      v-else-if="isEditingInPlace"
+      :type="inputField.type"
+      :model-value="value"
+      :label="t(label)"
+      :saving="saving"
+      :error-message="inlineError"
+      :dirty="isDirty"
+      @save="saveInPlace"
+      @cancel="cancelInPlace"
+    >
+      <template #input>
+        <div class="flex gap-1.5">
+          <div data-cy="coordinate-latitude" class="grow min-w-0">
+            <BaseInputTextNumberDatetime
+              v-model="draftLatitude"
+              :type="inputField.type as any"
+              :step="decimalPointStep"
+              input-style="defaultWithBorder"
+              aria-label="Latitude"
+              :invalid="!!inlineError"
+              :disabled="saving"
+            />
+          </div>
+          <div data-cy="coordinate-longitude" class="grow min-w-0">
+            <BaseInputTextNumberDatetime
+              v-model="draftLongitude"
+              :type="inputField.type as any"
+              :step="decimalPointStep"
+              input-style="defaultWithBorder"
+              aria-label="Longitude"
+              :invalid="!!inlineError"
+              :disabled="saving"
+            />
+          </div>
+        </div>
+      </template>
+    </InlineFieldEditor>
+    <div
+      v-else
+      ref="fieldValueRef"
+      data-cy="field-value"
+      class="flex items-center gap-2 min-h-(--field-value-min-height) text-value text-text-secondary"
+      :class="
+        canEditInPlace
+          ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) hover:bg-surface-editable-hover'
+          : undefined
+      "
+      v-bind="editableValueAttrs"
+      @click="startEditing"
+      @keydown.enter.prevent="startEditing"
+      @keydown.space.prevent="startEditing"
+    >
+      <span
+        v-if="displayValue"
+        :class="{
+          'border-b border-dashed border-border-dashed': canEditInPlace,
+        }"
+        >{{ displayValue }}</span
+      >
+      <span v-else class="opacity-[var(--opacity-empty)]">{{
+        emptyValueLabel
+      }}</span>
+      <span
+        v-if="canEditInPlace"
+        data-cy="field-edit-pencil"
+        aria-hidden="true"
+        class="ml-auto flex shrink-0 text-text-subtle"
+      >
+        <unicon :name="Unicons.EditAlt.name" height="12" />
+      </span>
+    </div>
+    <p role="status" class="sr-only">{{ savedAnnouncement }}</p>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { FormContext } from "vee-validate";
-import type {
-  Conditional,
-  InputField as InputFieldType,
+import {
+  Collection,
+  type Conditional,
+  type InputField as InputFieldType,
 } from "@/generated-types/queries";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { type PropType, computed, onMounted, inject, ref } from "vue";
+import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
+import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
+import {
+  type PropType,
+  computed,
+  onMounted,
+  inject,
+  nextTick,
+  ref,
+  unref,
+} from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
+import { useEditScope } from "@/composables/useEditScope";
+import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
+import { buildMetadataInput, saveScope } from "@/composables/useScopedSave";
+import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
+import { Unicons } from "@/types";
 
 export type Location = {
   latitude: string;
@@ -56,11 +149,15 @@ export type Location = {
 const props = defineProps({
   fieldKey: { type: String, required: true },
   label: { type: String, required: true },
-  value: { type: Object as PropType<Location>, required: true },
+  value: { type: Object as PropType<Location>, required: false },
   inputField: { type: Object as PropType<InputFieldType>, required: false },
   entityUuid: { type: String, required: true },
   permitted: { type: Boolean, required: false, default: undefined },
 });
+
+const emit = defineEmits<{
+  (event: "update:value", value: Location | { latitude: number; longitude: number } | ""): void;
+}>();
 
 const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 
@@ -70,21 +167,26 @@ const { getForm } = useFormHelper();
 const form: FormContext | undefined = getForm(props.entityUuid);
 const { errorMessage } = useField("intialValues." + props.fieldKey);
 const { conditionalFieldIsAvailable } = useConditionalValidation();
-const coordinateEditIsDisabled = computed(() => {
-  if (!useEditHelper.value.isEdit) return true;
-  if (!props.inputField?.validation?.available_if) return false;
-  return !conditionalFieldIsAvailable(
+const isAvailable = computed<boolean>(() => {
+  if (!props.inputField?.validation?.available_if) return true;
+  return conditionalFieldIsAvailable(
     props.inputField.validation.available_if as Conditional,
     props.entityUuid,
     mediafileViewerContext,
   );
 });
-const { t } = useI18n();
+const coordinateEditIsDisabled = computed(
+  () => !useEditHelper.value.isEdit || !isAvailable.value,
+);
+const { t, te } = useI18n();
+const translated = (key: string, fallback: string): string =>
+  te(key) ? t(key) : fallback;
+const emptyValueLabel = useEmptyValueLabel();
 
 const isPermitted = computed(() => props.permitted !== false);
 
 onMounted(() => {
-  setFormValues(computedLatitude.value, computedLongitude.value);
+  if (props.value) setFormValues(computedLatitude.value, computedLongitude.value);
   useEditHelper.value = useEditMode(props.entityUuid);
 });
 
@@ -114,4 +216,166 @@ const computedLatitude = computed<any>({
     if (form) setFormValues(value, computedLongitude.value);
   },
 });
+
+// --- Per-field editing ------------------------------------------------------
+const isFilled = (value: unknown): boolean =>
+  value !== undefined && value !== null && String(value).trim() !== "";
+const displayValue = computed<string>(() =>
+  isFilled(props.value?.latitude) && isFilled(props.value?.longitude)
+    ? `${props.value!.latitude}, ${props.value!.longitude}`
+    : "",
+);
+
+const entityFormData = inject<
+  | {
+      id?: string;
+      collection?: Collection;
+      onSaved?: (savedEntity: unknown) => void;
+    }
+  | undefined
+>("entityFormData", undefined);
+const entityCanUpdate = computed<boolean>(() =>
+  ["edit", "edit-delete"].includes(
+    unref((useEditHelper.value as any).permittedEditMode) as string,
+  ),
+);
+const canEditInPlace = computed<boolean>(
+  () =>
+    isAvailable.value &&
+    canEditFieldInPlace({
+      inputFieldType: props.inputField?.type,
+      editableByUser: !(props.inputField as any)?.readOnly,
+      locked: false,
+      masked: false,
+      entityCanUpdate: entityCanUpdate.value,
+      pageInEditMode: !!useEditHelper.value.isEdit,
+    }),
+);
+const editableValueAttrs = computed(() =>
+  canEditInPlace.value
+    ? {
+        role: "button",
+        tabindex: 0,
+        "aria-label": `${t(props.label)}, ${translated("inline-edit.edit-field", "edit")}`,
+      }
+    : {},
+);
+
+const { requestOpen, release } = useEditScope();
+const scopeId = computed(() => `${props.entityUuid}:${props.fieldKey}`);
+const isEditingInPlace = ref<boolean>(false);
+const saving = ref<boolean>(false);
+const inlineError = ref<string | undefined>(undefined);
+const savedAnnouncement = ref<string>("");
+const draftLatitude = ref<string>("");
+const draftLongitude = ref<string>("");
+const fieldValueRef = ref<HTMLElement | null>(null);
+
+const asText = (value: unknown): string => (isFilled(value) ? String(value) : "");
+const isDirty = computed<boolean>(
+  () =>
+    asText(draftLatitude.value) !== asText(props.value?.latitude) ||
+    asText(draftLongitude.value) !== asText(props.value?.longitude),
+);
+
+const focusValue = async () => {
+  await nextTick();
+  fieldValueRef.value?.focus();
+};
+const close = () => {
+  isEditingInPlace.value = false;
+  inlineError.value = undefined;
+  release(scopeId.value);
+};
+const cancelInPlace = () => {
+  close();
+  focusValue();
+};
+
+// Both coordinates or neither; each within its range.
+const validationError = (): string | undefined => {
+  const latitude = asText(draftLatitude.value);
+  const longitude = asText(draftLongitude.value);
+  if (!latitude && !longitude) return undefined;
+  if (!latitude || !longitude)
+    return translated(
+      "inline-edit.coordinates-both",
+      "Fill in both latitude and longitude",
+    );
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90)
+    return translated(
+      "inline-edit.latitude-range",
+      "Latitude must be between -90 and 90",
+    );
+  if (!Number.isFinite(lon) || lon < -180 || lon > 180)
+    return translated(
+      "inline-edit.longitude-range",
+      "Longitude must be between -180 and 180",
+    );
+  return undefined;
+};
+
+const saveInPlace = async () => {
+  if (saving.value) return;
+  if (!isDirty.value) {
+    cancelInPlace();
+    return;
+  }
+  const error = validationError();
+  if (error) {
+    inlineError.value = error;
+    return;
+  }
+  const cleared = !asText(draftLatitude.value);
+  const value = cleared
+    ? ""
+    : {
+        latitude: Number(draftLatitude.value),
+        longitude: Number(draftLongitude.value),
+      };
+  saving.value = true;
+  inlineError.value = undefined;
+  try {
+    const savedEntity = await saveScope({
+      entityId: entityFormData?.id || props.entityUuid,
+      collection: entityFormData?.collection ?? Collection.Entities,
+      formInput: buildMetadataInput(props.fieldKey, value),
+    });
+    form?.resetField(`intialValues.${props.fieldKey}`, { value });
+    emit("update:value", value);
+    if (savedEntity) entityFormData?.onSaved?.(savedEntity);
+    savedAnnouncement.value = translated("inline-edit.saved", "Saved");
+    close();
+    focusValue();
+  } catch {
+    inlineError.value = translated(
+      "inline-edit.save-failed",
+      "Saving failed, try again",
+    );
+  } finally {
+    saving.value = false;
+  }
+};
+
+const startEditing = () => {
+  if (!canEditInPlace.value || isEditingInPlace.value) return;
+  const opened = requestOpen({
+    id: scopeId.value,
+    isDirty: () => isDirty.value,
+    close,
+    save: async () => {
+      await saveInPlace();
+      return !isEditingInPlace.value;
+    },
+    discard: cancelInPlace,
+  });
+  if (!opened) return;
+  draftLatitude.value = asText(props.value?.latitude);
+  draftLongitude.value = asText(props.value?.longitude);
+  savedAnnouncement.value = "";
+  inlineError.value = undefined;
+  isEditingInPlace.value = true;
+};
 </script>
