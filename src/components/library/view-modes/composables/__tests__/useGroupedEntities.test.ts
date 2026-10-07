@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   AdvancedFilterTypes,
+  Operator,
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
@@ -284,6 +285,38 @@ describe("useGroupedEntities", () => {
     expect(groupRequest.advancedFilterInputs).not.toContainEqual(categoryFilter);
   });
 
+  it("keeps an or filter on the grouped key so it still narrows each group", async () => {
+    const orFilter: AdvancedFilterInput = {
+      type: AdvancedFilterTypes.Selection,
+      key: ["vlacc:1|properties.category.value"],
+      value: ["Non-fictie", "Formele catalografie"],
+      match_exact: true,
+      operator: Operator.Or,
+    };
+    const fetchEntities = createBackend(comments);
+    const grouped = useGroupedEntities({
+      fetchEntities,
+      getBaseVariables: () => ({
+        ...baseVariables(),
+        advancedFilterInputs: [typeFilter, orFilter],
+      }),
+    });
+
+    await grouped.load(config);
+
+    const groupRequest = fetchEntities.mock.calls[1][0];
+    expect(groupRequest.advancedFilterInputs).toEqual([
+      typeFilter,
+      orFilter,
+      {
+        type: AdvancedFilterTypes.Selection,
+        key: ["vlacc:1|properties.category.value"],
+        value: ["Formele catalografie"],
+        match_exact: true,
+      },
+    ]);
+  });
+
   it("resolves group values to labels for entity reference groups", async () => {
     const fetchEntities = createBackend(comments);
     const resolveLabels = vi.fn(async (ids: string[]) =>
@@ -323,6 +356,113 @@ describe("useGroupedEntities", () => {
     await grouped.load(config);
 
     expect(resolveLabels).not.toHaveBeenCalled();
+  });
+
+  describe("pinned groups", () => {
+    const toYou = {
+      id: "to-you",
+      label: "comments.to-you",
+      filterKey: ["vlacc:1|properties.thread_tagged_users.value"],
+      value: "Non-fictie",
+    };
+    const pinnedConfig: GroupByConfig = { ...config, pinnedGroups: [toYou] };
+
+    it("shows pinned groups first and fetches them with their own filter", async () => {
+      const { fetchEntities, grouped } = setup();
+
+      await grouped.load(pinnedConfig);
+
+      expect(grouped.groups.value.map((group) => group.label)).toEqual([
+        "comments.to-you",
+        "Formele catalografie",
+        "Non-fictie",
+      ]);
+      const [pinned] = grouped.groups.value;
+      expect(pinned.pinned).toBe(true);
+      expect(pinned.entities.map((e) => e.id)).toEqual(["c1", "c3"]);
+      expect(pinned.count).toBe(3);
+      const pinnedRequest = fetchEntities.mock.calls.find(
+        ([variables]) =>
+          !variables.advancedFilterInputs.some(
+            (filter: AdvancedFilterInput) => filter.distinct_by,
+          ) &&
+          variables.advancedFilterInputs.at(-1).value[0] === "Non-fictie",
+      )![0];
+      expect(pinnedRequest.advancedFilterInputs).toEqual([
+        typeFilter,
+        {
+          type: AdvancedFilterTypes.Selection,
+          key: toYou.filterKey,
+          value: [toYou.value],
+          match_exact: true,
+        },
+      ]);
+    });
+
+    it("loads more entities in a pinned group", async () => {
+      const { grouped } = setup();
+      await grouped.load(pinnedConfig);
+
+      await grouped.loadMoreInGroup(grouped.groups.value[0].id);
+
+      expect(grouped.groups.value[0].entities.map((e) => e.id)).toEqual([
+        "c1",
+        "c3",
+        "c4",
+      ]);
+    });
+
+    it("keeps pinned groups out of the group paging", async () => {
+      const { grouped } = setup();
+      await grouped.load(pinnedConfig);
+      expect(grouped.hasMoreGroups.value).toBe(true);
+
+      await grouped.loadMoreGroups();
+
+      expect(grouped.hasMoreGroups.value).toBe(false);
+      expect(grouped.groups.value.map((group) => group.label)).toEqual([
+        "comments.to-you",
+        "Formele catalografie",
+        "Non-fictie",
+        "comments.no-category",
+      ]);
+    });
+
+    it("lets a pinned group on the grouped key take the place of the group with that value", async () => {
+      const { grouped } = setup();
+      const ownGroup = { ...toYou, filterKey: config.filterKey };
+
+      await grouped.load({ ...config, pinnedGroups: [ownGroup] });
+      expect(grouped.groups.value.map((group) => group.label)).toEqual([
+        "comments.to-you",
+        "Formele catalografie",
+      ]);
+      expect(grouped.hasMoreGroups.value).toBe(true);
+
+      await grouped.loadMoreGroups();
+
+      expect(grouped.groups.value.map((group) => group.label)).toEqual([
+        "comments.to-you",
+        "Formele catalografie",
+        "comments.no-category",
+      ]);
+      expect(grouped.hasMoreGroups.value).toBe(false);
+    });
+
+    it("does not resolve labels of pinned groups", async () => {
+      const resolveLabels = vi.fn(async (ids: string[]) =>
+        ids.map((id) => ({ key: id, value: `Label of ${id}` })),
+      );
+      const grouped = useGroupedEntities({
+        fetchEntities: createBackend(comments),
+        getBaseVariables: baseVariables,
+        resolveLabels,
+      });
+
+      await grouped.load({ ...pinnedConfig, labelEntityTypes: ["group"] });
+
+      expect(grouped.groups.value[0].label).toBe("comments.to-you");
+    });
   });
 
   it("clears the groups on reset", async () => {
@@ -379,6 +519,18 @@ describe("buildTableItems", () => {
       ["x_a", "a", undefined, "x"],
       ["y_a", "a", "y", "y"],
     ]);
+  });
+
+  it("hides a pinned group that turned out to be empty", () => {
+    const pinnedEmpty = { ...group("p", []), pinned: true };
+    const loadingPinned = { ...pinnedEmpty, id: "q", loading: true };
+    const y = group("y", ["a"]);
+
+    expect(
+      buildTableItems(rows, [pinnedEmpty, loadingPinned, y]).map(
+        (item) => item.key,
+      ),
+    ).toEqual(["q_empty", "y_a"]);
   });
 
   it("keeps a group without loaded rows as a single header item", () => {

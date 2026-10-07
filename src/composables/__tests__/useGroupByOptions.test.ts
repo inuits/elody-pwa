@@ -85,6 +85,18 @@ describe("useGroupByOptions", () => {
     expect(onChange).toHaveBeenLastCalledWith(author);
   });
 
+  it("forgets the options and the user's choice when cleared", () => {
+    const { groupBy, onChange } = setup();
+    groupBy.select(author.key);
+
+    groupBy.clear();
+
+    expect(groupBy.hasOptions.value).toBe(false);
+    expect(onChange).toHaveBeenLastCalledWith(null);
+    groupBy.setOptions([category, author]);
+    expect(groupBy.selectedKey.value).toBe(category.key);
+  });
+
   it("has no options when none are configured", () => {
     const groupBy = useGroupByOptions({ onChange: vi.fn() });
 

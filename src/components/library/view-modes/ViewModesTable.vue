@@ -56,7 +56,9 @@
             class="flex items-center justify-between gap-2 px-3 py-2 mt-2 bg-accent-highlight text-text-body font-semibold text-sm"
           >
             <span>{{
-              groupStart.value === null ? t(groupStart.label) : groupStart.label
+              groupStart.value === null || groupStart.pinned
+                ? t(groupStart.label)
+                : groupStart.label
             }}</span>
             <span class="font-normal">{{ groupStart.count }}</span>
           </div>

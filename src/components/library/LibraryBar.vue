@@ -36,6 +36,21 @@
         />
       </div>
       <div
+        v-if="sortOptions.length > 0"
+        class="flex items-center w-full @md:w-auto"
+      >
+        <AdvancedDropdown
+          class="w-full @md:w-auto"
+          data-cy="sort-toggle"
+          v-model="selectedSortDirection"
+          :options="sortDirectionOptions"
+          :label="t('library.sort-direction')"
+          :clearable="false"
+          :add-icon-to-value="true"
+          label-position="inline"
+        />
+      </div>
+      <div
         v-if="showGroupBy && groupByHasOptions"
         class="w-full @md:w-auto"
       >
@@ -49,21 +64,6 @@
           :add-label-to-value="true"
           label-position="inline"
           @update:model-value="(value) => selectGroupBy(String(value ?? ''))"
-        />
-      </div>
-      <div
-        v-if="sortOptions.length > 0"
-        class="flex items-center w-full @md:w-auto"
-      >
-        <AdvancedDropdown
-          class="w-full @md:w-auto"
-          data-cy="sort-toggle"
-          v-model="selectedSortDirection"
-          :options="sortDirectionOptions"
-          :label="t('library.sort-direction')"
-          :clearable="false"
-          :add-icon-to-value="true"
-          label-position="inline"
         />
       </div>
     </div>
@@ -277,11 +277,15 @@ const {
   selectedKey: selectedGroupByKey,
   setOptions: setGroupByOptions,
   select: selectGroupBy,
+  clear: clearGroupByOptions,
 } = useGroupByOptions({
   onChange: (config) => props.setGroupBy?.(config),
 });
 
+let groupByOptionsRequest = 0;
 const loadGroupByOptions = async () => {
+  const request = ++groupByOptionsRequest;
+  clearGroupByOptions();
   const queryName = (route?.meta?.queries as any)?.getGroupByOptions;
   if (!queryName) return;
   const result = await apolloClient.query({
@@ -289,6 +293,7 @@ const loadGroupByOptions = async () => {
     variables: { entityType: route.meta?.entityType },
     fetchPolicy: "no-cache",
   });
+  if (request !== groupByOptionsRequest) return;
   setGroupByOptions(
     (result.data?.EntityTypeGroupByOptions?.options ?? []) as GroupByConfig[],
   );
@@ -303,8 +308,9 @@ const determineSortOptionsQuery = async (): Promise<any> => {
 onMounted(() => {
   emit("paginationLimitOptionsPromise", paginationLimitOptionsPromise);
   emit("sortOptionsPromise", sortOptionsPromise);
-  loadGroupByOptions();
 });
+
+watch(() => route.name, loadGroupByOptions, { immediate: true });
 
 watch(
   () => selectedPaginationLimitOption.value,

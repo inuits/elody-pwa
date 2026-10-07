@@ -1224,6 +1224,7 @@ const resetPaginationAndView = () => {
   const limitFromState = getStateForRoute(route)?.queryVariables?.limit;
   paginationStore.setLimit(limitFromState || 20);
   resetToListView();
+  hasRestoredViewModesAfterFetch.value = false;
 };
 
 watch(

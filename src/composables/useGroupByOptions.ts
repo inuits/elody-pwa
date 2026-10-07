@@ -48,5 +48,11 @@ export const useGroupByOptions = ({ onChange }: UseGroupByOptionsOptions) => {
     onChange(configFor(key));
   };
 
-  return { hasOptions, dropdownOptions, selectedKey, setOptions, select };
+  const clear = () => {
+    options.value = [];
+    chosenKey.value = undefined;
+    onChange(null);
+  };
+
+  return { hasOptions, dropdownOptions, selectedKey, setOptions, select, clear };
 };

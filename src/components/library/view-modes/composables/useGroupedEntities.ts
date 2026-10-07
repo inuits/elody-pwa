@@ -1,10 +1,12 @@
 import { computed, shallowRef } from "vue";
 import {
   AdvancedFilterTypes,
+  Operator,
   type AdvancedFilterInput,
   type Entity,
   type GetEntitiesQueryVariables,
   type GroupByConfig,
+  type GroupByPinnedGroup,
 } from "@/generated-types/queries";
 
 export type EntityGroup = {
@@ -16,6 +18,8 @@ export type EntityGroup = {
   page: number;
   loading: boolean;
   hasMore: boolean;
+  pinned?: boolean;
+  filterKey?: string[];
 };
 
 export type FetchEntities = (
@@ -68,6 +72,7 @@ export const buildTableItems = <Row extends { id: string }>(
     }));
   const rowsById = new Map(rows.map((row) => [row.id, row]));
   return groups.reduce<TableItem<Row>[]>((items, group) => {
+    if (group.pinned && !group.loading && group.count === 0) return items;
     const groupRows = group.entities
       .map((entity) => rowsById.get(entity.id))
       .filter((row): row is Row => row !== undefined);
@@ -94,11 +99,15 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
   const groupsCount = shallowRef<number>(0);
   const groupsPage = shallowRef<number>(0);
   const loading = shallowRef<boolean>(false);
+  const replacedGroupsCount = shallowRef<number>(0);
   let activeConfig: GroupByConfig | undefined;
   let generation = 0;
 
   const hasMoreGroups = computed(
-    () => groups.value.length < groupsCount.value,
+    () =>
+      groups.value.filter(({ pinned }) => !pinned).length +
+        replacedGroupsCount.value <
+      groupsCount.value,
   );
 
   const entities = computed<Entity[]>(() => {
@@ -114,26 +123,41 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
   const normalizedKey = (key: unknown): string =>
     (Array.isArray(key) ? key : [key]).map(String).sort().join("|");
 
-  const baseFiltersWithoutGroupedKey = (
+  const baseFiltersWithoutKey = (
     variables: GetEntitiesQueryVariables,
-    config: GroupByConfig,
+    filterKey: string[],
   ) =>
     baseFilters(variables).filter(
-      (filter) => normalizedKey(filter.key) !== normalizedKey(config.filterKey),
+      (filter) =>
+        filter.operator === Operator.Or ||
+        normalizedKey(filter.key) !== normalizedKey(filterKey),
     );
 
   const groupFilter = (
-    config: GroupByConfig,
+    filterKey: string[],
     value: string | null,
   ): AdvancedFilterInput =>
     value === null
-      ? { type: AdvancedFilterTypes.Text, key: config.filterKey, value: "" }
+      ? { type: AdvancedFilterTypes.Text, key: filterKey, value: "" }
       : {
           type: AdvancedFilterTypes.Selection,
-          key: config.filterKey,
+          key: filterKey,
           value: [value],
           match_exact: true,
         };
+
+  const toPinnedGroup = (pinnedGroup: GroupByPinnedGroup): EntityGroup => ({
+    id: `pinned:${pinnedGroup.id}`,
+    value: pinnedGroup.value,
+    label: pinnedGroup.label,
+    entities: [],
+    count: 0,
+    page: 0,
+    loading: true,
+    hasMore: false,
+    pinned: true,
+    filterKey: pinnedGroup.filterKey,
+  });
 
   const updateGroup = (id: string, changes: Partial<EntityGroup>) => {
     groups.value = groups.value.map((group) =>
@@ -149,14 +173,15 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
   ) => {
     const variables = options.getBaseVariables();
     const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE;
+    const filterKey = group.filterKey ?? config.filterKey;
     updateGroup(group.id, { loading: true });
     const { results, count } = await options.fetchEntities({
       ...variables,
       limit: pageSize,
       skip: page,
       advancedFilterInputs: [
-        ...baseFiltersWithoutGroupedKey(variables, config),
-        groupFilter(config, group.value),
+        ...baseFiltersWithoutKey(variables, filterKey),
+        groupFilter(filterKey, group.value),
       ],
     });
     if (loadGeneration !== generation) return;
@@ -222,7 +247,15 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
     const knownIds = new Set(
       page === 1 ? [] : groups.value.map(({ id }) => id),
     );
-    const newGroups = results
+    const replacedValues = new Set(
+      (config.pinnedGroups ?? [])
+        .filter(
+          ({ filterKey }) =>
+            normalizedKey(filterKey) === normalizedKey(config.filterKey),
+        )
+        .map(({ value }) => value),
+    );
+    const distinctGroups = results
       .map((representative) => {
         const value = getGroupValue(representative, config.key);
         return {
@@ -237,14 +270,26 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
         } as EntityGroup;
       })
       .filter(({ id }) => !knownIds.has(id) && !!knownIds.add(id));
+    const newGroups = distinctGroups.filter(
+      ({ value }) => value === null || !replacedValues.has(value),
+    );
 
     const labelledGroups = await withResolvedLabels(config, newGroups);
     if (loadGeneration !== generation) return [];
 
     groupsCount.value = count;
     groupsPage.value = page;
-    groups.value = [...(page === 1 ? [] : groups.value), ...labelledGroups];
-    return labelledGroups;
+    replacedGroupsCount.value =
+      (page === 1 ? 0 : replacedGroupsCount.value) +
+      distinctGroups.length -
+      newGroups.length;
+    const pinnedGroups =
+      page === 1 ? (config.pinnedGroups ?? []).map(toPinnedGroup) : [];
+    groups.value = [
+      ...(page === 1 ? pinnedGroups : groups.value),
+      ...labelledGroups,
+    ];
+    return [...pinnedGroups, ...labelledGroups];
   };
 
   const loadGroupsPage = async (page: number, loadGeneration: number) => {
@@ -286,6 +331,7 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
     groups.value = [];
     groupsCount.value = 0;
     groupsPage.value = 0;
+    replacedGroupsCount.value = 0;
     loading.value = false;
   };
 

@@ -733,6 +733,26 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
 
     expect(libGetUserPreferredViewModeConfiguration).not.toHaveBeenCalled();
   });
+  it("restores the view mode preferences after navigating to another page of the same entity type", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    libEntitiesLoading.value = true;
+    await flushPromises();
+    libEntities.value = [makePickerEntity("e1")];
+    libEntitiesLoading.value = false;
+    await flushPromises();
+    libGetUserPreferredViewModeConfiguration.mockClear();
+
+    mockRoute.path = "/other";
+    await flushPromises();
+    libEntitiesLoading.value = true;
+    await flushPromises();
+    libEntities.value = [makePickerEntity("e2")];
+    libEntitiesLoading.value = false;
+    await flushPromises();
+
+    expect(libGetUserPreferredViewModeConfiguration).toHaveBeenCalled();
+  });
 });
 
 describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
