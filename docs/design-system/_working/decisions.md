@@ -163,6 +163,13 @@ Later subtasks:
 | DS 6 | backend support | filter option counts (active-count chip), destructive-action flag |
 | DS 7 | Storybook + docs | stories, publishing these docs |
 
+## DS 2: per-field editing
+
+| # | Item | Handoff | Catalogue | Decision |
+|---|---|---|---|---|
+| E1 | Pencil on editable values | appears on hover | always visible, 12px, subtle | **catalogue** (user, 2026-10-07): editability must not depend on hover |
+| E2 | Dashed underline | under the value | under the value text only, square ends; none for pills | **catalogue** (user, 2026-10-07) |
+
 ## 3. Filters (DS 4)
 
 Already discussed:

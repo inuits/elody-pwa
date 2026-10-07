@@ -142,7 +142,7 @@
             class="flex column gap-2 items-center"
             :class="
               canEditInPlace
-                ? 'group cursor-pointer rounded-input border-b border-dashed border-border-dashed hover:bg-surface-editable-hover'
+                ? 'cursor-pointer rounded-input hover:bg-surface-editable-hover'
                 : undefined
             "
             v-bind="editableValueAttrs"
@@ -160,6 +160,10 @@
             />
             <MetadataTruncatedText
               v-else
+              data-cy="field-value-text"
+              :class="{
+                'border-b border-dashed border-border-dashed': underlineValue,
+              }"
               @overflow-status="handleOverflowStatus"
               :disabled="!linkedEntityId && !metadata.lineClamp"
               :line-clamp="metadata.lineClamp || 1"
@@ -288,9 +292,9 @@
               v-if="canEditInPlace"
               data-cy="field-edit-pencil"
               aria-hidden="true"
-              class="ml-auto flex text-text-muted opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+              class="ml-auto flex shrink-0 text-text-subtle"
             >
-              <unicon :name="Unicons.EditAlt.name" height="14" />
+              <unicon :name="Unicons.EditAlt.name" height="12" />
             </span>
             <BaseCopyToClipboard
               v-if="metadata.copyToClipboard && !isMaskedField"
@@ -683,6 +687,15 @@ const onSpaceKey = (event: KeyboardEvent) => {
   event.preventDefault();
   startEditing();
 };
+
+// The dashed underline marks editable text; chip values (dropdowns, pills)
+// carry their own shape instead.
+const underlineValue = computed<boolean>(
+  () =>
+    canEditInPlace.value &&
+    !autoCompleteType.value &&
+    !resolvedMetadataValue.value?.formatter,
+);
 </script>
 
 <style scoped>

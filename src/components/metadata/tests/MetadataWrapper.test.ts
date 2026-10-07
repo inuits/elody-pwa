@@ -366,23 +366,39 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     expect(value.attributes("aria-label")).toBe("metadata.labels.test, edit");
   });
 
-  it("signals editability with a dashed underline and a hover wash", async () => {
-    expect((await fieldValue()).classes()).toEqual(
-      expect.arrayContaining([
-        "border-b",
-        "border-dashed",
-        "border-border-dashed",
-        "hover:bg-surface-editable-hover",
-      ]),
+  it("washes the whole value on hover", async () => {
+    expect((await fieldValue()).classes()).toContain(
+      "hover:bg-surface-editable-hover",
     );
   });
 
-  it("shows a pencil that appears on hover", async () => {
+  it("underlines the value text itself, without rounded corners", async () => {
+    const wrapper = await mountWrapper(editableProps());
+    const text = wrapper.find('[data-cy="field-value-text"]');
+    expect(text.classes()).toEqual(
+      expect.arrayContaining(["border-b", "border-dashed", "border-border-dashed"]),
+    );
+    expect(text.classes().some((c) => c.startsWith("rounded"))).toBe(false);
+    expect(wrapper.find('[data-cy="field-value"]').classes()).not.toContain(
+      "border-b",
+    );
+  });
+
+  it("does not underline a read-only value", async () => {
+    const props = editableProps();
+    (props.metadata as any).readOnly = true;
+    const text = (await mountWrapper(props)).find('[data-cy="field-value-text"]');
+    expect(text.classes()).not.toContain("border-dashed");
+  });
+
+  it("always shows the pencil on an editable value, not only on hover", async () => {
     const pencil = (await mountWrapper(editableProps())).find(
       '[data-cy="field-edit-pencil"]',
     );
     expect(pencil.exists()).toBe(true);
     expect(pencil.attributes("aria-hidden")).toBe("true");
+    expect(pencil.classes().some((c) => c.includes("opacity-0"))).toBe(false);
+    expect(pencil.classes()).toContain("text-text-subtle");
   });
 
   it("opens the field's edit scope on click", async () => {

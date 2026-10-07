@@ -16,9 +16,11 @@ repeatable row group.
   - help `?`;
   - locale chip (multilingual fields).
 - **Value:** the rendered value. When it is editable in place:
-  - a dashed underline;
-  - a hover wash;
-  - a pencil, shown on hover and focus.
+  - a dashed underline under the value text, with square ends. Chip values
+    (dropdowns, pills) have no underline, since their shape already marks them;
+  - a pencil on the right, always visible, so editability never depends on
+    hovering;
+  - a hover wash behind the whole value.
 
 ## Tokens
 | Token | Role |
@@ -28,7 +30,7 @@ repeatable row group.
 | `--text-value`, `--color-text-secondary` | value |
 | `--color-border-dashed` | editable underline |
 | `--color-surface-editable-hover` | hover wash |
-| `--color-text-muted` | pencil |
+| `--color-text-subtle` | pencil |
 | `--opacity-empty` | empty value ("Geen waarde") |
 
 ## When a value is editable in place
@@ -50,9 +52,9 @@ Anything else renders as plain text, with no button role and no hover cue.
 ## States
 | State | Cue |
 |---|---|
-| resting | value with a dashed underline |
-| hover | wash + pencil |
-| focus | the global focus ring + pencil |
+| resting | dashed underline under the text + pencil |
+| hover | wash behind the value |
+| focus | the global focus ring |
 | empty | "Geen waarde" at `--opacity-empty` |
 | read-only | plain value, no underline, no hover |
 | editing | the [inline editor](./inline-editor.md) replaces the value |
