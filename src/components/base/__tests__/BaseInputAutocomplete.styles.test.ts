@@ -6,8 +6,8 @@ import BaseInputAutocomplete from "../BaseInputAutocomplete.vue";
 vi.mock("@vueform/multiselect", () => ({
   default: defineComponent({
     name: "MockMultiselect",
-    props: { classes: { default: () => ({}) } },
-    template: `<div data-cy="multiselect" />`,
+    props: { classes: { default: () => ({}) }, modelValue: { default: () => [] } },
+    template: `<div data-cy="multiselect"><template v-for="option in modelValue" :key="option.value"><slot name="tag" :option="option" :handle-tag-remove="() => {}" :disabled="false" /></template></div>`,
   }),
 }));
 
@@ -21,7 +21,11 @@ vi.mock("@/composables/useEdit", () => ({
   useEditMode: () => ({ isEdit: ref(true) }),
 }));
 vi.mock("@/components/base/BaseInputTextNumberDatetime.vue", () => ({
-  default: { template: "<div />" },
+  default: {
+    name: "BaseInputTextNumberDatetime",
+    props: ["size", "modelValue", "inputStyle", "type", "disabled"],
+    template: "<div data-cy='tag-input' />",
+  },
 }));
 
 const classesFor = (
@@ -40,6 +44,21 @@ const classesFor = (
     .props("classes") as Record<string, string>;
 
 describe("BaseInputAutocomplete — design-system styling", () => {
+  it("fits the value input on a relation chip (e.g. a page number) inside the chip", () => {
+    const tagInput = mount(BaseInputAutocomplete, {
+      props: {
+        modelValue: [{ label: "A", value: "a" }],
+        options: [{ label: "A", value: "a" }],
+        autocompleteStyle: "defaultWithBorder",
+        relationType: "refBibliographicalReferences",
+        displayInputForTag: true,
+      } as any,
+    }).findComponent({ name: "BaseInputTextNumberDatetime" });
+    expect(tagInput.exists()).toBe(true);
+    expect(tagInput.props("size")).toBe("compact");
+    expect(tagInput.classes().some((c) => c.includes("[26px]"))).toBe(false);
+  });
+
   it("uses the one focus ring when active", () => {
     const active = classesFor("default").containerActive;
     expect(active).toContain("outline-2");

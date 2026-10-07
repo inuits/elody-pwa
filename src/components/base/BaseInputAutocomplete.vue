@@ -63,7 +63,8 @@
         >
           <BaseInputTextNumberDatetime
             v-if="!isPlainText"
-            class="h-[26px] ml-2 py-[2px]"
+            class="ml-2"
+            size="compact"
             :style="{ width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch` }"
             :model-value="getTagInputValue(option.value)"
             @update:model-value="

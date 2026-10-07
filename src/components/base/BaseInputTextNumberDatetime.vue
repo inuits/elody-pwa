@@ -146,8 +146,11 @@ const props = withDefaults(
       value: string | number | boolean | undefined,
     ) => boolean;
     placeholder?: string;
+    // "compact" fits inside a chip (a value on a relation, e.g. a page number).
+    size?: "default" | "compact";
   }>(),
   {
+    size: "default",
     type: "text",
     step: 1,
     disabled: false,
@@ -186,8 +189,11 @@ const isInvalid = computed<boolean>(() => props.invalid || !!props.errorMessage)
 // the global :focus-visible ring, so the forms-plugin ring is suppressed.
 const fieldClasses = computed<string[]>(() => {
   const style = selectedInputStyle.value;
-  const shape =
-    "border rounded-input text-input p-(--input-padding) min-h-(--control-height) placeholder:text-text-placeholder focus:ring-0";
+  const sizing =
+    props.size === "compact"
+      ? "text-label p-(--input-padding-compact) min-h-(--control-height-compact)"
+      : "text-input p-(--input-padding) min-h-(--control-height)";
+  const shape = `border rounded-input ${sizing} placeholder:text-text-placeholder focus:ring-0`;
   if (props.readonly)
     return [shape, style.textColor, "bg-transparent border-transparent"];
   return [
