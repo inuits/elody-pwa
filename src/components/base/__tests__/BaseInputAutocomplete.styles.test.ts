@@ -59,6 +59,36 @@ describe("BaseInputAutocomplete — design-system styling", () => {
     expect(tagInput.classes().some((c) => c.includes("[26px]"))).toBe(false);
   });
 
+  // A disabled input swallows clicks entirely; at rest the click must reach
+  // the value box so the field row can open its editor.
+  const tagInputAt = (disabled: boolean) =>
+    mount(BaseInputAutocomplete, {
+      props: {
+        modelValue: [{ label: "A", value: "a" }],
+        options: [{ label: "A", value: "a" }],
+        autocompleteStyle: disabled ? "readOnly" : "defaultWithBorder",
+        relationType: "refBibliographicalReferences",
+        displayInputForTag: true,
+        disabled,
+      } as any,
+    });
+
+  it("marks the chip's value box so a click on it can open the editor", () => {
+    expect(tagInputAt(true).find("[data-tag-input]").exists()).toBe(true);
+  });
+
+  it("lets clicks pass through the value input at rest", () => {
+    expect(
+      tagInputAt(true).findComponent({ name: "BaseInputTextNumberDatetime" }).classes(),
+    ).toContain("pointer-events-none");
+  });
+
+  it("keeps the value input clickable while editing", () => {
+    expect(
+      tagInputAt(false).findComponent({ name: "BaseInputTextNumberDatetime" }).classes(),
+    ).not.toContain("pointer-events-none");
+  });
+
   it("uses the one focus ring when active", () => {
     const active = classesFor("default").containerActive;
     expect(active).toContain("outline-2");

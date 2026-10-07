@@ -72,7 +72,8 @@ Anything else renders as plain text, with no button role and no hover cue.
 ## Behaviour and keyboard
 - Click, Enter or Space on an editable value opens its edit scope. A click on
   a relation chip still navigates to the related entity; a plain-text relation
-  doesn't navigate, so clicking it opens the editor.
+  doesn't navigate, so clicking it opens the editor, and so does a click on a
+  chip's value box (a page number).
 - Only one scope edits at a time. If another scope is open and unchanged, it
   closes. If it has changes, it stays open and gets focus back. Nothing is
   saved or discarded implicitly.

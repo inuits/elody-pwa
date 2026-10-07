@@ -815,14 +815,18 @@ const saveRelationsInline = async () => {
   }
 };
 
-// A click on a relation chip navigates to the related entity; a plain-text
-// relation doesn't navigate, so the click opens the editor instead.
+// A click on a relation chip navigates to the related entity. A plain-text
+// relation doesn't navigate, and a chip's value box (a page number) is part
+// of the value, so those clicks open the editor instead.
 const isRelationChipClick = (event?: Event): boolean => {
   if (event?.type !== "click" || !isRelationField.value) return false;
-  const chip = (event.target as HTMLElement | null)?.closest?.(
-    ".multiselect-tag",
-  );
+  const target = event.target as HTMLElement | null;
+  const chip = target?.closest?.(".multiselect-tag");
   if (!chip) return false;
+  if (target?.closest?.("[data-tag-input]")) {
+    event.stopPropagation();
+    return false;
+  }
   if (props.metadata.inputField?.readOnlyValueAsPlainText) {
     event.stopPropagation();
     return false;

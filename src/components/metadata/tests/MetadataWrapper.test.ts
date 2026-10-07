@@ -143,7 +143,7 @@ const mountWrapper = async (
           name: "ViewModesAutocompleteRelations",
           props: ["editing", "mode", "formId", "relationType", "selectType", "disabled", "isReadOnly"],
           template:
-            "<div data-cy='relations-stub'><span class='multiselect-tag' data-cy='relation-chip'>Maker</span></div>",
+            "<div data-cy='relations-stub'><span class='multiselect-tag' data-cy='relation-chip'>Maker<span data-tag-input data-cy='relation-chip-input'><input disabled /></span></span></div>",
         },
         ViewModesAutocompleteMetadata: true,
         BaseCopyToClipboard: true,
@@ -720,6 +720,14 @@ describe("MetadataWrapper — inline relation editing", () => {
       const wrapper = await mountRelations();
       await wrapper.find('[data-cy="relation-chip"]').trigger("click");
       expect(useEditScope().isActive("MW-TEST:creator")).toBe(false);
+    });
+
+    it("opens the editor from a click on a chip's value box (page number)", async () => {
+      const wrapper = await mountRelations({
+        metadataOnRelationFieldConfig: { enabled: true, key: "page_number" },
+      });
+      await wrapper.find('[data-cy="relation-chip-input"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
     });
 
     it("opens the editor from a click beside the chips", async () => {

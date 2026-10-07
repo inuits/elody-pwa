@@ -55,8 +55,12 @@
         @click.stop="() => emit('handleTagClick', option)"
       >
         {{ stripHighlightTags(option.label) }}
+        <!-- data-tag-input: the chip's value box (e.g. a page number). At
+             rest the disabled input lets clicks through to this box, so a
+             field row can open its editor from it. -->
         <div
           v-if="displayInputForTag"
+          data-tag-input
           @click.stop
           @mousedown.stop
           @keydown.stop
@@ -64,6 +68,7 @@
           <BaseInputTextNumberDatetime
             v-if="!isPlainText"
             class="ml-2"
+            :class="{ 'pointer-events-none': props.disabled }"
             size="compact"
             :style="{ width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch` }"
             :model-value="getTagInputValue(option.value)"
