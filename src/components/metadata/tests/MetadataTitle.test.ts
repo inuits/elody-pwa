@@ -116,10 +116,10 @@ describe("MetadataTitle - field-row label", () => {
 });
 
 describe("MetadataTitle - help icons", () => {
-  // Label-line icons share the pencil's size, so none outgrows the label.
-  const LABEL_ICON_HEIGHT = "12";
+  // Help icons stay close to the label size, a step above the 12px pencil.
+  const LABEL_ICON_HEIGHT = "14";
 
-  it("sizes the info-panel icon like the edit pencil", () => {
+  it("sizes the info-panel icon to the label line", () => {
     const wrapper = getWrapper({
       label: "metadata.labels.reading",
       infoPanel: { title: "t", content: "<p>c</p>" },
@@ -132,7 +132,7 @@ describe("MetadataTitle - help icons", () => {
     ).toBe(LABEL_ICON_HEIGHT);
   });
 
-  it("sizes the tooltip icon like the edit pencil", () => {
+  it("sizes the tooltip icon to the label line", () => {
     const wrapper = shallowMount(MetadataTitle, {
       props: {
         metadata: { label: "metadata.labels.reading", tooltip: "hint" },

@@ -29,7 +29,7 @@
     >
       <template #activator="{ on, describedBy }">
         <div v-on="on" :aria-describedby="describedBy" class="pl-1">
-          <unicon :name="Unicons.QuestionCircle.name" height="12" />
+          <unicon :name="Unicons.QuestionCircle.name" height="14" />
         </div>
       </template>
       <template #default>
@@ -48,7 +48,7 @@
         openPanel({ title: infoPanel.title ?? '', content: infoPanel.content })
       "
     >
-      <unicon :name="Unicons.QuestionCircle.name" height="12" />
+      <unicon :name="Unicons.QuestionCircle.name" height="14" />
     </div>
   </div>
 </template>
