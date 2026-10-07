@@ -43,7 +43,7 @@ read-only in place.
 | dirty | Bewaar enabled |
 | saving | spinner in Bewaar, input locked |
 | error | danger border + message below (`role="alert"`), value kept, editor stays open |
-| saved | editor closes, "Opgeslagen" announced, focus back on the value |
+| saved | editor closes, the "entity updated" notification shows (as after the whole-form save), "Opgeslagen" announced, focus back on the value |
 
 ## Behaviour and keyboard
 - **Pick-then-Bewaar:** choosing in a select or date picker only changes the

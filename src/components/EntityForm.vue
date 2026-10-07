@@ -17,6 +17,7 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { createScopeSavedHandler } from "@/composables/scopeSavedHandler";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
   inject,
@@ -165,7 +166,10 @@ provide("entityFormData", {
   id: props.id,
   type: props.type,
   // Per-field saves hand the saved entity back to the page here.
-  onSaved: (savedEntity: Entity) => emit("mutatedEntityUpdated", savedEntity),
+  onSaved: createScopeSavedHandler<Entity>({
+    emitSaved: (savedEntity) => emit("mutatedEntityUpdated", savedEntity),
+    notifySuccess: (title, text) => displaySuccessNotification(t(title), t(text)),
+  }),
   collection:
     childRoutes.find(
       (route: any) =>
