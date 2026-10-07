@@ -52,6 +52,7 @@ To change what a role means everywhere, change the role token.
   - [History diff](components/history-diff.md)
   - [Field row](components/field-row.md)
   - [Inline editor](components/inline-editor.md)
+  - [WYSIWYG field](components/wysiwyg-field.md)
 - `patterns/`: per-field editing, filters, lists and other multi-component patterns
 
 ## Page template (components)

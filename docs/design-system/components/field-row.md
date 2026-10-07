@@ -51,8 +51,9 @@ All of these must hold (`fieldEditability.ts`):
 - the user may update the entity;
 - it isn't multilingual, metadata on a relation, or part of a repeatable
   panel (these get their own editors later);
-- the legacy page-wide edit mode is off. It still renders its own inputs until
-  it is removed.
+- the legacy page-wide edit mode is off. Its "Bewerk metadata" button is
+  hidden, so this only matters for flows that still switch it on themselves
+  (create forms, the multi-entity view).
 
 Anything else renders as plain text, with no button role and no hover cue.
 

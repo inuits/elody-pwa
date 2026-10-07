@@ -7,8 +7,9 @@ import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.v
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
+const editState = vi.hoisted(() => ({ isEdit: true }));
 vi.mock("@/composables/useEdit", () => ({
-  useEditMode: () => ({ isEdit: true }),
+  useEditMode: () => editState,
 }));
 vi.mock("@/components/base/BaseTooltip.vue", () => ({
   default: {
@@ -45,9 +46,10 @@ const flowConfiguration = () => ({
   guidedFlowButtonLabel: "tagging.tag-wem",
 });
 
-const getWrapper = (configurations: any[]) =>
+const getWrapper = (configurations: any[], extraProps = {}) =>
   shallowMount(WYSIWYGButtons, {
     props: {
+      ...extraProps,
       formId: "comment-new-1",
       editor: editorStub() as any,
       extensions: [WysiwygExtensions.ElodyTaggingExtension],
@@ -95,5 +97,33 @@ describe("WYSIWYGButtons — guided-flow tagging", () => {
   it("hides the legacy Tag button when every configuration has its own entry point", () => {
     const wrapper = getWrapper([triggerConfiguration(), flowConfiguration()]);
     expect(wrapper.text()).not.toContain("Tag");
+  });
+});
+
+describe("WYSIWYGButtons — in-place editing", () => {
+  const starterKitWrapper = (extraProps = {}) =>
+    shallowMount(WYSIWYGButtons, {
+      props: {
+        formId: "entity-1",
+        editor: editorStub() as any,
+        extensions: [WysiwygExtensions.StarterKit],
+        displayInline: true,
+        ...extraProps,
+      },
+      global: { mocks: { $t: (k: string) => k } },
+    });
+
+  it("disables the toolbar outside the page-wide edit mode", () => {
+    editState.isEdit = false;
+    const wrapper = starterKitWrapper();
+    expect(wrapper.find("button").attributes("disabled")).toBeDefined();
+    editState.isEdit = true;
+  });
+
+  it("enables the toolbar while the field is edited in place", () => {
+    editState.isEdit = false;
+    const wrapper = starterKitWrapper({ editing: true });
+    expect(wrapper.find("button").attributes("disabled")).toBeUndefined();
+    editState.isEdit = true;
   });
 });

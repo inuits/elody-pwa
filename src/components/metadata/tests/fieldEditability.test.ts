@@ -18,7 +18,7 @@ vi.mock("@/generated-types/queries", () => ({
   },
 }));
 
-import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
+import { canEditFieldInPlace, canEditWysiwygInPlace } from "@/components/metadata/fieldEditability";
 
 const editable = {
   inputFieldType: "text",
@@ -74,5 +74,25 @@ describe("canEditFieldInPlace", () => {
     ["the field belongs to a repeatable panel", { repeatable: true }],
   ])("refuses when %s", (_reason, override) => {
     expect(canEditFieldInPlace({ ...editable, ...override })).toBe(false);
+  });
+});
+
+describe("canEditWysiwygInPlace", () => {
+  const editable = {
+    locked: false,
+    entityCanUpdate: true,
+    pageInEditMode: false,
+  };
+
+  it("edits a WYSIWYG field in place when nothing prevents it", () => {
+    expect(canEditWysiwygInPlace(editable)).toBe(true);
+  });
+
+  it.each([
+    ["the field is locked", { locked: true }],
+    ["the user may not update the entity", { entityCanUpdate: false }],
+    ["the page-wide edit mode is on", { pageInEditMode: true }],
+  ])("refuses when %s", (_reason, override) => {
+    expect(canEditWysiwygInPlace({ ...editable, ...override })).toBe(false);
   });
 });

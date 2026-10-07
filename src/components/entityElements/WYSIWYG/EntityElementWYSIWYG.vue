@@ -1,6 +1,9 @@
 <template>
   <div
     v-if="editorLoaded"
+    ref="rootRef"
+    data-cy="wysiwyg-field"
+    @keydown="handleInPlaceKeydown"
     :class="[
       'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
@@ -13,13 +16,24 @@
       <h1 data-cy="entity-element-window-title" class="subtitle text-text-body">
         {{ t(element.label) }}
       </h1>
+      <WYSIWYGInPlaceActions
+        class="ml-auto"
+        :label="t(element.label)"
+        :can-edit="canEditInPlace"
+        :editing="isEditingInPlace"
+        :dirty="inPlaceDirty"
+        :saving="inPlaceSaving"
+        @edit="startEditing"
+        @save="saveInPlace"
+        @cancel="cancelInPlace"
+      />
     </div>
     <div v-else class="pl-2 py-2 flex gap-2 items-center">
       <metadata-title :metadata="element" :is-locked="isLocked" />
       <WYSIGYGVirtualKeyboard
         v-if="
           wysiwygElementConfiguration.virtualKeyboardLayouts &&
-          useEditHelper.isEdit &&
+          isEditable &&
           !isLocked
         "
         :editor="editor"
@@ -27,13 +41,39 @@
         :extra-layouts="wysiwygElementConfiguration.virtualKeyboardLayouts"
       />
       <WYSIWYGTransliterationToggle
-        v-if="!useEditHelper.isEdit && showTransliterationToggle"
+        v-if="
+          !useEditHelper.isEdit &&
+          !isEditingInPlace &&
+          !preparingInPlaceEdit &&
+          showTransliterationToggle
+        "
         :editor="editor"
         :transliteration-config="
           wysiwygElementConfiguration?.transliterationConfig
         "
       />
-      <MultilingualLocaleSelector :field-key="element.metadataKey" />
+      <MultilingualLocaleSelector
+        v-if="!isEditingInPlace"
+        :field-key="element.metadataKey"
+      />
+      <!-- While editing, the language is fixed: the edit scope is the field
+           in this language. -->
+      <span
+        v-else-if="editingLocaleLabel"
+        data-cy="wysiwyg-editing-locale"
+        class="rounded-chip bg-chip-neutral-bg text-chip-neutral-text text-chip font-bold p-(--chip-padding)"
+        >{{ editingLocaleLabel }}</span
+      >
+      <WYSIWYGInPlaceActions
+        :label="t(element.label)"
+        :can-edit="canEditInPlace"
+        :editing="isEditingInPlace"
+        :dirty="inPlaceDirty"
+        :saving="inPlaceSaving"
+        @edit="startEditing"
+        @save="saveInPlace"
+        @cancel="cancelInPlace"
+      />
     </div>
     <div
       v-if="editor"
@@ -44,7 +84,9 @@
         'flex flex-col relative',
         { 'py-4': !displayInline },
         { 'locked-field': isLocked },
+        { 'wysiwyg-editable-at-rest': canEditInPlace && !isEditingInPlace },
       ]"
+      @click="onContentClick"
     >
       <locked-field-indicator
         :is-locked="isLocked"
@@ -52,8 +94,9 @@
       />
       <Transition>
         <WYSIWYGButtons
-          v-if="useEditHelper.isEdit && !isLocked"
+          v-if="isEditable && !isLocked"
           :formId="formId"
+          :editing="isEditingInPlace"
           :editor="editor"
           :extensions="element.extensions"
           :displayInline="displayInline"
@@ -75,6 +118,21 @@
         </div>
         <div class="w-full"><editor-content :editor="editor" /></div>
       </div>
+      <p
+        v-if="inPlaceError"
+        role="alert"
+        class="text-hint text-danger px-2 pt-1"
+      >
+        {{ inPlaceError }}
+      </p>
+      <p
+        v-if="isEditingInPlace"
+        data-cy="wysiwyg-hint"
+        class="text-hint text-text-muted px-2 pt-1"
+      >
+        {{ inPlaceHint }}
+      </p>
+      <p role="status" class="sr-only">{{ savedAnnouncement }}</p>
     </div>
     <TagEntityModal
       v-if="
@@ -94,6 +152,7 @@
     <div
       v-if="tagContextMenu"
       data-tag-context-menu
+      data-wysiwyg-overlay
       class="fixed z-[9999] bg-white border border-neutral-30 rounded shadow-lg py-1"
       :style="{ left: tagContextMenu.x + 'px', top: tagContextMenu.y + 'px' }"
     >
@@ -112,15 +171,18 @@ import { Editor, EditorContent } from "@tiptap/vue-3";
 import {
   computed,
   inject,
+  nextTick,
   onMounted,
   onUnmounted,
   ref,
   shallowRef,
+  unref,
   watch,
 } from "vue";
 import { useWYSIWYGEditor } from "@/composables/useWYSIWYGEditor";
 import WYSIWYGButtons from "@/components/entityElements/WYSIWYG/WYSIWYGButtons.vue";
 import {
+  Collection,
   ValidationFields,
   type WysiwygElement,
   type WysiwygElementConfiguration,
@@ -148,6 +210,9 @@ import {
   type MultilingualFieldProvide,
 } from "@/composables/useMultilingualField";
 import { isTransliterationEnabledValue } from "@/composables/useTransliteration";
+import WYSIWYGInPlaceActions from "@/components/entityElements/WYSIWYG/WYSIWYGInPlaceActions.vue";
+import { canEditWysiwygInPlace } from "@/components/metadata/fieldEditability";
+import { useWysiwygInPlaceEditing } from "@/composables/useWysiwygInPlaceEditing";
 
 const props = withDefaults(
   defineProps<{
@@ -168,7 +233,7 @@ const {
 } = useWYSIWYGEditor();
 const { getForm, addEditableMetadataKeys } = useFormHelper();
 const useEditHelper = useEditMode(props.formId);
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const { isLocked } = useFieldLock(
   () => props.formId,
@@ -202,6 +267,99 @@ const multilingual = inject<MultilingualFieldProvide>(
   undefined,
 );
 const isSwappingLocale = ref(false);
+
+// Per-field editing (docs/design-system/components/wysiwyg-field.md): outside
+// the legacy page-wide edit mode the field is read-only until its own edit
+// scope opens. Saving sends only this field's key.
+const rootRef = ref<HTMLElement | undefined>(undefined);
+const fieldPath = `${ValidationFields.IntialValues}.${props.element.metadataKey}`;
+const entityFormData = inject<
+  { id?: string; collection?: Collection } | undefined
+>("entityFormData", undefined);
+const entityCanUpdate = computed<boolean>(() =>
+  ["edit", "edit-delete"].includes(
+    unref(useEditHelper.permittedEditMode as any) as string,
+  ),
+);
+const canEditInPlace = computed<boolean>(() =>
+  canEditWysiwygInPlace({
+    locked: isLocked.value,
+    entityCanUpdate: entityCanUpdate.value,
+    pageInEditMode: !!useEditHelper.isEdit,
+  }),
+);
+const multilingualEnabled = (): boolean => !!multilingual?.isEnabled?.value;
+const inPlace = useWysiwygInPlaceEditing({
+  scopeId: () => `${props.formId}:${props.element.metadataKey}`,
+  metadataKey: () => props.element.metadataKey,
+  entityId: () => entityFormData?.id || props.formId,
+  collection: () => entityFormData?.collection ?? Collection.Entities,
+  canEdit: () => canEditInPlace.value,
+  getEditor: () => editor.value,
+  readValue: () =>
+    multilingualEnabled()
+      ? multilingual!.currentValue.value
+      : (form.value?.values.intialValues[props.element.metadataKey] ?? ""),
+  writeValue: (value: string) =>
+    multilingualEnabled()
+      ? multilingual!.updateValue(value)
+      : form.value?.setFieldValue(fieldPath, value),
+  locale: () =>
+    multilingualEnabled() ? multilingual!.selectedLocale.value : undefined,
+  onSaved: (value: string) => {
+    initialValue.value = value;
+    form.value?.resetField(fieldPath, { value });
+  },
+  getRoot: () => rootRef.value,
+});
+const {
+  isEditing: isEditingInPlace,
+  isDirty: inPlaceDirty,
+  saving: inPlaceSaving,
+  error: inPlaceError,
+  savedAnnouncement,
+  save: saveInPlace,
+  cancel: cancelInPlace,
+  handleKeydown: handleInPlaceKeydown,
+} = inPlace;
+const isEditable = computed<boolean>(
+  () => !!useEditHelper.isEdit || isEditingInPlace.value,
+);
+const inPlaceHint = computed<string>(() =>
+  te("inline-edit.hint-textarea")
+    ? t("inline-edit.hint-textarea")
+    : "Ctrl+Enter saves · Esc cancels",
+);
+const editingLocaleLabel = computed<string | undefined>(() => {
+  if (!multilingualEnabled()) return undefined;
+  const locale = multilingual!.selectedLocale.value;
+  return (
+    unref(multilingual!.localeOptions).find(
+      (option: { value: string }) => option.value === locale,
+    )?.label ?? locale
+  );
+});
+
+// The transliteration toggle only transforms the view, and restores the
+// original content when it unmounts; it goes before editing starts so the
+// edit begins from the stored text.
+const preparingInPlaceEdit = ref<boolean>(false);
+const startEditing = async () => {
+  if (!canEditInPlace.value || isEditingInPlace.value) return;
+  preparingInPlaceEdit.value = true;
+  await nextTick();
+  inPlace.start();
+  preparingInPlaceEdit.value = false;
+};
+// Clicking the content opens editing too, except on a tagged entity (which
+// opens its detail) or while selecting text.
+const onContentClick = (event: MouseEvent) => {
+  if (!canEditInPlace.value || isEditingInPlace.value) return;
+  const target = event.target as HTMLElement | null;
+  if (target?.closest?.("[data-entity-id]")) return;
+  if (window.getSelection?.()?.toString()) return;
+  startEditing();
+};
 
 const tagContextMenu = ref<{
   x: number;
@@ -279,11 +437,11 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} focus:outline-none border border-text-body/60 rounded-md  p-2  ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
+        class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} border border-border-default rounded-input p-2 ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
       },
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;
-        if (!useEditHelper.isEdit || isLocked.value) {
+        if (!isEditable.value || isLocked.value) {
           openDetailModal(node, tagging.value?.configuration?.value ?? []);
           return false;
         }
@@ -303,6 +461,7 @@ onMounted(async () => {
     content: initialValue.value,
     onUpdate({ editor }) {
       if (isSwappingLocale.value) return;
+      inPlace.notifyChange();
       const htmlContent = editor.getHTML() as HTMLContent;
       paragraphAmount.value = countLinesOfContent(htmlContent);
       if (multilingual?.isEnabled?.value) {
@@ -325,12 +484,16 @@ onUnmounted(() => {
   editor.value?.destroy();
   tagging.value?.destroy();
   editorLoaded.value = false;
+  inPlace.dispose();
 });
 
 watch(
   [() => useEditHelper.isEdit, isLocked],
   ([isEdit, locked]) => {
-    if (editor.value) editor.value.setEditable(isEdit && !locked);
+    if (editor.value)
+      editor.value.setEditable(
+        (!!isEdit || isEditingInPlace.value) && !locked,
+      );
   },
   { immediate: true },
 );
@@ -338,7 +501,7 @@ watch(
 watch(
   () => form.value?.values.intialValues[props.element.metadataKey],
   () => {
-    if (editor.value && !useEditHelper.isEdit) {
+    if (editor.value && !useEditHelper.isEdit && !isEditingInPlace.value) {
       const neValue = multilingual?.isEnabled?.value
         ? multilingual.currentValue.value
         : form.value?.values.intialValues[props.element.metadataKey];
@@ -383,5 +546,13 @@ if (multilingual) {
 <style scoped>
 .locked-field :deep(.ProseMirror) {
   background: var(--color-background-normal) !important;
+}
+
+.wysiwyg-editable-at-rest :deep(.ProseMirror) {
+  cursor: pointer;
+}
+
+.wysiwyg-editable-at-rest :deep(.ProseMirror:hover) {
+  background: var(--color-surface-editable-hover);
 }
 </style>

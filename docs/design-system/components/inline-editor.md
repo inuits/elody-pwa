@@ -28,6 +28,7 @@ Under the editor:
 | checkbox | [checkbox](./checkbox.md) |
 | dropdown, metadata single / multi select | [dropdown](./dropdown.md), clearable ("— Geen waarde") unless required, multiple for multi-selects |
 
+Rich text has its own editor on the [WYSIWYG field](./wysiwyg-field.md).
 Relations, multilingual fields, metadata on relations and repeatable-panel
 fields don't have an inline editor yet. They stay read-only in place.
 
