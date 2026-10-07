@@ -23,8 +23,10 @@ import {
   buildRelationMetadataInput,
   saveScope,
   toMetadataValue,
+  validateRelations,
   validateScope,
 } from "@/composables/useScopedSave";
+import { defineRule } from "vee-validate";
 
 const rel = (key: string, type = "hasCreator", metadata: any[] = []) => ({
   key,
@@ -202,5 +204,50 @@ describe("toMetadataValue", () => {
 
   it("sends a formatted value as its label", () => {
     expect(toMetadataValue({ formatter: "pill", label: "Concept" })).toBe("Concept");
+  });
+});
+
+describe("validateRelations", () => {
+  defineRule("min_relations", (value: unknown[], [amount]: string[]) =>
+    (Array.isArray(value) && value.length >= Number(amount)) ||
+    "Choose at least one",
+  );
+  defineRule("counts_form_relations", (_value: unknown, _params: unknown, ctx: any) =>
+    ctx.form.relationValues.hasCreator.length === 1 || "Form counted deleted",
+  );
+
+  it("passes relations that meet the field's rules", async () => {
+    await expect(
+      validateRelations({
+        relations: [rel("c1")],
+        rules: "min_relations:1",
+        label: "Maker",
+        formValues: {},
+      }),
+    ).resolves.toEqual({ valid: true, errors: [] });
+  });
+
+  it("does not count removed relations", async () => {
+    const result = await validateRelations({
+      relations: [{ ...rel("c1"), editStatus: "deleted" }],
+      rules: "min_relations:1",
+      label: "Maker",
+      formValues: {},
+    });
+    expect(result).toEqual({ valid: false, errors: ["Choose at least one"] });
+  });
+
+  it("gives rules that read the form the relations without removed ones", async () => {
+    const result = await validateRelations({
+      relations: [rel("c1")],
+      rules: "counts_form_relations",
+      label: "Maker",
+      formValues: {
+        relationValues: {
+          hasCreator: [rel("c1"), { ...rel("c2"), editStatus: "deleted" }],
+        },
+      },
+    });
+    expect(result.valid).toBe(true);
   });
 });

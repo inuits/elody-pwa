@@ -186,7 +186,7 @@ describe("useWysiwygInPlaceEditing", () => {
       type("<p>Nieuw</p>");
       await editing.save();
       expect(editing.isEditing.value).toBe(false);
-      expect(options.onSaved).toHaveBeenCalledWith("<p>Nieuw</p>");
+      expect(options.onSaved).toHaveBeenCalledWith("<p>Nieuw</p>", {});
       expect(editing.savedAnnouncement.value).toBe("Saved");
     });
 

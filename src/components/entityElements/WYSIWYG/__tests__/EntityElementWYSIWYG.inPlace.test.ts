@@ -281,6 +281,20 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       expect(wrapper.find('[role="status"]').text()).toBe("Saved");
     });
 
+    it("hands the saved entity back to the page", async () => {
+      const onSaved = vi.fn();
+      const saved = { id: "entity-1", intialValues: { description: "<p>Nieuw</p>" } };
+      mocks.saveScope.mockResolvedValue(saved);
+      const wrapper = await startEditing({}, {
+        entityFormData: { id: "entity-1", collection: "entities", onSaved },
+      });
+      editor().type("<p>Nieuw</p>");
+      await wrapper.vm.$nextTick();
+      await button(wrapper, "Save").trigger("click");
+      await flushPromises();
+      expect(onSaved).toHaveBeenCalledWith(saved);
+    });
+
     it("does not reset the editor while typing", async () => {
       const wrapper = await startEditing();
       editor().commands.setContent.mockClear();

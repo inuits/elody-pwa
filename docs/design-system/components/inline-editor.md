@@ -27,10 +27,14 @@ Under the editor:
 | textarea, resizable textarea | input in textarea mode |
 | checkbox | [checkbox](./checkbox.md) |
 | dropdown, metadata single / multi select | [dropdown](./dropdown.md), clearable ("— Geen waarde") unless required, multiple for multi-selects |
+| relation single / multi select | the relation autocomplete, with its value inputs when the field has metadata on the relation (for example a page number) |
 
 Rich text has its own editor on the [WYSIWYG field](./wysiwyg-field.md).
-Relations, multilingual fields, metadata on relations and repeatable-panel
-fields don't have an inline editor yet. They stay read-only in place.
+Relation dropdowns edit in place only when they save as the entity's own
+relations: not when they save as metadata, belong to a linked entity or are
+inherited. Multilingual fields, metadata-on-relation fields shown as their own
+rows, and repeatable-panel fields don't have an inline editor yet. They stay
+read-only in place.
 
 ## States
 | State | Cue |
@@ -45,15 +49,23 @@ fields don't have an inline editor yet. They stay read-only in place.
 - **Pick-then-Bewaar:** choosing in a select or date picker only changes the
   draft. Nothing saves until Bewaar or Enter.
 - Enter commits (Ctrl+Enter in a textarea). Enter with nothing changed just
-  closes.
-- Escape cancels and restores the previous value.
+  closes. An Enter that picks an option in a select's menu only picks it.
+- Escape cancels and restores the previous value. An Escape that closes a
+  menu only closes the menu.
 - Clicking outside: an unchanged editor closes, a changed one stays open.
-  Clicks inside the editor's own menus (dropdown, date picker) count as
-  inside.
+  Clicks inside the editor's own menus and dialogs (dropdown, date picker,
+  the "create new" confirmation) count as inside.
 - The input gets focus when the editor opens. After save or cancel, focus
   returns to the value.
 - Saving sends **only this field's key** and validates **only this field**,
   with its usual rules. An invalid value is never sent.
+- **Relations:** saving sends only the relations that were added, removed or
+  changed (a changed value on the relation, such as a page number, including
+  clearing it). Relations that stay as they were aren't sent. The field's
+  relation rules (required relation, minimum/maximum, one of several types)
+  run on the relations as they would be after the save.
+- After a save, the page takes the entity the server returned, so every value
+  shown from it is current.
 - Leaving the page, or moving to another record, with a changed editor shows
   the unsaved-changes prompt: save, discard or stay. Leaving only happens
   after a save that worked.

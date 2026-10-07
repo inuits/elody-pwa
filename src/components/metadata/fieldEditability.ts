@@ -19,6 +19,13 @@ const IN_PLACE_FIELD_TYPES = new Set<string>([
   InputFieldTypes.DropdownMultiselectMetadata,
 ]);
 
+// Relation dropdowns edit in place only when they save as the entity's own
+// relations (relationValues), not as metadata, on a linked entity or inherited.
+const RELATION_FIELD_TYPES = new Set<string>([
+  InputFieldTypes.DropdownSingleselectRelations,
+  InputFieldTypes.DropdownMultiselectRelations,
+]);
+
 export type FieldEditabilityContext = {
   inputFieldType?: string;
   nonEditableField?: boolean;
@@ -28,6 +35,7 @@ export type FieldEditabilityContext = {
   entityCanUpdate: boolean;
   // The legacy page-wide edit mode still renders its own inputs.
   pageInEditMode: boolean;
+  relationEditable?: boolean;
   // Not yet edited in place: they get their own editors later.
   multilingual?: boolean;
   onRelation?: boolean;
@@ -36,7 +44,9 @@ export type FieldEditabilityContext = {
 
 export const canEditFieldInPlace = (field: FieldEditabilityContext): boolean =>
   !!field.inputFieldType &&
-  IN_PLACE_FIELD_TYPES.has(field.inputFieldType) &&
+  (IN_PLACE_FIELD_TYPES.has(field.inputFieldType) ||
+    (RELATION_FIELD_TYPES.has(field.inputFieldType) &&
+      !!field.relationEditable)) &&
   !field.nonEditableField &&
   field.editableByUser &&
   !field.locked &&

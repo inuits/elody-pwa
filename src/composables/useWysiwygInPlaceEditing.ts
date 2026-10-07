@@ -29,7 +29,8 @@ export type WysiwygInPlaceOptions = {
   readValue: () => string;
   writeValue: (value: string) => void;
   locale: () => string | undefined;
-  onSaved?: (value: string) => void;
+  // Gets the saved value and the saved entity the server returned.
+  onSaved?: (value: string, savedEntity: unknown) => void;
   // The element itself; clicks outside it close an unchanged editor.
   getRoot?: () => HTMLElement | null | undefined;
 };
@@ -93,7 +94,7 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
     saving.value = true;
     error.value = undefined;
     try {
-      await saveScope({
+      const savedEntity = await saveScope({
         entityId: options.entityId(),
         collection: options.collection(),
         formInput: buildMetadataInput(
@@ -102,7 +103,7 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
           options.locale(),
         ),
       });
-      options.onSaved?.(value);
+      options.onSaved?.(value, savedEntity);
       savedAnnouncement.value = translated("inline-edit.saved", "Saved");
       close();
     } catch {

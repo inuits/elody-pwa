@@ -6,6 +6,7 @@ import {
   type EntityFormInput,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
+import { validate } from "vee-validate";
 
 // Per-field editing saves only what the edited scope changed: one metadata
 // key, the added/removed/changed relations, or one relation's changed
@@ -142,4 +143,38 @@ export const validateScope = async (
     if (!result.valid) errors[path] = result.errors;
   }
   return { valid: Object.keys(errors).length === 0, errors };
+};
+
+type RelationLike = { editStatus?: string | null };
+const withoutRemoved = <T extends RelationLike>(relations: unknown): T[] =>
+  Array.isArray(relations)
+    ? relations.filter((relation: T) => relation?.editStatus !== EditStatus.Deleted)
+    : [];
+
+// A relation field's rules run on its relations as they would be after the
+// save: removed relations don't count, neither for the field itself nor for
+// rules that read other relation types from the form.
+export const validateRelations = async ({
+  relations,
+  rules,
+  label,
+  formValues,
+}: {
+  relations: RelationLike[];
+  rules: string;
+  label: string;
+  formValues: Record<string, any>;
+}): Promise<{ valid: boolean; errors: string[] }> => {
+  const relationValues = Object.fromEntries(
+    Object.entries(formValues?.relationValues ?? {}).map(([type, values]) => [
+      type,
+      withoutRemoved(values),
+    ]),
+  );
+  const result = await validate(withoutRemoved(relations), rules, {
+    name: label,
+    label,
+    values: { ...formValues, relationValues },
+  });
+  return { valid: result.valid, errors: result.errors };
 };

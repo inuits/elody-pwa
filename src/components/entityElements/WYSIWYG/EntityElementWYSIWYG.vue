@@ -274,7 +274,12 @@ const isSwappingLocale = ref(false);
 const rootRef = ref<HTMLElement | undefined>(undefined);
 const fieldPath = `${ValidationFields.IntialValues}.${props.element.metadataKey}`;
 const entityFormData = inject<
-  { id?: string; collection?: Collection } | undefined
+  | {
+      id?: string;
+      collection?: Collection;
+      onSaved?: (savedEntity: unknown) => void;
+    }
+  | undefined
 >("entityFormData", undefined);
 const entityCanUpdate = computed<boolean>(() =>
   ["edit", "edit-delete"].includes(
@@ -306,9 +311,10 @@ const inPlace = useWysiwygInPlaceEditing({
       : form.value?.setFieldValue(fieldPath, value),
   locale: () =>
     multilingualEnabled() ? multilingual!.selectedLocale.value : undefined,
-  onSaved: (value: string) => {
+  onSaved: (value: string, savedEntity: unknown) => {
     initialValue.value = value;
     form.value?.resetField(fieldPath, { value });
+    if (savedEntity) entityFormData?.onSaved?.(savedEntity);
   },
   getRoot: () => rootRef.value,
 });

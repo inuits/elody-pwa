@@ -10,8 +10,11 @@
   >
     <div data-cy="inline-editor-row" class="flex items-center gap-1.5 w-full">
       <div class="grow min-w-0">
+        <!-- A parent with its own input (relations) passes it here and
+             reports its changed state through `dirty`. -->
+        <slot v-if="$slots.input" name="input" />
         <AdvancedDropdown
-          v-if="isDropdown"
+          v-else-if="isDropdown"
           v-model="draft"
           :options="options"
           :clearable="!required"
@@ -100,8 +103,12 @@ const props = withDefaults(
     required?: boolean;
     saving?: boolean;
     errorMessage?: string;
+    // Set by a parent that owns the draft (custom input); otherwise the
+    // editor compares its own draft with the value it opened with.
+    dirty?: boolean;
   }>(),
   {
+    dirty: undefined,
     options: () => [],
     required: false,
     saving: false,
@@ -140,7 +147,11 @@ const inputType = computed(() =>
 
 const initial = JSON.stringify(props.modelValue ?? null);
 const draft = ref<any>(props.modelValue);
-const isDirty = computed(() => JSON.stringify(draft.value ?? null) !== initial);
+const isDirty = computed(() =>
+  props.dirty !== undefined
+    ? props.dirty
+    : JSON.stringify(draft.value ?? null) !== initial,
+);
 watch(isDirty, (dirty) => emit("dirty-change", dirty));
 watch(draft, (value) => emit("draft-change", value), { deep: true });
 
@@ -162,7 +173,10 @@ const commit = () => {
   emit("save", draft.value);
 };
 
+// Keys the input already handled (picking an option, closing its menu) are
+// left alone.
 const handleKeydown = (event: KeyboardEvent) => {
+  if (event.defaultPrevented) return;
   if (event.key === "Escape") {
     event.preventDefault();
     emit("cancel");
@@ -178,7 +192,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 // silent discard). Clicks in teleported menus belong to the editor.
 const rootRef = ref<HTMLElement | null>(null);
 const OVERLAY_SELECTOR =
-  ".menu, .multiselect-dropdown, [role='listbox'], .dp__menu, [role='tooltip']";
+  "dialog, [role='dialog'], .menu, .multiselect-dropdown, [role='listbox'], .dp__menu, [role='tooltip']";
 const handleOutsideMousedown = (event: MouseEvent) => {
   const target = event.target as HTMLElement | null;
   if (!target || rootRef.value?.contains(target)) return;

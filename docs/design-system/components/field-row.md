@@ -46,6 +46,7 @@ All of these must hold (`fieldEditability.ts`):
   - text, number, date, textarea;
   - checkbox, dropdown;
   - metadata dropdowns;
+  - relation dropdowns that save as the entity's own relations;
 - the field isn't marked non-editable or read-only for the user;
 - it isn't locked or masked;
 - the user may update the entity;
@@ -68,7 +69,9 @@ Anything else renders as plain text, with no button role and no hover cue.
 | editing | the [inline editor](./inline-editor.md) replaces the value |
 
 ## Behaviour and keyboard
-- Click, Enter or Space on an editable value opens its edit scope.
+- Click, Enter or Space on an editable value opens its edit scope. A click on
+  a relation chip still navigates to the related entity; a plain-text relation
+  doesn't navigate, so clicking it opens the editor.
 - Only one scope edits at a time. If another scope is open and unchanged, it
   closes. If it has changes, it stays open and gets focus back. Nothing is
   saved or discarded implicitly.

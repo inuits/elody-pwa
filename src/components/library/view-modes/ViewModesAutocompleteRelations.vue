@@ -2,7 +2,7 @@
   <base-input-autocomplete
     v-show="
       selectedDropdownOptions.length > 0 ||
-      isEdit ||
+      isEditing ||
       mode === 'create' ||
       isLoading
     "
@@ -44,7 +44,7 @@
   <p
     v-show="
       selectedDropdownOptions.length === 0 &&
-      !isEdit &&
+      !isEditing &&
       mode !== 'create' &&
       !isLoading
     "
@@ -125,6 +125,8 @@ const props = withDefaults(
     isMetadataField?: boolean;
     metadataOnRelationConfig?: MetadataOnRelationFieldConfig | null;
     readOnlyValueAsPlainText?: boolean;
+    // Rendered by an inline editor: editable outside the page-wide edit mode.
+    editing?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -153,6 +155,7 @@ const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const tagInputValues = ref<Map<string | number, string>>(new Map());
 const { createEntity } = useManageEntities();
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
+const isEditing = computed<boolean>(() => !!props.editing || !!unref(isEdit));
 const { replaceRelationsFromSameType, addRelations, getRelationsBasedOnType } =
   useFormHelper();
 
@@ -461,7 +464,7 @@ const findAutocompleteOption = async (
 };
 
 const handleTagClick = async (tag: DropdownOption) => {
-  if (isEdit) return;
+  if (isEditing.value) return;
   const linkFormattersSettings = (await getFormattersSettings())?.link || {};
   const [entityType, linkSetting] =
     Object.entries(linkFormattersSettings).find(

@@ -218,5 +218,72 @@ describe("InlineFieldEditor", () => {
       document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
       expect(wrapper.emitted("cancel")).toBeUndefined();
     });
+
+    it("treats clicks in a dialog the input opened (a confirm) as inside", async () => {
+      const wrapper = editor();
+      const dialog = document.createElement("dialog");
+      document.body.appendChild(dialog);
+      dialog.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+    });
+  });
+
+  describe("keys the input already handled", () => {
+    it("leaves an Enter that picked an option in the input's menu", async () => {
+      const wrapper = editor();
+      await input(wrapper).setValue("1959");
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      input(wrapper).element.addEventListener("keydown", (e) => e.preventDefault());
+      input(wrapper).element.dispatchEvent(event);
+      expect(wrapper.emitted("save")).toBeUndefined();
+    });
+
+    it("leaves an Escape that closed the input's menu", async () => {
+      const wrapper = editor();
+      input(wrapper).element.addEventListener("keydown", (e) => e.preventDefault());
+      input(wrapper).element.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+      );
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+    });
+  });
+
+  describe("custom input (relations)", () => {
+    const withSlot = (props: Record<string, unknown> = {}) =>
+      mount(InlineFieldEditor, {
+        props: { type: "dropdownMultiselectRelations", modelValue: undefined, label: "Maker", ...props },
+        slots: { input: "<div data-cy='relation-input'>relations</div>" },
+        attachTo: document.body,
+      });
+
+    it("renders the parent's input instead of a built-in one", () => {
+      const wrapper = withSlot();
+      expect(wrapper.find('[data-cy="relation-input"]').exists()).toBe(true);
+      expect(wrapper.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(false);
+      expect(input(wrapper).exists()).toBe(false);
+    });
+
+    it("takes its changed state from the parent", async () => {
+      const wrapper = withSlot({ dirty: false });
+      expect(wrapper.find('[data-cy="button-commit"]').attributes("disabled")).toBeDefined();
+      await wrapper.setProps({ dirty: true });
+      expect(wrapper.find('[data-cy="button-commit"]').attributes("disabled")).toBeUndefined();
+    });
+
+    it("saves when the parent reports a change", async () => {
+      const wrapper = withSlot({ dirty: true });
+      await wrapper.find('[data-cy="button-commit"]').trigger("click");
+      expect(wrapper.emitted("save")).toHaveLength(1);
+    });
+
+    it("keeps a changed editor open on an outside click", () => {
+      const wrapper = withSlot({ dirty: true });
+      document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+    });
   });
 });

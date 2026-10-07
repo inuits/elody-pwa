@@ -188,3 +188,27 @@ describe("ViewModesAutocompleteRelations read-only fallback to related options",
   });
 
 });
+
+describe("ViewModesAutocompleteRelations in an inline editor", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [];
+    vi.clearAllMocks();
+  });
+
+  const input = (wrapper: ReturnType<typeof mountWith>) =>
+    wrapper.find("base-input-autocomplete-stub");
+
+  it("hides an empty input outside editing, showing the empty value instead", async () => {
+    const wrapper = mountWith({ mode: "edit" });
+    await flushPromises();
+    expect(input(wrapper).attributes("style")).toContain("display: none");
+  });
+
+  it("shows the input even when nothing is selected yet while editing in place", async () => {
+    const wrapper = mountWith({ mode: "edit", editing: true });
+    await flushPromises();
+    expect(input(wrapper).attributes("style") ?? "").not.toContain("display: none");
+    expect(wrapper.find("p").attributes("style")).toContain("display: none");
+  });
+});

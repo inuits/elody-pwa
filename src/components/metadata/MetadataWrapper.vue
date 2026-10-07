@@ -96,11 +96,55 @@
       :required="isFieldRequired"
       :saving="inlineSaving"
       :error-message="inlineError"
+      :dirty="isRelationField ? relationDirty : undefined"
       @save="saveInline"
       @cancel="cancelInline"
       @dirty-change="inlineDirty = $event"
       @draft-change="latestDraft = $event"
-    />
+    >
+      <!-- Relations: the edit-mode autocomplete writes the selection into
+           the form's relationValues; the editor saves only the difference. -->
+      <template v-if="isRelationField" #input>
+        <ViewModesAutocompleteRelations
+          :editing="true"
+          mode="edit"
+          :model-value="fieldValueProxy"
+          :form-id="formId"
+          :metadata-key-to-get-options-for="metadataKeyToGetOptions"
+          :select-type="
+            fieldType === InputFieldTypes.DropdownSingleselectRelations
+              ? 'single'
+              : 'multi'
+          "
+          :relation-type="metadata.inputField.relationType"
+          :from-relation-type="metadata.inputField.fromRelationType"
+          :advanced-filter-input-for-retrieving-options="
+            metadata.inputField.advancedFilterInputForRetrievingOptions
+          "
+          :advanced-filter-input-for-retrieving-related-options="
+            metadata.inputField.advancedFilterInputForRetrievingRelatedOptions
+          "
+          :advanced-filter-input-for-retrieving-all-options="
+            metadata.inputField.advancedFilterInputForRetrievingAllOptions
+          "
+          :advanced-filter-input-for-searching-options="
+            metadata.inputField.advancedFilterInputForSearchingOptions
+          "
+          :is-metadata-field="metadata.inputField.isMetadataField"
+          :relation-filter="metadata.inputField.relationFilter"
+          :auto-selectable="metadata.inputField.autoSelectable"
+          :disabled="inlineSaving"
+          :can-create-option="metadata.inputField.canCreateEntityFromOption"
+          :metadata-key-to-create-entity-from-option="
+            metadata.inputField.metadataKeyToCreateEntityFromOption
+          "
+          :depends-on="metadata.inputField.dependsOn"
+          :metadata-on-relation-config="
+            metadata.inputField.metadataOnRelationFieldConfig
+          "
+        />
+      </template>
+    </InlineFieldEditor>
     <p data-cy="inline-save-status" role="status" class="sr-only">
       {{ savedAnnouncement }}
     </p>
@@ -346,6 +390,8 @@ import {
   type PanelRelationRootData,
   type Entitytyping,
   type BaseEntity,
+  EditStatus,
+  ValidationFields,
   ValidationRules,
 } from "@/generated-types/queries";
 import {
@@ -382,10 +428,15 @@ import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 import {
   buildMetadataInput,
+  buildRelationsInput,
   saveScope,
   toMetadataValue,
+  validateRelations,
   validateScope,
+  type RelationValue,
 } from "@/composables/useScopedSave";
+import { useFormHelper } from "@/composables/useFormHelper";
+import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -576,6 +627,22 @@ const entityCanUpdate = computed<boolean>(() =>
     unref(entityEditState.permittedEditMode as any) as string,
   ),
 );
+// Relations edit in place when the field saves as the entity's own relations
+// (not as metadata, not on a linked entity, not inherited).
+const isRelationField = computed<boolean>(
+  () => autoCompleteType.value === "relationAutocomplete",
+);
+const relationTypeOfField = computed<string | undefined>(
+  () => props.metadata.inputField?.relationType || undefined,
+);
+const relationEditable = computed<boolean>(
+  () =>
+    isRelationField.value &&
+    !!relationTypeOfField.value &&
+    !props.metadata.inputField?.isMetadataField &&
+    !props.linkedEntityId &&
+    !(props.metadata as PanelMetaData).hiddenField?.inherited,
+);
 const canEditInPlace = computed<boolean>(() =>
   canEditFieldInPlace({
     inputFieldType: props.metadata.inputField?.type,
@@ -590,6 +657,7 @@ const canEditInPlace = computed<boolean>(() =>
       fieldKind.value,
     ),
     repeatable: !!props.repeatablePanelConfig?.isRepeatable,
+    relationEditable: relationEditable.value,
   }),
 );
 const editFieldLabel = computed<string>(() =>
@@ -612,8 +680,15 @@ const savedAnnouncement = ref<string>("");
 const valueBeforeEditing = ref<unknown>(undefined);
 const latestDraft = ref<unknown>(undefined);
 const fieldValueRef = ref<HTMLElement | null>(null);
+// From EntityForm; onSaved hands a saved entity back to the page, as the
+// whole-form save did, so everything rendered from the entity is current.
 const entityFormData = inject<
-  { id?: string; collection?: Collection } | undefined
+  | {
+      id?: string;
+      collection?: Collection;
+      onSaved?: (savedEntity: unknown) => void;
+    }
+  | undefined
 >("entityFormData", undefined);
 const editScopeId = computed(() => `${props.formId}:${props.metadata.key}`);
 
@@ -627,11 +702,141 @@ const closeEditor = () => {
   inlineError.value = undefined;
   release(editScopeId.value);
 };
-const startEditing = () => {
+// --- Relations -------------------------------------------------------------
+const { getForm } = useFormHelper();
+const { getValidationRules } = useFieldValidation(
+  () => props.metadata.inputField?.validation,
+);
+const relationsPath = computed(
+  () => `${ValidationFields.RelationValues}.${relationTypeOfField.value}`,
+);
+const formRelations = (): unknown[] => {
+  const relations =
+    getForm(props.formId)?.values?.relationValues?.[
+      relationTypeOfField.value ?? ""
+    ];
+  return Array.isArray(relations) ? relations : [];
+};
+const relationsBeforeEditing = ref<unknown[]>([]);
+const metadataOnRelationKey = computed<string | undefined>(() => {
+  const config = props.metadata.inputField?.metadataOnRelationFieldConfig;
+  return config?.enabled ? config.key : undefined;
+});
+// The relations as they would be stored: removed ones dropped, and the
+// metadata-on-relation value present (empty when unset) on relations that
+// already existed, so clearing it counts as a change.
+const toScopeRelations = (
+  relations: unknown[],
+  existingKeys: Set<string>,
+): RelationValue[] =>
+  relations
+    .filter(
+      (relation: any) =>
+        relation && relation.editStatus !== EditStatus.Deleted,
+    )
+    .map((relation: any) => {
+      const metadata = (relation.metadata ?? [])
+        .filter(Boolean)
+        .map((entry: any) => ({ key: entry.key, value: entry.value }));
+      const key = metadataOnRelationKey.value;
+      if (
+        key &&
+        existingKeys.has(relation.key) &&
+        !metadata.some((entry: any) => entry.key === key)
+      )
+        metadata.push({ key, value: "" });
+      return {
+        key: relation.key,
+        type: relation.type ?? relationTypeOfField.value,
+        ...(relation.value !== undefined ? { value: relation.value } : {}),
+        metadata,
+      } as RelationValue;
+    });
+const relationScopeInput = computed(() => {
+  const existingKeys = new Set(
+    relationsBeforeEditing.value.map((relation: any) => relation?.key),
+  );
+  return buildRelationsInput(
+    toScopeRelations(relationsBeforeEditing.value, existingKeys),
+    toScopeRelations(formRelations(), existingKeys),
+  );
+});
+const relationDirty = computed<boolean>(
+  () =>
+    isEditingInPlace.value &&
+    isRelationField.value &&
+    relationScopeInput.value.relations.length > 0,
+);
+const restoreRelations = (relations: unknown[]) =>
+  getForm(props.formId)?.resetField(relationsPath.value, {
+    value: JSON.parse(JSON.stringify(relations)),
+  });
+const saveRelationsInline = async () => {
+  const form = getForm(props.formId);
+  const { valid, errors } = await validateRelations({
+    relations: formRelations() as any[],
+    rules: getValidationRules(true, isFieldRequired.value),
+    label: fieldLabel.value,
+    formValues: form?.values ?? {},
+  });
+  if (!valid) {
+    inlineError.value = errors[0];
+    return;
+  }
+  inlineSaving.value = true;
+  inlineError.value = undefined;
+  try {
+    const formInput = relationScopeInput.value;
+    const saved = await saveScope({
+      entityId: entityFormData?.id || props.formId,
+      collection: entityFormData?.collection ?? Collection.Entities,
+      formInput,
+    });
+    const stored = (saved as any)?.relationValues?.[
+      relationTypeOfField.value ?? ""
+    ];
+    restoreRelations(
+      Array.isArray(stored)
+        ? stored
+        : toScopeRelations(formRelations(), new Set()),
+    );
+    if (saved) entityFormData?.onSaved?.(saved);
+    savedAnnouncement.value = te("inline-edit.saved")
+      ? t("inline-edit.saved")
+      : "Saved";
+    closeEditor();
+    focusFieldValue();
+  } catch {
+    inlineError.value = te("inline-edit.save-failed")
+      ? t("inline-edit.save-failed")
+      : "Saving failed, try again";
+  } finally {
+    inlineSaving.value = false;
+  }
+};
+
+// A click on a relation chip navigates to the related entity; a plain-text
+// relation doesn't navigate, so the click opens the editor instead.
+const isRelationChipClick = (event?: Event): boolean => {
+  if (event?.type !== "click" || !isRelationField.value) return false;
+  const chip = (event.target as HTMLElement | null)?.closest?.(
+    ".multiselect-tag",
+  );
+  if (!chip) return false;
+  if (props.metadata.inputField?.readOnlyValueAsPlainText) {
+    event.stopPropagation();
+    return false;
+  }
+  return true;
+};
+
+const startEditing = (event?: Event) => {
   if (!canEditInPlace.value || isEditingInPlace.value) return;
+  if (isRelationChipClick(event)) return;
   const opened = requestOpen({
     id: editScopeId.value,
-    isDirty: () => inlineDirty.value,
+    isDirty: () =>
+      isRelationField.value ? relationDirty.value : inlineDirty.value,
     close: closeEditor,
     save: async () => {
       await saveInline(latestDraft.value);
@@ -640,17 +845,21 @@ const startEditing = () => {
     discard: () => cancelInline(),
   });
   if (!opened) return;
+  if (isRelationField.value)
+    relationsBeforeEditing.value = JSON.parse(JSON.stringify(formRelations()));
   valueBeforeEditing.value = fieldValueProxy.value;
   latestDraft.value = fieldValueProxy.value;
   savedAnnouncement.value = "";
   isEditingInPlace.value = true;
 };
 const cancelInline = () => {
-  fieldValueProxy.value = valueBeforeEditing.value;
+  if (isRelationField.value) restoreRelations(relationsBeforeEditing.value);
+  else fieldValueProxy.value = valueBeforeEditing.value;
   closeEditor();
   focusFieldValue();
 };
 const saveInline = async (value: unknown) => {
+  if (isRelationField.value) return saveRelationsInline();
   fieldValueProxy.value = value;
   const { valid, errors } = await validateScope(async () => {
     const result = await field.validate();
@@ -663,12 +872,14 @@ const saveInline = async (value: unknown) => {
   inlineSaving.value = true;
   inlineError.value = undefined;
   try {
-    await saveScope({
+    const savedEntity = await saveScope({
       entityId: props.linkedEntityId || entityFormData?.id || props.formId,
       collection: entityFormData?.collection ?? Collection.Entities,
       formInput: buildMetadataInput(props.metadata.key, toMetadataValue(value)),
     });
     field.resetField({ value: fieldValueProxy.value });
+    if (savedEntity && !props.linkedEntityId)
+      entityFormData?.onSaved?.(savedEntity);
     savedAnnouncement.value = te("inline-edit.saved")
       ? t("inline-edit.saved")
       : "Saved";

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
-import { defineComponent, h, nextTick, ref } from "vue";
+import { defineComponent, h, nextTick, provide, ref } from "vue";
 import { useForm, defineRule } from "vee-validate";
 
 vi.mock("@/main", () => ({
@@ -100,17 +100,25 @@ const buildProps = (key: string, isEdit: boolean) => ({
   },
 });
 
+// What EntityForm provides; onSaved hands the saved entity back to the page.
+const entityFormData = { onSaved: vi.fn() };
+
 const mountWrapper = async (
   props: ReturnType<typeof buildProps>,
   copyContext?: CopyFromParentContext,
+  relationValues: Record<string, unknown[]> = {},
 ) => {
   const Harness = defineComponent({
     setup() {
       const form = useForm({
-        initialValues: { intialValues: { lockedProperties: ["title"] } },
+        initialValues: {
+          intialValues: { lockedProperties: ["title"] },
+          relationValues,
+        },
       });
       useFormHelper().addForm(props.formId, form);
       defineRule("no_xss", () => true);
+      provide("entityFormData", entityFormData);
       return () => h(MetadataWrapper, props as any);
     },
   });
@@ -131,16 +139,21 @@ const mountWrapper = async (
         MetadataTruncatedText: { template: "<div><slot /></div>" },
         MetadataFormatter: true,
         TableInputField: true,
-        ViewModesAutocompleteRelations: true,
+        ViewModesAutocompleteRelations: {
+          name: "ViewModesAutocompleteRelations",
+          props: ["editing", "mode", "formId", "relationType", "selectType", "disabled", "isReadOnly"],
+          template:
+            "<div data-cy='relations-stub'><span class='multiselect-tag' data-cy='relation-chip'>Maker</span></div>",
+        },
         ViewModesAutocompleteMetadata: true,
         BaseCopyToClipboard: true,
         MetadataValueTooltip: true,
         EntityElementMetadata: { template: "<span>value</span>" },
         InlineFieldEditor: {
           name: "InlineFieldEditor",
-          props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage"],
+          props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage", "dirty"],
           emits: ["save", "cancel", "dirty-change", "draft-change"],
-          template: "<div data-cy='inline-editor-stub' />",
+          template: "<div data-cy='inline-editor-stub'><slot name='input' /></div>",
         },
       },
     },
@@ -525,6 +538,18 @@ describe("MetadataWrapper — inline editing", () => {
     });
   });
 
+  it("hands the saved entity back to the page", async () => {
+    entityFormData.onSaved.mockClear();
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST", intialValues: { year: "2020" } });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(entityFormData.onSaved).toHaveBeenCalledWith({
+      id: "MW-TEST",
+      intialValues: { year: "2020" },
+    });
+  });
+
   it("closes the editor and announces the save", async () => {
     scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
     const wrapper = await openEditor();
@@ -620,5 +645,288 @@ describe("MetadataWrapper — leaving with an open editor", () => {
     await flushPromises();
     expect(inlineEditor(wrapper).exists()).toBe(false);
     expect(scopedSave.saveScope).not.toHaveBeenCalled();
+  });
+});
+
+describe("MetadataWrapper — inline relation editing", () => {
+  const relation = (key: string, extra: Record<string, unknown> = {}) => ({
+    key,
+    type: "hasCreator",
+    ...extra,
+  });
+
+  const relationProps = (inputField: Record<string, unknown> = {}) => {
+    const p = buildProps("creator", false);
+    (p.metadata as any).value = "";
+    (p.metadata as any).inputField = {
+      type: InputFieldTypes.DropdownMultiselectRelations,
+      relationType: "hasCreator",
+      advancedFilterInputForSearchingOptions: { type: "text", item_types: ["person"] },
+      options: [],
+      __typename: "InputField",
+      ...inputField,
+    };
+    return p;
+  };
+
+  const form = () => useFormHelper().getForm("MW-TEST")!;
+  const setRelations = async (relations: unknown[]) => {
+    form().setFieldValue("relationValues.hasCreator", relations);
+    await flushPromises();
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  const mountRelations = (
+    inputField: Record<string, unknown> = {},
+    relations: unknown[] = [relation("c1", { value: "Ada" })],
+  ) => mountWrapper(relationProps(inputField), undefined, { hasCreator: relations });
+
+  const openEditor = async (
+    inputField: Record<string, unknown> = {},
+    relations?: unknown[],
+  ) => {
+    const wrapper = await mountRelations(inputField, relations);
+    await wrapper.find('[data-cy="field-value"]').trigger("keydown", { key: "Enter" });
+    await flushPromises();
+    return wrapper;
+  };
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate: true, canDelete: false });
+    useEditScope().release("MW-TEST:creator");
+  });
+
+  describe("at rest", () => {
+    it("makes a relation value editable in place", async () => {
+      const wrapper = await mountRelations();
+      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBe("button");
+    });
+
+    it("keeps a relation dropdown that saves as metadata read-only", async () => {
+      const wrapper = await mountRelations({ isMetadataField: true });
+      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBeUndefined();
+    });
+
+    it("keeps inherited relations read-only", async () => {
+      const p = relationProps();
+      (p.metadata as any).hiddenField = { inherited: true };
+      const wrapper = await mountWrapper(p, undefined, { hasCreator: [] });
+      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBeUndefined();
+    });
+
+    it("lets a click on a relation chip navigate instead of opening the editor", async () => {
+      const wrapper = await mountRelations();
+      await wrapper.find('[data-cy="relation-chip"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(false);
+    });
+
+    it("opens the editor from a click beside the chips", async () => {
+      const wrapper = await mountRelations();
+      await wrapper.find('[data-cy="relations-stub"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
+    });
+
+    it("opens the editor from a plain-text relation, which doesn't navigate", async () => {
+      const wrapper = await mountRelations({ readOnlyValueAsPlainText: true });
+      await wrapper.find('[data-cy="relation-chip"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
+    });
+  });
+
+  describe("editing", () => {
+    it("renders the relation autocomplete, editable, inside the inline editor", async () => {
+      const wrapper = await openEditor();
+      const input = inlineEditor(wrapper).findComponent({
+        name: "ViewModesAutocompleteRelations",
+      });
+      expect(input.props()).toMatchObject({
+        editing: true,
+        mode: "edit",
+        formId: "MW-TEST",
+        relationType: "hasCreator",
+        selectType: "multi",
+      });
+      expect(input.props("disabled")).toBeFalsy();
+    });
+
+    it("is pristine until the relations change", async () => {
+      const wrapper = await openEditor();
+      expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+      // The autocomplete re-writes the same selection: still pristine.
+      await setRelations([relation("c1", { value: "Ada", editStatus: "new" })]);
+      expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      expect(inlineEditor(wrapper).props("dirty")).toBe(true);
+      expect(useEditScope().hasUnsavedChanges.value).toBe(true);
+    });
+
+    it("saves only the added relation", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(scopedSave.saveScope).toHaveBeenCalledWith({
+        entityId: "MW-TEST",
+        collection: "entities",
+        formInput: {
+          metadata: [],
+          relations: [
+            { key: "c2", type: "hasCreator", value: "Bo", metadata: [], editStatus: "new" },
+          ],
+          updateOnlyRelations: true,
+        },
+      });
+    });
+
+    it("saves only the removed relation", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor({}, [
+        relation("c1", { value: "Ada" }),
+        relation("c2", { value: "Bo" }),
+      ]);
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "deleted" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+        { key: "c2", type: "hasCreator", editStatus: "deleted" },
+      ]);
+    });
+
+    describe("metadata on the relation", () => {
+      const config = {
+        metadataOnRelationFieldConfig: { enabled: true, key: "page_number" },
+      };
+
+      it("saves a changed value on an existing relation", async () => {
+        scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+        const wrapper = await openEditor(config, [
+          relation("c1", { metadata: [{ key: "page_number", value: "12" }] }),
+        ]);
+        await setRelations([
+          relation("c1", {
+            editStatus: "new",
+            metadata: [{ key: "page_number", value: "13" }],
+          }),
+        ]);
+        inlineEditor(wrapper).vm.$emit("save", undefined);
+        await flushPromises();
+        expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+          {
+            key: "c1",
+            type: "hasCreator",
+            editStatus: "changed",
+            metadata: [{ key: "page_number", value: "13" }],
+          },
+        ]);
+      });
+
+      it("saves a cleared value as empty", async () => {
+        scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+        const wrapper = await openEditor(config, [
+          relation("c1", { metadata: [{ key: "page_number", value: "12" }] }),
+        ]);
+        await setRelations([relation("c1", { editStatus: "new" })]);
+        inlineEditor(wrapper).vm.$emit("save", undefined);
+        await flushPromises();
+        expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+          {
+            key: "c1",
+            type: "hasCreator",
+            editStatus: "changed",
+            metadata: [{ key: "page_number", value: "" }],
+          },
+        ]);
+      });
+
+      it("is pristine when a relation without a value still has none", async () => {
+        const wrapper = await openEditor(config, [relation("c1")]);
+        await setRelations([relation("c1", { editStatus: "new" })]);
+        expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+      });
+    });
+
+    it("validates the relations with the field's relation rules", async () => {
+      defineRule("has_required_relation", (value: unknown[]) =>
+        (Array.isArray(value) && value.length > 0) || "Choose a maker",
+      );
+      const wrapper = await openEditor({
+        validation: {
+          value: ["has_required_relation"],
+          has_required_relation: { relationType: "hasCreator", amount: 1 },
+        },
+      });
+      await setRelations([relation("c1", { editStatus: "deleted" })]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(scopedSave.saveScope).not.toHaveBeenCalled();
+      expect(inlineEditor(wrapper).props("errorMessage")).toBe("Choose a maker");
+    });
+
+    it("restores the relations on cancel", async () => {
+      const wrapper = await openEditor();
+      await setRelations([relation("c2", { value: "Bo", editStatus: "new" })]);
+      inlineEditor(wrapper).vm.$emit("cancel");
+      await flushPromises();
+      expect(form().values.relationValues.hasCreator).toEqual([
+        relation("c1", { value: "Ada" }),
+      ]);
+      expect(inlineEditor(wrapper).exists()).toBe(false);
+    });
+
+    it("keeps the relations the server stored after a save", async () => {
+      scopedSave.saveScope.mockResolvedValue({
+        id: "MW-TEST",
+        relationValues: {
+          hasCreator: [relation("c1", { value: "Ada" }), relation("c2", { value: "Bo" })],
+        },
+      });
+      const wrapper = await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(form().values.relationValues.hasCreator).toEqual([
+        relation("c1", { value: "Ada" }),
+        relation("c2", { value: "Bo" }),
+      ]);
+      expect(inlineEditor(wrapper).exists()).toBe(false);
+      expect(wrapper.find('[role="status"]').text()).toBe("Saved");
+    });
+
+    it("hands the saved entity back to the page", async () => {
+      entityFormData.onSaved.mockClear();
+      const saved = { id: "MW-TEST", relationValues: { hasCreator: [] } };
+      scopedSave.saveScope.mockResolvedValue(saved);
+      const wrapper = await openEditor();
+      await setRelations([relation("c1", { value: "Ada", editStatus: "deleted" })]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(entityFormData.onSaved).toHaveBeenCalledWith(saved);
+    });
+
+    it("lets the leave prompt save the changed relations", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      expect(await useEditScope().saveActive()).toBe(true);
+      expect(scopedSave.saveScope).toHaveBeenCalled();
+    });
   });
 });
