@@ -146,7 +146,7 @@
                 : undefined
             "
             v-bind="editableValueAttrs"
-            @click="startEditing"
+            @click.capture="startEditing"
             @keydown.enter.prevent="startEditing"
             @keydown.space="onSpaceKey"
           >
@@ -582,7 +582,9 @@ const canEditInPlace = computed<boolean>(() =>
     entityCanUpdate: entityCanUpdate.value,
     pageInEditMode: props.isEdit,
     multilingual: (props.metadata as PanelMetaData).isMultilingual === true,
-    onRelation: fieldKind.value !== "PanelMetaData",
+    onRelation: ["PanelRelationMetaData", "PanelRelationRootData"].includes(
+      fieldKind.value,
+    ),
     repeatable: !!props.repeatablePanelConfig?.isRepeatable,
   }),
 );

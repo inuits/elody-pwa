@@ -395,6 +395,29 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
   });
 
+  it("is editable when the field config arrives without a __typename", async () => {
+    const props = editableProps();
+    delete (props.metadata as any).__typename;
+    expect((await fieldValue(props)).attributes("role")).toBe("button");
+  });
+
+  it("is plain text for metadata on a relation", async () => {
+    const props = editableProps();
+    (props.metadata as any).__typename = "PanelRelationMetaData";
+    expect((await fieldValue(props)).attributes("role")).toBeUndefined();
+  });
+
+  it("opens the scope when clicking a value whose display stops click events", async () => {
+    const props = editableProps("year", InputFieldTypes.DropdownSingleselectMetadata);
+    (props.metadata.inputField as any).options = [{ label: "Nieuw", value: "new" }];
+    (props.metadata as any).unit = "text";
+    const wrapper = await mountWrapper(props);
+    const display = wrapper.find("view-modes-autocomplete-metadata-stub");
+    expect(display.exists()).toBe(true);
+    await display.trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+  });
+
   it("is plain text for a read-only field", async () => {
     const props = editableProps();
     (props.metadata as any).readOnly = true;
