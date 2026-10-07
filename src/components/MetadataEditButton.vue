@@ -2,9 +2,10 @@
   <div
     data-cy="edit-toggle"
     v-if="
-      editModeHelper.editMode === 'view' ||
+      PAGE_EDIT_MODE_AVAILABLE &&
+      (editModeHelper.editMode === 'view' ||
       editModeHelper.editMode === 'edit' ||
-      editModeHelper.editMode === 'edit-delete'
+        editModeHelper.editMode === 'edit-delete')
     "
     class="ml-auto px-2"
   >
@@ -42,6 +43,7 @@ import BaseButtonNew, {
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
+import { PAGE_EDIT_MODE_AVAILABLE } from "@/components/metadata/fieldEditability";
 import { useRoute } from "vue-router";
 import type { useEditState } from "@/composables/useEditState";
 
