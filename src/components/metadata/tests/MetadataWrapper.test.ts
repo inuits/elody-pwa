@@ -372,6 +372,17 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     );
   });
 
+  it("gives every value row the same minimum height, editable or not", async () => {
+    expect((await fieldValue()).classes()).toContain(
+      "min-h-(--field-value-min-height)",
+    );
+    const props = editableProps();
+    (props.metadata as any).readOnly = true;
+    expect((await fieldValue(props)).classes()).toContain(
+      "min-h-(--field-value-min-height)",
+    );
+  });
+
   it("washes the whole value on hover", async () => {
     expect((await fieldValue()).classes()).toContain(
       "hover:bg-surface-editable-hover",

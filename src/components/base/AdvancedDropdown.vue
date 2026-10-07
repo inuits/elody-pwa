@@ -346,7 +346,7 @@ body {
   --vs-border: 1px solid var(--color-border-default);
   --vs-border-radius: var(--radius-input);
   --vs-padding: 5px 8px;
-  --vs-min-height: 32px;
+  --vs-min-height: var(--control-height);
   --vs-outline-width: var(--focus-ring-width);
   --vs-outline-color: var(--color-focus-ring);
   --vs-indicator-icon-color: var(--color-text-secondary);

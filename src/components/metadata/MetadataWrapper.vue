@@ -139,7 +139,7 @@
             data-cy="field-value"
             v-on="showTooltip ? on : {}"
             :aria-describedby="showTooltip ? describedBy : undefined"
-            class="flex column gap-2 items-center"
+            class="flex column gap-2 items-center min-h-(--field-value-min-height)"
             :class="
               canEditInPlace
                 ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) hover:bg-surface-editable-hover'

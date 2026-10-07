@@ -80,6 +80,10 @@ describe("BaseInputTextNumberDatetime", () => {
         '[data-cy="base-input-text"]',
       );
 
+    it("is at least the shared control height", () => {
+      expect(textInput().classes()).toContain("min-h-(--control-height)");
+    });
+
     it("uses the input radius token", () => {
       expect(textInput().classes()).toContain("rounded-input");
     });

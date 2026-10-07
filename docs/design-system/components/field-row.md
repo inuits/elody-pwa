@@ -24,6 +24,8 @@ repeatable row group.
     `--field-value-pad-x` beyond the text on both sides, while the text stays
     aligned with the label. A read-only dropdown display is transparent, so
     the wash shows through it.
+- Text values, chip values and read-only values all share the same minimum
+  row height, so rows line up whatever the field type.
 
 ## Tokens
 | Token | Role |
@@ -34,6 +36,7 @@ repeatable row group.
 | `--color-border-dashed` | editable underline |
 | `--color-surface-editable-hover` | hover wash |
 | `--field-value-pad-x` | how far the wash extends beyond the value |
+| `--field-value-min-height` | minimum height of every value row, text or chips |
 | `--color-text-subtle` | pencil |
 | `--opacity-empty` | empty value ("Geen waarde") |
 

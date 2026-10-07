@@ -187,7 +187,7 @@ const isInvalid = computed<boolean>(() => props.invalid || !!props.errorMessage)
 const fieldClasses = computed<string[]>(() => {
   const style = selectedInputStyle.value;
   const shape =
-    "border rounded-input text-input p-(--input-padding) placeholder:text-text-placeholder focus:ring-0";
+    "border rounded-input text-input p-(--input-padding) min-h-(--control-height) placeholder:text-text-placeholder focus:ring-0";
   if (props.readonly)
     return [shape, style.textColor, "bg-transparent border-transparent"];
   return [

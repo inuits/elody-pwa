@@ -26,6 +26,7 @@ component's style block:
 | `--text-value` | trigger value |
 | `--text-table` | options |
 | `--radius-input` | trigger |
+| `--control-height` | trigger height, the same as the text input |
 | `--radius-card`, `--shadow-overlay`, `--color-border-subtle` | popup |
 | `--color-border-default` | trigger border (bordered variant) |
 | `--color-accent-wash` | option hover and keyboard focus |

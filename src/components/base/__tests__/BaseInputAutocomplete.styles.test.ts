@@ -78,4 +78,21 @@ describe("BaseInputAutocomplete — design-system styling", () => {
     expect(container).toContain("!bg-transparent");
     expect(container).not.toContain("!bg-surface");
   });
+
+  it.each(["readOnly", "readOnlyAsPlainText"])(
+    "drops the empty-input spacer in %s mode, so a value row is only as tall as its content",
+    (style) => {
+      expect(classesFor(style).spacer).toBe("hidden");
+    },
+  );
+
+  it("renders plain-text relations at the value size, like other values", () => {
+    expect(classesFor("readOnlyAsPlainText").tag).toContain("!text-value");
+  });
+
+  it("keeps edit-mode controls at the shared control height", () => {
+    expect(classesFor("defaultWithBorder").spacer).toContain(
+      "h-[calc(var(--control-height)-2px)]",
+    );
+  });
 });
