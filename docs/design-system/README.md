@@ -50,6 +50,7 @@ To change what a role means everywhere, change the role token.
   - [Chip and badge](components/chip-and-badge.md)
   - [Dropdown](components/dropdown.md)
   - [History diff](components/history-diff.md)
+  - [Field row](components/field-row.md)
 - `patterns/`: per-field editing, filters, lists and other multi-component patterns
 
 ## Page template (components)

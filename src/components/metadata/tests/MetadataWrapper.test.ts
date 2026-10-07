@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { defineComponent, h, nextTick, ref } from "vue";
 import { useForm, defineRule } from "vee-validate";
@@ -30,6 +30,8 @@ import MetadataWrapper from "../MetadataWrapper.vue";
 import MetadataMaskedValue from "../MetadataMaskedValue.vue";
 import { InputFieldTypes } from "@/generated-types/queries";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useEditMode } from "@/composables/useEdit";
+import { useEditScope } from "@/composables/useEditScope";
 import {
   copyFromParentContextKey,
   type CopyFromParentContext,
@@ -324,5 +326,89 @@ describe("MetadataWrapper — masked field delegation", () => {
     const wrapper = await mountWrapper(buildProps("plain_key", false));
 
     expect(wrapper.findComponent(MetadataMaskedValue).exists()).toBe(false);
+  });
+});
+
+describe("MetadataWrapper — in-place editing affordance", () => {
+  const editableProps = (key = "year", type = InputFieldTypes.Text) => {
+    const props = buildProps(key, false);
+    props.metadata.inputField.type = type;
+    return props;
+  };
+
+  const allowUpdate = (canUpdate: boolean) =>
+    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate, canDelete: false });
+
+  const fieldValue = async (props = editableProps()) =>
+    (await mountWrapper(props)).find('[data-cy="field-value"]');
+
+  beforeEach(() => {
+    allowUpdate(true);
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("makes an editable value a button named after its field", async () => {
+    const value = await fieldValue();
+    expect(value.attributes("role")).toBe("button");
+    expect(value.attributes("tabindex")).toBe("0");
+    expect(value.attributes("aria-label")).toBe("metadata.labels.test, edit");
+  });
+
+  it("signals editability with a dashed underline and a hover wash", async () => {
+    expect((await fieldValue()).classes()).toEqual(
+      expect.arrayContaining([
+        "border-b",
+        "border-dashed",
+        "border-border-dashed",
+        "hover:bg-surface-editable-hover",
+      ]),
+    );
+  });
+
+  it("shows a pencil that appears on hover", async () => {
+    const pencil = (await mountWrapper(editableProps())).find(
+      '[data-cy="field-edit-pencil"]',
+    );
+    expect(pencil.exists()).toBe(true);
+    expect(pencil.attributes("aria-hidden")).toBe("true");
+  });
+
+  it("opens the field's edit scope on click", async () => {
+    await (await fieldValue()).trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+  });
+
+  it("opens the field's edit scope with Enter", async () => {
+    await (await fieldValue()).trigger("keydown", { key: "Enter" });
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+  });
+
+  it("is plain text for a read-only field", async () => {
+    const props = editableProps();
+    (props.metadata as any).readOnly = true;
+    expect((await fieldValue(props)).attributes("role")).toBeUndefined();
+  });
+
+  it("is plain text when the user may not update the entity", async () => {
+    allowUpdate(false);
+    expect((await fieldValue()).attributes("role")).toBeUndefined();
+  });
+
+  it("is plain text for a locked field", async () => {
+    expect((await fieldValue(editableProps("title"))).attributes("role")).toBeUndefined();
+  });
+
+  it("is plain text for a field type without an inline editor yet", async () => {
+    expect(
+      (await fieldValue(editableProps("year", InputFieldTypes.FileUpload))).attributes(
+        "role",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("does not open a scope for a read-only value", async () => {
+    allowUpdate(false);
+    await (await fieldValue()).trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
   });
 });

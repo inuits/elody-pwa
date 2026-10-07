@@ -1,12 +1,27 @@
 <template>
-  <div v-if="metadata.label" class="text-text-light text-sm flex">
-    <p data-cy="metadata-label">
+  <div v-if="metadata.label" class="flex items-center gap-1">
+    <p
+      data-cy="metadata-label"
+      class="text-label font-bold text-text-field-label"
+    >
       {{ t(metadata.label) }}
     </p>
-    <p v-if="isOneOfRequired" class="pl-1">
-      ( {{ t("metadata.labels.one-of-required") }} )
-    </p>
-    <p v-else-if="isFieldRequired" class="pl-1">*</p>
+    <!-- Label adornments, in order: required / one-of-required, help. -->
+    <span
+      v-if="isOneOfRequired"
+      data-cy="one-of-required-marker"
+      role="img"
+      class="text-label font-bold text-text-field-label"
+      :aria-label="t('metadata.labels.one-of-required')"
+      :title="t('metadata.labels.one-of-required')"
+      >◦</span
+    >
+    <span
+      v-else-if="isFieldRequired"
+      data-cy="required-marker"
+      class="text-label font-bold text-danger"
+      >*</span
+    >
     <base-tooltip
       v-if="metadata?.tooltip"
       position="top-right"

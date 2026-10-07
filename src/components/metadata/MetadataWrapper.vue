@@ -18,8 +18,8 @@
           'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
         }"
         :metadata="metadata"
-        :is-field-required="isFieldRequired && isEdit"
-        :is-one-of-required="isOneOfRequired && isEdit"
+        :is-field-required="isFieldRequired && (isEdit || canEditInPlace)"
+        :is-one-of-required="isOneOfRequired && (isEdit || canEditInPlace)"
         :is-locked="fieldIsLocked"
       />
       <MultilingualLocaleSelector :field-key="metadata.key" />
@@ -118,9 +118,19 @@
       >
         <template #activator="{ on, describedBy }">
           <div
+            data-cy="field-value"
             v-on="showTooltip ? on : {}"
             :aria-describedby="showTooltip ? describedBy : undefined"
             class="flex column gap-2 items-center"
+            :class="
+              canEditInPlace
+                ? 'group cursor-pointer rounded-input border-b border-dashed border-border-dashed hover:bg-surface-editable-hover'
+                : undefined
+            "
+            v-bind="editableValueAttrs"
+            @click="startEditing"
+            @keydown.enter.prevent="startEditing"
+            @keydown.space="onSpaceKey"
           >
             <MetadataMaskedValue
               v-if="isMaskedField"
@@ -256,6 +266,14 @@
                 :breakWords="breakWords"
               />
             </MetadataTruncatedText>
+            <span
+              v-if="canEditInPlace"
+              data-cy="field-edit-pencil"
+              aria-hidden="true"
+              class="ml-auto flex text-text-muted opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+            >
+              <unicon :name="Unicons.EditAlt.name" height="14" />
+            </span>
             <BaseCopyToClipboard
               v-if="metadata.copyToClipboard && !isMaskedField"
               class="w-6 h-6"
@@ -307,7 +325,7 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
+import { ref, onBeforeMount, computed, inject, provide, watch, unref } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
@@ -326,6 +344,9 @@ import { useVeeValidate } from "./useVeeValidate";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
+import { useEditScope } from "@/composables/useEditScope";
+import { useEditMode } from "@/composables/useEdit";
+import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -505,6 +526,55 @@ watch(
   },
   { deep: true },
 );
+
+// Per-field editing: an editable value is a button that opens its own edit
+// scope (docs/design-system/patterns/per-field-editing.md).
+const { requestOpen } = useEditScope();
+const { te } = useI18n();
+const entityEditState = useEditMode(props.formId);
+const entityCanUpdate = computed<boolean>(() =>
+  ["edit", "edit-delete"].includes(
+    unref(entityEditState.permittedEditMode as any) as string,
+  ),
+);
+const canEditInPlace = computed<boolean>(() =>
+  canEditFieldInPlace({
+    inputFieldType: props.metadata.inputField?.type,
+    nonEditableField: props.metadata.nonEditableField ?? false,
+    editableByUser: fieldIsEditableByUser.value,
+    locked: fieldIsLocked.value,
+    masked: isMaskedField.value,
+    entityCanUpdate: entityCanUpdate.value,
+    pageInEditMode: props.isEdit,
+  }),
+);
+const editFieldLabel = computed<string>(() =>
+  te("inline-edit.edit-field") ? t("inline-edit.edit-field") : "edit",
+);
+const editableValueAttrs = computed(() =>
+  canEditInPlace.value
+    ? {
+        role: "button",
+        tabindex: 0,
+        "aria-label": `${t(props.metadata.label ?? "")}, ${editFieldLabel.value}`,
+      }
+    : {},
+);
+const isEditingInPlace = ref<boolean>(false);
+const editScopeId = computed(() => `${props.formId}:${props.metadata.key}`);
+const startEditing = () => {
+  if (!canEditInPlace.value) return;
+  isEditingInPlace.value = requestOpen({
+    id: editScopeId.value,
+    isDirty: () => false,
+    close: () => (isEditingInPlace.value = false),
+  });
+};
+const onSpaceKey = (event: KeyboardEvent) => {
+  if (!canEditInPlace.value) return;
+  event.preventDefault();
+  startEditing();
+};
 </script>
 
 <style scoped>

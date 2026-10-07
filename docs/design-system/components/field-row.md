@@ -1,0 +1,80 @@
+# Field row
+
+One metadata field on a detail page: label above value, editable in place.
+Implemented by `src/components/metadata/MetadataWrapper.vue` (with
+`MetadataTitle.vue` for the label). Part of
+[per-field editing](../patterns/per-field-editing.md).
+
+## When to use
+Every single-valued metadata field and every relation field on a detail page.
+Interdependent fields use the group form card; repeating values use the
+repeatable row group.
+
+## Anatomy
+- **Label line:** the label, then its adornments in this order:
+  - required `*`, or the one-of-required `◦` (named by the rule);
+  - help `?`;
+  - locale chip (multilingual fields).
+- **Value:** the rendered value. When it is editable in place:
+  - a dashed underline;
+  - a hover wash;
+  - a pencil, shown on hover and focus.
+
+## Tokens
+| Token | Role |
+|---|---|
+| `--text-label`, `--color-text-field-label` | label |
+| `--color-danger` | required marker |
+| `--text-value`, `--color-text-secondary` | value |
+| `--color-border-dashed` | editable underline |
+| `--color-surface-editable-hover` | hover wash |
+| `--color-text-muted` | pencil |
+| `--opacity-empty` | empty value ("Geen waarde") |
+
+## When a value is editable in place
+All of these must hold (`fieldEditability.ts`):
+- the field type has an inline editor:
+  - text, number, date, textarea;
+  - checkbox, dropdown;
+  - metadata dropdowns and relation dropdowns;
+- the field isn't marked non-editable or read-only for the user;
+- it isn't locked or masked;
+- the user may update the entity;
+- the legacy page-wide edit mode is off. It still renders its own inputs until
+  it is removed.
+
+Anything else renders as plain text, with no button role and no hover cue.
+
+## States
+| State | Cue |
+|---|---|
+| resting | value with a dashed underline |
+| hover | wash + pencil |
+| focus | the global focus ring + pencil |
+| empty | "Geen waarde" at `--opacity-empty` |
+| read-only | plain value, no underline, no hover |
+| editing | the inline editor opens in place (see the inline editor) |
+
+## Behaviour and keyboard
+- Click, Enter or Space on an editable value opens its edit scope.
+- Only one scope edits at a time. If another scope is open and unchanged, it
+  closes. If it has changes, it stays open and gets focus back. Nothing is
+  saved or discarded implicitly.
+
+## Accessibility
+- An editable value is `role="button"`, focusable, named "{label}, bewerken".
+- The pencil is decorative (`aria-hidden`).
+- The required `*` and the one-of marker are part of the label line. The
+  one-of marker has an accessible name.
+
+## Copy
+| Key | NL | EN fallback |
+|---|---|---|
+| `inline-edit.edit-field` | bewerken | edit |
+| `metadata.labels.one-of-required` | (existing) | |
+
+## Implementation
+`MetadataWrapper.vue` decides editability and opens the scope through
+`useEditScope` (`src/composables/useEditScope.ts`). Tests:
+`src/components/metadata/tests/MetadataWrapper.test.ts`,
+`MetadataTitle.test.ts`, `fieldEditability.test.ts`.
