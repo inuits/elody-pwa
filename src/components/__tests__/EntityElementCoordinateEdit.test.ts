@@ -102,6 +102,12 @@ describe("EntityElementCoordinateEdit", () => {
     expect(isRendered(getWrapper(undefined))).toBe(true);
   });
 
+  it("has the same padding as a field row, so it lines up with the others", () => {
+    expect(mountField().find('[data-cy="metadata-wrapper"]').classes()).toEqual(
+      expect.arrayContaining(["py-2", "px-2"]),
+    );
+  });
+
   describe("at rest", () => {
     it("shows the value as text, like any field row", () => {
       const wrapper = mountField();

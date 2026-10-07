@@ -169,6 +169,21 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
     document.body.innerHTML = "";
   });
 
+  describe("alignment with field rows", () => {
+    it("pads the whole field like a field row", async () => {
+      const wrapper = await mountElement();
+      expect(wrapper.find('[data-cy="wysiwyg-field"]').classes()).toEqual(
+        expect.arrayContaining(["py-2", "px-2"]),
+      );
+    });
+
+    it("puts the editor box flush with the label, without its own margin", async () => {
+      await mountElement();
+      const editorClass = editor().options.editorProps.attributes.class;
+      expect(editorClass).not.toMatch(/\bmx-2\b/);
+    });
+  });
+
   describe("at rest", () => {
     it("shows the content read-only with an edit button on the label line", async () => {
       const wrapper = await mountElement();

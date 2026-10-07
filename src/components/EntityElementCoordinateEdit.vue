@@ -2,7 +2,7 @@
   <div
     data-cy="metadata-wrapper"
     v-if="inputField && isPermitted"
-    class="text-text-light text-sm"
+    class="py-2 px-2 text-text-light text-sm"
   >
     <MetadataTitle :metadata="{ label: label || 'metadata.no-label' } as any" />
     <div

@@ -7,6 +7,8 @@
     :class="[
       'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
+      // Inline it is a field row: the same padding, label then value.
+      { 'py-2 px-2': displayInline },
     ]"
   >
     <div
@@ -28,7 +30,7 @@
         @cancel="cancelInPlace"
       />
     </div>
-    <div v-else class="pl-2 py-2 flex gap-2 items-center">
+    <div v-else class="flex gap-2 items-center pb-1">
       <metadata-title :metadata="element" :is-locked="isLocked" />
       <WYSIGYGVirtualKeyboard
         v-if="
@@ -121,14 +123,16 @@
       <p
         v-if="inPlaceError"
         role="alert"
-        class="text-hint text-danger px-2 pt-1"
+        class="text-hint text-danger pt-1"
+        :class="{ 'px-4': !displayInline }"
       >
         {{ inPlaceError }}
       </p>
       <p
         v-if="isEditingInPlace"
         data-cy="wysiwyg-hint"
-        class="text-hint text-text-muted px-2 pt-1"
+        class="text-hint text-text-muted pt-1"
+        :class="{ 'px-4': !displayInline }"
       >
         {{ inPlaceHint }}
       </p>
@@ -443,7 +447,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm ${props.displayInline ? "mx-2 min-h-[125px]" : "mx-4 min-h-[250px]"} border border-border-default rounded-input p-2 ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
+        class: `prose prose-sm ${props.displayInline ? "min-h-[125px]" : "mx-4 min-h-[250px]"} border border-border-default rounded-input p-2 ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
       },
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;
