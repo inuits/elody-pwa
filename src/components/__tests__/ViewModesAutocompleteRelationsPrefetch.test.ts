@@ -5,6 +5,9 @@ import { ref } from "vue";
 const mocks = vi.hoisted(() => ({
   createdHelpers: [] as { name: string; helper: any }[],
   relatedOptions: [] as any[],
+  // How the registry hands out loading state: the creator gets a ref, later
+  // callers get the reactive registry entry, where it is a plain boolean.
+  loading: undefined as undefined | { as: "ref" | "plain"; value: boolean },
 }));
 
 vi.mock("@/composables/useGetDropdownOptions", () => ({
@@ -13,7 +16,11 @@ vi.mock("@/composables/useGetDropdownOptions", () => ({
       initialize: vi.fn().mockResolvedValue(undefined),
       getAutocompleteOptions: vi.fn().mockResolvedValue(undefined),
       entityDropdownOptions: ref([]),
-      entitiesLoading: ref(false),
+      entitiesLoading: !mocks.loading
+        ? ref(false)
+        : mocks.loading.as === "ref"
+          ? ref(mocks.loading.value)
+          : mocks.loading.value,
       getFormWithRelationFieldCheck: vi.fn(),
     };
     if (name.includes("fetchRelations"))
@@ -210,5 +217,33 @@ describe("ViewModesAutocompleteRelations in an inline editor", () => {
     await flushPromises();
     expect(input(wrapper).attributes("style") ?? "").not.toContain("display: none");
     expect(wrapper.find("p").attributes("style")).toContain("display: none");
+  });
+});
+
+describe("ViewModesAutocompleteRelations loading state", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [];
+    vi.clearAllMocks();
+  });
+
+  const loadingProp = async (as: "ref" | "plain", value: boolean) => {
+    mocks.loading = { as, value };
+    const wrapper = mountWith({ mode: "edit", editing: true });
+    await flushPromises();
+    mocks.loading = undefined;
+    return wrapper.find("base-input-autocomplete-stub").attributes("loading");
+  };
+
+  it("shows the dropdown's spinner while options load (state as a ref)", async () => {
+    expect(await loadingProp("ref", true)).toBe("true");
+  });
+
+  it("shows the dropdown's spinner while options load (state from the registry)", async () => {
+    expect(await loadingProp("plain", true)).toBe("true");
+  });
+
+  it("shows no spinner once loaded", async () => {
+    expect(await loadingProp("plain", false)).toBe("false");
   });
 });

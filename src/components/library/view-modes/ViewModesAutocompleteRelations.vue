@@ -183,8 +183,10 @@ onBeforeUnmount(() => {
 
 const isLoading = computed(() => {
   return (
-    allEntitiesHelper.value.entitiesLoading.value ||
-    relatedEntitiesHelper.value.entitiesLoading.value ||
+    // The creator of a dropdown state gets refs, later callers the reactive
+    // registry entry (already unwrapped): unref reads both.
+    unref(allEntitiesHelper.value.entitiesLoading) ||
+    unref(relatedEntitiesHelper.value.entitiesLoading) ||
     isCreatingEntity.value
   );
 });
