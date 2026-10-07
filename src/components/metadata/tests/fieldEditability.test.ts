@@ -45,13 +45,17 @@ describe("canEditFieldInPlace", () => {
     "dropdown",
     "dropdownSingleselectMetadata",
     "dropdownMultiselectMetadata",
-    "dropdownSingleselectRelations",
-    "dropdownMultiselectRelations",
   ])("supports the %s field type", (inputFieldType) => {
     expect(canEditFieldInPlace({ ...editable, inputFieldType })).toBe(true);
   });
 
-  it.each(["inputFieldWithSubFields", "fileUpload", undefined])(
+  it.each([
+    "dropdownSingleselectRelations",
+    "dropdownMultiselectRelations",
+    "inputFieldWithSubFields",
+    "fileUpload",
+    undefined,
+  ])(
     "does not yet edit %s fields in place",
     (inputFieldType) => {
       expect(canEditFieldInPlace({ ...editable, inputFieldType })).toBe(false);
@@ -65,6 +69,9 @@ describe("canEditFieldInPlace", () => {
     ["the value is masked", { masked: true }],
     ["the user may not update the entity", { entityCanUpdate: false }],
     ["the page-wide edit mode is on", { pageInEditMode: true }],
+    ["the field is multilingual", { multilingual: true }],
+    ["the field is metadata on a relation", { onRelation: true }],
+    ["the field belongs to a repeatable panel", { repeatable: true }],
   ])("refuses when %s", (_reason, override) => {
     expect(canEditFieldInPlace({ ...editable, ...override })).toBe(false);
   });

@@ -22,6 +22,7 @@ import {
   buildRelationsInput,
   buildRelationMetadataInput,
   saveScope,
+  toMetadataValue,
   validateScope,
 } from "@/composables/useScopedSave";
 
@@ -184,5 +185,22 @@ describe("validateScope", () => {
       valid: false,
       errors: { "intialValues.year": ["Jaar is verplicht"] },
     });
+  });
+});
+
+describe("toMetadataValue", () => {
+  it("keeps plain values and booleans as they are", () => {
+    expect(toMetadataValue("1958")).toBe("1958");
+    expect(toMetadataValue(false)).toBe(false);
+    expect(toMetadataValue(["a", "b"])).toEqual(["a", "b"]);
+  });
+
+  it("sends an empty value as an empty string", () => {
+    expect(toMetadataValue(undefined)).toBe("");
+    expect(toMetadataValue(null)).toBe("");
+  });
+
+  it("sends a formatted value as its label", () => {
+    expect(toMetadataValue({ formatter: "pill", label: "Concept" })).toBe("Concept");
   });
 });

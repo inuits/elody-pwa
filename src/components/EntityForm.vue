@@ -34,7 +34,9 @@ import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
-import { onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { useEditScope } from "@/composables/useEditScope";
+import { decideLeave } from "@/composables/useLeaveGuard";
 import { useSubmitForm } from "vee-validate";
 import {
   getChildrenOfHomeRoutes,
@@ -228,10 +230,9 @@ const validateAndSetDisableState = async () => {
   useEditHelper.setDisableState(formContainsErrors.value);
 };
 
-onBeforeRouteLeave(async () => {
-  if (!useEditHelper.isEdit || !form.value.meta.dirty) return true;
-
-  const choice = await confirm({
+const editScope = useEditScope();
+const askToLeave = () =>
+  confirm({
     title: t("confirm.discard-edit.title"),
     message: t("confirm.discard-edit.message"),
     confirmLabel: t("confirm.discard-edit.confirm"),
@@ -240,10 +241,28 @@ onBeforeRouteLeave(async () => {
     secondaryButtonStyle: "commit",
   });
 
-  if (choice === "secondary") {
-    await useEditHelper.save();
-    return true;
-  }
-  return choice === "confirm";
-});
+// Unsaved changes: the legacy page-wide edit mode or an open in-place editor.
+onBeforeRouteLeave(() =>
+  decideLeave({
+    pageEditChanged: !!useEditHelper.isEdit && form.value.meta.dirty,
+    scopeChanged: editScope.hasUnsavedChanges.value,
+    ask: askToLeave,
+    savePageEdit: () => useEditHelper.save(),
+    saveScope: editScope.saveActive,
+    discardScope: editScope.discardActive,
+  }),
+);
+
+// Moving to another record keeps this component: only an in-place editor is
+// checked here (the breadcrumbs already ask for the page-wide edit mode).
+onBeforeRouteUpdate(() =>
+  decideLeave({
+    pageEditChanged: false,
+    scopeChanged: editScope.hasUnsavedChanges.value,
+    ask: askToLeave,
+    savePageEdit: async () => undefined,
+    saveScope: editScope.saveActive,
+    discardScope: editScope.discardActive,
+  }),
+);
 </script>

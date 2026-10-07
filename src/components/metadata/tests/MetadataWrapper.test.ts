@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { defineComponent, h, nextTick, ref } from "vue";
 import { useForm, defineRule } from "vee-validate";
 
@@ -22,6 +22,12 @@ vi.mock("@/main", () => ({
 }));
 
 const loadDocumentMock = vi.fn().mockResolvedValue({ kind: "Document" });
+
+const scopedSave = vi.hoisted(() => ({ saveScope: vi.fn() }));
+vi.mock("@/composables/useScopedSave", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/composables/useScopedSave")>()),
+  saveScope: scopedSave.saveScope,
+}));
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({ loadDocument: loadDocumentMock }),
 }));
@@ -130,6 +136,12 @@ const mountWrapper = async (
         BaseCopyToClipboard: true,
         MetadataValueTooltip: true,
         EntityElementMetadata: { template: "<span>value</span>" },
+        InlineFieldEditor: {
+          name: "InlineFieldEditor",
+          props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage"],
+          emits: ["save", "cancel", "dirty-change", "draft-change"],
+          template: "<div data-cy='inline-editor-stub' />",
+        },
       },
     },
   });
@@ -410,5 +422,147 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     allowUpdate(false);
     await (await fieldValue()).trigger("click");
     expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+});
+
+describe("MetadataWrapper — inline editing", () => {
+  const props = () => {
+    const p = buildProps("year", false);
+    p.metadata.inputField.type = InputFieldTypes.Text;
+    return p;
+  };
+
+  const openEditor = async () => {
+    const wrapper = await mountWrapper(props());
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    return wrapper;
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate: true, canDelete: false });
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("swaps the value for the inline editor with the current value", async () => {
+    const wrapper = await openEditor();
+    expect(inlineEditor(wrapper).props("modelValue")).toBe("hello");
+    expect(inlineEditor(wrapper).props("type")).toBe(InputFieldTypes.Text);
+    expect(wrapper.find('[data-cy="field-value"]').exists()).toBe(false);
+  });
+
+  it("saves only the edited key", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(scopedSave.saveScope).toHaveBeenCalledWith({
+      entityId: "MW-TEST",
+      collection: "entities",
+      formInput: {
+        metadata: [{ key: "year", value: "2020" }],
+        relations: [],
+        updateOnlyRelations: false,
+      },
+    });
+  });
+
+  it("closes the editor and announces the save", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(false);
+    expect(wrapper.find('[role="status"]').text()).toBe("Saved");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("keeps the editor open with an error when the save fails", async () => {
+    scopedSave.saveScope.mockRejectedValue(new Error("server says no"));
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(true);
+    expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+      "Saving failed, try again",
+    );
+  });
+
+  it("does not save a value that fails the field's validation", async () => {
+    defineRule("regex", (value: string, [pattern]: string[]) =>
+      new RegExp(pattern).test(value ?? "") || "Invalid format",
+    );
+    const p = props();
+    (p.metadata.inputField as any).validation = { value: ["regex"], regex: "/^[0-9]{4}$/" };
+    const wrapper = await mountWrapper(p);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    inlineEditor(wrapper).vm.$emit("save", "123456");
+    await flushPromises();
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    expect(inlineEditor(wrapper).exists()).toBe(true);
+    expect(inlineEditor(wrapper).props("errorMessage")).toBeTruthy();
+  });
+
+  it("closes without saving on cancel", async () => {
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("cancel");
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(false);
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("reports unsaved changes while the editor holds a changed draft", async () => {
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    await flushPromises();
+    expect(useEditScope().hasUnsavedChanges.value).toBe(true);
+  });
+});
+
+describe("MetadataWrapper — leaving with an open editor", () => {
+  const openEditor = async () => {
+    const p = buildProps("year", false);
+    const wrapper = await mountWrapper(p);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    return wrapper;
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate: true, canDelete: false });
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("saves the typed draft when the leave prompt asks to save", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("draft-change", "2021");
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    expect(await useEditScope().saveActive()).toBe(true);
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: "2021" },
+    ]);
+  });
+
+  it("reports a failed save so the user stays on the page", async () => {
+    scopedSave.saveScope.mockRejectedValue(new Error("no"));
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("draft-change", "2021");
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    expect(await useEditScope().saveActive()).toBe(false);
+  });
+
+  it("closes the editor without saving when the prompt discards", async () => {
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    useEditScope().discardActive();
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(false);
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
   });
 });

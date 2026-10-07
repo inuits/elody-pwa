@@ -13,8 +13,6 @@ const IN_PLACE_FIELD_TYPES = new Set<string>([
   InputFieldTypes.Dropdown,
   InputFieldTypes.DropdownSingleselectMetadata,
   InputFieldTypes.DropdownMultiselectMetadata,
-  InputFieldTypes.DropdownSingleselectRelations,
-  InputFieldTypes.DropdownMultiselectRelations,
 ]);
 
 export type FieldEditabilityContext = {
@@ -26,6 +24,10 @@ export type FieldEditabilityContext = {
   entityCanUpdate: boolean;
   // The legacy page-wide edit mode still renders its own inputs.
   pageInEditMode: boolean;
+  // Not yet edited in place: they get their own editors later.
+  multilingual?: boolean;
+  onRelation?: boolean;
+  repeatable?: boolean;
 };
 
 export const canEditFieldInPlace = (field: FieldEditabilityContext): boolean =>
@@ -36,4 +38,7 @@ export const canEditFieldInPlace = (field: FieldEditabilityContext): boolean =>
   !field.locked &&
   !field.masked &&
   field.entityCanUpdate &&
-  !field.pageInEditMode;
+  !field.pageInEditMode &&
+  !field.multilingual &&
+  !field.onRelation &&
+  !field.repeatable;

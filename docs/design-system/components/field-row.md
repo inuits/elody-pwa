@@ -36,10 +36,12 @@ All of these must hold (`fieldEditability.ts`):
 - the field type has an inline editor:
   - text, number, date, textarea;
   - checkbox, dropdown;
-  - metadata dropdowns and relation dropdowns;
+  - metadata dropdowns;
 - the field isn't marked non-editable or read-only for the user;
 - it isn't locked or masked;
 - the user may update the entity;
+- it isn't multilingual, metadata on a relation, or part of a repeatable
+  panel (these get their own editors later);
 - the legacy page-wide edit mode is off. It still renders its own inputs until
   it is removed.
 
@@ -53,7 +55,7 @@ Anything else renders as plain text, with no button role and no hover cue.
 | focus | the global focus ring + pencil |
 | empty | "Geen waarde" at `--opacity-empty` |
 | read-only | plain value, no underline, no hover |
-| editing | the inline editor opens in place (see the inline editor) |
+| editing | the [inline editor](./inline-editor.md) replaces the value |
 
 ## Behaviour and keyboard
 - Click, Enter or Space on an editable value opens its edit scope.

@@ -11,6 +11,9 @@ export type EditScope = {
   isDirty: () => boolean;
   focus?: () => void;
   close?: () => void;
+  // Used by the leave prompt: save resolves to whether it succeeded.
+  save?: () => Promise<boolean>;
+  discard?: () => void;
 };
 
 export const createEditScopeStore = () => {
@@ -37,11 +40,29 @@ export const createEditScopeStore = () => {
     if (isActive(id)) activeScope.value = null;
   };
 
+  const saveActive = async (): Promise<boolean> => {
+    const current = activeScope.value;
+    if (!current?.save) return true;
+    return current.save();
+  };
+
+  const discardActive = (): void => {
+    activeScope.value?.discard?.();
+  };
+
   const hasUnsavedChanges: ComputedRef<boolean> = computed(
     () => !!activeScope.value?.isDirty(),
   );
 
-  return { activeScope, isActive, requestOpen, release, hasUnsavedChanges };
+  return {
+    activeScope,
+    isActive,
+    requestOpen,
+    release,
+    hasUnsavedChanges,
+    saveActive,
+    discardActive,
+  };
 };
 
 const store = createEditScopeStore();

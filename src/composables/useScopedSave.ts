@@ -19,6 +19,16 @@ export type RelationValue = {
   metadata?: MetadataEntry[] | null;
 };
 
+// The same conversion the whole-form save applies per key: a formatted value
+// is sent as its label, an empty value as "".
+export const toMetadataValue = (value: unknown): unknown => {
+  if (typeof value === "boolean") return value;
+  if (value === undefined || value === null) return "";
+  if (typeof value === "object" && (value as { formatter?: unknown }).formatter)
+    return (value as { label?: unknown }).label ?? "";
+  return value;
+};
+
 export const buildMetadataInput = (
   key: string,
   value: unknown,

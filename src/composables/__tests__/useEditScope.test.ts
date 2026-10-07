@@ -9,6 +9,8 @@ const scope = (id: string, dirty = false) => {
     isDirty: () => isDirty.value,
     focus: vi.fn(),
     close: vi.fn(),
+    save: vi.fn().mockResolvedValue(true),
+    discard: vi.fn(),
     setDirty: (value: boolean) => (isDirty.value = value),
   };
 };
@@ -79,5 +81,35 @@ describe("useEditScope", () => {
     store.requestOpen(scope("title", true));
     store.release("title");
     expect(store.hasUnsavedChanges.value).toBe(false);
+  });
+});
+
+describe("useEditScope — leaving with changes", () => {
+  it("saves the active scope and reports whether it worked", async () => {
+    const store = createEditScopeStore();
+    const title = scope("title", true);
+    store.requestOpen(title);
+    expect(await store.saveActive()).toBe(true);
+    expect(title.save).toHaveBeenCalled();
+  });
+
+  it("reports a failed save so navigation can stop", async () => {
+    const store = createEditScopeStore();
+    const title = scope("title", true);
+    title.save.mockResolvedValue(false);
+    store.requestOpen(title);
+    expect(await store.saveActive()).toBe(false);
+  });
+
+  it("discards the active scope's changes", () => {
+    const store = createEditScopeStore();
+    const title = scope("title", true);
+    store.requestOpen(title);
+    store.discardActive();
+    expect(title.discard).toHaveBeenCalled();
+  });
+
+  it("treats saving with nothing open as done", async () => {
+    expect(await createEditScopeStore().saveActive()).toBe(true);
   });
 });

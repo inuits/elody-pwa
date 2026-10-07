@@ -87,6 +87,23 @@
       </div>
       <slot name="fieldAction" />
     </div>
+    <InlineFieldEditor
+      v-if="isEditingInPlace"
+      :type="fieldType ?? ''"
+      :model-value="valueBeforeEditing"
+      :label="t(metadata.label ?? '')"
+      :options="(metadata.inputField?.options as any) ?? []"
+      :required="isFieldRequired"
+      :saving="inlineSaving"
+      :error-message="inlineError"
+      @save="saveInline"
+      @cancel="cancelInline"
+      @dirty-change="inlineDirty = $event"
+      @draft-change="latestDraft = $event"
+    />
+    <p data-cy="inline-save-status" role="status" class="sr-only">
+      {{ savedAnnouncement }}
+    </p>
     <div
       v-if="
         !(
@@ -95,7 +112,7 @@
           !metadata.nonEditableField &&
           fieldIsEditableByUser &&
           !fieldIsLocked
-        )
+        ) && !isEditingInPlace
       "
       data-testid="locked-field-view-container"
       class="relative flex gap-2"
@@ -118,6 +135,7 @@
       >
         <template #activator="{ on, describedBy }">
           <div
+            ref="fieldValueRef"
             data-cy="field-value"
             v-on="showTooltip ? on : {}"
             :aria-describedby="showTooltip ? describedBy : undefined"
@@ -316,6 +334,7 @@ import MetadataMaskedValue from "@/components/metadata/MetadataMaskedValue.vue";
 import { resolveValueTranslationKey } from "@/components/metadata/useValueTranslationKey";
 import {
   BaseLibraryModes,
+  Collection,
   type PanelMetaData,
   InputFieldTypes,
   Unit,
@@ -325,7 +344,16 @@ import {
   type BaseEntity,
   ValidationRules,
 } from "@/generated-types/queries";
-import { ref, onBeforeMount, computed, inject, provide, watch, unref } from "vue";
+import {
+  ref,
+  onBeforeMount,
+  computed,
+  inject,
+  provide,
+  watch,
+  unref,
+  nextTick,
+} from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
@@ -347,6 +375,13 @@ import { useI18n } from "vue-i18n";
 import { useEditScope } from "@/composables/useEditScope";
 import { useEditMode } from "@/composables/useEdit";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
+import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
+import {
+  buildMetadataInput,
+  saveScope,
+  toMetadataValue,
+  validateScope,
+} from "@/composables/useScopedSave";
 
 export type MetadataWrapperProps = {
   isEdit: boolean;
@@ -529,7 +564,7 @@ watch(
 
 // Per-field editing: an editable value is a button that opens its own edit
 // scope (docs/design-system/patterns/per-field-editing.md).
-const { requestOpen } = useEditScope();
+const { requestOpen, release } = useEditScope();
 const { te } = useI18n();
 const entityEditState = useEditMode(props.formId);
 const entityCanUpdate = computed<boolean>(() =>
@@ -546,6 +581,9 @@ const canEditInPlace = computed<boolean>(() =>
     masked: isMaskedField.value,
     entityCanUpdate: entityCanUpdate.value,
     pageInEditMode: props.isEdit,
+    multilingual: (props.metadata as PanelMetaData).isMultilingual === true,
+    onRelation: fieldKind.value !== "PanelMetaData",
+    repeatable: !!props.repeatablePanelConfig?.isRepeatable,
   }),
 );
 const editFieldLabel = computed<string>(() =>
@@ -561,14 +599,82 @@ const editableValueAttrs = computed(() =>
     : {},
 );
 const isEditingInPlace = ref<boolean>(false);
+const inlineDirty = ref<boolean>(false);
+const inlineSaving = ref<boolean>(false);
+const inlineError = ref<string | undefined>(undefined);
+const savedAnnouncement = ref<string>("");
+const valueBeforeEditing = ref<unknown>(undefined);
+const latestDraft = ref<unknown>(undefined);
+const fieldValueRef = ref<HTMLElement | null>(null);
+const entityFormData = inject<
+  { id?: string; collection?: Collection } | undefined
+>("entityFormData", undefined);
 const editScopeId = computed(() => `${props.formId}:${props.metadata.key}`);
+
+const focusFieldValue = async () => {
+  await nextTick();
+  fieldValueRef.value?.focus();
+};
+const closeEditor = () => {
+  isEditingInPlace.value = false;
+  inlineDirty.value = false;
+  inlineError.value = undefined;
+  release(editScopeId.value);
+};
 const startEditing = () => {
-  if (!canEditInPlace.value) return;
-  isEditingInPlace.value = requestOpen({
+  if (!canEditInPlace.value || isEditingInPlace.value) return;
+  const opened = requestOpen({
     id: editScopeId.value,
-    isDirty: () => false,
-    close: () => (isEditingInPlace.value = false),
+    isDirty: () => inlineDirty.value,
+    close: closeEditor,
+    save: async () => {
+      await saveInline(latestDraft.value);
+      return !isEditingInPlace.value;
+    },
+    discard: () => cancelInline(),
   });
+  if (!opened) return;
+  valueBeforeEditing.value = fieldValueProxy.value;
+  latestDraft.value = fieldValueProxy.value;
+  savedAnnouncement.value = "";
+  isEditingInPlace.value = true;
+};
+const cancelInline = () => {
+  fieldValueProxy.value = valueBeforeEditing.value;
+  closeEditor();
+  focusFieldValue();
+};
+const saveInline = async (value: unknown) => {
+  fieldValueProxy.value = value;
+  const { valid, errors } = await validateScope(async () => {
+    const result = await field.validate();
+    return { valid: result.valid, errors: result.errors };
+  }, [fieldKey.value]);
+  if (!valid) {
+    inlineError.value = Object.values(errors)[0]?.[0];
+    return;
+  }
+  inlineSaving.value = true;
+  inlineError.value = undefined;
+  try {
+    await saveScope({
+      entityId: props.linkedEntityId || entityFormData?.id || props.formId,
+      collection: entityFormData?.collection ?? Collection.Entities,
+      formInput: buildMetadataInput(props.metadata.key, toMetadataValue(value)),
+    });
+    field.resetField({ value: fieldValueProxy.value });
+    savedAnnouncement.value = te("inline-edit.saved")
+      ? t("inline-edit.saved")
+      : "Saved";
+    closeEditor();
+    focusFieldValue();
+  } catch {
+    inlineError.value = te("inline-edit.save-failed")
+      ? t("inline-edit.save-failed")
+      : "Saving failed, try again";
+  } finally {
+    inlineSaving.value = false;
+  }
 };
 const onSpaceKey = (event: KeyboardEvent) => {
   if (!canEditInPlace.value) return;
