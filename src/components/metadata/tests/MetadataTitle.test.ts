@@ -114,3 +114,41 @@ describe("MetadataTitle - field-row label", () => {
     expect(marker.attributes("aria-label")).toBe("metadata.labels.one-of-required");
   });
 });
+
+describe("MetadataTitle - help icons", () => {
+  // Label-line icons share the pencil's size, so none outgrows the label.
+  const LABEL_ICON_HEIGHT = "12";
+
+  it("sizes the info-panel icon like the edit pencil", () => {
+    const wrapper = getWrapper({
+      label: "metadata.labels.reading",
+      infoPanel: { title: "t", content: "<p>c</p>" },
+    });
+    expect(
+      wrapper
+        .find('[data-testid="info-panel-trigger"]')
+        .findComponent(uniconStub)
+        .props("height"),
+    ).toBe(LABEL_ICON_HEIGHT);
+  });
+
+  it("sizes the tooltip icon like the edit pencil", () => {
+    const wrapper = shallowMount(MetadataTitle, {
+      props: {
+        metadata: { label: "metadata.labels.reading", tooltip: "hint" },
+      } as any,
+      global: {
+        stubs: {
+          unicon: uniconStub,
+          BaseTooltip: {
+            template:
+              "<div><slot name='activator' :on='{}' described-by='x' /></div>",
+          },
+        },
+      },
+    });
+    expect(wrapper.findComponent(uniconStub).props("height")).toBe(
+      LABEL_ICON_HEIGHT,
+    );
+  });
+});

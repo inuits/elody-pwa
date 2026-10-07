@@ -13,7 +13,7 @@ repeatable row group.
 ## Anatomy
 - **Label line:** the label, then its adornments in this order:
   - required `*`, or the one-of-required `◦` (named by the rule);
-  - help `?`;
+  - help `?`, at the pencil's size (12px) so no icon outgrows the label;
   - locale chip (multilingual fields).
 - **Value:** the rendered value. When it is editable in place:
   - a dashed underline under the value text, with square ends. Chip values

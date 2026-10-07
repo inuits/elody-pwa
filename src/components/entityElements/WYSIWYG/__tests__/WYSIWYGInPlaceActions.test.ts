@@ -34,6 +34,12 @@ describe("WYSIWYGInPlaceActions", () => {
       );
     });
 
+    it("draws the pencil like a field row's: subtle ink, the same size", () => {
+      const button = editButton(mountActions());
+      expect(button.classes()).toContain("text-text-subtle");
+      expect(button.find("unicon-stub").attributes("height")).toBe("12");
+    });
+
     it("opens editing from the edit button", async () => {
       const wrapper = mountActions();
       await editButton(wrapper).trigger("click");

@@ -22,23 +22,23 @@
       @click="emit('cancel')"
     />
   </div>
-  <div v-else-if="canEdit" class="flex shrink-0">
-    <BaseButtonNew
-      data-cy="wysiwyg-edit-button"
-      :icon="DamsIcons.EditAlt"
-      :icon-height="12"
-      :aria-label="`${label}, ${editLabel}`"
-      button-style="ghost"
-      button-size="sm"
-      @click="emit('edit')"
-    />
-  </div>
+  <!-- The same pencil as a field row's (field-row.md): subtle ink, 12px. -->
+  <button
+    v-else-if="canEdit"
+    type="button"
+    data-cy="wysiwyg-edit-button"
+    class="flex shrink-0 items-center p-1 rounded-input cursor-pointer text-text-subtle hover:bg-surface-editable-hover"
+    :aria-label="`${label}, ${editLabel}`"
+    @click="emit('edit')"
+  >
+    <unicon :name="Unicons.EditAlt.name" height="12" />
+  </button>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { DamsIcons } from "@/generated-types/queries";
+import { Unicons } from "@/types";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
 defineProps<{

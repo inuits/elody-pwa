@@ -59,7 +59,8 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 | Token | Role |
 |---|---|
 | `--color-border-default`, `--radius-input` | editor border |
-| `--color-surface-editable-hover` | hover wash on editable content |
+| `--color-surface-editable-hover` | hover wash on editable content and the pencil |
+| `--color-text-subtle` | pencil, the same as a field row's |
 | `--text-hint`, `--color-text-muted` | keyboard hint |
 | `--color-danger` | error message |
 | `--color-chip-neutral-*`, `--chip-padding` | language chip while editing |
