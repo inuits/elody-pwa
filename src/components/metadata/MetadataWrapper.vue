@@ -142,7 +142,7 @@
             class="flex column gap-2 items-center"
             :class="
               canEditInPlace
-                ? 'cursor-pointer rounded-input hover:bg-surface-editable-hover'
+                ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) hover:bg-surface-editable-hover'
                 : undefined
             "
             v-bind="editableValueAttrs"

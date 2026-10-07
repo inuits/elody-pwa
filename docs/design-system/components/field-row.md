@@ -20,7 +20,10 @@ repeatable row group.
     (dropdowns, pills) have no underline, since their shape already marks them;
   - a pencil on the right, always visible, so editability never depends on
     hovering;
-  - a hover wash behind the whole value.
+  - a hover wash behind the whole value. The wash extends
+    `--field-value-pad-x` beyond the text on both sides, while the text stays
+    aligned with the label. A read-only dropdown display is transparent, so
+    the wash shows through it.
 
 ## Tokens
 | Token | Role |
@@ -30,6 +33,7 @@ repeatable row group.
 | `--text-value`, `--color-text-secondary` | value |
 | `--color-border-dashed` | editable underline |
 | `--color-surface-editable-hover` | hover wash |
+| `--field-value-pad-x` | how far the wash extends beyond the value |
 | `--color-text-subtle` | pencil |
 | `--opacity-empty` | empty value ("Geen waarde") |
 

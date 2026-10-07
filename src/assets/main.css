@@ -356,6 +356,10 @@
   --color-input-border-hover: var(--color-neutral-50); /* one step darker */
   --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
 
+  /* Field row (components/field-row.md): the hover wash extends this far
+     beyond the value text, which stays aligned with the label */
+  --field-value-pad-x: 6px;
+
   /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
      in BaseTooltip.vue */
   --text-tooltip: var(--text-label);

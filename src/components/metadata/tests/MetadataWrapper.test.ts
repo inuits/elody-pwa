@@ -366,6 +366,12 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     expect(value.attributes("aria-label")).toBe("metadata.labels.test, edit");
   });
 
+  it("pads the hover wash while keeping the text aligned with the label", async () => {
+    expect((await fieldValue()).classes()).toEqual(
+      expect.arrayContaining(["px-(--field-value-pad-x)", "-mx-(--field-value-pad-x)"]),
+    );
+  });
+
   it("washes the whole value on hover", async () => {
     expect((await fieldValue()).classes()).toContain(
       "hover:bg-surface-editable-hover",

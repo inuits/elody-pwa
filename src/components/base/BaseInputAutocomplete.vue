@@ -290,7 +290,8 @@ const classes = computed(() => {
   }
 
   if (props.autocompleteStyle === "readOnly") {
-    result["container"] = "multiselect border-none !bg-surface";
+    // Transparent so the field row's hover wash shows through.
+    result["container"] = "multiselect border-none !bg-transparent";
     result["tags"] =
       "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
   }

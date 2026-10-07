@@ -72,4 +72,10 @@ describe("BaseInputAutocomplete — design-system styling", () => {
       classesFor("default", { relationType: "hasCreator" }).tag,
     ).toContain("!rounded-chip");
   });
+
+  it("lets the field-row hover wash show through a read-only display", () => {
+    const container = classesFor("readOnly").container;
+    expect(container).toContain("!bg-transparent");
+    expect(container).not.toContain("!bg-surface");
+  });
 });
