@@ -119,6 +119,8 @@
               :selected-pagination-limit-option="paginationStore.limit.value"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
+              :show-group-by="displayTable"
+              :set-group-by="(config) => (chosenGroupBy = config)"
               :simple-search-value="simpleSearchTerm"
               :set-simple-search="
                 isSearchLibrary ||
@@ -447,6 +449,10 @@ import {
   TypeModals,
   ViewModes,
   type ViewModesWithConfig,
+  type GroupByConfig,
+  GetRelationLabelsForIdsDocument,
+  type GetRelationLabelsForIdsQuery,
+  type GetRelationLabelsForIdsQueryVariables,
 } from "@/generated-types/queries";
 import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { deepToRaw } from "@/utils/deepToRaw";
@@ -833,7 +839,6 @@ const {
   expandFilters,
   toggles,
   configPerViewMode,
-  groupByPerViewMode,
   viewModesIncludeViewModesMedia,
   showViewModesList,
   determineViewModes,
@@ -851,17 +856,29 @@ const {
   persistExpandFilters: props.persistExpandFilters,
 });
 
-const tableGroupBy = computed(
-  () => groupByPerViewMode.value[ViewModes.Table],
+const chosenGroupBy = ref<GroupByConfig | null>(null);
+const tableGroupBy = computed<GroupByConfig | undefined>(
+  () => chosenGroupBy.value ?? undefined,
 );
 const groupedEntities = useGroupedEntities({
   fetchEntities: fetchEntitiesWithVariables,
   getBaseVariables: getQueryVariables,
+  resolveLabels: async (ids, types, metadataKey) => {
+    const result = await (apolloClient as ApolloClient<any>).query<
+      GetRelationLabelsForIdsQuery,
+      GetRelationLabelsForIdsQueryVariables
+    >({
+      query: GetRelationLabelsForIdsDocument,
+      variables: { ids, types, metadataKeyAsLabel: metadataKey },
+      fetchPolicy: "no-cache",
+    });
+    return result.data?.RelationLabelsForIds ?? [];
+  },
 });
 const isTableGrouped = computed(
   () => displayTable.value && tableGroupBy.value !== undefined,
 );
-watch([fetchSequence, isTableGrouped], () => {
+watch([fetchSequence, isTableGrouped, tableGroupBy], () => {
   if (isTableGrouped.value) groupedEntities.load(tableGroupBy.value!);
   else groupedEntities.reset();
 });

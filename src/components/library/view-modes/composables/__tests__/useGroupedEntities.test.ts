@@ -284,6 +284,47 @@ describe("useGroupedEntities", () => {
     expect(groupRequest.advancedFilterInputs).not.toContainEqual(categoryFilter);
   });
 
+  it("resolves group values to labels for entity reference groups", async () => {
+    const fetchEntities = createBackend(comments);
+    const resolveLabels = vi.fn(async (ids: string[]) =>
+      ids.map((id) => ({ key: id, value: `Label of ${id}` })),
+    );
+    const grouped = useGroupedEntities({
+      fetchEntities,
+      getBaseVariables: baseVariables,
+      resolveLabels,
+    });
+
+    await grouped.load({
+      ...config,
+      labelEntityTypes: ["group"],
+      labelMetadataKey: "name",
+    });
+
+    expect(resolveLabels).toHaveBeenCalledWith(
+      ["Formele catalografie", "Non-fictie"],
+      ["group"],
+      "name",
+    );
+    expect(grouped.groups.value.map((group) => group.label)).toEqual([
+      "Label of Formele catalografie",
+      "Label of Non-fictie",
+    ]);
+  });
+
+  it("does not resolve labels without label entity types", async () => {
+    const resolveLabels = vi.fn();
+    const grouped = useGroupedEntities({
+      fetchEntities: createBackend(comments),
+      getBaseVariables: baseVariables,
+      resolveLabels,
+    });
+
+    await grouped.load(config);
+
+    expect(resolveLabels).not.toHaveBeenCalled();
+  });
+
   it("clears the groups on reset", async () => {
     const { grouped } = setup();
     await grouped.load(config);

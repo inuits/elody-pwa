@@ -36,6 +36,22 @@
         />
       </div>
       <div
+        v-if="showGroupBy && groupByHasOptions"
+        class="w-full @md:w-auto"
+      >
+        <AdvancedDropdown
+          class="w-full @md:w-auto"
+          data-cy="group-by-options"
+          :model-value="selectedGroupByKey"
+          :options="groupByDropdownOptions"
+          :label="t('library.group-by')"
+          :clearable="false"
+          :add-label-to-value="true"
+          label-position="inline"
+          @update:model-value="(value) => selectGroupBy(String(value ?? ''))"
+        />
+      </div>
+      <div
         v-if="sortOptions.length > 0"
         class="flex items-center w-full @md:w-auto"
       >
@@ -74,6 +90,7 @@ import {
   type Entitytyping,
   GetPaginationLimitOptionsDocument,
   type GetPaginationLimitOptionsQuery,
+  type GroupByConfig,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
@@ -82,6 +99,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { useImport } from "@/composables/useImport";
+import { useGroupByOptions } from "@/composables/useGroupByOptions";
 import debounce from "lodash.debounce";
 
 const props = withDefaults(
@@ -93,12 +111,16 @@ const props = withDefaults(
     filtersAvailableOnDetailPage?: boolean;
     simpleSearchValue?: string;
     setSimpleSearch?: (value: string) => void;
+    showGroupBy?: boolean;
+    setGroupBy?: (config: GroupByConfig | null) => void;
   }>(),
   {
     selectedPaginationLimitOption: 20,
     filtersAvailableOnDetailPage: false,
     simpleSearchValue: "",
     setSimpleSearch: undefined,
+    showGroupBy: false,
+    setGroupBy: undefined,
   },
 );
 
@@ -249,6 +271,29 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
     });
 };
 
+const {
+  hasOptions: groupByHasOptions,
+  dropdownOptions: groupByDropdownOptions,
+  selectedKey: selectedGroupByKey,
+  setOptions: setGroupByOptions,
+  select: selectGroupBy,
+} = useGroupByOptions({
+  onChange: (config) => props.setGroupBy?.(config),
+});
+
+const loadGroupByOptions = async () => {
+  const queryName = (route?.meta?.queries as any)?.getGroupByOptions;
+  if (!queryName) return;
+  const result = await apolloClient.query({
+    query: await loadDocument(queryName),
+    variables: { entityType: route.meta?.entityType },
+    fetchPolicy: "no-cache",
+  });
+  setGroupByOptions(
+    (result.data?.EntityTypeGroupByOptions?.options ?? []) as GroupByConfig[],
+  );
+};
+
 const determineSortOptionsQuery = async (): Promise<any> => {
   const queryName = (route?.meta?.queries as any)?.getSortOptions;
   const document = queryName ? await loadDocument(queryName) : undefined;
@@ -258,6 +303,7 @@ const determineSortOptionsQuery = async (): Promise<any> => {
 onMounted(() => {
   emit("paginationLimitOptionsPromise", paginationLimitOptionsPromise);
   emit("sortOptionsPromise", sortOptionsPromise);
+  loadGroupByOptions();
 });
 
 watch(

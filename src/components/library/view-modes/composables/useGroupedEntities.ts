@@ -22,9 +22,16 @@ export type FetchEntities = (
   variables: GetEntitiesQueryVariables,
 ) => Promise<{ results: Entity[]; count: number }>;
 
+export type ResolveLabels = (
+  ids: string[],
+  types: string[],
+  metadataKey: string | undefined,
+) => Promise<{ key: string; value: string }[]>;
+
 export type UseGroupedEntitiesOptions = {
   fetchEntities: FetchEntities;
   getBaseVariables: () => GetEntitiesQueryVariables;
+  resolveLabels?: ResolveLabels;
 };
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -164,6 +171,28 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
     });
   };
 
+  const withResolvedLabels = async (
+    config: GroupByConfig,
+    newGroups: EntityGroup[],
+  ): Promise<EntityGroup[]> => {
+    const ids = newGroups
+      .map(({ value }) => value)
+      .filter((value): value is string => value !== null);
+    if (!config.labelEntityTypes?.length || !options.resolveLabels || !ids.length)
+      return newGroups;
+    const labels = await options.resolveLabels(
+      ids,
+      config.labelEntityTypes,
+      config.labelMetadataKey ?? undefined,
+    );
+    const labelById = new Map(labels.map(({ key, value }) => [key, value]));
+    return newGroups.map((group) => ({
+      ...group,
+      label:
+        (group.value !== null && labelById.get(group.value)) || group.label,
+    }));
+  };
+
   const fetchGroups = async (
     config: GroupByConfig,
     page: number,
@@ -209,10 +238,13 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
       })
       .filter(({ id }) => !knownIds.has(id) && !!knownIds.add(id));
 
+    const labelledGroups = await withResolvedLabels(config, newGroups);
+    if (loadGeneration !== generation) return [];
+
     groupsCount.value = count;
     groupsPage.value = page;
-    groups.value = [...(page === 1 ? [] : groups.value), ...newGroups];
-    return newGroups;
+    groups.value = [...(page === 1 ? [] : groups.value), ...labelledGroups];
+    return labelledGroups;
   };
 
   const loadGroupsPage = async (page: number, loadGeneration: number) => {

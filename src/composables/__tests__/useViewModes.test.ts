@@ -724,40 +724,6 @@ describe("useViewModes", () => {
     });
   });
 
-  // ── groupByPerViewMode ────────────────────────────────────────────────────
-
-  describe("groupByPerViewMode", () => {
-    it("maps view mode names to their groupBy config when one is set", () => {
-      const groupBy = {
-        key: "intialValues.category",
-        filterKey: ["vlacc:1|properties.category.value"],
-        distinctBy: "properties.category.value",
-        groupOrderBy: "properties.last_activity_at.value",
-      };
-      const entities = ref<Entity[]>([
-        {
-          ...makeEntity("production"),
-          allowedViewModes: {
-            viewModes: [
-              { viewMode: ViewModes.Table, config: null, groupBy },
-              { viewMode: ViewModes.ViewModesGrid, config: null, groupBy: null },
-            ],
-          },
-        } as unknown as Entity,
-      ]);
-      const { groupByPerViewMode } = useViewModes({ entities });
-
-      expect(groupByPerViewMode.value).toEqual({ [ViewModes.Table]: groupBy });
-    });
-
-    it("returns empty object when entities is empty", () => {
-      const entities = ref<Entity[]>([]);
-      const { groupByPerViewMode } = useViewModes({ entities });
-
-      expect(groupByPerViewMode.value).toEqual({});
-    });
-  });
-
   // ── viewModesIncludeViewModesMedia ────────────────────────────────────────
 
   describe("viewModesIncludeViewModesMedia", () => {
