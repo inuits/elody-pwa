@@ -169,6 +169,7 @@ Later subtasks:
 |---|---|---|---|---|
 | E1 | Pencil on editable values | appears on hover | always visible, 12px, subtle | **catalogue** (user, 2026-10-07): editability must not depend on hover |
 | E2 | Dashed underline | under the value | under the value text only, square ends; none for pills | **catalogue** (user, 2026-10-07) |
+| E3 | Inline editor actions | text buttons Bewaar + Annuleer | 26px icon buttons ✓ / ✕ | **handoff** (user, 2026-10-07): text buttons, centred vertically on the input |
 
 ## 3. Filters (DS 4)
 

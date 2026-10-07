@@ -8,7 +8,7 @@
     class="flex flex-col gap-1 w-full"
     @keydown="handleKeydown"
   >
-    <div class="flex items-start gap-1.5 w-full">
+    <div data-cy="inline-editor-row" class="flex items-center gap-1.5 w-full">
       <div class="grow min-w-0">
         <AdvancedDropdown
           v-if="isDropdown"
@@ -82,7 +82,10 @@ import {
   watch,
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { InputFieldTypes, type DropdownOption } from "@/generated-types/queries";
+import {
+  InputFieldTypes,
+  type DropdownOption,
+} from "@/generated-types/queries";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
@@ -137,9 +140,7 @@ const inputType = computed(() =>
 
 const initial = JSON.stringify(props.modelValue ?? null);
 const draft = ref<any>(props.modelValue);
-const isDirty = computed(
-  () => JSON.stringify(draft.value ?? null) !== initial,
-);
+const isDirty = computed(() => JSON.stringify(draft.value ?? null) !== initial);
 watch(isDirty, (dirty) => emit("dirty-change", dirty));
 watch(draft, (value) => emit("draft-change", value), { deep: true });
 

@@ -140,6 +140,14 @@ describe("InlineFieldEditor", () => {
     });
   });
 
+  describe("layout", () => {
+    it("centres Bewaar and Annuleer vertically on the input", () => {
+      const row = editor().find('[data-cy="inline-editor-row"]');
+      expect(row.classes()).toContain("items-center");
+      expect(row.classes()).not.toContain("items-start");
+    });
+  });
+
   describe("inputs per type", () => {
     it("uses the dropdown for select fields, clearable unless required", () => {
       const options = [{ label: "Boek", value: "book" }];

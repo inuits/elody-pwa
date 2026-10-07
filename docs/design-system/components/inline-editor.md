@@ -10,7 +10,8 @@ Only through a field row (or a group card). It is never mounted on its own
 and never in a modal.
 
 ## Anatomy
-The input for the field type, then the actions inline on the right:
+The input for the field type, then the actions inline on the right,
+vertically centred on the input:
 - **Bewaar:** commit button, `sm`;
 - **Annuleer:** ghost button, `sm`.
 
