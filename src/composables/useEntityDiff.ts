@@ -152,7 +152,7 @@ export function useEntityDiff(
 
     const fields = panels.value
       .map((panel: WindowElementPanel) =>
-        getMetadataFields(panel, panel.panelType, props.entityId),
+        getMetadataFields(panel, props.entityId),
       )
       .flat();
 

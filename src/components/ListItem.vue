@@ -314,7 +314,6 @@ import {
   ListItemCoverageTypes,
   type Metadata,
   type MetadataField,
-  PanelType,
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import { stringIsUrl, asString } from "@/helpers";
@@ -563,7 +562,6 @@ const createWindowPanelsFromEntityListElements = (
 ) => {
   const panel: WindowElementPanel = {
     label: entityListElement.label,
-    panelType: PanelType.Relation,
     isEditable: false,
     isCollapsed: false,
     entityListElement,

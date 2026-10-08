@@ -1,9 +1,5 @@
 import { getValueForPanelMetadata } from "@/helpers";
-import {
-  type Conditional,
-  PanelType,
-  type VisibleIf,
-} from "@/generated-types/queries";
+import { type Conditional, type VisibleIf } from "@/generated-types/queries";
 
 const useConditionalValidation = () => {
   const conditionalFieldIsAvailable = (
@@ -15,7 +11,6 @@ const useConditionalValidation = () => {
     if (!formId || !availableIf.field) return isValid;
     try {
       const fieldValue: string = getValueForPanelMetadata(
-        PanelType.Metadata,
         availableIf.field,
         formId,
         mediafileViewerContext,
@@ -41,7 +36,6 @@ const useConditionalValidation = () => {
     if (!formId || !requiredIf.field) return isValid;
     try {
       const fieldValue: string = getValueForPanelMetadata(
-        PanelType.Metadata,
         requiredIf.field,
         formId,
         mediafileViewerContext,
@@ -73,7 +67,6 @@ const useConditionalValidation = () => {
     let currentValue: unknown;
     try {
       currentValue = getValueForPanelMetadata(
-        PanelType.Metadata,
         visibleIf.dependsOn,
         formId,
         mediafileViewerContext,

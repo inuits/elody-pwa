@@ -14,7 +14,6 @@ import {
   type MetadataInput,
   type PanelInfo,
   type PanelMetaData,
-  PanelType,
   RouteNames,
   type Unit,
   type WindowElementPanel,
@@ -297,7 +296,6 @@ const { mediafileSelectionState } = useEntityMediafileSelector();
 
 // Fixfix
 export const getValueForPanelMetadata = (
-  panelType: PanelType,
   metadataItemKey: string,
   entityId: string,
   mediafileViewerContext: string,
@@ -306,7 +304,7 @@ export const getValueForPanelMetadata = (
   repetitionIndex: number | undefined = undefined,
 ): string => {
   const form = useFormHelper().getForm(entityId);
-  if (panelType === PanelType.Metadata && form) {
+  if (form) {
     if (repetitionConfig && repetitionIndex !== undefined) {
       // Returns the whole repetition item (an object keyed by each sibling
       // field's own key), not this field's value — callers (useMetadataWrapper's
@@ -334,13 +332,12 @@ export const getValueForPanelMetadata = (
 
 export const getMetadataFields = (
   objectToGetMetadataFrom: WindowElementPanel | PanelMetaData[],
-  panelType: PanelType,
   formId: string,
   repetitionIndex: number | undefined = undefined,
 ): Array<PanelMetaData | EntityListElement> => {
   const fields: Array<PanelMetaData | EntityListElement> = [];
 
-  if (panelType === PanelType.BulkData && objectToGetMetadataFrom.bulkData)
+  if (objectToGetMetadataFrom.bulkData)
     return objectToGetMetadataFrom.bulkData.map((bulkDataItem: any) => {
       return {
         label: bulkDataItem.key,
@@ -366,7 +363,6 @@ export const getMetadataFields = (
         value:
           (value as PanelInfo).value ||
           getValueForPanelMetadata(
-            panelType,
             key,
             formId,
             undefined,
@@ -539,9 +535,7 @@ export const findWysiwygElement = (obj: any): WysiwygElement[] => {
   return results;
 };
 
-export const findEntityListElement = (
-  obj: any,
-): EntityListElement[] => {
+export const findEntityListElement = (obj: any): EntityListElement[] => {
   const results: EntityListElement[] = [];
 
   if (obj && obj.__typename === "EntityListElement") {
@@ -558,7 +552,7 @@ export const findEntityListElement = (
   }
 
   return results;
-}
+};
 
 export type RepeatablePanelFields = {
   repetitionKey: string;
@@ -579,9 +573,7 @@ export const findRepeatablePanelFields = (
     const repetitionKey = obj.repetitionConfig?.repetitionKey;
     if (obj.__typename === "WindowElementPanel" && repetitionKey) {
       const fieldKeys = Object.values(obj)
-        .filter(
-          (value: any) => value && value.__typename === "PanelMetaData",
-        )
+        .filter((value: any) => value && value.__typename === "PanelMetaData")
         .map((value: any) => value.key as string);
       results.push({ repetitionKey, fieldKeys });
     }

@@ -23,7 +23,6 @@ const mountPanel = (isCollapsed: boolean) =>
     props: {
       panel: {
         __typename: "WindowElementPanel",
-        panelType: "metadata",
         isCollapsed,
         panelHeaderContent: { label: "Annotaties" },
       } as any,
@@ -67,9 +66,9 @@ describe("EntityHistoryWindowPanel", () => {
       props: {
         panel: {
           __typename: "WindowElementPanel",
-          panelType: "relation",
           isCollapsed: false,
           relations,
+          bulkData: [{ key: "codec", value: "h264" }],
           panelHeaderContent: { label: "Relaties" },
           displayCondition: { key: "status" },
         } as any,

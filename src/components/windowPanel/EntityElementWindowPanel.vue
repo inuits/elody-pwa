@@ -67,11 +67,8 @@
           :key="idx + '-window-panel-content'"
         >
           <WindowPanelContent
-            :panel-type="panelType"
             :relation-array="relationArray"
-            :metadatafields="
-              getMetadataFields(panel, panelType, formId, idx - 1)
-            "
+            :metadatafields="getMetadataFields(panel, formId, idx - 1)"
             :can-be-multiple-columns="canBeMultipleColumns"
             :form-id="formId"
             :is-edit="isEdit"
@@ -112,7 +109,6 @@ import { useEditMode } from "@/composables/useEdit";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   type WindowElementPanel,
-  type PanelType,
   DamsIcons,
   type PanelRelation,
 } from "@/generated-types/queries";
@@ -133,7 +129,6 @@ const props = withDefaults(
 const { t } = useI18n();
 
 const editState = useEditMode(props.formId);
-const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
 const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
@@ -166,27 +161,13 @@ const toggleIsCollapsed = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
-const relationArray = computed((): PanelRelation[] => {
-  let returnArray: PanelRelation[] = [];
-
-  Object.values(props.panel).forEach((value) => {
-    if (typeof value === "object") {
-      const relationList = value as [PanelRelation];
-
-      try {
-        if (!relationList.length) {
-          throw Error("Value can not be spread");
-        }
-
-        returnArray.push(...relationList);
-      } catch {
-        returnArray = relationList;
-      }
-    }
-  });
-
-  return returnArray;
-});
+const relationArray = computed((): PanelRelation[] =>
+  Object.values(props.panel).flatMap((value) =>
+    Array.isArray(value)
+      ? value.filter((item) => item?.__typename === "PanelRelation")
+      : [],
+  ),
+);
 
 const expandPanel = () => {
   isCollapsed.value = false;

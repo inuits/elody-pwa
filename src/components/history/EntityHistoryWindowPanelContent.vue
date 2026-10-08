@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="panelType === PanelType.Relation && relationArray.length">
+    <div v-if="relationArray.length">
       <div class="pl-2 rounded-sm bg-accent-light">
         <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
         <div class="rounded-sm border-solid border-neutral-30 border-2">
@@ -24,10 +24,7 @@
         },
       ]"
     >
-      <template
-        v-for="(metadata, index) in metadatafields"
-        :key="metadata.key"
-      >
+      <template v-for="(metadata, index) in metadatafields" :key="metadata.key">
         <MultilingualWrapper
           v-if="itemMustBeShown(metadata)"
           :metadata="metadatafields[index]"
@@ -36,7 +33,7 @@
           <template #default="{ localizedMetadata }">
             <metadata-wrapper
               v-if="
-                !nonStandardFieldTypes.includes(metadata.__typename)  &&
+                !nonStandardFieldTypes.includes(metadata.__typename) &&
                 !parentIsListItem &&
                 metadata.unit !== Unit.CoordinatesDefault
               "
@@ -75,7 +72,9 @@
               :form-id="formId"
               :element="localizedMetadata || metadata"
               :changed="wysiwygDiffFor(metadata)?.changed ?? false"
-              :color-variant="wysiwygDiffFor(metadata)?.colorVariant ?? 'current'"
+              :color-variant="
+                wysiwygDiffFor(metadata)?.colorVariant ?? 'current'
+              "
             />
           </template>
         </MultilingualWrapper>
@@ -88,7 +87,6 @@
 import { inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
-  PanelType,
   Unit,
   type PanelRelation,
   type MetadataField,
@@ -109,7 +107,6 @@ import {
 } from "@/composables/useHistoryComparisonData";
 
 const props = defineProps<{
-  panelType: PanelType;
   relationArray: PanelRelation[];
   metadatafields: MetadataField[];
   canBeMultipleColumns: boolean;
@@ -134,7 +131,8 @@ const isEmptyValue = (value: unknown): boolean =>
 
 const itemMustBeShown = (metadata: MetadataField): boolean => {
   if (config?.customization?.hideEmptyFields !== true) return true;
-  if (nonStandardFieldTypes.includes(metadata.__typename as string)) return true;
+  if (nonStandardFieldTypes.includes(metadata.__typename as string))
+    return true;
   const key = (metadata as any).key ?? (metadata as any).metadataKey;
   const diffedValue = key
     ? getForm(props.formId)?.values?.intialValues?.[key]

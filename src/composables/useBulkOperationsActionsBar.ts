@@ -35,7 +35,6 @@ import {
   type DropdownOption,
   Entitytyping,
   ModalStyle,
-  PanelType,
   RouteNames,
   TypeModals,
   type Entity,
@@ -338,7 +337,10 @@ export const useBulkOperationsActionsBar = (
         downloadEntity: {
           type: Entitytyping.Download,
           metadata: [
-            { key: "title", value: t("bulk-operations.download-title", parentIntialValues) },
+            {
+              key: "title",
+              value: t("bulk-operations.download-title", parentIntialValues),
+            },
             { key: "status", value: "Queued" },
           ],
           relations,
@@ -676,7 +678,6 @@ export const determineActiveState = (
   if (item.actionContext.matchMetadataValue) {
     item.actionContext.matchMetadataValue.forEach((condition) => {
       const result = getValueForPanelMetadata(
-        PanelType.Metadata,
         condition.matchKey,
         parentEntityId,
         undefined,

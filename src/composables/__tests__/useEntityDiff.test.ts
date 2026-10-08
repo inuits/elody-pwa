@@ -8,7 +8,7 @@ vi.mock("@/helpers", () => ({
 }));
 
 describe("useEntityDiff", () => {
-  const mockPanels = ref<any[]>([{ panelType: "info" }]);
+  const mockPanels = ref<any[]>([{ label: "info" }]);
 
   const createMockEntity = (id: string, name: string, status: string) =>
     ({
@@ -25,7 +25,7 @@ describe("useEntityDiff", () => {
       { key: "name" },
       { key: "status" },
     ]);
-    mockPanels.value = [{ panelType: "info" }];
+    mockPanels.value = [{ label: "info" }];
   });
 
   it("should return null if no entity is provided", () => {
@@ -142,23 +142,27 @@ describe("useEntityDiff", () => {
     const v1 = createMockEntity("id-1", "Old Name", "Pending");
     const v2 = createMockEntity("id-2", "New Name", "Active");
 
-    const multiplePanels = ref<any[]>([
-      { panelType: "info" },
-      { panelType: "status" },
-    ]);
+    const multiplePanels = ref<any[]>([{ label: "info" }, { label: "status" }]);
 
     vi.mocked(getMetadataFields)
       .mockReturnValueOnce([{ key: "name" }])
       .mockReturnValueOnce([{ key: "status" }]);
 
     const props = { entity: v2, entities: [v2, v1], entityId: "1" };
-    const { diffedResults, keysToCompare } = useEntityDiff(props, multiplePanels);
+    const { diffedResults, keysToCompare } = useEntityDiff(
+      props,
+      multiplePanels,
+    );
 
     expect(keysToCompare.value).toContain("name");
     expect(keysToCompare.value).toContain("status");
     expect(keysToCompare.value).toHaveLength(2);
-    expect(diffedResults.value?.selectedVersion.intialValues.name.formatter).toBe("pill|added");
-    expect(diffedResults.value?.selectedVersion.intialValues.status.formatter).toBe("pill|added");
+    expect(
+      diffedResults.value?.selectedVersion.intialValues.name.formatter,
+    ).toBe("pill|added");
+    expect(
+      diffedResults.value?.selectedVersion.intialValues.status.formatter,
+    ).toBe("pill|added");
   });
 
   it("should correctly handle Date objects", () => {

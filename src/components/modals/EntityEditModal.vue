@@ -12,7 +12,9 @@
       </div>
 
       <div v-else-if="entity && metadataFields.length > 0">
-        <h2 class="title m-0 pb-4">{{ t(formTitle) || t("modals.entityEdit.title") }}</h2>
+        <h2 class="title m-0 pb-4">
+          {{ t(formTitle) || t("modals.entityEdit.title") }}
+        </h2>
 
         <div class="space-y-2 mb-6">
           <metadata-wrapper
@@ -54,7 +56,6 @@ import { watch, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   TypeModals,
-  PanelType,
   BaseLibraryModes,
   ContextMenuFormFlow,
 } from "@/generated-types/queries";
@@ -92,11 +93,7 @@ const activeFormId = computed(() =>
 const isFormValid = computed(() => form.value?.meta?.valid ?? false);
 
 const metadataFields = computed(() =>
-  getMetadataFields(
-    editableFields.value,
-    PanelType.Metadata,
-    activeFormId.value,
-  ),
+  getMetadataFields(editableFields.value, activeFormId.value),
 );
 
 const onSave = async ({
@@ -116,7 +113,7 @@ const onSave = async ({
     );
     if (success) handleCloseModal();
   } finally {
-    handleCloseModal()
+    handleCloseModal();
   }
 };
 
