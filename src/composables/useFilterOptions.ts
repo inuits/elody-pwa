@@ -256,6 +256,14 @@ export const useFilterOptions = () => {
     return value;
   };
 
+  const translateOptionLabel = (label: string): string => {
+    const translationKey = filterOptionsMapping.value?.translationKey;
+    if (!translationKey || !label) return label;
+    const key = translationKey.replace("$value", label);
+    const translated = t(key);
+    return translated !== key ? translated : label;
+  };
+
   const getOptionFromEntity = (
     entity: BaseEntity,
     counts: Map<string, number>,
@@ -272,7 +280,7 @@ export const useFilterOptions = () => {
 
     const baseOption = {
       icon: DamsIcons.NoIcon,
-      label: getReadableProp(labelValue) || getEntityTitle(entity),
+      label: translateOptionLabel(getReadableProp(labelValue)) || getEntityTitle(entity),
       value: getReadableProp(valueValue) || entity.id,
     };
 
@@ -312,7 +320,7 @@ export const useFilterOptions = () => {
       .map((label) => {
         const baseOption = {
           icon: DamsIcons.NoIcon,
-          label,
+          label: translateOptionLabel(label),
           value: label,
         };
 

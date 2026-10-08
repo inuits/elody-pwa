@@ -132,6 +132,57 @@ describe("useFilterOptions - data mapping", () => {
     ]);
   });
 
+  it("translates option labels with the translation key of the mapping", async () => {
+    const { options, entities, init } = useFilterOptions();
+
+    entities.value = [
+      { id: "1", type: "work" },
+      { id: "2", type: "nomen" },
+    ];
+
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "type",
+        value: "type",
+        translationKey: "entity-translations.$value",
+      },
+    });
+
+    expect(options.value).toEqual([
+      {
+        icon: expect.anything(),
+        label: "t:entity-translations.work",
+        value: "work",
+      },
+      {
+        icon: expect.anything(),
+        label: "t:entity-translations.nomen",
+        value: "nomen",
+      },
+    ]);
+  });
+
+  it("translates option labels from an array with the translation key of the mapping", async () => {
+    const { options, entities, init } = useFilterOptions();
+
+    entities.value = [{ id: "1", types: ["work", "person"] }];
+
+    await init({
+      entityType: "TEST_ENTITY",
+      filterOptionsMapping: {
+        label: "types",
+        value: "types",
+        translationKey: "entity-translations.$value",
+      },
+    });
+
+    expect(options.value.map((option) => option.label)).toEqual([
+      "t:entity-translations.work",
+      "t:entity-translations.person",
+    ]);
+  });
+
   it("should fall back to default id and title when no mapping provided", () => {
     const { options, entities, init } = useFilterOptions();
 
