@@ -22,6 +22,7 @@ export type UseGetDropdownOptionsParams = {
   formId?: string;
   relationFilter?: AdvancedFilterInput;
   optionsOrderByKey?: string;
+  optionLabelKeys?: string[];
 };
 
 export const useGetDropdownOptions = (
@@ -36,6 +37,7 @@ export const useGetDropdownOptions = (
   formId?: string,
   relationFilter?: AdvancedFilterInput,
   optionsOrderByKey?: string,
+  optionLabelKeys?: string[],
 ): ReturnType<typeof useGetDropdownOptionsState> => {
   const createNewDropdownOptionsState = () => {
     const newDropdownOptionsState = useGetDropdownOptionsState(
@@ -48,6 +50,7 @@ export const useGetDropdownOptions = (
       formId,
       relationFilter,
       optionsOrderByKey,
+      optionLabelKeys,
     );
 
     dropdownOptionsStates.value = {

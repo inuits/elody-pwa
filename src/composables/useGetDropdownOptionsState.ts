@@ -29,6 +29,7 @@ export const useGetDropdownOptionsState = (
   formId?: string,
   relationFilter?: AdvancedFilterInput,
   optionsOrderByKey?: string,
+  optionLabelKeys?: string[],
 ) => {
   const { locale } = useI18n();
   const apolloClient = inject(DefaultApolloClient);
@@ -217,18 +218,32 @@ export const useGetDropdownOptionsState = (
     return value;
   };
 
+  const resolveOptionLabelValue = (value: unknown): string => {
+    if (!Array.isArray(value)) return value ? String(value) : "";
+    if (value.some((entry) => typeof entry === "object" && entry?.lang))
+      return resolveLabel(value as TranslationEntry[]);
+    return value.filter(Boolean).join(", ");
+  };
+
+  const toDropdownOption = (entity: BaseEntity): DropdownOption => {
+    const labelParts = (optionLabelKeys ?? [])
+      .map((key) => resolveOptionLabelValue(entity.intialValues?.[key]))
+      .filter(Boolean);
+    const [label, ...secondaryLabelParts] = labelParts;
+    return {
+      icon: DamsIcons.NoIcon,
+      label:
+        label ??
+        resolveLabel(
+          getEntityTitle(entity) as unknown as string | TranslationEntry[],
+        ),
+      secondaryLabel: secondaryLabelParts.join(" · ") || undefined,
+      value: entity.id,
+    };
+  };
+
   const entityDropdownOptions = computed<DropdownOption[]>(
-    () =>
-      entities.value.map((entity: BaseEntity) => {
-        const rawLabel = getEntityTitle(entity) as unknown as
-          | string
-          | TranslationEntry[];
-        return {
-          icon: DamsIcons.NoIcon,
-          label: resolveLabel(rawLabel),
-          value: entity.id,
-        };
-      }) || [],
+    () => entities.value.map(toDropdownOption) || [],
   );
 
   const mapOptionsFilterInput = (
