@@ -60,7 +60,7 @@ const inlineEditorStub = {
   props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage"],
   emits: ["save", "cancel", "dirty-change", "draft-change"],
   template:
-    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span><button type='button' data-cy='editor-save'>Save</button></div>",
+    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span><button type='button' data-cy='editor-save'>Save</button><button type='button' data-cy='editor-clear' @click.stop>×</button></div>",
 };
 
 const refetchEntities = vi.fn().mockResolvedValue(undefined);
@@ -246,6 +246,15 @@ describe("ListItemInlineField", () => {
         wrapper.find('[data-cy="editor-save"]').element.addEventListener("click", onSave);
         click(wrapper.find('[data-cy="editor-save"]').element);
         expect(onSave).toHaveBeenCalled();
+      });
+
+      it("doesn't follow the link from a dropdown's X, which stops its own click", async () => {
+        const { wrapper, rowHandler } = mountInRow();
+        await value(wrapper).trigger("click");
+        await flushPromises();
+        const event = click(wrapper.find('[data-cy="editor-clear"]').element);
+        expect(event.defaultPrevented).toBe(true);
+        expect(rowHandler).not.toHaveBeenCalled();
       });
 
       it("follows the row's link again once the editor is closed", async () => {

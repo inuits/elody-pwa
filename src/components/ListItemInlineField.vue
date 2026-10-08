@@ -307,11 +307,17 @@ const keepClickInEditor = (event: MouseEvent) => {
 // While the editor is open its row's link doesn't navigate: a click
 // elsewhere on the row (or one that lands there after a dropdown menu
 // closed under the pointer) is stopped before the link handles it. Clicks
-// inside the editor pass through to the editor.
+// inside the editor still reach the editor, but lose the link's default
+// action up front, since a control may stop its own click before the
+// editor's wrapper sees it (a dropdown's X); only toggles keep theirs.
 const editorRef = ref<HTMLElement | null>(null);
 let rowLink: HTMLElement | null = null;
 const holdRowLink = (event: MouseEvent) => {
-  if (editorRef.value?.contains(event.target as Node)) return;
+  const target = event.target as Element | null;
+  if (target && editorRef.value?.contains(target)) {
+    if (!target.closest?.(TOGGLE_SELECTOR)) event.preventDefault();
+    return;
+  }
   event.preventDefault();
   event.stopPropagation();
 };
