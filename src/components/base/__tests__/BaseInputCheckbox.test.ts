@@ -151,3 +151,17 @@ describe("BaseInputCheckbox", () => {
     expect(errors).toEqual([]);
   });
 });
+
+describe("BaseInputCheckbox box styling", () => {
+  it("draws its box with the shared checkbox classes", async () => {
+    const { mount } = await import("@vue/test-utils");
+    const { default: BaseInputCheckbox } = await import("../BaseInputCheckbox.vue");
+    const { CHECKBOX_BOX_CLASSES } = await import("@/components/base/checkboxStyles");
+    const box = mount(BaseInputCheckbox, {
+      props: { modelValue: false, item: { id: "x" }, bulkOperationsContext: undefined },
+    }).find('input[type="checkbox"]');
+    expect(box.classes()).toEqual(
+      expect.arrayContaining(CHECKBOX_BOX_CLASSES.split(" ")),
+    );
+  });
+});

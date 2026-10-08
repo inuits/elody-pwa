@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount, shallowMount } from "@vue/test-utils";
+import { CHECKBOX_BOX_CLASSES } from "@/components/base/checkboxStyles";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 vi.mock("vue-router", () => ({
@@ -165,6 +166,15 @@ describe("AdvancedDropdown — multi select", () => {
 
   it("renders a checkbox in each option", () => {
     expect(multi().findAll('[data-cy="option"] input[type="checkbox"]')).toHaveLength(3);
+  });
+
+  it("draws its checkboxes like the design-system checkbox", () => {
+    const box = mountDropdown({ multiple: true }).find(
+      '[data-cy="option"] input[type="checkbox"]',
+    );
+    expect(box.classes()).toEqual(
+      expect.arrayContaining(CHECKBOX_BOX_CLASSES.split(" ")),
+    );
   });
 
   it("checks the boxes of the selected options", () => {

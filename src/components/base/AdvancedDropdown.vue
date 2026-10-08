@@ -38,7 +38,8 @@
         <input
           v-if="multiple"
           type="checkbox"
-          class="mr-2 accent-commit pointer-events-none"
+          class="mr-2 pointer-events-none"
+          :class="CHECKBOX_BOX_CLASSES"
           :checked="isOptionSelected(option)"
           tabindex="-1"
           aria-hidden="true"
@@ -124,6 +125,7 @@ import {
   type DropdownOption,
 } from "@/generated-types/queries";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { CHECKBOX_BOX_CLASSES } from "@/components/base/checkboxStyles";
 import { stripHighlightTags } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
