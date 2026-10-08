@@ -255,12 +255,14 @@ const onActivateKey = (event: KeyboardEvent) => {
   start();
 };
 
-// Clicks in the editor never reach the row's link. Form controls keep their
-// default action (a checkbox toggles); anything else would follow the link.
-const FORM_CONTROL_SELECTOR = "input, label, select, textarea, button";
+// Clicks in the editor never reach the row's link. Only a checkbox or radio
+// (and its label) keeps its default action, so it can toggle; everything
+// else, buttons included, would otherwise follow the link it sits in.
+const TOGGLE_SELECTOR =
+  "input[type='checkbox'], input[type='radio'], label";
 const keepClickInEditor = (event: MouseEvent) => {
   event.stopPropagation();
-  if (!(event.target as Element | null)?.closest?.(FORM_CONTROL_SELECTOR))
+  if (!(event.target as Element | null)?.closest?.(TOGGLE_SELECTOR))
     event.preventDefault();
 };
 </script>

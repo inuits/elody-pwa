@@ -60,7 +60,7 @@ const inlineEditorStub = {
   props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage"],
   emits: ["save", "cancel", "dirty-change", "draft-change"],
   template:
-    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span></div>",
+    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span><button type='button' data-cy='editor-save'>Save</button></div>",
 };
 
 const refetchEntities = vi.fn().mockResolvedValue(undefined);
@@ -182,6 +182,17 @@ describe("ListItemInlineField", () => {
       document.body.addEventListener("click", rowLink);
       const event = new MouseEvent("click", { bubbles: true, cancelable: true });
       wrapper.find('[data-cy="editor-text"]').element.dispatchEvent(event);
+      document.body.removeEventListener("click", rowLink);
+      expect(event.defaultPrevented).toBe(true);
+      expect(rowLink).not.toHaveBeenCalled();
+    });
+
+    it("keeps a click on Bewaar from following the row's link", async () => {
+      const wrapper = await openEditor();
+      const rowLink = vi.fn();
+      document.body.addEventListener("click", rowLink);
+      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+      wrapper.find('[data-cy="editor-save"]').element.dispatchEvent(event);
       document.body.removeEventListener("click", rowLink);
       expect(event.defaultPrevented).toBe(true);
       expect(rowLink).not.toHaveBeenCalled();
