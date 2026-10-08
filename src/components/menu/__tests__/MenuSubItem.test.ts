@@ -111,3 +111,25 @@ describe("MenuSubItem", () => {
     expect(menuItem.exists()).toBe(false);
   });
 });
+
+describe("MenuSubItem colour", () => {
+  it("uses the menu tokens like a main item, without an underline", async () => {
+    const wrapper = mount(MenuSubItem, {
+      props: {
+        show: true,
+        subMenuItem: {
+          label: "navigation.devices",
+          typeLink: { route: { destination: "realDevice" } },
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-cy="menu-sub-item"]').classes()).toEqual(
+      expect.arrayContaining([
+        "text-nav-item",
+        "hover:text-nav-item-hover",
+        "hover:no-underline",
+      ]),
+    );
+  });
+});

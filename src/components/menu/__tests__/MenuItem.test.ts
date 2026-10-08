@@ -45,11 +45,13 @@ vi.mock("@/types", () => ({
   },
 }));
 
+const menuKind = vi.hoisted(() => ({ type: "link" }));
+
 vi.mock("@/composables/useMenuHelper", () => ({
   default: () => ({
     checkIfRouteOrModal: vi.fn(() => ({
-      menuItemType: "link",
-      action: "/some-path",
+      menuItemType: menuKind.type,
+      action: menuKind.type === "link" ? "/some-path" : vi.fn(),
     })),
     setSelectedMenuItem: vi.fn(),
     selectedMenuItem: ref({ label: "Test Menu Item" }),
@@ -152,4 +154,34 @@ describe("MenuItem", () => {
     ).toBe(true);
     expect(wrapper.findAll('[data-cy="menu-sub-item"]')).toHaveLength(0);
   });
+});
+
+describe("MenuItem colour", () => {
+  // Every item takes the menu colour, whether it is a link, a group or an
+  // item that opens a form, so they look alike (and a link's underline and
+  // link colour don't leak in).
+  const item = async (type: "link" | "modal") => {
+    menuKind.type = type;
+    const wrapper = mountMenuItem({
+      label: "Other item",
+      typeLink: routeTo("some-path"),
+      subMenu: null,
+    } as MenuItem);
+    await flushPromises();
+    menuKind.type = "link";
+    return wrapper.find('[data-test="menu-item-component"]');
+  };
+
+  it.each(["link", "modal"] as const)(
+    "colours a %s item with the menu tokens, without an underline",
+    async (type) => {
+      expect((await item(type)).classes()).toEqual(
+        expect.arrayContaining([
+          "text-nav-item",
+          "hover:text-nav-item-hover",
+          "hover:no-underline",
+        ]),
+      );
+    },
+  );
 });

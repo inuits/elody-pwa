@@ -6,12 +6,13 @@
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center pl-4 min-h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg"
+      class="flex flex-row items-center pl-4 min-h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg hover:no-underline"
       :class="[
-        {
-          'bg-neutral-40 rounded-lg': isBeingHovered,
-          'text-accent-accent': isActiveParentOrSubmenu,
-        },
+        // Every item takes the menu colour, link or not, so they look alike.
+        isActiveParentOrSubmenu
+          ? 'text-accent-accent'
+          : 'text-nav-item hover:text-nav-item-hover',
+        { 'bg-neutral-40 rounded-lg': isBeingHovered },
       ]"
     >
       <base-tooltip v-if="!isExpanded" position="right" :tooltip-offset="24">

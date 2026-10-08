@@ -44,3 +44,16 @@ describe("main.css client theming", () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe("main.css menu colour", () => {
+  it("colours menu items like links by default, so a client theme reaches them", () => {
+    const theme = new Map<string, string>();
+    blocks(/@theme/).forEach((block) =>
+      declarations(block).forEach((value, name) => theme.set(name, value)),
+    );
+    expect(theme.get("--color-nav-item")).toBe("var(--color-text-link)");
+    expect(theme.get("--color-nav-item-hover")).toBe(
+      "var(--color-text-link-hover)",
+    );
+  });
+});

@@ -212,6 +212,9 @@
   --color-text-on-inverted: #FFFFFF;
   --color-text-link: var(--color-text-light);
   --color-text-link-hover: var(--color-accent);
+  /* Menu items (left navigation): coloured like links, never underlined */
+  --color-nav-item: var(--color-text-link);
+  --color-nav-item-hover: var(--color-text-link-hover);
   --color-accent-on-inverted: #7DE3EA;
 
   /* Borders */
@@ -584,6 +587,9 @@ body {
   --color-text-accent-strong: var(--color-accent-dark);
   --color-text-link: var(--color-text-light);
   --color-text-link-hover: var(--color-accent);
+  /* Menu items (left navigation): coloured like links, never underlined */
+  --color-nav-item: var(--color-text-link);
+  --color-nav-item-hover: var(--color-text-link-hover);
   --color-border-panel: var(--color-accent-light-strong);
   --color-commit: var(--color-accent-accent);
   --color-focus-ring: var(--color-accent-accent);
