@@ -224,6 +224,42 @@ describe("ListItem", () => {
     });
   });
 
+  describe("values on the relation to the page's entity", () => {
+    const refetchEntities = vi.fn();
+    const mountWith = (teaserMetadata: any[]) =>
+      shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "USER-1",
+          relationValues: { refOrganizations: [{ key: "test-uuid" }] },
+          refetchEntities,
+          teaserMetadata,
+        },
+        global: { renderStubDefaultSlot: true },
+      });
+
+    it("lets a field with an input be edited in place on the row", () => {
+      const field = mountWith([
+        { key: "roles", value: "admin", inputField: { type: "dropdownSingleselectMetadata" } },
+      ]).findComponent({ name: "ListItemInlineField" });
+      expect(field.exists()).toBe(true);
+      expect(field.props()).toMatchObject({
+        parentEntityId: "test-uuid",
+        linkedEntityId: "USER-1",
+        linkedEntityRelations: { refOrganizations: [{ key: "test-uuid" }] },
+        refetchEntities,
+      });
+    });
+
+    it("leaves a field without an input as it was", () => {
+      expect(
+        mountWith([{ key: "email", value: "a@b.c" }])
+          .findComponent({ name: "ListItemInlineField" })
+          .exists(),
+      ).toBe(false);
+    });
+  });
+
   describe("loading state", () => {
     it("stops pulsing once the parent finished loading, even when a context menu action toggled loading around the fetch", async () => {
       const wrapper = shallowMount(ListItem, {

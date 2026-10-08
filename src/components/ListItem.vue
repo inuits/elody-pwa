@@ -176,8 +176,33 @@
           :hide-selector="true"
         >
           <template #default="{ localizedMetadata }">
+            <!-- A field with an input is a value on the relation to the
+                 page's entity (a contact person's role): editable in place. -->
+            <ListItemInlineField
+              v-if="!useEditHelper.isEdit && metadataItem?.inputField"
+              :metadata="(localizedMetadata || metadataItem) as Metadata"
+              :parent-entity-id="formId"
+              :linked-entity-id="intialValues?.id || itemId"
+              :linked-entity-relations="relationValues"
+              :refetch-entities="refetchEntities"
+            >
+              <ReadOnlyMetadataWrapper
+                :form-id="formId || 'listview'"
+                :metadata="(localizedMetadata || metadataItem) as MetadataField"
+                :is-edit="false"
+                :linked-entity-id="intialValues?.id || itemId"
+                :entity-type="entityTypename"
+                :highlight="
+                  (isPrimaryMediafile &&
+                    metadataItem?.highlightIfPrimaryMediafile) ||
+                  (isPrimaryThumbnail &&
+                    metadataItem?.highlightIfPrimaryThumbnail)
+                "
+                :break-words="true"
+              />
+            </ListItemInlineField>
             <ReadOnlyMetadataWrapper
-              v-if="!useEditHelper.isEdit || !metadataItem?.inputField"
+              v-else-if="!useEditHelper.isEdit || !metadataItem?.inputField"
               :form-id="formId || 'listview'"
               :metadata="(localizedMetadata || metadataItem) as MetadataField"
               :is-edit="useEditHelper.isEdit"
@@ -334,6 +359,7 @@ import { hoveredListItem } from "@/composables/useListItemHelper";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
+import ListItemInlineField from "@/components/ListItemInlineField.vue";
 import PipelineListItemCard from "@/components/library/view-modes/pipeline/PipelineListItemCard.vue";
 
 const props = withDefaults(

@@ -59,6 +59,18 @@ All of these must hold (`fieldEditability.ts`):
 
 Anything else renders as plain text, with no button role and no hover cue.
 
+## On a list row
+A value shown on a list row can also be edited in place when it lives on the
+relation between the row's entity and the page's entity, such as a contact
+person's role or function in an organization (`ListItemInlineField.vue`).
+- It needs an input field of an inline-editable type, a relation from the row
+  back to the page's entity, and the right to update the page's entity.
+- The row is a link: a click on the value or in its editor stays there; a
+  click anywhere else on the row still opens the entity.
+- Saving sends that one key on that one relation (stored on the row's
+  entity), with the field's validation. The list refreshes and the usual
+  notification shows.
+
 ## States
 | State | Cue |
 |---|---|
