@@ -128,14 +128,17 @@ import {
   inject,
   nextTick,
   ref,
-  unref,
 } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useField } from "vee-validate";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
 import { useConditionalValidation } from "@/composables/useConditionalValidation";
-import { useEditScope } from "@/composables/useEditScope";
+import { useFieldLock } from "@/composables/useFieldLock";
+import {
+  canUpdateEntity,
+  useInPlaceScope,
+} from "@/composables/useInPlaceScope";
 import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 import { buildMetadataInput, saveScope } from "@/composables/useScopedSave";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
@@ -153,6 +156,8 @@ const props = defineProps({
   inputField: { type: Object as PropType<InputFieldType>, required: false },
   entityUuid: { type: String, required: true },
   permitted: { type: Boolean, required: false, default: undefined },
+  nonEditableField: { type: Boolean, required: false, default: false },
+  readOnly: { type: Boolean, required: false, default: false },
 });
 
 const emit = defineEmits<{
@@ -235,17 +240,20 @@ const entityFormData = inject<
   | undefined
 >("entityFormData", undefined);
 const entityCanUpdate = computed<boolean>(() =>
-  ["edit", "edit-delete"].includes(
-    unref((useEditHelper.value as any).permittedEditMode) as string,
-  ),
+  canUpdateEntity(useEditHelper.value as any),
+);
+const { isLocked } = useFieldLock(
+  () => props.entityUuid,
+  () => props.fieldKey,
 );
 const canEditInPlace = computed<boolean>(
   () =>
     isAvailable.value &&
     canEditFieldInPlace({
       inputFieldType: props.inputField?.type,
-      editableByUser: !(props.inputField as any)?.readOnly,
-      locked: false,
+      nonEditableField: props.nonEditableField,
+      editableByUser: !props.readOnly && !(props.inputField as any)?.readOnly,
+      locked: isLocked.value,
       masked: false,
       entityCanUpdate: entityCanUpdate.value,
       pageInEditMode: !!useEditHelper.value.isEdit,
@@ -256,13 +264,13 @@ const editableValueAttrs = computed(() =>
     ? {
         role: "button",
         tabindex: 0,
-        "aria-label": `${t(props.label)}, ${translated("inline-edit.edit-field", "edit")}`,
+        "aria-label": `${t(props.label)}, ${inPlaceScope.messages.editField()}`,
       }
     : {},
 );
 
-const { requestOpen, release } = useEditScope();
 const scopeId = computed(() => `${props.entityUuid}:${props.fieldKey}`);
+const inPlaceScope = useInPlaceScope(() => scopeId.value);
 const isEditingInPlace = ref<boolean>(false);
 const saving = ref<boolean>(false);
 const inlineError = ref<string | undefined>(undefined);
@@ -285,7 +293,7 @@ const focusValue = async () => {
 const close = () => {
   isEditingInPlace.value = false;
   inlineError.value = undefined;
-  release(scopeId.value);
+  inPlaceScope.release();
 };
 const cancelInPlace = () => {
   close();
@@ -346,14 +354,11 @@ const saveInPlace = async () => {
     form?.resetField(`intialValues.${props.fieldKey}`, { value });
     emit("update:value", value);
     if (savedEntity) entityFormData?.onSaved?.(savedEntity);
-    savedAnnouncement.value = translated("inline-edit.saved", "Saved");
+    savedAnnouncement.value = inPlaceScope.messages.saved();
     close();
     focusValue();
   } catch {
-    inlineError.value = translated(
-      "inline-edit.save-failed",
-      "Saving failed, try again",
-    );
+    inlineError.value = inPlaceScope.messages.saveFailed();
   } finally {
     saving.value = false;
   }
@@ -361,8 +366,7 @@ const saveInPlace = async () => {
 
 const startEditing = () => {
   if (!canEditInPlace.value || isEditingInPlace.value) return;
-  const opened = requestOpen({
-    id: scopeId.value,
+  const opened = inPlaceScope.open({
     isDirty: () => isDirty.value,
     close,
     save: async () => {

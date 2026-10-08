@@ -20,6 +20,7 @@ the surrounding field row. If there is no visible label, give the input an
 | `--text-input` | value size |
 | `--input-padding` | field padding |
 | `--control-height` | minimum height, shared with the dropdown, date picker and autocomplete |
+| `--multiselect-spacer-height` | the autocomplete's empty input: the control height inside its border |
 | `--control-height-compact`, `--input-padding-compact` | `size="compact"`: an input inside a chip, such as a relation's page number; text at the label size |
 | `--radius-input` | corners |
 | `--color-border-default` | resting border (bordered variant) |

@@ -7,7 +7,7 @@
   <div
     v-if="isEditing"
     data-cy="list-item-inline-editor"
-    @click.stop.prevent
+    @click="keepClickInEditor"
   >
     <InlineFieldEditor
       :type="inputFieldType"
@@ -35,8 +35,8 @@
     "
     v-bind="editableAttrs"
     @click="onValueClick"
-    @keydown.enter.prevent.stop="start"
-    @keydown.space.prevent.stop="start"
+    @keydown.enter="onActivateKey"
+    @keydown.space="onActivateKey"
   >
     <div class="min-w-0"><slot /></div>
     <span
@@ -64,7 +64,11 @@ import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { useEditMode } from "@/composables/useEdit";
-import { useEditScope } from "@/composables/useEditScope";
+import {
+  canUpdateEntity,
+  isInnerControlClick,
+  useInPlaceScope,
+} from "@/composables/useInPlaceScope";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
   buildRelationMetadataInput,
@@ -84,11 +88,8 @@ const props = defineProps<{
   refetchEntities?: () => Promise<void>;
 }>();
 
-const { t, te } = useI18n();
-const translated = (key: string, fallback: string): string =>
-  te(key) ? t(key) : fallback;
+const { t } = useI18n();
 const { displaySuccessNotification } = useBaseNotification();
-const { requestOpen, release } = useEditScope();
 const pageEditState = useEditMode(props.parentEntityId);
 
 const label = computed<string>(() => t(props.metadata.label ?? ""));
@@ -108,9 +109,7 @@ const relationType = computed<string | undefined>(() => {
 });
 
 const entityCanUpdate = computed<boolean>(() =>
-  ["edit", "edit-delete"].includes(
-    unref((pageEditState as any).permittedEditMode) as string,
-  ),
+  canUpdateEntity(pageEditState as any),
 );
 const canEdit = computed<boolean>(
   () =>
@@ -119,9 +118,11 @@ const canEdit = computed<boolean>(
     !!relationType.value &&
     canEditFieldInPlace({
       inputFieldType: inputFieldType.value,
+      nonEditableField: !!(props.metadata as any).nonEditableField,
       editableByUser: !(props.metadata as any).readOnly,
+      // Locks belong to the page entity's own fields, not to the relation.
       locked: false,
-      masked: false,
+      masked: !!(props.metadata as any).masked,
       entityCanUpdate: entityCanUpdate.value,
       pageInEditMode: !!unref((pageEditState as any).isEdit),
     }),
@@ -131,7 +132,7 @@ const editableAttrs = computed(() =>
     ? {
         role: "button",
         tabindex: 0,
-        "aria-label": `${label.value}, ${translated("inline-edit.edit-field", "edit")}`,
+        "aria-label": `${label.value}, ${inPlaceScope.messages.editField()}`,
       }
     : {},
 );
@@ -163,12 +164,13 @@ const scopeId = computed(
   () =>
     `${props.parentEntityId}:${props.linkedEntityId}:${props.metadata.key}`,
 );
+const inPlaceScope = useInPlaceScope(() => scopeId.value);
 
 const close = () => {
   isEditing.value = false;
   dirty.value = false;
   errorMessage.value = undefined;
-  release(scopeId.value);
+  inPlaceScope.release();
 };
 const focusValue = async () => {
   await nextTick();
@@ -207,15 +209,12 @@ const save = async (value: unknown) => {
       "notifications.success.entityUpdated.title",
       "notifications.success.entityUpdated.description",
     );
-    savedAnnouncement.value = translated("inline-edit.saved", "Saved");
+    savedAnnouncement.value = inPlaceScope.messages.saved();
     close();
     await props.refetchEntities?.();
     focusValue();
   } catch {
-    errorMessage.value = translated(
-      "inline-edit.save-failed",
-      "Saving failed, try again",
-    );
+    errorMessage.value = inPlaceScope.messages.saveFailed();
   } finally {
     saving.value = false;
   }
@@ -223,8 +222,7 @@ const save = async (value: unknown) => {
 
 const start = () => {
   if (!canEdit.value || isEditing.value) return;
-  const opened = requestOpen({
-    id: scopeId.value,
+  const opened = inPlaceScope.open({
     isDirty: () => dirty.value,
     close,
     save: async () => {
@@ -239,11 +237,30 @@ const start = () => {
   isEditing.value = true;
 };
 
-// The row is a link: an editable value keeps the click to itself.
+// The row is a link: an editable value keeps the click to itself, except a
+// click on a link or button inside the value.
 const onValueClick = (event: MouseEvent) => {
   if (!canEdit.value) return;
+  if (isInnerControlClick(event, valueRef.value)) return;
   event.preventDefault();
   event.stopPropagation();
   start();
+};
+
+// Enter and Space open the editor only when the value itself has focus.
+const onActivateKey = (event: KeyboardEvent) => {
+  if (!canEdit.value || event.target !== event.currentTarget) return;
+  event.preventDefault();
+  event.stopPropagation();
+  start();
+};
+
+// Clicks in the editor never reach the row's link. Form controls keep their
+// default action (a checkbox toggles); anything else would follow the link.
+const FORM_CONTROL_SELECTOR = "input, label, select, textarea, button";
+const keepClickInEditor = (event: MouseEvent) => {
+  event.stopPropagation();
+  if (!(event.target as Element | null)?.closest?.(FORM_CONTROL_SELECTOR))
+    event.preventDefault();
 };
 </script>

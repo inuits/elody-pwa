@@ -59,7 +59,8 @@ const inlineEditorStub = {
   name: "InlineFieldEditor",
   props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage"],
   emits: ["save", "cancel", "dirty-change", "draft-change"],
-  template: "<div data-cy='inline-editor-stub' />",
+  template:
+    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span></div>",
 };
 
 const refetchEntities = vi.fn().mockResolvedValue(undefined);
@@ -123,6 +124,26 @@ describe("ListItemInlineField", () => {
       expect(wrapper.find('[data-cy="field-edit-pencil"]').exists()).toBe(false);
     });
 
+    it.each([
+      ["marked non-editable", { nonEditableField: true }],
+      ["masked", { masked: true }],
+      ["read-only for the user", { readOnly: true }],
+    ])("is a plain value when the field is %s", (_reason, override) => {
+      const wrapper = mountField({ metadata: roleField(override) });
+      expect(value(wrapper).attributes("role")).toBeUndefined();
+    });
+
+    it("doesn't take Enter from a link inside the value", () => {
+      const wrapper = mountField();
+      const link = document.createElement("a");
+      link.href = "/elsewhere";
+      value(wrapper).element.appendChild(link);
+      const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+      link.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(false);
+      expect(useEditScope().isActive("ORG-1:USER-1:roles")).toBe(false);
+    });
+
     it("is a plain value when the row has no relation back to the page entity", () => {
       const wrapper = mountField({ linkedEntityRelations: {} });
       expect(value(wrapper).attributes("role")).toBeUndefined();
@@ -157,9 +178,28 @@ describe("ListItemInlineField", () => {
 
     it("keeps clicks inside the editor from reaching the row's link", async () => {
       const wrapper = await openEditor();
+      const rowLink = vi.fn();
+      document.body.addEventListener("click", rowLink);
       const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      wrapper.find('[data-cy="list-item-inline-editor"]').element.dispatchEvent(event);
+      wrapper.find('[data-cy="editor-text"]').element.dispatchEvent(event);
+      document.body.removeEventListener("click", rowLink);
       expect(event.defaultPrevented).toBe(true);
+      expect(rowLink).not.toHaveBeenCalled();
+    });
+
+    it("lets a checkbox in the editor toggle (its click isn't cancelled)", async () => {
+      const wrapper = await openEditor();
+      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+      wrapper.find('[data-cy="editor-checkbox"]').element.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("releases its edit scope when the row goes away (refetch, paging)", async () => {
+      const wrapper = await openEditor();
+      editor(wrapper).vm.$emit("dirty-change", true);
+      wrapper.unmount();
+      expect(useEditScope().isActive("ORG-1:USER-1:roles")).toBe(false);
+      expect(useEditScope().hasUnsavedChanges.value).toBe(false);
     });
 
     it("saves only this key on the user's relation to the page entity", async () => {

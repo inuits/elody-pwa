@@ -139,9 +139,15 @@ describe("BaseInputAutocomplete — design-system styling", () => {
     expect(classesFor("readOnlyAsPlainText").tag).toContain("!text-value");
   });
 
-  it("keeps edit-mode controls at the shared control height", () => {
+  it("keeps edit-mode controls at the shared control height, through a token", () => {
     expect(classesFor("defaultWithBorder").spacer).toContain(
-      "h-[calc(var(--control-height)-2px)]",
+      "!h-(--multiselect-spacer-height)",
     );
+  });
+
+  it("sizes plain-text relation chips with a token, not a px literal", () => {
+    const tag = classesFor("readOnlyAsPlainText").tag;
+    expect(tag).toContain("!h-(--chip-plain-text-height)");
+    expect(tag).not.toMatch(/\[\d+px\]/);
   });
 });

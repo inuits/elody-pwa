@@ -26,6 +26,7 @@ use the same tokens.
 |---|---|
 | `--text-chip`, `--chip-padding` | chip size and padding |
 | `--text-chip-lg`, `--chip-padding-lg` | large chip (comparison columns) |
+| `--chip-plain-text-height` | a relation shown as plain text instead of a chip |
 | `--text-badge`, `--badge-size`, `--badge-padding-x` | badge |
 | `--radius-chip` | all shapes |
 | `--color-badge-tone{1,2,3}-{bg,text}`, `--color-badge-subtype-*` | tones |

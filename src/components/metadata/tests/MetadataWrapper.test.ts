@@ -487,6 +487,41 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     ).toBeUndefined();
   });
 
+  it("releases its edit scope when the field goes away with the editor open", async () => {
+    const wrapper = await mountWrapper(editableProps());
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+    wrapper.unmount();
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("leaves a click on the copy button to the copy button", async () => {
+    const props = editableProps();
+    (props.metadata as any).copyToClipboard = true;
+    const wrapper = await mountWrapper(props);
+    await wrapper.find("base-copy-to-clipboard-stub").trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("doesn't block Enter on a value that can't be edited (its links still work)", async () => {
+    allowUpdate(false);
+    const value = await fieldValue();
+    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    value.element.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it("doesn't take Enter from a link inside an editable value", async () => {
+    const value = await fieldValue();
+    const link = document.createElement("a");
+    link.href = "/elsewhere";
+    value.element.appendChild(link);
+    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    link.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
   it("does not open a scope for a read-only value", async () => {
     allowUpdate(false);
     await (await fieldValue()).trigger("click");

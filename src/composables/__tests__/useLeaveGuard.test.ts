@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { decideLeave } from "@/composables/useLeaveGuard";
+import { decideLeave, leavesRecord } from "@/composables/useLeaveGuard";
 
 const options = (overrides: Record<string, unknown> = {}) => ({
   pageEditChanged: false,
@@ -50,5 +50,23 @@ describe("decideLeave", () => {
     expect(await decideLeave(o)).toBe(true);
     expect(o.savePageEdit).toHaveBeenCalled();
     expect(o.saveScope).not.toHaveBeenCalled();
+  });
+});
+
+describe("leavesRecord", () => {
+  const route = (path: string, query = {}, hash = "") => ({ path, query, hash });
+
+  it("is true when the route moves to another record", () => {
+    expect(leavesRecord(route("/entities/A"), route("/entities/B"))).toBe(true);
+  });
+
+  it("is false when only the query changes (paging a related list, a tab)", () => {
+    expect(
+      leavesRecord(route("/entities/A", { page: "2" }), route("/entities/A", { page: "1" })),
+    ).toBe(false);
+  });
+
+  it("is false when only the hash changes", () => {
+    expect(leavesRecord(route("/entities/A", {}, "#x"), route("/entities/A"))).toBe(false);
   });
 });

@@ -288,7 +288,7 @@ const classes = computed(() => {
       : "multiselect-tag !bg-chip-value-bg !text-chip-value-text !rounded-chip !font-bold !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",
     // Edit controls share one height (--control-height, minus the border).
-    spacer: "multiselect-spacer !h-[calc(var(--control-height)-2px)] !py-0",
+    spacer: "multiselect-spacer !h-(--multiselect-spacer-height) !py-0",
     ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
   };
 
@@ -310,7 +310,7 @@ const classes = computed(() => {
   if (props.autocompleteStyle === "readOnlyAsPlainText") {
     result["container"] = "multiselect border-none !bg-transparent";
     result["tag"] =
-      "multiselect-tag !bg-transparent !font-normal !text-value !h-[25px] !p-0 !rounded-none !text-text-body !opacity-100 hover:!bg-transparent hover:!text-text-body";
+      "multiselect-tag !bg-transparent !font-normal !text-value !h-(--chip-plain-text-height) !p-0 !rounded-none !text-text-body !opacity-100 hover:!bg-transparent hover:!text-text-body";
     result["tags"] = "flex min-w-0 rtl:pl-0 rtl:pr-2";
     result["tagsSearchWrapper"] = "!hidden";
     result["spacer"] = "hidden";

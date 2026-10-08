@@ -191,8 +191,8 @@
             "
             v-bind="editableValueAttrs"
             @click.capture="startEditing"
-            @keydown.enter.prevent="startEditing"
-            @keydown.space="onSpaceKey"
+            @keydown.enter="onActivateKey"
+            @keydown.space="onActivateKey"
           >
             <MetadataMaskedValue
               v-if="isMaskedField"
@@ -341,6 +341,7 @@
               <unicon :name="Unicons.EditAlt.name" height="12" />
             </span>
             <BaseCopyToClipboard
+              data-inline-edit-ignore
               v-if="metadata.copyToClipboard && !isMaskedField"
               class="w-6 h-6"
               :value="fieldValueProxy"
@@ -401,7 +402,6 @@ import {
   inject,
   provide,
   watch,
-  unref,
   nextTick,
 } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
@@ -422,7 +422,11 @@ import { useVeeValidate } from "./useVeeValidate";
 import type { PanelRepetitionProps } from "@/composables/useRepeatableFields";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import { useEditScope } from "@/composables/useEditScope";
+import {
+  canUpdateEntity,
+  isInnerControlClick,
+  useInPlaceScope,
+} from "@/composables/useInPlaceScope";
 import { useEditMode } from "@/composables/useEdit";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
@@ -619,13 +623,11 @@ watch(
 
 // Per-field editing: an editable value is a button that opens its own edit
 // scope (docs/design-system/patterns/per-field-editing.md).
-const { requestOpen, release } = useEditScope();
-const { te } = useI18n();
+const editScopeId = computed(() => `${props.formId}:${props.metadata.key}`);
+const inPlaceScope = useInPlaceScope(() => editScopeId.value);
 const entityEditState = useEditMode(props.formId);
 const entityCanUpdate = computed<boolean>(() =>
-  ["edit", "edit-delete"].includes(
-    unref(entityEditState.permittedEditMode as any) as string,
-  ),
+  canUpdateEntity(entityEditState),
 );
 // Relations edit in place when the field saves as the entity's own relations
 // (not as metadata, not on a linked entity, not inherited).
@@ -660,9 +662,7 @@ const canEditInPlace = computed<boolean>(() =>
     relationEditable: relationEditable.value,
   }),
 );
-const editFieldLabel = computed<string>(() =>
-  te("inline-edit.edit-field") ? t("inline-edit.edit-field") : "edit",
-);
+const editFieldLabel = computed<string>(() => inPlaceScope.messages.editField());
 const editableValueAttrs = computed(() =>
   canEditInPlace.value
     ? {
@@ -690,7 +690,6 @@ const entityFormData = inject<
     }
   | undefined
 >("entityFormData", undefined);
-const editScopeId = computed(() => `${props.formId}:${props.metadata.key}`);
 
 const focusFieldValue = async () => {
   await nextTick();
@@ -700,7 +699,7 @@ const closeEditor = () => {
   isEditingInPlace.value = false;
   inlineDirty.value = false;
   inlineError.value = undefined;
-  release(editScopeId.value);
+  inPlaceScope.release();
 };
 // --- Relations -------------------------------------------------------------
 const { getForm } = useFormHelper();
@@ -801,15 +800,11 @@ const saveRelationsInline = async () => {
         : toScopeRelations(formRelations(), new Set()),
     );
     if (saved) entityFormData?.onSaved?.(saved);
-    savedAnnouncement.value = te("inline-edit.saved")
-      ? t("inline-edit.saved")
-      : "Saved";
+    savedAnnouncement.value = inPlaceScope.messages.saved();
     closeEditor();
     focusFieldValue();
   } catch {
-    inlineError.value = te("inline-edit.save-failed")
-      ? t("inline-edit.save-failed")
-      : "Saving failed, try again";
+    inlineError.value = inPlaceScope.messages.saveFailed();
   } finally {
     inlineSaving.value = false;
   }
@@ -836,9 +831,11 @@ const isRelationChipClick = (event?: Event): boolean => {
 
 const startEditing = (event?: Event) => {
   if (!canEditInPlace.value || isEditingInPlace.value) return;
+  // A link or the copy button inside the value keeps its own click.
+  if (event?.type === "click" && isInnerControlClick(event, fieldValueRef.value))
+    return;
   if (isRelationChipClick(event)) return;
-  const opened = requestOpen({
-    id: editScopeId.value,
+  const opened = inPlaceScope.open({
     isDirty: () =>
       isRelationField.value ? relationDirty.value : inlineDirty.value,
     close: closeEditor,
@@ -884,21 +881,19 @@ const saveInline = async (value: unknown) => {
     field.resetField({ value: fieldValueProxy.value });
     if (savedEntity && !props.linkedEntityId)
       entityFormData?.onSaved?.(savedEntity);
-    savedAnnouncement.value = te("inline-edit.saved")
-      ? t("inline-edit.saved")
-      : "Saved";
+    savedAnnouncement.value = inPlaceScope.messages.saved();
     closeEditor();
     focusFieldValue();
   } catch {
-    inlineError.value = te("inline-edit.save-failed")
-      ? t("inline-edit.save-failed")
-      : "Saving failed, try again";
+    inlineError.value = inPlaceScope.messages.saveFailed();
   } finally {
     inlineSaving.value = false;
   }
 };
-const onSpaceKey = (event: KeyboardEvent) => {
-  if (!canEditInPlace.value) return;
+// Enter and Space open the editor only when the value itself has focus, so
+// a focused link inside it (or a value that can't be edited) keeps its keys.
+const onActivateKey = (event: KeyboardEvent) => {
+  if (!canEditInPlace.value || event.target !== event.currentTarget) return;
   event.preventDefault();
   startEditing();
 };

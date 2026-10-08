@@ -361,6 +361,8 @@
   --control-height: 32px;
   /* Compact input inside a chip (a relation's page number) */
   --control-height-compact: 20px;
+  /* The autocomplete's empty input: the control height inside its border */
+  --multiselect-spacer-height: calc(var(--control-height) - 2px);
   --input-padding-compact: 0 6px;
   --color-input-border-hover: var(--color-neutral-50); /* one step darker */
   --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
@@ -389,6 +391,8 @@
   /* Chip and badge (components/chip-and-badge.md) */
   --text-chip: var(--text-label);
   --chip-padding: 2px 8px;
+  /* A relation shown as plain text instead of a chip */
+  --chip-plain-text-height: 25px;
   --text-chip-lg: 1.125rem;
   --chip-padding-lg: 4px 12px;
   --text-badge: var(--text-micro);

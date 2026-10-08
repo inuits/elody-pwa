@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   saveScope: vi.fn(),
   editState: undefined as any,
   form: undefined as any,
+  locked: false,
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -17,6 +18,10 @@ vi.mock("@/composables/useFormHelper", () => ({
 vi.mock("@/composables/useEdit", () => ({
   useEditMode: () => mocks.editState,
 }));
+vi.mock("@/composables/useFieldLock", async () => {
+  const { computed } = await import("vue");
+  return { useFieldLock: () => ({ isLocked: computed(() => mocks.locked) }) };
+});
 vi.mock("@/composables/useConditionalValidation", () => ({
   useConditionalValidation: () => ({ conditionalFieldIsAvailable: () => true }),
 }));
@@ -83,6 +88,7 @@ describe("EntityElementCoordinateEdit", () => {
     vi.clearAllMocks();
     mocks.editState = reactive({ isEdit: false, permittedEditMode: "edit" });
     mocks.form = { setFieldValue: vi.fn(), resetField: vi.fn() };
+    mocks.locked = false;
     const scope = useEditScope();
     if (scope.activeScope.value) scope.release(scope.activeScope.value.id);
     document.body.innerHTML = "";
@@ -134,6 +140,16 @@ describe("EntityElementCoordinateEdit", () => {
       const value = mountField().find('[data-cy="field-value"]');
       expect(value.attributes("role")).toBeUndefined();
       expect(value.find('[data-cy="field-edit-pencil"]').exists()).toBe(false);
+    });
+
+    it.each([
+      ["marked non-editable", { nonEditableField: true }, () => {}],
+      ["read-only for the user", { readOnly: true }, () => {}],
+      ["locked", {}, () => (mocks.locked = true)],
+    ])("is plain text when the field is %s", (_reason, props, arrange) => {
+      arrange();
+      const value = mountField(props).find('[data-cy="field-value"]');
+      expect(value.attributes("role")).toBeUndefined();
     });
 
     it("keeps the two inputs in the page-wide edit mode", () => {
@@ -244,6 +260,14 @@ describe("EntityElementCoordinateEdit", () => {
       editor(wrapper).vm.$emit("save");
       await flushPromises();
       expect(editor(wrapper).props("errorMessage")).toBe("Saving failed, try again");
+    });
+
+    it("releases its edit scope when the field goes away", async () => {
+      const wrapper = await openEditor();
+      await latitude(wrapper).setValue("51.1");
+      wrapper.unmount();
+      expect(useEditScope().isActive("SITE-1:gps_coordinates")).toBe(false);
+      expect(useEditScope().hasUnsavedChanges.value).toBe(false);
     });
 
     it("closes without saving on cancel", async () => {

@@ -34,3 +34,11 @@ export const decideLeave = async ({
   }
   return false;
 };
+
+// A route update leaves the record only when the path changes. A changed
+// query or hash (paging a related list, a tab) stays on the same record, so
+// it never asks about unsaved changes.
+export const leavesRecord = (
+  to: { path: string },
+  from: { path: string },
+): boolean => to.path !== from.path;

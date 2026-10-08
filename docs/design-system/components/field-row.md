@@ -82,7 +82,13 @@ person's role or function in an organization (`ListItemInlineField.vue`).
 | editing | the [inline editor](./inline-editor.md) replaces the value |
 
 ## Behaviour and keyboard
-- Click, Enter or Space on an editable value opens its edit scope. A click on
+- Click, Enter or Space on an editable value opens its edit scope. A link or
+  the copy button inside the value keeps its own click and Enter; Enter and
+  Space open the editor only when the value itself has focus.
+- An edit scope ends with its field: when a field unmounts with its editor
+  open (a refetch, paging, a closed panel), its scope is released.
+- A changed query or hash on the same record never asks about unsaved
+  changes; moving to another record does. A click on
   a relation chip still navigates to the related entity; a plain-text relation
   doesn't navigate, so clicking it opens the editor, and so does a click on a
   chip's value box (a page number).

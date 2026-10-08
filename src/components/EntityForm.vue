@@ -37,7 +37,7 @@ import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 import { useEditScope } from "@/composables/useEditScope";
-import { decideLeave } from "@/composables/useLeaveGuard";
+import { decideLeave, leavesRecord } from "@/composables/useLeaveGuard";
 import { useSubmitForm } from "vee-validate";
 import {
   getChildrenOfHomeRoutes,
@@ -260,8 +260,10 @@ onBeforeRouteLeave(() =>
 );
 
 // Moving to another record keeps this component: only an in-place editor is
-// checked here (the breadcrumbs already ask for the page-wide edit mode).
-onBeforeRouteUpdate(() =>
+// checked here (the breadcrumbs already ask for the page-wide edit mode). A
+// query or hash change stays on the record and is never asked about.
+onBeforeRouteUpdate((to, from) =>
+  !leavesRecord(to, from) ||
   decideLeave({
     pageEditChanged: false,
     scopeChanged: editScope.hasUnsavedChanges.value,
