@@ -11,7 +11,8 @@ and never in a modal.
 
 ## Anatomy
 The input for the field type, then the actions inline on the right,
-vertically centred on the input:
+vertically centred on the input. Inputs take the row's width; a checkbox is
+only as wide as its box, so the actions sit right after it:
 - **Bewaar:** commit button, `sm`;
 - **Annuleer:** ghost button, `sm`.
 

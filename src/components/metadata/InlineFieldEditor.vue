@@ -9,7 +9,12 @@
     @keydown="handleKeydown"
   >
     <div data-cy="inline-editor-row" class="flex items-center gap-1.5 w-full">
-      <div class="grow min-w-0">
+      <!-- A checkbox is only as wide as its box, so the buttons sit right
+           after it; other inputs take the row. -->
+      <div
+        data-cy="inline-editor-input"
+        :class="type === InputFieldTypes.Checkbox ? 'shrink-0' : 'grow min-w-0'"
+      >
         <!-- A parent with its own input (relations) passes it here and
              reports its changed state through `dirty`. -->
         <slot v-if="$slots.input" name="input" />

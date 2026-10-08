@@ -146,6 +146,19 @@ describe("InlineFieldEditor", () => {
       expect(row.classes()).toContain("items-center");
       expect(row.classes()).not.toContain("items-start");
     });
+
+    it("lets a text input take the row, with the buttons at its end", () => {
+      const input = editor().find('[data-cy="inline-editor-input"]');
+      expect(input.classes()).toContain("grow");
+    });
+
+    it("keeps a checkbox only as wide as the box, with the buttons right after it", () => {
+      const input = editor({ type: "checkbox", modelValue: false }).find(
+        '[data-cy="inline-editor-input"]',
+      );
+      expect(input.classes()).not.toContain("grow");
+      expect(input.classes()).toContain("shrink-0");
+    });
   });
 
   describe("inputs per type", () => {
