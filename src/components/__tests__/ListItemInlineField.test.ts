@@ -198,6 +198,68 @@ describe("ListItemInlineField", () => {
       expect(rowLink).not.toHaveBeenCalled();
     });
 
+    describe("inside the row's link", () => {
+      const mountInRow = () => {
+        const row = document.createElement("a");
+        row.href = "/users/USER-1";
+        const elsewhere = document.createElement("span");
+        elsewhere.dataset.cy = "row-elsewhere";
+        const slot = document.createElement("div");
+        row.append(elsewhere, slot);
+        document.body.appendChild(row);
+        const rowHandler = vi.fn();
+        row.addEventListener("click", rowHandler);
+        const wrapper = mount(ListItemInlineField, {
+          props: {
+            metadata: roleField() as any,
+            parentEntityId: "ORG-1",
+            linkedEntityId: "USER-1",
+            linkedEntityRelations: userRelations,
+            refetchEntities,
+          },
+          slots: { default: "<span>Admin</span>" },
+          global: { stubs: { InlineFieldEditor: inlineEditorStub, unicon: true } },
+          attachTo: slot,
+        });
+        return { wrapper, row, elsewhere, rowHandler };
+      };
+      const click = (element: Element) => {
+        const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+        element.dispatchEvent(event);
+        return event;
+      };
+
+      it("doesn't follow the row's link from a click elsewhere on the row while editing", async () => {
+        const { wrapper, elsewhere, rowHandler } = mountInRow();
+        await value(wrapper).trigger("click");
+        await flushPromises();
+        const event = click(elsewhere);
+        expect(event.defaultPrevented).toBe(true);
+        expect(rowHandler).not.toHaveBeenCalled();
+      });
+
+      it("still lets clicks inside the editor reach the editor", async () => {
+        const { wrapper } = mountInRow();
+        await value(wrapper).trigger("click");
+        await flushPromises();
+        const onSave = vi.fn();
+        wrapper.find('[data-cy="editor-save"]').element.addEventListener("click", onSave);
+        click(wrapper.find('[data-cy="editor-save"]').element);
+        expect(onSave).toHaveBeenCalled();
+      });
+
+      it("follows the row's link again once the editor is closed", async () => {
+        const { wrapper, elsewhere, rowHandler } = mountInRow();
+        await value(wrapper).trigger("click");
+        await flushPromises();
+        editor(wrapper).vm.$emit("cancel");
+        await flushPromises();
+        const event = click(elsewhere);
+        expect(event.defaultPrevented).toBe(false);
+        expect(rowHandler).toHaveBeenCalled();
+      });
+    });
+
     it("lets a checkbox in the editor toggle (its click isn't cancelled)", async () => {
       const wrapper = await openEditor();
       const event = new MouseEvent("click", { bubbles: true, cancelable: true });

@@ -6,6 +6,7 @@
        See docs/design-system/components/field-row.md. -->
   <div
     v-if="isEditing"
+    ref="editorRef"
     data-cy="list-item-inline-editor"
     @click="keepClickInEditor"
   >
@@ -52,7 +53,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, unref } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  unref,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { validate } from "vee-validate";
 import {
@@ -265,4 +273,31 @@ const keepClickInEditor = (event: MouseEvent) => {
   if (!(event.target as Element | null)?.closest?.(TOGGLE_SELECTOR))
     event.preventDefault();
 };
+
+// While the editor is open its row's link doesn't navigate: a click
+// elsewhere on the row (or one that lands there after a dropdown menu
+// closed under the pointer) is stopped before the link handles it. Clicks
+// inside the editor pass through to the editor.
+const editorRef = ref<HTMLElement | null>(null);
+let rowLink: HTMLElement | null = null;
+const holdRowLink = (event: MouseEvent) => {
+  if (editorRef.value?.contains(event.target as Node)) return;
+  event.preventDefault();
+  event.stopPropagation();
+};
+const releaseRowLink = () => {
+  rowLink?.removeEventListener("click", holdRowLink, true);
+  rowLink = null;
+};
+watch(
+  isEditing,
+  (editing) => {
+    releaseRowLink();
+    if (!editing) return;
+    rowLink = editorRef.value?.closest("a") ?? null;
+    rowLink?.addEventListener("click", holdRowLink, true);
+  },
+  { flush: "post" },
+);
+onBeforeUnmount(releaseRowLink);
 </script>
