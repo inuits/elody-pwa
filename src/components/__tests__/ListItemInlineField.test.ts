@@ -298,6 +298,46 @@ describe("ListItemInlineField", () => {
       });
     });
 
+    it("sends a single choice as a list when the relation stores that key as a list", async () => {
+      mocks.saveScope.mockResolvedValue({ id: "USER-1" });
+      const wrapper = await openEditor({
+        linkedEntityRelations: {
+          refOrganizations: [
+            { key: "ORG-1", type: "refOrganizations", metadata: [{ key: "roles", value: ["admin"] }] },
+          ],
+        },
+      });
+      editor(wrapper).vm.$emit("save", "editor");
+      await flushPromises();
+      expect(
+        mocks.saveScope.mock.calls[0][0].formInput.relations[0].metadata,
+      ).toEqual([{ key: "roles", value: ["editor"] }]);
+    });
+
+    const listRoles = {
+      refOrganizations: [
+        { key: "ORG-1", type: "refOrganizations", metadata: [{ key: "roles", value: ["admin"] }] },
+      ],
+    };
+
+    it("sends a cleared choice as an empty list when the key is stored as a list", async () => {
+      mocks.saveScope.mockResolvedValue({ id: "USER-1" });
+      const wrapper = await openEditor({ linkedEntityRelations: listRoles });
+      editor(wrapper).vm.$emit("save", "");
+      await flushPromises();
+      expect(
+        mocks.saveScope.mock.calls[0][0].formInput.relations[0].metadata,
+      ).toEqual([{ key: "roles", value: [] }]);
+    });
+
+    it("starts a single choice from the stored value, unwrapped from its list", async () => {
+      const wrapper = await openEditor({
+        linkedEntityRelations: listRoles,
+        metadata: roleField({ value: { formatter: "pill", label: ["admin"] } }),
+      });
+      expect(editor(wrapper).props("modelValue")).toBe("admin");
+    });
+
     it("closes, refreshes the list and shows the usual notification after saving", async () => {
       mocks.saveScope.mockResolvedValue({ id: "USER-1" });
       const wrapper = await openEditor();

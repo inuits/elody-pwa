@@ -65,6 +65,7 @@ import { useI18n } from "vue-i18n";
 import { validate } from "vee-validate";
 import {
   Collection,
+  InputFieldTypes,
   ValidationRules,
   type Metadata,
 } from "@/generated-types/queries";
@@ -145,11 +146,40 @@ const editableAttrs = computed(() =>
     : {},
 );
 
+// What the relation stores for this key now. Its shape decides how a new
+// value is sent: a key stored as a list (podiumnet's roles) gets a single
+// choice as a one-item list, as the whole-form save did.
+const storedValue = computed<unknown>(() => {
+  const relations = (props.linkedEntityRelations ?? {}) as Record<
+    string,
+    any[]
+  >;
+  const relation = relations[relationType.value ?? ""]?.find?.(
+    (candidate) => candidate?.key === props.parentEntityId,
+  );
+  return relation?.metadata?.find?.(
+    (entry: { key: string }) => entry?.key === props.metadata.key,
+  )?.value;
+});
+const toStoredShape = (value: unknown): unknown => {
+  if (!Array.isArray(storedValue.value) || Array.isArray(value)) return value;
+  return value === "" ? [] : [value];
+};
+
 // A pill shows the stored value as its label.
+const isMultiple = computed<boolean>(
+  () => inputFieldType.value === InputFieldTypes.DropdownMultiselectMetadata,
+);
 const currentValue = computed<unknown>(() => {
-  const value = props.metadata.value as any;
-  if (value && typeof value === "object" && "formatter" in value)
-    return value.label;
+  const raw = props.metadata.value as any;
+  const value =
+    storedValue.value !== undefined
+      ? storedValue.value
+      : raw && typeof raw === "object" && "formatter" in raw
+        ? raw.label
+        : raw;
+  // A single choice stored as a one-item list starts as that one value.
+  if (!isMultiple.value && Array.isArray(value)) return value[0] ?? "";
   return value;
 });
 
@@ -210,7 +240,7 @@ const save = async (value: unknown) => {
       formInput: buildRelationMetadataInput(
         { key: props.parentEntityId, type: relationType.value! },
         props.metadata.key,
-        toMetadataValue(value),
+        toStoredShape(toMetadataValue(value)),
       ),
     });
     displaySuccessNotification(
