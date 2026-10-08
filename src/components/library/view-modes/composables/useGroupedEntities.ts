@@ -20,6 +20,7 @@ export type EntityGroup = {
   hasMore: boolean;
   pinned?: boolean;
   filterKey?: string[];
+  translationKey?: string | null;
 };
 
 export type FetchEntities = (
@@ -40,6 +41,17 @@ export type UseGroupedEntitiesOptions = {
 
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_GROUPS_PAGE_SIZE = 5;
+
+export const groupHeaderLabel = (
+  group: EntityGroup,
+  t: (key: string) => string,
+): string => {
+  if (group.value === null || group.pinned) return t(group.label);
+  if (!group.translationKey) return group.label;
+  const key = group.translationKey.replace("$value", group.value);
+  const translated = t(key);
+  return translated !== key ? translated : group.label;
+};
 
 export const getGroupValue = (entity: Entity, path: string): string | null => {
   let value: any = path
@@ -262,6 +274,7 @@ export const useGroupedEntities = (options: UseGroupedEntitiesOptions) => {
           id: value ?? "",
           value,
           label: value ?? config.emptyLabel ?? "",
+          translationKey: config.translationKey,
           entities: [],
           count: 0,
           page: 0,

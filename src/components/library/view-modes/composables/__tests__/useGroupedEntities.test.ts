@@ -10,6 +10,7 @@ import {
 import {
   buildTableItems,
   getGroupValue,
+  groupHeaderLabel,
   useGroupedEntities,
   type EntityGroup,
   type FetchEntities,
@@ -345,6 +346,16 @@ describe("useGroupedEntities", () => {
     ]);
   });
 
+  it("gives every group the translation key of the option", async () => {
+    const { grouped } = setup();
+
+    await grouped.load({ ...config, translationKey: "categories.$value" });
+
+    expect(
+      grouped.groups.value.map((group) => group.translationKey),
+    ).toEqual(["categories.$value", "categories.$value"]);
+  });
+
   it("does not resolve labels without label entity types", async () => {
     const resolveLabels = vi.fn();
     const grouped = useGroupedEntities({
@@ -577,5 +588,66 @@ describe("getGroupValue", () => {
         "intialValues.category",
       ),
     ).toBeNull();
+  });
+});
+
+describe("groupHeaderLabel", () => {
+  const t = (key: string) =>
+    ({
+      "comments.no-category": "Zonder categorie",
+      "comments.to-you": "Aan jou",
+      "entity-translations.work": "Werk",
+    })[key] ?? key;
+  const group = (overrides: Partial<EntityGroup>): EntityGroup => ({
+    id: "work",
+    value: "work",
+    label: "work",
+    entities: [],
+    count: 0,
+    page: 0,
+    loading: false,
+    hasMore: false,
+    ...overrides,
+  });
+
+  it("translates the value with the translation key of the group", () => {
+    expect(
+      groupHeaderLabel(
+        group({ translationKey: "entity-translations.$value" }),
+        t,
+      ),
+    ).toBe("Werk");
+  });
+
+  it("shows the value when the translation key has no translation for it", () => {
+    expect(
+      groupHeaderLabel(
+        group({
+          value: "nomen",
+          label: "nomen",
+          translationKey: "entity-translations.$value",
+        }),
+        t,
+      ),
+    ).toBe("nomen");
+  });
+
+  it("shows the value as is without a translation key", () => {
+    expect(groupHeaderLabel(group({}), t)).toBe("work");
+  });
+
+  it("translates the label of the empty group and of pinned groups", () => {
+    expect(
+      groupHeaderLabel(
+        group({ value: null, label: "comments.no-category" }),
+        t,
+      ),
+    ).toBe("Zonder categorie");
+    expect(
+      groupHeaderLabel(
+        group({ id: "pinned:to-you", label: "comments.to-you", pinned: true }),
+        t,
+      ),
+    ).toBe("Aan jou");
   });
 });
