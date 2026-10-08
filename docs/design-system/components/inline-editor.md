@@ -54,6 +54,10 @@ read-only in place.
   closes. An Enter that picks an option in a select's menu only picks it.
 - Escape cancels and restores the previous value. An Escape that closes a
   menu only closes the menu.
+- Enter and Escape also work after picking in a dropdown, when focus has
+  left the editor: while the editor is open it listens on the page, ignoring
+  keys typed in other fields and leaving Enter/Escape to a menu that is
+  still open.
 - Clicking outside: an unchanged editor closes, a changed one stays open.
   Clicks inside the editor's own menus and dialogs (dropdown, date picker,
   the "create new" confirmation) count as inside.

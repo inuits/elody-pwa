@@ -6,7 +6,6 @@
     ref="rootRef"
     data-cy="inline-field-editor"
     class="flex flex-col gap-1 w-full"
-    @keydown="handleKeydown"
   >
     <div data-cy="inline-editor-row" class="flex items-center gap-1.5 w-full">
       <!-- A checkbox is only as wide as its box, so the buttons sit right
@@ -178,10 +177,22 @@ const commit = () => {
   emit("save", draft.value);
 };
 
-// Keys the input already handled (picking an option, closing its menu) are
-// left alone.
+// Enter/Escape count when pressed in the editor, or on the page itself:
+// after picking in a dropdown, focus is on the (removed) option of a menu
+// rendered at the end of the page and falls back to <body>. Keys another
+// field on the page receives aren't ours. While a dropdown menu is open,
+// Enter picks and Escape closes it; keys the input already handled are
+// left alone too.
+const OPEN_SELECT_MENU = "[role='listbox'][id^='vue-select-']";
+const isOwnKey = (event: KeyboardEvent): boolean => {
+  const target = event.target as Element | null;
+  if (!target || target === document.body || target === document.documentElement)
+    return true;
+  return !!rootRef.value?.contains(target);
+};
 const handleKeydown = (event: KeyboardEvent) => {
-  if (event.defaultPrevented) return;
+  if (event.defaultPrevented || !isOwnKey(event)) return;
+  if (document.querySelector(OPEN_SELECT_MENU)) return;
   if (event.key === "Escape") {
     event.preventDefault();
     emit("cancel");
@@ -207,12 +218,14 @@ const handleOutsideMousedown = (event: MouseEvent) => {
 
 onMounted(async () => {
   document.addEventListener("mousedown", handleOutsideMousedown, true);
+  document.addEventListener("keydown", handleKeydown);
   await nextTick();
   rootRef.value
     ?.querySelector<HTMLElement>("input, textarea, [role='combobox']")
     ?.focus();
 });
-onBeforeUnmount(() =>
-  document.removeEventListener("mousedown", handleOutsideMousedown, true),
-);
+onBeforeUnmount(() => {
+  document.removeEventListener("mousedown", handleOutsideMousedown, true);
+  document.removeEventListener("keydown", handleKeydown);
+});
 </script>

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { enableAutoUnmount, mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 
 vi.mock("@/components/base/BaseDatePicker.vue", () => ({
@@ -35,6 +35,10 @@ vi.mock("@/components/base/BaseButtonNew.vue", () => ({
 }));
 
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
+
+// Each editor listens on the page while it's open; unmount them all so no
+// earlier test's editor handles a later test's keys.
+enableAutoUnmount(afterEach);
 
 const editor = (props: Record<string, unknown> = {}) =>
   mount(InlineFieldEditor, {
@@ -119,6 +123,56 @@ describe("InlineFieldEditor", () => {
       expect(wrapper.emitted("save")).toBeUndefined();
       await textarea.trigger("keydown", { key: "Enter", ctrlKey: true });
       expect(wrapper.emitted("save")?.[0]).toEqual(["ab"]);
+    });
+
+    describe("after picking in a dropdown (focus left the editor)", () => {
+      const pressOnPage = (key: string) =>
+        document.body.dispatchEvent(
+          new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }),
+        );
+
+      it("saves with Enter", async () => {
+        const wrapper = editor();
+        await input(wrapper).setValue("1959");
+        pressOnPage("Enter");
+        expect(wrapper.emitted("save")?.[0]).toEqual(["1959"]);
+      });
+
+      it("cancels with Escape", () => {
+        const wrapper = editor();
+        pressOnPage("Escape");
+        expect(wrapper.emitted("cancel")).toHaveLength(1);
+      });
+
+      it("leaves Enter and Escape to a dropdown menu that is still open", async () => {
+        const wrapper = editor();
+        await input(wrapper).setValue("1959");
+        const menu = document.createElement("div");
+        menu.setAttribute("role", "listbox");
+        menu.id = "vue-select-1-listbox";
+        document.body.appendChild(menu);
+        pressOnPage("Enter");
+        pressOnPage("Escape");
+        expect(wrapper.emitted("save")).toBeUndefined();
+        expect(wrapper.emitted("cancel")).toBeUndefined();
+      });
+
+      it("ignores keys typed in another field on the page", async () => {
+        const wrapper = editor();
+        const other = document.createElement("input");
+        document.body.appendChild(other);
+        other.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+        );
+        expect(wrapper.emitted("cancel")).toBeUndefined();
+      });
+
+      it("stops listening once closed", () => {
+        const wrapper = editor();
+        wrapper.unmount();
+        pressOnPage("Escape");
+        expect(wrapper.emitted("cancel")).toBeUndefined();
+      });
     });
 
     it("shows the keyboard hint under the editor", () => {
