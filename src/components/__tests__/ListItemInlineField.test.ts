@@ -329,6 +329,27 @@ describe("ListItemInlineField", () => {
       ],
     };
 
+    it("always sends a list when the field asks for one, even with nothing stored yet", async () => {
+      mocks.saveScope.mockResolvedValue({ id: "USER-1" });
+      const wrapper = await openEditor({
+        linkedEntityRelations: {
+          refOrganizations: [{ key: "ORG-1", type: "refOrganizations", metadata: [] }],
+        },
+        metadata: roleField({
+          inputField: {
+            type: "dropdownSingleselectMetadata",
+            valueAsList: true,
+            options: [],
+          },
+        }),
+      });
+      editor(wrapper).vm.$emit("save", "editor");
+      await flushPromises();
+      expect(
+        mocks.saveScope.mock.calls[0][0].formInput.relations[0].metadata,
+      ).toEqual([{ key: "roles", value: ["editor"] }]);
+    });
+
     it("sends a cleared choice as an empty list when the key is stored as a list", async () => {
       mocks.saveScope.mockResolvedValue({ id: "USER-1" });
       const wrapper = await openEditor({ linkedEntityRelations: listRoles });

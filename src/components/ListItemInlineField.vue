@@ -80,6 +80,7 @@ import {
 } from "@/composables/useInPlaceScope";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
+  asListIfNeeded,
   buildRelationMetadataInput,
   saveScope,
   toMetadataValue,
@@ -161,10 +162,13 @@ const storedValue = computed<unknown>(() => {
     (entry: { key: string }) => entry?.key === props.metadata.key,
   )?.value;
 });
-const toStoredShape = (value: unknown): unknown => {
-  if (!Array.isArray(storedValue.value) || Array.isArray(value)) return value;
-  return value === "" ? [] : [value];
-};
+// The field's valueAsList decides first; otherwise the stored shape does.
+const toStoredShape = (value: unknown): unknown =>
+  asListIfNeeded(
+    value,
+    !!(props.metadata.inputField as any)?.valueAsList ||
+      Array.isArray(storedValue.value),
+  );
 
 // A pill shows the stored value as its label.
 const isMultiple = computed<boolean>(

@@ -60,6 +60,10 @@ read-only in place.
   returns to the value.
 - Saving sends **only this field's key** and validates **only this field**,
   with its usual rules. An invalid value is never sent.
+- A field whose config sets `valueAsList` is always saved as a list, even
+  from a single-select (a cleared value as an empty list), for backends that
+  store the key as an array. A value on a list row's relation without that
+  flag follows the shape the relation already stores.
 - **Relations:** saving sends only the relations that were added, removed or
   changed (a changed value on the relation, such as a page number, including
   clearing it). Relations that stay as they were aren't sent. The field's

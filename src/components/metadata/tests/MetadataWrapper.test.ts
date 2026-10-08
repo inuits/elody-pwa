@@ -585,6 +585,19 @@ describe("MetadataWrapper — inline editing", () => {
     });
   });
 
+  it("saves a single choice as a list when the field asks for one", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const p = props();
+    (p.metadata.inputField as any).valueAsList = true;
+    const wrapper = await mountWrapper(p);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: ["2020"] },
+    ]);
+  });
+
   it("closes the editor and announces the save", async () => {
     scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
     const wrapper = await openEditor();

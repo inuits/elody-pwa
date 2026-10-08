@@ -431,6 +431,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 import {
+  asListIfNeeded,
   buildMetadataInput,
   buildRelationsInput,
   saveScope,
@@ -876,7 +877,13 @@ const saveInline = async (value: unknown) => {
     const savedEntity = await saveScope({
       entityId: props.linkedEntityId || entityFormData?.id || props.formId,
       collection: entityFormData?.collection ?? Collection.Entities,
-      formInput: buildMetadataInput(props.metadata.key, toMetadataValue(value)),
+      formInput: buildMetadataInput(
+        props.metadata.key,
+        asListIfNeeded(
+          toMetadataValue(value),
+          !!(props.metadata.inputField as any)?.valueAsList,
+        ),
+      ),
     });
     field.resetField({ value: fieldValueProxy.value });
     if (savedEntity && !props.linkedEntityId)

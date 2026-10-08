@@ -25,6 +25,7 @@ import {
   toMetadataValue,
   validateRelations,
   validateScope,
+  asListIfNeeded,
 } from "@/composables/useScopedSave";
 import { defineRule } from "vee-validate";
 
@@ -249,5 +250,20 @@ describe("validateRelations", () => {
       },
     });
     expect(result.valid).toBe(true);
+  });
+});
+
+describe("asListIfNeeded", () => {
+  it("leaves a value alone when the field doesn't ask for a list", () => {
+    expect(asListIfNeeded("admin", false)).toBe("admin");
+  });
+
+  it.each([
+    ["a single choice", "admin", ["admin"]],
+    ["a list", ["admin", "editor"], ["admin", "editor"]],
+    ["an empty value", "", []],
+    ["no value", undefined, []],
+  ])("sends %s as a list when the field asks for one", (_name, value, expected) => {
+    expect(asListIfNeeded(value, true)).toEqual(expected);
   });
 });

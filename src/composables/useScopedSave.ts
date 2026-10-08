@@ -30,6 +30,15 @@ export const toMetadataValue = (value: unknown): unknown => {
   return value;
 };
 
+// A field with valueAsList is always saved as a list, even from a
+// single-select (the backend stores the key as an array).
+export const asListIfNeeded = (value: unknown, asList: boolean): unknown => {
+  if (!asList) return value;
+  if (Array.isArray(value)) return value;
+  if (value === undefined || value === null || value === "") return [];
+  return [value];
+};
+
 export const buildMetadataInput = (
   key: string,
   value: unknown,
