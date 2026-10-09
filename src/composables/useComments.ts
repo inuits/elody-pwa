@@ -16,7 +16,7 @@ import {
 import { useManageEntities } from "@/composables/useManageEntities";
 import { useAuth } from "@/composables/useAuth";
 
-export type CommentStatus = "open" | "resolved";
+export type CommentStatus = "open" | "resolved" | "archived";
 
 export type Comment = {
   id: string;
@@ -82,6 +82,9 @@ export const groupComments = (comments: Comment[]): CommentThread[] => {
       };
     });
 };
+
+export const visibleThreadsOf = (threads: CommentThread[]): CommentThread[] =>
+  threads.filter((thread) => thread.status !== "archived");
 
 export const tagElementName = (tag: string): string =>
   `elody-${tag.toLowerCase()}`;
@@ -219,6 +222,24 @@ export const isOwnComment = (
       (identity) => !!identity && identity.toLowerCase() === author,
     )
   );
+};
+
+export const isThreadParticipant = (
+  thread: Pick<CommentThread, "subject" | "replies">,
+  identities: (string | null | undefined)[],
+): boolean =>
+  [thread.subject, ...thread.replies].some((comment) =>
+    isOwnComment(comment, identities),
+  );
+
+export const statusTransitionsOf = (
+  status: CommentStatus,
+  isParticipant: boolean,
+): CommentStatus[] => {
+  if (status === "open") return ["resolved"];
+  if (status === "resolved")
+    return isParticipant ? ["open", "archived"] : ["open"];
+  return ["open"];
 };
 
 const commentsByParentEntity = ref<Record<string, Comment[]>>({});

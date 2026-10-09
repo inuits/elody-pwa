@@ -53,9 +53,9 @@
           data-testid="comment-status"
           :class="[
             'text-xs px-2 py-0.5 rounded-full',
-            status === 'resolved'
-              ? 'bg-neutral-40 text-text-placeholder'
-              : 'bg-accent-normal text-white',
+            status === 'open'
+              ? 'bg-accent-normal text-white'
+              : 'bg-neutral-40 text-text-placeholder',
           ]"
         >
           {{ t(`comments.status.${status}`) }}

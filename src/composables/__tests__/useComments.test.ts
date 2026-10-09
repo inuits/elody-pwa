@@ -26,6 +26,9 @@ const {
   createFieldDisplayValuesOf,
   createFieldValuesOf,
   isOwnComment,
+  isThreadParticipant,
+  statusTransitionsOf,
+  visibleThreadsOf,
   useComments,
 } = await import("../useComments");
 
@@ -131,6 +134,11 @@ describe("groupComments", () => {
   it("defaults a subject with no status property to open", () => {
     const [thread] = groupComments([comment("CMT-a")]);
     expect(thread.status).toBe("open");
+  });
+
+  it("keeps an archived status", () => {
+    const [thread] = groupComments([comment("CMT-a", { status: "archived" })]);
+    expect(thread.status).toBe("archived");
   });
 
   it("keeps an explicit resolved status", () => {
@@ -422,5 +430,69 @@ describe("useComments.edit", () => {
       { key: "body", value: "<p>new</p>" },
       { key: "category", value: "" },
     ]);
+  });
+});
+
+describe("statusTransitionsOf", () => {
+  it("an open thread can only be resolved", () => {
+    expect(statusTransitionsOf("open", true)).toEqual(["resolved"]);
+  });
+
+  it("a participant can reopen or archive a resolved thread", () => {
+    expect(statusTransitionsOf("resolved", true)).toEqual(["open", "archived"]);
+  });
+
+  it("someone outside the thread can only reopen a resolved thread", () => {
+    expect(statusTransitionsOf("resolved", false)).toEqual(["open"]);
+  });
+
+  it("an archived thread can only be reopened, by anyone", () => {
+    expect(statusTransitionsOf("archived", true)).toEqual(["open"]);
+    expect(statusTransitionsOf("archived", false)).toEqual(["open"]);
+  });
+});
+
+describe("visibleThreadsOf", () => {
+  const threadWith = (id: string, status: string): any => ({
+    subject: comment(id, {}),
+    replies: [],
+    replyCount: 0,
+    status,
+  });
+
+  it("leaves archived threads out", () => {
+    const threads = [
+      threadWith("CMT-1", "open"),
+      threadWith("CMT-2", "archived"),
+      threadWith("CMT-3", "resolved"),
+    ];
+
+    expect(
+      visibleThreadsOf(threads).map((thread) => thread.subject.id),
+    ).toEqual(["CMT-1", "CMT-3"]);
+  });
+});
+
+describe("isThreadParticipant", () => {
+  const authored = (id: string, createdBy: string, subjectId?: string) => {
+    const authoredComment = comment(id, { subjectId });
+    authoredComment.intialValues.created_by = createdBy;
+    return authoredComment;
+  };
+  const thread: any = {
+    subject: authored("CMT-a", "a@inuits.eu"),
+    replies: [authored("CMT-b", "b@inuits.eu", "CMT-a")],
+  };
+
+  it("the thread author takes part", () => {
+    expect(isThreadParticipant(thread, ["A@inuits.eu"])).toBe(true);
+  });
+
+  it("a reply author takes part", () => {
+    expect(isThreadParticipant(thread, [undefined, "b@inuits.eu"])).toBe(true);
+  });
+
+  it("someone who wrote nothing in the thread does not take part", () => {
+    expect(isThreadParticipant(thread, ["c@inuits.eu"])).toBe(false);
   });
 });

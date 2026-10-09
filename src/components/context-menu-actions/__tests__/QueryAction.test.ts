@@ -210,4 +210,32 @@ describe("QueryAction - mutation flow", () => {
     expect(mockRouterPush).not.toHaveBeenCalled();
     expect(mockDisplaySuccessNotification).toHaveBeenCalled();
   });
+
+  it("navigates to the navigation target of the returned entity when it has one", async () => {
+    mockLoadDocument.mockResolvedValue(mockMutationDocument);
+    mockMutate.mockResolvedValue({
+      data: {
+        mutateEntityValues: {
+          uuid: "CMT-1",
+          type: "comment",
+          intialValues: {
+            navigate_to_id: "M-1",
+            navigate_to_type: "manifestation_word",
+          },
+        },
+      },
+    });
+
+    const wrapper = mountComponent({
+      navigateToCreatedEntity: true,
+      refreshAfterAction: false,
+    });
+    await wrapper.findComponent({ name: "BaseContextMenuItem" }).vm.$emit("clicked");
+    await flush();
+
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      name: "SingleEntity",
+      params: { id: "M-1", type: "manifestation_word" },
+    });
+  });
 });

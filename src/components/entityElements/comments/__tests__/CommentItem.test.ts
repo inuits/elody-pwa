@@ -124,3 +124,22 @@ describe("CommentItem edited marker", () => {
     expect(wrapper.find("[data-testid='comment-edited']").exists()).toBe(false);
   });
 });
+
+describe("CommentItem status", () => {
+  const statusOf = (status: string) =>
+    mount(CommentItem, {
+      props: { comment: comment({}), status },
+    }).find("[data-testid='comment-status']");
+
+  it("shows an archived thread as archived, in the muted style", () => {
+    const status = statusOf("archived");
+
+    expect(status.text()).toBe("t:comments.status.archived");
+    expect(status.classes()).toContain("bg-neutral-40");
+  });
+
+  it("only highlights an open thread", () => {
+    expect(statusOf("open").classes()).toContain("bg-accent-normal");
+    expect(statusOf("resolved").classes()).toContain("bg-neutral-40");
+  });
+});

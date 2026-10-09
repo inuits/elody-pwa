@@ -72,7 +72,11 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
-import { createFieldsOf, useComments } from "@/composables/useComments";
+import {
+  createFieldsOf,
+  useComments,
+  visibleThreadsOf,
+} from "@/composables/useComments";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   type CommentsElement,
@@ -98,7 +102,7 @@ const isCollapsed = ref<boolean>(false);
 
 const canPost = computed<boolean>(() => !props.element.readOnly);
 
-const threads = computed(() => threadsFor(props.id));
+const threads = computed(() => visibleThreadsOf(threadsFor(props.id)));
 const isLoading = computed(() => isLoadingFor(props.id));
 
 const taggableEntityConfiguration = computed(

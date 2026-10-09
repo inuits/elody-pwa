@@ -17,20 +17,17 @@
             {{ t("comments.thread-title") }}
           </h3>
           <div class="flex items-center gap-2">
-            <base-button-new
-              v-if="canPost"
-              :label="
-                thread.status === 'resolved'
-                  ? t('comments.reopen')
-                  : t('comments.resolve')
-              "
-              :icon="
-                thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check
-              "
-              button-style="accentNormal"
-              :disabled="isWorking"
-              @click="toggleStatus"
-            />
+            <template v-if="canPost">
+              <base-button-new
+                v-for="status in statusTransitions"
+                :key="status"
+                :label="t(statusActions[status].label)"
+                :icon="statusActions[status].icon"
+                button-style="accentNormal"
+                :disabled="isWorking"
+                @click="changeStatus(status)"
+              />
+            </template>
             <div
               class="cursor-pointer"
               @click="closeModal(TypeModals.CommentThread)"
@@ -98,7 +95,7 @@
         </div>
 
         <div
-          v-if="canPost && thread.status !== 'resolved'"
+          v-if="canPost && thread.status === 'open'"
           class="border-t border-neutral-30 pt-3"
         >
           <comment-composer
@@ -110,10 +107,10 @@
           />
         </div>
         <p
-          v-else-if="thread.status === 'resolved'"
+          v-else-if="thread.status !== 'open'"
           class="text-sm text-text-placeholder"
         >
-          {{ t("comments.resolved-hint") }}
+          {{ t(`comments.${thread.status}-hint`) }}
         </p>
       </div>
     </Transition>
@@ -131,8 +128,11 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import {
   createFieldValuesOf,
   isOwnComment,
+  isThreadParticipant,
+  statusTransitionsOf,
   useComments,
   type Comment,
+  type CommentStatus,
 } from "@/composables/useComments";
 import { useAuth } from "@/composables/useAuth";
 import { Unicons } from "@/types";
@@ -182,7 +182,7 @@ watch(subjectId, () => (editingCommentId.value = undefined));
 watch(
   () => thread.value?.status,
   (status) => {
-    if (status === "resolved") editingCommentId.value = undefined;
+    if (status !== "open") editingCommentId.value = undefined;
   },
 );
 
@@ -194,8 +194,24 @@ const userIdentities = computed<(string | undefined)[]>(() => [
 
 const canEditComment = (comment: Comment): boolean =>
   canPost.value &&
-  thread.value?.status !== "resolved" &&
+  thread.value?.status === "open" &&
   isOwnComment(comment, userIdentities.value);
+
+const statusActions: Record<CommentStatus, { label: string; icon: DamsIcons }> =
+  {
+    open: { label: "comments.reopen", icon: DamsIcons.Redo },
+    resolved: { label: "comments.resolve", icon: DamsIcons.Check },
+    archived: { label: "comments.archive", icon: DamsIcons.ArchiveAlt },
+  };
+
+const statusTransitions = computed<CommentStatus[]>(() =>
+  thread.value
+    ? statusTransitionsOf(
+        thread.value.status,
+        isThreadParticipant(thread.value, userIdentities.value),
+      )
+    : [],
+);
 
 const withWorking = async (action: () => Promise<void>) => {
   isWorking.value = true;
@@ -236,13 +252,10 @@ const saveEdit = (
     editingCommentId.value = undefined;
   });
 
-const toggleStatus = () =>
+const changeStatus = (status: CommentStatus) =>
   withWorking(async () => {
     if (!thread.value) return;
-    await setStatus(
-      thread.value.subject,
-      thread.value.status === "resolved" ? "open" : "resolved",
-    );
+    await setStatus(thread.value.subject, status);
   });
 
 const openTaggedEntity = (entityId: string, entityType: Entitytyping) => {
