@@ -24,14 +24,21 @@
             {{ libraryDataLabel }}
           </span>
         </div>
-        <MetadataWrapper
-          class="w-full max-w-[50%]"
+        <!-- The status is edited in place; its clicks (the value, the
+             inline editor) stay with it instead of toggling the panel. -->
+        <div
           v-if="panel.panelHeaderContent.panelStatus"
-          :metadata="getStatusMetadata()"
-          :form-id="formId"
-          :isEdit="isEdit"
-          :show-errors="editState.showErrors"
-        />
+          data-cy="panel-header-status"
+          class="w-full max-w-[50%]"
+          @click.stop
+        >
+          <MetadataWrapper
+            :metadata="getStatusMetadata()"
+            :form-id="formId"
+            :isEdit="isEdit"
+            :show-errors="editState.showErrors"
+          />
+        </div>
       </div>
       <div class="flex justify-end gap-4">
         <div v-if="repeatablePanel && isEdit">
