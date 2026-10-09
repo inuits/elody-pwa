@@ -3,7 +3,7 @@
     v-if="editorLoaded"
     ref="rootRef"
     data-cy="wysiwyg-field"
-    @keydown="handleInPlaceKeydown"
+    @keydown.capture="onInPlaceKeydown"
     :class="[
       'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
@@ -361,6 +361,20 @@ const startEditing = async () => {
   inPlace.start();
   preparingInPlaceEdit.value = false;
 };
+// Ctrl/Cmd+Enter and Escape are taken before the editor sees them:
+// ProseMirror otherwise uses them itself (a hard break, selecting the parent
+// node) and marks them handled. An open tag suggestion still gets Escape
+// first, to close it.
+const onInPlaceKeydown = (event: KeyboardEvent) => {
+  if (!isEditingInPlace.value) return;
+  const isSave = event.key === "Enter" && (event.ctrlKey || event.metaKey);
+  const isCancel = event.key === "Escape";
+  if (!isSave && !isCancel) return;
+  if (isCancel && tagging.value?.inlineSuggestion?.value) return;
+  handleInPlaceKeydown(event);
+  if (event.defaultPrevented) event.stopPropagation();
+};
+
 // Clicking the content opens editing too, except on a tagged entity (which
 // opens its detail) or while selecting text.
 const onContentClick = (event: MouseEvent) => {

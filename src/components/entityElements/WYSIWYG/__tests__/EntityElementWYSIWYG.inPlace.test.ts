@@ -339,6 +339,48 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       expect(editor().editable).toBe(false);
     });
 
+    describe("keys the editor itself would take", () => {
+      // ProseMirror handles Escape (select parent node) and Mod-Enter (hard
+      // break) on the editable content and marks them handled.
+      const pressInEditor = (wrapper: any, init: KeyboardEventInit) => {
+        const content = wrapper.find('[data-cy="editor-content"]').element;
+        content.addEventListener("keydown", (event: Event) => event.preventDefault());
+        const event = new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...init });
+        content.dispatchEvent(event);
+        return event;
+      };
+
+      it("cancels with Escape", async () => {
+        const wrapper = await startEditing();
+        editor().type("<p>Nieuw</p>");
+        await wrapper.vm.$nextTick();
+        pressInEditor(wrapper, { key: "Escape" });
+        await flushPromises();
+        expect(editor().editable).toBe(false);
+        expect(editor().getHTML()).toBe("<p>Oud</p>");
+      });
+
+      it("saves with Ctrl+Enter, without the editor adding a line break", async () => {
+        mocks.saveScope.mockResolvedValue({});
+        const wrapper = await startEditing();
+        editor().type("<p>Nieuw</p>");
+        await wrapper.vm.$nextTick();
+        const onEditor = vi.fn();
+        wrapper.find('[data-cy="editor-content"]').element.addEventListener("keydown", onEditor);
+        pressInEditor(wrapper, { key: "Enter", ctrlKey: true });
+        await flushPromises();
+        expect(mocks.saveScope).toHaveBeenCalled();
+        expect(onEditor).not.toHaveBeenCalled();
+      });
+
+      it("leaves a plain Enter to the editor", async () => {
+        const wrapper = await startEditing();
+        const event = pressInEditor(wrapper, { key: "Enter" });
+        expect(event.defaultPrevented).toBe(true);
+        expect(editor().editable).toBe(true);
+      });
+    });
+
     describe("a multilingual field", () => {
       const multilingual = () => ({
         "multilingual:description": {
