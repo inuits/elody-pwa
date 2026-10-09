@@ -2,8 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 const createEntity = vi.hoisted(() => vi.fn());
 const saveEntityValues = vi.hoisted(() => vi.fn());
+const mutate = vi.hoisted(() => vi.fn());
 
-vi.mock("@/main", () => ({ apolloClient: {} }));
+vi.mock("@/main", () => ({ apolloClient: { mutate } }));
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
     createEntity,
@@ -430,6 +431,20 @@ describe("useComments.edit", () => {
       { key: "body", value: "<p>new</p>" },
       { key: "category", value: "" },
     ]);
+  });
+});
+
+describe("useComments.remove", () => {
+  it("deletes the comment as a single entity", async () => {
+    mutate.mockClear();
+    await useComments().remove(comment("CMT-2", { subjectId: "CMT-1" }));
+
+    expect(mutate).toHaveBeenCalledOnce();
+    expect(mutate.mock.calls[0][0].variables).toEqual({
+      id: "CMT-2",
+      path: "entities",
+      deleteMediafiles: false,
+    });
   });
 });
 

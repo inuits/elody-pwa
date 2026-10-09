@@ -143,3 +143,27 @@ describe("CommentItem status", () => {
     expect(statusOf("resolved").classes()).toContain("bg-neutral-40");
   });
 });
+
+describe("CommentItem delete", () => {
+  it("offers delete on a comment the user may delete", async () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({}), canDelete: true },
+    });
+
+    await wrapper.find("[data-testid='comment-delete']").trigger("click");
+
+    expect(wrapper.find("[data-testid='comment-delete']").text()).toBe(
+      "t:comments.delete",
+    );
+    expect(wrapper.emitted("delete")).toHaveLength(1);
+    expect(wrapper.emitted("open")).toBeUndefined();
+  });
+
+  it("hides delete by default", () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({}), clickable: true },
+    });
+
+    expect(wrapper.find("[data-testid='comment-delete']").exists()).toBe(false);
+  });
+});

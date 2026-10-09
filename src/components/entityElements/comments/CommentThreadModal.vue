@@ -45,7 +45,9 @@
             :create-fields="createFields"
             :status="thread.status"
             :can-edit="canEditComment(thread.subject)"
+            :can-delete="canDeleteComment(thread.subject)"
             @edit="editingCommentId = thread.subject.id"
+            @delete="deleteComment(thread.subject, true)"
             @open-entity="openTaggedEntity"
           />
           <comment-composer
@@ -74,7 +76,9 @@
                   :comment="reply"
                   :taggable-entity-configuration="taggableEntityConfiguration"
                   :can-edit="canEditComment(reply)"
+                  :can-delete="canDeleteComment(reply)"
                   @edit="editingCommentId = reply.id"
+                  @delete="deleteComment(reply, false)"
                   @open-entity="openTaggedEntity"
                 />
                 <comment-composer
@@ -135,6 +139,7 @@ import {
   type CommentStatus,
 } from "@/composables/useComments";
 import { useAuth } from "@/composables/useAuth";
+import { useConfirmModal } from "@/composables/useConfirmModal";
 import { Unicons } from "@/types";
 import {
   DamsIcons,
@@ -148,7 +153,8 @@ import {
 } from "@/generated-types/queries";
 
 const { closeModal, getModalInfo, openModal } = useBaseModal();
-const { threadFor, post, edit, setStatus } = useComments();
+const { threadFor, post, edit, setStatus, remove } = useComments();
+const { confirm } = useConfirmModal();
 const { elodyUser, getUserEmail } = useAuth();
 const { t } = useI18n();
 
@@ -196,6 +202,9 @@ const canEditComment = (comment: Comment): boolean =>
   canPost.value &&
   thread.value?.status === "open" &&
   isOwnComment(comment, userIdentities.value);
+
+const canDeleteComment = (comment: Comment): boolean =>
+  canPost.value && isOwnComment(comment, userIdentities.value);
 
 const statusActions: Record<CommentStatus, { label: string; icon: DamsIcons }> =
   {
@@ -257,6 +266,26 @@ const changeStatus = (status: CommentStatus) =>
     if (!thread.value) return;
     await setStatus(thread.value.subject, status);
   });
+
+const deleteComment = async (comment: Comment, isSubject: boolean) => {
+  const choice = await confirm({
+    title: t("confirm.delete-comment.title"),
+    message: t(
+      isSubject
+        ? "confirm.delete-comment.message-thread"
+        : "confirm.delete-comment.message",
+    ),
+    confirmLabel: t("confirm.delete-comment.confirm"),
+    cancelLabel: t("confirm.delete-comment.cancel"),
+  });
+  if (choice !== "confirm") return;
+  await withWorking(async () => {
+    await remove(comment);
+    if (editingCommentId.value === comment.id)
+      editingCommentId.value = undefined;
+    if (isSubject) closeModal(TypeModals.CommentThread);
+  });
+};
 
 const openTaggedEntity = (entityId: string, entityType: Entitytyping) => {
   openModal(

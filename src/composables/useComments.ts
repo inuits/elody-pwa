@@ -2,6 +2,8 @@ import { ref } from "vue";
 import { apolloClient } from "@/main";
 import {
   AdvancedFilterTypes,
+  Collection,
+  DeleteDataDocument,
   EditStatus,
   Entitytyping,
   GetEntitiesDocument,
@@ -392,6 +394,18 @@ export const useComments = () => {
     await refresh(parentEntityIdOf(subject));
   };
 
+  const remove = async (comment: Comment): Promise<void> => {
+    await apolloClient.mutate({
+      mutation: DeleteDataDocument,
+      variables: {
+        id: comment.id,
+        path: Collection.Entities,
+        deleteMediafiles: false,
+      },
+    });
+    await refresh(parentEntityIdOf(comment));
+  };
+
   return {
     threadsFor,
     threadFor,
@@ -400,5 +414,6 @@ export const useComments = () => {
     post,
     edit,
     setStatus,
+    remove,
   };
 };

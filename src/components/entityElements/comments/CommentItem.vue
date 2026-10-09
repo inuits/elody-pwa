@@ -73,6 +73,14 @@
         >
           {{ t("comments.edit") }}
         </button>
+        <button
+          v-if="canDelete"
+          data-testid="comment-delete"
+          class="text-sm text-accent-normal hover:underline"
+          @click.stop="emit('delete')"
+        >
+          {{ t("comments.delete") }}
+        </button>
       </div>
     </div>
     <div
@@ -117,10 +125,12 @@ const props = withDefaults(
     status?: CommentStatus;
     replyCount?: number;
     canEdit?: boolean;
+    canDelete?: boolean;
     clickable?: boolean;
   }>(),
   {
     canEdit: false,
+    canDelete: false,
     clickable: false,
     createFields: () => [],
   },
@@ -129,6 +139,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   open: [];
   edit: [];
+  delete: [];
   "open-entity": [entityId: string, entityType: Entitytyping];
 }>();
 
