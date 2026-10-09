@@ -1854,11 +1854,10 @@ export type IntialValuesKeyValueArgs = {
   containsRelationPropertyValue?: InputMaybe<Scalars['String']>;
   formatter?: InputMaybe<Scalars['String']>;
   key: Scalars['String'];
+  keyAsLabel?: InputMaybe<KeyAsLabelInput>;
   keyOnMetadata?: InputMaybe<Scalars['String']>;
-  metadataKeyAsLabel?: InputMaybe<Scalars['String']>;
   relationEntityType?: InputMaybe<Scalars['String']>;
   relationKey?: InputMaybe<Scalars['String']>;
-  rootKeyAsLabel?: InputMaybe<Scalars['String']>;
   source: KeyValueSource;
   technicalOrigin?: InputMaybe<Scalars['String']>;
   uuid?: InputMaybe<Scalars['String']>;
@@ -1901,6 +1900,16 @@ export type KeyValue = {
 
 export type KeyValueKeyValueArgs = {
   key: Scalars['String'];
+};
+
+export enum KeyAsLabelOrigin {
+  Metadata = 'metadata',
+  Root = 'root'
+}
+
+export type KeyAsLabelInput = {
+  key: Scalars['String'];
+  origin: KeyAsLabelOrigin;
 };
 
 export enum KeyValueSource {
@@ -5683,8 +5692,7 @@ export type GetRelationLabelsForIdsQueryVariables = Exact<{
   ids: Array<Scalars['String']['input']> | Scalars['String']['input'];
   types: Array<Scalars['String']['input']> | Scalars['String']['input'];
   historyKeys?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
-  metadataKeyAsLabel?: InputMaybe<Scalars['String']['input']>;
-  rootKeyAsLabel?: InputMaybe<Scalars['String']['input']>;
+  keyAsLabel?: InputMaybe<KeyAsLabelInput>;
 }>;
 export type GetRelationLabelsForIdsQuery = { __typename?: 'Query', RelationLabelsForIds: Array<{ __typename?: 'KeyAndValue', key: string, value: string }> };
 export const GetRelationLabelsForIdsDocument = {"kind":"Document","definitions":[]} as unknown as DocumentNode<GetRelationLabelsForIdsQuery, GetRelationLabelsForIdsQueryVariables>;

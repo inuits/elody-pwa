@@ -453,6 +453,7 @@ import {
   type ViewModesWithConfig,
   type GroupByConfig,
   GetRelationLabelsForIdsDocument,
+  KeyAsLabelOrigin,
   type GetRelationLabelsForIdsQuery,
   type GetRelationLabelsForIdsQueryVariables,
 } from "@/generated-types/queries";
@@ -871,7 +872,13 @@ const groupedEntities = useGroupedEntities({
       GetRelationLabelsForIdsQueryVariables
     >({
       query: GetRelationLabelsForIdsDocument,
-      variables: { ids, types, metadataKeyAsLabel: metadataKey },
+      variables: {
+        ids,
+        types,
+        keyAsLabel: metadataKey
+          ? { origin: KeyAsLabelOrigin.Metadata, key: metadataKey }
+          : undefined,
+      },
       fetchPolicy: "no-cache",
     });
     return result.data?.RelationLabelsForIds ?? [];
