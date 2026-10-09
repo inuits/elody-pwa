@@ -66,6 +66,17 @@ describe("EntityElementWindowPanel header", () => {
     expect(isCollapsed(wrapper)).toBe(true);
   });
 
+  it("keeps the status only as wide as its value, so the rest of the header toggles", () => {
+    const status = mountPanel().find('[data-cy="panel-header-status"]');
+    expect(status.classes()).toContain("w-fit");
+    expect(status.classes()).not.toContain("w-full");
+  });
+
+  it("gives the status room again while its inline editor is open", () => {
+    const status = mountPanel().find('[data-cy="panel-header-status"]');
+    expect(status.classes()).toContain("has-[[data-cy=inline-field-editor]]:w-full");
+  });
+
   it("leaves the panel as it is when the status field in the header is clicked (to edit it)", async () => {
     const wrapper = mountPanel();
     await wrapper.find('[data-cy="status-value"]').trigger("click");

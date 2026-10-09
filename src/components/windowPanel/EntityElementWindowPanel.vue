@@ -25,11 +25,13 @@
           </span>
         </div>
         <!-- The status is edited in place; its clicks (the value, the
-             inline editor) stay with it instead of toggling the panel. -->
+             inline editor) stay with it instead of toggling the panel. It
+             is only as wide as its value, so the rest of the header still
+             toggles, and gets room again while its editor is open. -->
         <div
           v-if="panel.panelHeaderContent.panelStatus"
           data-cy="panel-header-status"
-          class="w-full max-w-[50%]"
+          class="w-fit max-w-[50%] min-w-0 has-[[data-cy=inline-field-editor]]:w-full"
           @click.stop
         >
           <MetadataWrapper
