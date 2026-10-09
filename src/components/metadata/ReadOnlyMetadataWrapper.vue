@@ -33,27 +33,10 @@
                 :value-options="refMetadata.inputField?.options"
                 :entity="{ type: entityType }"
               />
-              <span
+              <MetadataYesNo
                 v-else-if="fieldType === InputFieldTypes.Checkbox"
-                data-cy="metadata-checkbox-value"
-                class="flex items-center gap-1 text-sm"
-              >
-                <unicon
-                  :name="
-                    refMetadata.value ? Unicons.Check.name : Unicons.Cross.name
-                  "
-                  class="-mx-1"
-                  :class="
-                    refMetadata.value ? 'text-green-600' : 'text-gray-600'
-                  "
-                  height="18"
-                />
-                {{
-                  refMetadata.value
-                    ? t("metadata.labels.yes")
-                    : t("metadata.labels.no")
-                }}
-              </span>
+                :value="refMetadata.value"
+              />
               <entity-element-metadata
                 v-else
                 :label="refMetadata.label as string"
@@ -108,6 +91,7 @@ import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.v
 import { resolveValueTranslationKey } from "@/components/metadata/useValueTranslationKey";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import MetadataTruncatedText from "./MetadataTruncatedText.vue";
+import MetadataYesNo from "@/components/metadata/MetadataYesNo.vue";
 import MetadataValueTooltip from "./MetadataValueTooltip.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import {
@@ -122,7 +106,6 @@ import { computed, watch, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseCopyToClipboard from "@/components/base/BaseCopyToClipboard.vue";
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
-import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{

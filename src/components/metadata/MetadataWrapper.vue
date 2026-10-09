@@ -299,25 +299,10 @@
                 data-testid="unit-image"
                 @error="imageLoadError = true"
               />
-              <span
+              <MetadataYesNo
                 v-else-if="fieldType === InputFieldTypes.Checkbox"
-                data-cy="metadata-checkbox-value"
-                class="flex items-center gap-1 text-sm"
-              >
-                <unicon
-                  :name="
-                    fieldValueProxy ? Unicons.Check.name : Unicons.Cross.name
-                  "
-                  class="-mx-1"
-                  :class="fieldValueProxy ? 'text-green-600' : 'text-gray-600'"
-                  height="18"
-                />
-                {{
-                  fieldValueProxy
-                    ? t("metadata.labels.yes")
-                    : t("metadata.labels.no")
-                }}
-              </span>
+                :value="fieldValueProxy"
+              />
               <entity-element-metadata
                 v-else
                 :class="{ 'pr-6': fieldIsLocked }"
@@ -377,6 +362,7 @@ import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetada
 import EntityElementMetadata from "@/components/metadata/EntityElementMetadata.vue";
 import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
 import MetadataTruncatedText from "./MetadataTruncatedText.vue";
+import MetadataYesNo from "@/components/metadata/MetadataYesNo.vue";
 import MetadataValueTooltip from "./MetadataValueTooltip.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import MetadataMaskedValue from "@/components/metadata/MetadataMaskedValue.vue";

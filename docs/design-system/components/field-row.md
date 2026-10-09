@@ -40,6 +40,7 @@ repeatable row group.
 | `--field-value-min-height` | minimum height of every value row, text or chips |
 | `--color-text-subtle` | pencil |
 | `--opacity-empty` | empty value ("Geen waarde") |
+| `--color-success` | the check of a checkbox value ("Ja"); "Nee" shows a cross in the value colour, both at the value size (`MetadataYesNo.vue`) |
 
 ## When a value is editable in place
 All of these must hold (`fieldEditability.ts`):
