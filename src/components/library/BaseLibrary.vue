@@ -263,6 +263,7 @@
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
+            v-if="!displayMap"
             v-show="
               showViewModesList &&
               !isInitialLoading &&
@@ -303,6 +304,7 @@
             :primaryThumbnailId="primaryThumbnailId"
           />
           <ViewModesTable
+            v-if="!displayMap"
             v-show="
               displayTable &&
               !isInitialLoading &&

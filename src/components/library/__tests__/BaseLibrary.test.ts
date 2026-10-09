@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   entityUuid: "entity-123" as string | undefined,
   addRefetchFunction: undefined as unknown as ReturnType<typeof vi.fn>,
   addMutationCallback: undefined as unknown as ReturnType<typeof vi.fn>,
+  displayMap: false,
 }));
 
 // Module-level refs shared with the useBaseLibrary mock — cannot go in
@@ -176,7 +177,7 @@ vi.mock("@/composables/useViewModes", () => ({
     displayGrid: ref(false),
     displayTable: ref(false),
     displayPreview: ref(false),
-    displayMap: ref(false),
+    displayMap: ref(mocks.displayMap),
     displayPipeline: ref(false),
     expandFilters: ref(false),
     toggles: ref([]),
@@ -224,6 +225,7 @@ vi.mock("vue-router", () => ({
 
 import BaseLibrary from "../BaseLibrary.vue";
 import ViewModesList from "../view-modes/ViewModesList.vue";
+import ViewModesTable from "../view-modes/ViewModesTable.vue";
 import LibraryBar from "../LibraryBar.vue";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
@@ -1047,5 +1049,28 @@ describe("BaseLibrary.vue simple search in a preview", () => {
       baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
     });
     expect(setSimpleSearchOf(wrapper)).toBeUndefined();
+  });
+});
+
+describe("BaseLibrary.vue map view", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  afterEach(() => {
+    mocks.displayMap = false;
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("does not mount the hidden list and table, which would render every map entity", () => {
+    mocks.displayMap = true;
+    wrapper = getWrapper();
+    expect(wrapper.findComponent(ViewModesList).exists()).toBe(false);
+    expect(wrapper.findComponent(ViewModesTable).exists()).toBe(false);
+  });
+
+  it("mounts the list and table outside map view", () => {
+    wrapper = getWrapper();
+    expect(wrapper.findComponent(ViewModesList).exists()).toBe(true);
+    expect(wrapper.findComponent(ViewModesTable).exists()).toBe(true);
   });
 });
