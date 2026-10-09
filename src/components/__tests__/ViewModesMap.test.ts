@@ -300,6 +300,13 @@ describe("ViewModesMap loading overlay", () => {
     expect(wrapper.find('[data-testid="map-loading-overlay"]').exists()).toBe(true);
   });
 
+  it("lets the map be panned and clicked while loading", () => {
+    const wrapper = getWrapper(true);
+    const overlay = wrapper.find('[data-testid="map-loading-overlay"]');
+    expect(overlay.classes()).toContain("pointer-events-none");
+    expect(overlay.classes()).not.toContain("inset-0");
+  });
+
   it("renders a resolved SpinnerLoader inside the loading overlay", () => {
     const wrapper = getWrapper(true);
     const spinner = wrapper.findComponent(SpinnerLoader);

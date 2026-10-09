@@ -3,9 +3,9 @@
     <div
       v-if="entitiesLoading"
       data-testid="map-loading-overlay"
-      class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
+      class="absolute top-3 left-1/2 -translate-x-1/2 py-2 pl-4 pr-0 rounded-full bg-background-normal shadow pointer-events-none z-entity-single-spinner"
     >
-      <spinner-loader theme="accent" />
+      <spinner-loader theme="accent" :dimensions="10" />
     </div>
     <HeatMap
       v-if="refMapType === MapTypes.HeatMap"
