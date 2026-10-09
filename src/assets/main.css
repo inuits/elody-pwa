@@ -370,6 +370,8 @@
   /* Field row (components/field-row.md): the hover wash extends this far
      beyond the value text, which stays aligned with the label */
   --field-value-pad-x: 6px;
+  /* ...and this far above and below it, without moving it */
+  --field-value-pad-y: 3px;
   /* Every value row is at least this tall, text or chips */
   --field-value-min-height: 26px;
 

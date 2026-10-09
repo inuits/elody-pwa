@@ -36,6 +36,7 @@ repeatable row group.
 | `--color-border-dashed` | editable underline |
 | `--color-surface-editable-hover` | hover wash |
 | `--field-value-pad-x` | how far the wash extends beyond the value |
+| `--field-value-pad-y` | how far the wash extends above and below the value |
 | `--field-value-min-height` | minimum height of every value row, text or chips |
 | `--color-text-subtle` | pencil |
 | `--opacity-empty` | empty value ("Geen waarde") |

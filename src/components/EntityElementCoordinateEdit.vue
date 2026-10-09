@@ -80,7 +80,7 @@
       class="flex items-center gap-2 min-h-(--field-value-min-height) text-value text-text-secondary"
       :class="
         canEditInPlace
-          ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) hover:bg-surface-editable-hover'
+          ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) py-(--field-value-pad-y) -my-(--field-value-pad-y) hover:bg-surface-editable-hover'
           : undefined
       "
       v-bind="editableValueAttrs"

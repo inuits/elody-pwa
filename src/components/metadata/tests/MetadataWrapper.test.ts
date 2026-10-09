@@ -385,6 +385,12 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     );
   });
 
+  it("pads the hover wash above and below too, without moving the value", async () => {
+    expect((await fieldValue()).classes()).toEqual(
+      expect.arrayContaining(["py-(--field-value-pad-y)", "-my-(--field-value-pad-y)"]),
+    );
+  });
+
   it("gives every value row the same minimum height, editable or not", async () => {
     expect((await fieldValue()).classes()).toContain(
       "min-h-(--field-value-min-height)",
