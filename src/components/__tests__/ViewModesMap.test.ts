@@ -307,3 +307,63 @@ describe("ViewModesMap loading overlay", () => {
     expect(wrapper.find('[data-testid="map-loading-overlay"]').findComponent(SpinnerLoader).exists()).toBe(true);
   });
 });
+
+describe("ViewModesMap geo buckets", () => {
+  const config = [
+    { key: "mapType", value: MapTypes.WktMap },
+    { key: "bucketUntilZoom", value: 12 },
+  ];
+
+  it("draws a bucket as a point at its centroid with its count", () => {
+    const wrapper = mount(ViewModesMap, {
+      props: {
+        config,
+        entities: [
+          {
+            id: "site-1",
+            type: "site",
+            intialValues: {
+              map_location: "POLYGON((0 0, 1 0, 1 1, 0 0))",
+              bucket_count: 5,
+              bucket_location: [37.9, 26.7],
+            },
+          },
+        ],
+      },
+    });
+
+    expect(wrapper.vm.wktOfEntities).toEqual([
+      { wkt: "POINT(37.9 26.7)", id: "site-1", bucketCount: 5 },
+    ]);
+  });
+
+  it("draws a site without bucket count as its own wkt", () => {
+    const wrapper = mount(ViewModesMap, {
+      props: {
+        config,
+        entities: [
+          {
+            id: "site-1",
+            type: "site",
+            intialValues: {
+              map_location: "POLYGON((0 0, 1 0, 1 1, 0 0))",
+              bucket_count: "",
+              bucket_location: "",
+            },
+          },
+        ],
+      },
+    });
+
+    expect(wrapper.vm.wktOfEntities).toEqual([
+      { wkt: "POLYGON((0 0, 1 0, 1 1, 0 0))", id: "site-1" },
+    ]);
+  });
+
+  it("passes bucketUntilZoom to the wkt map", () => {
+    const wrapper = mount(ViewModesMap, {
+      props: { config, entities: [], mapType: MapTypes.WktMap },
+    });
+    expect(wrapper.findComponent(WktMap).props("bucketUntilZoom")).toBe(12);
+  });
+});

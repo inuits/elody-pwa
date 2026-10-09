@@ -8,7 +8,9 @@ import {
 import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
-import { Style, Icon, Fill, Stroke } from "ol/style";
+import { Style, Icon, Fill, Stroke, Circle as CircleStyle, Text } from "ol/style";
+import { createDefaultStyle } from "ol/style/Style";
+import type { FeatureLike } from "ol/Feature";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 import { ref } from "vue";
@@ -25,9 +27,10 @@ export interface HeatMapItem {
   id: string;
 }
 
-export interface WktItem { 
+export interface WktItem {
   wkt: string;
   id: string;
+  bucketCount?: number;
 }
 
 export interface Bucket {
@@ -39,6 +42,22 @@ export interface Bucket {
   weight: number;
   averageValue: number;
 }
+
+const bucketStyleCache: Record<number, Style> = {};
+
+const MIN_VISIBLE_SITE_PIXELS = 6;
+
+const siteDotStyle = new Style({
+  image: new CircleStyle({
+    radius: 5,
+    fill: new Fill({ color: "#3b82f6" }),
+    stroke: new Stroke({ color: "#ffffff", width: 2 }),
+  }),
+  geometry: (feature: FeatureLike) => {
+    const [minX, minY, maxX, maxY] = feature.getGeometry()!.getExtent();
+    return new Point([(minX + maxX) / 2, (minY + maxY) / 2]);
+  },
+});
 
 export const useMaps = () => {
   const { setHoveredListItem } = useListItemHelper();
@@ -148,6 +167,35 @@ export const useMaps = () => {
     });
   };
 
+  const getBucketStyle = (count: number): Style => {
+    if (!bucketStyleCache[count]) {
+      const isSingleSite = count <= 1;
+      bucketStyleCache[count] = new Style({
+        image: new CircleStyle({
+          radius: isSingleSite ? 5 : 16,
+          fill: new Fill({ color: "#3b82f6" }),
+          stroke: new Stroke({ color: "#ffffff", width: 2 }),
+        }),
+        text: isSingleSite
+          ? undefined
+          : new Text({
+              text: String(count),
+              fill: new Fill({ color: "#ffffff" }),
+              font: "bold 12px Arial",
+            }),
+      });
+    }
+    return bucketStyleCache[count];
+  };
+
+  const getSiteStyle = (feature: FeatureLike, resolution: number): Style[] => {
+    const [minX, minY, maxX, maxY] = feature.getGeometry()!.getExtent();
+    const sizeInPixels = Math.max(maxX - minX, maxY - minY) / resolution;
+    return sizeInPixels < MIN_VISIBLE_SITE_PIXELS
+      ? [siteDotStyle]
+      : createDefaultStyle(feature, resolution);
+  };
+
   const transformDataToWktFeatures = (
     data: ({wkt: string, id: string} | HeatMapItem)[],
     isHeatMode: boolean,
@@ -167,9 +215,14 @@ export const useMaps = () => {
       });
     }
 
-    return (data as WktItem[]).map((item) =>
-      getWktFeature(item.wkt, targetProjection, item.id),
-    );
+    return (data as WktItem[]).map((item) => {
+      const feature = getWktFeature(item.wkt, targetProjection, item.id);
+      if (item.bucketCount) {
+        feature.set("bucketCount", item.bucketCount);
+        feature.setStyle(getBucketStyle(item.bucketCount));
+      }
+      return feature;
+    });
   };
 
   const fetchGeoFilter = async (): Promise<AdvancedFilters> => {
@@ -286,6 +339,8 @@ export const useMaps = () => {
     zoomToHotspot,
     getMapElementFromEntity,
     transformDataToWktFeatures,
+    getBucketStyle,
+    getSiteStyle,
     hotspotZoomed,
   };
 };

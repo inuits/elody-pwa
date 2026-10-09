@@ -10,6 +10,7 @@
       :loadTilesWhileInteracting="true"
       @moveend="debouncedHandleMoveBoundingBox"
       @singleclick="handleMapClick"
+      @pointermove="handlePointerMove"
     >
       <Map.OlOverlay
         v-if="detailPopUp.isVisible && popUpDetailConfiguration"
@@ -62,7 +63,7 @@
       <Map.OlView
         ref="viewRef"
         :zoom="7"
-        :maxZoom="17"
+        :maxZoom="19"
         :center="localCenter"
         :projection="activeProjection"
       />
@@ -72,13 +73,14 @@
         <Sources.OlSourceXyz
           v-if="mapView === MapViews.Satellite"
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          :maxZoom="17"
           :attributions="[
             'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
           ]"
         />
       </Layers.OlTileLayer>
 
-      <Layers.OlVectorLayer>
+      <Layers.OlVectorLayer :style="getSiteStyle">
         <Sources.OlSourceVector
           :projection="activeProjection"
           :features="features"
@@ -132,6 +134,7 @@ const props = withDefaults(
     useFilters: boolean;
     geoFilters: AdvancedFilters | undefined;
     overlayWkt?: { wkt: string, id: string }[];
+    bucketUntilZoom?: number;
   }>(),
   {
     center: () => [],
@@ -147,6 +150,7 @@ const {
   transformDataToWktFeatures,
   activateNewGeoFilter,
   getGeojsonPolygonFromMap,
+  getSiteStyle,
 } = useMaps();
 
 const { t } = useI18n();
@@ -243,9 +247,14 @@ const handleMoveBoundingBox = () => {
   const map = mapRef.value?.map;
   if (!map) return;
 
-  const geojsonPolygon = getGeojsonPolygonFromMap(map);
+  const geojsonPolygon = getGeojsonPolygonFromMap(map, activeProjection.value);
   if (!props.geoFilters) return;
-  activateNewGeoFilter(props.filtersBaseApi, props.geoFilters, geojsonPolygon, 35);
+  const zoom = map.getView().getZoom() ?? 0;
+  const bucket =
+    props.bucketUntilZoom !== undefined && zoom < props.bucketUntilZoom
+      ? 35
+      : undefined;
+  activateNewGeoFilter(props.filtersBaseApi, props.geoFilters, geojsonPolygon, bucket);
 };
 
 const debouncedHandleMoveBoundingBox = debounce(() => {
@@ -253,12 +262,29 @@ const debouncedHandleMoveBoundingBox = debounce(() => {
   handleMoveBoundingBox();
 }, 1000);
 
+const handlePointerMove = (event: any) => {
+  const map = mapRef.value?.map;
+  if (!map || event.dragging) return;
+  map.getTargetElement().style.cursor = map.hasFeatureAtPixel(event.pixel)
+    ? "pointer"
+    : "";
+};
+
 const handleMapClick = (event: any) => {
   const map = mapRef.value?.map;
   if (!map) return;
 
   const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
   if (!feature) return;
+  if (feature.get("bucketCount") > 1) {
+    const view = map.getView();
+    view.animate({
+      center: event.coordinate,
+      zoom: (view.getZoom() ?? 0) + 2,
+      duration: 500,
+    });
+    return;
+  }
   detailPopUp.position = event.coordinate;
   detailPopUp.entityId = feature.id_;
   if (detailPopUp.entityId) detailPopUp.isVisible = true;
@@ -269,6 +295,13 @@ onMounted(async () => {
   localCenter.value = [lat, long];
   focusOnFeatures();
 });
+
+watch(
+  () => props.geoFilters,
+  (geoFilters) => {
+    if (geoFilters && props.useFilters) handleMoveBoundingBox();
+  },
+)
 
 watch(
   () => props.entities,

@@ -102,3 +102,67 @@ describe("useMaps – createPointFeature", () => {
     expect(mockInstances[1].setId).toHaveBeenCalledWith("entity-2");
   });
 });
+
+describe("useMaps – bucket features", () => {
+  it("shows the bucket size as text", () => {
+    const { getBucketStyle } = useMaps();
+    expect(getBucketStyle(5).getText()?.getText()).toBe("5");
+  });
+
+  it("shows no text for a single-site bucket", () => {
+    const { getBucketStyle } = useMaps();
+    expect(getBucketStyle(1).getText()).toBeFalsy();
+  });
+
+  it("reuses the style for the same bucket size", () => {
+    const { getBucketStyle } = useMaps();
+    expect(getBucketStyle(7)).toBe(getBucketStyle(7));
+  });
+
+  it("styles and tags wkt features that carry a bucket count", () => {
+    const { transformDataToWktFeatures, getBucketStyle } = useMaps();
+    const [feature] = transformDataToWktFeatures(
+      [{ wkt: "POINT(37.9 26.7)", id: "site-1", bucketCount: 5 }],
+      false,
+    );
+    expect(feature.get("bucketCount")).toBe(5);
+    expect(feature.getStyle()).toBe(getBucketStyle(5));
+  });
+
+  it("leaves plain wkt features unstyled", () => {
+    const { transformDataToWktFeatures } = useMaps();
+    const [feature] = transformDataToWktFeatures(
+      [{ wkt: "POINT(37.9 26.7)", id: "site-1" }],
+      false,
+    );
+    expect(feature.get("bucketCount")).toBeUndefined();
+    expect(feature.getStyle()).toBeNull();
+  });
+});
+
+describe("useMaps – site style", () => {
+  const siteOfSize = (size: number) => {
+    const { transformDataToWktFeatures } = useMaps();
+    const [feature] = transformDataToWktFeatures(
+      [{ wkt: `POLYGON((0 0, ${size} 0, ${size} ${size}, 0 ${size}, 0 0))`, id: "site-1" }],
+      false,
+    );
+    return feature;
+  };
+
+  it("draws a site smaller than a few pixels as a dot at its center", () => {
+    const { getSiteStyle } = useMaps();
+    const [style] = getSiteStyle(siteOfSize(1), 1);
+    expect(style.getImage()).toBeTruthy();
+    const dot = style.getGeometryFunction()(siteOfSize(1));
+    expect(dot.getCoordinates()).toEqual([0.5, 0.5]);
+  });
+
+  it("draws a site large enough to see as its polygon", () => {
+    const { getSiteStyle } = useMaps();
+    const site = siteOfSize(100);
+    const [style] = getSiteStyle(site, 1);
+    expect(style.getGeometryFunction()(site)).toBe(site.getGeometry());
+    expect(style.getStroke()).toBeTruthy();
+  });
+});
