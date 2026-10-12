@@ -56,7 +56,6 @@ import { watch, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   TypeModals,
-  PanelType,
   BaseLibraryModes,
   ContextMenuFormFlow,
 } from "@/generated-types/queries";
@@ -94,11 +93,7 @@ const activeFormId = computed(() =>
 const isFormValid = computed(() => form.value?.meta?.valid ?? false);
 
 const metadataFields = computed(() =>
-  getMetadataFields(
-    editableFields.value,
-    PanelType.Metadata,
-    activeFormId.value,
-  ),
+  getMetadataFields(editableFields.value, activeFormId.value),
 );
 
 const onSave = async ({

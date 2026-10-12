@@ -35,7 +35,7 @@ import { useI18n } from "vue-i18n";
 import type { ApolloClient } from "@apollo/client/core";
 import type { BaseEntity, Entity } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
-import { asString, getMappedSlug, getTitleOrNameFromEntity } from "@/helpers";
+import { asString } from "@/helpers";
 import { useImport } from "@/composables/useImport";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import MultiEntityColumn from "@/components/MultiEntityColumn.vue";
@@ -45,12 +45,7 @@ const route = useRoute();
 const { t } = useI18n();
 const { loadDocument } = useImport();
 const config: any = inject("config");
-const {
-  setRootRoute,
-  clearBreadcrumbPath,
-  getRouteBreadcrumbsOfEntity,
-  iterateOverBreadcrumbs,
-} = useBreadcrumbs(config);
+const { determineBreadcrumbsFromRouteConfig } = useBreadcrumbs(config);
 
 const entities = ref<BaseEntity[]>([]);
 const loading = ref<boolean>(true);
@@ -88,61 +83,14 @@ const loadEntities = async () => {
 };
 
 const determineBreadcrumbs = async () => {
-  const breadcrumbsConfig: any[] = (route.meta as any)?.breadcrumbs ?? [];
   const primaryEntity =
     entities.value.find((entity) => entity.id === id.value) ??
     entities.value[0];
   if (!primaryEntity) return;
-
-  clearBreadcrumbPath();
-  setCurrentCrumb(breadcrumbsConfig, primaryEntity);
-
-  let routeBreadcrumbs = breadcrumbsConfig.filter((entry) => !entry?.current);
-  let parentEntity: any = primaryEntity;
-  while (routeBreadcrumbs?.length && parentEntity) {
-    parentEntity = await iterateOverBreadcrumbs(
-      [parentEntity.id],
-      routeBreadcrumbs,
-      true,
-      parentEntity,
-    );
-    if (!parentEntity) break;
-    routeBreadcrumbs = getRouteBreadcrumbsOfEntity(getMappedSlug(parentEntity));
-  }
-};
-
-const setCurrentCrumb = (
-  breadcrumbsConfig: any[],
-  primaryEntity: BaseEntity,
-) => {
-  const currentConfig = breadcrumbsConfig.find((entry) => entry?.current);
-
-  const titleEntity =
-    (currentConfig?.title?.type && findEntityByType(currentConfig.title.type)) ||
-    primaryEntity;
-  const title =
-    (currentConfig?.title?.key &&
-      (titleEntity as any)?.intialValues?.[currentConfig.title.key]) ||
-    getTitleOrNameFromEntity(primaryEntity as any);
-
-  const pill = currentConfig?.pillLabel
-    ? {
-        formatter: "pill",
-        label: t(currentConfig.pillLabel),
-        translationKey: t(currentConfig.pillLabel),
-      }
-    : (primaryEntity as any).intialValues?.typePillLabel;
-
-  setRootRoute(primaryEntity.id, title, pill);
-};
-
-const findEntityByType = (type: string): BaseEntity | undefined => {
-  const wanted = type.toLowerCase();
-  return (
-    entities.value.find((entity) => entity.type?.toLowerCase() === wanted) ??
-    entities.value.find((entity) =>
-      entity.type?.toLowerCase().startsWith(wanted),
-    )
+  await determineBreadcrumbsFromRouteConfig(
+    (route.meta as any)?.breadcrumbs ?? [],
+    primaryEntity as Entity,
+    entities.value as Entity[],
   );
 };
 

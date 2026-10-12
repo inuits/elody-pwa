@@ -5,6 +5,7 @@
       {
         'cursor-pointer hover:border-accent-normal transition-colors':
           clickable,
+        'border-l-4 border-l-accent-normal': isNew,
       },
     ]"
     @click="clickable && emit('open')"
@@ -18,6 +19,13 @@
         </span>
         <span class="text-sm text-text-placeholder shrink-0">
           {{ formattedDate }}
+        </span>
+        <span
+          v-if="isNew"
+          data-testid="comment-new"
+          class="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-normal text-white shrink-0"
+        >
+          {{ t("comments.new") }}
         </span>
         <span
           v-if="comment.intialValues?.edited_at"
@@ -53,9 +61,9 @@
           data-testid="comment-status"
           :class="[
             'text-xs px-2 py-0.5 rounded-full',
-            status === 'resolved'
-              ? 'bg-neutral-40 text-text-placeholder'
-              : 'bg-accent-normal text-white',
+            status === 'open'
+              ? 'bg-accent-normal text-white'
+              : 'bg-neutral-40 text-text-placeholder',
           ]"
         >
           {{ t(`comments.status.${status}`) }}
@@ -72,6 +80,14 @@
           @click.stop="emit('edit')"
         >
           {{ t("comments.edit") }}
+        </button>
+        <button
+          v-if="canDelete"
+          data-testid="comment-delete"
+          class="text-sm text-accent-normal hover:underline"
+          @click.stop="emit('delete')"
+        >
+          {{ t("comments.delete") }}
         </button>
       </div>
     </div>
@@ -117,11 +133,15 @@ const props = withDefaults(
     status?: CommentStatus;
     replyCount?: number;
     canEdit?: boolean;
+    canDelete?: boolean;
     clickable?: boolean;
+    isNew?: boolean;
   }>(),
   {
     canEdit: false,
+    canDelete: false,
     clickable: false,
+    isNew: false,
     createFields: () => [],
   },
 );
@@ -129,6 +149,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   open: [];
   edit: [];
+  delete: [];
   "open-entity": [entityId: string, entityType: Entitytyping];
 }>();
 

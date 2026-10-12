@@ -48,7 +48,8 @@
       :icon="element.icon"
       :query="element.query"
       :refresh-after-action="element.refreshAfterAction"
-      :entity-id="parentEntityId"
+      :navigate-to-created-entity="element.navigateToCreatedEntity"
+      :entity-id="entityId || parentEntityId"
     />
     <download-zip-of-related-mediafiles-action
       v-if="element.__typename === 'ContextMenuDownloadZipOfRelatedMediafilesAction'"

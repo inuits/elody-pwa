@@ -337,3 +337,143 @@ describe("useBaseLibrary – access denied", () => {
     expect(accessDenied.value).toBe(false);
   });
 });
+
+describe("useBaseLibrary – fetching with custom variables", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+
+  it("returns the current query variables as an independent copy", async () => {
+    const apolloClient = {
+      query: vi.fn().mockResolvedValue({
+        data: { Entities: { results: [], count: 0, facets: [] } },
+      }),
+    } as any;
+    const { getEntities, getQueryVariables, setSortKey } =
+      useBaseLibrary(apolloClient);
+    await getEntities(mockRoute);
+    await setSortKey("properties.status.value");
+
+    const variables = getQueryVariables();
+    variables.searchValue.order_by = "changed";
+
+    expect(getQueryVariables().searchValue.order_by).toBe(
+      "properties.status.value",
+    );
+  });
+
+  it("queries with the given variables without touching the library state", async () => {
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValueOnce({
+          data: { Entities: { results: [{ id: "a" }], count: 1, facets: [] } },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            Entities: {
+              results: [{ id: "x" }, { id: "y" }],
+              count: 7,
+              facets: [],
+            },
+          },
+        }),
+    } as any;
+    const { entities, totalEntityCount, getEntities, fetchEntitiesWithVariables } =
+      useBaseLibrary(apolloClient);
+    await getEntities(mockRoute);
+
+    const result = await fetchEntitiesWithVariables({ limit: 50 } as any);
+
+    expect(result).toEqual({ results: [{ id: "x" }, { id: "y" }], count: 7 });
+    expect(apolloClient.query.mock.calls[1][0]).toMatchObject({
+      variables: { limit: 50 },
+      fetchPolicy: "no-cache",
+    });
+    expect(entities.value).toEqual([{ id: "a" }]);
+    expect(totalEntityCount.value).toBe(1);
+  });
+});
+
+describe("useBaseLibrary – superseded requests", () => {
+  const mockRoute = { name: "TestRoute", meta: {}, params: {} } as any;
+  const listingResult = (results: any[]) => ({
+    data: { Entities: { results, count: results.length, facets: [] } },
+  });
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const responseUntilAborted = (options: any) =>
+    new Promise((_resolve, reject) =>
+      options.context.fetchOptions.signal.addEventListener("abort", () =>
+        reject(Object.assign(new Error("aborted"), { name: "AbortError" })),
+      ),
+    );
+  const sentSignal = (query: any, call: number) =>
+    query.mock.calls[call][0].context.fetchOptions.signal as AbortSignal;
+
+  it("cancels a running request once the filters change", async () => {
+    const query = vi
+      .fn()
+      .mockImplementationOnce(responseUntilAborted)
+      .mockResolvedValueOnce(listingResult([{ id: "filtered" }]));
+    const library = useBaseLibrary({ query } as any);
+    const filters = [{ key: "title", value: "x" }] as any;
+
+    const firstFetch = library.getEntities(mockRoute);
+    await tick();
+    await library.setAdvancedFilters(filters, false, true, mockRoute);
+    await firstFetch;
+
+    expect(sentSignal(query, 0).aborted).toBe(true);
+    expect(query).toHaveBeenCalledTimes(2);
+    expect(query.mock.calls[1][0].variables.advancedFilterInputs).toEqual(filters);
+    expect(library.entities.value).toEqual([{ id: "filtered" }]);
+    expect(library.entitiesLoading.value).toBe(false);
+  });
+
+  it("keeps loading while the replacement request is still running", async () => {
+    let resolveReplacement: (value: unknown) => void;
+    const query = vi
+      .fn()
+      .mockImplementationOnce(responseUntilAborted)
+      .mockReturnValueOnce(new Promise((resolve) => (resolveReplacement = resolve)));
+    const library = useBaseLibrary({ query } as any);
+
+    const firstFetch = library.getEntities(mockRoute);
+    await tick();
+    const replacement = library.setAdvancedFilters(
+      [{ key: "title", value: "x" }] as any,
+      false,
+      true,
+      mockRoute,
+    );
+    await firstFetch;
+    await tick();
+
+    expect(library.entitiesLoading.value).toBe(true);
+    resolveReplacement!(listingResult([]));
+    await replacement;
+    expect(library.entitiesLoading.value).toBe(false);
+  });
+
+  it("does not cancel a running request that already carries the same filters", async () => {
+    let resolveFirst: (value: unknown) => void;
+    const query = vi
+      .fn()
+      .mockReturnValueOnce(new Promise((resolve) => (resolveFirst = resolve)));
+    const library = useBaseLibrary({ query } as any);
+    const filters = [{ key: "title", value: "x" }] as any;
+    await library.setAdvancedFilters(filters, false, false, mockRoute);
+
+    const firstFetch = library.getEntities(mockRoute);
+    await tick();
+    const sameFilters = library.setAdvancedFilters(
+      [{ key: "title", value: "x" }] as any,
+      false,
+      true,
+      mockRoute,
+    );
+    resolveFirst!(listingResult([{ id: "a" }]));
+    await Promise.all([firstFetch, sameFilters]);
+
+    expect(sentSignal(query, 0).aborted).toBe(false);
+    expect(query).toHaveBeenCalledTimes(1);
+  });
+});

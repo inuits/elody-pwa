@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, provide } from "vue";
+import { computed, provide, watch } from "vue";
 import EntityHistoryElement from "@/components/history/EntityHistoryElement.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -50,16 +50,23 @@ provide(
 
 useEditMode(props.entity.id);
 
+const formValuesFor = (entity: typeof props.entity) => ({
+  intialValues: structuredClone(deepToRaw(entity.intialValues ?? {})),
+  relationValues: structuredClone(deepToRaw(entity.relationValues ?? {})),
+  relationMetadata: {},
+  relatedEntityData: { metadata: {}, relations: {} },
+  uuid: entity.uuid,
+});
+
 if (props.entity.id) {
-  useFormHelper().createForm(props.entity.id, {
-    intialValues: structuredClone(deepToRaw(props.entity.intialValues ?? {})),
-    relationValues: structuredClone(
-      deepToRaw(props.entity.relationValues ?? {}),
-    ),
-    relationMetadata: {},
-    relatedEntityData: { metadata: {}, relations: {} },
-    uuid: props.entity.uuid,
-  });
+  const form = useFormHelper().createForm(
+    props.entity.id,
+    formValuesFor(props.entity),
+  );
+  watch(
+    () => [props.entity.intialValues, props.entity.relationValues],
+    () => form.resetForm({ values: formValuesFor(props.entity) }),
+  );
 }
 
 const omitIdMetadata = (value: any): any => {
@@ -71,6 +78,7 @@ const omitIdMetadata = (value: any): any => {
     if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
     const child = value[key];
     if (child?.__typename === "PanelMetaData" && child.key === "id") continue;
+    if (child?.hideInHistory === true) continue;
     result[key] = omitIdMetadata(child);
   }
   return result;

@@ -4,6 +4,8 @@ import LibraryBar from "../LibraryBar.vue";
 import { apolloClient } from "@/main";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useRoute } from "vue-router";
+import { nextTick, reactive } from "vue";
+import { flushPromises } from "@vue/test-utils";
 
 vi.mock("@/main", () => ({
   apolloClient: {
@@ -323,5 +325,99 @@ describe("LibraryBar.vue Simple Search", () => {
 
     expect((input.element as HTMLInputElement).value).toBe("");
     expect(setSimpleSearchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("LibraryBar.vue Group By", () => {
+  const groupByOption = {
+    key: "intialValues.category",
+    filterKey: ["vlacc:1|properties.category.value"],
+    distinctBy: "properties.category.value",
+    groupOrderBy: "properties.last_activity_at.value",
+    label: "Categorie",
+    primary: true,
+  };
+  const commentsRoute = {
+    name: "MyComments",
+    fullPath: "/myComments",
+    meta: {
+      entityType: "comment",
+      queries: { getGroupByOptions: "GetGroupByOptionsForComments" },
+    },
+  };
+  const worksRoute = {
+    name: "Works",
+    fullPath: "/works",
+    meta: { entityType: "work", queries: {} },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useStateManagement as any).mockReturnValue({
+      getStateForRoute: vi.fn(),
+    });
+    (apolloClient.query as any).mockResolvedValue({
+      data: { EntityTypeGroupByOptions: { options: [groupByOption] } },
+    });
+  });
+
+  const mountOn = (initialRoute: typeof commentsRoute | typeof worksRoute) => {
+    const route = reactive({ ...initialRoute });
+    (useRoute as any).mockReturnValue(route);
+    const setGroupBy = vi.fn();
+    mount(LibraryBar, {
+      props: {
+        setSortOrder: vi.fn(),
+        setSortKey: vi.fn(),
+        setLimit: vi.fn(),
+        selectedPaginationLimitOption: 20,
+        showGroupBy: true,
+        setGroupBy,
+      },
+      global: { stubs: { AdvancedDropdown: true } },
+    });
+    return { route, setGroupBy };
+  };
+
+  const navigate = async (
+    route: Record<string, unknown>,
+    target: typeof commentsRoute | typeof worksRoute,
+  ) => {
+    Object.assign(route, target);
+    await nextTick();
+    await flushPromises();
+  };
+
+  const groupByQueries = () =>
+    (apolloClient.query as any).mock.calls.filter(
+      ([options]: any[]) => options.query === "GetGroupByOptionsForComments",
+    );
+
+  it("loads the group by options of the route it is mounted on", async () => {
+    const { setGroupBy } = mountOn(commentsRoute);
+    await flushPromises();
+
+    expect(groupByQueries()[0][0].variables).toEqual({ entityType: "comment" });
+    expect(setGroupBy).toHaveBeenLastCalledWith(groupByOption);
+  });
+
+  it("loads the group by options when navigating to a route that has them", async () => {
+    const { route, setGroupBy } = mountOn(worksRoute);
+    await flushPromises();
+    expect(groupByQueries()).toHaveLength(0);
+
+    await navigate(route, commentsRoute);
+
+    expect(groupByQueries()).toHaveLength(1);
+    expect(setGroupBy).toHaveBeenLastCalledWith(groupByOption);
+  });
+
+  it("drops the group by options when navigating to a route without them", async () => {
+    const { route, setGroupBy } = mountOn(commentsRoute);
+    await flushPromises();
+
+    await navigate(route, worksRoute);
+
+    expect(setGroupBy).toHaveBeenLastCalledWith(null);
   });
 });

@@ -124,3 +124,66 @@ describe("CommentItem edited marker", () => {
     expect(wrapper.find("[data-testid='comment-edited']").exists()).toBe(false);
   });
 });
+
+describe("CommentItem status", () => {
+  const statusOf = (status: string) =>
+    mount(CommentItem, {
+      props: { comment: comment({}), status },
+    }).find("[data-testid='comment-status']");
+
+  it("shows an archived thread as archived, in the muted style", () => {
+    const status = statusOf("archived");
+
+    expect(status.text()).toBe("t:comments.status.archived");
+    expect(status.classes()).toContain("bg-neutral-40");
+  });
+
+  it("only highlights an open thread", () => {
+    expect(statusOf("open").classes()).toContain("bg-accent-normal");
+    expect(statusOf("resolved").classes()).toContain("bg-neutral-40");
+  });
+});
+
+describe("CommentItem delete", () => {
+  it("offers delete on a comment the user may delete", async () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({}), canDelete: true },
+    });
+
+    await wrapper.find("[data-testid='comment-delete']").trigger("click");
+
+    expect(wrapper.find("[data-testid='comment-delete']").text()).toBe(
+      "t:comments.delete",
+    );
+    expect(wrapper.emitted("delete")).toHaveLength(1);
+    expect(wrapper.emitted("open")).toBeUndefined();
+  });
+
+  it("hides delete by default", () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({}), clickable: true },
+    });
+
+    expect(wrapper.find("[data-testid='comment-delete']").exists()).toBe(false);
+  });
+});
+
+describe("CommentItem new marker", () => {
+  it("marks a new comment", () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({}), isNew: true },
+    });
+
+    const marker = wrapper.find("[data-testid='comment-new']");
+    expect(marker.exists()).toBe(true);
+    expect(marker.text()).toBe("t:comments.new");
+    expect(wrapper.classes()).toContain("border-l-accent-normal");
+  });
+
+  it("shows no marker on a comment that was already seen", () => {
+    const wrapper = mount(CommentItem, { props: { comment: comment({}) } });
+
+    expect(wrapper.find("[data-testid='comment-new']").exists()).toBe(false);
+    expect(wrapper.classes()).not.toContain("border-l-accent-normal");
+  });
+});

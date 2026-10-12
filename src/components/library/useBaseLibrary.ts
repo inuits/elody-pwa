@@ -99,6 +99,9 @@ export const useBaseLibrary = (
   let queryVariables: GetEntitiesQueryVariables = getDefaultQueryVariables();
   let hasPendingFetch = false;
   let pendingFetchRoute: RouteLocationNormalizedLoaded | undefined;
+  let requestInFlight:
+    | { controller: AbortController; variables: GetEntitiesQueryVariables }
+    | undefined;
 
   const setManipulationOfQuery = (
     manipulate: boolean,
@@ -176,7 +179,21 @@ export const useBaseLibrary = (
     if (stateSaved) queryVariables.skip = 1;
 
     if (shouldUseStateForRoute) updateStateForRoute(_route, { queryVariables });
-    if (forceFetch && _route !== undefined) await getEntities(_route);
+    if (forceFetch && _route !== undefined) {
+      cancelOutdatedRequest();
+      await getEntities(_route);
+    }
+  };
+
+  const cancelOutdatedRequest = () => {
+    if (!requestInFlight) return;
+    const currentVariables = snapshotVariables(
+      getStoredQueryVariables(_route) ?? queryVariables,
+    );
+    if (isEqual(requestInFlight.variables, currentVariables)) return;
+    requestInFlight.controller.abort();
+    requestInFlight = undefined;
+    entitiesLoading.value = false;
   };
 
   const setSkip = async (
@@ -286,6 +303,9 @@ export const useBaseLibrary = (
     }
     entitiesLoading.value = true;
     listingGeneration += 1;
+    const generation = listingGeneration;
+    const controller = new AbortController();
+    signal?.addEventListener("abort", () => controller.abort());
     exactTotalCount.value = null;
     exactCountLoading.value = false;
 
@@ -307,6 +327,7 @@ export const useBaseLibrary = (
         manipulationQuery.value?.document,
       );
       sentVariables = snapshotVariables(variables);
+      requestInFlight = { controller, variables: sentVariables };
       const result = await apolloClient.query({
         query: entitiesQuery,
         variables,
@@ -316,7 +337,7 @@ export const useBaseLibrary = (
           headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
           locallyHandledStatusCodes: [403],
           fetchOptions: {
-            signal,
+            signal: controller.signal,
           },
         },
       });
@@ -347,10 +368,11 @@ export const useBaseLibrary = (
         console.error("Failed to get entities:", error);
       }
     } finally {
-      entitiesLoading.value = false;
+      if (requestInFlight?.controller === controller) requestInFlight = undefined;
+      if (generation === listingGeneration) entitiesLoading.value = false;
     }
 
-    if (hasPendingFetch && !signal?.aborted) {
+    if (hasPendingFetch && !controller.signal.aborted) {
       hasPendingFetch = false;
       const nextRoute = pendingFetchRoute ?? route;
       pendingFetchRoute = undefined;
@@ -360,6 +382,32 @@ export const useBaseLibrary = (
       if (!sentVariables || !isEqual(sentVariables, pendingVariables))
         await getEntities(nextRoute);
     }
+  };
+
+  const getQueryVariables = (): GetEntitiesQueryVariables =>
+    snapshotVariables(getStoredQueryVariables(_route) ?? queryVariables);
+
+  const fetchEntitiesWithVariables = async (
+    variables: GetEntitiesQueryVariables,
+  ): Promise<{ results: Entity[]; count: number }> => {
+    const entitiesQuery = await determineEntitiesQuery(
+      _route!,
+      manipulationQuery.value?.document,
+    );
+    const result = await apolloClient.query({
+      query: entitiesQuery,
+      variables,
+      fetchPolicy: "no-cache",
+      context: {
+        headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
+      },
+    });
+    const fetchedEntities =
+      result.data.Entities || result.data.EntitiesHistory;
+    return {
+      results: (fetchedEntities?.results ?? []) as Entity[],
+      count: fetchedEntities?.count ?? 0,
+    };
   };
 
   const revealExactCount = async (): Promise<void> => {
@@ -458,6 +506,8 @@ export const useBaseLibrary = (
     fetchAllPromises,
     getEntities,
     getEntityById,
+    getQueryVariables,
+    fetchEntitiesWithVariables,
     manipulationQuery,
     setAdvancedFilters,
     setEntityType,

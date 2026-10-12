@@ -2,23 +2,35 @@ import ListItem from "../ListItem.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
+import type { SeenTracking } from "@/types/contextMenuRouteConfig";
 
 const mockSeenItems = vi.hoisted(() => ({
-  isItemSeen: vi.fn(() => false),
   markAsSeen: vi.fn(),
   markManyAsSeen: vi.fn(),
   unmarkManyAsSeen: vi.fn(),
 }));
 
+const mockSeenState = vi.hoisted(() => ({
+  tracking: undefined as unknown,
+  isSeen: vi.fn<(id: string) => boolean>(() => false),
+  isNew: vi.fn<(id: string, values?: Record<string, unknown>) => boolean>(
+    () => false,
+  ),
+}));
+
 vi.mock("@/composables/useSeenItems", () => ({
   useSeenItems: () => mockSeenItems,
+  useSeenState: (tracking: unknown) => {
+    mockSeenState.tracking = tracking;
+    return mockSeenState;
+  },
 }));
 
 const mockEntityPageConfig = vi.hoisted(() => ({
   actions: { value: [] },
   hasEditMetadataButton: { value: undefined },
   deleteButton: { value: undefined },
-  trackSeen: { value: false },
+  seenTracking: { value: undefined as SeenTracking | undefined },
 }));
 
 vi.mock("@/composables/useEntityPageConfig", () => ({
@@ -65,8 +77,8 @@ vi.mock("vue-i18n", () => ({
 
 describe("ListItem", () => {
   beforeEach(() => {
-    mockEntityPageConfig.trackSeen.value = false;
-    mockSeenItems.isItemSeen.mockImplementation(() => false);
+    mockEntityPageConfig.seenTracking.value = undefined;
+    mockSeenState.isSeen.mockImplementation(() => false);
   });
 
   afterEach(() => {
@@ -93,8 +105,8 @@ describe("ListItem", () => {
     };
 
     const markItemAsSeen = () => {
-      mockEntityPageConfig.trackSeen.value = true;
-      mockSeenItems.isItemSeen.mockImplementation(
+      mockEntityPageConfig.seenTracking.value = { display: "dimSeen" };
+      mockSeenState.isSeen.mockImplementation(
         (id: string) => id === "seen-item",
       );
     };
@@ -120,7 +132,7 @@ describe("ListItem", () => {
     });
 
     it("does not grey out an item that has not been seen", () => {
-      mockEntityPageConfig.trackSeen.value = true;
+      mockEntityPageConfig.seenTracking.value = { display: "dimSeen" };
 
       const wrapper = shallowMount(ListItem, { props: seenItemProps });
 
@@ -129,14 +141,10 @@ describe("ListItem", () => {
       );
     });
 
-    it("ignores the seen state when the entity type does not track seen items", () => {
-      mockSeenItems.isItemSeen.mockImplementation(() => true);
+    it("uses the seen tracking of the current route", () => {
+      shallowMount(ListItem, { props: seenItemProps });
 
-      const wrapper = shallowMount(ListItem, { props: seenItemProps });
-
-      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
-        "grayscale",
-      );
+      expect(mockSeenState.tracking).toBe(mockEntityPageConfig.seenTracking);
     });
 
     it("still hides the selection checkbox for a disabled item", () => {
@@ -150,6 +158,47 @@ describe("ListItem", () => {
       expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
         "grayscale",
       );
+    });
+  });
+
+  describe("new items", () => {
+    const newItemProps = {
+      ...defaultProps,
+      itemId: "new-item",
+      intialValues: { last_activity_at: "2026-10-09T10:00:00Z" },
+    };
+
+    beforeEach(() => {
+      mockEntityPageConfig.seenTracking.value = {
+        display: "highlightNew",
+        activityKey: "last_activity_at",
+        ttlDays: 30,
+      };
+    });
+
+    it("highlights an item with activity that was not seen yet", () => {
+      mockSeenState.isNew.mockImplementation((id: string) => id === "new-item");
+
+      const wrapper = shallowMount(ListItem, { props: newItemProps });
+
+      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+        "font-semibold",
+      );
+      expect(wrapper.find("[data-cy='new-indicator']").exists()).toBe(true);
+      expect(mockSeenState.isNew).toHaveBeenCalledWith("new-item", {
+        last_activity_at: "2026-10-09T10:00:00Z",
+      });
+    });
+
+    it("does not highlight an item without new activity", () => {
+      mockSeenState.isNew.mockImplementation(() => false);
+
+      const wrapper = shallowMount(ListItem, { props: newItemProps });
+
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
+        "font-semibold",
+      );
+      expect(wrapper.find("[data-cy='new-indicator']").exists()).toBe(false);
     });
   });
 

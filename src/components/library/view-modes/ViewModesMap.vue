@@ -3,9 +3,9 @@
     <div
       v-if="entitiesLoading"
       data-testid="map-loading-overlay"
-      class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
+      class="absolute top-3 left-1/2 -translate-x-1/2 py-2 pl-4 pr-0 rounded-full bg-background-normal shadow pointer-events-none z-entity-single-spinner"
     >
-      <spinner-loader theme="accent" />
+      <spinner-loader theme="accent" :dimensions="10" />
     </div>
     <HeatMap
       v-if="refMapType === MapTypes.HeatMap"
@@ -29,6 +29,7 @@
       :filters-base-api="filtersBaseApi"
       :use-filters="useFilters"
       :geo-filters="geoFilters"
+      :bucket-until-zoom="mapProperties.bucketUntilZoom"
     />
     <PointMap
       v-if="refMapType === MapTypes.PointsMap"
@@ -59,7 +60,7 @@ import HeatMap from "@/components/maps/HeatMap.vue";
 import WktMap from "@/components/maps/WktMap.vue";
 import PointMap from "@/components/maps/PointMap.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { useMaps } from "@/composables/useMaps";
+import { useMaps, type WktItem } from "@/composables/useMaps";
 import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { fromLonLat } from "ol/proj";
 
@@ -100,11 +101,16 @@ const wktOfEntities = computed(() => {
 });
 
 const getBasicWkts = () => {
-  const wkts: { wkt: string; id?: string }[] = props.entities.map((entity: Entity) => {
+  const wkts: WktItem[] = props.entities.map((entity: Entity) => {
+    const bucketCount = entity.intialValues?.bucket_count;
+    if (bucketCount) {
+      const [longitude, latitude] = entity.intialValues.bucket_location;
+      return { wkt: `POINT(${longitude} ${latitude})`, id: entity.id, bucketCount };
+    }
     return { wkt: entity.intialValues?.map_location, id: entity.id };
   });
 
-  return wkts.filter((item: { wkt: string; id?: string }) => !!item.wkt);
+  return wkts.filter((item: WktItem) => !!item.wkt);
 };
 
 const getHeatWkt = () => {

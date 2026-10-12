@@ -48,7 +48,6 @@ import {
   MediaFileElementTypes,
   type MapElement,
   type PanelMetaData,
-  PanelType,
   MapTypes,
   MapModes,
 } from "@/generated-types/queries";
@@ -87,7 +86,7 @@ const shouldDisplayMap = computed(() => {
 const { center } = useMapCenter(props.element, props.entityId);
 
 const getPanelMetadataValueByKey = (key: string) => {
-  return getValueForPanelMetadata(PanelType.Metadata, key, props.entityId, "");
+  return getValueForPanelMetadata(key, props.entityId, "");
 };
 
 const mapData = computed(() => {
@@ -114,7 +113,7 @@ const mapData = computed(() => {
   });
 
   return returnArray.filter((item) => {
-    if ('wkt' in item) {
+    if ("wkt" in item) {
       return !!item.wkt;
     }
 

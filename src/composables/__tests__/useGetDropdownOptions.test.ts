@@ -16,6 +16,13 @@ const mocks = vi.hoisted(() => {
 // computed the state helper builds on top of it — matches production wiring.
 const entitiesRef = shallowRef<any[]>([]);
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t: (key: string) => key,
+    locale: { value: "nl" },
+  }),
+}));
+
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
     getForm: mocks.getForm,
@@ -276,5 +283,97 @@ describe("optionsOrderByKey", () => {
     await createState(undefined).initialize();
 
     expect(mocks.calls).toEqual(["setEntityType"]);
+  });
+});
+
+describe("optionLabelKeys", () => {
+  const createState = (optionLabelKeys?: string[]) =>
+    useGetDropdownOptionsState(
+      "genre" as Entitytyping,
+      shallowRef("fetchAll") as any,
+      "refGenres",
+      "",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      optionLabelKeys,
+    );
+
+  const optionFor = (intialValues: Record<string, any>, keys?: string[]) => {
+    const { entityDropdownOptions } = createState(keys);
+    entitiesRef.value = [{ id: "genre-1", intialValues }];
+    return entityDropdownOptions.value[0];
+  };
+
+  it("shows the first key as label and the others as secondary label", () => {
+    const option = optionFor(
+      { title: "fantasy", audience_type: "jeugd", genre_type: "vormgenre" },
+      ["title", "audience_type", "genre_type"],
+    );
+
+    expect(option.label).toBe("fantasy");
+    expect(option.secondaryLabel).toBe("jeugd · vormgenre");
+  });
+
+  it("skips keys without a value", () => {
+    const option = optionFor({ title: "fantasy", audience_type: "" }, [
+      "title",
+      "audience_type",
+      "missing_key",
+    ]);
+
+    expect(option.label).toBe("fantasy");
+    expect(option.secondaryLabel).toBeUndefined();
+  });
+
+  it("promotes the next present value when the first key is missing", () => {
+    const option = optionFor({ audience_type: "jeugd" }, [
+      "title",
+      "audience_type",
+    ]);
+
+    expect(option.label).toBe("jeugd");
+    expect(option.secondaryLabel).toBeUndefined();
+  });
+
+  it("resolves multilingual values to the current locale", () => {
+    const option = optionFor(
+      {
+        title: [
+          { lang: "en", value: "fantasy" },
+          { lang: "nl", value: "fantastiek" },
+        ],
+        audience_type: "jeugd",
+      },
+      ["title", "audience_type"],
+    );
+
+    expect(option.label).toBe("fantastiek");
+    expect(option.secondaryLabel).toBe("jeugd");
+  });
+
+  it("joins plain array values", () => {
+    const option = optionFor(
+      { title: "fantasy", genre_type: ["vormgenre", "etiketgenre"] },
+      ["title", "genre_type"],
+    );
+
+    expect(option.secondaryLabel).toBe("vormgenre, etiketgenre");
+  });
+
+  it("falls back to the entity title when no keys are configured", () => {
+    const option = optionFor({ title: "fantasy", audience_type: "jeugd" });
+
+    expect(option.label).toBe("fantasy");
+    expect(option.secondaryLabel).toBeUndefined();
+  });
+
+  it("falls back to the entity title when no configured key resolves", () => {
+    const option = optionFor({ name: "fantasy" }, ["missing_key"]);
+
+    expect(option.label).toBe("fantasy");
+    expect(option.secondaryLabel).toBeUndefined();
   });
 });

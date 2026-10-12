@@ -232,7 +232,9 @@ const search = async (state: NonNullable<InlineSuggestionState>) => {
 watch(
   () => [
     props.suggestion?.query,
-    props.suggestion?.configurations.map((configuration) => configuration.tag).join(),
+    props.suggestion?.configurations
+      .map((configuration) => configuration.tag)
+      .join(),
   ],
   () => {
     if (!props.suggestion) {

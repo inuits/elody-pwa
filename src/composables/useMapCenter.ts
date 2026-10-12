@@ -1,9 +1,5 @@
 import { computed } from "vue";
-import {
-  MapTypes,
-  PanelType,
-  type MapElement,
-} from "@/generated-types/queries";
+import { MapTypes, type MapElement } from "@/generated-types/queries";
 import { getValueForPanelMetadata } from "@/helpers";
 import { fromLonLat } from "ol/proj";
 
@@ -34,7 +30,6 @@ export function useMapCenter(element: MapElement, entityId: string) {
   const center = computed(() => {
     const centerKey = element.center;
     const metadataCenterValue: unknown = getValueForPanelMetadata(
-      PanelType.Metadata,
       centerKey,
       entityId,
       "",

@@ -33,11 +33,15 @@
       >
         {{ t(createOptionConfig.createPromptTranslationKey, [option.label]) }}
       </div>
-      <SanitizedHtml
-        v-else
-        :mode="SanitizeMode.Html"
-        :content="option.label"
-      ></SanitizedHtml>
+      <div v-else class="flex items-baseline gap-2">
+        <SanitizedHtml
+          :mode="SanitizeMode.Html"
+          :content="option.label"
+        ></SanitizedHtml>
+        <span v-if="option.secondaryLabel" class="text-sm opacity-70">
+          {{ option.secondaryLabel }}
+        </span>
+      </div>
     </template>
     <template v-slot:tag="{ option, handleTagRemove, disabled }">
       <div
@@ -55,6 +59,9 @@
         @click.stop="() => emit('handleTagClick', option)"
       >
         {{ stripHighlightTags(option.label) }}
+        <span v-if="option.secondaryLabel" class="opacity-70">
+          · {{ option.secondaryLabel }}
+        </span>
         <div
           v-if="displayInputForTag"
           @click.stop

@@ -1,7 +1,9 @@
-import { ref } from "vue";
+import { ref, watch, type Ref } from "vue";
 import { apolloClient } from "@/main";
 import {
   AdvancedFilterTypes,
+  Collection,
+  DeleteDataDocument,
   EditStatus,
   Entitytyping,
   GetEntitiesDocument,
@@ -15,8 +17,14 @@ import {
 } from "@/generated-types/queries";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { useAuth } from "@/composables/useAuth";
+import {
+  isNewSince,
+  useSeenItems,
+  useSeenState,
+} from "@/composables/useSeenItems";
+import type { SeenTracking } from "@/types/contextMenuRouteConfig";
 
-export type CommentStatus = "open" | "resolved";
+export type CommentStatus = "open" | "resolved" | "archived";
 
 export type Comment = {
   id: string;
@@ -82,6 +90,9 @@ export const groupComments = (comments: Comment[]): CommentThread[] => {
       };
     });
 };
+
+export const visibleThreadsOf = (threads: CommentThread[]): CommentThread[] =>
+  threads.filter((thread) => thread.status !== "archived");
 
 export const tagElementName = (tag: string): string =>
   `elody-${tag.toLowerCase()}`;
@@ -219,6 +230,24 @@ export const isOwnComment = (
       (identity) => !!identity && identity.toLowerCase() === author,
     )
   );
+};
+
+export const isThreadParticipant = (
+  thread: Pick<CommentThread, "subject" | "replies">,
+  identities: (string | null | undefined)[],
+): boolean =>
+  [thread.subject, ...thread.replies].some((comment) =>
+    isOwnComment(comment, identities),
+  );
+
+export const statusTransitionsOf = (
+  status: CommentStatus,
+  isParticipant: boolean,
+): CommentStatus[] => {
+  if (status === "open") return ["resolved"];
+  if (status === "resolved")
+    return isParticipant ? ["open", "archived"] : ["open"];
+  return ["open"];
 };
 
 const commentsByParentEntity = ref<Record<string, Comment[]>>({});
@@ -371,6 +400,18 @@ export const useComments = () => {
     await refresh(parentEntityIdOf(subject));
   };
 
+  const remove = async (comment: Comment): Promise<void> => {
+    await apolloClient.mutate({
+      mutation: DeleteDataDocument,
+      variables: {
+        id: comment.id,
+        path: Collection.Entities,
+        deleteMediafiles: false,
+      },
+    });
+    await refresh(parentEntityIdOf(comment));
+  };
+
   return {
     threadsFor,
     threadFor,
@@ -379,5 +420,50 @@ export const useComments = () => {
     post,
     edit,
     setStatus,
+    remove,
   };
+};
+
+export const useThreadSeenTracking = (
+  tracking: Ref<SeenTracking | undefined>,
+  isOpen: Ref<boolean>,
+  thread: Ref<Pick<CommentThread, "subject" | "replies"> | undefined>,
+) => {
+  const { seenAtOf } = useSeenItems();
+  const { markSeen } = useSeenState(tracking);
+
+  const previousSeenAt = ref<number | undefined>(undefined);
+  let visitedThreadId: string | undefined;
+
+  watch(
+    () =>
+      [
+        isOpen.value,
+        thread.value?.subject.id,
+        tracking.value?.activityKey &&
+          thread.value?.subject.intialValues?.[tracking.value.activityKey],
+      ] as const,
+    ([open, threadId]) => {
+      if (!open || !thread.value) {
+        visitedThreadId = undefined;
+        return;
+      }
+      if (visitedThreadId !== threadId) {
+        visitedThreadId = threadId;
+        previousSeenAt.value = seenAtOf(threadId!);
+      }
+      markSeen(thread.value.subject.id, thread.value.subject.intialValues);
+    },
+    { immediate: true },
+  );
+
+  const isCommentNew = (comment: Comment): boolean =>
+    tracking.value?.display === "highlightNew" &&
+    isNewSince(
+      comment.intialValues?.created_at,
+      previousSeenAt.value,
+      tracking.value.ttlDays,
+    );
+
+  return { isCommentNew };
 };

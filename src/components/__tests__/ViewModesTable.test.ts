@@ -1,6 +1,7 @@
 import ViewModesTable from "../library/view-modes/ViewModesTable.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
+import type { SeenTracking } from "@/types/contextMenuRouteConfig";
 
 vi.mock("@/helpers", async () => {
   const actualModule = await vi.importActual("@/helpers");
@@ -18,7 +19,7 @@ const mockEntityPageConfig = vi.hoisted(() => ({
   actions: [],
   hasEditMetadataButton: undefined,
   deleteButton: undefined,
-  trackSeen: { value: false },
+  seenTracking: { value: undefined as SeenTracking | undefined },
 }));
 
 vi.mock("@/composables/useEntityPageConfig", () => ({
@@ -26,14 +27,25 @@ vi.mock("@/composables/useEntityPageConfig", () => ({
 }));
 
 const mockSeenItems = vi.hoisted(() => ({
-  isItemSeen: vi.fn(() => false),
   markAsSeen: vi.fn(),
   markManyAsSeen: vi.fn(),
   unmarkManyAsSeen: vi.fn(),
 }));
 
+const mockSeenState = vi.hoisted(() => ({
+  tracking: undefined as unknown,
+  isSeen: vi.fn<(id: string) => boolean>(() => false),
+  isNew: vi.fn<(id: string, values?: Record<string, unknown>) => boolean>(
+    () => false,
+  ),
+}));
+
 vi.mock("@/composables/useSeenItems", () => ({
   useSeenItems: () => mockSeenItems,
+  useSeenState: (tracking: unknown) => {
+    mockSeenState.tracking = tracking;
+    return mockSeenState;
+  },
 }));
 
 vi.mock("@/main", () => ({
@@ -93,8 +105,8 @@ describe("ViewModesTable", () => {
 
   describe("seen items", () => {
     beforeEach(() => {
-      mockEntityPageConfig.trackSeen.value = true;
-      mockSeenItems.isItemSeen.mockImplementation(
+      mockEntityPageConfig.seenTracking.value = { display: "dimSeen" };
+      mockSeenState.isSeen.mockImplementation(
         (id: string) => id === "entity1",
       );
     });
@@ -131,6 +143,30 @@ describe("ViewModesTable", () => {
 
       expect(wrapper.vm.processedEntities[0].memoKey).toContain(true);
       expect(wrapper.vm.processedEntities[1].memoKey).toContain(false);
+    });
+  });
+
+  describe("new items", () => {
+    it("includes the new state in the memo key so the item re-renders when it changes", async () => {
+      mockEntityPageConfig.seenTracking.value = {
+        display: "highlightNew",
+        activityKey: "last_activity_at",
+      };
+      mockSeenState.isNew.mockImplementation((id: string) => id === "entity1");
+
+      const wrapper = shallowMount(ViewModesTable, {
+        props: {
+          entities: [
+            { id: "entity1", intialValues: { last_activity_at: "2026-10-09" } },
+            { id: "entity2", intialValues: { last_activity_at: "2026-10-01" } },
+          ],
+        } as any,
+      });
+      await flushPromises();
+
+      expect(wrapper.vm.processedEntities[0].isNew).toBe(true);
+      expect(wrapper.vm.processedEntities[1].isNew).toBe(false);
+      expect(wrapper.vm.processedEntities[0].memoKey).toContain(true);
     });
   });
 
