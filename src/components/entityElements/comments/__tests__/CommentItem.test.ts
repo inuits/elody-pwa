@@ -167,3 +167,23 @@ describe("CommentItem delete", () => {
     expect(wrapper.find("[data-testid='comment-delete']").exists()).toBe(false);
   });
 });
+
+describe("CommentItem new marker", () => {
+  it("marks a new comment", () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({}), isNew: true },
+    });
+
+    const marker = wrapper.find("[data-testid='comment-new']");
+    expect(marker.exists()).toBe(true);
+    expect(marker.text()).toBe("t:comments.new");
+    expect(wrapper.classes()).toContain("border-l-accent-normal");
+  });
+
+  it("shows no marker on a comment that was already seen", () => {
+    const wrapper = mount(CommentItem, { props: { comment: comment({}) } });
+
+    expect(wrapper.find("[data-testid='comment-new']").exists()).toBe(false);
+    expect(wrapper.classes()).not.toContain("border-l-accent-normal");
+  });
+});

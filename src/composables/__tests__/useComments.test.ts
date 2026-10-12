@@ -1,4 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { effectScope, nextTick, ref, type EffectScope, type Ref } from "vue";
+import type { SeenTracking } from "@/types/contextMenuRouteConfig";
 
 const createEntity = vi.hoisted(() => vi.fn());
 const saveEntityValues = vi.hoisted(() => vi.fn());
@@ -30,8 +32,10 @@ const {
   isThreadParticipant,
   statusTransitionsOf,
   visibleThreadsOf,
+  useThreadSeenTracking,
   useComments,
 } = await import("../useComments");
+const { useSeenItems } = await import("../useSeenItems");
 
 const comment = (
   id: string,
@@ -509,5 +513,128 @@ describe("isThreadParticipant", () => {
 
   it("someone who wrote nothing in the thread does not take part", () => {
     expect(isThreadParticipant(thread, ["c@inuits.eu"])).toBe(false);
+  });
+});
+
+describe("useThreadSeenTracking", () => {
+  let tracking: Ref<SeenTracking | undefined>;
+  let scope: EffectScope;
+
+  const track = (
+    isOpen: Ref<boolean>,
+    current: Ref<any>,
+  ): ReturnType<typeof useThreadSeenTracking> =>
+    scope.run(() => useThreadSeenTracking(tracking, isOpen, current))!;
+
+  const seenThread = (
+    subjectCreatedAt: string,
+    ...replyCreatedAts: string[]
+  ): any => {
+    const subject = comment("S-1", { createdAt: subjectCreatedAt });
+    subject.intialValues.last_activity_at = [
+      subjectCreatedAt,
+      ...replyCreatedAts,
+    ].sort()[replyCreatedAts.length];
+    return {
+      subject,
+      replies: replyCreatedAts.map((createdAt, idx) =>
+        comment(`R-${idx + 1}`, { subjectId: "S-1", createdAt }),
+      ),
+    };
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
+    useSeenItems().seenItems.value = {};
+    scope = effectScope();
+    tracking = ref<SeenTracking | undefined>({
+      display: "highlightNew",
+      activityKey: "last_activity_at",
+      ttlDays: 30,
+    });
+  });
+
+  afterEach(() => {
+    scope.stop();
+    vi.useRealTimers();
+  });
+
+  it("marks the thread as seen with its activity value once it is open", async () => {
+    const isOpen = ref(false);
+    const current = ref<any>(
+      seenThread("2026-10-01T10:00:00Z", "2026-10-05T10:00:00Z"),
+    );
+
+    track(isOpen, current);
+    await nextTick();
+    expect(useSeenItems().seenAtOf("S-1")).toBeUndefined();
+
+    isOpen.value = true;
+    await nextTick();
+    expect(useSeenItems().seenAtOf("S-1")).toBe(
+      Date.parse("2026-10-05T10:00:00Z"),
+    );
+  });
+
+  it("marks new activity while the thread is open, such as an own reply", async () => {
+    const current = ref<any>(seenThread("2026-10-01T10:00:00Z"));
+
+    track(ref(true), current);
+    await nextTick();
+    current.value = seenThread("2026-10-01T10:00:00Z", "2026-10-09T11:59:00Z");
+    await nextTick();
+
+    expect(useSeenItems().seenAtOf("S-1")).toBe(
+      Date.parse("2026-10-09T11:59:00Z"),
+    );
+  });
+
+  it("labels the replies that came after the previous visit as new", async () => {
+    useSeenItems().markAsSeen("S-1", { at: "2026-10-05T10:00:00Z" });
+    const isOpen = ref(false);
+    const current = ref<any>(
+      seenThread(
+        "2026-10-01T10:00:00Z",
+        "2026-10-05T10:00:00Z",
+        "2026-10-07T10:00:00Z",
+      ),
+    );
+
+    const { isCommentNew } = track(isOpen, current);
+    isOpen.value = true;
+    await nextTick();
+
+    expect(isCommentNew(current.value.subject)).toBe(false);
+    expect(isCommentNew(current.value.replies[0])).toBe(false);
+    expect(isCommentNew(current.value.replies[1])).toBe(true);
+  });
+
+  it("forgets the previous visit when the thread is opened again", async () => {
+    const isOpen = ref(true);
+    const current = ref<any>(
+      seenThread("2026-10-01T10:00:00Z", "2026-10-07T10:00:00Z"),
+    );
+
+    const { isCommentNew } = track(isOpen, current);
+    await nextTick();
+    expect(isCommentNew(current.value.replies[0])).toBe(true);
+
+    isOpen.value = false;
+    await nextTick();
+    isOpen.value = true;
+    await nextTick();
+    expect(isCommentNew(current.value.replies[0])).toBe(false);
+  });
+
+  it("does nothing when comments do not track seen items", async () => {
+    tracking.value = undefined;
+    const current = ref<any>(seenThread("2026-10-09T10:00:00Z"));
+
+    const { isCommentNew } = track(ref(true), current);
+    await nextTick();
+
+    expect(useSeenItems().seenAtOf("S-1")).toBeUndefined();
+    expect(isCommentNew(current.value.subject)).toBe(false);
   });
 });

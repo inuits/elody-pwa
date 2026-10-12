@@ -5,8 +5,20 @@ import type {
   ContextMenuActionRouteConfig,
   EntityButtonConfig,
   EntityConfig,
+  SeenTracking,
   ToggleEntityButtonConfig,
 } from "@/types/contextMenuRouteConfig";
+
+const seenTrackingOf = (
+  config: EntityConfig | undefined,
+): SeenTracking | undefined => {
+  if (config?.trackSeen !== true) return undefined;
+  return {
+    activityKey: config.seenActivityKey,
+    display: config.seenDisplay ?? "dimSeen",
+    ttlDays: config.seenTtlDays,
+  };
+};
 
 export const useEntityPageConfig = () => {
   const route = useRoute();
@@ -53,6 +65,13 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.trackSeen === true,
   );
 
+  const seenTracking = computed<SeenTracking | undefined>(() =>
+    seenTrackingOf(entityConfig.value),
+  );
+
+  const seenTrackingForType = (entityType: string): SeenTracking | undefined =>
+    seenTrackingOf(route.meta.entityPageConfig?.[entityType]);
+
   const jobStatusPolling = computed<boolean>(
     () => entityConfig.value?.jobStatusPolling === true,
   );
@@ -70,6 +89,8 @@ export const useEntityPageConfig = () => {
     hasEditMetadataButton,
     deleteButton,
     trackSeen,
+    seenTracking,
+    seenTrackingForType,
     jobStatusPolling,
     showNavigationArrows,
     showHistoryButton,

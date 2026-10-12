@@ -55,6 +55,7 @@
               :status="thread.status"
               :reply-count="thread.replyCount"
               :clickable="true"
+              :is-new="isNew(thread.subject.id, thread.subject.intialValues)"
               @open="openThread(thread.subject.id)"
               @open-entity="openTaggedEntity"
             />
@@ -78,6 +79,8 @@ import {
   visibleThreadsOf,
 } from "@/composables/useComments";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenState } from "@/composables/useSeenItems";
 import {
   type CommentsElement,
   DamsIcons,
@@ -97,6 +100,11 @@ const props = defineProps<{
 const { t } = useI18n();
 const { threadsFor, isLoadingFor, load, post } = useComments();
 const { openModal } = useBaseModal();
+const { seenTrackingForType } = useEntityPageConfig();
+const { isNew } = useSeenState(
+  computed(() => seenTrackingForType(Entitytyping.Comment)),
+);
+
 const isComposerOpen = ref<boolean>(false);
 const isCollapsed = ref<boolean>(false);
 

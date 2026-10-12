@@ -5,6 +5,7 @@
       {
         'cursor-pointer hover:border-accent-normal transition-colors':
           clickable,
+        'border-l-4 border-l-accent-normal': isNew,
       },
     ]"
     @click="clickable && emit('open')"
@@ -18,6 +19,13 @@
         </span>
         <span class="text-sm text-text-placeholder shrink-0">
           {{ formattedDate }}
+        </span>
+        <span
+          v-if="isNew"
+          data-testid="comment-new"
+          class="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent-normal text-white shrink-0"
+        >
+          {{ t("comments.new") }}
         </span>
         <span
           v-if="comment.intialValues?.edited_at"
@@ -127,11 +135,13 @@ const props = withDefaults(
     canEdit?: boolean;
     canDelete?: boolean;
     clickable?: boolean;
+    isNew?: boolean;
   }>(),
   {
     canEdit: false,
     canDelete: false,
     clickable: false,
+    isNew: false,
     createFields: () => [],
   },
 );

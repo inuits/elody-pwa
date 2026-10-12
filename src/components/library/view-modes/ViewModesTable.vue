@@ -176,7 +176,7 @@ import { useI18n } from "vue-i18n";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
-import { useSeenItems } from "@/composables/useSeenItems";
+import { useSeenState } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   buildTableItems,
@@ -265,8 +265,8 @@ const {
   togglePreviewForListItem,
 );
 
-const { trackSeen } = useEntityPageConfig();
-const { isItemSeen } = useSeenItems();
+const { seenTracking } = useEntityPageConfig();
+const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
 
 const isRefetching = computed(
   () => props.entitiesLoading && refEntities.value.length > 0,
@@ -364,7 +364,8 @@ const processedEntities = computed(() => {
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity);
-    const isSeen = trackSeen.value === true && isItemSeen(entity.id);
+    const isSeen = isEntitySeen(entity.id);
+    const isNew = isEntityNew(entity.id, entity.intialValues);
     const formattedMetadata = formatTeaserMetadata(
       entity.teaserMetadata,
       entity.intialValues,
@@ -382,6 +383,7 @@ const processedEntities = computed(() => {
       isPreviewActive,
       isDisabled,
       isSeen,
+      isNew,
       previewEnabled,
       props.entitiesLoading,
       actionsColumnWidth.value,
@@ -409,6 +411,7 @@ const processedEntities = computed(() => {
           RelationActions.RemoveRelation,
         ) && props.parentEntityIdentifiers.length > 0,
       isDisabled,
+      isNew,
       relation,
       isPreviewActive,
       memoKey,

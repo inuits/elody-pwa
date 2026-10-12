@@ -80,6 +80,12 @@
       </div>
     </div>
 
+    <span
+      v-if="isNew"
+      data-cy="new-indicator"
+      class="w-2 h-2 ml-2 shrink-0 rounded-full bg-accent-normal"
+      :title="t('library.new')"
+    />
     <div>
       <BaseInputCheckbox
         v-if="
@@ -324,9 +330,9 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
-import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { useSeenItems } from "@/composables/useSeenItems";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenState } from "@/composables/useSeenItems";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
@@ -416,8 +422,8 @@ const { t } = useI18n();
 
 const { getEntityUuid } = useEntitySingle();
 
-const { trackSeen } = useEntityPageConfig();
-const { isItemSeen } = useSeenItems();
+const { seenTracking } = useEntityPageConfig();
+const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const actionLoading = ref<boolean>(false);
@@ -433,8 +439,9 @@ const useEditHelper = useEditMode(
   getEntityUuid() || asString(router.currentRoute.value.params.id),
 );
 
-const isSeen = computed<boolean>(
-  () => trackSeen.value === true && isItemSeen(props.itemId),
+const isSeen = computed<boolean>(() => isEntitySeen(props.itemId));
+const isNew = computed<boolean>(() =>
+  isEntityNew(props.itemId, props.intialValues as Record<string, unknown>),
 );
 
 const imageSize = computed(() => (isGridMode.value ? 500 : 100));
@@ -520,6 +527,7 @@ const wrapperClasses = computed(() => {
       "grayscale brightness-95 !cursor-default":
         props.isDisabled || isSeen.value,
     },
+    { "font-semibold": isNew.value },
     { "animate-pulse": loading.value },
     { "bg-background-light": !isActiveListItem.value },
     { "border-accent-highlight": !isActiveListItem.value },

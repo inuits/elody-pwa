@@ -46,6 +46,7 @@
             :status="thread.status"
             :can-edit="canEditComment(thread.subject)"
             :can-delete="canDeleteComment(thread.subject)"
+            :is-new="isNewForUser(thread.subject)"
             @edit="editingCommentId = thread.subject.id"
             @delete="deleteComment(thread.subject, true)"
             @open-entity="openTaggedEntity"
@@ -77,6 +78,7 @@
                   :taggable-entity-configuration="taggableEntityConfiguration"
                   :can-edit="canEditComment(reply)"
                   :can-delete="canDeleteComment(reply)"
+                  :is-new="isNewForUser(reply)"
                   @edit="editingCommentId = reply.id"
                   @delete="deleteComment(reply, false)"
                   @open-entity="openTaggedEntity"
@@ -135,15 +137,17 @@ import {
   isThreadParticipant,
   statusTransitionsOf,
   useComments,
+  useThreadSeenTracking,
   type Comment,
   type CommentStatus,
 } from "@/composables/useComments";
 import { useAuth } from "@/composables/useAuth";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { Unicons } from "@/types";
 import {
   DamsIcons,
-  type Entitytyping,
+  Entitytyping,
   ModalStyle,
   TypeModals,
   type BaseRelationValuesInput,
@@ -183,6 +187,13 @@ const thread = computed(() =>
   subjectId.value ? threadFor(subjectId.value) : undefined,
 );
 
+const { seenTrackingForType } = useEntityPageConfig();
+const { isCommentNew } = useThreadSeenTracking(
+  computed(() => seenTrackingForType(Entitytyping.Comment)),
+  computed(() => modalInfo.value.open),
+  thread,
+);
+
 // Stale edit state must not survive into the next thread the user opens.
 watch(subjectId, () => (editingCommentId.value = undefined));
 watch(
@@ -205,6 +216,9 @@ const canEditComment = (comment: Comment): boolean =>
 
 const canDeleteComment = (comment: Comment): boolean =>
   canPost.value && isOwnComment(comment, userIdentities.value);
+
+const isNewForUser = (comment: Comment): boolean =>
+  !isOwnComment(comment, userIdentities.value) && isCommentNew(comment);
 
 const statusActions: Record<CommentStatus, { label: string; icon: DamsIcons }> =
   {

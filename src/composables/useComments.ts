@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, watch, type Ref } from "vue";
 import { apolloClient } from "@/main";
 import {
   AdvancedFilterTypes,
@@ -17,6 +17,12 @@ import {
 } from "@/generated-types/queries";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { useAuth } from "@/composables/useAuth";
+import {
+  isNewSince,
+  useSeenItems,
+  useSeenState,
+} from "@/composables/useSeenItems";
+import type { SeenTracking } from "@/types/contextMenuRouteConfig";
 
 export type CommentStatus = "open" | "resolved" | "archived";
 
@@ -416,4 +422,48 @@ export const useComments = () => {
     setStatus,
     remove,
   };
+};
+
+export const useThreadSeenTracking = (
+  tracking: Ref<SeenTracking | undefined>,
+  isOpen: Ref<boolean>,
+  thread: Ref<Pick<CommentThread, "subject" | "replies"> | undefined>,
+) => {
+  const { seenAtOf } = useSeenItems();
+  const { markSeen } = useSeenState(tracking);
+
+  const previousSeenAt = ref<number | undefined>(undefined);
+  let visitedThreadId: string | undefined;
+
+  watch(
+    () =>
+      [
+        isOpen.value,
+        thread.value?.subject.id,
+        tracking.value?.activityKey &&
+          thread.value?.subject.intialValues?.[tracking.value.activityKey],
+      ] as const,
+    ([open, threadId]) => {
+      if (!open || !thread.value) {
+        visitedThreadId = undefined;
+        return;
+      }
+      if (visitedThreadId !== threadId) {
+        visitedThreadId = threadId;
+        previousSeenAt.value = seenAtOf(threadId!);
+      }
+      markSeen(thread.value.subject.id, thread.value.subject.intialValues);
+    },
+    { immediate: true },
+  );
+
+  const isCommentNew = (comment: Comment): boolean =>
+    tracking.value?.display === "highlightNew" &&
+    isNewSince(
+      comment.intialValues?.created_at,
+      previousSeenAt.value,
+      tracking.value.ttlDays,
+    );
+
+  return { isCommentNew };
 };
