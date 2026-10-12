@@ -34,9 +34,22 @@ Under the editor:
 Rich text has its own editor on the [WYSIWYG field](./wysiwyg-field.md).
 Relation dropdowns edit in place only when they save as the entity's own
 relations: not when they save as metadata, belong to a linked entity or are
-inherited. Multilingual fields, metadata-on-relation fields shown as their own
-rows, and repeatable-panel fields don't have an inline editor yet. They stay
-read-only in place.
+inherited. Multilingual fields and metadata-on-relation fields shown as their
+own rows don't have an inline editor yet. They stay read-only in place.
+
+A field in a repeatable panel (ISBN, EAN, …) edits in its own row: each row
+has its own scope, and saving sends the panel's whole stored list (one key,
+for example `isbn_group`) with that one value changed. Keys a row has but no
+field shows are kept. An "Add more" pill in the panel header adds an empty row; you
+click the field to fill in. The row is saved with its first saved field and
+is left out of every other save until then. There is one unsaved row at a time:
+"Add more" is always shown, and while a row is unsaved (or a panel without
+values shows its empty row) it moves the focus to that row's first field
+instead of adding another. An unsaved row's trash button just takes it away. A saved row's trash button
+asks for confirmation (there is no undo yet), then saves the list without
+it. Each removable row is headed by its number and the trash button,
+centred between two rules (`──── ISBN 2 🗑 ────`), which also separates
+the rows (no extra separator line). A row's fields keep their full width side by side. A lone empty row (a panel without values) has no line. Rows are not reordered.
 
 ## States
 | State | Cue |

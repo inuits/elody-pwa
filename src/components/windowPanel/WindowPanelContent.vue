@@ -3,6 +3,7 @@
     :class="[
       {
         'flex items-end':
+          isEdit &&
           repeatablePanelConfig?.repeatableFieldsHelper
             .repetitionDeleteIsAvailable.value,
       },

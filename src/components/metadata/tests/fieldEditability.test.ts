@@ -88,7 +88,6 @@ describe("canEditFieldInPlace", () => {
     ["the page-wide edit mode is on", { pageInEditMode: true }],
     ["the field is multilingual", { multilingual: true }],
     ["the field is metadata on a relation", { onRelation: true }],
-    ["the field belongs to a repeatable panel", { repeatable: true }],
   ])("refuses when %s", (_reason, override) => {
     expect(canEditFieldInPlace({ ...editable, ...override })).toBe(false);
   });

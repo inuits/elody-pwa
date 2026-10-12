@@ -39,7 +39,6 @@ export type FieldEditabilityContext = {
   // Not yet edited in place: they get their own editors later.
   multilingual?: boolean;
   onRelation?: boolean;
-  repeatable?: boolean;
 };
 
 export const canEditFieldInPlace = (field: FieldEditabilityContext): boolean =>
@@ -54,8 +53,7 @@ export const canEditFieldInPlace = (field: FieldEditabilityContext): boolean =>
   field.entityCanUpdate &&
   !field.pageInEditMode &&
   !field.multilingual &&
-  !field.onRelation &&
-  !field.repeatable;
+  !field.onRelation;
 
 // A WYSIWYG field (WysiwygElement) edits in place as a whole, in the selected
 // language when it is multilingual.

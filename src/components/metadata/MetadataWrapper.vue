@@ -610,7 +610,17 @@ watch(
 
 // Per-field editing: an editable value is a button that opens its own edit
 // scope (docs/design-system/patterns/per-field-editing.md).
-const editScopeId = computed(() => `${props.formId}:${props.metadata.key}`);
+// A field in a repeatable row saves its row in the panel's whole list.
+const repeatableRow = computed(() =>
+  props.repeatablePanelConfig?.isRepeatable
+    ? props.repeatablePanelConfig
+    : undefined,
+);
+const editScopeId = computed(
+  () =>
+    `${props.formId}:${props.metadata.key}` +
+    (repeatableRow.value ? `[${repeatableRow.value.index}]` : ""),
+);
 const inPlaceScope = useInPlaceScope(() => editScopeId.value);
 const entityEditState = useEditMode(props.formId);
 const entityCanUpdate = computed<boolean>(() =>
@@ -645,7 +655,6 @@ const canEditInPlace = computed<boolean>(() =>
     onRelation: ["PanelRelationMetaData", "PanelRelationRootData"].includes(
       fieldKind.value,
     ),
-    repeatable: !!props.repeatablePanelConfig?.isRepeatable,
     relationEditable: relationEditable.value,
   }),
 );
@@ -861,18 +870,23 @@ const saveInline = async (value: unknown) => {
   }
   inlineSaving.value = true;
   inlineError.value = undefined;
+  const savedValue = asListIfNeeded(
+    toMetadataValue(value),
+    !!(props.metadata.inputField as any)?.valueAsList,
+  );
+  const row = repeatableRow.value;
+  const rows = row?.repeatableFieldsHelper.rowsForSave(row.index);
+  if (row && rows)
+    rows[row.index] = { ...rows[row.index], [props.metadata.key]: savedValue };
   try {
     const savedEntity = await saveScope({
       entityId: props.linkedEntityId || entityFormData?.id || props.formId,
       collection: entityFormData?.collection ?? Collection.Entities,
-      formInput: buildMetadataInput(
-        props.metadata.key,
-        asListIfNeeded(
-          toMetadataValue(value),
-          !!(props.metadata.inputField as any)?.valueAsList,
-        ),
-      ),
+      formInput: row
+        ? buildMetadataInput(row.repeatableFieldsHelper.fieldKey, rows)
+        : buildMetadataInput(props.metadata.key, savedValue),
     });
+    if (row && rows) row.repeatableFieldsHelper.markSaved(rows);
     field.resetField({ value: fieldValueProxy.value });
     if (savedEntity && !props.linkedEntityId)
       entityFormData?.onSaved?.(savedEntity);

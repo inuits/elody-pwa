@@ -1089,3 +1089,56 @@ describe("MetadataWrapper — inline relation editing", () => {
     });
   });
 });
+
+describe("MetadataWrapper — a field in a repeatable row", () => {
+  const helper = () => ({
+    fieldKey: "isbn_group",
+    rowsForSave: vi.fn(() => [{ isbn: "111" }, { isbn: "222", note: "x" }]),
+    markSaved: vi.fn(),
+  });
+  const rowProps = (rows: ReturnType<typeof helper>, index = 1) => {
+    const p = buildProps("isbn", false);
+    (p.metadata as any).value = { isbn: "222", note: "x" };
+    (p as any).repeatablePanelConfig = {
+      isRepeatable: true,
+      index,
+      field: undefined,
+      repeatableFieldsHelper: rows,
+    };
+    return p;
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:isbn[1]");
+  });
+
+  it("is editable in place, in its own scope per row", async () => {
+    const wrapper = await mountWrapper(rowProps(helper()));
+    const value = wrapper.find('[data-cy="field-value"]');
+    expect(value.attributes("role")).toBe("button");
+    await value.trigger("click");
+    expect(useEditScope().isActive("MW-TEST:isbn[1]")).toBe(true);
+  });
+
+  it("saves the whole list with this row's value changed", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const rows = helper();
+    const wrapper = await mountWrapper(rowProps(rows));
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    inlineEditor(wrapper).vm.$emit("save", "333");
+    await flushPromises();
+    const saved = [{ isbn: "111" }, { isbn: "333", note: "x" }];
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "isbn_group", value: saved },
+    ]);
+    expect(rows.rowsForSave).toHaveBeenCalledWith(1);
+    expect(rows.markSaved).toHaveBeenCalledWith(saved);
+  });
+});

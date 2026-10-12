@@ -53,8 +53,9 @@ All of these must hold (`fieldEditability.ts`):
 - the field isn't marked non-editable or read-only for the user;
 - it isn't locked or masked;
 - the user may update the entity;
-- it isn't multilingual, metadata on a relation, or part of a repeatable
-  panel (these get their own editors later);
+- it isn't multilingual or metadata on a relation (these get their own
+  editors later). Fields in a repeatable panel edit in their own row (see the
+  [inline editor](./inline-editor.md));
 - the legacy page-wide edit mode is off. Its "Bewerk metadata" button is
   hidden, so this only matters for flows that still switch it on themselves
   (create forms, the multi-entity view).
