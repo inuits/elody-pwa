@@ -164,5 +164,15 @@ describe('EntityElementWindow panels', () => {
       expect(metadata.label).toBe('metadata.labels.status');
       expect(wrapper.find('h2').exists()).toBe(false);
     });
+
+    // A quarter of the header is too narrow for a dropdown plus Bewaar and
+    // Annuleer: the buttons covered the dropdown.
+    it('sizes the status to its editor (dropdown, then Bewaar/Annuleer) while it is open', async () => {
+      const wrapper = await mountWithStatus();
+      const status = wrapper.find('[data-cy="window-header-status"]');
+      expect(status.classes()).toContain('w-1/4');
+      expect(status.classes()).toContain('has-[[data-cy=inline-field-editor]]:w-auto');
+      expect(status.classes()).toContain('min-w-0');
+    });
   });
 });

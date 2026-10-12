@@ -21,9 +21,13 @@
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
 
+        <!-- While the status is edited in place, it is as wide as its editor:
+             the dropdown (which keeps its options' width), then
+             Bewaar/Annuleer, so the buttons never cover the dropdown. -->
         <div
           v-if="element.windowElementStatus"
-          class="flex gap-4 w-1/4 items-center"
+          data-cy="window-header-status"
+          class="flex gap-4 w-1/4 min-w-0 items-center has-[[data-cy=inline-field-editor]]:w-auto"
         >
           <MetadataWrapper
             class="w-full"
