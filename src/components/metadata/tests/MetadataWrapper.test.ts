@@ -141,9 +141,17 @@ const mountWrapper = async (
         TableInputField: true,
         ViewModesAutocompleteRelations: {
           name: "ViewModesAutocompleteRelations",
-          props: ["editing", "mode", "formId", "relationType", "selectType", "disabled", "isReadOnly"],
+          props: [
+            "editing",
+            "mode",
+            "formId",
+            "relationType",
+            "selectType",
+            "disabled",
+            "isReadOnly",
+          ],
           template:
-            "<div data-cy='relations-stub'><span class='multiselect-tag' data-cy='relation-chip'>Maker<span data-tag-input data-cy='relation-chip-input'><input disabled /></span></span></div>",
+            "<div data-cy='relations-stub'><span class='multiselect-tag' data-tag-link data-cy='relation-chip'>Maker<span data-tag-input data-cy='relation-chip-input'><input disabled /></span></span><span class='multiselect-tag' data-cy='relation-chip-plain'>Uitgever</span></div>",
         },
         ViewModesAutocompleteMetadata: true,
         BaseCopyToClipboard: true,
@@ -151,9 +159,19 @@ const mountWrapper = async (
         EntityElementMetadata: { template: "<span>value</span>" },
         InlineFieldEditor: {
           name: "InlineFieldEditor",
-          props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage", "dirty"],
+          props: [
+            "type",
+            "modelValue",
+            "label",
+            "options",
+            "required",
+            "saving",
+            "errorMessage",
+            "dirty",
+          ],
           emits: ["save", "cancel", "dirty-change", "draft-change"],
-          template: "<div data-cy='inline-editor-stub'><slot name='input' /></div>",
+          template:
+            "<div data-cy='inline-editor-stub'><slot name='input' /></div>",
         },
       },
     },
@@ -281,8 +299,9 @@ describe("MetadataWrapper — copy-from-parent button layout", () => {
     expect(action.exists()).toBe(true);
     expect(action.classes()).toContain("shrink-0");
     expect(action.classes()).toContain("w-fit");
-    expect(wrapper.find('[data-cy="copy-from-parent"]').element.parentElement).
-      toBe(action.element);
+    expect(
+      wrapper.find('[data-cy="copy-from-parent"]').element.parentElement,
+    ).toBe(action.element);
   });
 
   it("forces the label to stay visible - the button has no icon to fall back on", async () => {
@@ -341,9 +360,7 @@ describe("MetadataWrapper — masked field delegation", () => {
     const wrapper = await mountWrapper(buildMaskedProps() as any);
 
     // the masked component owns copying, so the value is never exposed twice
-    expect(
-      wrapper.findComponent(MetadataMaskedValue).exists(),
-    ).toBe(true);
+    expect(wrapper.findComponent(MetadataMaskedValue).exists()).toBe(true);
     expect(wrapper.text()).not.toContain("elk_secret");
   });
 
@@ -362,7 +379,10 @@ describe("MetadataWrapper — in-place editing affordance", () => {
   };
 
   const allowUpdate = (canUpdate: boolean) =>
-    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate, canDelete: false });
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate,
+      canDelete: false,
+    });
 
   const fieldValue = async (props = editableProps()) =>
     (await mountWrapper(props)).find('[data-cy="field-value"]');
@@ -381,13 +401,19 @@ describe("MetadataWrapper — in-place editing affordance", () => {
 
   it("pads the hover wash while keeping the text aligned with the label", async () => {
     expect((await fieldValue()).classes()).toEqual(
-      expect.arrayContaining(["px-(--field-value-pad-x)", "-mx-(--field-value-pad-x)"]),
+      expect.arrayContaining([
+        "px-(--field-value-pad-x)",
+        "-mx-(--field-value-pad-x)",
+      ]),
     );
   });
 
   it("pads the hover wash above and below too, without moving the value", async () => {
     expect((await fieldValue()).classes()).toEqual(
-      expect.arrayContaining(["py-(--field-value-pad-y)", "-my-(--field-value-pad-y)"]),
+      expect.arrayContaining([
+        "py-(--field-value-pad-y)",
+        "-my-(--field-value-pad-y)",
+      ]),
     );
   });
 
@@ -412,7 +438,11 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     const wrapper = await mountWrapper(editableProps());
     const text = wrapper.find('[data-cy="field-value-text"]');
     expect(text.classes()).toEqual(
-      expect.arrayContaining(["border-b", "border-dashed", "border-border-dashed"]),
+      expect.arrayContaining([
+        "border-b",
+        "border-dashed",
+        "border-border-dashed",
+      ]),
     );
     expect(text.classes().some((c) => c.startsWith("rounded"))).toBe(false);
     expect(wrapper.find('[data-cy="field-value"]').classes()).not.toContain(
@@ -423,7 +453,9 @@ describe("MetadataWrapper — in-place editing affordance", () => {
   it("does not underline a read-only value", async () => {
     const props = editableProps();
     (props.metadata as any).readOnly = true;
-    const text = (await mountWrapper(props)).find('[data-cy="field-value-text"]');
+    const text = (await mountWrapper(props)).find(
+      '[data-cy="field-value-text"]',
+    );
     expect(text.classes()).not.toContain("border-dashed");
   });
 
@@ -460,8 +492,13 @@ describe("MetadataWrapper — in-place editing affordance", () => {
   });
 
   it("opens the scope when clicking a value whose display stops click events", async () => {
-    const props = editableProps("year", InputFieldTypes.DropdownSingleselectMetadata);
-    (props.metadata.inputField as any).options = [{ label: "Nieuw", value: "new" }];
+    const props = editableProps(
+      "year",
+      InputFieldTypes.DropdownSingleselectMetadata,
+    );
+    (props.metadata.inputField as any).options = [
+      { label: "Nieuw", value: "new" },
+    ];
     (props.metadata as any).unit = "text";
     const wrapper = await mountWrapper(props);
     const display = wrapper.find("view-modes-autocomplete-metadata-stub");
@@ -482,14 +519,16 @@ describe("MetadataWrapper — in-place editing affordance", () => {
   });
 
   it("is plain text for a locked field", async () => {
-    expect((await fieldValue(editableProps("title"))).attributes("role")).toBeUndefined();
+    expect(
+      (await fieldValue(editableProps("title"))).attributes("role"),
+    ).toBeUndefined();
   });
 
   it("is plain text for a field type without an inline editor yet", async () => {
     expect(
-      (await fieldValue(editableProps("year", InputFieldTypes.FileUpload))).attributes(
-        "role",
-      ),
+      (
+        await fieldValue(editableProps("year", InputFieldTypes.FileUpload))
+      ).attributes("role"),
     ).toBeUndefined();
   });
 
@@ -512,7 +551,11 @@ describe("MetadataWrapper — in-place editing affordance", () => {
   it("doesn't block Enter on a value that can't be edited (its links still work)", async () => {
     allowUpdate(false);
     const value = await fieldValue();
-    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
     value.element.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
   });
@@ -522,7 +565,11 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     const link = document.createElement("a");
     link.href = "/elsewhere";
     value.element.appendChild(link);
-    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
     link.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
     expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
@@ -552,7 +599,10 @@ describe("MetadataWrapper — inline editing", () => {
 
   beforeEach(() => {
     scopedSave.saveScope.mockReset();
-    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate: true, canDelete: false });
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
     useEditScope().release("MW-TEST:year");
   });
 
@@ -581,7 +631,10 @@ describe("MetadataWrapper — inline editing", () => {
 
   it("hands the saved entity back to the page", async () => {
     entityFormData.onSaved.mockClear();
-    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST", intialValues: { year: "2020" } });
+    scopedSave.saveScope.mockResolvedValue({
+      id: "MW-TEST",
+      intialValues: { year: "2020" },
+    });
     const wrapper = await openEditor();
     inlineEditor(wrapper).vm.$emit("save", "2020");
     await flushPromises();
@@ -626,11 +679,16 @@ describe("MetadataWrapper — inline editing", () => {
   });
 
   it("does not save a value that fails the field's validation", async () => {
-    defineRule("regex", (value: string, [pattern]: string[]) =>
-      new RegExp(pattern).test(value ?? "") || "Invalid format",
+    defineRule(
+      "regex",
+      (value: string, [pattern]: string[]) =>
+        new RegExp(pattern).test(value ?? "") || "Invalid format",
     );
     const p = props();
-    (p.metadata.inputField as any).validation = { value: ["regex"], regex: "/^[0-9]{4}$/" };
+    (p.metadata.inputField as any).validation = {
+      value: ["regex"],
+      regex: "/^[0-9]{4}$/",
+    };
     const wrapper = await mountWrapper(p);
     await wrapper.find('[data-cy="field-value"]').trigger("click");
     inlineEditor(wrapper).vm.$emit("save", "123456");
@@ -669,7 +727,10 @@ describe("MetadataWrapper — leaving with an open editor", () => {
 
   beforeEach(() => {
     scopedSave.saveScope.mockReset();
-    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate: true, canDelete: false });
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
     useEditScope().release("MW-TEST:year");
   });
 
@@ -715,7 +776,10 @@ describe("MetadataWrapper — inline relation editing", () => {
     (p.metadata as any).inputField = {
       type: InputFieldTypes.DropdownMultiselectRelations,
       relationType: "hasCreator",
-      advancedFilterInputForSearchingOptions: { type: "text", item_types: ["person"] },
+      advancedFilterInputForSearchingOptions: {
+        type: "text",
+        item_types: ["person"],
+      },
       options: [],
       __typename: "InputField",
       ...inputField,
@@ -734,40 +798,54 @@ describe("MetadataWrapper — inline relation editing", () => {
   const mountRelations = (
     inputField: Record<string, unknown> = {},
     relations: unknown[] = [relation("c1", { value: "Ada" })],
-  ) => mountWrapper(relationProps(inputField), undefined, { hasCreator: relations });
+  ) =>
+    mountWrapper(relationProps(inputField), undefined, {
+      hasCreator: relations,
+    });
 
   const openEditor = async (
     inputField: Record<string, unknown> = {},
     relations?: unknown[],
   ) => {
     const wrapper = await mountRelations(inputField, relations);
-    await wrapper.find('[data-cy="field-value"]').trigger("keydown", { key: "Enter" });
+    await wrapper
+      .find('[data-cy="field-value"]')
+      .trigger("keydown", { key: "Enter" });
     await flushPromises();
     return wrapper;
   };
 
   beforeEach(() => {
     scopedSave.saveScope.mockReset();
-    useEditMode("MW-TEST").setPermittedEditMode({ canUpdate: true, canDelete: false });
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
     useEditScope().release("MW-TEST:creator");
   });
 
   describe("at rest", () => {
     it("makes a relation value editable in place", async () => {
       const wrapper = await mountRelations();
-      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBe("button");
+      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBe(
+        "button",
+      );
     });
 
     it("keeps a relation dropdown that saves as metadata read-only", async () => {
       const wrapper = await mountRelations({ isMetadataField: true });
-      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBeUndefined();
+      expect(
+        wrapper.find('[data-cy="field-value"]').attributes("role"),
+      ).toBeUndefined();
     });
 
     it("keeps inherited relations read-only", async () => {
       const p = relationProps();
       (p.metadata as any).hiddenField = { inherited: true };
       const wrapper = await mountWrapper(p, undefined, { hasCreator: [] });
-      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBeUndefined();
+      expect(
+        wrapper.find('[data-cy="field-value"]').attributes("role"),
+      ).toBeUndefined();
     });
 
     it("lets a click on a relation chip navigate instead of opening the editor", async () => {
@@ -790,9 +868,9 @@ describe("MetadataWrapper — inline relation editing", () => {
       expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
     });
 
-    it("opens the editor from a plain-text relation, which doesn't navigate", async () => {
-      const wrapper = await mountRelations({ readOnlyValueAsPlainText: true });
-      await wrapper.find('[data-cy="relation-chip"]').trigger("click");
+    it("opens the editor from a chip that isn't a link", async () => {
+      const wrapper = await mountRelations();
+      await wrapper.find('[data-cy="relation-chip-plain"]').trigger("click");
       expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
     });
   });
@@ -842,7 +920,13 @@ describe("MetadataWrapper — inline relation editing", () => {
         formInput: {
           metadata: [],
           relations: [
-            { key: "c2", type: "hasCreator", value: "Bo", metadata: [], editStatus: "new" },
+            {
+              key: "c2",
+              type: "hasCreator",
+              value: "Bo",
+              metadata: [],
+              editStatus: "new",
+            },
           ],
           updateOnlyRelations: true,
         },
@@ -861,9 +945,9 @@ describe("MetadataWrapper — inline relation editing", () => {
       ]);
       inlineEditor(wrapper).vm.$emit("save", undefined);
       await flushPromises();
-      expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
-        { key: "c2", type: "hasCreator", editStatus: "deleted" },
-      ]);
+      expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual(
+        [{ key: "c2", type: "hasCreator", editStatus: "deleted" }],
+      );
     });
 
     describe("metadata on the relation", () => {
@@ -884,7 +968,9 @@ describe("MetadataWrapper — inline relation editing", () => {
         ]);
         inlineEditor(wrapper).vm.$emit("save", undefined);
         await flushPromises();
-        expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+        expect(
+          scopedSave.saveScope.mock.calls[0][0].formInput.relations,
+        ).toEqual([
           {
             key: "c1",
             type: "hasCreator",
@@ -902,7 +988,9 @@ describe("MetadataWrapper — inline relation editing", () => {
         await setRelations([relation("c1", { editStatus: "new" })]);
         inlineEditor(wrapper).vm.$emit("save", undefined);
         await flushPromises();
-        expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+        expect(
+          scopedSave.saveScope.mock.calls[0][0].formInput.relations,
+        ).toEqual([
           {
             key: "c1",
             type: "hasCreator",
@@ -920,8 +1008,10 @@ describe("MetadataWrapper — inline relation editing", () => {
     });
 
     it("validates the relations with the field's relation rules", async () => {
-      defineRule("has_required_relation", (value: unknown[]) =>
-        (Array.isArray(value) && value.length > 0) || "Choose a maker",
+      defineRule(
+        "has_required_relation",
+        (value: unknown[]) =>
+          (Array.isArray(value) && value.length > 0) || "Choose a maker",
       );
       const wrapper = await openEditor({
         validation: {
@@ -933,7 +1023,9 @@ describe("MetadataWrapper — inline relation editing", () => {
       inlineEditor(wrapper).vm.$emit("save", undefined);
       await flushPromises();
       expect(scopedSave.saveScope).not.toHaveBeenCalled();
-      expect(inlineEditor(wrapper).props("errorMessage")).toBe("Choose a maker");
+      expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+        "Choose a maker",
+      );
     });
 
     it("restores the relations on cancel", async () => {
@@ -951,7 +1043,10 @@ describe("MetadataWrapper — inline relation editing", () => {
       scopedSave.saveScope.mockResolvedValue({
         id: "MW-TEST",
         relationValues: {
-          hasCreator: [relation("c1", { value: "Ada" }), relation("c2", { value: "Bo" })],
+          hasCreator: [
+            relation("c1", { value: "Ada" }),
+            relation("c2", { value: "Bo" }),
+          ],
         },
       });
       const wrapper = await openEditor();
@@ -974,7 +1069,9 @@ describe("MetadataWrapper — inline relation editing", () => {
       const saved = { id: "MW-TEST", relationValues: { hasCreator: [] } };
       scopedSave.saveScope.mockResolvedValue(saved);
       const wrapper = await openEditor();
-      await setRelations([relation("c1", { value: "Ada", editStatus: "deleted" })]);
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "deleted" }),
+      ]);
       inlineEditor(wrapper).vm.$emit("save", undefined);
       await flushPromises();
       expect(entityFormData.onSaved).toHaveBeenCalledWith(saved);

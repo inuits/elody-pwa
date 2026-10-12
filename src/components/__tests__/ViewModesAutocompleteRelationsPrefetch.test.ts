@@ -8,6 +8,13 @@ const mocks = vi.hoisted(() => ({
   // How the registry hands out loading state: the creator gets a ref, later
   // callers get the reactive registry entry, where it is a plain boolean.
   loading: undefined as undefined | { as: "ref" | "plain"; value: boolean },
+  formattersSettings: {} as Record<string, unknown>,
+}));
+
+vi.mock("@/main", () => ({
+  get formattersSettings() {
+    return mocks.formattersSettings;
+  },
 }));
 
 vi.mock("@/composables/useGetDropdownOptions", () => ({
@@ -119,13 +126,16 @@ describe("ViewModesAutocompleteRelations prefetch on mount", () => {
   });
 
   it("still prefetches exactly once when autoSelectable is set (podiumnet autoselect path)", async () => {
-    mountWith({ mode: "create", autoSelectable: true, modelValue: "some-value" });
+    mountWith({
+      mode: "create",
+      autoSelectable: true,
+      modelValue: "some-value",
+    });
     await flushPromises();
 
     expect(helperInitializeCalls("fetchAll")).toBe(1);
   });
 });
-
 
 describe("ViewModesAutocompleteRelations read-only fallback to related options", () => {
   beforeEach(() => {
@@ -166,7 +176,6 @@ describe("ViewModesAutocompleteRelations read-only fallback to related options",
     expect(options).toEqual(mocks.relatedOptions);
   });
 
-
   it("never hands the autocomplete a ref when the related options helper is set up without results", async () => {
     const wrapper = shallowMount(ViewModesAutocompleteRelations, {
       props: {
@@ -193,7 +202,6 @@ describe("ViewModesAutocompleteRelations read-only fallback to related options",
       .props("options");
     expect(Array.isArray(options)).toBe(true);
   });
-
 });
 
 describe("ViewModesAutocompleteRelations in an inline editor", () => {
@@ -215,7 +223,9 @@ describe("ViewModesAutocompleteRelations in an inline editor", () => {
   it("shows the input even when nothing is selected yet while editing in place", async () => {
     const wrapper = mountWith({ mode: "edit", editing: true });
     await flushPromises();
-    expect(input(wrapper).attributes("style") ?? "").not.toContain("display: none");
+    expect(input(wrapper).attributes("style") ?? "").not.toContain(
+      "display: none",
+    );
     expect(wrapper.find("p").attributes("style")).toContain("display: none");
   });
 });
@@ -245,5 +255,55 @@ describe("ViewModesAutocompleteRelations loading state", () => {
 
   it("shows no spinner once loaded", async () => {
     expect(await loadingProp("plain", false)).toBe("false");
+  });
+});
+
+describe("ViewModesAutocompleteRelations chips as links", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    vi.clearAllMocks();
+  });
+
+  const mountWithLinks = async (
+    link: Record<string, unknown>,
+    relationType: string,
+  ) => {
+    const helpers = await import("@/helpers");
+    mocks.formattersSettings = { link };
+    const wrapper = mountWith({ relationType, mode: "view", disabled: true });
+    await flushPromises();
+    return {
+      autocomplete: wrapper.findComponent({ name: "BaseInputAutocomplete" }),
+      goTo: vi.mocked(helpers.goToEntityPageById),
+    };
+  };
+  const clickTag = async (autocomplete: any) => {
+    autocomplete.vm.$emit("handleTagClick", { value: "org-1", label: "Org" });
+    await flushPromises();
+  };
+
+  it("makes the chips links when a link setting names the relation type", async () => {
+    const { autocomplete, goTo } = await mountWithLinks(
+      { genre: { link: "/genres/$value", relationType: "refGenres" } },
+      "refGenres",
+    );
+    expect(autocomplete.props("tagsAreLinks")).toBe(true);
+    await clickTag(autocomplete);
+    expect(goTo).toHaveBeenCalledWith(
+      "org-1",
+      { type: "genre" },
+      "SingleEntity",
+      expect.anything(),
+    );
+  });
+
+  it("keeps the chips plain when no link setting names the relation type", async () => {
+    const { autocomplete, goTo } = await mountWithLinks(
+      { genre: { link: "/genres/$value", relationType: "refGenres" } },
+      "refVenues",
+    );
+    expect(autocomplete.props("tagsAreLinks")).toBe(false);
+    await clickTag(autocomplete);
+    expect(goTo).not.toHaveBeenCalled();
   });
 });

@@ -6,7 +6,10 @@ import BaseInputAutocomplete from "../BaseInputAutocomplete.vue";
 vi.mock("@vueform/multiselect", () => ({
   default: defineComponent({
     name: "MockMultiselect",
-    props: { classes: { default: () => ({}) }, modelValue: { default: () => [] } },
+    props: {
+      classes: { default: () => ({}) },
+      modelValue: { default: () => [] },
+    },
     template: `<div data-cy="multiselect"><template v-for="option in modelValue" :key="option.value"><slot name="tag" :option="option" :handle-tag-remove="() => {}" :disabled="false" /></template></div>`,
   }),
 }));
@@ -17,8 +20,9 @@ vi.mock("@/composables/useEntitySingle", () => ({
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({ someModalIsOpened: ref(false) }),
 }));
+const editState = vi.hoisted(() => ({ isEdit: true }));
 vi.mock("@/composables/useEdit", () => ({
-  useEditMode: () => ({ isEdit: ref(true) }),
+  useEditMode: () => ({ isEdit: ref(editState.isEdit) }),
 }));
 vi.mock("@/components/base/BaseInputTextNumberDatetime.vue", () => ({
   default: {
@@ -79,13 +83,17 @@ describe("BaseInputAutocomplete — design-system styling", () => {
 
   it("lets clicks pass through the value input at rest", () => {
     expect(
-      tagInputAt(true).findComponent({ name: "BaseInputTextNumberDatetime" }).classes(),
+      tagInputAt(true)
+        .findComponent({ name: "BaseInputTextNumberDatetime" })
+        .classes(),
     ).toContain("pointer-events-none");
   });
 
   it("keeps the value input clickable while editing", () => {
     expect(
-      tagInputAt(false).findComponent({ name: "BaseInputTextNumberDatetime" }).classes(),
+      tagInputAt(false)
+        .findComponent({ name: "BaseInputTextNumberDatetime" })
+        .classes(),
     ).not.toContain("pointer-events-none");
   });
 
@@ -117,9 +125,9 @@ describe("BaseInputAutocomplete — design-system styling", () => {
 
   it("uses the chip radius for both kinds", () => {
     expect(classesFor("default").tag).toContain("!rounded-chip");
-    expect(
-      classesFor("default", { relationType: "hasCreator" }).tag,
-    ).toContain("!rounded-chip");
+    expect(classesFor("default", { relationType: "hasCreator" }).tag).toContain(
+      "!rounded-chip",
+    );
   });
 
   it("lets the field-row hover wash show through a read-only display", () => {
@@ -149,5 +157,43 @@ describe("BaseInputAutocomplete — design-system styling", () => {
     const tag = classesFor("readOnlyAsPlainText").tag;
     expect(tag).toContain("!h-(--chip-plain-text-height)");
     expect(tag).not.toMatch(/\[\d+px\]/);
+  });
+});
+
+describe("BaseInputAutocomplete — relation chips as links", () => {
+  const chipAtRest = (props: Record<string, unknown>) => {
+    editState.isEdit = false;
+    const chip = mount(BaseInputAutocomplete, {
+      props: {
+        modelValue: [{ label: "A", value: "a" }],
+        options: [{ label: "A", value: "a" }],
+        autocompleteStyle: "readOnly",
+        relationType: "refCompanies",
+        disabled: true,
+        ...props,
+      } as any,
+    }).find(".multiselect-tag");
+    editState.isEdit = true;
+    return chip;
+  };
+
+  it("marks a chip that links to its entity and shows it as clickable", () => {
+    const chip = chipAtRest({ tagsAreLinks: true });
+    expect(chip.attributes("data-tag-link")).toBeDefined();
+    expect(chip.classes()).toContain("!cursor-pointer");
+  });
+
+  it("shows a chip without a link as a plain chip", () => {
+    const chip = chipAtRest({ tagsAreLinks: false });
+    expect(chip.attributes("data-tag-link")).toBeUndefined();
+    expect(chip.classes()).not.toContain("!cursor-pointer");
+  });
+
+  it("never marks a relation shown as plain text as a link", () => {
+    const chip = chipAtRest({
+      tagsAreLinks: true,
+      autocompleteStyle: "readOnlyAsPlainText",
+    });
+    expect(chip.attributes("data-tag-link")).toBeUndefined();
   });
 });

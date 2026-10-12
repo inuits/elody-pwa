@@ -13,6 +13,7 @@
         : selectedDropdownOptions
     "
     :relationType="relationType"
+    :tags-are-links="!!linkEntityType"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
@@ -89,7 +90,8 @@ import {
   getEntityTitle,
   looksLikeEntityId,
 } from "@/helpers";
-import { getFormattersSettings, goToEntityPageById } from "@/helpers";
+import { goToEntityPageById } from "@/helpers";
+import { formattersSettings } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useManageEntities } from "@/composables/useManageEntities";
@@ -465,15 +467,22 @@ const findAutocompleteOption = async (
   return allEntitiesHelper.value.entityDropdownOptions.value?.[0];
 };
 
-const handleTagClick = async (tag: DropdownOption) => {
-  if (isEditing.value) return;
-  const linkFormattersSettings = (await getFormattersSettings())?.link || {};
-  const [entityType, linkSetting] =
-    Object.entries(linkFormattersSettings).find(
+// The entity type whose link setting names this relation type, if any.
+const linkEntityType = computed<string | undefined>(
+  () =>
+    Object.entries(formattersSettings?.link || {}).find(
       ([, value]) => (value as any).relationType === props.relationType,
-    ) || [];
-  if (entityType && linkSetting)
-    goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
+    )?.[0],
+);
+
+const handleTagClick = (tag: DropdownOption) => {
+  if (isEditing.value || !linkEntityType.value) return;
+  goToEntityPageById(
+    tag.value,
+    { type: linkEntityType.value },
+    "SingleEntity",
+    router,
+  );
 };
 
 watch(

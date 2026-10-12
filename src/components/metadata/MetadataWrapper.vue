@@ -649,7 +649,9 @@ const canEditInPlace = computed<boolean>(() =>
     relationEditable: relationEditable.value,
   }),
 );
-const editFieldLabel = computed<string>(() => inPlaceScope.messages.editField());
+const editFieldLabel = computed<string>(() =>
+  inPlaceScope.messages.editField(),
+);
 const editableValueAttrs = computed(() =>
   canEditInPlace.value
     ? {
@@ -697,10 +699,9 @@ const relationsPath = computed(
   () => `${ValidationFields.RelationValues}.${relationTypeOfField.value}`,
 );
 const formRelations = (): unknown[] => {
-  const relations =
-    getForm(props.formId)?.values?.relationValues?.[
-      relationTypeOfField.value ?? ""
-    ];
+  const relations = getForm(props.formId)?.values?.relationValues?.[
+    relationTypeOfField.value ?? ""
+  ];
   return Array.isArray(relations) ? relations : [];
 };
 const relationsBeforeEditing = ref<unknown[]>([]);
@@ -717,8 +718,7 @@ const toScopeRelations = (
 ): RelationValue[] =>
   relations
     .filter(
-      (relation: any) =>
-        relation && relation.editStatus !== EditStatus.Deleted,
+      (relation: any) => relation && relation.editStatus !== EditStatus.Deleted,
     )
     .map((relation: any) => {
       const metadata = (relation.metadata ?? [])
@@ -797,19 +797,18 @@ const saveRelationsInline = async () => {
   }
 };
 
-// A click on a relation chip navigates to the related entity. A plain-text
-// relation doesn't navigate, and a chip's value box (a page number) is part
-// of the value, so those clicks open the editor instead.
+// A click on a chip that links to its entity navigates there. A chip without
+// a link (none configured, or shown as plain text) and a chip's value box (a
+// page number) are part of the value, so those clicks open the editor instead.
 const isRelationChipClick = (event?: Event): boolean => {
   if (event?.type !== "click" || !isRelationField.value) return false;
   const target = event.target as HTMLElement | null;
   const chip = target?.closest?.(".multiselect-tag");
   if (!chip) return false;
-  if (target?.closest?.("[data-tag-input]")) {
-    event.stopPropagation();
-    return false;
-  }
-  if (props.metadata.inputField?.readOnlyValueAsPlainText) {
+  if (
+    !chip.hasAttribute("data-tag-link") ||
+    target?.closest?.("[data-tag-input]")
+  ) {
     event.stopPropagation();
     return false;
   }
@@ -819,7 +818,10 @@ const isRelationChipClick = (event?: Event): boolean => {
 const startEditing = (event?: Event) => {
   if (!canEditInPlace.value || isEditingInPlace.value) return;
   // A link or the copy button inside the value keeps its own click.
-  if (event?.type === "click" && isInnerControlClick(event, fieldValueRef.value))
+  if (
+    event?.type === "click" &&
+    isInnerControlClick(event, fieldValueRef.value)
+  )
     return;
   if (isRelationChipClick(event)) return;
   const opened = inPlaceScope.open({

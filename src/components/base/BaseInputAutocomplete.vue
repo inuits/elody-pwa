@@ -47,11 +47,10 @@
           { 'pr-2': !isEdit },
           {
             'hover:!bg-background-normal hover:!text-accent-accent !cursor-pointer':
-              !isEdit &&
-              relationType &&
-              props.autocompleteStyle !== 'readOnlyAsPlainText',
+              tagIsLink,
           },
         ]"
+        :data-tag-link="tagIsLink || undefined"
         @click.stop="() => emit('handleTagClick', option)"
       >
         {{ stripHighlightTags(option.label) }}
@@ -70,7 +69,9 @@
             class="ml-2"
             :class="{ 'pointer-events-none': props.disabled }"
             size="compact"
-            :style="{ width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch` }"
+            :style="{
+              width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch`,
+            }"
             :model-value="getTagInputValue(option.value)"
             @update:model-value="
               setTagInputValue(option.value, $event as string)
@@ -112,7 +113,7 @@ import SanitizedHtml from "@/components/SanitizedHtml.vue";
 import { stripHighlightTags } from "@/helpers";
 import useEntitySingle from "@/composables/useEntitySingle";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, unref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
@@ -131,6 +132,8 @@ const props = withDefaults(
     options: DropdownOption[];
     autocompleteStyle: AutocompleteStyle;
     relationType?: string;
+    // The client config links these chips to their entity pages.
+    tagsAreLinks?: boolean;
     selectType?: "multi" | "single";
     placeholder?: string;
     disabled?: boolean;
@@ -170,13 +173,22 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
+const tagIsLink = computed<boolean>(
+  () =>
+    !unref(isEdit) &&
+    props.tagsAreLinks &&
+    props.autocompleteStyle !== "readOnlyAsPlainText",
+);
 const { t, te } = useI18n();
 const removeChipLabel = computed<string>(() =>
   te("autocomplete.remove-chip") ? t("autocomplete.remove-chip") : "Remove",
 );
 const searchValue = ref<string>();
 const multiselectRef = ref();
-const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKeyboardContext", null);
+const virtualKeyboardContext = inject<VirtualKeyboardContext | null>(
+  "virtualKeyboardContext",
+  null,
+);
 
 watch(
   () => virtualKeyboardContext?.isOpen.value,
@@ -344,7 +356,11 @@ const handleTagCreate = async (option: any) => {
 
 const handleSearchChange = (value: string) => {
   searchValue.value = value;
-  if (!props.disableVirtualKeyboardContext && virtualKeyboardContext && virtualKeyboardContext.searchQuery.value !== value) {
+  if (
+    !props.disableVirtualKeyboardContext &&
+    virtualKeyboardContext &&
+    virtualKeyboardContext.searchQuery.value !== value
+  ) {
     // Should refactor keyboard to support multiple fields in 1 metadatawrapper parent
     virtualKeyboardContext.searchQuery.value = value;
   }
