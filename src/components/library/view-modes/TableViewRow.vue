@@ -1,10 +1,17 @@
 <template>
   <li data-cy="table-row" :class="wrapperClasses">
-    <div class="w-10 shrink-0">
+    <div class="w-10 shrink-0 relative">
+      <span
+        v-if="isNew"
+        data-cy="new-indicator"
+        :class="[
+          'absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-accent-normal',
+          showsCheckbox ? '-left-1' : 'left-1/2 -translate-x-1/2',
+        ]"
+        :title="t('library.new')"
+      />
       <BaseInputCheckbox
-        v-if="
-          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary && hasSelection
-        "
+        v-if="showsCheckbox"
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
         :item="{
@@ -144,9 +151,9 @@ import EntityButtons from "@/components/EntityButtons.vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import ReadOnlyMetadataWrapper from "@/components/metadata/ReadOnlyMetadataWrapper.vue";
-import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { hoveredListItem } from "@/composables/useListItemHelper";
-import { useSeenItems } from "@/composables/useSeenItems";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenState } from "@/composables/useSeenItems";
 import { stringIsUrl } from "@/helpers";
 import { auth } from "@/main";
 import { computed, ref } from "vue";
@@ -261,17 +268,25 @@ const isActiveListItem = computed<boolean>(() => {
   return false;
 });
 
-const { trackSeen } = useEntityPageConfig();
-const { isItemSeen } = useSeenItems();
+const { seenTracking } = useEntityPageConfig();
+const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
 
-const isSeen = computed<boolean>(
-  () => trackSeen.value === true && isItemSeen(props.itemId),
+const showsCheckbox = computed<boolean>(
+  () =>
+    props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+    props.hasSelection,
+);
+
+const isSeen = computed<boolean>(() => isEntitySeen(props.itemId));
+const isNew = computed<boolean>(() =>
+  isEntityNew(props.itemId, props.intialValues as Record<string, unknown>),
 );
 
 const wrapperClasses = computed(() => [
   "flex items-center gap-2 p-1.5 border rounded bg-background-light border-border-subtle cursor-pointer list-none mt-1",
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled || isSeen.value,
+    "font-semibold": isNew.value,
     "animate-pulse": props.loading,
     "bg-background-light": !isActiveListItem.value,
     "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,

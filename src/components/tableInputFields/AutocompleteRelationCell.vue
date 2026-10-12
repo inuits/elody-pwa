@@ -144,6 +144,9 @@ onBeforeMount(() => {
       ? (props.inputField.advancedFilterInputForRetrievingAllOptions as any)
       : (props.inputField.advancedFilterInputForRetrievingOptions as any),
     props.formId,
+    undefined,
+    undefined,
+    props.inputField.optionLabelKeys ?? undefined,
   );
 });
 

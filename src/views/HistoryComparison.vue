@@ -129,7 +129,7 @@ const route = useRoute();
 const entityId = route.params.id as string;
 const entityType = route.params.type as string;
 const { t } = useI18n();
-const { determineBreadcrumbsForEntity } = useBreadcrumbs(config);
+const { determineBreadcrumbsForEntity, determineBreadcrumbsFromRouteConfig } = useBreadcrumbs(config);
 
 const {
   currentEntity,
@@ -159,7 +159,11 @@ const {
 watch(
   currentEntity,
   (entity) => {
-    if (entity) determineBreadcrumbsForEntity(entity);
+    if (!entity) return;
+    const breadcrumbs = (route.meta as any)?.breadcrumbs;
+    if (breadcrumbs?.length)
+      determineBreadcrumbsFromRouteConfig(breadcrumbs, entity);
+    else determineBreadcrumbsForEntity(entity);
   },
   { immediate: true },
 );

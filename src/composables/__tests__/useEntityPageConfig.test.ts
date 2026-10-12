@@ -306,6 +306,81 @@ describe("useEntityPageConfig", () => {
       expect(showNavigationArrows.value).toBe(true);
     });
   });
+
+  describe("seenTracking", () => {
+    it("is undefined when seen tracking is off", () => {
+      const config: EntityPageConfig = { production: {} };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { seenTracking } = useEntityPageConfig();
+
+      expect(seenTracking.value).toBeUndefined();
+    });
+
+    it("dims seen items by default", () => {
+      const config: EntityPageConfig = { production: { trackSeen: true } };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { seenTracking } = useEntityPageConfig();
+
+      expect(seenTracking.value).toEqual({
+        activityKey: undefined,
+        display: "dimSeen",
+        ttlDays: undefined,
+      });
+    });
+
+    it("returns the configured activity key, display and ttl", () => {
+      const config: EntityPageConfig = {
+        production: {
+          trackSeen: true,
+          seenActivityKey: "last_activity_at",
+          seenDisplay: "highlightNew",
+          seenTtlDays: 30,
+        },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { seenTracking } = useEntityPageConfig();
+
+      expect(seenTracking.value).toEqual({
+        activityKey: "last_activity_at",
+        display: "highlightNew",
+        ttlDays: 30,
+      });
+    });
+  });
+
+  describe("seenTrackingForType", () => {
+    it("returns the seen tracking of another entity type than the route's", () => {
+      const config: EntityPageConfig = {
+        production: {},
+        comment: {
+          trackSeen: true,
+          seenActivityKey: "last_activity_at",
+          seenDisplay: "highlightNew",
+          seenTtlDays: 30,
+        },
+      };
+      mockRoute.value = { meta: { entityPageConfig: config }, params: { type: "productions" } };
+
+      const { seenTrackingForType } = useEntityPageConfig();
+
+      expect(seenTrackingForType("comment")).toEqual({
+        activityKey: "last_activity_at",
+        display: "highlightNew",
+        ttlDays: 30,
+      });
+      expect(seenTrackingForType("production")).toBeUndefined();
+      expect(seenTrackingForType("venue")).toBeUndefined();
+    });
+
+    it("is undefined without an entityPageConfig on the route", () => {
+      const { seenTrackingForType } = useEntityPageConfig();
+
+      expect(seenTrackingForType("comment")).toBeUndefined();
+    });
+  });
 });
 
 describe("slug casing", () => {

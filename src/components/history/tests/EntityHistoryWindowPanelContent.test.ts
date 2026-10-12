@@ -1,11 +1,13 @@
 import { mount } from "@vue/test-utils";
 import { describe, it, expect, vi } from "vitest";
 import EntityHistoryWindowPanelContent from "../EntityHistoryWindowPanelContent.vue";
-import { PanelType, Unit } from "@/generated-types/queries";
+import { Unit } from "@/generated-types/queries";
 
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (k: string) => k }) }));
 
-const formValues = vi.hoisted(() => ({ intialValues: {} as Record<string, any> }));
+const formValues = vi.hoisted(() => ({
+  intialValues: {} as Record<string, any>,
+}));
 const customization = vi.hoisted(() => ({ hideEmptyFields: false }));
 vi.mock("vue", async (importOriginal) => {
   const actual = await importOriginal<typeof import("vue")>();
@@ -35,7 +37,6 @@ describe("EntityHistoryWindowPanelContent", () => {
   it("passes the graphql-resolved permitted flag to the coordinate field", () => {
     const wrapper = mount(EntityHistoryWindowPanelContent, {
       props: {
-        panelType: PanelType.Metadata,
         relationArray: [],
         metadatafields: [coordinateField] as any,
         canBeMultipleColumns: false,
@@ -68,7 +69,6 @@ describe("EntityHistoryWindowPanelContent", () => {
     expect(coordinateEdit.props("permitted")).toBe(false);
   });
 
-
   describe("hiding empty fields", () => {
     const field = (key: string, value: unknown) => ({
       __typename: "PanelMetaData",
@@ -86,7 +86,6 @@ describe("EntityHistoryWindowPanelContent", () => {
       customization.hideEmptyFields = hideEmptyFields;
       return mount(EntityHistoryWindowPanelContent, {
         props: {
-          panelType: PanelType.Metadata,
           relationArray: [],
           metadatafields: metadatafields as any,
           canBeMultipleColumns: false,
@@ -146,7 +145,6 @@ describe("EntityHistoryWindowPanelContent", () => {
       customization.hideEmptyFields = true;
       const wrapper = mount(EntityHistoryWindowPanelContent, {
         props: {
-          panelType: PanelType.Metadata,
           relationArray: [],
           metadatafields: [relationList] as any,
           canBeMultipleColumns: false,
@@ -175,13 +173,40 @@ describe("EntityHistoryWindowPanelContent", () => {
         },
       });
 
-      expect(wrapper.findComponent({ name: "HistoryRelationDiff" }).exists()).toBe(true);
+      expect(
+        wrapper.findComponent({ name: "HistoryRelationDiff" }).exists(),
+      ).toBe(true);
     });
 
     it("shows empty fields when the client does not hide them", () => {
-      const wrapper = mountWith([field("subtitle", "")], { subtitle: "" }, false);
+      const wrapper = mountWith(
+        [field("subtitle", "")],
+        { subtitle: "" },
+        false,
+      );
 
       expect(shownKeys(wrapper)).toEqual(["subtitle"]);
     });
+  });
+
+  it("shows the belongs-to block whenever the panel carries relations", () => {
+    const wrapper = mount(EntityHistoryWindowPanelContent, {
+      props: {
+        relationArray: [{ __typename: "PanelRelation", label: "Lewis" }] as any,
+        metadatafields: [],
+        canBeMultipleColumns: false,
+        formId: "1",
+        identifiers: [],
+        parentIsListItem: false,
+        wysiwygDiffs: [],
+        relationDiffs: [],
+      },
+      global: {
+        provide: { config: { customization: {} } },
+        stubs: { EntityElementRelation: true },
+      },
+    });
+
+    expect(wrapper.text()).toContain("entity.belongs-to");
   });
 });

@@ -81,7 +81,6 @@ import {
   type MetadataAndRelation,
   ModalStyle,
   type PanelMetaData,
-  PanelType,
   SearchInputType,
   TypeModals,
 } from "@/generated-types/queries";
@@ -131,7 +130,6 @@ const componentMetadata = computed(() => {
         key: metadataItemKey,
         label: (value as PanelMetaData).label,
         value: getValueForPanelMetadata(
-          PanelType.Metadata,
           metadataItemKey,
           props.entityId,
           mediafileViewerContext,

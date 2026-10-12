@@ -15,7 +15,10 @@ import type { Context } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import { RouteNames, SearchInputType } from "@/generated-types/queries";
 import { useRoute } from "vue-router";
-import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import {
+  type BreadcrumbRoute,
+  useBreadcrumbs,
+} from "@/composables/useBreadcrumbs";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 
 const route = useRoute();
@@ -32,7 +35,9 @@ const entityType = computed<string | "not-set">(() =>
 );
 
 onMounted(() => {
-  const routeBreadcrumbs = getRouteBreadcrumbsOfEntity(entityType.value);
+  const routeBreadcrumbs =
+    (route.meta.breadcrumbs as BreadcrumbRoute[] | undefined) ??
+    getRouteBreadcrumbsOfEntity(entityType.value);
   const routeTitle: string =
     (routeBreadcrumbs[routeBreadcrumbs.length - 1].title as string) ??
     (routeBreadcrumbs[routeBreadcrumbs.length - 1].overviewPage as string);

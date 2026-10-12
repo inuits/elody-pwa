@@ -55,6 +55,7 @@
               :status="thread.status"
               :reply-count="thread.replyCount"
               :clickable="true"
+              :is-new="isNew(thread.subject.id, thread.subject.intialValues)"
               @open="openThread(thread.subject.id)"
               @open-entity="openTaggedEntity"
             />
@@ -72,8 +73,14 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import CommentItem from "@/components/entityElements/comments/CommentItem.vue";
 import CommentComposer from "@/components/entityElements/comments/CommentComposer.vue";
-import { createFieldsOf, useComments } from "@/composables/useComments";
+import {
+  createFieldsOf,
+  useComments,
+  visibleThreadsOf,
+} from "@/composables/useComments";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useSeenState } from "@/composables/useSeenItems";
 import {
   type CommentsElement,
   DamsIcons,
@@ -93,12 +100,17 @@ const props = defineProps<{
 const { t } = useI18n();
 const { threadsFor, isLoadingFor, load, post } = useComments();
 const { openModal } = useBaseModal();
+const { seenTrackingForType } = useEntityPageConfig();
+const { isNew } = useSeenState(
+  computed(() => seenTrackingForType(Entitytyping.Comment)),
+);
+
 const isComposerOpen = ref<boolean>(false);
 const isCollapsed = ref<boolean>(false);
 
 const canPost = computed<boolean>(() => !props.element.readOnly);
 
-const threads = computed(() => threadsFor(props.id));
+const threads = computed(() => visibleThreadsOf(threadsFor(props.id)));
 const isLoading = computed(() => isLoadingFor(props.id));
 
 const taggableEntityConfiguration = computed(

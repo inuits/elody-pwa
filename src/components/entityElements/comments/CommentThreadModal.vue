@@ -17,20 +17,17 @@
             {{ t("comments.thread-title") }}
           </h3>
           <div class="flex items-center gap-2">
-            <base-button-new
-              v-if="canPost"
-              :label="
-                thread.status === 'resolved'
-                  ? t('comments.reopen')
-                  : t('comments.resolve')
-              "
-              :icon="
-                thread.status === 'resolved' ? DamsIcons.Redo : DamsIcons.Check
-              "
-              button-style="commit"
-              :disabled="isWorking"
-              @click="toggleStatus"
-            />
+            <template v-if="canPost">
+              <base-button-new
+                v-for="status in statusTransitions"
+                :key="status"
+                :label="t(statusActions[status].label)"
+                :icon="statusActions[status].icon"
+                button-style="commit"
+                :disabled="isWorking"
+                @click="changeStatus(status)"
+              />
+            </template>
             <div
               class="cursor-pointer"
               @click="closeModal(TypeModals.CommentThread)"
@@ -48,7 +45,10 @@
             :create-fields="createFields"
             :status="thread.status"
             :can-edit="canEditComment(thread.subject)"
+            :can-delete="canDeleteComment(thread.subject)"
+            :is-new="isNewForUser(thread.subject)"
             @edit="editingCommentId = thread.subject.id"
+            @delete="deleteComment(thread.subject, true)"
             @open-entity="openTaggedEntity"
           />
           <comment-composer
@@ -77,7 +77,10 @@
                   :comment="reply"
                   :taggable-entity-configuration="taggableEntityConfiguration"
                   :can-edit="canEditComment(reply)"
+                  :can-delete="canDeleteComment(reply)"
+                  :is-new="isNewForUser(reply)"
                   @edit="editingCommentId = reply.id"
+                  @delete="deleteComment(reply, false)"
                   @open-entity="openTaggedEntity"
                 />
                 <comment-composer
@@ -98,7 +101,7 @@
         </div>
 
         <div
-          v-if="canPost && thread.status !== 'resolved'"
+          v-if="canPost && thread.status === 'open'"
           class="border-t border-neutral-30 pt-3"
         >
           <comment-composer
@@ -110,10 +113,10 @@
           />
         </div>
         <p
-          v-else-if="thread.status === 'resolved'"
+          v-else-if="thread.status !== 'open'"
           class="text-sm text-text-placeholder"
         >
-          {{ t("comments.resolved-hint") }}
+          {{ t(`comments.${thread.status}-hint`) }}
         </p>
       </div>
     </Transition>
@@ -131,14 +134,20 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import {
   createFieldValuesOf,
   isOwnComment,
+  isThreadParticipant,
+  statusTransitionsOf,
   useComments,
+  useThreadSeenTracking,
   type Comment,
+  type CommentStatus,
 } from "@/composables/useComments";
 import { useAuth } from "@/composables/useAuth";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { Unicons } from "@/types";
 import {
   DamsIcons,
-  type Entitytyping,
+  Entitytyping,
   ModalStyle,
   TypeModals,
   type BaseRelationValuesInput,
@@ -148,7 +157,8 @@ import {
 } from "@/generated-types/queries";
 
 const { closeModal, getModalInfo, openModal } = useBaseModal();
-const { threadFor, post, edit, setStatus } = useComments();
+const { threadFor, post, edit, setStatus, remove } = useComments();
+const { confirm } = useConfirmModal();
 const { elodyUser, getUserEmail } = useAuth();
 const { t } = useI18n();
 
@@ -177,12 +187,19 @@ const thread = computed(() =>
   subjectId.value ? threadFor(subjectId.value) : undefined,
 );
 
+const { seenTrackingForType } = useEntityPageConfig();
+const { isCommentNew } = useThreadSeenTracking(
+  computed(() => seenTrackingForType(Entitytyping.Comment)),
+  computed(() => modalInfo.value.open),
+  thread,
+);
+
 // Stale edit state must not survive into the next thread the user opens.
 watch(subjectId, () => (editingCommentId.value = undefined));
 watch(
   () => thread.value?.status,
   (status) => {
-    if (status === "resolved") editingCommentId.value = undefined;
+    if (status !== "open") editingCommentId.value = undefined;
   },
 );
 
@@ -194,8 +211,30 @@ const userIdentities = computed<(string | undefined)[]>(() => [
 
 const canEditComment = (comment: Comment): boolean =>
   canPost.value &&
-  thread.value?.status !== "resolved" &&
+  thread.value?.status === "open" &&
   isOwnComment(comment, userIdentities.value);
+
+const canDeleteComment = (comment: Comment): boolean =>
+  canPost.value && isOwnComment(comment, userIdentities.value);
+
+const isNewForUser = (comment: Comment): boolean =>
+  !isOwnComment(comment, userIdentities.value) && isCommentNew(comment);
+
+const statusActions: Record<CommentStatus, { label: string; icon: DamsIcons }> =
+  {
+    open: { label: "comments.reopen", icon: DamsIcons.Redo },
+    resolved: { label: "comments.resolve", icon: DamsIcons.Check },
+    archived: { label: "comments.archive", icon: DamsIcons.ArchiveAlt },
+  };
+
+const statusTransitions = computed<CommentStatus[]>(() =>
+  thread.value
+    ? statusTransitionsOf(
+        thread.value.status,
+        isThreadParticipant(thread.value, userIdentities.value),
+      )
+    : [],
+);
 
 const withWorking = async (action: () => Promise<void>) => {
   isWorking.value = true;
@@ -236,14 +275,31 @@ const saveEdit = (
     editingCommentId.value = undefined;
   });
 
-const toggleStatus = () =>
+const changeStatus = (status: CommentStatus) =>
   withWorking(async () => {
     if (!thread.value) return;
-    await setStatus(
-      thread.value.subject,
-      thread.value.status === "resolved" ? "open" : "resolved",
-    );
+    await setStatus(thread.value.subject, status);
   });
+
+const deleteComment = async (comment: Comment, isSubject: boolean) => {
+  const choice = await confirm({
+    title: t("confirm.delete-comment.title"),
+    message: t(
+      isSubject
+        ? "confirm.delete-comment.message-thread"
+        : "confirm.delete-comment.message",
+    ),
+    confirmLabel: t("confirm.delete-comment.confirm"),
+    cancelLabel: t("confirm.delete-comment.cancel"),
+  });
+  if (choice !== "confirm") return;
+  await withWorking(async () => {
+    await remove(comment);
+    if (editingCommentId.value === comment.id)
+      editingCommentId.value = undefined;
+    if (isSubject) closeModal(TypeModals.CommentThread);
+  });
+};
 
 const openTaggedEntity = (entityId: string, entityType: Entitytyping) => {
   openModal(

@@ -18,8 +18,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/main", () => ({ apolloClient: {} }));
+const { openModal } = vi.hoisted(() => ({ openModal: vi.fn() }));
 vi.mock("@/composables/useBaseModal", () => ({
-  useBaseModal: () => ({ openModal: vi.fn(), closeModal: vi.fn() }),
+  useBaseModal: () => ({ openModal, closeModal: vi.fn() }),
 }));
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({ dequeueAllItemsForBulkProcessing: vi.fn() }),
@@ -35,7 +36,9 @@ vi.mock("@/composables/useEntitySingle", () => ({
   default: () => ({ getEntityUuid: () => "" }),
 }));
 
-const { createTipTapNodeExtension } = await import("../ElodyTaggingExtension");
+const { createTipTapNodeExtension, createTaggingCommandsExtension } =
+  await import("../ElodyTaggingExtension");
+const { ref } = await import("vue");
 
 const aicapConfiguration = () => ({
   tag: "w",
@@ -216,5 +219,142 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
     expect(parsesAsXml(html)).toBe(true);
 
     editor.destroy();
+  });
+
+  describe("a tag spanning a line break keeps the <br> inside it", () => {
+    const buildTaggingEditor = async (content: string) => {
+      const { Editor } = await import("@tiptap/core");
+      const { default: Document } = await import("@tiptap/extension-document");
+      const { default: Paragraph } =
+        await import("@tiptap/extension-paragraph");
+      const { default: Text } = await import("@tiptap/extension-text");
+      const { default: HardBreak } =
+        await import("@tiptap/extension-hard-break");
+      const configuration = aicapConfiguration();
+      const tagNode = createTipTapNodeExtension(configuration as any);
+      return new Editor({
+        extensions: [
+          Document,
+          Paragraph,
+          Text,
+          HardBreak,
+          tagNode,
+          createTaggingCommandsExtension({
+            instanceId: "test",
+            configuration: ref([configuration] as any),
+          }),
+        ],
+        content,
+      });
+    };
+
+    it("tagging a selection across a hard break keeps the break", async () => {
+      const editor = await buildTaggingEditor("<p>ab=<br>cd</p>");
+
+      editor.commands.setTextSelection({ from: 2, to: 6 });
+      await editor.commands.linkEntityToTaggedText({
+        id: "W-42",
+        type: "word",
+      } as any);
+
+      const html = editor.getHTML();
+      expect(html).toMatch(/a<elody-w[^>]*>b=<br>c<\/elody-w>d/);
+
+      editor.destroy();
+    });
+
+    it("tagging a selection across two paragraphs joins them with a break", async () => {
+      const editor = await buildTaggingEditor("<p>ab=</p><p>cd</p>");
+
+      editor.commands.setTextSelection({ from: 2, to: 7 });
+      await editor.commands.linkEntityToTaggedText({
+        id: "W-42",
+        type: "word",
+      } as any);
+
+      expect(editor.getHTML()).toMatch(
+        /^<p>a<elody-w[^>]*>b=<br>c<\/elody-w>d<\/p>$/,
+      );
+
+      editor.destroy();
+    });
+
+    it("survives a parse -> re-render round trip of stored HTML", async () => {
+      const editor = await buildTaggingEditor(
+        '<p>a<elody-w type="person" data-entity-id="W-42" lemma="ktb">b=<br>c</elody-w>d</p>',
+      );
+
+      expect(editor.getHTML()).toMatch(/a<elody-w[^>]*>b=<br>c<\/elody-w>d/);
+
+      editor.destroy();
+    });
+
+    it("draws each line as its own tag piece so Firefox aligns RTL lines correctly", async () => {
+      const editor = await buildTaggingEditor(
+        '<p>a<elody-w type="person" data-entity-id="W-42" lemma="ktb">b=<br>c</elody-w>d</p>',
+      );
+
+      expect(editor.view.dom.innerHTML).toMatch(
+        /a<span[^>]*style="display: contents;"[^>]*><elody-w[^>]*>b=<\/elody-w><br><elody-w[^>]*>c<\/elody-w><\/span>d/,
+      );
+      expect(editor.getHTML()).toMatch(/a<elody-w[^>]*>b=<br>c<\/elody-w>d/);
+
+      editor.destroy();
+    });
+
+    it("draws a single-line tag as one plain element", async () => {
+      const editor = await buildTaggingEditor(
+        '<p>a<elody-w type="person" data-entity-id="W-42" lemma="ktb">bc</elody-w>d</p>',
+      );
+
+      expect(editor.view.dom.innerHTML).toMatch(
+        /a<elody-w[^>]*>bc<\/elody-w>d/,
+      );
+
+      editor.destroy();
+    });
+
+    it.each([
+      ["a hard break", "<p>عبد<br>الله</p>", 9],
+      ["two paragraphs", "<p>عبد</p><p>الله</p>", 10],
+    ])(
+      "hands the tag modal a <br> for a selection across %s",
+      async (_, content, to) => {
+        const editor = await buildTaggingEditor(content);
+        openModal.mockClear();
+
+        editor.commands.setTextSelection({ from: 1, to });
+        editor.commands.openTagModal();
+
+        expect(openModal.mock.calls[0][6].selectedText).toBe("عبد<br>الله");
+
+        editor.destroy();
+      },
+    );
+
+    it("hands the tag modal literal angle brackets, not HTML entities", async () => {
+      const editor = await buildTaggingEditor("<p>mo&lt;x&gt;on</p>");
+      openModal.mockClear();
+
+      editor.commands.setTextSelection({ from: 1, to: 8 });
+      editor.commands.openTagModal();
+
+      expect(openModal.mock.calls[0][6].selectedText).toBe("mo<x>on");
+
+      editor.destroy();
+    });
+
+    it("untagging restores the hard break", async () => {
+      const editor = await buildTaggingEditor(
+        '<p>a<elody-w type="person" data-entity-id="W-42" lemma="ktb">b=<br>c</elody-w>d</p>',
+      );
+
+      editor.commands.setTextSelection({ from: 2, to: 3 });
+      await editor.commands.untagSelectedText();
+
+      expect(editor.getHTML()).toBe("<p>ab=<br>cd</p>");
+
+      editor.destroy();
+    });
   });
 });

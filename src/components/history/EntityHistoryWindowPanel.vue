@@ -31,11 +31,8 @@
           :key="idx + '-window-panel-content'"
         >
           <EntityHistoryWindowPanelContent
-            :panel-type="panelType"
             :relation-array="relationArray"
-            :metadatafields="
-              getMetadataFields(panel, panelType, formId, idx - 1)
-            "
+            :metadatafields="getMetadataFields(panel, formId, idx - 1)"
             :can-be-multiple-columns="canBeMultipleColumns"
             :form-id="formId"
             :identifiers="identifiers"
@@ -71,7 +68,6 @@ import { getMetadataFields } from "@/helpers";
 import { useRepeatableFields } from "@/composables/useRepeatableFields";
 import {
   type WindowElementPanel,
-  type PanelType,
   type PanelRelation,
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
@@ -94,7 +90,6 @@ const props = withDefaults(
 );
 const { t } = useI18n();
 
-const panelType = ref<PanelType>(props.panel.panelType);
 const isCollapsed = ref<boolean>(false);
 const canBeMultipleColumns = ref<boolean>(
   props.panel.canBeMultipleColumns || false,
@@ -116,15 +111,11 @@ const toggleIsCollapsed = () => {
 
 const relationArray = computed((): PanelRelation[] =>
   Object.values(props.panel).flatMap((value) =>
-    Array.isArray(value) ? (value as PanelRelation[]) : [],
+    Array.isArray(value)
+      ? value.filter((item) => item?.__typename === "PanelRelation")
+      : [],
   ),
 );
-
-watchEffect(() => {
-  if (repeatablePanel.value) {
-    repeatableFieldsHelper.init();
-  }
-});
 </script>
 
 <style scoped>

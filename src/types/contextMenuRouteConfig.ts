@@ -86,11 +86,22 @@ export const isToggleButton = (
   btn: EntityButtonConfig | ToggleEntityButtonConfig,
 ): btn is ToggleEntityButtonConfig => "toggle" in btn && btn.toggle === true;
 
+export type SeenDisplay = "dimSeen" | "highlightNew";
+
+export type SeenTracking = {
+  activityKey?: string;
+  display: SeenDisplay;
+  ttlDays?: number;
+};
+
 export type EntityConfig = {
   actions?: ContextMenuActionRouteConfig[];
   hasEditMetadataButton?: boolean;
   deleteButton?: EntityButtonConfig | ToggleEntityButtonConfig | false;
   trackSeen?: boolean;
+  seenActivityKey?: string;
+  seenDisplay?: SeenDisplay;
+  seenTtlDays?: number;
   jobStatusPolling?: boolean;
   showNavigationArrows?: boolean;
   showHistoryButton?: boolean;

@@ -50,6 +50,16 @@ const buildVariables = () => {
   return variables;
 };
 
+const navigationTargetOf = (
+  entity: any,
+): { id: string; type: string } | undefined => {
+  const { navigate_to_id: id, navigate_to_type: type } =
+    entity?.intialValues ?? {};
+  if (id && type) return { id, type };
+  if (entity?.uuid) return { id: entity.uuid, type: entity.type };
+  return undefined;
+};
+
 const doAction = async () => {
   try {
     const document = await loadDocument(props.query);
@@ -79,11 +89,9 @@ const doAction = async () => {
       const createdEntity = result?.data
         ? (Object.values(result.data)[0] as any)
         : undefined;
-      if (createdEntity?.uuid) {
-        router.push({
-          name: "SingleEntity",
-          params: { id: createdEntity.uuid, type: createdEntity.type },
-        });
+      const navigationTarget = navigationTargetOf(createdEntity);
+      if (navigationTarget) {
+        router.push({ name: "SingleEntity", params: navigationTarget });
         return;
       }
     }

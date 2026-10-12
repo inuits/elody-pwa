@@ -8,7 +8,7 @@
       },
     ]"
   >
-    <div v-if="panelType === PanelType.Relation && relationArray.length">
+    <div v-if="relationArray.length">
       <div class="pl-2 rounded-sm bg-accent-light">
         <p class="text-sm text-text-body">{{ t("entity.belongs-to") }}</p>
         <div class="rounded-sm border-solid border-neutral-30 border-2">
@@ -52,7 +52,7 @@
           <template #default="{ localizedMetadata }">
             <metadata-wrapper
               v-if="
-                !nonStandardFieldTypes.includes(metadata.__typename)  &&
+                !nonStandardFieldTypes.includes(metadata.__typename) &&
                 !parentIsListItem &&
                 metadata.unit !== Unit.CoordinatesDefault
               "

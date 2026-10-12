@@ -20,6 +20,7 @@ import {
   findEntityListElement,
   findRepeatablePanelFields,
   getValueForPanelMetadata,
+  getMetadataFields,
   formatTeaserMetadata,
   tagMultilingualMetadata,
 } from "@/helpers";
@@ -28,7 +29,6 @@ import {
   type Entity,
   type ColumnList,
   InputFieldTypes,
-  PanelType,
 } from "@/generated-types/queries";
 import type { DropzoneFile } from "dropzone";
 
@@ -931,7 +931,6 @@ describe("getFromExpressEndpoint", () => {
       });
 
       const value = getValueForPanelMetadata(
-        PanelType.Metadata,
         "parallel_title",
         "entity-1",
         "",
@@ -952,7 +951,6 @@ describe("getFromExpressEndpoint", () => {
       });
 
       const value = getValueForPanelMetadata(
-        PanelType.Metadata,
         "parallel_title",
         "entity-1",
         "",
@@ -963,6 +961,38 @@ describe("getFromExpressEndpoint", () => {
 
       expect(value).toBe("");
     });
+  });
+});
+
+describe("getMetadataFields", () => {
+  it("reads metadata field values from the form without any panel type", () => {
+    mocks.getForm.mockReturnValue({
+      values: { intialValues: { refCreators: "Jane" } },
+    });
+
+    const fields = getMetadataFields(
+      {
+        canBeMultipleColumns: true,
+        refCreators: {
+          __typename: "PanelMetaData",
+          key: "refCreators",
+          label: "Creators",
+        },
+      } as any,
+      "entity-1",
+    ) as any[];
+
+    expect(fields).toHaveLength(1);
+    expect(fields[0].value).toBe("Jane");
+  });
+
+  it("returns the bulk data list when the panel has bulk data", () => {
+    const fields = getMetadataFields(
+      { bulkData: [{ key: "codec", value: "h264" }] } as any,
+      "entity-1",
+    ) as any[];
+
+    expect(fields).toEqual([{ label: "codec", key: "codec", value: "h264" }]);
   });
 });
 

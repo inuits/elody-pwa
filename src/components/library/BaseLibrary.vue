@@ -119,6 +119,8 @@
               :selected-pagination-limit-option="paginationStore.limit.value"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
+              :show-group-by="displayTable"
+              :set-group-by="(config) => (chosenGroupBy = config)"
               :simple-search-value="simpleSearchTerm"
               :set-simple-search="
                 isSearchLibrary ||
@@ -168,7 +170,7 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap && !displayPipeline"
+            :show-pagination="!displayMap && !displayPipeline && !isTableGrouped"
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -261,6 +263,7 @@
             :amount="placeholderEntitiesAmount"
           />
           <ViewModesList
+            v-if="!displayMap"
             v-show="
               showViewModesList &&
               !isInitialLoading &&
@@ -301,12 +304,24 @@
             :primaryThumbnailId="primaryThumbnailId"
           />
           <ViewModesTable
+            v-if="!displayMap"
             v-show="
               displayTable &&
               !isInitialLoading &&
               (!entitiesLoading || !!entities?.length)
             "
-            :entities="entities as Entity[]"
+            :entities="
+              (isTableGrouped
+                ? groupedEntities.entities.value
+                : entities) as Entity[]
+            "
+            :groups="isTableGrouped ? groupedEntities.groups.value : undefined"
+            :has-more-groups="
+              isTableGrouped && groupedEntities.hasMoreGroups.value
+            "
+            :groups-loading="groupedEntities.loading.value"
+            @load-more-in-group="groupedEntities.loadMoreInGroup"
+            @load-more-groups="groupedEntities.loadMoreGroups"
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
@@ -385,6 +400,7 @@ import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
+import { useGroupedEntities } from "@/components/library/view-modes/composables/useGroupedEntities";
 import { UploadStatus } from "@/composables/upload/types";
 import useUpload from "@/composables/upload/useUpload";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -435,6 +451,11 @@ import {
   TypeModals,
   ViewModes,
   type ViewModesWithConfig,
+  type GroupByConfig,
+  GetRelationLabelsForIdsDocument,
+  KeyAsLabelOrigin,
+  type GetRelationLabelsForIdsQuery,
+  type GetRelationLabelsForIdsQueryVariables,
 } from "@/generated-types/queries";
 import { formatTeaserMetadata, getEntityTitle } from "@/helpers";
 import { deepToRaw } from "@/utils/deepToRaw";
@@ -704,6 +725,8 @@ const {
   fetchAllPromises,
   getEntities,
   getEntityById,
+  getQueryVariables,
+  fetchEntitiesWithVariables,
   manipulationQuery,
   setAdvancedFilters,
   setEntityType,
@@ -834,6 +857,39 @@ const {
   persistPreferences: props.saveViewPreferences !== false,
   forceListView: props.forceListView,
   persistExpandFilters: props.persistExpandFilters,
+});
+
+const chosenGroupBy = ref<GroupByConfig | null>(null);
+const tableGroupBy = computed<GroupByConfig | undefined>(
+  () => chosenGroupBy.value ?? undefined,
+);
+const groupedEntities = useGroupedEntities({
+  fetchEntities: fetchEntitiesWithVariables,
+  getBaseVariables: getQueryVariables,
+  resolveLabels: async (ids, types, metadataKey) => {
+    const result = await (apolloClient as ApolloClient<any>).query<
+      GetRelationLabelsForIdsQuery,
+      GetRelationLabelsForIdsQueryVariables
+    >({
+      query: GetRelationLabelsForIdsDocument,
+      variables: {
+        ids,
+        types,
+        keyAsLabel: metadataKey
+          ? { origin: KeyAsLabelOrigin.Metadata, key: metadataKey }
+          : undefined,
+      },
+      fetchPolicy: "no-cache",
+    });
+    return result.data?.RelationLabelsForIds ?? [];
+  },
+});
+const isTableGrouped = computed(
+  () => displayTable.value && tableGroupBy.value !== undefined,
+);
+watch([fetchSequence, isTableGrouped, tableGroupBy], () => {
+  if (isTableGrouped.value) groupedEntities.load(tableGroupBy.value!);
+  else groupedEntities.reset();
 });
 
 const showBasicModePagination = computed(
@@ -1177,6 +1233,7 @@ const resetPaginationAndView = () => {
   const limitFromState = getStateForRoute(route)?.queryVariables?.limit;
   paginationStore.setLimit(limitFromState || 20);
   resetToListView();
+  hasRestoredViewModesAfterFetch.value = false;
 };
 
 watch(

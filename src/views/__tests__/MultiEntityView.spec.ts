@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   queryResult: { data: { WemOverview: [] as any[] } },
   loadDocument: vi.fn(),
   query: vi.fn(),
-  setRootRoute: vi.fn(),
+  determineBreadcrumbsFromRouteConfig: vi.fn(),
 }));
 
 vi.mock("vue-router", () => ({
@@ -42,10 +42,8 @@ vi.mock("@/helpers", () => ({
 
 vi.mock("@/composables/useBreadcrumbs", () => ({
   useBreadcrumbs: () => ({
-    setRootRoute: mocks.setRootRoute,
-    clearBreadcrumbPath: vi.fn(),
-    getRouteBreadcrumbsOfEntity: vi.fn(),
-    iterateOverBreadcrumbs: vi.fn().mockResolvedValue(undefined),
+    determineBreadcrumbsFromRouteConfig:
+      mocks.determineBreadcrumbsFromRouteConfig,
   }),
   breadcrumbRoutes: { value: [] },
 }));
@@ -108,38 +106,35 @@ describe("MultiEntityView", () => {
     wrapper.unmount();
   });
 
-  it("builds the current crumb from the configured pill label and title source", async () => {
+  it("builds the breadcrumbs from the route's configuration, for the requested entity among all loaded ones", async () => {
+    const breadcrumbs = [
+      {
+        current: true,
+        pillLabel: "navigation.wem",
+        title: { type: "manifestation", key: "title" },
+      },
+      { overviewPage: "HomePage", title: "navigation.home" },
+    ];
     mocks.route.meta = {
       queries: { getMultiEntity: "GetWemOverview" },
-      breadcrumbs: [
-        {
-          current: true,
-          pillLabel: "navigation.wem",
-          title: { type: "manifestation", key: "title" },
-        },
-        { overviewPage: "HomePage", title: "navigation.home" },
-      ],
+      breadcrumbs,
     };
-    mocks.queryResult.data.WemOverview = [
+    const loaded = [
       { id: "W-1", type: "work_word", intialValues: { title: "Work title" } },
-      { id: "E-1", type: "reading", intialValues: { title: "Reading title" } },
       {
         id: "M-123",
         type: "manifestation_word",
         intialValues: { title: "Manifestation title" },
       },
     ];
+    mocks.queryResult.data.WemOverview = loaded;
     const wrapper = getWrapper();
     await flushPromises();
 
-    expect(mocks.setRootRoute).toHaveBeenCalledWith(
-      "M-123",
-      "Manifestation title",
-      expect.objectContaining({
-        formatter: "pill",
-        label: "navigation.wem",
-        translationKey: "navigation.wem",
-      }),
+    expect(mocks.determineBreadcrumbsFromRouteConfig).toHaveBeenCalledWith(
+      breadcrumbs,
+      loaded[1],
+      loaded,
     );
     wrapper.unmount();
   });
