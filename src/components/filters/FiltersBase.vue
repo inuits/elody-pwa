@@ -626,6 +626,7 @@ const updateFilterVariables = () => {
   setVariables({
     parentIds: props.parentEntityIdentifiers,
     entityType: props.entityType,
+    routeEntityType: props.route?.meta?.entityType as string | undefined,
     entity: parentEntity?.value || parentEntity,
     dateToday: DateTime.now().toISO(),
   });

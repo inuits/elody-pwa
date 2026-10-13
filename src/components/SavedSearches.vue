@@ -49,7 +49,7 @@
       <base-context-menu-item
         @clicked="openFindAllFiltersModal"
         :icon="Unicons.SearchGlass.name"
-        :label="$t('saved-searches.all-filters')"
+        :label="$t('saved-searches.all-saved-searches')"
       />
     </div>
   </div>
