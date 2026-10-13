@@ -59,10 +59,11 @@ import type { MenuItem } from "@/generated-types/queries";
 import LogInLogout from "@/components/LogInLogout.vue";
 import Menuitem from "@/components/menu/MenuItem.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
-import { ref, onMounted, onUnmounted, inject } from "vue";
+import { ref, onMounted, onUnmounted, inject, watch } from "vue";
 import { getEnvironmentLabel } from "@/helpers";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useRouter } from "vue-router";
+import { useMenuBadges } from "@/composables/useMenuBadges";
 
 const config: any = inject("config");
 const environmentLabel = getEnvironmentLabel(config?.DEPLOYMENT_ENVIRONMENT);
@@ -79,6 +80,9 @@ const {
 } = useMenuHelper();
 const { someModalIsOpened } = useBaseModal();
 getMenuEntities();
+
+const { refreshBadges } = useMenuBadges();
+watch(menuItems, () => refreshBadges(menuItems.value));
 
 const changeExpandedStateOfMenu = (newState: boolean) => {
   if (!someModalIsOpened.value || (someModalIsOpened.value && newState))
@@ -115,6 +119,7 @@ const closeExpanded = (event: any) => {
 
 router.afterEach(() => {
   changeExpandedStateOfMenu(false);
+  refreshBadges(menuItems.value);
 });
 </script>
 

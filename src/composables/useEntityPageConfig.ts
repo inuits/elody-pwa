@@ -9,7 +9,7 @@ import type {
   ToggleEntityButtonConfig,
 } from "@/types/contextMenuRouteConfig";
 
-const seenTrackingOf = (
+export const seenTrackingOf = (
   config: EntityConfig | undefined,
 ): SeenTracking | undefined => {
   if (config?.trackSeen !== true) return undefined;
