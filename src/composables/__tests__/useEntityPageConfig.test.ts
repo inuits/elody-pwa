@@ -383,6 +383,36 @@ describe("useEntityPageConfig", () => {
   });
 });
 
+describe("hasEditMetadataButtonForType", () => {
+  // A view of several entities (the WEM overview) asks per entity type.
+  it("is on only for an entity type whose config turns it on", () => {
+    mockRoute.value = {
+      meta: {
+        entityPageConfig: {
+          work: { hasEditMetadataButton: true },
+          expression: { hasEditMetadataButton: false },
+          manifestation: {},
+        } as EntityPageConfig,
+      },
+      params: { type: "works" },
+    };
+
+    const { hasEditMetadataButtonForType } = useEntityPageConfig();
+
+    expect(hasEditMetadataButtonForType("work")).toBe(true);
+    expect(hasEditMetadataButtonForType("Work")).toBe(true);
+    expect(hasEditMetadataButtonForType("expression")).toBe(false);
+    expect(hasEditMetadataButtonForType("manifestation")).toBe(false);
+    expect(hasEditMetadataButtonForType("person")).toBe(false);
+  });
+
+  it("is off without an entityPageConfig on the route", () => {
+    mockRoute.value = { meta: {}, params: {} };
+    const { hasEditMetadataButtonForType } = useEntityPageConfig();
+    expect(hasEditMetadataButtonForType("work")).toBe(false);
+  });
+});
+
 describe("slug casing", () => {
   beforeEach(() => {
     mockRegisteredRoutes.value = [];

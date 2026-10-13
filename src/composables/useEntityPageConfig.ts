@@ -57,6 +57,15 @@ export const useEntityPageConfig = () => {
     () => entityConfig.value?.hasEditMetadataButton,
   );
 
+  // A view of several entities (the WEM overview) asks per entity type.
+  const hasEditMetadataButtonForType = (entityType: string): boolean => {
+    const config = route.meta.entityPageConfig;
+    return (
+      (config?.[entityType] ?? config?.[entityType.toLowerCase()])
+        ?.hasEditMetadataButton === true
+    );
+  };
+
   const deleteButton = computed<
     EntityButtonConfig | ToggleEntityButtonConfig | false | undefined
   >(() => entityConfig.value?.deleteButton);
@@ -87,6 +96,7 @@ export const useEntityPageConfig = () => {
   return {
     actions,
     hasEditMetadataButton,
+    hasEditMetadataButtonForType,
     deleteButton,
     trackSeen,
     seenTracking,
