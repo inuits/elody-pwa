@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   replace: vi.fn(),
   apolloQuery: vi.fn(),
+  afterEach: vi.fn(),
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -31,7 +32,7 @@ vi.mock("vue-i18n", () => ({
 vi.mock("vue-router", () => ({
   useRouter: () => ({
     beforeEach: vi.fn(),
-    afterEach: vi.fn(),
+    afterEach: mocks.afterEach,
     push: mocks.push,
     replace: mocks.replace,
   }),
@@ -309,6 +310,38 @@ describe("useBreadcrumbs", () => {
         overviewPage: "Documents",
       },
     ]);
+  });
+});
+
+describe("useBreadcrumbs after a navigation", () => {
+  const toOverview = {
+    params: {},
+    meta: { breadcrumbs: [{ overviewPage: "Works", title: "Werken" }] },
+  };
+  const afterNavigation = () => {
+    useBreadcrumbs({});
+    return mocks.afterEach.mock.calls.at(-1)![0];
+  };
+
+  beforeEach(() => {
+    breadcrumbRoutes.value = [
+      { id: "", overviewPage: "Works", title: "Werken", type: "" },
+    ];
+    rootRoute.value = { rootId: "W-1", rootTitle: "music work" } as any;
+  });
+
+  it("resets the path to the overview page it arrived on", () => {
+    afterNavigation()(toOverview, {}, undefined);
+    expect(breadcrumbRoutes.value).toEqual([]);
+    expect(rootRoute.value.rootTitle).toBe("Werken");
+  });
+
+  // A leave prompt (unsaved changes) can cancel the navigation; the page and
+  // its breadcrumbs stay as they were.
+  it("keeps the path when the navigation was cancelled", () => {
+    afterNavigation()(toOverview, {}, { type: 4 });
+    expect(breadcrumbRoutes.value).toHaveLength(1);
+    expect(rootRoute.value.rootTitle).toBe("music work");
   });
 });
 
