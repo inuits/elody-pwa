@@ -129,7 +129,6 @@ describe("EntityElementWindowPanel — repeatable rows edited in place", () => {
     fieldKey: "isbn_group",
     addRow: vi.fn(),
     isStoredRow: vi.fn((index: number) => index === 0),
-    hasUnsavedRow: vi.fn(() => false),
     canRemoveRow: vi.fn(() => true),
     rowsWithout: vi.fn(() => [{ isbn: "222" }]),
     removeSavedRow: vi.fn(),
@@ -185,7 +184,7 @@ describe("EntityElementWindowPanel — repeatable rows edited in place", () => {
   it("adds a row from the header when the entity can be updated", async () => {
     const wrapper = mountRepeatable();
     const add = wrapper.find('[data-cy="repeatable-add-row"]');
-    expect(add.text()).toBe("Add more");
+    expect(add.text()).toBe("actions.labels.add-more");
     await add.trigger("click");
     expect(state.rows.addRow).toHaveBeenCalled();
   });
@@ -200,7 +199,7 @@ describe("EntityElementWindowPanel — repeatable rows edited in place", () => {
   });
 
   it("always offers Add more, also while a row isn't saved yet", () => {
-    state.rows.hasUnsavedRow.mockReturnValue(true);
+    state.rows.isStoredRow.mockReturnValue(false);
     expect(
       mountRepeatable().find('[data-cy="repeatable-add-row"]').exists(),
     ).toBe(true);

@@ -55,18 +55,23 @@ describe("useRepeatableFields — rows edited in place", () => {
       "intialValues.repeatable-panels.isbn_group[1].isbn" as any,
       "333",
     );
-    expect(helper.rowsForSave(1)).toEqual([
-      { isbn: "111", hidden: "keep" },
+    expect(helper.rowsForSave(0, "isbn", "000")).toEqual([
+      { isbn: "000", hidden: "keep" },
       { isbn: "333" },
     ]);
   });
 
-  it("leaves an unsaved new row out, unless it is the row being saved", async () => {
+  it("leaves unsaved new rows out, unless it is the row being saved", async () => {
     const { helper } = await mountRows([{ isbn: "111" }]);
     helper.addRow();
+    helper.addRow();
     await nextTick();
-    expect(helper.rowsForSave(0)).toEqual([{ isbn: "111" }]);
-    expect(helper.rowsForSave(1)).toEqual([{ isbn: "111" }, {}]);
+    expect(helper.rowsForSave(0, "isbn", "999")).toEqual([{ isbn: "999" }]);
+    // The saved row goes right after the stored ones, wherever it is shown.
+    expect(helper.rowsForSave(2, "isbn", "222")).toEqual([
+      { isbn: "111" },
+      { isbn: "222" },
+    ]);
   });
 
   it("leaves a removed row out of the rows to save", async () => {
@@ -76,32 +81,50 @@ describe("useRepeatableFields — rows edited in place", () => {
 
   it("adds an empty row that stays unsaved until it is saved", async () => {
     const { helper } = await mountRows([{ isbn: "111" }]);
-    expect(helper.hasUnsavedRow()).toBe(false);
     helper.addRow();
     expect(helper.fields.value).toHaveLength(2);
     expect(helper.isStoredRow(1)).toBe(false);
-    expect(helper.hasUnsavedRow()).toBe(true);
     helper.markSaved([{ isbn: "111" }, { isbn: "222" }]);
     expect(helper.isStoredRow(1)).toBe(true);
-    expect(helper.hasUnsavedRow()).toBe(false);
   });
 
-  it("adds no second empty row: it hands back the unsaved one", async () => {
+  it("adds a row each time, also while others are unsaved", async () => {
     const { helper } = await mountRows([{ isbn: "111" }]);
     expect(helper.addRow()).toBe(1);
+    expect(helper.addRow()).toBe(2);
+    expect(helper.fields.value).toHaveLength(3);
+  });
+
+  it("adds a row next to the empty row of a panel without values", async () => {
+    const { helper } = await mountRows([]);
     expect(helper.addRow()).toBe(1);
     expect(helper.fields.value).toHaveLength(2);
   });
 
-  it("hands back the empty row of a panel without values", async () => {
-    const { helper } = await mountRows([]);
-    expect(helper.addRow()).toBe(0);
-    expect(helper.fields.value).toHaveLength(1);
+  // Saved rows stay first, in their stored order, so a row's place on screen
+  // is its place in the stored list.
+  it("moves a saved row up to right after the stored rows", async () => {
+    const { helper, form } = await mountRows([{ isbn: "111" }]);
+    helper.addRow();
+    helper.addRow();
+    await nextTick();
+    form.setFieldValue(
+      "intialValues.repeatable-panels.isbn_group[2].isbn" as any,
+      "333",
+    );
+    const rows = helper.rowsForSave(2, "isbn", "333");
+    helper.markSaved(rows, 2);
+    await nextTick();
+    expect(helper.isStoredRow(1)).toBe(true);
+    expect(helper.isStoredRow(2)).toBe(false);
+    expect(
+      form.values.intialValues["repeatable-panels"].isbn_group[1].isbn,
+    ).toBe("333");
   });
 
   it("counts the empty row of a panel without values as unsaved", async () => {
     const { helper } = await mountRows([]);
-    expect(helper.hasUnsavedRow()).toBe(true);
+    expect(helper.isStoredRow(0)).toBe(false);
     expect(helper.canRemoveRow(0)).toBe(false);
   });
 

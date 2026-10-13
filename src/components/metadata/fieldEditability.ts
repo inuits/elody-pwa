@@ -1,9 +1,5 @@
 import { InputFieldTypes } from "@/generated-types/queries";
 
-// Per-field editing replaces the page-wide edit mode ("Bewerk metadata"): its
-// button is hidden. The legacy code path stays until it is removed.
-export const PAGE_EDIT_MODE_AVAILABLE = false;
-
 // Field types that edit in place on a detail page. Other types keep their
 // read-only rendering until they get an inline editor
 // (docs/design-system/patterns/per-field-editing.md).
@@ -19,11 +15,13 @@ const IN_PLACE_FIELD_TYPES = new Set<string>([
   InputFieldTypes.DropdownMultiselectMetadata,
 ]);
 
-// Relation dropdowns edit in place only when they save as the entity's own
-// relations (relationValues), not as metadata, on a linked entity or inherited.
+// Relation dropdowns and relation tables edit in place only when they save as
+// the entity's own relations (relationValues), not as metadata, on a linked
+// entity or inherited.
 const RELATION_FIELD_TYPES = new Set<string>([
   InputFieldTypes.DropdownSingleselectRelations,
   InputFieldTypes.DropdownMultiselectRelations,
+  InputFieldTypes.InputFieldWithSubFields,
 ]);
 
 export type FieldEditabilityContext = {

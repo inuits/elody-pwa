@@ -49,7 +49,11 @@ describe("canEditFieldInPlace", () => {
     expect(canEditFieldInPlace({ ...editable, inputFieldType })).toBe(true);
   });
 
-  it.each(["dropdownSingleselectRelations", "dropdownMultiselectRelations"])(
+  it.each([
+    "dropdownSingleselectRelations",
+    "dropdownMultiselectRelations",
+    "inputFieldWithSubFields",
+  ])(
     "edits a %s field in place when it saves as the entity's own relations",
     (inputFieldType) => {
       expect(
@@ -58,7 +62,11 @@ describe("canEditFieldInPlace", () => {
     },
   );
 
-  it.each(["dropdownSingleselectRelations", "dropdownMultiselectRelations"])(
+  it.each([
+    "dropdownSingleselectRelations",
+    "dropdownMultiselectRelations",
+    "inputFieldWithSubFields",
+  ])(
     "keeps a %s field read-only when it doesn't save as the entity's own relations",
     (inputFieldType) => {
       expect(canEditFieldInPlace({ ...editable, inputFieldType })).toBe(false);
@@ -69,7 +77,6 @@ describe("canEditFieldInPlace", () => {
   );
 
   it.each([
-    "inputFieldWithSubFields",
     "fileUpload",
     undefined,
   ])(

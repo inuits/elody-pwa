@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { defineComponent, h, nextTick, provide, ref } from "vue";
-import { useForm, defineRule } from "vee-validate";
+import { useField, useForm, defineRule } from "vee-validate";
 
 vi.mock("@/main", () => ({
   i18n: {
@@ -138,7 +138,19 @@ const mountWrapper = async (
         BaseVirtualKeyboard: true,
         MetadataTruncatedText: { template: "<div><slot /></div>" },
         MetadataFormatter: true,
-        TableInputField: true,
+        TableInputField: {
+          name: "TableInputField",
+          props: [
+            "modelValue",
+            "subFields",
+            "formId",
+            "parentFieldKey",
+            "relationType",
+            "disabled",
+            "isFlowRelationValues",
+          ],
+          template: "<div data-cy='table-stub'></div>",
+        },
         ViewModesAutocompleteRelations: {
           name: "ViewModesAutocompleteRelations",
           props: [
@@ -1090,10 +1102,181 @@ describe("MetadataWrapper — inline relation editing", () => {
   });
 });
 
+describe("MetadataWrapper — a relation table edited in place", () => {
+  const author = (key: string, functionIndication = "aut", extra = {}) => ({
+    key,
+    type: "refAuthors",
+    metadata: [{ key: "function_indication", value: functionIndication }],
+    ...extra,
+  });
+
+  const tableProps = () => {
+    const p = buildProps("refAuthors", false);
+    (p.metadata as any).value = "";
+    (p.metadata as any).inputField = {
+      type: InputFieldTypes.InputFieldWithSubFields,
+      relationType: "refAuthors",
+      isMetadataField: false,
+      subFields: [
+        {
+          key: "name",
+          label: "metadata.labels.name",
+          inputField: {
+            type: InputFieldTypes.DropdownSingleselectRelations,
+            isMetadataField: false,
+          },
+        },
+        {
+          key: "function_indication",
+          label: "metadata.labels.function-indication",
+          inputField: { type: InputFieldTypes.Text, isMetadataField: true },
+        },
+      ],
+      options: [],
+      __typename: "InputField",
+    };
+    return p;
+  };
+
+  const form = () => useFormHelper().getForm("MW-TEST")!;
+  const setRows = async (rows: unknown[]) => {
+    form().setFieldValue("relationValues.refAuthors", rows);
+    await flushPromises();
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+  const save = async (wrapper: any) => {
+    inlineEditor(wrapper).vm.$emit("save", undefined);
+    await flushPromises();
+  };
+
+  const openTable = async (rows: unknown[] = [author("p1")]) => {
+    const wrapper = await mountWrapper(tableProps(), undefined, {
+      refAuthors: rows,
+    });
+    await wrapper
+      .find('[data-cy="field-value"]')
+      .trigger("keydown", { key: "Enter" });
+    await flushPromises();
+    return wrapper;
+  };
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:refAuthors");
+  });
+
+  it("makes the table editable in place", async () => {
+    const wrapper = await mountWrapper(tableProps(), undefined, {
+      refAuthors: [author("p1")],
+    });
+    expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBe(
+      "button",
+    );
+  });
+
+  // The table has its own borders; a dashed line under it adds nothing.
+  it("does not underline the table", async () => {
+    const wrapper = await mountWrapper(tableProps(), undefined, {
+      refAuthors: [author("p1")],
+    });
+    expect(
+      wrapper.find('[data-cy="field-value-text"]').classes(),
+    ).not.toContain("border-dashed");
+  });
+
+  it("renders the table, editable, inside the inline editor", async () => {
+    const wrapper = await openTable();
+    const table = inlineEditor(wrapper).findComponent({
+      name: "TableInputField",
+    });
+    expect(table.props()).toMatchObject({
+      formId: "MW-TEST",
+      parentFieldKey: "relationValues.refAuthors",
+      relationType: "refAuthors",
+      disabled: false,
+    });
+  });
+
+  it("saves only the added row, with its metadata", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("p2", "ill", { editStatus: "new" })]);
+    expect(inlineEditor(wrapper).props("dirty")).toBe(true);
+    await save(wrapper);
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput).toEqual({
+      metadata: [],
+      relations: [
+        {
+          key: "p2",
+          type: "refAuthors",
+          metadata: [{ key: "function_indication", value: "ill" }],
+          editStatus: "new",
+        },
+      ],
+      updateOnlyRelations: true,
+    });
+  });
+
+  it("saves a changed value in an existing row", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1", "ill")]);
+    await save(wrapper);
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+      {
+        key: "p1",
+        type: "refAuthors",
+        editStatus: "changed",
+        metadata: [{ key: "function_indication", value: "ill" }],
+      },
+    ]);
+  });
+
+  it("ignores a new row with no entity chosen", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("", "", { editStatus: "new" })]);
+    expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+  });
+
+  it("does not save while a cell is invalid", async () => {
+    defineRule("required", (value: unknown) => !!value || "Name is required");
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("", "ill", { editStatus: "new" })]);
+    mount(
+      defineComponent({
+        setup() {
+          useField("relationValues.refAuthors[1].key", "required", {
+            form: form(),
+          });
+          return () => null;
+        },
+      }),
+    );
+    await save(wrapper);
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+      "Name is required",
+    );
+  });
+
+  it("restores the rows on cancel", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("p2", "ill", { editStatus: "new" })]);
+    inlineEditor(wrapper).vm.$emit("cancel");
+    await flushPromises();
+    expect(form().values.relationValues.refAuthors).toEqual([author("p1")]);
+  });
+});
+
 describe("MetadataWrapper — a field in a repeatable row", () => {
   const helper = () => ({
     fieldKey: "isbn_group",
-    rowsForSave: vi.fn(() => [{ isbn: "111" }, { isbn: "222", note: "x" }]),
+    // The composable puts the value in the row it saves as.
+    rowsForSave: vi.fn(() => [{ isbn: "111" }, { isbn: "333", note: "x" }]),
     markSaved: vi.fn(),
   });
   const rowProps = (rows: ReturnType<typeof helper>, index = 1) => {
@@ -1138,7 +1321,7 @@ describe("MetadataWrapper — a field in a repeatable row", () => {
     expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
       { key: "isbn_group", value: saved },
     ]);
-    expect(rows.rowsForSave).toHaveBeenCalledWith(1);
-    expect(rows.markSaved).toHaveBeenCalledWith(saved);
+    expect(rows.rowsForSave).toHaveBeenCalledWith(1, "isbn", "333");
+    expect(rows.markSaved).toHaveBeenCalledWith(saved, 1);
   });
 });

@@ -1808,6 +1808,7 @@ export enum InputFieldTypes {
   DropdownSingleselectMetadata = 'dropdownSingleselectMetadata',
   DropdownSingleselectRelations = 'dropdownSingleselectRelations',
   FileUpload = 'fileUpload',
+  InputFieldWithSubFields = 'inputFieldWithSubFields',
   Number = 'number',
   Radio = 'radio',
   Range = 'range',

@@ -62,7 +62,7 @@
           ></base-button-new>
         </div>
         <!-- Adding a row only starts it (a pill): it is saved with its first
-             saved field. One unsaved row at a time; adding again goes to it. -->
+             saved field. Several rows may be unsaved at once. -->
         <button
           v-if="canEditRows"
           type="button"
@@ -258,8 +258,7 @@ const removeRowScope = useInPlaceScope(
 const translated = (key: string, fallback: string): string =>
   te(key) ? t(key) : fallback;
 const rowMessages = {
-  // The same label as the page-edit button.
-  add: () => t("Add more"),
+  add: () => t("actions.labels.add-more"),
   remove: () => translated("inline-edit.remove-row", "Remove row"),
 };
 const rowLabel = (rowNumber: number): string =>

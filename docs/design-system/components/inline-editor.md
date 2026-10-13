@@ -12,7 +12,9 @@ and never in a modal.
 ## Anatomy
 The input for the field type, then the actions inline on the right,
 vertically centred on the input. Inputs take the row's width; a checkbox is
-only as wide as its box, so the actions sit right after it:
+only as wide as its box, so the actions sit right after it. A dropdown keeps
+its options' width; where the actions don't fit beside it (a narrow window),
+they wrap below it:
 - **Bewaar:** commit button, `sm`;
 - **Annuleer:** ghost button, `sm`.
 
@@ -30,6 +32,7 @@ Under the editor:
 | dropdown, metadata single / multi select | [dropdown](./dropdown.md), clearable ("— Geen waarde") unless required, multiple for multi-selects |
 | coordinates | two number inputs, Latitude and Longitude; both or neither, latitude within -90…90, longitude within -180…180; emptying both clears the value |
 | relation single / multi select | the relation autocomplete, with its value inputs when the field has metadata on the relation (for example a page number) |
+| relation table | the table with its rows editable: add a row, change a cell, remove a row. Saving sends only the added, changed and removed relations; a row with no entity chosen is left out, and every visible cell validates first |
 
 Rich text has its own editor on the [WYSIWYG field](./wysiwyg-field.md).
 Relation dropdowns edit in place only when they save as the entity's own
@@ -42,10 +45,10 @@ has its own scope, and saving sends the panel's whole stored list (one key,
 for example `isbn_group`) with that one value changed. Keys a row has but no
 field shows are kept. An "Add more" pill in the panel header adds an empty row; you
 click the field to fill in. The row is saved with its first saved field and
-is left out of every other save until then. There is one unsaved row at a time:
-"Add more" is always shown, and while a row is unsaved (or a panel without
-values shows its empty row) it moves the focus to that row's first field
-instead of adding another. An unsaved row's trash button just takes it away. A saved row's trash button
+is left out of every other save until then. "Add more" is always shown and
+always adds a row at the bottom, so several rows can be unsaved at once; the
+focus moves to the new row's first field. Saved rows stay on top in their
+stored order: a row that saves moves up to right after the saved rows. An unsaved row's trash button just takes it away. A saved row's trash button
 asks for confirmation (there is no undo yet), then saves the list without
 it. Each removable row is headed by its number and the trash button,
 centred between two rules (`──── ISBN 2 🗑 ────`), which also separates

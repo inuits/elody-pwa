@@ -96,16 +96,27 @@
       :required="isFieldRequired"
       :saving="inlineSaving"
       :error-message="inlineError"
-      :dirty="isRelationField ? relationDirty : undefined"
+      :dirty="savesAsRelations ? relationDirty : undefined"
       @save="saveInline"
       @cancel="cancelInline"
       @dirty-change="inlineDirty = $event"
       @draft-change="latestDraft = $event"
     >
-      <!-- Relations: the edit-mode autocomplete writes the selection into
+      <!-- Relations: the edit-mode autocomplete or table writes the rows into
            the form's relationValues; the editor saves only the difference. -->
-      <template v-if="isRelationField" #input>
+      <template v-if="savesAsRelations" #input>
+        <TableInputField
+          v-if="isRelationTable"
+          :model-value="fieldValueProxy"
+          :is-flow-relation-values="true"
+          :sub-fields="(metadata.inputField as any)?.subFields ?? []"
+          :form-id="formId"
+          :parent-field-key="fieldKey"
+          :relation-type="metadata.inputField.relationType"
+          :disabled="inlineSaving"
+        />
         <ViewModesAutocompleteRelations
+          v-else
           :editing="true"
           mode="edit"
           :model-value="fieldValueProxy"
@@ -631,12 +642,23 @@ const entityCanUpdate = computed<boolean>(() =>
 const isRelationField = computed<boolean>(
   () => autoCompleteType.value === "relationAutocomplete",
 );
+// A table of relations, each row with its metadata (e.g. authors with their
+// function), saves like a relation dropdown.
+const isRelationTable = computed<boolean>(
+  () =>
+    fieldType.value === InputFieldTypes.InputFieldWithSubFields &&
+    !!props.metadata.inputField?.relationType &&
+    !props.metadata.inputField?.isMetadataField,
+);
+const savesAsRelations = computed<boolean>(
+  () => isRelationField.value || isRelationTable.value,
+);
 const relationTypeOfField = computed<string | undefined>(
   () => props.metadata.inputField?.relationType || undefined,
 );
 const relationEditable = computed<boolean>(
   () =>
-    isRelationField.value &&
+    savesAsRelations.value &&
     !!relationTypeOfField.value &&
     !props.metadata.inputField?.isMetadataField &&
     !props.linkedEntityId &&
@@ -726,8 +748,10 @@ const toScopeRelations = (
   existingKeys: Set<string>,
 ): RelationValue[] =>
   relations
+    // A table row with no entity chosen yet is not a relation.
     .filter(
-      (relation: any) => relation && relation.editStatus !== EditStatus.Deleted,
+      (relation: any) =>
+        relation?.key && relation.editStatus !== EditStatus.Deleted,
     )
     .map((relation: any) => {
       const metadata = (relation.metadata ?? [])
@@ -759,15 +783,42 @@ const relationScopeInput = computed(() => {
 const relationDirty = computed<boolean>(
   () =>
     isEditingInPlace.value &&
-    isRelationField.value &&
+    savesAsRelations.value &&
     relationScopeInput.value.relations.length > 0,
 );
 const restoreRelations = (relations: unknown[]) =>
   getForm(props.formId)?.resetField(relationsPath.value, {
     value: JSON.parse(JSON.stringify(relations)),
   });
+// The table's cells validate as their own fields (a row needs its entity,
+// a required function...).
+const tableCellPaths = (): string[] => {
+  const subFields: any[] = (props.metadata.inputField as any)?.subFields ?? [];
+  const metadataKeys = subFields
+    .filter((subField) => subField.inputField?.isMetadataField === true)
+    .map((subField) => subField.key);
+  return formRelations().flatMap((_, row) =>
+    subFields
+      .filter((subField) => !subField.hidden)
+      .map((subField) =>
+        subField.inputField?.isMetadataField
+          ? `${relationsPath.value}[${row}].metadata[${metadataKeys.indexOf(subField.key)}].value`
+          : `${relationsPath.value}[${row}].key`,
+      ),
+  );
+};
 const saveRelationsInline = async () => {
   const form = getForm(props.formId);
+  if (isRelationTable.value && form) {
+    const cells = await validateScope(
+      (path) => form.validateField(path as any),
+      tableCellPaths(),
+    );
+    if (!cells.valid) {
+      inlineError.value = Object.values(cells.errors)[0]?.[0];
+      return;
+    }
+  }
   const { valid, errors } = await validateRelations({
     relations: formRelations() as any[],
     rules: getValidationRules(true, isFieldRequired.value),
@@ -835,7 +886,7 @@ const startEditing = (event?: Event) => {
   if (isRelationChipClick(event)) return;
   const opened = inPlaceScope.open({
     isDirty: () =>
-      isRelationField.value ? relationDirty.value : inlineDirty.value,
+      savesAsRelations.value ? relationDirty.value : inlineDirty.value,
     close: closeEditor,
     save: async () => {
       await saveInline(latestDraft.value);
@@ -844,7 +895,7 @@ const startEditing = (event?: Event) => {
     discard: () => cancelInline(),
   });
   if (!opened) return;
-  if (isRelationField.value)
+  if (savesAsRelations.value)
     relationsBeforeEditing.value = JSON.parse(JSON.stringify(formRelations()));
   valueBeforeEditing.value = fieldValueProxy.value;
   latestDraft.value = fieldValueProxy.value;
@@ -852,13 +903,13 @@ const startEditing = (event?: Event) => {
   isEditingInPlace.value = true;
 };
 const cancelInline = () => {
-  if (isRelationField.value) restoreRelations(relationsBeforeEditing.value);
+  if (savesAsRelations.value) restoreRelations(relationsBeforeEditing.value);
   else fieldValueProxy.value = valueBeforeEditing.value;
   closeEditor();
   focusFieldValue();
 };
 const saveInline = async (value: unknown) => {
-  if (isRelationField.value) return saveRelationsInline();
+  if (savesAsRelations.value) return saveRelationsInline();
   fieldValueProxy.value = value;
   const { valid, errors } = await validateScope(async () => {
     const result = await field.validate();
@@ -875,9 +926,11 @@ const saveInline = async (value: unknown) => {
     !!(props.metadata.inputField as any)?.valueAsList,
   );
   const row = repeatableRow.value;
-  const rows = row?.repeatableFieldsHelper.rowsForSave(row.index);
-  if (row && rows)
-    rows[row.index] = { ...rows[row.index], [props.metadata.key]: savedValue };
+  const rows = row?.repeatableFieldsHelper.rowsForSave(
+    row.index,
+    props.metadata.key,
+    savedValue,
+  );
   try {
     const savedEntity = await saveScope({
       entityId: props.linkedEntityId || entityFormData?.id || props.formId,
@@ -886,8 +939,9 @@ const saveInline = async (value: unknown) => {
         ? buildMetadataInput(row.repeatableFieldsHelper.fieldKey, rows)
         : buildMetadataInput(props.metadata.key, savedValue),
     });
-    if (row && rows) row.repeatableFieldsHelper.markSaved(rows);
     field.resetField({ value: fieldValueProxy.value });
+    // After resetField: a saved new row may move up, and its field's path with it.
+    if (row && rows) row.repeatableFieldsHelper.markSaved(rows, row.index);
     if (savedEntity && !props.linkedEntityId)
       entityFormData?.onSaved?.(savedEntity);
     savedAnnouncement.value = inPlaceScope.messages.saved();
@@ -913,6 +967,7 @@ const underlineValue = computed<boolean>(
   () =>
     canEditInPlace.value &&
     !autoCompleteType.value &&
+    !isRelationTable.value &&
     !resolvedMetadataValue.value?.formatter,
 );
 </script>

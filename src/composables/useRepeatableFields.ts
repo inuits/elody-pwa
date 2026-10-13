@@ -18,11 +18,14 @@ export type UseRepeatableFields = {
   decreaseFieldRepeatAmount: (index: number) => void;
   fieldKey: string;
   // Per-field editing: rows are saved as the whole stored list.
-  rowsForSave: (editedIndex: number) => Record<string, unknown>[];
+  rowsForSave: (
+    editedIndex: number,
+    key: string,
+    value: unknown,
+  ) => Record<string, unknown>[];
   rowsWithout: (index: number) => Record<string, unknown>[];
-  markSaved: (rows: Record<string, unknown>[]) => void;
+  markSaved: (rows: Record<string, unknown>[], editedIndex?: number) => void;
   isStoredRow: (index: number) => boolean;
-  hasUnsavedRow: () => boolean;
   canRemoveRow: (index: number) => boolean;
   addRow: () => number;
   discardUnsavedRow: (index: number) => void;
@@ -95,25 +98,34 @@ export const useRepeatableFields = (
       .map((row, index) => ({ ...stored[index], ...(row ?? {}) }))
       .filter((_, index) => index < stored.length || index === editedIndex);
   };
-  const rowsForSave = (editedIndex: number): Row[] =>
-    savedRowsOnScreen(editedIndex);
+  // Saved rows come first on screen, so an unsaved row saves right after them.
+  const rowsForSave = (editedIndex: number, key: string, value: unknown): Row[] => {
+    const rows = savedRowsOnScreen(editedIndex);
+    const at = Math.min(editedIndex, storedRows().length);
+    rows[at] = { ...rows[at], [key]: value };
+    return rows;
+  };
   const rowsWithout = (index: number): Row[] =>
     savedRowsOnScreen().filter((_, rowIndex) => rowIndex !== index);
-  const markSaved = (rows: Row[]) =>
+  // A newly saved row moves up to right after the stored rows, so a row's
+  // place on screen stays its place in the stored list.
+  const markSaved = (rows: Row[], editedIndex?: number) => {
+    const stored = storedRows().length;
+    if (editedIndex !== undefined && editedIndex > stored)
+      fieldArray.value?.move(editedIndex, stored);
     getForm(formId)?.setFieldValue(`intialValues.${fieldKey}`, rows);
+  };
   const isStoredRow = (index: number) => index < storedRows().length;
 
-  // A row added in place exists only on screen until one of its fields saves.
-  const hasUnsavedRow = () => fields.value.length > storedRows().length;
   // A saved row is removed by saving; an unsaved one just goes, unless it is
   // the empty row a panel without values shows.
   const canRemoveRow = (index: number) =>
     isStoredRow(index) || fields.value.length > 1;
-  // One unsaved row at a time: adding again hands back the one there is
-  // (also the empty row a panel without values shows).
+  // Rows are added after all others; each exists only on screen until one of
+  // its fields saves.
   const addRow = (): number => {
-    if (!hasUnsavedRow()) fieldArray.value?.push({});
-    return storedRows().length;
+    fieldArray.value?.push({});
+    return fields.value.length - 1;
   };
   const discardUnsavedRow = (index: number) => {
     if (isStoredRow(index) || !canRemoveRow(index)) return;
@@ -143,7 +155,6 @@ export const useRepeatableFields = (
     rowsWithout,
     markSaved,
     isStoredRow,
-    hasUnsavedRow,
     canRemoveRow,
     addRow,
     discardUnsavedRow,

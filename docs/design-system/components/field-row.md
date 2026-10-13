@@ -17,7 +17,8 @@ repeatable row group.
   - locale chip (multilingual fields).
 - **Value:** the rendered value. When it is editable in place:
   - a dashed underline under the value text, with square ends. Chip values
-    (dropdowns, pills) have no underline, since their shape already marks them;
+    (dropdowns, pills) and tables have no underline, since their shape
+    already marks them;
   - a pencil on the right, always visible, so editability never depends on
     hovering;
   - a hover wash behind the whole value. The wash extends
@@ -48,7 +49,8 @@ All of these must hold (`fieldEditability.ts`):
   - text, number, date, textarea;
   - checkbox, dropdown;
   - metadata dropdowns;
-  - relation dropdowns that save as the entity's own relations;
+  - relation dropdowns and relation tables (rows with metadata, such as
+    authors with their function) that save as the entity's own relations;
   - coordinates (shown as "latitude, longitude");
 - the field isn't marked non-editable or read-only for the user;
 - it isn't locked or masked;
@@ -56,9 +58,10 @@ All of these must hold (`fieldEditability.ts`):
 - it isn't multilingual or metadata on a relation (these get their own
   editors later). Fields in a repeatable panel edit in their own row (see the
   [inline editor](./inline-editor.md));
-- the legacy page-wide edit mode is off. Its "Bewerk metadata" button is
-  hidden, so this only matters for flows that still switch it on themselves
-  (create forms, the multi-entity view).
+- the page-wide edit mode is off. Its "Bewerk metadata" button is hidden
+  unless the entity type turns it on in its page config
+  (`entityPageConfig[type].hasEditMetadataButton: true`). A column of the
+  multi-entity view (WEM overview) follows its own entity's type.
 
 Anything else renders as plain text, with no button role and no hover cue.
 
