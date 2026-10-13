@@ -7,7 +7,13 @@
     data-cy="inline-field-editor"
     class="flex flex-col gap-1 w-full"
   >
-    <div data-cy="inline-editor-row" class="flex items-center gap-1.5 w-full">
+    <!-- A dropdown keeps its options' width (AdvancedDropdown's min-width);
+         where it does not fit beside the buttons, they wrap below it. -->
+    <div
+      data-cy="inline-editor-row"
+      class="flex items-center gap-1.5 w-full"
+      :class="{ 'flex-wrap': isDropdown }"
+    >
       <!-- A checkbox is only as wide as its box, so the buttons sit right
            after it; other inputs take the row. -->
       <div
@@ -51,6 +57,7 @@
           :label="saveLabel"
           button-style="commit"
           button-size="sm"
+          force-show-label
           :disabled="!isDirty || saving"
           :loading="saving"
           @click="commit"
@@ -59,6 +66,7 @@
           :label="cancelLabel"
           button-style="ghost"
           button-size="sm"
+          force-show-label
           :disabled="saving"
           @click="emit('cancel')"
         />

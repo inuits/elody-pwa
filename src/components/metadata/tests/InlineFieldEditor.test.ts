@@ -27,7 +27,14 @@ vi.mock("@/components/base/BaseInputCheckbox.vue", () => ({
 vi.mock("@/components/base/BaseButtonNew.vue", () => ({
   default: {
     name: "BaseButtonNew",
-    props: ["label", "buttonStyle", "buttonSize", "disabled", "loading"],
+    props: {
+      label: String,
+      buttonStyle: String,
+      buttonSize: String,
+      disabled: Boolean,
+      loading: Boolean,
+      forceShowLabel: Boolean,
+    },
     emits: ["click"],
     template:
       "<button :data-cy=\"'button-' + buttonStyle\" :disabled='disabled' @click=\"$emit('click')\">{{ label }}</button>",
@@ -204,6 +211,32 @@ describe("InlineFieldEditor", () => {
     it("lets a text input take the row, with the buttons at its end", () => {
       const input = editor().find('[data-cy="inline-editor-input"]');
       expect(input.classes()).toContain("grow");
+    });
+
+    // The dropdown keeps its options' width; where that and the buttons do
+    // not fit (a narrow window), the buttons wrap below it.
+    it("wraps Bewaar and Annuleer below a dropdown that does not fit beside them", () => {
+      const row = editor({
+        type: "dropdownSingleselectMetadata",
+        modelValue: "book",
+        options: [{ label: "Boek", value: "book" }],
+      }).find('[data-cy="inline-editor-row"]');
+      expect(row.classes()).toContain("flex-wrap");
+    });
+
+    it("keeps a text input and its buttons on one row", () => {
+      const row = editor().find('[data-cy="inline-editor-row"]');
+      expect(row.classes()).not.toContain("flex-wrap");
+    });
+
+    // Bewaar and Annuleer have no icon: a narrow window must not hide their
+    // labels and leave empty buttons.
+    it("always shows the labels of Bewaar and Annuleer", () => {
+      const buttons = editor().findAllComponents({ name: "BaseButtonNew" });
+      expect(buttons.map((button) => button.props("forceShowLabel"))).toEqual([
+        true,
+        true,
+      ]);
     });
 
     it("keeps a checkbox only as wide as the box, with the buttons right after it", () => {

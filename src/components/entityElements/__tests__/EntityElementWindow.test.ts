@@ -165,14 +165,33 @@ describe('EntityElementWindow panels', () => {
       expect(wrapper.find('h2').exists()).toBe(false);
     });
 
-    // A quarter of the header is too narrow for a dropdown plus Bewaar and
-    // Annuleer: the buttons covered the dropdown.
-    it('sizes the status to its editor (dropdown, then Bewaar/Annuleer) while it is open', async () => {
+    // At rest and while editing, the status is as wide as its content (the
+    // whole pill; the dropdown, then Bewaar/Annuleer), never a fixed share
+    // of the header and never the whole header.
+    it('sizes the status to its content, at rest and while it is edited', async () => {
       const wrapper = await mountWithStatus();
       const status = wrapper.find('[data-cy="window-header-status"]');
-      expect(status.classes()).toContain('w-1/4');
-      expect(status.classes()).toContain('has-[[data-cy=inline-field-editor]]:w-auto');
+      expect(status.classes()).not.toContain('w-1/4');
+      expect(status.classes()).not.toContain('flex-1');
+      expect(status.classes()).not.toContain('grow');
       expect(status.classes()).toContain('min-w-0');
+    });
+
+    // In a narrow window (a WEM column) the status moves onto its own header
+    // line, at its own width, instead of being squeezed or running past the
+    // window's edge.
+    it('wraps the status onto its own line when it does not fit beside the title', async () => {
+      const wrapper = await mountWithStatus();
+      const header = wrapper.find('[data-cy="window-header"]');
+      expect(header.classes()).toContain('flex-wrap');
+    });
+
+    // On its own line the dropdown keeps its options' width rather than
+    // stretching across the line when Bewaar/Annuleer wrap below it.
+    it('keeps the status dropdown at its own width on a line of its own', async () => {
+      const wrapper = await mountWithStatus();
+      const status = wrapper.find('[data-cy="window-header-status"]');
+      expect(status.classes()).toContain('[&_[data-cy=inline-editor-input]]:grow-0');
     });
   });
 });

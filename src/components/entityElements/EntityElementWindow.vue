@@ -11,8 +11,11 @@
     <div
       class="h-full w-full border-solid border-neutral-30 border-2 bg-background-light rounded-t-md @container/window"
     >
+      <!-- The header wraps: in a narrow window (a WEM column) the status
+           gets a line of its own instead of being squeezed. -->
       <div
-        class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row"
+        data-cy="window-header"
+        class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row flex-wrap"
       >
         <h1
           data-cy="entity-element-window-title"
@@ -21,13 +24,14 @@
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
         </h1>
 
-        <!-- While the status is edited in place, it is as wide as its editor:
-             the dropdown (which keeps its options' width), then
-             Bewaar/Annuleer, so the buttons never cover the dropdown. -->
+        <!-- The status is as wide as its content: the whole pill at rest;
+             while edited in place the dropdown (at its options' width), then
+             Bewaar/Annuleer, so the buttons never cover the dropdown. On a
+             line of its own the dropdown does not stretch either. -->
         <div
           v-if="element.windowElementStatus"
           data-cy="window-header-status"
-          class="flex gap-4 w-1/4 min-w-0 items-center has-[[data-cy=inline-field-editor]]:w-auto"
+          class="flex gap-4 min-w-0 items-center [&_[data-cy=inline-editor-input]]:grow-0"
         >
           <MetadataWrapper
             class="w-full"
