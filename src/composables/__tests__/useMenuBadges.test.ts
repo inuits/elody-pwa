@@ -161,6 +161,31 @@ describe("useMenuBadges", () => {
     expect(totalBadgeCountOf(plainParent)).toBe(1);
   });
 
+  it("counts an item that is new in several children once in the parent", async () => {
+    respondWith({
+      GetMineShared: commentsOf("CMT-SHARED", "CMT-ONLY-MINE"),
+      GetTaggedShared: commentsOf("CMT-SHARED"),
+      GetCountChild: { Entities: { count: 2, results: [] } },
+    });
+    const childWith = (query: string, source = MenuBadgeSource.SeenItems) =>
+      menuItemWith({ source, query, entityType: "comment" });
+    const parent = menuItemWith(undefined, {
+      showChildBadgeTotal: true,
+      subMenu: {
+        name: "sub",
+        mine: childWith("GetMineShared"),
+        tagged: childWith("GetTaggedShared"),
+        counted: childWith("GetCountChild", MenuBadgeSource.Count),
+      } as any,
+    });
+    const { refreshBadges, badgeCountOf, totalBadgeCountOf } = useMenuBadges();
+
+    await refreshBadges([parent]);
+
+    expect(badgeCountOf((parent.subMenu as any).tagged)).toBe(1);
+    expect(totalBadgeCountOf(parent)).toBe(4);
+  });
+
   it("keeps the other badges when one query fails", async () => {
     query.mockImplementation(async ({ query: documentName }) => {
       if (documentName === "GetBroken") throw new Error("boom");

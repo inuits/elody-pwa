@@ -98,26 +98,51 @@ export const useMenuBadges = () => {
     await Promise.allSettled([...badges.values()].map(fetchBadge));
   };
 
+  const newItemIdsOf = (badge: MenuBadge): string[] => {
+    const ttlDays = seenTrackingForType(badge.entityType)?.ttlDays;
+    return (seenCandidates.value[badgeKeyOf(badge)] ?? [])
+      .filter((candidate) =>
+        isNew(candidate.id, candidate.activityAt, ttlDays),
+      )
+      .map((candidate) => candidate.id);
+  };
+
+  const fetchedCountOf = (badge: MenuBadge): number =>
+    counts.value[badgeKeyOf(badge)] ?? 0;
+
+  const isSeenItemsBadge = (badge: MenuBadge): boolean =>
+    badge.source === MenuBadgeSource.SeenItems;
+
   const badgeCountOf = (menuItem: MenuItem): number => {
     const badge = menuItem.badge;
     if (!badge) return 0;
-    const key = badgeKeyOf(badge);
-    if (badge.source !== MenuBadgeSource.SeenItems)
-      return counts.value[key] ?? 0;
-    const ttlDays = seenTrackingForType(badge.entityType)?.ttlDays;
-    return (seenCandidates.value[key] ?? []).filter((candidate) =>
-      isNew(candidate.id, candidate.activityAt, ttlDays),
-    ).length;
+    if (isSeenItemsBadge(badge)) return newItemIdsOf(badge).length;
+    return fetchedCountOf(badge);
   };
 
-  const totalBadgeCountOf = (menuItem: MenuItem): number =>
-    badgeCountOf(menuItem) +
-    (menuItem.showChildBadgeTotal
-      ? subMenuItemsOf(menuItem).reduce(
-          (total, subMenuItem) => total + badgeCountOf(subMenuItem),
-          0,
-        )
-      : 0);
+  const badgesInTotalOf = (menuItem: MenuItem): MenuBadge[] => {
+    const menuItems = menuItem.showChildBadgeTotal
+      ? [menuItem, ...subMenuItemsOf(menuItem)]
+      : [menuItem];
+    return menuItems
+      .map((item) => item.badge)
+      .filter((badge): badge is MenuBadge => !!badge);
+  };
+
+  const totalBadgeCountOf = (menuItem: MenuItem): number => {
+    const uniqueNewItemIds = new Set<string>();
+    let fetchedCount = 0;
+
+    for (const badge of badgesInTotalOf(menuItem)) {
+      if (isSeenItemsBadge(badge)) {
+        newItemIdsOf(badge).forEach((id) => uniqueNewItemIds.add(id));
+      } else {
+        fetchedCount += fetchedCountOf(badge);
+      }
+    }
+
+    return uniqueNewItemIds.size + fetchedCount;
+  };
 
   return { refreshBadges, badgeCountOf, totalBadgeCountOf };
 };
