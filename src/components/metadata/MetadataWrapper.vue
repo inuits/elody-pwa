@@ -416,7 +416,6 @@ import {
   inject,
   provide,
   watch,
-  nextTick,
 } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
@@ -438,7 +437,9 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import {
   canUpdateEntity,
+  focusUnlessMoved,
   isInnerControlClick,
+  singleFlight,
   useInPlaceScope,
 } from "@/composables/useInPlaceScope";
 import { useEditMode } from "@/composables/useEdit";
@@ -728,10 +729,7 @@ const entityFormData = inject<
   | undefined
 >("entityFormData", undefined);
 
-const focusFieldValue = async () => {
-  await nextTick();
-  fieldValueRef.value?.focus();
-};
+const focusFieldValue = () => focusUnlessMoved(() => fieldValueRef.value);
 const closeEditor = () => {
   isEditingInPlace.value = false;
   inlineDirty.value = false;
@@ -892,7 +890,7 @@ const isRelationChipClick = (event?: Event): boolean => {
   return true;
 };
 
-const startEditing = (event?: Event) => {
+const startEditing = async (event?: Event) => {
   if (!canEditInPlace.value || isEditingInPlace.value) return;
   // A link or the copy button inside the value keeps its own click.
   if (
@@ -901,7 +899,7 @@ const startEditing = (event?: Event) => {
   )
     return;
   if (isRelationChipClick(event)) return;
-  const opened = inPlaceScope.open({
+  const opened = await inPlaceScope.open({
     isDirty: () =>
       savesAsRelations.value ? relationDirty.value : inlineDirty.value,
     close: closeEditor,
@@ -925,7 +923,7 @@ const cancelInline = () => {
   closeEditor();
   focusFieldValue();
 };
-const saveInline = async (value: unknown) => {
+const saveInline = singleFlight(async (value: unknown) => {
   if (savesAsRelations.value) return saveRelationsInline();
   fieldValueProxy.value = value;
   const { valid, errors } = await validateScope(async () => {
@@ -969,7 +967,7 @@ const saveInline = async (value: unknown) => {
   } finally {
     inlineSaving.value = false;
   }
-};
+});
 // Enter and Space open the editor only when the value itself has focus, so
 // a focused link inside it (or a value that can't be edited) keeps its keys.
 const onActivateKey = (event: KeyboardEvent) => {

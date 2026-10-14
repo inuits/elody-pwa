@@ -26,7 +26,7 @@
 
         <!-- The status is as wide as its content: the whole pill at rest;
              while edited in place the dropdown (at its options' width), then
-             Bewaar/Annuleer, so the buttons never cover the dropdown. On a
+             Annuleer, so the button never covers the dropdown. On a
              line of its own the dropdown does not stretch either. -->
         <div
           v-if="element.windowElementStatus"

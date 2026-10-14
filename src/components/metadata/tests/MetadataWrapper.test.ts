@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { defineComponent, h, nextTick, provide, ref } from "vue";
 import { useField, useForm, defineRule } from "vee-validate";
@@ -684,6 +684,53 @@ describe("MetadataWrapper — inline editing", () => {
     expect(inlineEditor(wrapper).exists()).toBe(false);
     expect(wrapper.find('[role="status"]').text()).toBe("Saved");
     expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  describe("opening another field", () => {
+    const changeTo = async (wrapper: any, value: string) => {
+      inlineEditor(wrapper).vm.$emit("draft-change", value);
+      inlineEditor(wrapper).vm.$emit("dirty-change", true);
+      await nextTick();
+    };
+    const openOther = () =>
+      useEditScope().requestOpen({ id: "MW-TEST:other", isDirty: () => false });
+
+    afterEach(() => useEditScope().release("MW-TEST:other"));
+
+    it("saves the changed field first, then opens the other one", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor();
+      await changeTo(wrapper, "2020");
+      expect(await openOther()).toBe(true);
+      await flushPromises();
+      expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+        { key: "year", value: "2020" },
+      ]);
+      expect(inlineEditor(wrapper).exists()).toBe(false);
+      expect(useEditScope().isActive("MW-TEST:other")).toBe(true);
+    });
+
+    it("saves once when leaving the editor and opening the other field go together", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor();
+      await changeTo(wrapper, "2020");
+      inlineEditor(wrapper).vm.$emit("save", "2020");
+      await openOther();
+      await flushPromises();
+      expect(scopedSave.saveScope).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the changed field open, with its error, when its save fails", async () => {
+      scopedSave.saveScope.mockRejectedValue(new Error("server says no"));
+      const wrapper = await openEditor();
+      await changeTo(wrapper, "2020");
+      expect(await openOther()).toBe(false);
+      await flushPromises();
+      expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+        "Saving failed, try again",
+      );
+      expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+    });
   });
 
   it("keeps the editor open with an error when the save fails", async () => {

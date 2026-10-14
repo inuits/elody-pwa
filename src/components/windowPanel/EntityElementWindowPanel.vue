@@ -288,7 +288,7 @@ const addRow = async () => {
 const removeRow = async (index: number) => {
   if (!repeatableFieldsHelper.isStoredRow(index))
     return repeatableFieldsHelper.discardUnsavedRow(index);
-  if (!removeRowScope.open({ isDirty: () => false })) return;
+  if (!(await removeRowScope.open({ isDirty: () => false }))) return;
   try {
     const choice = await confirm({
       title: translated(

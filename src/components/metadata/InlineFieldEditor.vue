@@ -1,20 +1,22 @@
 <template>
   <!-- Inline editor (docs/design-system/components/inline-editor.md): the
-       input a field row swaps to. Pick-then-Bewaar: nothing saves until
-       Bewaar, Enter (Ctrl+Enter in a textarea) or a confirmed save. -->
+       input a field row swaps to. Nothing saves while you are in it: leaving
+       it (a click or Tab elsewhere), Enter (Ctrl+Enter in a textarea) or a
+       confirmed save saves it. -->
   <div
     ref="rootRef"
     data-cy="inline-field-editor"
     class="flex flex-col gap-1 w-full"
+    @focusout="handleFocusout"
   >
     <!-- A dropdown keeps its options' width (AdvancedDropdown's min-width);
-         where it does not fit beside the buttons, they wrap below it. -->
+         where it does not fit beside Annuleer, Annuleer wraps below it. -->
     <div
       data-cy="inline-editor-row"
       class="flex items-center gap-1.5 w-full"
       :class="{ 'flex-wrap': isDropdown }"
     >
-      <!-- A checkbox is only as wide as its box, so the buttons sit right
+      <!-- A checkbox is only as wide as its box, so Annuleer sits right
            after it; other inputs take the row. -->
       <div
         data-cy="inline-editor-input"
@@ -52,15 +54,11 @@
           :disabled="saving"
         />
       </div>
-      <div class="flex shrink-0 gap-1.5">
-        <BaseButtonNew
-          :label="saveLabel"
-          button-style="commit"
-          button-size="sm"
-          force-show-label
-          :disabled="!isDirty || saving"
-          :loading="saving"
-          @click="commit"
+      <div class="flex shrink-0 items-center gap-1.5">
+        <SpinnerLoader
+          v-if="saving"
+          data-cy="inline-editor-saving"
+          :dimensions="4"
         />
         <BaseButtonNew
           :label="cancelLabel"
@@ -105,6 +103,7 @@ import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -167,7 +166,6 @@ const isDirty = computed(() =>
 watch(isDirty, (dirty) => emit("dirty-change", dirty));
 watch(draft, (value) => emit("draft-change", value), { deep: true });
 
-const saveLabel = computed(() => translated("inline-edit.save", "Save"));
 const cancelLabel = computed(() => translated("inline-edit.cancel", "Cancel"));
 const hint = computed(() =>
   isTextarea.value
@@ -212,16 +210,21 @@ const handleKeydown = (event: KeyboardEvent) => {
   commit();
 };
 
-// Click outside: an unchanged editor closes, a changed one stays open (no
-// silent discard). Clicks in teleported menus belong to the editor.
+// Leaving the editor (a click or Tab elsewhere) saves a changed value and
+// closes an unchanged one. Teleported menus and dialogs belong to the editor.
 const rootRef = ref<HTMLElement | null>(null);
 const OVERLAY_SELECTOR =
   "dialog, [role='dialog'], .menu, .multiselect-dropdown, [role='listbox'], .dp__menu, [role='tooltip']";
+const isOutside = (target: Element): boolean =>
+  !rootRef.value?.contains(target) && !target.closest?.(OVERLAY_SELECTOR);
 const handleOutsideMousedown = (event: MouseEvent) => {
   const target = event.target as HTMLElement | null;
-  if (!target || rootRef.value?.contains(target)) return;
-  if (target.closest?.(OVERLAY_SELECTOR)) return;
-  if (!isDirty.value) emit("cancel");
+  if (target && isOutside(target)) commit();
+};
+// Focus going nowhere (a picked option removed, another window) isn't leaving.
+const handleFocusout = (event: FocusEvent) => {
+  const next = event.relatedTarget as HTMLElement | null;
+  if (next && isOutside(next)) commit();
 };
 
 onMounted(async () => {

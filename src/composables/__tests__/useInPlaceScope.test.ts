@@ -8,7 +8,9 @@ vi.mock("vue-i18n", () => ({
 
 import {
   canUpdateEntity,
+  focusUnlessMoved,
   isInnerControlClick,
+  singleFlight,
   useInPlaceScope,
 } from "@/composables/useInPlaceScope";
 import { useEditScope } from "@/composables/useEditScope";
@@ -34,24 +36,24 @@ describe("useInPlaceScope", () => {
     if (scope.activeScope.value) scope.release(scope.activeScope.value.id);
   });
 
-  it("opens the field's own edit scope", () => {
+  it("opens the field's own edit scope", async () => {
     const { open } = host("form:title");
-    expect(open()).toBe(true);
+    expect(await open()).toBe(true);
     expect(useEditScope().isActive("form:title")).toBe(true);
   });
 
-  it("releases its scope when the field goes away (refetch, paging), even when changed", () => {
+  it("releases its scope when the field goes away (refetch, paging), even when changed", async () => {
     const { open, wrapper } = host("form:title", true);
-    open();
+    await open();
     wrapper.unmount();
     expect(useEditScope().isActive("form:title")).toBe(false);
     expect(useEditScope().hasUnsavedChanges.value).toBe(false);
   });
 
-  it("leaves another field's open scope alone when it goes away", () => {
+  it("leaves another field's open scope alone when it goes away", async () => {
     const first = host("form:title");
     const second = host("form:year");
-    first.open();
+    await first.open();
     second.wrapper.unmount();
     expect(useEditScope().isActive("form:title")).toBe(true);
   });
@@ -61,6 +63,53 @@ describe("useInPlaceScope", () => {
     expect(api.messages.saved()).toBe("Saved");
     expect(api.messages.saveFailed()).toBe("Saving failed, try again");
     expect(api.messages.editField()).toBe("edit");
+  });
+});
+
+// Leaving an editor and opening the next one both save it; that must be one
+// request, not two.
+describe("singleFlight", () => {
+  it("shares a save that is still running", async () => {
+    let finish!: () => void;
+    const run = vi.fn(() => new Promise<void>((resolve) => (finish = resolve)));
+    const save = singleFlight(run);
+    const first = save("a");
+    const second = save("b");
+    finish();
+    await Promise.all([first, second]);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(run).toHaveBeenCalledWith("a");
+  });
+
+  it("runs again once the previous save is done, even after a failure", async () => {
+    const run = vi.fn().mockRejectedValueOnce(new Error("x")).mockResolvedValue(undefined);
+    const save = singleFlight(run);
+    await expect(save()).rejects.toThrow("x");
+    await save();
+    expect(run).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("focusUnlessMoved", () => {
+  const button = () => {
+    const element = document.createElement("button");
+    document.body.appendChild(element);
+    return element;
+  };
+
+  it("focuses the value when focus is nowhere (the editor went away)", async () => {
+    const value = button();
+    (document.activeElement as HTMLElement | null)?.blur();
+    await focusUnlessMoved(() => value);
+    expect(document.activeElement).toBe(value);
+  });
+
+  it("leaves focus where the user moved it (Tab, another field)", async () => {
+    const value = button();
+    const next = button();
+    next.focus();
+    await focusUnlessMoved(() => value);
+    expect(document.activeElement).toBe(next);
   });
 });
 

@@ -62,21 +62,11 @@ describe("InlineFieldEditor", () => {
   });
 
   describe("commit model", () => {
-    it("starts pristine with Bewaar disabled", () => {
-      expect(editor().find('[data-cy="button-commit"]').attributes("disabled")).toBeDefined();
-    });
-
-    it("enables Bewaar once the value changes", async () => {
+    // Leaving the editor saves it, so there is no Bewaar per field.
+    it("has no Bewaar button, only Annuleer", () => {
       const wrapper = editor();
-      await input(wrapper).setValue("1959");
-      expect(wrapper.find('[data-cy="button-commit"]').attributes("disabled")).toBeUndefined();
-    });
-
-    it("saves the draft with Bewaar", async () => {
-      const wrapper = editor();
-      await input(wrapper).setValue("1959");
-      await wrapper.find('[data-cy="button-commit"]').trigger("click");
-      expect(wrapper.emitted("save")?.[0]).toEqual(["1959"]);
+      expect(wrapper.find('[data-cy="button-commit"]').exists()).toBe(false);
+      expect(wrapper.find('[data-cy="button-ghost"]').exists()).toBe(true);
     });
 
     it("cancels with Annuleer", async () => {
@@ -202,20 +192,20 @@ describe("InlineFieldEditor", () => {
   });
 
   describe("layout", () => {
-    it("centres Bewaar and Annuleer vertically on the input", () => {
+    it("centres Annuleer vertically on the input", () => {
       const row = editor().find('[data-cy="inline-editor-row"]');
       expect(row.classes()).toContain("items-center");
       expect(row.classes()).not.toContain("items-start");
     });
 
-    it("lets a text input take the row, with the buttons at its end", () => {
+    it("lets a text input take the row, with Annuleer at its end", () => {
       const input = editor().find('[data-cy="inline-editor-input"]');
       expect(input.classes()).toContain("grow");
     });
 
-    // The dropdown keeps its options' width; where that and the buttons do
-    // not fit (a narrow window), the buttons wrap below it.
-    it("wraps Bewaar and Annuleer below a dropdown that does not fit beside them", () => {
+    // The dropdown keeps its options' width; where that and Annuleer do
+    // not fit (a narrow window), Annuleer wraps below it.
+    it("wraps Annuleer below a dropdown that does not fit beside it", () => {
       const row = editor({
         type: "dropdownSingleselectMetadata",
         modelValue: "book",
@@ -224,22 +214,21 @@ describe("InlineFieldEditor", () => {
       expect(row.classes()).toContain("flex-wrap");
     });
 
-    it("keeps a text input and its buttons on one row", () => {
+    it("keeps a text input and Annuleer on one row", () => {
       const row = editor().find('[data-cy="inline-editor-row"]');
       expect(row.classes()).not.toContain("flex-wrap");
     });
 
-    // Bewaar and Annuleer have no icon: a narrow window must not hide their
-    // labels and leave empty buttons.
-    it("always shows the labels of Bewaar and Annuleer", () => {
+    // Annuleer has no icon: a narrow window must not hide its label and
+    // leave an empty button.
+    it("always shows the label of Annuleer", () => {
       const buttons = editor().findAllComponents({ name: "BaseButtonNew" });
       expect(buttons.map((button) => button.props("forceShowLabel"))).toEqual([
-        true,
         true,
       ]);
     });
 
-    it("keeps a checkbox only as wide as the box, with the buttons right after it", () => {
+    it("keeps a checkbox only as wide as the box, with Annuleer right after it", () => {
       const input = editor({ type: "checkbox", modelValue: false }).find(
         '[data-cy="inline-editor-input"]',
       );
@@ -287,12 +276,14 @@ describe("InlineFieldEditor", () => {
   });
 
   describe("saving and errors", () => {
-    it("locks the input and shows the spinner on Bewaar while saving", () => {
+    it("locks the input and shows a spinner while saving", () => {
       const wrapper = editor({ saving: true });
       expect(input(wrapper).attributes("disabled")).toBeDefined();
-      expect(
-        wrapper.findComponent({ name: "BaseButtonNew" }).props("loading"),
-      ).toBe(true);
+      expect(wrapper.find('[data-cy="inline-editor-saving"]').exists()).toBe(true);
+    });
+
+    it("shows no spinner when not saving", () => {
+      expect(editor().find('[data-cy="inline-editor-saving"]').exists()).toBe(false);
     });
 
     it("shows an error as an alert linked to the input", () => {
@@ -312,11 +303,22 @@ describe("InlineFieldEditor", () => {
       expect(wrapper.emitted("cancel")).toHaveLength(1);
     });
 
-    it("keeps a changed editor open", async () => {
+    it("saves a changed editor", async () => {
       const wrapper = editor();
       await input(wrapper).setValue("1959");
       document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("save")?.[0]).toEqual(["1959"]);
       expect(wrapper.emitted("cancel")).toBeUndefined();
+    });
+
+    it("treats clicks in the input's menu as inside", async () => {
+      const wrapper = editor();
+      await input(wrapper).setValue("1959");
+      const menu = document.createElement("ul");
+      menu.setAttribute("role", "listbox");
+      document.body.appendChild(menu);
+      menu.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("save")).toBeUndefined();
     });
 
     it("treats clicks in a dialog the input opened (a confirm) as inside", async () => {
@@ -324,6 +326,65 @@ describe("InlineFieldEditor", () => {
       const dialog = document.createElement("dialog");
       document.body.appendChild(dialog);
       dialog.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+    });
+  });
+
+  describe("focus leaving (Tab)", () => {
+    const outside = () => {
+      const button = document.createElement("button");
+      document.body.appendChild(button);
+      return button;
+    };
+    const leaveTo = (
+      wrapper: ReturnType<typeof editor>,
+      relatedTarget: EventTarget | null,
+    ) =>
+      input(wrapper).element.dispatchEvent(
+        new FocusEvent("focusout", { bubbles: true, relatedTarget }),
+      );
+
+    it("saves a changed editor when focus moves outside it", async () => {
+      const wrapper = editor();
+      await input(wrapper).setValue("1959");
+      leaveTo(wrapper, outside());
+      expect(wrapper.emitted("save")?.[0]).toEqual(["1959"]);
+    });
+
+    it("closes an unchanged editor when focus moves outside it", () => {
+      const wrapper = editor();
+      leaveTo(wrapper, outside());
+      expect(wrapper.emitted("cancel")).toHaveLength(1);
+    });
+
+    it("stays open when focus moves to Annuleer", async () => {
+      const wrapper = editor();
+      await input(wrapper).setValue("1959");
+      leaveTo(wrapper, wrapper.find('[data-cy="button-ghost"]').element);
+      expect(wrapper.emitted("save")).toBeUndefined();
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+    });
+
+    it("stays open when focus moves into the input's menu", async () => {
+      const wrapper = editor();
+      await input(wrapper).setValue("1959");
+      const menu = document.createElement("ul");
+      menu.setAttribute("role", "listbox");
+      const option = document.createElement("li");
+      option.tabIndex = -1;
+      menu.appendChild(option);
+      document.body.appendChild(menu);
+      leaveTo(wrapper, option);
+      expect(wrapper.emitted("save")).toBeUndefined();
+    });
+
+    // A picked option is removed with focus on it, and switching windows
+    // blurs too: neither is the user leaving the field.
+    it("stays open when focus goes nowhere", async () => {
+      const wrapper = editor();
+      await input(wrapper).setValue("1959");
+      leaveTo(wrapper, null);
+      expect(wrapper.emitted("save")).toBeUndefined();
       expect(wrapper.emitted("cancel")).toBeUndefined();
     });
   });
@@ -369,20 +430,17 @@ describe("InlineFieldEditor", () => {
 
     it("takes its changed state from the parent", async () => {
       const wrapper = withSlot({ dirty: false });
-      expect(wrapper.find('[data-cy="button-commit"]').attributes("disabled")).toBeDefined();
+      document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("cancel")).toHaveLength(1);
       await wrapper.setProps({ dirty: true });
-      expect(wrapper.find('[data-cy="button-commit"]').attributes("disabled")).toBeUndefined();
-    });
-
-    it("saves when the parent reports a change", async () => {
-      const wrapper = withSlot({ dirty: true });
-      await wrapper.find('[data-cy="button-commit"]').trigger("click");
+      document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
       expect(wrapper.emitted("save")).toHaveLength(1);
     });
 
-    it("keeps a changed editor open on an outside click", () => {
+    it("saves on an outside click when the parent reports a change", () => {
       const wrapper = withSlot({ dirty: true });
       document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      expect(wrapper.emitted("save")).toHaveLength(1);
       expect(wrapper.emitted("cancel")).toBeUndefined();
     });
   });

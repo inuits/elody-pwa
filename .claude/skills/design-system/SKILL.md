@@ -66,7 +66,7 @@ checkbox `inputStyle` prop; "-" as an empty value.
 
 - **Empty value:** `useEmptyValueLabel()` ("Geen waarde"), shown at
   `opacity-[var(--opacity-empty)]`.
-- **Choosing never saves.** Selects and pickers change the draft; Bewaar commits.
+- **Choosing never saves.** Selects and pickers change the draft; an inline field saves when you leave it (or Enter), a form with Bewaar.
 - **Confirm only real loss.** Reversible actions execute and offer undo.
 - **Copy:** Dutch sentence case, verbs on buttons, strings in i18n
   (`modules/baseGraphql/translations/{nl,en}.json`). A `te()` check with an

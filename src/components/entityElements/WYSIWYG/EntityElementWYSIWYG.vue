@@ -4,6 +4,7 @@
     ref="rootRef"
     data-cy="wysiwyg-field"
     @keydown.capture="onInPlaceKeydown"
+    @focusout="inPlace.handleFocusout"
     :class="[
       'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
@@ -23,10 +24,8 @@
         :label="t(element.label)"
         :can-edit="canEditInPlace"
         :editing="isEditingInPlace"
-        :dirty="inPlaceDirty"
         :saving="inPlaceSaving"
         @edit="startEditing"
-        @save="saveInPlace"
         @cancel="cancelInPlace"
       />
     </div>
@@ -70,10 +69,8 @@
         :label="t(element.label)"
         :can-edit="canEditInPlace"
         :editing="isEditingInPlace"
-        :dirty="inPlaceDirty"
         :saving="inPlaceSaving"
         @edit="startEditing"
-        @save="saveInPlace"
         @cancel="cancelInPlace"
       />
     </div>
@@ -324,11 +321,9 @@ const inPlace = useWysiwygInPlaceEditing({
 });
 const {
   isEditing: isEditingInPlace,
-  isDirty: inPlaceDirty,
   saving: inPlaceSaving,
   error: inPlaceError,
   savedAnnouncement,
-  save: saveInPlace,
   cancel: cancelInPlace,
   handleKeydown: handleInPlaceKeydown,
 } = inPlace;

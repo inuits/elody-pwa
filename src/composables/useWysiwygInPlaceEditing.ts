@@ -3,6 +3,7 @@ import { useI18n } from "vue-i18n";
 import type { Collection } from "@/generated-types/queries";
 import { useEditScope } from "@/composables/useEditScope";
 import { buildMetadataInput, saveScope } from "@/composables/useScopedSave";
+import { singleFlight } from "@/composables/useInPlaceScope";
 
 // Per-field editing for a WYSIWYG field: the field is its own edit scope, and
 // saving sends only its key (with the selected language for a multilingual
@@ -31,7 +32,8 @@ export type WysiwygInPlaceOptions = {
   locale: () => string | undefined;
   // Gets the saved value and the saved entity the server returned.
   onSaved?: (value: string, savedEntity: unknown) => void;
-  // The element itself; clicks outside it close an unchanged editor.
+  // The element itself; leaving it saves a changed editor, closes an
+  // unchanged one.
   getRoot?: () => HTMLElement | null | undefined;
 };
 
@@ -62,11 +64,19 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
     if (isEditing.value && editor) currentHtml.value = editor.getHTML();
   };
 
+  const isOutside = (target: HTMLElement): boolean =>
+    !options.getRoot?.()?.contains(target) &&
+    !target.closest?.(OVERLAY_SELECTOR);
+  // Leaving the field (a click or Tab elsewhere) saves it; save closes an
+  // unchanged editor.
   const handleOutsideMousedown = (event: MouseEvent) => {
     const target = event.target as HTMLElement | null;
-    if (!target || options.getRoot?.()?.contains(target)) return;
-    if (target.closest?.(OVERLAY_SELECTOR)) return;
-    if (!isDirty.value) close();
+    if (target && isOutside(target)) save();
+  };
+  // Focus going nowhere (a closed dialog, another window) isn't leaving.
+  const handleFocusout = (event: FocusEvent) => {
+    const next = event.relatedTarget as HTMLElement | null;
+    if (isEditing.value && options.getRoot && next && isOutside(next)) save();
   };
 
   const close = () => {
@@ -84,8 +94,8 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
     close();
   };
 
-  const save = async (): Promise<void> => {
-    if (!isEditing.value || saving.value) return;
+  const save = singleFlight(async (): Promise<void> => {
+    if (!isEditing.value) return;
     if (!isDirty.value) {
       close();
       return;
@@ -114,12 +124,12 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
     } finally {
       saving.value = false;
     }
-  };
+  });
 
-  const start = () => {
+  const start = async () => {
     const editor = options.getEditor();
     if (!editor || isEditing.value || !options.canEdit()) return;
-    const opened = requestOpen({
+    const opened = await requestOpen({
       id: options.scopeId(),
       isDirty: () => isDirty.value,
       focus: () => options.getEditor()?.commands.focus(),
@@ -177,6 +187,7 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
     save,
     notifyChange,
     handleKeydown,
+    handleFocusout,
     dispose,
   };
 };

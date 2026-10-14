@@ -12,7 +12,6 @@ const mountActions = (props: Record<string, unknown> = {}) =>
       label: "Beschrijving",
       canEdit: true,
       editing: false,
-      dirty: false,
       saving: false,
       ...props,
     },
@@ -59,22 +58,12 @@ describe("WYSIWYGInPlaceActions", () => {
   });
 
   describe("while editing", () => {
-    it("replaces the edit button with save and cancel", () => {
+    // Leaving the field saves it, so there is no Bewaar.
+    it("replaces the edit button with cancel only", () => {
       const wrapper = mountActions({ editing: true });
       expect(editButton(wrapper).exists()).toBe(false);
-      expect(buttonLabelled(wrapper, "Save")).toBeDefined();
+      expect(buttonLabelled(wrapper, "Save")).toBeUndefined();
       expect(buttonLabelled(wrapper, "Cancel")).toBeDefined();
-    });
-
-    it("disables save until something changed", () => {
-      const wrapper = mountActions({ editing: true });
-      expect(buttonLabelled(wrapper, "Save")!.attributes("disabled")).toBeDefined();
-    });
-
-    it("saves a changed field", async () => {
-      const wrapper = mountActions({ editing: true, dirty: true });
-      await buttonLabelled(wrapper, "Save")!.trigger("click");
-      expect(wrapper.emitted("save")).toHaveLength(1);
     });
 
     it("cancels", async () => {
@@ -83,11 +72,15 @@ describe("WYSIWYGInPlaceActions", () => {
       expect(wrapper.emitted("cancel")).toHaveLength(1);
     });
 
-    it("locks both buttons while saving", () => {
-      const wrapper = mountActions({ editing: true, dirty: true, saving: true });
-      wrapper
-        .findAll("button")
-        .forEach((button) => expect(button.attributes("disabled")).toBeDefined());
+    it("locks cancel and shows a spinner while saving", () => {
+      const wrapper = mountActions({ editing: true, saving: true });
+      expect(buttonLabelled(wrapper, "Cancel")!.attributes("disabled")).toBeDefined();
+      expect(wrapper.find('[data-cy="wysiwyg-saving"]').exists()).toBe(true);
+    });
+
+    it("shows no spinner when not saving", () => {
+      const wrapper = mountActions({ editing: true });
+      expect(wrapper.find('[data-cy="wysiwyg-saving"]').exists()).toBe(false);
     });
   });
 });

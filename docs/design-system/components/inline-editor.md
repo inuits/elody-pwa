@@ -10,13 +10,12 @@ Only through a field row (or a group card). It is never mounted on its own
 and never in a modal.
 
 ## Anatomy
-The input for the field type, then the actions inline on the right,
-vertically centred on the input. Inputs take the row's width; a checkbox is
-only as wide as its box, so the actions sit right after it. A dropdown keeps
-its options' width; where the actions don't fit beside it (a narrow window),
-they wrap below it:
-- **Bewaar:** commit button, `sm`;
-- **Annuleer:** ghost button, `sm`.
+The input for the field type, then **Annuleer** (ghost button, `sm`) inline
+on the right, vertically centred on the input. There is no Bewaar: leaving
+the field saves it. Inputs take the row's width; a checkbox is only as wide
+as its box, so Annuleer sits right after it. A dropdown keeps its options'
+width; where Annuleer doesn't fit beside it (a narrow window), it wraps below
+it. While saving, a spinner sits before Annuleer.
 
 Under the editor:
 - the error message, when there is one;
@@ -57,15 +56,16 @@ the rows (no extra separator line). A row's fields keep their full width side by
 ## States
 | State | Cue |
 |---|---|
-| pristine | Bewaar disabled |
-| dirty | Bewaar enabled |
-| saving | spinner in Bewaar, input locked |
+| pristine | leaving closes the editor |
+| dirty | leaving saves |
+| saving | spinner before Annuleer, input locked |
 | error | danger border + message below (`role="alert"`), value kept, editor stays open |
-| saved | editor closes, the "entity updated" notification shows (as after the whole-form save), "Opgeslagen" announced, focus back on the value |
+| saved | editor closes, the "entity updated" notification shows (as after the whole-form save), "Opgeslagen" announced, focus back on the value unless it has moved on (Tab, another field) |
 
 ## Behaviour and keyboard
-- **Pick-then-Bewaar:** choosing in a select or date picker only changes the
-  draft. Nothing saves until Bewaar or Enter.
+- **Save on leave:** choosing in a select or date picker only changes the
+  draft. The value saves when you leave the field (click elsewhere or Tab
+  out) or press Enter.
 - Enter commits (Ctrl+Enter in a textarea). Enter with nothing changed just
   closes. An Enter that picks an option in a select's menu only picks it.
 - Escape cancels and restores the previous value. An Escape that closes a
@@ -74,9 +74,15 @@ the rows (no extra separator line). A row's fields keep their full width side by
   left the editor: while the editor is open it listens on the page, ignoring
   keys typed in other fields and leaving Enter/Escape to a menu that is
   still open.
-- Clicking outside: an unchanged editor closes, a changed one stays open.
-  Clicks inside the editor's own menus and dialogs (dropdown, date picker,
-  the "create new" confirmation) count as inside.
+- Leaving (a click outside, or focus moving outside): an unchanged editor
+  closes, a changed one saves. Clicks and focus inside the editor's own menus
+  and dialogs (dropdown, date picker, the "create new" confirmation) count as
+  inside, and so does focus going nowhere (a picked option removed, another
+  window).
+- Opening another field saves the changed one first. If that save fails (an
+  invalid value, a server error) the changed field stays open with its
+  error, focused, and the other field doesn't open. Leaving and opening at
+  once send one save, not two.
 - The input gets focus when the editor opens. After save or cancel, focus
   returns to the value.
 - Saving sends **only this field's key** and validates **only this field**,
@@ -105,7 +111,6 @@ the rows (no extra separator line). A row's fields keep their full width side by
 ## Copy
 | Key | NL | EN fallback |
 |---|---|---|
-| `inline-edit.save` | Bewaar | Save |
 | `inline-edit.cancel` | Annuleer | Cancel |
 | `inline-edit.hint` | Enter bewaart · Esc annuleert | Enter saves · Esc cancels |
 | `inline-edit.hint-textarea` | Ctrl+Enter bewaart · Esc annuleert | Ctrl+Enter saves · Esc cancels |

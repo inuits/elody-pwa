@@ -60,7 +60,7 @@ const inlineEditorStub = {
   props: ["type", "modelValue", "label", "options", "required", "saving", "errorMessage"],
   emits: ["save", "cancel", "dirty-change", "draft-change"],
   template:
-    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span><button type='button' data-cy='editor-save'>Save</button><button type='button' data-cy='editor-clear' @click.stop>×</button></div>",
+    "<div data-cy='inline-editor-stub'><input type='checkbox' data-cy='editor-checkbox' /><span data-cy='editor-text'>x</span><button type='button' data-cy='editor-cancel'>Annuleer</button><button type='button' data-cy='editor-clear' @click.stop>×</button></div>",
 };
 
 const refetchEntities = vi.fn().mockResolvedValue(undefined);
@@ -187,12 +187,12 @@ describe("ListItemInlineField", () => {
       expect(rowLink).not.toHaveBeenCalled();
     });
 
-    it("keeps a click on Bewaar from following the row's link", async () => {
+    it("keeps a click on Annuleer from following the row's link", async () => {
       const wrapper = await openEditor();
       const rowLink = vi.fn();
       document.body.addEventListener("click", rowLink);
       const event = new MouseEvent("click", { bubbles: true, cancelable: true });
-      wrapper.find('[data-cy="editor-save"]').element.dispatchEvent(event);
+      wrapper.find('[data-cy="editor-cancel"]').element.dispatchEvent(event);
       document.body.removeEventListener("click", rowLink);
       expect(event.defaultPrevented).toBe(true);
       expect(rowLink).not.toHaveBeenCalled();
@@ -242,10 +242,10 @@ describe("ListItemInlineField", () => {
         const { wrapper } = mountInRow();
         await value(wrapper).trigger("click");
         await flushPromises();
-        const onSave = vi.fn();
-        wrapper.find('[data-cy="editor-save"]').element.addEventListener("click", onSave);
-        click(wrapper.find('[data-cy="editor-save"]').element);
-        expect(onSave).toHaveBeenCalled();
+        const onCancel = vi.fn();
+        wrapper.find('[data-cy="editor-cancel"]').element.addEventListener("click", onCancel);
+        click(wrapper.find('[data-cy="editor-cancel"]').element);
+        expect(onCancel).toHaveBeenCalled();
       });
 
       it("doesn't follow the link from a dropdown's X, which stops its own click", async () => {

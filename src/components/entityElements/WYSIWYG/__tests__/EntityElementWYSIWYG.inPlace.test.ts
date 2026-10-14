@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { flushPromises, mount } from "@vue/test-utils";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { enableAutoUnmount, flushPromises, mount } from "@vue/test-utils";
 import { reactive, ref } from "vue";
 
 const mocks = vi.hoisted(() => ({
@@ -97,6 +97,10 @@ vi.mock(
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import { useEditScope } from "@/composables/useEditScope";
 
+// Each open editor listens on the page; unmount them so an earlier test's
+// editor doesn't save on a later test's click.
+enableAutoUnmount(afterEach);
+
 const element = (overrides: Record<string, unknown> = {}) => ({
   __typename: "WysiwygElement",
   label: "Beschrijving",
@@ -150,6 +154,10 @@ const editor = () => mocks.editors[mocks.editors.length - 1];
 const editButton = (wrapper: any) => wrapper.find('[data-cy="wysiwyg-edit-button"]');
 const button = (wrapper: any, label: string) =>
   wrapper.findAll("button").find((candidate: any) => candidate.text() === label);
+
+// Leaving the field saves it: a click elsewhere on the page.
+const leaveField = () =>
+  document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
 
 describe("EntityElementWYSIWYG — in-place editing", () => {
   beforeEach(() => {
@@ -262,10 +270,10 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       expect(wrapper.find('[data-cy="transliteration-toggle"]').exists()).toBe(false);
     });
 
-    it("puts Bewaar and Annuleer on the label line, with the keyboard hint below", async () => {
+    it("puts Annuleer on the label line, with the keyboard hint below", async () => {
       const wrapper = await startEditing();
       expect(editButton(wrapper).exists()).toBe(false);
-      expect(button(wrapper, "Save")).toBeDefined();
+      expect(button(wrapper, "Save")).toBeUndefined();
       expect(button(wrapper, "Cancel")).toBeDefined();
       expect(wrapper.find('[data-cy="wysiwyg-hint"]').text()).toBe(
         "Ctrl+Enter saves · Esc cancels",
@@ -277,7 +285,7 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       const wrapper = await startEditing();
       editor().type("<p>Nieuw</p>");
       await wrapper.vm.$nextTick();
-      await button(wrapper, "Save").trigger("click");
+      leaveField();
       await flushPromises();
       expect(mocks.saveScope).toHaveBeenCalledWith({
         entityId: "entity-1",
@@ -305,7 +313,7 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       });
       editor().type("<p>Nieuw</p>");
       await wrapper.vm.$nextTick();
-      await button(wrapper, "Save").trigger("click");
+      leaveField();
       await flushPromises();
       expect(onSaved).toHaveBeenCalledWith(saved);
     });
@@ -323,7 +331,7 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       const wrapper = await startEditing();
       editor().type("<p>Nieuw</p>");
       await wrapper.vm.$nextTick();
-      await button(wrapper, "Save").trigger("click");
+      leaveField();
       await flushPromises();
       expect(wrapper.find('[role="alert"]').text()).toBe("Saving failed, try again");
       expect(editor().editable).toBe(true);
@@ -404,7 +412,7 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
         const wrapper = await startEditing({}, multilingual());
         editor().type("<p>New</p>");
         await wrapper.vm.$nextTick();
-        await button(wrapper, "Save").trigger("click");
+        leaveField();
         await flushPromises();
         expect(mocks.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
           { key: "description", value: "<p>New</p>", lang: "en" },

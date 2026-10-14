@@ -57,8 +57,8 @@ component's style block:
   "— Geen waarde". Picking it clears the value. Required or chrome selects
   pass `:clearable="false"` and get neither ✕ nor the empty option.
 - **Multi selects** keep the popup open, and keep selected options in the list.
-- **Picking never saves.** The editor around the dropdown commits with
-  Bewaar.
+- **Picking never saves.** The editor around the dropdown saves when you
+  leave it or press Enter (a form: with Bewaar).
 - Options keep their config order.
 
 ## Accessibility

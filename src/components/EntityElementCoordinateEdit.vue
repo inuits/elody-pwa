@@ -126,7 +126,6 @@ import {
   computed,
   onMounted,
   inject,
-  nextTick,
   ref,
 } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -137,6 +136,8 @@ import { useConditionalValidation } from "@/composables/useConditionalValidation
 import { useFieldLock } from "@/composables/useFieldLock";
 import {
   canUpdateEntity,
+  focusUnlessMoved,
+  singleFlight,
   useInPlaceScope,
 } from "@/composables/useInPlaceScope";
 import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
@@ -286,10 +287,7 @@ const isDirty = computed<boolean>(
     asText(draftLongitude.value) !== asText(props.value?.longitude),
 );
 
-const focusValue = async () => {
-  await nextTick();
-  fieldValueRef.value?.focus();
-};
+const focusValue = () => focusUnlessMoved(() => fieldValueRef.value);
 const close = () => {
   isEditingInPlace.value = false;
   inlineError.value = undefined;
@@ -325,7 +323,7 @@ const validationError = (): string | undefined => {
   return undefined;
 };
 
-const saveInPlace = async () => {
+const saveInPlace = singleFlight(async () => {
   if (saving.value) return;
   if (!isDirty.value) {
     cancelInPlace();
@@ -362,11 +360,11 @@ const saveInPlace = async () => {
   } finally {
     saving.value = false;
   }
-};
+});
 
-const startEditing = () => {
+const startEditing = async () => {
   if (!canEditInPlace.value || isEditingInPlace.value) return;
-  const opened = inPlaceScope.open({
+  const opened = await inPlaceScope.open({
     isDirty: () => isDirty.value,
     close,
     save: async () => {

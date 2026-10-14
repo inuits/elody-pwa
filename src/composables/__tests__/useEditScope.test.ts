@@ -22,63 +22,67 @@ describe("useEditScope", () => {
     store = createEditScopeStore();
   });
 
-  it("opens a scope when nothing is being edited", () => {
+  it("opens a scope when nothing is being edited", async () => {
     const field = scope("title");
-    expect(store.requestOpen(field)).toBe(true);
+    expect(await store.requestOpen(field)).toBe(true);
     expect(store.isActive("title")).toBe(true);
   });
 
-  it("keeps a scope open when it is requested again", () => {
+  it("keeps a scope open when it is requested again", async () => {
     const field = scope("title");
-    store.requestOpen(field);
-    expect(store.requestOpen(field)).toBe(true);
+    await store.requestOpen(field);
+    expect(await store.requestOpen(field)).toBe(true);
     expect(field.close).not.toHaveBeenCalled();
   });
 
-  it("closes an unchanged scope when another one opens", () => {
+  it("closes an unchanged scope when another one opens", async () => {
     const title = scope("title");
     const year = scope("year");
-    store.requestOpen(title);
-    expect(store.requestOpen(year)).toBe(true);
+    await store.requestOpen(title);
+    expect(await store.requestOpen(year)).toBe(true);
     expect(title.close).toHaveBeenCalled();
+    expect(title.save).not.toHaveBeenCalled();
     expect(store.isActive("year")).toBe(true);
   });
 
-  it("keeps a changed scope open and refuses the second one", () => {
+  it("saves a changed scope before the next one opens", async () => {
     const title = scope("title", true);
     const year = scope("year");
-    store.requestOpen(title);
-    expect(store.requestOpen(year)).toBe(false);
-    expect(store.isActive("title")).toBe(true);
-    expect(title.close).not.toHaveBeenCalled();
+    await store.requestOpen(title);
+    expect(await store.requestOpen(year)).toBe(true);
+    expect(title.save).toHaveBeenCalled();
+    expect(store.isActive("year")).toBe(true);
   });
 
-  it("moves focus back to the changed scope instead of discarding it", () => {
+  it("keeps a changed scope open when its save fails, and refuses the next one", async () => {
     const title = scope("title", true);
-    store.requestOpen(title);
-    store.requestOpen(scope("year"));
+    title.save.mockResolvedValue(false);
+    await store.requestOpen(title);
+    expect(await store.requestOpen(scope("year"))).toBe(false);
+    expect(store.isActive("title")).toBe(true);
+    expect(title.close).not.toHaveBeenCalled();
     expect(title.focus).toHaveBeenCalled();
   });
 
-  it("releases only the scope that is active", () => {
+  it("releases only the scope that is active", async () => {
     const title = scope("title");
-    store.requestOpen(title);
+    await store.requestOpen(title);
     store.release("year");
     expect(store.isActive("title")).toBe(true);
     store.release("title");
     expect(store.isActive("title")).toBe(false);
   });
 
-  it("reports unsaved changes while the active scope is changed", () => {
+  it("reports unsaved changes while the active scope is changed", async () => {
     const title = scope("title");
-    store.requestOpen(title);
+    await store.requestOpen(title);
     expect(store.hasUnsavedChanges.value).toBe(false);
     title.setDirty(true);
     expect(store.hasUnsavedChanges.value).toBe(true);
   });
 
-  it("reports no unsaved changes once the scope is released", () => {
-    store.requestOpen(scope("title", true));
+  it("reports no unsaved changes once the scope is released", async () => {
+    await store.requestOpen(scope("title", true));
     store.release("title");
     expect(store.hasUnsavedChanges.value).toBe(false);
   });
@@ -88,7 +92,7 @@ describe("useEditScope — leaving with changes", () => {
   it("saves the active scope and reports whether it worked", async () => {
     const store = createEditScopeStore();
     const title = scope("title", true);
-    store.requestOpen(title);
+    await store.requestOpen(title);
     expect(await store.saveActive()).toBe(true);
     expect(title.save).toHaveBeenCalled();
   });
@@ -97,14 +101,14 @@ describe("useEditScope — leaving with changes", () => {
     const store = createEditScopeStore();
     const title = scope("title", true);
     title.save.mockResolvedValue(false);
-    store.requestOpen(title);
+    await store.requestOpen(title);
     expect(await store.saveActive()).toBe(false);
   });
 
-  it("discards the active scope's changes", () => {
+  it("discards the active scope's changes", async () => {
     const store = createEditScopeStore();
     const title = scope("title", true);
-    store.requestOpen(title);
+    await store.requestOpen(title);
     store.discardActive();
     expect(title.discard).toHaveBeenCalled();
   });

@@ -55,7 +55,6 @@
 <script lang="ts" setup>
 import {
   computed,
-  nextTick,
   onBeforeUnmount,
   ref,
   unref,
@@ -75,7 +74,9 @@ import { useFieldValidation } from "@/components/metadata/useFieldValidation";
 import { useEditMode } from "@/composables/useEdit";
 import {
   canUpdateEntity,
+  focusUnlessMoved,
   isInnerControlClick,
+  singleFlight,
   useInPlaceScope,
 } from "@/composables/useInPlaceScope";
 import { useBaseNotification } from "@/composables/useBaseNotification";
@@ -214,10 +215,7 @@ const close = () => {
   errorMessage.value = undefined;
   inPlaceScope.release();
 };
-const focusValue = async () => {
-  await nextTick();
-  valueRef.value?.focus();
-};
+const focusValue = () => focusUnlessMoved(() => valueRef.value);
 const cancel = () => {
   close();
   focusValue();
@@ -225,7 +223,7 @@ const cancel = () => {
 
 // The draft the leave prompt saves.
 const latestDraft = ref<unknown>(undefined);
-const save = async (value: unknown) => {
+const save = singleFlight(async (value: unknown) => {
   const result = await validate(
     value,
     getValidationRules(true, isRequired.value),
@@ -260,11 +258,11 @@ const save = async (value: unknown) => {
   } finally {
     saving.value = false;
   }
-};
+});
 
-const start = () => {
+const start = async () => {
   if (!canEdit.value || isEditing.value) return;
-  const opened = inPlaceScope.open({
+  const opened = await inPlaceScope.open({
     isDirty: () => dirty.value,
     close,
     save: async () => {

@@ -1,4 +1,4 @@
-import { onBeforeUnmount, unref } from "vue";
+import { nextTick, onBeforeUnmount, unref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useEditScope, type EditScope } from "@/composables/useEditScope";
 
@@ -13,7 +13,7 @@ export const useInPlaceScope = (getScopeId: () => string) => {
   const translated = (key: string, fallback: string): string =>
     te(key) ? t(key) : fallback;
 
-  const open = (scope: Omit<EditScope, "id">): boolean =>
+  const open = (scope: Omit<EditScope, "id">): Promise<boolean> =>
     requestOpen({ id: getScopeId(), ...scope });
 
   const releaseScope = () => release(getScopeId());
@@ -54,4 +54,26 @@ export const isInnerControlClick = (
   const target = event.target as Element | null;
   const control = target?.closest?.(INNER_CONTROL_SELECTOR);
   return !!control && control !== container && !!container?.contains(control);
+};
+
+// Leaving an editor saves it, and so does opening the next one: while a save
+// is running, a second call shares it instead of sending it again.
+export const singleFlight = <Args extends unknown[]>(
+  run: (...args: Args) => Promise<void>,
+): ((...args: Args) => Promise<void>) => {
+  let pending: Promise<void> | undefined;
+  return (...args) =>
+    (pending ??= run(...args).finally(() => (pending = undefined)));
+};
+
+// After a save or cancel, focus returns to the value, unless the user already
+// moved it on (Tab, a click on another field). Once the editor is gone, focus
+// that was in it is on <body>.
+export const focusUnlessMoved = async (
+  getTarget: () => HTMLElement | null | undefined,
+): Promise<void> => {
+  await nextTick();
+  const active = document.activeElement;
+  if (active && active !== document.body) return;
+  getTarget()?.focus();
 };

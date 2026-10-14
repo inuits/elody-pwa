@@ -1,9 +1,9 @@
 import { computed, shallowRef, type ComputedRef } from "vue";
 
 // Per-field editing: exactly one edit scope (a field, a group or a row) is
-// open at a time. A changed scope is never closed or saved implicitly: opening
-// another one is refused and focus returns to the changed scope. Leaving the
-// page with a changed scope goes through the usual unsaved-changes prompt.
+// open at a time. Opening another one saves a changed scope first; when that
+// save fails it stays open, focused, and the other one doesn't open. Leaving
+// the page with a changed scope goes through the usual unsaved-changes prompt.
 // See docs/design-system/patterns/per-field-editing.md.
 
 export type EditScope = {
@@ -21,17 +21,18 @@ export const createEditScopeStore = () => {
 
   const isActive = (id: string): boolean => activeScope.value?.id === id;
 
-  const requestOpen = (scope: EditScope): boolean => {
+  const requestOpen = async (scope: EditScope): Promise<boolean> => {
     const current = activeScope.value;
     if (!current || current.id === scope.id) {
       activeScope.value = scope;
       return true;
     }
     if (current.isDirty()) {
-      current.focus?.();
-      return false;
-    }
-    current.close?.();
+      if (!(await current.save?.())) {
+        current.focus?.();
+        return false;
+      }
+    } else current.close?.();
     activeScope.value = scope;
     return true;
   };

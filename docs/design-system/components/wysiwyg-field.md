@@ -15,7 +15,8 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
   - the virtual keyboard toggle (while editing, when the field has layouts);
   - the transliteration toggle (at rest only);
   - the language picker, or the language being edited as a chip;
-  - the actions: a pencil at rest, Bewaar and Annuleer while editing.
+  - the actions: a pencil at rest, Annuleer while editing (leaving the
+    field saves it; a spinner shows while saving).
 
   The actions sit on the label line, not under the content, so they stay in
   view however long the text is.
@@ -30,9 +31,9 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 |---|---|
 | resting, editable | pencil on the label line; hover wash on the content |
 | resting, read-only | content only, no pencil |
-| editing, pristine | toolbar, Bewaar disabled |
-| editing, dirty | Bewaar enabled |
-| saving | spinner in Bewaar, both buttons locked |
+| editing, pristine | toolbar; leaving closes the editor |
+| editing, dirty | leaving saves |
+| saving | spinner before Annuleer, Annuleer locked |
 | error | message below (`role="alert"`), content kept, editor stays open |
 | saved | editor read-only again, "Opgeslagen" announced |
 
@@ -42,9 +43,11 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 - Enter is a new line. **Ctrl/Cmd+Enter** saves, **Escape** cancels and
   restores the previous content. An Escape that closes a tag suggestion, or a
   key pressed in a tagging dialog, belongs to that and doesn't cancel.
-- Clicking outside: an unchanged editor closes, a changed one stays open.
-  The field's own menus and dialogs (tag suggestions, tag modal, context menu,
-  language picker) count as inside.
+- Leaving (a click outside, or focus moving outside): an unchanged editor
+  closes, a changed one saves. The toolbar and the field's own menus and
+  dialogs (tag suggestions, tag modal, context menu, language picker) count
+  as inside, and so does focus going nowhere. Opening another field saves
+  this one first, as for a field row.
 - **Multilingual:** the edit covers the selected language only. The language
   picker is replaced by a chip naming that language until the edit is saved
   or cancelled. Saving sends the value with its `lang`.
@@ -72,7 +75,7 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 
 ## Copy
 Uses the `inline-edit.*` keys of the [inline editor](./inline-editor.md)
-(`save`, `cancel`, `edit-field`, `hint-textarea`, `saved`, `save-failed`).
+(`cancel`, `edit-field`, `hint-textarea`, `saved`, `save-failed`).
 
 Tests: `useWysiwygInPlaceEditing.test.ts`, `EntityElementWYSIWYG.inPlace.test.ts`,
 `WYSIWYGInPlaceActions.test.ts`, `WYSIWYGButtons.test.ts`.
