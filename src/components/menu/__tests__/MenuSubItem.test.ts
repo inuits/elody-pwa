@@ -37,6 +37,13 @@ vi.mock("@vue/apollo-composable", () => ({
   })),
 }));
 
+const badgeCount = vi.hoisted(() => ({ value: 0 }));
+vi.mock("@/composables/useMenuBadges", () => ({
+  useMenuBadges: () => ({
+    badgeCountOf: () => badgeCount.value,
+  }),
+}));
+
 vi.mock("@/types", () => ({
   Unicons: {
     Plus: { name: "plus" },
@@ -131,5 +138,36 @@ describe("MenuSubItem colour", () => {
         "hover:no-underline",
       ]),
     );
+  });
+});
+
+describe("MenuSubItem badge", () => {
+  const subMenuItem = {
+    label: "navigation.my-comments",
+    typeLink: { route: { destination: "myComments" } },
+  } as MenuItem;
+
+  afterEach(() => {
+    badgeCount.value = 0;
+  });
+
+  it("shows the number of new items", () => {
+    badgeCount.value = 2;
+    const wrapper = mount(MenuSubItem, { props: { show: true, subMenuItem } });
+
+    expect(wrapper.find('[data-cy="menu-badge"]').text()).toBe("2");
+  });
+
+  it("caps large numbers", () => {
+    badgeCount.value = 150;
+    const wrapper = mount(MenuSubItem, { props: { show: true, subMenuItem } });
+
+    expect(wrapper.find('[data-cy="menu-badge"]').text()).toBe("99+");
+  });
+
+  it("shows nothing when there is nothing new", () => {
+    const wrapper = mount(MenuSubItem, { props: { show: true, subMenuItem } });
+
+    expect(wrapper.find('[data-cy="menu-badge"]').exists()).toBe(false);
   });
 });

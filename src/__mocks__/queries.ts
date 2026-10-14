@@ -2257,6 +2257,11 @@ export type MenuMenuItemArgs = {
   typeLink?: InputMaybe<MenuTypeLinkInput>;
 };
 
+export enum MenuBadgeSource {
+  Count = "count",
+  SeenItems = "seenItems",
+}
+
 export enum MenuIcons {
   Anpr = 'Anpr',
   ArchiveAlt = 'ArchiveAlt',

@@ -78,6 +78,11 @@
       :relation-type="field.relationType"
       :disabled="fieldEditIsDisabled"
     />
+    <BaseInputColor
+      v-else-if="field.type === InputFieldTypes.Color"
+      v-model:model-value="metadataValue"
+      :disabled="fieldEditIsDisabled"
+    />
     <BaseInputTextNumberDatetime
       v-else
       :name="fieldKey"
@@ -106,6 +111,7 @@ import {
 } from "@/generated-types/queries";
 import { useDefaultValue } from "@/components/metadata/useDefaultValue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import BaseInputColor from "@/components/base/BaseInputColor.vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
 import { computed, inject, onMounted } from "vue";

@@ -1325,3 +1325,38 @@ describe("MetadataWrapper — a field in a repeatable row", () => {
     expect(rows.markSaved).toHaveBeenCalledWith(saved, 1);
   });
 });
+
+describe("MetadataWrapper — color field view", () => {
+  const buildColorProps = (value: string) => ({
+    ...buildProps("color", false),
+    metadata: {
+      ...buildProps("color", false).metadata,
+      value,
+      // keeps the view off the image branch, which matches an undefined unit
+      unit: "text",
+      inputField: {
+        type: InputFieldTypes.Color,
+        options: [],
+        __typename: "InputField",
+      },
+    },
+  });
+
+  it("shows a swatch in the color next to the hex value", async () => {
+    const wrapper = await mountWrapper(buildColorProps("#ff0000"));
+    const value = wrapper.find('[data-cy="metadata-color-value"]');
+
+    expect(value.text()).toBe("#ff0000");
+    expect(
+      value.find('[data-cy="metadata-color-swatch"]').attributes("style"),
+    ).toContain("background-color: rgb(255, 0, 0)");
+  });
+
+  it("falls back to the regular view when there is no color", async () => {
+    const wrapper = await mountWrapper(buildColorProps(""));
+
+    expect(wrapper.find('[data-cy="metadata-color-value"]').exists()).toBe(
+      false,
+    );
+  });
+});

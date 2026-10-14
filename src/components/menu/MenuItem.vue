@@ -20,6 +20,7 @@
           <div
             v-on="on"
             :aria-describedby="describedBy"
+            class="relative"
             :class="icon && Unicons[icon] ? 'h-[18px]' : 'h-[24px]'"
           >
             <unicon
@@ -29,6 +30,7 @@
               height="18"
             />
             <CustomIcon v-else :icon="icon" :size="24" :color="iconColor" />
+            <MenuBadge :count="badgeCount" class="absolute -top-2 -right-3" />
           </div>
         </template>
         <template #default>
@@ -53,11 +55,12 @@
       />
       <div
         v-show="isExpanded"
-        class="w-full grid grid-cols-[1fr_auto] items-center"
+        class="w-full grid grid-cols-[1fr_auto_auto] items-center"
       >
         <span class="px-4 font-bold">
           {{ t(menuitem?.label) }}
         </span>
+        <MenuBadge :count="badgeCount" class="mr-1" />
         <div
           class="w-full flex justify-end align-center"
           v-show="menuitem.subMenu"
@@ -97,6 +100,8 @@ import { auth } from "@/main";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import MenuBadge from "@/components/menu/MenuBadge.vue";
+import { useMenuBadges } from "@/composables/useMenuBadges";
 
 const { checkIfRouteOrModal, setSelectedMenuItem, selectedMenuItem } =
   useMenuHelper();
@@ -118,6 +123,8 @@ const props = defineProps<{
 }>();
 
 const isActive = computed(() => props.menuitem === selectedMenuItem.value);
+const { totalBadgeCountOf } = useMenuBadges();
+const badgeCount = computed(() => totalBadgeCountOf(props.menuitem));
 const showMenuItem = computed(() => {
   const isEmptyGroup =
     !!props.menuitem?.subMenu && menuSubitem.value.length === 0;

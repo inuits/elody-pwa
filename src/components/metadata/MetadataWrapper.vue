@@ -314,6 +314,20 @@
                 v-else-if="fieldType === InputFieldTypes.Checkbox"
                 :value="fieldValueProxy"
               />
+              <span
+                v-else-if="
+                  fieldType === InputFieldTypes.Color && fieldValueProxy
+                "
+                data-cy="metadata-color-value"
+                class="flex items-center gap-2 text-sm"
+              >
+                <span
+                  data-cy="metadata-color-swatch"
+                  class="w-4 h-4 shrink-0 rounded border border-[rgba(0,58,82,0.6)]"
+                  :style="{ backgroundColor: fieldValueProxy }"
+                />
+                {{ fieldValueProxy }}
+              </span>
               <entity-element-metadata
                 v-else
                 :class="{ 'pr-6': fieldIsLocked }"

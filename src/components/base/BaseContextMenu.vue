@@ -1,5 +1,5 @@
 <template>
-  <Teleport :to="someModalIsOpened ? modalTeleportTarget() : 'body'">
+  <Teleport defer :to="someModalIsOpened ? modalTeleportTarget() : 'body'">
     <Transition class="base-context-menu-container">
       <div
         @click.prevent

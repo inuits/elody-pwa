@@ -66,6 +66,33 @@ describe("useFiltersBaseNew - Variable Resolution", () => {
     );
   });
 
+  it("resolves $routeEntityType separately from entityType", async () => {
+    const { initializeFilters, getNormalizedFiltersForApi, setVariables } =
+      useFiltersBaseNew();
+    setVariables({ entityType: "saved_search", routeEntityType: "production" });
+
+    await initializeFilters({
+      advancedFilters: {
+        applicableType: {
+          type: "text",
+          key: ["elody:1|metadata.applicableType.value"],
+          defaultValue: "$routeEntityType",
+          hidden: true,
+          __typename: "AdvancedFilter",
+        },
+        __typename: "AdvancedFilters",
+      },
+      fromState: false,
+    });
+
+    expect(getNormalizedFiltersForApi()).toEqual([
+      expect.objectContaining({
+        key: ["elody:1|metadata.applicableType.value"],
+        value: "production",
+      }),
+    ]);
+  });
+
   it("replaces parentIds to an actual value", async () => {
     const {
       filters,

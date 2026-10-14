@@ -37,6 +37,14 @@ vi.mock("@vue/apollo-composable", () => ({
   })),
 }));
 
+const badgeCount = vi.hoisted(() => ({ value: 0 }));
+vi.mock("@/composables/useMenuBadges", () => ({
+  useMenuBadges: () => ({
+    totalBadgeCountOf: () => badgeCount.value,
+    badgeCountOf: () => 0,
+  }),
+}));
+
 vi.mock("@/types", () => ({
   Unicons: {
     Plus: { name: "plus" },
@@ -184,4 +192,45 @@ describe("MenuItem colour", () => {
       );
     },
   );
+});
+
+describe("MenuItem badge", () => {
+  const menuitem = {
+    label: "navigation.comments",
+    typeLink: routeTo("Home"),
+  } as MenuItem;
+
+  afterEach(() => {
+    badgeCount.value = 0;
+  });
+
+  const mountWith = (isExpanded: boolean) =>
+    mount(MenuItemComponent, {
+      props: {
+        menuitem,
+        icon: "Test" as DamsIcons,
+        isExpanded,
+        isBeingHovered: false,
+      },
+    });
+
+  it("shows the total next to the label when expanded", () => {
+    badgeCount.value = 3;
+    const badge = mountWith(true).find('[data-cy="menu-badge"]');
+
+    expect(badge.text()).toBe("3");
+    expect(badge.classes()).not.toContain("absolute");
+  });
+
+  it("puts the total on the icon corner when collapsed", () => {
+    badgeCount.value = 3;
+    const badge = mountWith(false).find('[data-cy="menu-badge"]');
+
+    expect(badge.text()).toBe("3");
+    expect(badge.classes()).toContain("absolute");
+  });
+
+  it("shows nothing when the total is zero", () => {
+    expect(mountWith(true).find('[data-cy="menu-badge"]').exists()).toBe(false);
+  });
 });

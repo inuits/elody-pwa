@@ -52,8 +52,8 @@ export type CommentThread = {
 
 const COMMENT_FETCH_LIMIT = 200;
 
-const RELATION_PARENT_ENTITY = "refParentEntity";
-const RELATION_SUBJECT = "refSubject";
+const RELATION_PARENT_ENTITY = "ref_parent_entity";
+const RELATION_SUBJECT = "ref_subject";
 
 export const groupComments = (comments: Comment[]): CommentThread[] => {
   const isSubject = (comment: Comment) =>
