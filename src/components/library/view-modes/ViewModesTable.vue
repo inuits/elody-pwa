@@ -192,6 +192,7 @@ const props = withDefaults(
     listItemRouteName: string;
     openEntityInDetailModal?: boolean;
     enableNavigation?: boolean;
+    openPreviewOnClick?: boolean;
     parentEntityIdentifiers?: string[];
     parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
@@ -211,6 +212,7 @@ const props = withDefaults(
   {
     openEntityInDetailModal: false,
     enableNavigation: true,
+    openPreviewOnClick: false,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
@@ -253,6 +255,7 @@ const {
 const {
   containerNameForPreview,
   getLinkSettings,
+  opensPreviewOnClick,
   isEntityDisabled,
   entityWrapperHandler,
   getButtons,
@@ -263,6 +266,7 @@ const {
   previewComponentEnabled,
   openPreviewComponent,
   togglePreviewForListItem,
+  previewComponent,
 );
 
 const { seenTracking } = useEntityPageConfig();
@@ -385,6 +389,7 @@ const processedEntities = computed(() => {
       isSeen,
       isNew,
       previewEnabled,
+      opensPreviewOnClick.value,
       props.entitiesLoading,
       actionsColumnWidth.value,
     ];

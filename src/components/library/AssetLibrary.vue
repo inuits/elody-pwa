@@ -6,6 +6,7 @@
     :list-item-route-name="RouteNames.SingleEntity"
     :filter-type="entityType"
     :persist-expand-filters="true"
+    :open-preview-on-click="route.meta.openPreviewOnClick === true"
   />
 </template>
 

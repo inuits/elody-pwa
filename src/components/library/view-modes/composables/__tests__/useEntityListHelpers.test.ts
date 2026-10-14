@@ -109,3 +109,44 @@ describe("useEntityListHelpers.entityWrapperHandler", () => {
     expect(togglePreviewForListItem).not.toHaveBeenCalled();
   });
 });
+
+describe("useEntityListHelpers with openPreviewOnClick", () => {
+  const entity = { id: "NOTIF-1", type: "notification" } as unknown as Entity;
+  const previewComponent = { listItemsCoverage: "OneListItem" };
+
+  const helpersWith = (previewComponentLoaded: boolean) => {
+    const openPreviewComponent = vi.fn();
+    const helpers = useEntityListHelpers(
+      { enableNavigation: true, openPreviewOnClick: true },
+      ref([]),
+      ref(false),
+      openPreviewComponent,
+      vi.fn(),
+      ref(previewComponentLoaded ? previewComponent : undefined) as any,
+    );
+    return { helpers, openPreviewComponent };
+  };
+
+  it("opens a closed preview on click", () => {
+    const { helpers, openPreviewComponent } = helpersWith(true);
+    helpers.entityWrapperHandler(entity);
+    expect(openPreviewComponent).toHaveBeenCalledWith("NOTIF-1");
+  });
+
+  it("renders the item as a div instead of a link", () => {
+    const { helpers } = helpersWith(true);
+    expect(helpers.getLinkSettings(entity).tag).toBe("div");
+  });
+
+  it("still builds the forced navigation link", () => {
+    const { helpers } = helpersWith(true);
+    expect(helpers.getLinkSettings(entity, "", true).tag).toBe("router-link");
+  });
+
+  it("falls back to navigation when the type has no preview component", () => {
+    const { helpers, openPreviewComponent } = helpersWith(false);
+    helpers.entityWrapperHandler(entity);
+    expect(openPreviewComponent).not.toHaveBeenCalled();
+    expect(helpers.getLinkSettings(entity).tag).toBe("router-link");
+  });
+});

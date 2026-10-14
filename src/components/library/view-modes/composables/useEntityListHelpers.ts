@@ -4,6 +4,7 @@ import {
   type Buttons,
   type Entity,
   Entitytyping,
+  type PreviewComponent,
   RelationActions,
 } from "@/generated-types/queries";
 import {
@@ -18,6 +19,7 @@ export interface EntityListHelpersProps {
   idsOfNonSelectableEntities?: string[];
   parentEntityIdentifiers?: string[];
   enableNavigation?: boolean;
+  openPreviewOnClick?: boolean;
   showCurrentEntityFlow?: boolean;
   allowedActionsOnRelations?: RelationActions[];
 }
@@ -28,6 +30,7 @@ export const useEntityListHelpers = (
   previewComponentEnabled: Ref<boolean>,
   openPreviewComponent: (entityId: string) => void,
   togglePreviewForListItem?: (entityId: string) => void,
+  previewComponent?: Ref<PreviewComponent | undefined>,
 ) => {
   const mediafileViewerContext: any = inject("mediafileViewerContext");
   const isPreviewElement: boolean = inject("IsPreviewElement", false);
@@ -39,12 +42,21 @@ export const useEntityListHelpers = (
       : "preview-without-current-entity-flow",
   );
 
+  const opensPreviewOnClick = computed(
+    () => !!props.openPreviewOnClick && previewComponent?.value !== undefined,
+  );
+
   const getLinkSettings = (
     entity: Entity,
     listItemRouteName: string = "",
     force = false,
   ) => {
-    if ((!props.enableNavigation || previewComponentEnabled.value) && !force) {
+    if (
+      (!props.enableNavigation ||
+        previewComponentEnabled.value ||
+        opensPreviewOnClick.value) &&
+      !force
+    ) {
       if (
         (props.parentEntityIdentifiers?.length ?? 0) > 0 &&
         entity.type.toLowerCase() === Entitytyping.Mediafile
@@ -65,7 +77,8 @@ export const useEntityListHelpers = (
   const entityWrapperHandler = (entity: Entity) => {
     const entityId = entity.id || entity.uuid;
     if (!props.enableNavigation) togglePreviewForListItem?.(entityId);
-    else if (previewComponentEnabled.value) openPreviewComponent(entityId);
+    else if (previewComponentEnabled.value || opensPreviewOnClick.value)
+      openPreviewComponent(entityId);
     if (isEntityDisabled(entity) || !props.enableNavigation) return;
     updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
   };
@@ -102,6 +115,7 @@ export const useEntityListHelpers = (
   return {
     containerNameForPreview,
     getLinkSettings,
+    opensPreviewOnClick,
     isEntityDisabled,
     entityWrapperHandler,
     getButtons,

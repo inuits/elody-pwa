@@ -277,6 +277,7 @@
             :disable-previews="disableNewEntityPreviews"
             :open-entity-in-detail-modal="openEntityInDetailModal"
             :enable-navigation="enableNavigation"
+            :open-preview-on-click="openPreviewOnClick"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
@@ -327,6 +328,7 @@
             :list-item-route-name="listItemRouteName"
             :open-entity-in-detail-modal="openEntityInDetailModal"
             :enable-navigation="enableNavigation"
+            :open-preview-on-click="openPreviewOnClick"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
@@ -495,6 +497,7 @@ export type BaseLibraryProps = {
   confirmSelectionButton?: boolean;
   openEntityInDetailModal?: boolean;
   enableNavigation?: boolean;
+  openPreviewOnClick?: boolean;
   disableNewEntityPreviews?: boolean;
   idsOfNonSelectableEntities?: string[];
   relationType?: string;
@@ -543,6 +546,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   confirmSelectionButton: false,
   openEntityInDetailModal: false,
   enableNavigation: true,
+  openPreviewOnClick: false,
   disableNewEntityPreviews: false,
   idsOfNonSelectableEntities: () => [],
   hasStickyBars: true,
