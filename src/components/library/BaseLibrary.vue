@@ -1136,7 +1136,17 @@ const syncEditStateCallbacks = (): void => {
   if (!entityId) return;
   const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}`;
   useEditHelper.addMutationCallback(callbackName, () =>
-    saveRelatedEntityData(entityId, entities.value ?? []),
+    saveRelatedEntityData(
+      entityId,
+      entities.value ?? [],
+      props.relationType
+        ? {
+            type: (props.parentEntityType ||
+              route.meta.entityType) as Entitytyping,
+            relationType: props.relationType,
+          }
+        : undefined,
+    ),
   );
 };
 
