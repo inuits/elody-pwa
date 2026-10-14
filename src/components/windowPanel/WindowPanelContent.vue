@@ -88,7 +88,6 @@
               :entity-list="metadata.entityList ?? []"
               :identifiers="identifiers"
               :disable-library-bar="metadata.disableLibraryBar"
-              :enable-navigation="true"
               headerStyle="none"
               v-bind="metadata"
             />

@@ -1,4 +1,12 @@
-import { EditStatus, type Entity } from "@/generated-types/queries";
+import {
+  EditStatus,
+  GetEntityByIdDocument,
+  type BaseRelationValuesInput,
+  type Entity,
+  type Entitytyping,
+  type GetEntityByIdQueryVariables,
+} from "@/generated-types/queries";
+import { apolloClient } from "@/main";
 import { useFormHelper } from "@/composables/useFormHelper";
 import {
   mutateEntityRelations,
@@ -11,31 +19,37 @@ export const updateRelationDirect = async (
   relationKey: string,
   metadataUpdates: Record<string, any>,
 ): Promise<void> => {
-  await mutateEntityRelations(entity, relationType, (relation) => {
-    if (relation.key !== relationKey)
-      return { ...relation, editStatus: EditStatus.Unchanged };
+  await mutateEntityRelations(entity, relationType, (relation) =>
+    relation.key === relationKey
+      ? patchRelationMetadata(relation, metadataUpdates)
+      : { ...relation, editStatus: EditStatus.Unchanged },
+  );
+};
 
-    const existingMetadata: Array<{ key: string; value: any }> =
-      (relation as any).metadata ?? [];
+const patchRelationMetadata = (
+  relation: BaseRelationValuesInput,
+  metadataUpdates: Record<string, any>,
+): BaseRelationValuesInput => {
+  const existingMetadata: Array<{ key: string; value: any }> =
+    (relation as any).metadata ?? [];
 
-    const patchedMetadata = existingMetadata.map((metadataEntry) => {
-      if (!(metadataEntry.key in metadataUpdates)) return metadataEntry;
-      const newValue = metadataUpdates[metadataEntry.key];
-      const value =
-        Array.isArray(metadataEntry.value) && !Array.isArray(newValue)
-          ? [newValue]
-          : newValue;
-      return { ...metadataEntry, value };
-    });
-
-    for (const [key, newValue] of Object.entries(metadataUpdates)) {
-      if (!patchedMetadata.some((metadataEntry) => metadataEntry.key === key)) {
-        patchedMetadata.push({ key, value: newValue });
-      }
-    }
-
-    return { ...relation, metadata: patchedMetadata, editStatus: EditStatus.Changed };
+  const patchedMetadata = existingMetadata.map((metadataEntry) => {
+    if (!(metadataEntry.key in metadataUpdates)) return metadataEntry;
+    const newValue = metadataUpdates[metadataEntry.key];
+    const value =
+      Array.isArray(metadataEntry.value) && !Array.isArray(newValue)
+        ? [newValue]
+        : newValue;
+    return { ...metadataEntry, value };
   });
+
+  for (const [key, newValue] of Object.entries(metadataUpdates)) {
+    if (!patchedMetadata.some((metadataEntry) => metadataEntry.key === key)) {
+      patchedMetadata.push({ key, value: newValue });
+    }
+  }
+
+  return { ...relation, metadata: patchedMetadata, editStatus: EditStatus.Changed } as BaseRelationValuesInput;
 };
 
 const unwrapFormatterValue = (value: any): any => {
@@ -44,9 +58,14 @@ const unwrapFormatterValue = (value: any): any => {
   return value;
 };
 
+// Some related entities (e.g. aicap mediafiles) hold no relation back to the
+// parent, so their relation metadata lives only on the parent's relation.
+export type ParentRelation = { type: Entitytyping; relationType: string };
+
 export const saveRelatedEntityData = async (
   entityId: string,
   relatedEntities: Entity[],
+  parentRelation?: ParentRelation,
 ): Promise<void> => {
   const { getForm } = useFormHelper();
   const form = getForm(entityId);
@@ -67,13 +86,17 @@ export const saveRelatedEntityData = async (
       unwrapFormatterValue(value);
   }
 
+  const updatesOnParent: Record<string, Record<string, any>> = {};
   for (const [linkedEntityId, updates] of Object.entries(updatesByEntityId)) {
     const relatedEntity = relatedEntities.find(
       (entity) => entity.id === linkedEntityId,
     );
     if (!relatedEntity) continue;
     const inverseRelationType = findInverseRelationType(relatedEntity, entityId);
-    if (!inverseRelationType) continue;
+    if (!inverseRelationType) {
+      if (parentRelation) updatesOnParent[linkedEntityId] = updates;
+      continue;
+    }
     const changedUpdates = keepChangedUpdates(
       updates,
       findRelationMetadata(relatedEntity, inverseRelationType, entityId),
@@ -86,6 +109,39 @@ export const saveRelatedEntityData = async (
       changedUpdates,
     );
   }
+
+  if (parentRelation && Object.keys(updatesOnParent).length)
+    await saveOnParentRelations(entityId, parentRelation, updatesOnParent);
+};
+
+const saveOnParentRelations = async (
+  entityId: string,
+  { type, relationType }: ParentRelation,
+  updatesByRelationKey: Record<string, Record<string, any>>,
+): Promise<void> => {
+  const variables: GetEntityByIdQueryVariables = { id: entityId, type };
+  const { data } = await apolloClient.query({
+    query: GetEntityByIdDocument,
+    variables,
+    fetchPolicy: "no-cache",
+  });
+  const parent = data.Entity as Entity;
+  const changedByRelationKey = Object.fromEntries(
+    Object.entries(updatesByRelationKey).map(([relationKey, updates]) => [
+      relationKey,
+      keepChangedUpdates(
+        updates,
+        findRelationMetadata(parent, relationType, relationKey),
+      ),
+    ]),
+  );
+  if (!Object.values(changedByRelationKey).some((u) => Object.keys(u).length))
+    return;
+  await mutateEntityRelations(parent, relationType, (relation) =>
+    Object.keys(changedByRelationKey[relation.key] ?? {}).length
+      ? patchRelationMetadata(relation, changedByRelationKey[relation.key])
+      : { ...relation, editStatus: EditStatus.Unchanged },
+  );
 };
 
 const findRelationMetadata = (

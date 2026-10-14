@@ -137,6 +137,7 @@ describe("LinkAction", () => {
         .findComponent({ name: "BaseContextMenuItem" })
         .vm.$emit("clicked");
       expect(mockResolve).toHaveBeenCalledWith({
+        name: "SingleEntity",
         params: { id: "M-12345", type: "mediafiles" },
       });
     });
@@ -148,6 +149,7 @@ describe("LinkAction", () => {
         .findComponent({ name: "BaseContextMenuItem" })
         .vm.$emit("clicked");
       expect(mockResolve).toHaveBeenCalledWith({
+        name: "SingleEntity",
         params: { id: "M-12345", type: "mediafile" },
       });
     });

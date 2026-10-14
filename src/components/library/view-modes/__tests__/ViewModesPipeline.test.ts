@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import ViewModesPipeline from "../ViewModesPipeline.vue";
 import ListItem from "@/components/ListItem.vue";
-import type { Entity } from "@/generated-types/queries";
+import { ActionOnClick, type Entity } from "@/generated-types/queries";
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -166,7 +166,7 @@ describe("ViewModesPipeline", () => {
 
   it("does not navigate on a card click: the corner actions menu is the interaction", async () => {
     const wrapper = mountPipeline([makeEntity("a")], {
-      openEntityInDetailModal: true,
+      actionOnClick: ActionOnClick.OpenInModal,
     });
 
     await wrapper.find("[data-pipeline-node]").trigger("click");

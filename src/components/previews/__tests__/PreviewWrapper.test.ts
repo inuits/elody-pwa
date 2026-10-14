@@ -2,11 +2,7 @@ import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import PreviewWrapper from "../PreviewWrapper.vue";
 import { ListItemCoverageTypes, PreviewTypes } from "@/generated-types/queries";
-import { apolloClient, router } from "@/main";
-
-const { mockGoToEntityPage } = vi.hoisted(() => ({
-  mockGoToEntityPage: vi.fn(),
-}));
+import { apolloClient } from "@/main";
 
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (k: string) => k }) }));
 vi.mock("@/main", () => ({
@@ -31,11 +27,9 @@ vi.mock("@/composables/useMaps", () => ({
 }));
 vi.mock("@/helpers", () => ({
   getTitleOrNameFromEntity: () => "Some title",
-  goToEntityPage: (...args: unknown[]) => mockGoToEntityPage(...args),
 }));
 
 const CLOSE_SELECTOR = '[data-cy="close-preview-component"]';
-const OPEN_DETAIL_SELECTOR = '[data-cy="open-detail-page-button"]';
 const LOADING_SELECTOR = '[data-cy="preview-loading"]';
 
 const BaseTooltipStub = {
@@ -131,52 +125,6 @@ describe("PreviewWrapper close button (header)", () => {
     await wrapper.find(".base-tooltip-stub").trigger("click");
 
     expect(wrapper.emitted("closePreviewComponent")).toBeTruthy();
-  });
-});
-
-describe("PreviewWrapper open detail page button", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("renders when previewConfiguration.displayOpenDetailPageButton is true", async () => {
-    const wrapper = getWrapper({
-      type: PreviewTypes.MediaViewer,
-      previewConfiguration: { displayOpenDetailPageButton: true },
-    });
-    await flushPromises();
-    expect(wrapper.find(OPEN_DETAIL_SELECTOR).exists()).toBe(true);
-  });
-
-  it("does NOT render when displayOpenDetailPageButton is false", async () => {
-    const wrapper = getWrapper({
-      type: PreviewTypes.MediaViewer,
-      previewConfiguration: { displayOpenDetailPageButton: false },
-    });
-    await flushPromises();
-    expect(wrapper.find(OPEN_DETAIL_SELECTOR).exists()).toBe(false);
-  });
-
-  it("does NOT render when previewConfiguration is absent", async () => {
-    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
-    await flushPromises();
-    expect(wrapper.find(OPEN_DETAIL_SELECTOR).exists()).toBe(false);
-  });
-
-  it("navigates to the entity detail page on click", async () => {
-    const wrapper = getWrapper({
-      type: PreviewTypes.MediaViewer,
-      previewConfiguration: { displayOpenDetailPageButton: true },
-    });
-    await flushPromises();
-
-    await wrapper.find(`${OPEN_DETAIL_SELECTOR} button`).trigger("click");
-
-    expect(mockGoToEntityPage).toHaveBeenCalledWith(
-      { id: "e1" },
-      "SingleEntity",
-      router,
-    );
   });
 });
 
