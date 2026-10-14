@@ -36,6 +36,7 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
+import { aliasAsKeyTransform } from "@/aliasAsKeyTransform";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -143,6 +144,7 @@ const start = async (): Promise<void> => {
       httpLink,
     ]),
     cache: new InMemoryCache(),
+    documentTransform: aliasAsKeyTransform,
   });
 
   const [formattersSettingsResult] = await Promise.all([
