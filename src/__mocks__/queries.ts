@@ -1098,7 +1098,7 @@ export type EntityListElement = {
   customQueryFilters?: Maybe<Scalars['String']>;
   customQueryRelationType?: Maybe<Scalars['String']>;
   enableAdvancedFilters?: Maybe<Scalars['Boolean']>;
-  enableNavigation?: Maybe<Scalars['Boolean']>;
+  actionOnClick?: Maybe<ActionOnClick>;
   entityList?: Maybe<Array<Maybe<Entity>>>;
   entityListElement?: Maybe<EntityListElement>;
   entityTypes?: Maybe<Array<Maybe<Entitytyping>>>;
@@ -3272,6 +3272,13 @@ export type RegexpMatchFormatter = {
   __typename?: 'RegexpMatchFormatter';
   value: Scalars['String'];
 };
+
+export enum ActionOnClick {
+  Navigate = 'navigate',
+  None = 'none',
+  OpenInModal = 'openInModal',
+  OpenPreview = 'openPreview'
+}
 
 export enum RelationActions {
   AddRelation = 'addRelation',

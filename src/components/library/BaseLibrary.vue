@@ -275,9 +275,7 @@
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
             :disable-previews="disableNewEntityPreviews"
-            :open-entity-in-detail-modal="openEntityInDetailModal"
-            :enable-navigation="enableNavigation"
-            :open-preview-on-click="openPreviewOnClick"
+            :action-on-click="actionOnClick"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
@@ -326,9 +324,7 @@
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
-            :open-entity-in-detail-modal="openEntityInDetailModal"
-            :enable-navigation="enableNavigation"
-            :open-preview-on-click="openPreviewOnClick"
+            :action-on-click="actionOnClick"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
@@ -354,8 +350,7 @@
             :entities-loading="entitiesLoading"
             :bulk-operations-context="bulkOperationsContext"
             :list-item-route-name="listItemRouteName"
-            :open-entity-in-detail-modal="openEntityInDetailModal"
-            :enable-navigation="enableNavigation"
+            :action-on-click="actionOnClick"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :relation-type="relationType"
             :enable-selection="enableSelection"
@@ -432,6 +427,7 @@ import { useMaps } from "@/composables/useMaps";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useViewModes } from "@/composables/useViewModes";
 import {
+  ActionOnClick,
   ActionsOnResult,
   ActionsOnResultTypes,
   type AdvancedFilterInput,
@@ -495,9 +491,7 @@ export type BaseLibraryProps = {
   parentEntityIdentifiers?: string[];
   showButton?: boolean;
   confirmSelectionButton?: boolean;
-  openEntityInDetailModal?: boolean;
-  enableNavigation?: boolean;
-  openPreviewOnClick?: boolean;
+  actionOnClick?: ActionOnClick;
   disableNewEntityPreviews?: boolean;
   idsOfNonSelectableEntities?: string[];
   relationType?: string;
@@ -544,9 +538,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   parentEntityIdentifiers: () => [],
   showButton: true,
   confirmSelectionButton: false,
-  openEntityInDetailModal: false,
-  enableNavigation: true,
-  openPreviewOnClick: false,
+  actionOnClick: ActionOnClick.Navigate,
   disableNewEntityPreviews: false,
   idsOfNonSelectableEntities: () => [],
   hasStickyBars: true,

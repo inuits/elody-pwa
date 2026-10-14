@@ -43,7 +43,7 @@
           :relation-type="relationType"
           :has-selection="enableSelection"
           :base-library-mode="baseLibraryMode"
-          :is-enable-navigation="enableNavigation"
+          :is-enable-navigation="actionOnClick === ActionOnClick.Navigate"
           view-mode="pipeline"
           :refetch-entities="refetchEntities"
           :preview-component-enabled="false"
@@ -58,6 +58,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import {
+  ActionOnClick,
   BaseLibraryModes,
   type ConfigItem,
   type Entity,
@@ -87,8 +88,7 @@ const props = withDefaults(
     entitiesLoading: boolean;
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
-    openEntityInDetailModal?: boolean;
-    enableNavigation?: boolean;
+    actionOnClick?: ActionOnClick;
     parentEntityIdentifiers?: string[];
     relationType?: string;
     enableSelection?: boolean;
@@ -99,8 +99,7 @@ const props = withDefaults(
     allowedActionsOnRelations?: RelationActions[];
   }>(),
   {
-    openEntityInDetailModal: false,
-    enableNavigation: true,
+    actionOnClick: ActionOnClick.Navigate,
     parentEntityIdentifiers: () => [],
     relationType: undefined,
     enableSelection: true,

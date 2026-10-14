@@ -65,7 +65,7 @@
             class="list-item-table"
             @click="
               () => {
-                if (openEntityInDetailModal)
+                if (actionOnClick === ActionOnClick.OpenInModal)
                   openEntityInModal(entity.id, entity.type);
                 else entityWrapperHandler(entity.originalEntity);
               }
@@ -155,6 +155,7 @@
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
 import {
+  ActionOnClick,
   BaseLibraryModes,
   type Entity,
   Entitytyping,
@@ -190,9 +191,7 @@ const props = withDefaults(
     entitiesLoading: boolean;
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
-    openEntityInDetailModal?: boolean;
-    enableNavigation?: boolean;
-    openPreviewOnClick?: boolean;
+    actionOnClick?: ActionOnClick;
     parentEntityIdentifiers?: string[];
     parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
@@ -210,9 +209,7 @@ const props = withDefaults(
     groupsLoading?: boolean;
   }>(),
   {
-    openEntityInDetailModal: false,
-    enableNavigation: true,
-    openPreviewOnClick: false,
+    actionOnClick: ActionOnClick.Navigate,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
@@ -255,7 +252,6 @@ const {
 const {
   containerNameForPreview,
   getLinkSettings,
-  opensPreviewOnClick,
   isEntityDisabled,
   entityWrapperHandler,
   getButtons,
@@ -266,7 +262,6 @@ const {
   previewComponentEnabled,
   openPreviewComponent,
   togglePreviewForListItem,
-  previewComponent,
 );
 
 const { seenTracking } = useEntityPageConfig();
@@ -389,7 +384,6 @@ const processedEntities = computed(() => {
       isSeen,
       isNew,
       previewEnabled,
-      opensPreviewOnClick.value,
       props.entitiesLoading,
       actionsColumnWidth.value,
     ];

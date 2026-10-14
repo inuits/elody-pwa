@@ -6,7 +6,7 @@
     :list-item-route-name="RouteNames.SingleEntity"
     :filter-type="entityType"
     :persist-expand-filters="true"
-    :open-preview-on-click="route.meta.openPreviewOnClick === true"
+    :action-on-click="actionOnClick"
   />
 </template>
 
@@ -14,7 +14,11 @@
 import { computed, inject, onMounted, provide } from "vue";
 import type { Context } from "@/composables/useBulkOperations";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import { RouteNames, SearchInputType } from "@/generated-types/queries";
+import {
+  type ActionOnClick,
+  RouteNames,
+  SearchInputType,
+} from "@/generated-types/queries";
 import { useRoute } from "vue-router";
 import {
   type BreadcrumbRoute,
@@ -31,6 +35,9 @@ const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
 provide("mediafileViewerContext", "mediafilesContext");
 addMediafileSelectionStateContext("mediafilesContext");
 
+const actionOnClick = computed(
+  () => route.meta.actionOnClick as ActionOnClick | undefined,
+);
 const entityType = computed<string | "not-set">(() =>
   route.meta.entityType ? (route.meta.entityType as string) : "not-set",
 );

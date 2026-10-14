@@ -69,7 +69,7 @@
           ]"
           @click="
             () => {
-              if (openEntityInDetailModal)
+              if (actionOnClick === ActionOnClick.OpenInModal)
                 openEntityInModal(entity.id, entity.type);
               else entityWrapperHandler(entity.originalEntity);
             }
@@ -96,7 +96,7 @@
             :relation-type="relationType"
             :has-selection="enableSelection"
             :base-library-mode="baseLibraryMode"
-            :is-enable-navigation="enableNavigation"
+            :is-enable-navigation="actionOnClick === ActionOnClick.Navigate"
             :entity-list-elements="entityListElements"
             :view-mode="mode"
             :refetch-entities="refetchEntities"
@@ -154,6 +154,7 @@
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
 import {
+  ActionOnClick,
   BaseLibraryModes,
   type BaseRelationValuesInput,
   type ConfigItem,
@@ -189,9 +190,7 @@ const props = withDefaults(
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
     disablePreviews?: boolean;
-    openEntityInDetailModal?: boolean;
-    enableNavigation?: boolean;
-    openPreviewOnClick?: boolean;
+    actionOnClick?: ActionOnClick;
     parentEntityIdentifiers?: string[];
     parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
@@ -213,9 +212,7 @@ const props = withDefaults(
   }>(),
   {
     disablePreviews: false,
-    openEntityInDetailModal: false,
-    enableNavigation: true,
-    openPreviewOnClick: false,
+    actionOnClick: ActionOnClick.Navigate,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,
@@ -258,7 +255,6 @@ const {
 const {
   containerNameForPreview,
   getLinkSettings,
-  opensPreviewOnClick,
   isEntityDisabled,
   entityWrapperHandler,
   getButtons,
@@ -269,7 +265,6 @@ const {
   previewComponentEnabled,
   openPreviewComponent,
   togglePreviewForListItem,
-  previewComponent,
 );
 
 const { seenTracking } = useEntityPageConfig();
@@ -337,7 +332,6 @@ const processedEntities = computed(() => {
       isNew,
       currentMode,
       previewEnabled,
-      opensPreviewOnClick.value,
       props.entitiesLoading,
     ];
 

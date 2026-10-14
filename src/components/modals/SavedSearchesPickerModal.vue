@@ -10,7 +10,7 @@
         :search-input-type="SearchInputType.AdvancedSavedSearchType"
         :search-placeholder="$t('saved-searches.search-saved-searches')"
         :confirm-selection-button="true"
-        :enable-navigation="false"
+        :action-on-click="ActionOnClick.OpenPreview"
         :enable-bulk-operations="true"
         :disable-new-entity-previews="true"
         :enableAdvancedFilters="true"
@@ -30,6 +30,7 @@
 import BaseModal from "../base/BaseModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
+  ActionOnClick,
   TypeModals,
   Entitytyping,
   SearchInputType,

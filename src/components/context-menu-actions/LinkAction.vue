@@ -47,6 +47,7 @@ const openLink = () => {
     return;
   }
   const resolved = router.resolve({
+    name: "SingleEntity",
     params: { id: props.entityId, type: urlType.value },
   });
   window.open(resolved.href, "_blank");
