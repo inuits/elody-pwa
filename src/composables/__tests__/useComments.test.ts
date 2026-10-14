@@ -46,9 +46,9 @@ const comment = (
   type: "comment",
   intialValues: { body: `<p>${id}</p>`, status, created_at: createdAt },
   relationValues: {
-    refParentEntity: [{ key: "W-1", type: "refParentEntity" }],
+    ref_parent_entity: [{ key: "W-1", type: "ref_parent_entity" }],
     ...(subjectId
-      ? { refSubject: [{ key: subjectId, type: "refSubject" }] }
+      ? { ref_subject: [{ key: subjectId, type: "ref_subject" }] }
       : {}),
   },
 });
@@ -75,7 +75,7 @@ describe("flattenRelationsExceptTags", () => {
     const relations = flattenRelationsExceptTags(withTags, ["refTaggedUsers"]);
 
     expect(relations.map((relation: any) => relation.type)).toEqual([
-      "refParentEntity",
+      "ref_parent_entity",
     ]);
   });
 });
@@ -106,7 +106,7 @@ describe("tagRelationTypesOf", () => {
     );
 
     expect(relations.map((relation: any) => relation.type)).toEqual([
-      "refParentEntity",
+      "ref_parent_entity",
     ]);
   });
 });
