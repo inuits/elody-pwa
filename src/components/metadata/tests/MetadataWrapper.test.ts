@@ -429,6 +429,13 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     );
   });
 
+  it("keeps the label clear of the hover wash and focus ring", async () => {
+    const wrapper = await mountWrapper(editableProps());
+    expect(wrapper.find('[data-cy="field-label-row"]').classes()).toContain(
+      "mb-(--field-label-gap)",
+    );
+  });
+
   it("gives every value row the same minimum height, editable or not", async () => {
     expect((await fieldValue()).classes()).toContain(
       "min-h-(--field-value-min-height)",

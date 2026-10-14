@@ -374,6 +374,8 @@
   --field-value-pad-y: 3px;
   /* Every value row is at least this tall, text or chips */
   --field-value-min-height: 26px;
+  /* Space under the label, so the wash and focus ring above the value clear it */
+  --field-label-gap: 6px;
 
   /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
      in BaseTooltip.vue */

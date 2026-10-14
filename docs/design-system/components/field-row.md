@@ -39,6 +39,7 @@ repeatable row group.
 | `--field-value-pad-x` | how far the wash extends beyond the value |
 | `--field-value-pad-y` | how far the wash extends above and below the value |
 | `--field-value-min-height` | minimum height of every value row, text or chips |
+| `--field-label-gap` | space under the label, so the hover wash and focus ring clear it |
 | `--color-text-subtle` | pencil |
 | `--opacity-empty` | empty value ("Geen waarde") |
 | `--color-success` | the check of a checkbox value ("Ja"); "Nee" shows a cross in the value colour, both at the value size (`MetadataYesNo.vue`) |

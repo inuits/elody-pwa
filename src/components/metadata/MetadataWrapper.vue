@@ -12,7 +12,10 @@
       relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
     }"
   >
-    <div class="flex items-center gap-2">
+    <div
+      data-cy="field-label-row"
+      class="flex items-center gap-2 mb-(--field-label-gap)"
+    >
       <metadata-title
         :class="{
           'pb-2': fieldType === InputFieldTypes.InputFieldWithSubFields,
