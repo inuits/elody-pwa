@@ -307,11 +307,23 @@ describe("useBaseLibrary – access denied", () => {
     graphQLErrors: [{ extensions: { statusCode: 403 } }],
   });
 
-  it("handles a 403 itself instead of leaving it to the global error handler", async () => {
+  it("leaves a 403 on an overview library to the global error handler", async () => {
     const query = vi.fn().mockRejectedValue(forbidden);
-    const { getEntities, accessDenied, entities } = useBaseLibrary({
-      query,
-    } as any);
+    const { getEntities, accessDenied } = useBaseLibrary({ query } as any);
+
+    await getEntities(mockRoute);
+
+    expect(query.mock.calls[0][0].context.locallyHandledStatusCodes).toEqual(
+      [],
+    );
+    expect(accessDenied.value).toBe(false);
+  });
+
+  it("handles a 403 on a related-entities library itself instead of leaving it to the global error handler", async () => {
+    const query = vi.fn().mockRejectedValue(forbidden);
+    const { getEntities, accessDenied, entities, setParentEntityId } =
+      useBaseLibrary({ query } as any);
+    setParentEntityId("parent");
 
     await getEntities(mockRoute);
 
@@ -329,7 +341,10 @@ describe("useBaseLibrary – access denied", () => {
       .mockResolvedValue({
         data: { Entities: { results: [{ id: "a" }], count: 1, facets: [] } },
       });
-    const { getEntities, accessDenied } = useBaseLibrary({ query } as any);
+    const { getEntities, accessDenied, setParentEntityId } = useBaseLibrary({
+      query,
+    } as any);
+    setParentEntityId("parent");
 
     await getEntities(mockRoute);
     await getEntities(mockRoute);

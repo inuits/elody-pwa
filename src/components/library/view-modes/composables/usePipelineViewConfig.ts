@@ -5,7 +5,7 @@ import type { ConfigItem } from "@/generated-types/queries";
 // `viewModes(input: [{ viewMode: ViewModesPipeline, config: [...] }])`.
 export type PipelineViewConfig = {
   // relation types whose related entity feeds the entity carrying them,
-  // e.g. ["refWork", "refExpressions"] draws work -> expression ->
+  // e.g. ["ref_work", "ref_expressions"] draws work -> expression ->
   // manifestation; without any, the entities render as unconnected cards
   edgeRelations: string[];
   // an unpaged listing shows the whole flow; a positive override wins

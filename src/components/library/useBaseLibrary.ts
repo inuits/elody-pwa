@@ -335,7 +335,7 @@ export const useBaseLibrary = (
         notifyOnNetworkStatusChange: true,
         context: {
           headers: { "X-Parent-Entity-Id": parentEntityId.value ?? "" },
-          locallyHandledStatusCodes: [403],
+          locallyHandledStatusCodes: parentEntityId.value ? [403] : [],
           fetchOptions: {
             signal: controller.signal,
           },
@@ -360,7 +360,7 @@ export const useBaseLibrary = (
         });
       }
     } catch (error: any) {
-      if (isForbidden(error)) {
+      if (parentEntityId.value && isForbidden(error)) {
         accessDenied.value = true;
         entities.value = [];
         totalEntityCount.value = 0;

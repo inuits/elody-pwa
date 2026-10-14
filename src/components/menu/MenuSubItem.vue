@@ -13,6 +13,7 @@
     <p class="overflow-hidden px-4 cursor-pointer">
       {{ t(subMenuItem.label || "") }}
     </p>
+    <MenuBadge :count="badgeCount" class="mr-6" />
     <unicon v-if="!isLink" :name="Unicons.Plus.name" height="10" />
   </component>
 </template>
@@ -24,6 +25,8 @@ import { useI18n } from "vue-i18n";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { type MenuItem } from "@/generated-types/queries";
 import { Unicons } from "@/types";
+import MenuBadge from "@/components/menu/MenuBadge.vue";
+import { useMenuBadges } from "@/composables/useMenuBadges";
 
 const props = defineProps({
   show: {
@@ -40,6 +43,8 @@ const isActive = computed(
     (props.subMenuItem?.typeLink?.route?.destination as string)
 );
 const { checkIfRouteOrModal } = useMenuHelper();
+const { badgeCountOf } = useMenuBadges();
+const badgeCount = computed(() => badgeCountOf(props.subMenuItem));
 const menuAction = computed(() => checkIfRouteOrModal(props.subMenuItem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link

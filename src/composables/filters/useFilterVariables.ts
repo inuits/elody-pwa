@@ -4,6 +4,7 @@ import type { Entitytyping, Entity } from "@/generated-types/queries";
 type FilterVariables = {
   parentIds?: string[] | string;
   entityType?: Entitytyping | string;
+  routeEntityType?: Entitytyping | string;
   entity?: Entity;
   dateToday?: string;
 };

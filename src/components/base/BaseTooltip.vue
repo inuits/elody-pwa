@@ -16,6 +16,7 @@
 
     <Transition>
       <Teleport
+        defer
         :to="someModalIsOpened ? modalTeleportTarget() : 'body'"
         v-if="hasContent && hover"
       >
