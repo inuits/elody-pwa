@@ -39,7 +39,7 @@ import { Unicons } from "@/types";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
-import { trackUsage } from "@/analytics/usageAnalytics";
+import { trackSearch } from "@/analytics/usageAnalytics";
 
 const props = withDefaults(
   defineProps<{
@@ -80,8 +80,7 @@ onUnmounted(() => debouncedSearch.cancel());
 
 const submitSearch = () => {
   debouncedSearch.cancel();
-  // the length only: what people search for stays out of the usage events
-  trackUsage("search", { query_length: inputValue.value?.length ?? 0 });
+  trackSearch(inputValue.value, { scope: "header" });
   emit("search", inputValue.value);
 };
 

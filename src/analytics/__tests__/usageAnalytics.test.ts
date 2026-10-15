@@ -14,6 +14,7 @@ import {
   libraryOf,
   pseudonymOf,
   resetUsageAnalytics,
+  trackSearch,
   trackUsage,
   type UsageTracker,
 } from "@/analytics/usageAnalytics";
@@ -77,6 +78,37 @@ describe("trackUsage", () => {
     }));
     trackUsage("search", { query_length: 4 });
     expect(tracker.track).toHaveBeenCalledWith("search", { query_length: 4 });
+  });
+});
+
+describe("trackSearch", () => {
+  const started = async () => {
+    const tracker = fakeTracker();
+    await initUsageAnalytics({ usageAnalytics: settings }, "s-1", async () => ({
+      startUsageAnalytics: () => tracker,
+    }));
+    return tracker;
+  };
+
+  it("records where people search and how long the query is, never the query", async () => {
+    const tracker = await started();
+    trackSearch("harry potter", { scope: "library", entity_type: "reading" });
+    expect(tracker.track).toHaveBeenCalledWith("search", {
+      query_length: 12,
+      scope: "library",
+      entity_type: "reading",
+    });
+    expect(JSON.stringify(vi.mocked(tracker.track).mock.calls)).not.toContain(
+      "harry",
+    );
+  });
+
+  it("leaves clearing the search out", async () => {
+    const tracker = await started();
+    trackSearch("", { scope: "library" });
+    trackSearch("   ", { scope: "library" });
+    trackSearch(undefined, { scope: "header" });
+    expect(tracker.track).not.toHaveBeenCalled();
   });
 });
 
