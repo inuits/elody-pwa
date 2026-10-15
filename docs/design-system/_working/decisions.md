@@ -181,6 +181,9 @@ Later subtasks:
 | E12 | Empty value | "Geen waarde" at 45%, no underline | — | **done**: no underline under an empty value (`underlineValue` in MetadataWrapper) |
 | E14 | Undo (`useUndo`: inline chip after a save, toast after a removal) | required | toast after every save | **deferred** (user, 2026-10-15): not now. Annuleer/Esc only discard before a save; after leaving a field there is no one-click way back. E7 (confirm on row removal) stays until undo lands |
 | E13 | Feature flag for the new editing (MIGRATION_PLAN risk note) | behind a flag for one release if cataloguers are mid-season | — | **open**: no flag; decide before rolling out to vlacc / VLIZ |
+| E15 | Coordinates value | text pair + "Toon op kaart" link | — | **skipped** (user, 2026-10-15): coordinates show as text only |
+| E16 | Image value | 48px thumb, click opens the viewer | — | **deferred** (user, 2026-10-15): no image formatter exists and no field needs it yet |
+| E17 | Copy affordance | on every value | — | **deviation**: only on fields configured with `copyToClipboard`, as before; revealed on hover, focus or touch |
 
 ## 3. Filters (DS 4)
 

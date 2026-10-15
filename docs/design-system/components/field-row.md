@@ -78,6 +78,16 @@ person's role or function in an organization (`ListItemInlineField.vue`).
   entity), with the field's validation. The list refreshes and the usual
   notification shows.
 
+## Value types
+- **URL:** link ink, opens in a new tab, followed by an external-link glyph
+  (`aria-hidden`).
+- **Copy:** fields configured with `copyToClipboard` get a copy button
+  (`BaseCopyToClipboard`, a real `<button>` named "Kopieer"). It shows on
+  hover, keyboard focus or a coarse pointer (touch). After copying, a check and
+  a `role="status"` "Gekopieerd" show for 2s in place of the old toast. A
+  failed copy still shows an error toast (E17).
+- Coordinates show as text only (E15). Image thumbnails are deferred (E16).
+
 ## States
 | State | Cue |
 |---|---|
