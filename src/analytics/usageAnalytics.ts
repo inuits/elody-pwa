@@ -62,6 +62,19 @@ export const trackUsage = (
   }
 };
 
+/**
+ * A search someone ran, by where they ran it and how long the query was: what
+ * they searched for stays out of the usage events. Clearing a search is not one.
+ */
+export const trackSearch = (
+  query: string | undefined,
+  context: { scope: "header" | "library"; entity_type?: string },
+): void => {
+  const length = query?.trim().length ?? 0;
+  if (!length) return;
+  trackUsage("search", { query_length: length, ...context });
+};
+
 /** The library a user works for: the domain of their e-mail address. */
 export const libraryOf = (email: string | undefined): string | undefined => {
   const domain = email?.split("@")[1]?.trim().toLowerCase();

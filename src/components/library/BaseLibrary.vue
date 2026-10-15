@@ -401,6 +401,7 @@ import { useGroupedEntities } from "@/components/library/view-modes/composables/
 import { UploadStatus } from "@/composables/upload/types";
 import useUpload from "@/composables/upload/useUpload";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { trackSearch } from "@/analytics/usageAnalytics";
 import {
   breadcrumbPathFinished,
   breadcrumbRoutes,
@@ -773,6 +774,7 @@ if (
 
 const handleSetSimpleSearch = async (value: string) => {
   simpleSearchTerm.value = value;
+  trackSearch(value, { scope: "library", entity_type: entityType.value });
   const searchFilters: AdvancedFilterInput[] = value
     ? [
         ...(filtersBaseAPI.value?.getHiddenFiltersForApi() ?? []),
