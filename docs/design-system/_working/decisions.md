@@ -169,7 +169,17 @@ Later subtasks:
 |---|---|---|---|---|
 | E1 | Pencil on editable values | appears on hover | always visible, 12px, subtle | **catalogue** (user, 2026-10-07): editability must not depend on hover |
 | E2 | Dashed underline | under the value | under the value text only, square ends; none for pills | **catalogue** (user, 2026-10-07) |
-| E3 | Inline editor actions | text buttons Bewaar + Annuleer | 26px icon buttons ✓ / ✕ | **handoff** (user, 2026-10-07): text buttons, centred vertically on the input |
+| E3 | Inline editor actions | text buttons Bewaar + Annuleer | 26px icon buttons ✓ / ✕ | **handoff** (user, 2026-10-07): text buttons, centred vertically on the input. Bewaar dropped since, see E4 |
+| E4 | Commit model | pick-then-Bewaar, "don't auto-save on blur" (also CHANGES.md round 2) | — | **deviation** (user, 2026-10-14): no Bewaar per field; leaving the field (click outside, Tab out) saves a changed value, Enter saves, Annuleer/Esc discard. Also for WYSIWYG |
+| E5 | Opening a second field while one is changed | first stays open, nothing saved | — | **deviation** (user, 2026-10-14): the changed field saves first; on failure it stays open with its error and the second doesn't open |
+| E6 | Leaving the page with a changed field | (not specified) | — | **done** (2026-10-15): saves without asking, stays when the save fails; the save/discard/stay prompt is only for the page-wide edit mode |
+| E7 | Removing a repeatable row | executes at once, undo toast, no confirm | — | **interim** (user, 2026-10-12): a saved row asks for confirmation until undo exists; revisit with `useUndo` |
+| E8 | Reordering repeatable rows | drag handle + ↑/↓ | — | **open**: not built (user, 2026-10-12) |
+| E9 | Table input fields | a repeatable-row variant, each row its own scope | — | **deviation**: a relation table edits and saves as one scope (diff-only save) |
+| E10 | Clicking a value | never navigates | — | **deviation**: a relation chip links to its entity when the client's link formatter names the relation type |
+| E11 | Page-level "Bewerk" toggle | removed | — | **deviation** (user, 2026-10-13): opt-in per entity type (`hasEditMetadataButton`), hidden by default; removing the whole-form path is still open |
+| E12 | Empty value | "Geen waarde" at 45%, no underline | — | **open**: an empty editable text value still shows the dashed underline |
+| E13 | Feature flag for the new editing (MIGRATION_PLAN risk note) | behind a flag for one release if cataloguers are mid-season | — | **open**: no flag; decide before rolling out to vlacc / VLIZ |
 
 ## 3. Filters (DS 4)
 
