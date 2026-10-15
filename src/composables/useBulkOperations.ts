@@ -14,6 +14,7 @@ export enum BulkOperationsContextEnum {
   SavedSearchFilterModal = "SavedSearchFilterModal",
   TagEntityModal = "TagEntityModal",
   GuidedFlowStepPicker = "GuidedFlowStepPicker",
+  RelationPickerModal = "RelationPickerModal",
 }
 
 export type Context = RouteNames | BulkOperationsContextEnum;

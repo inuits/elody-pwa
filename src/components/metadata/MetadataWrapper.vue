@@ -131,6 +131,7 @@
         />
         <ViewModesAutocompleteRelations
           v-else
+          ref="relationAutocomplete"
           :editing="true"
           mode="edit"
           :model-value="fieldValueProxy"
@@ -168,6 +169,28 @@
             metadata.inputField.metadataOnRelationFieldConfig
           "
         />
+        <template v-if="!isRelationTable && pickerEntityType">
+          <button
+            type="button"
+            data-cy="relation-browse"
+            class="mt-1 text-hint text-text-link hover:underline"
+            :disabled="inlineSaving"
+            @click="openModal(TypeModals.RelationPicker, ModalStyle.Center)"
+          >
+            {{ browseLabel }}
+          </button>
+          <RelationPickerModal
+            :label="t(metadata.label ?? '')"
+            :entity-id="entityFormData?.id || formId"
+            :accepted-type="pickerEntityType"
+            :filters="
+              metadata.inputField.advancedFilterInputForRetrievingOptions ??
+              undefined
+            "
+            :single="fieldType === InputFieldTypes.DropdownSingleselectRelations"
+            @picked="(options) => relationAutocomplete?.addPicked(options)"
+          />
+        </template>
       </template>
     </InlineFieldEditor>
     <p data-cy="inline-save-status" role="status" class="sr-only">
@@ -433,7 +456,12 @@ import {
   EditStatus,
   ValidationFields,
   ValidationRules,
+  ModalStyle,
+  TypeModals,
+  type DropdownOption,
 } from "@/generated-types/queries";
+import { useBaseModal } from "@/composables/useBaseModal";
+import RelationPickerModal from "@/components/metadata/RelationPickerModal.vue";
 import {
   ref,
   onBeforeMount,
@@ -520,7 +548,8 @@ const emit = defineEmits<{
   (event: "update:metadata", mutatedField: PanelMetaData): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
+const { openModal } = useBaseModal();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
 const mediafileViewerContext = inject<string>("mediafileViewerContext", "");
@@ -773,6 +802,21 @@ const editingLocaleLabel = computed<string | undefined>(() => {
     )?.label ?? locale
   );
 });
+// "Blader…": the entity picker for a relation, when the field names the
+// entity type to pick (the search's own fallback, the field key, may not be one).
+const relationAutocomplete = ref<{
+  addPicked: (options: DropdownOption[]) => void;
+} | null>(null);
+const pickerEntityType = computed<string | undefined>(
+  () =>
+    props.metadata.inputField?.entityType ||
+    (props.metadata.inputField?.advancedFilterInputForSearchingOptions
+      ?.item_types?.[0] as string | undefined) ||
+    undefined,
+);
+const browseLabel = computed<string>(() =>
+  te("inline-edit.browse") ? t("inline-edit.browse") : "Browse…",
+);
 const savedCheck = useSavedFlash();
 const flashPanel = useParentSavedFlash();
 const valueBeforeEditing = ref<unknown>(undefined);

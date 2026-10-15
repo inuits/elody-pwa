@@ -39,6 +39,15 @@ relations: not when they save as metadata, belong to a linked entity or are
 inherited. Multilingual fields and metadata-on-relation fields shown as their
 own rows don't have an inline editor yet. They stay read-only in place.
 
+**Blader…:** under a relation's search, a "Blader…" link opens the entity
+picker (`RelationPickerModal`, `TypeModals.RelationPicker`) for the field's
+entity type (`inputField.entityType`, else the search's first `item_types`).
+Without one there is no link. The picker returns the entities without saving
+(`EntityPickerMode.Emit`); they join the search's chosen entities with their
+labels (`addPicked`), and a single select takes the first. The field saves as
+usual when you leave it. The picker renders inside the editor, so its clicks
+and focus count as inside, and Enter and Escape typed in it stay with it.
+
 A field in a repeatable panel (ISBN, EAN, …) edits in its own row: each row
 has its own scope, and saving sends the panel's whole stored list (one key,
 for example `isbn_group`) with that one value changed. Keys a row has but no

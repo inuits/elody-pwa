@@ -141,6 +141,24 @@ describe("InlineFieldEditor", () => {
       expect(box.classes()).not.toContain("[&_textarea]:field-sizing-content");
     });
 
+    it("leaves Enter and Escape typed in its own dialog (the entity picker) to that dialog", async () => {
+      const wrapper = mount(InlineFieldEditor, {
+        props: { type: "text", modelValue: "a", label: "Gezelschap", dirty: true },
+        slots: {
+          input:
+            "<input data-cy='own-input' /><dialog open><input data-cy='picker-search' /></dialog>",
+        },
+        attachTo: document.body,
+      });
+      const search = wrapper.find('[data-cy="picker-search"]');
+      await search.trigger("keydown", { key: "Enter" });
+      await search.trigger("keydown", { key: "Escape" });
+      expect(wrapper.emitted("save")).toBeUndefined();
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+      await wrapper.find('[data-cy="own-input"]').trigger("keydown", { key: "Escape" });
+      expect(wrapper.emitted("cancel")).toHaveLength(1);
+    });
+
     describe("after picking in a dropdown (focus left the editor)", () => {
       const pressOnPage = (key: string) =>
         document.body.dispatchEvent(

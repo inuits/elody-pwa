@@ -364,6 +364,21 @@ const handleSelect = (
   selectedDropdownOptions.value = [...options];
 };
 
+// Entities picked in the entity picker ("Blader…") join the chosen ones, with
+// their labels, as if picked from the list. A single select takes the first.
+const addPicked = (options: DropdownOption[]) => {
+  if (options.length === 0) return;
+  if (props.selectType === "single") return handleSelect(options.slice(0, 1));
+  const chosen = selectedDropdownOptions.value ?? [];
+  handleSelect([
+    ...chosen,
+    ...options.filter(
+      (option) => !chosen.some((entry) => entry.value === option.value),
+    ),
+  ]);
+};
+defineExpose({ addPicked });
+
 const handleCreatingFromTag = async (option: any) => {
   if (!props.canCreateOption) return;
 

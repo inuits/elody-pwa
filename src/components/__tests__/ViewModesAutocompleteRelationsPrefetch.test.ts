@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   // callers get the reactive registry entry, where it is a plain boolean.
   loading: undefined as undefined | { as: "ref" | "plain"; value: boolean },
   formattersSettings: {} as Record<string, unknown>,
+  replaceRelationsFromSameType: vi.fn(),
 }));
 
 vi.mock("@/main", () => ({
@@ -49,7 +50,7 @@ vi.mock("@/composables/useEdit", () => ({
 
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
-    replaceRelationsFromSameType: vi.fn(),
+    replaceRelationsFromSameType: mocks.replaceRelationsFromSameType,
     addRelations: vi.fn(),
     getRelationsBasedOnType: vi.fn(() => undefined),
   }),
@@ -305,5 +306,56 @@ describe("ViewModesAutocompleteRelations chips as links", () => {
     expect(autocomplete.props("tagsAreLinks")).toBe(false);
     await clickTag(autocomplete);
     expect(goTo).not.toHaveBeenCalled();
+  });
+});
+
+describe("ViewModesAutocompleteRelations — entities picked in the picker (Blader…)", () => {
+  const picked = (wrapper: any) =>
+    wrapper.findComponent({ name: "BaseInputAutocomplete" }).props("modelValue");
+
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [{ label: "Gent", value: "v-1" }];
+    mocks.replaceRelationsFromSameType.mockClear();
+  });
+
+  const mountEditing = async (selectType: "single" | "multi") => {
+    const wrapper = mountWith({
+      mode: "edit",
+      isReadOnly: true,
+      selectType,
+      modelValue: [{ key: "v-1" }],
+    });
+    await flushPromises();
+    return wrapper;
+  };
+
+  it("adds them as chips with their labels, next to the chosen ones", async () => {
+    const wrapper = await mountEditing("multi");
+    (wrapper.vm as any).addPicked([{ label: "Gent", value: "v-1" }]);
+    (wrapper.vm as any).addPicked([
+      { label: "Brugge", value: "v-2" },
+      { label: "Gent", value: "v-1" },
+    ]);
+    await flushPromises();
+    expect(picked(wrapper)).toEqual([
+      { label: "Gent", value: "v-1" },
+      { label: "Brugge", value: "v-2" },
+    ]);
+    expect(mocks.replaceRelationsFromSameType).toHaveBeenLastCalledWith(
+      [
+        expect.objectContaining({ id: "v-1" }),
+        expect.objectContaining({ id: "v-2" }),
+      ],
+      "refEpiDocTag",
+      "form-1",
+    );
+  });
+
+  it("replaces the choice of a single select", async () => {
+    const wrapper = await mountEditing("single");
+    (wrapper.vm as any).addPicked([{ label: "Brugge", value: "v-2" }]);
+    await flushPromises();
+    expect(picked(wrapper)).toEqual([{ label: "Brugge", value: "v-2" }]);
   });
 });

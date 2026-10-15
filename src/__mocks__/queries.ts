@@ -3701,6 +3701,7 @@ export enum TypeModals {
   EntityDetailModal = 'EntityDetailModal',
   GuidedFlow = 'GuidedFlow',
   IiifOperationsModal = 'IiifOperationsModal',
+  RelationPicker = 'RelationPicker',
   SaveSearch = 'SaveSearch',
   SaveSearchPicker = 'SaveSearchPicker',
   Search = 'Search',

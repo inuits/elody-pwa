@@ -34,7 +34,8 @@ vi.mock("@/composables/useImport", () => ({
 
 import MetadataWrapper from "../MetadataWrapper.vue";
 import MetadataMaskedValue from "../MetadataMaskedValue.vue";
-import { InputFieldTypes } from "@/generated-types/queries";
+import { InputFieldTypes, TypeModals } from "@/generated-types/queries";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import { useEditScope } from "@/composables/useEditScope";
@@ -108,6 +109,8 @@ const buildProps = (key: string, isEdit: boolean) => ({
 const entityFormData = { onSaved: vi.fn() };
 // The panel around the row: its header flashes the saved check.
 const panelFlash = vi.fn();
+// Entities handed to the relation search from the picker ("Blader…").
+const relationPicks = vi.fn();
 
 const mountWrapper = async (
   props: ReturnType<typeof buildProps>,
@@ -175,6 +178,13 @@ const mountWrapper = async (
           ],
           template:
             "<div data-cy='relations-stub'><span class='multiselect-tag' data-tag-link data-cy='relation-chip'>Maker<span data-tag-input data-cy='relation-chip-input'><input disabled /></span></span><span class='multiselect-tag' data-cy='relation-chip-plain'>Uitgever</span></div>",
+          methods: { addPicked: (options: unknown) => relationPicks(options) },
+        },
+        RelationPickerModal: {
+          name: "RelationPickerModal",
+          props: ["label", "entityId", "acceptedType", "filters", "single"],
+          emits: ["picked"],
+          template: "<div data-cy='relation-picker-stub'></div>",
         },
         ViewModesAutocompleteMetadata: true,
         BaseCopyToClipboard: true,
@@ -955,6 +965,57 @@ describe("MetadataWrapper — inline relation editing", () => {
       canDelete: false,
     });
     useEditScope().release("MW-TEST:creator");
+  });
+
+  describe("Blader… (the entity picker)", () => {
+    const browse = (wrapper: any) => wrapper.find('[data-cy="relation-browse"]');
+    const pickerModal = (wrapper: any) =>
+      wrapper.findComponent({ name: "RelationPickerModal" });
+
+    beforeEach(() => {
+      relationPicks.mockClear();
+      useBaseModal().closeModal(TypeModals.RelationPicker);
+    });
+
+    it("offers a Browse… link under the search that opens the picker for the field's entity type", async () => {
+      const wrapper = await openEditor();
+      expect(browse(wrapper).element.tagName).toBe("BUTTON");
+      expect(browse(wrapper).text()).toBe("Browse…");
+      expect(pickerModal(wrapper).props()).toMatchObject({
+        acceptedType: "person",
+        single: false,
+        entityId: "MW-TEST",
+      });
+      await browse(wrapper).trigger("click");
+      expect(useBaseModal().getModalInfo(TypeModals.RelationPicker).open).toBe(
+        true,
+      );
+    });
+
+    it("adds the picked entities to the search's choice, without saving", async () => {
+      const wrapper = await openEditor();
+      const options = [{ label: "Bob", value: "c2" }];
+      pickerModal(wrapper).vm.$emit("picked", options);
+      await flushPromises();
+      expect(relationPicks).toHaveBeenCalledWith(options);
+      expect(scopedSave.saveScope).not.toHaveBeenCalled();
+      expect(inlineEditor(wrapper).exists()).toBe(true);
+    });
+
+    it("lets a single select pick one", async () => {
+      const wrapper = await openEditor({
+        type: InputFieldTypes.DropdownSingleselectRelations,
+      });
+      expect(pickerModal(wrapper).props("single")).toBe(true);
+    });
+
+    it("offers no Browse… when the field names no entity type to pick", async () => {
+      const wrapper = await openEditor({
+        advancedFilterInputForSearchingOptions: { type: "text" },
+      });
+      expect(browse(wrapper).exists()).toBe(false);
+      expect(pickerModal(wrapper).exists()).toBe(false);
+    });
   });
 
   describe("at rest", () => {

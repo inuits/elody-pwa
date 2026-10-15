@@ -201,6 +201,9 @@ const isOwnKey = (event: KeyboardEvent): boolean => {
   const target = event.target as Element | null;
   if (!target || target === document.body || target === document.documentElement)
     return true;
+  // A dialog the editor opened (the entity picker) handles its own keys.
+  const dialog = target.closest?.("dialog");
+  if (dialog && rootRef.value?.contains(dialog)) return false;
   return !!rootRef.value?.contains(target);
 };
 const handleKeydown = (event: KeyboardEvent) => {
