@@ -37,6 +37,7 @@ import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
 import { aliasAsKeyTransform } from "@/aliasAsKeyTransform";
+import { initBrowserTracing } from "@/tracing/browserTracing";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -61,6 +62,7 @@ const start = async (): Promise<void> => {
 
   let { config, translations, version, urlMapping } =
     await getApplicationDetails();
+  await initBrowserTracing(config);
   i18n = setupI18n(translations, config.customization.applicationLocale);
 
   typeUrlMapping = urlMapping;
