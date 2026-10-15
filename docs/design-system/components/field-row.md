@@ -18,7 +18,7 @@ repeatable row group.
 - **Value:** the rendered value. When it is editable in place:
   - a dashed underline under the value text, with square ends. Chip values
     (dropdowns, pills) and tables have no underline, since their shape
-    already marks them;
+    already marks them. An empty value ("Geen waarde") has no underline (E12);
   - a pencil on the right, always visible, so editability never depends on
     hovering;
   - a hover wash behind the whole value. The wash extends

@@ -477,6 +477,18 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     );
   });
 
+  it.each([[""], [null], [[]]])(
+    "does not underline an empty value (%j), which shows 'Geen waarde'",
+    async (empty) => {
+      const props = editableProps();
+      (props.metadata as any).value = empty;
+      const text = (await mountWrapper(props)).find(
+        '[data-cy="field-value-text"]',
+      );
+      expect(text.classes()).not.toContain("border-dashed");
+    },
+  );
+
   it("does not underline a read-only value", async () => {
     const props = editableProps();
     (props.metadata as any).readOnly = true;

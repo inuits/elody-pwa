@@ -178,7 +178,7 @@ Later subtasks:
 | E9 | Table input fields | a repeatable-row variant, each row its own scope | — | **deviation**: a relation table edits and saves as one scope (diff-only save) |
 | E10 | Clicking a value | never navigates | — | **deviation**: a relation chip links to its entity when the client's link formatter names the relation type |
 | E11 | Page-level "Bewerk" toggle | removed | — | **deviation** (user, 2026-10-13): opt-in per entity type (`hasEditMetadataButton`), hidden by default; removing the whole-form path is still open |
-| E12 | Empty value | "Geen waarde" at 45%, no underline | — | **open**: an empty editable text value still shows the dashed underline |
+| E12 | Empty value | "Geen waarde" at 45%, no underline | — | **done**: no underline under an empty value (`underlineValue` in MetadataWrapper) |
 | E14 | Undo (`useUndo`: inline chip after a save, toast after a removal) | required | toast after every save | **deferred** (user, 2026-10-15): not now. Annuleer/Esc only discard before a save; after leaving a field there is no one-click way back. E7 (confirm on row removal) stays until undo lands |
 | E13 | Feature flag for the new editing (MIGRATION_PLAN risk note) | behind a flag for one release if cataloguers are mid-season | — | **open**: no flag; decide before rolling out to vlacc / VLIZ |
 

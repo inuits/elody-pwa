@@ -978,11 +978,17 @@ const onActivateKey = (event: KeyboardEvent) => {
   startEditing();
 };
 
+const isEmptyValue = (value: unknown): boolean =>
+  value == null ||
+  value === "" ||
+  (Array.isArray(value) && value.length === 0);
+
 // The dashed underline marks editable text; chip values (dropdowns, pills)
-// carry their own shape instead.
+// carry their own shape instead. An empty value shows "Geen waarde" bare (E12).
 const underlineValue = computed<boolean>(
   () =>
     canEditInPlace.value &&
+    !isEmptyValue(fieldValueProxy.value) &&
     !autoCompleteType.value &&
     !isRelationTable.value &&
     !resolvedMetadataValue.value?.formatter,
