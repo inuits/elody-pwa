@@ -9,11 +9,9 @@ import {
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { sha256 } from "crypto-hash";
 import "./assets/main.css";
-import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
 import { addComponentToRoutes } from "./views/router";
-import { BrowserTracing } from "@sentry/tracing";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
@@ -37,12 +35,16 @@ import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
 import { aliasAsKeyTransform } from "@/aliasAsKeyTransform";
-import { initBrowserTracing } from "@/tracing/browserTracing";
+import {
+  identifyInBrowserTracing,
+  initBrowserTracing,
+} from "@/tracing/browserTracing";
 import { getSessionId } from "@/observability/sessionId";
 import {
   createUsageLink,
   identifyUser,
   initUsageAnalytics,
+  libraryOf,
 } from "@/analytics/usageAnalytics";
 
 export let auth: typeof OpenIdConnectClient | null;
@@ -182,27 +184,12 @@ const start = async (): Promise<void> => {
     .provide("config", config)
     .provide(DefaultApolloClient, apolloClient);
 
-  if (config.GLITCH_TIP_ENABLED) {
-    Sentry.init({
-      app,
-      sendClientReports: false,
-      integrations: [
-        new BrowserTracing({
-          routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-          tracingOrigins: ["*"],
-        }),
-      ],
-      dsn: config.GLITCH_TIP_DSN_FRONTEND,
-      environment: config.NOMAD_NAMESPACE,
-    });
-    Sentry.setTag("session_id", sessionId);
-  }
-
-  // the user by pseudonym only: in the usage events (with their library) and the error reports
-  const pseudonym = await identifyUser(
-    auth.isAuthenticated.value ? auth.user : undefined,
-  );
-  if (pseudonym && config.GLITCH_TIP_ENABLED) Sentry.setUser({ id: pseudonym });
+  // the user by pseudonym only: in the usage events and in the traces, errors
+  // and replays (with their library), never by name or e-mail address
+  const user = auth.isAuthenticated.value ? auth.user : undefined;
+  const pseudonym = await identifyUser(user);
+  if (pseudonym)
+    identifyInBrowserTracing({ pseudonym, library: libraryOf(user?.email) });
 
   app.mount("#app");
 };

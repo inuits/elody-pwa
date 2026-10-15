@@ -74,7 +74,7 @@ export const pseudonymOf = async (id: string): Promise<string> =>
 
 /**
  * Identifies the logged-in user to OpenPanel by pseudonym, in the group of
- * their library; returns the pseudonym (also for Sentry), or undefined
+ * their library; returns the pseudonym (also for HyperDX), or undefined
  * without a user.
  */
 export const identifyUser = async (

@@ -119,7 +119,7 @@ describe("the user, pseudonymous, in a library", () => {
     );
   });
 
-  it("still gives the pseudonym (for Sentry) while usage analytics is off", async () => {
+  it("still gives the pseudonym (for HyperDX) while usage analytics is off", async () => {
     expect(await identifyUser({ email: "ann@brugge.be" })).toBe(
       await pseudonymOf("ann@brugge.be"),
     );

@@ -11,8 +11,8 @@ const newId = (): string =>
 let fallback: string | undefined;
 
 // One id per browser tab, kept across reloads, shared by the usage events
-// (OpenPanel), the error reports (Sentry/GlitchTip) and the browser's traces,
-// so a session can be followed from one tool to the others.
+// (OpenPanel) and everything HyperDX records (traces, errors, logs, replays),
+// so a session can be followed from one tool to the other.
 export const getSessionId = (): string => {
   try {
     const known = sessionStorage.getItem(SESSION_ID_KEY);
