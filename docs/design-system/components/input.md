@@ -26,6 +26,7 @@ the surrounding field row. If there is no visible label, give the input an
 | `--color-border-default` | resting border (bordered variant) |
 | `--color-input-border-hover` | hover border, one step darker |
 | `--textarea-min-height` | textarea never shorter than three rows |
+| `--textarea-max-height` | an inline textarea grows with its content up to six rows, then scrolls |
 | `--color-text-placeholder` | placeholder |
 | `--color-danger` | error border and message |
 | `--color-surface-muted`, `--color-text-disabled` | disabled |

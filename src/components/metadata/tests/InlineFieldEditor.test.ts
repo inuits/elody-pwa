@@ -122,6 +122,25 @@ describe("InlineFieldEditor", () => {
       expect(wrapper.emitted("save")?.[0]).toEqual(["ab"]);
     });
 
+    it("grows a textarea with its content, up to 6 rows", () => {
+      const box = editor({ type: "textarea", modelValue: "a" }).find(
+        '[data-cy="inline-editor-input"]',
+      );
+      expect(box.classes()).toEqual(
+        expect.arrayContaining([
+          "[&_textarea]:field-sizing-content",
+          "[&_textarea]:max-h-(--textarea-max-height)",
+        ]),
+      );
+    });
+
+    it("leaves other inputs at their own height", () => {
+      const box = editor({ type: "text", modelValue: "a" }).find(
+        '[data-cy="inline-editor-input"]',
+      );
+      expect(box.classes()).not.toContain("[&_textarea]:field-sizing-content");
+    });
+
     describe("after picking in a dropdown (focus left the editor)", () => {
       const pressOnPage = (key: string) =>
         document.body.dispatchEvent(

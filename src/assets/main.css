@@ -366,6 +366,8 @@
   --input-padding-compact: 0 6px;
   --color-input-border-hover: var(--color-neutral-50); /* one step darker */
   --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
+  /* An inline textarea grows with its content up to 6 rows, then scrolls */
+  --textarea-max-height: calc(6lh + 12px);
 
   /* Field row (components/field-row.md): the hover wash extends this far
      beyond the value text, which stays aligned with the label */

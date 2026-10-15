@@ -17,10 +17,17 @@
       :class="{ 'flex-wrap': isDropdown }"
     >
       <!-- A checkbox is only as wide as its box, so Annuleer sits right
-           after it; other inputs take the row. -->
+           after it; other inputs take the row. A textarea grows with its
+           content up to 6 rows.
+           shortcut: field-sizing isn't in Firefox yet, which keeps 3 rows
+           and scrolls; fine until it ships. -->
       <div
         data-cy="inline-editor-input"
-        :class="type === InputFieldTypes.Checkbox ? 'shrink-0' : 'grow min-w-0'"
+        :class="[
+          type === InputFieldTypes.Checkbox ? 'shrink-0' : 'grow min-w-0',
+          isTextarea &&
+            '[&_textarea]:field-sizing-content [&_textarea]:max-h-(--textarea-max-height)',
+        ]"
       >
         <!-- A parent with its own input (relations) passes it here and
              reports its changed state through `dirty`. -->
