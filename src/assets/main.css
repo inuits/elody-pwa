@@ -479,11 +479,14 @@ input[type="number"]::-webkit-inner-spin-button {
     transform: scale(var(--scale-press));
   }
 
+  /* Form controls repeat the pseudo-class: @tailwindcss/forms resets the
+     outline on [type='text']:focus (0,2,0), which outranks input:focus-visible. */
   button:focus-visible,
   [role="button"]:focus-visible,
   a:focus-visible,
-  input:focus-visible,
-  select:focus-visible {
+  input:focus-visible:focus-visible,
+  textarea:focus-visible:focus-visible,
+  select:focus-visible:focus-visible {
     outline: var(--focus-ring-width) solid var(--color-focus-ring);
     outline-offset: var(--focus-ring-offset);
   }
