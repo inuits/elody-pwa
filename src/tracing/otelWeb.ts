@@ -10,14 +10,17 @@ import {
 } from "@opentelemetry/sdk-trace-web";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import type { BrowserTracingSettings } from "@/tracing/browserTracing";
+import { SessionSpanProcessor } from "@/tracing/sessionSpanProcessor";
 
 export const startBrowserTracing = ({
   tracesUrl,
   serviceName,
+  sessionId,
 }: BrowserTracingSettings) => {
   const provider = new WebTracerProvider({
     resource: resourceFromAttributes({ [ATTR_SERVICE_NAME]: serviceName }),
     spanProcessors: [
+      ...(sessionId ? [new SessionSpanProcessor(sessionId)] : []),
       new BatchSpanProcessor(new OTLPTraceExporter({ url: tracesUrl })),
     ],
   });
