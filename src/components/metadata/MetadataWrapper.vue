@@ -231,7 +231,7 @@
             data-cy="field-value"
             v-on="showTooltip ? on : {}"
             :aria-describedby="showTooltip ? describedBy : undefined"
-            class="group/value flex column gap-2 items-center min-h-(--field-value-min-height)"
+            class="flex column gap-2 items-center min-h-(--field-value-min-height)"
             :class="
               canEditInPlace
                 ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) py-(--field-value-pad-y) -my-(--field-value-pad-y) hover:bg-surface-editable-hover'
@@ -404,7 +404,6 @@
             <BaseCopyToClipboard
               data-inline-edit-ignore
               v-if="metadata.copyToClipboard && !isMaskedField"
-              class="opacity-0 group-hover/value:opacity-100 focus-within:opacity-100 data-copied:opacity-100 pointer-coarse:opacity-100"
               :value="fieldValueProxy"
               @click.stop.prevent
             />

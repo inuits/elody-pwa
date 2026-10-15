@@ -183,7 +183,7 @@ Later subtasks:
 | E13 | Feature flag for the new editing (MIGRATION_PLAN risk note) | behind a flag for one release if cataloguers are mid-season | — | **open**: no flag; decide before rolling out to vlacc / VLIZ |
 | E15 | Coordinates value | text pair + "Toon op kaart" link | — | **skipped** (user, 2026-10-15): coordinates show as text only |
 | E16 | Image value | 48px thumb, click opens the viewer | — | **deferred** (user, 2026-10-15): no image formatter exists and no field needs it yet |
-| E17 | Copy affordance | on every value | — | **deviation**: only on fields configured with `copyToClipboard`, as before; revealed on hover, focus or touch |
+| E17 | Copy affordance | on every value | — | **deviation** (user, 2026-10-15): only on fields configured with `copyToClipboard`, as before, and always visible like the pencil instead of on hover |
 | E18 | Group form card (one gesture, one Bewaar/Annuleer, `role="group"`) | required | — | **deferred** (user, 2026-10-15): no config marks a field group yet and no client has one; build it with the first real group (a panel flag in baseGraphql) |
 | E19 | Inline editors for file upload and linked-entity fields | required | — | **not applicable** (user, 2026-10-15): upload fields are not panel metadata (they live in upload forms), and values on a list row's entity or relation already edit in place through `ListItemInlineField` |
 
