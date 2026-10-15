@@ -706,7 +706,10 @@ const editableValueAttrs = computed(() =>
     ? {
         role: "button",
         tabindex: 0,
-        "aria-label": `${t(props.metadata.label ?? "")}, ${editFieldLabel.value}`,
+        // no label: let the visible value name the button instead of ", edit"
+        "aria-label": props.metadata.label
+          ? `${t(props.metadata.label)}, ${editFieldLabel.value}`
+          : undefined,
       }
     : {},
 );

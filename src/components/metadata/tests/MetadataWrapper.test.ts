@@ -411,6 +411,14 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     expect(value.attributes("aria-label")).toBe("metadata.labels.test, edit");
   });
 
+  it("leaves an unlabelled value named by its content, not by ', edit'", async () => {
+    const props = editableProps();
+    props.metadata.label = "";
+    const value = await fieldValue(props);
+    expect(value.attributes("role")).toBe("button");
+    expect(value.attributes("aria-label")).toBeUndefined();
+  });
+
   it("pads the hover wash while keeping the text aligned with the label", async () => {
     expect((await fieldValue()).classes()).toEqual(
       expect.arrayContaining([
