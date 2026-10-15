@@ -103,7 +103,8 @@ const viteConfig = defineConfig(({ mode }) => ({
             return "apollo";
           if (id.includes("/leaflet/") || id.includes("/@vue-leaflet/"))
             return "leaflet";
-          if (id.includes("/@sentry/")) return "sentry";
+          // browser observability, loaded only when the app config switches it on
+          if (id.includes("/@hyperdx/")) return "hyperdx";
           if (id.includes("/openseadragon")) return "openseadragon";
           if (id.includes("/pdfjs-dist/")) return "pdfjs";
           if (id.match(/\/node_modules\/ol\//)) return "ol";
