@@ -57,7 +57,6 @@
             </MetadataTruncatedText>
             <BaseCopyToClipboard
               v-if="refMetadata.copyToClipboard"
-              class="w-6 h-6"
               :value="refMetadata.value"
               @click.stop.prevent
             />

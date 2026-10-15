@@ -594,6 +594,24 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
   });
 
+  it("shows the copy button on hover, focus or touch, and while it says Gekopieerd", async () => {
+    const props = editableProps();
+    (props.metadata as any).copyToClipboard = true;
+    const wrapper = await mountWrapper(props);
+    expect(wrapper.find('[data-cy="field-value"]').classes()).toContain(
+      "group/value",
+    );
+    expect(wrapper.find("base-copy-to-clipboard-stub").classes()).toEqual(
+      expect.arrayContaining([
+        "opacity-0",
+        "group-hover/value:opacity-100",
+        "focus-within:opacity-100",
+        "data-copied:opacity-100",
+        "pointer-coarse:opacity-100",
+      ]),
+    );
+  });
+
   it("doesn't block Enter on a value that can't be edited (its links still work)", async () => {
     allowUpdate(false);
     const value = await fieldValue();
