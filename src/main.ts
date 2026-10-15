@@ -38,6 +38,12 @@ import { useInputValidation } from "@/composables/useInputValidation";
 import { useApp } from "@/composables/useApp";
 import { aliasAsKeyTransform } from "@/aliasAsKeyTransform";
 import { initBrowserTracing } from "@/tracing/browserTracing";
+import { getSessionId } from "@/observability/sessionId";
+import {
+  createUsageLink,
+  identifyUser,
+  initUsageAnalytics,
+} from "@/analytics/usageAnalytics";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -60,9 +66,12 @@ const applyCustomization = (rulesObject: any) => {
 const start = async (): Promise<void> => {
   Unicon.add(Object.values(Unicons));
 
-  let { config, translations, version, urlMapping } =
-    await getApplicationDetails();
-  await initBrowserTracing(config);
+  const applicationDetails = await getApplicationDetails();
+  const { translations, version, urlMapping } = applicationDetails;
+  let { config } = applicationDetails;
+  // one id per tab, shared by the traces, the usage events and the error reports
+  const sessionId = getSessionId();
+  await initBrowserTracing(config, undefined, sessionId);
   i18n = setupI18n(translations, config.customization.applicationLocale);
 
   typeUrlMapping = urlMapping;
@@ -96,6 +105,8 @@ const start = async (): Promise<void> => {
   } else {
     await auth.verifyServerAuth();
   }
+
+  await initUsageAnalytics(config, sessionId);
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
@@ -142,6 +153,7 @@ const start = async (): Promise<void> => {
       graphqlErrorInterceptor,
       authCheckLink,
       authLink,
+      createUsageLink(),
       apqLink,
       httpLink,
     ]),
@@ -183,7 +195,14 @@ const start = async (): Promise<void> => {
       dsn: config.GLITCH_TIP_DSN_FRONTEND,
       environment: config.NOMAD_NAMESPACE,
     });
+    Sentry.setTag("session_id", sessionId);
   }
+
+  // the user by pseudonym only: in the usage events (with their library) and the error reports
+  const pseudonym = await identifyUser(
+    auth.isAuthenticated.value ? auth.user : undefined,
+  );
+  if (pseudonym && config.GLITCH_TIP_ENABLED) Sentry.setUser({ id: pseudonym });
 
   app.mount("#app");
 };

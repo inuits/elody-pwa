@@ -153,7 +153,6 @@ import {
   type DropdownOption,
   type Matchers,
   type GetFilterMatcherMappingQuery,
-  type AdvancedFilter,
   ContextMenuGeneralActionEnum,
   FilterMatchers,
 } from "@/generated-types/queries";
@@ -184,6 +183,7 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import EventBus from "@/EventBus";
 import { useImport } from "@/composables/useImport";
 import { DateTime } from "luxon";
+import { appliedFilterPaths, trackUsage } from "@/analytics/usageAnalytics";
 
 export type FiltersBaseAPI = {
   initializeAndActivateNewFilter: (
@@ -569,6 +569,11 @@ const saveFiltersToState = () => {
 
 const applyFilters = (saveState = false, force = true) => {
   if (saveState && props.shouldUseStateForRoute) saveFiltersToState();
+  // saveState: the user applied them (enter, the apply button), not a restore
+  if (saveState) {
+    const paths = appliedFilterPaths(getNormalizedFiltersForApi());
+    trackUsage("filters_applied", { filters: paths.join(","), count: paths.length });
+  }
 
   emit("applyFilters", getNormalizedFiltersForApi(), saveState, force);
 
