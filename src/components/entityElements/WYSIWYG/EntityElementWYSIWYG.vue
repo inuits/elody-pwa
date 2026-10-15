@@ -214,6 +214,7 @@ import { isTransliterationEnabledValue } from "@/composables/useTransliteration"
 import WYSIWYGInPlaceActions from "@/components/entityElements/WYSIWYG/WYSIWYGInPlaceActions.vue";
 import { canEditWysiwygInPlace } from "@/components/metadata/fieldEditability";
 import { useWysiwygInPlaceEditing } from "@/composables/useWysiwygInPlaceEditing";
+import { useParentSavedFlash } from "@/composables/useSavedFlash";
 
 const props = withDefaults(
   defineProps<{
@@ -295,6 +296,7 @@ const canEditInPlace = computed<boolean>(() =>
   }),
 );
 const multilingualEnabled = (): boolean => !!multilingual?.isEnabled?.value;
+const flashPanel = useParentSavedFlash();
 const inPlace = useWysiwygInPlaceEditing({
   scopeId: () => `${props.formId}:${props.element.metadataKey}`,
   metadataKey: () => props.element.metadataKey,
@@ -316,6 +318,7 @@ const inPlace = useWysiwygInPlaceEditing({
     initialValue.value = value;
     form.value?.resetField(fieldPath, { value });
     if (savedEntity) entityFormData?.onSaved?.(savedEntity);
+    flashPanel();
   },
   getRoot: () => rootRef.value,
 });

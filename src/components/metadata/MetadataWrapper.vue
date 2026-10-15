@@ -345,14 +345,28 @@
                 :breakWords="breakWords"
               />
             </MetadataTruncatedText>
-            <span
-              v-if="canEditInPlace"
-              data-cy="field-edit-pencil"
-              aria-hidden="true"
-              class="ml-auto flex shrink-0 text-text-subtle"
+            <Transition
+              leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
+              leave-to-class="opacity-0"
+              mode="out-in"
             >
-              <unicon :name="Unicons.EditAlt.name" height="12" />
-            </span>
+              <span
+                v-if="canEditInPlace && savedCheck.visible.value"
+                data-cy="field-saved-check"
+                aria-hidden="true"
+                class="ml-auto flex shrink-0 text-success"
+              >
+                <unicon :name="Unicons.Check.name" height="12" />
+              </span>
+              <span
+                v-else-if="canEditInPlace"
+                data-cy="field-edit-pencil"
+                aria-hidden="true"
+                class="ml-auto flex shrink-0 text-text-subtle"
+              >
+                <unicon :name="Unicons.EditAlt.name" height="12" />
+              </span>
+            </Transition>
             <BaseCopyToClipboard
               data-inline-edit-ignore
               v-if="metadata.copyToClipboard && !isMaskedField"
@@ -442,6 +456,10 @@ import {
   singleFlight,
   useInPlaceScope,
 } from "@/composables/useInPlaceScope";
+import {
+  useParentSavedFlash,
+  useSavedFlash,
+} from "@/composables/useSavedFlash";
 import { useEditMode } from "@/composables/useEdit";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
@@ -718,6 +736,8 @@ const inlineDirty = ref<boolean>(false);
 const inlineSaving = ref<boolean>(false);
 const inlineError = ref<string | undefined>(undefined);
 const savedAnnouncement = ref<string>("");
+const savedCheck = useSavedFlash();
+const flashPanel = useParentSavedFlash();
 const valueBeforeEditing = ref<unknown>(undefined);
 const latestDraft = ref<unknown>(undefined);
 const fieldValueRef = ref<HTMLElement | null>(null);
@@ -866,6 +886,8 @@ const saveRelationsInline = async () => {
     );
     if (saved) entityFormData?.onSaved?.(saved);
     savedAnnouncement.value = inPlaceScope.messages.saved();
+    savedCheck.flash();
+    flashPanel();
     closeEditor();
     focusFieldValue();
   } catch {
@@ -962,6 +984,8 @@ const saveInline = singleFlight(async (value: unknown) => {
     if (savedEntity && !props.linkedEntityId)
       entityFormData?.onSaved?.(savedEntity);
     savedAnnouncement.value = inPlaceScope.messages.saved();
+    savedCheck.flash();
+    flashPanel();
     closeEditor();
     focusFieldValue();
   } catch {

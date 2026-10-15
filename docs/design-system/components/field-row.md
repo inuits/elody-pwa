@@ -87,6 +87,7 @@ person's role or function in an organization (`ListItemInlineField.vue`).
 | empty | "Geen waarde" at `--opacity-empty` |
 | read-only | plain value, no underline, no hover |
 | editing | the [inline editor](./inline-editor.md) replaces the value |
+| saved | a `--color-success` check replaces the pencil for 2s (`SAVED_FLASH_MS`, `useSavedFlash`), then fades; the panel header shows the same check for 2s after any row inside saves, WYSIWYG fields included. The check is `aria-hidden`; the `role="status"` "Opgeslagen" announces the save |
 
 ## Behaviour and keyboard
 - Click, Enter or Space on an editable value opens its edit scope. A link or

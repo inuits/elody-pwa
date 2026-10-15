@@ -13,7 +13,7 @@ vi.mock("vue", async (importOriginal) => {
 
   return {
     ...actual,
-    inject: (key: string) => {
+    inject: (key: string, ...rest: unknown[]) => {
       if (key === "config") {
         return {
           features: {
@@ -21,7 +21,7 @@ vi.mock("vue", async (importOriginal) => {
           },
         };
       }
-      return actual.inject(key);
+      return (actual.inject as (...args: unknown[]) => unknown)(key, ...rest);
     },
   };
 });

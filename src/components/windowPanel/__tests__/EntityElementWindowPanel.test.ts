@@ -56,10 +56,15 @@ vi.mock("@/types", () => ({
     CompressAlt: { name: "compress" },
     ExpandAlt: { name: "expand" },
     Plus: { name: "plus" },
+    Check: { name: "check" },
   },
 }));
 
 import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
+import {
+  SAVED_FLASH_MS,
+  useParentSavedFlash,
+} from "@/composables/useSavedFlash";
 
 const mountPanel = () =>
   mount(EntityElementWindowPanel, {
@@ -78,9 +83,11 @@ const mountPanel = () =>
         unicon: true,
         WindowPanelContent: true,
         BaseButtonNew: true,
+        // A row inside the panel: saving it flashes the panel's check.
         MetadataWrapper: {
+          setup: () => ({ flashPanel: useParentSavedFlash() }),
           template:
-            "<div data-cy='panel-status'><span data-cy='status-value'>Draft</span></div>",
+            "<div data-cy='panel-status'><span data-cy='status-value' @click='flashPanel'>Draft</span></div>",
         },
       },
     },
@@ -110,6 +117,19 @@ describe("EntityElementWindowPanel header", () => {
     expect(status.classes()).toContain(
       "has-[[data-cy=inline-field-editor]]:w-full",
     );
+  });
+
+  it("flashes the saved check in its header for 2s when a row inside saves", async () => {
+    vi.useFakeTimers();
+    const wrapper = mountPanel();
+    const check = () => wrapper.find('[data-cy="panel-saved-check"]');
+    expect(check().exists()).toBe(false);
+    await wrapper.find('[data-cy="status-value"]').trigger("click");
+    expect(check().exists()).toBe(true);
+    vi.advanceTimersByTime(SAVED_FLASH_MS);
+    await flushPromises();
+    expect(check().exists()).toBe(false);
+    vi.useRealTimers();
   });
 
   it("leaves the panel as it is when the status field in the header is clicked (to edit it)", async () => {

@@ -39,6 +39,10 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import { useEditScope } from "@/composables/useEditScope";
 import {
+  SAVED_FLASH_MS,
+  provideSavedFlash,
+} from "@/composables/useSavedFlash";
+import {
   copyFromParentContextKey,
   type CopyFromParentContext,
 } from "@/composables/useCopyFromParent";
@@ -102,6 +106,8 @@ const buildProps = (key: string, isEdit: boolean) => ({
 
 // What EntityForm provides; onSaved hands the saved entity back to the page.
 const entityFormData = { onSaved: vi.fn() };
+// The panel around the row: its header flashes the saved check.
+const panelFlash = vi.fn();
 
 const mountWrapper = async (
   props: ReturnType<typeof buildProps>,
@@ -119,6 +125,7 @@ const mountWrapper = async (
       useFormHelper().addForm(props.formId, form);
       defineRule("no_xss", () => true);
       provide("entityFormData", entityFormData);
+      provideSavedFlash(panelFlash);
       return () => h(MetadataWrapper, props as any);
     },
   });
@@ -704,6 +711,32 @@ describe("MetadataWrapper — inline editing", () => {
     expect(inlineEditor(wrapper).exists()).toBe(false);
     expect(wrapper.find('[role="status"]').text()).toBe("Saved");
     expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("swaps the pencil for a saved check for 2s and flashes the panel", async () => {
+    vi.useFakeTimers();
+    panelFlash.mockClear();
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(wrapper.find('[data-cy="field-saved-check"]').exists()).toBe(true);
+    expect(wrapper.find('[data-cy="field-edit-pencil"]').exists()).toBe(false);
+    expect(panelFlash).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(SAVED_FLASH_MS);
+    await flushPromises();
+    expect(wrapper.find('[data-cy="field-saved-check"]').exists()).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it("shows no saved check when the save fails", async () => {
+    panelFlash.mockClear();
+    scopedSave.saveScope.mockRejectedValue(new Error("no"));
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(wrapper.find('[data-cy="field-saved-check"]').exists()).toBe(false);
+    expect(panelFlash).not.toHaveBeenCalled();
   });
 
   describe("opening another field", () => {

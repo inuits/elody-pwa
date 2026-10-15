@@ -96,6 +96,7 @@ vi.mock(
 
 import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
 import { useEditScope } from "@/composables/useEditScope";
+import { panelSavedFlashKey } from "@/composables/useSavedFlash";
 
 // Each open editor listens on the page; unmount them so an earlier test's
 // editor doesn't save on a later test's click.
@@ -302,6 +303,19 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       );
       expect(editor().editable).toBe(false);
       expect(wrapper.find('[role="status"]').text()).toBe("Saved");
+    });
+
+    it("flashes the panel's saved check after a save", async () => {
+      const flashPanel = vi.fn();
+      mocks.saveScope.mockResolvedValue({});
+      const wrapper = await startEditing({}, {
+        [panelSavedFlashKey as unknown as string]: flashPanel,
+      });
+      editor().type("<p>Nieuw</p>");
+      await wrapper.vm.$nextTick();
+      leaveField();
+      await flushPromises();
+      expect(flashPanel).toHaveBeenCalledTimes(1);
     });
 
     it("hands the saved entity back to the page", async () => {

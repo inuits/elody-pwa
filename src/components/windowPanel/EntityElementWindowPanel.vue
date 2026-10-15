@@ -10,6 +10,20 @@
     >
       <div class="flex gap-4 w-2/3 items-center">
         <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
+        <!-- The row itself announces the save; this only shows it -->
+        <Transition
+          leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
+          leave-to-class="opacity-0"
+        >
+          <span
+            v-if="panelSaved.visible.value"
+            data-cy="panel-saved-check"
+            aria-hidden="true"
+            class="flex text-success"
+          >
+            <unicon :name="Unicons.Check.name" height="14" />
+          </span>
+        </Transition>
         <div
           v-if="panel.panelHeaderContent.libraryData"
           class="grid transition-[grid-template-columns,opacity] duration-300 ease-out"
@@ -171,6 +185,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useRepeatableFields } from "@/composables/useRepeatableFields";
 import { useEditMode } from "@/composables/useEdit";
+import { provideSavedFlash, useSavedFlash } from "@/composables/useSavedFlash";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   type WindowElementPanel,
@@ -257,6 +272,9 @@ const removeRowScope = useInPlaceScope(
 );
 const translated = (key: string, fallback: string): string =>
   te(key) ? t(key) : fallback;
+const panelSaved = useSavedFlash();
+provideSavedFlash(panelSaved.flash);
+
 const rowMessages = {
   add: () => t("actions.labels.add-more"),
   remove: () => translated("inline-edit.remove-row", "Remove row"),
