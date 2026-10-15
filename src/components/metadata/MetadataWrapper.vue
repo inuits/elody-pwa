@@ -907,7 +907,6 @@ const startEditing = async (event?: Event) => {
       await saveInline(latestDraft.value);
       return !isEditingInPlace.value;
     },
-    discard: () => cancelInline(),
   });
   if (!opened) return;
   if (savesAsRelations.value)

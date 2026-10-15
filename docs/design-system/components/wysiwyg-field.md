@@ -56,7 +56,7 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 - Saving sends **only this field's key**. WYSIWYG fields have no validation
   rules of their own.
 - Only one field edits at a time, and leaving the page with a changed editor
-  shows the unsaved-changes prompt, as for any field row.
+  saves it first, as for any field row.
 
 ## Tokens
 | Token | Role |

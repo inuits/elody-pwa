@@ -138,7 +138,6 @@ export const useWysiwygInPlaceEditing = (options: WysiwygInPlaceOptions) => {
         await save();
         return !isEditing.value;
       },
-      discard: cancel,
     });
     if (!opened) return;
     storedBeforeEditing = options.readValue() ?? "";

@@ -817,15 +817,7 @@ describe("MetadataWrapper — leaving with an open editor", () => {
     inlineEditor(wrapper).vm.$emit("draft-change", "2021");
     inlineEditor(wrapper).vm.$emit("dirty-change", true);
     expect(await useEditScope().saveActive()).toBe(false);
-  });
-
-  it("closes the editor without saving when the prompt discards", async () => {
-    const wrapper = await openEditor();
-    inlineEditor(wrapper).vm.$emit("dirty-change", true);
-    useEditScope().discardActive();
-    await flushPromises();
-    expect(inlineEditor(wrapper).exists()).toBe(false);
-    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    useEditScope().release("MW-TEST:year");
   });
 });
 

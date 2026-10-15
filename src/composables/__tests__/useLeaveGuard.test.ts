@@ -7,7 +7,6 @@ const options = (overrides: Record<string, unknown> = {}) => ({
   ask: vi.fn(),
   savePageEdit: vi.fn().mockResolvedValue(undefined),
   saveScope: vi.fn().mockResolvedValue(true),
-  discardScope: vi.fn(),
   ...overrides,
 });
 
@@ -18,31 +17,21 @@ describe("decideLeave", () => {
     expect(o.ask).not.toHaveBeenCalled();
   });
 
-  it("asks when an in-place editor holds changes", async () => {
-    const o = options({ scopeChanged: true, ask: vi.fn().mockResolvedValue("cancel") });
-    expect(await decideLeave(o)).toBe(false);
-    expect(o.ask).toHaveBeenCalled();
-  });
-
-  it("saves the in-place editor and leaves only when the save worked", async () => {
-    const o = options({ scopeChanged: true, ask: vi.fn().mockResolvedValue("secondary") });
+  // Leaving the page is leaving the field: it saves, as a click elsewhere does.
+  it("saves a changed in-place editor without asking, and leaves", async () => {
+    const o = options({ scopeChanged: true });
     expect(await decideLeave(o)).toBe(true);
     expect(o.saveScope).toHaveBeenCalled();
+    expect(o.ask).not.toHaveBeenCalled();
   });
 
   it("stays when saving the in-place editor fails", async () => {
     const o = options({
       scopeChanged: true,
-      ask: vi.fn().mockResolvedValue("secondary"),
       saveScope: vi.fn().mockResolvedValue(false),
     });
     expect(await decideLeave(o)).toBe(false);
-  });
-
-  it("discards the in-place editor's changes when the user discards", async () => {
-    const o = options({ scopeChanged: true, ask: vi.fn().mockResolvedValue("confirm") });
-    expect(await decideLeave(o)).toBe(true);
-    expect(o.discardScope).toHaveBeenCalled();
+    expect(o.ask).not.toHaveBeenCalled();
   });
 
   it("keeps the legacy page-wide edit behaviour", async () => {

@@ -371,7 +371,6 @@ const startEditing = async () => {
       await saveInPlace();
       return !isEditingInPlace.value;
     },
-    discard: cancelInPlace,
   });
   if (!opened) return;
   draftLatitude.value = asText(props.value?.latitude);

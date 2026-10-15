@@ -1,7 +1,7 @@
-// The unsaved-changes prompt shown when leaving a detail page. It covers both
-// the legacy page-wide edit mode and an open in-place editor (useEditScope),
-// with the same three choices: discard ("confirm"), stay ("cancel") or save
-// ("secondary"). Leaving after a save only happens when the save worked.
+// Leaving a detail page. A changed in-place editor (useEditScope) saves, as
+// leaving the field does, and the page is left only when that save worked.
+// The legacy page-wide edit mode asks: discard ("confirm"), stay ("cancel")
+// or save ("secondary").
 
 export type LeaveChoice = "confirm" | "cancel" | "secondary" | string;
 
@@ -11,28 +11,22 @@ export const decideLeave = async ({
   ask,
   savePageEdit,
   saveScope,
-  discardScope,
 }: {
   pageEditChanged: boolean;
   scopeChanged: boolean;
   ask: () => Promise<LeaveChoice>;
   savePageEdit: () => Promise<unknown>;
   saveScope: () => Promise<boolean>;
-  discardScope: () => void;
 }): Promise<boolean> => {
-  if (!pageEditChanged && !scopeChanged) return true;
+  if (scopeChanged) return saveScope();
+  if (!pageEditChanged) return true;
 
   const choice = await ask();
   if (choice === "secondary") {
-    if (scopeChanged) return saveScope();
     await savePageEdit();
     return true;
   }
-  if (choice === "confirm") {
-    if (scopeChanged) discardScope();
-    return true;
-  }
-  return false;
+  return choice === "confirm";
 };
 
 // A route update leaves the record only when the path changes. A changed

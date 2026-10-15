@@ -13,7 +13,6 @@ export type EditScope = {
   close?: () => void;
   // Used by the leave prompt: save resolves to whether it succeeded.
   save?: () => Promise<boolean>;
-  discard?: () => void;
 };
 
 export const createEditScopeStore = () => {
@@ -21,14 +20,20 @@ export const createEditScopeStore = () => {
 
   const isActive = (id: string): boolean => activeScope.value?.id === id;
 
+  // Clicks made while the changed scope saves: only the last one opens.
+  let latestRequest = 0;
+
   const requestOpen = async (scope: EditScope): Promise<boolean> => {
+    const request = ++latestRequest;
     const current = activeScope.value;
     if (!current || current.id === scope.id) {
       activeScope.value = scope;
       return true;
     }
     if (current.isDirty()) {
-      if (!(await current.save?.())) {
+      const saved = await current.save?.();
+      if (request !== latestRequest) return false;
+      if (!saved) {
         current.focus?.();
         return false;
       }
@@ -47,10 +52,6 @@ export const createEditScopeStore = () => {
     return current.save();
   };
 
-  const discardActive = (): void => {
-    activeScope.value?.discard?.();
-  };
-
   const hasUnsavedChanges: ComputedRef<boolean> = computed(
     () => !!activeScope.value?.isDirty(),
   );
@@ -62,7 +63,6 @@ export const createEditScopeStore = () => {
     release,
     hasUnsavedChanges,
     saveActive,
-    discardActive,
   };
 };
 

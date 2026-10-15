@@ -255,7 +255,6 @@ onBeforeRouteLeave(() =>
     ask: askToLeave,
     savePageEdit: () => useEditHelper.save(),
     saveScope: editScope.saveActive,
-    discardScope: editScope.discardActive,
   }),
 );
 
@@ -270,7 +269,6 @@ onBeforeRouteUpdate((to, from) =>
     ask: askToLeave,
     savePageEdit: async () => undefined,
     saveScope: editScope.saveActive,
-    discardScope: editScope.discardActive,
   }),
 );
 </script>

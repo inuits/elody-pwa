@@ -82,7 +82,8 @@ the rows (no extra separator line). A row's fields keep their full width side by
 - Opening another field saves the changed one first. If that save fails (an
   invalid value, a server error) the changed field stays open with its
   error, focused, and the other field doesn't open. Leaving and opening at
-  once send one save, not two.
+  once send one save, not two. Clicking several fields while it saves opens
+  only the last one.
 - The input gets focus when the editor opens. After save or cancel, focus
   returns to the value.
 - Saving sends **only this field's key** and validates **only this field**,
@@ -98,9 +99,9 @@ the rows (no extra separator line). A row's fields keep their full width side by
   run on the relations as they would be after the save.
 - After a save, the page takes the entity the server returned, so every value
   shown from it is current.
-- Leaving the page, or moving to another record, with a changed editor shows
-  the unsaved-changes prompt: save, discard or stay. Leaving only happens
-  after a save that worked.
+- Leaving the page, or moving to another record, with a changed editor saves
+  it, without asking. Leaving only happens after a save that worked; when it
+  fails, you stay on the page with the error.
 
 ## Accessibility
 - The input is named after the field label.

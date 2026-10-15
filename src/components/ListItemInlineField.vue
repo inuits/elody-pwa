@@ -269,7 +269,6 @@ const start = async () => {
       await save(latestDraft.value ?? currentValue.value);
       return !isEditing.value;
     },
-    discard: cancel,
   });
   if (!opened) return;
   latestDraft.value = undefined;

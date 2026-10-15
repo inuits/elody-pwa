@@ -10,7 +10,6 @@ const scope = (id: string, dirty = false) => {
     focus: vi.fn(),
     close: vi.fn(),
     save: vi.fn().mockResolvedValue(true),
-    discard: vi.fn(),
     setDirty: (value: boolean) => (isDirty.value = value),
   };
 };
@@ -64,6 +63,19 @@ describe("useEditScope", () => {
     expect(title.focus).toHaveBeenCalled();
   });
 
+  it("opens only the last field asked for while the changed one saves", async () => {
+    const title = scope("title", true);
+    let finishSave!: (saved: boolean) => void;
+    title.save.mockReturnValue(new Promise((resolve) => (finishSave = resolve)));
+    await store.requestOpen(title);
+    const year = store.requestOpen(scope("year"));
+    const place = store.requestOpen(scope("place"));
+    finishSave(true);
+    expect(await year).toBe(false);
+    expect(await place).toBe(true);
+    expect(store.isActive("place")).toBe(true);
+  });
+
   it("releases only the scope that is active", async () => {
     const title = scope("title");
     await store.requestOpen(title);
@@ -103,14 +115,6 @@ describe("useEditScope — leaving with changes", () => {
     title.save.mockResolvedValue(false);
     await store.requestOpen(title);
     expect(await store.saveActive()).toBe(false);
-  });
-
-  it("discards the active scope's changes", async () => {
-    const store = createEditScopeStore();
-    const title = scope("title", true);
-    await store.requestOpen(title);
-    store.discardActive();
-    expect(title.discard).toHaveBeenCalled();
   });
 
   it("treats saving with nothing open as done", async () => {
