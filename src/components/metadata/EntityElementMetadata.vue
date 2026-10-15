@@ -15,8 +15,12 @@
           class="underline"
           target="_blank"
           :href="item"
-          >{{ t(linkText) || item }}</a
-        >
+          >{{ t(linkText) || item }}<span
+            data-cy="external-link-glyph"
+            aria-hidden="true"
+            class="inline-flex align-middle pl-1"
+            ><unicon :name="Unicons.ExternalLinkAlt.name" height="12" /></span
+        ></a>
         <SanitizedHtml
           v-else-if="stringIsHtml(item)"
           :mode="SanitizeMode.Html"
@@ -49,6 +53,13 @@
           :content="processedDisplayValue"
           :link-text="t(linkText)"
         ></SanitizedHtml>
+        <span
+          data-cy="external-link-glyph"
+          aria-hidden="true"
+          class="flex shrink-0 pl-1 text-text-link"
+        >
+          <unicon :name="Unicons.ExternalLinkAlt.name" height="12" />
+        </span>
       </div>
 
       <p v-else-if="stringIsHtml(readableValue)">

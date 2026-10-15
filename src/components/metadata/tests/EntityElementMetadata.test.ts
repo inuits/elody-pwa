@@ -280,4 +280,31 @@ describe("EntityElementMetadata", () => {
       );
     });
   });
+
+  describe("URL values", () => {
+    beforeEach(() =>
+      stringIsUrl.mockImplementation(
+        (value: unknown) =>
+          typeof value === "string" && value.startsWith("https://"),
+      ),
+    );
+
+    it("marks a single URL as external with a glyph after the link", async () => {
+      const wrapper = mount(EntityElementMetadata, {
+        props: { value: "https://podiumnet.be" },
+      });
+      await nextTick();
+      const glyph = wrapper.find('[data-cy="external-link-glyph"]');
+      expect(glyph.exists()).toBe(true);
+      expect(glyph.attributes("aria-hidden")).toBe("true");
+    });
+
+    it("marks each URL line as external", async () => {
+      const wrapper = mount(EntityElementMetadata, {
+        props: { value: "https://a.be\nplain\nhttps://b.be" },
+      });
+      await nextTick();
+      expect(wrapper.findAll('[data-cy="external-link-glyph"]')).toHaveLength(2);
+    });
+  });
 });
