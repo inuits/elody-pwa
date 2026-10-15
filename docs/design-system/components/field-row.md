@@ -56,9 +56,13 @@ All of these must hold (`fieldEditability.ts`):
 - the field isn't marked non-editable or read-only for the user;
 - it isn't locked or masked;
 - the user may update the entity;
-- it isn't multilingual or metadata on a relation (these get their own
-  editors later). Fields in a repeatable panel edit in their own row (see the
-  [inline editor](./inline-editor.md));
+- it isn't metadata on a relation (on a list row that is
+  `ListItemInlineField`, below). Fields in a repeatable panel edit in their own
+  row (see the [inline editor](./inline-editor.md)). A multilingual field edits
+  in the selected language: the save sends `{ key, value, lang }`, and while it
+  is open a chip shows that language instead of the language picker. In a
+  repeatable row a multilingual field stays read-only, since the row saves its
+  whole list without a language;
 - the page-wide edit mode is off. Its "Bewerk metadata" button is hidden
   unless the entity type turns it on in its page config
   (`entityPageConfig[type].hasEditMetadataButton: true`). A column of the

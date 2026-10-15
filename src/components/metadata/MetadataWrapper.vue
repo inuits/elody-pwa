@@ -25,7 +25,18 @@
         :is-one-of-required="isOneOfRequired && (isEdit || canEditInPlace)"
         :is-locked="fieldIsLocked"
       />
-      <MultilingualLocaleSelector :field-key="metadata.key" />
+      <MultilingualLocaleSelector
+        v-if="!isEditingInPlace"
+        :field-key="metadata.key"
+      />
+      <!-- While editing, the language is fixed: the edit scope is the field
+           in this language. -->
+      <span
+        v-else-if="editingLocaleLabel"
+        data-cy="field-editing-locale"
+        class="rounded-chip bg-chip-neutral-bg text-chip-neutral-text text-chip font-bold p-(--chip-padding)"
+        >{{ editingLocaleLabel }}</span
+      >
       <BaseVirtualKeyboard
         v-if="isEdit && virtualKeyboardLayouts"
         :input="keyboardInput"
@@ -457,6 +468,10 @@ import {
   useInPlaceScope,
 } from "@/composables/useInPlaceScope";
 import {
+  getMultilingualProvideKey,
+  type MultilingualFieldProvide,
+} from "@/composables/useMultilingualField";
+import {
   useParentSavedFlash,
   useSavedFlash,
 } from "@/composables/useSavedFlash";
@@ -709,7 +724,10 @@ const canEditInPlace = computed<boolean>(() =>
     masked: isMaskedField.value,
     entityCanUpdate: entityCanUpdate.value,
     pageInEditMode: props.isEdit,
-    multilingual: (props.metadata as PanelMetaData).isMultilingual === true,
+    // A repeatable row saves its whole list, which has no language.
+    multilingual:
+      (props.metadata as PanelMetaData).isMultilingual === true &&
+      !!repeatableRow.value,
     onRelation: ["PanelRelationMetaData", "PanelRelationRootData"].includes(
       fieldKind.value,
     ),
@@ -736,6 +754,25 @@ const inlineDirty = ref<boolean>(false);
 const inlineSaving = ref<boolean>(false);
 const inlineError = ref<string | undefined>(undefined);
 const savedAnnouncement = ref<string>("");
+// MultilingualWrapper's field: when enabled, the value shown and saved is the
+// one in its selected language.
+const multilingualField = inject<MultilingualFieldProvide | undefined>(
+  getMultilingualProvideKey(props.metadata.key),
+  undefined,
+);
+const editingLocale = (): string | undefined =>
+  multilingualField?.isEnabled.value
+    ? multilingualField.selectedLocale.value
+    : undefined;
+const editingLocaleLabel = computed<string | undefined>(() => {
+  const locale = editingLocale();
+  if (!locale) return undefined;
+  return (
+    multilingualField!.localeOptions.value.find(
+      (option) => option.value === locale,
+    )?.label ?? locale
+  );
+});
 const savedCheck = useSavedFlash();
 const flashPanel = useParentSavedFlash();
 const valueBeforeEditing = ref<unknown>(undefined);
@@ -976,8 +1013,9 @@ const saveInline = singleFlight(async (value: unknown) => {
       collection: entityFormData?.collection ?? Collection.Entities,
       formInput: row
         ? buildMetadataInput(row.repeatableFieldsHelper.fieldKey, rows)
-        : buildMetadataInput(props.metadata.key, savedValue),
+        : buildMetadataInput(props.metadata.key, savedValue, editingLocale()),
     });
+    if (editingLocale()) multilingualField!.updateValue(String(value ?? ""));
     field.resetField({ value: fieldValueProxy.value });
     // After resetField: a saved new row may move up, and its field's path with it.
     if (row && rows) row.repeatableFieldsHelper.markSaved(rows, row.index);

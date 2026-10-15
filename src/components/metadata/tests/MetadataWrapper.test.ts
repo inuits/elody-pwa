@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
-import { defineComponent, h, nextTick, provide, ref } from "vue";
+import { computed, defineComponent, h, nextTick, provide, ref } from "vue";
 import { useField, useForm, defineRule } from "vee-validate";
 
 vi.mock("@/main", () => ({
@@ -113,6 +113,7 @@ const mountWrapper = async (
   props: ReturnType<typeof buildProps>,
   copyContext?: CopyFromParentContext,
   relationValues: Record<string, unknown[]> = {},
+  extraProvide: Record<string, unknown> = {},
 ) => {
   const Harness = defineComponent({
     setup() {
@@ -132,9 +133,12 @@ const mountWrapper = async (
 
   const wrapper = mount(Harness, {
     global: {
-      provide: copyContext
-        ? { [copyFromParentContextKey as unknown as symbol]: copyContext }
-        : {},
+      provide: {
+        ...(copyContext
+          ? { [copyFromParentContextKey as unknown as symbol]: copyContext }
+          : {}),
+        ...extraProvide,
+      },
       stubs: {
         unicon: uniconStub,
         BaseTooltip: baseTooltipStub,
@@ -1475,5 +1479,90 @@ describe("MetadataWrapper — color field view", () => {
     expect(wrapper.find('[data-cy="metadata-color-value"]').exists()).toBe(
       false,
     );
+  });
+});
+
+describe("MetadataWrapper — a multilingual field", () => {
+  // What MultilingualWrapper provides for the field (multilingual:<key>).
+  const multilingualField = (enabled = true) => ({
+    currentValue: computed(() => "hello"),
+    selectedLocale: ref("fr"),
+    localeOptions: computed(() => [
+      { icon: undefined, label: "Frans", value: "fr" },
+    ]),
+    isEnabled: computed(() => enabled),
+    showSelector: true,
+    updateValue: vi.fn(),
+  });
+  const multilingualProps = () => {
+    const p = buildProps("year", false);
+    (p.metadata as any).isMultilingual = true;
+    return p;
+  };
+  const mountMultilingual = (field = multilingualField(), p = multilingualProps()) =>
+    mountWrapper(p, undefined, {}, { "multilingual:year": field });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("is editable in place", async () => {
+    const value = (await mountMultilingual()).find('[data-cy="field-value"]');
+    expect(value.attributes("role")).toBe("button");
+  });
+
+  it("saves the value in the selected language only", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const field = multilingualField();
+    const wrapper = await mountMultilingual(field);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    wrapper.findComponent({ name: "InlineFieldEditor" }).vm.$emit("save", "salut");
+    await flushPromises();
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: "salut", lang: "fr" },
+    ]);
+    expect(field.updateValue).toHaveBeenCalledWith("salut");
+  });
+
+  it("fixes the language while editing: a chip instead of the language picker", async () => {
+    const wrapper = await mountMultilingual();
+    expect(
+      wrapper.findComponent({ name: "MultilingualLocaleSelector" }).exists(),
+    ).toBe(true);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    expect(
+      wrapper.findComponent({ name: "MultilingualLocaleSelector" }).exists(),
+    ).toBe(false);
+    expect(wrapper.find('[data-cy="field-editing-locale"]').text()).toBe("Frans");
+  });
+
+  it("saves without a language when multilingual editing is off", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await mountMultilingual(multilingualField(false));
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    wrapper.findComponent({ name: "InlineFieldEditor" }).vm.$emit("save", "x");
+    await flushPromises();
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: "x" },
+    ]);
+  });
+
+  it("stays read-only in a repeatable row, which saves no language", async () => {
+    const p = multilingualProps();
+    (p as any).repeatablePanelConfig = {
+      isRepeatable: true,
+      index: 0,
+      field: undefined,
+      repeatableFieldsHelper: { fieldKey: "g", rowsForSave: vi.fn(), markSaved: vi.fn() },
+    };
+    const value = (await mountMultilingual(multilingualField(), p)).find(
+      '[data-cy="field-value"]',
+    );
+    expect(value.attributes("role")).toBeUndefined();
   });
 });
