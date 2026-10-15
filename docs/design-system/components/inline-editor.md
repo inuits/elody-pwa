@@ -52,6 +52,10 @@ asks for confirmation (there is no undo yet), then saves the list without
 it. Each removable row is headed by its number and the trash button,
 centred between two rules (`──── ISBN 2 🗑 ────`), which also separates
 the rows (no extra separator line). A row's fields keep their full width side by side. A lone empty row (a panel without values) has no line. Rows are not reordered.
+The rows are a `role="list"`, each row a `role="listitem"`, striped with
+`--color-surface-repeat-row` and filled with `--color-surface-row-hover` on
+hover. The trash button is named after the row's first filled value
+("Verwijder rij: 978-90-01"), else after its number ("Verwijder rij: ISBN 2").
 
 ## States
 | State | Cue |

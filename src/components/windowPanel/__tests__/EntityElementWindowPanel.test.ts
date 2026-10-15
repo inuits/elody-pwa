@@ -250,6 +250,37 @@ describe("EntityElementWindowPanel — repeatable rows edited in place", () => {
     ).toBe(false);
   });
 
+  it("makes the rows a list, one list item per row", () => {
+    const wrapper = mountRepeatable();
+    expect(wrapper.findAll('[role="list"]')).toHaveLength(1);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(2);
+  });
+
+  it("stripes the rows and fills a row on hover", () => {
+    const row = mountRepeatable().find('[role="listitem"]');
+    expect(row.classes()).toEqual(
+      expect.arrayContaining([
+        "even:bg-surface-repeat-row",
+        "hover:bg-surface-row-hover",
+      ]),
+    );
+  });
+
+  it("names each remove button after the row's value, else its number", () => {
+    state.rows.fields.value = [
+      { isLast: false, value: { isbn: "978-90-01" } },
+      { isLast: true, value: { isbn: "" } },
+    ];
+    const labels = mountRepeatable()
+      .findAll('[data-cy="repeatable-remove-row"]')
+      .map((b) => b.attributes("aria-label"));
+    expect(labels).toEqual(["Remove row: 978-90-01", "Remove row: ISBN 2"]);
+  });
+
+  it("keeps a panel that doesn't repeat out of the list roles", () => {
+    expect(mountPanel().find('[role="list"]').exists()).toBe(false);
+  });
+
   it("offers removing only rows that can go", () => {
     state.rows.canRemoveRow.mockImplementation((index: number) => index === 0);
     expect(

@@ -99,10 +99,18 @@
       class="grid transition-[grid-template-rows] duration-200 ease-out"
       :class="isCollapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'"
     >
-      <div class="min-h-0 overflow-hidden">
+      <div
+        class="min-h-0 overflow-hidden"
+        :role="repeatablePanel ? 'list' : undefined"
+      >
         <div
           v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
+          :role="repeatablePanel ? 'listitem' : undefined"
+          :class="
+            repeatablePanel &&
+            'rounded-input even:bg-surface-repeat-row hover:bg-surface-row-hover'
+          "
         >
           <!-- A removable row is headed by its number and the remove button,
                between two rules, so the fields keep the row's full width. -->
@@ -125,7 +133,7 @@
               data-cy="repeatable-remove-row"
               class="!w-max shrink-0"
               label=""
-              :aria-label="`${rowMessages.remove()}: ${rowLabel(idx)}`"
+              :aria-label="`${rowMessages.remove()}: ${rowName(idx)}`"
               :icon="DamsIcons.Trash"
               button-size="sm"
               button-style="ghost"
@@ -281,6 +289,21 @@ const rowMessages = {
 };
 const rowLabel = (rowNumber: number): string =>
   `${t(props.panel.panelHeaderContent?.label ?? "")} ${rowNumber}`.trim();
+// A row is named by its first filled field ("Verwijder rij: Jan Wolkers"),
+// else by its number.
+const rowName = (rowNumber: number): string => {
+  const row = repeatableFieldsHelper.fields.value[rowNumber - 1]?.value as
+    | Record<string, unknown>
+    | undefined;
+  const value = getMetadataFields(props.panel, props.formId, rowNumber - 1)
+    .map((field) => row?.[field.key])
+    .find(
+      (value) =>
+        (typeof value === "string" || typeof value === "number") &&
+        String(value).trim() !== "",
+    );
+  return value === undefined ? rowLabel(rowNumber) : String(value);
+};
 const canEditRows = computed<boolean>(
   () =>
     repeatablePanel.value &&
