@@ -20,7 +20,7 @@ describe("aliasAsKeyTransform", () => {
   });
 
   it("keeps an explicit key that differs from the alias", () => {
-    const query = `query Q { panel { owner: metaData { key(input: "person") } } }`;
+    const query = `query Q { panel { owner: metaData { label(input: "x") key(input: "person") } } }`;
     expect(transform(query)).toBe(normalize(query));
   });
 
@@ -36,7 +36,7 @@ describe("aliasAsKeyTransform", () => {
       ),
     ).toBe(
       normalize(
-        `query Q { a { file: uploadMetadata { label key(input: "file") } repeated: panels { inner { name: metaData { label key(input: "name") } } } } }`,
+        `query Q { a { file: uploadMetadata { label(input: "metadata.labels.file") key(input: "file") } repeated: panels { inner { name: metaData { label(input: "metadata.labels.name") key(input: "name") } } } } }`,
       ),
     );
   });
@@ -45,7 +45,9 @@ describe("aliasAsKeyTransform", () => {
     expect(
       transform(`fragment F on Panel { title: metaData { label } }`),
     ).toBe(
-      normalize(`fragment F on Panel { title: metaData { label key(input: "title") } }`),
+      normalize(
+        `fragment F on Panel { title: metaData { label(input: "metadata.labels.title") key(input: "title") } }`,
+      ),
     );
   });
 
@@ -67,5 +69,58 @@ describe("aliasAsKeyTransform", () => {
   it("leaves a keyValue without alias untouched", () => {
     const query = `query Q { intialValues { keyValue(key: "title", source: metadata) } }`;
     expect(transform(query)).toBe(normalize(query));
+  });
+
+  it("defaults the label to metadata.labels.<key>", () => {
+    expect(
+      transform(`query Q { panel { title: metaData { inputField { type } } } }`),
+    ).toBe(
+      normalize(
+        `query Q { panel { title: metaData { inputField { type } key(input: "title") label(input: "metadata.labels.title") } } }`,
+      ),
+    );
+  });
+
+  it("derives the default label from an explicit key", () => {
+    expect(
+      transform(`query Q { panel { owner: metaData { key(input: "person") } } }`),
+    ).toBe(
+      normalize(
+        `query Q { panel { owner: metaData { key(input: "person") label(input: "metadata.labels.person") } } }`,
+      ),
+    );
+  });
+
+  it("defaults the label of a non-aliased metaData with an explicit key", () => {
+    expect(
+      transform(`query Q { panel { metaData { key(input: "title") } } }`),
+    ).toBe(
+      normalize(
+        `query Q { panel { metaData { key(input: "title") label(input: "metadata.labels.title") } } }`,
+      ),
+    );
+  });
+
+  it("keeps an explicit label", () => {
+    const query = `query Q { panel { title: metaData { label(input: "custom.title") key(input: "title") } } }`;
+    expect(transform(query)).toBe(normalize(query));
+  });
+
+  it("ignores aliased label and key siblings", () => {
+    expect(
+      transform(`query Q { panel { title: metaData { other: label(input: "x") alt: key(input: "y") } } }`),
+    ).toBe(
+      normalize(
+        `query Q { panel { title: metaData { other: label(input: "x") alt: key(input: "y") key(input: "title") label(input: "metadata.labels.title") } } }`,
+      ),
+    );
+  });
+
+  it("fills a bare key with the alias", () => {
+    expect(transform(`query Q { panel { status: metaData { key } } }`)).toBe(
+      normalize(
+        `query Q { panel { status: metaData { key(input: "status") label(input: "metadata.labels.status") } } }`,
+      ),
+    );
   });
 });
