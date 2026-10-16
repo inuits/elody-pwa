@@ -10,25 +10,48 @@ const keyArgument = (value: string): ArgumentNode => ({
   value: { kind: Kind.STRING, value },
 });
 
-const hasKeySelection = (field: FieldNode) =>
-  field.selectionSet?.selections.some(
-    (selection) => selection.kind === Kind.FIELD && selection.name.value === "key",
+const findSelection = (field: FieldNode, name: string) =>
+  field.selectionSet?.selections.find(
+    (selection): selection is FieldNode =>
+      selection.kind === Kind.FIELD && !selection.alias && selection.name.value === name,
   );
 
-const addKeySelection = (field: FieldNode, alias: string): FieldNode => {
-  if (!field.selectionSet || hasKeySelection(field)) return field;
-  const keyField: FieldNode = {
+const inputArgument = (value: string): ArgumentNode => ({
+  kind: Kind.ARGUMENT,
+  name: { kind: Kind.NAME, value: "input" },
+  value: { kind: Kind.STRING, value },
+});
+
+const explicitKey = (field: FieldNode) => {
+  const value = findSelection(field, "key")?.arguments?.find(
+    (argument) => argument.name.value === "input",
+  )?.value;
+  return value?.kind === Kind.STRING ? value.value : undefined;
+};
+
+// A bare selection (no input) gets the default too; Apollo caches sibling metaData by field name + arguments.
+const withDefaultInput = (field: FieldNode, name: string, value: string): FieldNode => {
+  if (!field.selectionSet) return field;
+  const existing = findSelection(field, name);
+  if (existing?.arguments?.length) return field;
+  const defaulted: FieldNode = {
     kind: Kind.FIELD,
-    name: { kind: Kind.NAME, value: "key" },
-    arguments: [{ ...keyArgument(alias), name: { kind: Kind.NAME, value: "input" } }],
+    name: { kind: Kind.NAME, value: name },
+    arguments: [inputArgument(value)],
   };
-  return {
-    ...field,
-    selectionSet: {
-      ...field.selectionSet,
-      selections: [...field.selectionSet.selections, keyField],
-    },
-  };
+  const selections = existing
+    ? field.selectionSet.selections.map((selection) =>
+        selection === existing ? defaulted : selection,
+      )
+    : [...field.selectionSet.selections, defaulted];
+  return { ...field, selectionSet: { ...field.selectionSet, selections } };
+};
+
+const addPanelMetadataDefaults = (field: FieldNode): FieldNode => {
+  const alias = field.alias?.value;
+  const withKey = alias ? withDefaultInput(field, "key", alias) : field;
+  const key = explicitKey(withKey);
+  return key ? withDefaultInput(withKey, "label", `metadata.labels.${key}`) : withKey;
 };
 
 // The key argument must reach the cache too: Apollo stores fields by name + arguments, not by alias.
@@ -40,9 +63,8 @@ const addKeyArgument = (field: FieldNode, alias: string): FieldNode => {
 export const aliasAsKeyTransform = new DocumentTransform((document) =>
   visit(document, {
     Field(field) {
+      if (PANEL_METADATA_FIELDS.has(field.name.value)) return addPanelMetadataDefaults(field);
       if (!field.alias) return;
-      if (PANEL_METADATA_FIELDS.has(field.name.value))
-        return addKeySelection(field, field.alias.value);
       if (field.name.value === "keyValue")
         return addKeyArgument(field, field.alias.value);
     },
