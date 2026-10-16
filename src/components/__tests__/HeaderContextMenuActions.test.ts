@@ -76,4 +76,20 @@ describe("HeaderContextMenuActions", () => {
         .map((action) => action.props("label")),
     ).toEqual(["contextMenu.createDownload", "delete"]);
   });
+
+  it("keeps one primary and moves further promoted actions into the menu", () => {
+    const wrapper = mountComponent([
+      { ...downloadAction, label: "first", showAsButton: true },
+      { ...downloadAction, label: "menu" },
+      { ...downloadAction, label: "second", showAsButton: true },
+    ]);
+    const labels = (slot: string) =>
+      wrapper
+        .find(`[data-test="${slot}"]`)
+        .findAllComponents({ name: "QueryAction" })
+        .map((action) => action.props("label"));
+
+    expect(labels("promoted")).toEqual(["first"]);
+    expect(labels("overflow")).toEqual(["second", "menu"]);
+  });
 });

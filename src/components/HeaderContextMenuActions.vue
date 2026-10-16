@@ -175,19 +175,22 @@ const noOp = () => Promise.resolve();
 provide("RefetchParentEntity", noOp);
 
 const visibleActions = computed(() => {
-  const promoted: ContextMenuActionRouteConfig[] = [];
-  const overflow: ContextMenuActionRouteConfig[] = [];
+  const visible = props.actions.filter(
+    (action) =>
+      !("hidden" in action && action.hidden) && !isHiddenForMetadata(action),
+  );
+  const isPromoted = (action: ContextMenuActionRouteConfig) =>
+    "showAsButton" in action && Boolean(action.showAsButton);
 
-  for (const action of props.actions) {
-    if ("hidden" in action && action.hidden) continue;
-    if (isHiddenForMetadata(action)) continue;
-
-    const slot =
-      "showAsButton" in action && action.showAsButton ? promoted : overflow;
-    slot.push(action);
-  }
-
-  return { promoted, overflow };
+  // One primary per entity: further promoted actions lead the menu.
+  const [primary] = visible.filter(isPromoted);
+  return {
+    promoted: primary ? [primary] : [],
+    overflow: [
+      ...visible.filter((action) => isPromoted(action) && action !== primary),
+      ...visible.filter((action) => !isPromoted(action)),
+    ],
+  };
 });
 
 const promotedActions = computed(() => visibleActions.value.promoted);

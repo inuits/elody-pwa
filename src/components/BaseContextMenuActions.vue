@@ -70,22 +70,26 @@ const availableActions = computed(() => {
   const restMenuActions = { ...props.contextMenuActions };
   delete restMenuActions.__typename;
 
-  const promoted: Partial<ContextMenuActions> = {};
-  const overflow: Partial<ContextMenuActions> = {};
+  type Entry = [string, { hidden?: boolean; showAsButton?: boolean | null }];
+  const visible = (Object.entries(restMenuActions) as Entry[]).filter(
+    ([, action]) => action && typeof action === "object" && !action.hidden,
+  );
+  const isPromoted = ([, action]: Entry) => Boolean(action.showAsButton);
 
-  const entries = dangerLast(
-    Object.entries(restMenuActions),
+  // One primary per entity: further promoted actions lead the menu.
+  const [primary] = visible.filter(isPromoted);
+  const menu = dangerLast(
+    [
+      ...visible.filter((entry) => isPromoted(entry) && entry !== primary),
+      ...visible.filter((entry) => !isPromoted(entry)),
+    ],
     ([, action]) => action,
   );
-  for (const [key, action] of entries) {
-    if (!action || typeof action !== "object") continue;
-    if ("hidden" in action && action.hidden) continue;
 
-    const slot = "showAsButton" in action ? promoted : overflow;
-    slot[key as keyof ContextMenuActions] = action as any;
-  }
-
-  return { promoted, overflow };
+  return {
+    promoted: Object.fromEntries(primary ? [primary] : []) as Partial<ContextMenuActions>,
+    overflow: Object.fromEntries(menu) as Partial<ContextMenuActions>,
+  };
 });
 
 const promotedActions = computed(() => availableActions.value.promoted);

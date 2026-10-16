@@ -9,9 +9,9 @@ split button).
 ## When to use
 - Secondary actions of a row or panel that don't fit as visible buttons.
 - Never behind a bare ⋮: the trigger always shows a label ("Acties ⌄").
-- Exactly one promoted action (`showAsButton`) plus overflow actions: a
-  split button. Several promoted actions stay separate buttons next to the
-  "Acties" trigger.
+- One primary per entity. The first promoted action (`showAsButton`) plus
+  the other actions form a split button. Further promoted actions lead its
+  menu. A promoted action with no other actions is a plain primary button.
 
 ## Anatomy
 - Trigger: secondary `BaseButtonNew` (sm, bordered), label + ⌄ (⌃ while open).

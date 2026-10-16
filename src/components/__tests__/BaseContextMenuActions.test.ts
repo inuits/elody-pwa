@@ -111,17 +111,23 @@ describe("BaseContextMenuActions", () => {
     ).toBe(true);
   });
 
-  it("keeps separate buttons with more than one promoted action", async () => {
+  it("keeps one primary and moves further promoted actions to the top of the menu", async () => {
+    const general = { label: "x", icon: "Update" };
     const wrapper = getWrapper({
       doLinkAction: { ...followLink, showAsButton: true },
+      doGeneralAction: general,
       doElodyAction: { ...deleteRelation, showAsButton: true },
-      doGeneralAction: { label: "x", icon: "Update" },
     });
     await flushPromises();
 
+    expect(Object.keys(wrapper.vm.promotedActions)).toEqual(["doLinkAction"]);
+    expect(Object.keys(wrapper.vm.overflowActions)).toEqual([
+      "doElodyAction",
+      "doGeneralAction",
+    ]);
     expect(
       wrapper.findComponent({ name: "ContextMenuActionsShell" }).props("split"),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("sorts destructive actions last", async () => {
