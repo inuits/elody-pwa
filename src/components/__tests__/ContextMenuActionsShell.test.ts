@@ -115,4 +115,22 @@ describe("ContextMenuActionsShell", () => {
       expect(chevron.attributes("aria-expanded")).toBe("true");
     });
   });
+
+  it("opens its menu from an anchor the parent hands it", async () => {
+    const wrapper = getWrapper();
+    const anchor = document.createElement("button");
+
+    (wrapper.vm as any).openFrom(anchor);
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find("button").attributes("aria-expanded")).toBe("true");
+  });
+
+  it("tells the parent when its own trigger opens the menu", async () => {
+    const wrapper = getWrapper();
+
+    await wrapper.find("button").trigger("click");
+
+    expect(wrapper.emitted("open")).toHaveLength(1);
+  });
 });

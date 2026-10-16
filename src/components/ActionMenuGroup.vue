@@ -1,62 +1,34 @@
 <template>
-  <div class="flex flex-row flex-wrap justify-end items-center gap-2 !m-0">
-    <BaseButtonNew
-      v-for="option in visibleOptions"
-      :key="option.value"
-      class="action-row-button"
-      :button-style="primaryOptions.includes(option) ? 'primary' : 'secondary'"
-      button-size="sm"
-      :disabled="
-        !option.active ||
-        (isMainActionDisabled && primaryOptions.includes(option))
-      "
-      :label="t(option.label, [entityTypeLabel])"
-      :aria-label="nameWithCount(option)"
-      :tooltip-label="tooltipFor(option)"
-      :icon="option.icon"
-      :force-show-label="true"
-      @click.stop="
-        (event: MouseEvent) => {
-          handleEmit(option);
-          if (option.value === BulkOperationTypes.OpenDropdown)
-            contextMenuHandler.openContextMenu(
-              { x: 0, y: 0 },
-              event.currentTarget as HTMLElement,
-            );
-        }
-      "
-    />
-    <!-- Never a bare ⋮: the overflow names itself. -->
-    <BaseButtonNew
-      v-if="overflowOptions.length > 0"
-      class="action-row-button"
-      button-style="secondary"
-      button-size="sm"
-      :label="t('bulk-operations.more-actions')"
-      :force-show-label="true"
-      aria-haspopup="menu"
-      :aria-expanded="isMenuOpen"
-      @click.stop="
-        (event: MouseEvent) => {
-          clearSubDropdownOptions();
-          contextMenuHandler.openContextMenu(
-            { x: 0, y: 0 },
-            event.currentTarget as HTMLElement,
-          );
-        }
-      "
-    >
-      <unicon
-        :name="isMenuOpen ? Unicons.AngleUp.name : Unicons.AngleDown.name"
-        height="14"
+  <ContextMenuActionsShell
+    ref="shell"
+    class="!m-0"
+    :has-promoted-actions="primaryOption !== undefined"
+    :has-overflow-actions="menuOptions.length > 0 || hasSubDropdownOptions"
+    :split="true"
+    @open="clearSubDropdownOptions"
+  >
+    <template #promoted>
+      <BaseButtonNew
+        v-if="primaryOption"
+        button-style="primary"
+        button-size="sm"
+        :disabled="!primaryOption.active || isMainActionDisabled"
+        :label="t(primaryOption.label, [entityTypeLabel])"
+        :aria-label="nameWithCount(primaryOption)"
+        :tooltip-label="tooltipFor(primaryOption)"
+        :icon="primaryOption.icon"
+        :force-show-label="true"
+        @click.stop="
+          (event: MouseEvent) => {
+            handleEmit(primaryOption!);
+            if (primaryOption!.value === BulkOperationTypes.OpenDropdown)
+              shell?.openFrom(event.currentTarget as HTMLElement);
+          }
+        "
       />
-    </BaseButtonNew>
-
-    <div v-if="hasSubDropdownOptions" class="!m-0">
-      <BaseContextMenu
-        :context-menu="contextMenuHandler.getContextMenu()"
-        :direction="ContextMenuDirection.Left"
-      >
+    </template>
+    <template #overflow>
+      <template v-if="hasSubDropdownOptions">
         <BaseContextMenuItem
           v-for="(option, idx) in subDropdownOptions"
           :key="idx"
@@ -69,31 +41,25 @@
           :disable="!option.active"
           @clicked="handleEmit(option)"
         />
-      </BaseContextMenu>
-    </div>
-    <div v-else>
-      <BaseContextMenu
-        :context-menu="contextMenuHandler.getContextMenu()"
-        :direction="ContextMenuDirection.Left"
-      >
+      </template>
+      <template v-else>
         <BaseContextMenuItem
-          v-for="(option, idx) in overflowOptions"
+          v-for="(option, idx) in menuOptions"
           :key="idx"
           :label="t(option?.label, [entityTypeLabel])"
+          :icon="option.icon ? Unicons[option.icon]?.name : undefined"
           :tooltip-label="tooltipFor(option)"
           :disable="!option.active"
           @clicked="handleEmit(option)"
         />
-      </BaseContextMenu>
-    </div>
-  </div>
+      </template>
+    </template>
+  </ContextMenuActionsShell>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
-  ContextMenuDirection,
   ActionContextEntitiesSelectionType,
   type DropdownOption,
   Entitytyping,
@@ -101,7 +67,7 @@ import {
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
+import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { auth } from "@/main";
 import { Unicons } from "@/types";
@@ -131,7 +97,6 @@ const props = withDefaults(
     subDropdownOptions: () => [],
   },
 );
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
 const availableOptions = ref<DropdownOption[]>([]);
@@ -181,25 +146,17 @@ const secondaryOptions = computed<DropdownOption[]>(() =>
   ),
 );
 
-// The handoff caps the visible row at about five actions.
-const MAX_VISIBLE_ACTIONS = 5;
-
-const visibleOptions = computed<DropdownOption[]>(() =>
-  [...primaryOptions.value, ...secondaryOptions.value].slice(
-    0,
-    MAX_VISIBLE_ACTIONS,
-  ),
+// One primary, like a row's split button; every other action is in its menu.
+const primaryOption = computed<DropdownOption | undefined>(
+  () => primaryOptions.value[0],
 );
 
-const overflowOptions = computed<DropdownOption[]>(() =>
-  secondaryOptions.value.filter(
-    (option) => !visibleOptions.value.includes(option),
-  ),
-);
+const menuOptions = computed<DropdownOption[]>(() => [
+  ...primaryOptions.value.slice(1),
+  ...secondaryOptions.value,
+]);
 
-const isMenuOpen = computed<boolean>(
-  () => contextMenuHandler.value.getContextMenu()?.isVisible ?? false,
-);
+const shell = ref<InstanceType<typeof ContextMenuActionsShell>>();
 
 // Screen readers hear what a selection action acts on: "Delete (2 selected)".
 const nameWithCount = (option: DropdownOption): string | undefined =>
@@ -232,9 +189,3 @@ watch(
 );
 </script>
 
-<style scoped>
-/* BaseButtonNew fills its parent by default; row buttons size to their label. */
-.action-row-button {
-  width: auto;
-}
-</style>

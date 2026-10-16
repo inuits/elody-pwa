@@ -87,6 +87,8 @@ defineProps<{
   contextLabel?: string;
 }>();
 
+const emit = defineEmits<{ (event: "open"): void }>();
+
 const { t } = useI18n();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 
@@ -94,12 +96,17 @@ const isOpen = computed<boolean>(
   () => contextMenuHandler.value.getContextMenu()?.isVisible ?? false,
 );
 
-const openContextMenu = (event: Event) => {
-  contextMenuHandler.value.openContextMenu(
-    { x: 0, y: 0 },
-    event.currentTarget as HTMLElement,
-  );
+const openFrom = (anchor: HTMLElement) => {
+  contextMenuHandler.value.openContextMenu({ x: 0, y: 0 }, anchor);
 };
+
+const openContextMenu = (event: Event) => {
+  emit("open");
+  openFrom(event.currentTarget as HTMLElement);
+};
+
+// For a parent action that opens this menu itself (a bulk "open dropdown").
+defineExpose({ openFrom });
 
 const toggleContextMenu = (event: Event) => {
   if (isOpen.value) contextMenuHandler.value.closeContextMenu();

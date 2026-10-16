@@ -191,7 +191,7 @@ describe("ActionMenuGroup", () => {
     });
   });
 
-  describe("visible action row", () => {
+  describe("split button", () => {
     const option = (value: string, extra: Partial<DropdownOption> = {}) =>
       ({ label: `label.${value}`, value, ...extra }) as DropdownOption;
     const someSelected = {
@@ -213,76 +213,90 @@ describe("ActionMenuGroup", () => {
           clearSubDropdownOptions: () => {},
         },
         attachTo: document.body,
-        global: { stubs: { unicon: true, BaseTooltip: true } },
+        global: {
+          stubs: {
+            unicon: true,
+            BaseTooltip: true,
+            BaseContextMenu: { template: '<div data-test="menu"><slot /></div>' },
+          },
+        },
       });
-    const buttons = (wrapper: ReturnType<typeof mountRow>) =>
-      wrapper.findAllComponents({ name: "BaseButtonNew" });
+    // A lone action is a plain button, so look for it by style, not position.
+    const primary = (wrapper: ReturnType<typeof mountRow>) =>
+      wrapper
+        .findAllComponents({ name: "BaseButtonNew" })
+        .find((button) => button.props("label")?.startsWith("label."))!;
+    const menuLabels = (wrapper: ReturnType<typeof mountRow>) =>
+      wrapper
+        .find('[data-test="menu"]')
+        .findAllComponents({ name: "BaseContextMenuItem" })
+        .map((item) => item.props("label"));
 
-    it("shows secondary actions as visible labelled buttons", async () => {
+    it("joins the primary and the other actions in a split button", async () => {
       const wrapper = mountRow([
         option("create", { primary: true }),
         option("export"),
       ]);
       await flushPromises();
 
-      expect(buttons(wrapper).map((b) => b.props("label"))).toEqual([
-        "label.create",
-        "label.export",
-      ]);
-      expect(buttons(wrapper)[0].props("buttonStyle")).toBe("primary");
-      expect(buttons(wrapper)[1].props("buttonStyle")).toBe("secondary");
-      expect(buttons(wrapper)[1].props("forceShowLabel")).toBe(true);
+      expect(wrapper.find('[role="group"]').exists()).toBe(true);
+      expect(primary(wrapper).props("label")).toBe("label.create");
+      expect(primary(wrapper).props("buttonStyle")).toBe("primary");
+      expect(menuLabels(wrapper)).toEqual(["label.export"]);
     });
 
-    it("keeps an action that needs a selection visible but disabled", async () => {
-      const wrapper = mountRow([option("edit", someSelected)]);
+    it("puts further primaries in the menu", async () => {
+      const wrapper = mountRow([
+        option("create", { primary: true }),
+        option("export"),
+        option("import", { primary: true }),
+      ]);
       await flushPromises();
 
-      expect(buttons(wrapper)[0].props("disabled")).toBe(true);
+      expect(primary(wrapper).props("label")).toBe("label.create");
+      expect(menuLabels(wrapper)).toEqual(["label.import", "label.export"]);
     });
 
-    it("moves actions beyond five into a labelled overflow menu", async () => {
-      const wrapper = mountRow(
-        ["a", "b", "c", "d", "e", "f", "g"].map((value) => option(value)),
+    it("shows a labelled actions trigger without a primary", async () => {
+      const wrapper = mountRow([option("export"), option("delete")]);
+      await flushPromises();
+
+      expect(wrapper.find('[data-cy="overflow-menu-trigger"]').text()).toContain(
+        "contextMenu.actions",
       );
+      expect(menuLabels(wrapper)).toEqual(["label.export", "label.delete"]);
+    });
+
+    it("keeps an unavailable primary visible but disabled", async () => {
+      const wrapper = mountRow([
+        option("edit", { primary: true, ...someSelected }),
+      ]);
       await flushPromises();
 
-      const labels = buttons(wrapper).map((b) => b.props("label"));
-      expect(labels).toEqual([
-        "label.a",
-        "label.b",
-        "label.c",
-        "label.d",
-        "label.e",
-        "bulk-operations.more-actions",
-      ]);
-      expect(wrapper.find('[aria-haspopup="menu"]').exists()).toBe(true);
-      expect(wrapper.vm.overflowOptions.map((o: DropdownOption) => o.value))
-        .toEqual(["f", "g"]);
+      expect(primary(wrapper).props("disabled")).toBe(true);
     });
 
     it("never renders a bare ellipsis trigger", async () => {
-      const wrapper = mountRow(
-        ["a", "b", "c", "d", "e", "f"].map((value) => option(value)),
-      );
+      const wrapper = mountRow([option("a", { primary: true }), option("b")]);
       await flushPromises();
 
       expect(
-        buttons(wrapper).some((b) => b.props("icon") === "EllipsisV"),
+        wrapper
+          .findAllComponents({ name: "BaseButtonNew" })
+          .some((b) => b.props("icon") === "EllipsisV"),
       ).toBe(false);
     });
 
     it("names a selection action with the selection count", async () => {
       const wrapper = mountRow(
-        [option("delete", someSelected), option("create")],
+        [option("delete", { primary: true, ...someSelected })],
         [{ id: "1" }, { id: "2" }],
       );
       await flushPromises();
 
-      expect(buttons(wrapper)[0].props("ariaLabel")).toBe(
+      expect(primary(wrapper).props("ariaLabel")).toBe(
         "bulk-operations.action-for-selection:label.delete,2",
       );
-      expect(buttons(wrapper)[1].props("ariaLabel")).toBeUndefined();
     });
   });
 });

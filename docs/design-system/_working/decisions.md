@@ -201,7 +201,7 @@ Source: handoff (split-button, overflow-menu, action-discovery, selection-action
 | A7 | Menu item fit | `--leading-tight` (the body's 1.5 made items ~4px taller than the specimen) and no link underline on hover |
 | A9 | 2+ promoted row actions | one primary per entity (user, 2026-10-16): the first `showAsButton` action is the split primary, the other promoted actions move to the top of its menu (danger still last) |
 | A4 | Unavailable actions | missing permission → hidden (user, 2026-10-16: no need to show what you may never do). Unavailable because of state (nothing selected, wrong view mode) → visible, disabled, reason in a tooltip |
-| A8 | Selection bar | visible labelled row (primaries accent, others secondary, max 5), rest in labelled "More actions ⌄" anchored menu; `role="toolbar"`, count `role="status"`, off-page note, clear/select-page as real buttons; selection actions name the count ("Delete (2 selected)"). Not taken (user): collapse-when-empty, count on the confirm button. Danger ink for bulk actions needs a tone on bulk options (not added yet) |
+| A8 | Selection bar | same pattern as rows (user, 2026-10-16, replacing the first "visible row of up to 5"): first primary as split primary, everything else in its menu, "Actions ⌄" without a primary; `role="toolbar"`, count `role="status"`, off-page note, clear/select-page as real buttons; selection actions name the count ("Delete (2 selected)"). Not taken (user): collapse-when-empty, count on the confirm button. Danger ink for bulk actions needs a tone on bulk options (not added yet) |
 
 ## 3. Filters (DS 4)
 

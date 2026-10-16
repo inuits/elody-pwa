@@ -12,10 +12,11 @@ use the row's split button or "Actions" menu ([menu](./menu.md)).
 - Left: the count chip ("2/40 items selected"), the clear and select-page
   links (real buttons), and a note when selected items sit on other pages
   ("3 selected on other pages").
-- Right: the action row. Primary actions (`primary`, or the active
-  `primaryFallback`) as accent primary buttons, then the other actions as
-  labelled secondary buttons, at most five buttons in total. The rest go into
-  a labelled "More actions ⌄" menu. Never a bare ⋮.
+- Right: the same pattern as a row ([menu](./menu.md)). The first primary
+  (`primary`, or the active `primaryFallback`) is the split button's
+  primary; every other action, further primaries first, is in its menu. No
+  primary: the labelled "Actions ⌄" trigger. One action: a plain button.
+  Never a bare ⋮.
 - Picker contexts swap the row for the commit-teal "Confirm selection".
 
 ## States
@@ -31,8 +32,8 @@ use the row's split button or "Actions" menu ([menu](./menu.md)).
 - The count is `role="status"`, so changes are announced.
 - An action that needs a selection carries the count in its accessible
   name: "Delete (2 selected)".
-- Overflow trigger: `aria-haspopup="menu"`, `aria-expanded`; the menu opens
-  under it.
+- Chevron or "Actions" trigger: `aria-haspopup="menu"`, `aria-expanded`;
+  the menu opens under it.
 - shortcut: the toolbar has no arrow-key (roving tabindex) navigation; every
   control is reachable with Tab. Add it if users ask for keyboard speed.
 
