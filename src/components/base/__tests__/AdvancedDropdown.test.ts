@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { mount, shallowMount } from "@vue/test-utils";
+import { CHECKBOX_BOX_CLASSES } from "@/components/base/checkboxStyles";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 vi.mock("vue-router", () => ({
@@ -48,7 +49,7 @@ vi.mock("vue3-select-component", () => ({
       <slot name="tag" :option="{ label: 'Monografie', value: 'monograph' }" />
       <slot name="tag" :option="{ label: 'Tijdschrift', value: 'journal' }" />
       <div v-for="(option, index) in options" :key="option.value" data-cy="option">
-        <slot name="option" :option="option" :index="index" :is-selected="option.value === 'monograph'" :is-focused="false" :is-disabled="false" />
+        <component :is="$slots.option" v-if="$slots.option" v-bind="{ option, index, 'is-selected': option.value === 'monograph', 'is-focused': false, 'is-disabled': false }" />
       </div>
       <div data-cy="no-options"><slot name="no-options" /></div>
     </div>`,
@@ -167,6 +168,30 @@ describe("AdvancedDropdown — multi select", () => {
     expect(multi().findAll('[data-cy="option"] input[type="checkbox"]')).toHaveLength(3);
   });
 
+  it("draws its checkboxes like the design-system checkbox", () => {
+    const box = mountDropdown({ multiple: true }).find(
+      '[data-cy="option"] input[type="checkbox"]',
+    );
+    expect(box.classes()).toEqual(
+      expect.arrayContaining(CHECKBOX_BOX_CLASSES.split(" ")),
+    );
+  });
+
+  it("checks the boxes of the selected options", () => {
+    const boxes = mountDropdown({
+      multiple: true,
+      options: [
+        { label: "Monografie", value: "monograph" },
+        { label: "Tijdschrift", value: "journal" },
+        { label: "Boek", value: "book" },
+      ],
+      modelValue: ["monograph", "book"],
+    })
+      .findAll('[data-cy="option"] input[type="checkbox"]')
+      .map((box) => (box.element as HTMLInputElement).checked);
+    expect(boxes).toEqual([true, false, true]);
+  });
+
   it("keeps the menu open and the selected options listed", () => {
     const vueSelect = multi().findComponent({ name: "VueSelect" });
     expect(vueSelect.props("closeOnSelect")).toBe(false);
@@ -176,8 +201,15 @@ describe("AdvancedDropdown — multi select", () => {
 
 describe("AdvancedDropdown — selected option", () => {
   it("marks the selected option with a check", () => {
-    const optionEls = mountDropdown({ options: [{ label: "Monografie", value: "monograph" }], clearable: false })
-      .findAll('[data-cy="option"]');
-    expect(optionEls[0].find('[data-cy="option-check"]').exists()).toBe(true);
+    const optionEls = mountDropdown({
+      options: [
+        { label: "Monografie", value: "monograph" },
+        { label: "Tijdschrift", value: "journal" },
+      ],
+      modelValue: "journal",
+      clearable: false,
+    }).findAll('[data-cy="option"]');
+    expect(optionEls[0].find('[data-cy="option-check"]').exists()).toBe(false);
+    expect(optionEls[1].find('[data-cy="option-check"]').exists()).toBe(true);
   });
 });

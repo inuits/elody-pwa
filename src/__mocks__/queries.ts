@@ -1098,7 +1098,7 @@ export type EntityListElement = {
   customQueryFilters?: Maybe<Scalars['String']>;
   customQueryRelationType?: Maybe<Scalars['String']>;
   enableAdvancedFilters?: Maybe<Scalars['Boolean']>;
-  enableNavigation?: Maybe<Scalars['Boolean']>;
+  actionOnClick?: Maybe<ActionOnClick>;
   entityList?: Maybe<Array<Maybe<Entity>>>;
   entityListElement?: Maybe<EntityListElement>;
   entityTypes?: Maybe<Array<Maybe<Entitytyping>>>;
@@ -1808,6 +1808,7 @@ export enum InputFieldTypes {
   DropdownSingleselectMetadata = 'dropdownSingleselectMetadata',
   DropdownSingleselectRelations = 'dropdownSingleselectRelations',
   FileUpload = 'fileUpload',
+  InputFieldWithSubFields = 'inputFieldWithSubFields',
   Number = 'number',
   Radio = 'radio',
   Range = 'range',
@@ -3273,6 +3274,13 @@ export type RegexpMatchFormatter = {
   value: Scalars['String'];
 };
 
+export enum ActionOnClick {
+  Navigate = 'navigate',
+  None = 'none',
+  OpenInModal = 'openInModal',
+  OpenPreview = 'openPreview'
+}
+
 export enum RelationActions {
   AddRelation = 'addRelation',
   RemoveRelation = 'removeRelation'
@@ -3693,6 +3701,7 @@ export enum TypeModals {
   EntityDetailModal = 'EntityDetailModal',
   GuidedFlow = 'GuidedFlow',
   IiifOperationsModal = 'IiifOperationsModal',
+  RelationPicker = 'RelationPicker',
   SaveSearch = 'SaveSearch',
   SaveSearchPicker = 'SaveSearchPicker',
   Search = 'Search',
@@ -3880,6 +3889,7 @@ export enum ValidationRules {
   HasRequiredRelation = 'has_required_relation',
   MaxDateToday = 'max_date_today',
   NoXss = 'no_xss',
+  NoDefaults = 'no_defaults',
   Numeric = 'numeric',
   Regex = 'regex',
   Required = 'required',

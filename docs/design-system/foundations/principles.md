@@ -34,7 +34,8 @@ reversible executes immediately and offers undo:
 
 ## Choosing never saves
 Picking in a select, date picker or autocomplete only changes the draft.
-Saving is always an explicit Bewaar, so every editor behaves the same way.
+An inline field saves when you leave it (click elsewhere, Tab out) or press
+Enter; a form saves with Bewaar. Every editor of a kind behaves the same way.
 
 ## Empty is "Geen waarde"
 An empty value reads "Geen waarde" / "No value" at `--opacity-empty`. Never

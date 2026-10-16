@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   setEntityUuid: vi.fn(),
   setEntityType: vi.fn(),
   isAuthenticated: { value: true },
+  pageEditTypes: [] as string[],
   getEntityPageRoute: vi.fn(() => ({
     name: "SingleEntity",
     params: { id: "W-1", type: "work_word" },
@@ -31,6 +32,13 @@ vi.mock("@/components/base/BaseButtonNew.vue", () => ({
     emits: ["click"],
     template: `<button @click="$emit('click')">{{ label }}</button>`,
   },
+}));
+
+vi.mock("@/composables/useEntityPageConfig", () => ({
+  useEntityPageConfig: () => ({
+    hasEditMetadataButtonForType: (type: string) =>
+      mocks.pageEditTypes.includes(type),
+  }),
 }));
 
 vi.mock("@/composables/useEdit", () => ({
@@ -88,6 +96,7 @@ const getWrapper = (entityOverride: any = entity) =>
 describe("MultiEntityColumn", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.pageEditTypes = ["work_word"];
     mocks.editHelper = reactive({
       isEdit: false,
       editMode: "edit",
@@ -130,6 +139,15 @@ describe("MultiEntityColumn", () => {
     await flushPromises();
     expect(mocks.editHelper.setPermittedEditMode).not.toHaveBeenCalled();
     expect(mocks.editHelper.hideEditButton).toHaveBeenCalled();
+  });
+
+  // Fields are edited in place; the column's page-wide edit mode is opt-in
+  // per entity type, like the detail page's.
+  it("offers no page-wide edit mode for an entity type that doesn't turn it on", async () => {
+    mocks.pageEditTypes = [];
+    const wrapper = getWrapper();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain("metadata.labels.edit-metadata");
   });
 
   it("enters edit mode and focuses the entity-single singleton on its own entity", async () => {

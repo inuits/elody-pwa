@@ -19,10 +19,14 @@ the surrounding field row. If there is no visible label, give the input an
 |---|---|
 | `--text-input` | value size |
 | `--input-padding` | field padding |
+| `--control-height` | minimum height, shared with the dropdown, date picker and autocomplete |
+| `--multiselect-spacer-height` | the autocomplete's empty input: the control height inside its border |
+| `--control-height-compact`, `--input-padding-compact` | `size="compact"`: an input inside a chip, such as a relation's page number; text at the label size |
 | `--radius-input` | corners |
 | `--color-border-default` | resting border (bordered variant) |
 | `--color-input-border-hover` | hover border, one step darker |
 | `--textarea-min-height` | textarea never shorter than three rows |
+| `--textarea-max-height` | an inline textarea grows with its content up to six rows, then scrolls |
 | `--color-text-placeholder` | placeholder |
 | `--color-danger` | error border and message |
 | `--color-surface-muted`, `--color-text-disabled` | disabled |
@@ -46,7 +50,8 @@ the surrounding field row. If there is no visible label, give the input an
 | disabled | muted surface, disabled ink | `disabled` |
 | read-only | no border, no fill, plain value | `readonly` |
 
-Number inputs are right-aligned and never show spinner buttons. Textareas
+Number inputs are right-aligned and never show spinner buttons. The date
+picker's input follows the same border, radius, size, height and focus ring. Textareas
 resize vertically only and are at least three rows high.
 
 ## Behaviour and keyboard

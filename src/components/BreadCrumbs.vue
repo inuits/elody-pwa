@@ -233,8 +233,13 @@ const navigateToEntity = (route: any) => {
       },
     });
   } else if (route.overviewPage) {
-    router.push({ name: route.overviewPage });
-    clearBreadcrumbPathAndAddOverviewPage(route.overviewPage);
+    // A leave prompt can cancel the navigation: keep the path until it lands.
+    router.push({ name: route.overviewPage }).then((failure) => {
+      if (!failure)
+        clearBreadcrumbPathAndAddOverviewPage(
+          route.title ?? route.overviewPage,
+        );
+    });
   } else router.push({ name: "Home" });
 };
 </script>

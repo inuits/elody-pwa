@@ -70,30 +70,37 @@ const enableTimePicker = computed<boolean>(() => {
 </script>
 
 <style>
+/* Design-system input (components/input.md): same border, radius, size,
+   height and focus ring as every other edit control. */
 .dp__theme_light {
-  --dp-primary-color: var(--color-accent-accent);
+  --dp-primary-color: var(--color-commit);
   --dp-text-color: var(--color-text-body);
+  --dp-border-color: var(--color-border-default);
+  --dp-border-color-hover: var(--color-input-border-hover);
+  --dp-font-family: var(--font-sans);
 }
 
 .base-date-picker .dp__input {
-  border: 1px solid color-mix(in srgb, var(--color-text-body) 60%, transparent);
-  border-radius: 0.5rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-input);
+  font-size: var(--text-input);
+  min-height: var(--control-height);
+  padding-block: 0;
+  color: var(--color-text-body);
+}
+
+.base-date-picker .dp__input:hover {
+  border-color: var(--color-input-border-hover);
 }
 
 .base-date-picker .dp__input:focus,
-.base-date-picker .dp__input:hover,
 .base-date-picker .dp__input_focus {
-  border-color: color-mix(
-    in srgb,
-    var(--color-text-body) 60%,
-    transparent
-  ) !important;
-  outline: none !important;
-  box-shadow: none !important;
+  border-color: var(--color-border-default);
+  box-shadow: none;
 }
 
 .base-date-picker .dp__icon {
-  color: var(--color-black);
+  color: var(--color-text-secondary);
 }
 
 .base-modal--opened:has(.base-date-picker) {

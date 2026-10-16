@@ -82,3 +82,73 @@ describe("MetadataTitle - info panel trigger", () => {
     expect(wrapper.findComponent({ name: "BaseTooltip" }).exists()).toBe(true);
   });
 });
+
+describe("MetadataTitle - field-row label", () => {
+  const title = (props: Record<string, unknown> = {}) =>
+    shallowMount(MetadataTitle, {
+      props: { metadata: { label: "metadata.labels.title" }, ...props } as any,
+      global: { stubs: { unicon: uniconStub } },
+    });
+
+  it("renders the label at the label size, bold, in field-label ink", () => {
+    expect(title().find('[data-cy="metadata-label"]').classes()).toEqual(
+      expect.arrayContaining(["text-label", "font-bold", "text-text-field-label"]),
+    );
+  });
+
+  it("marks a required field with an asterisk in danger ink", () => {
+    const marker = title({ isFieldRequired: true }).find('[data-cy="required-marker"]');
+    expect(marker.text()).toBe("*");
+    expect(marker.classes()).toContain("text-danger");
+  });
+
+  it("shows no required marker for an optional field", () => {
+    expect(title().find('[data-cy="required-marker"]').exists()).toBe(false);
+  });
+
+  it("marks one-of-required fields with a ring marker named by the group rule", () => {
+    const marker = title({ isOneOfRequired: true }).find(
+      '[data-cy="one-of-required-marker"]',
+    );
+    expect(marker.text()).toBe("◦");
+    expect(marker.attributes("aria-label")).toBe("metadata.labels.one-of-required");
+  });
+});
+
+describe("MetadataTitle - help icons", () => {
+  // Help icons stay close to the label size, a step above the 12px pencil.
+  const LABEL_ICON_HEIGHT = "14";
+
+  it("sizes the info-panel icon to the label line", () => {
+    const wrapper = getWrapper({
+      label: "metadata.labels.reading",
+      infoPanel: { title: "t", content: "<p>c</p>" },
+    });
+    expect(
+      wrapper
+        .find('[data-testid="info-panel-trigger"]')
+        .findComponent(uniconStub)
+        .props("height"),
+    ).toBe(LABEL_ICON_HEIGHT);
+  });
+
+  it("sizes the tooltip icon to the label line", () => {
+    const wrapper = shallowMount(MetadataTitle, {
+      props: {
+        metadata: { label: "metadata.labels.reading", tooltip: "hint" },
+      } as any,
+      global: {
+        stubs: {
+          unicon: uniconStub,
+          BaseTooltip: {
+            template:
+              "<div><slot name='activator' :on='{}' described-by='x' /></div>",
+          },
+        },
+      },
+    });
+    expect(wrapper.findComponent(uniconStub).props("height")).toBe(
+      LABEL_ICON_HEIGHT,
+    );
+  });
+});

@@ -23,7 +23,6 @@
     </button>
     <BaseCopyToClipboard
       v-if="copyToClipboard && isRevealed && !isUnavailable"
-      class="w-6 h-6"
       :value="displayValue"
       @click.stop.prevent
     />

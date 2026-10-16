@@ -16,9 +16,8 @@
     >
       <input
         :id="checkboxId"
-        class="rounded border-[length:var(--border-width-control)] focus:ring-0"
         :class="[
-          'text-commit accent-commit border-neutral-60 checked:border-commit',
+          CHECKBOX_BOX_CLASSES,
           {
             'cursor-pointer': !disabled,
             'disabled:text-text-light disabled:accent-neutral-white disabled:border-border-subtle':
@@ -57,6 +56,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { bulkSelectAllSizeLimit } from "@/main";
 import { computed, onMounted, useId, watch } from "vue";
+import { CHECKBOX_BOX_CLASSES } from "@/components/base/checkboxStyles";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import { TypeModals } from "@/generated-types/queries";

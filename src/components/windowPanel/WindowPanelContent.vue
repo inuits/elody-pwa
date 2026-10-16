@@ -3,6 +3,7 @@
     :class="[
       {
         'flex items-end':
+          isEdit &&
           repeatablePanelConfig?.repeatableFieldsHelper
             .repetitionDeleteIsAvailable.value,
       },
@@ -32,6 +33,10 @@
         },
       ]"
     >
+      <!-- Existing code, kept as is: v-show has no effect on a <template>,
+           so hideEmptyFields doesn't hide anything here yet; the panel
+           writes the localized value back into its own field list. -->
+      <!-- eslint-disable vue/no-useless-template-attributes, vue/valid-v-show, vue/no-mutating-props -->
       <template
         v-for="(metadata, index) in metadatafields"
         v-show="itemMustBeShown(metadata.value)"
@@ -44,6 +49,7 @@
             (updatedMetadata) => (metadatafields[index] = updatedMetadata)
           "
         >
+          <!-- eslint-enable vue/no-useless-template-attributes, vue/valid-v-show, vue/no-mutating-props -->
           <template #default="{ localizedMetadata }">
             <metadata-wrapper
               v-if="
@@ -70,6 +76,8 @@
               :input-field="metadata.inputField"
               :entity-uuid="formId"
               :permitted="metadata.permitted"
+              :non-editable-field="metadata.nonEditableField ?? false"
+              :read-only="metadata.readOnly ?? false"
             />
 
             <entity-element-list
@@ -80,7 +88,6 @@
               :entity-list="metadata.entityList ?? []"
               :identifiers="identifiers"
               :disable-library-bar="metadata.disableLibraryBar"
-              :enable-navigation="true"
               headerStyle="none"
               v-bind="metadata"
             />
@@ -113,7 +120,7 @@
 import { inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
-  BaseLibraryModes,
+  PanelType,
   Unit,
   type PanelRelation,
   type MetadataField,
@@ -132,7 +139,8 @@ const emit = defineEmits<{
   (event: "decreaseRepeatedFieldAmount"): void;
 }>();
 
-const props = defineProps<{
+defineProps<{
+  panelType: PanelType;
   relationArray: PanelRelation[];
   metadatafields: MetadataField[];
   canBeMultipleColumns: boolean;

@@ -1,6 +1,7 @@
 import { computed, inject } from "vue";
 import type { Ref } from "vue";
 import {
+  ActionOnClick,
   type Buttons,
   type Entity,
   Entitytyping,
@@ -17,7 +18,7 @@ import type { OrderItem } from "@/composables/useOrderListItems";
 export interface EntityListHelpersProps {
   idsOfNonSelectableEntities?: string[];
   parentEntityIdentifiers?: string[];
-  enableNavigation?: boolean;
+  actionOnClick?: ActionOnClick;
   showCurrentEntityFlow?: boolean;
   allowedActionsOnRelations?: RelationActions[];
 }
@@ -39,12 +40,20 @@ export const useEntityListHelpers = (
       : "preview-without-current-entity-flow",
   );
 
+  const actionOnClick = computed(
+    () => props.actionOnClick ?? ActionOnClick.Navigate,
+  );
+
   const getLinkSettings = (
     entity: Entity,
     listItemRouteName: string = "",
     force = false,
   ) => {
-    if ((!props.enableNavigation || previewComponentEnabled.value) && !force) {
+    if (
+      (actionOnClick.value !== ActionOnClick.Navigate ||
+        previewComponentEnabled.value) &&
+      !force
+    ) {
       if (
         (props.parentEntityIdentifiers?.length ?? 0) > 0 &&
         entity.type.toLowerCase() === Entitytyping.Mediafile
@@ -64,9 +73,11 @@ export const useEntityListHelpers = (
 
   const entityWrapperHandler = (entity: Entity) => {
     const entityId = entity.id || entity.uuid;
-    if (!props.enableNavigation) togglePreviewForListItem?.(entityId);
-    else if (previewComponentEnabled.value) openPreviewComponent(entityId);
-    if (isEntityDisabled(entity) || !props.enableNavigation) return;
+    if (actionOnClick.value === ActionOnClick.OpenPreview)
+      togglePreviewForListItem?.(entityId);
+    if (actionOnClick.value !== ActionOnClick.Navigate) return;
+    if (previewComponentEnabled.value) openPreviewComponent(entityId);
+    if (isEntityDisabled(entity)) return;
     updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
   };
 

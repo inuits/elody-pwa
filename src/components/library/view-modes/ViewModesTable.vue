@@ -65,7 +65,7 @@
             class="list-item-table"
             @click="
               () => {
-                if (openEntityInDetailModal)
+                if (actionOnClick === ActionOnClick.OpenInModal)
                   openEntityInModal(entity.id, entity.type);
                 else entityWrapperHandler(entity.originalEntity);
               }
@@ -155,6 +155,7 @@
 <script lang="ts" setup>
 import type { Context } from "@/composables/useBulkOperations";
 import {
+  ActionOnClick,
   BaseLibraryModes,
   type Entity,
   Entitytyping,
@@ -190,8 +191,7 @@ const props = withDefaults(
     entitiesLoading: boolean;
     bulkOperationsContext: Context | undefined;
     listItemRouteName: string;
-    openEntityInDetailModal?: boolean;
-    enableNavigation?: boolean;
+    actionOnClick?: ActionOnClick;
     parentEntityIdentifiers?: string[];
     parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
@@ -209,8 +209,7 @@ const props = withDefaults(
     groupsLoading?: boolean;
   }>(),
   {
-    openEntityInDetailModal: false,
-    enableNavigation: true,
+    actionOnClick: ActionOnClick.Navigate,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
     enableSelection: true,

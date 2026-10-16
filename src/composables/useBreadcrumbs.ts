@@ -348,7 +348,10 @@ const useBreadcrumbs = (config: any) => {
     return entities;
   };
 
-  useRouter()?.afterEach((to) => {
+  // afterEach also runs for a cancelled navigation (a leave prompt): the page
+  // stays, and so do its breadcrumbs.
+  useRouter()?.afterEach((to, _from, failure) => {
+    if (failure) return;
     const isDetailPage = !!to.params["id"];
     if (isDetailPage || !to.meta.breadcrumbs) return;
     const breadcrumbs = to.meta.breadcrumbs as BreadcrumbRoute[];

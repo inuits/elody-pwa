@@ -51,27 +51,34 @@
           { 'pr-2': !isEdit },
           {
             'hover:!bg-background-normal hover:!text-accent-accent !cursor-pointer':
-              !isEdit &&
-              relationType &&
-              props.autocompleteStyle !== 'readOnlyAsPlainText',
+              tagIsLink,
           },
         ]"
+        :data-tag-link="tagIsLink || undefined"
         @click.stop="() => emit('handleTagClick', option)"
       >
         {{ stripHighlightTags(option.label) }}
         <span v-if="option.secondaryLabel" class="opacity-70">
           · {{ option.secondaryLabel }}
         </span>
+        <!-- data-tag-input: the chip's value box (e.g. a page number). At
+             rest the disabled input lets clicks through to this box, so a
+             field row can open its editor from it. -->
         <div
           v-if="displayInputForTag"
+          data-tag-input
           @click.stop
           @mousedown.stop
           @keydown.stop
         >
           <BaseInputTextNumberDatetime
             v-if="!isPlainText"
-            class="h-[26px] ml-2 py-[2px]"
-            :style="{ width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch` }"
+            class="ml-2"
+            :class="{ 'pointer-events-none': props.disabled }"
+            size="compact"
+            :style="{
+              width: `${Math.max(Math.ceil(getTagInputValue(option.value).length * 1.2) + 4, 6)}ch`,
+            }"
             :model-value="getTagInputValue(option.value)"
             @update:model-value="
               setTagInputValue(option.value, $event as string)
@@ -113,7 +120,7 @@ import SanitizedHtml from "@/components/SanitizedHtml.vue";
 import { stripHighlightTags } from "@/helpers";
 import useEntitySingle from "@/composables/useEntitySingle";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, ref, unref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
@@ -132,6 +139,8 @@ const props = withDefaults(
     options: DropdownOption[];
     autocompleteStyle: AutocompleteStyle;
     relationType?: string;
+    // The client config links these chips to their entity pages.
+    tagsAreLinks?: boolean;
     selectType?: "multi" | "single";
     placeholder?: string;
     disabled?: boolean;
@@ -171,13 +180,22 @@ const emit = defineEmits<{
 
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
+const tagIsLink = computed<boolean>(
+  () =>
+    !unref(isEdit) &&
+    props.tagsAreLinks &&
+    props.autocompleteStyle !== "readOnlyAsPlainText",
+);
 const { t, te } = useI18n();
 const removeChipLabel = computed<string>(() =>
   te("autocomplete.remove-chip") ? t("autocomplete.remove-chip") : "Remove",
 );
 const searchValue = ref<string>();
 const multiselectRef = ref();
-const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKeyboardContext", null);
+const virtualKeyboardContext = inject<VirtualKeyboardContext | null>(
+  "virtualKeyboardContext",
+  null,
+);
 
 watch(
   () => virtualKeyboardContext?.isOpen.value,
@@ -288,6 +306,8 @@ const classes = computed(() => {
       ? "multiselect-tag !bg-chip-relation-bg !text-chip-relation-text !rounded-chip !font-bold !opacity-100"
       : "multiselect-tag !bg-chip-value-bg !text-chip-value-text !rounded-chip !font-bold !opacity-100",
     dropdown: "multiselect-dropdown -bottom-px",
+    // Edit controls share one height (--control-height, minus the border).
+    spacer: "multiselect-spacer !h-(--multiselect-spacer-height) !py-0",
     ...(isEmpty ? { tags: "multiselect-tags multiselect-tags-margin" } : {}),
   };
 
@@ -297,17 +317,22 @@ const classes = computed(() => {
   }
 
   if (props.autocompleteStyle === "readOnly") {
-    result["container"] = "multiselect border-none !bg-surface";
+    // Transparent so the field row's hover wash shows through.
+    result["container"] = "multiselect border-none !bg-transparent";
     result["tags"] =
-      "grow shrink flex flex-wrap items-center mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+      "grow shrink flex flex-wrap items-center gap-1 min-w-0 rtl:pl-0 rtl:pr-2";
+    result["tag"] = `${result["tag"]} !m-0`;
+    // A read-only value is only as tall as its chips, like a text value.
+    result["spacer"] = "hidden";
   }
 
   if (props.autocompleteStyle === "readOnlyAsPlainText") {
     result["container"] = "multiselect border-none !bg-transparent";
     result["tag"] =
-      "multiselect-tag !bg-transparent !font-normal !h-[25px] !p-0 !rounded-none !text-text-body !opacity-100 hover:!bg-transparent hover:!text-text-body";
-    result["tags"] = "flex mt-1 min-w-0 rtl:pl-0 rtl:pr-2";
+      "multiselect-tag !bg-transparent !font-normal !text-value !h-(--chip-plain-text-height) !p-0 !rounded-none !text-text-body !opacity-100 hover:!bg-transparent hover:!text-text-body";
+    result["tags"] = "flex min-w-0 rtl:pl-0 rtl:pr-2";
     result["tagsSearchWrapper"] = "!hidden";
+    result["spacer"] = "hidden";
   }
 
   return result;
@@ -338,7 +363,11 @@ const handleTagCreate = async (option: any) => {
 
 const handleSearchChange = (value: string) => {
   searchValue.value = value;
-  if (!props.disableVirtualKeyboardContext && virtualKeyboardContext && virtualKeyboardContext.searchQuery.value !== value) {
+  if (
+    !props.disableVirtualKeyboardContext &&
+    virtualKeyboardContext &&
+    virtualKeyboardContext.searchQuery.value !== value
+  ) {
     // Should refactor keyboard to support multiple fields in 1 metadatawrapper parent
     virtualKeyboardContext.searchQuery.value = value;
   }

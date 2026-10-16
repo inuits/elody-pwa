@@ -69,7 +69,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useQuery } from "@vue/apollo-composable";
-import { useRoute, onBeforeRouteUpdate, useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
@@ -209,8 +209,10 @@ router.beforeEach(() => {
   if (useEditHelper.value.isEdit) useEditHelper.value.disableEdit();
 });
 
-onBeforeRouteUpdate(async (to: any) => {
-  queryVariables.id = to.params.id;
+// Another record loads only once the navigation is confirmed: a leave prompt
+// further down (unsaved changes) can still cancel it.
+watch(id, (newId) => {
+  queryVariables.id = newId;
   queryVariables.type = entityType.value;
   columnList.value = "no-values";
   useEditHelper.value.disableEdit();

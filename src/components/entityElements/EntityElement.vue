@@ -15,12 +15,15 @@
       ]"
     >
       <entity-element-list
-        v-if="element.__typename === 'EntityListElement' && isElementVisible(element)"
+        v-if="
+          element.__typename === 'EntityListElement' &&
+          isElementVisible(element)
+        "
         :label="element.label as string"
         :type="element.type"
         :isCollapsed="element.isCollapsed"
         :enable-advanced-filters="element.enableAdvancedFilters"
-        :enable-navigation="element.enableNavigation"
+        :action-on-click="element.actionOnClick"
         :types="element.entityTypes as string[]"
         :custom-query="element.customQuery"
         :custom-query-relation-type="element.customQueryRelationType"
@@ -221,10 +224,15 @@ const elements = computed<Elements[]>(() => {
 });
 
 const isElementVisible = (element: Elements): boolean => {
-  if (element.__typename !== 'EntityListElement') return true;
-  const condition = (element as EntityListElement).displayCondition as DisplayCondition | undefined;
+  if (element.__typename !== "EntityListElement") return true;
+  const condition = (element as EntityListElement).displayCondition as
+    | DisplayCondition
+    | undefined;
   if (!condition?.key) return true;
-  if (condition.value) return String(props.entityMetadata?.[condition.key]) === String(condition.value)
+  if (condition.value)
+    return (
+      String(props.entityMetadata?.[condition.key]) === String(condition.value)
+    );
   return props.entityRelations?.[condition.key] !== undefined;
 };
 

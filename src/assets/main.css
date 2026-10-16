@@ -212,6 +212,9 @@
   --color-text-on-inverted: #FFFFFF;
   --color-text-link: var(--color-text-light);
   --color-text-link-hover: var(--color-accent);
+  /* Menu items (left navigation): coloured like links, never underlined */
+  --color-nav-item: var(--color-text-link);
+  --color-nav-item-hover: var(--color-text-link-hover);
   --color-accent-on-inverted: #7DE3EA;
 
   /* Borders */
@@ -353,8 +356,28 @@
   /* Input (components/input.md) */
   --text-input: var(--text-value);
   --input-padding: 5px 8px;
+  /* One height for every single-line edit control: input, dropdown, date
+     picker, autocomplete */
+  --control-height: 32px;
+  /* Compact input inside a chip (a relation's page number) */
+  --control-height-compact: 20px;
+  /* The autocomplete's empty input: the control height inside its border */
+  --multiselect-spacer-height: calc(var(--control-height) - 2px);
+  --input-padding-compact: 0 6px;
   --color-input-border-hover: var(--color-neutral-50); /* one step darker */
   --textarea-min-height: calc(3lh + 12px); /* 3 rows + padding + border */
+  /* An inline textarea grows with its content up to 6 rows, then scrolls */
+  --textarea-max-height: calc(6lh + 12px);
+
+  /* Field row (components/field-row.md): the hover wash extends this far
+     beyond the value text, which stays aligned with the label */
+  --field-value-pad-x: 6px;
+  /* ...and this far above and below it, without moving it */
+  --field-value-pad-y: 3px;
+  /* Every value row is at least this tall, text or chips */
+  --field-value-min-height: 26px;
+  /* Space under the label, so the wash and focus ring above the value clear it */
+  --field-label-gap: 6px;
 
   /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
      in BaseTooltip.vue */
@@ -374,6 +397,8 @@
   /* Chip and badge (components/chip-and-badge.md) */
   --text-chip: var(--text-label);
   --chip-padding: 2px 8px;
+  /* A relation shown as plain text instead of a chip */
+  --chip-plain-text-height: 25px;
   --text-chip-lg: 1.125rem;
   --chip-padding-lg: 4px 12px;
   --text-badge: var(--text-micro);
@@ -456,11 +481,14 @@ input[type="number"]::-webkit-inner-spin-button {
     transform: scale(var(--scale-press));
   }
 
+  /* Form controls repeat the pseudo-class: @tailwindcss/forms resets the
+     outline on [type='text']:focus (0,2,0), which outranks input:focus-visible. */
   button:focus-visible,
   [role="button"]:focus-visible,
   a:focus-visible,
-  input:focus-visible,
-  select:focus-visible {
+  input:focus-visible:focus-visible,
+  textarea:focus-visible:focus-visible,
+  select:focus-visible:focus-visible {
     outline: var(--focus-ring-width) solid var(--color-focus-ring);
     outline-offset: var(--focus-ring-offset);
   }
@@ -572,6 +600,9 @@ body {
   --color-text-accent-strong: var(--color-accent-dark);
   --color-text-link: var(--color-text-light);
   --color-text-link-hover: var(--color-accent);
+  /* Menu items (left navigation): coloured like links, never underlined */
+  --color-nav-item: var(--color-text-link);
+  --color-nav-item-hover: var(--color-text-link-hover);
   --color-border-panel: var(--color-accent-light-strong);
   --color-commit: var(--color-accent-accent);
   --color-focus-ring: var(--color-accent-accent);

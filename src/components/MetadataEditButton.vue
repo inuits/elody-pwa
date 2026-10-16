@@ -2,9 +2,10 @@
   <div
     data-cy="edit-toggle"
     v-if="
-      editModeHelper.editMode === 'view' ||
+      pageEditModeEnabled &&
+      (editModeHelper.editMode === 'view' ||
       editModeHelper.editMode === 'edit' ||
-      editModeHelper.editMode === 'edit-delete'
+        editModeHelper.editMode === 'edit-delete')
     "
     class="ml-auto px-2"
   >
@@ -42,6 +43,7 @@ import BaseButtonNew, {
 import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import { DamsIcons } from "@/generated-types/queries";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useRoute } from "vue-router";
 import type { useEditState } from "@/composables/useEditState";
 
@@ -65,6 +67,12 @@ const editModeHelper = computed<ReturnType<typeof useEditState>>(() =>
   useEditMode(entityId.value),
 );
 const { isSingle } = useRouteHelpers();
+// Fields are edited in place; the page-wide edit mode is opt-in per entity
+// type (entityPageConfig[type].hasEditMetadataButton).
+const { hasEditMetadataButton } = useEntityPageConfig();
+const pageEditModeEnabled = computed<boolean>(
+  () => hasEditMetadataButton.value === true,
+);
 const { t } = useI18n();
 
 watch(

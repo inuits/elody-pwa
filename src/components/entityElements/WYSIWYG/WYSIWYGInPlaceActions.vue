@@ -1,0 +1,55 @@
+<template>
+  <!-- In-place editing actions on a WYSIWYG field's label line
+       (docs/design-system/components/wysiwyg-field.md): a pencil at rest,
+       Annuleer while editing (leaving the field saves it). They sit above the
+       content so they stay in view however long the text is. -->
+  <div v-if="editing" class="flex shrink-0 items-center gap-1.5">
+    <SpinnerLoader v-if="saving" data-cy="wysiwyg-saving" :dimensions="4" />
+    <BaseButtonNew
+      :label="cancelLabel"
+      button-style="ghost"
+      button-size="sm"
+      force-show-label
+      :disabled="saving"
+      @click="emit('cancel')"
+    />
+  </div>
+  <!-- The same pencil as a field row's (field-row.md): subtle ink, 12px. -->
+  <button
+    v-else-if="canEdit"
+    type="button"
+    data-cy="wysiwyg-edit-button"
+    class="flex shrink-0 items-center p-1 rounded-input cursor-pointer text-text-subtle hover:bg-surface-editable-hover"
+    :aria-label="`${label}, ${editLabel}`"
+    @click="emit('edit')"
+  >
+    <unicon :name="Unicons.EditAlt.name" height="12" />
+  </button>
+</template>
+
+<script lang="ts" setup>
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { Unicons } from "@/types";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+
+defineProps<{
+  label: string;
+  canEdit: boolean;
+  editing: boolean;
+  saving: boolean;
+}>();
+
+const emit = defineEmits<{
+  (event: "edit"): void;
+  (event: "cancel"): void;
+}>();
+
+const { t, te } = useI18n();
+const translated = (key: string, fallback: string): string =>
+  te(key) ? t(key) : fallback;
+
+const cancelLabel = computed(() => translated("inline-edit.cancel", "Cancel"));
+const editLabel = computed(() => translated("inline-edit.edit-field", "edit"));
+</script>

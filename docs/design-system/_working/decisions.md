@@ -163,6 +163,30 @@ Later subtasks:
 | DS 6 | backend support | filter option counts (active-count chip), destructive-action flag |
 | DS 7 | Storybook + docs | stories, publishing these docs |
 
+## DS 2: per-field editing
+
+| # | Item | Handoff | Catalogue | Decision |
+|---|---|---|---|---|
+| E1 | Pencil on editable values | appears on hover | always visible, 12px, subtle | **catalogue** (user, 2026-10-07): editability must not depend on hover |
+| E2 | Dashed underline | under the value | under the value text only, square ends; none for pills | **catalogue** (user, 2026-10-07) |
+| E3 | Inline editor actions | text buttons Bewaar + Annuleer | 26px icon buttons ✓ / ✕ | **handoff** (user, 2026-10-07): text buttons, centred vertically on the input. Bewaar dropped since, see E4 |
+| E4 | Commit model | pick-then-Bewaar, "don't auto-save on blur" (also CHANGES.md round 2) | — | **deviation** (user, 2026-10-14): no Bewaar per field; leaving the field (click outside, Tab out) saves a changed value, Enter saves, Annuleer/Esc discard. Also for WYSIWYG |
+| E5 | Opening a second field while one is changed | first stays open, nothing saved | — | **deviation** (user, 2026-10-14): the changed field saves first; on failure it stays open with its error and the second doesn't open |
+| E6 | Leaving the page with a changed field | (not specified) | — | **done** (2026-10-15): saves without asking, stays when the save fails; the save/discard/stay prompt is only for the page-wide edit mode |
+| E7 | Removing a repeatable row | executes at once, undo toast, no confirm | — | **interim** (user, 2026-10-12): a saved row asks for confirmation until undo exists; revisit with `useUndo` |
+| E8 | Reordering repeatable rows | drag handle + ↑/↓ | — | **open**: not built (user, 2026-10-12) |
+| E9 | Table input fields | a repeatable-row variant, each row its own scope | — | **deviation**: a relation table edits and saves as one scope (diff-only save) |
+| E10 | Clicking a value | never navigates | — | **deviation**: a relation chip links to its entity when the client's link formatter names the relation type |
+| E11 | Page-level "Bewerk" toggle | removed | — | **deviation** (user, 2026-10-13): opt-in per entity type (`hasEditMetadataButton`), hidden by default; removing the whole-form path is still open |
+| E12 | Empty value | "Geen waarde" at 45%, no underline | — | **done**: no underline under an empty value (`underlineValue` in MetadataWrapper) |
+| E14 | Undo (`useUndo`: inline chip after a save, toast after a removal) | required | toast after every save | **deferred** (user, 2026-10-15): not now. Annuleer/Esc only discard before a save; after leaving a field there is no one-click way back. E7 (confirm on row removal) stays until undo lands |
+| E13 | Feature flag for the new editing (MIGRATION_PLAN risk note) | behind a flag for one release if cataloguers are mid-season | — | **open**: no flag; decide before rolling out to vlacc / VLIZ |
+| E15 | Coordinates value | text pair + "Toon op kaart" link | — | **skipped** (user, 2026-10-15): coordinates show as text only |
+| E16 | Image value | 48px thumb, click opens the viewer | — | **deferred** (user, 2026-10-15): no image formatter exists and no field needs it yet |
+| E17 | Copy affordance | on every value | — | **deviation** (user, 2026-10-15): only on fields configured with `copyToClipboard`, as before, and always visible like the pencil instead of on hover |
+| E18 | Group form card (one gesture, one Bewaar/Annuleer, `role="group"`) | required | — | **deferred** (user, 2026-10-15): no config marks a field group yet and no client has one; build it with the first real group (a panel flag in baseGraphql) |
+| E19 | Inline editors for file upload and linked-entity fields | required | — | **not applicable** (user, 2026-10-15): upload fields are not panel metadata (they live in upload forms), and values on a list row's entity or relation already edit in place through `ListItemInlineField` |
+
 ## 3. Filters (DS 4)
 
 Already discussed:

@@ -1,5 +1,8 @@
 <template>
-  <div :class="[{ 'pl-10 py-0': parentIsListItem }, ' p-2 w-full']">
+  <div
+    ref="panelRef"
+    :class="[{ 'pl-10 py-0': parentIsListItem }, ' p-2 w-full']"
+  >
     <div
       v-if="panel.panelHeaderContent?.label"
       @click="toggleIsCollapsed()"
@@ -7,6 +10,20 @@
     >
       <div class="flex gap-4 w-2/3 items-center">
         <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
+        <!-- The row itself announces the save; this only shows it -->
+        <Transition
+          leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
+          leave-to-class="opacity-0"
+        >
+          <span
+            v-if="panelSaved.visible.value"
+            data-cy="panel-saved-check"
+            aria-hidden="true"
+            class="flex text-success"
+          >
+            <unicon :name="Unicons.Check.name" height="14" />
+          </span>
+        </Transition>
         <div
           v-if="panel.panelHeaderContent.libraryData"
           class="grid transition-[grid-template-columns,opacity] duration-300 ease-out"
@@ -24,14 +41,23 @@
             {{ libraryDataLabel }}
           </span>
         </div>
-        <MetadataWrapper
-          class="w-full max-w-[50%]"
+        <!-- The status is edited in place; its clicks (the value, the
+             inline editor) stay with it instead of toggling the panel. It
+             is only as wide as its value, so the rest of the header still
+             toggles, and gets room again while its editor is open. -->
+        <div
           v-if="panel.panelHeaderContent.panelStatus"
-          :metadata="getStatusMetadata()"
-          :form-id="formId"
-          :isEdit="isEdit"
-          :show-errors="editState.showErrors"
-        />
+          data-cy="panel-header-status"
+          class="w-fit max-w-[50%] min-w-0 has-[[data-cy=inline-field-editor]]:w-full"
+          @click.stop
+        >
+          <MetadataWrapper
+            :metadata="getStatusMetadata()"
+            :form-id="formId"
+            :isEdit="isEdit"
+            :show-errors="editState.showErrors"
+          />
+        </div>
       </div>
       <div class="flex justify-end gap-4">
         <div v-if="repeatablePanel && isEdit">
@@ -49,6 +75,18 @@
             "
           ></base-button-new>
         </div>
+        <!-- Adding a row only starts it (a pill): it is saved with its first
+             saved field. Several rows may be unsaved at once. -->
+        <button
+          v-if="canEditRows"
+          type="button"
+          data-cy="repeatable-add-row"
+          class="inline-flex items-center gap-(--button-gap) rounded-pill p-(--button-sm-padding) text-button-sm font-bold text-text-light hover:bg-accent-wash"
+          @click.stop="addRow"
+        >
+          <unicon :name="Unicons.Plus.name" height="14" aria-hidden="true" />
+          {{ rowMessages.add() }}
+        </button>
         <unicon
           :name="
             !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
@@ -61,12 +99,53 @@
       class="grid transition-[grid-template-rows] duration-200 ease-out"
       :class="isCollapsed ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'"
     >
-      <div class="min-h-0 overflow-hidden">
+      <div
+        class="min-h-0 overflow-hidden"
+        :role="repeatablePanel ? 'list' : undefined"
+      >
         <div
           v-for="idx in repeatableFieldsHelper.repeatAmount.value"
           :key="idx + '-window-panel-content'"
+          :role="repeatablePanel ? 'listitem' : undefined"
+          :class="
+            repeatablePanel &&
+            'rounded-input even:bg-surface-repeat-row hover:bg-surface-row-hover'
+          "
         >
+          <!-- A removable row is headed by its number and the remove button,
+               between two rules, so the fields keep the row's full width. -->
+          <div
+            v-if="canEditRows && repeatableFieldsHelper.canRemoveRow(idx - 1)"
+            data-cy="repeatable-row-header"
+            class="flex items-center gap-2 px-2 pt-2"
+          >
+            <span
+              aria-hidden="true"
+              class="flex-1 border-t border-border-default"
+            />
+            <span
+              data-cy="repeatable-row-label"
+              class="shrink-0 whitespace-nowrap text-label font-bold text-text-secondary"
+            >
+              {{ rowLabel(idx) }}
+            </span>
+            <base-button-new
+              data-cy="repeatable-remove-row"
+              class="!w-max shrink-0"
+              label=""
+              :aria-label="`${rowMessages.remove()}: ${rowName(idx)}`"
+              :icon="DamsIcons.Trash"
+              button-size="sm"
+              button-style="ghost"
+              @click="removeRow(idx - 1)"
+            />
+            <span
+              aria-hidden="true"
+              class="flex-1 border-t border-border-default"
+            />
+          </div>
           <WindowPanelContent
+            :data-repeatable-row="idx - 1"
             :relation-array="relationArray"
             :metadatafields="getMetadataFields(panel, formId, idx - 1)"
             :can-be-multiple-columns="canBeMultipleColumns"
@@ -89,7 +168,8 @@
             class="my-4 border-neutral-30"
             v-if="
               !repeatableFieldsHelper.fields.value[idx - 1]?.isLast &&
-              repeatablePanel
+              repeatablePanel &&
+              !canEditRows
             "
           />
         </div>
@@ -99,18 +179,28 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from "vue";
+import { computed, inject, nextTick, ref, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
 import { getMetadataFields } from "@/helpers";
+import {
+  canUpdateEntity,
+  useInPlaceScope,
+} from "@/composables/useInPlaceScope";
+import { buildMetadataInput, saveScope } from "@/composables/useScopedSave";
+import { useConfirmModal } from "@/composables/useConfirmModal";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useRepeatableFields } from "@/composables/useRepeatableFields";
 import { useEditMode } from "@/composables/useEdit";
+import { provideSavedFlash, useSavedFlash } from "@/composables/useSavedFlash";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   type WindowElementPanel,
   DamsIcons,
   type PanelRelation,
+  type PanelMetaData,
+  Collection,
 } from "@/generated-types/queries";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
@@ -126,7 +216,7 @@ const props = withDefaults(
   }>(),
   { parentIsListItem: false },
 );
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const editState = useEditMode(props.formId);
 const isCollapsed = ref<boolean>(props.panel.isCollapsed);
@@ -171,6 +261,109 @@ const relationArray = computed((): PanelRelation[] =>
 
 const expandPanel = () => {
   isCollapsed.value = false;
+};
+
+// --- Rows of a repeatable panel, added and removed in place ----------------
+const entityFormData = inject<
+  | {
+      id?: string;
+      collection?: Collection;
+      onSaved?: (savedEntity: unknown) => void;
+    }
+  | undefined
+>("entityFormData", undefined);
+const { confirm } = useConfirmModal();
+const { displayErrorNotification } = useBaseNotification();
+// Removing shifts the rows, so it takes the edit scope like an editor does.
+const removeRowScope = useInPlaceScope(
+  () => `${props.formId}:${panelId.value}:remove-row`,
+);
+const translated = (key: string, fallback: string): string =>
+  te(key) ? t(key) : fallback;
+const panelSaved = useSavedFlash();
+provideSavedFlash(panelSaved.flash);
+
+const rowMessages = {
+  add: () => t("actions.labels.add-more"),
+  remove: () => translated("inline-edit.remove-row", "Remove row"),
+};
+const rowLabel = (rowNumber: number): string =>
+  `${t(props.panel.panelHeaderContent?.label ?? "")} ${rowNumber}`.trim();
+// A row is named by its first filled field ("Verwijder rij: Jan Wolkers"),
+// else by its number.
+const rowName = (rowNumber: number): string => {
+  const row = repeatableFieldsHelper.fields.value[rowNumber - 1]?.value as
+    | Record<string, unknown>
+    | undefined;
+  const value = getMetadataFields(props.panel, props.formId, rowNumber - 1)
+    .map((field) => row?.[field.key])
+    .find(
+      (value) =>
+        (typeof value === "string" || typeof value === "number") &&
+        String(value).trim() !== "",
+    );
+  return value === undefined ? rowLabel(rowNumber) : String(value);
+};
+const canEditRows = computed<boolean>(
+  () =>
+    repeatablePanel.value &&
+    !props.isEdit &&
+    props.panel.isEditable !== false &&
+    canUpdateEntity(editState) &&
+    getMetadataFields(props.panel, props.formId).some(
+      (field) => !!(field as PanelMetaData).inputField,
+    ),
+);
+const panelRef = ref<HTMLElement | null>(null);
+// The row's first field gets the focus; it opens when it is clicked.
+const addRow = async () => {
+  const index = repeatableFieldsHelper.addRow();
+  expandPanel();
+  await nextTick();
+  panelRef.value
+    ?.querySelector<HTMLElement>(
+      `[data-repeatable-row="${index}"] [data-cy="field-value"][role="button"]`,
+    )
+    ?.focus();
+};
+const removeRow = async (index: number) => {
+  if (!repeatableFieldsHelper.isStoredRow(index))
+    return repeatableFieldsHelper.discardUnsavedRow(index);
+  if (!(await removeRowScope.open({ isDirty: () => false }))) return;
+  try {
+    const choice = await confirm({
+      title: translated(
+        "inline-edit.remove-row-confirm.title",
+        "Remove this row?",
+      ),
+      message: translated(
+        "inline-edit.remove-row-confirm.message",
+        "Its values are deleted when you confirm.",
+      ),
+      confirmLabel: translated(
+        "inline-edit.remove-row-confirm.confirm",
+        "Remove",
+      ),
+      cancelLabel: translated(
+        "inline-edit.remove-row-confirm.cancel",
+        "Cancel",
+      ),
+      confirmButtonStyle: "danger",
+    });
+    if (choice !== "confirm") return;
+    const rows = repeatableFieldsHelper.rowsWithout(index);
+    const savedEntity = await saveScope({
+      entityId: entityFormData?.id || props.formId,
+      collection: entityFormData?.collection ?? Collection.Entities,
+      formInput: buildMetadataInput(repeatableFieldsHelper.fieldKey, rows),
+    });
+    repeatableFieldsHelper.removeSavedRow(index, rows);
+    if (savedEntity) entityFormData?.onSaved?.(savedEntity);
+  } catch {
+    displayErrorNotification(removeRowScope.messages.saveFailed(), "");
+  } finally {
+    removeRowScope.release();
+  }
 };
 
 watchEffect(() => {

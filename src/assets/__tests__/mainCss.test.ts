@@ -44,3 +44,29 @@ describe("main.css client theming", () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe("main.css menu colour", () => {
+  it("colours menu items like links by default, so a client theme reaches them", () => {
+    const theme = new Map<string, string>();
+    blocks(/@theme/).forEach((block) =>
+      declarations(block).forEach((value, name) => theme.set(name, value)),
+    );
+    expect(theme.get("--color-nav-item")).toBe("var(--color-text-link)");
+    expect(theme.get("--color-nav-item-hover")).toBe(
+      "var(--color-text-link-hover)",
+    );
+  });
+});
+
+// @tailwindcss/forms resets the outline on `[type='text']:focus` (0,2,0),
+// which beats a plain `input:focus-visible` (0,1,1) and hides the ring on
+// every text, number and date input. Checked live in Chrome; here the
+// selectors are pinned so the ring keeps outranking it.
+describe("main.css focus ring", () => {
+  it.each(["input", "textarea", "select"])(
+    "gives %s the ring over the forms plugin's reset",
+    (element) => {
+      expect(css).toMatch(new RegExp(`${element}:focus-visible:focus-visible`));
+    },
+  );
+});

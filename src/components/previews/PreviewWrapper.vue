@@ -45,19 +45,7 @@
     >
       {{ getTitleFromEntity }}
     </h1>
-    <div
-      v-if="displayOpenDetailPageButton"
-      data-cy="open-detail-page-button"
-      class="px-2"
-    >
-      <base-button-new
-        button-size="sm"
-        button-style="primary"
-        :label="t('metadata.labels.open-detail-page')"
-        @click="openDetailPage"
-      />
-    </div>
-    <div v-else><!-- Only here to center the title :) --></div>
+    <div><!-- Only here to center the title :) --></div>
   </div>
   <div
     v-if="previewLoading"
@@ -157,13 +145,12 @@ import { computed, onMounted, provide, ref, watch } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import EntityColumn from "@/components/EntityColumn.vue";
-import { getTitleOrNameFromEntity, goToEntityPage } from "@/helpers";
+import { getTitleOrNameFromEntity } from "@/helpers";
 import { Unicons } from "@/types";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
-import { apolloClient, router } from "@/main";
+import { apolloClient } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
 
 const { t } = useI18n();
@@ -272,18 +259,6 @@ const isPrimaryColumnListPreview = computed<boolean>(
 const showHeaderCloseButton = computed<boolean>(
   () => !isPrimaryColumnListPreview.value,
 );
-
-const displayOpenDetailPageButton = computed<boolean>(
-  () =>
-    props.previewComponent.previewConfiguration?.displayOpenDetailPageButton ===
-    true,
-);
-
-const openDetailPage = (): void => {
-  const entity = props.entities.find((item) => item.id === props.entityId);
-  if (!entity) return;
-  goToEntityPage(entity, "SingleEntity", router);
-};
 
 onMounted(async () => {
   const hasPreviewQuery =

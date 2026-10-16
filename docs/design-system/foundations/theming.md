@@ -65,6 +65,7 @@ follow.
 | `--color-text-field-label` | field labels |
 | `--color-text-light` | legacy label blue: labels, ghost buttons, links in older components |
 | `--color-text-link` | links |
+| `--color-nav-item`, `--color-nav-item-hover` | left-menu items, links or not (default: the link colours); the active item uses the accent |
 | `--color-surface` | cards, panels, inputs |
 | `--color-surface-app` | page background |
 | `--color-background-light` / `--color-background-normal` | legacy equivalents of surface and app background, still used by older components |

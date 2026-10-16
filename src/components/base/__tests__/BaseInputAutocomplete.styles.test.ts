@@ -6,8 +6,11 @@ import BaseInputAutocomplete from "../BaseInputAutocomplete.vue";
 vi.mock("@vueform/multiselect", () => ({
   default: defineComponent({
     name: "MockMultiselect",
-    props: { classes: { default: () => ({}) } },
-    template: `<div data-cy="multiselect" />`,
+    props: {
+      classes: { default: () => ({}) },
+      modelValue: { default: () => [] },
+    },
+    template: `<div data-cy="multiselect"><template v-for="option in modelValue" :key="option.value"><slot name="tag" :option="option" :handle-tag-remove="() => {}" :disabled="false" /></template></div>`,
   }),
 }));
 
@@ -17,11 +20,16 @@ vi.mock("@/composables/useEntitySingle", () => ({
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({ someModalIsOpened: ref(false) }),
 }));
+const editState = vi.hoisted(() => ({ isEdit: true }));
 vi.mock("@/composables/useEdit", () => ({
-  useEditMode: () => ({ isEdit: ref(true) }),
+  useEditMode: () => ({ isEdit: ref(editState.isEdit) }),
 }));
 vi.mock("@/components/base/BaseInputTextNumberDatetime.vue", () => ({
-  default: { template: "<div />" },
+  default: {
+    name: "BaseInputTextNumberDatetime",
+    props: ["size", "modelValue", "inputStyle", "type", "disabled"],
+    template: "<div data-cy='tag-input' />",
+  },
 }));
 
 const classesFor = (
@@ -40,6 +48,55 @@ const classesFor = (
     .props("classes") as Record<string, string>;
 
 describe("BaseInputAutocomplete — design-system styling", () => {
+  it("fits the value input on a relation chip (e.g. a page number) inside the chip", () => {
+    const tagInput = mount(BaseInputAutocomplete, {
+      props: {
+        modelValue: [{ label: "A", value: "a" }],
+        options: [{ label: "A", value: "a" }],
+        autocompleteStyle: "defaultWithBorder",
+        relationType: "refBibliographicalReferences",
+        displayInputForTag: true,
+      } as any,
+    }).findComponent({ name: "BaseInputTextNumberDatetime" });
+    expect(tagInput.exists()).toBe(true);
+    expect(tagInput.props("size")).toBe("compact");
+    expect(tagInput.classes().some((c) => c.includes("[26px]"))).toBe(false);
+  });
+
+  // A disabled input swallows clicks entirely; at rest the click must reach
+  // the value box so the field row can open its editor.
+  const tagInputAt = (disabled: boolean) =>
+    mount(BaseInputAutocomplete, {
+      props: {
+        modelValue: [{ label: "A", value: "a" }],
+        options: [{ label: "A", value: "a" }],
+        autocompleteStyle: disabled ? "readOnly" : "defaultWithBorder",
+        relationType: "refBibliographicalReferences",
+        displayInputForTag: true,
+        disabled,
+      } as any,
+    });
+
+  it("marks the chip's value box so a click on it can open the editor", () => {
+    expect(tagInputAt(true).find("[data-tag-input]").exists()).toBe(true);
+  });
+
+  it("lets clicks pass through the value input at rest", () => {
+    expect(
+      tagInputAt(true)
+        .findComponent({ name: "BaseInputTextNumberDatetime" })
+        .classes(),
+    ).toContain("pointer-events-none");
+  });
+
+  it("keeps the value input clickable while editing", () => {
+    expect(
+      tagInputAt(false)
+        .findComponent({ name: "BaseInputTextNumberDatetime" })
+        .classes(),
+    ).not.toContain("pointer-events-none");
+  });
+
   it("uses the one focus ring when active", () => {
     const active = classesFor("default").containerActive;
     expect(active).toContain("outline-2");
@@ -68,8 +125,75 @@ describe("BaseInputAutocomplete — design-system styling", () => {
 
   it("uses the chip radius for both kinds", () => {
     expect(classesFor("default").tag).toContain("!rounded-chip");
-    expect(
-      classesFor("default", { relationType: "hasCreator" }).tag,
-    ).toContain("!rounded-chip");
+    expect(classesFor("default", { relationType: "hasCreator" }).tag).toContain(
+      "!rounded-chip",
+    );
+  });
+
+  it("lets the field-row hover wash show through a read-only display", () => {
+    const container = classesFor("readOnly").container;
+    expect(container).toContain("!bg-transparent");
+    expect(container).not.toContain("!bg-surface");
+  });
+
+  it.each(["readOnly", "readOnlyAsPlainText"])(
+    "drops the empty-input spacer in %s mode, so a value row is only as tall as its content",
+    (style) => {
+      expect(classesFor(style).spacer).toBe("hidden");
+    },
+  );
+
+  it("renders plain-text relations at the value size, like other values", () => {
+    expect(classesFor("readOnlyAsPlainText").tag).toContain("!text-value");
+  });
+
+  it("keeps edit-mode controls at the shared control height, through a token", () => {
+    expect(classesFor("defaultWithBorder").spacer).toContain(
+      "!h-(--multiselect-spacer-height)",
+    );
+  });
+
+  it("sizes plain-text relation chips with a token, not a px literal", () => {
+    const tag = classesFor("readOnlyAsPlainText").tag;
+    expect(tag).toContain("!h-(--chip-plain-text-height)");
+    expect(tag).not.toMatch(/\[\d+px\]/);
+  });
+});
+
+describe("BaseInputAutocomplete — relation chips as links", () => {
+  const chipAtRest = (props: Record<string, unknown>) => {
+    editState.isEdit = false;
+    const chip = mount(BaseInputAutocomplete, {
+      props: {
+        modelValue: [{ label: "A", value: "a" }],
+        options: [{ label: "A", value: "a" }],
+        autocompleteStyle: "readOnly",
+        relationType: "refCompanies",
+        disabled: true,
+        ...props,
+      } as any,
+    }).find(".multiselect-tag");
+    editState.isEdit = true;
+    return chip;
+  };
+
+  it("marks a chip that links to its entity and shows it as clickable", () => {
+    const chip = chipAtRest({ tagsAreLinks: true });
+    expect(chip.attributes("data-tag-link")).toBeDefined();
+    expect(chip.classes()).toContain("!cursor-pointer");
+  });
+
+  it("shows a chip without a link as a plain chip", () => {
+    const chip = chipAtRest({ tagsAreLinks: false });
+    expect(chip.attributes("data-tag-link")).toBeUndefined();
+    expect(chip.classes()).not.toContain("!cursor-pointer");
+  });
+
+  it("never marks a relation shown as plain text as a link", () => {
+    const chip = chipAtRest({
+      tagsAreLinks: true,
+      autocompleteStyle: "readOnlyAsPlainText",
+    });
+    expect(chip.attributes("data-tag-link")).toBeUndefined();
   });
 });

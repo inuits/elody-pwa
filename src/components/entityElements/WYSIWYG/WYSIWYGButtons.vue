@@ -201,12 +201,16 @@ const props = defineProps<{
   extensions: WysiwygExtensions[];
   displayInline: boolean;
   tagging?: ElodyTaggingInstance;
+  // The field is edited in place (outside the page-wide edit mode).
+  editing?: boolean;
 }>();
 
 const useEditHelper = useEditMode(props.formId);
 const { t } = useI18n();
 
-const buttonsDisabled = computed(() => !useEditHelper.isEdit);
+const buttonsDisabled = computed(
+  () => !(useEditHelper.isEdit || props.editing),
+);
 const editorHasSelection = computed(() => {
   const { selection } = props.editor.state;
   return selection.from !== selection.to;

@@ -1,0 +1,252 @@
+<template>
+  <!-- Inline editor (docs/design-system/components/inline-editor.md): the
+       input a field row swaps to. Nothing saves while you are in it: leaving
+       it (a click or Tab elsewhere), Enter (Ctrl+Enter in a textarea) or a
+       confirmed save saves it. -->
+  <div
+    ref="rootRef"
+    data-cy="inline-field-editor"
+    class="flex flex-col gap-1 w-full"
+    @focusout="handleFocusout"
+  >
+    <!-- A dropdown keeps its options' width (AdvancedDropdown's min-width);
+         where it does not fit beside Annuleer, Annuleer wraps below it. -->
+    <div
+      data-cy="inline-editor-row"
+      class="flex items-center gap-1.5 w-full"
+      :class="{ 'flex-wrap': isDropdown }"
+    >
+      <!-- A checkbox is only as wide as its box, so Annuleer sits right
+           after it; other inputs take the row. A textarea grows with its
+           content up to 6 rows.
+           shortcut: field-sizing isn't in Firefox yet, which keeps 3 rows
+           and scrolls; fine until it ships. -->
+      <div
+        data-cy="inline-editor-input"
+        :class="[
+          type === InputFieldTypes.Checkbox ? 'shrink-0' : 'grow min-w-0',
+          isTextarea &&
+            '[&_textarea]:field-sizing-content [&_textarea]:max-h-(--textarea-max-height)',
+        ]"
+      >
+        <!-- A parent with its own input (relations) passes it here and
+             reports its changed state through `dirty`. -->
+        <slot v-if="$slots.input" name="input" />
+        <AdvancedDropdown
+          v-else-if="isDropdown"
+          v-model="draft"
+          :options="options"
+          :clearable="!required"
+          :multiple="isMultiple"
+          :disable="saving"
+          style-type="defaultWithBorder"
+        />
+        <BaseInputCheckbox
+          v-else-if="type === InputFieldTypes.Checkbox"
+          v-model="draft"
+          :item="{ id: label }"
+          :bulk-operations-context="undefined"
+          :aria-label="label"
+          :disabled="saving"
+          ignore-bulk-operations
+        />
+        <BaseInputTextNumberDatetime
+          v-else
+          v-model="draft"
+          :type="inputType"
+          input-style="defaultWithBorder"
+          :aria-label="label"
+          :invalid="!!errorMessage"
+          :described-by="errorMessage ? errorId : undefined"
+          :disabled="saving"
+        />
+      </div>
+      <div class="flex shrink-0 items-center gap-1.5">
+        <SpinnerLoader
+          v-if="saving"
+          data-cy="inline-editor-saving"
+          :dimensions="4"
+        />
+        <BaseButtonNew
+          :label="cancelLabel"
+          button-style="ghost"
+          button-size="sm"
+          force-show-label
+          :disabled="saving"
+          @click="emit('cancel')"
+        />
+      </div>
+    </div>
+    <p
+      v-if="errorMessage"
+      :id="errorId"
+      role="alert"
+      class="text-hint text-danger"
+    >
+      {{ errorMessage }}
+    </p>
+    <p data-cy="inline-editor-hint" class="text-hint text-text-muted">
+      {{ hint }}
+    </p>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useId,
+  watch,
+} from "vue";
+import { useI18n } from "vue-i18n";
+import {
+  InputFieldTypes,
+  type DropdownOption,
+} from "@/generated-types/queries";
+import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
+
+const props = withDefaults(
+  defineProps<{
+    type: string;
+    modelValue: unknown;
+    label: string;
+    options?: DropdownOption[];
+    required?: boolean;
+    saving?: boolean;
+    errorMessage?: string;
+    // Set by a parent that owns the draft (custom input); otherwise the
+    // editor compares its own draft with the value it opened with.
+    dirty?: boolean;
+  }>(),
+  {
+    dirty: undefined,
+    options: () => [],
+    required: false,
+    saving: false,
+    errorMessage: undefined,
+  },
+);
+
+const emit = defineEmits<{
+  (event: "save", value: unknown): void;
+  (event: "cancel"): void;
+  (event: "dirty-change", dirty: boolean): void;
+  (event: "draft-change", value: unknown): void;
+}>();
+
+const { t, te } = useI18n();
+const translated = (key: string, fallback: string): string =>
+  te(key) ? t(key) : fallback;
+
+const DROPDOWN_TYPES: string[] = [
+  InputFieldTypes.Dropdown,
+  InputFieldTypes.DropdownSingleselectMetadata,
+  InputFieldTypes.DropdownMultiselectMetadata,
+];
+const MULTIPLE_TYPES: string[] = [InputFieldTypes.DropdownMultiselectMetadata];
+const TEXTAREA_TYPES: string[] = [
+  InputFieldTypes.Textarea,
+  InputFieldTypes.ResizableTextarea,
+];
+
+const isDropdown = computed(() => DROPDOWN_TYPES.includes(props.type));
+const isMultiple = computed(() => MULTIPLE_TYPES.includes(props.type));
+const isTextarea = computed(() => TEXTAREA_TYPES.includes(props.type));
+const inputType = computed(() =>
+  isTextarea.value ? InputFieldTypes.Textarea : props.type,
+);
+
+const initial = JSON.stringify(props.modelValue ?? null);
+const draft = ref<any>(props.modelValue);
+const isDirty = computed(() =>
+  props.dirty !== undefined
+    ? props.dirty
+    : JSON.stringify(draft.value ?? null) !== initial,
+);
+watch(isDirty, (dirty) => emit("dirty-change", dirty));
+watch(draft, (value) => emit("draft-change", value), { deep: true });
+
+const cancelLabel = computed(() => translated("inline-edit.cancel", "Cancel"));
+const hint = computed(() =>
+  isTextarea.value
+    ? translated("inline-edit.hint-textarea", "Ctrl+Enter saves · Esc cancels")
+    : translated("inline-edit.hint", "Enter saves · Esc cancels"),
+);
+const errorId = `inline-editor-error-${useId()}`;
+
+const commit = () => {
+  if (props.saving) return;
+  if (!isDirty.value) {
+    emit("cancel");
+    return;
+  }
+  emit("save", draft.value);
+};
+
+// Enter/Escape count when pressed in the editor, or on the page itself:
+// after picking in a dropdown, focus is on the (removed) option of a menu
+// rendered at the end of the page and falls back to <body>. Keys another
+// field on the page receives aren't ours. While a dropdown menu is open,
+// Enter picks and Escape closes it; keys the input already handled are
+// left alone too.
+const OPEN_SELECT_MENU = "[role='listbox'][id^='vue-select-']";
+const isOwnKey = (event: KeyboardEvent): boolean => {
+  const target = event.target as Element | null;
+  if (!target || target === document.body || target === document.documentElement)
+    return true;
+  // A dialog the editor opened (the entity picker) handles its own keys.
+  const dialog = target.closest?.("dialog");
+  if (dialog && rootRef.value?.contains(dialog)) return false;
+  return !!rootRef.value?.contains(target);
+};
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.defaultPrevented || !isOwnKey(event)) return;
+  if (document.querySelector(OPEN_SELECT_MENU)) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    emit("cancel");
+    return;
+  }
+  if (event.key !== "Enter") return;
+  if (isTextarea.value && !(event.ctrlKey || event.metaKey)) return;
+  event.preventDefault();
+  commit();
+};
+
+// Leaving the editor (a click or Tab elsewhere) saves a changed value and
+// closes an unchanged one. Teleported menus and dialogs belong to the editor.
+const rootRef = ref<HTMLElement | null>(null);
+const OVERLAY_SELECTOR =
+  "dialog, [role='dialog'], .menu, .multiselect-dropdown, [role='listbox'], .dp__menu, [role='tooltip']";
+const isOutside = (target: Element): boolean =>
+  !rootRef.value?.contains(target) && !target.closest?.(OVERLAY_SELECTOR);
+const handleOutsideMousedown = (event: MouseEvent) => {
+  const target = event.target as HTMLElement | null;
+  if (target && isOutside(target)) commit();
+};
+// Focus going nowhere (a picked option removed, another window) isn't leaving.
+const handleFocusout = (event: FocusEvent) => {
+  const next = event.relatedTarget as HTMLElement | null;
+  if (next && isOutside(next)) commit();
+};
+
+onMounted(async () => {
+  document.addEventListener("mousedown", handleOutsideMousedown, true);
+  document.addEventListener("keydown", handleKeydown);
+  await nextTick();
+  rootRef.value
+    ?.querySelector<HTMLElement>("input, textarea, [role='combobox']")
+    ?.focus();
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("mousedown", handleOutsideMousedown, true);
+  document.removeEventListener("keydown", handleKeydown);
+});
+</script>

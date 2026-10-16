@@ -4,8 +4,8 @@
     v-if="show"
     :is="linkTag"
     :class="[
-      'flex flex-column justify-between items-center cursor-pointer ml-9 mt-1 origin-top-center hover:text-accent-accent',
-      { 'text-accent-accent': isActive },
+      'flex flex-column justify-between items-center cursor-pointer ml-9 mt-1 origin-top-center hover:no-underline',
+      isActive ? 'text-accent-accent' : 'text-nav-item hover:text-nav-item-hover',
     ]"
     :to="isLink ? menuAction.action : undefined"
     @click="((event: Event) => handleClick(event, menuAction))"

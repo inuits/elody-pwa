@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
-import { mount } from "@vue/test-utils";
-import { defineComponent, h, nextTick, ref } from "vue";
-import { useForm, defineRule } from "vee-validate";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { flushPromises, mount } from "@vue/test-utils";
+import { computed, defineComponent, h, nextTick, provide, ref } from "vue";
+import { useField, useForm, defineRule } from "vee-validate";
 
 vi.mock("@/main", () => ({
   i18n: {
@@ -22,14 +22,27 @@ vi.mock("@/main", () => ({
 }));
 
 const loadDocumentMock = vi.fn().mockResolvedValue({ kind: "Document" });
+
+const scopedSave = vi.hoisted(() => ({ saveScope: vi.fn() }));
+vi.mock("@/composables/useScopedSave", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/composables/useScopedSave")>()),
+  saveScope: scopedSave.saveScope,
+}));
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({ loadDocument: loadDocumentMock }),
 }));
 
 import MetadataWrapper from "../MetadataWrapper.vue";
 import MetadataMaskedValue from "../MetadataMaskedValue.vue";
-import { InputFieldTypes } from "@/generated-types/queries";
+import { InputFieldTypes, TypeModals } from "@/generated-types/queries";
+import { useBaseModal } from "@/composables/useBaseModal";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useEditMode } from "@/composables/useEdit";
+import { useEditScope } from "@/composables/useEditScope";
+import {
+  SAVED_FLASH_MS,
+  provideSavedFlash,
+} from "@/composables/useSavedFlash";
 import {
   copyFromParentContextKey,
   type CopyFromParentContext,
@@ -92,26 +105,43 @@ const buildProps = (key: string, isEdit: boolean) => ({
   },
 });
 
+// What EntityForm provides; onSaved hands the saved entity back to the page.
+const entityFormData = { onSaved: vi.fn() };
+// The panel around the row: its header flashes the saved check.
+const panelFlash = vi.fn();
+// Entities handed to the relation search from the picker ("Blader…").
+const relationPicks = vi.fn();
+
 const mountWrapper = async (
   props: ReturnType<typeof buildProps>,
   copyContext?: CopyFromParentContext,
+  relationValues: Record<string, unknown[]> = {},
+  extraProvide: Record<string, unknown> = {},
 ) => {
   const Harness = defineComponent({
     setup() {
       const form = useForm({
-        initialValues: { intialValues: { lockedProperties: ["title"] } },
+        initialValues: {
+          intialValues: { lockedProperties: ["title"] },
+          relationValues,
+        },
       });
       useFormHelper().addForm(props.formId, form);
       defineRule("no_xss", () => true);
+      provide("entityFormData", entityFormData);
+      provideSavedFlash(panelFlash);
       return () => h(MetadataWrapper, props as any);
     },
   });
 
   const wrapper = mount(Harness, {
     global: {
-      provide: copyContext
-        ? { [copyFromParentContextKey as unknown as symbol]: copyContext }
-        : {},
+      provide: {
+        ...(copyContext
+          ? { [copyFromParentContextKey as unknown as symbol]: copyContext }
+          : {}),
+        ...extraProvide,
+      },
       stubs: {
         unicon: uniconStub,
         BaseTooltip: baseTooltipStub,
@@ -122,12 +152,60 @@ const mountWrapper = async (
         BaseVirtualKeyboard: true,
         MetadataTruncatedText: { template: "<div><slot /></div>" },
         MetadataFormatter: true,
-        TableInputField: true,
-        ViewModesAutocompleteRelations: true,
+        TableInputField: {
+          name: "TableInputField",
+          props: [
+            "modelValue",
+            "subFields",
+            "formId",
+            "parentFieldKey",
+            "relationType",
+            "disabled",
+            "isFlowRelationValues",
+          ],
+          template: "<div data-cy='table-stub'></div>",
+        },
+        ViewModesAutocompleteRelations: {
+          name: "ViewModesAutocompleteRelations",
+          props: [
+            "editing",
+            "mode",
+            "formId",
+            "relationType",
+            "selectType",
+            "disabled",
+            "isReadOnly",
+          ],
+          template:
+            "<div data-cy='relations-stub'><span class='multiselect-tag' data-tag-link data-cy='relation-chip'>Maker<span data-tag-input data-cy='relation-chip-input'><input disabled /></span></span><span class='multiselect-tag' data-cy='relation-chip-plain'>Uitgever</span></div>",
+          methods: { addPicked: (options: unknown) => relationPicks(options) },
+        },
+        RelationPickerModal: {
+          name: "RelationPickerModal",
+          props: ["label", "entityId", "acceptedType", "filters", "single"],
+          emits: ["picked"],
+          template: "<div data-cy='relation-picker-stub'></div>",
+        },
         ViewModesAutocompleteMetadata: true,
         BaseCopyToClipboard: true,
         MetadataValueTooltip: true,
         EntityElementMetadata: { template: "<span>value</span>" },
+        InlineFieldEditor: {
+          name: "InlineFieldEditor",
+          props: [
+            "type",
+            "modelValue",
+            "label",
+            "options",
+            "required",
+            "saving",
+            "errorMessage",
+            "dirty",
+          ],
+          emits: ["save", "cancel", "dirty-change", "draft-change"],
+          template:
+            "<div data-cy='inline-editor-stub'><slot name='input' /></div>",
+        },
       },
     },
   });
@@ -326,6 +404,1101 @@ describe("MetadataWrapper — masked field delegation", () => {
   });
 });
 
+describe("MetadataWrapper — in-place editing affordance", () => {
+  const editableProps = (key = "year", type = InputFieldTypes.Text) => {
+    const props = buildProps(key, false);
+    props.metadata.inputField.type = type;
+    return props;
+  };
+
+  const allowUpdate = (canUpdate: boolean) =>
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate,
+      canDelete: false,
+    });
+
+  const fieldValue = async (props = editableProps()) =>
+    (await mountWrapper(props)).find('[data-cy="field-value"]');
+
+  beforeEach(() => {
+    allowUpdate(true);
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("makes an editable value a button named after its field", async () => {
+    const value = await fieldValue();
+    expect(value.attributes("role")).toBe("button");
+    expect(value.attributes("tabindex")).toBe("0");
+    expect(value.attributes("aria-label")).toBe("metadata.labels.test, edit");
+  });
+
+  it("leaves an unlabelled value named by its content, not by ', edit'", async () => {
+    const props = editableProps();
+    props.metadata.label = "";
+    const value = await fieldValue(props);
+    expect(value.attributes("role")).toBe("button");
+    expect(value.attributes("aria-label")).toBeUndefined();
+  });
+
+  it("pads the hover wash while keeping the text aligned with the label", async () => {
+    expect((await fieldValue()).classes()).toEqual(
+      expect.arrayContaining([
+        "px-(--field-value-pad-x)",
+        "-mx-(--field-value-pad-x)",
+      ]),
+    );
+  });
+
+  it("pads the hover wash above and below too, without moving the value", async () => {
+    expect((await fieldValue()).classes()).toEqual(
+      expect.arrayContaining([
+        "py-(--field-value-pad-y)",
+        "-my-(--field-value-pad-y)",
+      ]),
+    );
+  });
+
+  it("keeps the label clear of the hover wash and focus ring", async () => {
+    const wrapper = await mountWrapper(editableProps());
+    expect(wrapper.find('[data-cy="field-label-row"]').classes()).toContain(
+      "mb-(--field-label-gap)",
+    );
+  });
+
+  it("gives every value row the same minimum height, editable or not", async () => {
+    expect((await fieldValue()).classes()).toContain(
+      "min-h-(--field-value-min-height)",
+    );
+    const props = editableProps();
+    (props.metadata as any).readOnly = true;
+    expect((await fieldValue(props)).classes()).toContain(
+      "min-h-(--field-value-min-height)",
+    );
+  });
+
+  it("washes the whole value on hover", async () => {
+    expect((await fieldValue()).classes()).toContain(
+      "hover:bg-surface-editable-hover",
+    );
+  });
+
+  it("underlines the value text itself, without rounded corners", async () => {
+    const wrapper = await mountWrapper(editableProps());
+    const text = wrapper.find('[data-cy="field-value-text"]');
+    expect(text.classes()).toEqual(
+      expect.arrayContaining([
+        "border-b",
+        "border-dashed",
+        "border-border-dashed",
+      ]),
+    );
+    expect(text.classes().some((c) => c.startsWith("rounded"))).toBe(false);
+    expect(wrapper.find('[data-cy="field-value"]').classes()).not.toContain(
+      "border-b",
+    );
+  });
+
+  it.each([[""], [null], [[]]])(
+    "does not underline an empty value (%j), which shows 'Geen waarde'",
+    async (empty) => {
+      const props = editableProps();
+      (props.metadata as any).value = empty;
+      const text = (await mountWrapper(props)).find(
+        '[data-cy="field-value-text"]',
+      );
+      expect(text.classes()).not.toContain("border-dashed");
+    },
+  );
+
+  it("does not underline a read-only value", async () => {
+    const props = editableProps();
+    (props.metadata as any).readOnly = true;
+    const text = (await mountWrapper(props)).find(
+      '[data-cy="field-value-text"]',
+    );
+    expect(text.classes()).not.toContain("border-dashed");
+  });
+
+  it("always shows the pencil on an editable value, not only on hover", async () => {
+    const pencil = (await mountWrapper(editableProps())).find(
+      '[data-cy="field-edit-pencil"]',
+    );
+    expect(pencil.exists()).toBe(true);
+    expect(pencil.attributes("aria-hidden")).toBe("true");
+    expect(pencil.classes().some((c) => c.includes("opacity-0"))).toBe(false);
+    expect(pencil.classes()).toContain("text-text-subtle");
+  });
+
+  it("opens the field's edit scope on click", async () => {
+    await (await fieldValue()).trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+  });
+
+  it("opens the field's edit scope with Enter", async () => {
+    await (await fieldValue()).trigger("keydown", { key: "Enter" });
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+  });
+
+  it("is editable when the field config arrives without a __typename", async () => {
+    const props = editableProps();
+    delete (props.metadata as any).__typename;
+    expect((await fieldValue(props)).attributes("role")).toBe("button");
+  });
+
+  it("is plain text for metadata on a relation", async () => {
+    const props = editableProps();
+    (props.metadata as any).__typename = "PanelRelationMetaData";
+    expect((await fieldValue(props)).attributes("role")).toBeUndefined();
+  });
+
+  it("opens the scope when clicking a value whose display stops click events", async () => {
+    const props = editableProps(
+      "year",
+      InputFieldTypes.DropdownSingleselectMetadata,
+    );
+    (props.metadata.inputField as any).options = [
+      { label: "Nieuw", value: "new" },
+    ];
+    (props.metadata as any).unit = "text";
+    const wrapper = await mountWrapper(props);
+    const display = wrapper.find("view-modes-autocomplete-metadata-stub");
+    expect(display.exists()).toBe(true);
+    await display.trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+  });
+
+  it("is plain text for a read-only field", async () => {
+    const props = editableProps();
+    (props.metadata as any).readOnly = true;
+    expect((await fieldValue(props)).attributes("role")).toBeUndefined();
+  });
+
+  it("is plain text when the user may not update the entity", async () => {
+    allowUpdate(false);
+    expect((await fieldValue()).attributes("role")).toBeUndefined();
+  });
+
+  it("is plain text for a locked field", async () => {
+    expect(
+      (await fieldValue(editableProps("title"))).attributes("role"),
+    ).toBeUndefined();
+  });
+
+  it("is plain text for a field type without an inline editor yet", async () => {
+    expect(
+      (
+        await fieldValue(editableProps("year", InputFieldTypes.FileUpload))
+      ).attributes("role"),
+    ).toBeUndefined();
+  });
+
+  it("releases its edit scope when the field goes away with the editor open", async () => {
+    const wrapper = await mountWrapper(editableProps());
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+    wrapper.unmount();
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("leaves a click on the copy button to the copy button", async () => {
+    const props = editableProps();
+    (props.metadata as any).copyToClipboard = true;
+    const wrapper = await mountWrapper(props);
+    await wrapper.find("base-copy-to-clipboard-stub").trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("always shows the copy button, like the pencil", async () => {
+    const props = editableProps();
+    (props.metadata as any).copyToClipboard = true;
+    const copy = (await mountWrapper(props)).find(
+      "base-copy-to-clipboard-stub",
+    );
+    expect(copy.classes().some((c) => c.includes("opacity"))).toBe(false);
+  });
+
+  it("doesn't block Enter on a value that can't be edited (its links still work)", async () => {
+    allowUpdate(false);
+    const value = await fieldValue();
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    value.element.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it("doesn't take Enter from a link inside an editable value", async () => {
+    const value = await fieldValue();
+    const link = document.createElement("a");
+    link.href = "/elsewhere";
+    value.element.appendChild(link);
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    link.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("does not open a scope for a read-only value", async () => {
+    allowUpdate(false);
+    await (await fieldValue()).trigger("click");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+});
+
+describe("MetadataWrapper — inline editing", () => {
+  const props = () => {
+    const p = buildProps("year", false);
+    p.metadata.inputField.type = InputFieldTypes.Text;
+    return p;
+  };
+
+  const openEditor = async () => {
+    const wrapper = await mountWrapper(props());
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    return wrapper;
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("swaps the value for the inline editor with the current value", async () => {
+    const wrapper = await openEditor();
+    expect(inlineEditor(wrapper).props("modelValue")).toBe("hello");
+    expect(inlineEditor(wrapper).props("type")).toBe(InputFieldTypes.Text);
+    expect(wrapper.find('[data-cy="field-value"]').exists()).toBe(false);
+  });
+
+  it("saves only the edited key", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(scopedSave.saveScope).toHaveBeenCalledWith({
+      entityId: "MW-TEST",
+      collection: "entities",
+      formInput: {
+        metadata: [{ key: "year", value: "2020" }],
+        relations: [],
+        updateOnlyRelations: false,
+      },
+    });
+  });
+
+  it("hands the saved entity back to the page", async () => {
+    entityFormData.onSaved.mockClear();
+    scopedSave.saveScope.mockResolvedValue({
+      id: "MW-TEST",
+      intialValues: { year: "2020" },
+    });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(entityFormData.onSaved).toHaveBeenCalledWith({
+      id: "MW-TEST",
+      intialValues: { year: "2020" },
+    });
+  });
+
+  it("saves a single choice as a list when the field asks for one", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const p = props();
+    (p.metadata.inputField as any).valueAsList = true;
+    const wrapper = await mountWrapper(p);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: ["2020"] },
+    ]);
+  });
+
+  it("closes the editor and announces the save", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(false);
+    expect(wrapper.find('[role="status"]').text()).toBe("Saved");
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("swaps the pencil for a saved check for 2s and flashes the panel", async () => {
+    vi.useFakeTimers();
+    panelFlash.mockClear();
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(wrapper.find('[data-cy="field-saved-check"]').exists()).toBe(true);
+    expect(wrapper.find('[data-cy="field-edit-pencil"]').exists()).toBe(false);
+    expect(panelFlash).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(SAVED_FLASH_MS);
+    await flushPromises();
+    expect(wrapper.find('[data-cy="field-saved-check"]').exists()).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it("shows no saved check when the save fails", async () => {
+    panelFlash.mockClear();
+    scopedSave.saveScope.mockRejectedValue(new Error("no"));
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(wrapper.find('[data-cy="field-saved-check"]').exists()).toBe(false);
+    expect(panelFlash).not.toHaveBeenCalled();
+  });
+
+  describe("opening another field", () => {
+    const changeTo = async (wrapper: any, value: string) => {
+      inlineEditor(wrapper).vm.$emit("draft-change", value);
+      inlineEditor(wrapper).vm.$emit("dirty-change", true);
+      await nextTick();
+    };
+    const openOther = () =>
+      useEditScope().requestOpen({ id: "MW-TEST:other", isDirty: () => false });
+
+    afterEach(() => useEditScope().release("MW-TEST:other"));
+
+    it("saves the changed field first, then opens the other one", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor();
+      await changeTo(wrapper, "2020");
+      expect(await openOther()).toBe(true);
+      await flushPromises();
+      expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+        { key: "year", value: "2020" },
+      ]);
+      expect(inlineEditor(wrapper).exists()).toBe(false);
+      expect(useEditScope().isActive("MW-TEST:other")).toBe(true);
+    });
+
+    it("saves once when leaving the editor and opening the other field go together", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor();
+      await changeTo(wrapper, "2020");
+      inlineEditor(wrapper).vm.$emit("save", "2020");
+      await openOther();
+      await flushPromises();
+      expect(scopedSave.saveScope).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the changed field open, with its error, when its save fails", async () => {
+      scopedSave.saveScope.mockRejectedValue(new Error("server says no"));
+      const wrapper = await openEditor();
+      await changeTo(wrapper, "2020");
+      expect(await openOther()).toBe(false);
+      await flushPromises();
+      expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+        "Saving failed, try again",
+      );
+      expect(useEditScope().isActive("MW-TEST:year")).toBe(true);
+    });
+  });
+
+  it("keeps the editor open with an error when the save fails", async () => {
+    scopedSave.saveScope.mockRejectedValue(new Error("server says no"));
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("save", "2020");
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(true);
+    expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+      "Saving failed, try again",
+    );
+  });
+
+  it("does not save a value that fails the field's validation", async () => {
+    defineRule(
+      "regex",
+      (value: string, [pattern]: string[]) =>
+        new RegExp(pattern).test(value ?? "") || "Invalid format",
+    );
+    const p = props();
+    (p.metadata.inputField as any).validation = {
+      value: ["regex"],
+      regex: "/^[0-9]{4}$/",
+    };
+    const wrapper = await mountWrapper(p);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    inlineEditor(wrapper).vm.$emit("save", "123456");
+    await flushPromises();
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    expect(inlineEditor(wrapper).exists()).toBe(true);
+    expect(inlineEditor(wrapper).props("errorMessage")).toBeTruthy();
+  });
+
+  it("closes without saving on cancel", async () => {
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("cancel");
+    await flushPromises();
+    expect(inlineEditor(wrapper).exists()).toBe(false);
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    expect(useEditScope().isActive("MW-TEST:year")).toBe(false);
+  });
+
+  it("reports unsaved changes while the editor holds a changed draft", async () => {
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    await flushPromises();
+    expect(useEditScope().hasUnsavedChanges.value).toBe(true);
+  });
+});
+
+describe("MetadataWrapper — leaving with an open editor", () => {
+  const openEditor = async () => {
+    const p = buildProps("year", false);
+    const wrapper = await mountWrapper(p);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    return wrapper;
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("saves the typed draft when the leave prompt asks to save", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("draft-change", "2021");
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    expect(await useEditScope().saveActive()).toBe(true);
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: "2021" },
+    ]);
+  });
+
+  it("reports a failed save so the user stays on the page", async () => {
+    scopedSave.saveScope.mockRejectedValue(new Error("no"));
+    const wrapper = await openEditor();
+    inlineEditor(wrapper).vm.$emit("draft-change", "2021");
+    inlineEditor(wrapper).vm.$emit("dirty-change", true);
+    expect(await useEditScope().saveActive()).toBe(false);
+    useEditScope().release("MW-TEST:year");
+  });
+});
+
+describe("MetadataWrapper — inline relation editing", () => {
+  const relation = (key: string, extra: Record<string, unknown> = {}) => ({
+    key,
+    type: "hasCreator",
+    ...extra,
+  });
+
+  const relationProps = (inputField: Record<string, unknown> = {}) => {
+    const p = buildProps("creator", false);
+    (p.metadata as any).value = "";
+    (p.metadata as any).inputField = {
+      type: InputFieldTypes.DropdownMultiselectRelations,
+      relationType: "hasCreator",
+      advancedFilterInputForSearchingOptions: {
+        type: "text",
+        item_types: ["person"],
+      },
+      options: [],
+      __typename: "InputField",
+      ...inputField,
+    };
+    return p;
+  };
+
+  const form = () => useFormHelper().getForm("MW-TEST")!;
+  const setRelations = async (relations: unknown[]) => {
+    form().setFieldValue("relationValues.hasCreator", relations);
+    await flushPromises();
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  const mountRelations = (
+    inputField: Record<string, unknown> = {},
+    relations: unknown[] = [relation("c1", { value: "Ada" })],
+  ) =>
+    mountWrapper(relationProps(inputField), undefined, {
+      hasCreator: relations,
+    });
+
+  const openEditor = async (
+    inputField: Record<string, unknown> = {},
+    relations?: unknown[],
+  ) => {
+    const wrapper = await mountRelations(inputField, relations);
+    await wrapper
+      .find('[data-cy="field-value"]')
+      .trigger("keydown", { key: "Enter" });
+    await flushPromises();
+    return wrapper;
+  };
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:creator");
+  });
+
+  describe("Blader… (the entity picker)", () => {
+    const browse = (wrapper: any) => wrapper.find('[data-cy="relation-browse"]');
+    const pickerModal = (wrapper: any) =>
+      wrapper.findComponent({ name: "RelationPickerModal" });
+
+    beforeEach(() => {
+      relationPicks.mockClear();
+      useBaseModal().closeModal(TypeModals.RelationPicker);
+    });
+
+    it("offers a Browse… link under the search that opens the picker for the field's entity type", async () => {
+      const wrapper = await openEditor();
+      expect(browse(wrapper).element.tagName).toBe("BUTTON");
+      expect(browse(wrapper).text()).toBe("Browse…");
+      expect(pickerModal(wrapper).props()).toMatchObject({
+        acceptedType: "person",
+        single: false,
+        entityId: "MW-TEST",
+      });
+      await browse(wrapper).trigger("click");
+      expect(useBaseModal().getModalInfo(TypeModals.RelationPicker).open).toBe(
+        true,
+      );
+    });
+
+    it("adds the picked entities to the search's choice, without saving", async () => {
+      const wrapper = await openEditor();
+      const options = [{ label: "Bob", value: "c2" }];
+      pickerModal(wrapper).vm.$emit("picked", options);
+      await flushPromises();
+      expect(relationPicks).toHaveBeenCalledWith(options);
+      expect(scopedSave.saveScope).not.toHaveBeenCalled();
+      expect(inlineEditor(wrapper).exists()).toBe(true);
+    });
+
+    it("lets a single select pick one", async () => {
+      const wrapper = await openEditor({
+        type: InputFieldTypes.DropdownSingleselectRelations,
+      });
+      expect(pickerModal(wrapper).props("single")).toBe(true);
+    });
+
+    it("offers no Browse… when the field names no entity type to pick", async () => {
+      const wrapper = await openEditor({
+        advancedFilterInputForSearchingOptions: { type: "text" },
+      });
+      expect(browse(wrapper).exists()).toBe(false);
+      expect(pickerModal(wrapper).exists()).toBe(false);
+    });
+  });
+
+  describe("at rest", () => {
+    it("makes a relation value editable in place", async () => {
+      const wrapper = await mountRelations();
+      expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBe(
+        "button",
+      );
+    });
+
+    it("keeps a relation dropdown that saves as metadata read-only", async () => {
+      const wrapper = await mountRelations({ isMetadataField: true });
+      expect(
+        wrapper.find('[data-cy="field-value"]').attributes("role"),
+      ).toBeUndefined();
+    });
+
+    it("keeps inherited relations read-only", async () => {
+      const p = relationProps();
+      (p.metadata as any).hiddenField = { inherited: true };
+      const wrapper = await mountWrapper(p, undefined, { hasCreator: [] });
+      expect(
+        wrapper.find('[data-cy="field-value"]').attributes("role"),
+      ).toBeUndefined();
+    });
+
+    it("lets a click on a relation chip navigate instead of opening the editor", async () => {
+      const wrapper = await mountRelations();
+      await wrapper.find('[data-cy="relation-chip"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(false);
+    });
+
+    it("opens the editor from a click on a chip's value box (page number)", async () => {
+      const wrapper = await mountRelations({
+        metadataOnRelationFieldConfig: { enabled: true, key: "page_number" },
+      });
+      await wrapper.find('[data-cy="relation-chip-input"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
+    });
+
+    it("opens the editor from a click beside the chips", async () => {
+      const wrapper = await mountRelations();
+      await wrapper.find('[data-cy="relations-stub"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
+    });
+
+    it("opens the editor from a chip that isn't a link", async () => {
+      const wrapper = await mountRelations();
+      await wrapper.find('[data-cy="relation-chip-plain"]').trigger("click");
+      expect(useEditScope().isActive("MW-TEST:creator")).toBe(true);
+    });
+  });
+
+  describe("editing", () => {
+    it("renders the relation autocomplete, editable, inside the inline editor", async () => {
+      const wrapper = await openEditor();
+      const input = inlineEditor(wrapper).findComponent({
+        name: "ViewModesAutocompleteRelations",
+      });
+      expect(input.props()).toMatchObject({
+        editing: true,
+        mode: "edit",
+        formId: "MW-TEST",
+        relationType: "hasCreator",
+        selectType: "multi",
+      });
+      expect(input.props("disabled")).toBeFalsy();
+    });
+
+    it("is pristine until the relations change", async () => {
+      const wrapper = await openEditor();
+      expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+      // The autocomplete re-writes the same selection: still pristine.
+      await setRelations([relation("c1", { value: "Ada", editStatus: "new" })]);
+      expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      expect(inlineEditor(wrapper).props("dirty")).toBe(true);
+      expect(useEditScope().hasUnsavedChanges.value).toBe(true);
+    });
+
+    it("saves only the added relation", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(scopedSave.saveScope).toHaveBeenCalledWith({
+        entityId: "MW-TEST",
+        collection: "entities",
+        formInput: {
+          metadata: [],
+          relations: [
+            {
+              key: "c2",
+              type: "hasCreator",
+              value: "Bo",
+              metadata: [],
+              editStatus: "new",
+            },
+          ],
+          updateOnlyRelations: true,
+        },
+      });
+    });
+
+    it("saves only the removed relation", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      const wrapper = await openEditor({}, [
+        relation("c1", { value: "Ada" }),
+        relation("c2", { value: "Bo" }),
+      ]);
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "deleted" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual(
+        [{ key: "c2", type: "hasCreator", editStatus: "deleted" }],
+      );
+    });
+
+    describe("metadata on the relation", () => {
+      const config = {
+        metadataOnRelationFieldConfig: { enabled: true, key: "page_number" },
+      };
+
+      it("saves a changed value on an existing relation", async () => {
+        scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+        const wrapper = await openEditor(config, [
+          relation("c1", { metadata: [{ key: "page_number", value: "12" }] }),
+        ]);
+        await setRelations([
+          relation("c1", {
+            editStatus: "new",
+            metadata: [{ key: "page_number", value: "13" }],
+          }),
+        ]);
+        inlineEditor(wrapper).vm.$emit("save", undefined);
+        await flushPromises();
+        expect(
+          scopedSave.saveScope.mock.calls[0][0].formInput.relations,
+        ).toEqual([
+          {
+            key: "c1",
+            type: "hasCreator",
+            editStatus: "changed",
+            metadata: [{ key: "page_number", value: "13" }],
+          },
+        ]);
+      });
+
+      it("saves a cleared value as empty", async () => {
+        scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+        const wrapper = await openEditor(config, [
+          relation("c1", { metadata: [{ key: "page_number", value: "12" }] }),
+        ]);
+        await setRelations([relation("c1", { editStatus: "new" })]);
+        inlineEditor(wrapper).vm.$emit("save", undefined);
+        await flushPromises();
+        expect(
+          scopedSave.saveScope.mock.calls[0][0].formInput.relations,
+        ).toEqual([
+          {
+            key: "c1",
+            type: "hasCreator",
+            editStatus: "changed",
+            metadata: [{ key: "page_number", value: "" }],
+          },
+        ]);
+      });
+
+      it("is pristine when a relation without a value still has none", async () => {
+        const wrapper = await openEditor(config, [relation("c1")]);
+        await setRelations([relation("c1", { editStatus: "new" })]);
+        expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+      });
+    });
+
+    it("validates the relations with the field's relation rules", async () => {
+      defineRule(
+        "has_required_relation",
+        (value: unknown[]) =>
+          (Array.isArray(value) && value.length > 0) || "Choose a maker",
+      );
+      const wrapper = await openEditor({
+        validation: {
+          value: ["has_required_relation"],
+          has_required_relation: { relationType: "hasCreator", amount: 1 },
+        },
+      });
+      await setRelations([relation("c1", { editStatus: "deleted" })]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(scopedSave.saveScope).not.toHaveBeenCalled();
+      expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+        "Choose a maker",
+      );
+    });
+
+    it("restores the relations on cancel", async () => {
+      const wrapper = await openEditor();
+      await setRelations([relation("c2", { value: "Bo", editStatus: "new" })]);
+      inlineEditor(wrapper).vm.$emit("cancel");
+      await flushPromises();
+      expect(form().values.relationValues.hasCreator).toEqual([
+        relation("c1", { value: "Ada" }),
+      ]);
+      expect(inlineEditor(wrapper).exists()).toBe(false);
+    });
+
+    it("keeps the relations the server stored after a save", async () => {
+      scopedSave.saveScope.mockResolvedValue({
+        id: "MW-TEST",
+        relationValues: {
+          hasCreator: [
+            relation("c1", { value: "Ada" }),
+            relation("c2", { value: "Bo" }),
+          ],
+        },
+      });
+      const wrapper = await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(form().values.relationValues.hasCreator).toEqual([
+        relation("c1", { value: "Ada" }),
+        relation("c2", { value: "Bo" }),
+      ]);
+      expect(inlineEditor(wrapper).exists()).toBe(false);
+      expect(wrapper.find('[role="status"]').text()).toBe("Saved");
+    });
+
+    it("hands the saved entity back to the page", async () => {
+      entityFormData.onSaved.mockClear();
+      const saved = { id: "MW-TEST", relationValues: { hasCreator: [] } };
+      scopedSave.saveScope.mockResolvedValue(saved);
+      const wrapper = await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "deleted" }),
+      ]);
+      inlineEditor(wrapper).vm.$emit("save", undefined);
+      await flushPromises();
+      expect(entityFormData.onSaved).toHaveBeenCalledWith(saved);
+    });
+
+    it("lets the leave prompt save the changed relations", async () => {
+      scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+      await openEditor();
+      await setRelations([
+        relation("c1", { value: "Ada", editStatus: "new" }),
+        relation("c2", { value: "Bo", editStatus: "new" }),
+      ]);
+      expect(await useEditScope().saveActive()).toBe(true);
+      expect(scopedSave.saveScope).toHaveBeenCalled();
+    });
+  });
+});
+
+describe("MetadataWrapper — a relation table edited in place", () => {
+  const author = (key: string, functionIndication = "aut", extra = {}) => ({
+    key,
+    type: "refAuthors",
+    metadata: [{ key: "function_indication", value: functionIndication }],
+    ...extra,
+  });
+
+  const tableProps = () => {
+    const p = buildProps("refAuthors", false);
+    (p.metadata as any).value = "";
+    (p.metadata as any).inputField = {
+      type: InputFieldTypes.InputFieldWithSubFields,
+      relationType: "refAuthors",
+      isMetadataField: false,
+      subFields: [
+        {
+          key: "name",
+          label: "metadata.labels.name",
+          inputField: {
+            type: InputFieldTypes.DropdownSingleselectRelations,
+            isMetadataField: false,
+          },
+        },
+        {
+          key: "function_indication",
+          label: "metadata.labels.function-indication",
+          inputField: { type: InputFieldTypes.Text, isMetadataField: true },
+        },
+      ],
+      options: [],
+      __typename: "InputField",
+    };
+    return p;
+  };
+
+  const form = () => useFormHelper().getForm("MW-TEST")!;
+  const setRows = async (rows: unknown[]) => {
+    form().setFieldValue("relationValues.refAuthors", rows);
+    await flushPromises();
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+  const save = async (wrapper: any) => {
+    inlineEditor(wrapper).vm.$emit("save", undefined);
+    await flushPromises();
+  };
+
+  const openTable = async (rows: unknown[] = [author("p1")]) => {
+    const wrapper = await mountWrapper(tableProps(), undefined, {
+      refAuthors: rows,
+    });
+    await wrapper
+      .find('[data-cy="field-value"]')
+      .trigger("keydown", { key: "Enter" });
+    await flushPromises();
+    return wrapper;
+  };
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:refAuthors");
+  });
+
+  it("makes the table editable in place", async () => {
+    const wrapper = await mountWrapper(tableProps(), undefined, {
+      refAuthors: [author("p1")],
+    });
+    expect(wrapper.find('[data-cy="field-value"]').attributes("role")).toBe(
+      "button",
+    );
+  });
+
+  // The table has its own borders; a dashed line under it adds nothing.
+  it("does not underline the table", async () => {
+    const wrapper = await mountWrapper(tableProps(), undefined, {
+      refAuthors: [author("p1")],
+    });
+    expect(
+      wrapper.find('[data-cy="field-value-text"]').classes(),
+    ).not.toContain("border-dashed");
+  });
+
+  it("renders the table, editable, inside the inline editor", async () => {
+    const wrapper = await openTable();
+    const table = inlineEditor(wrapper).findComponent({
+      name: "TableInputField",
+    });
+    expect(table.props()).toMatchObject({
+      formId: "MW-TEST",
+      parentFieldKey: "relationValues.refAuthors",
+      relationType: "refAuthors",
+      disabled: false,
+    });
+  });
+
+  it("saves only the added row, with its metadata", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("p2", "ill", { editStatus: "new" })]);
+    expect(inlineEditor(wrapper).props("dirty")).toBe(true);
+    await save(wrapper);
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput).toEqual({
+      metadata: [],
+      relations: [
+        {
+          key: "p2",
+          type: "refAuthors",
+          metadata: [{ key: "function_indication", value: "ill" }],
+          editStatus: "new",
+        },
+      ],
+      updateOnlyRelations: true,
+    });
+  });
+
+  it("saves a changed value in an existing row", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1", "ill")]);
+    await save(wrapper);
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.relations).toEqual([
+      {
+        key: "p1",
+        type: "refAuthors",
+        editStatus: "changed",
+        metadata: [{ key: "function_indication", value: "ill" }],
+      },
+    ]);
+  });
+
+  it("ignores a new row with no entity chosen", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("", "", { editStatus: "new" })]);
+    expect(inlineEditor(wrapper).props("dirty")).toBe(false);
+  });
+
+  it("does not save while a cell is invalid", async () => {
+    defineRule("required", (value: unknown) => !!value || "Name is required");
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("", "ill", { editStatus: "new" })]);
+    mount(
+      defineComponent({
+        setup() {
+          useField("relationValues.refAuthors[1].key", "required", {
+            form: form(),
+          });
+          return () => null;
+        },
+      }),
+    );
+    await save(wrapper);
+    expect(scopedSave.saveScope).not.toHaveBeenCalled();
+    expect(inlineEditor(wrapper).props("errorMessage")).toBe(
+      "Name is required",
+    );
+  });
+
+  it("restores the rows on cancel", async () => {
+    const wrapper = await openTable();
+    await setRows([author("p1"), author("p2", "ill", { editStatus: "new" })]);
+    inlineEditor(wrapper).vm.$emit("cancel");
+    await flushPromises();
+    expect(form().values.relationValues.refAuthors).toEqual([author("p1")]);
+  });
+});
+
+describe("MetadataWrapper — a field in a repeatable row", () => {
+  const helper = () => ({
+    fieldKey: "isbn_group",
+    // The composable puts the value in the row it saves as.
+    rowsForSave: vi.fn(() => [{ isbn: "111" }, { isbn: "333", note: "x" }]),
+    markSaved: vi.fn(),
+  });
+  const rowProps = (rows: ReturnType<typeof helper>, index = 1) => {
+    const p = buildProps("isbn", false);
+    (p.metadata as any).value = { isbn: "222", note: "x" };
+    (p as any).repeatablePanelConfig = {
+      isRepeatable: true,
+      index,
+      field: undefined,
+      repeatableFieldsHelper: rows,
+    };
+    return p;
+  };
+  const inlineEditor = (wrapper: any) =>
+    wrapper.findComponent({ name: "InlineFieldEditor" });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:isbn[1]");
+  });
+
+  it("is editable in place, in its own scope per row", async () => {
+    const wrapper = await mountWrapper(rowProps(helper()));
+    const value = wrapper.find('[data-cy="field-value"]');
+    expect(value.attributes("role")).toBe("button");
+    await value.trigger("click");
+    expect(useEditScope().isActive("MW-TEST:isbn[1]")).toBe(true);
+  });
+
+  it("saves the whole list with this row's value changed", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const rows = helper();
+    const wrapper = await mountWrapper(rowProps(rows));
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    inlineEditor(wrapper).vm.$emit("save", "333");
+    await flushPromises();
+    const saved = [{ isbn: "111" }, { isbn: "333", note: "x" }];
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "isbn_group", value: saved },
+    ]);
+    expect(rows.rowsForSave).toHaveBeenCalledWith(1, "isbn", "333");
+    expect(rows.markSaved).toHaveBeenCalledWith(saved, 1);
+  });
+});
+
 describe("MetadataWrapper — color field view", () => {
   const buildColorProps = (value: string) => ({
     ...buildProps("color", false),
@@ -358,5 +1531,90 @@ describe("MetadataWrapper — color field view", () => {
     expect(wrapper.find('[data-cy="metadata-color-value"]').exists()).toBe(
       false,
     );
+  });
+});
+
+describe("MetadataWrapper — a multilingual field", () => {
+  // What MultilingualWrapper provides for the field (multilingual:<key>).
+  const multilingualField = (enabled = true) => ({
+    currentValue: computed(() => "hello"),
+    selectedLocale: ref("fr"),
+    localeOptions: computed(() => [
+      { icon: undefined, label: "Frans", value: "fr" },
+    ]),
+    isEnabled: computed(() => enabled),
+    showSelector: true,
+    updateValue: vi.fn(),
+  });
+  const multilingualProps = () => {
+    const p = buildProps("year", false);
+    (p.metadata as any).isMultilingual = true;
+    return p;
+  };
+  const mountMultilingual = (field = multilingualField(), p = multilingualProps()) =>
+    mountWrapper(p, undefined, {}, { "multilingual:year": field });
+
+  beforeEach(() => {
+    scopedSave.saveScope.mockReset();
+    useEditMode("MW-TEST").setPermittedEditMode({
+      canUpdate: true,
+      canDelete: false,
+    });
+    useEditScope().release("MW-TEST:year");
+  });
+
+  it("is editable in place", async () => {
+    const value = (await mountMultilingual()).find('[data-cy="field-value"]');
+    expect(value.attributes("role")).toBe("button");
+  });
+
+  it("saves the value in the selected language only", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const field = multilingualField();
+    const wrapper = await mountMultilingual(field);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    wrapper.findComponent({ name: "InlineFieldEditor" }).vm.$emit("save", "salut");
+    await flushPromises();
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: "salut", lang: "fr" },
+    ]);
+    expect(field.updateValue).toHaveBeenCalledWith("salut");
+  });
+
+  it("fixes the language while editing: a chip instead of the language picker", async () => {
+    const wrapper = await mountMultilingual();
+    expect(
+      wrapper.findComponent({ name: "MultilingualLocaleSelector" }).exists(),
+    ).toBe(true);
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    expect(
+      wrapper.findComponent({ name: "MultilingualLocaleSelector" }).exists(),
+    ).toBe(false);
+    expect(wrapper.find('[data-cy="field-editing-locale"]').text()).toBe("Frans");
+  });
+
+  it("saves without a language when multilingual editing is off", async () => {
+    scopedSave.saveScope.mockResolvedValue({ id: "MW-TEST" });
+    const wrapper = await mountMultilingual(multilingualField(false));
+    await wrapper.find('[data-cy="field-value"]').trigger("click");
+    wrapper.findComponent({ name: "InlineFieldEditor" }).vm.$emit("save", "x");
+    await flushPromises();
+    expect(scopedSave.saveScope.mock.calls[0][0].formInput.metadata).toEqual([
+      { key: "year", value: "x" },
+    ]);
+  });
+
+  it("stays read-only in a repeatable row, which saves no language", async () => {
+    const p = multilingualProps();
+    (p as any).repeatablePanelConfig = {
+      isRepeatable: true,
+      index: 0,
+      field: undefined,
+      repeatableFieldsHelper: { fieldKey: "g", rowsForSave: vi.fn(), markSaved: vi.fn() },
+    };
+    const value = (await mountMultilingual(multilingualField(), p)).find(
+      '[data-cy="field-value"]',
+    );
+    expect(value.attributes("role")).toBeUndefined();
   });
 });

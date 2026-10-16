@@ -5,6 +5,17 @@ import { ref } from "vue";
 const mocks = vi.hoisted(() => ({
   createdHelpers: [] as { name: string; helper: any }[],
   relatedOptions: [] as any[],
+  // How the registry hands out loading state: the creator gets a ref, later
+  // callers get the reactive registry entry, where it is a plain boolean.
+  loading: undefined as undefined | { as: "ref" | "plain"; value: boolean },
+  formattersSettings: {} as Record<string, unknown>,
+  replaceRelationsFromSameType: vi.fn(),
+}));
+
+vi.mock("@/main", () => ({
+  get formattersSettings() {
+    return mocks.formattersSettings;
+  },
 }));
 
 vi.mock("@/composables/useGetDropdownOptions", () => ({
@@ -13,7 +24,11 @@ vi.mock("@/composables/useGetDropdownOptions", () => ({
       initialize: vi.fn().mockResolvedValue(undefined),
       getAutocompleteOptions: vi.fn().mockResolvedValue(undefined),
       entityDropdownOptions: ref([]),
-      entitiesLoading: ref(false),
+      entitiesLoading: !mocks.loading
+        ? ref(false)
+        : mocks.loading.as === "ref"
+          ? ref(mocks.loading.value)
+          : mocks.loading.value,
       getFormWithRelationFieldCheck: vi.fn(),
     };
     if (name.includes("fetchRelations"))
@@ -35,7 +50,7 @@ vi.mock("@/composables/useEdit", () => ({
 
 vi.mock("@/composables/useFormHelper", () => ({
   useFormHelper: () => ({
-    replaceRelationsFromSameType: vi.fn(),
+    replaceRelationsFromSameType: mocks.replaceRelationsFromSameType,
     addRelations: vi.fn(),
     getRelationsBasedOnType: vi.fn(() => undefined),
   }),
@@ -112,13 +127,16 @@ describe("ViewModesAutocompleteRelations prefetch on mount", () => {
   });
 
   it("still prefetches exactly once when autoSelectable is set (podiumnet autoselect path)", async () => {
-    mountWith({ mode: "create", autoSelectable: true, modelValue: "some-value" });
+    mountWith({
+      mode: "create",
+      autoSelectable: true,
+      modelValue: "some-value",
+    });
     await flushPromises();
 
     expect(helperInitializeCalls("fetchAll")).toBe(1);
   });
 });
-
 
 describe("ViewModesAutocompleteRelations read-only fallback to related options", () => {
   beforeEach(() => {
@@ -159,7 +177,6 @@ describe("ViewModesAutocompleteRelations read-only fallback to related options",
     expect(options).toEqual(mocks.relatedOptions);
   });
 
-
   it("never hands the autocomplete a ref when the related options helper is set up without results", async () => {
     const wrapper = shallowMount(ViewModesAutocompleteRelations, {
       props: {
@@ -186,5 +203,159 @@ describe("ViewModesAutocompleteRelations read-only fallback to related options",
       .props("options");
     expect(Array.isArray(options)).toBe(true);
   });
+});
 
+describe("ViewModesAutocompleteRelations in an inline editor", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [];
+    vi.clearAllMocks();
+  });
+
+  const input = (wrapper: ReturnType<typeof mountWith>) =>
+    wrapper.find("base-input-autocomplete-stub");
+
+  it("hides an empty input outside editing, showing the empty value instead", async () => {
+    const wrapper = mountWith({ mode: "edit" });
+    await flushPromises();
+    expect(input(wrapper).attributes("style")).toContain("display: none");
+  });
+
+  it("shows the input even when nothing is selected yet while editing in place", async () => {
+    const wrapper = mountWith({ mode: "edit", editing: true });
+    await flushPromises();
+    expect(input(wrapper).attributes("style") ?? "").not.toContain(
+      "display: none",
+    );
+    expect(wrapper.find("p").attributes("style")).toContain("display: none");
+  });
+});
+
+describe("ViewModesAutocompleteRelations loading state", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [];
+    vi.clearAllMocks();
+  });
+
+  const loadingProp = async (as: "ref" | "plain", value: boolean) => {
+    mocks.loading = { as, value };
+    const wrapper = mountWith({ mode: "edit", editing: true });
+    await flushPromises();
+    mocks.loading = undefined;
+    return wrapper.find("base-input-autocomplete-stub").attributes("loading");
+  };
+
+  it("shows the dropdown's spinner while options load (state as a ref)", async () => {
+    expect(await loadingProp("ref", true)).toBe("true");
+  });
+
+  it("shows the dropdown's spinner while options load (state from the registry)", async () => {
+    expect(await loadingProp("plain", true)).toBe("true");
+  });
+
+  it("shows no spinner once loaded", async () => {
+    expect(await loadingProp("plain", false)).toBe("false");
+  });
+});
+
+describe("ViewModesAutocompleteRelations chips as links", () => {
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    vi.clearAllMocks();
+  });
+
+  const mountWithLinks = async (
+    link: Record<string, unknown>,
+    relationType: string,
+  ) => {
+    const helpers = await import("@/helpers");
+    mocks.formattersSettings = { link };
+    const wrapper = mountWith({ relationType, mode: "view", disabled: true });
+    await flushPromises();
+    return {
+      autocomplete: wrapper.findComponent({ name: "BaseInputAutocomplete" }),
+      goTo: vi.mocked(helpers.goToEntityPageById),
+    };
+  };
+  const clickTag = async (autocomplete: any) => {
+    autocomplete.vm.$emit("handleTagClick", { value: "org-1", label: "Org" });
+    await flushPromises();
+  };
+
+  it("makes the chips links when a link setting names the relation type", async () => {
+    const { autocomplete, goTo } = await mountWithLinks(
+      { genre: { link: "/genres/$value", relationType: "refGenres" } },
+      "refGenres",
+    );
+    expect(autocomplete.props("tagsAreLinks")).toBe(true);
+    await clickTag(autocomplete);
+    expect(goTo).toHaveBeenCalledWith(
+      "org-1",
+      { type: "genre" },
+      "SingleEntity",
+      expect.anything(),
+    );
+  });
+
+  it("keeps the chips plain when no link setting names the relation type", async () => {
+    const { autocomplete, goTo } = await mountWithLinks(
+      { genre: { link: "/genres/$value", relationType: "refGenres" } },
+      "refVenues",
+    );
+    expect(autocomplete.props("tagsAreLinks")).toBe(false);
+    await clickTag(autocomplete);
+    expect(goTo).not.toHaveBeenCalled();
+  });
+});
+
+describe("ViewModesAutocompleteRelations — entities picked in the picker (Blader…)", () => {
+  const picked = (wrapper: any) =>
+    wrapper.findComponent({ name: "BaseInputAutocomplete" }).props("modelValue");
+
+  beforeEach(() => {
+    mocks.createdHelpers.length = 0;
+    mocks.relatedOptions = [{ label: "Gent", value: "v-1" }];
+    mocks.replaceRelationsFromSameType.mockClear();
+  });
+
+  const mountEditing = async (selectType: "single" | "multi") => {
+    const wrapper = mountWith({
+      mode: "edit",
+      isReadOnly: true,
+      selectType,
+      modelValue: [{ key: "v-1" }],
+    });
+    await flushPromises();
+    return wrapper;
+  };
+
+  it("adds them as chips with their labels, next to the chosen ones", async () => {
+    const wrapper = await mountEditing("multi");
+    (wrapper.vm as any).addPicked([{ label: "Gent", value: "v-1" }]);
+    (wrapper.vm as any).addPicked([
+      { label: "Brugge", value: "v-2" },
+      { label: "Gent", value: "v-1" },
+    ]);
+    await flushPromises();
+    expect(picked(wrapper)).toEqual([
+      { label: "Gent", value: "v-1" },
+      { label: "Brugge", value: "v-2" },
+    ]);
+    expect(mocks.replaceRelationsFromSameType).toHaveBeenLastCalledWith(
+      [
+        expect.objectContaining({ id: "v-1" }),
+        expect.objectContaining({ id: "v-2" }),
+      ],
+      "refEpiDocTag",
+      "form-1",
+    );
+  });
+
+  it("replaces the choice of a single select", async () => {
+    const wrapper = await mountEditing("single");
+    (wrapper.vm as any).addPicked([{ label: "Brugge", value: "v-2" }]);
+    await flushPromises();
+    expect(picked(wrapper)).toEqual([{ label: "Brugge", value: "v-2" }]);
+  });
 });

@@ -48,7 +48,7 @@
             :enable-preview="true"
             :enable-advanced-filters="enableAdvancedFilters"
             :enable-bulk-operations="true"
-            :enable-navigation="enableNavigation"
+            :action-on-click="actionOnClick"
             :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="entityType"
             :filter-type="Entitytyping.Mediafile"
@@ -83,7 +83,7 @@
             :search-input-type-on-drawer="SearchInputType.AdvancedInputType"
             :enable-advanced-filters="enableAdvancedFilters"
             :enable-bulk-operations="true"
-            :enable-navigation="enableNavigation"
+            :action-on-click="actionOnClick"
             :entity-type="types[0]"
             :parent-entity-identifiers="identifiers"
             :parent-entity-type="entityType"
@@ -121,6 +121,7 @@ import type {
   EntitySubelement,
 } from "@/generated-types/queries";
 import {
+  ActionOnClick,
   SearchInputType,
   EntityListViewMode,
   type Entity,
@@ -174,7 +175,7 @@ const props = withDefaults(
     identifiers: string[];
     relationType: string;
     viewMode?: EntityListViewMode;
-    enableNavigation?: boolean;
+    actionOnClick?: ActionOnClick;
     baseLibraryMode?: BaseLibraryModes;
     disableLibraryBar?: boolean;
     entityId: string;

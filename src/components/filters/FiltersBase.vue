@@ -152,7 +152,6 @@ import {
   type DropdownOption,
   type Matchers,
   type GetFilterMatcherMappingQuery,
-  type AdvancedFilter,
   ContextMenuGeneralActionEnum,
   FilterMatchers,
 } from "@/generated-types/queries";

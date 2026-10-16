@@ -26,6 +26,7 @@ component's style block:
 | `--text-value` | trigger value |
 | `--text-table` | options |
 | `--radius-input` | trigger |
+| `--control-height` | trigger height, the same as the text input |
 | `--radius-card`, `--shadow-overlay`, `--color-border-subtle` | popup |
 | `--color-border-default` | trigger border (bordered variant) |
 | `--color-accent-wash` | option hover and keyboard focus |
@@ -56,8 +57,8 @@ component's style block:
   "— Geen waarde". Picking it clears the value. Required or chrome selects
   pass `:clearable="false"` and get neither ✕ nor the empty option.
 - **Multi selects** keep the popup open, and keep selected options in the list.
-- **Picking never saves.** The editor around the dropdown commits with
-  Bewaar.
+- **Picking never saves.** The editor around the dropdown saves when you
+  leave it or press Enter (a form: with Bewaar).
 - Options keep their config order.
 
 ## Accessibility

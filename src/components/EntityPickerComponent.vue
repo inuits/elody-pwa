@@ -27,8 +27,7 @@
       :filters="allFilters"
       :show-button="showButton"
       :confirm-selection-button="true"
-      :open-entity-in-detail-modal="true"
-      :enable-navigation="false"
+      :action-on-click="ActionOnClick.OpenInModal"
       :enable-advanced-filters="
         searchMode !== EntityPickerSearchMode.Search && enableAdvancedFilters
       "
@@ -71,6 +70,7 @@ import {
   type MutateEntityValuesMutationVariables,
   SearchInputType,
   TypeModals,
+  ActionOnClick,
 } from "@/generated-types/queries";
 import {
   buildEntityPickerSearchFilters,

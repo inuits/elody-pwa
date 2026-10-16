@@ -10,7 +10,7 @@ use the same tokens.
 - **Chip:** a short status or category value ("Concept", "Gepubliceerd").
 - **Badge:** an entity type shown as one letter (W, E, M), always with its
   full name available to screen readers.
-- **Relation chip:** a linked entity. Clicking it navigates.
+- **Relation chip:** a linked entity. It navigates on click only when the client config has a `link` entry whose `relationType` matches the field; then it shows a pointer and hover colour. Otherwise it looks static, and a click opens the field's editor.
 - **Value chip:** a chosen value of a dropdown field (publication status,
   yes/no) shown in the autocomplete tag input. Not a link.
 - Not for actions. A chip never triggers a change by itself.
@@ -26,6 +26,7 @@ use the same tokens.
 |---|---|
 | `--text-chip`, `--chip-padding` | chip size and padding |
 | `--text-chip-lg`, `--chip-padding-lg` | large chip (comparison columns) |
+| `--chip-plain-text-height` | a relation shown as plain text instead of a chip |
 | `--text-badge`, `--badge-size`, `--badge-padding-x` | badge |
 | `--radius-chip` | all shapes |
 | `--color-badge-tone{1,2,3}-{bg,text}`, `--color-badge-subtype-*` | tones |

@@ -38,6 +38,7 @@
       <div class="flex w-1/2 shrink-0 items-center justify-center gap-2">
         <base-button-new
           v-if="
+            pageEditModeEnabled &&
             !editHelper.isEdit &&
             (editHelper.editMode === 'edit' ||
               editHelper.editMode === 'edit-delete')
@@ -91,6 +92,7 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import MetadataFormatterPill from "@/components/metadata/MetadataFormatterPill.vue";
 import { useEditMode } from "@/composables/useEdit";
+import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useFormHelper } from "@/composables/useFormHelper";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -113,6 +115,12 @@ const { confirm } = useConfirmModal();
 
 useEditMode(props.entity.id);
 const editHelper = useEditMode(props.entity.id);
+// Fields are edited in place; the page-wide edit mode is opt-in per entity
+// type (entityPageConfig[type].hasEditMetadataButton).
+const { hasEditMetadataButtonForType } = useEntityPageConfig();
+const pageEditModeEnabled = computed<boolean>(() =>
+  hasEditMetadataButtonForType(props.entity.type ?? ""),
+);
 const entityRef = computed(() => props.entity);
 const identifiers = computed<string[]>(
   () => props.entity.intialValues?.identifiers ?? [props.entity.id],

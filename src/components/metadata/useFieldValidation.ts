@@ -39,22 +39,26 @@ export const useFieldValidation = (
     isEdit: boolean,
     isFieldRequired: boolean,
   ): string => {
-    let defaultRules = "no_xss";
     const validationOnField = getValidation() ?? undefined;
 
-    if (!validationOnField) return defaultRules;
+    if (!validationOnField) return "no_xss";
 
     const validationValue: ValidationRules[] = toArray<ValidationRules>(
       validationOnField.value || undefined,
     );
+    const xssRule = validationValue.includes(ValidationRules.NoDefaults)
+      ? []
+      : ["no_xss"];
 
-    if (validationValue) {
-      if (validationValue.includes(ValidationRules.CustomValue)) {
-        if (!validationOnField.customValue)
-          throw Error("Please define a 'customValue' when using CustomValue");
-        return validationOnField.customValue;
-      } else defaultRules += `|${validationValue.join("|")}`;
+    if (validationValue.includes(ValidationRules.CustomValue)) {
+      if (!validationOnField.customValue)
+        throw Error("Please define a 'customValue' when using CustomValue");
+      return validationOnField.customValue;
     }
+    const defaultRules = [
+      ...xssRule,
+      ...validationValue.filter((rule) => rule !== ValidationRules.NoDefaults),
+    ].join("|");
 
     if (isRulePresent(validationOnField, ValidationRules.Regex)) {
       const cleanedRegex = cleanRegexValue(validationOnField.regex || "");
@@ -106,12 +110,12 @@ export const useFieldValidation = (
     ) {
       const { includedMetadataFields = [], amount } =
         validationOnField.has_one_of_required_metadata ?? {};
-      return `${defaultRules}:${amount}:${includedMetadataFields.join(":")}|no_xss`;
+      return `${defaultRules}:${amount}:${[includedMetadataFields.join(":"), ...xssRule].join("|")}`;
     }
 
     if (isFieldRequired) {
       if (defaultRules.includes(ValidationRules.Required)) return defaultRules;
-      return `${defaultRules}|required`;
+      return defaultRules ? `${defaultRules}|required` : "required";
     }
 
     return defaultRules;

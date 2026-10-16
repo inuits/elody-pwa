@@ -80,6 +80,29 @@ describe("BaseInputTextNumberDatetime", () => {
         '[data-cy="base-input-text"]',
       );
 
+    it("is at least the shared control height", () => {
+      expect(textInput().classes()).toContain("min-h-(--control-height)");
+    });
+
+    describe("compact (inside a chip)", () => {
+      const compact = () => textInput({ size: "compact" }).classes();
+
+      it("uses the compact height and padding, at the label size", () => {
+        expect(compact()).toEqual(
+          expect.arrayContaining([
+            "min-h-(--control-height-compact)",
+            "p-(--input-padding-compact)",
+            "text-label",
+          ]),
+        );
+      });
+
+      it("drops the full control height and size", () => {
+        expect(compact()).not.toContain("min-h-(--control-height)");
+        expect(compact()).not.toContain("text-input");
+      });
+    });
+
     it("uses the input radius token", () => {
       expect(textInput().classes()).toContain("rounded-input");
     });

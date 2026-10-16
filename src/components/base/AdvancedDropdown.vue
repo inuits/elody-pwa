@@ -31,17 +31,21 @@
         menuContainer: `border border-border-subtle rounded-card shadow-overlay !mt-0 !z-header`,
       }"
     >
-      <template #option="{ option, isSelected }">
+      <!-- vue3-select-component renders this slot as a component with
+           hyphenated props ("is-selected"), so the selection is read from
+           our own state instead of the slot's isSelected. -->
+      <template #option="{ option }">
         <input
           v-if="multiple"
           type="checkbox"
-          class="mr-2 accent-commit pointer-events-none"
-          :checked="isSelected"
+          class="mr-2 pointer-events-none"
+          :class="CHECKBOX_BOX_CLASSES"
+          :checked="isOptionSelected(option)"
           tabindex="-1"
           aria-hidden="true"
         />
         <div
-          v-else-if="isSelected"
+          v-else-if="isOptionSelected(option)"
           data-cy="option-check"
           class="mr-2 w-[18px] h-[18px]"
         >
@@ -121,6 +125,7 @@ import {
   type DropdownOption,
 } from "@/generated-types/queries";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { CHECKBOX_BOX_CLASSES } from "@/components/base/checkboxStyles";
 import { stripHighlightTags } from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useRoute } from "vue-router";
@@ -244,6 +249,12 @@ const selectOptions = computed<DropdownOption[]>(() => {
 const selectedValues = computed<any[]>(() =>
   Array.isArray(selectedItem.value) ? selectedItem.value : [],
 );
+const isOptionSelected = (option: DropdownOption): boolean =>
+  props.multiple
+    ? selectedValues.value.includes(option.value)
+    : selectedItem.value !== undefined &&
+      selectedItem.value !== null &&
+      selectedItem.value === option.value;
 const isFirstSelected = (option: any): boolean =>
   selectedValues.value[0] === option.value;
 const selectedCountLabel = computed<string>(() => {
@@ -346,7 +357,7 @@ body {
   --vs-border: 1px solid var(--color-border-default);
   --vs-border-radius: var(--radius-input);
   --vs-padding: 5px 8px;
-  --vs-min-height: 32px;
+  --vs-min-height: var(--control-height);
   --vs-outline-width: var(--focus-ring-width);
   --vs-outline-color: var(--color-focus-ring);
   --vs-indicator-icon-color: var(--color-text-secondary);

@@ -49,7 +49,7 @@
         :enable-preview="true"
         :enable-advanced-filters="false"
         :enable-bulk-operations="true"
-        :enable-navigation="false"
+        :action-on-click="ActionOnClick.OpenPreview"
         :parent-entity-identifiers="
           entityId === mediafileSelectionState.selectedMediafile?.id ||
           entityId === mediafileSelectionState.selectedMediafile?.uuid
@@ -75,6 +75,7 @@
 
 <script lang="ts" setup>
 import {
+  ActionOnClick,
   Entitytyping,
   type MediaFileElement,
   MediaFileElementTypes,

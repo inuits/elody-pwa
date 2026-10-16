@@ -17,6 +17,7 @@ import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
+import { createScopeSavedHandler } from "@/composables/scopeSavedHandler";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
   inject,
@@ -34,7 +35,9 @@ import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper, type EntityValues } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
-import { onBeforeRouteLeave } from "vue-router";
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { useEditScope } from "@/composables/useEditScope";
+import { decideLeave, leavesRecord } from "@/composables/useLeaveGuard";
 import { useSubmitForm } from "vee-validate";
 import {
   getChildrenOfHomeRoutes,
@@ -162,6 +165,11 @@ const submit = useSubmitForm<EntityValues>(async () => {
 provide("entityFormData", {
   id: props.id,
   type: props.type,
+  // Per-field saves hand the saved entity back to the page here.
+  onSaved: createScopeSavedHandler<Entity>({
+    emitSaved: (savedEntity) => emit("mutatedEntityUpdated", savedEntity),
+    notifySuccess: (title, text) => displaySuccessNotification(t(title), t(text)),
+  }),
   collection:
     childRoutes.find(
       (route: any) =>
@@ -228,10 +236,9 @@ const validateAndSetDisableState = async () => {
   useEditHelper.setDisableState(formContainsErrors.value);
 };
 
-onBeforeRouteLeave(async () => {
-  if (!useEditHelper.isEdit || !form.value.meta.dirty) return true;
-
-  const choice = await confirm({
+const editScope = useEditScope();
+const askToLeave = () =>
+  confirm({
     title: t("confirm.discard-edit.title"),
     message: t("confirm.discard-edit.message"),
     confirmLabel: t("confirm.discard-edit.confirm"),
@@ -240,10 +247,28 @@ onBeforeRouteLeave(async () => {
     secondaryButtonStyle: "commit",
   });
 
-  if (choice === "secondary") {
-    await useEditHelper.save();
-    return true;
-  }
-  return choice === "confirm";
-});
+// Unsaved changes: the legacy page-wide edit mode or an open in-place editor.
+onBeforeRouteLeave(() =>
+  decideLeave({
+    pageEditChanged: !!useEditHelper.isEdit && form.value.meta.dirty,
+    scopeChanged: editScope.hasUnsavedChanges.value,
+    ask: askToLeave,
+    savePageEdit: () => useEditHelper.save(),
+    saveScope: editScope.saveActive,
+  }),
+);
+
+// Moving to another record keeps this component: only an in-place editor is
+// checked here (the breadcrumbs already ask for the page-wide edit mode). A
+// query or hash change stays on the record and is never asked about.
+onBeforeRouteUpdate((to, from) =>
+  !leavesRecord(to, from) ||
+  decideLeave({
+    pageEditChanged: false,
+    scopeChanged: editScope.hasUnsavedChanges.value,
+    ask: askToLeave,
+    savePageEdit: async () => undefined,
+    saveScope: editScope.saveActive,
+  }),
+);
 </script>

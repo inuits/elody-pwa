@@ -2,7 +2,7 @@
   <base-input-autocomplete
     v-show="
       selectedDropdownOptions.length > 0 ||
-      isEdit ||
+      isEditing ||
       mode === 'create' ||
       isLoading
     "
@@ -13,6 +13,7 @@
         : selectedDropdownOptions
     "
     :relationType="relationType"
+    :tags-are-links="!!linkEntityType"
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
@@ -44,7 +45,7 @@
   <p
     v-show="
       selectedDropdownOptions.length === 0 &&
-      !isEdit &&
+      !isEditing &&
       mode !== 'create' &&
       !isLoading
     "
@@ -89,7 +90,8 @@ import {
   getEntityTitle,
   looksLikeEntityId,
 } from "@/helpers";
-import { getFormattersSettings, goToEntityPageById } from "@/helpers";
+import { goToEntityPageById } from "@/helpers";
+import { formattersSettings } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useManageEntities } from "@/composables/useManageEntities";
@@ -125,6 +127,8 @@ const props = withDefaults(
     isMetadataField?: boolean;
     metadataOnRelationConfig?: MetadataOnRelationFieldConfig | null;
     readOnlyValueAsPlainText?: boolean;
+    // Rendered by an inline editor: editable outside the page-wide edit mode.
+    editing?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -153,6 +157,7 @@ const selectedDropdownOptions = ref<DropdownOption[]>([]);
 const tagInputValues = ref<Map<string | number, string>>(new Map());
 const { createEntity } = useManageEntities();
 const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
+const isEditing = computed<boolean>(() => !!props.editing || !!unref(isEdit));
 const { replaceRelationsFromSameType, addRelations, getRelationsBasedOnType } =
   useFormHelper();
 
@@ -180,8 +185,10 @@ onBeforeUnmount(() => {
 
 const isLoading = computed(() => {
   return (
-    allEntitiesHelper.value.entitiesLoading.value ||
-    relatedEntitiesHelper.value.entitiesLoading.value ||
+    // The creator of a dropdown state gets refs, later callers the reactive
+    // registry entry (already unwrapped): unref reads both.
+    unref(allEntitiesHelper.value.entitiesLoading) ||
+    unref(relatedEntitiesHelper.value.entitiesLoading) ||
     isCreatingEntity.value
   );
 });
@@ -357,6 +364,21 @@ const handleSelect = (
   selectedDropdownOptions.value = [...options];
 };
 
+// Entities picked in the entity picker ("Blader…") join the chosen ones, with
+// their labels, as if picked from the list. A single select takes the first.
+const addPicked = (options: DropdownOption[]) => {
+  if (options.length === 0) return;
+  if (props.selectType === "single") return handleSelect(options.slice(0, 1));
+  const chosen = selectedDropdownOptions.value ?? [];
+  handleSelect([
+    ...chosen,
+    ...options.filter(
+      (option) => !chosen.some((entry) => entry.value === option.value),
+    ),
+  ]);
+};
+defineExpose({ addPicked });
+
 const handleCreatingFromTag = async (option: any) => {
   if (!props.canCreateOption) return;
 
@@ -460,15 +482,22 @@ const findAutocompleteOption = async (
   return allEntitiesHelper.value.entityDropdownOptions.value?.[0];
 };
 
-const handleTagClick = async (tag: DropdownOption) => {
-  if (isEdit) return;
-  const linkFormattersSettings = (await getFormattersSettings())?.link || {};
-  const [entityType, linkSetting] =
-    Object.entries(linkFormattersSettings).find(
+// The entity type whose link setting names this relation type, if any.
+const linkEntityType = computed<string | undefined>(
+  () =>
+    Object.entries(formattersSettings?.link || {}).find(
       ([, value]) => (value as any).relationType === props.relationType,
-    ) || [];
-  if (entityType && linkSetting)
-    goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
+    )?.[0],
+);
+
+const handleTagClick = (tag: DropdownOption) => {
+  if (isEditing.value || !linkEntityType.value) return;
+  goToEntityPageById(
+    tag.value,
+    { type: linkEntityType.value },
+    "SingleEntity",
+    router,
+  );
 };
 
 watch(

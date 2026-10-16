@@ -2,6 +2,9 @@
 
 Selects or deselects one item. Implemented by
 `src/components/base/BaseInputCheckbox.vue`.
+The box's classes live in `src/components/base/checkboxStyles.ts`
+(`CHECKBOX_BOX_CLASSES`), shared with the checkboxes in a multi-select
+dropdown's options, so both look the same.
 
 ## When to use
 - Selecting rows or items, including bulk selection, and options in a
