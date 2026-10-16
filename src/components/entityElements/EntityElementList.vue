@@ -69,6 +69,7 @@
             :id="id"
             :library-data-key="libraryDataKey"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+            :open-preview-by-default="openPreviewByDefault"
           />
           <BaseLibrary
             class="flex-1"
@@ -107,6 +108,7 @@
             :library-data-key="libraryDataKey"
             :actions-on-result="actionsOnResult"
             :add-entities-to-forms="addEntitiesToForms"
+            :open-preview-by-default="openPreviewByDefault"
           />
         </div>
       </template>
@@ -187,6 +189,7 @@ const props = withDefaults(
     id: string;
     previewLabel?: string;
     cropMediafileCoordinatesKey?: string;
+    openPreviewByDefault?: boolean;
     actionsOnResult?: ActionsOnResult;
     addEntitiesToForms?: boolean;
     headerStyle?: "normal" | "none";
@@ -202,6 +205,7 @@ const props = withDefaults(
     allowedActionsOnRelations: () => [],
     filtersNeedContext: undefined,
     previewLabel: undefined,
+    openPreviewByDefault: undefined,
     addEntitiesToForms: false,
     headerStyle: "normal",
   },
