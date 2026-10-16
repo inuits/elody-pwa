@@ -487,17 +487,23 @@ watch(
   }
 }
 
-@container preview (min-width: 450px) {
+/* A split nested in a preview: same tiers, against its own container */
+@container preview (min-width: 500px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }
 }
-@container preview (min-width: 550px) {
+@container preview (min-width: 630px) {
   .responsive-grid {
     grid-template-columns: 35% 65%;
   }
 }
-@container preview (min-width: 755px) {
+@container preview (min-width: 830px) {
+  .responsive-grid {
+    grid-template-columns: 30% 70%;
+  }
+}
+@container preview (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
   }

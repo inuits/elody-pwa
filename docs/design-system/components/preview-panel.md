@@ -27,6 +27,13 @@ own ×.
 - Clicking another row swaps the content; the title announces the change
   (`aria-live="polite"`).
 
+## Split
+The list and the preview share their container by container queries:
+below 500px they stack; 500 / 630 / 830 / 1024px → 40/60, 35/65, 30/70,
+25/75. A split nested inside a preview uses the same tiers against its own
+container (`preview` container name). While a preview is open the list
+shows only its first field (table: first column).
+
 ## Accessibility
 - `role="complementary"`, named by the title (`aria-labelledby`).
 

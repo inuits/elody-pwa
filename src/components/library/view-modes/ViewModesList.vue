@@ -494,20 +494,27 @@ const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
   }
 }
 
-/* Preview container queries */
-@container preview (min-width: 450px) {
+/* Preview container queries: a split nested in a preview uses the same
+   tiers, measured against its own container (entity-list-element.md) */
+@container preview (min-width: 500px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }
 }
 
-@container preview (min-width: 550px) {
+@container preview (min-width: 630px) {
   .responsive-grid {
     grid-template-columns: 35% 65%;
   }
 }
 
-@container preview (min-width: 755px) {
+@container preview (min-width: 830px) {
+  .responsive-grid {
+    grid-template-columns: 30% 70%;
+  }
+}
+
+@container preview (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
   }
