@@ -337,4 +337,38 @@ describe("ListItem", () => {
       );
     });
   });
+
+  describe("row controls", () => {
+    it("toggles the preview from a real eye button", async () => {
+      const wrapper = shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "row-1",
+          baseLibraryMode: "normalBaseLibrary" as any,
+          previewComponentFeatureEnabled: true,
+        },
+      });
+      const toggle = wrapper.findComponent({ name: "PreviewToggle" });
+
+      toggle.vm.$emit("toggle");
+
+      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["row-1"]);
+    });
+
+    it("navigates from a real, named button", async () => {
+      const wrapper = shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "row-1",
+          previewComponentEnabled: true,
+          isEnableNavigation: true,
+        },
+      });
+      const open = wrapper.find('button[data-cy="list-item-open"]');
+
+      expect(open.attributes("aria-label")).toBe("actions.labels.open-item");
+      await open.trigger("click");
+      expect(wrapper.emitted("navigateTo")).toHaveLength(1);
+    });
+  });
 });

@@ -39,11 +39,21 @@ Checked 2026-10-16 against implementation plan phase 4 (items 4, 6, 8) and
 | Inscription detail | More actions (mediafiles bar chevron) | ✅ | ✅ | ✅ | ✅ |
 | Inscription detail | Actions for file_example_TIFF_5MB.jpeg (row) | ✅ | ✅ | ✅ | ✅ |
 
+Row preview eye (`PreviewToggle`, both list and table rows): a real button,
+22×22 with a 22px icon and 1px side margins (lists.card `PreviewEye`), named
+"Open preview" / "Close preview", `aria-pressed`, focusable; clicking it opens
+the preview without following the row link. The list-row "›" is a button
+named "Open {title}".
+
 Unnamed buttons: none left on the overview. On the detail page, four remain,
 all in the image viewer (see below).
 
 ## Found, out of DS 3 scope
 
+- DS 4 (#165146): with a preview open, the re-rendered list passes
+  `previewComponentCurrentActive = false` to every row, so no eye shows the
+  open state (accent, `aria-pressed="true"`). Same before DS 3; belongs with
+  the preview-active row cue (phase 4 item 1).
 - DS 4 (#165146): breadcrumb "… n" history toggle is a clickable `div`, not
   keyboard-reachable. List item rows differ from the specimen (row states,
   grid cards, list mode).

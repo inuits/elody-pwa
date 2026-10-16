@@ -267,9 +267,12 @@
         @toggle-loading="toggleLoading"
       />
     </div>
-    <div
+    <button
       v-if="previewComponentEnabled && isEnableNavigation"
-      class="flex flex-row"
+      type="button"
+      data-cy="list-item-open"
+      class="flex flex-row cursor-pointer"
+      :aria-label="t('actions.labels.open-item', { item: rowTitle ?? itemId })"
       @click="() => emit('navigateTo')"
     >
       <slot>
@@ -278,42 +281,16 @@
           class="h-5.5 w-5.5 text-text-body"
         />
       </slot>
-    </div>
-    <div
+    </button>
+    <PreviewToggle
       v-else-if="
-        baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-        baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+        previewComponentFeatureEnabled &&
+        (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+          baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
       "
-      class="flex"
-      @click.stop.prevent="emit('togglePreviewComponent', itemId)"
-    >
-      <base-tooltip position="top-right" :tooltip-offset="8">
-        <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy" class="flex">
-            <unicon
-              v-if="previewComponentFeatureEnabled"
-              :name="Unicons.Eye.name"
-              class="h-5.5 w-5.5 text-text-body mx-1"
-              :class="{
-                '!text-accent-accent fill-current':
-                  previewComponentCurrentActive,
-              }"
-            />
-          </div>
-        </template>
-        <template #default>
-          <span>
-            <div>
-              {{
-                previewComponentCurrentActive
-                  ? t("preview-component.close")
-                  : t("preview-component.open")
-              }}
-            </div>
-          </span>
-        </template>
-      </base-tooltip>
-    </div>
+      :active="previewComponentCurrentActive"
+      @toggle="emit('togglePreviewComponent', itemId)"
+    />
   </li>
   <template v-if="entityListElements">
     <div
@@ -361,9 +338,9 @@ import { useSeenState } from "@/composables/useSeenItems";
 import { computed, inject, onUpdated, ref, watch } from "vue";
 import { Unicons } from "@/types";
 import { auth, router } from "@/main";
+import PreviewToggle from "@/components/PreviewToggle.vue";
 import EntityButtons from "./EntityButtons.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useI18n } from "vue-i18n";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
 import ListItemInlineField from "@/components/ListItemInlineField.vue";
