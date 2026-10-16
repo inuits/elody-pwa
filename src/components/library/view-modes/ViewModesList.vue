@@ -21,6 +21,24 @@
           },
         ]"
       >
+        <!-- entity-list-element.md: list mode gets a column-header row when
+             every row shares its fields. Labels sit over the measured cells
+             of the first row; the cells keep theirs for screen readers. -->
+        <div
+          v-if="columnLabels"
+          ref="listHeader"
+          data-cy="list-column-header"
+          aria-hidden="true"
+          class="relative h-(--list-header-height) border-b border-border-faint text-label font-bold text-text-field-label"
+        >
+          <span
+            v-for="(label, idx) in columnLabels"
+            :key="idx"
+            class="absolute top-1/2 -translate-y-1/2 truncate"
+            :style="headerCellStyles[idx]"
+            >{{ label ? t(label) : "" }}</span
+          >
+        </div>
         <div v-if="Array.isArray(relations)">
           <div
             v-show="!disablePreviews"
@@ -55,6 +73,7 @@
               :view-mode="mode"
               :multi-line="multiLine"
               :multi-line-columns="multiLineColumns"
+              :hide-labels="!!columnLabels"
             />
           </div>
         </div>
@@ -74,7 +93,7 @@
               else entityWrapperHandler(entity.originalEntity);
             }
           "
-          v-memo="entity.memoKey"
+          v-memo="[entity.memoKey, !!columnLabels]"
         >
           <ListItem
             :item-id="entity.id"
@@ -103,6 +122,7 @@
             :preview-component-enabled="previewComponentEnabled"
             :preview-component-current-active="entity.isPreviewActive"
             :preview-open="entity.isPreviewOpen"
+            :hide-labels="!!columnLabels"
             :preview-component-feature-enabled="previewComponent !== undefined"
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
@@ -169,7 +189,11 @@ import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, unref, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useEditMode } from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { sharedColumnLabels } from "@/components/library/view-modes/composables/sharedColumnLabels";
 import { useFormHelper } from "@/composables/useFormHelper";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
@@ -371,6 +395,54 @@ const processedEntities = computed(() => {
     };
   });
 });
+
+const { t } = useI18n();
+const { getEntityUuid } = useEntitySingle();
+const editHelper = useEditMode(getEntityUuid() || "");
+
+const columnLabels = computed<string[] | undefined>(() => {
+  if (props.mode !== "list" || unref(editHelper.isEdit)) return undefined;
+  const rows = processedEntities.value.map((entity) => entity.teaserMetadata);
+  if (!rows.every(Array.isArray)) return undefined;
+  return sharedColumnLabels(rows as Metadata[][]);
+});
+
+// Places each header label over the matching cell of the first row, so the
+// header follows the row layout (actions width, wrapping, multi-line).
+const listHeader = ref<HTMLElement>();
+const headerCellStyles = ref<Record<string, string>[]>([]);
+const measureHeader = () => {
+  const header = listHeader.value;
+  const cells = header?.parentElement?.querySelector(
+    '[data-cy="list-item-content"]',
+  )?.children;
+  if (!header || !cells) return;
+  const left = header.getBoundingClientRect().left;
+  headerCellStyles.value = [...cells].map((cell) => {
+    const box = cell.getBoundingClientRect();
+    return { left: `${box.left - left}px`, width: `${box.width}px` };
+  });
+};
+const headerObserver =
+  typeof ResizeObserver === "undefined"
+    ? undefined
+    : new ResizeObserver(() => measureHeader());
+watch(
+  [listHeader, () => processedEntities.value],
+  async () => {
+    headerObserver?.disconnect();
+    await nextTick();
+    const firstRow = listHeader.value?.parentElement?.querySelector(
+      '[data-cy="list-item-content"]',
+    );
+    if (!listHeader.value || !firstRow) return;
+    headerObserver?.observe(listHeader.value);
+    headerObserver?.observe(firstRow);
+    measureHeader();
+  },
+  { flush: "post" },
+);
+onBeforeUnmount(() => headerObserver?.disconnect());
 
 const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
   openModal(

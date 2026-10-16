@@ -160,6 +160,9 @@
         { 'flex items-center': isListMode && !props.multiLine },
         { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
         { 'p-4': isGridMode },
+        // The list's column-header row shows the labels; keep them for
+        // screen readers.
+        { '[&_[data-cy=metadata-label]]:sr-only': hideLabels },
       ]"
       :style="multiLineGridStyle"
     >
@@ -369,6 +372,8 @@ const props = withDefaults(
     previewComponentCurrentActive: boolean;
     // The eye's pressed state: this row's preview is open now.
     previewOpen?: boolean;
+    // Set when the list shows a column-header row.
+    hideLabels?: boolean;
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
     isPrimaryMediafile?: boolean;
@@ -405,6 +410,7 @@ const props = withDefaults(
     multiLine: false,
     multiLineColumns: 5,
     previewOpen: false,
+    hideLabels: false,
   },
 );
 

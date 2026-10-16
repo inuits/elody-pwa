@@ -385,6 +385,7 @@
   --list-row-content-min: 8rem;
   /* Flat list and table rows: cell padding, hairline below */
   --list-row-pad: 7px 8px;
+  --list-header-height: 24px;
   /* The row whose preview is open (entity-list-element.md) */
   --list-row-preview-border: 3px;
 

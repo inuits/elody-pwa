@@ -26,6 +26,16 @@ List and table rows are flat: `--list-row-pad`, `--text-table`, a
 `--color-border-faint` hairline below, no per-row border, radius or gap.
 Grid items stay bordered cards (`--radius-card`).
 
+### Column-header row (list mode)
+When every row on the page has the same fields, list mode shows one header
+row (`--list-header-height`, `--text-label`, bold, `--color-text-field-label`,
+hairline below) and the cells drop their visible labels
+(`ListItem` `hideLabels`; the labels stay for screen readers, the header is
+`aria-hidden`). Each label is placed over the first row's measured cell, so
+it follows the row layout (actions width, wrapping, multi-line, preview
+open). Mixed lists and edit mode keep per-cell labels.
+(`sharedColumnLabels.ts`, `ViewModesList.vue`)
+
 ## Row states
 `ListItem.vue` (list, grid) and `TableViewRow.vue` (table).
 

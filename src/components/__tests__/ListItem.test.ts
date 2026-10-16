@@ -457,6 +457,28 @@ describe("ListItem", () => {
     });
   });
 
+  describe("list column header", () => {
+    it("keeps cell labels for screen readers only when the list has a header row", () => {
+      const content = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1", hideLabels: true },
+      }).find('[data-cy="list-item-content"]');
+
+      expect(content.classes()).toContain(
+        "[&_[data-cy=metadata-label]]:sr-only",
+      );
+    });
+
+    it("shows cell labels without a header row", () => {
+      const content = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1" },
+      }).find('[data-cy="list-item-content"]');
+
+      expect(content.classes()).not.toContain(
+        "[&_[data-cy=metadata-label]]:sr-only",
+      );
+    });
+  });
+
   describe("flat rows", () => {
     const rowOf = (viewMode: "list" | "grid") =>
       shallowMount(ListItem, {
