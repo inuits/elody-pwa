@@ -3,6 +3,7 @@ import ActionMenuGroup from "../ActionMenuGroup.vue";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import type { Entitytyping, DropdownOption } from "@/generated-types/queries";
 import {
+  ActionTone,
   ActionContextEntitiesSelectionType,
   TypeModals,
   Permission,
@@ -285,6 +286,26 @@ describe("ActionMenuGroup", () => {
           .findAllComponents({ name: "BaseButtonNew" })
           .some((b) => b.props("icon") === "EllipsisV"),
       ).toBe(false);
+    });
+
+    it("shows destructive actions last in danger ink", async () => {
+      const wrapper = mountRow([
+        option("create", { primary: true }),
+        option("delete", { tone: ActionTone.Danger }),
+        option("export"),
+      ]);
+      await flushPromises();
+      const items = wrapper
+        .find('[data-test="menu"]')
+        .findAllComponents({ name: "BaseContextMenuItem" });
+
+      expect(items.map((item) => item.props("label"))).toEqual([
+        "label.export",
+        "label.delete",
+      ]);
+      expect(items[1].attributes("style")).toContain(
+        "--menu-item-ink: var(--color-danger-ink)",
+      );
     });
 
     it("names a selection action with the selection count", async () => {

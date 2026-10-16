@@ -48,6 +48,7 @@
           :key="idx"
           :label="t(option?.label, [entityTypeLabel])"
           :icon="option.icon ? Unicons[option.icon]?.name : undefined"
+          :style="toneStyle(option)"
           :tooltip-label="tooltipFor(option)"
           :disable="!option.active"
           @clicked="handleEmit(option)"
@@ -71,6 +72,10 @@ import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { auth } from "@/main";
 import { Unicons } from "@/types";
+import {
+  dangerLast,
+  toneStyle,
+} from "@/components/context-menu-actions/actionTone";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
 import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -151,10 +156,9 @@ const primaryOption = computed<DropdownOption | undefined>(
   () => primaryOptions.value[0],
 );
 
-const menuOptions = computed<DropdownOption[]>(() => [
-  ...primaryOptions.value.slice(1),
-  ...secondaryOptions.value,
-]);
+const menuOptions = computed<DropdownOption[]>(() =>
+  dangerLast([...primaryOptions.value.slice(1), ...secondaryOptions.value]),
+);
 
 const shell = ref<InstanceType<typeof ContextMenuActionsShell>>();
 

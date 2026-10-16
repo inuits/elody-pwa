@@ -16,7 +16,8 @@ use the row's split button or "Actions" menu ([menu](./menu.md)).
   (`primary`, or the active `primaryFallback`) is the split button's
   primary; every other action, further primaries first, is in its menu. No
   primary: the labelled "Actions ⌄" trigger. One action: a plain button.
-  Never a bare ⋮.
+  Never a bare ⋮. Bulk options with `tone: Danger` sort last in the menu, in
+  danger ink.
 - Picker contexts swap the row for the commit-teal "Confirm selection".
 
 ## States

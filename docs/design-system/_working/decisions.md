@@ -203,7 +203,7 @@ Source: handoff (split-button, overflow-menu, action-discovery, selection-action
 | A10 | Button heights | every `BaseButtonNew` variant gets a 1px border, transparent where not visible (user, 2026-10-16), so primary and secondary line up. Triggers stay `sm` (user: rows stay compact; deliberate deviation from the md specimen) |
 | A11 | Disabled with a reason | `BaseButtonNew` with `disabled` + `tooltipLabel` is `aria-disabled` and blocks clicks itself, so the reason is keyboard-reachable (phase 4 item 4) |
 | A4 | Unavailable actions | missing permission → hidden (user, 2026-10-16: no need to show what you may never do). Unavailable because of state (nothing selected, wrong view mode) → visible, disabled, reason in a tooltip |
-| A8 | Selection bar | same pattern as rows (user, 2026-10-16, replacing the first "visible row of up to 5"): first primary as split primary, everything else in its menu, "Actions ⌄" without a primary; `role="toolbar"`, count `role="status"`, off-page note, clear/select-page as real buttons; selection actions name the count ("Delete (2 selected)"). Not taken (user): collapse-when-empty, count on the confirm button. Danger ink for bulk actions needs a tone on bulk options (not added yet) |
+| A8 | Selection bar | same pattern as rows (user, 2026-10-16, replacing the first "visible row of up to 5"): first primary as split primary, everything else in its menu, "Actions ⌄" without a primary; `role="toolbar"`, count `role="status"`, off-page note, clear/select-page as real buttons; selection actions name the count ("Delete (2 selected)"). Not taken (user): collapse-when-empty, count on the confirm button. Bulk options take the same `tone` (user, 2026-10-16); podiumnet marks its 7 bulk deletes |
 
 ## 3. Filters (DS 4)
 
