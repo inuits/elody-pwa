@@ -223,3 +223,4 @@ Already discussed:
 | # | Item | Decision |
 |---|---|---|
 | L1 | List total | moves from the selection bar to a count chip at the start of the list header (`ResultCountChip`), neutral chip, `role="status"`; copy "{n} result(s)" / "{n} resulta(a)t(en)" with singular/plural (handoff wording over the old "items"); capped reveal kept (user, 2026-10-16). Left out of compact basic-mode relation lists, like the rest of the header (mine) |
+| L2 | Pager | list footer only (out of the selection bar, and basic-mode lists move it from above the list): page size left as "20 per page", numbered pager right (‹ 1 … 9 10 11 … 63 ›, no first/last arrows), current page in `--color-accent-dark` with white (7:1; the plain accent is 2.9:1). Shown when there is more than one page, in every mode except map, pipeline and grouped tables (user, 2026-10-16). Page size hides while the total fits on the smallest option (mine) |

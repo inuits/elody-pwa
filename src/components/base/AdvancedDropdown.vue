@@ -14,6 +14,7 @@
     <VueSelect
       class="!text-text-body !bg-background-light border-none !rounded-input text-value flex-1 min-w-0"
       v-model="selectedItem"
+      :input-id="inputId"
       :teleport="someModalIsOpened ? modalTeleportTarget() : 'body'"
       :options="selectOptions"
       :placeholder="label"
@@ -145,6 +146,8 @@ const props = withDefaults(
     selectFirstOptionByDefault?: boolean;
     labelPosition?: "above" | "inline";
     label?: string;
+    // Pairs the select with an external <label for>.
+    inputId?: string;
     disable?: boolean;
     itemsSelected?: boolean;
     multiple?: boolean;

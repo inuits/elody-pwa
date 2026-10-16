@@ -127,8 +127,6 @@
           >
             <LibraryBar
               :route="route"
-              :set-limit="setPaginationLimit"
-              :selected-pagination-limit-option="paginationStore.limit.value"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
               :show-group-by="displayTable"
@@ -139,9 +137,6 @@
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
                   ? undefined
                   : handleSetSimpleSearch
-              "
-              @pagination-limit-options-promise="
-                (promise) => (paginationLimitOptionsPromise = promise)
               "
               @sort-options-promise="
                 (promise) => (sortOptionsPromise = promise)
@@ -253,13 +248,6 @@
               />
             </div>
           </div>
-        </div>
-        <div
-          v-if="showBasicModePagination"
-          data-test="basic-library-pagination"
-          class="flex justify-center pt-2"
-        >
-          <BasePaginationNew />
         </div>
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
@@ -389,6 +377,27 @@
             :setAdvancedFilters="setAdvancedFilters"
           />
         </div>
+        <!-- pagination.md: page size left, pager right, at the list footer only. -->
+        <div
+          v-if="showPageSize || showListPager"
+          data-cy="list-footer"
+          class="flex flex-wrap items-center gap-2 pt-2"
+        >
+          <PageSizeSelect
+            v-if="showPageSize"
+            :set-limit="setPaginationLimit"
+            :selected-pagination-limit-option="paginationStore.limit.value"
+            :total="totalEntityCount"
+            @pagination-limit-options-promise="
+              (promise) => (paginationLimitOptionsPromise = promise)
+            "
+          />
+          <BasePagination
+            v-if="showListPager"
+            data-test="list-pager"
+            class="ml-auto"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -400,7 +409,8 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import BasePaginationNew from "@/components/base/BasePagination.vue";
+import BasePagination from "@/components/base/BasePagination.vue";
+import PageSizeSelect from "@/components/library/PageSizeSelect.vue";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
@@ -904,14 +914,23 @@ watch([fetchSequence, isTableGrouped, tableGroupBy], () => {
   else groupedEntities.reset();
 });
 
-const showBasicModePagination = computed(
+const showListPager = computed(
   () =>
     !props.predefinedEntities &&
     !displayMap.value &&
     !displayPipeline.value &&
-    (props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
-      props.baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder) &&
+    !isTableGrouped.value &&
     paginationStore.totalPages.value > 1,
+);
+// Mounted wherever the library bar used to hold it: it registers the
+// pagination-limit promise the first fetch waits for.
+const showPageSize = computed(
+  () =>
+    !props.disableLibraryBar &&
+    showCurrentEntityFlow.value &&
+    !props.predefinedEntities &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
 
 const noResultTranslations = computed(() => ({

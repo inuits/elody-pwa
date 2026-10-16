@@ -758,9 +758,10 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
   });
 });
 
-describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
+describe("BaseLibrary.vue list footer", () => {
   let wrapper: ReturnType<typeof getWrapper> | null = null;
-  const paginationSelector = '[data-test="basic-library-pagination"]';
+  const paginationSelector = '[data-cy="list-footer"] [data-test="list-pager"]';
+  const pageSizeSelector = '[data-cy="list-footer"] page-size-select-stub';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -809,14 +810,32 @@ describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
     expect(wrapper.find(paginationSelector).exists()).toBe(false);
   });
 
-  it("does not add basic-mode pagination in NormalBaseLibrary mode (the bulk-operations bar already owns pagination there)", async () => {
+  it("shows the pager in the footer of the main library too", async () => {
     libPaginationTotalPages.value = 4;
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });
     await flushPromises();
 
-    expect(wrapper.find(paginationSelector).exists()).toBe(false);
+    expect(wrapper.find(paginationSelector).exists()).toBe(true);
+  });
+
+  it("puts the page size in the footer of the main library", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(pageSizeSelector).exists()).toBe(true);
+  });
+
+  it("leaves the page size out of compact relation lists", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(pageSizeSelector).exists()).toBe(false);
   });
 });
 

@@ -76,6 +76,7 @@ vi.mock("../usePaginationStore", () => ({
     updateTotalAmount: vi.fn(),
     skip: ref(1),
     limit: ref(20),
+    totalPages: ref(1),
   }),
 }));
 

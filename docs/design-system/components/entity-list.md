@@ -4,8 +4,8 @@ The query-driven result list (table, list, grid). Implemented by
 `src/components/library/BaseLibrary.vue` and its view modes.
 
 ## Header
-One row above the list: the count chip, the view-mode switch, page size,
-sort and simple search (`LibraryBar.vue`).
+One row above the list: the count chip, the view-mode switch, sort and
+simple search (`LibraryBar.vue`).
 
 ### Count chip
 `src/components/library/ResultCountChip.vue`. The single source of the list
@@ -20,6 +20,9 @@ total; the selection bar and pager don't repeat it.
 - Shown in the main library and in relation lists on detail pages
   (`NormalBaseLibrary`, `PreviewBaseLibrary`); not in compact basic-mode
   relation lists. Hidden until the first page has loaded.
+
+## Footer
+One row under the list: page size left, pager right ([pagination](./pagination.md)).
 
 ## Accessibility
 - The count chip sits in a `role="status"` region, so new totals are

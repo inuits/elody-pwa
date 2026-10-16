@@ -17,7 +17,7 @@ when the bar is narrow.
 - Left: the bold selection count ("Selection: 2", hidden at 0), a note when selected items sit on
   other pages ("3 selected on other pages"), and the "Clear selection" and
   "Select page" links: real buttons in label ink, `--text-label`, underlined.
-- Right, after the pager: the same pattern as a row ([menu](./menu.md)). The first primary
+- Right: the same pattern as a row ([menu](./menu.md)). The first primary
   (`primary`, or the active `primaryFallback`) is the split button's
   primary; every other action, further primaries first, is in its menu. No
   primary: the labelled "Actions ⌄" trigger. One action: a plain button.

@@ -47,10 +47,6 @@
       {{ $t("bulk-operations.select-page") }}
     </button>
     <div class="flex items-center gap-(--selection-bar-gap) ml-auto">
-      <div v-if="!excludePagination && showPagination" class="flex">
-        <BasePaginationSkeleton v-if="isLoading" />
-        <BasePaginationNew v-else />
-      </div>
       <div
         v-if="showButton && useExtendedBulkOperations"
         class="flex justify-end w-fit"
@@ -89,8 +85,6 @@ import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BasePaginationNew from "@/components/base/BasePagination.vue";
-import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
 import {
   type Context,
   type InBulkProcessableItem,

@@ -392,6 +392,11 @@
   /* Item ink; a destructive item (tone Danger) switches it to danger ink */
   --menu-item-ink: var(--color-text-body);
 
+  /* Pager (components/pagination.md): current page filled in dark accent (7:1 on white) */
+  --pager-button-size: 24px;
+  --pager-gap: 2px;
+  --pager-current-bg: var(--color-accent-dark);
+
   /* Selection bar (components/selection-bar.md) */
   --selection-bar-padding: 6px 10px;
   --selection-bar-gap: 8px;
