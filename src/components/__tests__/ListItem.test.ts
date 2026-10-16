@@ -479,6 +479,65 @@ describe("ListItem", () => {
     });
   });
 
+  describe("grid cards", () => {
+    const card = (props = {}) =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "card-1", viewMode: "grid", ...props },
+      });
+
+    it("has a fixed card size", () => {
+      expect(card().find('[data-cy="list-item"]').classes()).toEqual(
+        expect.arrayContaining([
+          "w-(--grid-card-width)",
+          "h-(--grid-card-height)",
+        ]),
+      );
+    });
+
+    it("always shows a media area, with a placeholder when there is no media", () => {
+      const media = card().find('[data-cy="grid-card-media"]');
+      expect(media.classes()).toEqual(
+        expect.arrayContaining(["h-(--grid-card-media-height)", "bg-surface-muted"]),
+      );
+      expect(media.text()).toContain("library.no-media");
+    });
+
+    it("letterboxes the thumbnail instead of cropping it square", () => {
+      const viewer = card({ media: "file.jpg" }).findComponent({
+        name: "ImageViewer",
+      });
+      expect(viewer.props("url")).toContain("/full/");
+    });
+
+    it("shows the title, badges and one secondary line", () => {
+      const fields = card({
+        teaserMetadata: [
+          { key: "title", value: "A title" },
+          { key: "type", value: "photo" },
+          { key: "status", value: { formatter: "pill" } },
+          { key: "credit", value: "Someone" },
+        ],
+      }).findAll('[data-cy="list-item-content"] > div');
+
+      expect(fields.map((field) => field.classes().includes("hidden"))).toEqual(
+        [false, false, false, true],
+      );
+    });
+
+    it("shows the first field as a two-line title", () => {
+      const fields = card({
+        teaserMetadata: [
+          { key: "title", value: "A title" },
+          { key: "type", value: "Book" },
+        ],
+      }).findAll('[data-cy="list-item-content"] > div');
+      expect(fields[0].classes()).toEqual(
+        expect.arrayContaining(["line-clamp-2", "font-bold", "text-value"]),
+      );
+      expect(fields[1].classes()).toContain("text-text-secondary");
+    });
+  });
+
   describe("flat rows", () => {
     const rowOf = (viewMode: "list" | "grid") =>
       shallowMount(ListItem, {

@@ -7,6 +7,8 @@ import type { Entitytyping } from "@/generated-types/queries";
 const mocks = vi.hoisted(() => ({
   selected: [] as { id: string }[],
   dequeueAll: vi.fn(),
+  operations: [] as unknown[],
+  hasSelectionOperations: true,
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -19,10 +21,10 @@ vi.mock("vue-i18n", () => ({
 
 vi.mock("@/composables/useBulkOperationsActionsBar", () => ({
   useBulkOperationsActionsBar: () => ({
-    bulkOperations: ref([]),
+    bulkOperations: ref(mocks.operations),
     selectedBulkOperation: ref(undefined),
     bulkOperationsPromiseIsResolved: ref(true),
-    hasBulkOperationsWithItemsSelection: ref(true),
+    hasBulkOperationsWithItemsSelection: ref(mocks.hasSelectionOperations),
     itemsSelected: ref(mocks.selected.length > 0),
     subDropdownOptions: ref([]),
     clearSubDropdownOptions: vi.fn(),
@@ -53,6 +55,8 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
 describe("BulkOperationsActionsBar", () => {
   beforeEach(() => {
     mocks.selected = [];
+    mocks.operations = [];
+    mocks.hasSelectionOperations = true;
     vi.clearAllMocks();
   });
 
@@ -97,6 +101,17 @@ describe("BulkOperationsActionsBar", () => {
     expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
       "border-border-default",
     );
+  });
+
+  it("hides when it has nothing to offer (no selection, no actions)", () => {
+    mocks.hasSelectionOperations = false;
+    expect(getWrapper().find('[role="toolbar"]').isVisible()).toBe(false);
+  });
+
+  it("shows when there are actions without a selection", () => {
+    mocks.hasSelectionOperations = false;
+    mocks.operations = [{ value: "create" }];
+    expect(getWrapper().find('[role="toolbar"]').isVisible()).toBe(true);
   });
 
   it("leaves the total to the list header count chip", () => {

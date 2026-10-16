@@ -3,6 +3,7 @@
        something is selected. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
+    v-show="hasContent"
     role="toolbar"
     :aria-label="t('bulk-operations.selection-toolbar')"
     class="flex flex-wrap items-center gap-(--selection-bar-gap) p-(--selection-bar-padding) bg-surface border rounded-button text-ui"
@@ -174,6 +175,17 @@ const {
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
   parentEntity,
+);
+
+// Lists without bulk actions would otherwise show an empty bordered bar.
+const hasContent = computed<boolean>(
+  () =>
+    itemsSelected.value ||
+    (props.useExtendedBulkOperations &&
+      ((hasBulkOperationsWithItemsSelection.value && props.enableSelection) ||
+        (props.showButton &&
+          (props.confirmSelectionButton ||
+            (bulkOperations.value?.length ?? 0) > 0)))),
 );
 
 const offPageCount = computed<number>(() =>

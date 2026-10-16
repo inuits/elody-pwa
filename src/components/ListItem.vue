@@ -17,7 +17,7 @@
   <li v-else data-cy="list-item" :class="wrapperClasses">
     <div
       v-if="isGridMode && !isPreviewElement"
-      class="flex justify-between items-center pb-2"
+      class="absolute top-0 inset-x-0 z-1 flex justify-between items-center p-2"
     >
       <BaseInputCheckbox
         v-if="
@@ -106,19 +106,43 @@
         :bulk-operations-context="bulkOperationsContext"
       />
     </div>
+    <!-- entity-list-element.md: grid cards always have a media area; the
+         thumbnail is letterboxed, no media gets a placeholder, never blank. -->
     <div
-      v-if="canShowCopyRight() && media && !imageSrcError"
-      :class="[
-        'flex items-center',
-        { 'justify-center mb-4 h-[50%]': isGridMode },
-      ]"
+      v-if="isGridMode"
+      data-cy="grid-card-media"
+      class="flex flex-col items-center justify-center gap-1 w-full h-(--grid-card-media-height) shrink-0 overflow-hidden bg-surface-muted"
     >
       <ImageViewer
         v-if="canShowCopyRight() && media && !imageSrcError"
         :key="`${itemId}-image-${imageSize}`"
+        height-class="h-full"
+        width-class="w-full object-contain"
+        :url="
+          mediaIsLink
+            ? media
+            : `/api/iiif/3/${media}/full/^${imageSize},/0/default.jpg`
+        "
+        :mediaIsLink="mediaIsLink"
+        @error="setNoImage()"
+      />
+      <template v-else>
+        <unicon
+          :name="thumbIcon || Unicons.NoImage.name"
+          class="size-10 text-text-subtle"
+        />
+        <span class="text-ui text-text-muted">{{ t("library.no-media") }}</span>
+      </template>
+    </div>
+    <div
+      v-if="isListMode && canShowCopyRight() && media && !imageSrcError"
+      class="flex items-center"
+    >
+      <ImageViewer
+        :key="`${itemId}-image-${imageSize}`"
         class="object-cover self-center outline-none"
-        :height-class="isListMode ? 'h-10' : '!h-48'"
-        :width-class="isListMode ? 'w-10' : '!w-48'"
+        height-class="h-10"
+        width-class="w-10"
         :url="
           mediaIsLink
             ? media
@@ -130,25 +154,18 @@
     </div>
     <div
       v-if="
-        !canShowCopyRight() ||
-        (media && imageSrcError) ||
-        (!media && isMediaType)
+        isListMode &&
+        (!canShowCopyRight() ||
+          (media && imageSrcError) ||
+          (!media && isMediaType))
       "
       :key="`${itemId}-icon-${imageSize}`"
-      :class="[
-        { 'h-10 w-10': isListMode },
-        {
-          'h-48 w-48 flex flex-col justify-center items-center shadow-sm mb-4':
-            isGridMode,
-        },
-        'text-neutral-700 rounded-sm outline-none self-center',
-      ]"
+      class="h-10 w-10 text-neutral-700 rounded-sm outline-none self-center"
     >
       <unicon
         :name="thumbIcon"
         class="h-10 w-10 p-1 text-neutral-70 rounded-sm outline-none self-center"
       />
-      <div v-if="isGridMode" class="text-neutral-70">No media</div>
     </div>
 
     <div
@@ -159,10 +176,12 @@
           : 'w-full',
         { 'flex items-center': isListMode && !props.multiLine },
         { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
-        { 'p-4': isGridMode },
-        // The list's column-header row shows the labels; keep them for
-        // screen readers.
-        { '[&_[data-cy=metadata-label]]:sr-only': hideLabels },
+        {
+          'flex flex-col gap-1 min-h-0 p-(--grid-card-body-pad)': isGridMode,
+        },
+        // The list's column-header row shows the labels, a grid card has
+        // none; keep them for screen readers.
+        { '[&_[data-cy=metadata-label]]:sr-only': hideLabels || isGridMode },
       ]"
       :style="multiLineGridStyle"
     >
@@ -172,6 +191,13 @@
         :class="[
           teaserMetadataStyle,
           { 'text-text-secondary': idx === 0 && isSeen },
+          // Grid card body: title (2 lines), then badges / one secondary line.
+          isGridMode
+            ? idx === 0
+              ? 'line-clamp-2 font-bold text-value'
+              : 'truncate text-ui text-text-secondary'
+            : '',
+          { hidden: isGridMode && !isShownOnGridCard(idx) },
           idx < 1 && teaserMetadata[0]?.value?.formatter
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine
@@ -318,6 +344,7 @@ import {
   type WindowElementPanel,
 } from "@/generated-types/queries";
 import { stringIsUrl, asString } from "@/helpers";
+import { Unicons } from "@/types";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import EntityElementWindowPanel from "@/components/windowPanel/EntityElementWindowPanel.vue";
@@ -485,6 +512,18 @@ const onlyReadModeTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode),
 );
 
+// Grid card body: the title, every badge, and the first plain field as its
+// one secondary line.
+const gridSecondaryIndex = computed(() =>
+  onlyReadModeTeaserMetadata.value.findIndex(
+    (field, idx) => idx > 0 && !field?.value?.formatter,
+  ),
+);
+const isShownOnGridCard = (idx: number): boolean =>
+  idx === 0 ||
+  idx === gridSecondaryIndex.value ||
+  !!onlyReadModeTeaserMetadata.value[idx]?.value?.formatter;
+
 const orderMetadataChild = ref(null);
 onUpdated(() => {
   if (!orderMetadataChild.value) return;
@@ -526,7 +565,7 @@ const wrapperClasses = computed(() => {
         isListMode.value,
     },
     {
-      "border border-border-subtle rounded-card p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]":
+      "relative border border-border-subtle rounded-card mb-2 flex flex-col overflow-hidden w-(--grid-card-width) h-(--grid-card-height)":
         isGridMode.value,
     },
     {

@@ -26,6 +26,9 @@ when the bar is narrow.
 - Picker contexts swap the row for the commit-teal "Confirm selection".
 
 ## States
+Hidden (`v-show`) when it has nothing to offer: no selection, no "Select
+page", no actions.
+
 | State | Cue |
 |---|---|
 | action unavailable (needs a selection, wrong view mode, selection constraint) | button stays visible, disabled, reason in its tooltip |

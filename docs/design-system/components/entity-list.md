@@ -24,7 +24,15 @@ total; the selection bar and pager don't repeat it.
 ## Rows
 List and table rows are flat: `--list-row-pad`, `--text-table`, a
 `--color-border-faint` hairline below, no per-row border, radius or gap.
-Grid items stay bordered cards (`--radius-card`).
+Grid items are cards: `--grid-card-width` × `--grid-card-height`, 1px
+border, `--radius-card`, no shadow.
+- Media area on top (`--grid-card-media-height`, `--color-surface-muted`),
+  thumbnail letterboxed (full IIIF image, `object-contain`). No image: a
+  muted glyph and "No media" (`library.no-media`), never a blank box.
+- Checkbox and actions overlay the top of the media area.
+- Body (`--grid-card-body-pad`): the first field as the title (13px bold,
+  2-line clamp), every badge, and the first plain field as one secondary
+  line; other fields are hidden. Labels stay for screen readers only.
 
 ### Column-header row (list mode)
 When every row on the page has the same fields, list mode shows one header
