@@ -379,6 +379,13 @@
   /* Space under the label, so the wash and focus ring above the value clear it */
   --field-label-gap: 6px;
 
+  /* Menu (components/menu.md): split-button and overflow menus */
+  --menu-padding: 4px;
+  --menu-min-width: 170px;
+  --menu-item-padding: 6px 10px;
+  --menu-item-gap: 8px;
+  --menu-icon-size: 14px;
+
   /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
      in BaseTooltip.vue */
   --text-tooltip: var(--text-label);

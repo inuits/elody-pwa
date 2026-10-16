@@ -63,6 +63,7 @@
           <BaseContextMenuActions
             :context-menu-actions="element.contextMenuActions"
             :parent-entity-id="formId"
+            :context-label="previewLabel ? t(previewLabel) : t(element.label)"
           />
         </div>
       </div>

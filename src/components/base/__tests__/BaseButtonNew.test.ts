@@ -149,4 +149,14 @@ describe("BaseButtonNew", () => {
         .attributes("aria-label"),
     ).toBe("Sluit");
   });
+
+  it("renders trailing content after the label", () => {
+    const wrapper = shallowMount(BaseButtonNew, {
+      props: { label: "Acties" },
+      slots: { default: '<i data-test="chevron" />' },
+      global: { stubs: { unicon: true } },
+    });
+
+    expect(wrapper.find('[data-test="chevron"]').exists()).toBe(true);
+  });
 });

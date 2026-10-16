@@ -187,6 +187,17 @@ Later subtasks:
 | E18 | Group form card (one gesture, one Bewaar/Annuleer, `role="group"`) | required | — | **deferred** (user, 2026-10-15): no config marks a field group yet and no client has one; build it with the first real group (a panel flag in baseGraphql) |
 | E19 | Inline editors for file upload and linked-entity fields | required | — | **not applicable** (user, 2026-10-15): upload fields are not panel metadata (they live in upload forms), and values on a list row's entity or relation already edit in place through `ListItemInlineField` |
 
+## DS 3: action discovery
+
+Source: handoff (split-button, overflow-menu, action-discovery, selection-action-bar, IMPLEMENTATION phase 4). The reverted POC branch is not used.
+
+| # | Item | Decision |
+|---|---|---|
+| A1 | Overflow trigger | ghost sm `BaseButtonNew` "Acties ⌄/⌃", never a bare ⋮; name "Acties voor {titel}" when the caller passes `contextLabel` (panels pass their title) |
+| A2 | Menu behaviour | shared `BaseContextMenu`, so every menu gets it: `role="menu"`, anchored under the trigger when an anchor is passed (pointer position as fallback for not-yet-swept callers), ↑/↓/Home/End, Escape returns focus, Tab closes |
+| A3 | Menu look | specimen values as `--menu-*` tokens: card radius, overlay shadow, subtle border, 12.5px, 4px inset, items 6px 10px with button radius, 14px icons, accent-wash hover, disabled ink (not opacity) |
+| A4 | Permission-hidden actions | stay hidden for now (no reason texts exist); disabled-with-reason items already stay focusable via `aria-disabled` |
+
 ## 3. Filters (DS 4)
 
 Already discussed:

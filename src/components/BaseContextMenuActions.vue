@@ -2,6 +2,7 @@
   <context-menu-actions-shell
     :has-promoted-actions="hasPromotedActions"
     :has-overflow-actions="hasAvailableContextMenuActions"
+    :context-label="contextLabel"
   >
     <template #promoted>
       <context-menu-action
@@ -49,6 +50,7 @@ const props = withDefaults(
     relation?: object | string;
     bulkOperationsContext: Context | undefined;
     refetchEntities?: () => Promise<void>;
+    contextLabel?: string;
   }>(),
   {
     contextMenuActions: undefined,
@@ -63,7 +65,8 @@ const handleEmit = () => {
 };
 
 const availableActions = computed(() => {
-  const { __typename, ...restMenuActions } = { ...props.contextMenuActions };
+  const restMenuActions = { ...props.contextMenuActions };
+  delete restMenuActions.__typename;
 
   const promoted: Partial<ContextMenuActions> = {};
   const overflow: Partial<ContextMenuActions> = {};

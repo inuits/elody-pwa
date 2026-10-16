@@ -40,6 +40,7 @@
       ]"
       >{{ label }}</span
     >
+    <slot />
 
     <div v-if="disabled && tooltipLabel" class="-mb-2 text-text-secondary">
       <base-tooltip position="top-right" :tooltip-offset="8">
