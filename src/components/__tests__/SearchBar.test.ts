@@ -50,4 +50,12 @@ describe("SearchBar.vue debounce", () => {
     vi.advanceTimersByTime(250);
     expect(wrapper.emitted("search")).toEqual([["john"]]);
   });
+
+describe("SearchBar.vue accessible name", () => {
+  it("names its icon-only search button", () => {
+    expect(mountSearchBar().find("button").attributes("aria-label")).toBe(
+      "library.search",
+    );
+  });
+});
 });

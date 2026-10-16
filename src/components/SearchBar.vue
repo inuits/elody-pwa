@@ -24,6 +24,7 @@
         'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg cursor-pointer',
         { 'ml-2': inputEnabled },
       ]"
+      :aria-label="t('library.search')"
       @click="!inputEnabled ? openSearchModal() : submitSearch()"
     >
       <unicon :name="Unicons.SearchGlass.name"></unicon>

@@ -33,4 +33,12 @@ describe("FiltersListItemPanel", () => {
       expect.arrayContaining(["border-b", "border-border-faint"]),
     );
   });
+
+  it("names its icon-only clear button", () => {
+    expect(
+      panel().findComponent({ name: "BaseButtonNew" }).attributes("aria-label"),
+    ).toBe(
+      "filters.clear-filter",
+    );
+  });
 });

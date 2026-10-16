@@ -19,6 +19,7 @@
       <button
         type="button"
         data-testid="repetitive-step-modal-close"
+        :aria-label="t('actions.labels.close')"
         class="cursor-pointer p-1 rounded hover:bg-background-normal"
         @click="emit('close')"
       >
@@ -38,6 +39,9 @@ import { Unicons } from "@/types";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const { isBlocking } = useBlockingLoader();
 const { registerOpenDialog, unregisterOpenDialog } = useBaseModal();
