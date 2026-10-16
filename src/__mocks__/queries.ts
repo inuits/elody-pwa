@@ -3889,6 +3889,7 @@ export enum ValidationRules {
   HasRequiredRelation = 'has_required_relation',
   MaxDateToday = 'max_date_today',
   NoXss = 'no_xss',
+  NoDefaults = 'no_defaults',
   Numeric = 'numeric',
   Regex = 'regex',
   Required = 'required',
