@@ -30,14 +30,15 @@
             @select-page="bulkSelect"
             @select-all="bulkSelect"
           />
-          <span
+          <button
             v-if="!allFieldsSelected"
+            type="button"
             data-cy="csv-export-select-all"
-            class="select-actions text-text-body"
+            class="text-label text-text-light underline cursor-pointer select-none"
             @click="bulkSelect"
           >
             {{ t("bulk-operations.select-all") }}
-          </span>
+          </button>
         </div>
         <div class="flex-1 min-h-0 overflow-y-hidden hover:overflow-y-auto">
           <div v-if="isLoading">

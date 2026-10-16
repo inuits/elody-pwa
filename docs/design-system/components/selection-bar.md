@@ -9,10 +9,16 @@ Above every list that supports selection. Not for single-row actions: those
 use the row's split button or "Actions" menu ([menu](./menu.md)).
 
 ## Anatomy
-- Left: the count chip ("2/40 items selected"), the clear and select-page
-  links (real buttons), and a note when selected items sit on other pages
-  ("3 selected on other pages").
-- Right: the same pattern as a row ([menu](./menu.md)). The first primary
+One surface: `--color-surface`, a 1px border (`--color-border-subtle`,
+`--color-border-default` once something is selected), `--radius-button`,
+`--selection-bar-padding`, `--selection-bar-gap`, `--text-ui`. Items wrap
+when the bar is narrow.
+- Left: the list total as a neutral chip ("1,258 items", with the
+  capped-count reveal; DS 4 moves it to the list header), the bold selection
+  count ("Selection: 2", hidden at 0), a note when selected items sit on
+  other pages ("3 selected on other pages"), and the "Clear selection" and
+  "Select page" links: real buttons in label ink, `--text-label`, underlined.
+- Right, after the pager: the same pattern as a row ([menu](./menu.md)). The first primary
   (`primary`, or the active `primaryFallback`) is the split button's
   primary; every other action, further primaries first, is in its menu. No
   primary: the labelled "Actions ⌄" trigger. One action: a plain button.

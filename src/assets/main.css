@@ -392,6 +392,10 @@
   /* Item ink; a destructive item (tone Danger) switches it to danger ink */
   --menu-item-ink: var(--color-text-body);
 
+  /* Selection bar (components/selection-bar.md) */
+  --selection-bar-padding: 6px 10px;
+  --selection-bar-gap: 8px;
+
   /* Split button (components/menu.md): primary + chevron in one capsule */
   --split-button-divider: color-mix(in srgb, var(--color-neutral-white) 40%, transparent);
   --split-button-chevron-padding-x: 8px;

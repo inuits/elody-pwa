@@ -65,10 +65,61 @@ describe("BulkOperationsActionsBar", () => {
     );
   });
 
-  it("announces the count as a live status", () => {
+  it("announces the selection count as a live status", () => {
     mocks.selected = [{ id: "a" }];
 
-    expect(getWrapper().find('[role="status"]').text()).toContain("1/");
+    expect(getWrapper().find('[role="status"]').text()).toBe(
+      "bulk-operations.selection-count:1",
+    );
+  });
+
+  it("keeps the live region mounted but empty without a selection", () => {
+    expect(getWrapper().find('[role="status"]').text()).toBe("");
+  });
+
+  it("is a bordered surface with the selection bar tokens", () => {
+    expect(getWrapper().find('[role="toolbar"]').classes()).toEqual(
+      expect.arrayContaining([
+        "bg-surface",
+        "border",
+        "rounded-button",
+        "p-(--selection-bar-padding)",
+        "gap-(--selection-bar-gap)",
+        "text-ui",
+      ]),
+    );
+  });
+
+  it("borders the bar more strongly once something is selected", () => {
+    expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
+      "border-border-subtle",
+    );
+    mocks.selected = [{ id: "a" }];
+    expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
+      "border-border-default",
+    );
+  });
+
+  it("shows the total as a neutral chip, never mint", () => {
+    mocks.selected = [{ id: "a" }];
+    const chip = getWrapper().find('[data-cy="selection-bar-total"]');
+
+    expect(chip.classes()).toEqual(
+      expect.arrayContaining(["bg-chip-neutral-bg", "rounded-chip", "text-chip"]),
+    );
+    expect(chip.classes()).not.toContain("bg-accent-normal");
+  });
+
+  it("styles select page and clear selection as label links", () => {
+    mocks.selected = [{ id: "a" }];
+    const links = getWrapper().findAll('[data-cy="selection-bar-link"]');
+
+    expect(links).toHaveLength(2);
+    links.forEach((link) =>
+      expect(link.classes()).toEqual(
+        expect.arrayContaining(["text-label", "text-text-light", "underline"]),
+      ),
+    );
   });
 
   it("notes selected items that sit on other pages", () => {
@@ -95,7 +146,7 @@ describe("BulkOperationsActionsBar", () => {
     mocks.selected = [{ id: "a" }];
     const clear = getWrapper()
       .findAll("button")
-      .find((button) => button.text() === "bulk-operations.undo-selection");
+      .find((button) => button.text() === "bulk-operations.clear-selection");
 
     await clear!.trigger("click");
 

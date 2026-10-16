@@ -15,6 +15,7 @@ Checked 2026-10-16 against implementation plan phase 4 (items 4, 6, 8) and
 | 6 | Count `role="status"` | ✅ |
 | 6 | Select page, capped-count reveal, confirm-selection mode | ✅ existed; "select page" and "undo selection" are now real buttons |
 | 6 | Collapsed-empty variant | ➖ not taken (user decision) |
+| 6 | Bar anatomy (`selection-action-bar.md`) | ✅ bordered surface, neutral total chip, bold "Selection: n", label-ink links, measured live (A14). Pager look and the total's move to the list header: DS 4 |
 | 8 | Specimen matches | ✅ with the deviations below |
 | 8 | Every menu action reachable and labelled | ✅ keyboard pass below |
 
