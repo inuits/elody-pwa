@@ -1,5 +1,9 @@
 <template>
-  <div v-for="(element, index) in contextMenuActions" :key="index">
+  <div
+    v-for="(element, index) in contextMenuActions"
+    :key="index"
+    :style="toneStyle(element)"
+  >
     <link-action
       v-if="element.__typename === 'ContextMenuLinkAction'"
       :label="element.label"
@@ -65,6 +69,7 @@
 
 <script lang="ts" setup>
 import { type ContextMenuActions } from "@/generated-types/queries";
+import { toneStyle } from "@/components/context-menu-actions/actionTone";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import LinkAction from "@/components/context-menu-actions/LinkAction.vue";

@@ -39,6 +39,7 @@ import type { Entitytyping } from "@/generated-types/queries";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
+import { dangerLast } from "@/components/context-menu-actions/actionTone";
 import { computed } from "vue";
 import type { Context } from "@/composables/useBulkOperations";
 
@@ -72,9 +73,12 @@ const availableActions = computed(() => {
   const promoted: Partial<ContextMenuActions> = {};
   const overflow: Partial<ContextMenuActions> = {};
 
-  for (const key in restMenuActions) {
-    const action = restMenuActions[key as keyof typeof restMenuActions];
-    if (!action) continue;
+  const entries = dangerLast(
+    Object.entries(restMenuActions),
+    ([, action]) => action,
+  );
+  for (const [key, action] of entries) {
+    if (!action || typeof action !== "object") continue;
     if ("hidden" in action && action.hidden) continue;
 
     const slot = "showAsButton" in action ? promoted : overflow;

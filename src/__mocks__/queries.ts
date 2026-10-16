@@ -615,6 +615,11 @@ export type ContextMenuActions = {
   doLinkAction?: Maybe<ContextMenuLinkAction>;
 };
 
+export enum ActionTone {
+  Danger = 'Danger',
+  Default = 'Default'
+}
+
 export enum ContextMenuDirection {
   Left = 'left',
   Right = 'right'

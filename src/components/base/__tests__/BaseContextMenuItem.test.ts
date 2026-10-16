@@ -76,7 +76,10 @@ describe("BaseContextMenuItem", () => {
       expect.arrayContaining([
         "p-(--menu-item-padding)",
         "rounded-button",
+        "leading-tight",
         "hover:bg-accent-wash",
+        "hover:no-underline",
+        "text-(color:--menu-item-ink)",
       ]),
     );
     expect(wrapper.findComponent({ name: "BaseIcon" }).classes()).toContain(

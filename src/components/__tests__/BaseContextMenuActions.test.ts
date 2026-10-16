@@ -123,4 +123,17 @@ describe("BaseContextMenuActions", () => {
       wrapper.findComponent({ name: "ContextMenuActionsShell" }).props("split"),
     ).toBe(false);
   });
+
+  it("sorts destructive actions last", async () => {
+    const wrapper = getWrapper({
+      doElodyAction: { ...deleteRelation, tone: "Danger" },
+      doLinkAction: followLink,
+    });
+    await flushPromises();
+
+    expect(Object.keys(wrapper.vm.overflowActions!)).toEqual([
+      "doLinkAction",
+      "doElodyAction",
+    ]);
+  });
 });

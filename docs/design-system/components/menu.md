@@ -23,7 +23,13 @@ split button).
 - Menu: surface, 1px subtle border, card radius, overlay shadow, 12.5px
   text. Opens under the trigger, aligned to its right edge near the
   viewport edge, and above it near the bottom.
-- Item: optional 14px icon + verb-first label.
+- Item: optional 14px icon + verb-first label, `--leading-tight` line
+  height. Items are links in markup, but never underline on hover.
+- Destructive items: the action config sets `tone(input: Danger)` (route
+  configs: `tone: ActionTone.Danger`). The renderer then gives the item
+  danger ink and sorts it last. Never inferred from the verb.
+- Nesting: menus are flat. At most one submenu level is allowed; none
+  exists today.
 
 ## Tokens
 | Token | Role |
@@ -33,6 +39,7 @@ split button).
 | `--menu-item-padding` | item padding |
 | `--menu-item-gap` | icon–label gap |
 | `--menu-icon-size` | item icon size |
+| `--menu-item-ink` | item text colour; danger items switch it to `--color-danger-ink` |
 | `--radius-card` | menu corners |
 | `--radius-button` | item corners |
 | `--shadow-overlay` | menu elevation |

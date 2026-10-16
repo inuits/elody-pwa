@@ -62,4 +62,18 @@ describe("HeaderContextMenuActions", () => {
 
     expect(wrapper.attributes("data-split")).toBe("true");
   });
+
+  it("sorts destructive actions last in the menu", () => {
+    const wrapper = mountComponent([
+      { ...downloadAction, label: "delete", tone: "Danger" as any },
+      downloadAction,
+    ]);
+
+    expect(
+      wrapper
+        .find('[data-test="overflow"]')
+        .findAllComponents({ name: "QueryAction" })
+        .map((action) => action.props("label")),
+    ).toEqual(["contextMenu.createDownload", "delete"]);
+  });
 });

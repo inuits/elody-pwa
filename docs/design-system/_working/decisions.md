@@ -197,6 +197,8 @@ Source: handoff (split-button, overflow-menu, action-discovery, selection-action
 | A2 | Menu behaviour | shared `BaseContextMenu`, so every menu gets it: `role="menu"`, anchored under the trigger when an anchor is passed (pointer position as fallback for not-yet-swept callers), ↑/↓/Home/End, Escape returns focus, Tab closes |
 | A3 | Menu look | specimen values as `--menu-*` tokens: card radius, overlay shadow, subtle border, 12.5px, 4px inset, items 6px 10px with button radius, 14px icons, accent-wash hover, disabled ink (not opacity) |
 | A5 | Split button | exactly one `showAsButton` action + overflow → one capsule (accent primary + accent chevron, 40% white divider, accent-hover while open); more promoted actions stay separate buttons + "Acties". Promoted buttons move from commit teal to accent primary. Rows name the chevron after their first teaser value |
+| A6 | Destructive items | `ActionTone { Default, Danger }` enum + `tone(input:)` on every context-menu action type in baseGraphql (added in DS 3; DS 6 builds on it). Danger items get danger ink and sort last (stable). aicap marks its 12 delete actions |
+| A7 | Menu item fit | `--leading-tight` (the body's 1.5 made items ~4px taller than the specimen) and no link underline on hover |
 | A4 | Permission-hidden actions | stay hidden for now (no reason texts exist); disabled-with-reason items already stay focusable via `aria-disabled` |
 
 ## 3. Filters (DS 4)

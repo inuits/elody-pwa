@@ -6,11 +6,11 @@
       @click="clicked()"
       :class="[
         !asButton
-          ? 'flex items-center gap-(--menu-item-gap) w-full p-(--menu-item-padding) rounded-button'
+          ? 'flex items-center gap-(--menu-item-gap) w-full p-(--menu-item-padding) rounded-button leading-tight hover:no-underline'
           : '',
         !asButton && disable ? 'text-text-disabled cursor-default' : '',
         !asButton && !disable
-          ? 'text-text-body hover:bg-accent-wash cursor-pointer'
+          ? 'text-(color:--menu-item-ink) hover:bg-accent-wash cursor-pointer'
           : '',
         highlight ? 'bg-accent-wash' : '',
       ]"

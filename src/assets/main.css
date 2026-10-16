@@ -385,6 +385,8 @@
   --menu-item-padding: 6px 10px;
   --menu-item-gap: 8px;
   --menu-icon-size: 14px;
+  /* Item ink; a destructive item (tone Danger) switches it to danger ink */
+  --menu-item-ink: var(--color-text-body);
 
   /* Split button (components/menu.md): primary + chevron in one capsule */
   --split-button-divider: color-mix(in srgb, var(--color-neutral-white) 40%, transparent);
