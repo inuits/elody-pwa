@@ -11,7 +11,10 @@ export const startUsageAnalytics = ({
 }: UsageAnalyticsSettings & { sessionId: string }): UsageTracker => {
   const op = new OpenPanel({
     clientId,
-    apiUrl,
+    // the app's own telemetry proxy (the GraphQL server) is given as a path
+    apiUrl: new URL(apiUrl, window.location.origin)
+      .toString()
+      .replace(/\/$/, ""),
     // page views of the single-page app, from the browser's history
     trackScreenViews: true,
     trackOutgoingLinks: false,
