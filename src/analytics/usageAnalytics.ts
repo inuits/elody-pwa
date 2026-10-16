@@ -75,6 +75,54 @@ export const trackSearch = (
   trackUsage("search", { query_length: length, ...context });
 };
 
+/*
+ * The tracking plan's other events (elody-ui analytics tracking): each sent where
+ * the user does the thing, with the names and properties the plan gives them.
+ * Without the value an event is about, nothing is sent.
+ */
+const sendIf = (
+  name: string,
+  value: string | undefined,
+  properties: Record<string, unknown>,
+  entityType?: string,
+): void => {
+  if (!value) return;
+  trackUsage(name, { ...properties, ...(entityType ? { entity_type: entityType } : {}) });
+};
+
+export const trackViewMode = (viewMode: string | undefined, entityType?: string) =>
+  sendIf("view_mode_changed", viewMode, { view_mode: viewMode }, entityType);
+
+export const trackSort = (sort: string | undefined, entityType?: string) =>
+  sendIf("sort_changed", sort, { sort }, entityType);
+
+export const trackBulkOperation = (
+  operation: string | undefined,
+  selected: number,
+  entityType?: string,
+) => sendIf("bulk_operation", operation, { operation, selected }, entityType);
+
+export const trackContextAction = (
+  action: string | undefined,
+  actionType: string | undefined,
+  entityType?: string,
+) =>
+  sendIf(
+    "context_action",
+    action,
+    { action, ...(actionType ? { action_type: actionType } : {}) },
+    entityType,
+  );
+
+export const trackFormOpened = (form: string | undefined, entityType?: string) =>
+  sendIf("form_opened", form, { form }, entityType);
+
+export const trackFormSubmitted = (
+  form: string | undefined,
+  outcome: "ok" | "error",
+  entityType?: string,
+) => sendIf("form_submitted", form, { form, outcome }, entityType);
+
 /** The library a user works for: the domain of their e-mail address. */
 export const libraryOf = (email: string | undefined): string | undefined => {
   const domain = email?.split("@")[1]?.trim().toLowerCase();

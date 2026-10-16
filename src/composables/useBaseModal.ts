@@ -1,4 +1,5 @@
 import { computed, reactive, ref, readonly } from "vue";
+import { trackFormOpened } from "@/analytics/usageAnalytics";
 import {
   type DeleteQueryOptions,
   ModalStyle,
@@ -66,6 +67,7 @@ export const useBaseModal = () => {
     if (modals[modalType].open) return;
 
     _someModalIsOpened.value = true;
+    if (modalType === TypeModals.DynamicForm) trackFormOpened(formQuery);
 
     const updatedModal = {
       open: true,

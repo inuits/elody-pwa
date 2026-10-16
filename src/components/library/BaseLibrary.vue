@@ -103,7 +103,10 @@
             "
             class="mr-2"
           >
-            <BaseToggleGroup :toggles="toggles" />
+            <BaseToggleGroup
+              :toggles="toggles"
+              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
+            />
           </div>
           <div
             v-if="
@@ -401,7 +404,7 @@ import { useGroupedEntities } from "@/components/library/view-modes/composables/
 import { UploadStatus } from "@/composables/upload/types";
 import useUpload from "@/composables/upload/useUpload";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { trackSearch } from "@/analytics/usageAnalytics";
+import { trackSearch, trackViewMode } from "@/analytics/usageAnalytics";
 import {
   breadcrumbPathFinished,
   breadcrumbRoutes,

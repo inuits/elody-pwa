@@ -1,5 +1,9 @@
 <template>
-  <div v-for="(element, index) in contextMenuActions" :key="index">
+  <div
+    v-for="(element, index) in contextMenuActions"
+    :key="index"
+    @click.capture="trackContextAction(String(index), (element as { action?: string }).action, entityType)"
+  >
     <link-action
       v-if="element.__typename === 'ContextMenuLinkAction'"
       :label="element.label"
@@ -64,6 +68,7 @@
 </template>
 
 <script lang="ts" setup>
+import { trackContextAction } from "@/analytics/usageAnalytics";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";

@@ -14,8 +14,14 @@ import {
   libraryOf,
   pseudonymOf,
   resetUsageAnalytics,
+  trackBulkOperation,
+  trackContextAction,
+  trackFormOpened,
+  trackFormSubmitted,
   trackSearch,
+  trackSort,
   trackUsage,
+  trackViewMode,
   type UsageTracker,
 } from "@/analytics/usageAnalytics";
 
@@ -245,5 +251,46 @@ describe("appliedFilterPaths", () => {
         { type: "text", key: "vlacc:1|properties.title.value", value: "" },
       ] as any),
     ).toEqual(["properties.material_type.value", "audit.created.at"]);
+  });
+});
+
+describe("the tracking plan's planned events", () => {
+  const started = async () => {
+    const tracker = fakeTracker();
+    await initUsageAnalytics({ usageAnalytics: settings }, "s-1", async () => ({
+      startUsageAnalytics: () => tracker,
+    }));
+    return tracker;
+  };
+
+  it("names each event and property as the tracking plan does", async () => {
+    const tracker = await started();
+    trackViewMode("ViewModesGrid", "person");
+    trackSort("properties.title.value", "work_word");
+    trackBulkOperation("exportCsv", 12, "manifestation_word");
+    trackContextAction("doElodyAction", "Delete", "reading");
+    trackFormOpened("GetPersonCreateForm");
+    trackFormSubmitted("GetPersonCreateForm", "ok", "person");
+    trackFormSubmitted("GetPersonCreateForm", "error");
+    expect(vi.mocked(tracker.track).mock.calls).toEqual([
+      ["view_mode_changed", { view_mode: "ViewModesGrid", entity_type: "person" }],
+      ["sort_changed", { sort: "properties.title.value", entity_type: "work_word" }],
+      ["bulk_operation", { operation: "exportCsv", selected: 12, entity_type: "manifestation_word" }],
+      ["context_action", { action: "doElodyAction", action_type: "Delete", entity_type: "reading" }],
+      ["form_opened", { form: "GetPersonCreateForm" }],
+      ["form_submitted", { form: "GetPersonCreateForm", outcome: "ok", entity_type: "person" }],
+      ["form_submitted", { form: "GetPersonCreateForm", outcome: "error" }],
+    ]);
+  });
+
+  it("sends nothing without the value the event is about", async () => {
+    const tracker = await started();
+    trackViewMode(undefined, "person");
+    trackSort("", "person");
+    trackBulkOperation(undefined, 3);
+    trackContextAction("", undefined);
+    trackFormOpened(undefined);
+    trackFormSubmitted("", "ok");
+    expect(tracker.track).not.toHaveBeenCalled();
   });
 });
