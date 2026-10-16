@@ -13,6 +13,7 @@ import { apolloClient } from "@/main";
 export interface PreviewComponentProps {
   entityType: Entitytyping;
   baseLibraryMode?: BaseLibraryModes;
+  openPreviewByDefault?: boolean;
 }
 
 export const usePreviewComponent = (
@@ -23,6 +24,10 @@ export const usePreviewComponent = (
   const previewComponentEnabled = ref<boolean>(false);
   const previewForEntity = ref<string | undefined>(undefined);
   const lastPreviewedEntityId = ref<string | undefined>(undefined);
+
+  const shouldOpenByDefault = (): boolean =>
+    !!previewComponent.value &&
+    (props.openPreviewByDefault ?? !!previewComponent.value.openByDefault);
 
   const getPreviewItemsForEntity = async () => {
     previewComponent.value = undefined;
@@ -37,7 +42,7 @@ export const usePreviewComponent = (
       .then((result) => {
         previewComponent.value =
           result.data.PreviewComponents?.previewComponent;
-        if (previewComponent.value?.openByDefault && refEntities.value[0]?.id)
+        if (shouldOpenByDefault() && refEntities.value[0]?.id)
           togglePreviewComponent(refEntities.value[0].id);
       });
   };
@@ -124,7 +129,7 @@ export const usePreviewComponent = (
         configurePreviewComponentWithNewEntities(newEntities);
       if (
         !previewForEntity.value &&
-        previewComponent.value?.openByDefault &&
+        shouldOpenByDefault() &&
         newEntities[0]?.id
       )
         togglePreviewComponent(newEntities[0].id);

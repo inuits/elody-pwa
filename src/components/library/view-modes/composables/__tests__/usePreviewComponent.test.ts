@@ -38,6 +38,7 @@ const makePreviewComponent = (
 
 const setup = async (
   previewComponentOverrides: PreviewComponentOverrides = {},
+  openPreviewByDefault?: boolean,
 ) => {
   vi.mocked(apolloClient.query).mockResolvedValue({
     data: {
@@ -54,6 +55,7 @@ const setup = async (
   const props = reactive({
     entityType: Entitytyping.Asset,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    openPreviewByDefault,
   });
   const composable = usePreviewComponent(props, entities);
   await flushPromises();
@@ -433,6 +435,69 @@ describe("usePreviewComponent", () => {
 
       expect(previewComponentEnabled.value).toBe(true);
       expect(previewForEntity.value).toBe("entity-1");
+    });
+  });
+
+  describe("openPreviewByDefault override", () => {
+    it("keeps the preview closed when false, even if the entity type opens it by default", async () => {
+      const { previewComponentEnabled, previewForEntity } = await setup(
+        { openByDefault: true },
+        false,
+      );
+
+      expect(previewComponentEnabled.value).toBe(false);
+      expect(previewForEntity.value).toBeUndefined();
+    });
+
+    it("keeps the preview closed when false after the entities change", async () => {
+      const { previewComponentEnabled, entities } = await setup(
+        { openByDefault: true },
+        false,
+      );
+
+      entities.value = [makeEntity("entity-4")];
+      await flushPromises();
+
+      expect(previewComponentEnabled.value).toBe(false);
+    });
+
+    it("opens the first entity when true, even if the entity type does not", async () => {
+      const { previewComponentEnabled, previewForEntity } = await setup(
+        { openByDefault: false },
+        true,
+      );
+
+      expect(previewComponentEnabled.value).toBe(true);
+      expect(previewForEntity.value).toBe("entity-1");
+    });
+
+    it("does not open when true but the entity type has no preview configured", async () => {
+      vi.mocked(apolloClient.query).mockResolvedValue({
+        data: { PreviewComponents: { previewComponent: null } },
+      });
+      const entities = ref([makeEntity("entity-1")]);
+      const { previewComponentEnabled } = usePreviewComponent(
+        reactive({
+          entityType: Entitytyping.Asset,
+          baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+          openPreviewByDefault: true,
+        }),
+        entities,
+      );
+      await flushPromises();
+      entities.value = [makeEntity("entity-2")];
+      await flushPromises();
+
+      expect(previewComponentEnabled.value).toBe(false);
+    });
+
+    it("falls back to the entity type setting when not set", async () => {
+      const { previewComponentEnabled } = await setup(
+        { openByDefault: true },
+        undefined,
+      );
+
+      expect(previewComponentEnabled.value).toBe(true);
     });
   });
 });
