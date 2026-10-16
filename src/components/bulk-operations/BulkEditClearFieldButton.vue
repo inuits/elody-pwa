@@ -8,6 +8,9 @@
     <BaseButtonNew
       :data-cy="`bulk-edit-clear-${fieldKey}`"
       :icon="cleared ? DamsIcons.ArrowCircleLeft : DamsIcons.Trash"
+      :aria-label="
+        t(cleared ? 'bulk-operations.keep-field' : 'bulk-operations.clear-field')
+      "
       :button-style="cleared ? 'commit' : 'secondary'"
       button-size="sm"
       @click="() => emit('toggle')"

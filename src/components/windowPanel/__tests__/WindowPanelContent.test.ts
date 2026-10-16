@@ -52,4 +52,10 @@ describe("WindowPanelContent — a row of a repeatable panel", () => {
   it("makes room for its delete button in page edit mode", () => {
     expect(mountRow(true).classes()).toContain("flex");
   });
+
+  it("names its icon-only delete button", () => {
+    expect(
+      mountRow(true).findComponent({ name: "BaseButtonNew" }).props("ariaLabel"),
+    ).toBe("inline-edit.remove-row");
+  });
 });

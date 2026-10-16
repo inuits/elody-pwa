@@ -6,6 +6,8 @@
       :icon="DamsIcons.Plus"
       button-style="commit"
       button-size="sm"
+      :aria-haspopup="types.length > 1 ? 'menu' : undefined"
+      :aria-expanded="types.length > 1 ? isOpen : undefined"
       @click.stop="onClick"
     />
     <!-- Mounted only after this component is mounted so the Teleport target
@@ -30,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import {
   ContextMenuDirection,
   DamsIcons,
@@ -60,19 +62,23 @@ const contextMenuHandler = ref(new ContextMenuHandler());
 
 // the dropdown's Teleport target only exists once the dialog is in the DOM
 const isMounted = ref(false);
+
+const isOpen = computed<boolean>(
+  () => contextMenuHandler.value.getContextMenu()?.isVisible ?? false,
+);
 onMounted(() => (isMounted.value = true));
 
 // a single creatable type needs no menu — pick it straight away; multiple
-// types open a dropdown of buttons (one per type) at the click position
+// types open a dropdown of buttons (one per type) under the button
 const onClick = (event: MouseEvent) => {
   if (props.types.length <= 1) {
     if (props.types[0]) emit("select", props.types[0]);
     return;
   }
-  contextMenuHandler.value.openContextMenu({
-    x: event.clientX,
-    y: event.clientY,
-  });
+  contextMenuHandler.value.openContextMenu(
+    { x: 0, y: 0 },
+    event.currentTarget as HTMLElement,
+  );
 };
 
 const select = (type: RepetitiveCreatableType) => {

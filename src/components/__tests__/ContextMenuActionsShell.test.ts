@@ -133,4 +133,13 @@ describe("ContextMenuActionsShell", () => {
 
     expect(wrapper.emitted("open")).toHaveLength(1);
   });
+
+  it("uses a caller's trigger label instead of Actions", () => {
+    const trigger = getWrapper({ triggerLabel: "Saved searches" }).find(
+      "button",
+    );
+
+    expect(trigger.text()).toContain("Saved searches");
+    expect(trigger.text()).not.toContain("contextMenu.actions");
+  });
 });

@@ -204,4 +204,16 @@ describe("BaseButtonNew", () => {
       getWrapper({ disabled: true }).find("button").attributes("disabled"),
     ).toBeDefined();
   });
+
+  it("hides a squeezed label only visually, so the name survives", () => {
+    const label = getWrapper().find("span");
+
+    expect(label.classes()).toEqual(
+      expect.arrayContaining([
+        "@max-xs/window:sr-only",
+        "@max-xl/wrapper-content:sr-only",
+      ]),
+    );
+    expect(label.classes().join(" ")).not.toMatch(/:hidden\b/);
+  });
 });

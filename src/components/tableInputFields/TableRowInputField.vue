@@ -37,6 +37,7 @@
     <BaseButtonNew
       class="!w-auto"
       :icon="DamsIcons.Trash"
+      :aria-label="t('inline-edit.remove-row')"
       button-style="danger"
       button-size="sm"
       @click="emit('remove-row', rowIndex)"
@@ -47,6 +48,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { useI18n } from "vue-i18n";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import TableCellInputField from "@/components/tableInputFields/TableCellInputField.vue";
 import {
@@ -57,6 +59,8 @@ import {
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
 import { looksLikeEntityId } from "@/helpers";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   rowIndex: number;

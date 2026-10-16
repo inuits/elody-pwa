@@ -15,6 +15,8 @@ split button).
 
 ## Anatomy
 - Trigger: secondary `BaseButtonNew` (sm, bordered), label + ⌄ (⌃ while open).
+  "Actions" by default; `triggerLabel` names a more specific scope
+  ("Saved searches" in the filter panel).
 - Split button: the promoted action as a primary (accent) button and an
   accent chevron segment in one capsule, split by a white 40% divider. The
   chevron takes the accent-hover fill while open.

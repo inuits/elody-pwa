@@ -41,7 +41,7 @@
       :class="[
         { invisible: loading && !hasIcon },
         {
-          '@max-xs/window:hidden @max-xl/wrapper-content:hidden':
+          '@max-xs/window:sr-only @max-xl/wrapper-content:sr-only':
             !forceShowLabel,
         },
       ]"

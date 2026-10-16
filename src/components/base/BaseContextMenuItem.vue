@@ -22,6 +22,7 @@
               icon: buttonIcon,
               buttonSize: 'sm',
               disabled: disable,
+              forceShowLabel: true,
             }
           : {
               role: 'menuitem',

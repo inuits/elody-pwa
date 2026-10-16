@@ -49,4 +49,24 @@ describe("RepetitiveCreateButton", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("select")?.[0]).toEqual([types[1]]);
   });
+
+  it("announces its type menu and opens it under the button", async () => {
+    const wrapper = getWrapper({ types });
+    const trigger = button(wrapper);
+    expect(trigger.attributes("aria-haspopup")).toBe("menu");
+    expect(trigger.attributes("aria-expanded")).toBe("false");
+
+    await trigger.trigger("click");
+
+    expect(trigger.attributes("aria-expanded")).toBe("true");
+    expect(
+      (wrapper.vm as any).contextMenuHandler.getContextMenu().anchor,
+    ).toBe(trigger.element);
+  });
+
+  it("does not announce a menu for a single type", () => {
+    expect(
+      button(getWrapper({ types: [types[0]] })).attributes("aria-haspopup"),
+    ).toBeUndefined();
+  });
 });

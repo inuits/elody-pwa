@@ -98,4 +98,14 @@ describe("BaseContextMenuItem", () => {
     expect(classes).not.toContain("opacity-40");
     expect(classes).not.toContain("hover:bg-accent-wash");
   });
+
+  it("always shows a promoted button's label", () => {
+    const wrapper = shallowMount(BaseContextMenuItem, {
+      props: { label: "Download", asButton: true },
+    });
+
+    expect(
+      wrapper.findComponent({ name: "BaseButtonNew" }).props("forceShowLabel"),
+    ).toBe(true);
+  });
 });

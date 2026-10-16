@@ -23,6 +23,7 @@
         <div class="@6xl/modal:hidden">
           <base-button-new
             icon="Redo"
+            :aria-label="t('actions.labels.reset-upload')"
             button-style="commit"
             @click="resetUpload()"
           />
@@ -38,6 +39,7 @@
         <div class="ml-5 @lg/modal:hidden">
           <base-button-new
             icon="CheckCircle"
+            :aria-label="t('actions.labels.complete')"
             button-style="commit"
             @click="emit('closeAndDeleteForm')"
           />

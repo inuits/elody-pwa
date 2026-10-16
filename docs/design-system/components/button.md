@@ -73,6 +73,9 @@ Enter and Space activate it. While loading or disabled it does nothing.
 ## Accessibility
 - A real `<button type="button">`.
 - Icon-only buttons must set `ariaLabel`.
+- When space runs out, a label is hidden visually only (`sr-only`), so the
+  button keeps its name. `forceShowLabel` keeps it visible (split primaries
+  and promoted actions always do).
 - Loading sets `aria-busy`. If the result needs announcing, announce it from
   the surrounding region, not from the button.
 

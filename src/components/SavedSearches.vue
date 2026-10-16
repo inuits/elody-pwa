@@ -29,7 +29,7 @@
         :disable="!selectedFilter"
       />
 
-      <hr class="border-t-1 border-neutral-50" />
+      <hr role="separator" class="border-t-1 border-neutral-50" />
 
       <template v-if="lastUsedFilters.length > 0">
         <base-context-menu-item
@@ -42,6 +42,7 @@
       </template>
 
       <hr
+        role="separator"
         class="border-t-1 border-neutral-50"
         v-if="lastUsedFilters.length > 0"
       />

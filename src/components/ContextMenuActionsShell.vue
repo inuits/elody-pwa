@@ -43,7 +43,7 @@
         class="overflow-menu-trigger"
         button-style="secondary"
         button-size="sm"
-        :label="t('contextMenu.actions')"
+        :label="triggerLabel ?? t('contextMenu.actions')"
         :aria-label="
           contextLabel
             ? t('contextMenu.actions-for', { title: contextLabel })
@@ -85,6 +85,8 @@ defineProps<{
   split?: boolean;
   // What the actions act on, for the trigger's accessible name.
   contextLabel?: string;
+  // A more specific trigger label than "Actions" ("Saved searches").
+  triggerLabel?: string;
 }>();
 
 const emit = defineEmits<{ (event: "open"): void }>();
