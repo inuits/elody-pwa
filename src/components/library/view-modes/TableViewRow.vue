@@ -92,44 +92,20 @@
         :refetch-entities="refetchEntities"
         :intial-values="intialValues"
         :relation-values="relationValues"
+        :context-label="rowTitle"
       />
     </div>
 
-    <div
-      class="w-8 shrink-0 flex justify-center"
-      @click.stop.prevent="emit('togglePreviewComponent', itemId)"
-    >
-      <base-tooltip
+    <div class="w-8 shrink-0 flex justify-center">
+      <PreviewToggle
         v-if="
-          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-          baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+          previewComponentFeatureEnabled &&
+          (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+            baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
         "
-        position="top-right"
-        :tooltip-offset="8"
-      >
-        <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy" class="flex">
-            <unicon
-              v-if="previewComponentFeatureEnabled"
-              :name="Unicons.Eye.name"
-              class="h-5.5 w-5.5 text-text-body mx-1"
-              :class="{
-                '!text-accent-accent fill-current':
-                  previewComponentCurrentActive,
-              }"
-            />
-          </div>
-        </template>
-        <template #default>
-          <span>
-            {{
-              previewComponentCurrentActive
-                ? t("preview-component.close")
-                : t("preview-component.open")
-            }}
-          </span>
-        </template>
-      </base-tooltip>
+        :active="previewComponentCurrentActive"
+        @toggle="emit('togglePreviewComponent', itemId)"
+      />
     </div>
   </li>
 </template>
@@ -147,8 +123,8 @@ import {
 } from "@/generated-types/queries";
 import type { Context } from "@/composables/useBulkOperations";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import PreviewToggle from "@/components/PreviewToggle.vue";
 import EntityButtons from "@/components/EntityButtons.vue";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import ImageViewer from "@/components/base/ImageViewer.vue";
 import ReadOnlyMetadataWrapper from "@/components/metadata/ReadOnlyMetadataWrapper.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
@@ -158,7 +134,6 @@ import { stringIsUrl } from "@/helpers";
 import { auth } from "@/main";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -233,6 +208,12 @@ const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const visibleMetadata = computed(() =>
   (props.teaserMetadata ?? []).filter((m) => !m.showOnlyInEditMode),
 );
+
+// The first teaser value is what the row shows as its title.
+const rowTitle = computed(() => {
+  const value = props.teaserMetadata?.[0]?.value;
+  return typeof value === "string" ? value : undefined;
+});
 
 const columnClass = (idx: number): string => {
   const base = "flex justify-start flex-col mx-2 break-words";

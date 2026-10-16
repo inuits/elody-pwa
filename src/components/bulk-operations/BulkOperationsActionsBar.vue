@@ -1,126 +1,129 @@
 <template>
+  <!-- selection-action-bar.md: one bordered surface; the border firms up once
+       something is selected. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
-    class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-background-light"
+    role="toolbar"
+    :aria-label="t('bulk-operations.selection-toolbar')"
+    class="flex flex-wrap items-center gap-(--selection-bar-gap) p-(--selection-bar-padding) bg-surface border rounded-button text-ui"
+    :class="itemsSelected ? 'border-border-default' : 'border-border-subtle'"
   >
-    <div class="flex justify-start items-center">
-      <div
-        class="px-2 my-2.5 rounded-md"
-        :class="
-          useExtendedBulkOperations && itemsSelected
-            ? `text-neutral-white bg-accent-normal`
-            : `text-text-body bg-chip-neutral-bg`
-        "
-      >
-        <span>
-          <span v-if="itemsSelected" class="font-bold"
-            >{{ getEnqueuedItemCount(context) }}/</span
-          ><button
-            v-if="canRevealExactCount(totalItemsCount, exactCount)"
-            type="button"
-            class="underline decoration-dotted cursor-pointer disabled:cursor-wait"
-            :disabled="exactCountLoading"
-            :title="$t('bulk-operations.reveal-exact-count')"
-            @click="emit('revealExactCount')"
-          >
-            {{ formatResultCount(totalItemsCount, locale) }}</button
-          ><span v-else
-            >{{ formatDisplayCount(totalItemsCount, exactCount, locale) }}
-          </span>
-          {{ $t("bulk-operations.items") }}
-          <span v-if="itemsSelected">{{ $t("bulk-operations.selected") }}</span>
-        </span>
-      </div>
-      <div v-if="exactCountLoading" class="flex items-center ml-1">
-        <SpinnerLoader theme="accent" :dimensions="12" />
-      </div>
-      <BaseTooltip
-        v-else-if="canRevealExactCount(totalItemsCount, exactCount)"
-        position="top-end"
-        :tooltip-offset="8"
-      >
-        <template #activator="{ on, describedBy }">
-          <div
-            v-on="on"
-            :aria-describedby="describedBy"
-            class="flex items-center ml-1"
-          >
-            <Unicon :name="Unicons.QuestionCircle.name" height="20" />
-          </div>
-        </template>
-        <span>
-          {{ $t("bulk-operations.capped-items-tooltip") }}
-        </span>
-      </BaseTooltip>
-      <div v-if="itemsSelected">
-        <span
-          class="select-actions"
-          :class="
-            useExtendedBulkOperations ? `text-accent-accent` : `text-text-body`
-          "
-          @click="dequeueAllItemsForBulkProcessing(context)"
-        >
-          {{ $t("bulk-operations.undo-selection") }}
-        </span>
-      </div>
-      <div
-        v-if="
-          useExtendedBulkOperations &&
-          hasBulkOperationsWithItemsSelection &&
-          enableSelection
-        "
-      >
-        <span
-          class="select-actions"
-          :class="
-            useExtendedBulkOperations && itemsSelected
-              ? `text-accent-accent`
-              : `text-text-body`
-          "
-          @click="() => emit('selectPage')"
-        >
-          {{ $t("bulk-operations.select-page") }}
-        </span>
-      </div>
-    </div>
-    <div v-if="!excludePagination && showPagination" class="flex">
-      <BasePaginationSkeleton v-if="isLoading" />
-      <BasePaginationNew v-else />
-    </div>
-    <div
-      v-if="showButton && useExtendedBulkOperations"
-      class="flex justify-end w-fit"
+    <!-- The list total; moves to the list header count chip in DS 4. -->
+    <span
+      data-cy="selection-bar-total"
+      class="inline-flex items-center p-(--chip-padding) rounded-chip text-chip font-bold bg-chip-neutral-bg text-chip-neutral-text"
     >
-      <div v-if="confirmSelectionButton" class="w-full !m-0">
-        <BaseButtonNew
-          :label="$t('bulk-operations.confirm-selection')"
-          :icon="DamsIcons.Check"
-          button-style="commit"
-          :disabled="!itemsSelected"
-          button-size="sm"
-          @click="emit('confirmSelection', getEnqueuedItems(context))"
-        />
+      <button
+        v-if="canRevealExactCount(totalItemsCount, exactCount)"
+        type="button"
+        class="underline decoration-dotted cursor-pointer disabled:cursor-wait"
+        :disabled="exactCountLoading"
+        :title="$t('bulk-operations.reveal-exact-count')"
+        @click="emit('revealExactCount')"
+      >
+        {{ formatResultCount(totalItemsCount, locale) }}</button
+      ><span v-else>{{
+        formatDisplayCount(totalItemsCount, exactCount, locale)
+      }}</span
+      >&nbsp;{{ $t("bulk-operations.items") }}
+    </span>
+    <SpinnerLoader v-if="exactCountLoading" theme="accent" :dimensions="12" />
+    <BaseTooltip
+      v-else-if="canRevealExactCount(totalItemsCount, exactCount)"
+      position="top-end"
+      :tooltip-offset="8"
+    >
+      <template #activator="{ on, describedBy }">
+        <span
+          v-on="on"
+          :aria-describedby="describedBy"
+          class="flex items-center text-text-light"
+        >
+          <Unicon :name="Unicons.QuestionCircle.name" height="14" />
+        </span>
+      </template>
+      <span>
+        {{ $t("bulk-operations.capped-items-tooltip") }}
+      </span>
+    </BaseTooltip>
+    <!-- Mounted while empty, so screen readers announce the first selection. -->
+    <span role="status" class="font-bold">{{
+      itemsSelected
+        ? t("bulk-operations.selection-count", {
+            count: getEnqueuedItemCount(context),
+          })
+        : ""
+    }}</span>
+    <span
+      v-if="offPageCount > 0"
+      data-cy="selection-off-page-note"
+      class="text-label text-text-light"
+      >{{
+        t("bulk-operations.selected-on-other-pages", { count: offPageCount })
+      }}</span
+    >
+    <button
+      v-if="itemsSelected"
+      type="button"
+      data-cy="selection-bar-link"
+      class="text-label text-text-light underline cursor-pointer"
+      @click="dequeueAllItemsForBulkProcessing(context)"
+    >
+      {{ t("bulk-operations.clear-selection") }}
+    </button>
+    <button
+      v-if="
+        useExtendedBulkOperations &&
+        hasBulkOperationsWithItemsSelection &&
+        enableSelection
+      "
+      type="button"
+      data-cy="selection-bar-link"
+      class="text-label text-text-light underline cursor-pointer"
+      @click="() => emit('selectPage')"
+    >
+      {{ $t("bulk-operations.select-page") }}
+    </button>
+    <div class="flex items-center gap-(--selection-bar-gap) ml-auto">
+      <div v-if="!excludePagination && showPagination" class="flex">
+        <BasePaginationSkeleton v-if="isLoading" />
+        <BasePaginationNew v-else />
       </div>
-      <div v-else class="!m-0">
-        <ActionMenuGroup
-          v-if="bulkOperations !== undefined && auth.isAuthenticated.value"
-          v-model="selectedBulkOperation"
-          @update:modelValue="handleSelectedBulkOperation"
-          :options="bulkOperations"
-          :items-selected="itemsSelected"
-          :selected-items="getEnqueuedItems(context)"
-          :entity-type="entityType"
-          :parent-entity-id="parentEntityId"
-          :sub-dropdown-options="subDropdownOptions"
-          :clear-sub-dropdown-options="clearSubDropdownOptions"
-        />
+      <div
+        v-if="showButton && useExtendedBulkOperations"
+        class="flex justify-end w-fit"
+      >
+        <div v-if="confirmSelectionButton" class="w-full">
+          <BaseButtonNew
+            :label="$t('bulk-operations.confirm-selection')"
+            :icon="DamsIcons.Check"
+            button-style="commit"
+            :disabled="!itemsSelected"
+            button-size="sm"
+            @click="emit('confirmSelection', getEnqueuedItems(context))"
+          />
+        </div>
+        <div v-else>
+          <ActionMenuGroup
+            v-if="bulkOperations !== undefined && auth.isAuthenticated.value"
+            v-model="selectedBulkOperation"
+            @update:modelValue="handleSelectedBulkOperation"
+            :options="bulkOperations"
+            :items-selected="itemsSelected"
+            :selected-items="getEnqueuedItems(context)"
+            :entity-type="entityType"
+            :parent-entity-id="parentEntityId"
+            :sub-dropdown-options="subDropdownOptions"
+            :clear-sub-dropdown-options="clearSubDropdownOptions"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { inject } from "vue";
+import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   canRevealExactCount,
@@ -166,6 +169,8 @@ const props = withDefaults(
     isLoading?: boolean;
     exactCount?: number | null;
     exactCountLoading?: boolean;
+    // Ids on the visible page, to tell selected items on other pages apart.
+    pageItemIds?: string[];
   }>(),
   {
     totalItemsCount: 0,
@@ -184,7 +189,7 @@ const props = withDefaults(
   },
 );
 
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 
@@ -229,20 +234,12 @@ const {
   emit as BulkOperationsActionsBarEmits,
   parentEntity,
 );
+
+const offPageCount = computed<number>(() =>
+  props.pageItemIds
+    ? getEnqueuedItems(props.context).filter(
+        (item) => !props.pageItemIds!.includes(item.id),
+      ).length
+    : 0,
+);
 </script>
-
-<style>
-@reference "@/assets/main.css"
-
-.alignment-nested-divs div div {
-  @apply py-1 mr-3;
-}
-
-.select-actions {
-  @apply px-2 underline cursor-pointer select-none;
-}
-
-.disabled-select-actions {
-  @apply text-text-light select-none;
-}
-</style>

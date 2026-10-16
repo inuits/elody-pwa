@@ -79,23 +79,28 @@
             button-style="commit"
             @click="applyFilters(true)"
           />
-          <BaseButtonNew
-            v-if="
-              hasSavedSearch &&
-              enableSaveSearchFilters &&
-              auth.isAuthenticated.value === true
-            "
-            :icon="DamsIcons.EllipsisV"
-            class="!w-1/5"
-            @click.stop="
-              (event: MouseEvent) =>
-                contextMenuHandler.openContextMenu({
-                  x: event.clientX,
-                  y: event.clientY,
-                })
-            "
-          />
         </div>
+        <ContextMenuActionsShell
+          v-if="
+            hasSavedSearch &&
+            enableSaveSearchFilters &&
+            auth.isAuthenticated.value === true
+          "
+          class="!justify-start !pl-0 pb-4"
+          :has-promoted-actions="false"
+          :has-overflow-actions="true"
+          :trigger-label="t('saved-searches.title')"
+        >
+          <template #overflow>
+            <saved-searches
+              :active-filters="filters"
+              :has-active-filters="activeFilterCount > 0"
+              :entityType="entityType"
+              @filterDeleted="() => (clearAllActiveFilters = true)"
+              :route="route"
+            />
+          </template>
+        </ContextMenuActionsShell>
         <div>
           <BaseInputAutocomplete
             v-if="addFilterOptions.length > 0"
@@ -130,15 +135,6 @@
         />
       </div>
     </div>
-    <base-context-menu :context-menu="contextMenuHandler.getContextMenu()">
-      <saved-searches
-        :active-filters="filters"
-        :has-active-filters="activeFilterCount > 0"
-        :entityType="entityType"
-        @filterDeleted="() => (clearAllActiveFilters = true)"
-        :route="route"
-      />
-    </base-context-menu>
   </div>
 </template>
 
@@ -161,14 +157,13 @@ import {
 } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
+import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import SavedSearches from "@/components/SavedSearches.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { apolloClient } from "@/main";
 import { computed, onMounted, ref, watch, inject } from "vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import {
@@ -256,7 +251,6 @@ const emit = defineEmits<{
 
 const clearAllActiveFilters = ref<boolean>(false);
 const fetchEntities = ref<boolean>(false);
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const displayedFilterOptions = ref<DropdownOption[]>([]);
 const lastActiveFilter = ref<SavedSearchType | undefined>(undefined);
 const matchers = ref<DropdownOption[]>([]);

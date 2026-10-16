@@ -44,6 +44,11 @@
           <BaseButtonNew
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
+            :aria-label="
+              $t('actions.labels.remove-item', {
+                item: entityLabel(branch, steps[0]?.key) || index + 1,
+              })
+            "
             button-style="danger"
             button-size="sm"
             @click="emit('remove', index)"

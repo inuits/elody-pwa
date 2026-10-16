@@ -207,6 +207,7 @@ const props = withDefaults(
     configPerViewMode: object;
     showCurrentEntityFlow?: boolean;
     cropMediafileCoordinatesKey?: string;
+    openPreviewByDefault?: boolean;
     primaryMediafileId?: string;
     primaryThumbnailId?: string;
   }>(),
@@ -223,6 +224,7 @@ const props = withDefaults(
     refetchEntities: undefined,
     showCurrentEntityFlow: true,
     cropMediafileCoordinatesKey: "",
+    openPreviewByDefault: undefined,
     expandFilters: false,
     primaryMediafileId: "",
     primaryThumbnailId: "",

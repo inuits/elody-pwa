@@ -6,6 +6,9 @@ export type ContextMenu = {
     x: number;
     y: number;
   };
+  // The trigger: the menu opens under it and Escape returns focus to it.
+  anchor?: HTMLElement;
+  close?: () => void;
 };
 
 const activeContextMenus = ref<ContextMenu[]>([]);
@@ -35,16 +38,21 @@ export class ContextMenuHandler {
     return this.contextMenu.value;
   };
 
-  public openContextMenu = (position: { x: number; y: number }): void => {
+  public openContextMenu = (
+    position: { x: number; y: number },
+    anchor?: HTMLElement,
+  ): void => {
     this.deactiveAllContextMenus();
     this.contextMenu.value.isVisible = true;
     this.contextMenu.value.position = position;
+    this.contextMenu.value.anchor = anchor;
+    this.contextMenu.value.close = this.closeContextMenu;
     this.addActiveContextMenu(this.contextMenu);
     document.addEventListener("click", this.closeContextMenu);
     document.addEventListener("wheel", this.closeContextMenu);
   };
 
-  private closeContextMenu = (): void => {
+  public closeContextMenu = (): void => {
     document.removeEventListener("click", this.closeContextMenu);
     document.removeEventListener("wheel", this.closeContextMenu);
     this.contextMenu.value.isVisible = false;

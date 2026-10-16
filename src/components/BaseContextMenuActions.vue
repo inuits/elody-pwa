@@ -2,6 +2,8 @@
   <context-menu-actions-shell
     :has-promoted-actions="hasPromotedActions"
     :has-overflow-actions="hasAvailableContextMenuActions"
+    :context-label="contextLabel"
+    :split="Object.keys(promotedActions).length === 1"
   >
     <template #promoted>
       <context-menu-action
@@ -37,6 +39,7 @@ import type { Entitytyping } from "@/generated-types/queries";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import ContextMenuAction from "@/components/context-menu-actions/ContextMenuAction.vue";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
+import { dangerLast } from "@/components/context-menu-actions/actionTone";
 import { computed } from "vue";
 import type { Context } from "@/composables/useBulkOperations";
 
@@ -49,6 +52,7 @@ const props = withDefaults(
     relation?: object | string;
     bulkOperationsContext: Context | undefined;
     refetchEntities?: () => Promise<void>;
+    contextLabel?: string;
   }>(),
   {
     contextMenuActions: undefined,
@@ -63,21 +67,29 @@ const handleEmit = () => {
 };
 
 const availableActions = computed(() => {
-  const { __typename, ...restMenuActions } = { ...props.contextMenuActions };
+  const restMenuActions = { ...props.contextMenuActions };
+  delete restMenuActions.__typename;
 
-  const promoted: Partial<ContextMenuActions> = {};
-  const overflow: Partial<ContextMenuActions> = {};
+  type Entry = [string, { hidden?: boolean; showAsButton?: boolean | null }];
+  const visible = (Object.entries(restMenuActions) as Entry[]).filter(
+    ([, action]) => action && typeof action === "object" && !action.hidden,
+  );
+  const isPromoted = ([, action]: Entry) => Boolean(action.showAsButton);
 
-  for (const key in restMenuActions) {
-    const action = restMenuActions[key as keyof typeof restMenuActions];
-    if (!action) continue;
-    if ("hidden" in action && action.hidden) continue;
+  // One primary per entity: further promoted actions lead the menu.
+  const [primary] = visible.filter(isPromoted);
+  const menu = dangerLast(
+    [
+      ...visible.filter((entry) => isPromoted(entry) && entry !== primary),
+      ...visible.filter((entry) => !isPromoted(entry)),
+    ],
+    ([, action]) => action,
+  );
 
-    const slot = "showAsButton" in action ? promoted : overflow;
-    slot[key as keyof ContextMenuActions] = action as any;
-  }
-
-  return { promoted, overflow };
+  return {
+    promoted: Object.fromEntries(primary ? [primary] : []) as Partial<ContextMenuActions>,
+    overflow: Object.fromEntries(menu) as Partial<ContextMenuActions>,
+  };
 });
 
 const promotedActions = computed(() => availableActions.value.promoted);

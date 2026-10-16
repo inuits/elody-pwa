@@ -115,4 +115,18 @@ describe("TableViewRow", () => {
       "left-1/2",
     );
   });
+
+  it("toggles the preview from a real eye button", () => {
+    const wrapper = shallowMount(TableViewRow, {
+      props: {
+        ...props,
+        baseLibraryMode: "normalBaseLibrary" as any,
+        previewComponentFeatureEnabled: true,
+      },
+    });
+
+    wrapper.findComponent({ name: "PreviewToggle" }).vm.$emit("toggle");
+
+    expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["item"]);
+  });
 });

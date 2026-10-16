@@ -149,4 +149,71 @@ describe("BaseButtonNew", () => {
         .attributes("aria-label"),
     ).toBe("Sluit");
   });
+
+  it("renders trailing content after the label", () => {
+    const wrapper = shallowMount(BaseButtonNew, {
+      props: { label: "Acties" },
+      slots: { default: '<i data-test="chevron" />' },
+      global: { stubs: { unicon: true } },
+    });
+
+    expect(wrapper.find('[data-test="chevron"]').exists()).toBe(true);
+  });
+
+  it.each(["primary", "ghost", "commit", "danger"])(
+    "gives the %s variant a transparent border so every button is the same height",
+    (buttonStyle) => {
+      expect(classesOf({ buttonStyle })).toEqual(
+        expect.arrayContaining(["border", "border-transparent"]),
+      );
+    },
+  );
+
+  describe("disabled with a reason", () => {
+    const getReasoned = (onClick = vi.fn()) =>
+      shallowMount(BaseButtonNew, {
+        props: { label: "Bewaar", disabled: true, tooltipLabel: "why" },
+        attrs: { onClick },
+        global: { stubs: { unicon: true } },
+      });
+
+    it("stays focusable so keyboard users reach the reason", () => {
+      const button = getReasoned().find("button");
+
+      expect(button.attributes("disabled")).toBeUndefined();
+      expect(button.attributes("aria-disabled")).toBe("true");
+    });
+
+    it("does not fire its click", async () => {
+      const onClick = vi.fn();
+
+      await getReasoned(onClick).find("button").trigger("click");
+
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it("drops the hover style", () => {
+      expect(getReasoned().find("button").classes()).not.toContain(
+        "hover:bg-accent-hover",
+      );
+    });
+  });
+
+  it("keeps a disabled button without a reason natively disabled", () => {
+    expect(
+      getWrapper({ disabled: true }).find("button").attributes("disabled"),
+    ).toBeDefined();
+  });
+
+  it("hides a squeezed label only visually, so the name survives", () => {
+    const label = getWrapper().find("span");
+
+    expect(label.classes()).toEqual(
+      expect.arrayContaining([
+        "@max-xs/window:sr-only",
+        "@max-xl/wrapper-content:sr-only",
+      ]),
+    );
+    expect(label.classes().join(" ")).not.toMatch(/:hidden\b/);
+  });
 });

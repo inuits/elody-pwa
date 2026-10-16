@@ -172,6 +172,9 @@
             :total-items="totalEntityCount || NaN"
             :show-pagination="!displayMap && !displayPipeline && !isTableGrouped"
             :is-loading="isInitialLoading"
+            :page-item-ids="
+              (predefinedEntities ?? entities).map((entity) => entity.uuid)
+            "
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
@@ -299,6 +302,7 @@
             :show-current-entity-flow="showCurrentEntityFlow"
             @add-refetch-function-to-edit-state="syncEditStateCallbacks"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+            :open-preview-by-default="openPreviewByDefault"
             :primaryMediafileId="primaryMediafileId"
             :primaryThumbnailId="primaryThumbnailId"
           />
@@ -337,6 +341,7 @@
             :config-per-view-mode="configPerViewMode"
             :refetch-entities="refetchEntities"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+            :open-preview-by-default="openPreviewByDefault"
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
@@ -519,6 +524,7 @@ export type BaseLibraryProps = {
   entityTypeAsCenterPoint?: string;
   centerCoordinatesKey?: string;
   cropMediafileCoordinatesKey?: string;
+  openPreviewByDefault?: boolean;
   actionsOnResult?: ActionsOnResult;
   addEntitiesToForms?: boolean;
   saveViewPreferences?: boolean;
@@ -558,6 +564,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   ignoreFetchingData: false,
   centerCoordinatesKey: "",
   cropMediafileCoordinatesKey: "",
+  openPreviewByDefault: undefined,
   addEntitiesToForms: false,
   saveViewPreferences: true,
   forceShowFilters: false,

@@ -110,6 +110,7 @@
     >
       <base-button-new
         :icon="DamsIcons.Trash"
+        :aria-label="t('inline-edit.remove-row')"
         @click="emit('decreaseRepeatedFieldAmount')"
       />
     </div>

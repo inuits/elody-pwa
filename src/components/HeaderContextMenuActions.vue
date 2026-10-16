@@ -2,6 +2,7 @@
   <context-menu-actions-shell
     :has-promoted-actions="hasPromotedActions"
     :has-overflow-actions="hasOverflowActions"
+    :split="promotedActions.length === 1"
   >
     <template #promoted>
       <template v-for="(action, i) in promotedActions" :key="i">
@@ -47,7 +48,11 @@
       </template>
     </template>
     <template #overflow>
-      <template v-for="(action, i) in overflowActions" :key="i">
+      <div
+        v-for="(action, i) in overflowActions"
+        :key="i"
+        :style="toneStyle(action)"
+      >
         <elody-action
           v-if="action.type === 'elody'"
           :label="action.label"
@@ -118,7 +123,7 @@
           :entity-type="action.entityType"
           :parent-relation="action.parentRelation"
         />
-      </template>
+      </div>
     </template>
   </context-menu-actions-shell>
 </template>
@@ -128,6 +133,10 @@ import { computed, provide } from "vue";
 import type { Entitytyping } from "@/generated-types/queries";
 import type { ContextMenuActionRouteConfig } from "@/types/contextMenuRouteConfig";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
+import {
+  dangerLast,
+  toneStyle,
+} from "@/components/context-menu-actions/actionTone";
 import ElodyAction from "@/components/context-menu-actions/ElodyAction.vue";
 import DownloadZipOfRelatedMediafilesAction from "@/components/context-menu-actions/DownloadZipOfRelatedMediafilesAction.vue";
 import QueryAction from "@/components/context-menu-actions/QueryAction.vue";
@@ -166,23 +175,26 @@ const noOp = () => Promise.resolve();
 provide("RefetchParentEntity", noOp);
 
 const visibleActions = computed(() => {
-  const promoted: ContextMenuActionRouteConfig[] = [];
-  const overflow: ContextMenuActionRouteConfig[] = [];
+  const visible = props.actions.filter(
+    (action) =>
+      !("hidden" in action && action.hidden) && !isHiddenForMetadata(action),
+  );
+  const isPromoted = (action: ContextMenuActionRouteConfig) =>
+    "showAsButton" in action && Boolean(action.showAsButton);
 
-  for (const action of props.actions) {
-    if ("hidden" in action && action.hidden) continue;
-    if (isHiddenForMetadata(action)) continue;
-
-    const slot =
-      "showAsButton" in action && action.showAsButton ? promoted : overflow;
-    slot.push(action);
-  }
-
-  return { promoted, overflow };
+  // One primary per entity: further promoted actions lead the menu.
+  const [primary] = visible.filter(isPromoted);
+  return {
+    promoted: primary ? [primary] : [],
+    overflow: [
+      ...visible.filter((action) => isPromoted(action) && action !== primary),
+      ...visible.filter((action) => !isPromoted(action)),
+    ],
+  };
 });
 
 const promotedActions = computed(() => visibleActions.value.promoted);
-const overflowActions = computed(() => visibleActions.value.overflow);
+const overflowActions = computed(() => dangerLast(visibleActions.value.overflow));
 
 const hasPromotedActions = computed(() => promotedActions.value.length > 0);
 const hasOverflowActions = computed(() => overflowActions.value.length > 0);

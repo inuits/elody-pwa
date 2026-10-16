@@ -1,4 +1,5 @@
 import type {
+  ActionTone,
   ContextMenuElodyActionEnum,
   ContextMenuFormFlow,
   ContextMenuGeneralActionEnum,
@@ -13,6 +14,7 @@ type BaseAction = {
   label: string;
   icon: string;
   hideForMetadata?: { key: string; equals: string | number | boolean };
+  tone?: ActionTone;
 };
 
 export type DownloadZipActionConfig = BaseAction & {

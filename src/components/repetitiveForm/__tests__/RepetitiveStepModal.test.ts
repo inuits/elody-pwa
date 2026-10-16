@@ -49,4 +49,12 @@ describe("RepetitiveStepModal", () => {
     getWrapper(true);
     expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
   });
+
+  it("names its icon-only close button", () => {
+    expect(
+      getWrapper(true)
+        .find("[data-testid='repetitive-step-modal-close']")
+        .attributes("aria-label"),
+    ).toBe("actions.labels.close");
+  });
 });

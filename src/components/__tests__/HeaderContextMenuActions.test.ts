@@ -21,9 +21,9 @@ const mountComponent = (actions: ContextMenuActionRouteConfig[]) =>
     global: {
       stubs: {
         ContextMenuActionsShell: {
-          props: ["hasPromotedActions", "hasOverflowActions"],
+          props: ["hasPromotedActions", "hasOverflowActions", "split"],
           template:
-            '<div><div data-test="promoted"><slot name="promoted" /></div><div data-test="overflow"><slot name="overflow" /></div></div>',
+            '<div :data-split="String(split)"><div data-test="promoted"><slot name="promoted" /></div><div data-test="overflow"><slot name="overflow" /></div></div>',
         },
       },
     },
@@ -52,5 +52,44 @@ describe("HeaderContextMenuActions", () => {
     expect(
       wrapper.find('[data-test="overflow"]').findComponent({ name: "QueryAction" }).exists(),
     ).toBe(true);
+  });
+
+  it("asks for a split button with one promoted action and overflow", () => {
+    const wrapper = mountComponent([
+      { ...downloadAction, showAsButton: true },
+      downloadAction,
+    ]);
+
+    expect(wrapper.attributes("data-split")).toBe("true");
+  });
+
+  it("sorts destructive actions last in the menu", () => {
+    const wrapper = mountComponent([
+      { ...downloadAction, label: "delete", tone: "Danger" as any },
+      downloadAction,
+    ]);
+
+    expect(
+      wrapper
+        .find('[data-test="overflow"]')
+        .findAllComponents({ name: "QueryAction" })
+        .map((action) => action.props("label")),
+    ).toEqual(["contextMenu.createDownload", "delete"]);
+  });
+
+  it("keeps one primary and moves further promoted actions into the menu", () => {
+    const wrapper = mountComponent([
+      { ...downloadAction, label: "first", showAsButton: true },
+      { ...downloadAction, label: "menu" },
+      { ...downloadAction, label: "second", showAsButton: true },
+    ]);
+    const labels = (slot: string) =>
+      wrapper
+        .find(`[data-test="${slot}"]`)
+        .findAllComponents({ name: "QueryAction" })
+        .map((action) => action.props("label"));
+
+    expect(labels("promoted")).toEqual(["first"]);
+    expect(labels("overflow")).toEqual(["second", "menu"]);
   });
 });

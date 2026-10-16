@@ -2,19 +2,26 @@
   <button
     data-cy="base-button-new"
     type="button"
-    :disabled="disabled || loading"
+    :disabled="(disabled && !disabledWithReason) || loading"
+    :aria-disabled="disabledWithReason ? 'true' : undefined"
     :aria-label="ariaLabel"
     :aria-busy="loading ? 'true' : undefined"
-    class="relative flex justify-center items-center gap-(--button-gap) whitespace-nowrap w-full font-bold cursor-pointer transition-transform active:scale-[.97] disabled:cursor-auto disabled:active:scale-100"
+    class="relative flex justify-center items-center gap-(--button-gap) whitespace-nowrap w-full font-bold transition-transform disabled:cursor-auto disabled:active:scale-100"
     :class="[
-      `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
-      `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
-      `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
-      `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
+      disabledWithReason
+        ? `cursor-auto ${unprefixed(selectedButtonStyle)}`
+        : [
+            `${selectedButtonStyle.textColor} ${selectedButtonStyle.bgColor}`,
+            'cursor-pointer active:scale-[.97]',
+            `${selectedButtonStyle.hoverStyle.textColor} ${selectedButtonStyle.hoverStyle.bgColor}`,
+            `${selectedButtonStyle.activeStyle.textColor} ${selectedButtonStyle.activeStyle.bgColor}`,
+            `${selectedButtonStyle.disabledStyle.textColor} ${selectedButtonStyle.disabledStyle.bgColor}`,
+          ],
       selectedButtonStyle.radius,
-      selectedButtonStyle.extra ?? '',
+      disabledWithReason ? '' : (selectedButtonStyle.extra ?? ''),
       sizeClasses,
     ]"
+    @click.capture="blockClickWhenDisabled"
   >
     <!-- Loading keeps the width: the spinner takes the icon's place, or
          overlays an invisible label when there is no icon. -->
@@ -34,12 +41,13 @@
       :class="[
         { invisible: loading && !hasIcon },
         {
-          '@max-xs/window:hidden @max-xl/wrapper-content:hidden':
+          '@max-xs/window:sr-only @max-xl/wrapper-content:sr-only':
             !forceShowLabel,
         },
       ]"
       >{{ label }}</span
     >
+    <slot />
 
     <div v-if="disabled && tooltipLabel" class="-mb-2 text-text-secondary">
       <base-tooltip position="top-right" :tooltip-offset="8">
@@ -89,7 +97,7 @@ const disabledStyle: PseudoStyle = {
 // Primary: client accent fill, white ink, darker accent + accent shadow on hover.
 const primaryButton: Button = {
   textColor: "text-neutral-white",
-  bgColor: "bg-accent",
+  bgColor: "bg-accent border border-transparent",
   hoverStyle: {
     textColor: "hover:text-neutral-white",
     bgColor: "hover:bg-accent-hover",
@@ -117,10 +125,10 @@ const secondaryButton: Button = {
   disabledStyle,
   radius: "rounded-input",
 };
-// Ghost: borderless, label-blue ink.
+// Ghost: no visible border, label-blue ink.
 const ghostButton: Button = {
   textColor: "text-text-light",
-  bgColor: "bg-transparent",
+  bgColor: "bg-transparent border border-transparent",
   hoverStyle: {
     textColor: "hover:text-accent-dark",
     bgColor: "hover:bg-accent-wash",
@@ -135,7 +143,7 @@ const ghostButton: Button = {
 // Commit: platform-fixed teal (Bewaar, confirm); never client-themed.
 const commitButton: Button = {
   textColor: "text-neutral-white",
-  bgColor: "bg-commit",
+  bgColor: "bg-commit border border-transparent",
   hoverStyle: {
     textColor: "hover:text-neutral-white",
     bgColor: "hover:bg-commit-hover",
@@ -150,7 +158,7 @@ const commitButton: Button = {
 // Danger: destructive actions.
 const dangerButton: Button = {
   textColor: "text-neutral-white",
-  bgColor: "bg-danger",
+  bgColor: "bg-danger border border-transparent",
   hoverStyle: {
     textColor: "hover:text-neutral-white",
     bgColor: "hover:bg-red-dark",
@@ -209,6 +217,26 @@ const { t } = useI18n();
 const selectedButtonStyle = computed<Button>(
   () => buttonStyles[props.buttonStyle],
 );
+
+// Disabled with a reason stays focusable (aria-disabled), so keyboard users
+// can reach the reason; clicks are stopped here instead of by the browser.
+const disabledWithReason = computed<boolean>(
+  () => props.disabled && !!props.tooltipLabel,
+);
+
+const blockClickWhenDisabled = (event: MouseEvent) => {
+  if (disabledWithReason.value) event.stopImmediatePropagation();
+};
+
+// The disabled look without the :disabled variant, keeping the border width.
+const unprefixed = ({ bgColor, disabledStyle }: Button): string =>
+  [
+    disabledStyle.textColor,
+    disabledStyle.bgColor,
+    ...bgColor.split(" ").filter((name) => name.startsWith("border")),
+  ]
+    .join(" ")
+    .replaceAll("disabled:", "");
 
 const hasIcon = computed<boolean>(() => props.icon !== DamsIcons.NoIcon);
 

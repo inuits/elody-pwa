@@ -1,54 +1,34 @@
 <template>
-  <div
-    class="flex flex-row justify-end items-center !m-0"
-    :class="[{ 'w-fit': primaryOptions }]"
+  <ContextMenuActionsShell
+    ref="shell"
+    class="!m-0"
+    :has-promoted-actions="primaryOption !== undefined"
+    :has-overflow-actions="menuOptions.length > 0 || hasSubDropdownOptions"
+    :split="true"
+    @open="clearSubDropdownOptions"
   >
-    <div class="flex flex-col">
+    <template #promoted>
       <BaseButtonNew
-        v-for="primaryOption in primaryOptions"
-        :key="primaryOption"
-        class="pl-4 pr-6 my-1"
-        :class="{ '-mr-4': secondaryOptions.length > 0 }"
-        button-style="commit"
+        v-if="primaryOption"
+        button-style="primary"
         button-size="sm"
-        :disabled="isMainActionDisabled || !primaryOption.active"
+        :disabled="!primaryOption.active || isMainActionDisabled"
         :label="t(primaryOption.label, [entityTypeLabel])"
+        :aria-label="nameWithCount(primaryOption)"
         :tooltip-label="tooltipFor(primaryOption)"
         :icon="primaryOption.icon"
-        :force-show-label="primaryOptions.length > 1"
+        :force-show-label="true"
         @click.stop="
           (event: MouseEvent) => {
-            handleEmit(primaryOption);
-            if (primaryOption.value === BulkOperationTypes.OpenDropdown)
-              contextMenuHandler.openContextMenu({
-                x: event.clientX,
-                y: event.clientY,
-              });
+            handleEmit(primaryOption!);
+            if (primaryOption!.value === BulkOperationTypes.OpenDropdown)
+              shell?.openFrom(event.currentTarget as HTMLElement);
           }
         "
       />
-    </div>
-    <BaseButtonNew
-      v-if="hasSecondaryOptions"
-      button-size="sm"
-      :icon="DamsIcons.EllipsisV"
-      class="!w-max !p-2 ml-2"
-      @click.stop="
-        (event: MouseEvent) => {
-          clearSubDropdownOptions();
-          contextMenuHandler.openContextMenu({
-            x: event.clientX,
-            y: event.clientY,
-          });
-        }
-      "
-    />
-
-    <div v-if="hasSubDropdownOptions" class="!m-0">
-      <BaseContextMenu
-        :context-menu="contextMenuHandler.getContextMenu()"
-        :direction="ContextMenuDirection.Left"
-      >
+    </template>
+    <template #overflow>
+      <template v-if="hasSubDropdownOptions">
         <BaseContextMenuItem
           v-for="(option, idx) in subDropdownOptions"
           :key="idx"
@@ -61,41 +41,41 @@
           :disable="!option.active"
           @clicked="handleEmit(option)"
         />
-      </BaseContextMenu>
-    </div>
-    <div v-else>
-      <BaseContextMenu
-        :context-menu="contextMenuHandler.getContextMenu()"
-        :direction="ContextMenuDirection.Left"
-      >
+      </template>
+      <template v-else>
         <BaseContextMenuItem
-          v-for="(option, idx) in secondaryOptions"
+          v-for="(option, idx) in menuOptions"
           :key="idx"
           :label="t(option?.label, [entityTypeLabel])"
+          :icon="option.icon ? Unicons[option.icon]?.name : undefined"
+          :style="toneStyle(option)"
           :tooltip-label="tooltipFor(option)"
           :disable="!option.active"
           @clicked="handleEmit(option)"
         />
-      </BaseContextMenu>
-    </div>
-  </div>
+      </template>
+    </template>
+  </ContextMenuActionsShell>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
-  ContextMenuDirection,
-  DamsIcons,
+  ActionContextEntitiesSelectionType,
   type DropdownOption,
   Entitytyping,
   BulkOperationTypes,
 } from "@/generated-types/queries";
 import BaseButtonNew from "./base/BaseButtonNew.vue";
 import { useI18n } from "vue-i18n";
-import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
+import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { auth } from "@/main";
+import { Unicons } from "@/types";
+import {
+  dangerLast,
+  toneStyle,
+} from "@/components/context-menu-actions/actionTone";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
 import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -122,7 +102,6 @@ const props = withDefaults(
     subDropdownOptions: () => [],
   },
 );
-const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());
 const { t } = useI18n();
 
 const availableOptions = ref<DropdownOption[]>([]);
@@ -172,9 +151,27 @@ const secondaryOptions = computed<DropdownOption[]>(() =>
   ),
 );
 
-const hasSecondaryOptions = computed(() => {
-  return secondaryOptions.value.length > 0;
-});
+// One primary, like a row's split button; every other action is in its menu.
+const primaryOption = computed<DropdownOption | undefined>(
+  () => primaryOptions.value[0],
+);
+
+const menuOptions = computed<DropdownOption[]>(() =>
+  dangerLast([...primaryOptions.value.slice(1), ...secondaryOptions.value]),
+);
+
+const shell = ref<InstanceType<typeof ContextMenuActionsShell>>();
+
+// Screen readers hear what a selection action acts on: "Delete (2 selected)".
+const nameWithCount = (option: DropdownOption): string | undefined =>
+  props.itemsSelected &&
+  option.actionContext?.entitiesSelectionType ===
+    ActionContextEntitiesSelectionType.SomeSelected
+    ? t("bulk-operations.action-for-selection", {
+        action: t(option.label, [entityTypeLabel.value]),
+        count: props.selectedItems.length,
+      })
+    : undefined;
 
 const hasSubDropdownOptions = computed(() => {
   return props.subDropdownOptions.length > 0;
@@ -195,3 +192,4 @@ watch(
   { deep: true, immediate: true },
 );
 </script>
+

@@ -379,6 +379,27 @@
   /* Space under the label, so the wash and focus ring above the value clear it */
   --field-label-gap: 6px;
 
+  /* List row (list mode): the text keeps this width before the row's
+     actions wrap onto their own line */
+  --list-row-content-min: 8rem;
+
+  /* Menu (components/menu.md): split-button and overflow menus */
+  --menu-padding: 4px;
+  --menu-min-width: 170px;
+  --menu-item-padding: 6px 10px;
+  --menu-item-gap: 8px;
+  --menu-icon-size: 14px;
+  /* Item ink; a destructive item (tone Danger) switches it to danger ink */
+  --menu-item-ink: var(--color-text-body);
+
+  /* Selection bar (components/selection-bar.md) */
+  --selection-bar-padding: 6px 10px;
+  --selection-bar-gap: 8px;
+
+  /* Split button (components/menu.md): primary + chevron in one capsule */
+  --split-button-divider: color-mix(in srgb, var(--color-neutral-white) 40%, transparent);
+  --split-button-chevron-padding-x: 8px;
+
   /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
      in BaseTooltip.vue */
   --text-tooltip: var(--text-label);
@@ -476,7 +497,7 @@ input[type="number"]::-webkit-inner-spin-button {
       transform var(--transition-duration-ui) var(--ease-ui);
   }
 
-  button:active:not(:disabled),
+  button:active:not(:disabled):not([aria-disabled="true"]),
   [role="button"]:active {
     transform: scale(var(--scale-press));
   }

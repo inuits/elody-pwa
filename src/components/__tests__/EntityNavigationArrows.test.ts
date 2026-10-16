@@ -183,4 +183,15 @@ describe("EntityNavigationArrows", () => {
       params: { id: "1", type: "assets" },
     });
   });
+
+  it("names the icon-only arrows for screen readers", () => {
+    const names = getWrapper()
+      .findAllComponents({ name: "BaseButtonNew" })
+      .map((button) => button.props("ariaLabel"));
+
+    expect(names).toEqual([
+      "entity-navigation.open-previous",
+      "entity-navigation.open-next",
+    ]);
+  });
 });

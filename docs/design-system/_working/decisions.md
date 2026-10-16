@@ -187,6 +187,27 @@ Later subtasks:
 | E18 | Group form card (one gesture, one Bewaar/Annuleer, `role="group"`) | required | — | **deferred** (user, 2026-10-15): no config marks a field group yet and no client has one; build it with the first real group (a panel flag in baseGraphql) |
 | E19 | Inline editors for file upload and linked-entity fields | required | — | **not applicable** (user, 2026-10-15): upload fields are not panel metadata (they live in upload forms), and values on a list row's entity or relation already edit in place through `ListItemInlineField` |
 
+## DS 3: action discovery
+
+Source: handoff (split-button, overflow-menu, action-discovery, selection-action-bar, IMPLEMENTATION phase 4). The reverted POC branch is not used.
+
+| # | Item | Decision |
+|---|---|---|
+| A1 | Overflow trigger | secondary (bordered, per specimen) sm `BaseButtonNew` "Acties ⌄/⌃", never a bare ⋮; name "Acties voor {titel}" when the caller passes `contextLabel` (panels pass their title) |
+| A2 | Menu behaviour | shared `BaseContextMenu`, so every menu gets it: `role="menu"`, anchored under the trigger when an anchor is passed (pointer position as fallback for not-yet-swept callers), ↑/↓/Home/End, Escape returns focus, Tab closes |
+| A3 | Menu look | specimen values as `--menu-*` tokens: card radius, overlay shadow, subtle border, 12.5px, 4px inset, items 6px 10px with button radius, 14px icons, accent-wash hover, disabled ink (not opacity) |
+| A5 | Split button | exactly one `showAsButton` action + overflow → one capsule (accent primary + accent chevron, 40% white divider, accent-hover while open); more promoted actions stay separate buttons + "Acties". Promoted buttons move from commit teal to accent primary. Rows name the chevron after their first teaser value |
+| A6 | Destructive items | `ActionTone { Default, Danger }` enum + `tone(input:)` on every context-menu action type in baseGraphql (added in DS 3; DS 6 builds on it). Danger items get danger ink and sort last (stable). aicap marks its 12 delete actions |
+| A7 | Menu item fit | `--leading-tight` (the body's 1.5 made items ~4px taller than the specimen) and no link underline on hover |
+| A9 | 2+ promoted row actions | one primary per entity (user, 2026-10-16): the first `showAsButton` action is the split primary, the other promoted actions move to the top of its menu (danger still last) |
+| A10 | Button heights | every `BaseButtonNew` variant gets a 1px border, transparent where not visible (user, 2026-10-16), so primary and secondary line up. Triggers stay `sm` (user: rows stay compact; deliberate deviation from the md specimen) |
+| A11 | Disabled with a reason | `BaseButtonNew` with `disabled` + `tooltipLabel` is `aria-disabled` and blocks clicks itself, so the reason is keyboard-reachable (phase 4 item 4) |
+| A12 | Sweep (user, 2026-10-16) | filter-panel ⋮ → labelled "Saved searches ⌄" on its own line (shell `triggerLabel`); repeatable "Create new" menu anchored + `aria-haspopup`; aria-labels on nine icon-only actions (record arrows, repeatable/table/overview remove, bulk clear field, upload reset/complete; found live: per-filter clear, search button, repeatable step modal close); squeezed button labels become `sr-only`, promoted labels always shown. Row preview eye became `PreviewToggle` (a real 22px button per lists.card, named, `aria-pressed`), list-row "›" a named button. Kept icon-only on purpose: the row preview eye, the icon-only actions above (well-known glyphs, now named). Left for DS 4: breadcrumb "… n" history toggle (a clickable div, not keyboard-reachable). Not triggers: the upload progress "⋯" separator |
+| A13 | Narrow list rows | the labelled trigger (91px vs the old 24px ⋮) was pushed out of rows in narrow columns (mediafiles beside an open preview, 250px) and clipped. List rows now wrap: the text column keeps `--list-row-content-min` (8rem) and the actions drop onto their own line, right-aligned (user, 2026-10-16). Wide rows unchanged. The fixed 250px preview column itself is DS 4 (container tiers) |
+| A14 | Selection bar look | specimen anatomy: bordered surface (subtle → default border on selection), 6px 10px padding, 8px gap, 12px; total as a neutral chip (no mint), bold "Selection: n" live text (empty at 0, docs over specimen), "Clear selection" / "Select page" as label-ink underlined link buttons; pager + actions right-aligned. Pager look and moving the total to the list header stay DS 4 (`pagination.md`, `entity-list-element.md`) |
+| A4 | Unavailable actions | missing permission → hidden (user, 2026-10-16: no need to show what you may never do). Unavailable because of state (nothing selected, wrong view mode) → visible, disabled, reason in a tooltip |
+| A8 | Selection bar | same pattern as rows (user, 2026-10-16, replacing the first "visible row of up to 5"): first primary as split primary, everything else in its menu, "Actions ⌄" without a primary; `role="toolbar"`, count `role="status"`, off-page note, clear/select-page as real buttons; selection actions name the count ("Delete (2 selected)"). Not taken (user): collapse-when-empty, count on the confirm button. Bulk options take the same `tone` (user, 2026-10-16); podiumnet marks its 7 bulk deletes |
+
 ## 3. Filters (DS 4)
 
 Already discussed:

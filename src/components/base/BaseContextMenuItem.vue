@@ -6,28 +6,40 @@
       @click="clicked()"
       :class="[
         !asButton
-          ? 'text-gray-700 block px-4 py-2 text-sm flex items-center gap-2 w-full hover:bg-neutral-50 cursor-pointer'
+          ? 'flex items-center gap-(--menu-item-gap) w-full p-(--menu-item-padding) rounded-button leading-tight hover:no-underline'
           : '',
-        disable ? 'opacity-40 cursor-default' : '',
-        highlight ? 'text-neutral-900 bg-blue-50' : '',
+        !asButton && disable ? 'text-text-disabled cursor-default' : '',
+        !asButton && !disable
+          ? 'text-(color:--menu-item-ink) hover:bg-accent-wash cursor-pointer'
+          : '',
+        highlight ? 'bg-accent-wash' : '',
       ]"
       id="menu-item-add"
       v-bind="
         asButton
           ? {
-              buttonStyle: 'commit',
+              buttonStyle: 'primary',
               icon: buttonIcon,
               buttonSize: 'sm',
               disabled: disable,
+              forceShowLabel: true,
             }
           : {
               role: 'menuitem',
               tabindex: -1,
+              'aria-disabled': disable || undefined,
+              onKeydown: activateWithKeyboard,
             }
       "
     >
-      <BaseIcon v-if="icon" class="w-6 h-6 cursor-pointer" :name="icon" />
-      {{ label }}
+      <template v-if="!asButton">
+        <BaseIcon
+          v-if="icon"
+          class="size-(--menu-icon-size) shrink-0 fill-current"
+          :name="icon"
+        />
+        {{ label }}
+      </template>
     </component>
 
     <div v-if="disable && tooltipLabel" class="mr-3">
@@ -90,6 +102,13 @@ const buttonIcon = computed(() =>
     (iconKey) => Unicons[iconKey as keyof typeof Unicons].name === props.icon,
   ),
 );
+
+// A menuitem is no native button: Enter and Space need wiring.
+const activateWithKeyboard = (event: KeyboardEvent) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  event.preventDefault();
+  clicked();
+};
 
 const clicked = () => {
   if (!props.disable) {

@@ -98,4 +98,48 @@ describe("BaseContextMenuActions", () => {
       Object.keys(actions),
     );
   });
+
+  it("asks for a split button with exactly one promoted action and overflow", async () => {
+    const wrapper = getWrapper({
+      doLinkAction: followLink,
+      doElodyAction: { ...deleteRelation, showAsButton: true },
+    });
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "ContextMenuActionsShell" }).props("split"),
+    ).toBe(true);
+  });
+
+  it("keeps one primary and moves further promoted actions to the top of the menu", async () => {
+    const general = { label: "x", icon: "Update" };
+    const wrapper = getWrapper({
+      doLinkAction: { ...followLink, showAsButton: true },
+      doGeneralAction: general,
+      doElodyAction: { ...deleteRelation, showAsButton: true },
+    });
+    await flushPromises();
+
+    expect(Object.keys(wrapper.vm.promotedActions)).toEqual(["doLinkAction"]);
+    expect(Object.keys(wrapper.vm.overflowActions)).toEqual([
+      "doElodyAction",
+      "doGeneralAction",
+    ]);
+    expect(
+      wrapper.findComponent({ name: "ContextMenuActionsShell" }).props("split"),
+    ).toBe(true);
+  });
+
+  it("sorts destructive actions last", async () => {
+    const wrapper = getWrapper({
+      doElodyAction: { ...deleteRelation, tone: "Danger" },
+      doLinkAction: followLink,
+    });
+    await flushPromises();
+
+    expect(Object.keys(wrapper.vm.overflowActions!)).toEqual([
+      "doLinkAction",
+      "doElodyAction",
+    ]);
+  });
 });

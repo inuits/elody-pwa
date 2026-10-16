@@ -19,6 +19,7 @@
         class="!w-8 h-8"
         label=""
         :icon="DamsIcons.Cross"
+        :aria-label="t('filters.clear-filter')"
         :icon-height="16"
         :disabled="!selectedMatcher"
         button-style="commit"
@@ -35,6 +36,9 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import type { DropdownOption } from "@/generated-types/queries";
 import { DamsIcons } from "@/generated-types/queries";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineProps({
   matchers: {

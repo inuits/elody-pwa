@@ -248,4 +248,11 @@ describe("RepetitiveOverview", () => {
     const wrapper = getWrapper({ branches: [], steps, repeatable: false });
     expect(wrapper.find("[data-testid='repetitive-overview-add']").exists()).toBe(true);
   });
+
+  it("names each icon-only remove button", () => {
+    const remove = getWrapper().findAllComponents({ name: "BaseButtonNew" })
+      .find((button) => button.attributes("data-testid") === "repetitive-overview-remove");
+
+    expect(remove!.props("ariaLabel")).toBe("actions.labels.remove-item");
+  });
 });

@@ -38,6 +38,9 @@ Colours come from the role tokens listed per variant.
 
 At most one primary or commit button per row.
 
+Every variant has a 1px border (transparent where it isn't visible), so all
+buttons of a size are the same height side by side.
+
 Retired and removed: `default` (grey), `accentNormal` (mint), `accentAccent`
 and `redDefault`. They became `secondary`, `commit`, `commit` and `danger`.
 
@@ -60,7 +63,9 @@ Without one, the label stays in place invisibly and the spinner sits on top
 of it.
 
 A disabled button can carry `tooltipLabel`. A help icon then explains why
-it's disabled.
+it's disabled. Such a button is `aria-disabled` instead of `disabled`: it
+stays focusable so keyboard users reach the reason, and the component stops
+its clicks. Without a reason it is natively `disabled`.
 
 ## Behaviour and keyboard
 Enter and Space activate it. While loading or disabled it does nothing.
@@ -68,6 +73,9 @@ Enter and Space activate it. While loading or disabled it does nothing.
 ## Accessibility
 - A real `<button type="button">`.
 - Icon-only buttons must set `ariaLabel`.
+- When space runs out, a label is hidden visually only (`sr-only`), so the
+  button keeps its name. `forceShowLabel` keeps it visible (split primaries
+  and promoted actions always do).
 - Loading sets `aria-busy`. If the result needs announcing, announce it from
   the surrounding region, not from the button.
 
