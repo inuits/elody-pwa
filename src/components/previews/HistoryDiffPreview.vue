@@ -7,14 +7,13 @@
         :entity="config.entity"
         :entity-type="entityType"
         :column-list="columnList"
-        @close-preview-component="emit('closePreviewComponent')"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import type {
   ColumnList,
   Entity,
@@ -36,12 +35,9 @@ const props = withDefaults(
   {},
 );
 
-const emit = defineEmits<{
-  (event: "closePreviewComponent"): void;
+defineEmits<{
   (event: "togglePreviewComponent", entityId: string): void;
 }>();
-
-const isMultipleColumn = ref<boolean>(true);
 
 const panels = computed(() => {
   const panels: WindowElementPanel[] = [];
@@ -98,7 +94,8 @@ const columnConfigs = computed(() => {
     },
   };
 
-  isMultipleColumn.value = hasPrevious;
   return columns;
 });
+
+const isMultipleColumn = computed(() => !!columnConfigs.value?.previous);
 </script>

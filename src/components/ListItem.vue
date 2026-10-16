@@ -278,6 +278,7 @@
           baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
       "
       :active="previewOpen"
+      :data-preview-for="itemId"
       @toggle="emit('togglePreviewComponent', itemId)"
     />
   </li>

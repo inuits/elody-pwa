@@ -4,6 +4,7 @@
       <!-- The row's preview affordance (lists.card: PreviewEye): 22px eye,
            body ink, accent and filled while this row's preview is open. -->
       <button
+        v-bind="$attrs"
         v-on="on"
         type="button"
         data-cy="preview-toggle"
@@ -23,6 +24,7 @@
 </template>
 
 <script lang="ts" setup>
+defineOptions({ inheritAttrs: false });
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";

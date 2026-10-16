@@ -35,36 +35,11 @@ const getWrapper = (
     global: { stubs, provide },
   });
 
-describe("EntityElementWrapper close button (deep, per panel)", () => {
-  it("renders the close button when baseLibraryMode is PreviewBaseLibrary", () => {
+describe("EntityElementWrapper inside a preview", () => {
+  it("leaves closing the preview to the preview header", () => {
     const wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
-    });
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(true);
-  });
-
-  it("does NOT render the close button when baseLibraryMode is NormalBaseLibrary", () => {
-    const wrapper = getWrapper({
-      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });
     expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(false);
-  });
-
-  it("does NOT render the close button (nor the header) when headerStyle is 'none'", () => {
-    const wrapper = getWrapper({
-      baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
-      headerStyle: "none",
-    });
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(false);
-  });
-
-  it("emits closePreviewComponent when the close button is clicked", async () => {
-    const wrapper = getWrapper({
-      baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
-    });
-
-    await wrapper.find(".base-tooltip-stub").trigger("click");
-
-    expect(wrapper.emitted("closePreviewComponent")).toBeTruthy();
   });
 });

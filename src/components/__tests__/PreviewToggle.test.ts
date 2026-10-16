@@ -57,4 +57,21 @@ describe("PreviewToggle", () => {
     // The row is a link: the eye must not follow it.
     expect(event.defaultPrevented).toBe(true);
   });
+
+  it("puts its attributes on the button, so the preview can focus it again", () => {
+    const wrapper = mount(PreviewToggle, {
+      props: { active: false },
+      attrs: { "data-preview-for": "row-1" },
+      global: {
+        stubs: {
+          unicon: true,
+          BaseTooltip: {
+            template: '<div><slot name="activator" :on="{}" /><slot /></div>',
+          },
+        },
+      },
+    });
+
+    expect(wrapper.find("button").attributes("data-preview-for")).toBe("row-1");
+  });
 });

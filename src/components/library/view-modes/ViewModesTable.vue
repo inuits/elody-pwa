@@ -131,7 +131,7 @@
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto bg-background-light rounded-lg"
+        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -145,6 +145,7 @@
           :relation-type="relationType"
           :parent-entity-type="parentEntityType"
           :refetch-entities="refetchEntities"
+          :detail-path="previewDetailPath"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -267,6 +268,15 @@ const {
   openPreviewComponent,
   togglePreviewForListItem,
 );
+
+// "Open detail page" in the preview header, for lists that navigate.
+const previewDetailPath = computed(() => {
+  const entity = refEntities.value.find(
+    (entity) => entity.id === previewForEntity.value,
+  );
+  if (!entity || props.actionOnClick !== ActionOnClick.Navigate) return;
+  return getLinkSettings(entity, props.listItemRouteName, true).path;
+});
 
 const { seenTracking } = useEntityPageConfig();
 const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);

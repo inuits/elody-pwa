@@ -24,34 +24,6 @@
       @click.self="emit('toggleElementCollapse', entityId, label)"
     >
       <div class="flex p-2">
-        <base-tooltip
-          v-if="baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary"
-          position="top-right"
-          :tooltip-offset="8"
-          @click="emit('closePreviewComponent')"
-        >
-          <template #activator="{ on, describedBy }">
-            <div
-              class="flex items-center"
-              data-cy="close-preview-component"
-              v-on="on"
-              :aria-describedby="describedBy"
-            >
-              <unicon
-                class="cursor-pointer mr-4 flex justify-center items-center"
-                :name="Unicons.Cross.name"
-                height="24"
-              />
-            </div>
-          </template>
-          <template #default>
-            <span>
-              <div>
-                {{ t("preview-component.close") }}
-              </div>
-            </span>
-          </template>
-        </base-tooltip>
         <span
           data-cy="entity-element-wrapper-title"
           class="subtitle mr-2"
@@ -96,7 +68,6 @@
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { inject } from "vue";
 
 withDefaults(
@@ -118,7 +89,6 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "closePreviewComponent"): void;
   (
     event: "toggleElementCollapse",
     entityId: string,

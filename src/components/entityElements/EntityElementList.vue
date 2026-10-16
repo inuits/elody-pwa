@@ -18,7 +18,6 @@
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
       :header-style="headerStyle"
-      @close-preview-component="emit('closePreviewComponent')"
       @toggle-element-collapse="
         (entityId, elementLabel) =>
           emit('toggleElementCollapse', entityId, elementLabel)
@@ -212,7 +211,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "closePreviewComponent"): void;
   (
     event: "toggleElementCollapse",
     entityId: string,

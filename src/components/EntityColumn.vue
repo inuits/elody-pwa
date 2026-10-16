@@ -35,7 +35,6 @@
           :preview-label="previewLabel"
           :entity-metadata="intialValues"
           :entity-relations="relationValues"
-          @close-preview-component="emit('closePreviewComponent')"
           @toggle-element-collapse="(entityId, elementLabel) => toggleElementCollapse(entityId, elementLabel, undefined, isPreviewElement)"
           @resize-column="resizeColumn"
         >
@@ -97,7 +96,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "closePreviewComponent"): void,
   (event: "mutatedEntityUpdated", mutatedEntity: Entity): void
 }>();
 const isPreviewElement: boolean = inject("IsPreviewElement", false);

@@ -324,6 +324,7 @@
   /* Composite rhythm + layout constants (not part of the auto-generated
      spacing scale; referenced directly, e.g. p-[var(--panel-header-pad)]) */
   --panel-header-pad: 10px 16px;
+  --text-panel-title: 14px;
   --panel-body-pad: 6px 16px 14px;
   --field-row-pad: 4px 6px;
   --table-row-pad: 7px 0;
