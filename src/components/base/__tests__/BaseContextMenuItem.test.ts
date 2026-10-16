@@ -82,8 +82,8 @@ describe("BaseContextMenuItem", () => {
         "text-(color:--menu-item-ink)",
       ]),
     );
-    expect(wrapper.findComponent({ name: "BaseIcon" }).classes()).toContain(
-      "size-(--menu-icon-size)",
+    expect(wrapper.findComponent({ name: "BaseIcon" }).classes()).toEqual(
+      expect.arrayContaining(["size-(--menu-icon-size)", "fill-current"]),
     );
   });
 

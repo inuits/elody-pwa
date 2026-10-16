@@ -3,7 +3,7 @@
     <BaseButtonNew
       v-for="option in visibleOptions"
       :key="option.value"
-      class="w-auto"
+      class="action-row-button"
       :button-style="primaryOptions.includes(option) ? 'primary' : 'secondary'"
       button-size="sm"
       :disabled="
@@ -29,7 +29,7 @@
     <!-- Never a bare ⋮: the overflow names itself. -->
     <BaseButtonNew
       v-if="overflowOptions.length > 0"
-      class="w-auto"
+      class="action-row-button"
       button-style="secondary"
       button-size="sm"
       :label="t('bulk-operations.more-actions')"
@@ -231,3 +231,10 @@ watch(
   { deep: true, immediate: true },
 );
 </script>
+
+<style scoped>
+/* BaseButtonNew fills its parent by default; row buttons size to their label. */
+.action-row-button {
+  width: auto;
+}
+</style>

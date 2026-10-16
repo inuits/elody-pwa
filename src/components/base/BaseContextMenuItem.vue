@@ -34,7 +34,7 @@
       <template v-if="!asButton">
         <BaseIcon
           v-if="icon"
-          class="size-(--menu-icon-size) shrink-0"
+          class="size-(--menu-icon-size) shrink-0 fill-current"
           :name="icon"
         />
         {{ label }}
