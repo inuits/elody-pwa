@@ -49,6 +49,7 @@
         :id="id"
         :preview-label="previewLabel"
         :cropMediafileCoordinatesKey="element.cropMediafileCoordinatesKey"
+        :open-preview-by-default="element.openPreviewByDefault ?? undefined"
         :actions-on-result="element.actionsOnResult"
         :add-entities-to-forms="element.addEntitiesToForms"
         @close-preview-component="emit('closePreviewComponent')"

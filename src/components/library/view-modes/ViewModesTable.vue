@@ -204,6 +204,7 @@ const props = withDefaults(
     showCurrentEntityFlow?: boolean;
     refetchEntities?: () => Promise<void>;
     cropMediafileCoordinatesKey?: string;
+    openPreviewByDefault?: boolean;
     groups?: EntityGroup[];
     hasMoreGroups?: boolean;
     groupsLoading?: boolean;
@@ -218,6 +219,7 @@ const props = withDefaults(
     showCurrentEntityFlow: true,
     refetchEntities: undefined,
     cropMediafileCoordinatesKey: "",
+    openPreviewByDefault: undefined,
     groups: undefined,
     hasMoreGroups: false,
     groupsLoading: false,
