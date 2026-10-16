@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => {
   return {
     getForm: vi.fn(),
     calls: [] as string[],
+    advancedFilters: [] as any[],
+    entityType: undefined as string | undefined,
   };
 });
 
@@ -33,10 +35,15 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
   useBaseLibrary: () => ({
     entities: entitiesRef,
     getEntities: vi.fn(),
-    setAdvancedFilters: vi.fn(),
+    setAdvancedFilters: vi.fn((filters: any[]) => {
+      mocks.advancedFilters = filters;
+    }),
     setIsSearchLibrary: vi.fn(),
     setsearchInputType: vi.fn(),
-    setEntityType: vi.fn(() => mocks.calls.push("setEntityType")),
+    setEntityType: vi.fn((entityType: string) => {
+      mocks.entityType = entityType;
+      mocks.calls.push("setEntityType");
+    }),
     setSortKey: vi.fn((key: string) => mocks.calls.push(`setSortKey:${key}`)),
     setSortOrder: vi.fn((isAsc: boolean) =>
       mocks.calls.push(`setSortOrder:${isAsc}`),
@@ -375,5 +382,101 @@ describe("optionLabelKeys", () => {
 
     expect(option.label).toBe("fantasy");
     expect(option.secondaryLabel).toBeUndefined();
+  });
+});
+
+describe("selected options of a relation field", () => {
+  const relationFilter = {
+    type: "selection",
+    key: ["vlacc:1|identifiers"],
+    value: "$relationValues.ref_subjects.key",
+    match_exact: true,
+  } as any;
+  const parent = shallowRef({
+    id: "W-1",
+    relationValues: { ref_subjects: [{ key: "PERS-1" }, { key: "NOM-1" }] },
+  }) as any;
+
+  const initializeWith = async (optionsFilters: any[]) => {
+    await useGetDropdownOptionsState(
+      "nomen" as Entitytyping,
+      parent,
+      "ref_subjects",
+      "",
+      undefined,
+      optionsFilters as any,
+      "W-1",
+      relationFilter,
+    ).initialize();
+  };
+
+  const textFilter = {
+    type: "text",
+    key: ["vlacc:1|properties.title.value"],
+    value: "*",
+    match_exact: false,
+  };
+
+  it("keeps a selection filter on the type key so every allowed type is fetched", async () => {
+    const typeSelection = {
+      type: "selection",
+      key: "type",
+      value: ["nomen", "person", "corporation"],
+      match_exact: true,
+    };
+
+    await initializeWith([textFilter, typeSelection]);
+
+    expect(mocks.advancedFilters).toEqual([
+      { ...typeSelection, item_types: [] },
+      { ...relationFilter, value: ["PERS-1", "NOM-1"] },
+    ]);
+    expect(mocks.entityType).toBe("nomen");
+  });
+
+  it("keeps a selection filter on a prefixed type key", async () => {
+    const typeSelection = {
+      type: "selection",
+      key: ["vlacc:1|type"],
+      value: ["person", "corporation"],
+      match_exact: true,
+    };
+
+    await initializeWith([textFilter, typeSelection]);
+
+    expect(mocks.advancedFilters[0]).toEqual({
+      ...typeSelection,
+      item_types: [],
+    });
+    expect(mocks.entityType).toBe("nomen");
+  });
+
+  it("drops selection filters on other keys", async () => {
+    const levelSelection = {
+      type: "selection",
+      key: ["vlacc:1|properties.level.value"],
+      value: ["Rug"],
+      match_exact: true,
+    };
+
+    await initializeWith([textFilter, levelSelection]);
+
+    expect(mocks.advancedFilters).toEqual([
+      { ...relationFilter, value: ["PERS-1", "NOM-1"] },
+    ]);
+    expect(mocks.entityType).toBe("nomen");
+  });
+
+  it("still uses a type filter as entity type", async () => {
+    const typeFilter = { type: "type", value: "genre", match_exact: true };
+
+    await initializeWith([textFilter, typeFilter]);
+
+    expect(mocks.advancedFilters[0]).toEqual({
+      ...typeFilter,
+      key: undefined,
+      item_types: [],
+    });
+    expect(mocks.entityType).toBe("genre");
   });
 });

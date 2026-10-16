@@ -19,6 +19,15 @@ import { omitDeep } from "@apollo/client/utilities";
 import { useI18n } from "vue-i18n";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
 
+const isTypeKey = (key: unknown): boolean =>
+  (Array.isArray(key) ? key : [key]).some(
+    (k) => typeof k === "string" && k.split("|").pop() === "type",
+  );
+
+const isTypeFilter = (filter: AdvancedFilterInput): boolean =>
+  filter.type === AdvancedFilterTypes.Type ||
+  (filter.type === AdvancedFilterTypes.Selection && isTypeKey(filter.key));
+
 export const useGetDropdownOptionsState = (
   entityType: Entitytyping,
   parent: Ref<BaseEntity | "fetchAll">,
@@ -108,9 +117,7 @@ export const useGetDropdownOptionsState = (
         parentValue !== "fetchAll" && (relationType || fromRelationType)
           ? [
               // to get selected options we only need a type from the filters to retrieve all options
-              ...filters.filter(
-                (filter) => filter.type === AdvancedFilterTypes.Type,
-              ),
+              ...filters.filter(isTypeFilter),
               getRelationFilter(formId, fromRelationType, relationFilter),
             ]
           : filters;
