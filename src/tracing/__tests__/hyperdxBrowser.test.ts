@@ -60,4 +60,25 @@ describe("startBrowserTracing with HyperDX", () => {
       teamId: "brugge.be",
     });
   });
+
+  it("puts the client and environment on everything it sends, also once the user is known", () => {
+    const tracing = startBrowserTracing({
+      ...settings,
+      sessionId: "s-1",
+      attributes: { "service.namespace": "vlacc-dams", "deployment.environment": "local" },
+    });
+    expect(hyperdx.setGlobalAttributes).toHaveBeenCalledWith({
+      session_id: "s-1",
+      "service.namespace": "vlacc-dams",
+      "deployment.environment": "local",
+    });
+    tracing.identify({ pseudonym: "p-1", library: "brugge.be" });
+    expect(hyperdx.setGlobalAttributes).toHaveBeenLastCalledWith({
+      session_id: "s-1",
+      "service.namespace": "vlacc-dams",
+      "deployment.environment": "local",
+      userId: "p-1",
+      teamId: "brugge.be",
+    });
+  });
 });

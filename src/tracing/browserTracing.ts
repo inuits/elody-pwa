@@ -6,6 +6,8 @@ export type BrowserTracingSettings = {
   apiKey?: string;
   /** the tab's session id (observability/sessionId), on everything sent */
   sessionId?: string;
+  /** on everything sent too: the client (service.namespace) and environment */
+  attributes?: Record<string, string>;
 };
 
 export type BrowserTracingUser = { pseudonym: string; library?: string };

@@ -12,6 +12,7 @@ export const startBrowserTracing = ({
   serviceName,
   apiKey,
   sessionId,
+  attributes,
 }: BrowserTracingSettings): BrowserTracing => {
   HyperDX.init({
     apiKey: apiKey ?? "",
@@ -30,8 +31,11 @@ export const startBrowserTracing = ({
     // the session replay shows the screens, never what was typed
     maskAllInputs: true,
   });
-  const session = sessionId ? { session_id: sessionId } : {};
-  if (sessionId) HyperDX.setGlobalAttributes(session);
+  const session = {
+    ...(sessionId ? { session_id: sessionId } : {}),
+    ...attributes,
+  };
+  if (Object.keys(session).length) HyperDX.setGlobalAttributes(session);
   return {
     identify: ({ pseudonym, library }) =>
       HyperDX.setGlobalAttributes({
