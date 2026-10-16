@@ -457,6 +457,33 @@ describe("ListItem", () => {
     });
   });
 
+  describe("flat rows", () => {
+    const rowOf = (viewMode: "list" | "grid") =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1", viewMode },
+      }).find('[data-cy="list-item"]');
+
+    it("separates list rows with a faint hairline instead of a card border", () => {
+      const classes = rowOf("list").classes();
+      expect(classes).toEqual(
+        expect.arrayContaining([
+          "border-b",
+          "border-border-faint",
+          "p-(--list-row-pad)",
+          "text-table",
+        ]),
+      );
+      expect(classes).not.toContain("rounded");
+      expect(classes).not.toContain("mb-2");
+    });
+
+    it("keeps grid items as bordered cards", () => {
+      expect(rowOf("grid").classes()).toEqual(
+        expect.arrayContaining(["border", "rounded-card"]),
+      );
+    });
+  });
+
   describe("narrow list rows", () => {
     const listRow = () =>
       shallowMount(ListItem, {

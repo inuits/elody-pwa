@@ -511,14 +511,17 @@ const isPipelineMode = computed(() => props.viewMode === "pipeline");
 
 const wrapperClasses = computed(() => {
   return [
-    "border rounded cursor-pointer list-none z-[-1]",
+    "cursor-pointer list-none z-[-1]",
     {
-      // Wraps the actions below the text when the row is too narrow (a list
-      // beside an open preview); wide rows stay on one line.
-      "flex flex-wrap items-center gap-2 p-1.5 mb-2": isListMode.value,
+      // Flat rows with a hairline below (entity-list-element.md). Wraps the
+      // actions below the text when the row is too narrow (a list beside an
+      // open preview); wide rows stay on one line.
+      "flex flex-wrap items-center gap-2 p-(--list-row-pad) border-b border-border-faint text-table":
+        isListMode.value,
     },
     {
-      "p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]": isGridMode.value,
+      "border border-border-subtle rounded-card p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]":
+        isGridMode.value,
     },
     {
       "border-dashed border-2 !border-accent-normal":
@@ -531,7 +534,7 @@ const wrapperClasses = computed(() => {
     { "animate-pulse": loading.value },
     // entity-list-element.md: the checkbox owns the wash, the open preview
     // owns the left border; hover fills.
-    "border-border-subtle hover:bg-surface-row-hover",
+    "hover:bg-surface-row-hover",
     isChecked.value ? "bg-accent-wash shadow-accent-row" : "bg-background-light",
     {
       "border-l-(length:--list-row-preview-border) border-l-accent":

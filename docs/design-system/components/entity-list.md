@@ -21,6 +21,11 @@ total; the selection bar and pager don't repeat it.
   (`NormalBaseLibrary`, `PreviewBaseLibrary`); not in compact basic-mode
   relation lists. Hidden until the first page has loaded.
 
+## Rows
+List and table rows are flat: `--list-row-pad`, `--text-table`, a
+`--color-border-faint` hairline below, no per-row border, radius or gap.
+Grid items stay bordered cards (`--radius-card`).
+
 ## Row states
 `ListItem.vue` (list, grid) and `TableViewRow.vue` (table).
 

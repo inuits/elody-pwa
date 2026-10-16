@@ -274,7 +274,7 @@ const isNew = computed<boolean>(() =>
 const wrapperClasses = computed(() => [
   // entity-list-element.md: the checkbox owns the wash, the open preview owns
   // the left border; hover fills.
-  "flex items-center gap-2 p-1.5 border rounded border-border-subtle cursor-pointer list-none mt-1 hover:bg-surface-row-hover",
+  "flex items-center gap-2 p-(--list-row-pad) border-b border-border-faint text-table cursor-pointer list-none hover:bg-surface-row-hover",
   isChecked.value ? "bg-accent-wash shadow-accent-row" : "bg-background-light",
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled,

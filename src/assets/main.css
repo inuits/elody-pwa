@@ -383,6 +383,8 @@
   /* List row (list mode): the text keeps this width before the row's
      actions wrap onto their own line */
   --list-row-content-min: 8rem;
+  /* Flat list and table rows: cell padding, hairline below */
+  --list-row-pad: 7px 8px;
   /* The row whose preview is open (entity-list-element.md) */
   --list-row-preview-border: 3px;
 

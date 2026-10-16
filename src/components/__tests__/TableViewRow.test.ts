@@ -140,6 +140,20 @@ describe("TableViewRow", () => {
     expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["item"]);
   });
 
+  it("is a flat row with a faint hairline instead of a card border", () => {
+    const classes = row(shallowMount(TableViewRow, { props })).classes();
+    expect(classes).toEqual(
+      expect.arrayContaining([
+        "border-b",
+        "border-border-faint",
+        "p-(--list-row-pad)",
+        "text-table",
+      ]),
+    );
+    expect(classes).not.toContain("rounded");
+    expect(classes).not.toContain("mt-1");
+  });
+
   describe("row states", () => {
     const rowProps = {
       ...props,
