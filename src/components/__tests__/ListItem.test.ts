@@ -217,7 +217,7 @@ describe("ListItem", () => {
           multiLine: false,
         },
       });
-      const metadataContainer = wrapper.find("[class*='w-full']");
+      const metadataContainer = wrapper.find("[data-cy='list-item-content']");
       expect(metadataContainer.exists()).toBe(true);
       expect(metadataContainer.classes()).toContain("flex");
       expect(metadataContainer.classes()).toContain("items-center");
@@ -231,7 +231,7 @@ describe("ListItem", () => {
           multiLine: true,
         },
       });
-      const metadataContainer = wrapper.find("[class*='w-full']");
+      const metadataContainer = wrapper.find("[data-cy='list-item-content']");
       expect(metadataContainer.exists()).toBe(true);
       expect(metadataContainer.classes()).toContain("grid");
       expect(metadataContainer.classes()).toContain("gap-x-4");
@@ -250,7 +250,7 @@ describe("ListItem", () => {
           ],
         },
       });
-      const metadataItems = wrapper.findAll("[class*='w-full'] > div");
+      const metadataItems = wrapper.findAll("[data-cy='list-item-content'] > div");
       expect(metadataItems.length).toBeGreaterThan(0);
       expect(metadataItems[0].attributes("style")).toContain(
         "grid-column: span 2",
@@ -267,7 +267,7 @@ describe("ListItem", () => {
           ],
         },
       });
-      const metadataItems = wrapper.findAll("[class*='w-full'] > div");
+      const metadataItems = wrapper.findAll("[data-cy='list-item-content'] > div");
       expect(metadataItems.length).toBeGreaterThan(0);
       expect(metadataItems[0].attributes("style")).toBeFalsy();
     });
@@ -369,6 +369,37 @@ describe("ListItem", () => {
       expect(open.attributes("aria-label")).toBe("actions.labels.open-item");
       await open.trigger("click");
       expect(wrapper.emitted("navigateTo")).toHaveLength(1);
+    });
+  });
+
+  describe("narrow list rows", () => {
+    const listRow = () =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1", viewMode: "list" as const },
+      });
+
+    it("lets its actions wrap onto their own line", () => {
+      expect(listRow().find('[data-cy="list-item"]').classes()).toContain(
+        "flex-wrap",
+      );
+    });
+
+    it("keeps the text column at a readable minimum before wrapping", () => {
+      expect(
+        listRow().find('[data-cy="list-item-content"]').classes(),
+      ).toEqual(
+        expect.arrayContaining([
+          "flex-1",
+          "basis-(--list-row-content-min)",
+          "min-w-0",
+        ]),
+      );
+    });
+
+    it("right-aligns the actions when they wrap", () => {
+      expect(
+        listRow().find('[data-cy="list-item-actions"]').classes(),
+      ).toContain("ml-auto");
     });
   });
 });

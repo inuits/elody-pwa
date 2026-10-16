@@ -152,8 +152,11 @@
     </div>
 
     <div
+      data-cy="list-item-content"
       :class="[
-        'w-full',
+        isListMode
+          ? 'flex-1 basis-(--list-row-content-min) min-w-0'
+          : 'w-full',
         { 'flex items-center': isListMode && !props.multiLine },
         { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
         { 'p-4': isGridMode },
@@ -252,7 +255,7 @@
       />
     </div>
 
-    <div v-if="isListMode" class="flex">
+    <div v-if="isListMode" data-cy="list-item-actions" class="flex ml-auto">
       <EntityButtons
         :buttons="buttons"
         :parent-entity-id="formId"
@@ -521,7 +524,9 @@ const wrapperClasses = computed(() => {
   return [
     "border rounded cursor-pointer list-none z-[-1]",
     {
-      "flex items-center gap-2 p-1.5 mb-2": isListMode.value,
+      // Wraps the actions below the text when the row is too narrow (a list
+      // beside an open preview); wide rows stay on one line.
+      "flex flex-wrap items-center gap-2 p-1.5 mb-2": isListMode.value,
     },
     {
       "p-1.5 mb-2 flex flex-col w-[300px] min-h-[350px]": isGridMode.value,

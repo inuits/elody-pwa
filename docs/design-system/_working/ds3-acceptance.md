@@ -45,6 +45,10 @@ Row preview eye (`PreviewToggle`, both list and table rows): a real button,
 the preview without following the row link. The list-row "›" is a button
 named "Open {title}".
 
+Narrow rows: with the mediafiles preview open (250px list column), the row's
+"Actions" trigger wraps below the filename and stays fully visible at 1280,
+1920 and 2560px; overview rows still fit on one line.
+
 Unnamed buttons: none left on the overview. On the detail page, four remain,
 all in the image viewer (see below).
 

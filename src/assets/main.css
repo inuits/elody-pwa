@@ -379,6 +379,10 @@
   /* Space under the label, so the wash and focus ring above the value clear it */
   --field-label-gap: 6px;
 
+  /* List row (list mode): the text keeps this width before the row's
+     actions wrap onto their own line */
+  --list-row-content-min: 8rem;
+
   /* Menu (components/menu.md): split-button and overflow menus */
   --menu-padding: 4px;
   --menu-min-width: 170px;
