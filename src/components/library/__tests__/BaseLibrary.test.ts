@@ -227,6 +227,7 @@ import BaseLibrary from "../BaseLibrary.vue";
 import ViewModesList from "../view-modes/ViewModesList.vue";
 import ViewModesTable from "../view-modes/ViewModesTable.vue";
 import LibraryBar from "../LibraryBar.vue";
+import ResultCountChip from "../ResultCountChip.vue";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
 // --- Props / wrapper factories ------------------------------------------------
@@ -1072,5 +1073,38 @@ describe("BaseLibrary.vue map view", () => {
     wrapper = getWrapper();
     expect(wrapper.findComponent(ViewModesList).exists()).toBe(true);
     expect(wrapper.findComponent(ViewModesTable).exists()).toBe(true);
+  });
+});
+
+describe("BaseLibrary.vue list header count chip", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [];
+    libTotalEntityCount.value = 1258;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("shows the list total in the header", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.findComponent(ResultCountChip).props("count")).toBe(1258);
+  });
+
+  it("leaves the count out of compact relation lists", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.findComponent(ResultCountChip).exists()).toBe(false);
   });
 });

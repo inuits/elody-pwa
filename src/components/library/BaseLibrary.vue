@@ -96,6 +96,18 @@
           v-if="!disableLibraryBar"
           class="h-fit flex flex-row items-center gap-y-4"
         >
+          <ResultCountChip
+            v-if="
+              !isInitialLoading &&
+              (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
+            "
+            class="mr-2"
+            :count="totalEntityCount"
+            :exact-count="exactTotalCount"
+            :exact-count-loading="exactCountLoading"
+            @reveal-exact-count="revealExactCount"
+          />
           <div
             v-if="
               toggles.length > 1 &&
@@ -155,10 +167,6 @@
         >
           <BulkOperationsActionsBar
             :context="bulkOperationsContext"
-            :total-items-count="totalEntityCount"
-            :exact-count="exactTotalCount"
-            :exact-count-loading="exactCountLoading"
-            @reveal-exact-count="revealExactCount"
             :use-extended-bulk-operations="!isSearchLibrary"
             :show-button="showButton"
             :confirm-selection-button="confirmSelectionButton"
@@ -396,6 +404,7 @@ import BasePaginationNew from "@/components/base/BasePagination.vue";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
+import ResultCountChip from "@/components/library/ResultCountChip.vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";

@@ -37,7 +37,6 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
   mount(BulkOperationsActionsBar, {
     props: {
       context: "home" as any,
-      totalItemsCount: 40,
       useExtendedBulkOperations: true,
       entityType: "inscription" as Entitytyping,
       refetchEntities: () => {},
@@ -100,14 +99,8 @@ describe("BulkOperationsActionsBar", () => {
     );
   });
 
-  it("shows the total as a neutral chip, never mint", () => {
-    mocks.selected = [{ id: "a" }];
-    const chip = getWrapper().find('[data-cy="selection-bar-total"]');
-
-    expect(chip.classes()).toEqual(
-      expect.arrayContaining(["bg-chip-neutral-bg", "rounded-chip", "text-chip"]),
-    );
-    expect(chip.classes()).not.toContain("bg-accent-normal");
+  it("leaves the total to the list header count chip", () => {
+    expect(getWrapper().text()).not.toContain("bulk-operations.items");
   });
 
   it("styles select page and clear selection as label links", () => {

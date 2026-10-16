@@ -1,0 +1,26 @@
+# Entity list
+
+The query-driven result list (table, list, grid). Implemented by
+`src/components/library/BaseLibrary.vue` and its view modes.
+
+## Header
+One row above the list: the count chip, the view-mode switch, page size,
+sort and simple search (`LibraryBar.vue`).
+
+### Count chip
+`src/components/library/ResultCountChip.vue`. The single source of the list
+total; the selection bar and pager don't repeat it.
+- Neutral chip: `--color-chip-neutral-bg` / `--color-chip-neutral-text`,
+  `--radius-chip`, `--chip-padding`, `--text-chip`, bold.
+- Copy: `library.result-count`, with singular and plural forms
+  ("1 result" / "1,258 results", "1 resultaat" / "1.258 resultaten").
+- Capped totals (above `LISTING_COUNT_CAP`) read "1,000+ results". The chip
+  is then a button that loads the exact count, with a spinner while it
+  loads and a "?" tooltip explaining the cap.
+- Shown in the main library and in relation lists on detail pages
+  (`NormalBaseLibrary`, `PreviewBaseLibrary`); not in compact basic-mode
+  relation lists. Hidden until the first page has loaded.
+
+## Accessibility
+- The count chip sits in a `role="status"` region, so new totals are
+  announced.

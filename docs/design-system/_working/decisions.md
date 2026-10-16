@@ -217,3 +217,9 @@ Already discussed:
 | FL1 | Section header label | 11.5px bold | 12.5px bold | 11.5px bold | 12.5px bold (uncommitted) | |
 | FL2 | Active cue | count chip | 7px accent dot | count chip (always "1", bug) | dot (uncommitted) | |
 | FL3 | Chevron | ⌄ closed / ⌃ open | ▾ open / ▸ closed | ⌄ / ⌃ | config icon | |
+
+## DS 4: lists, panels, filters, navigation
+
+| # | Item | Decision |
+|---|---|---|
+| L1 | List total | moves from the selection bar to a count chip at the start of the list header (`ResultCountChip`), neutral chip, `role="status"`; copy "{n} result(s)" / "{n} resulta(a)t(en)" with singular/plural (handoff wording over the old "items"); capped reveal kept (user, 2026-10-16). Left out of compact basic-mode relation lists, like the rest of the header (mine) |
