@@ -258,6 +258,7 @@
 </template>
 
 <script setup lang="ts">
+import { trackFormSubmitted } from "@/analytics/usageAnalytics";
 import { useBaseModal } from "@/composables/useBaseModal";
 import type {
   ActionProgress,
@@ -1006,6 +1007,7 @@ const submitActionFunction = async (field: FormAction) => {
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
+    trackFormSubmitted(props.dynamicFormQuery, "ok", entity?.type);
     showErrors.value = false;
     await getTenants();
     const callbackFunctions: [() => void] | undefined = extractActionArguments(
@@ -1039,6 +1041,7 @@ const submitActionFunction = async (field: FormAction) => {
     );
   } catch (e: ApolloError) {
     console.error(e);
+    trackFormSubmitted(props.dynamicFormQuery, "error");
     const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
     submitErrors.value = errorObject.message;
@@ -1084,9 +1087,8 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
         undefined,
         form,
       );
-      let entity: Entity;
-      entity = (await performSubmitAction(document, entityInput)).data
-        .CreateEntity;
+      const entity: Entity = (await performSubmitAction(document, entityInput))
+        .data.CreateEntity;
       setArgumentForSubmitAllFormTabs(
         entity["id"],
         props.allFormRelationTypes[formKeyIndex],
@@ -1192,13 +1194,13 @@ const submitWithExtraMetadataActionFunction = async (field: FormAction) => {
   closeAndDeleteForm();
 };
 
-const validateAndGoToNextFormTabActionFunction = async (field: FormAction) => {
+const validateAndGoToNextFormTabActionFunction = async () => {
   const valid = await isFormValid();
   if (!valid) return;
   tabs.selectedIndex++;
 };
 
-const goToPreviousFormTabActionFunction = async (field: FormAction) => {
+const goToPreviousFormTabActionFunction = async () => {
   tabs.selectedIndex--;
 };
 
@@ -1381,7 +1383,7 @@ const startOcrActionFunction = async (field: FormAction) => {
   }
 };
 
-const bulkUpdateMetadataActionFunction = async (field: FormAction) => {
+const bulkUpdateMetadataActionFunction = async () => {
   const { startBlocking, stopBlocking } = useBlockingLoader();
   let isBlockingForBulkEdit = false;
   try {
