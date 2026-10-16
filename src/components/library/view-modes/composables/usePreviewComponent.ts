@@ -79,20 +79,20 @@ export const usePreviewComponent = (
     else openPreviewComponent(entityId);
   };
 
+  // Whether this row's preview is open now: the eye's pressed state.
+  const isPreviewOpenForListItem = (entityId: string): boolean => {
+    if (!previewComponentEnabled.value) return false;
+    const coverage = previewComponent.value?.listItemsCoverage;
+    if (coverage === ListItemCoverageTypes.AllListItems) return true;
+    return (
+      coverage === ListItemCoverageTypes.OneListItem &&
+      previewForEntity.value === entityId
+    );
+  };
+
+  // The row's highlight: open, or (keepLastActiveItemHighlighted) last previewed.
   const isPreviewComponentEnabledForListItem = (entityId: string): boolean => {
-    if (previewComponentEnabled.value) {
-      if (
-        previewComponent.value?.listItemsCoverage ===
-        ListItemCoverageTypes.AllListItems
-      )
-        return true;
-      if (
-        previewComponent.value?.listItemsCoverage ===
-          ListItemCoverageTypes.OneListItem &&
-        previewForEntity.value === entityId
-      )
-        return true;
-    }
+    if (isPreviewOpenForListItem(entityId)) return true;
     if (
       previewComponent.value?.previewConfiguration
         ?.keepLastActiveItemHighlighted &&
@@ -145,5 +145,6 @@ export const usePreviewComponent = (
     closePreviewComponent,
     togglePreviewForListItem,
     isPreviewComponentEnabledForListItem,
+    isPreviewOpenForListItem,
   };
 };

@@ -61,13 +61,23 @@ describe("TableViewRow", () => {
     expect(mockSeenState.tracking).toBe(mockEntityPageConfig.seenTracking);
   });
 
-  it("greys out a seen row", () => {
+  it("shows a seen row's title in secondary ink without greying the row", () => {
     mockSeenState.isSeen.mockReturnValue(true);
 
-    const wrapper = shallowMount(TableViewRow, { props });
+    const wrapper = shallowMount(TableViewRow, {
+      props: {
+        ...props,
+        teaserMetadata: [
+          { key: "title", value: "Seen" },
+          { key: "type", value: "Book" },
+        ] as any,
+      },
+    });
+    const columns = wrapper.findAll(".col-primary, .col-secondary");
 
-    expect(row(wrapper).classes()).toContain("grayscale");
-    expect(wrapper.find("[data-cy='new-indicator']").exists()).toBe(false);
+    expect(columns[0].classes()).toContain("text-text-secondary");
+    expect(columns[1].classes()).not.toContain("text-text-secondary");
+    expect(row(wrapper).classes()).not.toContain("grayscale");
     expect(mockSeenState.isSeen).toHaveBeenCalledWith("item");
   });
 
@@ -128,5 +138,67 @@ describe("TableViewRow", () => {
     wrapper.findComponent({ name: "PreviewToggle" }).vm.$emit("toggle");
 
     expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["item"]);
+  });
+
+  describe("row states", () => {
+    const rowProps = {
+      ...props,
+      baseLibraryMode: "normalBaseLibrary" as any,
+      hasSelection: true,
+      previewComponentFeatureEnabled: true,
+      previewComponentListItemsCoverage: "OneListItem" as any,
+    };
+
+    it("fills on hover", () => {
+      const wrapper = shallowMount(TableViewRow, { props: rowProps });
+      expect(row(wrapper).classes()).toContain("hover:bg-surface-row-hover");
+    });
+
+    it("washes a selected row with an accent row shadow", async () => {
+      const wrapper = shallowMount(TableViewRow, { props: rowProps });
+
+      await wrapper
+        .findComponent({ name: "BaseInputCheckbox" })
+        .vm.$emit("update:modelValue", true);
+
+      expect(row(wrapper).classes()).toEqual(
+        expect.arrayContaining(["bg-accent-wash", "shadow-accent-row"]),
+      );
+    });
+
+    it("marks the previewed row with an accent left border and no wash", () => {
+      const wrapper = shallowMount(TableViewRow, {
+        props: { ...rowProps, previewComponentCurrentActive: true },
+      });
+
+      expect(row(wrapper).classes()).toEqual(
+        expect.arrayContaining([
+          "border-l-(length:--list-row-preview-border)",
+          "border-l-accent",
+        ]),
+      );
+      expect(row(wrapper).classes()).not.toContain("bg-accent-wash");
+      expect(row(wrapper).classes()).not.toContain("border-neutral-800");
+    });
+
+    it("presses the eye only while the row's preview is open", () => {
+      const lastPreviewed = shallowMount(TableViewRow, {
+        props: { ...rowProps, previewComponentCurrentActive: true },
+      });
+      const open = shallowMount(TableViewRow, {
+        props: {
+          ...rowProps,
+          previewComponentCurrentActive: true,
+          previewOpen: true,
+        },
+      });
+
+      expect(
+        lastPreviewed.findComponent({ name: "PreviewToggle" }).props("active"),
+      ).toBe(false);
+      expect(
+        open.findComponent({ name: "PreviewToggle" }).props("active"),
+      ).toBe(true);
+    });
   });
 });

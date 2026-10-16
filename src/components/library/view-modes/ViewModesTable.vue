@@ -96,6 +96,7 @@
               :refetch-entities="refetchEntities"
               :preview-component-enabled="previewComponentEnabled"
               :preview-component-current-active="entity.isPreviewActive"
+              :preview-open="entity.isPreviewOpen"
               :preview-component-feature-enabled="previewComponent !== undefined"
               :preview-component-list-items-coverage="
                 previewComponent?.listItemsCoverage
@@ -249,6 +250,7 @@ const {
   closePreviewComponent,
   togglePreviewForListItem,
   isPreviewComponentEnabledForListItem,
+  isPreviewOpenForListItem,
 } = usePreviewComponent(props, refEntities);
 
 const {
@@ -356,14 +358,10 @@ const processedEntities = computed(() => {
 
   return refEntities.value.map((entity) => {
     const linkSettings = getLinkSettings(entity, props.listItemRouteName);
-    const forcedLinkSettings = getLinkSettings(
-      entity,
-      props.listItemRouteName,
-      true,
-    );
 
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
+    const isPreviewOpen = isPreviewOpenForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity);
     const isSeen = isEntitySeen(entity.id);
     const isNew = isEntityNew(entity.id, entity.intialValues);
@@ -382,6 +380,7 @@ const processedEntities = computed(() => {
       entity.relationValues,
       relation,
       isPreviewActive,
+      isPreviewOpen,
       isDisabled,
       isSeen,
       isNew,
@@ -396,7 +395,6 @@ const processedEntities = computed(() => {
       type: entity.type,
       componentTag: linkSettings.tag,
       componentPath: linkSettings.path,
-      forcedNavigationPath: forcedLinkSettings.path,
       buttons,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
@@ -415,6 +413,7 @@ const processedEntities = computed(() => {
       isNew,
       relation,
       isPreviewActive,
+      isPreviewOpen,
       memoKey,
     };
   });

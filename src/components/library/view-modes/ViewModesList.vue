@@ -102,6 +102,7 @@
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
             :preview-component-current-active="entity.isPreviewActive"
+            :preview-open="entity.isPreviewOpen"
             :preview-component-feature-enabled="previewComponent !== undefined"
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
@@ -110,11 +111,6 @@
             :is-primary-thumbnail="primaryThumbnailId === entity.id"
             :multi-line="multiLine"
             :multi-line-columns="multiLineColumns"
-            @navigate-to="
-              () => {
-                router.push(entity.forcedNavigationPath);
-              }
-            "
             @toggle-preview-component="
               (previewForEntityId) => togglePreviewComponent(previewForEntityId)
             "
@@ -174,7 +170,6 @@ import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
 import { computed, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
@@ -253,6 +248,7 @@ const {
   closePreviewComponent,
   togglePreviewForListItem,
   isPreviewComponentEnabledForListItem,
+  isPreviewOpenForListItem,
 } = usePreviewComponent(props, refEntities);
 const {
   containerNameForPreview,
@@ -304,13 +300,9 @@ const processedEntities = computed(() => {
 
   return refEntities.value.map((entity) => {
     const linkSettings = getLinkSettings(entity, props.listItemRouteName);
-    const forcedLinkSettings = getLinkSettings(
-      entity,
-      props.listItemRouteName,
-      true,
-    );
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
+    const isPreviewOpen = isPreviewOpenForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity);
     const isSeen = isEntitySeen(entity.id);
     const isNew = isEntityNew(entity.id, entity.intialValues);
@@ -329,6 +321,7 @@ const processedEntities = computed(() => {
       entity.relationValues,
       relation,
       isPreviewActive,
+      isPreviewOpen,
       isDisabled,
       isSeen,
       isNew,
@@ -343,7 +336,6 @@ const processedEntities = computed(() => {
       type: entity.type,
       componentTag: linkSettings.tag,
       componentPath: linkSettings.path,
-      forcedNavigationPath: forcedLinkSettings.path,
 
       buttons,
       entityTypename: getMappedSlug(entity),
@@ -363,6 +355,7 @@ const processedEntities = computed(() => {
       isNew,
       relation: relation,
       isPreviewActive: isPreviewActive,
+      isPreviewOpen,
 
       memoKey: memoKey,
     };

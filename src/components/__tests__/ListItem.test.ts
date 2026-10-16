@@ -111,12 +111,30 @@ describe("ListItem", () => {
       );
     };
 
-    it("greys out an item that has been seen", () => {
+    it("shows a seen item's title in secondary ink", () => {
+      markItemAsSeen();
+
+      const wrapper = shallowMount(ListItem, {
+        props: {
+          ...seenItemProps,
+          teaserMetadata: [
+            { key: "title", value: "Seen" },
+            { key: "type", value: "Book" },
+          ] as any,
+        },
+      });
+      const fields = wrapper.findAll("[data-cy='list-item-content'] > div");
+
+      expect(fields[0].classes()).toContain("text-text-secondary");
+      expect(fields[1].classes()).not.toContain("text-text-secondary");
+    });
+
+    it("does not grey out a seen item like a disabled one", () => {
       markItemAsSeen();
 
       const wrapper = shallowMount(ListItem, { props: seenItemProps });
 
-      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
         "grayscale",
       );
     });
@@ -355,20 +373,87 @@ describe("ListItem", () => {
       expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["row-1"]);
     });
 
-    it("navigates from a real, named button", async () => {
+    it("keeps the eye while a preview is open", () => {
       const wrapper = shallowMount(ListItem, {
         props: {
           ...defaultProps,
           itemId: "row-1",
+          baseLibraryMode: "normalBaseLibrary" as any,
+          previewComponentFeatureEnabled: true,
           previewComponentEnabled: true,
           isEnableNavigation: true,
         },
       });
-      const open = wrapper.find('button[data-cy="list-item-open"]');
 
-      expect(open.attributes("aria-label")).toBe("actions.labels.open-item");
-      await open.trigger("click");
-      expect(wrapper.emitted("navigateTo")).toHaveLength(1);
+      expect(wrapper.findComponent({ name: "PreviewToggle" }).exists()).toBe(
+        true,
+      );
+      expect(wrapper.find('[data-cy="list-item-open"]').exists()).toBe(false);
+    });
+  });
+
+  describe("row states", () => {
+    const rowProps = {
+      ...defaultProps,
+      itemId: "row-1",
+      baseLibraryMode: "normalBaseLibrary" as any,
+      hasSelection: true,
+      previewComponentFeatureEnabled: true,
+      previewComponentListItemsCoverage: "OneListItem" as any,
+    };
+    const row = (wrapper: ReturnType<typeof shallowMount>) =>
+      wrapper.find("[data-cy='list-item']");
+
+    it("fills on hover", () => {
+      const wrapper = shallowMount(ListItem, { props: rowProps });
+      expect(row(wrapper).classes()).toContain("hover:bg-surface-row-hover");
+    });
+
+    it("washes a selected row with an accent row shadow", async () => {
+      const wrapper = shallowMount(ListItem, { props: rowProps });
+
+      await wrapper
+        .findComponent(BaseInputCheckbox)
+        .vm.$emit("update:modelValue", true);
+
+      expect(row(wrapper).classes()).toEqual(
+        expect.arrayContaining(["bg-accent-wash", "shadow-accent-row"]),
+      );
+    });
+
+    it("marks the previewed row with an accent left border and no wash", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...rowProps, previewComponentCurrentActive: true },
+      });
+
+      expect(row(wrapper).classes()).toEqual(
+        expect.arrayContaining([
+          "border-l-(length:--list-row-preview-border)",
+          "border-l-accent",
+        ]),
+      );
+      expect(row(wrapper).classes()).not.toContain("bg-accent-wash");
+      expect(row(wrapper).classes()).not.toContain("border-neutral-800");
+    });
+
+    it("presses the eye only while the row's preview is open", () => {
+      const lastPreviewed = shallowMount(ListItem, {
+        props: { ...rowProps, previewComponentCurrentActive: true },
+      });
+      const open = shallowMount(ListItem, {
+        props: {
+          ...rowProps,
+          previewComponentCurrentActive: true,
+          previewOpen: true,
+        },
+      });
+
+      expect(
+        lastPreviewed.findComponent({ name: "PreviewToggle" }).props("active"),
+      ).toBe(false);
+      expect(
+        open.findComponent({ name: "PreviewToggle" }).props("active"),
+      ).toBe(true);
     });
   });
 

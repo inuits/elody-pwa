@@ -391,6 +391,40 @@ describe("usePreviewComponent", () => {
     });
   });
 
+  describe("isPreviewOpenForListItem — the eye's pressed state", () => {
+    it("is true for the entity whose preview is open", async () => {
+      const { togglePreviewComponent, isPreviewOpenForListItem } = await setup();
+
+      togglePreviewComponent("entity-1");
+
+      expect(isPreviewOpenForListItem("entity-1")).toBe(true);
+      expect(isPreviewOpenForListItem("entity-2")).toBe(false);
+    });
+
+    it("is false for the last previewed entity once the panel closes", async () => {
+      const {
+        togglePreviewComponent,
+        closePreviewComponent,
+        isPreviewOpenForListItem,
+      } = await setup({ keepLastActiveItemHighlighted: true });
+
+      togglePreviewComponent("entity-1");
+      closePreviewComponent();
+
+      expect(isPreviewOpenForListItem("entity-1")).toBe(false);
+    });
+
+    it("is true for every entity when the preview covers all list items", async () => {
+      const { togglePreviewComponent, isPreviewOpenForListItem } = await setup({
+        listItemsCoverage: ListItemCoverageTypes.AllListItems,
+      });
+
+      togglePreviewComponent("entity-1");
+
+      expect(isPreviewOpenForListItem("entity-3")).toBe(true);
+    });
+  });
+
   describe("initial fetch — getPreviewItemsForEntity", () => {
     it("queries apolloClient with the entity type on mount", async () => {
       await setup();

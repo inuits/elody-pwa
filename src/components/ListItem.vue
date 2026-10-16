@@ -168,6 +168,7 @@
         :key="`${formId || idx}_${metadataItem?.key || idx}`"
         :class="[
           teaserMetadataStyle,
+          { 'text-text-secondary': idx === 0 && isSeen },
           idx < 1 && teaserMetadata[0]?.value?.formatter
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine
@@ -270,28 +271,13 @@
         @toggle-loading="toggleLoading"
       />
     </div>
-    <button
-      v-if="previewComponentEnabled && isEnableNavigation"
-      type="button"
-      data-cy="list-item-open"
-      class="flex flex-row cursor-pointer"
-      :aria-label="t('actions.labels.open-item', { item: rowTitle ?? itemId })"
-      @click="() => emit('navigateTo')"
-    >
-      <slot>
-        <unicon
-          :name="Unicons.AngleRight.name"
-          class="h-5.5 w-5.5 text-text-body"
-        />
-      </slot>
-    </button>
     <PreviewToggle
-      v-else-if="
+      v-if="
         previewComponentFeatureEnabled &&
         (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
           baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
       "
-      :active="previewComponentCurrentActive"
+      :active="previewOpen"
       @toggle="emit('togglePreviewComponent', itemId)"
     />
   </li>
@@ -339,7 +325,6 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { computed, inject, onUpdated, ref, watch } from "vue";
-import { Unicons } from "@/types";
 import { auth, router } from "@/main";
 import PreviewToggle from "@/components/PreviewToggle.vue";
 import EntityButtons from "./EntityButtons.vue";
@@ -379,7 +364,10 @@ const props = withDefaults(
     viewMode?: "list" | "grid" | "pipeline";
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
+    // Row highlight: preview open, or last previewed (keepLastActiveItemHighlighted).
     previewComponentCurrentActive: boolean;
+    // The eye's pressed state: this row's preview is open now.
+    previewOpen?: boolean;
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
     isPrimaryMediafile?: boolean;
@@ -415,11 +403,11 @@ const props = withDefaults(
     isPrimaryThumbnail: false,
     multiLine: false,
     multiLineColumns: 5,
+    previewOpen: false,
   },
 );
 
 const emit = defineEmits<{
-  (event: "navigateTo"): void;
   (event: "togglePreviewComponent", previewForEntityId: string): void;
   (event: "addRefetchFunctionToEditState"): void;
 }>();
@@ -537,16 +525,16 @@ const wrapperClasses = computed(() => {
     },
     { "!border-status-new": props.isPreview },
     { "!border-status-deleted": isMarkedAsToBeDeleted.value },
-    {
-      "grayscale brightness-95 !cursor-default":
-        props.isDisabled || isSeen.value,
-    },
+    { "grayscale brightness-95 !cursor-default": props.isDisabled },
     { "font-semibold": isNew.value },
     { "animate-pulse": loading.value },
-    { "bg-background-light": !isActiveListItem.value },
-    { "border-border-subtle": !isActiveListItem.value },
+    // entity-list-element.md: the checkbox owns the wash, the open preview
+    // owns the left border; hover fills.
+    "border-border-subtle hover:bg-surface-row-hover",
+    isChecked.value ? "bg-accent-wash shadow-accent-row" : "bg-background-light",
     {
-      "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+      "border-l-(length:--list-row-preview-border) border-l-accent":
+        isActiveListItem.value,
     },
   ];
 });

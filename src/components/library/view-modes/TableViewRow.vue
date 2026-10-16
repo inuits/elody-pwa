@@ -60,7 +60,10 @@
       <div
         v-for="(metadataItem, idx) in visibleMetadata"
         :key="`${itemId}_${metadataItem?.key || idx}`"
-        :class="columnClass(idx)"
+        :class="[
+          columnClass(idx),
+          { 'text-text-secondary': idx === 0 && isSeen },
+        ]"
         :style="
           props.colMinWidths?.[idx] ? { minWidth: props.colMinWidths[idx] } : {}
         "
@@ -103,7 +106,7 @@
           (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
             baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
         "
-        :active="previewComponentCurrentActive"
+        :active="previewOpen"
         @toggle="emit('togglePreviewComponent', itemId)"
       />
     </div>
@@ -160,13 +163,17 @@ const props = withDefaults(
     hasThumbnail: boolean;
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
+    // Row highlight: preview open, or last previewed (keepLastActiveItemHighlighted).
     previewComponentCurrentActive: boolean;
+    // The eye's pressed state: this row's preview is open now.
+    previewOpen?: boolean;
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes;
     loading?: boolean;
     colMinWidths?: string[];
   }>(),
   {
+    previewOpen: false,
     itemType: undefined,
     entityTypename: undefined,
     teaserMetadata: () => [],
@@ -264,13 +271,16 @@ const isNew = computed<boolean>(() =>
 );
 
 const wrapperClasses = computed(() => [
-  "flex items-center gap-2 p-1.5 border rounded bg-background-light border-border-subtle cursor-pointer list-none mt-1",
+  // entity-list-element.md: the checkbox owns the wash, the open preview owns
+  // the left border; hover fills.
+  "flex items-center gap-2 p-1.5 border rounded border-border-subtle cursor-pointer list-none mt-1 hover:bg-surface-row-hover",
+  isChecked.value ? "bg-accent-wash shadow-accent-row" : "bg-background-light",
   {
-    "grayscale brightness-95 !cursor-default": props.isDisabled || isSeen.value,
+    "grayscale brightness-95 !cursor-default": props.isDisabled,
     "font-semibold": isNew.value,
     "animate-pulse": props.loading,
-    "bg-background-light": !isActiveListItem.value,
-    "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
+    "border-l-(length:--list-row-preview-border) border-l-accent":
+      isActiveListItem.value,
   },
 ]);
 </script>

@@ -305,7 +305,7 @@
   --shadow-modal: 0 24px 64px rgba(9, 30, 66, 0.4);
   --shadow-toast: 0 12px 32px rgba(9, 30, 66, 0.35);
   --shadow-accent-hover: 0 2px 6px rgba(59, 166, 203, 0.4);
-  --shadow-accent-row: 0 1px 4px rgba(59, 166, 203, 0.25);
+  --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
   --shadow-commit-hover: 0 2px 8px rgba(12, 178, 188, 0.35);
   --opacity-empty: 0.45;
 
@@ -382,6 +382,8 @@
   /* List row (list mode): the text keeps this width before the row's
      actions wrap onto their own line */
   --list-row-content-min: 8rem;
+  /* The row whose preview is open (entity-list-element.md) */
+  --list-row-preview-border: 3px;
 
   /* Menu (components/menu.md): split-button and overflow menus */
   --menu-padding: 4px;
@@ -643,4 +645,6 @@ body {
   --color-diff-new: var(--color-success-ink);
   --color-diff-new-bg: var(--color-success-bg);
   --color-diff-new-border: var(--color-success);
+  /* Follows the client accent (selected list rows) */
+  --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }

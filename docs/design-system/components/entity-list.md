@@ -21,6 +21,23 @@ total; the selection bar and pager don't repeat it.
   (`NormalBaseLibrary`, `PreviewBaseLibrary`); not in compact basic-mode
   relation lists. Hidden until the first page has loaded.
 
+## Row states
+`ListItem.vue` (list, grid) and `TableViewRow.vue` (table).
+
+| State | Cue |
+|---|---|
+| hover | `--color-surface-row-hover` fill |
+| selected (checkbox) | `--color-accent-wash` + `--shadow-accent-row`; the checkbox owns the wash |
+| preview open | `--list-row-preview-border` left border in `--color-accent`, no wash; its eye is pressed |
+| last previewed (`keepLastActiveItemHighlighted`) | same left border, eye not pressed |
+| seen (`seenDisplay: dimSeen`) | first field (the row title) in `--color-text-secondary` |
+| disabled | greyed out, not clickable |
+
+The eye (`PreviewToggle`) stays on every row while a preview is open:
+`aria-pressed` follows "this row's preview is open now"
+(`isPreviewOpenForListItem`), not the highlight. Clicking a row switches the
+preview; the detail page opens from the preview header.
+
 ## Footer
 One row under the list: page size left, pager right ([pagination](./pagination.md)).
 
