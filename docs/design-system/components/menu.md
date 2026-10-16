@@ -1,16 +1,25 @@
-# Menu and overflow trigger
+# Menu, overflow trigger and split button
 
 A list of actions that opens from a labelled trigger. Implemented by
 `src/components/base/BaseContextMenu.vue` (the menu),
 `src/components/base/BaseContextMenuItem.vue` (an item) and
-`src/components/ContextMenuActionsShell.vue` (the "Acties" trigger).
+`src/components/ContextMenuActionsShell.vue` (the "Acties" trigger and the
+split button).
 
 ## When to use
 - Secondary actions of a row or panel that don't fit as visible buttons.
 - Never behind a bare ⋮: the trigger always shows a label ("Acties ⌄").
+- Exactly one promoted action (`showAsButton`) plus overflow actions: a
+  split button. Several promoted actions stay separate buttons next to the
+  "Acties" trigger.
 
 ## Anatomy
-- Trigger: ghost `BaseButtonNew` (sm), label + ⌄ (⌃ while open).
+- Trigger: secondary `BaseButtonNew` (sm, bordered), label + ⌄ (⌃ while open).
+- Split button: the promoted action as a primary (accent) button and an
+  accent chevron segment in one capsule, split by a white 40% divider. The
+  chevron takes the accent-hover fill while open.
+- A promoted action on its own is a primary (accent) button, not commit
+  teal: it starts an action, it does not confirm a form.
 - Menu: surface, 1px subtle border, card radius, overlay shadow, 12.5px
   text. Opens under the trigger, aligned to its right edge near the
   viewport edge, and above it near the bottom.
@@ -28,6 +37,8 @@ A list of actions that opens from a labelled trigger. Implemented by
 | `--radius-button` | item corners |
 | `--shadow-overlay` | menu elevation |
 | `--text-table` | menu text size |
+| `--split-button-divider` | line between primary and chevron |
+| `--split-button-chevron-padding-x` | chevron segment side padding |
 
 ## States
 | State | Cue |
@@ -46,6 +57,9 @@ A list of actions that opens from a labelled trigger. Implemented by
 ## Accessibility
 - Trigger: `aria-haspopup="menu"`, `aria-expanded`; its name is
   "Acties voor {titel}" when the caller passes `contextLabel`.
+- Split button: a `role="group"`; the primary is named by its label, the
+  chevron "Meer acties voor {titel}" ("Meer acties" without a title). Rows
+  pass their first teaser value as the title, panels their heading.
 - Menu `role="menu"`, items `role="menuitem"`.
 
 ## Content

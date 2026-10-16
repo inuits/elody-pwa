@@ -386,6 +386,10 @@
   --menu-item-gap: 8px;
   --menu-icon-size: 14px;
 
+  /* Split button (components/menu.md): primary + chevron in one capsule */
+  --split-button-divider: color-mix(in srgb, var(--color-neutral-white) 40%, transparent);
+  --split-button-chevron-padding-x: 8px;
+
   /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
      in BaseTooltip.vue */
   --text-tooltip: var(--text-label);

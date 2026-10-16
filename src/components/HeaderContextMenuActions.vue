@@ -2,6 +2,7 @@
   <context-menu-actions-shell
     :has-promoted-actions="hasPromotedActions"
     :has-overflow-actions="hasOverflowActions"
+    :split="promotedActions.length === 1"
   >
     <template #promoted>
       <template v-for="(action, i) in promotedActions" :key="i">

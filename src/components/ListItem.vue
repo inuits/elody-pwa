@@ -40,6 +40,7 @@
         :bulk-operations-context="bulkOperationsContext"
         :intial-values="intialValues"
         :relation-values="relationValues"
+        :context-label="rowTitle"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -262,6 +263,7 @@
         :refetch-entities="refetchEntities"
         :intial-values="intialValues"
         :relation-values="relationValues"
+        :context-label="rowTitle"
         @toggle-loading="toggleLoading"
       />
     </div>
@@ -498,6 +500,12 @@ const teaserMetadataStyle = computed<string>(() => {
     listStylesBasedOnAmount[amountOfTeaserMetadataItems],
   );
 });
+// The first teaser value is what the row shows as its title.
+const rowTitle = computed(() => {
+  const value = props.teaserMetadata[0]?.value;
+  return typeof value === "string" ? value : undefined;
+});
+
 const onlyReadModeTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode),
 );

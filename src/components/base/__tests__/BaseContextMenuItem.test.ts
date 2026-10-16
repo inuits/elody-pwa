@@ -24,6 +24,16 @@ describe("BaseContextMenuItem", () => {
     ).toBe("DownloadAlt");
   });
 
+  it("renders a promoted action as an accent primary button", () => {
+    const wrapper = shallowMount(BaseContextMenuItem, {
+      props: { label: "Download", asButton: true },
+    });
+
+    expect(
+      wrapper.findComponent({ name: "BaseButtonNew" }).props("buttonStyle"),
+    ).toBe("primary");
+  });
+
   it("activates a menu item with Enter and Space", async () => {
     const wrapper = shallowMount(BaseContextMenuItem, {
       props: { label: "Dupliceer" },

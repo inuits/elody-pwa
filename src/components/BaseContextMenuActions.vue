@@ -3,6 +3,7 @@
     :has-promoted-actions="hasPromotedActions"
     :has-overflow-actions="hasAvailableContextMenuActions"
     :context-label="contextLabel"
+    :split="Object.keys(promotedActions).length === 1"
   >
     <template #promoted>
       <context-menu-action

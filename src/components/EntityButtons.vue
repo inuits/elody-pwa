@@ -10,6 +10,7 @@
         :relation="relation"
         :bulk-operations-context="bulkOperationsContext"
         :refetch-entities="refetchEntities"
+        :context-label="contextLabel"
         @toggle-loading="emit('toggleLoading')"
       />
       <BaseTooltip v-else position="top-right" :tooltip-offset="8">
@@ -67,6 +68,7 @@ const props = withDefaults(
     refetchEntities?: () => Promise<void>;
     intialValues?: object;
     relationValues?: object;
+    contextLabel?: string;
   }>(),
   {
     buttons: undefined,

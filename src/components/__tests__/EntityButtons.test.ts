@@ -37,10 +37,11 @@ const contextMenu = {
   doLinkAction: { label: "follow", icon: "AngleRight" },
 };
 
-const getWrapper = (buttons: unknown) =>
+const getWrapper = (buttons: unknown, contextLabel?: string) =>
   mount(EntityButtons, {
     props: {
       buttons: buttons as Buttons,
+      contextLabel,
       entityId: "MF-1",
       entityType: "mediafile" as Entitytyping,
       bulkOperationsContext: BulkOperationsContextEnum.Home,
@@ -52,7 +53,7 @@ const getWrapper = (buttons: unknown) =>
       stubs: {
         BaseContextMenuActions: {
           name: "BaseContextMenuActions",
-          props: ["contextMenuActions"],
+          props: ["contextMenuActions", "contextLabel"],
           template: '<div data-test="context-menu" />',
         },
         BaseTooltip: {
@@ -86,8 +87,19 @@ describe("EntityButtons", () => {
     ).toEqual(contextMenu);
   });
 
+  it("names the row's actions after the row", () => {
+    const wrapper = getWrapper({ contextMenu }, "Brief aan Jan");
+
+    expect(
+      wrapper.findComponent({ name: "BaseContextMenuActions" }).props(
+        "contextLabel",
+      ),
+    ).toBe("Brief aan Jan");
+  });
+
   it("treats the contextMenu key as the context menu without a typename", () => {
-    const { __typename, ...untypedContextMenu } = contextMenu;
+    const untypedContextMenu: Partial<typeof contextMenu> = { ...contextMenu };
+    delete untypedContextMenu.__typename;
     const wrapper = getWrapper({ contextMenu: untypedContextMenu });
 
     expect(wrapper.findAll("button")).toHaveLength(0);

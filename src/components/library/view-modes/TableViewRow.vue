@@ -92,6 +92,7 @@
         :refetch-entities="refetchEntities"
         :intial-values="intialValues"
         :relation-values="relationValues"
+        :context-label="rowTitle"
       />
     </div>
 
@@ -233,6 +234,12 @@ const mediaIsLink = computed(() => stringIsUrl(props.media || ""));
 const visibleMetadata = computed(() =>
   (props.teaserMetadata ?? []).filter((m) => !m.showOnlyInEditMode),
 );
+
+// The first teaser value is what the row shows as its title.
+const rowTitle = computed(() => {
+  const value = props.teaserMetadata?.[0]?.value;
+  return typeof value === "string" ? value : undefined;
+});
 
 const columnClass = (idx: number): string => {
   const base = "flex justify-start flex-col mx-2 break-words";

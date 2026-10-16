@@ -18,7 +18,7 @@
       v-bind="
         asButton
           ? {
-              buttonStyle: 'commit',
+              buttonStyle: 'primary',
               icon: buttonIcon,
               buttonSize: 'sm',
               disabled: disable,

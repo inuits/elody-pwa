@@ -98,4 +98,29 @@ describe("BaseContextMenuActions", () => {
       Object.keys(actions),
     );
   });
+
+  it("asks for a split button with exactly one promoted action and overflow", async () => {
+    const wrapper = getWrapper({
+      doLinkAction: followLink,
+      doElodyAction: { ...deleteRelation, showAsButton: true },
+    });
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "ContextMenuActionsShell" }).props("split"),
+    ).toBe(true);
+  });
+
+  it("keeps separate buttons with more than one promoted action", async () => {
+    const wrapper = getWrapper({
+      doLinkAction: { ...followLink, showAsButton: true },
+      doElodyAction: { ...deleteRelation, showAsButton: true },
+      doGeneralAction: { label: "x", icon: "Update" },
+    });
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "ContextMenuActionsShell" }).props("split"),
+    ).toBe(false);
+  });
 });
