@@ -36,8 +36,10 @@ describe("startBrowserTracing with HyperDX", () => {
 
   it("joins the app's own API to the browser's trace, and no other origin", () => {
     startBrowserTracing(settings);
-    const targets: RegExp[] = hyperdx.init.mock.calls[0][0].tracePropagationTargets;
-    const propagates = (url: string) => targets.some((target) => target.test(url));
+    const targets: RegExp[] =
+      hyperdx.init.mock.calls[0][0].tracePropagationTargets;
+    const propagates = (url: string) =>
+      targets.some((target) => target.test(url));
     expect(propagates(`${window.location.origin}/api/graphql`)).toBe(true);
     expect(propagates("/api/graphql")).toBe(true);
     // OpenPanel's API also lives under /api, on another origin: no traceparent there
@@ -65,7 +67,10 @@ describe("startBrowserTracing with HyperDX", () => {
     const tracing = startBrowserTracing({
       ...settings,
       sessionId: "s-1",
-      attributes: { "service.namespace": "vlacc-dams", "deployment.environment": "local" },
+      attributes: {
+        "service.namespace": "vlacc-dams",
+        "deployment.environment": "local",
+      },
     });
     expect(hyperdx.setGlobalAttributes).toHaveBeenCalledWith({
       session_id: "s-1",
@@ -80,5 +85,33 @@ describe("startBrowserTracing with HyperDX", () => {
       userId: "p-1",
       teamId: "brugge.be",
     });
+  });
+
+  it("sends to the app's own telemetry proxy when the config names a path", () => {
+    startBrowserTracing({
+      ...settings,
+      tracesUrl: "/api/telemetry/otlp/v1/traces",
+    });
+    const options = hyperdx.init.mock.calls[0][0];
+    expect(options.tracesUrl).toBe(
+      `${window.location.origin}/api/telemetry/otlp/v1/traces`,
+    );
+    expect(options.logsUrl).toBe(
+      `${window.location.origin}/api/telemetry/otlp/v1/logs`,
+    );
+  });
+
+  it("does not trace its own telemetry requests", () => {
+    startBrowserTracing(settings);
+    const ignored: RegExp[] = hyperdx.init.mock.calls[0][0].ignoreUrls;
+    const ignores = (url: string) =>
+      ignored.some((pattern) => pattern.test(url));
+    expect(
+      ignores(`${window.location.origin}/api/telemetry/otlp/v1/traces`),
+    ).toBe(true);
+    expect(ignores(`${window.location.origin}/api/telemetry/usage/track`)).toBe(
+      true,
+    );
+    expect(ignores(`${window.location.origin}/api/graphql`)).toBe(false);
   });
 });
