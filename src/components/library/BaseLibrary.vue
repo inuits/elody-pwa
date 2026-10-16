@@ -172,6 +172,9 @@
             :total-items="totalEntityCount || NaN"
             :show-pagination="!displayMap && !displayPipeline && !isTableGrouped"
             :is-loading="isInitialLoading"
+            :page-item-ids="
+              (predefinedEntities ?? entities).map((entity) => entity.uuid)
+            "
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "

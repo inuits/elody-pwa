@@ -19,7 +19,19 @@ vi.mock("@vue/apollo-composable", () => ({
 vi.mock("@/types", () => ({
   Unicons: {
     EllipsisV: { name: "EllipsisV" },
+    AngleDown: { name: "angle-down" },
+    AngleUp: { name: "angle-up" },
+    QuestionCircle: { name: "question-circle" },
   },
+}));
+
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t: (key: string, params?: Record<string, unknown> | unknown[]) =>
+      params && !Array.isArray(params)
+        ? `${key}:${Object.values(params).join(",")}`
+        : key,
+  }),
 }));
 
 vi.mock("session-vue-3-oidc-library", () => ({
@@ -176,6 +188,101 @@ describe("ActionMenuGroup", () => {
 
       expect(values(wrapper.vm.primaryOptions)).toEqual(["createEntity"]);
       expect(wrapper.vm.primaryOptions[0].active).toBe(false);
+    });
+  });
+
+  describe("visible action row", () => {
+    const option = (value: string, extra: Partial<DropdownOption> = {}) =>
+      ({ label: `label.${value}`, value, ...extra }) as DropdownOption;
+    const someSelected = {
+      actionContext: {
+        entitiesSelectionType: ActionContextEntitiesSelectionType.SomeSelected,
+      },
+    };
+
+    const mountRow = (
+      options: DropdownOption[],
+      selectedItems: { id: string }[] = [],
+    ) =>
+      mount(ActionMenuGroup, {
+        props: {
+          options,
+          itemsSelected: selectedItems.length > 0,
+          selectedItems: selectedItems as any,
+          entityType: "Entitytyping" as Entitytyping,
+          clearSubDropdownOptions: () => {},
+        },
+        attachTo: document.body,
+        global: { stubs: { unicon: true, BaseTooltip: true } },
+      });
+    const buttons = (wrapper: ReturnType<typeof mountRow>) =>
+      wrapper.findAllComponents({ name: "BaseButtonNew" });
+
+    it("shows secondary actions as visible labelled buttons", async () => {
+      const wrapper = mountRow([
+        option("create", { primary: true }),
+        option("export"),
+      ]);
+      await flushPromises();
+
+      expect(buttons(wrapper).map((b) => b.props("label"))).toEqual([
+        "label.create",
+        "label.export",
+      ]);
+      expect(buttons(wrapper)[0].props("buttonStyle")).toBe("primary");
+      expect(buttons(wrapper)[1].props("buttonStyle")).toBe("secondary");
+      expect(buttons(wrapper)[1].props("forceShowLabel")).toBe(true);
+    });
+
+    it("keeps an action that needs a selection visible but disabled", async () => {
+      const wrapper = mountRow([option("edit", someSelected)]);
+      await flushPromises();
+
+      expect(buttons(wrapper)[0].props("disabled")).toBe(true);
+    });
+
+    it("moves actions beyond five into a labelled overflow menu", async () => {
+      const wrapper = mountRow(
+        ["a", "b", "c", "d", "e", "f", "g"].map((value) => option(value)),
+      );
+      await flushPromises();
+
+      const labels = buttons(wrapper).map((b) => b.props("label"));
+      expect(labels).toEqual([
+        "label.a",
+        "label.b",
+        "label.c",
+        "label.d",
+        "label.e",
+        "bulk-operations.more-actions",
+      ]);
+      expect(wrapper.find('[aria-haspopup="menu"]').exists()).toBe(true);
+      expect(wrapper.vm.overflowOptions.map((o: DropdownOption) => o.value))
+        .toEqual(["f", "g"]);
+    });
+
+    it("never renders a bare ellipsis trigger", async () => {
+      const wrapper = mountRow(
+        ["a", "b", "c", "d", "e", "f"].map((value) => option(value)),
+      );
+      await flushPromises();
+
+      expect(
+        buttons(wrapper).some((b) => b.props("icon") === "EllipsisV"),
+      ).toBe(false);
+    });
+
+    it("names a selection action with the selection count", async () => {
+      const wrapper = mountRow(
+        [option("delete", someSelected), option("create")],
+        [{ id: "1" }, { id: "2" }],
+      );
+      await flushPromises();
+
+      expect(buttons(wrapper)[0].props("ariaLabel")).toBe(
+        "bulk-operations.action-for-selection:label.delete,2",
+      );
+      expect(buttons(wrapper)[1].props("ariaLabel")).toBeUndefined();
     });
   });
 });

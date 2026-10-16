@@ -1,48 +1,56 @@
 <template>
-  <div
-    class="flex flex-row justify-end items-center !m-0"
-    :class="[{ 'w-fit': primaryOptions }]"
-  >
-    <div class="flex flex-col">
-      <BaseButtonNew
-        v-for="primaryOption in primaryOptions"
-        :key="primaryOption"
-        class="pl-4 pr-6 my-1"
-        :class="{ '-mr-4': secondaryOptions.length > 0 }"
-        button-style="commit"
-        button-size="sm"
-        :disabled="isMainActionDisabled || !primaryOption.active"
-        :label="t(primaryOption.label, [entityTypeLabel])"
-        :tooltip-label="tooltipFor(primaryOption)"
-        :icon="primaryOption.icon"
-        :force-show-label="primaryOptions.length > 1"
-        @click.stop="
-          (event: MouseEvent) => {
-            handleEmit(primaryOption);
-            if (primaryOption.value === BulkOperationTypes.OpenDropdown)
-              contextMenuHandler.openContextMenu({
-                x: event.clientX,
-                y: event.clientY,
-              });
-          }
-        "
-      />
-    </div>
+  <div class="flex flex-row flex-wrap justify-end items-center gap-2 !m-0">
     <BaseButtonNew
-      v-if="hasSecondaryOptions"
+      v-for="option in visibleOptions"
+      :key="option.value"
+      class="w-auto"
+      :button-style="primaryOptions.includes(option) ? 'primary' : 'secondary'"
       button-size="sm"
-      :icon="DamsIcons.EllipsisV"
-      class="!w-max !p-2 ml-2"
+      :disabled="
+        !option.active ||
+        (isMainActionDisabled && primaryOptions.includes(option))
+      "
+      :label="t(option.label, [entityTypeLabel])"
+      :aria-label="nameWithCount(option)"
+      :tooltip-label="tooltipFor(option)"
+      :icon="option.icon"
+      :force-show-label="true"
       @click.stop="
         (event: MouseEvent) => {
-          clearSubDropdownOptions();
-          contextMenuHandler.openContextMenu({
-            x: event.clientX,
-            y: event.clientY,
-          });
+          handleEmit(option);
+          if (option.value === BulkOperationTypes.OpenDropdown)
+            contextMenuHandler.openContextMenu(
+              { x: 0, y: 0 },
+              event.currentTarget as HTMLElement,
+            );
         }
       "
     />
+    <!-- Never a bare ⋮: the overflow names itself. -->
+    <BaseButtonNew
+      v-if="overflowOptions.length > 0"
+      class="w-auto"
+      button-style="secondary"
+      button-size="sm"
+      :label="t('bulk-operations.more-actions')"
+      :force-show-label="true"
+      aria-haspopup="menu"
+      :aria-expanded="isMenuOpen"
+      @click.stop="
+        (event: MouseEvent) => {
+          clearSubDropdownOptions();
+          contextMenuHandler.openContextMenu(
+            { x: 0, y: 0 },
+            event.currentTarget as HTMLElement,
+          );
+        }
+      "
+    >
+      <unicon
+        :name="isMenuOpen ? Unicons.AngleUp.name : Unicons.AngleDown.name"
+        height="14"
+      />
+    </BaseButtonNew>
 
     <div v-if="hasSubDropdownOptions" class="!m-0">
       <BaseContextMenu
@@ -69,7 +77,7 @@
         :direction="ContextMenuDirection.Left"
       >
         <BaseContextMenuItem
-          v-for="(option, idx) in secondaryOptions"
+          v-for="(option, idx) in overflowOptions"
           :key="idx"
           :label="t(option?.label, [entityTypeLabel])"
           :tooltip-label="tooltipFor(option)"
@@ -86,7 +94,7 @@ import { computed, ref, watch } from "vue";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import {
   ContextMenuDirection,
-  DamsIcons,
+  ActionContextEntitiesSelectionType,
   type DropdownOption,
   Entitytyping,
   BulkOperationTypes,
@@ -96,6 +104,7 @@ import { useI18n } from "vue-i18n";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { auth } from "@/main";
+import { Unicons } from "@/types";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
 import { determineSelectionConstraintViolation } from "@/composables/useSelectionConstraints";
 import type { InBulkProcessableItem } from "@/composables/useBulkOperations";
@@ -172,9 +181,36 @@ const secondaryOptions = computed<DropdownOption[]>(() =>
   ),
 );
 
-const hasSecondaryOptions = computed(() => {
-  return secondaryOptions.value.length > 0;
-});
+// The handoff caps the visible row at about five actions.
+const MAX_VISIBLE_ACTIONS = 5;
+
+const visibleOptions = computed<DropdownOption[]>(() =>
+  [...primaryOptions.value, ...secondaryOptions.value].slice(
+    0,
+    MAX_VISIBLE_ACTIONS,
+  ),
+);
+
+const overflowOptions = computed<DropdownOption[]>(() =>
+  secondaryOptions.value.filter(
+    (option) => !visibleOptions.value.includes(option),
+  ),
+);
+
+const isMenuOpen = computed<boolean>(
+  () => contextMenuHandler.value.getContextMenu()?.isVisible ?? false,
+);
+
+// Screen readers hear what a selection action acts on: "Delete (2 selected)".
+const nameWithCount = (option: DropdownOption): string | undefined =>
+  props.itemsSelected &&
+  option.actionContext?.entitiesSelectionType ===
+    ActionContextEntitiesSelectionType.SomeSelected
+    ? t("bulk-operations.action-for-selection", {
+        action: t(option.label, [entityTypeLabel.value]),
+        count: props.selectedItems.length,
+      })
+    : undefined;
 
 const hasSubDropdownOptions = computed(() => {
   return props.subDropdownOptions.length > 0;

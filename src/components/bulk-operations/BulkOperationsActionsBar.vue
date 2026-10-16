@@ -1,10 +1,13 @@
 <template>
   <div
     v-if="bulkOperationsPromiseIsResolved"
+    role="toolbar"
+    :aria-label="t('bulk-operations.selection-toolbar')"
     class="flex justify-between items-center rounded alignment-nested-divs px-3 !py-1 bg-background-light"
   >
     <div class="flex justify-start items-center">
       <div
+        role="status"
         class="px-2 my-2.5 rounded-md"
         :class="
           useExtendedBulkOperations && itemsSelected
@@ -52,8 +55,15 @@
           {{ $t("bulk-operations.capped-items-tooltip") }}
         </span>
       </BaseTooltip>
+      <span
+        v-if="offPageCount > 0"
+        data-cy="selection-off-page-note"
+        class="px-2 text-text-light"
+        >{{ t("bulk-operations.selected-on-other-pages", { count: offPageCount }) }}</span
+      >
       <div v-if="itemsSelected">
-        <span
+        <button
+          type="button"
           class="select-actions"
           :class="
             useExtendedBulkOperations ? `text-accent-accent` : `text-text-body`
@@ -61,7 +71,7 @@
           @click="dequeueAllItemsForBulkProcessing(context)"
         >
           {{ $t("bulk-operations.undo-selection") }}
-        </span>
+        </button>
       </div>
       <div
         v-if="
@@ -70,7 +80,8 @@
           enableSelection
         "
       >
-        <span
+        <button
+          type="button"
           class="select-actions"
           :class="
             useExtendedBulkOperations && itemsSelected
@@ -80,7 +91,7 @@
           @click="() => emit('selectPage')"
         >
           {{ $t("bulk-operations.select-page") }}
-        </span>
+        </button>
       </div>
     </div>
     <div v-if="!excludePagination && showPagination" class="flex">
@@ -120,7 +131,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from "vue";
+import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   canRevealExactCount,
@@ -166,6 +177,8 @@ const props = withDefaults(
     isLoading?: boolean;
     exactCount?: number | null;
     exactCountLoading?: boolean;
+    // Ids on the visible page, to tell selected items on other pages apart.
+    pageItemIds?: string[];
   }>(),
   {
     totalItemsCount: 0,
@@ -184,7 +197,7 @@ const props = withDefaults(
   },
 );
 
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 
@@ -228,6 +241,14 @@ const {
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
   parentEntity,
+);
+
+const offPageCount = computed<number>(() =>
+  props.pageItemIds
+    ? getEnqueuedItems(props.context).filter(
+        (item) => !props.pageItemIds!.includes(item.id),
+      ).length
+    : 0,
 );
 </script>
 
