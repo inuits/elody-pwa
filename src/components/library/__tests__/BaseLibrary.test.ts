@@ -758,10 +758,10 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
   });
 });
 
-describe("BaseLibrary.vue list footer", () => {
+describe("BaseLibrary.vue pager and page size", () => {
   let wrapper: ReturnType<typeof getWrapper> | null = null;
-  const paginationSelector = '[data-cy="list-footer"] [data-test="list-pager"]';
-  const pageSizeSelector = '[data-cy="list-footer"] page-size-select-stub';
+  const paginationSelector = '[data-test="list-pager"]';
+  const pageSizeSelector = '[data-cy="list-header"] page-size-select-stub';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -810,17 +810,35 @@ describe("BaseLibrary.vue list footer", () => {
     expect(wrapper.find(paginationSelector).exists()).toBe(false);
   });
 
-  it("shows the pager in the footer of the main library too", async () => {
+  it("puts the pager in the list header, next to the count", async () => {
     libPaginationTotalPages.value = 4;
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });
     await flushPromises();
 
+    expect(
+      wrapper.find('[data-cy="list-header"] [data-test="list-pager"]').exists(),
+    ).toBe(true);
+  });
+
+  it("keeps the pager above the list when the library bar is disabled", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper({ disableLibraryBar: true });
+    await flushPromises();
+
     expect(wrapper.find(paginationSelector).exists()).toBe(true);
   });
 
-  it("puts the page size in the footer of the main library", async () => {
+  it("has no list footer", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-footer"]').exists()).toBe(false);
+  });
+
+  it("puts the page size in the list header of the main library", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });

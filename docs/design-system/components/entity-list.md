@@ -4,7 +4,8 @@ The query-driven result list (table, list, grid). Implemented by
 `src/components/library/BaseLibrary.vue` and its view modes.
 
 ## Header
-One row above the list: the count chip, the view-mode switch, sort and
+One row above the list (`data-cy="list-header"`): the count chip, the pager
+([pagination](./pagination.md)), the view-mode switch, page size, sort and
 simple search (`LibraryBar.vue`).
 
 ### Count chip
@@ -60,9 +61,6 @@ The eye (`PreviewToggle`) stays on every row while a preview is open:
 `aria-pressed` follows "this row's preview is open now"
 (`isPreviewOpenForListItem`), not the highlight. Clicking a row switches the
 preview; the detail page opens from the preview header.
-
-## Footer
-One row under the list: page size left, pager right ([pagination](./pagination.md)).
 
 ## Accessibility
 - The count chip sits in a `role="status"` region, so new totals are

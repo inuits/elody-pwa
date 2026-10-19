@@ -1,6 +1,6 @@
 # Pagination
 
-Page navigation and page size, in the list footer. Implemented by
+Page navigation and page size, in the list header. Implemented by
 `src/components/base/BasePagination.vue` (pager) and
 `src/components/library/PageSizeSelect.vue` (page size), mounted by
 `BaseLibrary.vue`.
@@ -10,7 +10,9 @@ Every paged list. Not when the list fits on one page: the pager hides, and
 the page size hides while the total fits on the smallest option.
 
 ## Anatomy
-List footer row: page size left, pager right.
+In the list header row (`templates/elody-list-screen`, chosen over the
+handoff's footer placement): count chip · pager · view modes · page size ·
+sort. Lists whose library bar is disabled show the pager above the list.
 - Page size: an `AdvancedDropdown` reading "20 per page"
   (`pagination.per-page`; config labels are bare numbers, other labels are
   translation keys).

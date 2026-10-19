@@ -92,8 +92,11 @@
           { sticky: hasStickyBars },
         ]"
       >
+        <!-- List header (templates/elody-list-screen): count, pager, view
+             modes, page size, sort. -->
         <div
           v-if="!disableLibraryBar"
+          data-cy="list-header"
           class="h-fit flex flex-row items-center gap-y-4"
         >
           <ResultCountChip
@@ -108,6 +111,11 @@
             :exact-count-loading="exactCountLoading"
             @reveal-exact-count="revealExactCount"
           />
+          <BasePagination
+            v-if="showListPager"
+            data-test="list-pager"
+            class="mr-2 shrink-0"
+          />
           <div
             v-if="
               toggles.length > 1 &&
@@ -117,6 +125,16 @@
           >
             <BaseToggleGroup :toggles="toggles" />
           </div>
+          <PageSizeSelect
+            v-if="showPageSize"
+            class="mr-2 shrink-0"
+            :set-limit="setPaginationLimit"
+            :selected-pagination-limit-option="paginationStore.limit.value"
+            :total="totalEntityCount"
+            @pagination-limit-options-promise="
+              (promise) => (paginationLimitOptionsPromise = promise)
+            "
+          />
           <div
             v-if="
               !predefinedEntities &&
@@ -250,6 +268,12 @@
           </div>
         </div>
         <div
+          v-if="showListPager && !pagerInHeader"
+          class="flex justify-center pt-2"
+        >
+          <BasePagination data-test="list-pager" />
+        </div>
+        <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
           class="flex-1 min-h-0"
           data-cy="base-library-grid-container"
@@ -375,27 +399,6 @@
             :centerCoordinatesKey="centerCoordinatesKey"
             :setPaginationLimit="setPaginationLimit"
             :setAdvancedFilters="setAdvancedFilters"
-          />
-        </div>
-        <!-- pagination.md: page size left, pager right, at the list footer only. -->
-        <div
-          v-if="showPageSize || showListPager"
-          data-cy="list-footer"
-          class="flex flex-wrap items-center gap-2 pt-2"
-        >
-          <PageSizeSelect
-            v-if="showPageSize"
-            :set-limit="setPaginationLimit"
-            :selected-pagination-limit-option="paginationStore.limit.value"
-            :total="totalEntityCount"
-            @pagination-limit-options-promise="
-              (promise) => (paginationLimitOptionsPromise = promise)
-            "
-          />
-          <BasePagination
-            v-if="showListPager"
-            data-test="list-pager"
-            class="ml-auto"
           />
         </div>
       </div>
@@ -921,6 +924,10 @@ const showListPager = computed(
     !displayPipeline.value &&
     !isTableGrouped.value &&
     paginationStore.totalPages.value > 1,
+);
+// The pager sits in the list header; lists without one keep it above the list.
+const pagerInHeader = computed(
+  () => showCurrentEntityFlow.value && !props.disableLibraryBar,
 );
 // Mounted wherever the library bar used to hold it: it registers the
 // pagination-limit promise the first fetch waits for.
