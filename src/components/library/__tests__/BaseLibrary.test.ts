@@ -830,19 +830,34 @@ describe("BaseLibrary.vue pager and page size", () => {
     expect(wrapper.find(paginationSelector).exists()).toBe(true);
   });
 
-  it("puts the selection bar's actions in the same header band", async () => {
+  it("puts the selection bar in its own row under the band, inside the results panel", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
       enableBulkOperations: true,
     });
     await flushPromises();
+    const bar = { name: "BulkOperationsActionsBar" };
 
     expect(
-      wrapper
-        .find('[data-cy="list-header"]')
-        .findComponent({ name: "BulkOperationsActionsBar" })
-        .exists(),
+      wrapper.find('[data-cy="list-header"]').findComponent(bar).exists(),
+    ).toBe(false);
+    expect(
+      wrapper.find('[data-cy="results-panel"]').findComponent(bar).exists(),
     ).toBe(true);
+  });
+
+  it("joins the band and the list into one white panel", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
+      "rounded-t-card",
+    );
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).toEqual(
+      expect.arrayContaining(["bg-surface", "border-border-panel", "rounded-card"]),
+    );
   });
 
   it("styles the header of the main library as the accent-light results band", async () => {

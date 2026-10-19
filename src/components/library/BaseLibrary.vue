@@ -75,33 +75,37 @@
         />
       </div>
       <div
-        v-if="showCurrentEntityFlow"
+        data-cy="results-panel"
         :class="[
-          'z-header right-0 pb-4 h-fit',
+          'row-span-2 flex flex-col min-h-0',
+          // ui_kits/clients: band, selection row and list in one white panel.
           {
-            'top-0 bg-background-normal pt-4':
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+            'mt-3 bg-surface border border-border-panel rounded-card':
+              hasResultsBand,
           },
-          {
-            'row-span-2':
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
-          },
-          { 'col-span-2': !enableAdvancedFilters },
-          { 'pl-[1%]': enableAdvancedFilters },
-          { sticky: hasStickyBars },
+          { 'col-span-1': isFiltersPanelExpanded },
+          isFiltersPanelExpanded
+            ? hasResultsBand
+              ? 'ml-[1%]'
+              : 'pl-[1%]'
+            : '',
+          { 'col-span-2': !isFiltersPanelExpanded },
         ]"
       >
         <!-- List header (templates/elody-list-screen): one accent-light band
              with count, pager, view modes, page size, sort and the selection
              bar's actions; it wraps when narrow. -->
         <div
+          v-if="showCurrentEntityFlow"
           data-cy="list-header"
           class="h-fit flex flex-wrap items-center gap-2"
-          :class="{
-            'p-(--list-band-pad) bg-surface-panel-header border border-border-panel rounded-card':
-              hasResultsBand,
-          }"
+          :class="[
+            {
+              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card':
+                hasResultsBand,
+            },
+            { 'sticky top-0 z-header': hasStickyBars },
+          ]"
         >
           <ResultCountChip
             v-if="
@@ -166,12 +170,13 @@
               "
             />
           </div>
+        </div>
           <BulkOperationsActionsBar
             v-if="
               enableBulkOperations &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
-            class="flex-1 min-w-fit"
+            class="px-(--list-band-pad) py-2 border-b border-border-subtle"
             :context="bulkOperationsContext"
             :use-extended-bulk-operations="!isSearchLibrary"
             :show-button="showButton"
@@ -218,15 +223,6 @@
             "
             @refetch="async () => await refetchEntities()"
           />
-        </div>
-      </div>
-      <div
-        :class="[
-          'row-span-2 flex flex-col min-h-0',
-          { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
-          { 'col-span-2': !isFiltersPanelExpanded },
-        ]"
-      >
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
           :class="[
