@@ -411,7 +411,7 @@
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */
   --list-band-pad: 8px 16px;
-  --view-switch-size: 34px;
+  --view-switch-size: 30px;
 
   /* Selection bar (components/selection-bar.md) */
   --selection-bar-gap: 8px;

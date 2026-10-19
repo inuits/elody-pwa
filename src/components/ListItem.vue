@@ -28,6 +28,7 @@
         "
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
+        size="compact"
         :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
         :bulk-operations-context="bulkOperationsContext"
       />
@@ -96,6 +97,7 @@
         "
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
+        size="compact"
         :item="{
           id: itemId,
           teaserMetadata,

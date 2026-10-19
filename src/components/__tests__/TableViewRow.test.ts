@@ -154,6 +154,19 @@ describe("TableViewRow", () => {
     expect(classes).not.toContain("mt-1");
   });
 
+  it("uses the compact checkbox in its dense rows", () => {
+    const wrapper = shallowMount(TableViewRow, {
+      props: {
+        ...props,
+        baseLibraryMode: "normalBaseLibrary" as any,
+        hasSelection: true,
+      },
+    });
+    expect(
+      wrapper.findComponent({ name: "BaseInputCheckbox" }).props("size"),
+    ).toBe("compact");
+  });
+
   describe("row states", () => {
     const rowProps = {
       ...props,

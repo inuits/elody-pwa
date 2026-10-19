@@ -28,9 +28,9 @@
       >
         <!-- ui_kits/clients: one "⇅ Descending" toggle, not a dropdown. -->
         <BaseButtonNew
-          class="!w-auto"
+          class="!w-auto min-h-8"
           data-cy="sort-toggle"
-          button-size="sm"
+          button-size="md"
           :icon="selectedSortDirection === 'asc' ? DamsIcons.SortUp : DamsIcons.SortDown"
           :label="t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')"
           :aria-label="`${t('library.sort-direction')}: ${t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')}`"

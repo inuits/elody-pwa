@@ -14,6 +14,7 @@
         v-if="showsCheckbox"
         :class="[{ invisible: isDisabled }, 'text-center']"
         v-model="isChecked"
+        size="compact"
         :item="{
           id: itemId,
           teaserMetadata,

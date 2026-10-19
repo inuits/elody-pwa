@@ -392,6 +392,20 @@ describe("ListItem", () => {
     });
   });
 
+  it("uses the compact checkbox in its dense rows", () => {
+    const wrapper = shallowMount(ListItem, {
+      props: {
+        ...defaultProps,
+        itemId: "row-1",
+        baseLibraryMode: "normalBaseLibrary" as any,
+        hasSelection: true,
+      },
+    });
+    expect(wrapper.findComponent(BaseInputCheckbox).props("size")).toBe(
+      "compact",
+    );
+  });
+
   describe("row states", () => {
     const rowProps = {
       ...defaultProps,
