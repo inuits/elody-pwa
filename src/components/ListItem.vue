@@ -60,7 +60,7 @@
         >
           <MultilingualWrapper
             :metadata="metadataItem"
-            :form-id="intialValues?.id || itemId"
+            :form-id="`${intialValues?.id || itemId}_listitem`"
             :hide-selector="true"
           >
             <template #default="{ localizedMetadata }">
@@ -178,10 +178,10 @@
             : {}
         "
       >
-        <!-- the row's own entity, so the page form's locale/translations never leak in -->
+        <!-- own key per row: the page form's locale must not leak in, and the edit modal reads translations stored under the entity id on save -->
         <MultilingualWrapper
           :metadata="metadataItem"
-          :form-id="intialValues?.id || itemId || 'listview'"
+          :form-id="`${intialValues?.id || itemId || 'listview'}_listitem`"
           :hide-selector="true"
         >
           <template #default="{ localizedMetadata }">

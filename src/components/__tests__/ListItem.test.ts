@@ -288,7 +288,8 @@ describe("ListItem", () => {
       const wrappers = wrapper.findAllComponents(MultilingualWrapper);
       expect(wrappers.length).toBeGreaterThan(0);
       for (const multilingual of wrappers)
-        expect(multilingual.props("formId")).toBe("WBI-1");
+        // not the entity id itself: the edit modal reads translations stored there on save
+        expect(multilingual.props("formId")).toBe("WBI-1_listitem");
     });
   });
 
@@ -306,9 +307,9 @@ describe("ListItem", () => {
       wrapper.vm.toggleLoading();
       await wrapper.vm.$nextTick();
 
-      expect(
-        wrapper.find("[data-cy='list-item']").classes(),
-      ).not.toContain("animate-pulse");
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
+        "animate-pulse",
+      );
     });
 
     it("pulses while the parent is loading", async () => {
