@@ -1,5 +1,6 @@
 import ListItem from "../ListItem.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
@@ -270,6 +271,24 @@ describe("ListItem", () => {
       const metadataItems = wrapper.findAll("[class*='w-full'] > div");
       expect(metadataItems.length).toBeGreaterThan(0);
       expect(metadataItems[0].attributes("style")).toBeFalsy();
+    });
+  });
+
+  describe("multilingual teaser metadata", () => {
+    it("scopes each row's translations to its own entity, not the page form", () => {
+      // otherwise switching the page entity's locale overwrites every row
+      const wrapper = shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "WBI-1",
+          teaserMetadata: [{ key: "name", isMultilingual: true, value: [] }],
+        },
+      });
+
+      const wrappers = wrapper.findAllComponents(MultilingualWrapper);
+      expect(wrappers.length).toBeGreaterThan(0);
+      for (const multilingual of wrappers)
+        expect(multilingual.props("formId")).toBe("WBI-1");
     });
   });
 

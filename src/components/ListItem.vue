@@ -60,7 +60,7 @@
         >
           <MultilingualWrapper
             :metadata="metadataItem"
-            :form-id="formId"
+            :form-id="intialValues?.id || itemId"
             :hide-selector="true"
           >
             <template #default="{ localizedMetadata }">
@@ -178,9 +178,10 @@
             : {}
         "
       >
+        <!-- the row's own entity, so the page form's locale/translations never leak in -->
         <MultilingualWrapper
           :metadata="metadataItem"
-          :form-id="formId || 'listview'"
+          :form-id="intialValues?.id || itemId || 'listview'"
           :hide-selector="true"
         >
           <template #default="{ localizedMetadata }">
