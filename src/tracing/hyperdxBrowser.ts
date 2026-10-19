@@ -1,4 +1,5 @@
 import HyperDX from "@hyperdx/browser";
+import { captureConsole } from "@/tracing/consoleCapture";
 import type {
   BrowserTracing,
   BrowserTracingSettings,
@@ -22,6 +23,7 @@ export const startBrowserTracing = ({
   attributes,
 }: BrowserTracingSettings): BrowserTracing => {
   const traces = onThisOrigin(tracesUrl);
+  const consoleBeforeInit = { warn: console.warn, error: console.error };
   HyperDX.init({
     apiKey: apiKey ?? "",
     service: serviceName,
@@ -35,10 +37,24 @@ export const startBrowserTracing = ({
       new RegExp(`^${escapeRegExp(window.location.origin)}/api/`),
       /^\/api\//,
     ],
-    consoleCapture: true,
+    // HyperDX's console capture JSON-stringifies every argument, and a Vue
+    // warning carrying a component freezes the tab: see captureConsole below
+    consoleCapture: false,
     advancedNetworkCapture: false,
     // the session replay shows the screens, never what was typed
     maskAllInputs: true,
+  });
+  // Console warnings and errors as HyperDX's console spans, with the arguments
+  // reduced to short text. console.error goes back to its unpatched self, past
+  // HyperDX's error capture (which stringifies them too); uncaught errors and
+  // rejections still reach that.
+  captureConsole(console, consoleBeforeInit, (level, message, error) => {
+    HyperDX.addAction(`console.${level}`, {
+      component: "console",
+      level,
+      message,
+    });
+    if (error) HyperDX.recordException(error);
   });
   const session = {
     ...(sessionId ? { session_id: sessionId } : {}),
