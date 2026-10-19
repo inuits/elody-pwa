@@ -77,8 +77,14 @@ describe("BulkOperationsActionsBar", () => {
     );
   });
 
-  it("keeps the live region mounted but empty without a selection", () => {
-    expect(getWrapper().find('[role="status"]').text()).toBe("");
+  it("says nothing is selected yet, like the aicap UI kit", () => {
+    expect(getWrapper().find('[role="status"]').text()).toBe(
+      "bulk-operations.nothing-selected",
+    );
+  });
+
+  it("puts the actions right after the selection label, not at the far right", () => {
+    expect(getWrapper().find(".ml-auto").exists()).toBe(false);
   });
 
   it("sits in the list's results band without a surface of its own", () => {

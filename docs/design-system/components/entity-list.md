@@ -9,7 +9,10 @@ The query-driven result list (table, list, grid). Implemented by
 to bottom:
 1. The results band (`data-cy="list-header"`, `--color-surface-panel-header`,
    `--list-band-pad`, hairline below): count chip, pager
-   ([pagination](./pagination.md)), view-mode switch, page size, sort
+   ([pagination](./pagination.md)), view-mode switch (`BaseToggleGroup`: one
+   bordered capsule, `--view-switch-size` icon buttons named "List view",
+   "Map view"…, `aria-pressed`, active in accent wash + accent ink), page
+   size, sort
    ("Order by" select + one direction toggle button) and simple search; it
    wraps when narrow.
 2. The [selection bar](./selection-bar.md) row.

@@ -1,31 +1,62 @@
 <template>
-  <div class="flex w-fit h-fit rounded bg-background-light select-none">
-    <BaseToggle
-      class="m-0.5"
+  <!-- View switch: one segmented capsule like the band's other controls;
+       the active view in accent wash. -->
+  <div
+    role="group"
+    :aria-label="$t('library.view-mode')"
+    class="flex w-fit h-fit border border-border-default rounded-input bg-surface overflow-hidden select-none"
+  >
+    <BaseTooltip
       v-for="(toggle, index) in toggles"
       :key="index"
-      v-model="toggle.isOn"
-      :icon-on="toggle.iconOn"
-      :icon-off="toggle.iconOff"
-      :is-part-of-toggle-group="true"
-      @turn-all-toggles-in-group-off="turnAllTogglesOff"
-    />
+      position="bottom"
+      :tooltip-offset="8"
+    >
+      <template #activator="{ on, describedBy }">
+        <button
+          v-on="on"
+          type="button"
+          class="flex items-center justify-center size-(--view-switch-size) cursor-pointer"
+          :class="
+            toggle.isOn
+              ? 'bg-accent-wash text-accent-ink'
+              : 'text-text-secondary hover:bg-surface-row-hover'
+          "
+          :aria-label="toggle.label ? $t(toggle.label) : undefined"
+          :aria-describedby="describedBy"
+          :aria-pressed="toggle.isOn ? 'true' : 'false'"
+          @click="select(index)"
+        >
+          <unicon
+            :name="Unicons[toggle.isOn ? toggle.iconOn : toggle.iconOff].name"
+            height="18"
+          />
+        </button>
+      </template>
+      <span v-if="toggle.label">{{ $t(toggle.label) }}</span>
+    </BaseTooltip>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { DamsIcons } from "@/generated-types/queries";
-import BaseToggle from "@/components/base/BaseToggle.vue";
+import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import { Unicons } from "@/types";
 import { onMounted, ref, watch, type Ref } from "vue";
 
 const props = defineProps<{
-  toggles: { isOn: Ref<boolean>; iconOn: DamsIcons; iconOff: DamsIcons }[];
+  toggles: {
+    isOn: Ref<boolean>;
+    iconOn: DamsIcons;
+    iconOff: DamsIcons;
+    label?: string;
+  }[];
 }>();
 
 const toggles = ref(props.toggles);
 
-const turnAllTogglesOff = () => {
-  for (const toggle of toggles.value) toggle.isOn = false;
+const select = (index: number) => {
+  toggles.value.forEach((toggle, i) => (toggle.isOn = i === index));
 };
 
 const onlyHaveOneToggleTurnedOn = () => {
@@ -37,10 +68,10 @@ const onlyHaveOneToggleTurnedOn = () => {
 onMounted(() => onlyHaveOneToggleTurnedOn());
 watch(toggles, () => onlyHaveOneToggleTurnedOn());
 watch(
-  () => props.toggles, 
-  () => { 
-    toggles.value = props.toggles 
-  }, 
-  { deep: true }
+  () => props.toggles,
+  () => {
+    toggles.value = props.toggles;
+  },
+  { deep: true },
 );
 </script>

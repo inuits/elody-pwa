@@ -13,7 +13,9 @@ use the row's split button or "Actions" menu ([menu](./menu.md)).
 A row of its own under the list's results band, inside the results panel
 ([entity list](./entity-list.md)): `--list-band-pad` sides, hairline below,
 no surface of its own. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
-- Left: the bold selection count ("Selection: 2", hidden at 0) and, when
+- Left: the selection count, bold ("Selection: 2"), or muted "Selection:
+  nothing selected" at 0 (`bulk-operations.nothing-selected`); then the
+  actions right after it (not pushed right). When
   selected items sit on other pages, a note ("3 selected on other pages")
   with a "Clear selection" link (label ink, `--text-label`, underlined).
   Selecting or clearing the page is the list header's checkbox, so there is

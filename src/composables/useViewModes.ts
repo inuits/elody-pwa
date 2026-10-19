@@ -13,6 +13,8 @@ export type ViewModeToggle = {
   isOn: Ref<boolean>;
   iconOn: DamsIcons;
   iconOff: DamsIcons;
+  // i18n key naming the view for the switch's buttons
+  label: string;
 };
 
 export type UseViewModesOptions = {
@@ -113,12 +115,14 @@ export const useViewModes = (options: UseViewModesOptions) => {
           isOn: displayList,
           iconOn: DamsIcons.ListUl,
           iconOff: DamsIcons.ListUl,
+          label: "library.view-modes.list",
         });
       } else if (viewMode === ViewModes.ViewModesGrid) {
         newToggles.push({
           isOn: displayGrid,
           iconOn: DamsIcons.Apps,
           iconOff: DamsIcons.Apps,
+          label: "library.view-modes.grid",
         });
       } else if (viewMode === ViewModes.Table) {
         if (hasMixedTeaserMetadata.value) {
@@ -132,6 +136,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
             isOn: displayTable,
             iconOn: DamsIcons.Table,
             iconOff: DamsIcons.Table,
+            label: "library.view-modes.table",
           });
         }
       } else if (viewMode === ViewModes.ViewModesMedia) {
@@ -139,12 +144,14 @@ export const useViewModes = (options: UseViewModesOptions) => {
           isOn: displayPreview,
           iconOn: DamsIcons.Image,
           iconOff: DamsIcons.Image,
+          label: "library.view-modes.media",
         });
       } else if (viewMode === ViewModes.ViewModesMap) {
         newToggles.push({
           isOn: displayMap,
           iconOn: DamsIcons.Map,
           iconOff: DamsIcons.Map,
+          label: "library.view-modes.map",
         });
       } else if (viewMode === ViewModes.ViewModesPipeline) {
         // No shared-teaser-metadata precondition here (unlike Table): mixed
@@ -153,6 +160,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
           isOn: displayPipeline,
           iconOn: DamsIcons.Sitemap,
           iconOff: DamsIcons.Sitemap,
+          label: "library.view-modes.pipeline",
         });
       }
     }

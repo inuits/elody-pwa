@@ -1240,6 +1240,16 @@ describe("BaseLibrary.vue select-all in the list header", () => {
     expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "ua");
     expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "b");
   });
+
+  it("tells the rows to re-read their checkboxes after clearing the page", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    bulkMocks.trigger.mockClear();
+
+    wrapper.findComponent(ViewModesList).vm.$emit("togglePageSelection", false);
+
+    expect(bulkMocks.trigger).toHaveBeenCalledWith(undefined);
+  });
 });
 
 describe("BaseLibrary.vue create action placement", () => {

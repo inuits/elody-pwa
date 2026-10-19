@@ -8,13 +8,16 @@
     :aria-label="t('bulk-operations.selection-toolbar')"
     class="flex flex-wrap items-center gap-(--selection-bar-gap) text-ui"
   >
-    <!-- Mounted while empty, so screen readers announce the first selection. -->
-    <span role="status" class="font-bold">{{
+    <!-- Always mounted, so screen readers announce selection changes. -->
+    <span
+      role="status"
+      :class="itemsSelected ? 'font-bold' : 'text-text-muted'"
+      >{{
       itemsSelected
         ? t("bulk-operations.selection-count", {
             count: getEnqueuedItemCount(context),
           })
-        : ""
+        : t("bulk-operations.nothing-selected")
     }}</span>
     <span
       v-if="offPageCount > 0"
@@ -35,7 +38,7 @@
     >
       {{ t("bulk-operations.clear-selection") }}
     </button>
-    <div class="flex items-center gap-(--selection-bar-gap) ml-auto">
+    <div class="flex items-center gap-(--selection-bar-gap)">
       <div
         v-if="showButton && useExtendedBulkOperations"
         class="flex justify-end w-fit"

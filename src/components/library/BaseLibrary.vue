@@ -1060,6 +1060,8 @@ const clearPageSelection = () => {
     dequeueItemForBulkProcessing(props.bulkOperationsContext, entity.uuid);
     dequeueItemForBulkProcessing(props.bulkOperationsContext, entity.id);
   }
+  // Row checkboxes re-read the store on this event, as after bulkSelect.
+  triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 
 const refetchEntities = async (
