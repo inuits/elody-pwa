@@ -81,6 +81,23 @@ describe("FiltersListItemPanel", () => {
       );
     });
 
+    it("rings the whole box on focus instead of the clipped inner input", () => {
+      const box = mountWith(two, "ContainsMatcher").find('[data-cy="filter-input-box"]');
+      expect(box.classes()).toEqual(
+        expect.arrayContaining([
+          "has-[input:focus-visible]:outline-(length:--focus-ring-width)",
+          "has-[input:focus-visible]:outline-(color:--color-focus-ring)",
+          "[&_input:not([type=checkbox])]:!outline-none",
+        ]),
+      );
+    });
+
+    it("sets the typed value at the catalogue's table size", () => {
+      expect(
+        mountWith(two, "ContainsMatcher").find('[data-cy="filter-input-box"]').classes(),
+      ).toContain("[&_input:not([type=checkbox])]:!text-table");
+    });
+
     it("keeps the filled clear button beside the box", () => {
       const wrapper = mountWith(two, "ContainsMatcher");
       expect(

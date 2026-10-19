@@ -18,7 +18,7 @@
         :data-cy="inlineMode ? 'filter-input-box' : undefined"
         :class="
           inlineMode
-            ? 'flex min-w-0 items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input:not([type=checkbox])]:!border-0 [&_input:not([type=checkbox])]:!bg-transparent [&_input:not([type=checkbox])]:!shadow-none'
+            ? 'flex min-w-0 items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input:not([type=checkbox])]:!border-0 [&_input:not([type=checkbox])]:!bg-transparent [&_input:not([type=checkbox])]:!shadow-none [&_input:not([type=checkbox])]:!text-table [&_input:not([type=checkbox])]:!rounded-none [&_input:not([type=checkbox])]:!outline-none has-[input:focus-visible]:outline-solid has-[input:focus-visible]:outline-(length:--focus-ring-width) has-[input:focus-visible]:outline-(color:--color-focus-ring) has-[input:focus-visible]:outline-offset-(length:--focus-ring-offset)'
             : 'contents'
         "
       >
@@ -27,7 +27,7 @@
           data-cy="filter-matcher-dropdown"
           :class="
             inlineMode
-              ? 'shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block'
+              ? 'shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!rounded-none [&_.control]:!bg-transparent [&_.control]:!rounded-none [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block'
               : 'col-start-1 row-start-1 self-start justify-self-start max-h-9'
           "
           :model-value="selectedMatcher"
