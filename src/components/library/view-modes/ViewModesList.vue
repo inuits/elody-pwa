@@ -22,22 +22,21 @@
         ]"
       >
         <!-- entity-list-element.md: list mode gets a column-header row when
-             every row shares its fields. Labels sit over the measured cells
-             of the first row; the cells keep theirs for screen readers. -->
-        <div
-          v-if="columnLabels"
-          ref="listHeader"
-          data-cy="list-column-header"
-          aria-hidden="true"
-          class="relative h-(--list-header-height) border-b border-border-faint text-label font-bold text-text-field-label"
-        >
-          <span
-            v-for="(label, idx) in columnLabels"
-            :key="idx"
-            class="absolute top-1/2 -translate-y-1/2 truncate"
-            :style="headerCellStyles[idx]"
-            >{{ label ? t(label) : "" }}</span
-          >
+             every row shares its fields. -->
+        <div v-if="columnLabels" ref="listHeader">
+          <ListColumnHeader
+            :labels="columnLabels"
+            :cell-styles="headerCellStyles"
+            :checkbox-style="headerCheckboxStyle"
+            :selectable="
+              enableSelection &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
+            :all-selected="pageIsSelected"
+            @toggle-page-selection="
+              (selected) => emit('togglePageSelection', selected)
+            "
+          />
         </div>
         <div v-if="Array.isArray(relations)">
           <div
@@ -190,10 +189,11 @@ import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
 import { computed, nextTick, onBeforeUnmount, ref, unref, watch } from "vue";
-import { useI18n } from "vue-i18n";
 import { useEditMode } from "@/composables/useEdit";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { sharedColumnLabels } from "@/components/library/view-modes/composables/sharedColumnLabels";
+import ListColumnHeader from "@/components/library/view-modes/ListColumnHeader.vue";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
@@ -253,6 +253,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
+  (event: "togglePageSelection", selected: boolean): void;
 }>();
 
 const refEntities = ref<Entity[]>(props.entities);
@@ -396,7 +397,6 @@ const processedEntities = computed(() => {
   });
 });
 
-const { t } = useI18n();
 const { getEntityUuid } = useEntitySingle();
 const editHelper = useEditMode(getEntityUuid() || "");
 
@@ -411,18 +411,43 @@ const columnLabels = computed<string[] | undefined>(() => {
 // header follows the row layout (actions width, wrapping, multi-line).
 const listHeader = ref<HTMLElement>();
 const headerCellStyles = ref<Record<string, string>[]>([]);
+const headerCheckboxStyle = ref<Record<string, string>>();
 const measureHeader = () => {
   const header = listHeader.value;
-  const cells = header?.parentElement?.querySelector(
-    '[data-cy="list-item-content"]',
-  )?.children;
+  const firstRow = header?.parentElement?.querySelector('[data-cy="list-item"]');
+  const cells = firstRow?.querySelector('[data-cy="list-item-content"]')?.children;
   if (!header || !cells) return;
   const left = header.getBoundingClientRect().left;
   headerCellStyles.value = [...cells].map((cell) => {
     const box = cell.getBoundingClientRect();
     return { left: `${box.left - left}px`, width: `${box.width}px` };
   });
+  // Line the select-all box up with the rows' boxes.
+  const rowBox = firstRow?.querySelector("input[type=checkbox]");
+  const headerRoot = header.querySelector('[data-cy="list-column-header"]')
+    ?.firstElementChild as HTMLElement | null | undefined;
+  const headerBox = headerRoot?.querySelector("input[type=checkbox]");
+  if (!rowBox || !headerRoot || !headerBox) return;
+  const inset =
+    headerBox.getBoundingClientRect().left -
+    headerRoot.getBoundingClientRect().left;
+  headerCheckboxStyle.value = {
+    left: `${rowBox.getBoundingClientRect().left - left - inset}px`,
+  };
 };
+
+const { isEnqueued } = useBulkOperations();
+const pageIsSelected = computed(
+  () =>
+    processedEntities.value.length > 0 &&
+    processedEntities.value
+      .filter((entity) => !entity.isDisabled)
+      .every(
+        (entity) =>
+          isEnqueued(props.bulkOperationsContext, entity.id) ||
+          isEnqueued(props.bulkOperationsContext, entity.originalEntity.uuid),
+      ),
+);
 const headerObserver =
   typeof ResizeObserver === "undefined"
     ? undefined

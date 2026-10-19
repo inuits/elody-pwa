@@ -312,6 +312,10 @@
             :entity-type="entityType"
             :show-current-entity-flow="showCurrentEntityFlow"
             @add-refetch-function-to-edit-state="syncEditStateCallbacks"
+            @toggle-page-selection="
+              (selected: boolean) =>
+                selected ? bulkSelect() : clearPageSelection()
+            "
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
             :open-preview-by-default="openPreviewByDefault"
             :primaryMediafileId="primaryMediafileId"
@@ -828,8 +832,11 @@ let paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>;
 let sortOptionsPromise: (entityType: Entitytyping) => Promise<void>;
 let customBulkOperationsPromise: () => Promise<void>;
 
-const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
-  useBulkOperations();
+const {
+  enqueueItemForBulkProcessing,
+  dequeueItemForBulkProcessing,
+  triggerBulkSelectionEvent,
+} = useBulkOperations();
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm, createForm, deleteForm } =
   useFormHelper();
@@ -1041,6 +1048,14 @@ const bulkSelect = (items = entities.value) => {
     }
   }
   triggerBulkSelectionEvent(props.bulkOperationsContext);
+};
+
+// The header's select-all, unticked. Rows enqueue by id, bulkSelect by uuid.
+const clearPageSelection = () => {
+  for (const entity of props.predefinedEntities ?? entities.value) {
+    dequeueItemForBulkProcessing(props.bulkOperationsContext, entity.uuid);
+    dequeueItemForBulkProcessing(props.bulkOperationsContext, entity.id);
+  }
 };
 
 const refetchEntities = async (

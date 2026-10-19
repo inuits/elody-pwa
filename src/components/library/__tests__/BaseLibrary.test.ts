@@ -118,10 +118,16 @@ vi.mock("@/composables/useMaps", () => ({
   useMaps: () => ({ getBasicMapProperties: vi.fn(() => ({ mapType: "" })) }),
 }));
 
+const bulkMocks = vi.hoisted(() => ({
+  enqueue: vi.fn(),
+  dequeue: vi.fn(),
+  trigger: vi.fn(),
+}));
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({
-    enqueueItemForBulkProcessing: vi.fn(),
-    triggerBulkSelectionEvent: vi.fn(),
+    enqueueItemForBulkProcessing: bulkMocks.enqueue,
+    dequeueItemForBulkProcessing: bulkMocks.dequeue,
+    triggerBulkSelectionEvent: bulkMocks.trigger,
   }),
   BulkOperationsContextEnum: {
     EntityElementListEntityPickerModal: "EntityElementListEntityPickerModal",
@@ -1195,5 +1201,43 @@ describe("BaseLibrary.vue list header count chip", () => {
     await flushPromises();
 
     expect(wrapper.findComponent(ResultCountChip).exists()).toBe(false);
+  });
+});
+
+describe("BaseLibrary.vue select-all in the list header", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [
+      { id: "a", uuid: "ua", teaserMetadata: {}, intialValues: {} },
+      { id: "b", uuid: "ub", teaserMetadata: {}, intialValues: {} },
+    ] as any;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("selects the page", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    wrapper.findComponent(ViewModesList).vm.$emit("togglePageSelection", true);
+
+    expect(bulkMocks.enqueue).toHaveBeenCalledTimes(2);
+  });
+
+  it("clears the page", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    wrapper.findComponent(ViewModesList).vm.$emit("togglePageSelection", false);
+
+    expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "ua");
+    expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "b");
   });
 });

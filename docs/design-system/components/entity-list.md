@@ -42,9 +42,12 @@ border, `--radius-card`, no shadow.
   line; other fields are hidden. Labels stay for screen readers only.
 
 ### Column-header row (list mode)
-When every row on the page has the same fields, list mode shows one header
-row (`--list-header-height`, `--text-label`, bold, `--color-text-field-label`,
-hairline below) and the cells drop their visible labels
+When every row on the page has the same fields, list mode shows one sticky
+header row (`ListColumnHeader.vue`; `--list-header-height`, `--text-label`,
+bold, `--color-text-field-label`, `--color-surface`, hairline below) with a
+select-all checkbox (named "Select page"; ticks when every row on the page
+is selected; unticking clears the page), the field labels and "Actions"
+on the right and the cells drop their visible labels
 (`ListItem` `hideLabels`; the labels stay for screen readers, the header is
 `aria-hidden`). Each label is placed over the first row's measured cell, so
 it follows the row layout (actions width, wrapping, multi-line, preview
