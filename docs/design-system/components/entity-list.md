@@ -4,15 +4,20 @@ The query-driven result list (table, list, grid). Implemented by
 `src/components/library/BaseLibrary.vue` and its view modes.
 
 ## Header
-One results band above the list (`data-cy="list-header"`,
-`templates/elody-list-screen`): count chip, pager
-([pagination](./pagination.md)), view-mode switch, page size, sort, simple
-search and the [selection bar](./selection-bar.md), wrapping onto a second
-line when narrow. Main and preview lists draw it as a band:
-`--color-surface-panel-header`, 1px `--color-border-panel`, `--radius-card`,
-`--list-band-pad`. Compact relation lists keep a plain row (it may hold only
+`ui_kits/clients` (aicap): one white results panel (`data-cy="results-panel"`,
+`--color-surface`, 1px `--color-border-panel`, `--radius-card`) holding, top
+to bottom:
+1. The results band (`data-cy="list-header"`, `--color-surface-panel-header`,
+   `--list-band-pad`, hairline below): count chip, pager
+   ([pagination](./pagination.md)), view-mode switch, page size, sort
+   ("Order by" select + one direction toggle button) and simple search; it
+   wraps when narrow.
+2. The [selection bar](./selection-bar.md) row.
+3. The list, with its sticky column-header row.
+
+Compact relation lists keep a plain row without the panel (it may hold only
 a pager). A disabled library bar hides the count, view modes, page size and
-sort; the pager and the selection bar stay.
+sort; the pager stays.
 
 ### Count chip
 `src/components/library/ResultCountChip.vue`. The single source of the list

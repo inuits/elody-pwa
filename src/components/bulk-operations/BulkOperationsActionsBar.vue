@@ -66,7 +66,7 @@
             v-if="bulkOperations !== undefined && auth.isAuthenticated.value"
             v-model="selectedBulkOperation"
             @update:modelValue="handleSelectedBulkOperation"
-            :options="bulkOperations"
+            :options="barOperations"
             :items-selected="itemsSelected"
             :selected-items="getEnqueuedItems(context)"
             :entity-type="entityType"
@@ -77,6 +77,28 @@
         </div>
       </div>
     </div>
+    <!-- ui_kits/clients: the page's create action is a pill next to the page
+         title (TheHeader), not part of the selection bar. -->
+    <Teleport
+      v-if="createInPageHeader && auth.isAuthenticated.value"
+      defer
+      to="#page-header-create"
+    >
+      <BaseButtonNew
+        v-for="option in createOperations"
+        :key="option.value"
+        data-cy="page-header-create"
+        class="!w-auto !rounded-pill"
+        button-style="primary"
+        button-size="sm"
+        :icon="option.icon ?? DamsIcons.PlusCircle"
+        :label="t(option.label)"
+        @click="
+          selectedBulkOperation = option;
+          handleSelectedBulkOperation(option);
+        "
+      />
+    </Teleport>
   </div>
 </template>
 
@@ -94,7 +116,12 @@ import {
   type BulkOperationsActionsBarEmits,
   type BulkOperationsActionsBarProps,
 } from "@/composables/useBulkOperationsActionsBar";
-import { DamsIcons, type Entitytyping } from "@/generated-types/queries";
+import {
+  BulkOperationTypes,
+  DamsIcons,
+  type DropdownOption,
+  type Entitytyping,
+} from "@/generated-types/queries";
 import { auth } from "@/main";
 
 const props = withDefaults(
@@ -114,6 +141,8 @@ const props = withDefaults(
     excludePagination?: boolean;
     showPagination?: boolean;
     isLoading?: boolean;
+    // The page's own library: its create action goes to the page header.
+    createInPageHeader?: boolean;
     // Ids on the visible page, to tell selected items on other pages apart.
     pageItemIds?: string[];
   }>(),
@@ -176,6 +205,17 @@ const {
   parentEntity,
 );
 
+const isCreate = (option: DropdownOption) =>
+  option.value === BulkOperationTypes.CreateEntity;
+const createOperations = computed<DropdownOption[]>(() =>
+  props.createInPageHeader ? (bulkOperations.value ?? []).filter(isCreate) : [],
+);
+const barOperations = computed<DropdownOption[] | undefined>(() =>
+  props.createInPageHeader
+    ? bulkOperations.value?.filter((option) => !isCreate(option))
+    : bulkOperations.value,
+);
+
 // Lists without bulk actions would otherwise show an empty bordered bar.
 const hasContent = computed<boolean>(
   () =>
@@ -184,7 +224,7 @@ const hasContent = computed<boolean>(
       ((hasBulkOperationsWithItemsSelection.value && props.enableSelection) ||
         (props.showButton &&
           (props.confirmSelectionButton ||
-            (bulkOperations.value?.length ?? 0) > 0)))),
+            (barOperations.value?.length ?? 0) > 0)))),
 );
 
 const offPageCount = computed<number>(() =>

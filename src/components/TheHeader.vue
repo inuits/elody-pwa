@@ -3,6 +3,9 @@
     class="z-header flex items-center mx-6 my-8 px-6 py-4 rounded-3xl bg-background-light flex-wrap min-[1400px]:flex-nowrap"
   >
     <BreadCrumbs />
+    <!-- The page's create action, teleported in by its main list
+         (ui_kits/clients: a pill next to the title). -->
+    <div id="page-header-create" class="flex items-center ml-4 empty:hidden" />
     <MetadataEditButton
       class="ml-0 min-[880px]:ml-6"
       v-if="showEditMetadataButton"
@@ -51,14 +54,12 @@ import HeaderContextMenuActions from "@/components/HeaderContextMenuActions.vue"
 import HistoryButton from "@/components/HistoryButton.vue";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { auth } from "@/main";
-import { usePageStatus } from "@/composables/usePageStatus";
 import type { EntityButtonConfig, ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
 
 const route = useRoute();
 const router = useRouter();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
-const { pageStatus } = usePageStatus();
 const {
   actions: contextMenuActions,
   hasEditMetadataButton: configEditMetadataButton,

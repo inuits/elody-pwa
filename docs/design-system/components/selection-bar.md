@@ -10,9 +10,9 @@ Above every list that supports selection. Not for single-row actions: those
 use the row's split button or "Actions" menu ([menu](./menu.md)).
 
 ## Anatomy
-No surface of its own: it sits in the list's results band
-([entity list](./entity-list.md)), after sort, and fills the rest of the
-row. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
+A row of its own under the list's results band, inside the results panel
+([entity list](./entity-list.md)): `--list-band-pad` sides, hairline below,
+no surface of its own. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
 - Left: the bold selection count ("Selection: 2", hidden at 0), a note when selected items sit on
   other pages ("3 selected on other pages"), and the "Clear selection" and
   "Select page" links: real buttons in label ink, `--text-label`, underlined.
@@ -23,6 +23,10 @@ row. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
   Never a bare ⋮. Bulk options with `tone: Danger` sort last in the menu, in
   danger ink.
 - Picker contexts swap the row for the commit-teal "Confirm selection".
+- The page's own list (not a relation list or search) moves its
+  `createEntity` action out of the bar into a primary pill next to the page
+  title (`TheHeader` `#page-header-create`, via `Teleport`), as in
+  `ui_kits/clients`. It fires the same bulk-operation handler.
 
 ## States
 Hidden (`v-show`) when it has nothing to offer: no selection, no "Select

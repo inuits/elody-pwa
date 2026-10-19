@@ -177,6 +177,11 @@
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
             class="px-(--list-band-pad) py-2 border-b border-border-subtle"
+            :create-in-page-header="
+              ownsRouteState &&
+              !isSearchLibrary &&
+              props.parentEntityIdentifiers.length === 0
+            "
             :context="bulkOperationsContext"
             :use-extended-bulk-operations="!isSearchLibrary"
             :show-button="showButton"

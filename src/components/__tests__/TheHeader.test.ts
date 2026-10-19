@@ -80,6 +80,14 @@ describe("TheHeader context menu", () => {
     mockHasRoute.mockReturnValue(true);
   });
 
+  it("offers a spot next to the title for the page's create action", () => {
+    const html = mountHeader().html();
+    expect(html.indexOf('id="page-header-create"')).toBeGreaterThan(-1);
+    expect(html.indexOf("bread-crumbs-stub")).toBeLessThan(
+      html.indexOf('id="page-header-create"'),
+    );
+  });
+
   it("renders HeaderContextMenuActions when on a single-entity page with configured actions", () => {
     mockEntityPageConfig.actions.value = [refreshAction];
 

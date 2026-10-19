@@ -1241,3 +1241,37 @@ describe("BaseLibrary.vue select-all in the list header", () => {
     expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "b");
   });
 });
+
+describe("BaseLibrary.vue create action placement", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const createInPageHeader = (props: Record<string, unknown>) =>
+    getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      enableBulkOperations: true,
+      ...props,
+    })
+      .findComponent({ name: "BulkOperationsActionsBar" })
+      .props("createInPageHeader");
+
+  it("sends the page's own library's create action to the page header", () => {
+    expect(createInPageHeader({})).toBe(true);
+  });
+
+  it("keeps a relation list's create in its own bar", () => {
+    expect(createInPageHeader({ parentEntityIdentifiers: ["parent"] })).toBe(
+      false,
+    );
+  });
+});

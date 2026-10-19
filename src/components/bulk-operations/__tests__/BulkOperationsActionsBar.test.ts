@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   selected: [] as { id: string }[],
   dequeueAll: vi.fn(),
   operations: [] as unknown[],
+  handle: vi.fn(),
   hasSelectionOperations: true,
 }));
 
@@ -28,7 +29,7 @@ vi.mock("@/composables/useBulkOperationsActionsBar", () => ({
     itemsSelected: ref(mocks.selected.length > 0),
     subDropdownOptions: ref([]),
     clearSubDropdownOptions: vi.fn(),
-    handleSelectedBulkOperation: vi.fn(),
+    handleSelectedBulkOperation: mocks.handle,
     getEnqueuedItemCount: () => mocks.selected.length,
     getEnqueuedItems: () => mocks.selected,
     dequeueAllItemsForBulkProcessing: mocks.dequeueAll,
@@ -156,5 +157,60 @@ describe("BulkOperationsActionsBar", () => {
     await selectPage!.trigger("click");
 
     expect(wrapper.emitted("selectPage")).toHaveLength(1);
+  });
+
+  describe("create in the page header", () => {
+    const create = {
+      value: "createEntity",
+      label: "navigation.create-inscription",
+      primary: true,
+    };
+    const exportXlsx = { value: "exportXlsx", label: "bulk-operations.export" };
+
+    beforeEach(() => {
+      mocks.operations = [create, exportXlsx];
+    });
+
+    const mountBar = (createInPageHeader: boolean) =>
+      mount(BulkOperationsActionsBar, {
+        props: {
+          context: "home" as any,
+          useExtendedBulkOperations: true,
+          entityType: "inscription" as Entitytyping,
+          refetchEntities: () => {},
+          selectedPaginationLimitOption: 20,
+          excludePagination: true,
+          createInPageHeader,
+        },
+        global: {
+          stubs: {
+            ActionMenuGroup: true,
+            BaseTooltip: true,
+            Unicon: true,
+            teleport: true,
+          },
+          mocks: { $t: (key: string) => key },
+        },
+      });
+
+    it("moves the create action out of the bar into a page-header pill", async () => {
+      const wrapper = mountBar(true);
+      const pill = wrapper.find('[data-cy="page-header-create"]');
+
+      expect(pill.text()).toBe("navigation.create-inscription");
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([exportXlsx]);
+      await pill.trigger("click");
+      expect(mocks.handle).toHaveBeenCalledWith(create);
+    });
+
+    it("keeps create in the bar for other lists", () => {
+      const wrapper = mountBar(false);
+      expect(wrapper.find('[data-cy="page-header-create"]').exists()).toBe(false);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([create, exportXlsx]);
+    });
   });
 });
