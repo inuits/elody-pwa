@@ -82,6 +82,9 @@
           :is="entity.componentTag"
           :to="entity.componentPath"
           :class="[
+            // A navigating row is a link: no link underline or colour on hover
+            // (the base a:hover rule); the row's own hover fill is enough.
+            'text-inherit hover:text-inherit hover:no-underline',
             mode === 'list' ? 'list-item-list' : 'list-item-grid',
             { 'list-item-list-multi-line': mode === 'list' && multiLine },
           ]"

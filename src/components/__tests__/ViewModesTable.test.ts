@@ -190,4 +190,15 @@ describe("ViewModesTable", () => {
       expect(rowIsLoading()).toBe(false);
     });
   });
+
+  it("keeps row text plain on hover: the row link gets no underline or link colour", async () => {
+    const wrapper = shallowMount(ViewModesTable, {
+      props: { entities: [{ id: "entity1" }], mode: "list" } as any,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(".list-item-table").classes()).toEqual(
+      expect.arrayContaining(["hover:no-underline", "text-inherit", "hover:text-inherit"]),
+    );
+  });
 });

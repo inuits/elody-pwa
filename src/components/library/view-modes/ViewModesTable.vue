@@ -62,7 +62,7 @@
             v-if="entity"
             :is="entity.componentTag"
             :to="entity.componentPath"
-            class="list-item-table"
+            class="list-item-table text-inherit hover:text-inherit hover:no-underline"
             @click="
               () => {
                 if (actionOnClick === ActionOnClick.OpenInModal)

@@ -293,4 +293,15 @@ describe("ViewModesList", () => {
       expect(wrapper.vm.processedEntities[0].memoKey).toContain(true);
     });
   });
+
+  it("keeps row text plain on hover: the row link gets no underline or link colour", async () => {
+    const wrapper = shallowMount(ViewModesList, {
+      props: { entities: [{ id: "entity1" }], mode: "list" } as any,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(".list-item-list").classes()).toEqual(
+      expect.arrayContaining(["hover:no-underline", "text-inherit", "hover:text-inherit"]),
+    );
+  });
 });

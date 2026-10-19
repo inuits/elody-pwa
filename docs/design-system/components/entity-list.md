@@ -67,7 +67,7 @@ open). Mixed lists and edit mode keep per-cell labels.
 
 | State | Cue |
 |---|---|
-| hover | `--color-surface-row-hover` fill |
+| hover | `--color-surface-row-hover` fill only; a navigating row is a link but its text keeps its colour and gets no underline (overrides the base `a:hover`) |
 | selected (checkbox) | `--color-accent-wash` + `--shadow-accent-row`; the checkbox owns the wash |
 | preview open | `--list-row-preview-border` left border in `--color-accent`, no wash; its eye is pressed |
 | last previewed (`keepLastActiveItemHighlighted`) | same left border, eye not pressed |
