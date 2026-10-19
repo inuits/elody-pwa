@@ -445,35 +445,43 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   return conversionFunction(value, details[1]);
 };
 
-export const convertBytesToHumanFormat = (bytesString: string): string => {
-  if (!bytesString) return "0 B";
-  const match = bytesString.trim().match(/^([0-9]*\.?[0-9]+)\s*([a-zA-Z]*)$/i);
-
-  if (!match) {
-    return "0 B";
-  }
-
-  const value = parseFloat(match[1]);
-  let unit = match[2].toUpperCase();
-
-  if (isNaN(value) || value <= 0) {
-    return "0 B";
-  }
-
-  if (unit === "" || unit === "BYTE" || unit === "BYTES" || unit === "b") {
-    unit = "B";
-  }
+export const convertBytesToHumanFormat = (
+  bytesInput: string | number
+): string => {
+  if (bytesInput == null || bytesInput === "") return "0 B";
 
   const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const unitIndex = sizes.indexOf(unit);
-
-  // If the unit is unrecognized, default to treating the value as raw bytes
-  const baseIndex = unitIndex !== -1 ? unitIndex : 0;
-
   const k = 1024;
-  const rawBytes = value * Math.pow(k, baseIndex);
+  let rawBytes: number;
 
-  // Calculate the new optimal unit index, clamping it within the bounds of the sizes array
+  // Handle direct numbers (like a MongoDB long returned as a JS number)
+  if (typeof bytesInput === "number") {
+    if (isNaN(bytesInput) || bytesInput <= 0) return "0 B";
+    rawBytes = bytesInput;
+  } else {
+    // Handle string parsing
+    const match = String(bytesInput).trim().match(/^([0-9]*\.?[0-9]+)\s*([a-zA-Z]*)$/i);
+
+    if (!match) return "0 B";
+
+    const value = parseFloat(match[1]);
+    let unit = match[2].toUpperCase();
+
+    if (isNaN(value) || value <= 0) return "0 B";
+
+    if (unit === "" || unit === "BYTE" || unit === "BYTES") {
+      unit = "B";
+    }
+
+    const unitIndex = sizes.indexOf(unit);
+    const baseIndex = unitIndex !== -1 ? unitIndex : 0;
+    
+    rawBytes = value * Math.pow(k, baseIndex);
+  }
+
+  // Format the raw bytes into a human-readable string
+  if (rawBytes === 0) return "0 B";
+
   const i = Math.max(0, Math.min(Math.floor(Math.log(rawBytes) / Math.log(k)), sizes.length - 1));
   const decimals = 2;
 
