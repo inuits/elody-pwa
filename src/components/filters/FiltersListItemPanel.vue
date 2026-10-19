@@ -13,7 +13,7 @@
         <AdvancedDropdown
           v-if="hasModes"
           data-cy="filter-matcher-dropdown"
-          class="shrink-0 max-w-[50%] border-r border-border-subtle bg-surface-muted text-hint"
+          class="shrink-0 max-w-[50%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--button-sm-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted"
           :model-value="selectedMatcher"
           :options="matchers"
           :label="defaultLabel"

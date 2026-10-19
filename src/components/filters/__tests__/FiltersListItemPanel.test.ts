@@ -64,6 +64,19 @@ describe("FiltersListItemPanel", () => {
       expect(box.find('[data-cy="matcher-input"]').exists()).toBe(true);
     });
 
+    it("draws the mode as a small muted prefix segment", () => {
+      const prefix = mountWith(two, "ContainsMatcher")
+        .find('[data-cy="filter-input-box"]')
+        .findComponent({ name: "AdvancedDropdown" });
+      expect(prefix.classes()).toEqual(
+        expect.arrayContaining([
+          "[--vs-font-size:var(--text-hint)]",
+          "[--vs-text-color:var(--color-text-muted)]",
+          "bg-surface-muted",
+        ]),
+      );
+    });
+
     it("keeps the filled clear button beside the box", () => {
       const wrapper = mountWith(two, "ContainsMatcher");
       expect(
