@@ -24,27 +24,16 @@
         t("bulk-operations.selected-on-other-pages", { count: offPageCount })
       }}</span
     >
+    <!-- The list header's checkbox selects/clears the page; this clears what
+         sits on other pages too. -->
     <button
-      v-if="itemsSelected"
+      v-if="offPageCount > 0"
       type="button"
       data-cy="selection-bar-link"
       class="text-label text-text-light underline cursor-pointer"
       @click="dequeueAllItemsForBulkProcessing(context)"
     >
       {{ t("bulk-operations.clear-selection") }}
-    </button>
-    <button
-      v-if="
-        useExtendedBulkOperations &&
-        hasBulkOperationsWithItemsSelection &&
-        enableSelection
-      "
-      type="button"
-      data-cy="selection-bar-link"
-      class="text-label text-text-light underline cursor-pointer"
-      @click="() => emit('selectPage')"
-    >
-      {{ $t("bulk-operations.select-page") }}
     </button>
     <div class="flex items-center gap-(--selection-bar-gap) ml-auto">
       <div
@@ -67,6 +56,7 @@
             v-model="selectedBulkOperation"
             @update:modelValue="handleSelectedBulkOperation"
             :options="barOperations"
+            :flat="true"
             :items-selected="itemsSelected"
             :selected-items="getEnqueuedItems(context)"
             :entity-type="entityType"
@@ -165,7 +155,6 @@ const { t } = useI18n();
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 
 const emit = defineEmits<{
-  (event: "selectPage"): void;
   (event: "selectAll"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (
@@ -191,7 +180,6 @@ const {
   bulkOperations,
   selectedBulkOperation,
   bulkOperationsPromiseIsResolved,
-  hasBulkOperationsWithItemsSelection,
   itemsSelected,
   subDropdownOptions,
   clearSubDropdownOptions,
@@ -221,10 +209,8 @@ const hasContent = computed<boolean>(
   () =>
     itemsSelected.value ||
     (props.useExtendedBulkOperations &&
-      ((hasBulkOperationsWithItemsSelection.value && props.enableSelection) ||
-        (props.showButton &&
-          (props.confirmSelectionButton ||
-            (barOperations.value?.length ?? 0) > 0)))),
+      props.showButton &&
+      (props.confirmSelectionButton || (barOperations.value?.length ?? 0) > 0)),
 );
 
 const offPageCount = computed<number>(() =>

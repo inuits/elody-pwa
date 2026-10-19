@@ -2,14 +2,34 @@
   <ContextMenuActionsShell
     ref="shell"
     class="!m-0"
-    :has-promoted-actions="primaryOption !== undefined"
+    :has-promoted-actions="
+      flat ? flatOptions.length > 0 : primaryOption !== undefined
+    "
     :has-overflow-actions="menuOptions.length > 0 || hasSubDropdownOptions"
-    :split="true"
+    :split="!flat"
     @open="clearSubDropdownOptions"
   >
     <template #promoted>
+      <!-- Flat (ui_kits/clients selection row): every action its own button,
+           disabled with its reason until it applies, destructive last. -->
+      <template v-if="flat">
+        <BaseButtonNew
+          v-for="option in flatOptions"
+          :key="option.value"
+          :class="{ '!text-danger-ink': isDanger(option) }"
+          button-style="secondary"
+          button-size="sm"
+          :disabled="!option.active"
+          :label="t(option.label, [entityTypeLabel])"
+          :aria-label="nameWithCount(option)"
+          :tooltip-label="tooltipFor(option)"
+          :icon="option.icon"
+          :force-show-label="true"
+          @click.stop="handleEmit(option)"
+        />
+      </template>
       <BaseButtonNew
-        v-if="primaryOption"
+        v-else-if="primaryOption"
         button-style="primary"
         button-size="sm"
         :disabled="!primaryOption.active || isMainActionDisabled"
@@ -74,6 +94,7 @@ import { auth } from "@/main";
 import { Unicons } from "@/types";
 import {
   dangerLast,
+  isDanger,
   toneStyle,
 } from "@/components/context-menu-actions/actionTone";
 import { determineActiveState } from "@/composables/useBulkOperationsActionsBar";
@@ -93,9 +114,12 @@ const props = withDefaults(
     parentEntityId?: string | undefined;
     subDropdownOptions?: DropdownOption[];
     clearSubDropdownOptions: () => void;
+    // Every action as its own button instead of a split button.
+    flat?: boolean;
   }>(),
   {
     isMainActionDisabled: false,
+    flat: false,
     itemsSelected: false,
     selectedItems: () => [],
     options: () => [],
@@ -156,8 +180,19 @@ const primaryOption = computed<DropdownOption | undefined>(
   () => primaryOptions.value[0],
 );
 
+const opensDropdown = (option: DropdownOption) =>
+  option.value === BulkOperationTypes.OpenDropdown;
+// Flat: actions that open a sub-menu stay behind the labelled "Actions" menu.
+const flatOptions = computed<DropdownOption[]>(() =>
+  dangerLast(
+    optionsWithActiveState.value.filter((option) => !opensDropdown(option)),
+  ),
+);
+
 const menuOptions = computed<DropdownOption[]>(() =>
-  dangerLast([...primaryOptions.value.slice(1), ...secondaryOptions.value]),
+  props.flat
+    ? optionsWithActiveState.value.filter(opensDropdown)
+    : dangerLast([...primaryOptions.value.slice(1), ...secondaryOptions.value]),
 );
 
 const shell = ref<InstanceType<typeof ContextMenuActionsShell>>();

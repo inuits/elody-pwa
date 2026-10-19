@@ -320,4 +320,77 @@ describe("ActionMenuGroup", () => {
       );
     });
   });
+
+  describe("flat (the list's selection row)", () => {
+    const action = (value: string, extra: Partial<DropdownOption> = {}) =>
+      ({
+        label: `bulk-operations.${value}`,
+        value,
+        actionContext: {
+          entitiesSelectionType: ActionContextEntitiesSelectionType.SomeSelected,
+          activeViewMode: [ActionContextViewModeTypes.ReadMode],
+          labelForTooltip: null,
+        },
+        ...extra,
+      }) as DropdownOption;
+
+    const mountFlat = (options: DropdownOption[], itemsSelected = false) =>
+      mount(ActionMenuGroup, {
+        props: {
+          options,
+          itemsSelected,
+          flat: true,
+          entityType: "Entitytyping" as Entitytyping,
+          clearSubDropdownOptions: () => {},
+        },
+      });
+
+    const buttons = (wrapper: ReturnType<typeof mountFlat>) =>
+      wrapper.findAllComponents({ name: "BaseButtonNew" });
+
+    it("shows every action as its own button, destructive last", async () => {
+      const wrapper = mountFlat([
+        action("delete", { tone: ActionTone.Danger }),
+        action("export"),
+        action("merge"),
+      ]);
+      await flushPromises();
+
+      expect(buttons(wrapper).map((b) => b.props("label"))).toEqual([
+        "bulk-operations.export",
+        "bulk-operations.merge",
+        "bulk-operations.delete",
+      ]);
+      expect(wrapper.find('[data-cy="split-button-chevron"]').exists()).toBe(
+        false,
+      );
+    });
+
+    it("disables selection actions until something is selected", async () => {
+      const idle = mountFlat([action("export")]);
+      const selecting = mountFlat([action("export")], true);
+      await flushPromises();
+
+      expect(buttons(idle)[0].props("disabled")).toBe(true);
+      expect(buttons(selecting)[0].props("disabled")).toBe(false);
+    });
+
+    it("marks a destructive action in danger ink", async () => {
+      const wrapper = mountFlat([action("delete", { tone: ActionTone.Danger })]);
+      await flushPromises();
+
+      expect(buttons(wrapper)[0].classes()).toContain("!text-danger-ink");
+    });
+
+    it("runs an action from its button", async () => {
+      const wrapper = mountFlat([action("export")], true);
+      await flushPromises();
+
+      await buttons(wrapper)[0].trigger("click");
+
+      expect(wrapper.emitted("update:modelValue")?.[0]?.[0]).toMatchObject({
+        value: "export",
+      });
+    });
+  });
 });

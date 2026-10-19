@@ -105,16 +105,14 @@ describe("BulkOperationsActionsBar", () => {
     expect(getWrapper().text()).not.toContain("bulk-operations.items");
   });
 
-  it("styles select page and clear selection as label links", () => {
-    mocks.selected = [{ id: "a" }];
-    const links = getWrapper().findAll('[data-cy="selection-bar-link"]');
+  it("has no Select page link: the list header's checkbox selects the page", () => {
+    expect(getWrapper().text()).not.toContain("bulk-operations.select-page");
+  });
 
-    expect(links).toHaveLength(2);
-    links.forEach((link) =>
-      expect(link.classes()).toEqual(
-        expect.arrayContaining(["text-label", "text-text-light", "underline"]),
-      ),
-    );
+  it("shows actions as separate buttons", () => {
+    expect(
+      getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
+    ).toBe(true);
   });
 
   it("notes selected items that sit on other pages", () => {
@@ -137,26 +135,21 @@ describe("BulkOperationsActionsBar", () => {
     ).toBe(false);
   });
 
-  it("clears the selection from a real button", async () => {
+  it("offers Clear selection only for items selected on other pages", async () => {
     mocks.selected = [{ id: "a" }];
-    const clear = getWrapper()
+    expect(getWrapper({ pageItemIds: ["a"] }).text()).not.toContain(
+      "bulk-operations.clear-selection",
+    );
+
+    mocks.selected = [{ id: "a" }, { id: "b" }];
+    const clear = getWrapper({ pageItemIds: ["a"] })
       .findAll("button")
       .find((button) => button.text() === "bulk-operations.clear-selection");
-
+    expect(clear!.classes()).toEqual(
+      expect.arrayContaining(["text-label", "text-text-light", "underline"]),
+    );
     await clear!.trigger("click");
-
     expect(mocks.dequeueAll).toHaveBeenCalled();
-  });
-
-  it("selects the page from a real button", async () => {
-    const wrapper = getWrapper();
-    const selectPage = wrapper
-      .findAll("button")
-      .find((button) => button.text() === "bulk-operations.select-page");
-
-    await selectPage!.trigger("click");
-
-    expect(wrapper.emitted("selectPage")).toHaveLength(1);
   });
 
   describe("create in the page header", () => {

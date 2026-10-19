@@ -202,7 +202,6 @@
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
-            @select-page="bulkSelect"
             @confirm-selection="
               (selection) => emit('confirmSelection', selection)
             "

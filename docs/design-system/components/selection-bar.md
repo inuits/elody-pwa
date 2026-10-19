@@ -13,15 +13,16 @@ use the row's split button or "Actions" menu ([menu](./menu.md)).
 A row of its own under the list's results band, inside the results panel
 ([entity list](./entity-list.md)): `--list-band-pad` sides, hairline below,
 no surface of its own. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
-- Left: the bold selection count ("Selection: 2", hidden at 0), a note when selected items sit on
-  other pages ("3 selected on other pages"), and the "Clear selection" and
-  "Select page" links: real buttons in label ink, `--text-label`, underlined.
-- Right: the same pattern as a row ([menu](./menu.md)). The first primary
-  (`primary`, or the active `primaryFallback`) is the split button's
-  primary; every other action, further primaries first, is in its menu. No
-  primary: the labelled "Actions ⌄" trigger. One action: a plain button.
-  Never a bare ⋮. Bulk options with `tone: Danger` sort last in the menu, in
-  danger ink.
+- Left: the bold selection count ("Selection: 2", hidden at 0) and, when
+  selected items sit on other pages, a note ("3 selected on other pages")
+  with a "Clear selection" link (label ink, `--text-label`, underlined).
+  Selecting or clearing the page is the list header's checkbox, so there is
+  no "Select page" link.
+- Right (`ActionMenuGroup` `flat`, `ui_kits/clients`): every action as its
+  own secondary sm button, disabled with its reason (tooltip) until it
+  applies, destructive (`tone: Danger`) last in danger ink. Actions that open
+  a sub-menu (`OpenDropdown`) stay behind the labelled "Actions ⌄" trigger.
+  Rows and other places keep the split button.
 - Picker contexts swap the row for the commit-teal "Confirm selection".
 - The page's own list (not a relation list or search) moves its
   `createEntity` action out of the bar into a primary pill next to the page
