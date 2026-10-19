@@ -433,6 +433,7 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
       Number(value) !== -1 ? `${Number(value) * 100}%` : "charging",
     VOLT: (value: string) => `${value} V`,
     PX: (value: string) => `${value}px`,
+    BYTES: (value: string) => convertBytesToHumanFormat(value),
   };
 
   const details = unit.split("_");
@@ -443,6 +444,42 @@ export const convertUnitToReadbleFormat = (unit: Unit, value: string) => {
   const conversionFunction = unitConversionTable[details[0] as string];
   return conversionFunction(value, details[1]);
 };
+
+export const convertBytesToHumanFormat = (bytesString: string): string => {
+  if (!bytesString) return "0 B";
+  const match = bytesString.trim().match(/^([0-9]*\.?[0-9]+)\s*([a-zA-Z]*)$/i);
+
+  if (!match) {
+    return "0 B";
+  }
+
+  const value = parseFloat(match[1]);
+  let unit = match[2].toUpperCase();
+
+  if (isNaN(value) || value <= 0) {
+    return "0 B";
+  }
+
+  if (unit === "" || unit === "BYTE" || unit === "BYTES" || unit === "b") {
+    unit = "B";
+  }
+
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const unitIndex = sizes.indexOf(unit);
+
+  // If the unit is unrecognized, default to treating the value as raw bytes
+  const baseIndex = unitIndex !== -1 ? unitIndex : 0;
+
+  const k = 1024;
+  const rawBytes = value * Math.pow(k, baseIndex);
+
+  // Calculate the new optimal unit index, clamping it within the bounds of the sizes array
+  const i = Math.max(0, Math.min(Math.floor(Math.log(rawBytes) / Math.log(k)), sizes.length - 1));
+  const decimals = 2;
+
+  return `${parseFloat((rawBytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
+};
+
 export const convertDateToReadbleFormat = (
   dateString: string,
   format: string,
