@@ -151,27 +151,18 @@ export const useBulkOperationsActionsBar = (
   );
   const entityType = computed(() => props.entityType || route.meta.entityType);
 
-  const hasBulkOperationsWithItemsSelection = computed<boolean>(() => {
-    const operationsWithContext = bulkOperations.value?.filter(
-      (item: DropdownOption) => {
-        if (!item.actionContext) return true;
-        return (
-          item.actionContext?.entitiesSelectionType ===
-          ActionContextEntitiesSelectionType.SomeSelected
-        );
-      },
-    );
-    const bulkOperationsWithoutCreation = bulkOperations.value?.filter(
-      (item: DropdownOption) => {
-        return item.value !== BulkOperationTypes.CreateEntity;
-      },
-    );
-    return (
-      (bulkOperationsWithoutCreation?.length > 0 &&
-        operationsWithContext?.length > 0) ||
-      false
-    );
-  });
+  // Is there an action that acts on a selection? Create never does; an
+  // action without a context does.
+  const hasBulkOperationsWithItemsSelection = computed<boolean>(
+    () =>
+      bulkOperations.value?.some(
+        (item: DropdownOption) =>
+          item.value !== BulkOperationTypes.CreateEntity &&
+          (!item.actionContext ||
+            item.actionContext.entitiesSelectionType ===
+              ActionContextEntitiesSelectionType.SomeSelected),
+      ) ?? false,
+  );
 
   const itemsSelected = computed<boolean>(
     () => getEnqueuedItemCount(props.context) > 0,

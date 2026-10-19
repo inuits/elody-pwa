@@ -17,7 +17,9 @@
         ? t("bulk-operations.selection-count", {
             count: getEnqueuedItemCount(context),
           })
-        : t("bulk-operations.nothing-selected")
+        : hasBulkOperationsWithItemsSelection && enableSelection
+          ? t("bulk-operations.nothing-selected")
+          : ""
     }}</span>
     <span
       v-if="offPageCount > 0"
@@ -184,6 +186,7 @@ const {
   selectedBulkOperation,
   bulkOperationsPromiseIsResolved,
   itemsSelected,
+  hasBulkOperationsWithItemsSelection,
   subDropdownOptions,
   clearSubDropdownOptions,
   handleSelectedBulkOperation,

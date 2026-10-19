@@ -77,6 +77,11 @@ describe("BulkOperationsActionsBar", () => {
     );
   });
 
+  it("says nothing about a selection when no action acts on one", () => {
+    mocks.hasSelectionOperations = false;
+    expect(getWrapper().find('[role="status"]').text()).toBe("");
+  });
+
   it("says nothing is selected yet, like the aicap UI kit", () => {
     expect(getWrapper().find('[role="status"]').text()).toBe(
       "bulk-operations.nothing-selected",
