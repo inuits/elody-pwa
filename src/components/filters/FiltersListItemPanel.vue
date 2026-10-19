@@ -1,24 +1,25 @@
 <template>
   <div
     data-cy="filters-list-item-panel"
-    class="flex flex-col gap-1.5 px-3 py-2 border-b border-border-faint bg-surface-group-form"
+    class="flex flex-col gap-1.5 px-3 py-2 border-b border-border-faint"
   >
     <!-- Catalogue TextFilter: the mode is a prefix inside the input box
          ("contains ▾ | value"); a single-matcher filter has no mode. Lists,
          two fields or a slider stack under the mode instead. One element
          tree for both forms: switching only changes classes, so the
          matcher is never remounted (it would refetch its options). -->
+    <!-- Grid: inline = [input box | ×]; stacked = [mode | ×] over the
+         matcher spanning both columns (the box wrapper becomes contents). -->
     <div
-      class="flex gap-1.5"
+      class="grid grid-cols-[1fr_auto] gap-1.5"
       :class="inlineMode ? 'items-stretch' : 'items-start'"
     >
       <div
         :data-cy="inlineMode ? 'filter-input-box' : undefined"
-        class="flex flex-1 min-w-0"
         :class="
           inlineMode
-            ? 'items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input:not([type=checkbox])]:!border-0 [&_input:not([type=checkbox])]:!bg-transparent [&_input:not([type=checkbox])]:!shadow-none'
-            : 'flex-col gap-1.5'
+            ? 'flex min-w-0 items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input:not([type=checkbox])]:!border-0 [&_input:not([type=checkbox])]:!bg-transparent [&_input:not([type=checkbox])]:!shadow-none'
+            : 'contents'
         "
       >
         <AdvancedDropdown
@@ -27,7 +28,7 @@
           :class="
             inlineMode
               ? 'shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block'
-              : 'self-start max-h-9'
+              : 'col-start-1 row-start-1 self-start justify-self-start max-h-9'
           "
           :model-value="selectedMatcher"
           :options="matchers"
@@ -36,12 +37,15 @@
           label-position="inline"
           @update:model-value="$emit('update:selected-matcher', $event)"
         />
-        <div class="flex-1 min-w-0">
+        <div
+          class="min-w-0"
+          :class="inlineMode ? 'flex-1' : 'col-span-2 row-start-2'"
+        >
           <slot v-if="selectedMatcher" />
         </div>
       </div>
       <BaseButtonNew
-        class="shrink-0"
+        class="shrink-0 col-start-2 row-start-1"
         :class="inlineMode ? '!w-auto !h-auto aspect-square' : '!w-8 h-8'"
         label=""
         :icon="DamsIcons.Cross"

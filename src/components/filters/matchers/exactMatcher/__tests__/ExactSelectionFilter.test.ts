@@ -222,3 +222,41 @@ describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
     expect(wrapper.emitted("updateValue")!.length).toBe(1);
   });
 });
+
+describe("ExactSelectionFilter while options load", () => {
+  const fetchingFilter = () =>
+    makeFilter({
+      options: [],
+      advancedFilterInputForRetrievingOptions: [
+        { type: AdvancedFilterTypes.Text, key: ["k"], value: "*", match_exact: false },
+      ],
+    });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.options.value = [];
+    mocks.loadOptionsAndFacetsInParallel.mockReturnValue(new Promise(() => {}));
+  });
+
+  it("shows three option-shaped skeleton rows (handoff), not a spinner", async () => {
+    const wrapper = getWrapper(fetchingFilter());
+    await flushPromises();
+
+    expect(wrapper.findAll('[data-cy="filter-options-skeleton"]')).toHaveLength(3);
+    expect(wrapper.findComponent({ name: "SpinnerLoader" }).exists()).toBe(false);
+  });
+
+  it("does not say there are no options while still loading", async () => {
+    const wrapper = getWrapper(fetchingFilter());
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain("filters.noOptionsAvailable");
+  });
+
+  it("counts as a list while loading, so the panel lays it out full width", async () => {
+    const wrapper = getWrapper(fetchingFilter());
+    await flushPromises();
+
+    expect((wrapper.vm as any).rendersList).toBe(true);
+  });
+});

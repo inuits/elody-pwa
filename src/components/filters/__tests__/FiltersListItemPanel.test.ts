@@ -28,6 +28,10 @@ describe("FiltersListItemPanel", () => {
     expect(panel().classes()).toContain("gap-1.5");
   });
 
+  it("sits on white, without a tinted background (aicap mockup)", () => {
+    expect(panel().classes()).not.toContain("bg-surface-group-form");
+  });
+
   it("closes the section with a faint bottom border", () => {
     expect(panel().classes()).toEqual(
       expect.arrayContaining(["border-b", "border-border-faint"]),
@@ -103,6 +107,16 @@ describe("FiltersListItemPanel", () => {
       });
       expect(wrapper.find('[data-cy="filter-input-box"]').exists()).toBe(false);
       expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
+    it("gives a stacked list the full panel width, the clear button on the mode row", () => {
+      const wrapper = shallowMount(FiltersListItemPanel, {
+        props: { matchers: two, selectedMatcher: "ExactAutoCompleteMatcher", defaultLabel: "", stacked: true },
+        slots: { default: '<input type="checkbox" data-cy="matcher-input" />' },
+      });
+      expect(
+        wrapper.find('[data-cy="matcher-input"]').element.parentElement!.className,
+      ).toContain("col-span-2");
     });
 
     it("stacks the mode above matchers with two fields or a slider", () => {

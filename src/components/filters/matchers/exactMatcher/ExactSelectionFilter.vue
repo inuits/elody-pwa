@@ -1,6 +1,16 @@
 <template>
-  <div v-if="isLoading" class="flex items-center justify-center">
-  <SpinnerLoader theme="accent" :dimensions="10" />
+  <!-- filter-panel.md: option-shaped skeleton rows while options load. -->
+  <div v-if="loading" aria-busy="true" class="flex flex-col gap-2 py-1">
+    <div
+      v-for="row in 3"
+      :key="row"
+      data-cy="filter-options-skeleton"
+      aria-hidden="true"
+      class="flex items-center gap-2"
+    >
+      <span class="size-4 shrink-0 rounded-chip bg-surface-sunken animate-pulse" />
+      <span class="h-3 flex-1 rounded-chip bg-surface-sunken animate-pulse" />
+    </div>
   </div>
   <div v-if="showFilters" class="grow">
     <AutocompleteFilter
@@ -24,7 +34,7 @@
       @updateValue="$emit('updateValue', $event)"
     />
   </div>
-  <div v-if="!showFilters && !isLoadingOptions">
+  <div v-if="!showFilters && !loading">
     {{ t("filters.noOptionsAvailable") }}
   </div>
 </template>
@@ -38,7 +48,6 @@ import {
 } from "@/generated-types/queries";
 import AutocompleteFilter from "./AutocompleteFilter.vue";
 import CheckboxFilter from "./CheckboxFilter.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useFilterOptions } from "@/composables/useFilterOptions";
 import { type FilterListItem } from "@/composables/useStateManagement";
 import { useRoute } from "vue-router";
@@ -122,6 +131,13 @@ const hasWildcardTextFilter = computed(() => {
       f.type === AdvancedFilterTypes.Text && f.value === "*",
   );
 });
+
+// Nothing to show yet (first load, or a refetch before any options): show
+// skeletons, never "no options". An autocomplete searching as you type keeps
+// its field instead.
+const loading = computed(
+  () => isLoading.value || (!!isLoadingOptions.value && !showFilters.value),
+);
 
 const showFilters = computed(() => {
   return (
@@ -281,7 +297,10 @@ const reset = () => {
 defineExpose({
   reset,
   // A checkbox list needs the panel's full width (FiltersListItemPanel).
-  rendersList: computed(() => showFilters.value && !useAutocomplete.value),
+  // Loading counts as a list: the skeleton rows need the full width.
+  rendersList: computed(
+    () => loading.value || (showFilters.value && !useAutocomplete.value),
+  ),
 });
 
 watch(selectedOptions, () => {
