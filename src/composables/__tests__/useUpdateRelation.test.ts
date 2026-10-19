@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EditStatus } from "@/generated-types/queries";
 import type { Entity } from "@/generated-types/queries";
 
-const { mockMutate, mockGetForm } = vi.hoisted(() => ({
+const { mockMutate, mockQuery, mockGetForm } = vi.hoisted(() => ({
   mockMutate: vi.fn().mockResolvedValue({}),
+  mockQuery: vi.fn(),
   mockGetForm: vi.fn(),
 }));
 
 vi.mock("@/main", () => ({
-  apolloClient: { mutate: mockMutate },
+  apolloClient: { mutate: mockMutate, query: mockQuery },
 }));
 
 vi.mock("@/composables/useFormHelper", () => ({
@@ -341,5 +342,129 @@ describe("saveRelatedEntityData", () => {
       (m: any) => m.key === "roles",
     );
     expect(rolesEntry?.value).toEqual(["member"]);
+  });
+
+  describe("when the related entity holds no relation back to the parent", () => {
+    const parentRelation = {
+      id: "WBI-1",
+      type: "web_inscription",
+      relationType: "ref_mediafiles",
+    };
+    const parent = makeEntity("WBI-1", {
+      ref_mediafiles: [
+        {
+          key: "M-1",
+          metadata: [{ key: "coordinates", value: { x: 1, y: 2, w: 3, h: 4 } }],
+        },
+        { key: "M-2", metadata: [{ key: "order", value: 1 }] },
+        { key: "M-3", metadata: [] },
+      ],
+      ref_theme: [{ key: "WBT-1", metadata: [] }],
+    });
+
+    beforeEach(() => mockQuery.mockResolvedValue({ data: { Entity: parent } }));
+
+    it("saves every change on the parent's relations in one mutation", async () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relatedEntityData: {
+            metadata: {},
+            relations: { "order-M-1": 2, "order-M-2": 1, "order-M-3": 3 },
+          },
+        },
+      });
+
+      await saveRelatedEntityData(
+        "WBI-1",
+        [makeEntity("M-1"), makeEntity("M-2"), makeEntity("M-3")],
+        parentRelation as any,
+      );
+
+      expect(mockQuery).toHaveBeenCalledOnce();
+      expect(mockQuery.mock.calls[0][0].variables).toEqual({
+        id: "WBI-1",
+        type: "web_inscription",
+      });
+      expect(mockMutate).toHaveBeenCalledOnce();
+      const { variables } = mockMutate.mock.calls[0][0];
+      expect(variables.id).toBe("WBI-1");
+      const byKey = Object.fromEntries(
+        variables.formInput.relations.map((r: any) => [r.key, r]),
+      );
+      expect(byKey["M-1"].editStatus).toBe(EditStatus.Changed);
+      expect(byKey["M-1"].metadata).toEqual([
+        { key: "coordinates", value: { x: 1, y: 2, w: 3, h: 4 } },
+        { key: "order", value: 2 },
+      ]);
+      expect(byKey["M-2"].editStatus).toBe(EditStatus.Unchanged);
+      expect(byKey["M-3"].metadata).toEqual([{ key: "order", value: 3 }]);
+      expect(byKey["WBT-1"].editStatus).toBe(EditStatus.Unchanged);
+    });
+
+    it("does not save when nothing changed", async () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relatedEntityData: { metadata: {}, relations: { "order-M-2": 1 } },
+        },
+      });
+
+      await saveRelatedEntityData(
+        "WBI-1",
+        [makeEntity("M-2")],
+        parentRelation as any,
+      );
+
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
+
+    it("saves on the owner, not the page entity, when they differ", async () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relatedEntityData: { metadata: {}, relations: { "order-M-1": 2 } },
+        },
+      });
+
+      // e.g. an inscription's mediafiles shown on a web script page
+      await saveRelatedEntityData(
+        "WBS-1",
+        [makeEntity("M-1")],
+        parentRelation as any,
+      );
+
+      expect(mockQuery.mock.calls[0][0].variables).toEqual({
+        id: "WBI-1",
+        type: "web_inscription",
+      });
+      expect(mockMutate.mock.calls[0][0].variables.id).toBe("WBI-1");
+    });
+
+    it("does not save when the parent holds no such relation", async () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relatedEntityData: { metadata: {}, relations: { "order-M-9": 2 } },
+        },
+      });
+
+      await saveRelatedEntityData(
+        "WBI-1",
+        [makeEntity("M-9")],
+        parentRelation as any,
+      );
+
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
+
+    it("does not save without the parent relation to fall back to", async () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relatedEntityData: { metadata: {}, relations: { "order-M-1": 2 } },
+        },
+      });
+
+      await saveRelatedEntityData("WBI-1", [makeEntity("M-1")]);
+
+      expect(mockQuery).not.toHaveBeenCalled();
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
   });
 });
