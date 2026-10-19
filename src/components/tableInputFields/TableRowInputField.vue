@@ -1,6 +1,7 @@
 <template>
   <div
     v-for="(subField, colIndex) in visibleSubFields"
+    v-show="!isLinkedEntityMissing"
     :key="subField.key"
     class="flex items-center px-2 py-1 border-b border-[rgba(0,58,82,0.08)]"
     :class="{
@@ -27,11 +28,13 @@
       :sub-field="subField"
       :field-key="getCellFieldKey(subField)"
       :form-id="formId"
-      :disabled="disabled"
+      :disabled="disabled || isLinkedEntityMissing"
+      @linked-entity-missing="isLinkedEntityMissing = $event"
     />
   </div>
   <div
     v-if="!disabled"
+    v-show="!isLinkedEntityMissing"
     class="flex items-center justify-center px-1 py-1 border-b border-[rgba(0,58,82,0.08)] border-l border-l-[rgba(0,58,82,0.2)]"
   >
     <BaseButtonNew
@@ -82,6 +85,8 @@ const visibleSubFields = computed(() =>
 const metadataSubFields = computed(() =>
   props.subFields.filter((sf) => sf.inputField?.isMetadataField === true),
 );
+
+const isLinkedEntityMissing = ref(false);
 
 const getCellFieldKey = (subField: SubField): string => {
   if (!props.relationType) {

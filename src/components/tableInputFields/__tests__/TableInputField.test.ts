@@ -1,9 +1,10 @@
 /**
  * Tests for TableInputField, TableCellInputField, and AutocompleteRelationCell
  */
-import { shallowMount } from "@vue/test-utils";
+import { flushPromises, mount, shallowMount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ref } from "vue";
+import { h, ref } from "vue";
+import { apolloClient } from "@/main";
 import { useField } from "vee-validate";
 import { EditStatus, InputFieldTypes } from "@/generated-types/queries";
 import type { SubField, InputField } from "@/generated-types/queries";
@@ -89,12 +90,15 @@ vi.mock("@/composables/useManageEntities", () => ({
 
 vi.mock("@/helpers", () => ({
   getTranslatedMessage: vi.fn((key: string) => key),
+  looksLikeEntityId: vi.fn((value: string) => /^[A-Z]+-/.test(value ?? "")),
+  getEntityTitle: vi.fn((entity: any) => entity?.intialValues?.name ?? ""),
 }));
 
 // ─── Lazy component imports (must come after vi.mock() calls) ─────────────────
 
 const { default: TableInputField } = await import("@/components/tableInputFields/TableInputField.vue");
 const { default: TableCellInputField } = await import("@/components/tableInputFields/TableCellInputField.vue");
+const { default: TableRowInputField } = await import("@/components/tableInputFields/TableRowInputField.vue");
 const { default: AutocompleteRelationCell } = await import(
   "@/components/tableInputFields/AutocompleteRelationCell.vue"
 );
@@ -749,5 +753,128 @@ describe("TableCellInputField", () => {
 
     // The getter must now return the new path so vee-validate reads the correct value
     expect(getter()).toBe("authors[1].name");
+  });
+});
+
+// ─── Relations whose linked entity no longer exists ───────────────────────────
+
+const notFoundError = {
+  graphQLErrors: [{ message: "404: NOT FOUND", extensions: { response: { status: 404 } } }],
+};
+const serverError = {
+  graphQLErrors: [{ message: "500", extensions: { response: { status: 500 } } }],
+};
+
+describe("AutocompleteRelationCell — missing linked entity", () => {
+  const inputField = {
+    type: InputFieldTypes.DropdownSingleselectRelations,
+    isMetadataField: false,
+    relationType: "ref_authors",
+    entityType: "person",
+  } as InputField;
+
+  const mountCell = async (modelValue: string) => {
+    const wrapper = shallowMount(AutocompleteRelationCell, {
+      props: { modelValue, inputField, formId: "form-1", disabled: true },
+    });
+    await flushPromises();
+    return wrapper;
+  };
+
+  beforeEach(() => {
+    vi.mocked(apolloClient.query).mockReset();
+  });
+
+  it("emits linked-entity-missing true when the linked entity is not found", async () => {
+    vi.mocked(apolloClient.query).mockRejectedValue(notFoundError);
+    const wrapper = await mountCell("PERS-274S72F");
+    expect(wrapper.emitted("linked-entity-missing")?.at(-1)).toEqual([true]);
+  });
+
+  it("emits linked-entity-missing false when the linked entity exists", async () => {
+    vi.mocked(apolloClient.query).mockResolvedValue({
+      data: { Entity: { intialValues: { name: "Patterson, James" } } },
+    } as any);
+    const wrapper = await mountCell("PERS-D0RAP5H");
+    expect(wrapper.emitted("linked-entity-missing")?.at(-1)).toEqual([false]);
+  });
+
+  it("does not treat other errors as a missing linked entity", async () => {
+    vi.mocked(apolloClient.query).mockRejectedValue(serverError);
+    const wrapper = await mountCell("PERS-D0RAP5H");
+    expect(wrapper.emitted("linked-entity-missing")?.at(-1)).toEqual([false]);
+  });
+});
+
+describe("TableCellInputField — missing linked entity", () => {
+  it("forwards linked-entity-missing from the relation cell", async () => {
+    const wrapper = shallowMount(TableCellInputField, {
+      props: {
+        modelValue: "PERS-274S72F",
+        subField: relationKeySubField,
+        fieldKey: "relationValues.ref_authors[0].key",
+        formId: "form-1",
+      },
+    });
+    await wrapper
+      .findComponent(AutocompleteRelationCell)
+      .vm.$emit("linked-entity-missing", true);
+    expect(wrapper.emitted("linked-entity-missing")?.at(-1)).toEqual([true]);
+  });
+});
+
+describe("TableRowInputField — missing linked entity", () => {
+  const item = {
+    key: "PERS-274S72F",
+    type: "ref_authors",
+    metadata: [
+      { key: "function_indication", value: "aut" },
+      { key: "main_author", value: false },
+    ],
+  };
+
+  const mountRow = () =>
+    mount(
+      {
+        render: () =>
+          h("div", [
+            h(TableRowInputField, {
+              rowIndex: 0,
+              item,
+              subFields: relationSubFields,
+              formId: "form-1",
+              parentFieldKey: "relationValues.ref_authors",
+              relationType: "ref_authors",
+              disabled: false,
+            }),
+          ]),
+      },
+      { global: { stubs: { TableCellInputField: true, BaseButtonNew: true } } },
+    );
+
+  const rowCells = (wrapper: ReturnType<typeof mountRow>) =>
+    wrapper.findAll(":scope > div");
+
+  it("shows the row while its linked entity exists", () => {
+    const wrapper = mountRow();
+    expect(rowCells(wrapper).every((cell) => cell.isVisible())).toBe(true);
+  });
+
+  it("hides the whole row once the relation cell reports a missing linked entity", async () => {
+    const wrapper = mountRow();
+    await wrapper
+      .findAllComponents(TableCellInputField)[0]
+      .vm.$emit("linked-entity-missing", true);
+    expect(rowCells(wrapper).length).toBeGreaterThan(0);
+    expect(rowCells(wrapper).some((cell) => cell.isVisible())).toBe(false);
+  });
+
+  it("disables the hidden row's cells so they never block saving", async () => {
+    const wrapper = mountRow();
+    await wrapper
+      .findAllComponents(TableCellInputField)[0]
+      .vm.$emit("linked-entity-missing", true);
+    const cells = wrapper.findAllComponents(TableCellInputField);
+    expect(cells.every((cell) => cell.props("disabled") === true)).toBe(true);
   });
 });
