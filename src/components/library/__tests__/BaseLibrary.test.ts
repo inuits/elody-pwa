@@ -1285,3 +1285,16 @@ describe("BaseLibrary.vue create action placement", () => {
     );
   });
 });
+
+describe("BaseLibrary.vue filter rail width", () => {
+  it("gives the filter rail the fixed design width and the list the rest", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).toContain(
+      "grid-cols-[var(--filter-panel-width)_1fr]",
+    );
+    wrapper.unmount();
+  });
+});

@@ -19,7 +19,7 @@
     </div>
     <div
       v-else
-      class="@container bg-background-normal grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
+      class="@container bg-background-normal grid grid-cols-[var(--filter-panel-width)_1fr] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
       :class="wrapperClasses"
     >
       <div

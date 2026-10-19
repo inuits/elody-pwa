@@ -5,7 +5,7 @@
   >
     <!-- Catalogue TextFilter: the mode is a prefix inside the input box
          ("contains ▾ | value"); a single-matcher filter has no mode. -->
-    <div v-if="inlineMode" class="flex items-start gap-1.5">
+    <div v-if="inlineMode" class="flex items-stretch gap-1.5">
       <div
         data-cy="filter-input-box"
         class="flex flex-1 min-w-0 items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input]:!border-0 [&_input]:!bg-transparent [&_input]:!shadow-none"
@@ -13,7 +13,7 @@
         <AdvancedDropdown
           v-if="hasModes"
           data-cy="filter-matcher-dropdown"
-          class="shrink-0 max-w-[50%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--button-sm-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted"
+          class="shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block"
           :model-value="selectedMatcher"
           :options="matchers"
           :label="defaultLabel"
@@ -26,7 +26,7 @@
         </div>
       </div>
       <BaseButtonNew
-        class="!w-8 h-8 shrink-0"
+        class="!w-auto !h-auto aspect-square shrink-0"
         label=""
         :icon="DamsIcons.Cross"
         :aria-label="t('filters.clear-filter')"
