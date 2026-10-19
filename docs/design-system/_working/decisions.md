@@ -216,7 +216,7 @@ Already discussed:
 |---|---|---|---|---|---|---|
 | FL1 | Section header label | 11.5px bold | 12.5px bold | 11.5px bold | 12.5px bold (uncommitted) | |
 | FL2 | Active cue | count chip | 7px accent dot | count chip (always "1", bug) | dot (uncommitted) | |
-| FL3 | Chevron | ⌄ closed / ⌃ open | ▾ open / ▸ closed | ⌄ / ⌃ | config icon | |
+| FL3 | Chevron | ⌄ closed / ⌃ open | ▾ open / ▸ closed | ⌄ / ⌃ | config icon |⌄ closed / ⌃ open, as handoff (user, 2026-10-19) |
 
 ## DS 4: lists, panels, filters, navigation
 
@@ -239,3 +239,4 @@ Already discussed:
 | L15 | No selection actions | user, 2026-10-19: no "Selection: nothing selected" when the list has no action that acts on a selection. Root fix in `hasBulkOperationsWithItemsSelection`: create plus select-nothing actions (e.g. "Export all entities") no longer count as selection actions, so such lists also lose row checkboxes and select-all (aicap inscriptions; mediafiles already had none) |
 | L16 | Row and band sizes | user, 2026-10-19 (rows looked bigger than the rest): row padding and type already matched (7px 8px, 12.5–13px); the height came from the 40px default checkbox, so list and table rows use `size="compact"` (rows 37px single-line). Band controls all 32px: view switch 30px buttons + border, sort toggle md with `min-h-8` |
 | L17 | Row hover | user, 2026-10-19: no underline on row text on hover (not in any spec). Navigating rows are `router-link`s and picked up the base `a:hover` underline and link colour; the list and table row wrappers now keep their text colour and no underline; hover stays the row-hover fill |
+| L18 | Filter rail (sources compared 2026-10-19) | user: (1) the rail stays collapsible and starts closed; the overview remembers it for the session only (sessionStorage `_expandFilters`, was localStorage, which reopened it in every new session); (2) small "Clear all ×" + full-width primary "Apply filter(s)" at the top, as the catalogue FilterActionBar; (3) active section keeps the accent-light surface (FL2: no chip, no dot); (4) section chevrons ⌄ closed / ⌃ open (handoff, FL3), headers become keyboard toggles with `aria-expanded`; (5) text filters take the catalogue/mockup form, mode as a prefix inside the input — to do; (6) clearing one filter stays the filled × button; (7) the ? only where the config gives a tooltip (already so; aicap sets `tooltip(value: true)` on every filter) |

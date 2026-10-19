@@ -32,6 +32,24 @@ export type UseViewModesOptions = {
   persistExpandFilters?: boolean;
 };
 
+// The filter rail starts closed in every new session; within a session the
+// overview remembers it (sessionStorage, not the long-lived preferences).
+const EXPAND_FILTERS_KEY = "_expandFilters";
+const readSessionExpandFilters = (): boolean => {
+  try {
+    return window.sessionStorage.getItem(EXPAND_FILTERS_KEY) === "true";
+  } catch {
+    return false;
+  }
+};
+const writeSessionExpandFilters = (value: boolean): void => {
+  try {
+    window.sessionStorage.setItem(EXPAND_FILTERS_KEY, String(value));
+  } catch {
+    // storage unavailable (private mode): the rail just starts closed
+  }
+};
+
 export const useViewModes = (options: UseViewModesOptions) => {
   const { getGlobalState, updateGlobalState } = useStateManagement();
 
@@ -43,7 +61,11 @@ export const useViewModes = (options: UseViewModesOptions) => {
   const displayPreview = ref<boolean>(options.enablePreview ?? false);
   const displayMap = ref<boolean>(false);
   const displayPipeline = ref<boolean>(false);
-  const expandFilters = ref<boolean>(false);
+  const persistsExpandFilters = () =>
+    !!options.enableAdvancedFilters && !!options.persistExpandFilters;
+  const expandFilters = ref<boolean>(
+    persistsExpandFilters() && readSessionExpandFilters(),
+  );
 
   const toggles = ref<ViewModeToggle[]>([]);
 
@@ -194,10 +216,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
         !hasMixedTeaserMetadata.value || viewMode !== ViewModes.Table,
     );
 
-    expandFilters.value =
-      options.enableAdvancedFilters && options.persistExpandFilters
-        ? displayPreferences.expandFilters
-        : false;
+    expandFilters.value = persistsExpandFilters() && readSessionExpandFilters();
 
     if (
       !displayPreview.value &&
@@ -258,9 +277,8 @@ export const useViewModes = (options: UseViewModesOptions) => {
   // ── Persist watcher ───────────────────────────────────────────────────────
 
   watch([displayGrid, displayTable, displayPipeline, expandFilters], () => {
-    const _expandFilters = options.persistExpandFilters
-      ? expandFilters.value
-      : getGlobalState("_displayPreferences")?.expandFilters;
+    if (options.persistExpandFilters)
+      writeSessionExpandFilters(expandFilters.value);
 
     displayList.value =
       !displayGrid.value &&
@@ -273,7 +291,6 @@ export const useViewModes = (options: UseViewModesOptions) => {
         grid: displayPreview.value ? false : displayGrid.value,
         table: displayTable.value,
         pipeline: displayPreview.value ? false : displayPipeline.value,
-        expandFilters: _expandFilters,
       });
     }
   });

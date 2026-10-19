@@ -425,12 +425,9 @@ describe("useViewModes", () => {
       expect(expandFilters.value).toBe(false);
     });
 
-    it("restores expandFilters when enableAdvancedFilters and persistExpandFilters are both true", () => {
-      mockGetGlobalState.mockReturnValue({
-        grid: false,
-        table: false,
-        expandFilters: true,
-      });
+    it("restores expandFilters from the session when enableAdvancedFilters and persistExpandFilters are both true", () => {
+      window.sessionStorage.setItem("_expandFilters", "true");
+      mockGetGlobalState.mockReturnValue({ grid: false, table: false });
       const entities = ref<Entity[]>([]);
       const { getUserPreferredViewModeConfiguration, expandFilters } =
         useViewModes({
@@ -442,6 +439,7 @@ describe("useViewModes", () => {
       getUserPreferredViewModeConfiguration();
 
       expect(expandFilters.value).toBe(true);
+      window.sessionStorage.clear();
     });
 
     it("does not restore the table preference when entities have different teaserMetadata columns", () => {
@@ -899,7 +897,8 @@ describe("useViewModes", () => {
       expect(displayList.value).toBe(true);
     });
 
-    it("writes the current expandFilters value when persistExpandFilters is true", async () => {
+    it("writes the current expandFilters value to the session, not the long-lived preferences, when persistExpandFilters is true", async () => {
+      window.sessionStorage.clear();
       const entities = ref<Entity[]>([]);
       const { displayGrid, expandFilters } = useViewModes({
         entities,
@@ -911,14 +910,16 @@ describe("useViewModes", () => {
       displayGrid.value = true;
       await nextTick();
 
+      expect(window.sessionStorage.getItem("_expandFilters")).toBe("true");
       expect(mockUpdateGlobalState).toHaveBeenCalledWith(
         "_displayPreferences",
-        expect.objectContaining({ expandFilters: true }),
+        expect.not.objectContaining({ expandFilters: expect.anything() }),
       );
+      window.sessionStorage.clear();
     });
 
-    it("preserves the stored expandFilters value (does not write its own) when persistExpandFilters is false", async () => {
-      mockGetGlobalState.mockReturnValue({ expandFilters: true });
+    it("leaves the session value alone when persistExpandFilters is false", async () => {
+      window.sessionStorage.setItem("_expandFilters", "true");
       const entities = ref<Entity[]>([]);
       const { displayGrid, expandFilters } = useViewModes({
         entities,
@@ -930,10 +931,8 @@ describe("useViewModes", () => {
       displayGrid.value = true;
       await nextTick();
 
-      expect(mockUpdateGlobalState).toHaveBeenCalledWith(
-        "_displayPreferences",
-        expect.objectContaining({ expandFilters: true }),
-      );
+      expect(window.sessionStorage.getItem("_expandFilters")).toBe("true");
+      window.sessionStorage.clear();
     });
 
     it("does not call updateGlobalState when persistPreferences is false and displayTable changes", async () => {
