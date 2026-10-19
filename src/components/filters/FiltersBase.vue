@@ -63,20 +63,24 @@
       ]"
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
-        <div class="flex justify-between gap-4 pb-4">
+        <!-- Catalogue FilterActionBar: small "Clear all ×" + full-width
+             primary "Apply filter(s)". -->
+        <div class="flex gap-1.5 pb-4">
           <BaseButtonNew
             data-cy="filters-clear-button"
-            class="!w-1/3 !p-2.5"
+            class="!w-auto shrink-0"
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
-            :icon-height="22"
             button-style="secondary"
+            button-size="sm"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew
             data-cy="filters-search-button"
+            class="flex-1"
             :label="t('filters.apply')"
-            button-style="commit"
+            button-style="primary"
+            button-size="sm"
             @click="applyFilters(true)"
           />
         </div>
