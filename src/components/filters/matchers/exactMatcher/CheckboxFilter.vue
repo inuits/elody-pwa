@@ -1,14 +1,33 @@
 <template>
   <div class="text-table">
-    <BaseInputCheckbox
+    <!-- Catalogue CheckboxListFilter: box + label, the count in a muted
+         column on the right, hover wash. -->
+    <div
       v-for="option in filterOptions"
       :key="option.option.value"
-      v-model="option.isSelected"
-      :label="option.option.label"
-      :item="{ id: option.option.value }"
-      :ignore-bulk-operations="true"
-      size="compact"
-    />
+      data-cy="checkbox-filter-option"
+      class="flex items-center gap-2 rounded-input hover:bg-accent-wash"
+    >
+      <BaseInputCheckbox
+        v-model="option.isSelected"
+        class="flex-1 min-w-0"
+        :label="splitCount(option.option.label).name"
+        :aria-label="
+          splitCount(option.option.label).count
+            ? `${splitCount(option.option.label).name}, ${splitCount(option.option.label).count}`
+            : undefined
+        "
+        :item="{ id: option.option.value }"
+        :ignore-bulk-operations="true"
+        size="compact"
+      />
+      <span
+        v-if="splitCount(option.option.label).count"
+        data-cy="checkbox-filter-count"
+        class="shrink-0 pr-1 text-text-subtle"
+        >{{ splitCount(option.option.label).count }}</span
+      >
+    </div>
   </div>
 </template>
 
@@ -31,6 +50,13 @@ interface FilterOption {
 }
 
 const filterOptions = ref<FilterOption[]>([]);
+
+// shortcut: the backend sends "Label (12)" as one string; DS 6 (filter
+// option counts) should send the count separately, then drop this split.
+const splitCount = (label: string): { name: string; count?: string } => {
+  const match = /^(.*\S)\s+\((\d+)\)$/.exec(label ?? "");
+  return match ? { name: match[1], count: match[2] } : { name: label };
+};
 
 onMounted(async () => {
   normalizeOptions(props.options);

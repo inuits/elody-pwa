@@ -4,16 +4,31 @@
     class="flex flex-col gap-1.5 px-3 py-2 border-b border-border-faint bg-surface-group-form"
   >
     <!-- Catalogue TextFilter: the mode is a prefix inside the input box
-         ("contains ▾ | value"); a single-matcher filter has no mode. -->
-    <div v-if="inlineMode" class="flex items-stretch gap-1.5">
+         ("contains ▾ | value"); a single-matcher filter has no mode. Lists,
+         two fields or a slider stack under the mode instead. One element
+         tree for both forms: switching only changes classes, so the
+         matcher is never remounted (it would refetch its options). -->
+    <div
+      class="flex gap-1.5"
+      :class="inlineMode ? 'items-stretch' : 'items-start'"
+    >
       <div
-        data-cy="filter-input-box"
-        class="flex flex-1 min-w-0 items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input]:!border-0 [&_input]:!bg-transparent [&_input]:!shadow-none"
+        :data-cy="inlineMode ? 'filter-input-box' : undefined"
+        class="flex flex-1 min-w-0"
+        :class="
+          inlineMode
+            ? 'items-stretch border border-border-default rounded-input bg-surface overflow-hidden [&_input:not([type=checkbox])]:!border-0 [&_input:not([type=checkbox])]:!bg-transparent [&_input:not([type=checkbox])]:!shadow-none'
+            : 'flex-col gap-1.5'
+        "
       >
         <AdvancedDropdown
           v-if="hasModes"
           data-cy="filter-matcher-dropdown"
-          class="shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block"
+          :class="
+            inlineMode
+              ? 'shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block'
+              : 'self-start max-h-9'
+          "
           :model-value="selectedMatcher"
           :options="matchers"
           :label="defaultLabel"
@@ -26,7 +41,8 @@
         </div>
       </div>
       <BaseButtonNew
-        class="!w-auto !h-auto aspect-square shrink-0"
+        class="shrink-0"
+        :class="inlineMode ? '!w-auto !h-auto aspect-square' : '!w-8 h-8'"
         label=""
         :icon="DamsIcons.Cross"
         :aria-label="t('filters.clear-filter')"
@@ -37,34 +53,6 @@
         @click="$emit('reset')"
       />
     </div>
-    <template v-else>
-      <div class="flex w-full justify-start gap-1.5">
-        <AdvancedDropdown
-          v-if="hasModes"
-          data-cy="filter-matcher-dropdown"
-          class="max-h-9"
-          :model-value="selectedMatcher"
-          :options="matchers"
-          :label="defaultLabel"
-          :clearable="false"
-          label-position="inline"
-          @update:model-value="$emit('update:selected-matcher', $event)"
-        />
-        <div class="grow"></div>
-        <BaseButtonNew
-          class="!w-8 h-8"
-          label=""
-          :icon="DamsIcons.Cross"
-          :aria-label="t('filters.clear-filter')"
-          :icon-height="16"
-          :disabled="!selectedMatcher"
-          button-style="commit"
-          button-size="sm"
-          @click="$emit('reset')"
-        />
-      </div>
-      <slot v-if="selectedMatcher" />
-    </template>
   </div>
 </template>
 
@@ -91,6 +79,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  // The matcher rendered a list (checkboxes): it needs the full width.
+  stacked: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 defineEmits(["update:selected-matcher", "reset"]);
@@ -98,7 +91,8 @@ defineEmits(["update:selected-matcher", "reset"]);
 // Two fields (min/max) or a slider don't fit one input box: mode stacks.
 const STACKED_MATCHERS = ["InBetweenMatcher", "RangeMatcher"];
 const inlineMode = computed(
-  () => !STACKED_MATCHERS.includes(props.selectedMatcher ?? ""),
+  () =>
+    !props.stacked && !STACKED_MATCHERS.includes(props.selectedMatcher ?? ""),
 );
 const hasModes = computed(() => props.matchers.length > 1);
 </script>

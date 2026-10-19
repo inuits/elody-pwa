@@ -1287,13 +1287,13 @@ describe("BaseLibrary.vue create action placement", () => {
 });
 
 describe("BaseLibrary.vue filter rail width", () => {
-  it("gives the filter rail the fixed design width and the list the rest", async () => {
+  it("gives the filter rail 30% (250px felt too narrow; user, 2026-10-19)", async () => {
     mockRoute.path = "/test";
     const wrapper = getWrapper();
     await flushPromises();
 
     expect(wrapper.find(".grid").classes()).toContain(
-      "grid-cols-[var(--filter-panel-width)_1fr]",
+      "grid-cols-[30%_70%]",
     );
     wrapper.unmount();
   });

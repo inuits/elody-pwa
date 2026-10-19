@@ -96,6 +96,15 @@ describe("FiltersListItemPanel", () => {
       expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
     });
 
+    it("stacks the mode above a matcher that renders a checkbox list", () => {
+      const wrapper = shallowMount(FiltersListItemPanel, {
+        props: { matchers: two, selectedMatcher: "ExactAutoCompleteMatcher", defaultLabel: "", stacked: true },
+        slots: { default: '<input type="checkbox" data-cy="matcher-input" />' },
+      });
+      expect(wrapper.find('[data-cy="filter-input-box"]').exists()).toBe(false);
+      expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
     it("stacks the mode above matchers with two fields or a slider", () => {
       const wrapper = mountWith(
         [...two, { label: "between", value: "InBetweenMatcher" }],

@@ -280,6 +280,8 @@ const reset = () => {
 
 defineExpose({
   reset,
+  // A checkbox list needs the panel's full width (FiltersListItemPanel).
+  rendersList: computed(() => showFilters.value && !useAutocomplete.value),
 });
 
 watch(selectedOptions, () => {

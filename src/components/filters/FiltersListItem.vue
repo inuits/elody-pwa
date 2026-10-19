@@ -14,6 +14,7 @@
       :matchers="filterMatchers"
       :selected-matcher="selectedMatcher"
       :default-label="matcherDefaultLabel"
+      :stacked="!!matcherComponentRef?.rendersList"
       @update:selected-matcher="updateSelectedMatcher"
       @reset="resetFilter"
     >
