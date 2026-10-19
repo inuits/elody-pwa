@@ -92,20 +92,24 @@
           { sticky: hasStickyBars },
         ]"
       >
-        <!-- List header (templates/elody-list-screen): count, pager, view
-             modes, page size, sort. -->
+        <!-- List header (templates/elody-list-screen): one accent-light band
+             with count, pager, view modes, page size, sort and the selection
+             bar's actions; it wraps when narrow. -->
         <div
-          v-if="!disableLibraryBar"
           data-cy="list-header"
-          class="h-fit flex flex-row items-center gap-y-4"
+          class="h-fit flex flex-wrap items-center gap-2"
+          :class="{
+            'p-(--list-band-pad) bg-surface-panel-header border border-border-panel rounded-card':
+              hasResultsBand,
+          }"
         >
           <ResultCountChip
             v-if="
+              !disableLibraryBar &&
               !isInitialLoading &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
-            class="mr-2"
             :count="totalEntityCount"
             :exact-count="exactTotalCount"
             :exact-count-loading="exactCountLoading"
@@ -114,20 +118,20 @@
           <BasePagination
             v-if="showListPager"
             data-test="list-pager"
-            class="mr-2 shrink-0"
+            class="shrink-0"
           />
           <div
             v-if="
+              !disableLibraryBar &&
               toggles.length > 1 &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
-            class="mr-2"
           >
             <BaseToggleGroup :toggles="toggles" />
           </div>
           <PageSizeSelect
             v-if="showPageSize"
-            class="mr-2 shrink-0"
+            class="shrink-0"
             :set-limit="setPaginationLimit"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total="totalEntityCount"
@@ -137,11 +141,12 @@
           />
           <div
             v-if="
+              !disableLibraryBar &&
               !predefinedEntities &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
-            class="w-full"
+            class="min-w-0"
           >
             <LibraryBar
               :route="route"
@@ -161,24 +166,12 @@
               "
             />
           </div>
-        </div>
-      </div>
-      <div
-        :class="[
-          'row-span-2 flex flex-col min-h-0',
-          { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
-          { 'col-span-2': !isFiltersPanelExpanded },
-        ]"
-      >
-        <div
-          v-if="
-            enableBulkOperations &&
-            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-            showCurrentEntityFlow
-          "
-          :class="[{ sticky: hasStickyBars }, 'pb-2 z-header']"
-        >
           <BulkOperationsActionsBar
+            v-if="
+              enableBulkOperations &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
+            class="flex-1 min-w-fit"
             :context="bulkOperationsContext"
             :use-extended-bulk-operations="!isSearchLibrary"
             :show-button="showButton"
@@ -226,6 +219,14 @@
             @refetch="async () => await refetchEntities()"
           />
         </div>
+      </div>
+      <div
+        :class="[
+          'row-span-2 flex flex-col min-h-0',
+          { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
+          { 'col-span-2': !isFiltersPanelExpanded },
+        ]"
+      >
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
           :class="[
@@ -266,12 +267,6 @@
               />
             </div>
           </div>
-        </div>
-        <div
-          v-if="showListPager && !pagerInHeader"
-          class="flex justify-center pt-2"
-        >
-          <BasePagination data-test="list-pager" />
         </div>
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
@@ -925,9 +920,13 @@ const showListPager = computed(
     !isTableGrouped.value &&
     paginationStore.totalPages.value > 1,
 );
-// The pager sits in the list header; lists without one keep it above the list.
-const pagerInHeader = computed(
-  () => showCurrentEntityFlow.value && !props.disableLibraryBar,
+// Main and preview lists get the accent-light results band; compact
+// relation lists keep a plain row (it may hold only a pager).
+const hasResultsBand = computed(
+  () =>
+    !props.disableLibraryBar &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
 // Mounted wherever the library bar used to hold it: it registers the
 // pagination-limit promise the first fetch waits for.

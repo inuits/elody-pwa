@@ -10,10 +10,9 @@ Above every list that supports selection. Not for single-row actions: those
 use the row's split button or "Actions" menu ([menu](./menu.md)).
 
 ## Anatomy
-One surface: `--color-surface`, a 1px border (`--color-border-subtle`,
-`--color-border-default` once something is selected), `--radius-button`,
-`--selection-bar-padding`, `--selection-bar-gap`, `--text-ui`. Items wrap
-when the bar is narrow.
+No surface of its own: it sits in the list's results band
+([entity list](./entity-list.md)), after sort, and fills the rest of the
+row. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
 - Left: the bold selection count ("Selection: 2", hidden at 0), a note when selected items sit on
   other pages ("3 selected on other pages"), and the "Clear selection" and
   "Select page" links: real buttons in label ink, `--text-label`, underlined.

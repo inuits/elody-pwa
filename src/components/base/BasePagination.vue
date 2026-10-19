@@ -1,11 +1,19 @@
 <template>
-  <!-- pagination.md: real buttons, current page filled, ‹/› disabled at the edges. -->
+  <!-- templates/elody-list-screen: « ‹ page [n] of N › », real buttons. -->
   <nav
     :aria-label="$t('pagination.label')"
-    class="flex items-center gap-(--pager-gap) text-ui text-text-body select-none"
-    @keydown.left.prevent="moveFocus(-1)"
-    @keydown.right.prevent="moveFocus(1)"
+    class="flex items-center gap-(--pager-gap) text-label text-text-panel-header select-none"
   >
+    <button
+      type="button"
+      data-cy="pager-first"
+      :class="buttonClasses"
+      :aria-label="$t('pagination.first')"
+      :disabled="currentPage <= 1"
+      @click="paginationStore.goToPage(1)"
+    >
+      <unicon :name="Unicons.AngleDoubleLeft.name" height="16" />
+    </button>
     <button
       type="button"
       data-cy="pager-previous"
@@ -16,36 +24,18 @@
     >
       <unicon :name="Unicons.AngleLeft.name" height="16" />
     </button>
-    <template v-for="(item, index) in items" :key="`${item}-${index}`">
-      <span v-if="item === '…'" aria-hidden="true" class="px-1 text-text-muted"
-        >…</span
-      >
-      <button
-        v-else
-        type="button"
-        data-cy="pager-page"
-        :class="[
-          buttonClasses,
-          item === currentPage
-            ? 'bg-(--pager-current-bg) text-text-on-accent font-bold'
-            : '',
-        ]"
-        :aria-current="item === currentPage ? 'page' : undefined"
-        @click="paginationStore.goToPage(item)"
-      >
-        {{ item }}{{ item === lastPage && isCapped ? "+" : "" }}
-      </button>
-    </template>
-    <button
-      type="button"
-      data-cy="pager-next"
-      :class="buttonClasses"
-      :aria-label="$t('pagination.next')"
-      :disabled="currentPage >= lastPage"
-      @click="paginationStore.next()"
-    >
-      <unicon :name="Unicons.AngleRight.name" height="16" />
-    </button>
+    <span class="px-1">{{ $t("pagination.page") }}</span>
+    <BaseInputTextNumberDatetime
+      v-model="localPage"
+      class="w-(--pager-input-width) text-center font-bold"
+      type="number"
+      input-style="defaultWithBorder"
+      :aria-label="$t('pagination.page-number')"
+      @keyup.enter="updatePage"
+      @focusout="updatePage"
+    />
+    <span class="px-1">{{ $t("pagination.of") }}</span>
+    <span data-cy="pager-last-page">{{ lastPageLabel }}</span>
     <BaseTooltip v-if="isCapped" position="top-end" :tooltip-offset="8">
       <template #activator="{ on, describedBy }">
         <span
@@ -58,38 +48,58 @@
       </template>
       <span>{{ $t("pagination.capped-pages-tooltip") }}</span>
     </BaseTooltip>
+    <button
+      type="button"
+      data-cy="pager-next"
+      :class="buttonClasses"
+      :aria-label="$t('pagination.next')"
+      :disabled="currentPage >= lastPage"
+      @click="paginationStore.next()"
+    >
+      <unicon :name="Unicons.AngleRight.name" height="16" />
+    </button>
+    <button
+      type="button"
+      data-cy="pager-last"
+      :class="buttonClasses"
+      :aria-label="$t('pagination.last')"
+      :disabled="currentPage >= lastPage"
+      @click="paginationStore.goToPage(lastPage)"
+    >
+      <unicon :name="Unicons.AngleDoubleRight.name" height="16" />
+    </button>
   </nav>
 </template>
 
 <script lang="ts" setup>
 import {
   PaginationStoreKey,
-  pageItems,
   type PaginationStore,
 } from "@/components/library/usePaginationStore";
 import { Unicons } from "@/types";
-import { computed, inject } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 
 const paginationStore = inject(PaginationStoreKey) as PaginationStore;
 
 const buttonClasses =
-  "inline-flex items-center justify-center min-w-(--pager-button-size) h-(--pager-button-size) px-1 rounded-input cursor-pointer hover:bg-surface-row-hover disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent";
+  "inline-flex items-center justify-center size-(--pager-button-size) rounded-input cursor-pointer hover:bg-surface-row-hover disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent";
 
 const currentPage = computed(() => paginationStore.currentPage.value);
 const isCapped = computed(() => paginationStore.countIsCapped.value);
 // totalPages is reactive; getLastPage() is a plain function.
 const lastPage = computed(() => Math.max(paginationStore.totalPages.value, 1));
-const items = computed(() => pageItems(currentPage.value, lastPage.value));
+const lastPageLabel = computed(
+  () => `${lastPage.value}${isCapped.value ? "+" : ""}`,
+);
 
-// ←/→ move focus within the pager group; Enter/Space activate natively.
-const moveFocus = (step: number) => {
-  const nav = (document.activeElement as HTMLElement | null)?.closest("nav");
-  if (!nav) return;
-  const buttons = [
-    ...nav.querySelectorAll<HTMLButtonElement>("button:not([disabled])"),
-  ];
-  const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
-  buttons[index + step]?.focus();
+const localPage = ref<number | string>(currentPage.value);
+watch(currentPage, (page) => (localPage.value = page));
+
+const updatePage = () => {
+  paginationStore.goToPage(Number(localPage.value));
+  // An out-of-range number is ignored; show the real page again.
+  localPage.value = currentPage.value;
 };
 </script>

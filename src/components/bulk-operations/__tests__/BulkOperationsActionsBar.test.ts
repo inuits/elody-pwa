@@ -80,27 +80,13 @@ describe("BulkOperationsActionsBar", () => {
     expect(getWrapper().find('[role="status"]').text()).toBe("");
   });
 
-  it("is a bordered surface with the selection bar tokens", () => {
-    expect(getWrapper().find('[role="toolbar"]').classes()).toEqual(
-      expect.arrayContaining([
-        "bg-surface",
-        "border",
-        "rounded-button",
-        "p-(--selection-bar-padding)",
-        "gap-(--selection-bar-gap)",
-        "text-ui",
-      ]),
+  it("sits in the list's results band without a surface of its own", () => {
+    const classes = getWrapper().find('[role="toolbar"]').classes();
+    expect(classes).toEqual(
+      expect.arrayContaining(["gap-(--selection-bar-gap)", "text-ui"]),
     );
-  });
-
-  it("borders the bar more strongly once something is selected", () => {
-    expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
-      "border-border-subtle",
-    );
-    mocks.selected = [{ id: "a" }];
-    expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
-      "border-border-default",
-    );
+    expect(classes).not.toContain("border");
+    expect(classes).not.toContain("bg-surface");
   });
 
   it("hides when it has nothing to offer (no selection, no actions)", () => {

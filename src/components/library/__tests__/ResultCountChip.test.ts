@@ -42,11 +42,17 @@ describe("ResultCountChip", () => {
     expect(getWrapper({ count: 1 }).text()).toBe("1 result");
   });
 
-  it("is a neutral chip", () => {
+  it("is a white chip in accent ink on the results band", () => {
     expect(getWrapper().find('[data-cy="list-count-chip"]').classes()).toEqual(
-      expect.arrayContaining(["bg-chip-neutral-bg", "rounded-chip", "text-chip"]),
+      expect.arrayContaining([
+        "bg-surface",
+        "text-text-panel-header",
+        "rounded-chip",
+        "text-chip",
+      ]),
     );
   });
+
 
   it("shows a capped total as cap+ and asks to reveal the exact count", async () => {
     const wrapper = getWrapper({ count: 1001 });

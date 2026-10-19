@@ -4,14 +4,20 @@ The query-driven result list (table, list, grid). Implemented by
 `src/components/library/BaseLibrary.vue` and its view modes.
 
 ## Header
-One row above the list (`data-cy="list-header"`): the count chip, the pager
-([pagination](./pagination.md)), the view-mode switch, page size, sort and
-simple search (`LibraryBar.vue`).
+One results band above the list (`data-cy="list-header"`,
+`templates/elody-list-screen`): count chip, pager
+([pagination](./pagination.md)), view-mode switch, page size, sort, simple
+search and the [selection bar](./selection-bar.md), wrapping onto a second
+line when narrow. Main and preview lists draw it as a band:
+`--color-surface-panel-header`, 1px `--color-border-panel`, `--radius-card`,
+`--list-band-pad`. Compact relation lists keep a plain row (it may hold only
+a pager). A disabled library bar hides the count, view modes, page size and
+sort; the pager and the selection bar stay.
 
 ### Count chip
 `src/components/library/ResultCountChip.vue`. The single source of the list
 total; the selection bar and pager don't repeat it.
-- Neutral chip: `--color-chip-neutral-bg` / `--color-chip-neutral-text`,
+- White chip on the band: `--color-surface`, `--color-text-panel-header`,
   `--radius-chip`, `--chip-padding`, `--text-chip`, bold.
 - Copy: `library.result-count`, with singular and plural forms
   ("1 result" / "1,258 results", "1 resultaat" / "1.258 resultaten").

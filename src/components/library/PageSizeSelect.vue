@@ -1,7 +1,7 @@
 <template>
-  <!-- pagination.md: page size sits left in the list footer, "20 per page". -->
+  <!-- templates/elody-list-screen: "Items: 20 ▾" beside sort. -->
   <div
-    v-if="isResolved && options.length > 0"
+    v-if="isResolved && rawOptions.length > 0"
     v-show="total > smallestLimit"
     class="flex items-center"
   >
@@ -10,7 +10,9 @@
       v-model="selectedOption"
       data-cy="page-size"
       :input-id="inputId"
-      :options="options"
+      :options="rawOptions"
+      :label="t('library.items')"
+      :add-label-to-value="true"
       :clearable="false"
       label-position="inline"
     />
@@ -60,14 +62,6 @@ const selectedOption = ref<number | undefined>(
 );
 
 // Config labels are bare numbers ("20"); anything else (e.g. "all") is a key.
-const options = computed<DropdownOption[]>(() =>
-  rawOptions.value.map((option) => ({
-    ...option,
-    label: Number.isNaN(Number(option.label))
-      ? option.label
-      : t("pagination.per-page", { count: option.label }),
-  })),
-);
 
 const smallestLimit = computed(() =>
   Math.min(

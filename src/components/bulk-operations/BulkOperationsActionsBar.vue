@@ -1,13 +1,12 @@
 <template>
-  <!-- selection-action-bar.md: one bordered surface; the border firms up once
-       something is selected. -->
+  <!-- Sits in the list's results band (templates/elody-list-screen), which
+       draws the surface. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
     v-show="hasContent"
     role="toolbar"
     :aria-label="t('bulk-operations.selection-toolbar')"
-    class="flex flex-wrap items-center gap-(--selection-bar-gap) p-(--selection-bar-padding) bg-surface border rounded-button text-ui"
-    :class="itemsSelected ? 'border-border-default' : 'border-border-subtle'"
+    class="flex flex-wrap items-center gap-(--selection-bar-gap) text-ui"
   >
     <!-- Mounted while empty, so screen readers announce the first selection. -->
     <span role="status" class="font-bold">{{

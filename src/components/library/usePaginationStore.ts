@@ -108,18 +108,3 @@ export const createPaginationStore = () => {
 
 export type PaginationStore = ReturnType<typeof createPaginationStore>;
 export const PaginationStoreKey = Symbol("PaginationStore");
-
-export type PageItem = number | "…";
-
-// The pager's numbered buttons: first, last and the current page's neighbours,
-// with an ellipsis for each gap (a gap of one page shows that page instead).
-export const pageItems = (current: number, last: number): PageItem[] => {
-  const pages = [...new Set([1, current - 1, current, current + 1, last])]
-    .filter((page) => page >= 1 && page <= last)
-    .sort((a, b) => a - b);
-  return pages.flatMap((page, index): PageItem[] => {
-    const gap = index ? page - pages[index - 1] : 1;
-    if (gap === 2) return [page - 1, page];
-    return gap > 2 ? ["…", page] : [page];
-  });
-};

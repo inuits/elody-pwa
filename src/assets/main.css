@@ -403,13 +403,16 @@
   /* Item ink; a destructive item (tone Danger) switches it to danger ink */
   --menu-item-ink: var(--color-text-body);
 
-  /* Pager (components/pagination.md): current page filled in dark accent (7:1 on white) */
+  /* Pager (components/pagination.md): « ‹ page [n] of N › » */
   --pager-button-size: 24px;
   --pager-gap: 2px;
-  --pager-current-bg: var(--color-accent-dark);
+  --pager-input-width: 3.5rem;
+
+  /* List results band (components/entity-list.md): count, pager, view
+     modes, page size, sort and the selection bar in one row */
+  --list-band-pad: 8px 16px;
 
   /* Selection bar (components/selection-bar.md) */
-  --selection-bar-padding: 6px 10px;
   --selection-bar-gap: 8px;
 
   /* Split button (components/menu.md): primary + chevron in one capsule */

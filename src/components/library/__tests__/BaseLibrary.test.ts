@@ -822,12 +822,49 @@ describe("BaseLibrary.vue pager and page size", () => {
     ).toBe(true);
   });
 
-  it("keeps the pager above the list when the library bar is disabled", async () => {
+  it("keeps the pager when the library bar is disabled", async () => {
     libPaginationTotalPages.value = 4;
     wrapper = getWrapper({ disableLibraryBar: true });
     await flushPromises();
 
     expect(wrapper.find(paginationSelector).exists()).toBe(true);
+  });
+
+  it("puts the selection bar's actions in the same header band", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      enableBulkOperations: true,
+    });
+    await flushPromises();
+
+    expect(
+      wrapper
+        .find('[data-cy="list-header"]')
+        .findComponent({ name: "BulkOperationsActionsBar" })
+        .exists(),
+    ).toBe(true);
+  });
+
+  it("styles the header of the main library as the accent-light results band", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toEqual(
+      expect.arrayContaining(["bg-surface-panel-header", "border-border-panel"]),
+    );
+  });
+
+  it("leaves a compact relation list's header unstyled", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).not.toContain(
+      "bg-surface-panel-header",
+    );
   });
 
   it("has no list footer", async () => {

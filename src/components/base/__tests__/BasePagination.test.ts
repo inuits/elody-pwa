@@ -1,9 +1,8 @@
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect } from "vitest";
 import BasePagination from "../BasePagination.vue";
 import {
   createPaginationStore,
-  pageItems,
   PaginationStoreKey,
 } from "@/components/library/usePaginationStore";
 
@@ -21,26 +20,8 @@ const getWrapper = (total: number, page = 1) => {
   return { wrapper, store };
 };
 
-const pageButtons = (wrapper: ReturnType<typeof getWrapper>["wrapper"]) =>
-  wrapper.findAll('[data-cy="pager-page"]').map((b) => b.text());
-
-describe("pageItems", () => {
-  it("lists every page when there are few", () => {
-    expect(pageItems(2, 5)).toEqual([1, 2, 3, 4, 5]);
-  });
-
-  it("keeps the first, last and neighbours of the current page, with gaps", () => {
-    expect(pageItems(10, 63)).toEqual([1, "…", 9, 10, 11, "…", 63]);
-  });
-
-  it("shows a single hidden page instead of an ellipsis", () => {
-    expect(pageItems(4, 63)).toEqual([1, 2, 3, 4, 5, "…", 63]);
-  });
-
-  it("returns nothing for an empty list", () => {
-    expect(pageItems(1, 0)).toEqual([]);
-  });
-});
+const button = (wrapper: ReturnType<typeof getWrapper>["wrapper"], cy: string) =>
+  wrapper.find(`[data-cy="pager-${cy}"]`);
 
 describe("BasePagination", () => {
   it("is a navigation landmark", () => {
@@ -48,62 +29,65 @@ describe("BasePagination", () => {
     expect(nav.attributes("aria-label")).toBe("pagination.label");
   });
 
-  it("marks the current page", () => {
-    const current = getWrapper(100, 3).wrapper.find('[aria-current="page"]');
-    expect(current.text()).toBe("3");
+  it("reads 'page [n] of N' like the list-screen template", () => {
+    const { wrapper } = getWrapper(100, 3);
+    expect(wrapper.find("input").element.value).toBe("3");
+    expect(wrapper.text()).toContain("pagination.page");
+    expect(wrapper.text()).toContain("pagination.of");
+    expect(wrapper.find('[data-cy="pager-last-page"]').text()).toBe("5");
   });
 
-  it("disables previous on the first page", () => {
+  it("names every arrow button", () => {
+    const { wrapper } = getWrapper(100, 3);
+    expect(
+      ["first", "previous", "next", "last"].map((cy) =>
+        button(wrapper, cy).attributes("aria-label"),
+      ),
+    ).toEqual([
+      "pagination.first",
+      "pagination.previous",
+      "pagination.next",
+      "pagination.last",
+    ]);
+  });
+
+  it("disables first and previous on the first page", () => {
     const { wrapper } = getWrapper(100, 1);
-    expect(
-      wrapper.find('[data-cy="pager-previous"]').attributes("disabled"),
-    ).toBeDefined();
-    expect(
-      wrapper.find('[data-cy="pager-next"]').attributes("disabled"),
-    ).toBeUndefined();
+    expect(button(wrapper, "first").attributes("disabled")).toBeDefined();
+    expect(button(wrapper, "previous").attributes("disabled")).toBeDefined();
+    expect(button(wrapper, "next").attributes("disabled")).toBeUndefined();
   });
 
-  it("disables next on the last page", () => {
+  it("disables next and last on the last page", () => {
     const { wrapper } = getWrapper(100, 5);
-    expect(
-      wrapper.find('[data-cy="pager-next"]').attributes("disabled"),
-    ).toBeDefined();
+    expect(button(wrapper, "next").attributes("disabled")).toBeDefined();
+    expect(button(wrapper, "last").attributes("disabled")).toBeDefined();
   });
 
-  it("goes to the clicked page", async () => {
+  it("jumps to the last page", async () => {
     const { wrapper, store } = getWrapper(100, 1);
-    const page5 = wrapper
-      .findAll('[data-cy="pager-page"]')
-      .find((button) => button.text() === "5");
-    await page5!.trigger("click");
+    await button(wrapper, "last").trigger("click");
     expect(store.currentPage.value).toBe(5);
   });
 
-  it("names the arrow buttons", () => {
-    const { wrapper } = getWrapper(100, 2);
+  it("goes to the page typed in the box on Enter", async () => {
+    const { wrapper, store } = getWrapper(100, 1);
+    const input = wrapper.find("input");
+    await input.setValue("4");
+    await input.trigger("keyup", { key: "Enter" });
+    await flushPromises();
+    expect(store.currentPage.value).toBe(4);
+  });
+
+  it("names the page box", () => {
     expect(
-      wrapper.find('[data-cy="pager-previous"]').attributes("aria-label"),
-    ).toBe("pagination.previous");
-    expect(
-      wrapper.find('[data-cy="pager-next"]').attributes("aria-label"),
-    ).toBe("pagination.next");
+      getWrapper(100).wrapper.find("input").attributes("aria-label"),
+    ).toBe("pagination.page-number");
   });
 
   it("marks the last page as an estimate when the count is capped", () => {
     // 1001 is the backend's "more than 1000" sentinel: 50 pages of 20.
     const { wrapper } = getWrapper(1001, 1);
-    expect(pageButtons(wrapper).at(-1)).toBe("50+");
-  });
-
-  it("moves focus between pager buttons with the arrow keys", async () => {
-    const { wrapper } = getWrapper(100, 1);
-    document.body.appendChild(wrapper.element);
-    const buttons = wrapper.findAll("button:not([disabled])");
-    (buttons[0].element as HTMLElement).focus();
-
-    await wrapper.find("nav").trigger("keydown", { key: "ArrowRight" });
-
-    expect(document.activeElement).toBe(buttons[1].element);
-    wrapper.unmount();
+    expect(wrapper.find('[data-cy="pager-last-page"]').text()).toBe("50+");
   });
 });

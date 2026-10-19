@@ -61,7 +61,7 @@ const emit = defineEmits<{ (event: "revealExactCount"): void }>();
 const { t, locale } = useI18n();
 
 const chipClasses =
-  "inline-flex items-center p-(--chip-padding) rounded-chip text-chip font-bold bg-chip-neutral-bg text-chip-neutral-text";
+  "inline-flex items-center p-(--chip-padding) rounded-chip text-chip font-bold bg-surface text-text-panel-header";
 
 const revealable = computed(() =>
   canRevealExactCount(props.count, props.exactCount),

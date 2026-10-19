@@ -45,14 +45,13 @@ describe("PageSizeSelect", () => {
     mocks.state = undefined;
   });
 
-  it("labels each option as n per page", async () => {
-    const { wrapper } = await getWrapper();
+  it("reads 'Items: 20' like the list-screen template", async () => {
+    const dropdown = (await getWrapper()).wrapper.findComponent(AdvancedDropdown);
+    expect(dropdown.props("label")).toBe("library.items");
+    expect(dropdown.props("addLabelToValue")).toBe(true);
     expect(
-      wrapper
-        .findComponent(AdvancedDropdown)
-        .props("options")
-        .map((option: { label: string }) => option.label),
-    ).toEqual(["pagination.per-page:20", "pagination.per-page:50"]);
+      dropdown.props("options").map((option: { label: string }) => option.label),
+    ).toEqual(["20", "50"]);
   });
 
   it("names the select for screen readers", async () => {

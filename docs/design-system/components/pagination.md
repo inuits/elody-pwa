@@ -10,34 +10,33 @@ Every paged list. Not when the list fits on one page: the pager hides, and
 the page size hides while the total fits on the smallest option.
 
 ## Anatomy
-In the list header row (`templates/elody-list-screen`, chosen over the
-handoff's footer placement): count chip · pager · view modes · page size ·
-sort. Lists whose library bar is disabled show the pager above the list.
-- Page size: an `AdvancedDropdown` reading "20 per page"
-  (`pagination.per-page`; config labels are bare numbers, other labels are
-  translation keys).
-- Pager: ‹ · numbered pages · ›. Page 1, the last page and the current
-  page's neighbours are shown; a gap becomes "…" (a gap of one page shows
-  that page). Buttons are `--pager-button-size` high, `--radius-input`,
-  `--text-ui`, `--pager-gap` apart; hover = row-hover fill.
-- Current page: `--pager-current-bg` (dark accent) with white bold numeral.
-- Capped total: the last page reads "50+", with a "?" tooltip
+Follows `templates/elody-list-screen` (chosen over the handoff's footer
+placement and numbered pages). In the list's results band
+([entity list](./entity-list.md)): count chip · pager · view modes · page
+size · sort · selection bar.
+- Pager: « ‹ page [n] of N › ». First / previous / next / last are
+  `--pager-button-size` icon buttons (`--radius-input`, hover = row-hover
+  fill); the page box is a `BaseInputTextNumberDatetime`
+  (`--pager-input-width`) that jumps on Enter or blur; an out-of-range
+  number snaps back. Text `--text-label` in `--color-text-panel-header`.
+- Capped total: "of 50+", with a "?" tooltip
   (`pagination.capped-pages-tooltip`).
-- The total lives in the list header count chip ([entity list](./entity-list.md)),
-  never here.
+- Page size: an `AdvancedDropdown` reading "Items: 20" (`library.items`).
+- The total lives in the count chip, never here.
 
 ## States
 | State | Cue |
 |---|---|
-| first / last page | ‹ / › disabled |
+| first / last page | « ‹ / › » disabled |
 | one page | pager hidden |
+| total fits the smallest page size | page size hidden |
 | page size change | back to page 1 |
 
 ## Accessibility
-- `<nav aria-label="Pagination">`; current page `aria-current="page"`.
-- ‹ / › named "Previous page" / "Next page"; disabled edges are real
-  disabled buttons.
-- ←/→ move focus between the pager's buttons; Enter/Space activate.
+- `<nav aria-label="Pagination">`.
+- Arrows named "First page", "Previous page", "Next page", "Last page";
+  disabled edges are real disabled buttons. The page box is named "Page
+  number".
 - The page-size select has a hidden `<label>` "Results per page".
 
 ## Not yet
