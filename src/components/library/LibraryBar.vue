@@ -26,15 +26,18 @@
         v-if="sortOptions.length > 0"
         class="flex items-center w-full @md:w-auto"
       >
-        <AdvancedDropdown
-          class="w-full @md:w-auto"
+        <!-- ui_kits/clients: one "⇅ Descending" toggle, not a dropdown. -->
+        <BaseButtonNew
+          class="!w-auto"
           data-cy="sort-toggle"
-          v-model="selectedSortDirection"
-          :options="sortDirectionOptions"
-          :label="t('library.sort-direction')"
-          :clearable="false"
-          :add-icon-to-value="true"
-          label-position="inline"
+          button-size="sm"
+          :icon="selectedSortDirection === 'asc' ? DamsIcons.SortUp : DamsIcons.SortDown"
+          :label="t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')"
+          :aria-label="`${t('library.sort-direction')}: ${t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')}`"
+          @click="
+            selectedSortDirection =
+              selectedSortDirection === 'asc' ? 'desc' : 'asc'
+          "
         />
       </div>
       <div
@@ -82,6 +85,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { useImport } from "@/composables/useImport";
 import { useGroupByOptions } from "@/composables/useGroupByOptions";
@@ -117,11 +121,7 @@ const isAsc = ref<boolean>(false);
 const selectedSortOption = ref<any>();
 const sortOptions = ref<DropdownOption[]>([]);
 const sortOptionsPromiseIsResolved = ref<boolean>(false);
-const selectedSortDirection = ref<any>();
-const sortDirectionOptions = ref<DropdownOption[]>([
-  { label: "library.desc", value: "desc", icon: DamsIcons.SortDown },
-  { label: "library.asc", value: "asc", icon: DamsIcons.SortUp },
-]);
+const selectedSortDirection = ref<"asc" | "desc">();
 const { getStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
 const { t } = useI18n();
@@ -209,11 +209,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       const isAscFromState = stateIsAsc !== undefined ? stateIsAsc : apiIsAsc;
 
       const sortOrder = isAscFromState ? "asc" : "desc";
-      const matchedOption = sortDirectionOptions.value.find(
-        (option) => option.value === sortOrder,
-      );
-
-      selectedSortDirection.value = matchedOption?.value;
+      selectedSortDirection.value = sortOrder;
       setIsAsc(sortOrder);
       props.setSortOrder(isAsc.value, false);
 

@@ -187,6 +187,31 @@ describe("LibraryBar.vue Sort Logic", () => {
     expect(setSortOrderMock).toHaveBeenCalledWith(false, false);
   });
 
+  it("flips the sort direction from one toggle button", async () => {
+    wrapper = createWrapper();
+    (apolloClient.query as any).mockResolvedValue({
+      data: {
+        EntityTypeSortOptions: {
+          sortOptions: { isAsc: "desc", options: [{ label: "ID", value: "id" }] },
+        },
+      },
+    });
+    getStateForRouteMock.mockReturnValue({});
+    await wrapper.emitted("sortOptionsPromise")[0][0]("entity");
+    await flushPromises();
+    setSortOrderMock.mockClear();
+    const toggle = wrapper.find('button[data-cy="sort-toggle"]');
+
+    expect(toggle.text()).toBe("library.desc");
+    await toggle.trigger("click");
+    await flushPromises();
+
+    expect(setSortOrderMock).toHaveBeenCalledWith(true, true);
+    expect(wrapper.find('button[data-cy="sort-toggle"]').text()).toBe(
+      "library.asc",
+    );
+  });
+
   it("triggers watcher and calls setSortOrder(val, true) when sort direction changes", async () => {
     wrapper = createWrapper();
 
@@ -261,7 +286,7 @@ describe("LibraryBar.vue Simple Search", () => {
     return wrapper;
   };
 
-  it("leaves the page size to the list footer", async () => {
+  it("leaves the page size to the list header", async () => {
     const wrapper = await mountWithRouteMeta({});
     expect(wrapper.emitted("paginationLimitOptionsPromise")).toBeUndefined();
   });
