@@ -71,6 +71,13 @@ export type ParentRelation = {
   relationType: string;
 };
 
+export const toParentRelation = (
+  relationType?: string,
+  id?: string,
+  type?: Entitytyping,
+): ParentRelation | undefined =>
+  relationType && id && type ? { id, type, relationType } : undefined;
+
 export const saveRelatedEntityData = async (
   entityId: string,
   relatedEntities: Entity[],
@@ -95,29 +102,28 @@ export const saveRelatedEntityData = async (
       unwrapFormatterValue(value);
   }
 
+  // The form lives on the page entity; the relations belong to the list owner.
+  const ownerId = parentRelation?.id ?? entityId;
   const updatesOnParent: Record<string, Record<string, any>> = {};
   for (const [linkedEntityId, updates] of Object.entries(updatesByEntityId)) {
     const relatedEntity = relatedEntities.find(
       (entity) => entity.id === linkedEntityId,
     );
     if (!relatedEntity) continue;
-    const inverseRelationType = findInverseRelationType(
-      relatedEntity,
-      entityId,
-    );
+    const inverseRelationType = findInverseRelationType(relatedEntity, ownerId);
     if (!inverseRelationType) {
       if (parentRelation) updatesOnParent[linkedEntityId] = updates;
       continue;
     }
     const changedUpdates = keepChangedUpdates(
       updates,
-      findRelationMetadata(relatedEntity, inverseRelationType, entityId),
+      findRelationMetadata(relatedEntity, inverseRelationType, ownerId),
     );
     if (!Object.keys(changedUpdates).length) continue;
     await updateRelationDirect(
       relatedEntity,
       inverseRelationType,
-      entityId,
+      ownerId,
       changedUpdates,
     );
   }

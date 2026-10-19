@@ -19,6 +19,7 @@ vi.mock("@/composables/useFormHelper", () => ({
 import {
   updateRelationDirect,
   saveRelatedEntityData,
+  toParentRelation,
 } from "@/composables/useUpdateRelation";
 
 const makeEntity = (
@@ -454,6 +455,34 @@ describe("saveRelatedEntityData", () => {
       expect(mockMutate).not.toHaveBeenCalled();
     });
 
+    it("uses the owner's inverse relation, not the page entity's, when they differ", async () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relatedEntityData: { metadata: {}, relations: { "order-M-1": 2 } },
+        },
+      });
+      const related = makeEntity("M-1", {
+        ref_web_script: [
+          { key: "WBS-1", metadata: [{ key: "order", value: 5 }] },
+        ],
+        ref_inscription: [
+          { key: "WBI-1", metadata: [{ key: "order", value: 1 }] },
+        ],
+      });
+
+      await saveRelatedEntityData("WBS-1", [related], parentRelation as any);
+
+      expect(mockQuery).not.toHaveBeenCalled();
+      expect(mockMutate).toHaveBeenCalledOnce();
+      const { variables } = mockMutate.mock.calls[0][0];
+      expect(variables.id).toBe("M-1");
+      const byKey = Object.fromEntries(
+        variables.formInput.relations.map((r: any) => [r.key, r]),
+      );
+      expect(byKey["WBI-1"].metadata).toEqual([{ key: "order", value: 2 }]);
+      expect(byKey["WBS-1"].editStatus).toBe(EditStatus.Unchanged);
+    });
+
     it("does not save without the parent relation to fall back to", async () => {
       mockGetForm.mockReturnValue({
         values: {
@@ -467,4 +496,27 @@ describe("saveRelatedEntityData", () => {
       expect(mockMutate).not.toHaveBeenCalled();
     });
   });
+});
+
+describe("toParentRelation", () => {
+  it("builds the parent relation from the list owner", () => {
+    expect(
+      toParentRelation("ref_mediafiles", "WBI-1", "web_inscription" as any),
+    ).toEqual({
+      id: "WBI-1",
+      type: "web_inscription",
+      relationType: "ref_mediafiles",
+    });
+  });
+
+  it.each([
+    [undefined, "WBI-1", "web_inscription"],
+    ["ref_mediafiles", undefined, "web_inscription"],
+    ["ref_mediafiles", "WBI-1", undefined],
+  ])(
+    "returns nothing when part of the owner is missing (%s, %s, %s)",
+    (relationType, id, type) => {
+      expect(toParentRelation(relationType, id, type as any)).toBeUndefined();
+    },
+  );
 });

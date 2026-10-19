@@ -170,7 +170,9 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap && !displayPipeline && !isTableGrouped"
+            :show-pagination="
+              !displayMap && !displayPipeline && !isTableGrouped
+            "
             :is-loading="isInitialLoading"
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
@@ -424,7 +426,10 @@ import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useEntityNavigation } from "@/composables/useEntityNavigation";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { saveRelatedEntityData } from "@/composables/useUpdateRelation";
+import {
+  saveRelatedEntityData,
+  toParentRelation,
+} from "@/composables/useUpdateRelation";
 import { useMaps } from "@/composables/useMaps";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useViewModes } from "@/composables/useViewModes";
@@ -1138,20 +1143,14 @@ const syncEditStateCallbacks = (): void => {
   );
   const entityId = getEntityUuid();
   if (!entityId) return;
-  const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}`;
+  const ownerId = props.parentEntityIdentifiers?.[0];
+  // Unique per list: a duplicate name replaces the earlier list's callback.
+  const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}-${props.relationType ?? ""}-${ownerId ?? ""}`;
   useEditHelper.addMutationCallback(callbackName, () =>
     saveRelatedEntityData(
       entityId,
       entities.value ?? [],
-      props.relationType &&
-        props.parentEntityIdentifiers[0] &&
-        props.parentEntityType
-        ? {
-            id: props.parentEntityIdentifiers[0],
-            type: props.parentEntityType,
-            relationType: props.relationType,
-          }
-        : undefined,
+      toParentRelation(props.relationType, ownerId, props.parentEntityType),
     ),
   );
 };
