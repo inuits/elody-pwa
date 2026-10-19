@@ -41,4 +41,57 @@ describe("FiltersListItemPanel", () => {
       "filters.clear-filter",
     );
   });
+
+  describe("text filter form (catalogue TextFilter)", () => {
+    const two = [
+      { label: "contains", value: "ContainsMatcher" },
+      { label: "exact", value: "ExactInputMatcher" },
+    ];
+    const mountWith = (matchers: unknown[], selectedMatcher: string) =>
+      shallowMount(FiltersListItemPanel, {
+        props: { matchers, selectedMatcher, defaultLabel: "" },
+        slots: { default: '<input data-cy="matcher-input" />' },
+      });
+
+    it("puts the mode inside the input box as a prefix", () => {
+      const box = mountWith(two, "ContainsMatcher").find(
+        '[data-cy="filter-input-box"]',
+      );
+      expect(box.classes()).toEqual(
+        expect.arrayContaining(["border", "border-border-default", "rounded-input"]),
+      );
+      expect(box.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(true);
+      expect(box.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
+    it("keeps the filled clear button beside the box", () => {
+      const wrapper = mountWith(two, "ContainsMatcher");
+      expect(
+        wrapper
+          .find('[data-cy="filter-input-box"]')
+          .findComponent({ name: "BaseButtonNew" })
+          .exists(),
+      ).toBe(false);
+      expect(wrapper.findComponent({ name: "BaseButtonNew" }).exists()).toBe(true);
+    });
+
+    it("has no mode when the filter offers a single matcher", () => {
+      const wrapper = mountWith([two[0]], "ContainsMatcher");
+      expect(wrapper.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(
+        false,
+      );
+      expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
+    it("stacks the mode above matchers with two fields or a slider", () => {
+      const wrapper = mountWith(
+        [...two, { label: "between", value: "InBetweenMatcher" }],
+        "InBetweenMatcher",
+      );
+      expect(wrapper.find('[data-cy="filter-input-box"]').exists()).toBe(false);
+      expect(wrapper.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(
+        true,
+      );
+    });
+  });
 });
