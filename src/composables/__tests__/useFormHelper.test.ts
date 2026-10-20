@@ -254,6 +254,17 @@ describe("useFormHelper - getEditableMetadataKeys", () => {
     const keys = getEditableMetadataKeys(columnList, "test-include-metadata-relation");
     expect(keys).toContain("ref_booking_agency");
   });
+
+  it("keeps keys registered by components when rebuilt after an entity refetch", () => {
+    const formId = "test-keep-registered-keys";
+    const columnList = { title: makePanelMetaData("title") };
+    getEditableMetadataKeys(columnList, formId);
+    addEditableMetadataKeys(["reading"], formId);
+
+    const keys = getEditableMetadataKeys(columnList, formId);
+
+    expect(keys).toEqual(["title", "reading"]);
+  });
 });
 
 describe("useFormHelper - extractMetadataValue", () => {
