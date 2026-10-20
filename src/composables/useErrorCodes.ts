@@ -344,8 +344,10 @@ export const useErrorCodes = (): {
       return "";
     }
 
+    const responseBody = error.response.errors[0]?.extensions?.response?.body;
     const graphqlErrorMessage =
-      error.response.errors[0]?.extensions?.response?.body?.message ||
+      responseBody?.message ||
+      (typeof responseBody === "string" && responseBody) ||
       error.response.errors[0]?.message;
 
     const { code, message } =
