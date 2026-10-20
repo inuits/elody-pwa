@@ -161,8 +161,11 @@ const useFormHelper = () => {
         return;
       keyArray.push(getKeyBasedOnInputField(metadataItem));
     });
-    editableFields.value[formId] = keyArray;
-    return keyArray;
+    const merged = [
+      ...new Set([...keyArray, ...(editableFields.value[formId] ?? [])]),
+    ];
+    editableFields.value[formId] = merged;
+    return merged;
   };
 
   const addEditableMetadataKeys = (keys: string[], formId: string): void => {
