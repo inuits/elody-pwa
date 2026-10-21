@@ -1,5 +1,5 @@
 ### Base stage
-FROM node:22-bookworm-slim AS base
+FROM node:22.23.4-bookworm-slim AS base
 
 RUN npm install -g pnpm@10.33.4
 WORKDIR /app
@@ -29,7 +29,7 @@ RUN pnpm run test:unit -- --maxWorkers=2
 # and slows down every client pipeline that pulls it.
 # The COPY --from=test-stage line forces the unit tests to run even though
 # this stage does not otherwise depend on them.
-FROM node:22-bookworm-slim AS build-stage
+FROM node:22.23.4-bookworm-slim AS build-stage
 COPY --from=test-stage /app/package.json /tmp/.unit-tests-passed
 WORKDIR /app
 COPY . .
