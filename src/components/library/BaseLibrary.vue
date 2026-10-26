@@ -179,7 +179,8 @@
               enableBulkOperations &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
-            class="px-(--list-band-pad) py-2 border-b border-border-subtle"
+            class="py-2 border-b border-border-subtle"
+            :class="{ 'px-(--list-band-pad)': hasResultsBand }"
             :create-in-page-header="
               ownsRouteState &&
               !isSearchLibrary &&

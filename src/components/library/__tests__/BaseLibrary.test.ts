@@ -1307,7 +1307,7 @@ describe("BaseLibrary.vue inside a detail panel", () => {
   it("draws no results band or border of its own (never a box inside a panel)", async () => {
     mockRoute.path = "/test";
     const wrapper = getWrapper(
-      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary, enableBulkOperations: true },
       { InsidePanel: true },
     );
     await flushPromises();
@@ -1319,6 +1319,9 @@ describe("BaseLibrary.vue inside a detail panel", () => {
       "border-border-panel",
     );
     expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
+    expect(
+      wrapper.findComponent({ name: "BulkOperationsActionsBar" }).classes(),
+    ).not.toContain("px-(--list-band-pad)");
     wrapper.unmount();
   });
 });
