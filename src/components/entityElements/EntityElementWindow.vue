@@ -115,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, useId } from "vue";
+import { computed, onMounted, useId, provide } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
@@ -133,6 +133,9 @@ import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
+
+// Lists and viewers inside know they sit in a panel (no chrome of their own).
+provide("InsidePanel", true);
 
 const titleId = useId();
 const props = defineProps<{

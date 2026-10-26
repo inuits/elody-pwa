@@ -8,7 +8,7 @@
     >
       <template #content>
         <div
-          class="flex flex-col gap-3 mx-1 mb-1 p-3 bg-background-normal rounded-b"
+          class="flex flex-col gap-3"
         >
           <div v-if="canPost && !isComposerOpen" class="self-start">
             <base-button-new

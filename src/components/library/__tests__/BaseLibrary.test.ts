@@ -257,11 +257,15 @@ const config = {
   },
 };
 
-const getWrapper = (props: Record<string, unknown> = {}) =>
+const getWrapper = (
+  props: Record<string, unknown> = {},
+  extraProvide: Record<string, unknown> = {},
+) =>
   shallowMount(BaseLibrary, {
     props: { ...getDefaultProps(), ...props },
     global: {
       provide: {
+        ...extraProvide,
         config,
         [DefaultApolloClient as symbol]: { query: vi.fn(), mutate: vi.fn() },
         IsPreviewElement: false,
@@ -1295,6 +1299,26 @@ describe("BaseLibrary.vue filter rail width", () => {
     expect(wrapper.find(".grid").classes()).toContain(
       "grid-cols-[30%_70%]",
     );
+    wrapper.unmount();
+  });
+});
+
+describe("BaseLibrary.vue inside a detail panel", () => {
+  it("draws no results band or border of its own (never a box inside a panel)", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).not.toContain(
+      "bg-surface-panel-header",
+    );
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).not.toContain(
+      "border-border-panel",
+    );
+    expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
     wrapper.unmount();
   });
 });

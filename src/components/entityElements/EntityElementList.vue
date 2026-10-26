@@ -24,18 +24,7 @@
       "
     >
       <template v-slot:content>
-        <div
-          v-if="!requiresCustomQuery || queryLoaded"
-          :class="[
-            {
-              'mx-1 pb-2 bg-background-normal':
-                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode ===
-                  BaseLibraryModes.BasicBaseLibraryWithBorder ||
-                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
-            },
-          ]"
-        >
+        <div v-if="!requiresCustomQuery || queryLoaded">
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
             class="flex-1"

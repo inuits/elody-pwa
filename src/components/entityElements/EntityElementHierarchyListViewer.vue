@@ -7,7 +7,7 @@
     class="flex flex-col h-full"
   >
     <template v-slot:content>
-      <div class="mx-1 mb-1 pb-1 bg-background-normal">
+      <div>
         <div
           v-show="isLoading"
           class="min-h-[20rem] w-full flex justify-center items-center"

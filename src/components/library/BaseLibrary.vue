@@ -19,11 +19,11 @@
     </div>
     <div
       v-else
-      class="@container bg-background-normal grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
+      class="@container grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
       :class="wrapperClasses"
     >
       <div
-        class="z-header top-0 pt-3 pb-2 bg-background-normal"
+        class="z-header top-0 pt-3 pb-2"
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !isFiltersPanelExpanded },
@@ -734,6 +734,8 @@ const wrapperClasses = computed(() => {
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
+  // Page background only on the list's own page; inside a panel it's white.
+  if (!insidePanel) classes.push("bg-background-normal");
 
   return classes;
 });
@@ -939,9 +941,13 @@ const showListPager = computed(
 );
 // Main and preview lists get the accent-light results band; compact
 // relation lists keep a plain row (it may hold only a pager).
+// Inside a detail panel the panel is the chrome: no band or border of the
+// list's own (panel → block → rows, never a fourth box).
+const insidePanel: boolean = inject("InsidePanel", false);
 const hasResultsBand = computed(
   () =>
     !props.disableLibraryBar &&
+    !insidePanel &&
     (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );

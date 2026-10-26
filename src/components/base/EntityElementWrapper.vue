@@ -1,15 +1,10 @@
 <template>
   <div
     data-cy="entity-element-wrapper"
-    :class="[
-      'bg-accent-normal rounded-t-lg',
-      { 'rounded-lg': isCollapsed },
-      {
-        'border-t-4 border-accent-normal rounded-t-none':
-          headerStyle === 'none',
-      },
-    ]"
+    class="bg-surface border border-border-panel rounded-card"
   >
+    <!-- panel-and-block-shells.md: PanelShell — white card, accent-light
+         header band; the gold section-header fill is not for panels. -->
     <div
       v-if="
         (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
@@ -17,29 +12,31 @@
           baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary) &&
         headerStyle !== 'none'
       "
+      data-cy="entity-element-wrapper-header"
       :class="[
-        'flex items-center justify-between relative',
+        'flex items-center justify-between relative p-(--panel-header-pad) bg-surface-panel-header',
+        isCollapsed ? 'rounded-card' : 'rounded-t-card border-b border-border-panel',
         { 'cursor-pointer': !isPreviewElement },
       ]"
       @click.self="emit('toggleElementCollapse', entityId, label)"
     >
-      <div class="flex p-2">
-        <span
+      <div class="flex items-center gap-2">
+        <h3
           data-cy="entity-element-wrapper-title"
-          class="subtitle mr-2"
+          class="m-0 text-(length:--text-panel-title) font-black text-text-panel-header"
           :class="[
             {
               'text-center absolute left-1/2 transform -translate-x-1/2':
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
             },
           ]"
-          >{{ previewLabel ? previewLabel : t(label) }}</span
+          >{{ previewLabel ? previewLabel : t(label) }}</h3
         >
         <slot name="actions"></slot>
       </div>
       <span
         v-if="!isPreviewElement"
-        class="p-2 text-text-subtitle"
+        class="flex text-text-panel-header"
         @click="emit('toggleElementCollapse', entityId, label)"
       >
         <unicon
@@ -49,14 +46,20 @@
     </div>
     <transition name="collapse">
       <div v-if="!useVshowInsteadOfVif && !isCollapsed">
-        <div class="h-full min-h-0 @container/wrapper-content">
+        <div
+          data-cy="entity-element-wrapper-content"
+          class="h-full min-h-0 p-(--panel-body-pad) @container/wrapper-content"
+        >
           <slot name="content"></slot>
         </div>
       </div>
     </transition>
     <transition name="collapse">
       <div v-if="useVshowInsteadOfVif" v-show="!isCollapsed">
-        <div class="h-full min-h-0 @container/wrapper-content">
+        <div
+          data-cy="entity-element-wrapper-content"
+          class="h-full min-h-0 p-(--panel-body-pad) @container/wrapper-content"
+        >
           <slot name="content"></slot>
         </div>
       </div>
@@ -68,7 +71,10 @@
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
-import { inject } from "vue";
+import { inject, provide } from "vue";
+
+// Lists and viewers inside know they sit in a panel (no chrome of their own).
+provide("InsidePanel", true);
 
 withDefaults(
   defineProps<{
