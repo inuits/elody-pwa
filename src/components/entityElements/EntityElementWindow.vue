@@ -8,21 +8,26 @@
       :orientation="element.expandButtonOptions.orientation"
       v-on:expand-media-list="resizeColumn"
     />
-    <div
-      class="h-full w-full border-solid border-neutral-30 border-2 bg-background-light rounded-t-md @container/window"
+    <!-- panel-and-block-shells.md: PanelShell — white card, 1px panel
+         border, accent-light header band, no shadow. -->
+    <section
+      role="region"
+      :aria-labelledby="titleId"
+      class="h-full w-full bg-surface border border-border-panel rounded-card @container/window"
     >
       <!-- The header wraps: in a narrow window (a WEM column) the status
            gets a line of its own instead of being squeezed. -->
       <div
         data-cy="window-header"
-        class="border-solid border-neutral-30 border-b-2 rounded-t-md flex flex-row flex-wrap"
+        class="flex flex-row flex-wrap items-center gap-2 p-(--panel-header-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card"
       >
-        <h1
+        <h3
+          :id="titleId"
           data-cy="entity-element-window-title"
-          class="subtitle text-text-body p-2"
+          class="m-0 text-(length:--text-panel-title) font-black text-text-panel-header"
         >
           {{ previewLabel ? t(previewLabel) : t(element.label) }}
-        </h1>
+        </h3>
 
         <!-- The status is as wide as its content: the whole pill at rest;
              while edited in place the dropdown (at its options' width), then
@@ -68,6 +73,8 @@
         </div>
       </div>
       <div
+        data-cy="window-body"
+        class="p-(--panel-body-pad)"
         :class="[
           {
             'grid grid-cols-2 gap-2 justify-items-center max-w-full':
@@ -78,10 +85,11 @@
         <div
           v-for="(panel, index) in filteredPanels"
           :key="index"
+          data-cy="window-block"
           :class="[
             'w-full',
             {
-              'border-solid border-neutral-30 border-b-2':
+              'border-b border-border-faint last:border-b-0':
                 props.element.layout !== WindowElementLayout.HorizontalGrid,
             },
           ]"
@@ -94,7 +102,7 @@
           />
         </div>
       </div>
-    </div>
+    </section>
     <base-expand-button
       v-if="
         element.expandButtonOptions?.shown &&
@@ -107,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from "vue";
+import { computed, onMounted, useId } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
@@ -126,6 +134,7 @@ import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 
+const titleId = useId();
 const props = defineProps<{
   element: WindowElement;
   identifiers: string[];

@@ -195,3 +195,76 @@ describe('EntityElementWindow panels', () => {
     });
   });
 });
+
+describe('EntityElementWindow as a PanelShell (panel-and-block-shells.md)', () => {
+  const mountPanel = async () => {
+    const wrapper = mount(EntityElementWindow, {
+      props: { element: { label: 'Inscription info' }, identifiers: [], formId: '1' },
+    });
+    await flushPromises();
+    return wrapper;
+  };
+
+  it('is a white card with a 1px panel border and card radius, no shadow', async () => {
+    const card = (await mountPanel()).find('[data-cy="entity-element-window"] > section');
+    expect(card.classes()).toEqual(
+      expect.arrayContaining(['bg-surface', 'border', 'border-border-panel', 'rounded-card']),
+    );
+  });
+
+  it('has the accent-light header band', async () => {
+    const header = (await mountPanel()).find('[data-cy="window-header"]');
+    expect(header.classes()).toEqual(
+      expect.arrayContaining([
+        'bg-surface-panel-header',
+        'border-b',
+        'border-border-panel',
+        'p-(--panel-header-pad)',
+      ]),
+    );
+  });
+
+  it('titles the panel as an h3 at the panel title size, in panel-header ink', async () => {
+    const title = (await mountPanel()).find('[data-cy="entity-element-window-title"]');
+    expect(title.element.tagName).toBe('H3');
+    expect(title.classes()).toEqual(
+      expect.arrayContaining([
+        'text-(length:--text-panel-title)',
+        'font-black',
+        'text-text-panel-header',
+      ]),
+    );
+  });
+
+  it('is a region named by its title', async () => {
+    const wrapper = await mountPanel();
+    const region = wrapper.find('[role="region"]');
+    const title = wrapper.find('[data-cy="entity-element-window-title"]');
+    expect(region.attributes('aria-labelledby')).toBe(title.attributes('id'));
+  });
+
+  it('separates its blocks with a faint hairline, the last one without', async () => {
+    const wrapper = mount(EntityElementWindow, {
+      props: {
+        element: {
+          label: 'W',
+          a: { __typename: 'WindowElementPanel', label: 'A' },
+          b: { __typename: 'WindowElementPanel', label: 'B' },
+        },
+        identifiers: [],
+        formId: '1',
+      },
+    });
+    await flushPromises();
+    const block = wrapper.findAll('[data-cy="window-block"]')[0];
+    expect(block.classes()).toEqual(
+      expect.arrayContaining(['border-b', 'border-border-faint', 'last:border-b-0']),
+    );
+    expect(block.classes()).not.toContain('border-b-2');
+  });
+
+  it('pads its body like a panel', async () => {
+    const body = (await mountPanel()).find('[data-cy="window-body"]');
+    expect(body.classes()).toContain('p-(--panel-body-pad)');
+  });
+});

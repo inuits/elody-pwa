@@ -102,7 +102,7 @@ const isCollapsed = (wrapper: ReturnType<typeof mountPanel>) =>
 describe("EntityElementWindowPanel header", () => {
   it("collapses the panel from a click on the header", async () => {
     const wrapper = mountPanel();
-    await wrapper.find("h2").trigger("click");
+    await wrapper.find("h4").trigger("click");
     expect(isCollapsed(wrapper)).toBe(true);
   });
 
@@ -377,5 +377,21 @@ describe("EntityElementWindowPanel — repeatable rows edited in place", () => {
     await wrapper.find('[data-cy="repeatable-remove-row"]').trigger("click");
     await flushPromises();
     expect(state.rows.removeSavedRow).not.toHaveBeenCalled();
+  });
+});
+
+describe("EntityElementWindowPanel as a BlockShell (panel-and-block-shells.md)", () => {
+  it("labels the block as an h4 in 12.5px bold body ink", () => {
+    const label = mountPanel().find("h4");
+    expect(label.text()).toContain("Status");
+    expect(label.classes()).toEqual(
+      expect.arrayContaining(["text-table", "font-bold", "text-text-body"]),
+    );
+  });
+
+  it("is unboxed, with the block's vertical padding", () => {
+    const root = mountPanel().find("[data-cy='window-panel']");
+    expect(root.classes()).toContain("py-(--block-pad-y)");
+    expect(root.classes()).not.toContain("p-2");
   });
 });
