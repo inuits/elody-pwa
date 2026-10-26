@@ -268,6 +268,38 @@ describe("useFilterOptions - multilingual (translation) values", () => {
     },
   ];
 
+  const multilingualTitleEntity = () => [
+    {
+      id: "LANG-1",
+      title: [
+        { key: "name", value: "Arabic", lang: "en" },
+        { key: "name", value: "Arabisch", lang: "nl" },
+      ],
+    },
+  ];
+
+  it("resolves a multilingual fallback title to the current locale", async () => {
+    i18nMocks.locale = "nl";
+    const { options, entities, init } = useFilterOptions();
+    await init({ entityType: "TEST_ENTITY", filterOptionsMapping: { value: "id" } });
+
+    entities.value = multilingualTitleEntity();
+
+    expect(options.value).toEqual([
+      { icon: expect.anything(), label: "Arabisch", value: "LANG-1" },
+    ]);
+  });
+
+  it("falls back to the first entry of a multilingual title for another locale", async () => {
+    i18nMocks.locale = "fr";
+    const { options, entities, init } = useFilterOptions();
+    await init({ entityType: "TEST_ENTITY", filterOptionsMapping: { value: "id" } });
+
+    entities.value = multilingualTitleEntity();
+
+    expect(options.value[0].label).toBe("Arabic");
+  });
+
   it("resolves the current locale value when label/value paths share a translation array", async () => {
     const { options, entities, init } = useFilterOptions();
 
