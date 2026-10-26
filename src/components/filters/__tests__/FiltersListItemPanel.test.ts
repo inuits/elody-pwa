@@ -32,17 +32,43 @@ describe("FiltersListItemPanel", () => {
     expect(panel().classes()).not.toContain("bg-surface-group-form");
   });
 
+  describe("clearing one filter (handoff: Wis filter link)", () => {
+    const withActive = (active: boolean) =>
+      shallowMount(FiltersListItemPanel, {
+        props: {
+          matchers: [],
+          selectedMatcher: "ContainsMatcher",
+          defaultLabel: "",
+          active,
+        },
+      });
+
+    it("offers a Clear filter link only when the filter has a value", () => {
+      expect(withActive(false).find('[data-cy="filter-clear-link"]').exists()).toBe(false);
+      expect(withActive(true).find('[data-cy="filter-clear-link"]').text()).toBe(
+        "filters.clear-filter",
+      );
+    });
+
+    it("styles it as a small label-ink link, not a commit button", () => {
+      const link = withActive(true).find('[data-cy="filter-clear-link"]');
+      expect(link.element.tagName).toBe("BUTTON");
+      expect(link.classes()).toEqual(
+        expect.arrayContaining(["text-label", "text-text-light", "underline"]),
+      );
+      expect(withActive(true).findComponent({ name: "BaseButtonNew" }).exists()).toBe(false);
+    });
+
+    it("clears the filter", async () => {
+      const wrapper = withActive(true);
+      await wrapper.find('[data-cy="filter-clear-link"]').trigger("click");
+      expect(wrapper.emitted("reset")).toHaveLength(1);
+    });
+  });
+
   it("closes the section with a faint bottom border", () => {
     expect(panel().classes()).toEqual(
       expect.arrayContaining(["border-b", "border-border-faint"]),
-    );
-  });
-
-  it("names its icon-only clear button", () => {
-    expect(
-      panel().findComponent({ name: "BaseButtonNew" }).attributes("aria-label"),
-    ).toBe(
-      "filters.clear-filter",
     );
   });
 
@@ -98,17 +124,6 @@ describe("FiltersListItemPanel", () => {
       ).toContain("[&_input:not([type=checkbox])]:!text-table");
     });
 
-    it("keeps the filled clear button beside the box", () => {
-      const wrapper = mountWith(two, "ContainsMatcher");
-      expect(
-        wrapper
-          .find('[data-cy="filter-input-box"]')
-          .findComponent({ name: "BaseButtonNew" })
-          .exists(),
-      ).toBe(false);
-      expect(wrapper.findComponent({ name: "BaseButtonNew" }).exists()).toBe(true);
-    });
-
     it("has no mode when the filter offers a single matcher", () => {
       const wrapper = mountWith([two[0]], "ContainsMatcher");
       expect(wrapper.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(
@@ -126,14 +141,14 @@ describe("FiltersListItemPanel", () => {
       expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
     });
 
-    it("gives a stacked list the full panel width, the clear button on the mode row", () => {
+    it("gives a stacked list the full panel width under the mode", () => {
       const wrapper = shallowMount(FiltersListItemPanel, {
         props: { matchers: two, selectedMatcher: "ExactAutoCompleteMatcher", defaultLabel: "", stacked: true },
         slots: { default: '<input type="checkbox" data-cy="matcher-input" />' },
       });
       expect(
         wrapper.find('[data-cy="matcher-input"]').element.parentElement!.className,
-      ).toContain("col-span-2");
+      ).toContain("row-start-2");
     });
 
     it("stacks the mode above matchers with two fields or a slider", () => {

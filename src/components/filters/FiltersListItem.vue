@@ -15,6 +15,7 @@
       :selected-matcher="selectedMatcher"
       :default-label="matcherDefaultLabel"
       :stacked="!!matcherComponentRef?.rendersList"
+      :active="filter.isActive"
       @update:selected-matcher="updateSelectedMatcher"
       @reset="resetFilter"
     >

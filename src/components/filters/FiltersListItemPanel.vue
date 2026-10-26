@@ -8,12 +8,9 @@
          two fields or a slider stack under the mode instead. One element
          tree for both forms: switching only changes classes, so the
          matcher is never remounted (it would refetch its options). -->
-    <!-- Grid: inline = [input box | ×]; stacked = [mode | ×] over the
-         matcher spanning both columns (the box wrapper becomes contents). -->
-    <div
-      class="grid grid-cols-[1fr_auto] gap-1.5"
-      :class="inlineMode ? 'items-stretch' : 'items-start'"
-    >
+    <!-- Stacked: the box wrapper becomes contents, so the mode and the
+         matcher are grid rows of their own. -->
+    <div class="grid gap-1.5">
       <div
         :data-cy="inlineMode ? 'filter-input-box' : undefined"
         :class="
@@ -28,7 +25,7 @@
           :class="
             inlineMode
               ? 'shrink-0 !min-w-0 max-w-[60%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-body)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!rounded-none [&_.control]:!bg-transparent [&_.control]:!rounded-none [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-body [&_.selectedOption]:truncate [&_.selectedOption]:block [&_.indicators-container]:!pl-0'
-              : 'col-start-1 row-start-1 self-start justify-self-start max-h-9'
+              : 'row-start-1 justify-self-start max-h-9'
           "
           :model-value="selectedMatcher"
           :options="matchers"
@@ -39,31 +36,28 @@
         />
         <div
           class="min-w-0"
-          :class="inlineMode ? 'flex-1' : 'col-span-2 row-start-2'"
+          :class="inlineMode ? 'flex-1' : 'row-start-2'"
         >
           <slot v-if="selectedMatcher" />
         </div>
       </div>
-      <BaseButtonNew
-        class="shrink-0 col-start-2 row-start-1"
-        :class="inlineMode ? '!w-auto !h-auto aspect-square' : '!w-8 h-8'"
-        label=""
-        :icon="DamsIcons.Cross"
-        :aria-label="t('filters.clear-filter')"
-        :icon-height="16"
-        :disabled="!selectedMatcher"
-        button-style="commit"
-        button-size="sm"
-        @click="$emit('reset')"
-      />
     </div>
+    <!-- filter-panel.md: "Wis filter" on an active section; it clears and
+         applies at once. -->
+    <button
+      v-if="active"
+      type="button"
+      data-cy="filter-clear-link"
+      class="self-end text-label text-text-light underline cursor-pointer"
+      @click="$emit('reset')"
+    >
+      {{ t("filters.clear-filter") }}
+    </button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import type { DropdownOption } from "@/generated-types/queries";
-import { DamsIcons } from "@/generated-types/queries";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
@@ -82,6 +76,11 @@ const props = defineProps({
   defaultLabel: {
     type: String,
     required: true,
+  },
+  // The filter has a value: offer "Clear filter".
+  active: {
+    type: Boolean,
+    default: false,
   },
   // The matcher rendered a list (checkboxes): it needs the full width.
   stacked: {
