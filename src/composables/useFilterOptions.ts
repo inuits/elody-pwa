@@ -280,7 +280,9 @@ export const useFilterOptions = () => {
 
     const baseOption = {
       icon: DamsIcons.NoIcon,
-      label: translateOptionLabel(getReadableProp(labelValue)) || getEntityTitle(entity),
+      label:
+        translateOptionLabel(getReadableProp(labelValue)) ||
+        String(resolveTranslatableValue(getEntityTitle(entity)) ?? ""),
       value: getReadableProp(valueValue) || entity.id,
     };
 
