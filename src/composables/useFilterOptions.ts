@@ -280,7 +280,10 @@ export const useFilterOptions = () => {
 
     const baseOption = {
       icon: DamsIcons.NoIcon,
-      label: translateOptionLabel(getReadableProp(labelValue)) || getEntityTitle(entity),
+      label:
+        translateOptionLabel(getReadableProp(labelValue)) ||
+        // the fallback title can itself be multilingual (e.g. a language's name)
+        String(resolveTranslatableValue(getEntityTitle(entity)) ?? ""),
       value: getReadableProp(valueValue) || entity.id,
     };
 
