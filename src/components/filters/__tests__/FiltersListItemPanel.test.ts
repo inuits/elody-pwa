@@ -68,14 +68,14 @@ describe("FiltersListItemPanel", () => {
       expect(box.find('[data-cy="matcher-input"]').exists()).toBe(true);
     });
 
-    it("draws the mode as a small muted prefix segment", () => {
+    it("draws the mode as a small grey prefix segment in body ink (mockup)", () => {
       const prefix = mountWith(two, "ContainsMatcher")
         .find('[data-cy="filter-input-box"]')
         .findComponent({ name: "AdvancedDropdown" });
       expect(prefix.classes()).toEqual(
         expect.arrayContaining([
           "[--vs-font-size:var(--text-hint)]",
-          "[--vs-text-color:var(--color-text-muted)]",
+          "[--vs-text-color:var(--color-text-body)]",
           "bg-surface-muted",
         ]),
       );

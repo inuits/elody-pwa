@@ -27,7 +27,7 @@
           data-cy="filter-matcher-dropdown"
           :class="
             inlineMode
-              ? 'shrink-0 !min-w-0 max-w-[55%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-muted)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!rounded-none [&_.control]:!bg-transparent [&_.control]:!rounded-none [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-muted [&_.selectedOption]:truncate [&_.selectedOption]:block'
+              ? 'shrink-0 !min-w-0 max-w-[60%] border-r border-border-subtle bg-surface-muted [--vs-font-size:var(--text-hint)] [--vs-text-color:var(--color-text-body)] [--vs-padding:var(--chip-padding)] [--vs-indicator-icon-size:var(--menu-icon-size)] [&_.vue-select]:!bg-transparent [&_.vue-select]:!rounded-none [&_.control]:!bg-transparent [&_.control]:!rounded-none [&_.vue-select]:!text-hint [&_.selectedOption]:!text-text-body [&_.selectedOption]:truncate [&_.selectedOption]:block [&_.indicators-container]:!pl-0'
               : 'col-start-1 row-start-1 self-start justify-self-start max-h-9'
           "
           :model-value="selectedMatcher"
