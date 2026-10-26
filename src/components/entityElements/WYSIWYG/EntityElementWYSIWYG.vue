@@ -33,13 +33,13 @@
       <metadata-title :metadata="element" :is-locked="isLocked" />
       <WYSIGYGVirtualKeyboard
         v-if="
-          wysiwygElementConfiguration.virtualKeyboardLayouts &&
+          wysiwygElementConfiguration?.virtualKeyboardLayouts &&
           isEditable &&
           !isLocked
         "
         :editor="editor"
         :keyboardClass="element.metadataKey"
-        :extra-layouts="wysiwygElementConfiguration.virtualKeyboardLayouts"
+        :extra-layouts="wysiwygElementConfiguration?.virtualKeyboardLayouts"
       />
       <WYSIWYGTransliterationToggle
         v-if="
@@ -104,7 +104,7 @@
       </Transition>
       <div class="flex">
         <div
-          v-if="wysiwygElementConfiguration.showLineNumbers"
+          v-if="wysiwygElementConfiguration?.showLineNumbers"
           class="mt-[3px]"
         >
           <div

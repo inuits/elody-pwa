@@ -103,7 +103,10 @@
             "
             class="mr-2"
           >
-            <BaseToggleGroup :toggles="toggles" />
+            <BaseToggleGroup
+              :toggles="toggles"
+              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
+            />
           </div>
           <div
             v-if="
@@ -170,7 +173,9 @@
             :parent-entity-id="props.parentEntityIdentifiers[0]"
             :selected-pagination-limit-option="paginationStore.limit.value"
             :total-items="totalEntityCount || NaN"
-            :show-pagination="!displayMap && !displayPipeline && !isTableGrouped"
+            :show-pagination="
+              !displayMap && !displayPipeline && !isTableGrouped
+            "
             :is-loading="isInitialLoading"
             :page-item-ids="
               (predefinedEntities ?? entities).map((entity) => entity.uuid)
@@ -406,6 +411,7 @@ import { useGroupedEntities } from "@/components/library/view-modes/composables/
 import { UploadStatus } from "@/composables/upload/types";
 import useUpload from "@/composables/upload/useUpload";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { trackSearch, trackViewMode } from "@/analytics/usageAnalytics";
 import {
   breadcrumbPathFinished,
   breadcrumbRoutes,
@@ -427,7 +433,10 @@ import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useEntityNavigation } from "@/composables/useEntityNavigation";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { saveRelatedEntityData } from "@/composables/useUpdateRelation";
+import {
+  saveRelatedEntityData,
+  toParentRelation,
+} from "@/composables/useUpdateRelation";
 import { useMaps } from "@/composables/useMaps";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useViewModes } from "@/composables/useViewModes";
@@ -780,6 +789,7 @@ if (
 
 const handleSetSimpleSearch = async (value: string) => {
   simpleSearchTerm.value = value;
+  trackSearch(value, { scope: "library", entity_type: entityType.value });
   const searchFilters: AdvancedFilterInput[] = value
     ? [
         ...(filtersBaseAPI.value?.getHiddenFiltersForApi() ?? []),
@@ -1141,18 +1151,14 @@ const syncEditStateCallbacks = (): void => {
   );
   const entityId = getEntityUuid();
   if (!entityId) return;
-  const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}`;
+  const ownerId = props.parentEntityIdentifiers?.[0];
+  // Unique per list: a duplicate name replaces the earlier list's callback.
+  const callbackName = `saveRelatedEntityData-${props.useOtherQuery?.name ?? "default"}-${props.relationType ?? ""}-${ownerId ?? ""}`;
   useEditHelper.addMutationCallback(callbackName, () =>
     saveRelatedEntityData(
       entityId,
       entities.value ?? [],
-      props.relationType
-        ? {
-            type: (props.parentEntityType ||
-              route.meta.entityType) as Entitytyping,
-            relationType: props.relationType,
-          }
-        : undefined,
+      toParentRelation(props.relationType, ownerId, props.parentEntityType),
     ),
   );
 };

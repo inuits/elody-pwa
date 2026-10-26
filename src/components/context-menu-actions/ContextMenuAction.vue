@@ -3,6 +3,7 @@
     v-for="(element, index) in contextMenuActions"
     :key="index"
     :style="toneStyle(element)"
+    @click.capture="trackContextAction(String(index), (element as { action?: string }).action, entityType)"
   >
     <link-action
       v-if="element.__typename === 'ContextMenuLinkAction'"
@@ -68,6 +69,7 @@
 </template>
 
 <script lang="ts" setup>
+import { trackContextAction } from "@/analytics/usageAnalytics";
 import { type ContextMenuActions } from "@/generated-types/queries";
 import { toneStyle } from "@/components/context-menu-actions/actionTone";
 import GeneralAction from "@/components/context-menu-actions/GeneralAction.vue";

@@ -18,6 +18,7 @@
 <script lang="ts" setup>
 import { computed, onBeforeMount, onBeforeUnmount, onMounted, ref, toRef, watch } from "vue";
 import debounce from "lodash.debounce";
+import type { ApolloError } from "@apollo/client/core";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import {
   type DropdownOption,
@@ -40,6 +41,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string | undefined): void;
+  (e: "linked-entity-missing", value: boolean): void;
 }>();
 
 const allEntitiesHelper = ref<ReturnType<typeof useGetDropdownOptions>>();
@@ -86,6 +88,13 @@ const syncSelectedFromModelValue = async () => {
   selectedOptions.value = [{ label, value: key }];
 };
 
+const isNotFoundError = (error: unknown): boolean =>
+  (error as ApolloError)?.graphQLErrors?.some(
+    (graphQLError) =>
+      (graphQLError.extensions?.response as { status?: number } | undefined)
+        ?.status === 404,
+  ) ?? false;
+
 const resolveEntityLabel = async (key: string): Promise<string> => {
   const entityType = props.inputField.entityType as Entitytyping | undefined;
   if (!entityType) return key;
@@ -97,8 +106,10 @@ const resolveEntityLabel = async (key: string): Promise<string> => {
       fetchPolicy: "no-cache",
     });
     const entity = result.data?.Entity;
+    emit("linked-entity-missing", false);
     return entity ? getEntityTitle(entity) : key;
-  } catch {
+  } catch (error) {
+    emit("linked-entity-missing", isNotFoundError(error));
     return key;
   }
 };

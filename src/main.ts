@@ -9,11 +9,9 @@ import {
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { sha256 } from "crypto-hash";
 import "./assets/main.css";
-import * as Sentry from "@sentry/vue";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
 import { addComponentToRoutes } from "./views/router";
-import { BrowserTracing } from "@sentry/tracing";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
 import { createRouter, createWebHistory, type Router } from "vue-router";
@@ -38,6 +36,18 @@ import { useInputValidation } from "@/composables/useInputValidation";
 import { applyClientTheme } from "@/utils/clientTheme";
 import { useApp } from "@/composables/useApp";
 import { aliasAsKeyTransform } from "@/aliasAsKeyTransform";
+import {
+  identifyInBrowserTracing,
+  initBrowserTracing,
+} from "@/tracing/browserTracing";
+import { getSessionId } from "@/observability/sessionId";
+import { createSessionLink } from "@/observability/sessionLink";
+import {
+  createUsageLink,
+  identifyUser,
+  initUsageAnalytics,
+  libraryOf,
+} from "@/analytics/usageAnalytics";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -65,6 +75,9 @@ const start = async (): Promise<void> => {
   const applicationDetails = await getApplicationDetails();
   const { translations, version, urlMapping } = applicationDetails;
   let { config } = applicationDetails;
+  // one id per tab, shared by the traces, the usage events and the error reports
+  const sessionId = getSessionId();
+  await initBrowserTracing(config, undefined, sessionId);
   i18n = setupI18n(translations, config.customization.applicationLocale);
 
   typeUrlMapping = urlMapping;
@@ -98,6 +111,8 @@ const start = async (): Promise<void> => {
   } else {
     await auth.verifyServerAuth();
   }
+
+  await initUsageAnalytics(config, sessionId);
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
@@ -144,6 +159,9 @@ const start = async (): Promise<void> => {
       graphqlErrorInterceptor,
       authCheckLink,
       authLink,
+      // with tracing on, the backend's spans name the tab's session too
+      ...(config.browserTracing ? [createSessionLink(sessionId)] : []),
+      createUsageLink(),
       apqLink,
       httpLink,
     ]),
@@ -172,20 +190,12 @@ const start = async (): Promise<void> => {
     .provide("config", config)
     .provide(DefaultApolloClient, apolloClient);
 
-  if (config.GLITCH_TIP_ENABLED) {
-    Sentry.init({
-      app,
-      sendClientReports: false,
-      integrations: [
-        new BrowserTracing({
-          routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-          tracingOrigins: ["*"],
-        }),
-      ],
-      dsn: config.GLITCH_TIP_DSN_FRONTEND,
-      environment: config.NOMAD_NAMESPACE,
-    });
-  }
+  // the user by pseudonym only: in the usage events and in the traces, errors
+  // and replays (with their library), never by name or e-mail address
+  const user = auth.isAuthenticated.value ? auth.user : undefined;
+  const pseudonym = await identifyUser(user);
+  if (pseudonym)
+    identifyInBrowserTracing({ pseudonym, library: libraryOf(user?.email) });
 
   app.mount("#app");
 };

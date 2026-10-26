@@ -9,6 +9,7 @@
       :icon-off="toggle.iconOff"
       :is-part-of-toggle-group="true"
       @turn-all-toggles-in-group-off="turnAllTogglesOff"
+      @update:model-value="(on: boolean) => on && emit('selected', toggle)"
     />
   </div>
 </template>
@@ -18,9 +19,14 @@ import type { DamsIcons } from "@/generated-types/queries";
 import BaseToggle from "@/components/base/BaseToggle.vue";
 import { onMounted, ref, watch, type Ref } from "vue";
 
+type Toggle = { viewMode?: string; isOn: Ref<boolean>; iconOn: DamsIcons; iconOff: DamsIcons };
+
 const props = defineProps<{
-  toggles: { isOn: Ref<boolean>; iconOn: DamsIcons; iconOff: DamsIcons }[];
+  toggles: Toggle[];
 }>();
+
+// a toggle the user turned on: a click, not a change the page made
+const emit = defineEmits<{ (event: "selected", toggle: Toggle): void }>();
 
 const toggles = ref(props.toggles);
 

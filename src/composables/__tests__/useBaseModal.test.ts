@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useBaseModal } from "../useBaseModal";
 import { TypeModals, ModalStyle } from "@/generated-types/queries";
+import { trackFormOpened } from "@/analytics/usageAnalytics";
+
+vi.mock("@/analytics/usageAnalytics", () => ({ trackFormOpened: vi.fn() }));
 
 describe("useBaseModal", () => {
   beforeEach(() => {
@@ -502,5 +505,22 @@ describe("useBaseModal", () => {
 
     const result = getModalInfo("InvalidType" as TypeModals);
     expect(result).toBeUndefined();
+  });
+
+  describe("usage events", () => {
+    it("tells usage analytics which form opened", () => {
+      const { openModal } = useBaseModal();
+      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetPersonCreateForm");
+      expect(trackFormOpened).toHaveBeenCalledWith("GetPersonCreateForm");
+    });
+
+    it("sends nothing for other modals, or a form already open", () => {
+      vi.mocked(trackFormOpened).mockClear();
+      const { openModal } = useBaseModal();
+      openModal(TypeModals.Confirm, ModalStyle.Center);
+      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetPersonCreateForm");
+      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetPersonCreateForm");
+      expect(trackFormOpened).toHaveBeenCalledTimes(1);
+    });
   });
 });
