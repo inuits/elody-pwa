@@ -1325,3 +1325,35 @@ describe("BaseLibrary.vue inside a detail panel", () => {
     wrapper.unmount();
   });
 });
+
+describe("BaseLibrary.vue add pills in a detail panel", () => {
+  it("gives the list header a spot for the add pills and points the bar at it", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary, enableBulkOperations: true },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    const spot = wrapper.find('[data-cy="list-header"] [data-list-actions]');
+    expect(spot.exists()).toBe(true);
+    expect(
+      wrapper.findComponent({ name: "BulkOperationsActionsBar" }).props("listHeaderTarget"),
+    ).toBe(`[data-list-actions="${spot.attributes("data-list-actions")}"]`);
+    wrapper.unmount();
+  });
+
+  it("leaves the actions in the bar on the list's own page", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      enableBulkOperations: true,
+    });
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "BulkOperationsActionsBar" }).props("listHeaderTarget"),
+    ).toBeUndefined();
+    wrapper.unmount();
+  });
+});

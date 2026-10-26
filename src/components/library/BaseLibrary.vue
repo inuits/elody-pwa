@@ -173,6 +173,12 @@
               "
             />
           </div>
+          <!-- In a detail panel the bar's add pills land here. -->
+          <span
+            v-if="insidePanel"
+            :data-list-actions="listActionsId"
+            class="ml-auto flex items-center gap-2"
+          />
         </div>
           <BulkOperationsActionsBar
             v-if="
@@ -181,6 +187,11 @@
             "
             class="py-2 border-b border-border-subtle"
             :class="{ 'px-(--list-band-pad)': hasResultsBand }"
+            :list-header-target="
+              insidePanel
+                ? `[data-list-actions=&quot;${listActionsId}&quot;]`
+                : undefined
+            "
             :create-in-page-header="
               ownsRouteState &&
               !isSearchLibrary &&
@@ -504,6 +515,7 @@ import {
   onUnmounted,
   provide,
   ref,
+  useId,
   watch,
 } from "vue";
 import { useI18n } from "vue-i18n";
@@ -945,6 +957,7 @@ const showListPager = computed(
 // Inside a detail panel the panel is the chrome: no band or border of the
 // list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
+const listActionsId = useId();
 const hasResultsBand = computed(
   () =>
     !props.disableLibraryBar &&

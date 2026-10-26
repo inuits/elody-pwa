@@ -87,7 +87,31 @@
         button-style="primary"
         button-size="sm"
         :icon="option.icon ?? DamsIcons.PlusCircle"
-        :label="t(option.label)"
+        :label="t(option.label, [entityTypeLabel])"
+        :force-show-label="true"
+        @click="
+          selectedBulkOperation = option;
+          handleSelectedBulkOperation(option);
+        "
+      />
+    </Teleport>
+    <!-- ui_kits/clients: in a detail panel, adding (create / add existing)
+         is a small pill in the list's own header, beside the count. -->
+    <Teleport
+      v-if="listHeaderTarget && auth.isAuthenticated.value"
+      defer
+      :to="listHeaderTarget"
+    >
+      <BaseButtonNew
+        v-for="option in listHeaderOperations"
+        :key="option.value"
+        data-cy="list-header-add"
+        class="!w-auto !rounded-pill"
+        :button-style="option.primary ? 'primary' : 'secondary'"
+        button-size="sm"
+        :icon="option.icon ?? DamsIcons.PlusCircle"
+        :label="t(option.label, [entityTypeLabel])"
+        :force-show-label="true"
         @click="
           selectedBulkOperation = option;
           handleSelectedBulkOperation(option);
@@ -138,6 +162,8 @@ const props = withDefaults(
     isLoading?: boolean;
     // The page's own library: its create action goes to the page header.
     createInPageHeader?: boolean;
+    // Inside a detail panel: where the list header's add pills go.
+    listHeaderTarget?: string;
     // Ids on the visible page, to tell selected items on other pages apart.
     pageItemIds?: string[];
   }>(),
@@ -199,16 +225,27 @@ const {
   parentEntity,
 );
 
+// As ActionMenuGroup: labels like "Add new {0}" take the entity type.
+const entityTypeLabel = computed(() =>
+  t(`entity-translations.${props.entityType?.toLowerCase()}`, 2),
+);
 const isCreate = (option: DropdownOption) =>
   option.value === BulkOperationTypes.CreateEntity;
 const createOperations = computed<DropdownOption[]>(() =>
   props.createInPageHeader ? (bulkOperations.value ?? []).filter(isCreate) : [],
 );
-const barOperations = computed<DropdownOption[] | undefined>(() =>
-  props.createInPageHeader
-    ? bulkOperations.value?.filter((option) => !isCreate(option))
-    : bulkOperations.value,
+const isAdd = (option: DropdownOption) =>
+  isCreate(option) || option.value === BulkOperationTypes.AddRelation;
+const listHeaderOperations = computed<DropdownOption[]>(() =>
+  props.listHeaderTarget ? (bulkOperations.value ?? []).filter(isAdd) : [],
 );
+const barOperations = computed<DropdownOption[] | undefined>(() => {
+  if (props.createInPageHeader)
+    return bulkOperations.value?.filter((option) => !isCreate(option));
+  if (props.listHeaderTarget)
+    return bulkOperations.value?.filter((option) => !isAdd(option));
+  return bulkOperations.value;
+});
 
 // Lists without bulk actions would otherwise show an empty bordered bar.
 const hasContent = computed<boolean>(

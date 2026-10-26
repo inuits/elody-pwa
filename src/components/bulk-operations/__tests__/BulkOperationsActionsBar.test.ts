@@ -201,7 +201,7 @@ describe("BulkOperationsActionsBar", () => {
       const wrapper = mountBar(true);
       const pill = wrapper.find('[data-cy="page-header-create"]');
 
-      expect(pill.text()).toBe("navigation.create-inscription");
+      expect(pill.text()).toMatch(/^navigation\.create-inscription/);
       expect(
         wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
       ).toEqual([exportXlsx]);
@@ -215,6 +215,64 @@ describe("BulkOperationsActionsBar", () => {
       expect(
         wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
       ).toEqual([create, exportXlsx]);
+    });
+  });
+
+  describe("add in the list header (detail panels)", () => {
+    const create = { value: "createEntity", label: "bulk-operations.add-new", primary: true };
+    const addExisting = { value: "addRelation", label: "bulk-operations.add-existing" };
+    const exportAll = { value: "exportXlsx", label: "bulk-operations.export" };
+
+    beforeEach(() => {
+      mocks.operations = [create, addExisting, exportAll];
+    });
+
+    const mountBar = (listHeaderTarget?: string) =>
+      mount(BulkOperationsActionsBar, {
+        props: {
+          context: "home" as any,
+          useExtendedBulkOperations: true,
+          entityType: "mediafile" as Entitytyping,
+          refetchEntities: () => {},
+          selectedPaginationLimitOption: 20,
+          excludePagination: true,
+          listHeaderTarget,
+        },
+        global: {
+          stubs: { ActionMenuGroup: true, BaseTooltip: true, Unicon: true, teleport: true },
+          mocks: { $t: (key: string) => key },
+        },
+      });
+
+    it("moves create and add-relation into the list header as pills", async () => {
+      const wrapper = mountBar('[data-list-actions="x"]');
+      const pills = wrapper.findAll('[data-cy="list-header-add"]');
+
+      expect(pills.map((pill) => pill.text().split(":")[0])).toEqual([
+        "bulk-operations.add-new",
+        "bulk-operations.add-existing",
+      ]);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([exportAll]);
+      await pills[1].trigger("click");
+      expect(mocks.handle).toHaveBeenCalledWith(addExisting);
+    });
+
+    it("always shows the pill labels, with the entity type filled in like the bar did", () => {
+      const pill = mountBar('[data-list-actions="x"]').findComponent({ name: "BaseButtonNew" });
+      expect(pill.props("forceShowLabel")).toBe(true);
+      expect(pill.props("label")).toBe(
+        "bulk-operations.add-new:entity-translations.mediafile:",
+      );
+    });
+
+    it("keeps them in the bar without a list header target", () => {
+      const wrapper = mountBar();
+      expect(wrapper.find('[data-cy="list-header-add"]').exists()).toBe(false);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([create, addExisting, exportAll]);
     });
   });
 });
