@@ -49,7 +49,11 @@ const patchRelationMetadata = (
     }
   }
 
-  return { ...relation, metadata: patchedMetadata, editStatus: EditStatus.Changed } as BaseRelationValuesInput;
+  return {
+    ...relation,
+    metadata: patchedMetadata,
+    editStatus: EditStatus.Changed,
+  } as BaseRelationValuesInput;
 };
 
 const unwrapFormatterValue = (value: any): any => {
@@ -60,7 +64,19 @@ const unwrapFormatterValue = (value: any): any => {
 
 // Some related entities (e.g. aicap mediafiles) hold no relation back to the
 // parent, so their relation metadata lives only on the parent's relation.
-export type ParentRelation = { type: Entitytyping; relationType: string };
+// The parent is the list's owner, which is not always the page entity.
+export type ParentRelation = {
+  id: string;
+  type: Entitytyping;
+  relationType: string;
+};
+
+export const toParentRelation = (
+  relationType?: string,
+  id?: string,
+  type?: Entitytyping,
+): ParentRelation | undefined =>
+  relationType && id && type ? { id, type, relationType } : undefined;
 
 export const saveRelatedEntityData = async (
   entityId: string,
@@ -86,54 +102,66 @@ export const saveRelatedEntityData = async (
       unwrapFormatterValue(value);
   }
 
+  // The form lives on the page entity; the relations belong to the list owner.
+  const ownerId = parentRelation?.id ?? entityId;
   const updatesOnParent: Record<string, Record<string, any>> = {};
   for (const [linkedEntityId, updates] of Object.entries(updatesByEntityId)) {
     const relatedEntity = relatedEntities.find(
       (entity) => entity.id === linkedEntityId,
     );
     if (!relatedEntity) continue;
-    const inverseRelationType = findInverseRelationType(relatedEntity, entityId);
+    const inverseRelationType = findInverseRelationType(relatedEntity, ownerId);
     if (!inverseRelationType) {
       if (parentRelation) updatesOnParent[linkedEntityId] = updates;
       continue;
     }
     const changedUpdates = keepChangedUpdates(
       updates,
-      findRelationMetadata(relatedEntity, inverseRelationType, entityId),
+      findRelationMetadata(relatedEntity, inverseRelationType, ownerId),
     );
     if (!Object.keys(changedUpdates).length) continue;
     await updateRelationDirect(
       relatedEntity,
       inverseRelationType,
-      entityId,
+      ownerId,
       changedUpdates,
     );
   }
 
   if (parentRelation && Object.keys(updatesOnParent).length)
-    await saveOnParentRelations(entityId, parentRelation, updatesOnParent);
+    await saveOnParentRelations(parentRelation, updatesOnParent);
 };
 
 const saveOnParentRelations = async (
-  entityId: string,
-  { type, relationType }: ParentRelation,
+  { id, type, relationType }: ParentRelation,
   updatesByRelationKey: Record<string, Record<string, any>>,
 ): Promise<void> => {
-  const variables: GetEntityByIdQueryVariables = { id: entityId, type };
+  const variables: GetEntityByIdQueryVariables = { id, type };
   const { data } = await apolloClient.query({
     query: GetEntityByIdDocument,
     variables,
     fetchPolicy: "no-cache",
   });
   const parent = data.Entity as Entity;
+  const parentRelationKeys = new Set(
+    (
+      (parent?.relationValues as Record<string, any[]> | undefined)?.[
+        relationType
+      ] ?? []
+    ).map((relation) => relation.key),
+  );
+  // Only touch relations the parent really holds; anything else would trigger a
+  // full relations PUT for nothing.
   const changedByRelationKey = Object.fromEntries(
-    Object.entries(updatesByRelationKey).map(([relationKey, updates]) => [
-      relationKey,
-      keepChangedUpdates(
-        updates,
-        findRelationMetadata(parent, relationType, relationKey),
-      ),
-    ]),
+    Object.entries(updatesByRelationKey)
+      .filter(([relationKey]) => parentRelationKeys.has(relationKey))
+      .map(([relationKey, updates]) => [
+        relationKey,
+        keepChangedUpdates(
+          updates,
+          findRelationMetadata(parent, relationType, relationKey),
+        ),
+      ]),
   );
   if (!Object.values(changedByRelationKey).some((u) => Object.keys(u).length))
     return;
@@ -151,9 +179,8 @@ const findRelationMetadata = (
 ): Array<{ key: string; value: any }> => {
   const relations = (entity.relationValues ?? {}) as Record<string, any[]>;
   return (
-    relations[relationType]?.find(
-      (relation) => relation.key === relationKey,
-    )?.metadata ?? []
+    relations[relationType]?.find((relation) => relation.key === relationKey)
+      ?.metadata ?? []
   );
 };
 

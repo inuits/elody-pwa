@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { describe, it, expect } from "vitest";
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import BaseToggleGroup from "../BaseToggleGroup.vue";
 import { DamsIcons } from "@/generated-types/queries";
 
@@ -53,5 +53,30 @@ describe("BaseToggleGroup (view switch)", () => {
     expect(getWrapper().wrapper.find('[role="group"]').classes()).toEqual(
       expect.arrayContaining(["border", "border-border-default", "rounded-input"]),
     );
+  });
+
+  it("names the toggle the user turned on (usage tracking)", async () => {
+    const own = [
+      { viewMode: "ViewModesList", isOn: ref(true), iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
+      { viewMode: "ViewModesGrid", isOn: ref(false), iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
+    ];
+    const wrapper = mount(BaseToggleGroup, {
+      props: { toggles: own },
+      global: {
+        stubs: { unicon: true, BaseTooltip: { template: '<div><slot name="activator" :on="{}" /><slot /></div>' } },
+        mocks: { $t: (key: string) => key },
+      },
+    });
+    await wrapper.findAll("button")[1].trigger("click");
+    expect(wrapper.emitted("selected")).toHaveLength(1);
+    expect((wrapper.emitted("selected")![0][0] as { viewMode: string }).viewMode).toBe("ViewModesGrid");
+  });
+
+  it("says nothing when the page switches a toggle itself", async () => {
+    const { wrapper, list, map } = getWrapper();
+    list.value = false;
+    map.value = true;
+    await nextTick();
+    expect(wrapper.emitted("selected")).toBeUndefined();
   });
 });

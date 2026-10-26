@@ -1,4 +1,5 @@
 import { computed, inject, onMounted, ref, type Ref, watch } from "vue";
+import { trackBulkOperation } from "@/analytics/usageAnalytics";
 import { useRoute, useRouter } from "vue-router";
 
 import {
@@ -454,6 +455,11 @@ export const useBulkOperationsActionsBar = (
     const bulkOperationModalConfig =
       selectedBulkOperation.value.bulkOperationModal;
     const operationType = selectedBulkOperation.value.value;
+    trackBulkOperation(
+      operationType,
+      getEnqueuedItemCount(props.context),
+      entityType.value,
+    );
 
     if (operationType === BulkOperationTypes.OpenDropdown) {
       subDropdownOptions.value = selectedBulkOperation.value?.subOptions.map(

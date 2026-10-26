@@ -31,6 +31,7 @@
       :form-id="formId"
       :cell-key="fieldKey"
       :disabled="disabled"
+      @linked-entity-missing="emit('linked-entity-missing', $event)"
     />
     <ViewModesAutocompleteMetadata
       v-else-if="isFieldMetadataDropdown"
@@ -78,6 +79,10 @@ const props = defineProps<{
   fieldKey: string;
   formId: string;
   disabled?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: "linked-entity-missing", value: boolean): void;
 }>();
 
 const fieldLabel = computed<string>(() =>

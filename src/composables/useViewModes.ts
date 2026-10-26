@@ -10,6 +10,8 @@ import type { Entity, ViewModesWithConfig } from "@/generated-types/queries";
 import { useStateManagement } from "@/composables/useStateManagement";
 
 export type ViewModeToggle = {
+  /** the view mode the toggle switches to (usage events name it) */
+  viewMode: ViewModes;
   isOn: Ref<boolean>;
   iconOn: DamsIcons;
   iconOff: DamsIcons;
@@ -134,6 +136,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
     for (const viewMode of viewModes) {
       if (viewMode === ViewModes.ViewModesList) {
         newToggles.push({
+          viewMode: ViewModes.ViewModesList,
           isOn: displayList,
           iconOn: DamsIcons.ListUl,
           iconOff: DamsIcons.ListUl,
@@ -141,6 +144,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
         });
       } else if (viewMode === ViewModes.ViewModesGrid) {
         newToggles.push({
+          viewMode: ViewModes.ViewModesGrid,
           isOn: displayGrid,
           iconOn: DamsIcons.Apps,
           iconOff: DamsIcons.Apps,
@@ -155,6 +159,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
           displayList.value = true;
         } else {
           newToggles.push({
+            viewMode: ViewModes.Table,
             isOn: displayTable,
             iconOn: DamsIcons.Table,
             iconOff: DamsIcons.Table,
@@ -163,6 +168,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
         }
       } else if (viewMode === ViewModes.ViewModesMedia) {
         newToggles.push({
+          viewMode: ViewModes.ViewModesMedia,
           isOn: displayPreview,
           iconOn: DamsIcons.Image,
           iconOff: DamsIcons.Image,
@@ -170,6 +176,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
         });
       } else if (viewMode === ViewModes.ViewModesMap) {
         newToggles.push({
+          viewMode: ViewModes.ViewModesMap,
           isOn: displayMap,
           iconOn: DamsIcons.Map,
           iconOff: DamsIcons.Map,
@@ -179,6 +186,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
         // No shared-teaser-metadata precondition here (unlike Table): mixed
         // entity types are normal in a pipeline.
         newToggles.push({
+          viewMode: ViewModes.ViewModesPipeline,
           isOn: displayPipeline,
           iconOn: DamsIcons.Sitemap,
           iconOff: DamsIcons.Sitemap,

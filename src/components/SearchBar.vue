@@ -40,6 +40,7 @@ import { Unicons } from "@/types";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
+import { trackSearch } from "@/analytics/usageAnalytics";
 
 const props = withDefaults(
   defineProps<{
@@ -80,6 +81,7 @@ onUnmounted(() => debouncedSearch.cancel());
 
 const submitSearch = () => {
   debouncedSearch.cancel();
+  trackSearch(inputValue.value, { scope: "header" });
   emit("search", inputValue.value);
 };
 

@@ -52,6 +52,8 @@ const mockBulkOperations = vi.hoisted(() => ({
   dequeueAllItemsForBulkProcessing: vi.fn(),
 }));
 
+vi.mock("@/analytics/usageAnalytics", () => ({ trackBulkOperation: vi.fn() }));
+
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => mockBulkOperations,
 }));
@@ -668,6 +670,25 @@ describe("useBulkOperationsActionsBar", () => {
   });
 
   describe("Main Bulk Operation Handler", () => {
+    it("tells usage analytics which operation ran on how many items", async () => {
+      const { trackBulkOperation } = await import("@/analytics/usageAnalytics");
+      const props = createMockProps();
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(props, createMockEmit());
+
+      selectedBulkOperation.value = {
+        value: BulkOperationTypes.DownloadMediafiles,
+        bulkOperationModal: undefined,
+      } as any;
+      handleSelectedBulkOperation();
+
+      expect(trackBulkOperation).toHaveBeenCalledWith(
+        BulkOperationTypes.DownloadMediafiles,
+        mockBulkOperations.getEnqueuedItemCount(props.context),
+        Entitytyping.Asset,
+      );
+    });
+
     it("should return early when no bulk operation is selected", () => {
       const props = createMockProps();
       const emit = createMockEmit();

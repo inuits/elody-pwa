@@ -18,10 +18,9 @@
   "dependencies": {
     "@apollo/client": "^3.11.10",
     "@floating-ui/vue": "^1.1.5",
+    "@hyperdx/browser": "0.26.0",
     "@kyvg/vue3-notification": "3.4.1",
-    "@sentry/integrations": "^6.19.7",
-    "@sentry/tracing": "^6.19.7",
-    "@sentry/vue": "^6.19.7",
+    "@openpanel/web": "1.4.1",
     "@tanstack/vue-virtual": "^3.13.12",
     "@tiptap/core": "^3.31.3",
     "@tiptap/extension-bold": "^3.31.3",

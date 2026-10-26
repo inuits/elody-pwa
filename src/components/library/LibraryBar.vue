@@ -15,6 +15,7 @@
           class="w-full @md:w-auto"
           data-cy="sort-options"
           v-model="selectedSortOption"
+          @update:model-value="(sort: string) => trackSort(sort, route.meta?.entityType as string)"
           :options="sortOptions"
           :label="t('library.sort')"
           :clearable="false"
@@ -90,6 +91,7 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import { useImport } from "@/composables/useImport";
 import { useGroupByOptions } from "@/composables/useGroupByOptions";
 import debounce from "lodash.debounce";
+import { trackSort } from "@/analytics/usageAnalytics";
 
 const props = withDefaults(
   defineProps<{

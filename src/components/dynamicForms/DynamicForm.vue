@@ -258,6 +258,7 @@
 </template>
 
 <script setup lang="ts">
+import { trackFormSubmitted } from "@/analytics/usageAnalytics";
 import { useBaseModal } from "@/composables/useBaseModal";
 import type {
   ActionProgress,
@@ -1006,6 +1007,7 @@ const submitActionFunction = async (field: FormAction) => {
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
+    trackFormSubmitted(props.dynamicFormQuery, "ok", entity?.type);
     showErrors.value = false;
     await getTenants();
     const callbackFunctions: [() => void] | undefined = extractActionArguments(
@@ -1039,6 +1041,7 @@ const submitActionFunction = async (field: FormAction) => {
     );
   } catch (e: ApolloError) {
     console.error(e);
+    trackFormSubmitted(props.dynamicFormQuery, "error");
     const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
     submitErrors.value = errorObject.message;

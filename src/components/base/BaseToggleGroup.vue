@@ -44,19 +44,26 @@ import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { Unicons } from "@/types";
 import { onMounted, ref, watch, type Ref } from "vue";
 
+type Toggle = {
+  viewMode?: string;
+  isOn: Ref<boolean>;
+  iconOn: DamsIcons;
+  iconOff: DamsIcons;
+  label?: string;
+};
+
 const props = defineProps<{
-  toggles: {
-    isOn: Ref<boolean>;
-    iconOn: DamsIcons;
-    iconOff: DamsIcons;
-    label?: string;
-  }[];
+  toggles: Toggle[];
 }>();
+
+// a toggle the user turned on: a click, not a change the page made
+const emit = defineEmits<{ (event: "selected", toggle: Toggle): void }>();
 
 const toggles = ref(props.toggles);
 
 const select = (index: number) => {
   toggles.value.forEach((toggle, i) => (toggle.isOn = i === index));
+  emit("selected", props.toggles[index]);
 };
 
 const onlyHaveOneToggleTurnedOn = () => {

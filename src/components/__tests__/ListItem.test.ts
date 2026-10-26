@@ -1,5 +1,6 @@
 import ListItem from "../ListItem.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
@@ -327,6 +328,25 @@ describe("ListItem", () => {
     });
   });
 
+  describe("multilingual teaser metadata", () => {
+    it("scopes each row's translations to its own entity, not the page form", () => {
+      // otherwise switching the page entity's locale overwrites every row
+      const wrapper = shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "WBI-1",
+          teaserMetadata: [{ key: "name", isMultilingual: true, value: [] }],
+        },
+      });
+
+      const wrappers = wrapper.findAllComponents(MultilingualWrapper);
+      expect(wrappers.length).toBeGreaterThan(0);
+      for (const multilingual of wrappers)
+        // not the entity id itself: the edit modal reads translations stored there on save
+        expect(multilingual.props("formId")).toBe("WBI-1_listitem");
+    });
+  });
+
   describe("loading state", () => {
     it("stops pulsing once the parent finished loading, even when a context menu action toggled loading around the fetch", async () => {
       const wrapper = shallowMount(ListItem, {
@@ -341,9 +361,9 @@ describe("ListItem", () => {
       wrapper.vm.toggleLoading();
       await wrapper.vm.$nextTick();
 
-      expect(
-        wrapper.find("[data-cy='list-item']").classes(),
-      ).not.toContain("animate-pulse");
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
+        "animate-pulse",
+      );
     });
 
     it("pulses while the parent is loading", async () => {
