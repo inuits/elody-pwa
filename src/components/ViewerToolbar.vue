@@ -138,6 +138,9 @@
         }}
       </button>
     </div>
+    <div v-if="$slots.navigation" class="pt-[10px]">
+      <slot name="navigation" />
+    </div>
     <div class="flex">
       <BaseTooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on }">

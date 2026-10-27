@@ -9,34 +9,16 @@
       class="relative w-full"
     >
       <div
-        v-if="viewerContainsMultipleMediafiles"
-        class="absolute top-0 left-1/2 -translate-x-1/2 z-30 h-10 flex items-center gap-2 pointer-events-none"
+        v-if="viewerContainsMultipleMediafiles && !showsIiifViewer"
+        class="absolute top-0 left-1/2 -translate-x-1/2 z-30 h-10 flex items-center pointer-events-none"
       >
-        <button
-          class="pointer-events-auto"
-          data-testid="nav-prev-mediafile"
-          @click="selectPreviousMediafileHandler"
-        >
-          <unicon
-            :name="Unicons.ArrowCircleLeft.name"
-            height="20"
-            class="text-neutral-700 cursor-pointer"
-          />
-        </button>
-        <button
-          class="pointer-events-auto"
-          data-testid="nav-next-mediafile"
-          @click="selectNextMediafileHandler"
-        >
-          <unicon
-            :name="Unicons.ArrowCircleRight.name"
-            height="20"
-            class="text-neutral-700 cursor-pointer"
-          />
-        </button>
+        <MediafileNavigationArrows
+          @previous="selectPreviousMediafileHandler"
+          @next="selectNextMediafileHandler"
+        />
       </div>
       <IIIFViewer
-        v-if="viewerType === ElodyViewers.Iiif && !displayProcessingImage"
+        v-if="showsIiifViewer"
         :imageFilename="
           getValueOfMediafile(mediafileViewerContext, 'display_filename') || ''
         "
@@ -59,7 +41,14 @@
         :crop-sizes="displayedCropSizes"
         :show-cropped="showCropped"
         :can-recrop="canRecrop"
-      />
+      >
+        <template v-if="viewerContainsMultipleMediafiles" #navigation>
+          <MediafileNavigationArrows
+            @previous="selectPreviousMediafileHandler"
+            @next="selectNextMediafileHandler"
+          />
+        </template>
+      </IIIFViewer>
       <RecropModal
         v-if="canRecrop"
         :open="isRecropModalOpen"
@@ -198,6 +187,7 @@ import {
 import IIIFViewer from "@/components/IIIFViewer.vue";
 import RecropModal from "@/components/RecropModal.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
+import MediafileNavigationArrows from "@/components/base/MediafileNavigationArrows.vue";
 import {
   computed,
   ref,
@@ -379,6 +369,11 @@ const displayProcessingImage = computed<boolean>(() => {
 
 const viewerType = computed<ElodyViewers | undefined>(() =>
   getViewerForMimetype(mimetype.value),
+);
+
+// The IIIF toolbar hosts the arrows itself, so they never sit on top of its buttons.
+const showsIiifViewer = computed<boolean>(
+  () => viewerType.value === ElodyViewers.Iiif && !displayProcessingImage.value,
 );
 
 const togglePreviewComponent = (id: string): void => {
