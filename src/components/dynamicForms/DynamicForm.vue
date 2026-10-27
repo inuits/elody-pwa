@@ -4,7 +4,7 @@
     class="p-4 pt-0 h-full w-full overflow-y-auto"
     :key="dynamicFormQuery"
   >
-    <div v-if="!dynamicFormLoaded" class="w-full">
+    <div v-if="showSkeleton" class="w-full">
       <DynamicFormSkeleton :formKey="dynamicFormQuery" />
     </div>
     <div
@@ -298,6 +298,7 @@ import {
 } from "@/generated-types/queries";
 import { useImport } from "@/composables/useImport";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
+import { showsFormSkeleton } from "@/components/dynamicForms/formSkeleton";
 import {
   computed,
   inject,
@@ -741,6 +742,12 @@ const formClosing = ref<boolean>(false);
 const submitErrors = ref<string | undefined>(undefined);
 const createdEntity = ref<Entity | null>(null);
 const { changeExpandedState } = useMenuHelper();
+const showSkeleton = computed(() =>
+  showsFormSkeleton({
+    dynamicFormLoaded: dynamicFormLoaded.value,
+    hasFieldsFromProps: Boolean(modalFormFields),
+  }),
+);
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
   // A caller-supplied field set (bulk edit) has no fetched form behind it.
