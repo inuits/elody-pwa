@@ -9,7 +9,7 @@
       :metadata="refMetadata"
       :is-field-required="false"
     />
-    <div class="flex gap-2">
+    <div class="flex gap-2 has-[:dir(rtl)]:[direction:rtl]">
       <base-tooltip
         class="w-full basis-[fit-content]"
         position="right-end"
