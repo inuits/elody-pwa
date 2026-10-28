@@ -63,8 +63,10 @@
           </div>
         </template>
         <template #default>
+          <!-- The tooltip's light ink; the value's own secondary ink is dark on dark. -->
           <entity-element-metadata
-            class="text-text-placeholder"
+            data-cy="field-value-tooltip"
+            class="!text-inherit"
             :label="refMetadata.label as string"
             v-model:value="metadataValueToDisplayOnTooltip"
             :link-text="refMetadata.linkText"
