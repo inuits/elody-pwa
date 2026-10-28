@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="relative"
-    :class="showNavigationArrows ? 'h-[calc(100%-38px)]' : 'h-full'"
-  >
-    <entity-navigation-arrows class="px-6 pb-2" />
+  <div class="relative h-full">
     <div
       v-if="showSavingSpinner"
       class="absolute inset-0 flex justify-center items-center bg-background-normal/60 z-entity-single-spinner"
@@ -49,7 +45,6 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import EntityNavigationArrows from "@/components/EntityNavigationArrows.vue";
 import {
   asString,
   mapUrlToEntityType,
@@ -83,7 +78,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const { trackSeen, jobStatusPolling, showNavigationArrows } =
+const { trackSeen, jobStatusPolling } =
   useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();

@@ -2,6 +2,7 @@
   <div
     class="z-header flex items-center mx-6 my-8 px-6 py-4 rounded-3xl bg-background-light flex-wrap min-[1400px]:flex-nowrap"
   >
+    <EntityNavigationArrows class="mr-2" />
     <BreadCrumbs />
     <!-- The page's create action, teleported in by its main list
          (ui_kits/clients: a pill next to the title). -->
@@ -41,6 +42,7 @@
 
 <script lang="ts" setup>
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
+import EntityNavigationArrows from "@/components/EntityNavigationArrows.vue";
 import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import LanguageSelect from "@/components/LanguageSelect.vue";

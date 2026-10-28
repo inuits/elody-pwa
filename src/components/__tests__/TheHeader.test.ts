@@ -200,4 +200,14 @@ describe("TheHeader history button", () => {
       false,
     );
   });
+
+  // Detail template: the record stepper leads the breadcrumb row.
+  it("puts the record stepper in front of the breadcrumbs", () => {
+    const html = mountHeader().html();
+
+    expect(html.indexOf("entity-navigation-arrows-stub")).toBeGreaterThan(-1);
+    expect(html.indexOf("entity-navigation-arrows-stub")).toBeLessThan(
+      html.indexOf("bread-crumbs-stub"),
+    );
+  });
 });

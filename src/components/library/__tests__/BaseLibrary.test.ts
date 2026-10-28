@@ -881,6 +881,17 @@ describe("BaseLibrary.vue pager and page size", () => {
     );
   });
 
+  it("sets the band's dropdowns in the small ui text, like the list template", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
+      "[--vs-font-size:var(--text-ui)]",
+    );
+  });
+
   it("leaves a compact relation list's header unstyled", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,

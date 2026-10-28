@@ -412,6 +412,11 @@
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */
   --list-band-pad: 8px 16px;
+
+  /* Record stepper */
+  --stepper-pad: 2px 3px;
+  --stepper-button-size: 22px;
+  --crumb-pad: 3px 12px;
   --view-switch-size: 30px;
 
   /* Selection bar (components/selection-bar.md) */

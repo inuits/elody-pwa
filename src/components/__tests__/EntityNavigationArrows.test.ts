@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import { ref } from "vue";
 import EntityNavigationArrows from "@/components/EntityNavigationArrows.vue";
@@ -21,7 +21,10 @@ vi.mock("vue-router", () => ({
 }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (k: string) => k }),
+  useI18n: () => ({
+    t: (k: string, named?: Record<string, unknown>) =>
+      named ? `${k} ${JSON.stringify(named)}` : k,
+  }),
 }));
 
 vi.mock("@/composables/useEntityPageConfig", () => ({
@@ -43,6 +46,12 @@ vi.mock("@/composables/useEntityNavigation", () => ({
         return undefined;
       return mockEntities.value[index + 1];
     },
+    getPosition: (currentId: string) => {
+      const index = mockEntities.value.findIndex((e) => e.id === currentId);
+      return index === -1
+        ? undefined
+        : { index: index + 1, total: mockEntities.value.length };
+    },
     getNavigationRoute: (entity: { id: string; type: string }) => ({
       name: mockListItemRouteName,
       params: { id: entity.id, type: entity.type },
@@ -50,8 +59,12 @@ vi.mock("@/composables/useEntityNavigation", () => ({
   }),
 }));
 
-const getWrapper = (ownsRouteState: boolean = true) =>
-  shallowMount(EntityNavigationArrows, {
+// The stepper listens on window, so every wrapper is unmounted after its test.
+const wrappers: { unmount: () => void }[] = [];
+afterEach(() => wrappers.splice(0).forEach((wrapper) => wrapper.unmount()));
+
+const getWrapper = (ownsRouteState: boolean = true) => {
+  const wrapper = shallowMount(EntityNavigationArrows, {
     global: {
       provide: { OwnsRouteState: ownsRouteState },
       stubs: {
@@ -65,6 +78,9 @@ const getWrapper = (ownsRouteState: boolean = true) =>
       },
     },
   });
+  wrappers.push(wrapper);
+  return wrapper;
+};
 
 describe("EntityNavigationArrows", () => {
   beforeEach(() => {
@@ -193,5 +209,58 @@ describe("EntityNavigationArrows", () => {
       "entity-navigation.open-previous",
       "entity-navigation.open-next",
     ]);
+  });
+
+  // Catalogue RecordStepper: "‹ 2 of 3 ›", the record's place in the list.
+  it("shows the record's position between the arrows", () => {
+    const wrapper = getWrapper();
+
+    expect(wrapper.find('[data-cy="entity-navigation-position"]').text()).toBe(
+      'entity-navigation.position {"index":2,"total":3}',
+    );
+    expect(wrapper.find('[role="group"]').attributes("aria-label")).toBe(
+      "entity-navigation.position-label",
+    );
+  });
+
+  it("steps with Alt + arrow keys", async () => {
+    getWrapper();
+
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowRight", altKey: true }),
+    );
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true }),
+    );
+
+    expect(mockPush.mock.calls).toEqual([
+      [{ name: "SingleEntity", params: { id: "3", type: "assets" } }],
+      [{ name: "SingleEntity", params: { id: "1", type: "assets" } }],
+    ]);
+  });
+
+  it("leaves Alt + arrow alone while typing in a field", () => {
+    getWrapper();
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "ArrowRight",
+        altKey: true,
+        bubbles: true,
+      }),
+    );
+
+    expect(mockPush).not.toHaveBeenCalled();
+    input.remove();
+  });
+
+  it("does not step with a plain arrow key", () => {
+    getWrapper();
+
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });

@@ -39,15 +39,23 @@ vi.mock("@/composables/useConfirmModal", () => ({
 }));
 
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
+import { breadcrumbRoutes } from "@/composables/useBreadcrumbs";
 
-const clickOverview = async () => {
-  const wrapper = mount(BreadCrumbs, {
+const overview = { id: "", overviewPage: "Works", title: "Werken", type: "" };
+
+const mountCrumbs = () =>
+  mount(BreadCrumbs, {
     global: {
       provide: { config: {} },
       stubs: { unicon: true, MetadataFormatter: true, CustomIcon: true },
     },
   });
-  const crumb = wrapper.findAll("p").find((p) => p.text() === "Werken")!;
+
+const clickOverview = async () => {
+  const wrapper = mountCrumbs();
+  const crumb = wrapper
+    .findAll("button")
+    .find((button) => button.text() === "Werken")!;
   await crumb.trigger("click");
   await flushPromises();
 };
@@ -56,6 +64,43 @@ describe("BreadCrumbs", () => {
   beforeEach(() => {
     mocks.push.mockReset();
     mocks.clearBreadcrumbPathAndAddOverviewPage.mockReset();
+    (breadcrumbRoutes as any).value = [overview];
+  });
+
+  // Catalogue Breadcrumb: capsules in a navigation landmark.
+  it("renders the trail as a breadcrumb landmark ending on the current page", () => {
+    const wrapper = mountCrumbs();
+
+    expect(wrapper.find("nav").attributes("aria-label")).toBe(
+      "navigation.breadcrumb",
+    );
+    const current = wrapper.find('[aria-current="page"]');
+    expect(current.text()).toBe("Work 1");
+    expect(current.classes()).toEqual(
+      expect.arrayContaining(["rounded-pill", "bg-surface-muted"]),
+    );
+  });
+
+  it("opens the earlier steps from a named history button", async () => {
+    (breadcrumbRoutes as any).value = [
+      overview,
+      { id: "a", title: "Asset A", type: "asset" },
+      { id: "b", title: "Asset B", type: "asset" },
+    ];
+    const wrapper = mountCrumbs();
+    const toggle = wrapper.find('[data-cy="breadcrumb-history"]');
+
+    expect(toggle.element.tagName).toBe("BUTTON");
+    expect(toggle.text()).toContain("2");
+    expect(toggle.attributes("aria-expanded")).toBe("false");
+    expect(toggle.attributes("aria-label")).toBe("navigation.breadcrumb-history");
+
+    await toggle.trigger("click");
+
+    expect(toggle.attributes("aria-expanded")).toBe("true");
+    expect(
+      wrapper.findAll('[data-cy="breadcrumb-history-item"]').map((b) => b.text()),
+    ).toEqual(["Asset A", "Werken"]);
   });
 
   it("resets the path to the overview page, under its title, once the navigation succeeds", async () => {

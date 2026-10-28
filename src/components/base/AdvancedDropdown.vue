@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="root"
     data-cy="base-dropdown-new"
     :aria-busy="loading ? 'true' : undefined"
     :class="[
@@ -267,6 +268,7 @@ const selectedCountLabel = computed<string>(() => {
     : `${count} selected`;
 });
 
+const root = ref<HTMLElement>();
 const shouldCalculateWidth = ref(false);
 const calculatedWidth = ref(200);
 
@@ -287,10 +289,12 @@ const calculateWidth = () => {
   span.style.position = "absolute";
   span.style.visibility = "hidden";
   span.style.whiteSpace = "nowrap";
+  // The host may scale --vs-font-size (list band), so measure where it renders.
+  const style = getComputedStyle(root.value ?? document.body);
   span.style.font = `
-    ${getComputedStyle(document.body).getPropertyValue("--vs-font-weight")} 
-    ${getComputedStyle(document.body).getPropertyValue("--vs-font-size")} 
-    ${getComputedStyle(document.body).getPropertyValue("--vs-font-family")}
+    ${style.getPropertyValue("--vs-font-weight")} 
+    ${style.getPropertyValue("--vs-font-size")} 
+    ${style.getPropertyValue("--vs-font-family")}
   `;
 
   document.body.appendChild(span);

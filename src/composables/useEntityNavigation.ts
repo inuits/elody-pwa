@@ -38,6 +38,14 @@ export const useEntityNavigation = () => {
     return entities[index + 1];
   };
 
+  const getPosition = (
+    currentId: string,
+  ): { index: number; total: number } | undefined => {
+    const index = findIndexById(currentId);
+    if (index === -1) return undefined;
+    return { index: index + 1, total: navigationEntitiesRef!.value.length };
+  };
+
   const getNavigationRoute = (entity: Entity) =>
     getEntityPageRoute(entity, navigationListItemRouteName as string);
 
@@ -48,6 +56,7 @@ export const useEntityNavigation = () => {
     setNavigationEntities,
     getPreviousEntity,
     getNextEntity,
+    getPosition,
     getNavigationRoute,
     hasNavigationEntities,
   };

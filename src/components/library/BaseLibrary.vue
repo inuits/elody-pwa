@@ -98,7 +98,7 @@
         <div
           v-if="showCurrentEntityFlow"
           data-cy="list-header"
-          class="h-fit flex flex-wrap items-center gap-2"
+          class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
           :class="[
             {
               'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card':
