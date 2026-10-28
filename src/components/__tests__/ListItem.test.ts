@@ -98,6 +98,42 @@ describe("ListItem", () => {
     teaserMetadata: [],
   };
 
+  // ui_kits/clients list: the title cell is 13px bold link ink, the rest secondary.
+  describe("row title", () => {
+    const fieldsOf = (teaserMetadata: any[]) =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "item", teaserMetadata },
+      }).findAll("[data-cy='list-item-content'] > div");
+
+    it("sets the first field as the row title and the others in secondary ink", () => {
+      const fields = fieldsOf([
+        { key: "title", value: "AICAP0001" },
+        { key: "script", value: "SC-1" },
+      ]);
+
+      expect(fields[0].classes()).toEqual(
+        expect.arrayContaining([
+          "font-bold",
+          "text-value",
+          "text-text-link",
+          // the value component sets its own secondary ink
+          "[&_[data-cy=entity-element-metadata]]:text-inherit",
+        ]),
+      );
+      expect(fields[1].classes()).toContain("text-text-secondary");
+      expect(fields[1].classes()).not.toContain("font-bold");
+    });
+
+    it("leaves a leading pill as it is", () => {
+      const fields = fieldsOf([
+        { key: "type", value: { formatter: "pill", label: "Book" } },
+        { key: "title", value: "Oasis" },
+      ]);
+
+      expect(fields[0].classes()).not.toContain("font-bold");
+    });
+  });
+
   describe("seen items", () => {
     const seenItemProps = {
       ...defaultProps,
@@ -127,7 +163,7 @@ describe("ListItem", () => {
       const fields = wrapper.findAll("[data-cy='list-item-content'] > div");
 
       expect(fields[0].classes()).toContain("text-text-secondary");
-      expect(fields[1].classes()).not.toContain("text-text-secondary");
+      expect(fields[0].classes()).not.toContain("text-text-link");
     });
 
     it("does not grey out a seen item like a disabled one", () => {

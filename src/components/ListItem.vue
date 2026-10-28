@@ -199,6 +199,15 @@
               ? 'line-clamp-2 font-bold text-value'
               : 'truncate text-ui text-text-secondary'
             : '',
+          // List row (ui_kits/clients): bold title in link ink, the rest secondary.
+          isListMode
+            ? idx === 0 && !teaserMetadata[0]?.value?.formatter
+              ? [
+                  'font-bold text-value [&_[data-cy=entity-element-metadata]]:text-inherit',
+                  { 'text-text-link': !isSeen },
+                ]
+              : 'text-text-secondary'
+            : '',
           { hidden: isGridMode && !isShownOnGridCard(idx) },
           idx < 1 && teaserMetadata[0]?.value?.formatter
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
