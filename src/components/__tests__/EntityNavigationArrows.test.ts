@@ -218,6 +218,9 @@ describe("EntityNavigationArrows", () => {
     expect(wrapper.find('[data-cy="entity-navigation-position"]').text()).toBe(
       'entity-navigation.position {"index":2,"total":3}',
     );
+    expect(
+      wrapper.find('[data-cy="entity-navigation-position"]').attributes("role"),
+    ).toBe("status");
     expect(wrapper.find('[role="group"]').attributes("aria-label")).toBe(
       "entity-navigation.position-label",
     );

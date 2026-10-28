@@ -8,7 +8,14 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("vue-router", () => ({
-  useRouter: () => ({ push: mocks.push, replace: vi.fn(), beforeEach: vi.fn() }),
+  useRouter: () => ({
+    push: mocks.push,
+    replace: vi.fn(),
+    beforeEach: vi.fn(),
+    resolve: (to: { name?: string }) => ({
+      href: `/${(to.name ?? "").toLowerCase()}`,
+    }),
+  }),
 }));
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key, locale: ref("en") }),
@@ -53,9 +60,7 @@ const mountCrumbs = () =>
 
 const clickOverview = async () => {
   const wrapper = mountCrumbs();
-  const crumb = wrapper
-    .findAll("button")
-    .find((button) => button.text() === "Werken")!;
+  const crumb = wrapper.findAll("a").find((link) => link.text() === "Werken")!;
   await crumb.trigger("click");
   await flushPromises();
 };
@@ -81,6 +86,20 @@ describe("BreadCrumbs", () => {
     );
   });
 
+  // Handoff navigation.md: ancestors are plain links, so middle-click works.
+  it("renders an ancestor crumb as a link to its page", () => {
+    const crumb = mountCrumbs().find("nav a");
+
+    expect(crumb.text()).toBe("Werken");
+    expect(crumb.attributes("href")).toBe("/works");
+  });
+
+  it("leaves a modified click to the browser, to open the crumb elsewhere", async () => {
+    await mountCrumbs().find("nav a").trigger("click", { metaKey: true });
+
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
   it("opens the earlier steps from a named history button", async () => {
     (breadcrumbRoutes as any).value = [
       overview,
@@ -99,7 +118,7 @@ describe("BreadCrumbs", () => {
 
     expect(toggle.attributes("aria-expanded")).toBe("true");
     expect(
-      wrapper.findAll('[data-cy="breadcrumb-history-item"]').map((b) => b.text()),
+      wrapper.findAll('[data-cy="breadcrumb-history-item"]').map((a) => a.text()),
     ).toEqual(["Asset A", "Werken"]);
   });
 

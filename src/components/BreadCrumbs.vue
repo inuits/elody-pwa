@@ -11,7 +11,7 @@
         data-cy="breadcrumb-history"
         :aria-label="t('navigation.breadcrumb-history')"
         :aria-expanded="showHistory ? 'true' : 'false'"
-        class="flex items-center gap-1 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:bg-accent-wash"
+        class="flex items-center gap-1 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:text-accent-ink"
         @click="toggleList()"
       >
         <unicon height="16" :name="Unicons.EllipsisH.name" aria-hidden="true" />
@@ -20,14 +20,14 @@
       <span class="text-border-dashed" aria-hidden="true">›</span>
     </template>
     <template v-if="previousRoute?.title">
-      <button
-        type="button"
-        class="max-w-[40vw] truncate rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:bg-accent-wash"
+      <a
+        :href="crumbHref(previousRoute)"
+        class="max-w-[40vw] truncate rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:text-accent-ink hover:no-underline"
         :title="resolveTitle(previousRoute.title)"
-        @click="checkNavigationAvailable(previousRoute)"
+        @click="onCrumbClick($event, previousRoute)"
       >
         {{ resolveTitle(previousRoute.title) }}
-      </button>
+      </a>
       <span class="text-border-dashed" aria-hidden="true">›</span>
     </template>
     <span
@@ -47,11 +47,11 @@
         v-for="breadcrumbRoute in [...breadcrumbRoutes].slice(0, -1).reverse()"
         :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
       >
-        <button
-          type="button"
+        <a
+          :href="crumbHref(breadcrumbRoute)"
           data-cy="breadcrumb-history-item"
-          class="flex w-full items-center gap-2 rounded-button px-2 py-1 text-left text-table text-text-body hover:bg-accent-wash"
-          @click="checkNavigationAvailable(breadcrumbRoute)"
+          class="flex w-full items-center gap-2 rounded-button px-2 py-1 text-table text-text-body hover:bg-accent-wash hover:text-accent-ink hover:no-underline"
+          @click="onCrumbClick($event, breadcrumbRoute)"
         >
           <template v-if="breadcrumbRoute.icon">
             <unicon
@@ -68,7 +68,7 @@
             />
           </template>
           {{ resolveTitle(breadcrumbRoute.title) }}
-        </button>
+        </a>
       </li>
     </ul>
     <div
@@ -180,31 +180,37 @@ const checkNavigationAvailable = (route: any) => {
   else navigateToEntity(route);
 };
 
+const crumbTarget = (route: any) => {
+  const type = Array.isArray(route.type) ? route.type[0] : route.type;
+  if (route.id && route.routeName)
+    return { name: route.routeName, params: { id: route.id, type } };
+  if (route.id) return { params: { id: route.id, type } };
+  if (route.overviewPage) return { name: route.overviewPage };
+  return { name: "Home" };
+};
+
+const crumbHref = (route: any) => router.resolve(crumbTarget(route)).href;
+
+// A modified or non-primary click opens the link elsewhere; the browser handles it.
+const onCrumbClick = (event: MouseEvent, route: any) => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (event.button !== 0) return;
+  event.preventDefault();
+  checkNavigationAvailable(route);
+};
+
 const navigateToEntity = (route: any) => {
-  if (route.id && route.routeName) {
-    router.push({
-      name: route.routeName,
-      params: {
-        id: route.id,
-        type: Array.isArray(route.type) ? route.type[0] : route.type,
-      },
-    });
-  } else if (route.id) {
-    router.replace({
-      params: {
-        id: route.id,
-        type: Array.isArray(route.type) ? route.type[0] : route.type,
-      },
-    });
-  } else if (route.overviewPage) {
+  const target = crumbTarget(route);
+  if (route.id && !route.routeName) router.replace(target);
+  else if (route.overviewPage && !route.id) {
     // A leave prompt can cancel the navigation: keep the path until it lands.
-    router.push({ name: route.overviewPage }).then((failure) => {
+    router.push(target).then((failure) => {
       if (!failure)
         clearBreadcrumbPathAndAddOverviewPage(
           route.title ?? route.overviewPage,
         );
     });
-  } else router.push({ name: "Home" });
+  } else router.push(target);
 };
 </script>
 

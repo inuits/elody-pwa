@@ -35,6 +35,7 @@ vi.mock("vue-router", () => ({
     afterEach: mocks.afterEach,
     push: mocks.push,
     replace: mocks.replace,
+    resolve: () => ({ href: "/resolved" }),
   }),
 }));
 
@@ -538,7 +539,7 @@ describe("BreadCrumbs navigation", () => {
     ];
     const wrapper = mountBreadCrumbs();
 
-    await wrapper.find("nav button").trigger("click");
+    await wrapper.find("nav a").trigger("click");
 
     expect(mocks.push).toHaveBeenCalledWith({
       name: RouteNames.SingleEntity,
@@ -553,7 +554,7 @@ describe("BreadCrumbs navigation", () => {
     ];
     const wrapper = mountBreadCrumbs();
 
-    await wrapper.find("nav button").trigger("click");
+    await wrapper.find("nav a").trigger("click");
 
     expect(mocks.replace).toHaveBeenCalledWith({
       params: { id: "C-1", type: "collection" },

@@ -24,6 +24,7 @@
     </BaseTooltip>
     <span
       data-cy="entity-navigation-position"
+      role="status"
       class="px-1.5 text-label font-bold text-text-muted whitespace-nowrap"
     >
       {{ position ? t("entity-navigation.position", position) : "" }}
