@@ -296,6 +296,18 @@ describe("MetadataWrapper — locked field rendering", () => {
   });
 });
 
+// tooltip.md: light text on the inverted surface. The value component sets its
+// own secondary ink, which was dark on dark.
+describe("MetadataWrapper — full-value tooltip", () => {
+  it("shows the value in the tooltip's own light ink", async () => {
+    const wrapper = await mountWrapper(buildProps("unlocked_key", false));
+    const tooltipValue = wrapper.find('[data-cy="field-value-tooltip"]');
+
+    expect(tooltipValue.classes()).toContain("!text-inherit");
+    expect(tooltipValue.classes()).not.toContain("text-text-placeholder");
+  });
+});
+
 describe("MetadataWrapper — copy-from-parent button layout", () => {
   const copy = vi.fn();
   const context: CopyFromParentContext = {

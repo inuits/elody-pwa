@@ -54,6 +54,11 @@ describe("PageSizeSelect", () => {
     ).toEqual(["20", "50"]);
   });
 
+  it("is bordered like the other band controls", async () => {
+    const dropdown = (await getWrapper()).wrapper.findComponent(AdvancedDropdown);
+    expect(dropdown.props("styleType")).toBe("defaultWithBorder");
+  });
+
   it("names the select for screen readers", async () => {
     const { wrapper } = await getWrapper();
     const label = wrapper.find("label");

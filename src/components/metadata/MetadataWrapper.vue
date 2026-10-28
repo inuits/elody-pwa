@@ -410,8 +410,10 @@
           </div>
         </template>
         <template #default>
+          <!-- The tooltip's light ink; the value's own secondary ink is dark on dark. -->
           <entity-element-metadata
-            class="text-text-placeholder"
+            data-cy="field-value-tooltip"
+            class="!text-inherit"
             :label="fieldLabel"
             v-model:value="fieldTooltipValue"
             :link-text="metadata.linkText"

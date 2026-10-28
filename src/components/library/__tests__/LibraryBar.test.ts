@@ -212,6 +212,25 @@ describe("LibraryBar.vue Sort Logic", () => {
     );
   });
 
+  // ui_kits/clients: the sort select is bordered like the button beside it.
+  it("draws the sort select bordered, as a select standing on its own", async () => {
+    wrapper = createWrapper();
+    (apolloClient.query as any).mockResolvedValue({
+      data: {
+        EntityTypeSortOptions: {
+          sortOptions: { isAsc: "desc", options: [{ label: "ID", value: "id" }] },
+        },
+      },
+    });
+    getStateForRouteMock.mockReturnValue({});
+    await wrapper.emitted("sortOptionsPromise")[0][0]("entity");
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "AdvancedDropdown" }).props("styleType"),
+    ).toBe("defaultWithBorder");
+  });
+
   it("triggers watcher and calls setSortOrder(val, true) when sort direction changes", async () => {
     wrapper = createWrapper();
 

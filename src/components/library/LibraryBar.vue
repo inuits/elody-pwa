@@ -21,6 +21,7 @@
           :clearable="false"
           :add-label-to-value="true"
           label-position="inline"
+          style-type="defaultWithBorder"
         />
       </div>
       <div
@@ -54,6 +55,7 @@
           :clearable="false"
           :add-label-to-value="true"
           label-position="inline"
+          style-type="defaultWithBorder"
           @update:model-value="(value) => selectGroupBy(String(value ?? ''))"
         />
       </div>

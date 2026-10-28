@@ -15,6 +15,7 @@
       :add-label-to-value="true"
       :clearable="false"
       label-position="inline"
+      style-type="defaultWithBorder"
     />
   </div>
 </template>
