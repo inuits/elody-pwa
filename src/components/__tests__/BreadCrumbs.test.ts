@@ -100,6 +100,14 @@ describe("BreadCrumbs", () => {
     expect(mocks.push).not.toHaveBeenCalled();
   });
 
+  // Handoff navigation.md: "don't truncate the current breadcrumb item".
+  it("shows the current page's title in full", () => {
+    const current = mountCrumbs().find('[aria-current="page"]');
+
+    expect(current.html()).not.toMatch(/truncate|max-w-/);
+    expect(current.attributes("title")).toBeUndefined();
+  });
+
   it("opens the earlier steps from a named history button", async () => {
     (breadcrumbRoutes as any).value = [
       overview,

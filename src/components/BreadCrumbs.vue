@@ -3,7 +3,7 @@
   <nav
     v-if="breadCrumbRoutesExist"
     :aria-label="t('navigation.breadcrumb')"
-    class="relative z-notification flex flex-wrap items-center gap-2 min-[900px]:flex-nowrap"
+    class="relative z-notification flex min-w-0 flex-wrap items-center gap-2"
   >
     <template v-if="breadcrumbRoutes.length > 1">
       <button
@@ -32,12 +32,11 @@
     </template>
     <span
       aria-current="page"
-      class="flex min-w-0 max-w-[10vw] items-center gap-1.5 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body min-[1200px]:max-w-[20vw] min-[1250px]:max-w-[25vw] min-[1330px]:max-w-[30vw] min-[1400px]:max-w-[33vw] min-[1550px]:max-w-[40vw] min-[1650px]:max-w-[45vw]"
+      class="flex min-w-0 items-center gap-1.5 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body"
     >
       <MetadataFormatter v-if="typePillLabel" v-bind="typePillLabel" />
-      <span class="truncate" :title="currentRouteTitle">{{
-        currentRouteTitle
-      }}</span>
+      <!-- Handoff: the current item is never cut off; a long title wraps the row instead. -->
+      <span>{{ currentRouteTitle }}</span>
     </span>
     <ul
       v-if="showHistory"
