@@ -700,6 +700,7 @@ const useUpload = (config: any = {}) => {
       filesToUpload = mediafiles.value.slice(lastUploadedFileIndex.value);
 
     for (const file of filesToUpload) {
+      let prepared = false;
       try {
         lastUploadedFileIndex.value = files.value.indexOf(file);
         file.status = "uploading";
@@ -715,8 +716,16 @@ const useUpload = (config: any = {}) => {
           ProgressStepType.Prepare,
           ProgressStepStatus.Complete,
         );
+        prepared = true;
         yield await __uploadFile(file, url, config);
       } catch (error) {
+        // A rejected upload-URL request (e.g. a duplicate) left the prepare step spinning
+        if (!prepared)
+          updateFileThumbnails(
+            file,
+            ProgressStepType.Prepare,
+            ProgressStepStatus.Failed,
+          );
         updateFileThumbnails(
           file,
           ProgressStepType.Upload,

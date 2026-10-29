@@ -27,12 +27,17 @@ vi.mock("@/composables/useErrorCodes", () => ({
   }),
 }));
 
+const uploadUrlMock = vi.hoisted(() => ({
+  getUploadUrl: async (): Promise<string> =>
+    "http://storage.test/upload/ticket?x=1",
+}));
+
 vi.mock("@/composables/upload/useUploadFlowConfiguration", () => ({
   useUploadFlowConfiguration: () => ({
     getUploadFlowConfiguration: vi.fn().mockReturnValue({
       checkUploadValidity: () => true,
       validateFiles: () => true,
-      getUploadUrl: async () => "http://storage.test/upload/ticket?x=1",
+      getUploadUrl: () => uploadUrlMock.getUploadUrl(),
     }),
   }),
 }));
@@ -609,6 +614,29 @@ describe("useUpload - per-file progressbar", () => {
     updateFileThumbnails(file, "validate" as any, "complete" as any);
     updateFileThumbnails(file, "prepare" as any, "complete" as any);
     expect(bar(file).getAttribute("aria-valuenow")).toBe("2");
+  });
+
+  it("stops the prepare spinner when the server rejects the file", async () => {
+    const original = uploadUrlMock.getUploadUrl;
+    uploadUrlMock.getUploadUrl = () =>
+      Promise.reject("Entity with following identifiers already exists");
+    const { upload, resetUpload, files, uploadFlow, uploadStatus } = useUpload(
+      { api: { storageApiUrl: "http://storage.test" } },
+    );
+    resetUpload();
+    uploadFlow.value = UploadFlow.MediafilesOnly;
+    uploadStatus.value = UploadStatus.NoUpload;
+    const file = createRow("dup.pdf");
+    files.value = [file];
+
+    await upload(false, {} as any, {} as any).catch(() => undefined);
+    await flushPromises();
+    uploadUrlMock.getUploadUrl = original;
+
+    const visible = (cls: string) =>
+      !file.previewTemplate.querySelector(`.${cls}`).classList.contains("hidden");
+    expect(visible("file-prepare-loading")).toBe(false);
+    expect(visible("file-prepare-failed")).toBe(true);
   });
 
   it("describes the step that changed last", () => {
