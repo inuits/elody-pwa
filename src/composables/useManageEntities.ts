@@ -90,9 +90,23 @@ export const useManageEntities = () => {
     });
   };
 
+  // Mediafiles live in their own collection; an entity's linked mediafiles stay
+  const deleteEntity = async ({ id, type }: { id: string; type?: string }) => {
+    const document = await loadDocument("DeleteData");
+    await apolloClient.mutate({
+      mutation: document,
+      variables: {
+        id,
+        path: type === "mediafile" ? Collection.Mediafiles : Collection.Entities,
+        deleteMediafiles: false,
+      },
+    });
+  };
+
   return {
     createEntity,
     addRelations,
     saveEntityValues,
+    deleteEntity,
   };
 };

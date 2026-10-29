@@ -90,7 +90,9 @@
             :branches="branches"
             :steps="flowConfig?.steps ?? []"
             :repeatable="flowConfig?.repeatable ?? false"
+            :undoable="!isChainInProgress && !isCommitting"
             @remove="onRemoveBranch"
+            @undo="onUndoBranch"
           />
         </aside>
       </div>
@@ -180,9 +182,11 @@ import {
   useRepetitiveForm,
   describeCreatedEntity,
   primaryEntity,
+  undoPlan,
   toDisplayValue,
 } from "@/composables/useRepetitiveForm";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import { useManageEntities } from "@/composables/useManageEntities";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
@@ -228,6 +232,7 @@ const { getCallbackFunctions } = useModalActions();
 const { confirm } = useConfirmModal();
 const { displayErrorNotification } = useBaseNotification();
 const { run } = useAsyncAction();
+const { deleteEntity } = useManageEntities();
 const { startBlocking, stopBlocking } = useBlockingLoader();
 const router = useRouter();
 const route = useRoute();
@@ -412,6 +417,28 @@ const onTerminalSelected = (items: Record<string, any>[]) => {
 
 const onRemoveBranch = (index: number) => {
   store.removeBranch(index);
+};
+
+// Undo deletes only the records this chain created (undoPlan); records the
+// user picked stay. On failure the chain stays in the rail.
+const onUndoBranch = async (index: number) => {
+  const branch = branches.value[index];
+  const deletes = branch ? undoPlan(branch) : null;
+  if (!deletes?.length) return;
+  startBlocking();
+  try {
+    for (const entityToDelete of deletes) {
+      await deleteEntity(entityToDelete);
+    }
+    store.removeBranch(index);
+  } catch (error: any) {
+    displayErrorNotification(
+      "repetitiveForm.undo-failed-title",
+      commitFailureText(error),
+    );
+  } finally {
+    stopBlocking();
+  }
 };
 
 const goBack = () => {

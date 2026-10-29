@@ -257,4 +257,49 @@ describe("RepetitiveOverview", () => {
 
     expect(remove!.props("ariaLabel")).toBe("actions.labels.remove-item");
   });
+
+  it("offers Undo on the newest row only, while undo is still possible", () => {
+    const createdBranch = (id: string, label: string) => ({
+      entities: {
+        author: [{ key: "author", id, type: Entitytyping.Person, label, isNew: true }],
+      },
+    });
+    const props = {
+      branches: [createdBranch("p-1", "Jan"), createdBranch("p-2", "Piet")],
+      steps: [{ key: "author", entityType: Entitytyping.Person, createForm: "x" }],
+      repeatable: true,
+      undoable: true,
+    };
+    const rows = getWrapper(props).findAll("[data-testid='repetitive-overview-row']");
+    expect(rows[0].find("[data-testid='repetitive-overview-undo']").exists()).toBe(true);
+    expect(rows[1].find("[data-testid='repetitive-overview-undo']").exists()).toBe(false);
+    expect(
+      getWrapper({ ...props, undoable: false })
+        .find("[data-testid='repetitive-overview-undo']")
+        .exists(),
+    ).toBe(false);
+  });
+
+  it("offers no Undo for a chain that only picked existing records", () => {
+    const wrapper = getWrapper({
+      branches: [personBranch("person-1", "Jan")],
+      steps: [{ key: "author", entityType: Entitytyping.Person, createForm: "x" }],
+      repeatable: true,
+      undoable: true,
+    });
+    expect(wrapper.find("[data-testid='repetitive-overview-undo']").exists()).toBe(false);
+  });
+
+  it("emits undo with the branch index", async () => {
+    const wrapper = getWrapper({
+      branches: [
+        { entities: { author: [{ key: "author", id: "p-1", type: Entitytyping.Person, label: "Jan", isNew: true }] } },
+      ],
+      steps: [{ key: "author", entityType: Entitytyping.Person, createForm: "x" }],
+      repeatable: true,
+      undoable: true,
+    });
+    await wrapper.find("[data-testid='repetitive-overview-undo']").trigger("click");
+    expect(wrapper.emitted("undo")?.[0]).toEqual([0]);
+  });
 });

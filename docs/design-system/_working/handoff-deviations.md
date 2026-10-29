@@ -92,5 +92,7 @@ Kinds:
 | G-A | Deviation | guided flow footer: Vorige · Volgende · Bewaar en sluit | each step's configured form keeps its own submit as "Next"; footer has Back and Save and close | move the submit to the footer if all step forms allow it |
 | V20 | Deviation | rail rows: entity-type badge + title + check | step label + title + check (the flow config carries no badge tones) | add badge tones to the step config |
 | G-B | Deviation | passed steps clickable to revisit | not clickable (the step's record already exists; revisiting would create a second one); Back stays | revisit-to-edit |
+| V21 | Parked | each saved step undoable | no Undo for a chain with an upload step (the upload reports its host's id, not the new mediafile's) | have the upload report created mediafile ids, then delete them on undo |
+| V21 | Open | — | a guided-flow upload the server rejects (duplicate) still advances the step | check `DynamicForm`'s upload path |
 | Step 9 | Parked | DAMS tenants: media-first detail layout | not started (needs vliz-dams) | — |
 | DS 3 note | Open | every button named | recrop modal close button had no name (found in DS 3) | check |

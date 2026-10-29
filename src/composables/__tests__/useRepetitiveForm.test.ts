@@ -6,6 +6,7 @@ import {
 } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
+  undoPlan,
   describePickedItem,
   describeCreatedEntity,
   buildRelationMetadata,
@@ -1318,5 +1319,49 @@ describe("describeCreatedEntity", () => {
       label: undefined,
       details: [],
     });
+  });
+});
+
+describe("undoPlan", () => {
+  const entity = (key: string, id: string, isNew: boolean, type = key) =>
+    ({ key, id, type, isNew }) as any;
+
+  it("deletes each record the chain created, newest first", () => {
+    const plan = undoPlan({
+      entities: {
+        work: [entity("work", "w-1", true)],
+        expression: [entity("expression", "e-1", true)],
+      },
+    });
+    expect(plan).toEqual([
+      { id: "e-1", type: "expression" },
+      { id: "w-1", type: "work" },
+    ]);
+  });
+
+  it("leaves picked records alone", () => {
+    const plan = undoPlan({
+      entities: {
+        work: [entity("work", "w-1", false)],
+        expression: [entity("expression", "e-1", true)],
+      },
+    });
+    expect(plan).toEqual([{ id: "e-1", type: "expression" }]);
+  });
+
+  it("can't undo a chain with an upload step (it reports its host's id, not the mediafile's)", () => {
+    const plan = undoPlan({
+      entities: {
+        web_story_frame: [entity("web_story_frame", "f-1", true)],
+        mediafile: [entity("mediafile", "f-1", true, "mediafile")],
+      },
+    });
+    expect(plan).toBeNull();
+  });
+
+  it("has nothing to undo for a chain of picked records", () => {
+    expect(
+      undoPlan({ entities: { work: [entity("work", "w-1", false)] } }),
+    ).toEqual([]);
   });
 });

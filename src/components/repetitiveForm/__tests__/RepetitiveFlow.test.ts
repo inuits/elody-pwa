@@ -28,11 +28,13 @@ vi.mock("vue-i18n", () => ({
 const manageMocks = vi.hoisted(() => ({
   createEntity: vi.fn(),
   addRelations: vi.fn().mockResolvedValue(undefined),
+  deleteEntity: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
     createEntity: manageMocks.createEntity,
     addRelations: manageMocks.addRelations,
+    deleteEntity: manageMocks.deleteEntity,
   }),
 }));
 // deliberately NOT mocked: it is module-scoped state shared with the page the
@@ -81,8 +83,8 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
 vi.mock("@/components/repetitiveForm/RepetitiveOverview.vue", () => ({
   default: {
     name: "RepetitiveOverview",
-    props: ["branches", "steps", "repeatable"],
-    emits: ["add-another", "finish", "remove"],
+    props: ["branches", "steps", "repeatable", "undoable"],
+    emits: ["remove", "undo"],
     template: "<div data-testid='overview-stub' />",
   },
 }));
@@ -404,6 +406,46 @@ describe("RepetitiveFlow", () => {
       .trigger("click");
     expect(form(wrapper).exists()).toBe(false);
     expect(field(wrapper).exists()).toBe(true);
+  });
+
+  it("undoes the newest chain by deleting only the records it created", async () => {
+    manageMocks.deleteEntity.mockClear();
+    const wrapper = getWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]); // picked: kept
+    await flushPromises();
+    field(wrapper).vm.$emit("created", { id: "expr-new" }, "expression");
+    await flushPromises();
+    expect(overview(wrapper).props("undoable")).toBe(true);
+    overview(wrapper).vm.$emit("undo", 0);
+    await flushPromises();
+    expect(manageMocks.deleteEntity).toHaveBeenCalledTimes(1);
+    expect(manageMocks.deleteEntity).toHaveBeenCalledWith({
+      id: "expr-new",
+      type: "expression",
+    });
+    expect(useRepetitiveForm().branches.value).toHaveLength(0);
+  });
+
+  it("keeps the chain and reports when undo fails", async () => {
+    manageMocks.deleteEntity.mockRejectedValueOnce(new Error("nope"));
+    notificationMocks.displayErrorNotification.mockClear();
+    const wrapper = getWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("created", { id: "expr-new" }, "expression");
+    await flushPromises();
+    overview(wrapper).vm.$emit("undo", 0);
+    await flushPromises();
+    expect(useRepetitiveForm().branches.value).toHaveLength(1);
+    expect(notificationMocks.displayErrorNotification).toHaveBeenCalled();
+  });
+
+  it("ends undo at the next action (a step of the next chain)", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-2" }]);
+    await flushPromises();
+    expect(overview(wrapper).props("undoable")).toBe(false);
   });
 
   it("disables Save and close with a reason while a chain is half done", async () => {

@@ -50,7 +50,21 @@
             </span>
           </div>
         </div>
-        <div class="w-fit shrink-0">
+        <div class="flex flex-col items-end gap-1 shrink-0">
+          <!-- guided-flow.md: the newest saved chain is undoable until the next action -->
+          <BaseButtonNew
+            v-if="undoable && index === branches.length - 1 && hasCreated(branches[index])"
+            data-testid="repetitive-overview-undo"
+            :label="$t('actions.labels.undo')"
+            :aria-label="
+              $t('repetitiveForm.undo-item', {
+                item: entityLabel(branches[index], steps[0]?.key) || index + 1,
+              })
+            "
+            button-style="secondary"
+            button-size="sm"
+            @click="emit('undo', index)"
+          />
           <BaseButtonNew
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
@@ -78,6 +92,7 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   primaryEntity,
   toDisplayValue,
+  undoPlan,
   type RepetitiveBranch,
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
@@ -86,10 +101,17 @@ const props = defineProps<{
   branches: RepetitiveBranch[];
   steps: RepetitiveStep[];
   repeatable: boolean;
+  undoable?: boolean;
 }>();
 const emit = defineEmits<{
   (e: "remove", index: number): void;
+  (e: "undo", index: number): void;
 }>();
+
+// Undo deletes what the chain created (undoPlan); nothing created, or uploads
+// onto a picked record, means no Undo
+const hasCreated = (branch: RepetitiveBranch): boolean =>
+  Boolean(undoPlan(branch)?.length);
 
 // branch indexes, newest first; remove still emits the branch's own index
 const newestFirst = computed(() =>
