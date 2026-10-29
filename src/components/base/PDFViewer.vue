@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="root"
     class="relative w-full h-full flex flex-col"
     :class="{
       'animated-pulse bg-blue-default10': loading,
@@ -10,16 +11,21 @@
       <spinner-loader theme="accent" />
     </div>
 
-    <PdfToolbar
+    <ViewerToolbar
       v-show="!loading"
-      @zoomIn="zoomIn"
-      @zoomOut="zoomOut"
-      @changePage="onChangePage"
-      :pageNum="pageNum"
-      :pageCount="numPages"
-      :mediafileId="props.source?.id"
-      :originalFilename="props.source?.original_filename"
+      mode="pdf"
+      :page="pageNum"
+      :page-count="numPages"
+      :mediafile-id="props.source?.id"
+      :original-filename="props.source?.original_filename"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @fullscreen="toggleFullscreen"
+      @change-page="onChangePage"
     />
+    <span role="status" class="sr-only">{{
+      isFullscreen ? t("media-viewer.fullscreen-on") : ""
+    }}</span>
 
     <div
       v-if="!loading"
@@ -58,9 +64,10 @@
 <script lang="ts" setup>
 import type { Ref } from "vue";
 import { nextTick, onUnmounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import * as pdfjsLibImport from "pdfjs-dist";
 
-import PdfToolbar from "../PdfToolbar.vue";
+import ViewerToolbar from "@/components/ViewerToolbar.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { CacheStrategy, useGetMediafile } from "@/composables/useGetMediafile";
 
@@ -94,6 +101,18 @@ const decentralizeFromTop = ref<boolean>(false);
 const error = ref<string | null>(null);
 
 const { getMediafile } = useGetMediafile();
+const { t } = useI18n();
+
+const root = ref<HTMLElement | null>(null);
+const isFullscreen = ref(false);
+const onFullscreenChange = (): void => {
+  isFullscreen.value = document.fullscreenElement === root.value;
+};
+document.addEventListener("fullscreenchange", onFullscreenChange);
+const toggleFullscreen = (): void => {
+  if (document.fullscreenElement) void document.exitFullscreen();
+  else void root.value?.requestFullscreen();
+};
 
 let currentObjectUrl: string | null = null;
 let currentRenderTask: any = null;
@@ -309,6 +328,7 @@ watch(
 );
 
 onUnmounted(() => {
+  document.removeEventListener("fullscreenchange", onFullscreenChange);
   if (currentRenderTask && typeof currentRenderTask.cancel === "function") {
     try {
       currentRenderTask.cancel();

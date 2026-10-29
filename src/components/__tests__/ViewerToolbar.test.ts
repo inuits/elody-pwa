@@ -51,7 +51,7 @@ const getWrapper = (props = getDefaultProps()) =>
         },
         SpinnerLoader: { template: "<div />" },
         unicon: {
-          template: "<span :data-icon-name=\"name\" />",
+          template: '<span :data-icon-name="name" />',
           props: ["name", "height"],
         },
       },
@@ -325,8 +325,7 @@ describe("ViewerToolbar - shared toolbar shell", () => {
     const wrapper = mount(ViewerToolbar, {
       props: getDefaultProps(),
       slots: {
-        navigation:
-          '<MediafileNavigationArrows />',
+        navigation: "<MediafileNavigationArrows />",
       },
       global: {
         mocks: { $t: (key: string) => key },
@@ -339,10 +338,89 @@ describe("ViewerToolbar - shared toolbar shell", () => {
       },
     });
     expect(
-      wrapper.find('[data-testid="nav-prev-mediafile"]').attributes("aria-label"),
+      wrapper
+        .find('[data-testid="nav-prev-mediafile"]')
+        .attributes("aria-label"),
     ).toBe("media-viewer.previous-file");
     expect(
-      wrapper.find('[data-testid="nav-next-mediafile"]').attributes("aria-label"),
+      wrapper
+        .find('[data-testid="nav-next-mediafile"]')
+        .attributes("aria-label"),
     ).toBe("media-viewer.next-file");
+  });
+});
+
+describe("ViewerToolbar - pdf mode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const pdfProps = (page = 3, pageCount = 12) => ({
+    mode: "pdf" as const,
+    mediafileId: "mediafile-1",
+    originalFilename: "doc.pdf",
+    page,
+    pageCount,
+  });
+  const byLabel = (wrapper: ReturnType<typeof getWrapper>, label: string) =>
+    wrapper.find(`[aria-label="${label}"]`);
+
+  it("shows zoom, fullscreen, download and page navigation, and no image-only controls", () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    const names = wrapper
+      .findAll("button, input")
+      .map((el) => el.attributes("aria-label") || el.text().trim());
+    expect(names).toEqual([
+      "media-viewer.fullscreen",
+      "media-viewer.zoom-in",
+      "media-viewer.zoom-out",
+      "media-viewer.download",
+      "media-viewer.previous-page",
+      "pagination.page-number",
+      "media-viewer.next-page",
+    ]);
+  });
+
+  it("emits zoom and fullscreen requests", async () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    await byLabel(wrapper, "media-viewer.zoom-in").trigger("click");
+    await byLabel(wrapper, "media-viewer.zoom-out").trigger("click");
+    await byLabel(wrapper, "media-viewer.fullscreen").trigger("click");
+    expect(wrapper.emitted("zoom-in")).toHaveLength(1);
+    expect(wrapper.emitted("zoom-out")).toHaveLength(1);
+    expect(wrapper.emitted("fullscreen")).toHaveLength(1);
+  });
+
+  it("shows the current page and the page count", () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    const input = byLabel(wrapper, "pagination.page-number");
+    expect((input.element as HTMLInputElement).value).toBe("3");
+    expect(wrapper.text()).toContain("/ 12");
+  });
+
+  it("steps to the previous and next page", async () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    await byLabel(wrapper, "media-viewer.previous-page").trigger("click");
+    await byLabel(wrapper, "media-viewer.next-page").trigger("click");
+    expect(wrapper.emitted("change-page")).toEqual([[2], [4]]);
+  });
+
+  it("disables the arrows at the first and last page", () => {
+    const first = getWrapper(pdfProps(1, 2) as any);
+    expect(
+      byLabel(first, "media-viewer.previous-page").attributes("disabled"),
+    ).toBeDefined();
+    const last = getWrapper(pdfProps(2, 2) as any);
+    expect(
+      byLabel(last, "media-viewer.next-page").attributes("disabled"),
+    ).toBeDefined();
+  });
+
+  it("clamps a typed page into range", async () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    const input = byLabel(wrapper, "pagination.page-number");
+    await input.setValue("99");
+    expect(wrapper.emitted("change-page")).toEqual([[12]]);
+    expect((input.element as HTMLInputElement).value).toBe("12");
   });
 });

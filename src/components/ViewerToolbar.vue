@@ -20,6 +20,7 @@
         type="button"
         class="viewer-button"
         :aria-label="$t('media-viewer.fullscreen')"
+        @click="$emit('fullscreen')"
       >
         <unicon :name="Unicons.Desktop.name" height="20" />
       </button>
@@ -28,6 +29,7 @@
         type="button"
         class="viewer-button"
         :aria-label="$t('media-viewer.zoom-in')"
+        @click="$emit('zoom-in')"
       >
         <unicon :name="Unicons.SearchPlus.name" height="20" />
       </button>
@@ -36,10 +38,12 @@
         type="button"
         class="viewer-button"
         :aria-label="$t('media-viewer.zoom-out')"
+        @click="$emit('zoom-out')"
       >
         <unicon :name="Unicons.SearchMinus.name" height="20" />
       </button>
       <button
+        v-if="mode === 'image'"
         ref="rotateRef"
         type="button"
         class="viewer-button"
@@ -149,7 +153,39 @@
     <div v-if="$slots.navigation" class="flex items-center">
       <slot name="navigation" />
     </div>
-    <div class="flex items-center gap-1">
+    <div v-if="mode === 'pdf'" class="flex items-center gap-1 text-table">
+      <button
+        type="button"
+        class="viewer-button"
+        :aria-label="$t('media-viewer.previous-page')"
+        :title="$t('media-viewer.previous-page')"
+        :disabled="page <= 1"
+        @click="$emit('change-page', page - 1)"
+      >
+        <unicon :name="Unicons.AngleLeft.name" height="20" />
+      </button>
+      <input
+        type="number"
+        class="viewer-page-input"
+        min="1"
+        :max="pageCount"
+        :value="page"
+        :aria-label="$t('pagination.page-number')"
+        @change="changePage"
+      />
+      <span class="text-neutral-700">/ {{ pageCount }}</span>
+      <button
+        type="button"
+        class="viewer-button"
+        :aria-label="$t('media-viewer.next-page')"
+        :title="$t('media-viewer.next-page')"
+        :disabled="page >= pageCount"
+        @click="$emit('change-page', page + 1)"
+      >
+        <unicon :name="Unicons.AngleRight.name" height="20" />
+      </button>
+    </div>
+    <div v-else class="flex items-center gap-1">
       <BaseTooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
           <div v-on="on" :aria-describedby="describedBy" class="flex">
@@ -189,23 +225,29 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMediafileCrop } from "@/composables/useMediafileCrop";
 import { useMediafileDownload } from "@/composables/useMediafileDownload";
 
-const props = defineProps<{
-  zoomIn?: HTMLDivElement | string | null;
-  zoomOut?: HTMLDivElement | string | null;
-  fullPage?: HTMLDivElement | string | null;
-  home?: HTMLDivElement | string | null;
-  rotate?: HTMLButtonElement | null;
-  originalFilename?: string;
-  mediafileId?: string;
-  imageFilename?: string;
-  dimensions?: Record<string, any>;
-  enableSelection?: boolean;
-  hasCropData?: boolean;
-  showingCropped?: boolean;
-  canRecrop?: boolean;
-  isRecropModal?: boolean;
-  logo?: { src: string; href: string; alt?: string };
-}>();
+const props = withDefaults(
+  defineProps<{
+    mode?: "image" | "pdf";
+    page?: number;
+    pageCount?: number;
+    zoomIn?: HTMLDivElement | string | null;
+    zoomOut?: HTMLDivElement | string | null;
+    fullPage?: HTMLDivElement | string | null;
+    home?: HTMLDivElement | string | null;
+    rotate?: HTMLButtonElement | null;
+    originalFilename?: string;
+    mediafileId?: string;
+    imageFilename?: string;
+    dimensions?: Record<string, any>;
+    enableSelection?: boolean;
+    hasCropData?: boolean;
+    showingCropped?: boolean;
+    canRecrop?: boolean;
+    isRecropModal?: boolean;
+    logo?: { src: string; href: string; alt?: string };
+  }>(),
+  { mode: "image", page: 1, pageCount: 1 },
+);
 
 const emit = defineEmits<{
   (event: "update:zoomIn", value: HTMLDivElement | undefined): void;
@@ -217,6 +259,10 @@ const emit = defineEmits<{
   (event: "cancel-selection"): void;
   (event: "toggle-crop-view"): void;
   (event: "open-recrop-modal"): void;
+  (event: "fullscreen"): void;
+  (event: "zoom-in"): void;
+  (event: "zoom-out"): void;
+  (event: "change-page", page: number): void;
 }>();
 
 const zoomInRef = ref<HTMLDivElement>();
@@ -247,6 +293,16 @@ onMounted(() => {
   emit("update:home", homeRef.value);
   emit("update:rotate", rotateRef.value);
 });
+
+const changePage = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const page = Math.min(
+    Math.max(1, Math.round(Number(input.value)) || props.page),
+    props.pageCount,
+  );
+  input.value = String(page);
+  emit("change-page", page);
+};
 
 const downloadImage = () => {
   downloadMediafile(props.mediafileId!, props.originalFilename);
@@ -286,6 +342,22 @@ const openIiifOperationsModal = () => {
 }
 .viewer-button:hover:not(:disabled) {
   background: var(--color-accent-wash);
+}
+.viewer-page-input {
+  width: var(--viewer-page-input-width);
+  height: var(--viewer-button-height);
+  padding: 0;
+  border: none;
+  border-radius: var(--viewer-button-radius);
+  background: var(--color-surface-muted);
+  text-align: center;
+  font-size: var(--text-table);
+  appearance: textfield;
+}
+.viewer-page-input::-webkit-outer-spin-button,
+.viewer-page-input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 .viewer-button:disabled {
   color: var(--color-text-disabled);
