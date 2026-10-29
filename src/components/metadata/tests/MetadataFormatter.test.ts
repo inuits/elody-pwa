@@ -11,6 +11,7 @@ vi.mock("@/helpers", () => ({
   convertUnitToReadbleFormat: vi.fn().mockImplementation((_unit, value) => value ?? ""),
   stringIsUrl: vi.fn().mockReturnValue(false),
   stringIsHtml: vi.fn().mockReturnValue(false),
+  stripHighlightTags: (value: unknown) => value,
 }));
 
 const mocks = vi.hoisted(() => ({ t: vi.fn(), te: vi.fn(() => false) }));

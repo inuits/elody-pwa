@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => {
     useEntityMediafileSelector: vi.fn(),
     IIIFViewer: {
       default: {},
-      template: '<div class="iiif-viewer"></div>',
+      template: '<div class="iiif-viewer"><slot name="navigation" /></div>',
       props: [
         "enableSelection",
         "cropSizes",
@@ -391,6 +391,25 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       expect(wrapper.find('[data-testid="nav-next-mediafile"]').exists()).toBe(
         true,
       );
+    });
+
+    it("renders the arrows inside the IIIF viewer toolbar so they cannot cover its buttons", async () => {
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+        { id: "media2", mimetype: "image/png" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper();
+      await nextTick();
+
+      expect(
+        wrapper.findAll('[data-testid="nav-prev-mediafile"]'),
+      ).toHaveLength(1);
+      expect(
+        wrapper
+          .find(".iiif-viewer")
+          .find('[data-testid="nav-prev-mediafile"]')
+          .exists(),
+      ).toBe(true);
     });
 
     it("should call selectNextMediafile and emit togglePreviewComponent when next clicked", async () => {

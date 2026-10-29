@@ -24,7 +24,11 @@
       @cancel-selection="undoLastSelection"
       @toggle-crop-view="$emit('toggle-crop-view')"
       @open-recrop-modal="$emit('open-recrop-modal')"
-    />
+    >
+      <template v-if="$slots.navigation" #navigation>
+        <slot name="navigation" />
+      </template>
+    </viewer-toolbar>
 
     <div
       ref="OpenSeadragonDiv"

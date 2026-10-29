@@ -197,15 +197,18 @@ describe("MetadataFormatterPill — design-system badge", () => {
   });
 
   it("resolves a configured tone to the badge tone tokens", () => {
-    const style = pill({ formatter: "pill", label: "work" }).attributes("style");
+    const style = pill({ formatter: "pill", label: "work" }).attributes(
+      "style",
+    );
     expect(style).toContain("var(--color-badge-tone1-bg)");
     expect(style).toContain("var(--color-badge-tone1-text)");
   });
 
   it("renders an auto pill as a relation chip", () => {
-    const style = pill({ formatter: "pill|auto", label: "anything" }).attributes(
-      "style",
-    );
+    const style = pill({
+      formatter: "pill|auto",
+      label: "anything",
+    }).attributes("style");
     expect(style).toContain("var(--color-chip-relation-bg)");
   });
 });
@@ -434,7 +437,9 @@ describe("MetadataFormatterPill — chip and badge shapes", () => {
 
   it("renders a configured value as a chip: label size, bold, chip padding", () => {
     mocks.t.mockImplementation((key: string) => key);
-    expect(firstPill({ formatter: "pill", label: "concept" }).classes()).toEqual(
+    expect(
+      firstPill({ formatter: "pill", label: "concept" }).classes(),
+    ).toEqual(
       expect.arrayContaining([
         "text-chip",
         "font-bold",
@@ -509,5 +514,85 @@ describe("MetadataFormatterPill — chip and badge shapes", () => {
         "var(--color-badge-tone3-bg)",
       );
     });
+  });
+});
+
+describe("MetadataFormatterPill — search highlights", () => {
+  it("renders the highlight instead of the literal mark tags", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: { formatter: "pill|auto", label: "<mark>91</mark>.2" },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).toBe("91.2");
+    expect(wrapper.find("mark").text()).toBe("91");
+  });
+
+  it("highlights every entry of a multi-value label", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: { formatter: "pill", label: ["<mark>a</mark>b", "cd"] },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).not.toContain("<mark>");
+    expect(wrapper.findAll("mark").map((mark) => mark.text())).toEqual(["a"]);
+  });
+
+  it("looks up the colour by the value without highlight", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: { formatter: "pill", label: "<mark>concept</mark>" },
+    });
+    await nextTick();
+
+    expect(wrapper.element.children[0].getAttribute("style")).toContain(
+      "rgb(170, 170, 170)",
+    );
+  });
+
+  it("translates by the value without highlight", async () => {
+    mocks.t.mockImplementation((key: string) =>
+      key === "production-status.concept" ? "Concept" : key,
+    );
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill",
+        label: "<mark>concept</mark>",
+        translationKey: "production-status.$value",
+      },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).toBe("Concept");
+  });
+
+  it("highlights nested values and titles them without the tags", async () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, {
+      props: {
+        formatter: "pill|organization",
+        label: [
+          {
+            label: "<mark>Org</mark> A",
+            values: [{ key: "function", value: "<mark>prog</mark>rammer" }],
+          },
+        ],
+      },
+    });
+    await nextTick();
+
+    expect(wrapper.text()).not.toContain("<mark>");
+    expect(wrapper.findAll("mark").map((mark) => mark.text())).toEqual([
+      "Org",
+      "prog",
+    ]);
+    expect(
+      wrapper
+        .findAll("span")
+        .find((span) => span.text() === "programmer")
+        ?.attributes("title"),
+    ).toBe("function: programmer");
   });
 });

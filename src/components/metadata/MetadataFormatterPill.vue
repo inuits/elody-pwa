@@ -23,7 +23,14 @@
           height="14"
           width="14"
         />
-        <span :class="{ 'font-semibold': entry.nested }">{{
+        <SanitizedHtml
+          v-if="isHighlighted(entry)"
+          :mode="SanitizeMode.Html"
+          :content="entry.markup"
+          class="inline [&_mark]:!text-black"
+          :class="{ 'font-semibold': entry.nested }"
+        />
+        <span v-else :class="{ 'font-semibold': entry.nested }">{{
           entry.nested ? entry.label : displayValue(entry.label)
         }}</span>
         <span
@@ -36,7 +43,13 @@
             color: nestedSettingsFor(nestedValue.value)?.text,
           }"
         >
-          {{ displayValue(nestedValue.value) }}
+          <SanitizedHtml
+            v-if="isHighlighted(nestedValue)"
+            :mode="SanitizeMode.Html"
+            :content="nestedValue.markup"
+            class="inline [&_mark]:!text-black"
+          />
+          <template v-else>{{ displayValue(nestedValue.value) }}</template>
         </span>
       </template>
     </div>
@@ -49,6 +62,9 @@ import { formattersSettings } from "@/main";
 import { useI18n } from "vue-i18n";
 import { resolveOptionLabel } from "@/components/metadata/useValueTranslationKey";
 import { Unicons } from "@/types";
+import SanitizedHtml from "@/components/SanitizedHtml.vue";
+import { SanitizeMode } from "@/generated-types/queries";
+import { stripHighlightTags } from "@/helpers";
 
 type NestedPillValue = { key: string; value: string };
 type NestedPillEntry = {
@@ -72,24 +88,42 @@ const props = withDefaults(
 
 const { t } = useI18n();
 
-const toNestedValue = (value: NestedPillValue | string): NestedPillValue =>
-  typeof value === "object" ? value : { key: "", value };
+type HighlightedNestedValue = NestedPillValue & { markup: string };
+
+const toNestedValue = (
+  value: NestedPillValue | string,
+): HighlightedNestedValue => {
+  const { key, value: raw } =
+    typeof value === "object" ? value : { key: "", value };
+  return { key, value: stripHighlightTags(raw), markup: raw };
+};
 
 // Every value gets its own pill: one pill cannot carry two colours, and a
 // joined string has no entry in formattersSettings to look up.
 const entries = computed<
-  { label: string; values: NestedPillValue[]; nested: boolean }[]
+  {
+    label: string;
+    markup: string;
+    values: HighlightedNestedValue[];
+    nested: boolean;
+  }[]
 >(() =>
   (Array.isArray(props.label) ? props.label : [props.label])
     .filter(Boolean)
     .map((value) =>
       typeof value === "object"
         ? {
-            label: value.label,
+            label: stripHighlightTags(value.label),
+            markup: value.label,
             values: (value.values ?? []).map(toNestedValue),
             nested: true,
           }
-        : { label: value, values: [], nested: false },
+        : {
+            label: stripHighlightTags(value),
+            markup: value,
+            values: [],
+            nested: false,
+          },
     ),
 );
 
@@ -202,6 +236,22 @@ const nestedTitle = ({ key, value }: NestedPillValue): string | undefined => {
   const name =
     keyTranslation === `metadata.labels.${key}` ? key : keyTranslation;
   return `${name}: ${displayValue(value)}`;
+};
+
+const isHighlighted = ({
+  markup,
+  label,
+  value,
+  nested,
+}: {
+  markup: string;
+  label?: string;
+  value?: string;
+  nested?: boolean;
+}): boolean => {
+  const plain = label ?? value ?? "";
+  if (markup === plain) return false;
+  return nested || displayValue(plain) === plain;
 };
 
 const displayValue = (value: string): string => {

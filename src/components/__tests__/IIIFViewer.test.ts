@@ -61,6 +61,7 @@ vi.mock("@/components/ViewerToolbar.vue", () => ({
       '<button data-testid="toggle-selection-button" @click="$emit(\'toggle-selection\')" />' +
       '<button data-testid="toggle-crop-view-button" @click="$emit(\'toggle-crop-view\')" />' +
       '<button data-testid="open-recrop-modal-button" @click="$emit(\'open-recrop-modal\')" />' +
+      '<slot name="navigation" />' +
       "</div>",
   },
 }));
@@ -207,6 +208,21 @@ describe("IIIFViewer - forwarding crop/recrop state to ViewerToolbar", () => {
 
     expect(wrapper.emitted("toggle-crop-view")).toHaveLength(1);
     expect(wrapper.emitted("open-recrop-modal")).toHaveLength(1);
+  });
+});
+
+describe("IIIFViewer - navigation slot", () => {
+  it("forwards the navigation slot into the toolbar", () => {
+    const wrapper = mount(IIIFViewer, {
+      props: { imageFilename: "test-image.jpg", mediafileId: "mediafile-1" },
+      slots: { navigation: '<button data-testid="nav-slot" />' },
+    });
+    expect(
+      wrapper
+        .findComponent(ViewerToolbarMock)
+        .find('[data-testid="nav-slot"]')
+        .exists(),
+    ).toBe(true);
   });
 });
 
