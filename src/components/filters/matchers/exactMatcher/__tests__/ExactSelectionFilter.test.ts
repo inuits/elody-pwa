@@ -222,3 +222,59 @@ describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
     expect(wrapper.emitted("updateValue")!.length).toBe(1);
   });
 });
+
+describe("ExactSelectionFilter search on a seeded text input", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.options.value = [];
+  });
+
+  const makeSeededFilter = (resolveDefaultValueToOptionIds: boolean) =>
+    makeFilter({
+      selectionOption: AutocompleteSelectionOptions.Autocomplete,
+      options: [],
+      advancedFilterInputForRetrievingOptions: [
+        {
+          type: AdvancedFilterTypes.Text,
+          key: ["vlacc:1|properties.name.value"],
+          value: "$entity.intialValues.primary_author_name",
+          match_exact: false,
+          resolveDefaultValueToOptionIds,
+        },
+        {
+          type: AdvancedFilterTypes.Selection,
+          key: "type",
+          value: ["person", "corporation"],
+        },
+      ],
+    });
+
+  const search = async (wrapper: any, value: string) => {
+    wrapper
+      .findComponent({ name: "AutocompleteFilter" })
+      .vm.$emit("searchOptions", value);
+    await flushPromises();
+    return mocks.setFilters.mock.calls.at(-1)![0];
+  };
+
+  it("searches on the typed text instead of the default seed value", async () => {
+    mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
+    const wrapper = getWrapper(makeSeededFilter(true));
+    await flushPromises();
+
+    const filters = await search(wrapper, "Claus");
+
+    expect(filters[0].value).toBe("Claus");
+    expect(filters[1].value).toEqual(["person", "corporation"]);
+  });
+
+  it("keeps a fixed text value when the input is not a resolvable default", async () => {
+    mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
+    const wrapper = getWrapper(makeSeededFilter(false));
+    await flushPromises();
+
+    const filters = await search(wrapper, "Claus");
+
+    expect(filters[0].value).toBe("$entity.intialValues.primary_author_name");
+  });
+});

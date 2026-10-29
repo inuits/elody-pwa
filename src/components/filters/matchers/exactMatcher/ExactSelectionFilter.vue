@@ -221,7 +221,8 @@ const buildFilterForSearch =
       return filter;
     }
 
-    const shouldReplaceFilterValue = filter.value === "*";
+    const shouldReplaceFilterValue =
+      filter.value === "*" || !!filter.resolveDefaultValueToOptionIds;
     return {
       ...filter,
       value: shouldReplaceFilterValue ? searchValue || "*" : filter.value,
