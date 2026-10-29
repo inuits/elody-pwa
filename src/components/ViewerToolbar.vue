@@ -329,23 +329,6 @@ const openIiifOperationsModal = () => {
 </script>
 
 <style scoped>
-.viewer-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--viewer-button-width);
-  height: var(--viewer-button-height);
-  border-radius: var(--viewer-button-radius);
-  color: var(--color-neutral-700);
-  cursor: pointer;
-}
-.viewer-button--text {
-  padding: 0 var(--viewer-text-button-padding-x);
-  font-size: var(--text-table);
-}
-.viewer-button:hover:not(:disabled) {
-  background: var(--color-accent-wash);
-}
 .viewer-page-input {
   width: var(--viewer-page-input-width);
   height: var(--viewer-button-height);
@@ -361,9 +344,5 @@ const openIiifOperationsModal = () => {
 .viewer-page-input::-webkit-inner-spin-button {
   appearance: none;
   margin: 0;
-}
-.viewer-button:disabled {
-  color: var(--color-text-disabled);
-  cursor: not-allowed;
 }
 </style>

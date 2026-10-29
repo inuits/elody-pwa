@@ -1,7 +1,8 @@
 <template>
-  <div class="relative">
+  <div class="relative" role="region" :aria-label="t('map.label')">
     <Map.OlMap
       ref="mapRef"
+      :controls="[]"
       style="width: 100%; height: 65vh"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
@@ -15,42 +16,12 @@
         positioning="bottom-center"
         :autoPan="true"
       >
-        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
-          <div
-            v-if="featureLoading"
-            class="h-full w-full flex items-center justify-center py-4"
-          >
-            <spinner-loader theme="accent" dimensions="10" />
-          </div>
-          <div v-else-if="featureResult">
-            <div class="flex justify-end items-center">
-              <button @click="detailPopUp.isVisible = false">
-                <unicon
-                  class="cursor-pointer"
-                  :name="Unicons.Close.name"
-                  :height="18"
-                />
-              </button>
-            </div>
-            <div>
-              <div
-                v-for="item of popUpDetailConfiguration"
-                :key="item.key"
-                class="pb-2"
-              >
-                <div>
-                  <p class="font-bold">{{ t(item.label) }}</p>
-                  <p>{{ featureResult.Entity.intialValues[item.key] || emptyValueLabel }}</p>
-                </div>
-              </div>
-              <router-link
-                class="underline text-accent-accent"
-                :to="`/${featureResult.Entity.type}/${featureResult.Entity.id}`"
-                target="_blank"
-              >Open in other tab</router-link>
-            </div>
-          </div>
-        </div>
+        <MapFeaturePopUp
+          :entity="featureResult?.Entity"
+          :configuration="popUpDetailConfiguration"
+          :loading="featureLoading"
+          @close="detailPopUp.isVisible = false"
+        />
       </Map.OlOverlay>
 
       <Map.OlView
@@ -72,7 +43,7 @@
         />
       </Layers.OlTileLayer>
 
-      <Layers.OlVectorLayer v-if="clustering" :style="clusterStyle">
+      <Layers.OlVectorLayer v-if="clustering" ref="clusterLayerRef">
         <Sources.OlSourceCluster :distance="40">
           <Sources.OlSourceVector
             ref="vectorSourceRef"
@@ -89,27 +60,26 @@
           :projection="activeProjection"
         />
       </Layers.OlVectorLayer>
-
-      <MapControls.OlFullscreenControl />
+      <MapChrome fullscreen />
     </Map.OlMap>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, nextTick } from "vue";
-import { Map, Layers, Sources, MapControls } from "vue3-openlayers";
+import { Map, Layers, Sources } from "vue3-openlayers";
 import { Style, Icon, Fill, Stroke, Circle as CircleStyle, Text } from "ol/style";
 import { extend, type Extent } from "ol/extent";
 import type View from "ol/View";
+import type VectorLayer from "ol/layer/Vector";
 import debounce from "lodash.debounce";
 import { useMaps } from "@/composables/useMaps";
 import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 import { useQuery } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { readCssToken } from "@/utils/cssToken";
-import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
-import { Unicons } from "@/types";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import MapChrome from "@/components/maps/MapChrome.vue";
+import MapFeaturePopUp from "@/components/maps/MapFeaturePopUp.vue";
 import {
   MapViews,
   type AdvancedFilters,
@@ -153,7 +123,6 @@ const {
 } = useMaps();
 
 const { t } = useI18n();
-const emptyValueLabel = useEmptyValueLabel();
 const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
   useHeatMapDetailPopUp();
 
@@ -219,6 +188,10 @@ const clusterStyle = (feature: any) => {
   }
   return clusterStyleCache[size];
 };
+
+// Set on the layer: Vue drops a style function bound as :style on a component.
+const clusterLayerRef = ref<{ vectorLayer: VectorLayer }>();
+watch(clusterLayerRef, (layer) => layer?.vectorLayer.setStyle(clusterStyle));
 
 const focusOnFeatures = async () => {
   if (!pointFeatures.value.length || !viewRef.value) return;

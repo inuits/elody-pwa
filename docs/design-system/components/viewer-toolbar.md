@@ -42,3 +42,18 @@ middle, context actions on the right.
   viewer element (OpenSeadragon detaches the rest of the page). PDF uses the
   browser's fullscreen on the viewer element, announced the same way.
 - The page input is named "Page number"; the arrows "Previous page" / "Next page".
+
+## Maps
+`maps/MapChrome.vue` sits inside every OpenLayers map (`WktMap`, `PointMap`,
+`HeatMap`, which pass `:controls="[]"`): a white capsule top-left with the
+same `.viewer-button` zoom in / zoom out (and fullscreen where the map had
+it), and an attribution that never collapses (`map-viewer.md`). Each map is a
+`role="region"` named "Map". The feature popup is `maps/MapFeaturePopUp.vue`:
+`role="dialog"` named by the feature's first value, a named close button,
+Escape closes, overlay radius and shadow.
+
+Geometry and site dots use the client accent (stroke, 25% fill), read with
+`readCssToken()`. Set an OpenLayers style function on the layer instance, not
+as `:style` on the vue3-openlayers component: Vue normalises `style` on any
+component and drops functions.
+

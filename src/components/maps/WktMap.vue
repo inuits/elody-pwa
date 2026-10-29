@@ -1,10 +1,11 @@
 <template>
-  <div class="relative">
+  <div class="relative" role="region" :aria-label="t('map.label')">
     <div class="absolute top-2 right-2 z-[1000] pointer-events-auto">
       <slot name="controls" />
     </div>
     <Map.OlMap
       ref="mapRef"
+      :controls="[]"
       style="width: 100%; height: 65vh"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
@@ -19,45 +20,12 @@
         positioning="bottom-center"
         :autoPan="true"
       >
-        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
-          <div
-            v-if="featureLoading"
-            class="h-full w-full flex items-center justify-center py-4"
-          >
-            <spinner-loader theme="accent" dimensions="10" />
-          </div>
-          <div v-else-if="featureResult">
-            <div class="flex justify-end items-center">
-              <button @click="detailPopUp.isVisible = false">
-                <unicon
-                  class="cursor-pointer"
-                  :name="Unicons.Close.name"
-                  :height="18"
-                />
-              </button>
-            </div>
-            <div>
-              <div
-                v-for="item of popUpDetailConfiguration"
-                :key="item.key"
-                class="pb-2"
-              >
-                <div>
-                  <p class="font-bold">{{ t(item.label) }}</p>
-                  <p>
-                    {{ featureResult.Entity.intialValues[item.key] || emptyValueLabel }}
-                  </p>
-                </div>
-              </div>
-              <router-link
-                class="underline text-accent-accent"
-                :to="`/${featureResult.Entity.type}/${featureResult.Entity.id}`"
-                target="_blank"
-                >Open in other tab</router-link
-              >
-            </div>
-          </div>
-        </div>
+        <MapFeaturePopUp
+          :entity="featureResult?.Entity"
+          :configuration="popUpDetailConfiguration"
+          :loading="featureLoading"
+          @close="detailPopUp.isVisible = false"
+        />
       </Map.OlOverlay>
 
       <Map.OlView
@@ -80,7 +48,7 @@
         />
       </Layers.OlTileLayer>
 
-      <Layers.OlVectorLayer :style="getSiteStyle">
+      <Layers.OlVectorLayer ref="sitesLayerRef">
         <Sources.OlSourceVector
           :projection="activeProjection"
           :features="features"
@@ -94,6 +62,7 @@
           :features="overlayFeatures"
         />
       </Layers.OlVectorLayer>
+      <MapChrome />
     </Map.OlMap>
   </div>
 </template>
@@ -105,6 +74,7 @@ import { Style, Stroke, Fill } from "ol/style";
 import { useMaps } from "@/composables/useMaps";
 import { type Extent, extend } from "ol/extent";
 import type View from "ol/View";
+import type VectorLayer from "ol/layer/Vector";
 import {
   MapModes,
   MapViews,
@@ -119,11 +89,10 @@ import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import debounce from "lodash.debounce";
 import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 import { useQuery } from "@vue/apollo-composable";
-import { Unicons } from "@/types";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import MapChrome from "@/components/maps/MapChrome.vue";
+import MapFeaturePopUp from "@/components/maps/MapFeaturePopUp.vue";
 import { useI18n } from "vue-i18n";
 import { readCssToken, withAlpha } from "@/utils/cssToken";
-import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
 
 const props = withDefaults(
   defineProps<{
@@ -156,11 +125,13 @@ const {
 } = useMaps();
 
 const { t } = useI18n();
-const emptyValueLabel = useEmptyValueLabel();
 const { detailPopUp, setEntityDetailConfigurations, popUpDetailConfiguration } =
   useHeatMapDetailPopUp();
 
 const viewRef = ref<{ view: View }>(null);
+// Set on the layer: Vue drops a style function bound as :style on a component.
+const sitesLayerRef = ref<{ vectorLayer: VectorLayer }>();
+watch(sitesLayerRef, (layer) => layer?.vectorLayer.setStyle(getSiteStyle));
 const mapRef = ref<InstanceType<typeof Map.OlMap> | undefined>(undefined);
 const localCenter = ref<number[]>([]);
 const activeProjection = computed(() => {

@@ -1,7 +1,8 @@
 <template>
-  <div class="relative">
+  <div class="relative" role="region" :aria-label="t('map.label')">
     <OLMap.OlMap
       ref="mapRef"
+      :controls="[]"
       :loadTilesWhileAnimating="true"
       :loadTilesWhileInteracting="true"
       style="height: 65vh"
@@ -16,43 +17,12 @@
         positioning="bottom-center"
         :autoPan="true"
       >
-        <div class="bg-white rounded shadow-lg p-3 text-sm w-48">
-          <div
-            v-if="featureLoading"
-            class="h-full w-full flex items-center justify-center py-4"
-          >
-            <spinner-loader theme="accent" dimensions="10" />
-          </div>
-          <div v-else-if="featureResult">
-            <div class="flex justify-end items-center">
-              <button @click="detailPopUp.isVisible = false">
-                <unicon
-                  class="cursor-pointer"
-                  :name="Unicons.Close.name"
-                  :height="18"
-                />
-              </button>
-            </div>
-            <div>
-              <div
-                v-for="item of popUpDetailConfiguration"
-                :key="item.key"
-                class="pb-2"
-              >
-                <div v-if="featureResult.Entity.intialValues[item.key]">
-                  <p class="font-bold">{{ t(item.label) }}</p>
-                  <p>{{ featureResult.Entity.intialValues[item.key] }}</p>
-                </div>
-              </div>
-              <router-link
-                class="underline text-accent-accent"
-                :to="`/${featureResult.Entity.type}/${featureResult.Entity.id}`"
-                target="_blank"
-                >Open in other tab</router-link
-              >
-            </div>
-          </div>
-        </div>
+        <MapFeaturePopUp
+          :entity="featureResult?.Entity"
+          :configuration="popUpDetailConfiguration"
+          :loading="featureLoading"
+          @close="detailPopUp.isVisible = false"
+        />
       </OLMap.OlOverlay>
       <Layers.OlTileLayer>
         <Sources.OlSourceOsm />
@@ -68,8 +38,7 @@
       </Layers.OlHeatmapLayer>
 
       <MapControls.OlContextMenuControl :items="contextMenuItems" />
-
-      <MapControls.OlFullscreenControl />
+      <MapChrome fullscreen />
     </OLMap.OlMap>
   </div>
 </template>
@@ -106,8 +75,8 @@ import { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import { useMaps } from "@/composables/useMaps";
 import GeoJSON from "ol/format/GeoJSON";
 import { useQuery } from "@vue/apollo-composable";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { Unicons } from "@/types";
+import MapChrome from "@/components/maps/MapChrome.vue";
+import MapFeaturePopUp from "@/components/maps/MapFeaturePopUp.vue";
 import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 
 const props = withDefaults(
