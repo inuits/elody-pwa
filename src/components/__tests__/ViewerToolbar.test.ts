@@ -424,3 +424,25 @@ describe("ViewerToolbar - pdf mode", () => {
     expect((input.element as HTMLInputElement).value).toBe("12");
   });
 });
+
+describe("ViewerToolbar - text mode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows only zoom and download", () => {
+    const wrapper = getWrapper({
+      mode: "text",
+      mediafileId: "mediafile-1",
+      originalFilename: "notes.txt",
+    } as any);
+    const names = wrapper
+      .findAll("button, input")
+      .map((el) => el.attributes("aria-label") || el.text().trim());
+    expect(names).toEqual([
+      "media-viewer.zoom-in",
+      "media-viewer.zoom-out",
+      "media-viewer.download",
+    ]);
+  });
+});

@@ -417,6 +417,8 @@
   --viewer-button-radius: 6px;
   --viewer-text-button-padding-x: 8px;
   --viewer-page-input-width: 32px;
+  /* Warn banner under the bar (text viewer's sanitised-content notice) */
+  --viewer-banner-accent-width: 3px;
 
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */

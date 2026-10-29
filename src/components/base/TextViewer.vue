@@ -1,42 +1,36 @@
 <template>
   <div class="flex w-full h-full relative flex-col select-text">
-    <div
-      class="w-full bg-background-light z-20 p-2 shadow-sm flex items-center h-10 select-none"
-    >
-      <button
-        v-if="props.source?.id && !downloadLoading"
-        @click="
-          downloadMediafile(props.source.id, props.source.original_filename)
-        "
-        class="cursor-pointer"
-      >
-        <unicon
-          :name="Unicons.Download.name"
-          height="20"
-          class="text-neutral-700"
-        />
-      </button>
-      <spinner-loader
-        v-else-if="downloadLoading"
-        theme="accent"
-        :dimensions="5"
+    <div class="relative shrink-0 h-(--viewer-toolbar-height) select-none">
+      <ViewerToolbar
+        mode="text"
+        :mediafile-id="props.source?.id"
+        :original-filename="props.source?.original_filename"
+        @zoom-in="zoom(ZOOM_STEP)"
+        @zoom-out="zoom(-ZOOM_STEP)"
       />
     </div>
     <transition name="collapse">
       <div
         v-if="showSanitizedWarning"
-        class="flex items-center justify-between bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 text-sm overflow-hidden"
+        role="status"
+        data-testid="text-viewer-sanitized-warning"
+        class="viewer-banner flex items-center justify-between px-4 py-2 text-table text-text-body overflow-hidden"
       >
         <span>{{ t("text-viewer.sanitized-warning") }}</span>
-        <button
-          class="ml-4 font-semibold hover:text-yellow-900 cursor-pointer"
+        <BaseButtonNew
+          class="ml-4"
+          button-style="ghost"
+          button-size="sm"
+          :label="t('text-viewer.dismiss')"
           @click="showSanitizedWarning = false"
-        >
-          {{ t("text-viewer.dismiss") }}
-        </button>
+        />
       </div>
     </transition>
-    <div class="w-full flex-1 p-4 bg-neutral-20 overflow-y-scroll">
+    <div
+      data-testid="text-viewer-content"
+      class="w-full flex-1 p-4 bg-neutral-20 overflow-y-scroll"
+      :style="{ fontSize: `${zoomLevel * 100}%` }"
+    >
       <sanitized-html
         :mode="SanitizeMode.Html"
         :content="fileContent"
@@ -50,14 +44,18 @@
 import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useGetMediafile } from "@/composables/useGetMediafile";
-import { useMediafileDownload } from "@/composables/useMediafileDownload";
 import SanitizedHtml from "@/components/SanitizedHtml.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
+import ViewerToolbar from "@/components/ViewerToolbar.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { SanitizeMode } from "@/generated-types/queries";
-import { Unicons } from "@/types";
 
 const { t } = useI18n();
-const { downloadMediafile, downloadLoading } = useMediafileDownload();
+
+const ZOOM_STEP = 0.25;
+const zoomLevel = ref<number>(1);
+const zoom = (step: number) => {
+  zoomLevel.value = Math.min(3, Math.max(0.5, zoomLevel.value + step));
+};
 
 interface Source {
   id: string;
@@ -86,6 +84,11 @@ onMounted(getText);
 </script>
 
 <style scoped>
+.viewer-banner {
+  background: var(--color-warning-bg);
+  border-left: var(--viewer-banner-accent-width) solid var(--color-warning);
+}
+
 .collapse-enter-active,
 .collapse-leave-active {
   transition:

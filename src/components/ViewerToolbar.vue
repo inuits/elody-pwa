@@ -16,6 +16,7 @@
         <img :src="logo.src" :alt="logo.alt ?? ''" class="h-6" />
       </a>
       <button
+        v-if="mode !== 'text'"
         ref="fullPageRef"
         type="button"
         class="viewer-button"
@@ -185,7 +186,7 @@
         <unicon :name="Unicons.AngleRight.name" height="20" />
       </button>
     </div>
-    <div v-else class="flex items-center gap-1">
+    <div v-else-if="mode === 'image'" class="flex items-center gap-1">
       <BaseTooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
           <div v-on="on" :aria-describedby="describedBy" class="flex">
@@ -227,7 +228,7 @@ import { useMediafileDownload } from "@/composables/useMediafileDownload";
 
 const props = withDefaults(
   defineProps<{
-    mode?: "image" | "pdf";
+    mode?: "image" | "pdf" | "text";
     page?: number;
     pageCount?: number;
     zoomIn?: HTMLDivElement | string | null;
