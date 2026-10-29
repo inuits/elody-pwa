@@ -194,7 +194,7 @@ describe("RepetitiveOverview", () => {
     rows.forEach((row) => expect(row.text()).toContain("auteur"));
   });
 
-  it("removes a single entity of a multi-select pass by its row index", async () => {
+  it("removes a single entity of a multi-select pass by its branch index (newest shown first)", async () => {
     const wrapper = getWrapper({
       branches: [personBranch("person-1", "Jan"), personBranch("person-2", "Piet")],
       steps: [{ key: "author", entityType: Entitytyping.Person, createForm: "x" }],
@@ -203,7 +203,8 @@ describe("RepetitiveOverview", () => {
     await wrapper
       .findAll("[data-testid='repetitive-overview-remove']")[1]
       .trigger("click");
-    expect(wrapper.emitted("remove")?.[0]).toEqual([1]);
+    // the second row shown is the older chain, Jan (branch 0)
+    expect(wrapper.emitted("remove")?.[0]).toEqual([0]);
   });
 
   it("emits remove with the row index when the row's delete button is clicked", async () => {
@@ -220,33 +221,34 @@ describe("RepetitiveOverview", () => {
     expect(wrapper.find("[data-testid='repetitive-overview-list']").exists()).toBe(false);
   });
 
-  it("emits add-another when the add button is clicked", async () => {
+  it("is a polite log of what this session created", () => {
+    const list = getWrapper().find("[data-testid='repetitive-overview-list']");
+    expect(list.attributes("role")).toBe("log");
+    expect(list.attributes("aria-live")).toBe("polite");
+  });
+
+  it("puts the newest chain on top", () => {
+    const wrapper = getWrapper({
+      branches: [personBranch("person-1", "Jan"), personBranch("person-2", "Piet")],
+      steps: [{ key: "author", entityType: Entitytyping.Person, createForm: "x" }],
+      repeatable: true,
+    });
+    const rows = wrapper.findAll("[data-testid='repetitive-overview-row']");
+    expect(rows[0].text()).toContain("Piet");
+    expect(rows[1].text()).toContain("Jan");
+  });
+
+  it("checks every saved row", () => {
+    const row = getWrapper().find("[data-testid='repetitive-overview-row']");
+    expect(row.find("[data-testid='repetitive-overview-saved']").exists()).toBe(
+      true,
+    );
+  });
+
+  it("has no add or finish buttons of its own (the flow footer has them)", () => {
     const wrapper = getWrapper();
-    await wrapper.find("[data-testid='repetitive-overview-add']").trigger("click");
-    expect(wrapper.emitted("add-another")).toBeTruthy();
-  });
-
-  it("emits finish when the finish button is clicked", async () => {
-    const wrapper = getWrapper();
-    await wrapper.find("[data-testid='repetitive-overview-finish']").trigger("click");
-    expect(wrapper.emitted("finish")).toBeTruthy();
-  });
-
-  it("disables finish when there are no branches", () => {
-    const wrapper = getWrapper({ branches: [], steps, repeatable: true });
-    expect(
-      wrapper.find("[data-testid='repetitive-overview-finish']").attributes("disabled"),
-    ).toBeDefined();
-  });
-
-  it("hides the add button when a non-repeatable flow already has a branch", () => {
-    const wrapper = getWrapper({ branches, steps, repeatable: false });
     expect(wrapper.find("[data-testid='repetitive-overview-add']").exists()).toBe(false);
-  });
-
-  it("shows the add button on an empty non-repeatable flow", () => {
-    const wrapper = getWrapper({ branches: [], steps, repeatable: false });
-    expect(wrapper.find("[data-testid='repetitive-overview-add']").exists()).toBe(true);
+    expect(wrapper.find("[data-testid='repetitive-overview-finish']").exists()).toBe(false);
   });
 
   it("names each icon-only remove button", () => {

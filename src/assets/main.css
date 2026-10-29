@@ -420,6 +420,10 @@
   /* Warn banner under the bar (text viewer's sanitised-content notice) */
   --viewer-banner-accent-width: 3px;
 
+  /* Guided flow (guided-flow.md): the "Created this session" rail beside
+     the step card on wide screens */
+  --guided-flow-rail-width: 280px;
+
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */
   --list-band-pad: 8px 16px;

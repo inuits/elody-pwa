@@ -90,6 +90,7 @@ Kinds:
 | V17 | Open | — | the failed prepare step's tooltip says "Mismatch between mediafiles and CSV" for any failure | general wording |
 | — | Open | "rejected" state: toast with the type/size reason | not checked | check Dropzone's rejected files |
 | G-A | Deviation | guided flow footer: Vorige · Volgende · Bewaar en sluit | each step's configured form keeps its own submit as "Next"; footer has Back and Save and close | move the submit to the footer if all step forms allow it |
+| V20 | Deviation | rail rows: entity-type badge + title + check | step label + title + check (the flow config carries no badge tones) | add badge tones to the step config |
 | G-B | Deviation | passed steps clickable to revisit | not clickable (the step's record already exists; revisiting would create a second one); Back stays | revisit-to-edit |
 | Step 9 | Parked | DAMS tenants: media-first detail layout | not started (needs vliz-dams) | — |
 | DS 3 note | Open | every button named | recrop modal close button had no name (found in DS 3) | check |

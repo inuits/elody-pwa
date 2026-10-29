@@ -3,89 +3,77 @@
     <p
       v-if="branches.length === 0"
       data-testid="repetitive-overview-empty"
-      class="text-text-light py-4"
+      class="text-text-light text-table py-2"
     >
-      {{ $t("repetitiveForm.no-entities-yet") }}
+      {{ $t("repetitiveForm.rail-empty") }}
     </p>
 
-    <ul v-else data-testid="repetitive-overview-list" class="flex flex-col">
-      <!-- rows follow the base library list-item styling -->
+    <!-- guided-flow.md: the created-so-far rail, newest on top, additions announced -->
+    <ul
+      v-else
+      data-testid="repetitive-overview-list"
+      role="log"
+      aria-live="polite"
+      class="flex flex-col gap-2"
+    >
       <li
-        v-for="(branch, index) in branches"
+        v-for="index in newestFirst"
         :key="index"
         data-testid="repetitive-overview-row"
-        class="flex items-center gap-2 p-1.5 mb-2 border border-border-subtle rounded bg-background-light"
+        class="flex items-start gap-2 p-2 border border-border-subtle rounded-card bg-background-light text-table"
       >
-        <span
-          class="flex items-center justify-center w-8 h-8 rounded-full bg-accent-light text-accent-accent font-bold shrink-0"
-        >
-          {{ index + 1 }}
-        </span>
-        <div
-          v-for="step in steps"
-          :key="step.key"
-          class="flex flex-col min-w-0 flex-1 px-2"
-        >
-          <span class="text-base font-semibold text-text-light">
-            {{ $t(step.label ?? step.key) }}
-          </span>
-          <span class="font-medium truncate max-w-[400px]">
-            {{ entityLabel(branch, step.key) }}
-          </span>
-          <span
-            v-for="entry in overviewEntries(branch, step)"
-            :key="entry.label"
-            class="text-text-light text-sm truncate"
+        <unicon
+          data-testid="repetitive-overview-saved"
+          :name="Unicons.CheckCircle.name"
+          height="16"
+          class="shrink-0 mt-0.5 fill-success"
+          aria-hidden="true"
+        />
+        <div class="flex flex-col min-w-0 flex-1 gap-1">
+          <div
+            v-for="step in steps"
+            :key="step.key"
+            class="flex flex-col min-w-0"
           >
-            {{ $t(entry.label) }}: {{ entry.value }}
-          </span>
+            <span class="text-text-light">
+              {{ $t(step.label ?? step.key) }}
+            </span>
+            <span class="font-bold truncate">
+              {{ entityLabel(branches[index], step.key) }}
+            </span>
+            <span
+              v-for="entry in overviewEntries(branches[index], step)"
+              :key="entry.label"
+              class="text-text-light truncate"
+            >
+              {{ $t(entry.label) }}: {{ entry.value }}
+            </span>
+          </div>
         </div>
-        <div class="w-fit ml-auto shrink-0">
+        <div class="w-fit shrink-0">
           <BaseButtonNew
             data-testid="repetitive-overview-remove"
             :icon="DamsIcons.Trash"
             :aria-label="
               $t('actions.labels.remove-item', {
-                item: entityLabel(branch, steps[0]?.key) || index + 1,
+                item:
+                  entityLabel(branches[index], steps[0]?.key) || index + 1,
               })
             "
-            button-style="danger"
+            button-style="ghost"
             button-size="sm"
             @click="emit('remove', index)"
           />
         </div>
       </li>
     </ul>
-
-    <div class="flex gap-3 mt-6">
-      <div v-if="repeatable || branches.length === 0" class="w-fit">
-        <BaseButtonNew
-          data-testid="repetitive-overview-add"
-          :label="$t('repetitiveForm.add-another')"
-          :icon="DamsIcons.Plus"
-          button-style="commit"
-          button-size="sm"
-          @click="emit('add-another')"
-        />
-      </div>
-      <div class="w-fit">
-        <BaseButtonNew
-          data-testid="repetitive-overview-finish"
-          :label="$t('repetitiveForm.finish')"
-          :icon="DamsIcons.Check"
-          button-style="commit"
-          button-size="sm"
-          :disabled="branches.length === 0"
-          :loading="finishing"
-          @click="emit('finish')"
-        />
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { DamsIcons, type RepetitiveStep } from "@/generated-types/queries";
+import { Unicons } from "@/types";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   primaryEntity,
@@ -94,17 +82,19 @@ import {
   type StagedEntityDetail,
 } from "@/composables/useRepetitiveForm";
 
-defineProps<{
+const props = defineProps<{
   branches: RepetitiveBranch[];
   steps: RepetitiveStep[];
   repeatable: boolean;
-  finishing?: boolean;
 }>();
 const emit = defineEmits<{
-  (e: "add-another"): void;
-  (e: "finish"): void;
   (e: "remove", index: number): void;
 }>();
+
+// branch indexes, newest first; remove still emits the branch's own index
+const newestFirst = computed(() =>
+  props.branches.map((_, index) => index).reverse(),
+);
 
 const entityLabel = (branch: RepetitiveBranch, stepKey: string): string => {
   const entity = primaryEntity(branch, stepKey);

@@ -49,64 +49,93 @@
         </li>
       </ol>
 
-      <RepetitiveOverview
-        v-if="view === 'overview'"
-        :branches="branches"
-        :steps="flowConfig?.steps ?? []"
-        :repeatable="flowConfig?.repeatable ?? false"
-        :finishing="isCommitting"
-        @add-another="addAnother"
-        @finish="onFinish"
-        @remove="onRemoveBranch"
-      />
-
-      <template v-else-if="view === 'step' && activeStep">
-        <RepetitiveStepField
-          :step="activeStep"
-          :scope-filter="scopeFilter"
-          :skip-search="skipSearch"
-          :create-prefill="createPrefill"
-          :picker-parent-uuid="pickerParentUuid"
-          @selected="onSelected"
-          @created="onCreated"
-          @metadata-submitted="onMetadataSubmitted"
-          @terminal-selected="onTerminalSelected"
+      <!-- guided-flow.md: step card beside the "Created this session" rail -->
+      <div
+        v-if="view === 'step'"
+        class="grid gap-4"
+        :class="{ 'lg:grid-cols-[1fr_var(--guided-flow-rail-width)]': hasRail }"
+      >
+        <section
+          data-testid="repetitive-flow-step-card"
+          class="bg-surface-group-form rounded-card p-4 min-w-0"
         >
-          <template
-            #actions
-            v-if="
-              ((currentStepIndex > 0 && flowConfig?.linear) ||
-                !flowConfig?.linear) &&
-              activeStep?.showBackButton !== false
-            "
+          <p
+            v-if="isChainDone"
+            data-testid="repetitive-flow-complete"
+            class="text-text-body"
           >
-            <div class="w-fit">
-              <BaseButtonNew
-                data-testid="repetitive-flow-back"
-                :label="
-                  currentStepIndex > 0
-                    ? $t('repetitiveForm.back-to-previous-step')
-                    : $t('repetitiveForm.back-to-overview')
-                "
-                :icon="DamsIcons.AngleLeft"
-                button-style="commit"
-                button-size="sm"
-                @click="goBack"
-              />
-            </div>
-          </template>
-        </RepetitiveStepField>
-      </template>
+            {{ $t("repetitiveForm.item-complete") }}
+          </p>
+          <RepetitiveStepField
+            v-else-if="activeStep"
+            :step="activeStep"
+            :scope-filter="scopeFilter"
+            :skip-search="skipSearch"
+            :create-prefill="createPrefill"
+            :picker-parent-uuid="pickerParentUuid"
+            @selected="onSelected"
+            @created="onCreated"
+            @metadata-submitted="onMetadataSubmitted"
+            @terminal-selected="onTerminalSelected"
+          />
+        </section>
+        <aside v-if="hasRail" :aria-labelledby="railHeadingId">
+          <h2
+            :id="railHeadingId"
+            class="text-table font-bold text-text-light mb-2"
+          >
+            {{ $t("repetitiveForm.created-this-session") }}
+          </h2>
+          <RepetitiveOverview
+            :branches="branches"
+            :steps="flowConfig?.steps ?? []"
+            :repeatable="flowConfig?.repeatable ?? false"
+            @remove="onRemoveBranch"
+          />
+        </aside>
+      </div>
+
+      <div
+        v-if="view === 'step'"
+        class="flex items-center justify-between gap-3 mt-6"
+      >
+        <div class="w-fit">
+          <BaseButtonNew
+            v-if="canGoBack"
+            data-testid="repetitive-flow-back"
+            :label="$t('repetitiveForm.back-to-previous-step')"
+            :icon="DamsIcons.AngleLeft"
+            button-style="ghost"
+            button-size="sm"
+            @click="goBack"
+          />
+        </div>
+        <div v-if="hasRail" class="w-fit">
+          <BaseButtonNew
+            data-testid="repetitive-flow-save-close"
+            :label="$t('repetitiveForm.save-and-close')"
+            :icon="DamsIcons.Check"
+            button-style="commit"
+            button-size="sm"
+            :disabled="!canSaveAndClose"
+            :tooltip-label="
+              isChainInProgress ? $t('repetitiveForm.finish-current-first') : ''
+            "
+            :loading="isCommitting"
+            @click="onFinish"
+          />
+        </div>
+      </div>
 
       <template v-else-if="view === 'finalize'">
         <div class="w-fit mb-4">
           <BaseButtonNew
             data-testid="repetitive-flow-back-to-overview"
-            :label="$t('repetitiveForm.back-to-overview')"
+            :label="$t('repetitiveForm.back-to-previous-step')"
             :icon="DamsIcons.AngleLeft"
-            button-style="commit"
+            button-style="ghost"
             button-size="sm"
-            @click="view = 'overview'"
+            @click="view = 'step'"
           />
         </div>
         <h2
@@ -137,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, useId } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
@@ -204,12 +233,37 @@ const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 
-const view = ref<"step" | "overview" | "finalize">("overview");
+const view = ref<"step" | "finalize">("step");
+const railHeadingId = useId();
 let hasStarted = false;
 const hostEntityId = ref<string | undefined>(undefined);
 const lastPicked = ref<Record<string, any> | undefined>(undefined);
 
 const activeStep = computed(() => store.activeStep());
+
+// Linear and pick-and-return flows don't collect chains, so they get no rail
+const hasRail = computed(
+  () => !flowConfig.value?.linear && !flowConfig.value?.returnsSelection,
+);
+const isChainInProgress = computed(
+  () =>
+    currentStepIndex.value > 0 ||
+    Object.keys(currentBranch.value.entities).length > 0,
+);
+// A non-repeatable flow is done after its one chain: no new step 1
+const isChainDone = computed(
+  () => !flowConfig.value?.repeatable && branches.value.length > 0,
+);
+const canGoBack = computed(
+  () =>
+    activeStep.value?.showBackButton !== false &&
+    !isChainDone.value &&
+    (currentStepIndex.value > 0 ||
+      (hasRail.value && isChainInProgress.value)),
+);
+const canSaveAndClose = computed(
+  () => branches.value.length > 0 && !isChainInProgress.value,
+);
 
 // guided-flow.md: the dialog is named by the flow; the step strip shows the position
 const modalTitle = computed(() => {
@@ -260,7 +314,7 @@ const start = () => {
   setEntityId(FLOW_ID);
   hostEntityId.value =
     getEntityUuid() || asString(route.params.id) || undefined;
-  view.value = store.opensOnFirstStep() ? "step" : "overview";
+  view.value = "step";
 };
 
 const advance = async (
@@ -286,8 +340,8 @@ const advance = async (
     if (target) emit("finished", { id: target.id, type: target.type });
     return;
   }
+  // after the last step the store files the chain and starts the next on step 1
   completeCurrentStep();
-  if (wasLast) view.value = "overview";
 };
 
 const onSelected = (entities: { id: string; label?: string }[]) =>
@@ -356,11 +410,6 @@ const onTerminalSelected = (items: Record<string, any>[]) => {
   emit("finished", entity);
 };
 
-const addAnother = () => {
-  store.startNewBranch();
-  view.value = "step";
-};
-
 const onRemoveBranch = (index: number) => {
   store.removeBranch(index);
 };
@@ -372,7 +421,6 @@ const goBack = () => {
   }
   // leaving from the first step abandons the branch in progress
   store.startNewBranch();
-  view.value = "overview";
 };
 
 const isCommitting = ref(false);
@@ -450,7 +498,7 @@ const reset = () => {
   hostEntityId.value = undefined;
   selectedFinalizeType.value = null;
   lastPicked.value = undefined;
-  view.value = "overview";
+  view.value = "step";
   if (!hasStarted) return;
   hasStarted = false;
   dequeueAllItemsForBulkProcessing(
