@@ -189,6 +189,27 @@ describe("useErrorCodes", () => {
         );
       },
     );
+
+    it("reads the error code from a plain string response body", async () => {
+      const error = {
+        name: "GraphQLError",
+        message: "test error",
+        response: {
+          errors: [
+            {
+              message: "409: CONFLICT",
+              extensions: {
+                response: { status: 409, body: "W5014 | id:552804" },
+              },
+            },
+          ],
+        },
+      } as unknown as GraphQLError;
+
+      const result = await errorCodes.handleGraphqlError(error, true);
+
+      expect(result).toBe("No metadata available for item with id 552804");
+    });
   });
 
   describe("handleHttpError", () => {

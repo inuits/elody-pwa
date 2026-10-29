@@ -207,7 +207,7 @@
         ) && !isEditingInPlace
       "
       data-testid="locked-field-view-container"
-      class="relative flex gap-2"
+      class="relative flex gap-2 has-[:dir(rtl)]:[direction:rtl]"
       :class="[
         {
           'locked-field p-1 bg-background-normal/70 rounded-md': fieldIsLocked,
