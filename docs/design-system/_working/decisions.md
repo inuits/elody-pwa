@@ -7,6 +7,10 @@ then marked **done**. When every row is done, this file can be deleted.
 **Rule:** the handoff is the default. We only look at the alternatives when
 something seems wrong or conflicts.
 
+Every deviation from the handoff (and every parked handoff item) is also
+listed in [handoff-deviations.md](handoff-deviations.md), to revisit after the
+redesign.
+
 Columns:
 - **Handoff:** `elody-design-system-handoff/` (docs, specimens, CHANGES Round 2)
 - **Catalogue:** `components/*.jsx` + `readme.md`
@@ -294,3 +298,4 @@ Test data in local aicap: `ds5-sample.pdf` and `ds5-sample.mp4` (facsimile) on i
 
 Status (2026-10-29, part 2): upload A–D done (V12–V16); Retry parked. Next: step 8 guided flow, then step 9 media-first (ask before touching vliz-dams). Test data in local aicap now also includes `ds5-sample-2.pdf` on AICAP0001_001MAr01.
 | V17 | Upload: stuck prepare spinner | user, 2026-10-29 (pre-existing bug, fix asked): when the server rejected a file's upload-URL request (e.g. "Entity … already exists"), the row's "Mediafiles" (prepare) step kept spinning; the upload loop now marks prepare as failed when it never completed, as `__getUploadUrl` already did for a missing URL. Verified live with a duplicate: validate complete, prepare failed, upload failed. The failed-prepare tooltip reads "Mismatch between mediafiles and CSV" (existing text, CSV-specific) |
+| V18 | Guided flow plan | user, 2026-10-29: follow `guided-flow.md` (modal named by the flow, wizard steps with `aria-current` and checks, step card + "Created this session" rail `role="log"` newest first replacing the separate overview, footer Back ghost + Save and close commit, Escape per handoff). A: each step's configured form keeps its own submit as "Next" (no footer Next). B: passed steps not clickable (a revisit would create a second record). C: inline Undo on the newest rail row deletes the records that chain created (picked existing records untouched). A and B are in `handoff-deviations.md`. Tested on aicap (its guided flow button enabled locally, never committed), then vlacc |
