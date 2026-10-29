@@ -10,18 +10,29 @@
           v-for="(step, index) in flowConfig?.steps ?? []"
           :key="step.key"
           class="flex items-center gap-2"
+          :aria-current="index === currentStepIndex ? 'step' : undefined"
         >
+          <!-- guided-flow.md: filled current step, check on finished ones -->
           <span
-            class="flex items-center justify-center w-6 h-6 rounded-full text-sm font-bold"
+            class="flex items-center justify-center w-6 h-6 rounded-full text-table font-bold"
             :class="
               index === currentStepIndex
-                ? 'bg-accent-accent text-neutral-white'
+                ? 'bg-accent-dark text-neutral-white'
                 : index < currentStepIndex
-                  ? 'bg-accent-light text-accent-accent'
-                  : 'bg-background-normal text-text-light'
+                  ? 'bg-accent-light text-accent-ink'
+                  : 'bg-surface-muted text-text-light'
             "
           >
-            {{ index + 1 }}
+            <template v-if="index < currentStepIndex">
+              <unicon
+                data-testid="step-done"
+                :name="Unicons.Check.name"
+                height="16"
+                aria-hidden="true"
+              />
+              <span class="sr-only">{{ $t("repetitiveForm.step-done") }}</span>
+            </template>
+            <template v-else>{{ index + 1 }}</template>
           </span>
           <span
             :class="
@@ -155,6 +166,7 @@ import { asString } from "@/helpers";
 import { useAsyncAction } from "@/composables/useAsyncAction";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { Unicons } from "@/types";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
 import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField.vue";
 import RepetitiveOverview from "@/components/repetitiveForm/RepetitiveOverview.vue";
@@ -199,17 +211,10 @@ const lastPicked = ref<Record<string, any> | undefined>(undefined);
 
 const activeStep = computed(() => store.activeStep());
 
+// guided-flow.md: the dialog is named by the flow; the step strip shows the position
 const modalTitle = computed(() => {
   const flowLabel = flowConfig.value?.label;
-  const title = flowLabel ? t(flowLabel) : "";
-  if (view.value === "step" && activeStep.value) {
-    return t("repetitiveForm.step-of", {
-      current: currentStepIndex.value + 1,
-      total: flowConfig.value?.steps.length ?? 0,
-      label: t(activeStep.value.label ?? activeStep.value.key),
-    });
-  }
-  return title;
+  return flowLabel ? t(flowLabel) : "";
 });
 
 const scopeFilter = computed<AdvancedFilterInput | null>(() =>

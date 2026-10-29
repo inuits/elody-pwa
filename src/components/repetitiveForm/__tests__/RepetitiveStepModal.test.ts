@@ -57,4 +57,14 @@ describe("RepetitiveStepModal", () => {
         .attributes("aria-label"),
     ).toBe("actions.labels.close");
   });
+
+  it("is a dialog named by its title", () => {
+    const wrapper = getWrapper(true, "Create web theme frames");
+    const dialog = wrapper.find("dialog");
+    const titleId = wrapper
+      .find("[data-testid='repetitive-step-modal-title']")
+      .attributes("id");
+    expect(titleId).toBeTruthy();
+    expect(dialog.attributes("aria-labelledby")).toBe(titleId);
+  });
 });

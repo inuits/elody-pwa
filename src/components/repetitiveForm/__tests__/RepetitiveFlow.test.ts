@@ -243,12 +243,22 @@ describe("RepetitiveFlow", () => {
     );
   });
 
-  it("titles the modal with the step counter while in a step", async () => {
+  it("keeps the flow's name as the modal title during a step (the strip shows the position)", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
-    expect(modal(wrapper).props("title")).toBe(
-      "repetitiveForm.step-of|1/2|repetitiveForm.step-work",
-    );
+    expect(modal(wrapper).props("title")).toBe("repetitiveForm.omnibus-title");
+  });
+
+  it("marks the current step and checks the finished ones", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    const items = wrapper.findAll("[data-testid='repetitive-flow-steps'] li");
+    expect(items[0].attributes("aria-current")).toBeUndefined();
+    expect(items[0].find("[data-testid='step-done']").exists()).toBe(true);
+    expect(items[1].attributes("aria-current")).toBe("step");
+    expect(items[1].find("[data-testid='step-done']").exists()).toBe(false);
   });
 
   it("renders a numbered step strip with step labels during a step", async () => {

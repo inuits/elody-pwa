@@ -68,6 +68,7 @@ Kinds:
 | L27 | Parked | record stepper with a result-list popover | no popover | build |
 | L28 | Deviation | account only in the expanded rail's footer row | collapsed rail keeps profile + logout | — |
 | L29 | Open | text ≥ 4.5:1 | aicap's theme link colour (#C2A169) is ~2.4:1 on white | client theme decision |
+| V19 | Open | client themes derive their accent roles | aicap sets only its accent, so `--color-accent-dark` (pager current page, current guided step) stays the platform blue next to its gold | add `accent-dark` to aicap's theme |
 | L30 | Deviation | — | band button bold, selects regular (catalogue Button vs mockup select) | — |
 | L31 | Deviation | em dash for an empty value in the preview (`preview-panel.md`) | "No value" (the handoff's foundations deprecate "-") | — |
 | DS 4 leftovers | Parked | — | detail-panel add pills; missing "Add entity-translations.inscription" label | pick up as a side task |

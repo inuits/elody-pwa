@@ -3,17 +3,22 @@
     ref="dialog"
     data-testid="repetitive-step-modal"
     :class="[
-      'relative rounded-lg border-0 p-0 w-[80vw] max-h-[90vh] m-auto bg-neutral-white',
+      'relative rounded-overlay border-0 p-0 w-[80vw] max-h-[90vh] m-auto bg-neutral-white',
       // teleport target for tooltips/dropdowns while a modal is open
       // (see BaseTooltip/AdvancedDropdown '.base-modal--opened')
       { 'base-modal--opened': open },
     ]"
+    :aria-labelledby="titleId"
     @cancel.prevent="emit('close')"
   >
     <div
-      class="flex items-center justify-between px-6 py-4 border-b border-neutral-50 sticky top-0 bg-neutral-white z-guided-flow-header"
+      class="flex items-center justify-between px-6 py-4 border-b border-border-subtle sticky top-0 bg-neutral-white z-guided-flow-header"
     >
-      <h1 data-testid="repetitive-step-modal-title" class="text-lg font-bold">
+      <h1
+        :id="titleId"
+        data-testid="repetitive-step-modal-title"
+        class="text-lg font-bold"
+      >
         {{ title }}
       </h1>
       <button
@@ -34,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount, useId } from "vue";
 import { Unicons } from "@/types";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
@@ -42,6 +47,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const titleId = useId();
 
 const { isBlocking } = useBlockingLoader();
 const { registerOpenDialog, unregisterOpenDialog } = useBaseModal();
