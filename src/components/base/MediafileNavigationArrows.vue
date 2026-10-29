@@ -2,7 +2,10 @@
   <div class="flex items-center gap-2">
     <button
       class="pointer-events-auto"
+      type="button"
       data-testid="nav-prev-mediafile"
+      :aria-label="$t('media-viewer.previous-file')"
+      :title="$t('media-viewer.previous-file')"
       @click="$emit('previous')"
     >
       <unicon
@@ -13,7 +16,10 @@
     </button>
     <button
       class="pointer-events-auto"
+      type="button"
       data-testid="nav-next-mediafile"
+      :aria-label="$t('media-viewer.next-file')"
+      :title="$t('media-viewer.next-file')"
       @click="$emit('next')"
     >
       <unicon

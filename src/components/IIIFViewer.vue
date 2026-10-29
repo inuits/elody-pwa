@@ -10,6 +10,7 @@
       v-model:zoomOut="zoomOutDiv"
       v-model:fullPage="fullPageButtonDiv"
       v-model:home="homeDiv"
+      v-model:rotate="rotateButton"
       :originalFilename="originalFilename"
       :mediafileId="mediafileId"
       :image-filename="imageFilename"
@@ -34,12 +35,18 @@
       ref="OpenSeadragonDiv"
       class="w-full h-full z-0"
       data-testid="openseadragon-container"
-    />
+    >
+      <!-- inside the viewer element: OpenSeadragon's full page detaches the rest of the page -->
+      <span role="status" class="sr-only">{{
+        isFullPage ? t("media-viewer.fullscreen-on") : ""
+      }}</span>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import OpenSeadragon from "openseadragon";
 import { ShapeNames } from "openseadragon-select-plugin";
 import ViewerToolbar from "./ViewerToolbar.vue";
@@ -83,6 +90,17 @@ const zoomInDiv = ref<string>();
 const zoomOutDiv = ref<string>();
 const fullPageButtonDiv = ref<string>();
 const homeDiv = ref<string>();
+const rotateButton = ref<HTMLButtonElement>();
+const isFullPage = ref(false);
+
+const { t } = useI18n();
+const translateButtonTitles = () => {
+  OpenSeadragon.setString("Tooltips.FullPage", t("media-viewer.fullscreen"));
+  OpenSeadragon.setString("Tooltips.ZoomIn", t("media-viewer.zoom-in"));
+  OpenSeadragon.setString("Tooltips.ZoomOut", t("media-viewer.zoom-out"));
+  OpenSeadragon.setString("Tooltips.Home", t("entity.reset-viewer"));
+  OpenSeadragon.setString("Tooltips.RotateRight", t("media-viewer.rotate"));
+};
 
 let viewer: OpenSeadragon.Viewer | null = null;
 let selectionObj: any = null;
@@ -114,13 +132,22 @@ const initViewer = () => {
   if (fullPageButtonDiv.value)
     dragonOption.fullPageButton = fullPageButtonDiv.value;
   if (homeDiv.value) dragonOption.homeButton = homeDiv.value;
+  if (rotateButton.value) {
+    dragonOption.showRotationControl = true;
+    dragonOption.rotateRightButton = rotateButton.value;
+  }
 
   if (isShowingCropped.value) {
     const url = buildCropUrl(props.imageFilename, props.cropSizes!);
     dragonOption.tileSources = { type: "image", url };
   }
 
+  translateButtonTitles();
   viewer = OpenSeadragon(dragonOption);
+  isFullPage.value = false;
+  viewer.addHandler("full-page", (event) => {
+    isFullPage.value = event.fullPage;
+  });
 };
 
 const toggleSelection = () => {

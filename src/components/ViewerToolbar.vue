@@ -1,54 +1,66 @@
 <template>
   <div
-    class="absolute w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10"
+    role="toolbar"
+    :aria-label="$t('media-viewer.toolbar')"
+    class="absolute w-full bg-background-light z-[5] px-2 shadow-sm flex justify-between items-center gap-1 h-(--viewer-toolbar-height)"
   >
-    <div class="pt-[10px] flex flex-row">
+    <div class="flex items-center gap-1">
       <a
         v-if="logo"
         :href="logo.href"
         target="_blank"
         rel="noopener noreferrer"
-        class="mr-2 ml-2 flex"
+        class="mx-2 flex"
         data-testid="viewer-toolbar-logo"
       >
         <img :src="logo.src" :alt="logo.alt ?? ''" class="h-6" />
       </a>
-      <button ref="fullPageRef" class="a1 mr-2 ml-2">
-        <unicon
-          :name="Unicons.Desktop.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
+      <button
+        ref="fullPageRef"
+        type="button"
+        class="viewer-button"
+        :aria-label="$t('media-viewer.fullscreen')"
+      >
+        <unicon :name="Unicons.Desktop.name" height="20" />
       </button>
-      <button ref="zoomInRef" class="mr-2">
-        <unicon
-          :name="Unicons.SearchPlus.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
+      <button
+        ref="zoomInRef"
+        type="button"
+        class="viewer-button"
+        :aria-label="$t('media-viewer.zoom-in')"
+      >
+        <unicon :name="Unicons.SearchPlus.name" height="20" />
       </button>
-      <button ref="zoomOutRef">
-        <unicon
-          :name="Unicons.SearchMinus.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
+      <button
+        ref="zoomOutRef"
+        type="button"
+        class="viewer-button"
+        :aria-label="$t('media-viewer.zoom-out')"
+      >
+        <unicon :name="Unicons.SearchMinus.name" height="20" />
+      </button>
+      <button
+        ref="rotateRef"
+        type="button"
+        class="viewer-button"
+        data-testid="viewer-rotate"
+        :aria-label="$t('media-viewer.rotate')"
+      >
+        <unicon :name="Unicons.Redo.name" height="20" />
       </button>
 
       <BaseTooltip v-if="enableSelection" position="top" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <button
+              type="button"
+              class="viewer-button"
               data-testid="draw-crop-selection"
+              :aria-label="$t('tooltip.media-viewer.selection')"
               :disabled="!canCrop"
               @click="$emit('toggle-selection')"
-              class="ml-2 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
-              <unicon
-                :name="Unicons.Crop.name"
-                height="20"
-                class="text-neutral-700"
-              />
+              <unicon :name="Unicons.Crop.name" height="20" />
             </button>
           </div>
         </template>
@@ -63,18 +75,16 @@
 
       <BaseTooltip v-if="enableSelection" position="top" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <button
+              type="button"
+              class="viewer-button"
               data-testid="cancel-crop-selection"
+              :aria-label="$t('tooltip.media-viewer.remove-selected-area')"
               :disabled="!canCrop"
               @click="$emit('cancel-selection')"
-              class="ml-2 rounded-lg transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             >
-              <unicon
-                :name="Unicons.Cancel.name"
-                height="20"
-                class="text-neutral-700"
-              />
+              <unicon :name="Unicons.Cancel.name" height="20" />
             </button>
           </div>
         </template>
@@ -89,47 +99,45 @@
 
       <button
         v-if="mediafileId && !downloadImageLoadingRef"
+        type="button"
+        class="viewer-button"
+        data-testid="viewer-download"
+        :aria-label="$t('media-viewer.download')"
+        :title="$t('media-viewer.download')"
         @click="downloadImage"
       >
-        <unicon
-          :name="Unicons.Download.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer ml-2"
-        />
+        <unicon :name="Unicons.Download.name" height="20" />
       </button>
       <spinner-loader
         v-else-if="downloadImageLoadingRef"
-        class="ml-2"
+        class="mx-1"
         theme="accent"
         :dimensions="5"
       />
 
       <BaseTooltip v-if="canRecrop" position="top" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <button
+              type="button"
+              class="viewer-button"
               data-testid="open-recrop-modal"
+              :aria-label="$t('tooltip.media-viewer.recrop')"
               @click="$emit('open-recrop-modal')"
-              class="ml-2 rounded-lg transition cursor-pointer"
             >
-              <unicon
-                :name="Unicons.Crop.name"
-                height="20"
-                class="text-neutral-700"
-              />
+              <unicon :name="Unicons.Crop.name" height="20" />
             </button>
           </div>
         </template>
-        <span class="text-sm text-text-placeholder">
-          {{ $t("tooltip.media-viewer.recrop") }}
-        </span>
+        <span>{{ $t("tooltip.media-viewer.recrop") }}</span>
       </BaseTooltip>
 
       <button
         v-if="hasCropData"
+        type="button"
+        class="viewer-button viewer-button--text"
         data-testid="toggle-crop-view"
         @click="$emit('toggle-crop-view')"
-        class="ml-2 flex items-center h-5 text-sm text-neutral-700 cursor-pointer"
       >
         {{
           showingCropped
@@ -138,23 +146,21 @@
         }}
       </button>
     </div>
-    <div v-if="$slots.navigation" class="pt-[10px]">
+    <div v-if="$slots.navigation" class="flex items-center">
       <slot name="navigation" />
     </div>
-    <div class="flex">
+    <div class="flex items-center gap-1">
       <BaseTooltip position="top-end" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy">
+          <div v-on="on" :aria-describedby="describedBy" class="flex">
             <button
-              class="mr-2 pt-[10px]"
+              type="button"
+              class="viewer-button"
               data-testid="open-iiif-operations-modal"
+              :aria-label="$t('iiif-operations-modal.title')"
               @click="openIiifOperationsModal"
             >
-              <unicon
-                :name="Unicons.ImageResizeLandscape.name"
-                height="20"
-                class="text-neutral-700 cursor-pointer"
-              />
+              <unicon :name="Unicons.ImageResizeLandscape.name" height="20" />
             </button>
           </div>
         </template>
@@ -164,7 +170,8 @@
       </BaseTooltip>
       <button
         ref="homeRef"
-        class="text-sm mr-2 text-neutral-700 cursor-pointer"
+        type="button"
+        class="viewer-button viewer-button--text"
       >
         {{ $t("entity.reset-viewer") }}
       </button>
@@ -187,6 +194,7 @@ const props = defineProps<{
   zoomOut?: HTMLDivElement | string | null;
   fullPage?: HTMLDivElement | string | null;
   home?: HTMLDivElement | string | null;
+  rotate?: HTMLButtonElement | null;
   originalFilename?: string;
   mediafileId?: string;
   imageFilename?: string;
@@ -204,6 +212,7 @@ const emit = defineEmits<{
   (event: "update:zoomOut", value: HTMLDivElement | undefined): void;
   (event: "update:fullPage", value: HTMLDivElement | undefined): void;
   (event: "update:home", value: HTMLDivElement | undefined): void;
+  (event: "update:rotate", value: HTMLButtonElement | undefined): void;
   (event: "toggle-selection"): void;
   (event: "cancel-selection"): void;
   (event: "toggle-crop-view"): void;
@@ -214,6 +223,7 @@ const zoomInRef = ref<HTMLDivElement>();
 const zoomOutRef = ref<HTMLDivElement>();
 const fullPageRef = ref<HTMLDivElement>();
 const homeRef = ref<HTMLDivElement>();
+const rotateRef = ref<HTMLButtonElement>();
 
 const { openModal } = useBaseModal();
 
@@ -235,6 +245,7 @@ onMounted(() => {
   emit("update:zoomOut", zoomOutRef.value);
   emit("update:fullPage", fullPageRef.value);
   emit("update:home", homeRef.value);
+  emit("update:rotate", rotateRef.value);
 });
 
 const downloadImage = () => {
@@ -257,3 +268,27 @@ const openIiifOperationsModal = () => {
   );
 };
 </script>
+
+<style scoped>
+.viewer-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--viewer-button-width);
+  height: var(--viewer-button-height);
+  border-radius: var(--viewer-button-radius);
+  color: var(--color-neutral-700);
+  cursor: pointer;
+}
+.viewer-button--text {
+  padding: 0 var(--viewer-text-button-padding-x);
+  font-size: var(--text-table);
+}
+.viewer-button:hover:not(:disabled) {
+  background: var(--color-accent-wash);
+}
+.viewer-button:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+</style>

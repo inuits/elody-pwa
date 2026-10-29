@@ -409,6 +409,14 @@
   --pager-gap: 2px;
   --pager-input-width: 3.5rem;
 
+  /* Viewer toolbar (media-viewer.md, catalogue ViewerToolbar): one white
+     bar over every viewer mode, 20px icons in 28×24 buttons */
+  --viewer-toolbar-height: 40px;
+  --viewer-button-width: 28px;
+  --viewer-button-height: 24px;
+  --viewer-button-radius: 6px;
+  --viewer-text-button-padding-x: 8px;
+
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */
   --list-band-pad: 8px 16px;

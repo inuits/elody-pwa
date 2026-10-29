@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import ViewerToolbar from "@/components/ViewerToolbar.vue";
+import MediafileNavigationArrows from "@/components/base/MediafileNavigationArrows.vue";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
 const mocks = vi.hoisted(() => ({
   openModal: vi.fn(),
   isSelectable: vi.fn(() => false),
   downloadMediafile: vi.fn(),
-  downloadLoading: { value: false },
 }));
 
 vi.mock("@/composables/useBaseModal", () => ({
@@ -18,12 +18,15 @@ vi.mock("@/composables/useMediafileCrop", () => ({
   useMediafileCrop: () => ({ isSelectable: mocks.isSelectable }),
 }));
 
-vi.mock("@/composables/useMediafileDownload", () => ({
-  useMediafileDownload: () => ({
-    downloadMediafile: mocks.downloadMediafile,
-    downloadLoading: mocks.downloadLoading,
-  }),
-}));
+vi.mock("@/composables/useMediafileDownload", async () => {
+  const { ref } = await vi.importActual<typeof import("vue")>("vue");
+  return {
+    useMediafileDownload: () => ({
+      downloadMediafile: mocks.downloadMediafile,
+      downloadLoading: ref(false),
+    }),
+  };
+});
 
 vi.mock("@/types", () => ({
   Unicons: new Proxy({}, { get: (_t, name) => ({ name: String(name) }) }),
@@ -274,5 +277,72 @@ describe("ViewerToolbar - existing crop/cancel buttons, and the isRecropModal by
         .find('[data-testid="draw-crop-selection"]')
         .attributes("disabled"),
     ).toBeDefined();
+  });
+});
+
+describe("ViewerToolbar - shared toolbar shell", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const allControlsProps = () => ({
+    ...getDefaultProps(),
+    enableSelection: true,
+    canRecrop: true,
+    hasCropData: true,
+  });
+
+  it("is a named toolbar", () => {
+    const wrapper = getWrapper();
+    const toolbar = wrapper.find('[role="toolbar"]');
+    expect(toolbar.exists()).toBe(true);
+    expect(toolbar.attributes("aria-label")).toBe("media-viewer.toolbar");
+  });
+
+  it("gives every button an accessible name", () => {
+    const wrapper = getWrapper(allControlsProps());
+    const unnamed = wrapper
+      .findAll("button")
+      .filter((b) => !b.attributes("aria-label") && !b.text().trim());
+    expect(unnamed).toHaveLength(0);
+  });
+
+  it("names the download button", () => {
+    const wrapper = getWrapper();
+    expect(
+      wrapper.find('[data-testid="viewer-download"]').attributes("aria-label"),
+    ).toBe("media-viewer.download");
+  });
+
+  it("renders a rotate button and hands its element to the viewer", () => {
+    const wrapper = getWrapper();
+    const rotate = wrapper.find('[data-testid="viewer-rotate"]');
+    expect(rotate.attributes("aria-label")).toBe("media-viewer.rotate");
+    expect(wrapper.emitted("update:rotate")?.[0][0]).toBe(rotate.element);
+  });
+
+  it("names the navigation slot's file arrows", () => {
+    const wrapper = mount(ViewerToolbar, {
+      props: getDefaultProps(),
+      slots: {
+        navigation:
+          '<MediafileNavigationArrows />',
+      },
+      global: {
+        mocks: { $t: (key: string) => key },
+        components: { MediafileNavigationArrows },
+        stubs: {
+          BaseTooltip: true,
+          SpinnerLoader: true,
+          unicon: true,
+        },
+      },
+    });
+    expect(
+      wrapper.find('[data-testid="nav-prev-mediafile"]').attributes("aria-label"),
+    ).toBe("media-viewer.previous-file");
+    expect(
+      wrapper.find('[data-testid="nav-next-mediafile"]').attributes("aria-label"),
+    ).toBe("media-viewer.next-file");
   });
 });
