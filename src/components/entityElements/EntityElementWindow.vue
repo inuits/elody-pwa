@@ -10,14 +10,19 @@
     />
     <!-- panel-and-block-shells.md: PanelShell — white card, 1px panel
          border, accent-light header band, no shadow. -->
+    <!-- In a preview the preview panel is the shell (preview-panel.md). -->
     <section
-      role="region"
-      :aria-labelledby="titleId"
-      class="h-full w-full bg-surface border border-border-panel rounded-card @container/window"
+      :role="compact ? undefined : 'region'"
+      :aria-labelledby="compact ? undefined : titleId"
+      class="h-full w-full @container/window"
+      :class="{
+        'bg-surface border border-border-panel rounded-card': !compact,
+      }"
     >
       <!-- The header wraps: in a narrow window (a WEM column) the status
            gets a line of its own instead of being squeezed. -->
       <div
+        v-if="!compact"
         data-cy="window-header"
         class="flex flex-row flex-wrap items-center gap-2 p-(--panel-header-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card"
       >
@@ -74,8 +79,8 @@
       </div>
       <div
         data-cy="window-body"
-        class="p-(--panel-body-pad)"
         :class="[
+          compact ? undefined : 'p-(--panel-body-pad)',
           {
             'grid grid-cols-2 gap-2 justify-items-center max-w-full':
               props.element.layout === WindowElementLayout.HorizontalGrid,
@@ -115,7 +120,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, useId, provide } from "vue";
+import { computed, inject, onMounted, useId, provide } from "vue";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
@@ -137,6 +142,7 @@ import BaseContextMenuActions from "@/components/BaseContextMenuActions.vue";
 // Lists and viewers inside know they sit in a panel (no chrome of their own).
 provide("InsidePanel", true);
 
+const compact: boolean = inject("CompactPreview", false);
 const titleId = useId();
 const props = defineProps<{
   element: WindowElement;

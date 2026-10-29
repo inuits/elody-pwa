@@ -85,8 +85,10 @@
       "
     />
   </div>
+  <!-- ui_kits/clients: a hairline under the viewer, then the label/value
+       rows inside the same panel. -->
   <div
-    class="metadata-preview"
+    class="metadata-preview mx-4 mt-2 mb-3.5 border-t border-border-subtle pt-2"
     v-if="
       metadataPreviewElement && previewComponent.type !== PreviewTypes.History
     "
@@ -98,6 +100,7 @@
       :identifiers="[entityId]"
       :entity-type="entityType"
       :preview-label="getTitleFromEntity"
+      compact
     />
   </div>
   <div

@@ -51,6 +51,7 @@ import {
   reactive,
   isReactive,
   watch,
+  provide,
   ref,
   onMounted,
 } from "vue";
@@ -89,11 +90,16 @@ const props = withDefaults(
     identifiers: string[];
     entityType: Entitytyping;
     previewLabel?: string;
+    compact?: boolean;
   }>(),
   {
     previewLabel: undefined,
+    compact: false,
   },
 );
+
+// preview-panel.md: a preview's metadata renders as compact label/value rows.
+provide("CompactPreview", props.compact);
 
 const emit = defineEmits<{
   (event: "mutatedEntityUpdated", mutatedEntity: Entity): void

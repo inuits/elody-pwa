@@ -268,3 +268,35 @@ describe('EntityElementWindow as a PanelShell (panel-and-block-shells.md)', () =
     expect(body.classes()).toContain('p-(--panel-body-pad)');
   });
 });
+
+// preview-panel.md: the preview's metadata sits in the preview panel itself,
+// under a hairline; no second card or header repeating the title.
+describe('EntityElementWindow in a compact preview', () => {
+  const element = {
+    label: 'Mediafile',
+    info: { __typename: 'WindowElementPanel', label: 'Info' },
+  };
+  const mountWindow = (compact: boolean) =>
+    mount(EntityElementWindow, {
+      props: { element, identifiers: [], formId: '1', previewLabel: 'file.png' },
+      global: {
+        provide: { CompactPreview: compact },
+        stubs: { EntityElementWindowPanel: true },
+      },
+    });
+
+  it('draws no card and no header', () => {
+    const wrapper = mountWindow(true);
+
+    expect(wrapper.find('[data-cy="window-header"]').exists()).toBe(false);
+    expect(wrapper.find('[role="region"]').exists()).toBe(false);
+    expect(wrapper.find('[data-cy="window-body"]').exists()).toBe(true);
+  });
+
+  it('keeps the panel shell outside a preview', () => {
+    const wrapper = mountWindow(false);
+
+    expect(wrapper.find('[data-cy="window-header"]').exists()).toBe(true);
+    expect(wrapper.find('[role="region"]').exists()).toBe(true);
+  });
+});

@@ -8,13 +8,20 @@
       fieldIsConditionallyVisible
     "
     :key="fieldLabel"
-    :class="{
-      relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
-    }"
+    :class="[
+      {
+        relative: fieldType === InputFieldTypes.InputFieldWithSubFields,
+      },
+      // A row of the preview's label/value grid (WindowPanelContent).
+      compact
+        ? 'grid grid-cols-subgrid col-span-2 items-baseline text-table text-text-secondary'
+        : undefined,
+    ]"
   >
     <div
       data-cy="field-label-row"
-      class="flex items-center gap-2 mb-(--field-label-gap)"
+      class="flex items-center gap-2"
+      :class="{ 'mb-(--field-label-gap)': !compact }"
     >
       <metadata-title
         :class="{
@@ -231,12 +238,13 @@
             data-cy="field-value"
             v-on="showTooltip ? on : {}"
             :aria-describedby="showTooltip ? describedBy : undefined"
-            class="flex column gap-2 items-center min-h-(--field-value-min-height)"
-            :class="
+            class="flex column gap-2 items-center"
+            :class="[
+              { 'min-h-(--field-value-min-height)': !compact },
               canEditInPlace
                 ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) py-(--field-value-pad-y) -my-(--field-value-pad-y) hover:bg-surface-editable-hover'
-                : undefined
-            "
+                : undefined,
+            ]"
             v-bind="editableValueAttrs"
             @click.capture="startEditing"
             @keydown.enter="onActivateKey"
@@ -553,6 +561,7 @@ const { t, te } = useI18n();
 const { openModal } = useBaseModal();
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
+const compact: boolean = inject("CompactPreview", false);
 const mediafileViewerContext = inject<string>("mediafileViewerContext", "");
 const { fieldIsVisibleByCondition } = useConditionalValidation();
 

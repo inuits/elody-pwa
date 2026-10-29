@@ -403,3 +403,40 @@ describe("PreviewWrapper parent entity provide", () => {
     expect(injected?.value ?? injected).toEqual(entity);
   });
 });
+
+describe("PreviewWrapper metadata under the preview", () => {
+  it("renders the metadata compact, only that column", async () => {
+    vi.mocked(apolloClient.query).mockResolvedValue({
+      data: { PreviewElement: PRIMARY_PREVIEW_ELEMENT },
+    } as any);
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+          type: PreviewTypes.MediaViewer,
+          metadataPreviewQuery: "GetMetadataPreview",
+        },
+        entityType: "mediafile",
+        entities: [{ id: "e1" }],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: [],
+        cropMediafileCoordinatesKey: "",
+      },
+      global: {
+        stubs: {
+          ...stubs,
+          EntityColumn: {
+            props: { compact: Boolean },
+            template: '<div class="entity-column-stub" :data-compact="compact" />',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    const column = wrapper.find(".metadata-preview .entity-column-stub");
+    expect(column.attributes("data-compact")).toBe("true");
+  });
+});
