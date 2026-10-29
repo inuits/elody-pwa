@@ -281,3 +281,10 @@ Next, in order:
 
 Open: V9 (move `ViewModesMedia` to `MediaViewerNew`?); DS 4 leftovers (detail-panel add pills, missing "Add entity-translations.inscription" label) as a side task?
 Test data in local aicap: `ds5-sample.pdf` and `ds5-sample.mp4` (facsimile) on inscription AICAP0001_001MAr01, to delete when DS 5 is done.
+
+### DS 5, part 2 (branch `feat-165148-viewers-flows-part2`, from `beta/redesign`)
+
+| # | Item | Decision |
+|---|---|---|
+| V12 | Upload plan | user, 2026-10-29: do A–D from `upload.md` (A dropzone, B file rows, C status banner, D info strips); per-row Retry parked. No percentage bars: each file is one `fetch` without progress events, so progress is per step |
+| V13 | Dropzone | per `upload.md`: 2px dashed `--color-border-dashed`, card radius (was 3px `text-light`); dragover accent border + wash (was commit teal, 3px). The label is a real `<button>` inside `.dz-message` (Dropzone.js opens the file dialog for clicks there, so Enter/Space work natively, as in Dropzone.js's own markup); its name is the configured label (label-in-name, not a separate "Upload files"). It stays visible above the file list (was hidden once files were added, leaving keyboard users no way to add more). Verified live 2026-10-29: Enter opens the file dialog |
