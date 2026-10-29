@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { nextTick, ref } from "vue";
+import { ref } from "vue";
 import { flushPromises } from "@vue/test-utils";
 import useUpload from "../useUpload";
 import { UploadFlow } from "@/generated-types/queries";
@@ -136,11 +136,6 @@ describe("useUpload - Missing Mediafiles validation", () => {
     return { name, type, previewTemplate, status: "added" } as any;
   };
 
-  const settleReactivity = async () => {
-    await flushPromises();
-    await nextTick();
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  };
 
   it("calls the error handler and updates DOM for missing mediafiles in a CSV file", async () => {
     const csvFile = createFakeFile("data.csv", "text/csv");
@@ -155,7 +150,7 @@ describe("useUpload - Missing Mediafiles validation", () => {
     );
 
     expect(
-      csvFile.previewTemplate.classList.contains("border-red-default"),
+      csvFile.previewTemplate.classList.contains("border-danger"),
     ).toBe(true);
     expect(errorContainer?.classList.contains("hidden")).toBe(false);
     expect(errorContainer?.innerHTML).toContain("Missing missing-image.jpg");
@@ -176,7 +171,7 @@ describe("useUpload - Missing Mediafiles validation", () => {
     );
 
     expect(
-      excelFile.previewTemplate.classList.contains("border-red-default"),
+      excelFile.previewTemplate.classList.contains("border-danger"),
     ).toBe(true);
     expect(errorContainer?.classList.contains("hidden")).toBe(false);
     expect(errorContainer?.innerHTML).toContain("Missing missing-image.jpg");
@@ -202,7 +197,7 @@ describe("useUpload - Missing Mediafiles validation", () => {
     );
 
     expect(
-      excelFile.previewTemplate.classList.contains("border-red-default"),
+      excelFile.previewTemplate.classList.contains("border-danger"),
     ).toBe(false);
     expect(errorContainer?.classList.contains("hidden")).toBe(true);
     expect(errorContainer?.innerHTML).toContain("");
@@ -225,7 +220,7 @@ describe("useUpload - Missing Mediafiles validation", () => {
     );
 
     expect(
-      csvFile.previewTemplate.classList.contains("border-red-default"),
+      csvFile.previewTemplate.classList.contains("border-danger"),
     ).toBe(false);
     expect(errorContainer?.classList.contains("hidden")).toBe(true);
     expect(errorContainer?.innerHTML).toContain("");
@@ -290,7 +285,7 @@ describe("useUpload - Warnings from dry run", () => {
     expect(warningContainer?.classList.contains("hidden")).toBe(false);
     expect(warningContainer?.innerHTML).toContain("Error");
     expect(
-      csvFile.previewTemplate.classList.contains("border-red-default"),
+      csvFile.previewTemplate.classList.contains("border-danger"),
     ).toBe(false);
     expect(errorContainer?.classList.contains("hidden")).toBe(true);
   });
@@ -326,7 +321,7 @@ describe("useUpload - Warnings from dry run", () => {
     expect(warningContainer?.classList.contains("hidden")).toBe(false);
     expect(errorContainer?.classList.contains("hidden")).toBe(false);
     expect(
-      csvFile.previewTemplate.classList.contains("border-red-default"),
+      csvFile.previewTemplate.classList.contains("border-danger"),
     ).toBe(true);
   });
 
@@ -443,7 +438,7 @@ describe("useUpload - Warnings from mediafile upload", () => {
     expect(warningContainer?.innerHTML).toContain("File empty.txt is empty.");
     expect(errorContainer?.classList.contains("hidden")).toBe(true);
     expect(
-      mediafile.previewTemplate.classList.contains("border-red-default"),
+      mediafile.previewTemplate.classList.contains("border-danger"),
     ).toBe(false);
     expect(failedUploads.value).not.toContain("empty.txt");
     expect(amountUploaded.value).toBeGreaterThan(0);
@@ -566,5 +561,59 @@ describe("useUpload - CSV reordering upload", () => {
       ".file-upload-failed",
     );
     expect(failedStep?.classList.contains("hidden")).toBe(false);
+  });
+});
+
+describe("useUpload - per-file progressbar", () => {
+  const STEPS = ["validate", "prepare", "upload"];
+  const STATUSES = ["empty", "loading", "complete", "failed"];
+
+  // Mirrors UploadFilePreviewProgress: one container per step, one node per
+  // status, each node titled with its translated status.
+  const createRow = (name: string) => {
+    const previewTemplate = document.createElement("div");
+    const bar = document.createElement("div");
+    bar.setAttribute("role", "progressbar");
+    STEPS.forEach((step) => {
+      const container = document.createElement("div");
+      container.classList.add(`file-${step}-container`);
+      STATUSES.forEach((status) => {
+        const node = document.createElement("div");
+        node.classList.add(`file-${step}-${status}`);
+        if (status !== "empty") node.classList.add("hidden");
+        node.setAttribute("title", `${step} ${status}`);
+        container.appendChild(node);
+      });
+      bar.appendChild(container);
+    });
+    previewTemplate.appendChild(bar);
+    ["warning-message-container", "error-message-container"].forEach((c) => {
+      const el = document.createElement("div");
+      el.classList.add(c, "hidden");
+      previewTemplate.appendChild(el);
+    });
+    return { name, type: "image/png", previewTemplate } as any;
+  };
+  const bar = (file: any) =>
+    file.previewTemplate.querySelector('[role="progressbar"]');
+
+  it("names the row's progressbar after the file", () => {
+    const file = createRow("scan_001.tiff");
+    useUpload().updateFileThumbnails(file, "upload" as any, "loading" as any);
+    expect(bar(file).getAttribute("aria-label")).toBe("scan_001.tiff");
+  });
+
+  it("counts the completed steps as the value", () => {
+    const file = createRow("scan_001.tiff");
+    const { updateFileThumbnails } = useUpload();
+    updateFileThumbnails(file, "validate" as any, "complete" as any);
+    updateFileThumbnails(file, "prepare" as any, "complete" as any);
+    expect(bar(file).getAttribute("aria-valuenow")).toBe("2");
+  });
+
+  it("describes the step that changed last", () => {
+    const file = createRow("scan_001.tiff");
+    useUpload().updateFileThumbnails(file, "upload" as any, "loading" as any);
+    expect(bar(file).getAttribute("aria-valuetext")).toBe("upload loading");
   });
 });

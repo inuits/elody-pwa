@@ -1,6 +1,6 @@
 import type Dropzone from "dropzone";
 import { type DropzoneFile } from "dropzone";
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   type ActionProgressStep,
   type EntityInput,
@@ -35,7 +35,6 @@ const mainFileTypes = [
 const UPLOAD_TIMEOUT_MS = 10 * 60 * 1000;
 
 const {
-  handleHttpError,
   getMessageAndCodeFromErrorString,
   getSeverityFromErrorString,
 } = useErrorCodes();
@@ -100,7 +99,6 @@ const {
   extraMediafileType,
   typeToIncludeInUrl,
   shouldIncludeTypeInUrl,
-  resetState: resetUploadState,
 } = useUploadState();
 
 const useUpload = (config: any = {}) => {
@@ -996,9 +994,23 @@ const useUpload = (config: any = {}) => {
     if (!stepNode || !stepTypeContainer) return;
     __hideAllFileProgressSteps(stepTypeContainer);
     stepNode.classList.remove("hidden");
+    __updateFileProgressbar(file, stepNode);
 
     if (status !== ProgressStepStatus.Failed && !errors.length) return;
     __handleFileThumbnailError(file, errors);
+  };
+
+  // upload.md: role="progressbar" per row; value = steps done, text = the
+  // translated status of the step that changed (the step node's title).
+  const __updateFileProgressbar = (file: DropzoneFile, stepNode: Element) => {
+    const progressbar = file.previewTemplate.querySelector('[role="progressbar"]');
+    if (!progressbar) return;
+    const stepsDone = progressbar.querySelectorAll(
+      '[class*="-complete"]:not(.hidden)',
+    ).length;
+    progressbar.setAttribute("aria-label", file.name);
+    progressbar.setAttribute("aria-valuenow", String(stepsDone));
+    progressbar.setAttribute("aria-valuetext", stepNode.getAttribute("title") ?? "");
   };
 
   const __handleFileThumbnailError = (
@@ -1019,7 +1031,7 @@ const useUpload = (config: any = {}) => {
 
     errorContainer.innerHTML = "";
     if (errors.length <= 0) {
-      filePreview.classList.remove("border-2", "border-red-default");
+      filePreview.classList.remove("border-2", "border-danger");
       errorContainer.classList.add("hidden");
       return;
     }
@@ -1038,7 +1050,7 @@ const useUpload = (config: any = {}) => {
     });
     errorContainer.appendChild(errorList);
 
-    filePreview.classList.add("border-2", "border-red-default");
+    filePreview.classList.add("border-2", "border-danger");
     errorContainer.classList.remove("hidden");
   };
 
