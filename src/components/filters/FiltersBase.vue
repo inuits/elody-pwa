@@ -5,52 +5,18 @@
     :class="isExpanded ? 'rounded-t' : 'rounded-card'"
     @keydown.enter="applyFilters(true)"
   >
-    <div
-      class=""
-      :class="[
-        'flex justify-between items-center px-4 h-12 border-t border-x select-none cursor-pointer',
-        { 'border-border-panel rounded-t': isExpanded },
-        { 'border-background-light rounded-card': !isExpanded },
-      ]"
-      @click="() => emit('expandFilters', expandFilters)"
-    >
-      <span class="text-text-body text-xl font-bold">
-        {{ t("filters.filter") }}
-      </span>
-      <div class="flex items-center">
-        <span
-          v-if="simpleSearchActive"
-          data-cy="filters-disabled-label"
-          class="flex items-center gap-1.5 text-text-body"
-        >
-          <unicon
-            class="text-text-body"
-            :name="Unicons[DamsIcons.SearchGlass].name"
-          />
-          {{ t("filters.disabled-simple-search") }}
-        </span>
-        <template v-else>
-          <span class="text-text-body">
-            {{ activeFilterCount }} {{ t("filters.active") }}
-          </span>
-          <div
-            v-if="
-              (selectedSavedFilter || lastActiveFilter) &&
-              auth.isAuthenticated.value === true
-            "
-            class="bg-chip-neutral-bg rounded-chip py-1 px-2 ml-2"
-          >
-            <span class="text-text-body">
-              {{ selectedSavedFilter?.title || lastActiveFilter?.title }}
-            </span>
-          </div>
-          <unicon
-            class="text-text-body ml-4"
-            :name="Unicons[getAngleIcon].name"
-          />
-        </template>
-      </div>
-    </div>
+    <FiltersHeader
+      :active-count="activeFilterCount"
+      :expanded="!!expandFilters"
+      :simple-search-active="simpleSearchActive"
+      :saved-search-title="appliedSavedSearch?.title"
+      :saved-search-modified="
+        !!appliedSavedSearch &&
+        savedSearchIsModified(appliedSavedSearch.value, filters)
+      "
+      @toggle="() => emit('expandFilters', expandFilters)"
+      @clear-saved-search="() => (clearAllActiveFilters = true)"
+    />
 
     <div
       v-if="!simpleSearchActive"
@@ -58,25 +24,30 @@
         'w-full rounded-b bg-background-light',
         { hidden: !expandFilters },
         {
-          'scrollable border-x border-b-2 border-border-panel': expandFilters,
+          'scrollable border-x border-b border-border-panel rounded-b-card':
+            expandFilters,
         },
       ]"
     >
       <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
-        <div class="flex justify-between gap-4 pb-4">
+        <!-- Catalogue FilterActionBar: small "Clear all ×" + full-width
+             primary "Apply filter(s)". -->
+        <div class="flex gap-1.5 pb-4">
           <BaseButtonNew
             data-cy="filters-clear-button"
-            class="!w-1/3 !p-2.5"
+            class="!w-auto shrink-0"
             :label="t('filters.clear')"
             :icon="DamsIcons.Cross"
-            :icon-height="22"
             button-style="secondary"
+            button-size="sm"
             @click="() => (clearAllActiveFilters = true)"
           />
           <BaseButtonNew
             data-cy="filters-search-button"
+            class="flex-1"
             :label="t('filters.apply')"
-            button-style="commit"
+            button-style="primary"
+            button-size="sm"
             @click="applyFilters(true)"
           />
         </div>
@@ -160,11 +131,12 @@ import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
+import FiltersHeader from "@/components/filters/FiltersHeader.vue";
+import { savedSearchIsModified } from "@/components/filters/savedSearchIsModified";
 import SavedSearches from "@/components/SavedSearches.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { apolloClient } from "@/main";
 import { computed, onMounted, ref, watch, inject } from "vue";
-import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import {
   type SavedSearchType,
@@ -332,6 +304,12 @@ const addFilterOptions = computed(() =>
 const selectedSavedFilter = computed(() => {
   return getActiveFilter();
 });
+// The saved search whose filters are applied, shown as the header chip.
+const appliedSavedSearch = computed(() =>
+  auth.isAuthenticated.value === true
+    ? selectedSavedFilter.value || lastActiveFilter.value
+    : undefined,
+);
 
 // fetched even when predefined filters are present: those only narrow the
 // custom query's own filters, which stay user-editable and need matchers to
@@ -575,10 +553,6 @@ const applyFilters = (saveState = false, force = true) => {
     setTimeout(() => (fetchEntities.value = false), 50);
   }
 };
-
-const getAngleIcon = computed<DamsIcons>(() =>
-  props.expandFilters ? DamsIcons.AngleUp : DamsIcons.AngleDown,
-);
 
 const isExpanded = computed<boolean>(
   () => props.expandFilters && !props.simpleSearchActive,

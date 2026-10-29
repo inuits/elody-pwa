@@ -108,7 +108,6 @@ const mountPage = async () => {
       provide: { config: { features: {} } },
       stubs: {
         EntityColumn: FormWithLeavePrompt,
-        EntityNavigationArrows: true,
         SpinnerLoader: true,
         EditModal: true,
         DeleteModal: true,

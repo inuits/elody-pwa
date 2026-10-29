@@ -290,6 +290,27 @@ describe("useBulkOperationsActionsBar", () => {
       expect(hasBulkOperationsWithItemsSelection.value).toBe(true);
     });
 
+    it("should be false when create is combined only with actions that need no selection", () => {
+      const props = createMockProps();
+      const emit = createMockEmit();
+
+      const { hasBulkOperationsWithItemsSelection, bulkOperations } =
+        useBulkOperationsActionsBar(props, emit);
+
+      bulkOperations.value = [
+        { value: BulkOperationTypes.CreateEntity } as any,
+        {
+          value: "exportXlsx",
+          actionContext: {
+            entitiesSelectionType:
+              ActionContextEntitiesSelectionType.NoneSelected,
+          },
+        } as any,
+      ];
+
+      expect(hasBulkOperationsWithItemsSelection.value).toBe(false);
+    });
+
     it("should be true when a create operation is combined with a selectable operation", () => {
       const props = createMockProps();
       const emit = createMockEmit();

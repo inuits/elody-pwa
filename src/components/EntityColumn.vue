@@ -35,7 +35,6 @@
           :preview-label="previewLabel"
           :entity-metadata="intialValues"
           :entity-relations="relationValues"
-          @close-preview-component="emit('closePreviewComponent')"
           @toggle-element-collapse="(entityId, elementLabel) => toggleElementCollapse(entityId, elementLabel, undefined, isPreviewElement)"
           @resize-column="resizeColumn"
         >
@@ -52,6 +51,7 @@ import {
   reactive,
   isReactive,
   watch,
+  provide,
   ref,
   onMounted,
 } from "vue";
@@ -90,14 +90,18 @@ const props = withDefaults(
     identifiers: string[];
     entityType: Entitytyping;
     previewLabel?: string;
+    compact?: boolean;
   }>(),
   {
     previewLabel: undefined,
+    compact: false,
   },
 );
 
+// preview-panel.md: a preview's metadata renders as compact label/value rows.
+provide("CompactPreview", props.compact);
+
 const emit = defineEmits<{
-  (event: "closePreviewComponent"): void,
   (event: "mutatedEntityUpdated", mutatedEntity: Entity): void
 }>();
 const isPreviewElement: boolean = inject("IsPreviewElement", false);

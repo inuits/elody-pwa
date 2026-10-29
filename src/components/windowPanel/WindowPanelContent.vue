@@ -24,13 +24,17 @@
       </div>
     </div>
 
+    <!-- In a preview: one label/value grid, each field a row of it. -->
     <div
       v-else
+      :data-cy="compact ? 'preview-field-grid' : undefined"
       :class="[
-        {
-          'grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2 max-w-full':
-            canBeMultipleColumns,
-        },
+        compact
+          ? 'grid grid-cols-[minmax(0,max-content)_minmax(0,1fr)] gap-x-3.5 gap-y-1.5'
+          : {
+              'grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2 max-w-full':
+                canBeMultipleColumns,
+            },
       ]"
     >
       <!-- Existing code, kept as is: v-show has no effect on a <template>,
@@ -57,7 +61,7 @@
                 !parentIsListItem &&
                 metadata.unit !== Unit.CoordinatesDefault
               "
-              class="py-2 px-2"
+              :class="{ 'py-2 px-2': !compact }"
               :form-id="formId"
               :is-edit="isEdit"
               :repeatablePanelConfig="repeatablePanelConfig"
@@ -155,6 +159,7 @@ defineProps<{
 
 const { t } = useI18n();
 const config = inject("config") as any;
+const compact: boolean = inject("CompactPreview", false);
 const nonStandardFieldTypes = ["EntityListElement", "WysiwygElement"];
 
 const itemMustBeShown = (value: any): boolean => {

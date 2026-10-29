@@ -305,7 +305,7 @@
   --shadow-modal: 0 24px 64px rgba(9, 30, 66, 0.4);
   --shadow-toast: 0 12px 32px rgba(9, 30, 66, 0.35);
   --shadow-accent-hover: 0 2px 6px rgba(59, 166, 203, 0.4);
-  --shadow-accent-row: 0 1px 4px rgba(59, 166, 203, 0.25);
+  --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
   --shadow-commit-hover: 0 2px 8px rgba(12, 178, 188, 0.35);
   --opacity-empty: 0.45;
 
@@ -324,7 +324,9 @@
   /* Composite rhythm + layout constants (not part of the auto-generated
      spacing scale; referenced directly, e.g. p-[var(--panel-header-pad)]) */
   --panel-header-pad: 10px 16px;
+  --text-panel-title: 14px;
   --panel-body-pad: 6px 16px 14px;
+  --block-pad-y: 9px;
   --field-row-pad: 4px 6px;
   --table-row-pad: 7px 0;
   --gutter-panels: 14px;
@@ -382,6 +384,16 @@
   /* List row (list mode): the text keeps this width before the row's
      actions wrap onto their own line */
   --list-row-content-min: 8rem;
+  /* Flat list and table rows: cell padding, hairline below */
+  --list-row-pad: 7px 8px;
+  --list-header-height: 24px;
+  /* Grid cards: media area on top, then title, badges, one secondary line */
+  --grid-card-width: 300px;
+  --grid-card-height: 350px;
+  --grid-card-media-height: 220px;
+  --grid-card-body-pad: 8px 12px;
+  /* The row whose preview is open (entity-list-element.md) */
+  --list-row-preview-border: 3px;
 
   /* Menu (components/menu.md): split-button and overflow menus */
   --menu-padding: 4px;
@@ -392,8 +404,22 @@
   /* Item ink; a destructive item (tone Danger) switches it to danger ink */
   --menu-item-ink: var(--color-text-body);
 
+  /* Pager (components/pagination.md): « ‹ page [n] of N › » */
+  --pager-button-size: 24px;
+  --pager-gap: 2px;
+  --pager-input-width: 3.5rem;
+
+  /* List results band (components/entity-list.md): count, pager, view
+     modes, page size, sort and the selection bar in one row */
+  --list-band-pad: 8px 16px;
+
+  /* Record stepper */
+  --stepper-pad: 2px 3px;
+  --stepper-button-size: 22px;
+  --crumb-pad: 3px 12px;
+  --view-switch-size: 30px;
+
   /* Selection bar (components/selection-bar.md) */
-  --selection-bar-padding: 6px 10px;
   --selection-bar-gap: 8px;
 
   /* Split button (components/menu.md): primary + chevron in one capsule */
@@ -638,4 +664,6 @@ body {
   --color-diff-new: var(--color-success-ink);
   --color-diff-new-bg: var(--color-success-bg);
   --color-diff-new-border: var(--color-success);
+  /* Follows the client accent (selected list rows) */
+  --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }

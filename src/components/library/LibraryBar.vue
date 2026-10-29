@@ -1,8 +1,6 @@
 <template>
   <div
-    v-if="
-      paginationLimitOptionsPromiseIsResolved && sortOptionsPromiseIsResolved
-    "
+    v-if="sortOptionsPromiseIsResolved"
     class="flex justify-between items-center w-full"
     :class="[
       { 'flex-wrap': filtersAvailableOnDetailPage },
@@ -12,17 +10,6 @@
     <div
       class="flex flex-col @md:flex-row justify-start gap-3 w-full @md:w-auto"
     >
-      <div v-if="paginationLimitOptions.length > 0" class="w-full @md:w-auto">
-        <AdvancedDropdown
-          class="w-full @md:w-auto"
-          v-model="selectedPaginationLimitOption"
-          :options="paginationLimitOptions"
-          :label="t('library.items')"
-          :clearable="false"
-          :add-label-to-value="true"
-          label-position="inline"
-        />
-      </div>
       <div v-if="sortOptions.length > 0" class="w-full @md:w-auto">
         <AdvancedDropdown
           class="w-full @md:w-auto"
@@ -34,21 +21,25 @@
           :clearable="false"
           :add-label-to-value="true"
           label-position="inline"
+          style-type="defaultWithBorder"
         />
       </div>
       <div
         v-if="sortOptions.length > 0"
         class="flex items-center w-full @md:w-auto"
       >
-        <AdvancedDropdown
-          class="w-full @md:w-auto"
+        <!-- ui_kits/clients: one "⇅ Descending" toggle, not a dropdown. -->
+        <BaseButtonNew
+          class="!w-auto min-h-8"
           data-cy="sort-toggle"
-          v-model="selectedSortDirection"
-          :options="sortDirectionOptions"
-          :label="t('library.sort-direction')"
-          :clearable="false"
-          :add-icon-to-value="true"
-          label-position="inline"
+          button-size="md"
+          :icon="selectedSortDirection === 'asc' ? DamsIcons.SortUp : DamsIcons.SortDown"
+          :label="t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')"
+          :aria-label="`${t('library.sort-direction')}: ${t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')}`"
+          @click="
+            selectedSortDirection =
+              selectedSortDirection === 'asc' ? 'desc' : 'asc'
+          "
         />
       </div>
       <div
@@ -64,6 +55,7 @@
           :clearable="false"
           :add-label-to-value="true"
           label-position="inline"
+          style-type="defaultWithBorder"
           @update:model-value="(value) => selectGroupBy(String(value ?? ''))"
         />
       </div>
@@ -89,8 +81,6 @@ import {
   DamsIcons,
   type DropdownOption,
   type Entitytyping,
-  GetPaginationLimitOptionsDocument,
-  type GetPaginationLimitOptionsQuery,
   type GroupByConfig,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
@@ -98,6 +88,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
 import { useImport } from "@/composables/useImport";
 import { useGroupByOptions } from "@/composables/useGroupByOptions";
@@ -106,8 +97,6 @@ import { trackSort } from "@/analytics/usageAnalytics";
 
 const props = withDefaults(
   defineProps<{
-    setLimit: (limit: number) => void;
-    selectedPaginationLimitOption: number;
     setSortKey: (sortKey: string) => void;
     setSortOrder: (sortOrder: boolean, force?: boolean) => void;
     filtersAvailableOnDetailPage?: boolean;
@@ -117,7 +106,6 @@ const props = withDefaults(
     setGroupBy?: (config: GroupByConfig | null) => void;
   }>(),
   {
-    selectedPaginationLimitOption: 20,
     filtersAvailableOnDetailPage: false,
     simpleSearchValue: "",
     setSimpleSearch: undefined,
@@ -128,29 +116,16 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (
-    event: "paginationLimitOptionsPromise",
-    paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>,
-  ): void;
-  (
     event: "sortOptionsPromise",
     sortOptionsPromise: (entityType: Entitytyping) => Promise<void>,
   ): void;
 }>();
 
 const isAsc = ref<boolean>(false);
-const paginationLimitOptions = ref<DropdownOption[]>([]);
-const paginationLimitOptionsPromiseIsResolved = ref<boolean>(false);
-const selectedPaginationLimitOption = ref<number>(
-  props.selectedPaginationLimitOption,
-);
 const selectedSortOption = ref<any>();
 const sortOptions = ref<DropdownOption[]>([]);
 const sortOptionsPromiseIsResolved = ref<boolean>(false);
-const selectedSortDirection = ref<any>();
-const sortDirectionOptions = ref<DropdownOption[]>([
-  { label: "library.desc", value: "desc", icon: DamsIcons.SortDown },
-  { label: "library.asc", value: "asc", icon: DamsIcons.SortUp },
-]);
+const selectedSortDirection = ref<"asc" | "desc">();
 const { getStateForRoute } = useStateManagement();
 const { loadDocument } = useImport();
 const { t } = useI18n();
@@ -188,29 +163,6 @@ onUnmounted(() => debouncedSetSimpleSearch.cancel());
 
 const setIsAsc = (sortDirection: "asc" | "desc") => {
   isAsc.value = sortDirection === "asc";
-};
-
-const paginationLimitOptionsPromise = async () => {
-  return apolloClient
-    .query<GetPaginationLimitOptionsQuery>({
-      query: GetPaginationLimitOptionsDocument,
-    })
-    .then((result) => {
-      paginationLimitOptions.value =
-        result.data?.PaginationLimitOptions.options || [];
-
-      const state = getStateForRoute(route, true);
-      const limit =
-        state?.queryVariables?.limit ||
-        paginationLimitOptions.value?.[0].value ||
-        20;
-
-      selectedPaginationLimitOption.value = paginationLimitOptions.value.find(
-        (option) => option.value === limit,
-      )?.value;
-      props.setLimit(limit);
-      paginationLimitOptionsPromiseIsResolved.value = true;
-    });
 };
 
 const sortOptionsPromise = async (entityType: Entitytyping) => {
@@ -261,11 +213,7 @@ const sortOptionsPromise = async (entityType: Entitytyping) => {
       const isAscFromState = stateIsAsc !== undefined ? stateIsAsc : apiIsAsc;
 
       const sortOrder = isAscFromState ? "asc" : "desc";
-      const matchedOption = sortDirectionOptions.value.find(
-        (option) => option.value === sortOrder,
-      );
-
-      selectedSortDirection.value = matchedOption?.value;
+      selectedSortDirection.value = sortOrder;
       setIsAsc(sortOrder);
       props.setSortOrder(isAsc.value, false);
 
@@ -308,21 +256,11 @@ const determineSortOptionsQuery = async (): Promise<any> => {
 };
 
 onMounted(() => {
-  emit("paginationLimitOptionsPromise", paginationLimitOptionsPromise);
   emit("sortOptionsPromise", sortOptionsPromise);
 });
 
 watch(() => route.name, loadGroupByOptions, { immediate: true });
 
-watch(
-  () => selectedPaginationLimitOption.value,
-  async () =>
-    await props.setLimit(
-      selectedPaginationLimitOption.value,
-      selectedPaginationLimitOption.value !== -1,
-    ),
-  { deep: true },
-);
 watch(
   () => selectedSortOption.value,
   async () => await props.setSortKey(selectedSortOption.value, true),

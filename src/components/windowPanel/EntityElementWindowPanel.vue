@@ -1,15 +1,19 @@
 <template>
   <div
     ref="panelRef"
-    :class="[{ 'pl-10 py-0': parentIsListItem }, ' p-2 w-full']"
+    data-cy="window-panel"
+    :class="[{ 'pl-10 py-0': parentIsListItem }, 'py-(--block-pad-y) w-full']"
   >
+    <!-- panel-and-block-shells.md: BlockShell — unboxed, bold label. -->
     <div
       v-if="panel.panelHeaderContent?.label"
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
       <div class="flex gap-4 w-2/3 items-center">
-        <h2>{{ t(panel.panelHeaderContent.label) }}</h2>
+        <h4 class="m-0 text-table font-bold text-text-body">
+          {{ t(panel.panelHeaderContent.label) }}
+        </h4>
         <!-- The row itself announces the save; this only shows it -->
         <Transition
           leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"

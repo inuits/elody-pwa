@@ -7,6 +7,9 @@ import type { Entitytyping } from "@/generated-types/queries";
 const mocks = vi.hoisted(() => ({
   selected: [] as { id: string }[],
   dequeueAll: vi.fn(),
+  operations: [] as unknown[],
+  handle: vi.fn(),
+  hasSelectionOperations: true,
 }));
 
 vi.mock("vue-i18n", () => ({
@@ -19,14 +22,14 @@ vi.mock("vue-i18n", () => ({
 
 vi.mock("@/composables/useBulkOperationsActionsBar", () => ({
   useBulkOperationsActionsBar: () => ({
-    bulkOperations: ref([]),
+    bulkOperations: ref(mocks.operations),
     selectedBulkOperation: ref(undefined),
     bulkOperationsPromiseIsResolved: ref(true),
-    hasBulkOperationsWithItemsSelection: ref(true),
+    hasBulkOperationsWithItemsSelection: ref(mocks.hasSelectionOperations),
     itemsSelected: ref(mocks.selected.length > 0),
     subDropdownOptions: ref([]),
     clearSubDropdownOptions: vi.fn(),
-    handleSelectedBulkOperation: vi.fn(),
+    handleSelectedBulkOperation: mocks.handle,
     getEnqueuedItemCount: () => mocks.selected.length,
     getEnqueuedItems: () => mocks.selected,
     dequeueAllItemsForBulkProcessing: mocks.dequeueAll,
@@ -37,7 +40,6 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
   mount(BulkOperationsActionsBar, {
     props: {
       context: "home" as any,
-      totalItemsCount: 40,
       useExtendedBulkOperations: true,
       entityType: "inscription" as Entitytyping,
       refetchEntities: () => {},
@@ -54,6 +56,8 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
 describe("BulkOperationsActionsBar", () => {
   beforeEach(() => {
     mocks.selected = [];
+    mocks.operations = [];
+    mocks.hasSelectionOperations = true;
     vi.clearAllMocks();
   });
 
@@ -73,53 +77,53 @@ describe("BulkOperationsActionsBar", () => {
     );
   });
 
-  it("keeps the live region mounted but empty without a selection", () => {
+  it("says nothing about a selection when no action acts on one", () => {
+    mocks.hasSelectionOperations = false;
     expect(getWrapper().find('[role="status"]').text()).toBe("");
   });
 
-  it("is a bordered surface with the selection bar tokens", () => {
-    expect(getWrapper().find('[role="toolbar"]').classes()).toEqual(
-      expect.arrayContaining([
-        "bg-surface",
-        "border",
-        "rounded-button",
-        "p-(--selection-bar-padding)",
-        "gap-(--selection-bar-gap)",
-        "text-ui",
-      ]),
+  it("says nothing is selected yet, like the aicap UI kit", () => {
+    expect(getWrapper().find('[role="status"]').text()).toBe(
+      "bulk-operations.nothing-selected",
     );
   });
 
-  it("borders the bar more strongly once something is selected", () => {
-    expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
-      "border-border-subtle",
-    );
-    mocks.selected = [{ id: "a" }];
-    expect(getWrapper().find('[role="toolbar"]').classes()).toContain(
-      "border-border-default",
-    );
+  it("puts the actions right after the selection label, not at the far right", () => {
+    expect(getWrapper().find(".ml-auto").exists()).toBe(false);
   });
 
-  it("shows the total as a neutral chip, never mint", () => {
-    mocks.selected = [{ id: "a" }];
-    const chip = getWrapper().find('[data-cy="selection-bar-total"]');
-
-    expect(chip.classes()).toEqual(
-      expect.arrayContaining(["bg-chip-neutral-bg", "rounded-chip", "text-chip"]),
+  it("sits in the list's results band without a surface of its own", () => {
+    const classes = getWrapper().find('[role="toolbar"]').classes();
+    expect(classes).toEqual(
+      expect.arrayContaining(["gap-(--selection-bar-gap)", "text-ui"]),
     );
-    expect(chip.classes()).not.toContain("bg-accent-normal");
+    expect(classes).not.toContain("border");
+    expect(classes).not.toContain("bg-surface");
   });
 
-  it("styles select page and clear selection as label links", () => {
-    mocks.selected = [{ id: "a" }];
-    const links = getWrapper().findAll('[data-cy="selection-bar-link"]');
+  it("hides when it has nothing to offer (no selection, no actions)", () => {
+    mocks.hasSelectionOperations = false;
+    expect(getWrapper().find('[role="toolbar"]').isVisible()).toBe(false);
+  });
 
-    expect(links).toHaveLength(2);
-    links.forEach((link) =>
-      expect(link.classes()).toEqual(
-        expect.arrayContaining(["text-label", "text-text-light", "underline"]),
-      ),
-    );
+  it("shows when there are actions without a selection", () => {
+    mocks.hasSelectionOperations = false;
+    mocks.operations = [{ value: "create" }];
+    expect(getWrapper().find('[role="toolbar"]').isVisible()).toBe(true);
+  });
+
+  it("leaves the total to the list header count chip", () => {
+    expect(getWrapper().text()).not.toContain("bulk-operations.items");
+  });
+
+  it("has no Select page link: the list header's checkbox selects the page", () => {
+    expect(getWrapper().text()).not.toContain("bulk-operations.select-page");
+  });
+
+  it("shows actions as separate buttons", () => {
+    expect(
+      getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
+    ).toBe(true);
   });
 
   it("notes selected items that sit on other pages", () => {
@@ -142,25 +146,133 @@ describe("BulkOperationsActionsBar", () => {
     ).toBe(false);
   });
 
-  it("clears the selection from a real button", async () => {
+  it("offers Clear selection only for items selected on other pages", async () => {
     mocks.selected = [{ id: "a" }];
-    const clear = getWrapper()
+    expect(getWrapper({ pageItemIds: ["a"] }).text()).not.toContain(
+      "bulk-operations.clear-selection",
+    );
+
+    mocks.selected = [{ id: "a" }, { id: "b" }];
+    const clear = getWrapper({ pageItemIds: ["a"] })
       .findAll("button")
       .find((button) => button.text() === "bulk-operations.clear-selection");
-
+    expect(clear!.classes()).toEqual(
+      expect.arrayContaining(["text-label", "text-text-light", "underline"]),
+    );
     await clear!.trigger("click");
-
     expect(mocks.dequeueAll).toHaveBeenCalled();
   });
 
-  it("selects the page from a real button", async () => {
-    const wrapper = getWrapper();
-    const selectPage = wrapper
-      .findAll("button")
-      .find((button) => button.text() === "bulk-operations.select-page");
+  describe("create in the page header", () => {
+    const create = {
+      value: "createEntity",
+      label: "navigation.create-inscription",
+      primary: true,
+    };
+    const exportXlsx = { value: "exportXlsx", label: "bulk-operations.export" };
 
-    await selectPage!.trigger("click");
+    beforeEach(() => {
+      mocks.operations = [create, exportXlsx];
+    });
 
-    expect(wrapper.emitted("selectPage")).toHaveLength(1);
+    const mountBar = (createInPageHeader: boolean) =>
+      mount(BulkOperationsActionsBar, {
+        props: {
+          context: "home" as any,
+          useExtendedBulkOperations: true,
+          entityType: "inscription" as Entitytyping,
+          refetchEntities: () => {},
+          selectedPaginationLimitOption: 20,
+          excludePagination: true,
+          createInPageHeader,
+        },
+        global: {
+          stubs: {
+            ActionMenuGroup: true,
+            BaseTooltip: true,
+            Unicon: true,
+            teleport: true,
+          },
+          mocks: { $t: (key: string) => key },
+        },
+      });
+
+    it("moves the create action out of the bar into a page-header pill", async () => {
+      const wrapper = mountBar(true);
+      const pill = wrapper.find('[data-cy="page-header-create"]');
+
+      expect(pill.text()).toMatch(/^navigation\.create-inscription/);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([exportXlsx]);
+      await pill.trigger("click");
+      expect(mocks.handle).toHaveBeenCalledWith(create);
+    });
+
+    it("keeps create in the bar for other lists", () => {
+      const wrapper = mountBar(false);
+      expect(wrapper.find('[data-cy="page-header-create"]').exists()).toBe(false);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([create, exportXlsx]);
+    });
+  });
+
+  describe("add in the list header (detail panels)", () => {
+    const create = { value: "createEntity", label: "bulk-operations.add-new", primary: true };
+    const addExisting = { value: "addRelation", label: "bulk-operations.add-existing" };
+    const exportAll = { value: "exportXlsx", label: "bulk-operations.export" };
+
+    beforeEach(() => {
+      mocks.operations = [create, addExisting, exportAll];
+    });
+
+    const mountBar = (listHeaderTarget?: string) =>
+      mount(BulkOperationsActionsBar, {
+        props: {
+          context: "home" as any,
+          useExtendedBulkOperations: true,
+          entityType: "mediafile" as Entitytyping,
+          refetchEntities: () => {},
+          selectedPaginationLimitOption: 20,
+          excludePagination: true,
+          listHeaderTarget,
+        },
+        global: {
+          stubs: { ActionMenuGroup: true, BaseTooltip: true, Unicon: true, teleport: true },
+          mocks: { $t: (key: string) => key },
+        },
+      });
+
+    it("moves create and add-relation into the list header as pills", async () => {
+      const wrapper = mountBar('[data-list-actions="x"]');
+      const pills = wrapper.findAll('[data-cy="list-header-add"]');
+
+      expect(pills.map((pill) => pill.text().split(":")[0])).toEqual([
+        "bulk-operations.add-new",
+        "bulk-operations.add-existing",
+      ]);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([exportAll]);
+      await pills[1].trigger("click");
+      expect(mocks.handle).toHaveBeenCalledWith(addExisting);
+    });
+
+    it("always shows the pill labels, with the entity type filled in like the bar did", () => {
+      const pill = mountBar('[data-list-actions="x"]').findComponent({ name: "BaseButtonNew" });
+      expect(pill.props("forceShowLabel")).toBe(true);
+      expect(pill.props("label")).toBe(
+        "bulk-operations.add-new:entity-translations.mediafile:",
+      );
+    });
+
+    it("keeps them in the bar without a list header target", () => {
+      const wrapper = mountBar();
+      expect(wrapper.find('[data-cy="list-header-add"]').exists()).toBe(false);
+      expect(
+        wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+      ).toEqual([create, addExisting, exportAll]);
+    });
   });
 });

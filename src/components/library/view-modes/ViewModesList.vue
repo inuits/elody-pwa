@@ -21,6 +21,23 @@
           },
         ]"
       >
+        <!-- entity-list-element.md: list mode gets a column-header row when
+             every row shares its fields. -->
+        <div v-if="columnLabels" ref="listHeader">
+          <ListColumnHeader
+            :labels="columnLabels"
+            :cell-styles="headerCellStyles"
+            :checkbox-style="headerCheckboxStyle"
+            :selectable="
+              enableSelection &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
+            :all-selected="pageIsSelected"
+            @toggle-page-selection="
+              (selected) => emit('togglePageSelection', selected)
+            "
+          />
+        </div>
         <div v-if="Array.isArray(relations)">
           <div
             v-show="!disablePreviews"
@@ -55,6 +72,7 @@
               :view-mode="mode"
               :multi-line="multiLine"
               :multi-line-columns="multiLineColumns"
+              :hide-labels="!!columnLabels"
             />
           </div>
         </div>
@@ -64,6 +82,9 @@
           :is="entity.componentTag"
           :to="entity.componentPath"
           :class="[
+            // A navigating row is a link: no link underline or colour on hover
+            // (the base a:hover rule); the row's own hover fill is enough.
+            'text-inherit hover:text-inherit hover:no-underline',
             mode === 'list' ? 'list-item-list' : 'list-item-grid',
             { 'list-item-list-multi-line': mode === 'list' && multiLine },
           ]"
@@ -74,7 +95,7 @@
               else entityWrapperHandler(entity.originalEntity);
             }
           "
-          v-memo="entity.memoKey"
+          v-memo="[entity.memoKey, !!columnLabels]"
         >
           <ListItem
             :item-id="entity.id"
@@ -102,6 +123,8 @@
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
             :preview-component-current-active="entity.isPreviewActive"
+            :preview-open="entity.isPreviewOpen"
+            :hide-labels="!!columnLabels"
             :preview-component-feature-enabled="previewComponent !== undefined"
             :preview-component-list-items-coverage="
               previewComponent?.listItemsCoverage
@@ -110,11 +133,6 @@
             :is-primary-thumbnail="primaryThumbnailId === entity.id"
             :multi-line="multiLine"
             :multi-line-columns="multiLineColumns"
-            @navigate-to="
-              () => {
-                router.push(entity.forcedNavigationPath);
-              }
-            "
             @toggle-preview-component="
               (previewForEntityId) => togglePreviewComponent(previewForEntityId)
             "
@@ -129,7 +147,7 @@
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto bg-background-light rounded-lg"
+        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -143,6 +161,7 @@
           :relation-type="relationType"
           :parent-entity-type="parentEntityType"
           :refetch-entities="refetchEntities"
+          :detail-path="previewDetailPath"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -172,9 +191,13 @@ import ListItem from "@/components/ListItem.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, unref, watch } from "vue";
+import { useEditMode } from "@/composables/useEdit";
+import useEntitySingle from "@/composables/useEntitySingle";
+import { sharedColumnLabels } from "@/components/library/view-modes/composables/sharedColumnLabels";
+import ListColumnHeader from "@/components/library/view-modes/ListColumnHeader.vue";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { router } from "@/main";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
@@ -233,6 +256,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
+  (event: "togglePageSelection", selected: boolean): void;
 }>();
 
 const refEntities = ref<Entity[]>(props.entities);
@@ -253,6 +277,7 @@ const {
   closePreviewComponent,
   togglePreviewForListItem,
   isPreviewComponentEnabledForListItem,
+  isPreviewOpenForListItem,
 } = usePreviewComponent(props, refEntities);
 const {
   containerNameForPreview,
@@ -268,6 +293,15 @@ const {
   openPreviewComponent,
   togglePreviewForListItem,
 );
+
+// "Open detail page" in the preview header, for lists that navigate.
+const previewDetailPath = computed(() => {
+  const entity = refEntities.value.find(
+    (entity) => entity.id === previewForEntity.value,
+  );
+  if (!entity || props.actionOnClick !== ActionOnClick.Navigate) return;
+  return getLinkSettings(entity, props.listItemRouteName, true).path;
+});
 
 const { seenTracking } = useEntityPageConfig();
 const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
@@ -304,13 +338,9 @@ const processedEntities = computed(() => {
 
   return refEntities.value.map((entity) => {
     const linkSettings = getLinkSettings(entity, props.listItemRouteName);
-    const forcedLinkSettings = getLinkSettings(
-      entity,
-      props.listItemRouteName,
-      true,
-    );
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
+    const isPreviewOpen = isPreviewOpenForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity);
     const isSeen = isEntitySeen(entity.id);
     const isNew = isEntityNew(entity.id, entity.intialValues);
@@ -329,6 +359,7 @@ const processedEntities = computed(() => {
       entity.relationValues,
       relation,
       isPreviewActive,
+      isPreviewOpen,
       isDisabled,
       isSeen,
       isNew,
@@ -343,7 +374,6 @@ const processedEntities = computed(() => {
       type: entity.type,
       componentTag: linkSettings.tag,
       componentPath: linkSettings.path,
-      forcedNavigationPath: forcedLinkSettings.path,
 
       buttons,
       entityTypename: getMappedSlug(entity),
@@ -363,11 +393,84 @@ const processedEntities = computed(() => {
       isNew,
       relation: relation,
       isPreviewActive: isPreviewActive,
+      isPreviewOpen,
 
       memoKey: memoKey,
     };
   });
 });
+
+const { getEntityUuid } = useEntitySingle();
+const editHelper = useEditMode(getEntityUuid() || "");
+
+const columnLabels = computed<string[] | undefined>(() => {
+  if (props.mode !== "list" || unref(editHelper.isEdit)) return undefined;
+  const rows = processedEntities.value.map((entity) => entity.teaserMetadata);
+  if (!rows.every(Array.isArray)) return undefined;
+  return sharedColumnLabels(rows as Metadata[][]);
+});
+
+// Places each header label over the matching cell of the first row, so the
+// header follows the row layout (actions width, wrapping, multi-line).
+const listHeader = ref<HTMLElement>();
+const headerCellStyles = ref<Record<string, string>[]>([]);
+const headerCheckboxStyle = ref<Record<string, string>>();
+const measureHeader = () => {
+  const header = listHeader.value;
+  const firstRow = header?.parentElement?.querySelector('[data-cy="list-item"]');
+  const cells = firstRow?.querySelector('[data-cy="list-item-content"]')?.children;
+  if (!header || !cells) return;
+  const left = header.getBoundingClientRect().left;
+  headerCellStyles.value = [...cells].map((cell) => {
+    const box = cell.getBoundingClientRect();
+    return { left: `${box.left - left}px`, width: `${box.width}px` };
+  });
+  // Line the select-all box up with the rows' boxes.
+  const rowBox = firstRow?.querySelector("input[type=checkbox]");
+  const headerRoot = header.querySelector('[data-cy="list-column-header"]')
+    ?.firstElementChild as HTMLElement | null | undefined;
+  const headerBox = headerRoot?.querySelector("input[type=checkbox]");
+  if (!rowBox || !headerRoot || !headerBox) return;
+  const inset =
+    headerBox.getBoundingClientRect().left -
+    headerRoot.getBoundingClientRect().left;
+  headerCheckboxStyle.value = {
+    left: `${rowBox.getBoundingClientRect().left - left - inset}px`,
+  };
+};
+
+const { isEnqueued } = useBulkOperations();
+const pageIsSelected = computed(
+  () =>
+    processedEntities.value.length > 0 &&
+    processedEntities.value
+      .filter((entity) => !entity.isDisabled)
+      .every(
+        (entity) =>
+          isEnqueued(props.bulkOperationsContext, entity.id) ||
+          isEnqueued(props.bulkOperationsContext, entity.originalEntity.uuid),
+      ),
+);
+const headerObserver =
+  typeof ResizeObserver === "undefined"
+    ? undefined
+    : new ResizeObserver(() => measureHeader());
+watch(
+  [listHeader, () => processedEntities.value],
+  async () => {
+    headerObserver?.disconnect();
+    await nextTick();
+    const firstRow = listHeader.value?.parentElement?.querySelector(
+      '[data-cy="list-item-content"]',
+    );
+    if (!listHeader.value || !firstRow) return;
+    headerObserver?.observe(listHeader.value);
+    headerObserver?.observe(firstRow);
+    measureHeader();
+  },
+  { flush: "post" },
+);
+onBeforeUnmount(() => headerObserver?.disconnect());
 
 const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
   openModal(
@@ -419,20 +522,27 @@ const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
   }
 }
 
-/* Preview container queries */
-@container preview (min-width: 450px) {
+/* Preview container queries: a split nested in a preview uses the same
+   tiers, measured against its own container (entity-list-element.md) */
+@container preview (min-width: 500px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }
 }
 
-@container preview (min-width: 550px) {
+@container preview (min-width: 630px) {
   .responsive-grid {
     grid-template-columns: 35% 65%;
   }
 }
 
-@container preview (min-width: 755px) {
+@container preview (min-width: 830px) {
+  .responsive-grid {
+    grid-template-columns: 30% 70%;
+  }
+}
+
+@container preview (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
   }

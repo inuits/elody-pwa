@@ -1,52 +1,45 @@
 <template>
-  <div
-    class="flex items-center justify-between"
-    :class="[{ 'my-2': showHeaderCloseButton }]"
+  <!-- preview-panel.md: the shared panel shell; one header with the title,
+       "Open detail page" and the close cross. -->
+  <section
+    role="complementary"
+    :aria-labelledby="titleId"
+    class="border border-border-panel rounded-card bg-surface overflow-hidden"
+    @keydown.esc.stop="close"
   >
-    <base-tooltip
-      v-if="showHeaderCloseButton"
-      position="top-right"
-      :tooltip-offset="8"
-      @click="emit('closePreviewComponent')"
+    <header
+      ref="header"
+      data-cy="preview-header"
+      tabindex="-1"
+      class="flex items-center gap-2 p-(--panel-header-pad) bg-surface-panel-header outline-none"
     >
-      <template #activator="{ on, describedBy }">
-        <div
-          class="flex items-center"
-          data-cy="close-preview-component"
-          v-on="on"
-          :aria-describedby="describedBy"
-        >
-          <unicon
-            class="cursor-pointer mr-4 ml-2 flex justify-center items-center"
-            :name="Unicons.Cross.name"
-            height="24"
-          />
-        </div>
-      </template>
-      <template #default>
-        <span>
-          <div>
-            {{ t("preview-component.close") }}
-          </div>
-        </span>
-      </template>
-    </base-tooltip>
-    <h1
-      data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 truncate max-w-[90%]"
-      v-if="previewComponent.title"
-    >
-      {{ t(previewComponent.title) }}
-    </h1>
-    <h1
-      data-cy="entity-element-window-title"
-      class="subtitle text-text-body p-2 truncate max-w-[90%]"
-      v-if="previewComponent.type === PreviewTypes.MediaViewer"
-    >
-      {{ getTitleFromEntity }}
-    </h1>
-    <div><!-- Only here to center the title :) --></div>
-  </div>
+      <h3
+        :id="titleId"
+        data-cy="preview-title"
+        aria-live="polite"
+        class="flex-1 min-w-0 truncate text-(length:--text-panel-title) font-bold text-text-panel-header"
+      >
+        {{ title }}
+      </h3>
+      <BaseButtonNew
+        v-if="detailPath"
+        data-cy="preview-open-detail"
+        class="!w-auto shrink-0"
+        button-style="primary"
+        button-size="sm"
+        :label="t('preview-component.open-detail-page')"
+        @click="router.push(detailPath)"
+      />
+      <BaseButtonNew
+        data-cy="close-preview-component"
+        class="!w-auto shrink-0"
+        button-style="ghost"
+        button-size="sm"
+        :icon="DamsIcons.Cross"
+        :aria-label="t('preview-component.close')"
+        @click="close"
+      />
+    </header>
   <div
     v-if="previewLoading"
     data-cy="preview-loading"
@@ -66,7 +59,6 @@
       :identifiers="[entityId]"
       :entity-type="entityType"
       :preview-label="getTitleFromEntity"
-      @close-preview-component="emit('closePreviewComponent')"
     />
     <ViewModesMap
       v-else-if="previewComponent.type === PreviewTypes.Map"
@@ -93,8 +85,10 @@
       "
     />
   </div>
+  <!-- ui_kits/clients: a hairline under the viewer, then the label/value
+       rows inside the same panel. -->
   <div
-    class="metadata-preview"
+    class="metadata-preview mx-4 mt-2 mb-3.5 border-t border-border-subtle pt-2"
     v-if="
       metadataPreviewElement && previewComponent.type !== PreviewTypes.History
     "
@@ -106,7 +100,7 @@
       :identifiers="[entityId]"
       :entity-type="entityType"
       :preview-label="getTitleFromEntity"
-      @close-preview-component="emit('closePreviewComponent')"
+      compact
     />
   </div>
   <div
@@ -123,14 +117,15 @@
       :entities="entities"
       :entity-type="entityType"
       :parent-entity-id="parentIds[0]"
-      @close-preview-component="emit('closePreviewComponent')"
     />
   </div>
+  </section>
 </template>
 
 <script setup lang="ts">
 import {
   type ColumnList,
+  DamsIcons,
   type Entity,
   type Entitytyping,
   ListItemCoverageTypes,
@@ -141,16 +136,16 @@ import {
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
 import MediaViewerPreview from "@/components/previews/MediaViewerPreview.vue";
 import { useI18n } from "vue-i18n";
-import { computed, onMounted, provide, ref, watch } from "vue";
+import type { RouteLocationRaw } from "vue-router";
+import { computed, nextTick, onMounted, provide, ref, useId, watch } from "vue";
 import { useImport } from "@/composables/useImport";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity } from "@/helpers";
-import { Unicons } from "@/types";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
+import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
-import { apolloClient } from "@/main";
+import { apolloClient, router } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
 
 const { t } = useI18n();
@@ -171,6 +166,8 @@ const props = withDefaults(
     relationType?: string;
     parentEntityType?: Entitytyping;
     refetchEntities?: () => Promise<void>;
+    // Set when the list navigates to its entities; shows "Open detail page".
+    detailPath?: RouteLocationRaw;
   }>(),
   {},
 );
@@ -246,21 +243,39 @@ const getTitleFromEntity = computed(() => {
   else return getTitleOrNameFromEntity(entity);
 });
 
-// A primary ColumnList preview renders its own close button deeper down
-// (inside the entity list's EntityElementWrapper). Every other case —
-// MediaViewer, Map, History, and metadata-only previews — relies on this
-// header button instead.
-const isPrimaryColumnListPreview = computed<boolean>(
-  () =>
-    props.previewComponent.type === PreviewTypes.ColumnList &&
-    !!primaryPreviewElement.value,
+const title = computed<string>(() =>
+  props.previewComponent.title
+    ? t(props.previewComponent.title)
+    : getTitleFromEntity.value,
 );
+const titleId = useId();
+const header = ref<HTMLElement>();
 
-const showHeaderCloseButton = computed<boolean>(
-  () => !isPrimaryColumnListPreview.value,
-);
+// Focus moves to the header on open and back to the row's eye on close.
+// Opening re-renders the list, so the eye is looked up again by entity id;
+// the original opener is the fallback.
+let opener: HTMLElement | null = null;
+const close = async () => {
+  const entityId = props.entityId;
+  emit("closePreviewComponent");
+  await nextTick();
+  const eye = [
+    ...document.querySelectorAll<HTMLElement>("[data-preview-for]"),
+  ].find(
+    (element) =>
+      element.dataset.previewFor === entityId &&
+      // the other view mode stays mounted behind v-show
+      !element.closest('[style*="display: none"]'),
+  );
+  (eye ?? opener)?.focus();
+};
 
 onMounted(async () => {
+  opener = document.activeElement as HTMLElement | null;
+  // Opened from a control (the eye): move focus. Opened by default on page
+  // load: nothing had focus, so leave it alone.
+  if (opener && opener !== document.body)
+    header.value?.focus({ preventScroll: true });
   const hasPreviewQuery =
     props.previewComponent.previewQuery ||
     props.previewComponent.metadataPreviewQuery;

@@ -118,10 +118,16 @@ vi.mock("@/composables/useMaps", () => ({
   useMaps: () => ({ getBasicMapProperties: vi.fn(() => ({ mapType: "" })) }),
 }));
 
+const bulkMocks = vi.hoisted(() => ({
+  enqueue: vi.fn(),
+  dequeue: vi.fn(),
+  trigger: vi.fn(),
+}));
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({
-    enqueueItemForBulkProcessing: vi.fn(),
-    triggerBulkSelectionEvent: vi.fn(),
+    enqueueItemForBulkProcessing: bulkMocks.enqueue,
+    dequeueItemForBulkProcessing: bulkMocks.dequeue,
+    triggerBulkSelectionEvent: bulkMocks.trigger,
   }),
   BulkOperationsContextEnum: {
     EntityElementListEntityPickerModal: "EntityElementListEntityPickerModal",
@@ -227,6 +233,7 @@ import BaseLibrary from "../BaseLibrary.vue";
 import ViewModesList from "../view-modes/ViewModesList.vue";
 import ViewModesTable from "../view-modes/ViewModesTable.vue";
 import LibraryBar from "../LibraryBar.vue";
+import ResultCountChip from "../ResultCountChip.vue";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
 // --- Props / wrapper factories ------------------------------------------------
@@ -250,11 +257,15 @@ const config = {
   },
 };
 
-const getWrapper = (props: Record<string, unknown> = {}) =>
+const getWrapper = (
+  props: Record<string, unknown> = {},
+  extraProvide: Record<string, unknown> = {},
+) =>
   shallowMount(BaseLibrary, {
     props: { ...getDefaultProps(), ...props },
     global: {
       provide: {
+        ...extraProvide,
         config,
         [DefaultApolloClient as symbol]: { query: vi.fn(), mutate: vi.fn() },
         IsPreviewElement: false,
@@ -757,9 +768,10 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
   });
 });
 
-describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
+describe("BaseLibrary.vue pager and page size", () => {
   let wrapper: ReturnType<typeof getWrapper> | null = null;
-  const paginationSelector = '[data-test="basic-library-pagination"]';
+  const paginationSelector = '[data-test="list-pager"]';
+  const pageSizeSelector = '[data-cy="list-header"] page-size-select-stub';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -808,14 +820,113 @@ describe("BaseLibrary.vue basic-mode relation-list pagination", () => {
     expect(wrapper.find(paginationSelector).exists()).toBe(false);
   });
 
-  it("does not add basic-mode pagination in NormalBaseLibrary mode (the bulk-operations bar already owns pagination there)", async () => {
+  it("puts the pager in the list header, next to the count", async () => {
     libPaginationTotalPages.value = 4;
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });
     await flushPromises();
 
-    expect(wrapper.find(paginationSelector).exists()).toBe(false);
+    expect(
+      wrapper.find('[data-cy="list-header"] [data-test="list-pager"]').exists(),
+    ).toBe(true);
+  });
+
+  it("keeps the pager when the library bar is disabled", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper({ disableLibraryBar: true });
+    await flushPromises();
+
+    expect(wrapper.find(paginationSelector).exists()).toBe(true);
+  });
+
+  it("puts the selection bar in its own row under the band, inside the results panel", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      enableBulkOperations: true,
+    });
+    await flushPromises();
+    const bar = { name: "BulkOperationsActionsBar" };
+
+    expect(
+      wrapper.find('[data-cy="list-header"]').findComponent(bar).exists(),
+    ).toBe(false);
+    expect(
+      wrapper.find('[data-cy="results-panel"]').findComponent(bar).exists(),
+    ).toBe(true);
+  });
+
+  it("joins the band and the list into one white panel", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
+      "rounded-t-card",
+    );
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).toEqual(
+      expect.arrayContaining(["bg-surface", "border-border-panel", "rounded-card"]),
+    );
+  });
+
+  it("styles the header of the main library as the accent-light results band", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toEqual(
+      expect.arrayContaining(["bg-surface-panel-header", "border-border-panel"]),
+    );
+  });
+
+  it("sets the band's dropdowns in the small ui text, like the list template", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
+      "[--vs-font-size:var(--text-ui)]",
+    );
+  });
+
+  it("leaves a compact relation list's header unstyled", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).not.toContain(
+      "bg-surface-panel-header",
+    );
+  });
+
+  it("has no list footer", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-footer"]').exists()).toBe(false);
+  });
+
+  it("puts the page size in the list header of the main library", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(pageSizeSelector).exists()).toBe(true);
+  });
+
+  it("leaves the page size out of compact relation lists", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(pageSizeSelector).exists()).toBe(false);
   });
 });
 
@@ -1072,5 +1183,188 @@ describe("BaseLibrary.vue map view", () => {
     wrapper = getWrapper();
     expect(wrapper.findComponent(ViewModesList).exists()).toBe(true);
     expect(wrapper.findComponent(ViewModesTable).exists()).toBe(true);
+  });
+});
+
+describe("BaseLibrary.vue list header count chip", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [];
+    libTotalEntityCount.value = 1258;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("shows the list total in the header", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.findComponent(ResultCountChip).props("count")).toBe(1258);
+  });
+
+  it("leaves the count out of compact relation lists", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.findComponent(ResultCountChip).exists()).toBe(false);
+  });
+});
+
+describe("BaseLibrary.vue select-all in the list header", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [
+      { id: "a", uuid: "ua", teaserMetadata: {}, intialValues: {} },
+      { id: "b", uuid: "ub", teaserMetadata: {}, intialValues: {} },
+    ] as any;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("selects the page", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    wrapper.findComponent(ViewModesList).vm.$emit("togglePageSelection", true);
+
+    expect(bulkMocks.enqueue).toHaveBeenCalledTimes(2);
+  });
+
+  it("clears the page", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+
+    wrapper.findComponent(ViewModesList).vm.$emit("togglePageSelection", false);
+
+    expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "ua");
+    expect(bulkMocks.dequeue).toHaveBeenCalledWith(undefined, "b");
+  });
+
+  it("tells the rows to re-read their checkboxes after clearing the page", async () => {
+    wrapper = getWrapper();
+    await flushPromises();
+    bulkMocks.trigger.mockClear();
+
+    wrapper.findComponent(ViewModesList).vm.$emit("togglePageSelection", false);
+
+    expect(bulkMocks.trigger).toHaveBeenCalledWith(undefined);
+  });
+});
+
+describe("BaseLibrary.vue create action placement", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const createInPageHeader = (props: Record<string, unknown>) =>
+    getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      enableBulkOperations: true,
+      ...props,
+    })
+      .findComponent({ name: "BulkOperationsActionsBar" })
+      .props("createInPageHeader");
+
+  it("sends the page's own library's create action to the page header", () => {
+    expect(createInPageHeader({})).toBe(true);
+  });
+
+  it("keeps a relation list's create in its own bar", () => {
+    expect(createInPageHeader({ parentEntityIdentifiers: ["parent"] })).toBe(
+      false,
+    );
+  });
+});
+
+describe("BaseLibrary.vue filter rail width", () => {
+  it("gives the filter rail 30% (250px felt too narrow; user, 2026-10-19)", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).toContain(
+      "grid-cols-[30%_70%]",
+    );
+    wrapper.unmount();
+  });
+});
+
+describe("BaseLibrary.vue inside a detail panel", () => {
+  it("draws no results band or border of its own (never a box inside a panel)", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary, enableBulkOperations: true },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).not.toContain(
+      "bg-surface-panel-header",
+    );
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).not.toContain(
+      "border-border-panel",
+    );
+    expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
+    expect(
+      wrapper.findComponent({ name: "BulkOperationsActionsBar" }).classes(),
+    ).not.toContain("px-(--list-band-pad)");
+    wrapper.unmount();
+  });
+});
+
+describe("BaseLibrary.vue add pills in a detail panel", () => {
+  it("gives the list header a spot for the add pills and points the bar at it", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary, enableBulkOperations: true },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    const spot = wrapper.find('[data-cy="list-header"] [data-list-actions]');
+    expect(spot.exists()).toBe(true);
+    expect(
+      wrapper.findComponent({ name: "BulkOperationsActionsBar" }).props("listHeaderTarget"),
+    ).toBe(`[data-list-actions="${spot.attributes("data-list-actions")}"]`);
+    wrapper.unmount();
+  });
+
+  it("leaves the actions in the bar on the list's own page", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      enableBulkOperations: true,
+    });
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "BulkOperationsActionsBar" }).props("listHeaderTarget"),
+    ).toBeUndefined();
+    wrapper.unmount();
   });
 });

@@ -1,117 +1,81 @@
 <template>
-  <div v-if="breadCrumbRoutesExist">
-    <div
-      class="flex flex-wrap gap-2 min-[900px]:h-10 min-[900px]:flex-nowrap relative z-notification"
+  <!-- Catalogue Breadcrumb: grey capsules joined by a light "›". -->
+  <nav
+    v-if="breadCrumbRoutesExist"
+    :aria-label="t('navigation.breadcrumb')"
+    class="relative z-notification flex min-w-0 flex-wrap items-center gap-2"
+  >
+    <template v-if="breadcrumbRoutes.length > 1">
+      <button
+        type="button"
+        data-cy="breadcrumb-history"
+        :aria-label="t('navigation.breadcrumb-history')"
+        :aria-expanded="showHistory ? 'true' : 'false'"
+        class="flex items-center gap-1 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:text-accent-ink"
+        @click="toggleList()"
+      >
+        <unicon height="16" :name="Unicons.EllipsisH.name" aria-hidden="true" />
+        {{ breadcrumbRoutes.length - 1 }}
+      </button>
+      <span class="text-border-dashed" aria-hidden="true">›</span>
+    </template>
+    <template v-if="previousRoute?.title">
+      <a
+        :href="crumbHref(previousRoute)"
+        class="max-w-[40vw] truncate rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:text-accent-ink hover:no-underline"
+        :title="resolveTitle(previousRoute.title)"
+        @click="onCrumbClick($event, previousRoute)"
+      >
+        {{ resolveTitle(previousRoute.title) }}
+      </a>
+      <span class="text-border-dashed" aria-hidden="true">›</span>
+    </template>
+    <span
+      aria-current="page"
+      class="flex min-w-0 items-center gap-1.5 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body"
     >
-      <div
-        :class="[
-          'flex justify-center items-center bg-accent-wash h-full',
-          { 'rounded-t-pill rounded-br-pill': showHistory },
-          { 'rounded-pill': !showHistory },
-        ]"
+      <MetadataFormatter v-if="typePillLabel" v-bind="typePillLabel" />
+      <!-- Handoff: the current item is never cut off; a long title wraps the row instead. -->
+      <span>{{ currentRouteTitle }}</span>
+    </span>
+    <ul
+      v-if="showHistory"
+      class="absolute left-0 top-full z-notification mt-1 min-w-48 rounded-card border border-border-subtle bg-surface p-1 shadow-overlay"
+    >
+      <li
+        v-for="breadcrumbRoute in [...breadcrumbRoutes].slice(0, -1).reverse()"
+        :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
       >
-        <div
-          v-if="breadcrumbRoutes.length > 1"
-          @click="toggleList()"
-          class="flex cursor-pointer"
+        <a
+          :href="crumbHref(breadcrumbRoute)"
+          data-cy="breadcrumb-history-item"
+          class="flex w-full items-center gap-2 rounded-button px-2 py-1 text-table text-text-body hover:bg-accent-wash hover:text-accent-ink hover:no-underline"
+          @click="onCrumbClick($event, breadcrumbRoute)"
         >
-          <unicon height="24" :name="Unicons.EllipsisH.name"></unicon>
-          <p class="ml-1">{{ breadcrumbRoutes.length - 1 }}</p>
-        </div>
-        <unicon
-          v-if="breadcrumbRoutes.length > 1"
-          height="24"
-          :name="Unicons.AngleRight.name"
-        ></unicon>
-        <p
-          v-if="previousRoute?.title"
-          :class="[
-            'px-2 cursor-pointer',
-            { 'max-w-[40vw] truncate': truncatePreviousRouteName },
-          ]"
-          @mouseenter="
-            truncatePreviousRouteName = resolveTitle(
-              previousRoute.title,
-            ).includes(' ')
-          "
-          @mouseleave="truncatePreviousRouteName = true"
-          @click="checkNavigationAvailable(previousRoute)"
-        >
-          {{ resolveTitle(previousRoute?.title) }}
-        </p>
-      </div>
-      <div
-        v-if="previousRoute"
-        class="flex h-full justify-center items-center px-2"
-      >
-        <unicon height="24" :name="Unicons.AngleRight.name" />
-      </div>
-      <div
-        :class="[
-          `flex max-w-[10vw] min-[1200px]:max-w-[20vw] min-[1250px]:max-w-[25vw] min-[1330px]:max-w-[30vw] min-[1400px]:max-w-[33vw] min-[1550px]:max-w-[40vw] min-[1650px]:max-w-[45vw]
-            items-center subtitle text-neutral-black truncate`,
-          { 'max-w-[40vw] truncate': !truncatePreviousRouteName },
-        ]"
-      >
-        <div class="mr-2" v-if="typePillLabel">
-          <MetadataFormatter class="p-2" v-bind="typePillLabel" />
-        </div>
-        {{ currentRouteTitle }}
-      </div>
-    </div>
+          <template v-if="breadcrumbRoute.icon">
+            <unicon
+              v-if="Unicons[breadcrumbRoute.icon]"
+              height="16"
+              :name="Unicons[breadcrumbRoute.icon].name"
+              aria-hidden="true"
+            />
+            <CustomIcon
+              v-else
+              :icon="breadcrumbRoute.icon"
+              :size="16"
+              color="text-body"
+            />
+          </template>
+          {{ resolveTitle(breadcrumbRoute.title) }}
+        </a>
+      </li>
+    </ul>
     <div
       v-if="showHistory"
-      class="absolute bg-accent-wash rounded-b-md z-notification"
-    >
-      <ul>
-        <li
-          v-show="showHistory"
-          v-for="breadcrumbRoute in [...breadcrumbRoutes]
-            .slice(0, -1)
-            .reverse()"
-          :key="breadcrumbRoute.title || breadcrumbRoute.overviewPage"
-          @click="checkNavigationAvailable(breadcrumbRoute)"
-        >
-          <div class="flex flex-col items-end w-full">
-            <div class="px-4">
-              <unicon
-                v-if="index !== 0"
-                height="24"
-                :name="Unicons.AngleUp.name"
-              ></unicon>
-            </div>
-            <div
-              :class="[
-                'cursor-pointer hover:bg-background-normal w-full flex px-4',
-                { 'justify-between': breadcrumbRoute.icon },
-                { 'justify-end': !breadcrumbRoute.icon },
-              ]"
-            >
-              <div class="mr-2" v-if="breadcrumbRoute.icon">
-                <unicon
-                  v-if="Unicons[breadcrumbRoute.icon]"
-                  height="24"
-                  :name="Unicons[breadcrumbRoute.icon].name"
-                ></unicon>
-                <CustomIcon
-                  v-else
-                  :icon="breadcrumbRoute.icon"
-                  :size="24"
-                  color="text-body"
-                />
-              </div>
-              <p>{{ resolveTitle(breadcrumbRoute.title) }}</p>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
-    <div
-      v-if="showHistory"
-      class="absolute top-0 left-0 h-screen w-screen z-backdrop"
+      class="fixed inset-0 z-backdrop"
       @click="showHistory = false"
     ></div>
-  </div>
+  </nav>
 </template>
 
 <script lang="ts" setup>
@@ -150,7 +114,6 @@ const resolveTitle = (
 };
 
 const showHistory = ref<boolean>(false);
-const truncatePreviousRouteName = ref<boolean>(true);
 const breadCrumbRoutesExist = computed(
   () => breadcrumbRoutes.value.length > 0 || !!currentRouteTitle.value,
 );
@@ -216,32 +179,37 @@ const checkNavigationAvailable = (route: any) => {
   else navigateToEntity(route);
 };
 
+const crumbTarget = (route: any) => {
+  const type = Array.isArray(route.type) ? route.type[0] : route.type;
+  if (route.id && route.routeName)
+    return { name: route.routeName, params: { id: route.id, type } };
+  if (route.id) return { params: { id: route.id, type } };
+  if (route.overviewPage) return { name: route.overviewPage };
+  return { name: "Home" };
+};
+
+const crumbHref = (route: any) => router.resolve(crumbTarget(route)).href;
+
+// A modified or non-primary click opens the link elsewhere; the browser handles it.
+const onCrumbClick = (event: MouseEvent, route: any) => {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (event.button !== 0) return;
+  event.preventDefault();
+  checkNavigationAvailable(route);
+};
+
 const navigateToEntity = (route: any) => {
-  if (route.id && route.routeName) {
-    router.push({
-      name: route.routeName,
-      params: {
-        id: route.id,
-        type: Array.isArray(route.type) ? route.type[0] : route.type,
-      },
-    });
-  } else if (route.id) {
-    router.replace({
-      params: {
-        id: route.id,
-        type: Array.isArray(route.type) ? route.type[0] : route.type,
-      },
-    });
-  } else if (route.overviewPage) {
+  const target = crumbTarget(route);
+  if (route.id && !route.routeName) router.replace(target);
+  else if (route.overviewPage && !route.id) {
     // A leave prompt can cancel the navigation: keep the path until it lands.
-    router.push({ name: route.overviewPage }).then((failure) => {
+    router.push(target).then((failure) => {
       if (!failure)
         clearBreadcrumbPathAndAddOverviewPage(
           route.title ?? route.overviewPage,
         );
     });
-  } else router.push({ name: "Home" });
+  } else router.push(target);
 };
 </script>
 
-<style scoped></style>

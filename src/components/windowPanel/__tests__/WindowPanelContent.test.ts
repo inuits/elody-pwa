@@ -59,3 +59,38 @@ describe("WindowPanelContent — a row of a repeatable panel", () => {
     ).toBe("inline-edit.remove-row");
   });
 });
+
+describe("WindowPanelContent — compact preview", () => {
+  const mountFields = (compact: boolean) =>
+    shallowMount(WindowPanelContent, {
+      props: {
+        panelType: "metadata",
+        relationArray: [],
+        metadatafields: [{ key: "type", __typename: "MetadataField" }],
+        canBeMultipleColumns: true,
+        formId: "E-1",
+        isEdit: false,
+        editState: {},
+        identifiers: [],
+        parentIsListItem: false,
+      } as any,
+      global: {
+        provide: { config: { customization: {} }, CompactPreview: compact },
+      },
+    });
+
+  it("lays its fields out as one label/value grid", () => {
+    const grid = mountFields(true).find('[data-cy="preview-field-grid"]');
+
+    expect(grid.exists()).toBe(true);
+    expect(grid.classes()).not.toContain(
+      "grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))]",
+    );
+  });
+
+  it("keeps the multi-column field layout outside a preview", () => {
+    expect(
+      mountFields(false).find('[data-cy="preview-field-grid"]').exists(),
+    ).toBe(false);
+  });
+});

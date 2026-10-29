@@ -41,7 +41,6 @@ describe("LibraryBar.vue Sort Logic", () => {
   let wrapper: any;
   const setSortOrderMock = vi.fn();
   const setSortKeyMock = vi.fn();
-  const setLimitMock = vi.fn();
 
   const getStateForRouteMock = vi.fn();
 
@@ -57,8 +56,6 @@ describe("LibraryBar.vue Sort Logic", () => {
       props: {
         setSortOrder: setSortOrderMock,
         setSortKey: setSortKeyMock,
-        setLimit: setLimitMock,
-        selectedPaginationLimitOption: 20,
       },
       global: {
         stubs: {
@@ -190,6 +187,50 @@ describe("LibraryBar.vue Sort Logic", () => {
     expect(setSortOrderMock).toHaveBeenCalledWith(false, false);
   });
 
+  it("flips the sort direction from one toggle button", async () => {
+    wrapper = createWrapper();
+    (apolloClient.query as any).mockResolvedValue({
+      data: {
+        EntityTypeSortOptions: {
+          sortOptions: { isAsc: "desc", options: [{ label: "ID", value: "id" }] },
+        },
+      },
+    });
+    getStateForRouteMock.mockReturnValue({});
+    await wrapper.emitted("sortOptionsPromise")[0][0]("entity");
+    await flushPromises();
+    setSortOrderMock.mockClear();
+    const toggle = wrapper.find('button[data-cy="sort-toggle"]');
+
+    expect(toggle.text()).toBe("library.desc");
+    await toggle.trigger("click");
+    await flushPromises();
+
+    expect(setSortOrderMock).toHaveBeenCalledWith(true, true);
+    expect(wrapper.find('button[data-cy="sort-toggle"]').text()).toBe(
+      "library.asc",
+    );
+  });
+
+  // ui_kits/clients: the sort select is bordered like the button beside it.
+  it("draws the sort select bordered, as a select standing on its own", async () => {
+    wrapper = createWrapper();
+    (apolloClient.query as any).mockResolvedValue({
+      data: {
+        EntityTypeSortOptions: {
+          sortOptions: { isAsc: "desc", options: [{ label: "ID", value: "id" }] },
+        },
+      },
+    });
+    getStateForRouteMock.mockReturnValue({});
+    await wrapper.emitted("sortOptionsPromise")[0][0]("entity");
+    await flushPromises();
+
+    expect(
+      wrapper.findComponent({ name: "AdvancedDropdown" }).props("styleType"),
+    ).toBe("defaultWithBorder");
+  });
+
   it("triggers watcher and calls setSortOrder(val, true) when sort direction changes", async () => {
     wrapper = createWrapper();
 
@@ -219,7 +260,6 @@ describe("LibraryBar.vue Sort Logic", () => {
 describe("LibraryBar.vue Simple Search", () => {
   const setSortOrderMock = vi.fn();
   const setSortKeyMock = vi.fn();
-  const setLimitMock = vi.fn();
   const setSimpleSearchMock = vi.fn();
 
   beforeEach(() => {
@@ -229,7 +269,6 @@ describe("LibraryBar.vue Simple Search", () => {
     });
     (apolloClient.query as any).mockResolvedValue({
       data: {
-        PaginationLimitOptions: { options: [{ label: "20", value: 20 }] },
         EntityTypeSortOptions: { sortOptions: { isAsc: "asc", options: [] } },
       },
     });
@@ -248,8 +287,6 @@ describe("LibraryBar.vue Simple Search", () => {
       props: {
         setSortOrder: setSortOrderMock,
         setSortKey: setSortKeyMock,
-        setLimit: setLimitMock,
-        selectedPaginationLimitOption: 20,
         simpleSearchValue: "",
         setSimpleSearch: setSimpleSearchMock,
         ...extraProps,
@@ -261,14 +298,17 @@ describe("LibraryBar.vue Simple Search", () => {
       },
     });
 
-    // the whole template is gated behind both promises resolving, same as
-    // the "Sort Logic" tests above
-    await wrapper.emitted("paginationLimitOptionsPromise")[0][0]("entity");
+    // the whole template is gated behind the sort options resolving
     await wrapper.emitted("sortOptionsPromise")[0][0]("entity");
     await wrapper.vm.$nextTick();
 
     return wrapper;
   };
+
+  it("leaves the page size to the list header", async () => {
+    const wrapper = await mountWithRouteMeta({});
+    expect(wrapper.emitted("paginationLimitOptionsPromise")).toBeUndefined();
+  });
 
   it("does not render the search box when the route has no simpleSearch keys configured", async () => {
     const wrapper = await mountWithRouteMeta({
@@ -369,8 +409,6 @@ describe("LibraryBar.vue Group By", () => {
       props: {
         setSortOrder: vi.fn(),
         setSortKey: vi.fn(),
-        setLimit: vi.fn(),
-        selectedPaginationLimitOption: 20,
         showGroupBy: true,
         setGroupBy,
       },

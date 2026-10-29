@@ -5,7 +5,7 @@
       :label="filterLabel"
       :tooltip="filter.advancedFilter.tooltip"
       :tooltip-text="tooltipText"
-      :icon="headerIcon"
+      :open="isOpen"
       @toggle="toggleOpen"
     />
 
@@ -14,6 +14,8 @@
       :matchers="filterMatchers"
       :selected-matcher="selectedMatcher"
       :default-label="matcherDefaultLabel"
+      :stacked="!!matcherComponentRef?.rendersList"
+      :active="filter.isActive"
       @update:selected-matcher="updateSelectedMatcher"
       @reset="resetFilter"
     >
@@ -43,7 +45,6 @@ import {
   BulkOperationsContextEnum,
 } from "@/composables/useBulkOperations";
 import { computed, markRaw, onBeforeMount, ref, watch } from "vue";
-import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { dequal as isEqual } from "dequal";
 import FiltersListItemPanel from "@/components/filters/FiltersListItemPanel.vue";
@@ -80,9 +81,6 @@ const matcherComponentRef = ref();
 const filterLabel = computed(() => t(props.filter.advancedFilter.label || ""));
 const tooltipText = computed(() =>
   t(`tooltip.advancedFilterTypes.${props.filter.advancedFilter.type}`),
-);
-const headerIcon = computed(() =>
-  isOpen.value ? Unicons.Minus.name : Unicons.Plus.name,
 );
 const filterMatchers = computed(() => {
   const { allowedMatchers, matcherLabels } = props.filter.advancedFilter;

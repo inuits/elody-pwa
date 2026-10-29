@@ -1,58 +1,25 @@
 <template>
-  <!-- selection-action-bar.md: one bordered surface; the border firms up once
-       something is selected. -->
+  <!-- Sits in the list's results band (templates/elody-list-screen), which
+       draws the surface. -->
   <div
     v-if="bulkOperationsPromiseIsResolved"
+    v-show="hasContent"
     role="toolbar"
     :aria-label="t('bulk-operations.selection-toolbar')"
-    class="flex flex-wrap items-center gap-(--selection-bar-gap) p-(--selection-bar-padding) bg-surface border rounded-button text-ui"
-    :class="itemsSelected ? 'border-border-default' : 'border-border-subtle'"
+    class="flex flex-wrap items-center gap-(--selection-bar-gap) text-ui"
   >
-    <!-- The list total; moves to the list header count chip in DS 4. -->
+    <!-- Always mounted, so screen readers announce selection changes. -->
     <span
-      data-cy="selection-bar-total"
-      class="inline-flex items-center p-(--chip-padding) rounded-chip text-chip font-bold bg-chip-neutral-bg text-chip-neutral-text"
-    >
-      <button
-        v-if="canRevealExactCount(totalItemsCount, exactCount)"
-        type="button"
-        class="underline decoration-dotted cursor-pointer disabled:cursor-wait"
-        :disabled="exactCountLoading"
-        :title="$t('bulk-operations.reveal-exact-count')"
-        @click="emit('revealExactCount')"
-      >
-        {{ formatResultCount(totalItemsCount, locale) }}</button
-      ><span v-else>{{
-        formatDisplayCount(totalItemsCount, exactCount, locale)
-      }}</span
-      >&nbsp;{{ $t("bulk-operations.items") }}
-    </span>
-    <SpinnerLoader v-if="exactCountLoading" theme="accent" :dimensions="12" />
-    <BaseTooltip
-      v-else-if="canRevealExactCount(totalItemsCount, exactCount)"
-      position="top-end"
-      :tooltip-offset="8"
-    >
-      <template #activator="{ on, describedBy }">
-        <span
-          v-on="on"
-          :aria-describedby="describedBy"
-          class="flex items-center text-text-light"
-        >
-          <Unicon :name="Unicons.QuestionCircle.name" height="14" />
-        </span>
-      </template>
-      <span>
-        {{ $t("bulk-operations.capped-items-tooltip") }}
-      </span>
-    </BaseTooltip>
-    <!-- Mounted while empty, so screen readers announce the first selection. -->
-    <span role="status" class="font-bold">{{
+      role="status"
+      :class="itemsSelected ? 'font-bold' : 'text-text-muted'"
+      >{{
       itemsSelected
         ? t("bulk-operations.selection-count", {
             count: getEnqueuedItemCount(context),
           })
-        : ""
+        : hasBulkOperationsWithItemsSelection && enableSelection
+          ? t("bulk-operations.nothing-selected")
+          : ""
     }}</span>
     <span
       v-if="offPageCount > 0"
@@ -62,8 +29,10 @@
         t("bulk-operations.selected-on-other-pages", { count: offPageCount })
       }}</span
     >
+    <!-- The list header's checkbox selects/clears the page; this clears what
+         sits on other pages too. -->
     <button
-      v-if="itemsSelected"
+      v-if="offPageCount > 0"
       type="button"
       data-cy="selection-bar-link"
       class="text-label text-text-light underline cursor-pointer"
@@ -71,24 +40,7 @@
     >
       {{ t("bulk-operations.clear-selection") }}
     </button>
-    <button
-      v-if="
-        useExtendedBulkOperations &&
-        hasBulkOperationsWithItemsSelection &&
-        enableSelection
-      "
-      type="button"
-      data-cy="selection-bar-link"
-      class="text-label text-text-light underline cursor-pointer"
-      @click="() => emit('selectPage')"
-    >
-      {{ $t("bulk-operations.select-page") }}
-    </button>
-    <div class="flex items-center gap-(--selection-bar-gap) ml-auto">
-      <div v-if="!excludePagination && showPagination" class="flex">
-        <BasePaginationSkeleton v-if="isLoading" />
-        <BasePaginationNew v-else />
-      </div>
+    <div class="flex items-center gap-(--selection-bar-gap)">
       <div
         v-if="showButton && useExtendedBulkOperations"
         class="flex justify-end w-fit"
@@ -108,7 +60,8 @@
             v-if="bulkOperations !== undefined && auth.isAuthenticated.value"
             v-model="selectedBulkOperation"
             @update:modelValue="handleSelectedBulkOperation"
-            :options="bulkOperations"
+            :options="barOperations"
+            :flat="true"
             :items-selected="itemsSelected"
             :selected-items="getEnqueuedItems(context)"
             :entity-type="entityType"
@@ -119,22 +72,60 @@
         </div>
       </div>
     </div>
+    <!-- ui_kits/clients: the page's create action is a pill next to the page
+         title (TheHeader), not part of the selection bar. -->
+    <Teleport
+      v-if="createInPageHeader && auth.isAuthenticated.value"
+      defer
+      to="#page-header-create"
+    >
+      <BaseButtonNew
+        v-for="option in createOperations"
+        :key="option.value"
+        data-cy="page-header-create"
+        class="!w-auto !rounded-pill"
+        button-style="primary"
+        button-size="sm"
+        :icon="option.icon ?? DamsIcons.PlusCircle"
+        :label="t(option.label, [entityTypeLabel])"
+        :force-show-label="true"
+        @click="
+          selectedBulkOperation = option;
+          handleSelectedBulkOperation(option);
+        "
+      />
+    </Teleport>
+    <!-- ui_kits/clients: in a detail panel, adding (create / add existing)
+         is a small pill in the list's own header, beside the count. -->
+    <Teleport
+      v-if="listHeaderTarget && auth.isAuthenticated.value"
+      defer
+      :to="listHeaderTarget"
+    >
+      <BaseButtonNew
+        v-for="option in listHeaderOperations"
+        :key="option.value"
+        data-cy="list-header-add"
+        class="!w-auto !rounded-pill"
+        :button-style="option.primary ? 'primary' : 'secondary'"
+        button-size="sm"
+        :icon="option.icon ?? DamsIcons.PlusCircle"
+        :label="t(option.label, [entityTypeLabel])"
+        :force-show-label="true"
+        @click="
+          selectedBulkOperation = option;
+          handleSelectedBulkOperation(option);
+        "
+      />
+    </Teleport>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  canRevealExactCount,
-  formatDisplayCount,
-  formatResultCount,
-} from "@/composables/useResultCount";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
-import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BasePaginationNew from "@/components/base/BasePagination.vue";
-import BasePaginationSkeleton from "@/components/base/skeletons/BasePaginationSkeleton.vue";
 import {
   type Context,
   type InBulkProcessableItem,
@@ -144,15 +135,17 @@ import {
   type BulkOperationsActionsBarEmits,
   type BulkOperationsActionsBarProps,
 } from "@/composables/useBulkOperationsActionsBar";
-import { DamsIcons, type Entitytyping } from "@/generated-types/queries";
+import {
+  BulkOperationTypes,
+  DamsIcons,
+  type DropdownOption,
+  type Entitytyping,
+} from "@/generated-types/queries";
 import { auth } from "@/main";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
-import { Unicons } from "@/types";
 
 const props = withDefaults(
   defineProps<{
     context: Context;
-    totalItemsCount: number;
     useExtendedBulkOperations: boolean;
     showButton?: boolean;
     confirmSelectionButton?: boolean;
@@ -167,15 +160,14 @@ const props = withDefaults(
     excludePagination?: boolean;
     showPagination?: boolean;
     isLoading?: boolean;
-    exactCount?: number | null;
-    exactCountLoading?: boolean;
+    // The page's own library: its create action goes to the page header.
+    createInPageHeader?: boolean;
+    // Inside a detail panel: where the list header's add pills go.
+    listHeaderTarget?: string;
     // Ids on the visible page, to tell selected items on other pages apart.
     pageItemIds?: string[];
   }>(),
   {
-    totalItemsCount: 0,
-    exactCount: null,
-    exactCountLoading: false,
     showButton: true,
     confirmSelectionButton: false,
     customBulkOperations: undefined,
@@ -189,14 +181,12 @@ const props = withDefaults(
   },
 );
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 
 const emit = defineEmits<{
-  (event: "selectPage"): void;
   (event: "selectAll"): void;
-  (event: "revealExactCount"): void;
   (event: "confirmSelection", selectedItems: InBulkProcessableItem[]): void;
   (
     event: "setBulkOperationsAvailable",
@@ -221,8 +211,8 @@ const {
   bulkOperations,
   selectedBulkOperation,
   bulkOperationsPromiseIsResolved,
-  hasBulkOperationsWithItemsSelection,
   itemsSelected,
+  hasBulkOperationsWithItemsSelection,
   subDropdownOptions,
   clearSubDropdownOptions,
   handleSelectedBulkOperation,
@@ -233,6 +223,37 @@ const {
   props as BulkOperationsActionsBarProps,
   emit as BulkOperationsActionsBarEmits,
   parentEntity,
+);
+
+// As ActionMenuGroup: labels like "Add new {0}" take the entity type.
+const entityTypeLabel = computed(() =>
+  t(`entity-translations.${props.entityType?.toLowerCase()}`, 2),
+);
+const isCreate = (option: DropdownOption) =>
+  option.value === BulkOperationTypes.CreateEntity;
+const createOperations = computed<DropdownOption[]>(() =>
+  props.createInPageHeader ? (bulkOperations.value ?? []).filter(isCreate) : [],
+);
+const isAdd = (option: DropdownOption) =>
+  isCreate(option) || option.value === BulkOperationTypes.AddRelation;
+const listHeaderOperations = computed<DropdownOption[]>(() =>
+  props.listHeaderTarget ? (bulkOperations.value ?? []).filter(isAdd) : [],
+);
+const barOperations = computed<DropdownOption[] | undefined>(() => {
+  if (props.createInPageHeader)
+    return bulkOperations.value?.filter((option) => !isCreate(option));
+  if (props.listHeaderTarget)
+    return bulkOperations.value?.filter((option) => !isAdd(option));
+  return bulkOperations.value;
+});
+
+// Lists without bulk actions would otherwise show an empty bordered bar.
+const hasContent = computed<boolean>(
+  () =>
+    itemsSelected.value ||
+    (props.useExtendedBulkOperations &&
+      props.showButton &&
+      (props.confirmSelectionButton || (barOperations.value?.length ?? 0) > 0)),
 );
 
 const offPageCount = computed<number>(() =>

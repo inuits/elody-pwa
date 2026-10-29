@@ -28,17 +28,138 @@ describe("FiltersListItemPanel", () => {
     expect(panel().classes()).toContain("gap-1.5");
   });
 
+  it("sits on white, without a tinted background (aicap mockup)", () => {
+    expect(panel().classes()).not.toContain("bg-surface-group-form");
+  });
+
+  describe("clearing one filter (handoff: Wis filter link)", () => {
+    const withActive = (active: boolean) =>
+      shallowMount(FiltersListItemPanel, {
+        props: {
+          matchers: [],
+          selectedMatcher: "ContainsMatcher",
+          defaultLabel: "",
+          active,
+        },
+      });
+
+    it("offers a Clear filter link only when the filter has a value", () => {
+      expect(withActive(false).find('[data-cy="filter-clear-link"]').exists()).toBe(false);
+      expect(withActive(true).find('[data-cy="filter-clear-link"]').text()).toBe(
+        "filters.clear-filter",
+      );
+    });
+
+    it("styles it as a small label-ink link, not a commit button", () => {
+      const link = withActive(true).find('[data-cy="filter-clear-link"]');
+      expect(link.element.tagName).toBe("BUTTON");
+      expect(link.classes()).toEqual(
+        expect.arrayContaining(["text-label", "text-text-light", "underline"]),
+      );
+      expect(withActive(true).findComponent({ name: "BaseButtonNew" }).exists()).toBe(false);
+    });
+
+    it("clears the filter", async () => {
+      const wrapper = withActive(true);
+      await wrapper.find('[data-cy="filter-clear-link"]').trigger("click");
+      expect(wrapper.emitted("reset")).toHaveLength(1);
+    });
+  });
+
   it("closes the section with a faint bottom border", () => {
     expect(panel().classes()).toEqual(
       expect.arrayContaining(["border-b", "border-border-faint"]),
     );
   });
 
-  it("names its icon-only clear button", () => {
-    expect(
-      panel().findComponent({ name: "BaseButtonNew" }).attributes("aria-label"),
-    ).toBe(
-      "filters.clear-filter",
-    );
+  describe("text filter form (catalogue TextFilter)", () => {
+    const two = [
+      { label: "contains", value: "ContainsMatcher" },
+      { label: "exact", value: "ExactInputMatcher" },
+    ];
+    const mountWith = (matchers: unknown[], selectedMatcher: string) =>
+      shallowMount(FiltersListItemPanel, {
+        props: { matchers, selectedMatcher, defaultLabel: "" },
+        slots: { default: '<input data-cy="matcher-input" />' },
+      });
+
+    it("puts the mode inside the input box as a prefix", () => {
+      const box = mountWith(two, "ContainsMatcher").find(
+        '[data-cy="filter-input-box"]',
+      );
+      expect(box.classes()).toEqual(
+        expect.arrayContaining(["border", "border-border-default", "rounded-input"]),
+      );
+      expect(box.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(true);
+      expect(box.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
+    it("draws the mode as a small grey prefix segment in body ink (mockup)", () => {
+      const prefix = mountWith(two, "ContainsMatcher")
+        .find('[data-cy="filter-input-box"]')
+        .findComponent({ name: "AdvancedDropdown" });
+      expect(prefix.classes()).toEqual(
+        expect.arrayContaining([
+          "[--vs-font-size:var(--text-hint)]",
+          "[--vs-text-color:var(--color-text-body)]",
+          "bg-surface-muted",
+        ]),
+      );
+    });
+
+    it("rings the whole box on focus instead of the clipped inner input", () => {
+      const box = mountWith(two, "ContainsMatcher").find('[data-cy="filter-input-box"]');
+      expect(box.classes()).toEqual(
+        expect.arrayContaining([
+          "has-[input:focus-visible]:outline-(length:--focus-ring-width)",
+          "has-[input:focus-visible]:outline-(color:--color-focus-ring)",
+          "[&_input:not([type=checkbox])]:!outline-none",
+        ]),
+      );
+    });
+
+    it("sets the typed value at the catalogue's table size", () => {
+      expect(
+        mountWith(two, "ContainsMatcher").find('[data-cy="filter-input-box"]').classes(),
+      ).toContain("[&_input:not([type=checkbox])]:!text-table");
+    });
+
+    it("has no mode when the filter offers a single matcher", () => {
+      const wrapper = mountWith([two[0]], "ContainsMatcher");
+      expect(wrapper.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(
+        false,
+      );
+      expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
+    it("stacks the mode above a matcher that renders a checkbox list", () => {
+      const wrapper = shallowMount(FiltersListItemPanel, {
+        props: { matchers: two, selectedMatcher: "ExactAutoCompleteMatcher", defaultLabel: "", stacked: true },
+        slots: { default: '<input type="checkbox" data-cy="matcher-input" />' },
+      });
+      expect(wrapper.find('[data-cy="filter-input-box"]').exists()).toBe(false);
+      expect(wrapper.find('[data-cy="matcher-input"]').exists()).toBe(true);
+    });
+
+    it("gives a stacked list the full panel width under the mode", () => {
+      const wrapper = shallowMount(FiltersListItemPanel, {
+        props: { matchers: two, selectedMatcher: "ExactAutoCompleteMatcher", defaultLabel: "", stacked: true },
+        slots: { default: '<input type="checkbox" data-cy="matcher-input" />' },
+      });
+      expect(
+        wrapper.find('[data-cy="matcher-input"]').element.parentElement!.className,
+      ).toContain("row-start-2");
+    });
+
+    it("stacks the mode above matchers with two fields or a slider", () => {
+      const wrapper = mountWith(
+        [...two, { label: "between", value: "InBetweenMatcher" }],
+        "InBetweenMatcher",
+      );
+      expect(wrapper.find('[data-cy="filter-input-box"]').exists()).toBe(false);
+      expect(wrapper.findComponent({ name: "AdvancedDropdown" }).exists()).toBe(
+        true,
+      );
+    });
   });
 });

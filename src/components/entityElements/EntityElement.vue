@@ -52,7 +52,6 @@
         :open-preview-by-default="element.openPreviewByDefault ?? undefined"
         :actions-on-result="element.actionsOnResult"
         :add-entities-to-forms="element.addEntitiesToForms"
-        @close-preview-component="emit('closePreviewComponent')"
         @toggle-element-collapse="
           (entityId, elementLabel) =>
             emit('toggleElementCollapse', entityId, elementLabel)
@@ -193,7 +192,6 @@ const props = withDefaults(
   },
 );
 const emit = defineEmits<{
-  (event: "closePreviewComponent"): void;
   (event: "resizeColumn", toggled: boolean): void;
   (
     event: "toggleElementCollapse",

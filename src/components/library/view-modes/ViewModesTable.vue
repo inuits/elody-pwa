@@ -62,7 +62,7 @@
             v-if="entity"
             :is="entity.componentTag"
             :to="entity.componentPath"
-            class="list-item-table"
+            class="list-item-table text-inherit hover:text-inherit hover:no-underline"
             @click="
               () => {
                 if (actionOnClick === ActionOnClick.OpenInModal)
@@ -96,6 +96,7 @@
               :refetch-entities="refetchEntities"
               :preview-component-enabled="previewComponentEnabled"
               :preview-component-current-active="entity.isPreviewActive"
+              :preview-open="entity.isPreviewOpen"
               :preview-component-feature-enabled="previewComponent !== undefined"
               :preview-component-list-items-coverage="
                 previewComponent?.listItemsCoverage
@@ -130,7 +131,7 @@
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto bg-background-light rounded-lg"
+        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -144,6 +145,7 @@
           :relation-type="relationType"
           :parent-entity-type="parentEntityType"
           :refetch-entities="refetchEntities"
+          :detail-path="previewDetailPath"
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
@@ -249,6 +251,7 @@ const {
   closePreviewComponent,
   togglePreviewForListItem,
   isPreviewComponentEnabledForListItem,
+  isPreviewOpenForListItem,
 } = usePreviewComponent(props, refEntities);
 
 const {
@@ -265,6 +268,15 @@ const {
   openPreviewComponent,
   togglePreviewForListItem,
 );
+
+// "Open detail page" in the preview header, for lists that navigate.
+const previewDetailPath = computed(() => {
+  const entity = refEntities.value.find(
+    (entity) => entity.id === previewForEntity.value,
+  );
+  if (!entity || props.actionOnClick !== ActionOnClick.Navigate) return;
+  return getLinkSettings(entity, props.listItemRouteName, true).path;
+});
 
 const { seenTracking } = useEntityPageConfig();
 const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
@@ -356,14 +368,10 @@ const processedEntities = computed(() => {
 
   return refEntities.value.map((entity) => {
     const linkSettings = getLinkSettings(entity, props.listItemRouteName);
-    const forcedLinkSettings = getLinkSettings(
-      entity,
-      props.listItemRouteName,
-      true,
-    );
 
     const relation = findRelation(entity.id, rType as string, parentId);
     const isPreviewActive = isPreviewComponentEnabledForListItem(entity.id);
+    const isPreviewOpen = isPreviewOpenForListItem(entity.id);
     const isDisabled = isEntityDisabled(entity);
     const isSeen = isEntitySeen(entity.id);
     const isNew = isEntityNew(entity.id, entity.intialValues);
@@ -382,6 +390,7 @@ const processedEntities = computed(() => {
       entity.relationValues,
       relation,
       isPreviewActive,
+      isPreviewOpen,
       isDisabled,
       isSeen,
       isNew,
@@ -396,7 +405,6 @@ const processedEntities = computed(() => {
       type: entity.type,
       componentTag: linkSettings.tag,
       componentPath: linkSettings.path,
-      forcedNavigationPath: forcedLinkSettings.path,
       buttons,
       entityTypename: getMappedSlug(entity),
       teaserMetadata: formattedMetadata,
@@ -415,6 +423,7 @@ const processedEntities = computed(() => {
       isNew,
       relation,
       isPreviewActive,
+      isPreviewOpen,
       memoKey,
     };
   });
@@ -478,17 +487,23 @@ watch(
   }
 }
 
-@container preview (min-width: 450px) {
+/* A split nested in a preview: same tiers, against its own container */
+@container preview (min-width: 500px) {
   .responsive-grid {
     grid-template-columns: 40% 60%;
   }
 }
-@container preview (min-width: 550px) {
+@container preview (min-width: 630px) {
   .responsive-grid {
     grid-template-columns: 35% 65%;
   }
 }
-@container preview (min-width: 755px) {
+@container preview (min-width: 830px) {
+  .responsive-grid {
+    grid-template-columns: 30% 70%;
+  }
+}
+@container preview (min-width: 1024px) {
   .responsive-grid {
     grid-template-columns: 25% 75%;
   }

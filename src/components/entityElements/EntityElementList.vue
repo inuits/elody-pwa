@@ -18,25 +18,13 @@
       :base-library-mode="baseLibraryMode"
       :preview-label="previewLabel"
       :header-style="headerStyle"
-      @close-preview-component="emit('closePreviewComponent')"
       @toggle-element-collapse="
         (entityId, elementLabel) =>
           emit('toggleElementCollapse', entityId, elementLabel)
       "
     >
       <template v-slot:content>
-        <div
-          v-if="!requiresCustomQuery || queryLoaded"
-          :class="[
-            {
-              'mx-1 pb-2 bg-background-normal':
-                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode ===
-                  BaseLibraryModes.BasicBaseLibraryWithBorder ||
-                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
-            },
-          ]"
-        >
+        <div v-if="!requiresCustomQuery || queryLoaded">
           <BaseLibrary
             v-if="type === MediaFileElementTypes.Media"
             class="flex-1"
@@ -212,7 +200,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "closePreviewComponent"): void;
   (
     event: "toggleElementCollapse",
     entityId: string,

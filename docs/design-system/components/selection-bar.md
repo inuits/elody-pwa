@@ -2,35 +2,45 @@
 
 Bulk actions on a list's selection. Implemented by
 `src/components/bulk-operations/BulkOperationsActionsBar.vue` (the bar) and
-`src/components/ActionMenuGroup.vue` (its action row).
+`src/components/ActionMenuGroup.vue` (its action row). The list total is
+not here: it is the list header count chip ([entity list](./entity-list.md)).
 
 ## When to use
 Above every list that supports selection. Not for single-row actions: those
 use the row's split button or "Actions" menu ([menu](./menu.md)).
 
 ## Anatomy
-One surface: `--color-surface`, a 1px border (`--color-border-subtle`,
-`--color-border-default` once something is selected), `--radius-button`,
-`--selection-bar-padding`, `--selection-bar-gap`, `--text-ui`. Items wrap
-when the bar is narrow.
-- Left: the list total as a neutral chip ("1,258 items", with the
-  capped-count reveal; DS 4 moves it to the list header), the bold selection
-  count ("Selection: 2", hidden at 0), a note when selected items sit on
-  other pages ("3 selected on other pages"), and the "Clear selection" and
-  "Select page" links: real buttons in label ink, `--text-label`, underlined.
-- Right, after the pager: the same pattern as a row ([menu](./menu.md)). The first primary
-  (`primary`, or the active `primaryFallback`) is the split button's
-  primary; every other action, further primaries first, is in its menu. No
-  primary: the labelled "Actions ⌄" trigger. One action: a plain button.
-  Never a bare ⋮. Bulk options with `tone: Danger` sort last in the menu, in
-  danger ink.
+A row of its own under the list's results band, inside the results panel
+([entity list](./entity-list.md)): `--list-band-pad` sides, hairline below,
+no surface of its own. `--selection-bar-gap`, `--text-ui`. Items wrap when narrow.
+- Left: the selection count, bold ("Selection: 2"), or muted "Selection:
+  nothing selected" at 0 (`bulk-operations.nothing-selected`) — only when
+  an action acts on a selection; a list without such actions has no
+  checkboxes and no label at all; then the
+  actions right after it (not pushed right). When
+  selected items sit on other pages, a note ("3 selected on other pages")
+  with a "Clear selection" link (label ink, `--text-label`, underlined).
+  Selecting or clearing the page is the list header's checkbox, so there is
+  no "Select page" link.
+- Right (`ActionMenuGroup` `flat`, `ui_kits/clients`): every action as its
+  own secondary sm button, disabled with its reason (tooltip) until it
+  applies, destructive (`tone: Danger`) last in danger ink. Actions that open
+  a sub-menu (`OpenDropdown`) stay behind the labelled "Actions ⌄" trigger.
+  Rows and other places keep the split button.
 - Picker contexts swap the row for the commit-teal "Confirm selection".
+- The page's own list (not a relation list or search) moves its
+  `createEntity` action out of the bar into a primary pill next to the page
+  title (`TheHeader` `#page-header-create`, via `Teleport`), as in
+  `ui_kits/clients`. It fires the same bulk-operation handler.
 
 ## States
+Hidden (`v-show`) when it has nothing to offer: no selection, no "Select
+page", no actions.
+
 | State | Cue |
 |---|---|
 | action unavailable (needs a selection, wrong view mode, selection constraint) | button stays visible, disabled, reason in its tooltip |
-| items selected | count chip shows "n/total", clear link appears |
+| items selected | "Selection: n" appears, clear link appears |
 | selection spans pages | off-page note |
 | permission missing | action not shown at all |
 

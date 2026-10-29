@@ -2,7 +2,7 @@ import { mount, flushPromises } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import PreviewWrapper from "../PreviewWrapper.vue";
 import { ListItemCoverageTypes, PreviewTypes } from "@/generated-types/queries";
-import { apolloClient } from "@/main";
+import { apolloClient, router } from "@/main";
 
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (k: string) => k }) }));
 vi.mock("@/main", () => ({
@@ -46,8 +46,9 @@ const stubs = {
   HistoryDiffPreview: { template: '<div class="history-stub" />' },
   unicon: { template: "<i />", props: ["name", "height"] },
   BaseButtonNew: {
-    template: '<button class="base-button-new-stub">{{ label }}</button>',
-    props: ["label", "buttonSize", "buttonStyle"],
+    template:
+      '<button class="base-button-new-stub" :aria-label="ariaLabel">{{ label }}</button>',
+    props: ["label", "buttonSize", "buttonStyle", "ariaLabel"],
   },
   SpinnerLoader: { template: '<div class="spinner-stub" />' },
 };
@@ -74,12 +75,55 @@ const getWrapper = (
     global: { stubs },
   });
 
-describe("PreviewWrapper close button (header)", () => {
+const mountAttached = (previewComponent: Record<string, unknown>) => {
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  return mount(PreviewWrapper, {
+    attachTo: host,
+    props: {
+      previewComponent: {
+        listItemsCoverage: ListItemCoverageTypes.OneListItem,
+        ...previewComponent,
+      },
+      entityType: "asset",
+      entities: [{ id: "e1" }],
+      entitiesLoading: false,
+      configPerViewMode: {},
+      entityId: "e1",
+      parentIds: [],
+      cropMediafileCoordinatesKey: "",
+    },
+    global: { stubs },
+  });
+};
+
+describe("PreviewWrapper panel shell header", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("does NOT render the header close button for a primary ColumnList preview (it has its own deep close button)", async () => {
+  it("is a complementary region named by the entity title", async () => {
+    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+    const region = wrapper.find('[role="complementary"]');
+    const title = wrapper.find(`#${region.attributes("aria-labelledby")}`);
+
+    expect(title.text()).toBe("Some title");
+  });
+
+  it("uses the configured title over the entity title", async () => {
+    const wrapper = getWrapper({
+      type: PreviewTypes.Map,
+      title: "preview.map-title",
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="preview-title"]').text()).toBe(
+      "preview.map-title",
+    );
+  });
+
+  it("has one close button, also for a primary ColumnList preview", async () => {
     vi.mocked(apolloClient.query).mockResolvedValueOnce({
       data: { PreviewElement: PRIMARY_PREVIEW_ELEMENT },
     });
@@ -88,43 +132,103 @@ describe("PreviewWrapper close button (header)", () => {
       previewQuery: "GetPreviewInArea",
     });
     await flushPromises();
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(false);
+
+    expect(wrapper.findAll(CLOSE_SELECTOR)).toHaveLength(1);
   });
 
-  it("renders the header close button for metadata-only (ColumnList) previews", async () => {
-    const wrapper = getWrapper({
-      type: PreviewTypes.ColumnList,
-      metadataPreviewQuery: "GetMetadataPreviewForInscription",
-    });
-    await flushPromises();
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(true);
-  });
-
-  it("renders the header close button for MediaViewer previews", async () => {
-    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
-    await flushPromises();
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(true);
-  });
-
-  it("renders the header close button for Map previews", async () => {
-    const wrapper = getWrapper({ type: PreviewTypes.Map });
-    await flushPromises();
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(true);
-  });
-
-  it("renders the header close button for History previews", async () => {
-    const wrapper = getWrapper({ type: PreviewTypes.History });
-    await flushPromises();
-    expect(wrapper.find(CLOSE_SELECTOR).exists()).toBe(true);
-  });
-
-  it("emits closePreviewComponent when the header close button is clicked", async () => {
+  it("names the close button", async () => {
     const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
     await flushPromises();
 
-    await wrapper.find(".base-tooltip-stub").trigger("click");
+    expect(wrapper.find(CLOSE_SELECTOR).attributes("aria-label")).toBe(
+      "preview-component.close",
+    );
+  });
+
+  it("emits closePreviewComponent when the close button is clicked", async () => {
+    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    await wrapper.find(CLOSE_SELECTOR).trigger("click");
 
     expect(wrapper.emitted("closePreviewComponent")).toBeTruthy();
+  });
+
+  it("opens the detail page from the header", async () => {
+    const wrapper = getWrapper(
+      { type: PreviewTypes.MediaViewer },
+      { detailPath: "/inscriptions/e1" },
+    );
+    await flushPromises();
+    const open = wrapper.find('[data-cy="preview-open-detail"]');
+
+    expect(open.text()).toBe("preview-component.open-detail-page");
+    await open.trigger("click");
+    expect(router.push).toHaveBeenCalledWith("/inscriptions/e1");
+  });
+
+  it("offers no detail page when the list doesn't navigate", async () => {
+    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="preview-open-detail"]').exists()).toBe(
+      false,
+    );
+  });
+
+  it("leaves focus alone when it opens by default on page load", async () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    const wrapper = mountAttached({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    expect(document.activeElement).toBe(document.body);
+    wrapper.unmount();
+  });
+
+  it("moves focus to its header when a control opens it", async () => {
+    const eye = document.createElement("button");
+    document.body.appendChild(eye);
+    eye.focus();
+    const wrapper = mountAttached({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    expect(document.activeElement).toBe(
+      wrapper.find('[data-cy="preview-header"]').element,
+    );
+    wrapper.unmount();  eye.remove();
+  });
+
+  it("returns focus to the previewed row's eye after the list re-renders", async () => {
+    const eye = document.createElement("button");
+    eye.dataset.previewFor = "e1";
+    document.body.appendChild(eye);
+    const wrapper = mountAttached({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    await wrapper.find(CLOSE_SELECTOR).trigger("click");
+    await flushPromises();
+
+    expect(document.activeElement).toBe(eye);
+    wrapper.unmount();
+    eye.remove();
+  });
+
+  it("closes on Escape and returns focus to the control that opened it", async () => {
+    const opener = document.createElement("button");
+    document.body.appendChild(opener);
+    opener.focus();
+    const wrapper = mountAttached({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    await wrapper
+      .find('[role="complementary"]')
+      .trigger("keydown", { key: "Escape" });
+
+    expect(wrapper.emitted("closePreviewComponent")).toBeTruthy();
+    await flushPromises();
+    expect(document.activeElement).toBe(opener);
+    wrapper.unmount();
+    opener.remove();
   });
 });
 
@@ -297,5 +401,42 @@ describe("PreviewWrapper parent entity provide", () => {
 
     const injected = wrapper.findComponent(injector).vm.parentEntity;
     expect(injected?.value ?? injected).toEqual(entity);
+  });
+});
+
+describe("PreviewWrapper metadata under the preview", () => {
+  it("renders the metadata compact, only that column", async () => {
+    vi.mocked(apolloClient.query).mockResolvedValue({
+      data: { PreviewElement: PRIMARY_PREVIEW_ELEMENT },
+    } as any);
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+          type: PreviewTypes.MediaViewer,
+          metadataPreviewQuery: "GetMetadataPreview",
+        },
+        entityType: "mediafile",
+        entities: [{ id: "e1" }],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: [],
+        cropMediafileCoordinatesKey: "",
+      },
+      global: {
+        stubs: {
+          ...stubs,
+          EntityColumn: {
+            props: { compact: Boolean },
+            template: '<div class="entity-column-stub" :data-compact="compact" />',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    const column = wrapper.find(".metadata-preview .entity-column-stub");
+    expect(column.attributes("data-compact")).toBe("true");
   });
 });

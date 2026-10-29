@@ -1,42 +1,55 @@
 <template>
-  <div v-if="visible" class="flex items-center justify-between w-full">
+  <!-- Catalogue RecordStepper: "‹ 2 of 5 ›", the record's place in the list it was opened from. -->
+  <span
+    v-if="visible"
+    role="group"
+    :aria-label="t('entity-navigation.position-label')"
+    class="inline-flex items-center gap-0.5 rounded-pill bg-surface-muted p-(--stepper-pad)"
+  >
     <BaseTooltip position="bottom-start" :tooltip-offset="4">
       <template #activator="{ on, describedBy }">
         <BaseButtonNew
           v-on="on"
           :aria-describedby="describedBy"
           data-cy="entity-navigation-previous"
-          class="!w-[30px] !h-[30px] !p-0"
-          :icon="DamsIcons.ArrowCircleLeft"
+          class="!size-(--stepper-button-size) !p-0 !rounded-pill"
+          button-style="ghost"
+          :icon="DamsIcons.AngleLeft"
           :aria-label="t('entity-navigation.open-previous')"
-          :icon-height="30"
           :disabled="!previousEntity"
           @click="navigateTo(previousEntity)"
         />
       </template>
       <span>{{ t("entity-navigation.open-previous") }}</span>
     </BaseTooltip>
+    <span
+      data-cy="entity-navigation-position"
+      role="status"
+      class="px-1.5 text-label font-bold text-text-muted whitespace-nowrap"
+    >
+      {{ position ? t("entity-navigation.position", position) : "" }}
+    </span>
     <BaseTooltip position="bottom-end" :tooltip-offset="4">
       <template #activator="{ on, describedBy }">
         <BaseButtonNew
           v-on="on"
           :aria-describedby="describedBy"
           data-cy="entity-navigation-next"
-          class="!w-[30px] !h-[30px] !p-0"
-          :icon="DamsIcons.ArrowCircleRight"
+          class="!size-(--stepper-button-size) !p-0 !rounded-pill"
+          button-style="ghost"
+          :icon="DamsIcons.AngleRight"
           :aria-label="t('entity-navigation.open-next')"
-          :icon-height="30"
           :disabled="!nextEntity"
           @click="navigateTo(nextEntity)"
         />
       </template>
       <span>{{ t("entity-navigation.open-next") }}</span>
     </BaseTooltip>
-  </div>
+  </span>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
@@ -52,6 +65,7 @@ const { showNavigationArrows } = useEntityPageConfig();
 const {
   getPreviousEntity,
   getNextEntity,
+  getPosition,
   getNavigationRoute,
   hasNavigationEntities,
 } = useEntityNavigation();
@@ -70,6 +84,10 @@ const nextEntity = computed<Entity | undefined>(() =>
   isSingleEntityPage.value ? getNextEntity(entityId.value) : undefined,
 );
 
+const position = computed(() =>
+  isSingleEntityPage.value ? getPosition(entityId.value) : undefined,
+);
+
 const ownsRouteState: boolean = inject("OwnsRouteState", true);
 
 const visible = computed(
@@ -84,6 +102,18 @@ const navigateTo = (entity: Entity | undefined) => {
   if (!entity) return;
   router.push(getNavigationRoute(entity));
 };
+
+// Alt + ← / → steps, except where the keys move the caret in a field.
+const onKeydown = (event: KeyboardEvent) => {
+  if (!visible.value || !event.altKey) return;
+  const target = event.target as HTMLElement | null;
+  if (target?.closest?.("input, textarea, select, [contenteditable]")) return;
+  if (event.key === "ArrowLeft") navigateTo(previousEntity.value);
+  else if (event.key === "ArrowRight") navigateTo(nextEntity.value);
+};
+
+onMounted(() => window.addEventListener("keydown", onKeydown));
+onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 </script>
 
 <style scoped></style>

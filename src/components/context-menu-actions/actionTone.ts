@@ -2,7 +2,7 @@ import { ActionTone } from "@/generated-types/queries";
 
 type Toned = { tone?: ActionTone | null };
 
-const isDanger = (action: unknown): boolean =>
+export const isDanger = (action: unknown): boolean =>
   (action as Toned | null)?.tone === ActionTone.Danger;
 
 // The schema flag decides, never the verb: destructive actions sort last.

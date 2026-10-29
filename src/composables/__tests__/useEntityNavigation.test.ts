@@ -115,4 +115,15 @@ describe("useEntityNavigation", () => {
       params: { id: "5", type: "asset" },
     });
   });
+
+  it("gives the current entity's 1-based position in the cached list", () => {
+    const { setNavigationEntities, getPosition } = useEntityNavigation();
+    setNavigationEntities(
+      ref([makeEntity("1"), makeEntity("2"), makeEntity("3")]),
+      "SingleEntity",
+    );
+
+    expect(getPosition("2")).toEqual({ index: 2, total: 3 });
+    expect(getPosition("9")).toBeUndefined();
+  });
 });

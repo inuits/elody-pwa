@@ -19,11 +19,11 @@
     </div>
     <div
       v-else
-      class="@container bg-background-normal grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
+      class="@container grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
       :class="wrapperClasses"
     >
       <div
-        class="z-header top-0 pt-3 pb-2 bg-background-normal"
+        class="z-header top-0 pt-3 pb-2"
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !isFiltersPanelExpanded },
@@ -75,51 +75,88 @@
         />
       </div>
       <div
-        v-if="showCurrentEntityFlow"
+        data-cy="results-panel"
         :class="[
-          'z-header right-0 pb-4 h-fit',
+          'row-span-2 flex flex-col min-h-0',
+          // ui_kits/clients: band, selection row and list in one white panel.
           {
-            'top-0 bg-background-normal pt-4':
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
+            'mt-3 bg-surface border border-border-panel rounded-card':
+              hasResultsBand,
           },
-          {
-            'row-span-2':
-              baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
-          },
-          { 'col-span-2': !enableAdvancedFilters },
-          { 'pl-[1%]': enableAdvancedFilters },
-          { sticky: hasStickyBars },
+          { 'col-span-1': isFiltersPanelExpanded },
+          isFiltersPanelExpanded
+            ? hasResultsBand
+              ? 'ml-[1%]'
+              : 'pl-[1%]'
+            : '',
+          { 'col-span-2': !isFiltersPanelExpanded },
         ]"
       >
+        <!-- List header (templates/elody-list-screen): one accent-light band
+             with count, pager, view modes, page size, sort and the selection
+             bar's actions; it wraps when narrow. -->
         <div
-          v-if="!disableLibraryBar"
-          class="h-fit flex flex-row items-center gap-y-4"
+          v-if="showCurrentEntityFlow"
+          data-cy="list-header"
+          class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
+          :class="[
+            {
+              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card':
+                hasResultsBand,
+            },
+            { 'sticky top-0 z-header': hasStickyBars },
+          ]"
         >
+          <ResultCountChip
+            v-if="
+              !disableLibraryBar &&
+              !isInitialLoading &&
+              (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
+            "
+            :count="totalEntityCount"
+            :exact-count="exactTotalCount"
+            :exact-count-loading="exactCountLoading"
+            @reveal-exact-count="revealExactCount"
+          />
+          <BasePagination
+            v-if="showListPager"
+            data-test="list-pager"
+            class="shrink-0"
+          />
           <div
             v-if="
+              !disableLibraryBar &&
               toggles.length > 1 &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
-            class="mr-2"
           >
             <BaseToggleGroup
               :toggles="toggles"
               @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
             />
           </div>
+          <PageSizeSelect
+            v-if="showPageSize"
+            class="shrink-0"
+            :set-limit="setPaginationLimit"
+            :selected-pagination-limit-option="paginationStore.limit.value"
+            :total="totalEntityCount"
+            @pagination-limit-options-promise="
+              (promise) => (paginationLimitOptionsPromise = promise)
+            "
+          />
           <div
             v-if="
+              !disableLibraryBar &&
               !predefinedEntities &&
               (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
             "
-            class="w-full"
+            class="min-w-0"
           >
             <LibraryBar
               :route="route"
-              :set-limit="setPaginationLimit"
-              :selected-pagination-limit-option="paginationStore.limit.value"
               :set-sort-key="setSortKey"
               :set-sort-order="setSortOrder"
               :show-group-by="displayTable"
@@ -131,37 +168,36 @@
                   ? undefined
                   : handleSetSimpleSearch
               "
-              @pagination-limit-options-promise="
-                (promise) => (paginationLimitOptionsPromise = promise)
-              "
               @sort-options-promise="
                 (promise) => (sortOptionsPromise = promise)
               "
             />
           </div>
+          <!-- In a detail panel the bar's add pills land here. -->
+          <span
+            v-if="insidePanel"
+            :data-list-actions="listActionsId"
+            class="ml-auto flex items-center gap-2"
+          />
         </div>
-      </div>
-      <div
-        :class="[
-          'row-span-2 flex flex-col min-h-0',
-          { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
-          { 'col-span-2': !isFiltersPanelExpanded },
-        ]"
-      >
-        <div
-          v-if="
-            enableBulkOperations &&
-            baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-            showCurrentEntityFlow
-          "
-          :class="[{ sticky: hasStickyBars }, 'pb-2 z-header']"
-        >
           <BulkOperationsActionsBar
+            v-if="
+              enableBulkOperations &&
+              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+            "
+            class="py-2 border-b border-border-subtle"
+            :class="{ 'px-(--list-band-pad)': hasResultsBand }"
+            :list-header-target="
+              insidePanel
+                ? `[data-list-actions=&quot;${listActionsId}&quot;]`
+                : undefined
+            "
+            :create-in-page-header="
+              ownsRouteState &&
+              !isSearchLibrary &&
+              props.parentEntityIdentifiers.length === 0
+            "
             :context="bulkOperationsContext"
-            :total-items-count="totalEntityCount"
-            :exact-count="exactTotalCount"
-            :exact-count-loading="exactCountLoading"
-            @reveal-exact-count="revealExactCount"
             :use-extended-bulk-operations="!isSearchLibrary"
             :show-button="showButton"
             :confirm-selection-button="confirmSelectionButton"
@@ -183,7 +219,6 @@
             @custom-bulk-operations-promise="
               (promise) => (customBulkOperationsPromise = promise)
             "
-            @select-page="bulkSelect"
             @confirm-selection="
               (selection) => emit('confirmSelection', selection)
             "
@@ -209,7 +244,6 @@
             "
             @refetch="async () => await refetchEntities()"
           />
-        </div>
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
           :class="[
@@ -250,13 +284,6 @@
               />
             </div>
           </div>
-        </div>
-        <div
-          v-if="showBasicModePagination"
-          data-test="basic-library-pagination"
-          class="flex justify-center pt-2"
-        >
-          <BasePaginationNew />
         </div>
         <div
           v-if="entities?.length !== 0 || relations?.length !== 0"
@@ -306,6 +333,10 @@
             :entity-type="entityType"
             :show-current-entity-flow="showCurrentEntityFlow"
             @add-refetch-function-to-edit-state="syncEditStateCallbacks"
+            @toggle-page-selection="
+              (selected: boolean) =>
+                selected ? bulkSelect() : clearPageSelection()
+            "
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
             :open-preview-by-default="openPreviewByDefault"
             :primaryMediafileId="primaryMediafileId"
@@ -397,10 +428,12 @@ import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
 import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
-import BasePaginationNew from "@/components/base/BasePagination.vue";
+import BasePagination from "@/components/base/BasePagination.vue";
+import PageSizeSelect from "@/components/library/PageSizeSelect.vue";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
+import ResultCountChip from "@/components/library/ResultCountChip.vue";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
@@ -482,6 +515,7 @@ import {
   onUnmounted,
   provide,
   ref,
+  useId,
   watch,
 } from "vue";
 import { useI18n } from "vue-i18n";
@@ -713,6 +747,8 @@ const wrapperClasses = computed(() => {
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
+  // Page background only on the list's own page; inside a panel it's white.
+  if (!insidePanel) classes.push("bg-background-normal");
 
   return classes;
 });
@@ -825,8 +861,11 @@ let paginationLimitOptionsPromise: (entityType: Entitytyping) => Promise<void>;
 let sortOptionsPromise: (entityType: Entitytyping) => Promise<void>;
 let customBulkOperationsPromise: () => Promise<void>;
 
-const { enqueueItemForBulkProcessing, triggerBulkSelectionEvent } =
-  useBulkOperations();
+const {
+  enqueueItemForBulkProcessing,
+  dequeueItemForBulkProcessing,
+  triggerBulkSelectionEvent,
+} = useBulkOperations();
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm, createForm, deleteForm } =
   useFormHelper();
@@ -905,14 +944,36 @@ watch([fetchSequence, isTableGrouped, tableGroupBy], () => {
   else groupedEntities.reset();
 });
 
-const showBasicModePagination = computed(
+const showListPager = computed(
   () =>
     !props.predefinedEntities &&
     !displayMap.value &&
     !displayPipeline.value &&
-    (props.baseLibraryMode === BaseLibraryModes.BasicBaseLibrary ||
-      props.baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder) &&
+    !isTableGrouped.value &&
     paginationStore.totalPages.value > 1,
+);
+// Main and preview lists get the accent-light results band; compact
+// relation lists keep a plain row (it may hold only a pager).
+// Inside a detail panel the panel is the chrome: no band or border of the
+// list's own (panel → block → rows, never a fourth box).
+const insidePanel: boolean = inject("InsidePanel", false);
+const listActionsId = useId();
+const hasResultsBand = computed(
+  () =>
+    !props.disableLibraryBar &&
+    !insidePanel &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
+// Mounted wherever the library bar used to hold it: it registers the
+// pagination-limit promise the first fetch waits for.
+const showPageSize = computed(
+  () =>
+    !props.disableLibraryBar &&
+    showCurrentEntityFlow.value &&
+    !props.predefinedEntities &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
 
 const noResultTranslations = computed(() => ({
@@ -1020,6 +1081,16 @@ const bulkSelect = (items = entities.value) => {
       });
     }
   }
+  triggerBulkSelectionEvent(props.bulkOperationsContext);
+};
+
+// The header's select-all, unticked. Rows enqueue by id, bulkSelect by uuid.
+const clearPageSelection = () => {
+  for (const entity of props.predefinedEntities ?? entities.value) {
+    dequeueItemForBulkProcessing(props.bulkOperationsContext, entity.uuid);
+    dequeueItemForBulkProcessing(props.bulkOperationsContext, entity.id);
+  }
+  // Row checkboxes re-read the store on this event, as after bulkSelect.
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
 

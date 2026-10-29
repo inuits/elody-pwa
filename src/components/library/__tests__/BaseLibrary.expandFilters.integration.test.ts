@@ -76,6 +76,7 @@ vi.mock("../usePaginationStore", () => ({
     updateTotalAmount: vi.fn(),
     skip: ref(1),
     limit: ref(20),
+    totalPages: ref(1),
   }),
 }));
 
@@ -201,6 +202,7 @@ const getWrapper = (props: Record<string, unknown> = {}) =>
 describe("BaseLibrary.vue expandFilters persistence (real useViewModes)", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
     mockRoute.name = "TestRoute";
     mockRoute.path = "/test";
     libEntities.value = [];
@@ -212,7 +214,7 @@ describe("BaseLibrary.vue expandFilters persistence (real useViewModes)", () => 
     vi.clearAllMocks();
   });
 
-  it("persists expandFilters:true to localStorage when the user toggles the filter panel (persistExpandFilters=true, matching AssetLibrary)", async () => {
+  it("remembers an opened filter panel for the session only (persistExpandFilters=true, matching AssetLibrary)", async () => {
     const wrapper = getWrapper({ persistExpandFilters: true });
     await flushPromises();
 
@@ -222,10 +224,30 @@ describe("BaseLibrary.vue expandFilters persistence (real useViewModes)", () => 
     filtersBase.vm.$emit("expandFilters", false);
     await flushPromises();
 
+    expect(window.sessionStorage.getItem("_expandFilters")).toBe("true");
     const stored = JSON.parse(
       window.localStorage.getItem("_displayPreferences") || "{}",
     );
-    expect(stored.expandFilters).toBe(true);
+    expect(stored).not.toHaveProperty("expandFilters");
+
+    wrapper.unmount();
+  });
+
+  it("reopens the filter panel from the session", async () => {
+    window.sessionStorage.setItem("_expandFilters", "true");
+    const wrapper = getWrapper({ persistExpandFilters: true });
+    await flushPromises();
+
+    expect(wrapper.findComponent(FiltersBase).props("expandFilters")).toBe(true);
+
+    wrapper.unmount();
+  });
+
+  it("starts closed in a new session", async () => {
+    const wrapper = getWrapper({ persistExpandFilters: true });
+    await flushPromises();
+
+    expect(wrapper.findComponent(FiltersBase).props("expandFilters")).toBe(false);
 
     wrapper.unmount();
   });

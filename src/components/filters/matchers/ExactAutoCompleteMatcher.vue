@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import SelectionFilter from "./exactMatcher/ExactSelectionFilter.vue";
 
 defineProps({
@@ -26,5 +26,8 @@ const reset = () => {
   filterComponentRef.value?.reset();
 };
 
-defineExpose({ reset });
+defineExpose({
+  reset,
+  rendersList: computed(() => !!filterComponentRef.value?.rendersList),
+});
 </script>

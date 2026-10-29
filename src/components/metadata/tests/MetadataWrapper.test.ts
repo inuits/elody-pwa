@@ -296,6 +296,18 @@ describe("MetadataWrapper — locked field rendering", () => {
   });
 });
 
+// tooltip.md: light text on the inverted surface. The value component sets its
+// own secondary ink, which was dark on dark.
+describe("MetadataWrapper — full-value tooltip", () => {
+  it("shows the value in the tooltip's own light ink", async () => {
+    const wrapper = await mountWrapper(buildProps("unlocked_key", false));
+    const tooltipValue = wrapper.find('[data-cy="field-value-tooltip"]');
+
+    expect(tooltipValue.classes()).toContain("!text-inherit");
+    expect(tooltipValue.classes()).not.toContain("text-text-placeholder");
+  });
+});
+
 describe("MetadataWrapper — copy-from-parent button layout", () => {
   const copy = vi.fn();
   const context: CopyFromParentContext = {
@@ -1616,5 +1628,34 @@ describe("MetadataWrapper — a multilingual field", () => {
       '[data-cy="field-value"]',
     );
     expect(value.attributes("role")).toBeUndefined();
+  });
+});
+
+// preview-panel.md / ui_kits/clients: the preview's metadata is one label/value
+// grid; each field takes a row of the grid its window panel lays out.
+describe("MetadataWrapper — compact preview row", () => {
+  it("takes one row of the preview grid: label left, value right", async () => {
+    const wrapper = await mountWrapper(
+      buildProps("unlocked_key", false),
+      undefined,
+      {},
+      { CompactPreview: true },
+    );
+    const row = wrapper.find('[data-cy="metadata-wrapper"]');
+
+    expect(row.classes()).toEqual(
+      expect.arrayContaining(["grid", "grid-cols-subgrid", "col-span-2"]),
+    );
+    expect(wrapper.find('[data-cy="field-label-row"]').classes()).not.toContain(
+      "mb-(--field-label-gap)",
+    );
+  });
+
+  it("keeps the stacked field row outside a preview", async () => {
+    const wrapper = await mountWrapper(buildProps("unlocked_key", false));
+
+    expect(wrapper.find('[data-cy="metadata-wrapper"]').classes()).not.toContain(
+      "grid-cols-subgrid",
+    );
   });
 });

@@ -98,6 +98,42 @@ describe("ListItem", () => {
     teaserMetadata: [],
   };
 
+  // ui_kits/clients list: the title cell is 13px bold link ink, the rest secondary.
+  describe("row title", () => {
+    const fieldsOf = (teaserMetadata: any[]) =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "item", teaserMetadata },
+      }).findAll("[data-cy='list-item-content'] > div");
+
+    it("sets the first field as the row title and the others in secondary ink", () => {
+      const fields = fieldsOf([
+        { key: "title", value: "AICAP0001" },
+        { key: "script", value: "SC-1" },
+      ]);
+
+      expect(fields[0].classes()).toEqual(
+        expect.arrayContaining([
+          "font-bold",
+          "text-value",
+          "text-text-link",
+          // the value component sets its own secondary ink
+          "[&_[data-cy=entity-element-metadata]]:text-inherit",
+        ]),
+      );
+      expect(fields[1].classes()).toContain("text-text-secondary");
+      expect(fields[1].classes()).not.toContain("font-bold");
+    });
+
+    it("leaves a leading pill as it is", () => {
+      const fields = fieldsOf([
+        { key: "type", value: { formatter: "pill", label: "Book" } },
+        { key: "title", value: "Oasis" },
+      ]);
+
+      expect(fields[0].classes()).not.toContain("font-bold");
+    });
+  });
+
   describe("seen items", () => {
     const seenItemProps = {
       ...defaultProps,
@@ -112,12 +148,30 @@ describe("ListItem", () => {
       );
     };
 
-    it("greys out an item that has been seen", () => {
+    it("shows a seen item's title in secondary ink", () => {
+      markItemAsSeen();
+
+      const wrapper = shallowMount(ListItem, {
+        props: {
+          ...seenItemProps,
+          teaserMetadata: [
+            { key: "title", value: "Seen" },
+            { key: "type", value: "Book" },
+          ] as any,
+        },
+      });
+      const fields = wrapper.findAll("[data-cy='list-item-content'] > div");
+
+      expect(fields[0].classes()).toContain("text-text-secondary");
+      expect(fields[0].classes()).not.toContain("text-text-link");
+    });
+
+    it("does not grey out a seen item like a disabled one", () => {
       markItemAsSeen();
 
       const wrapper = shallowMount(ListItem, { props: seenItemProps });
 
-      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
         "grayscale",
       );
     });
@@ -375,20 +429,209 @@ describe("ListItem", () => {
       expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["row-1"]);
     });
 
-    it("navigates from a real, named button", async () => {
+    it("keeps the eye while a preview is open", () => {
       const wrapper = shallowMount(ListItem, {
         props: {
           ...defaultProps,
           itemId: "row-1",
+          baseLibraryMode: "normalBaseLibrary" as any,
+          previewComponentFeatureEnabled: true,
           previewComponentEnabled: true,
           isEnableNavigation: true,
         },
       });
-      const open = wrapper.find('button[data-cy="list-item-open"]');
 
-      expect(open.attributes("aria-label")).toBe("actions.labels.open-item");
-      await open.trigger("click");
-      expect(wrapper.emitted("navigateTo")).toHaveLength(1);
+      expect(wrapper.findComponent({ name: "PreviewToggle" }).exists()).toBe(
+        true,
+      );
+      expect(wrapper.find('[data-cy="list-item-open"]').exists()).toBe(false);
+    });
+  });
+
+  it("uses the compact checkbox in its dense rows", () => {
+    const wrapper = shallowMount(ListItem, {
+      props: {
+        ...defaultProps,
+        itemId: "row-1",
+        baseLibraryMode: "normalBaseLibrary" as any,
+        hasSelection: true,
+      },
+    });
+    expect(wrapper.findComponent(BaseInputCheckbox).props("size")).toBe(
+      "compact",
+    );
+  });
+
+  describe("row states", () => {
+    const rowProps = {
+      ...defaultProps,
+      itemId: "row-1",
+      baseLibraryMode: "normalBaseLibrary" as any,
+      hasSelection: true,
+      previewComponentFeatureEnabled: true,
+      previewComponentListItemsCoverage: "OneListItem" as any,
+    };
+    const row = (wrapper: ReturnType<typeof shallowMount>) =>
+      wrapper.find("[data-cy='list-item']");
+
+    it("fills on hover", () => {
+      const wrapper = shallowMount(ListItem, { props: rowProps });
+      expect(row(wrapper).classes()).toContain("hover:bg-surface-row-hover");
+    });
+
+    it("washes a selected row with an accent row shadow", async () => {
+      const wrapper = shallowMount(ListItem, { props: rowProps });
+
+      await wrapper
+        .findComponent(BaseInputCheckbox)
+        .vm.$emit("update:modelValue", true);
+
+      expect(row(wrapper).classes()).toEqual(
+        expect.arrayContaining(["bg-accent-wash", "shadow-accent-row"]),
+      );
+    });
+
+    it("marks the previewed row with an accent left border and no wash", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...rowProps, previewComponentCurrentActive: true },
+      });
+
+      expect(row(wrapper).classes()).toEqual(
+        expect.arrayContaining([
+          "border-l-(length:--list-row-preview-border)",
+          "border-l-accent",
+        ]),
+      );
+      expect(row(wrapper).classes()).not.toContain("bg-accent-wash");
+      expect(row(wrapper).classes()).not.toContain("border-neutral-800");
+    });
+
+    it("presses the eye only while the row's preview is open", () => {
+      const lastPreviewed = shallowMount(ListItem, {
+        props: { ...rowProps, previewComponentCurrentActive: true },
+      });
+      const open = shallowMount(ListItem, {
+        props: {
+          ...rowProps,
+          previewComponentCurrentActive: true,
+          previewOpen: true,
+        },
+      });
+
+      expect(
+        lastPreviewed.findComponent({ name: "PreviewToggle" }).props("active"),
+      ).toBe(false);
+      expect(
+        open.findComponent({ name: "PreviewToggle" }).props("active"),
+      ).toBe(true);
+    });
+  });
+
+  describe("list column header", () => {
+    it("keeps cell labels for screen readers only when the list has a header row", () => {
+      const content = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1", hideLabels: true },
+      }).find('[data-cy="list-item-content"]');
+
+      expect(content.classes()).toContain(
+        "[&_[data-cy=metadata-label]]:sr-only",
+      );
+    });
+
+    it("shows cell labels without a header row", () => {
+      const content = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1" },
+      }).find('[data-cy="list-item-content"]');
+
+      expect(content.classes()).not.toContain(
+        "[&_[data-cy=metadata-label]]:sr-only",
+      );
+    });
+  });
+
+  describe("grid cards", () => {
+    const card = (props = {}) =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "card-1", viewMode: "grid", ...props },
+      });
+
+    it("has a fixed card size", () => {
+      expect(card().find('[data-cy="list-item"]').classes()).toEqual(
+        expect.arrayContaining([
+          "w-(--grid-card-width)",
+          "h-(--grid-card-height)",
+        ]),
+      );
+    });
+
+    it("always shows a media area, with a placeholder when there is no media", () => {
+      const media = card().find('[data-cy="grid-card-media"]');
+      expect(media.classes()).toEqual(
+        expect.arrayContaining(["h-(--grid-card-media-height)", "bg-surface-muted"]),
+      );
+      expect(media.text()).toContain("library.no-media");
+    });
+
+    it("letterboxes the thumbnail instead of cropping it square", () => {
+      const viewer = card({ media: "file.jpg" }).findComponent({
+        name: "ImageViewer",
+      });
+      expect(viewer.props("url")).toContain("/full/");
+    });
+
+    it("shows the title, badges and one secondary line", () => {
+      const fields = card({
+        teaserMetadata: [
+          { key: "title", value: "A title" },
+          { key: "type", value: "photo" },
+          { key: "status", value: { formatter: "pill" } },
+          { key: "credit", value: "Someone" },
+        ],
+      }).findAll('[data-cy="list-item-content"] > div');
+
+      expect(fields.map((field) => field.classes().includes("hidden"))).toEqual(
+        [false, false, false, true],
+      );
+    });
+
+    it("shows the first field as a two-line title", () => {
+      const fields = card({
+        teaserMetadata: [
+          { key: "title", value: "A title" },
+          { key: "type", value: "Book" },
+        ],
+      }).findAll('[data-cy="list-item-content"] > div');
+      expect(fields[0].classes()).toEqual(
+        expect.arrayContaining(["line-clamp-2", "font-bold", "text-value"]),
+      );
+      expect(fields[1].classes()).toContain("text-text-secondary");
+    });
+  });
+
+  describe("flat rows", () => {
+    const rowOf = (viewMode: "list" | "grid") =>
+      shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "row-1", viewMode },
+      }).find('[data-cy="list-item"]');
+
+    it("separates list rows with a faint hairline instead of a card border", () => {
+      const classes = rowOf("list").classes();
+      expect(classes).toEqual(
+        expect.arrayContaining([
+          "border-b",
+          "border-border-faint",
+          "p-(--list-row-pad)",
+          "text-table",
+        ]),
+      );
+      expect(classes).not.toContain("rounded");
+      expect(classes).not.toContain("mb-2");
+    });
+
+    it("keeps grid items as bordered cards", () => {
+      expect(rowOf("grid").classes()).toEqual(
+        expect.arrayContaining(["border", "rounded-card"]),
+      );
     });
   });
 
