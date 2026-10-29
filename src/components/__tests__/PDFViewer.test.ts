@@ -71,3 +71,23 @@ describe("PDFViewer - toolbar", () => {
     });
   });
 });
+
+describe("PDFViewer - download name", () => {
+  it("passes the mediafile's original filename to the toolbar", async () => {
+    const wrapper = mount(PDFViewer, {
+      props: {
+        source: {
+          id: "mediafile-1",
+          intialValues: { original_filename: "doc.pdf" },
+        },
+      },
+      global: {
+        stubs: { ViewerToolbar: ViewerToolbarStub, SpinnerLoader: true },
+      },
+    });
+    await flushPromises();
+    expect(
+      wrapper.findComponent(ViewerToolbarStub).props("originalFilename"),
+    ).toBe("doc.pdf");
+  });
+});

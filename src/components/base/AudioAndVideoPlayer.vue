@@ -1,15 +1,11 @@
 <template>
   <div class="w-full h-full relative flex flex-col">
-    <div
-      class="w-full bg-background-light z-[5] p-2 shadow-sm flex justify-between items-center h-10 shrink-0"
-    >
-      <button @click="downloadVideo">
-        <unicon
-          :name="Unicons.Download.name"
-          height="20"
-          class="text-neutral-700 cursor-pointer"
-        />
-      </button>
+    <div class="relative shrink-0 h-(--viewer-toolbar-height)">
+      <ViewerToolbar
+        mode="av"
+        :mediafile-id="props.source?.id"
+        :original-filename="props.source?.intialValues?.original_filename"
+      />
     </div>
     <div class="flex-1 min-h-0" v-if="mediaType === 'Video'">
       <video
@@ -37,6 +33,7 @@
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { Unicons } from "@/types";
 import { ref, inject } from "vue";
+import ViewerToolbar from "@/components/ViewerToolbar.vue";
 
 type AudioAndVideoPlayerMediaType = "Audio" | "Video";
 
@@ -66,16 +63,5 @@ const getFileUrl = (): string => {
   }
 
   return `/api/mediafile/${fileLocation}`;
-};
-
-const downloadVideo = (): void => {
-  const a = document.createElement("a");
-  const originalFilename = props.source.intialValues.original_filename?.replace(/\.[^/.]*$/, "") || ""
-  a.href = `/api/mediafile/${props.source.id}?original=true&originalFilename=${originalFilename}`;
-  a.download = originalFilename;
-  a.target = "_blank";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
 };
 </script>

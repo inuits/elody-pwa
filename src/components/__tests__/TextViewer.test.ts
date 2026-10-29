@@ -173,8 +173,10 @@ describe("TextViewer - toolbar and warning", () => {
   const mockGetMediafile = vi.fn();
   const source = {
     id: "mediafile-1",
-    original_filename: "notes.txt",
-    intialValues: { original_file_location: "path/to/notes.txt" },
+    intialValues: {
+      original_file_location: "path/to/notes.txt",
+      original_filename: "notes.txt",
+    },
   };
   const ViewerToolbarStub = {
     name: "ViewerToolbar",

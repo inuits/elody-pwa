@@ -17,7 +17,7 @@
       :page="pageNum"
       :page-count="numPages"
       :mediafile-id="props.source?.id"
-      :original-filename="props.source?.original_filename"
+      :original-filename="props.source?.intialValues?.original_filename"
       @zoom-in="zoomIn"
       @zoom-out="zoomOut"
       @fullscreen="toggleFullscreen"
@@ -76,6 +76,7 @@ const pdfjsLib: typeof import("pdfjs-dist") = pdfjsLibImport;
 type SourceType = {
   initialValues?: {
     original_file_location?: string;
+    original_filename?: string;
   };
   [k: string]: any;
 };

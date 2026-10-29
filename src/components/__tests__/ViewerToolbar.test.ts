@@ -446,3 +446,17 @@ describe("ViewerToolbar - text mode", () => {
     ]);
   });
 });
+
+describe("ViewerToolbar - av mode", () => {
+  it("shows only download (the native controls carry transport and fullscreen)", () => {
+    const wrapper = getWrapper({
+      mode: "av",
+      mediafileId: "mediafile-1",
+      originalFilename: "clip.mp4",
+    } as any);
+    const names = wrapper
+      .findAll("button, input")
+      .map((el) => el.attributes("aria-label") || el.text().trim());
+    expect(names).toEqual(["media-viewer.download"]);
+  });
+});

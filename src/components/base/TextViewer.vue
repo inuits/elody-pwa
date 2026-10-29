@@ -4,7 +4,7 @@
       <ViewerToolbar
         mode="text"
         :mediafile-id="props.source?.id"
-        :original-filename="props.source?.original_filename"
+        :original-filename="props.source?.intialValues?.original_filename"
         @zoom-in="zoom(ZOOM_STEP)"
         @zoom-out="zoom(-ZOOM_STEP)"
       />
@@ -59,9 +59,9 @@ const zoom = (step: number) => {
 
 interface Source {
   id: string;
-  original_filename?: string;
   intialValues: {
     original_file_location: string;
+    original_filename?: string;
   };
 }
 

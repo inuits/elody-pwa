@@ -16,7 +16,7 @@
         <img :src="logo.src" :alt="logo.alt ?? ''" class="h-6" />
       </a>
       <button
-        v-if="mode !== 'text'"
+        v-if="mode === 'image' || mode === 'pdf'"
         ref="fullPageRef"
         type="button"
         class="viewer-button"
@@ -26,6 +26,7 @@
         <unicon :name="Unicons.Desktop.name" height="20" />
       </button>
       <button
+        v-if="mode !== 'av'"
         ref="zoomInRef"
         type="button"
         class="viewer-button"
@@ -35,6 +36,7 @@
         <unicon :name="Unicons.SearchPlus.name" height="20" />
       </button>
       <button
+        v-if="mode !== 'av'"
         ref="zoomOutRef"
         type="button"
         class="viewer-button"
@@ -228,7 +230,7 @@ import { useMediafileDownload } from "@/composables/useMediafileDownload";
 
 const props = withDefaults(
   defineProps<{
-    mode?: "image" | "pdf" | "text";
+    mode?: "image" | "pdf" | "text" | "av";
     page?: number;
     pageCount?: number;
     zoomIn?: HTMLDivElement | string | null;
