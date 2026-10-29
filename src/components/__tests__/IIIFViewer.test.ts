@@ -17,17 +17,20 @@ const mocks = vi.hoisted(() => {
     selection: vi.fn(),
     initSelection: vi.fn(),
     destroy: vi.fn(),
+    addHandler: vi.fn(),
     element: document.createElement("div"),
     viewport: {
       viewerElementToImageCoordinates: vi.fn(),
     },
   };
   const openSeadragonFactory = vi.fn(() => openSeadragonInstance);
-  return { openSeadragonInstance, openSeadragonFactory };
+  const setString = vi.fn();
+  return { openSeadragonInstance, openSeadragonFactory, setString };
 });
 
 vi.mock("openseadragon", () => ({
   default: Object.assign(mocks.openSeadragonFactory, {
+    setString: mocks.setString,
     Point: class {
       constructor(
         public x: number,
@@ -35,6 +38,10 @@ vi.mock("openseadragon", () => ({
       ) {}
     },
   }),
+}));
+
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({ t: (key: string) => key }),
 }));
 
 vi.mock("openseadragon-select-plugin", () => ({
@@ -380,5 +387,51 @@ describe("IIIFViewer - clear-selection emit on undo", () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.emitted("clear-selection")).toBeUndefined();
+  });
+});
+
+describe("IIIFViewer - toolbar controls", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows the rotation control bound to the toolbar's rotate button", async () => {
+    const wrapper = getWrapper();
+    const rotate = document.createElement("button");
+    wrapper.findComponent(ViewerToolbarMock).vm.$emit("update:rotate", rotate);
+    await wrapper.setProps({ imageFilename: "other.jpg" });
+
+    const options = mocks.openSeadragonFactory.mock.calls.at(-1)![0];
+    expect(options.showRotationControl).toBe(true);
+    expect(options.rotateRightButton).toBe(rotate);
+  });
+
+  it("gives OpenSeadragon's button titles our translated names", () => {
+    getWrapper();
+    expect(mocks.setString).toHaveBeenCalledWith(
+      "Tooltips.ZoomIn",
+      "media-viewer.zoom-in",
+    );
+    expect(mocks.setString).toHaveBeenCalledWith(
+      "Tooltips.RotateRight",
+      "media-viewer.rotate",
+    );
+  });
+
+  it("announces fullscreen in a status region", async () => {
+    const wrapper = getWrapper();
+    const handler = mocks.openSeadragonInstance.addHandler.mock.calls.find(
+      ([event]) => event === "full-page",
+    )![1];
+    const status = () => wrapper.find('[role="status"]');
+    expect(status().text()).toBe("");
+
+    handler({ fullPage: true });
+    await wrapper.vm.$nextTick();
+    expect(status().text()).toBe("media-viewer.fullscreen-on");
+
+    handler({ fullPage: false });
+    await wrapper.vm.$nextTick();
+    expect(status().text()).toBe("");
   });
 });

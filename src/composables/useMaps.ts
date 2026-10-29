@@ -9,7 +9,7 @@ import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Style, Icon, Fill, Stroke, Circle as CircleStyle, Text } from "ol/style";
-import { createDefaultStyle } from "ol/style/Style";
+import { readCssToken, withAlpha } from "@/utils/cssToken";
 import type { FeatureLike } from "ol/Feature";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
@@ -47,17 +47,31 @@ const bucketStyleCache: Record<number, Style> = {};
 
 const MIN_VISIBLE_SITE_PIXELS = 6;
 
-const siteDotStyle = new Style({
-  image: new CircleStyle({
-    radius: 5,
-    fill: new Fill({ color: "#3b82f6" }),
-    stroke: new Stroke({ color: "#ffffff", width: 2 }),
-  }),
-  geometry: (feature: FeatureLike) => {
-    const [minX, minY, maxX, maxY] = feature.getGeometry()!.getExtent();
-    return new Point([(minX + maxX) / 2, (minY + maxY) / 2]);
-  },
-});
+// Resolved on use, not at import: the client theme is applied at boot.
+const accent = () => readCssToken("--color-accent", "black");
+const white = () => readCssToken("--color-white", "white");
+
+let siteDotStyleCache: Style | undefined;
+const siteDotStyle = () =>
+  (siteDotStyleCache ??= new Style({
+    image: new CircleStyle({
+      radius: 5,
+      fill: new Fill({ color: accent() }),
+      stroke: new Stroke({ color: white(), width: 2 }),
+    }),
+    geometry: (feature: FeatureLike) => {
+      const [minX, minY, maxX, maxY] = feature.getGeometry()!.getExtent();
+      return new Point([(minX + maxX) / 2, (minY + maxY) / 2]);
+    },
+  }));
+
+// map-viewer.md: accent stroke, ~25% fill
+let siteStyleCache: Style | undefined;
+const siteStyle = () =>
+  (siteStyleCache ??= new Style({
+    stroke: new Stroke({ color: accent(), width: 2 }),
+    fill: new Fill({ color: withAlpha(accent(), 0.25) }),
+  }));
 
 export const useMaps = () => {
   const { setHoveredListItem } = useListItemHelper();
@@ -173,15 +187,15 @@ export const useMaps = () => {
       bucketStyleCache[count] = new Style({
         image: new CircleStyle({
           radius: isSingleSite ? 5 : 16,
-          fill: new Fill({ color: "#3b82f6" }),
-          stroke: new Stroke({ color: "#ffffff", width: 2 }),
+          fill: new Fill({ color: accent() }),
+          stroke: new Stroke({ color: white(), width: 2 }),
         }),
         text: isSingleSite
           ? undefined
           : new Text({
               text: String(count),
-              fill: new Fill({ color: "#ffffff" }),
-              font: "bold 12px Arial",
+              fill: new Fill({ color: white() }),
+              font: `bold ${readCssToken("--text-ui", "12px")} ${readCssToken("--font-sans", "sans-serif")}`,
             }),
       });
     }
@@ -192,8 +206,8 @@ export const useMaps = () => {
     const [minX, minY, maxX, maxY] = feature.getGeometry()!.getExtent();
     const sizeInPixels = Math.max(maxX - minX, maxY - minY) / resolution;
     return sizeInPixels < MIN_VISIBLE_SITE_PIXELS
-      ? [siteDotStyle]
-      : createDefaultStyle(feature, resolution);
+      ? [siteDotStyle()]
+      : [siteStyle()];
   };
 
   const transformDataToWktFeatures = (

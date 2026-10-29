@@ -409,6 +409,17 @@
   --pager-gap: 2px;
   --pager-input-width: 3.5rem;
 
+  /* Viewer toolbar (media-viewer.md, catalogue ViewerToolbar): one white
+     bar over every viewer mode, 20px icons in 28×24 buttons */
+  --viewer-toolbar-height: 40px;
+  --viewer-button-width: 28px;
+  --viewer-button-height: 24px;
+  --viewer-button-radius: 6px;
+  --viewer-text-button-padding-x: 8px;
+  --viewer-page-input-width: 32px;
+  /* Warn banner under the bar (text viewer's sanitised-content notice) */
+  --viewer-banner-accent-width: 3px;
+
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */
   --list-band-pad: 8px 16px;
@@ -487,6 +498,30 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 .vue-notification.error {
   border-left: 3px solid var(--color-danger) !important;
+}
+
+/* Viewer and map control button (components/viewer-toolbar.md): one box
+   for every icon button over a viewer or map */
+.viewer-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--viewer-button-width);
+  height: var(--viewer-button-height);
+  border-radius: var(--viewer-button-radius);
+  color: var(--color-neutral-700);
+  cursor: pointer;
+}
+.viewer-button--text {
+  padding: 0 var(--viewer-text-button-padding-x);
+  font-size: var(--text-table);
+}
+.viewer-button:hover:not(:disabled) {
+  background: var(--color-accent-wash);
+}
+.viewer-button:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
 }
 
 /* Interaction polish (redesign): every button animates its surface and

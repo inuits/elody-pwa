@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import ViewerToolbar from "@/components/ViewerToolbar.vue";
+import MediafileNavigationArrows from "@/components/base/MediafileNavigationArrows.vue";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 
 const mocks = vi.hoisted(() => ({
   openModal: vi.fn(),
   isSelectable: vi.fn(() => false),
   downloadMediafile: vi.fn(),
-  downloadLoading: { value: false },
 }));
 
 vi.mock("@/composables/useBaseModal", () => ({
@@ -18,12 +18,15 @@ vi.mock("@/composables/useMediafileCrop", () => ({
   useMediafileCrop: () => ({ isSelectable: mocks.isSelectable }),
 }));
 
-vi.mock("@/composables/useMediafileDownload", () => ({
-  useMediafileDownload: () => ({
-    downloadMediafile: mocks.downloadMediafile,
-    downloadLoading: mocks.downloadLoading,
-  }),
-}));
+vi.mock("@/composables/useMediafileDownload", async () => {
+  const { ref } = await vi.importActual<typeof import("vue")>("vue");
+  return {
+    useMediafileDownload: () => ({
+      downloadMediafile: mocks.downloadMediafile,
+      downloadLoading: ref(false),
+    }),
+  };
+});
 
 vi.mock("@/types", () => ({
   Unicons: new Proxy({}, { get: (_t, name) => ({ name: String(name) }) }),
@@ -48,7 +51,7 @@ const getWrapper = (props = getDefaultProps()) =>
         },
         SpinnerLoader: { template: "<div />" },
         unicon: {
-          template: "<span :data-icon-name=\"name\" />",
+          template: '<span :data-icon-name="name" />',
           props: ["name", "height"],
         },
       },
@@ -274,5 +277,186 @@ describe("ViewerToolbar - existing crop/cancel buttons, and the isRecropModal by
         .find('[data-testid="draw-crop-selection"]')
         .attributes("disabled"),
     ).toBeDefined();
+  });
+});
+
+describe("ViewerToolbar - shared toolbar shell", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const allControlsProps = () => ({
+    ...getDefaultProps(),
+    enableSelection: true,
+    canRecrop: true,
+    hasCropData: true,
+  });
+
+  it("is a named toolbar", () => {
+    const wrapper = getWrapper();
+    const toolbar = wrapper.find('[role="toolbar"]');
+    expect(toolbar.exists()).toBe(true);
+    expect(toolbar.attributes("aria-label")).toBe("media-viewer.toolbar");
+  });
+
+  it("gives every button an accessible name", () => {
+    const wrapper = getWrapper(allControlsProps());
+    const unnamed = wrapper
+      .findAll("button")
+      .filter((b) => !b.attributes("aria-label") && !b.text().trim());
+    expect(unnamed).toHaveLength(0);
+  });
+
+  it("names the download button", () => {
+    const wrapper = getWrapper();
+    expect(
+      wrapper.find('[data-testid="viewer-download"]').attributes("aria-label"),
+    ).toBe("media-viewer.download");
+  });
+
+  it("renders a rotate button and hands its element to the viewer", () => {
+    const wrapper = getWrapper();
+    const rotate = wrapper.find('[data-testid="viewer-rotate"]');
+    expect(rotate.attributes("aria-label")).toBe("media-viewer.rotate");
+    expect(wrapper.emitted("update:rotate")?.[0][0]).toBe(rotate.element);
+  });
+
+  it("names the navigation slot's file arrows", () => {
+    const wrapper = mount(ViewerToolbar, {
+      props: getDefaultProps(),
+      slots: {
+        navigation: "<MediafileNavigationArrows />",
+      },
+      global: {
+        mocks: { $t: (key: string) => key },
+        components: { MediafileNavigationArrows },
+        stubs: {
+          BaseTooltip: true,
+          SpinnerLoader: true,
+          unicon: true,
+        },
+      },
+    });
+    expect(
+      wrapper
+        .find('[data-testid="nav-prev-mediafile"]')
+        .attributes("aria-label"),
+    ).toBe("media-viewer.previous-file");
+    expect(
+      wrapper
+        .find('[data-testid="nav-next-mediafile"]')
+        .attributes("aria-label"),
+    ).toBe("media-viewer.next-file");
+  });
+});
+
+describe("ViewerToolbar - pdf mode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const pdfProps = (page = 3, pageCount = 12) => ({
+    mode: "pdf" as const,
+    mediafileId: "mediafile-1",
+    originalFilename: "doc.pdf",
+    page,
+    pageCount,
+  });
+  const byLabel = (wrapper: ReturnType<typeof getWrapper>, label: string) =>
+    wrapper.find(`[aria-label="${label}"]`);
+
+  it("shows zoom, fullscreen, download and page navigation, and no image-only controls", () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    const names = wrapper
+      .findAll("button, input")
+      .map((el) => el.attributes("aria-label") || el.text().trim());
+    expect(names).toEqual([
+      "media-viewer.fullscreen",
+      "media-viewer.zoom-in",
+      "media-viewer.zoom-out",
+      "media-viewer.download",
+      "media-viewer.previous-page",
+      "pagination.page-number",
+      "media-viewer.next-page",
+    ]);
+  });
+
+  it("emits zoom and fullscreen requests", async () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    await byLabel(wrapper, "media-viewer.zoom-in").trigger("click");
+    await byLabel(wrapper, "media-viewer.zoom-out").trigger("click");
+    await byLabel(wrapper, "media-viewer.fullscreen").trigger("click");
+    expect(wrapper.emitted("zoom-in")).toHaveLength(1);
+    expect(wrapper.emitted("zoom-out")).toHaveLength(1);
+    expect(wrapper.emitted("fullscreen")).toHaveLength(1);
+  });
+
+  it("shows the current page and the page count", () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    const input = byLabel(wrapper, "pagination.page-number");
+    expect((input.element as HTMLInputElement).value).toBe("3");
+    expect(wrapper.text()).toContain("/ 12");
+  });
+
+  it("steps to the previous and next page", async () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    await byLabel(wrapper, "media-viewer.previous-page").trigger("click");
+    await byLabel(wrapper, "media-viewer.next-page").trigger("click");
+    expect(wrapper.emitted("change-page")).toEqual([[2], [4]]);
+  });
+
+  it("disables the arrows at the first and last page", () => {
+    const first = getWrapper(pdfProps(1, 2) as any);
+    expect(
+      byLabel(first, "media-viewer.previous-page").attributes("disabled"),
+    ).toBeDefined();
+    const last = getWrapper(pdfProps(2, 2) as any);
+    expect(
+      byLabel(last, "media-viewer.next-page").attributes("disabled"),
+    ).toBeDefined();
+  });
+
+  it("clamps a typed page into range", async () => {
+    const wrapper = getWrapper(pdfProps() as any);
+    const input = byLabel(wrapper, "pagination.page-number");
+    await input.setValue("99");
+    expect(wrapper.emitted("change-page")).toEqual([[12]]);
+    expect((input.element as HTMLInputElement).value).toBe("12");
+  });
+});
+
+describe("ViewerToolbar - text mode", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows only zoom and download", () => {
+    const wrapper = getWrapper({
+      mode: "text",
+      mediafileId: "mediafile-1",
+      originalFilename: "notes.txt",
+    } as any);
+    const names = wrapper
+      .findAll("button, input")
+      .map((el) => el.attributes("aria-label") || el.text().trim());
+    expect(names).toEqual([
+      "media-viewer.zoom-in",
+      "media-viewer.zoom-out",
+      "media-viewer.download",
+    ]);
+  });
+});
+
+describe("ViewerToolbar - av mode", () => {
+  it("shows only download (the native controls carry transport and fullscreen)", () => {
+    const wrapper = getWrapper({
+      mode: "av",
+      mediafileId: "mediafile-1",
+      originalFilename: "clip.mp4",
+    } as any);
+    const names = wrapper
+      .findAll("button, input")
+      .map((el) => el.attributes("aria-label") || el.text().trim());
+    expect(names).toEqual(["media-viewer.download"]);
   });
 });
