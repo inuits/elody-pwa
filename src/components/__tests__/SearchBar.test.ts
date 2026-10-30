@@ -62,12 +62,17 @@ describe("SearchBar.vue handoff shape", () => {
       global: { stubs: { unicon: true } },
     });
 
-  it("renders the header trigger as a pill field that opens a dialog", () => {
+  // ui_kits/vlacc AppShell (list and detail top bar): a round accent icon
+  // button; the field lives in the list toolbar (user, 2026-10-30)
+  it("renders the header trigger as a named round icon button that opens a dialog", () => {
     const trigger = mountTrigger().find("[data-testid='search-trigger']");
     expect(trigger.element.tagName).toBe("BUTTON");
-    expect(trigger.classes()).toContain("rounded-pill");
+    expect(trigger.classes()).toEqual(
+      expect.arrayContaining(["rounded-round", "bg-accent", "text-text-on-accent"]),
+    );
+    expect(trigger.attributes("aria-label")).toBe("library.search");
     expect(trigger.attributes("aria-haspopup")).toBe("dialog");
-    expect(trigger.text()).toBe("search.search-placeholder");
+    expect(trigger.text()).toBe("");
   });
 
   it("uses a named search pill inside the modal, with no separate search button", () => {

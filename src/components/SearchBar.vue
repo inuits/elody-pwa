@@ -4,11 +4,11 @@
     type="button"
     data-testid="search-trigger"
     aria-haspopup="dialog"
-    class="flex items-center gap-2 w-64 px-3 min-h-(--control-height) rounded-pill border border-border-default bg-surface text-input text-text-muted cursor-pointer hover:border-input-border-hover"
+    :aria-label="t('library.search')"
+    class="flex items-center justify-center shrink-0 size-(--control-height) rounded-round bg-accent text-text-on-accent cursor-pointer hover:bg-accent-hover"
     @click="openSearchModal"
   >
     <unicon :name="Unicons.SearchGlass.name" height="14" aria-hidden="true" />
-    <span>{{ t("search.search-placeholder") }}</span>
   </button>
   <div v-else class="flex items-center gap-2">
     <!-- modal.md: first focus on the field, not the close cross -->
