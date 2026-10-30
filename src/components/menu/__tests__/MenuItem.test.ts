@@ -165,9 +165,8 @@ describe("MenuItem", () => {
 });
 
 describe("MenuItem colour", () => {
-  // Every item takes the menu colour, whether it is a link, a group or an
-  // item that opens a form, so they look alike (and a link's underline and
-  // link colour don't leak in).
+  // navigation.md: every item, link or not, rests in muted ink and gets a
+  // light wash on hover (and no link underline leaks in)
   const item = async (type: "link" | "modal") => {
     menuKind.type = type;
     const wrapper = mountMenuItem({
@@ -181,17 +180,61 @@ describe("MenuItem colour", () => {
   };
 
   it.each(["link", "modal"] as const)(
-    "colours a %s item with the menu tokens, without an underline",
+    "colours a %s item with the rail tokens, without an underline",
     async (type) => {
       expect((await item(type)).classes()).toEqual(
         expect.arrayContaining([
-          "text-nav-item",
-          "hover:text-nav-item-hover",
+          "text-text-muted",
+          "hover:bg-accent-highlight",
           "hover:no-underline",
         ]),
       );
     },
   );
+
+  it("renders an item that opens a form as a real button", async () => {
+    expect((await item("modal")).element.tagName).toBe("BUTTON");
+    expect((await item("modal")).attributes("type")).toBe("button");
+  });
+});
+
+describe("MenuItem rail item (navigation.md)", () => {
+  const mountCollapsed = (destination: string) =>
+    mount(MenuItemComponent, {
+      props: {
+        menuitem: {
+          label: "navigation.works",
+          typeLink: routeTo(destination),
+          subMenu: null,
+        } as MenuItem,
+        icon: "Test" as DamsIcons,
+        isExpanded: false,
+        isBeingHovered: false,
+      },
+    });
+
+  it("is a named icon button of the rail item size when collapsed", async () => {
+    const wrapper = mountCollapsed("some-path");
+    await flushPromises();
+    const el = wrapper.find('[data-test="menu-item-component"]');
+    expect(el.attributes("aria-label")).toBe("navigation.works");
+    expect(el.classes()).toEqual(
+      expect.arrayContaining([
+        "w-(--nav-rail-item-width)",
+        "h-(--nav-rail-item-height)",
+        "rounded-(--nav-rail-item-radius)",
+      ]),
+    );
+  });
+
+  it("marks the current page with the accent wash and accent ink", async () => {
+    // the mocked route is "/", whose last segment is ""
+    const wrapper = mountCollapsed("");
+    await flushPromises();
+    expect(
+      wrapper.find('[data-test="menu-item-component"]').classes(),
+    ).toEqual(expect.arrayContaining(["bg-accent-light", "text-accent-ink"]));
+  });
 });
 
 describe("MenuItem badge", () => {

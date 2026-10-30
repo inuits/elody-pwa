@@ -2,27 +2,30 @@
   <nav
     data-cy="menu-nav"
     ref="navigation"
+    :aria-label="$t('navigation.main')"
     :class="[
-      'navbar fixed left-0 top-0 w-24 h-screen flex flex-col bg-background-light z-navigation',
-      { 'w-80': isExpanded },
+      'navbar fixed left-0 top-0 h-screen flex flex-col bg-surface z-navigation',
+      // navigation.md: 52px rail; expanded, a flyout over the content
+      isExpanded
+        ? 'w-(--nav-flyout-width) shadow-overlay'
+        : 'w-(--nav-rail-width)',
     ]"
     @click.self="changeExpandedStateOfMenu(true)"
   >
-    <div class="shrink-0 px-5 pt-10">
+    <div
+      class="shrink-0 flex flex-col items-center gap-1 p-(--nav-rail-pad)"
+    >
       <router-link
         :to="{ path: '/' }"
         @click="setSelectedMenuItem(menuItems[0])"
-        class="mt-4 text-neutral-700 font-semibold mb-8 text-xl flex justify-center"
+        class="flex justify-center"
       >
-        <img src="/logo.svg" alt="Elody logo" class="h-12" />
+        <img src="/logo.svg" alt="Elody logo" class="w-(--nav-rail-logo) h-auto" />
       </router-link>
-      <div
-        v-if="environmentLabel"
-        data-cy="environment-pill"
-        class="mb-8 -mt-6 flex justify-center"
-      >
+      <div v-if="environmentLabel" data-cy="environment-pill" class="flex">
+        <!-- small enough for the 52px rail -->
         <span
-          class="rounded-full bg-accent-normal text-neutral-0 text-xs font-semibold px-2 py-0.5 uppercase"
+          class="rounded-chip bg-surface-muted text-text-secondary text-hint font-semibold px-1 uppercase"
         >
           {{ environmentLabel }}
         </span>
@@ -30,7 +33,10 @@
     </div>
     <div
       data-cy="menu-nav-items"
-      class="navbar-items flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-5 pb-4"
+      :class="[
+        'navbar-items flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col gap-(--nav-rail-gap) pb-4',
+        isExpanded ? 'px-3' : 'items-center',
+      ]"
       @click.self="changeExpandedStateOfMenu(true)"
     >
       <div
@@ -50,7 +56,10 @@
         />
       </div>
     </div>
-    <LogInLogout :is-expanded="isExpanded" class="shrink-0 pt-4 pb-8 pl-4" />
+    <LogInLogout
+      :is-expanded="isExpanded"
+      :class="['shrink-0 pt-4 pb-(--nav-rail-gap)', { 'px-3': isExpanded }]"
+    />
   </nav>
 </template>
 
@@ -97,12 +106,20 @@ const changeHoveredItem = (item: MenuItem | undefined) => {
   }
 };
 
+// navigation.md Round 2: Escape closes the expanded menu
+const closeOnEscape = (event: KeyboardEvent) => {
+  if (event.key === "Escape" && isExpanded.value)
+    changeExpandedStateOfMenu(false);
+};
+
 onMounted(() => {
   document.body.addEventListener("click", closeExpanded);
+  document.addEventListener("keydown", closeOnEscape);
 });
 
 onUnmounted(() => {
   document.body.removeEventListener("click", closeExpanded);
+  document.removeEventListener("keydown", closeOnEscape);
 });
 
 const closeExpanded = (event: any) => {

@@ -5,14 +5,20 @@
       data-test="menu-item-component"
       :is="linkTag"
       :to="isLink ? menuAction.action : undefined"
+      :type="isLink ? undefined : 'button'"
+      :aria-label="isExpanded ? undefined : t(menuitem?.label)"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center pl-4 min-h-9 mt-3 cursor-pointer hover:bg-neutral-40 hover:rounded-lg hover:no-underline"
+      class="flex flex-row items-center cursor-pointer rounded-(--nav-rail-item-radius) hover:no-underline"
       :class="[
-        // Every item takes the menu colour, link or not, so they look alike.
+        isExpanded
+          ? 'w-full min-h-(--nav-rail-item-height) px-2 gap-2'
+          : 'justify-center w-(--nav-rail-item-width) h-(--nav-rail-item-height)',
+        // navigation.md: muted at rest, light wash on hover, accent wash +
+        // accent ink on the current page; link or not, they look alike
         isActiveParentOrSubmenu
-          ? 'text-accent-accent'
-          : 'text-nav-item hover:text-nav-item-hover',
-        { 'bg-neutral-40 rounded-lg': isBeingHovered },
+          ? 'bg-accent-light text-accent-ink'
+          : 'text-text-muted hover:bg-accent-highlight',
+        { 'bg-accent-highlight': isBeingHovered && !isActiveParentOrSubmenu },
       ]"
     >
       <base-tooltip v-if="!isExpanded" position="right" :tooltip-offset="24">
@@ -57,7 +63,7 @@
         v-show="isExpanded"
         class="w-full grid grid-cols-[1fr_auto_auto] items-center"
       >
-        <span class="px-4 font-bold">
+        <span class="text-table">
           {{ t(menuitem?.label) }}
         </span>
         <MenuBadge :count="badgeCount" class="mr-1" />
@@ -112,7 +118,7 @@ const menuAction = computed(() => checkIfRouteOrModal(props.menuitem));
 const isLink = computed(
   () => menuAction.value?.menuItemType === MenuItemType.link,
 );
-const linkTag = computed(() => (isLink.value ? "router-link" : "div"));
+const linkTag = computed(() => (isLink.value ? "router-link" : "button"));
 const route = useRoute();
 
 const props = defineProps<{

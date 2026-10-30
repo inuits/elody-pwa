@@ -333,6 +333,15 @@
   --gutter-field-grid: 4px 18px;
   --page-pad: 14px 18px 60px;
   --nav-rail-width: 52px;
+  /* Nav rail (navigation.md, catalogue NavRail) and top bar (ui_kits AppShell) */
+  --nav-rail-pad: 14px 0;
+  --nav-rail-gap: 10px;
+  --nav-rail-logo: 26px;
+  --nav-rail-item-width: 34px;
+  --nav-rail-item-height: 30px;
+  --nav-rail-item-radius: 7px;
+  --nav-flyout-width: 320px;
+  --topbar-pad: 10px 18px;
   --filter-panel-width: 250px;
   --touch-target-min: 44px;
   --field-grid-breakpoint-2col: 1100px;

@@ -211,3 +211,22 @@ describe("TheHeader history button", () => {
     );
   });
 });
+
+// ui_kits AppShell: a flat full-width top bar, not a floating rounded card
+describe("TheHeader bar", () => {
+  it("is a flat bar with the top bar padding and a hairline below", () => {
+    const classes = mountHeader().classes();
+    expect(classes).toEqual(
+      expect.arrayContaining([
+        "p-(--topbar-pad)",
+        "bg-surface",
+        "border-b",
+        "border-border-subtle",
+      ]),
+    );
+    expect(classes).not.toEqual(
+      expect.arrayContaining(["rounded-3xl"]),
+    );
+    expect(classes.some((c) => /^m[xy]-/.test(c))).toBe(false);
+  });
+});

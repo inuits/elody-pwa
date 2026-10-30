@@ -1,7 +1,8 @@
 <template>
   <div
-    class="z-header flex items-center mx-6 my-8 px-6 py-4 rounded-3xl bg-background-light flex-wrap min-[1400px]:flex-nowrap"
+    class="z-header flex items-center gap-2 p-(--topbar-pad) bg-surface border-b border-border-subtle flex-wrap min-[1400px]:flex-nowrap"
   >
+    <!-- ui_kits AppShell: a flat full-width top bar -->
     <EntityNavigationArrows class="mr-2" />
     <BreadCrumbs />
     <!-- The page's create action, teleported in by its main list
