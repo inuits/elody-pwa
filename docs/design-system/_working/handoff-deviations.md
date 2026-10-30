@@ -95,6 +95,5 @@ Kinds:
 | V21 | Parked | each saved step undoable | no Undo for a chain with an upload step (the upload reports its host's id, not the new mediafile's) | have the upload report created mediafile ids, then delete them on undo |
 | V21 | Open | — | a guided-flow upload the server rejects (duplicate) still advances the step | check `DynamicForm`'s upload path |
 | V24 | Parked | search pill shows a spinner while searching | no spinner in the pill (the results list shows its own loading) | add a `loading` state to `BaseSearchPill` |
-| V24 | Open | — | search modal results sit in the library's grey container inside the white modal | decide whether results go straight on the surface |
 | Step 9 | Parked | DAMS tenants: media-first detail layout | not started (needs vliz-dams) | — |
 | DS 3 note | Open | every button named | recrop modal close button had no name (found in DS 3) | check |

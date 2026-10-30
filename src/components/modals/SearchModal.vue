@@ -48,7 +48,7 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { ref, watch } from "vue";
+import { provide, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useSimpleSearch } from "@/composables/useSimpleSearch";
 import { useI18n } from "vue-i18n";
@@ -57,6 +57,8 @@ const { t } = useI18n();
 const { closeModal, getModalInfo } = useBaseModal();
 const { buildFilters } = useSimpleSearch();
 const isModalOpened = ref<boolean>(false);
+// the modal is the chrome: no grey well or band of the list's own (L25)
+provide("InsidePanel", true);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const handleSearch = (term: string) => {
