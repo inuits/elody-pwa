@@ -3,6 +3,7 @@
     ref="dialog"
     data-testid="modal-dialog"
     closedby="none"
+    :aria-labelledby="title ? titleId : undefined"
     @close="hideModal"
     @cancel="handleCancel"
     :class="[
@@ -15,21 +16,36 @@
           currentModalStyle === ModalStyle.CenterWide,
       },
       modalStyle,
-      `@container/modal relative`,
+      `@container/modal relative shadow-modal backdrop:bg-scrim`,
     ]"
   >
     <div
       v-if="!cancelButtonAvailabe"
-      class="flex justify-end p-2"
+      :class="[
+        'flex items-center gap-2',
+        title
+          ? 'justify-between p-(--panel-header-pad) bg-surface-panel-header border-b border-border-panel'
+          : 'justify-end p-2',
+      ]"
       data-testid="modal-header"
     >
-      <unicon
-        :name="Unicons.Close.name"
-        :height="iconHeight"
-        class="cursor-pointer"
+      <h2
+        v-if="title"
+        :id="titleId"
+        data-testid="modal-title"
+        class="m-0 text-(length:--text-panel-title) font-bold text-text-panel-header"
+      >
+        {{ title }}
+      </h2>
+      <button
+        type="button"
         data-testid="modal-close-button"
+        :aria-label="$t('actions.labels.close')"
+        class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted"
         @click="hideModal"
-      />
+      >
+        <unicon :name="Unicons.Close.name" :height="iconHeight" />
+      </button>
     </div>
     <div data-testid="modal-content">
       <slot />
@@ -41,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onUnmounted } from "vue";
+import { ref, computed, watch, onUnmounted, useId } from "vue";
 import { type TypeModals, ModalStyle } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -58,6 +74,8 @@ const props = withDefaults(
     iconHeight?: number;
     modalColor?: string;
     cancelButtonAvailabe?: boolean;
+    // panel-shell header title; also names the dialog
+    title?: string;
   }>(),
   {
     modalHeightStyle: "max-h-[75vh] my-[12.5vh]",
@@ -68,6 +86,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits(["update:modalState", "hideModal"]);
+const titleId = useId();
 
 const { getModalInfo, registerOpenDialog, unregisterOpenDialog } =
   useBaseModal();
@@ -138,11 +157,6 @@ onUnmounted(() => {
 dialog {
   max-width: 100vw;
   border: 0;
-}
-
-dialog::backdrop {
-  background-color: var(--color-accent-normal);
-  opacity: 0.3;
 }
 
 dialog:focus {
