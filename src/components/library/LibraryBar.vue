@@ -1,76 +1,60 @@
 <template>
-  <div
-    v-if="sortOptionsPromiseIsResolved"
-    class="flex justify-between items-center w-full"
-    :class="[
-      { 'flex-wrap': filtersAvailableOnDetailPage },
-      { 'flex-nowrap': !filtersAvailableOnDetailPage },
-    ]"
-  >
-    <div
-      class="flex flex-col @md:flex-row justify-start gap-3 w-full @md:w-auto"
-    >
-      <div v-if="sortOptions.length > 0" class="w-full @md:w-auto">
-        <AdvancedDropdown
-          class="w-full @md:w-auto"
-          data-cy="sort-options"
-          v-model="selectedSortOption"
-          @update:model-value="(sort: string) => trackSort(sort, route.meta?.entityType as string)"
-          :options="sortOptions"
-          :label="t('library.sort')"
-          :clearable="false"
-          :add-label-to-value="true"
-          label-position="inline"
-          style-type="defaultWithBorder"
-        />
-      </div>
-      <div
-        v-if="sortOptions.length > 0"
-        class="flex items-center w-full @md:w-auto"
-      >
-        <!-- ui_kits/clients: one "⇅ Descending" toggle, not a dropdown. -->
-        <BaseButtonNew
-          class="!w-auto min-h-8"
-          data-cy="sort-toggle"
-          button-size="md"
-          :icon="selectedSortDirection === 'asc' ? DamsIcons.SortUp : DamsIcons.SortDown"
-          :label="t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')"
-          :aria-label="`${t('library.sort-direction')}: ${t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')}`"
-          @click="
-            selectedSortDirection =
-              selectedSortDirection === 'asc' ? 'desc' : 'asc'
-          "
-        />
-      </div>
-      <div
-        v-if="showGroupBy && groupByHasOptions"
-        class="w-full @md:w-auto"
-      >
-        <AdvancedDropdown
-          class="w-full @md:w-auto"
-          data-cy="group-by-options"
-          :model-value="selectedGroupByKey"
-          :options="groupByDropdownOptions"
-          :label="t('library.group-by')"
-          :clearable="false"
-          :add-label-to-value="true"
-          label-position="inline"
-          style-type="defaultWithBorder"
-          @update:model-value="(value) => selectGroupBy(String(value ?? ''))"
-        />
-      </div>
-    </div>
-    <div
-      v-if="simpleSearchKeys.length > 0 && setSimpleSearch"
-      class="w-full @md:w-64"
-    >
-      <BaseSearchPill
-        data-cy="simple-search"
-        v-model="simpleSearchInput"
-        :label="t('library.search-in-results')"
-        :placeholder="t('library.search-in-results')"
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    <!-- ui_kits/vlacc: search, page size, sort and direction together on the
+         right of the band, wrapping as one group -->
+    <BaseSearchPill
+      v-if="
+        sortOptionsPromiseIsResolved &&
+        simpleSearchKeys.length > 0 &&
+        setSimpleSearch
+      "
+      class="w-64"
+      data-cy="simple-search"
+      v-model="simpleSearchInput"
+      :label="t('library.search-in-results')"
+      :placeholder="t('library.search-in-results')"
+    />
+    <!-- the page size; it registers the promise the first fetch waits for, so
+         it isn't gated on the sort options -->
+    <slot />
+    <template v-if="sortOptionsPromiseIsResolved && sortOptions.length > 0">
+      <AdvancedDropdown
+        data-cy="sort-options"
+        v-model="selectedSortOption"
+        @update:model-value="(sort: string) => trackSort(sort, route.meta?.entityType as string)"
+        :options="sortOptions"
+        :label="t('library.sort')"
+        :clearable="false"
+        :add-label-to-value="true"
+        label-position="inline"
+        style-type="defaultWithBorder"
       />
-    </div>
+      <!-- ui_kits/clients: one "⇅ Descending" toggle, not a dropdown. -->
+      <BaseButtonNew
+        class="!w-auto min-h-8"
+        data-cy="sort-toggle"
+        button-size="md"
+        :icon="selectedSortDirection === 'asc' ? DamsIcons.SortUp : DamsIcons.SortDown"
+        :label="t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')"
+        :aria-label="`${t('library.sort-direction')}: ${t(selectedSortDirection === 'asc' ? 'library.asc' : 'library.desc')}`"
+        @click="
+          selectedSortDirection =
+            selectedSortDirection === 'asc' ? 'desc' : 'asc'
+        "
+      />
+    </template>
+    <AdvancedDropdown
+      v-if="sortOptionsPromiseIsResolved && showGroupBy && groupByHasOptions"
+      data-cy="group-by-options"
+      :model-value="selectedGroupByKey"
+      :options="groupByDropdownOptions"
+      :label="t('library.group-by')"
+      :clearable="false"
+      :add-label-to-value="true"
+      label-position="inline"
+      style-type="defaultWithBorder"
+      @update:model-value="(value) => selectGroupBy(String(value ?? ''))"
+    />
   </div>
 </template>
 
@@ -98,14 +82,12 @@ const props = withDefaults(
   defineProps<{
     setSortKey: (sortKey: string) => void;
     setSortOrder: (sortOrder: boolean, force?: boolean) => void;
-    filtersAvailableOnDetailPage?: boolean;
     simpleSearchValue?: string;
     setSimpleSearch?: (value: string) => void;
     showGroupBy?: boolean;
     setGroupBy?: (config: GroupByConfig | null) => void;
   }>(),
   {
-    filtersAvailableOnDetailPage: false,
     simpleSearchValue: "",
     setSimpleSearch: undefined,
     showGroupBy: false,

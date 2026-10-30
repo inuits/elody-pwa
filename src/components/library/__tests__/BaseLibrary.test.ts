@@ -275,6 +275,7 @@ const getWrapper = (
       stubs: {
         teleport: true,
       },
+      renderStubDefaultSlot: true,
     },
   });
 
@@ -918,6 +919,17 @@ describe("BaseLibrary.vue pager and page size", () => {
     await flushPromises();
 
     expect(wrapper.find(pageSizeSelector).exists()).toBe(true);
+  });
+
+  it("hands the page size to the library bar, which sits on the right of the band", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    const bar = wrapper.findComponent(LibraryBar);
+    expect(bar.find("page-size-select-stub").exists()).toBe(true);
+    expect(bar.element.parentElement?.classList).toContain("ml-auto");
   });
 
   it("leaves the page size out of compact relation lists", async () => {

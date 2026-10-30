@@ -136,25 +136,7 @@
               @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
             />
           </div>
-          <PageSizeSelect
-            v-if="showPageSize"
-            class="shrink-0"
-            :set-limit="setPaginationLimit"
-            :selected-pagination-limit-option="paginationStore.limit.value"
-            :total="totalEntityCount"
-            @pagination-limit-options-promise="
-              (promise) => (paginationLimitOptionsPromise = promise)
-            "
-          />
-          <div
-            v-if="
-              !disableLibraryBar &&
-              !predefinedEntities &&
-              (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
-            "
-            class="min-w-0"
-          >
+          <div v-if="showLibraryBar" class="min-w-0 ml-auto">
             <LibraryBar
               :route="route"
               :set-sort-key="setSortKey"
@@ -171,13 +153,24 @@
               @sort-options-promise="
                 (promise) => (sortOptionsPromise = promise)
               "
-            />
+            >
+              <PageSizeSelect
+                v-if="showPageSize"
+                class="shrink-0"
+                :set-limit="setPaginationLimit"
+                :selected-pagination-limit-option="paginationStore.limit.value"
+                :total="totalEntityCount"
+                @pagination-limit-options-promise="
+                  (promise) => (paginationLimitOptionsPromise = promise)
+                "
+              />
+            </LibraryBar>
           </div>
           <!-- In a detail panel the bar's add pills land here. -->
           <span
             v-if="insidePanel"
             :data-list-actions="listActionsId"
-            class="ml-auto flex items-center gap-2"
+            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar }]"
           />
         </div>
           <BulkOperationsActionsBar
@@ -965,7 +958,14 @@ const hasResultsBand = computed(
     (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
-// Mounted wherever the library bar used to hold it: it registers the
+const showLibraryBar = computed(
+  () =>
+    !props.disableLibraryBar &&
+    !props.predefinedEntities &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
+// Slotted into the library bar, between search and sort: it registers the
 // pagination-limit promise the first fetch waits for.
 const showPageSize = computed(
   () =>

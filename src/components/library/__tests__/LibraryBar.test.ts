@@ -277,6 +277,7 @@ describe("LibraryBar.vue Simple Search", () => {
   const mountWithRouteMeta = async (
     meta: Record<string, any>,
     extraProps = {},
+    slots: Record<string, string> = {},
   ) => {
     (useRoute as any).mockReturnValueOnce({
       name: "TestRoute",
@@ -291,6 +292,7 @@ describe("LibraryBar.vue Simple Search", () => {
         setSimpleSearch: setSimpleSearchMock,
         ...extraProps,
       },
+      slots,
       global: {
         stubs: {
           AdvancedDropdown: true,
@@ -304,6 +306,42 @@ describe("LibraryBar.vue Simple Search", () => {
 
     return wrapper;
   };
+
+  // ui_kits/vlacc: search, "Items: 20", sort and direction sit together on the right
+  it("lines up search, the page size slot and sort, right-aligned and wrapping as one group", async () => {
+    (apolloClient.query as any).mockResolvedValue({
+      data: {
+        EntityTypeSortOptions: {
+          sortOptions: { isAsc: "asc", options: [{ label: "Title", value: "title" }] },
+        },
+      },
+    });
+    const wrapper = await mountWithRouteMeta(
+      { simpleSearch: { keys: ["podiumnet:1|properties.title.value"] } },
+      {},
+      { default: '<div data-test="page-size" />' },
+    );
+    await flushPromises();
+
+    const order = [...wrapper.element.querySelectorAll("[data-cy], [data-test]")]
+      .map((el) => el.getAttribute("data-cy") ?? el.getAttribute("data-test"))
+      .filter((key) => ["simple-search", "page-size", "sort-options"].includes(key!));
+    expect(order).toEqual(["simple-search", "page-size", "sort-options"]);
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining(["flex-wrap", "justify-end"]),
+    );
+  });
+
+  // the page size registers the promise the first fetch waits for
+  it("renders the page size slot before the sort options resolve", () => {
+    (useRoute as any).mockReturnValueOnce({ name: "T", fullPath: "/t", meta: {} });
+    const wrapper = mount(LibraryBar, {
+      props: { setSortOrder: setSortOrderMock, setSortKey: setSortKeyMock },
+      slots: { default: '<div data-test="page-size" />' },
+      global: { stubs: { AdvancedDropdown: true } },
+    });
+    expect(wrapper.find('[data-test="page-size"]').exists()).toBe(true);
+  });
 
   it("leaves the page size to the list header", async () => {
     const wrapper = await mountWithRouteMeta({});
