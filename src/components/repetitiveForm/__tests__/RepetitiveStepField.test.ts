@@ -569,3 +569,12 @@ describe("RepetitiveStepField picker surface", () => {
     expect(wrapper.find("[data-on-white]").attributes("data-on-white")).toBe("true");
   });
 });
+
+// F4: an empty actions row takes no space above the picker
+describe("RepetitiveStepField actions row", () => {
+  it("only spaces the actions row when it holds something", () => {
+    const row = getWrapper().find("[data-testid='repetitive-step-actions']");
+    expect(row.classes()).toContain("has-[>*]:mb-4");
+    expect(row.classes()).not.toContain("mb-4");
+  });
+});

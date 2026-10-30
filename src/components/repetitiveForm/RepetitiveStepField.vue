@@ -4,7 +4,7 @@
          single modal. Nested <dialog> elements would steal the app-wide
          '.base-modal--opened' teleport target used by tooltips/dropdowns. -->
     <div v-if="step.metadataOnly" data-testid="repetitive-step-metadata">
-      <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
+      <div class="flex gap-3 has-[>*]:mb-4" data-testid="repetitive-step-actions">
         <slot name="actions" />
       </div>
       <!-- no entity of its own: just collects field values (e.g. relation
@@ -20,7 +20,7 @@
 
     <div v-else-if="view === 'pick'" data-testid="repetitive-step-picker">
       <!-- one row: the flow's back button (slot) next to this step's buttons -->
-      <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
+      <div class="flex gap-3 has-[>*]:mb-4" data-testid="repetitive-step-actions">
         <slot name="actions" />
         <RepetitiveCreateButton
           v-if="creatableOptions.length"
@@ -82,7 +82,7 @@
     </div>
 
     <div v-else data-testid="repetitive-step-create">
-      <div class="flex gap-3 mb-4" data-testid="repetitive-step-actions">
+      <div class="flex gap-3 has-[>*]:mb-4" data-testid="repetitive-step-actions">
         <slot name="actions" />
         <div v-if="showBackFromCreate" class="w-fit">
           <BaseButtonNew

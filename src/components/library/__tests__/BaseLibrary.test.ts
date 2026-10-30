@@ -1383,7 +1383,10 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
   it("drops only the grey well on a white surface (a guided-flow picker step)", async () => {
     mockRoute.path = "/test";
     const wrapper = getWrapper(
-      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      {
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        parentEntityIdentifiers: ["work-1"],
+      },
       { OnWhiteSurface: true },
     );
     await flushPromises();
@@ -1391,6 +1394,14 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
     expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
     expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
       "bg-surface-panel-header",
+    );
+    // the picker lines up with the step strip above it (F4)
+    expect(wrapper.find(".grid").classes()).not.toContain("px-3");
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).not.toContain(
+      "mt-(--page-pad-top)",
+    );
+    expect(wrapper.find(".grid > .z-header").classes()).not.toContain(
+      "pt-(--page-pad-top)",
     );
     wrapper.unmount();
   });
@@ -1407,5 +1418,57 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
       "pt-(--page-pad-top)",
     );
     wrapper.unmount();
+  });
+
+  // user, 2026-10-30 (F1–F3): "Filters" opens the rail from the band; no bar
+  // above the list while it is closed
+  describe("filters toggle in the band", () => {
+    const mountMain = async (props = {}) => {
+      mockRoute.path = "/test";
+      const wrapper = getWrapper({
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        enableAdvancedFilters: true,
+        ...props,
+      });
+      await flushPromises();
+      return wrapper;
+    };
+
+    it("leads the band with a spot for the filters toggle and hands it to the filters", async () => {
+      const wrapper = await mountMain();
+      const spot = wrapper.find('[data-cy="list-header"] > [data-filters-toggle]');
+      expect(spot.exists()).toBe(true);
+      expect(spot.element).toBe(
+        wrapper.find('[data-cy="list-header"]').element.firstElementChild,
+      );
+      const id = spot.attributes("data-filters-toggle");
+      expect(wrapper.findComponent({ name: "FiltersBase" }).props("toggleTarget")).toBe(
+        `[data-filters-toggle="${id}"]`,
+      );
+      wrapper.unmount();
+    });
+
+    it("has no toggle spot without filters", async () => {
+      const wrapper = await mountMain({ enableAdvancedFilters: false });
+      expect(wrapper.find("[data-filters-toggle]").exists()).toBe(false);
+      wrapper.unmount();
+    });
+
+    it("hides the filter column while closed and shows it when open", async () => {
+      const closed = await mountMain();
+      expect(closed.find(".grid > .z-header").classes()).toContain("hidden");
+      closed.unmount();
+      const open = await mountMain({ forceShowFilters: true });
+      expect(open.find(".grid > .z-header").classes()).not.toContain("hidden");
+      open.unmount();
+    });
+
+    it("starts the results panel at the page padding below the top bar", async () => {
+      const wrapper = await mountMain();
+      expect(wrapper.find('[data-cy="results-panel"]').classes()).toContain(
+        "mt-(--page-pad-top)",
+      );
+      wrapper.unmount();
+    });
   });
 });

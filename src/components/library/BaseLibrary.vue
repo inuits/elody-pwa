@@ -23,9 +23,12 @@
       :class="wrapperClasses"
     >
       <div
-        class="z-header top-0 pt-(--page-pad-top) pb-2"
+        class="z-header top-0 pb-2"
         :class="[
-          { hidden: !enableAdvancedFilters },
+          // level with the results panel's top
+          { 'pt-(--page-pad-top)': !onWhiteSurface },
+          // closed, the rail opens from the band's Filters button (F1)
+          { hidden: !enableAdvancedFilters || !isFiltersPanelExpanded },
           { 'row-span-1': !isFiltersPanelExpanded },
           { 'row-span-2': isFiltersPanelExpanded },
           { sticky: hasStickyBars },
@@ -35,6 +38,7 @@
           v-show="enableAdvancedFilters"
           :simple-search-active="!!simpleSearchTerm"
           :expandFilters="expandFilters"
+          :toggle-target="filtersToggleTarget"
           :manipulation-query="manipulationQuery"
           :parent-entity-identifiers="parentEntityIdentifiers"
           :route="route"
@@ -80,13 +84,15 @@
           'row-span-2 flex flex-col min-h-0',
           // ui_kits/clients: band, selection row and list in one white panel.
           {
-            'mt-3 bg-surface border border-border-panel rounded-card':
+            'bg-surface border border-border-panel rounded-card':
               hasResultsBand,
           },
+          // below the top bar; a white-surface host spaces it itself
+          { 'mt-(--page-pad-top)': hasResultsBand && !onWhiteSurface },
           { 'col-span-1': isFiltersPanelExpanded },
           isFiltersPanelExpanded
             ? hasResultsBand
-              ? 'ml-[1%]'
+              ? 'ml-(--gutter-panels)'
               : 'pl-[1%]'
             : '',
           { 'col-span-2': !isFiltersPanelExpanded },
@@ -107,6 +113,12 @@
             { 'sticky top-0 z-header': hasStickyBars },
           ]"
         >
+          <!-- FiltersBase teleports its Filters button here -->
+          <span
+            v-if="filtersToggleTarget"
+            :data-filters-toggle="filtersToggleId"
+            class="contents"
+          />
           <ResultCountChip
             v-if="
               !disableLibraryBar &&
@@ -739,9 +751,11 @@ const wrapperClasses = computed(() => {
 
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     // ui_kits ListScreen: the page padding on a list page of its own
-    classes.push(
-      props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-(--page-pad-x)",
-    );
+    // a white surface (guided-flow picker step) is padded by its host
+    if (!onWhiteSurface)
+      classes.push(
+        props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-(--page-pad-x)",
+      );
   }
   // Page background only on the list's own page; inside a panel or on a
   // white surface (a guided-flow picker step) it's white.
@@ -956,6 +970,12 @@ const showListPager = computed(
 const insidePanel: boolean = inject("InsidePanel", false);
 const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();
+const filtersToggleId = useId();
+const filtersToggleTarget = computed(() =>
+  props.enableAdvancedFilters && showCurrentEntityFlow.value
+    ? `[data-filters-toggle="${filtersToggleId}"]`
+    : undefined,
+);
 const hasResultsBand = computed(
   () =>
     !props.disableLibraryBar &&
