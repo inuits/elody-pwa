@@ -1,21 +1,20 @@
 <template>
   <BaseModal
-    class="bg-background-normal h-[70vh]"
+    class="bg-surface h-[70vh]"
     :modal-type="TypeModals.Search"
     :cancel-button-availabe="false"
+    :title="t('search.simple-search')"
     @hide-modal="closeModal(TypeModals.Search)"
   >
-    <div class="bg-background-normal h-full">
-      <h1 class="title pb-4 text-center">
-        {{ t("search.simple-search") }}
-      </h1>
+    <!-- the results scroll inside the modal, under the field -->
+    <div class="flex flex-col gap-4 h-full min-h-0 p-4">
       <search-bar
         :input-enabled="true"
         @search="handleSearch"
       />
       <div
         v-if="isModalOpened && filters.length"
-        class="overflow-y-scroll h-full"
+        class="flex-1 min-h-0 overflow-y-auto"
       >
         <base-library
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"

@@ -51,11 +51,30 @@ describe("SearchBar.vue debounce", () => {
     expect(wrapper.emitted("search")).toEqual([["john"]]);
   });
 
-describe("SearchBar.vue accessible name", () => {
-  it("names its icon-only search button", () => {
-    expect(mountSearchBar().find("button").attributes("aria-label")).toBe(
-      "library.search",
-    );
-  });
 });
+
+// navigation.md: the header search trigger is a pill field that opens the
+// simple-search modal; inside the modal the field searches as you type
+describe("SearchBar.vue handoff shape", () => {
+  const mountTrigger = () =>
+    mount(SearchBar, {
+      props: { inputEnabled: false },
+      global: { stubs: { unicon: true } },
+    });
+
+  it("renders the header trigger as a pill field that opens a dialog", () => {
+    const trigger = mountTrigger().find("[data-testid='search-trigger']");
+    expect(trigger.element.tagName).toBe("BUTTON");
+    expect(trigger.classes()).toContain("rounded-pill");
+    expect(trigger.attributes("aria-haspopup")).toBe("dialog");
+    expect(trigger.text()).toBe("search.search-placeholder");
+  });
+
+  it("uses a named search pill inside the modal, with no separate search button", () => {
+    const wrapper = mountSearchBar();
+    const pill = wrapper.findComponent({ name: "BaseSearchPill" });
+    expect(pill.exists()).toBe(true);
+    expect(pill.props("label")).toBe("library.search");
+    expect(wrapper.find("button").exists()).toBe(false);
+  });
 });

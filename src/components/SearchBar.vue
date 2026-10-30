@@ -1,34 +1,33 @@
 <template>
-  <div :class="['flex', { 'p-4 bg-background-normal': inputEnabled }]">
-    <div class="flex w-full bg-background-light rounded-lg">
-      <input
-        v-if="inputEnabled"
-        type="text"
-        class="w-full rounded-lg border-0"
-        v-model="inputValue"
-        :placeholder="t('search.search-placeholder')"
-        @keydown.enter="submitSearch"
-      />
-      <BaseVirtualKeyboard
-        v-if="inputEnabled && virtualKeyboardLayouts"
-        class="flex items-center pr-2"
-        :input="inputValue"
-        :layouts="virtualKeyboardLayouts"
-        :keyboard-class="keyboardClass"
-        @on-change="inputValue = $event"
-      />
-    </div>
-    <button
-      type="button"
-      :class="[
-        'flex justify-center items-center h-10 w-10 p-2.5 text-sm font-medium text-neutral-white bg-accent-normal rounded-lg cursor-pointer',
-        { 'ml-2': inputEnabled },
-      ]"
-      :aria-label="t('library.search')"
-      @click="!inputEnabled ? openSearchModal() : submitSearch()"
-    >
-      <unicon :name="Unicons.SearchGlass.name"></unicon>
-    </button>
+  <button
+    v-if="!inputEnabled"
+    type="button"
+    data-testid="search-trigger"
+    aria-haspopup="dialog"
+    class="flex items-center gap-2 w-64 px-3 min-h-(--control-height) rounded-pill border border-border-default bg-surface text-input text-text-muted cursor-pointer hover:border-input-border-hover"
+    @click="openSearchModal"
+  >
+    <unicon :name="Unicons.SearchGlass.name" height="14" aria-hidden="true" />
+    <span>{{ t("search.search-placeholder") }}</span>
+  </button>
+  <div v-else class="flex items-center gap-2">
+    <!-- modal.md: first focus on the field, not the close cross -->
+    <BaseSearchPill
+      v-model="inputValue"
+      class="flex-1"
+      :label="t('library.search')"
+      :placeholder="t('search.search-placeholder')"
+      autofocus
+      @keydown.enter="submitSearch"
+    />
+    <BaseVirtualKeyboard
+      v-if="virtualKeyboardLayouts"
+      class="flex items-center"
+      :input="inputValue"
+      :layouts="virtualKeyboardLayouts"
+      :keyboard-class="keyboardClass"
+      @on-change="inputValue = $event"
+    />
   </div>
 </template>
 
@@ -38,6 +37,7 @@ import { computed, inject, onUnmounted, ref, useId, watch } from "vue";
 import debounce from "lodash.debounce";
 import { Unicons } from "@/types";
 import BaseVirtualKeyboard from "@/components/base/BaseVirtualKeyboard.vue";
+import BaseSearchPill from "@/components/base/BaseSearchPill.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 import { trackSearch } from "@/analytics/usageAnalytics";

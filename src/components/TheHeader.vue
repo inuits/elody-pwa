@@ -33,7 +33,6 @@
       v-if="config.features.hasTenantSelect"
     />
     <SearchBar
-      class="flex justify-end"
       v-if="showSearch"
       :inputEnabled="false"
     />

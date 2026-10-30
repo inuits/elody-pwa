@@ -40,6 +40,11 @@ the surrounding field row. If there is no visible label, give the input an
 - `defaultWithDarkBackgroundInput`: borderless on the accent tint
   (pagination page field).
 
+Search fields use `BaseSearchPill` instead: a pill (`rounded-pill`) with a
+search icon, a required `label` (the input's accessible name) and the focus
+ring on the pill. Used by the list toolbar ("Zoek in resultaten…") and the
+search modal ("Zoek…").
+
 ## States
 | State | Cue | Trigger |
 |---|---|---|

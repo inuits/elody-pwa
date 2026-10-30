@@ -327,17 +327,19 @@ describe("LibraryBar.vue Simple Search", () => {
     expect(wrapper.find('[data-cy="simple-search"]').exists()).toBe(false);
   });
 
-  it("renders the search box with a placeholder derived from the route's breadcrumb title when simpleSearch keys are configured", async () => {
+  // ui_kits/vlacc: a named search pill "Zoek in resultaten…"; the page name is
+  // left out (inside a picker it named the page behind the modal)
+  it("renders the search box as a named search pill for the results", async () => {
     const wrapper = await mountWithRouteMeta({
       simpleSearch: { keys: ["podiumnet:1|properties.title.value"] },
       breadcrumbs: [{ title: "navigation.productions" }],
     });
 
-    const input = wrapper.find('[data-cy="simple-search"] input');
-    expect(input.exists()).toBe(true);
-    expect(input.attributes("placeholder")).toBe(
-      "library.simple-search-placeholder",
-    );
+    const pill = wrapper.findComponent({ name: "BaseSearchPill" });
+    expect(pill.exists()).toBe(true);
+    expect(pill.attributes("data-cy")).toBe("simple-search");
+    expect(pill.props("label")).toBe("library.search-in-results");
+    expect(pill.props("placeholder")).toBe("library.search-in-results");
   });
 
   it("calls setSimpleSearch with the typed value", async () => {

@@ -64,12 +64,11 @@
       v-if="simpleSearchKeys.length > 0 && setSimpleSearch"
       class="w-full @md:w-64"
     >
-      <BaseInputTextNumberDatetime
+      <BaseSearchPill
         data-cy="simple-search"
-        type="text"
-        input-style="defaultWithBorder"
         v-model="simpleSearchInput"
-        :placeholder="simpleSearchPlaceholder"
+        :label="t('library.search-in-results')"
+        :placeholder="t('library.search-in-results')"
       />
     </div>
   </div>
@@ -89,7 +88,7 @@ import { useI18n } from "vue-i18n";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
-import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import BaseSearchPill from "@/components/base/BaseSearchPill.vue";
 import { useImport } from "@/composables/useImport";
 import { useGroupByOptions } from "@/composables/useGroupByOptions";
 import debounce from "lodash.debounce";
@@ -133,14 +132,6 @@ const route = useRoute();
 
 const simpleSearchKeys = computed<string[]>(
   () => (route.meta as any)?.simpleSearch?.keys ?? [],
-);
-const currentPageLabel = computed<string>(() => {
-  const breadcrumbs = (route.meta as any)?.breadcrumbs;
-  const lastCrumb = breadcrumbs?.[breadcrumbs.length - 1];
-  return lastCrumb?.title ? t(lastCrumb.title) : "";
-});
-const simpleSearchPlaceholder = computed<string>(() =>
-  t("library.simple-search-placeholder", { entity: currentPageLabel.value }),
 );
 const simpleSearchInput = ref<string>(props.simpleSearchValue);
 const debouncedSetSimpleSearch = debounce(
