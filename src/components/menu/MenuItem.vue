@@ -8,7 +8,7 @@
       :type="isLink ? undefined : 'button'"
       :aria-label="isExpanded ? undefined : t(menuitem?.label)"
       @click="!isLink && menuAction?.action ? menuAction.action() : undefined"
-      class="flex flex-row items-center cursor-pointer rounded-(--nav-rail-item-radius) hover:no-underline"
+      class="flex flex-row items-center text-left cursor-pointer rounded-(--nav-rail-item-radius) hover:no-underline"
       :class="[
         isExpanded
           ? 'w-full min-h-(--nav-rail-item-height) px-2 gap-2'

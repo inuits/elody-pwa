@@ -195,6 +195,8 @@ describe("MenuItem colour", () => {
   it("renders an item that opens a form as a real button", async () => {
     expect((await item("modal")).element.tagName).toBe("BUTTON");
     expect((await item("modal")).attributes("type")).toBe("button");
+    // buttons centre their text; menu labels start at the icon
+    expect((await item("modal")).classes()).toContain("text-left");
   });
 });
 
