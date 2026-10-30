@@ -459,7 +459,11 @@ const commitFailureText = (error: any): string =>
 
 const onFinish = async () => {
   if (isCommitting.value) return;
-  if (!hostEntityId.value) {
+  // a flow opened from the menu has no host; it only needs one to link to
+  const needsHost = branches.value.some(
+    (branch) => branch.pendingHostRelations.length > 0,
+  );
+  if (needsHost && !hostEntityId.value) {
     displayErrorNotification(
       "repetitiveForm.finish-failed-title",
       "repetitiveForm.finish-failed-description",
@@ -468,7 +472,8 @@ const onFinish = async () => {
   }
   isCommitting.value = true;
   try {
-    await store.commitPendingHostRelations(hostEntityId.value);
+    if (hostEntityId.value)
+      await store.commitPendingHostRelations(hostEntityId.value);
   } catch (error: any) {
     displayErrorNotification(
       "repetitiveForm.finish-failed-title",

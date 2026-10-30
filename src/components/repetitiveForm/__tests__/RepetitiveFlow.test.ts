@@ -362,6 +362,22 @@ describe("RepetitiveFlow", () => {
     ).toBe("repetitiveForm.finalize-omnibus");
   });
 
+  // opened from the menu there is no host; a flow with nothing to link to one
+  // must still reach its finalize screen
+  it("finalizes without a host when no step links to the host", async () => {
+    routeMocks.id = undefined;
+    try {
+      const wrapper = getWrapper();
+      await completeOneBranch(wrapper);
+      await finish(wrapper);
+      expect(
+        wrapper.find("[data-testid='repetitive-flow-finalize-heading']").exists(),
+      ).toBe(true);
+    } finally {
+      routeMocks.id = "org-1";
+    }
+  });
+
   it("goes back from the second step to the first via the back button", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
