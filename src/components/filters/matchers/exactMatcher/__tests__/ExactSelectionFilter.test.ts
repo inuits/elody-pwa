@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import {
   AdvancedFilterTypes,
@@ -276,5 +276,99 @@ describe("ExactSelectionFilter search on a seeded text input", () => {
     const filters = await search(wrapper, "Claus");
 
     expect(filters[0].value).toBe("$entity.intialValues.primary_author_name");
+  });
+});
+
+describe("ExactSelectionFilter seed resolution ranking", () => {
+  const exactHits = [
+    { label: "Nix, Garth", value: "entities/1" },
+    { label: "Nix, Garth", value: "entities/2" },
+  ];
+  const rankedHits = [
+    { label: "Nix, Garth", value: "entities/3" },
+    { label: "Nix, Anna", value: "entities/4" },
+  ];
+
+  const respondWith = (exact: any[], contains: any[]) =>
+    mocks.loadOptionsAndFacetsInParallel.mockImplementation(async () => {
+      const inputs = mocks.setFilters.mock.calls.at(-1)![0];
+      mocks.options.value = inputs[0].match_exact ? exact : contains;
+    });
+
+  const makeSeededFilter = (type = AdvancedFilterTypes.Text) =>
+    makeFilter({
+      selectionOption: AutocompleteSelectionOptions.Autocomplete,
+      options: [],
+      advancedFilterInputForRetrievingOptions: [
+        {
+          type,
+          key: ["vlacc:1|properties.name.value"],
+          value: "$entity.intialValues.primary_author_name",
+          match_exact: false,
+          resolveDefaultValueToOptionIds: true,
+        },
+        {
+          type: AdvancedFilterTypes.Selection,
+          key: "type",
+          value: ["person", "corporation"],
+        },
+      ],
+    });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.options.value = [];
+  });
+
+  afterEach(() => {
+    mocks.loadOptionsAndFacetsInParallel.mockReset();
+    mocks.loadOptionsAndFacetsInParallel.mockResolvedValue(undefined);
+  });
+
+  it("first searches the seed value as an exact match", async () => {
+    respondWith(exactHits, rankedHits);
+    getWrapper(makeSeededFilter());
+    await flushPromises();
+
+    const firstInputs = mocks.setFilters.mock.calls[0][0];
+    expect(firstInputs[0].match_exact).toBe(true);
+    expect(firstInputs[1]).toEqual({
+      type: AdvancedFilterTypes.Selection,
+      key: "type",
+      value: ["person", "corporation"],
+    });
+  });
+
+  it("fills every exact match and skips the contains search", async () => {
+    respondWith(exactHits, rankedHits);
+    const wrapper = getWrapper(makeSeededFilter());
+    await flushPromises();
+
+    expect(mocks.setFilters).toHaveBeenCalledTimes(1);
+    expect(wrapper.emitted("updateValue")).toEqual([
+      [["entities/1", "entities/2"]],
+    ]);
+  });
+
+  it("falls back to the contains search and fills only the best ranked option", async () => {
+    respondWith([], rankedHits);
+    const wrapper = getWrapper(makeSeededFilter());
+    await flushPromises();
+
+    expect(mocks.setFilters).toHaveBeenCalledTimes(2);
+    expect(mocks.setFilters.mock.calls[1][0][0].match_exact).toBe(false);
+    expect(wrapper.emitted("updateValue")).toEqual([[["entities/3"]]]);
+  });
+
+  it("keeps filling every option for a flagged selection input", async () => {
+    respondWith([], rankedHits);
+    const wrapper = getWrapper(makeSeededFilter(AdvancedFilterTypes.Selection));
+    await flushPromises();
+
+    expect(mocks.setFilters).toHaveBeenCalledTimes(1);
+    expect(mocks.setFilters.mock.calls[0][0][0].match_exact).toBe(false);
+    expect(wrapper.emitted("updateValue")).toEqual([
+      [["entities/3", "entities/4"]],
+    ]);
   });
 });

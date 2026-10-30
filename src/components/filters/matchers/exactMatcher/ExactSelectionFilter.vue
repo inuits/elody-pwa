@@ -86,11 +86,35 @@ const shouldResolveOptionIds = computed(() =>
   ),
 );
 
-const autoFillParentWithOptionIds = () => {
-  if (hasResolvedOptionIds.value || !shouldResolveOptionIds.value) return;
+const isSeedTextInput = (input: AdvancedFilterInput) =>
+  !!input.resolveDefaultValueToOptionIds &&
+  input.type === AdvancedFilterTypes.Text;
+
+const asExactSeedSearch = (filters: AdvancedFilterInput[]) =>
+  filters.map((input) =>
+    isSeedTextInput(input) ? { ...input, match_exact: true } : input,
+  );
+
+const fetchSeedOptions = async (filters: AdvancedFilterInput[]) => {
+  if (!filters.some(isSeedTextInput)) {
+    await fetchSelectionOptions(filters);
+    return false;
+  }
+
+  await fetchSelectionOptions(asExactSeedSearch(filters));
+  if (options.value.length) return false;
+
+  await fetchSelectionOptions(filters);
+  return true;
+};
+
+const autoFillParentWithOptionIds = (onlyBestRanked: boolean) => {
   hasResolvedOptionIds.value = true;
 
-  const optionIds = options.value.map((option) => option.value);
+  const resolvedOptions = onlyBestRanked
+    ? options.value.slice(0, 1)
+    : options.value;
+  const optionIds = resolvedOptions.map((option) => option.value);
   if (optionIds.length) emit("updateValue", optionIds);
 };
 
@@ -174,10 +198,13 @@ const loadOptions = async () => {
   }
 
   try {
-    await fetchSelectionOptions(
-      props.filter.advancedFilter.advancedFilterInputForRetrievingOptions,
-    );
-    autoFillParentWithOptionIds();
+    const filters =
+      props.filter.advancedFilter.advancedFilterInputForRetrievingOptions;
+    if (shouldResolveOptionIds.value && !hasResolvedOptionIds.value) {
+      autoFillParentWithOptionIds(await fetchSeedOptions(filters!));
+    } else {
+      await fetchSelectionOptions(filters);
+    }
     initialAmountOfOptions.value = options.value.length;
     hasFetchedOptions.value = true;
     isLoading.value = false;
