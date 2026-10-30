@@ -5,7 +5,7 @@
     role="complementary"
     :aria-label="t('filters.filter')"
     class="relative bg-background-light w-full"
-    :class="isExpanded ? 'rounded-t' : 'rounded-card'"
+    :class="inPane ? '' : isExpanded ? 'rounded-t' : 'rounded-card'"
     @keydown.enter="applyFilters(true)"
   >
     <!-- the band's Filters button (F1); in place when no band asks for it -->
@@ -23,7 +23,9 @@
         @clear-saved-search="() => (clearAllActiveFilters = true)"
       />
     </Teleport>
+    <!-- in the pane the Filters button heads the column instead -->
     <FiltersHeader
+      v-if="!inPane"
       :active-count="activeFilterCount"
       :expanded="!!expandFilters"
       :simple-search-active="simpleSearchActive"
@@ -43,7 +45,7 @@
         { hidden: !expandFilters },
         {
           'scrollable border-x border-b border-border-panel rounded-b-card':
-            expandFilters,
+            expandFilters && !inPane,
         },
       ]"
     >
@@ -200,6 +202,8 @@ const props = withDefaults(
     expandFilters?: boolean;
     // selector of the band spot the Filters button teleports to
     toggleTarget?: string;
+    // rendered inside the results panel's FiltersPane
+    inPane?: boolean;
     manipulationQuery: object | undefined;
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
@@ -222,6 +226,7 @@ const props = withDefaults(
     onRegisterApi: undefined,
     expandFilters: false,
     toggleTarget: undefined,
+    inPane: false,
     simpleSearchActive: false,
   },
 );

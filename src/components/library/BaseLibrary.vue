@@ -28,17 +28,24 @@
           // level with the results panel's top
           { 'pt-(--page-pad-top)': !onWhiteSurface },
           // closed, the rail opens from the band's Filters button (F1)
-          { hidden: !enableAdvancedFilters || !isFiltersPanelExpanded },
-          { 'row-span-1': !isFiltersPanelExpanded },
-          { 'row-span-2': isFiltersPanelExpanded },
+          { hidden: !enableAdvancedFilters || !railOpen },
+          { 'row-span-1': !railOpen },
+          { 'row-span-2': railOpen },
           { sticky: hasStickyBars },
         ]"
       >
+        <!-- pane layout: the filters move into the results panel's pane -->
+        <Teleport
+          defer
+          :to="filtersPaneBody || 'body'"
+          :disabled="!filtersPaneBody"
+        >
         <FiltersBase
           v-show="enableAdvancedFilters"
           :simple-search-active="!!simpleSearchTerm"
           :expandFilters="expandFilters"
           :toggle-target="filtersToggleTarget"
+          :in-pane="filtersInPane"
           :manipulation-query="manipulationQuery"
           :parent-entity-identifiers="parentEntityIdentifiers"
           :route="route"
@@ -77,11 +84,13 @@
             }
           "
         />
+        </Teleport>
       </div>
       <div
         data-cy="results-panel"
         :class="[
-          'row-span-2 flex flex-col min-h-0',
+          'row-span-2 flex min-h-0',
+          filtersInPane ? 'flex-row' : 'flex-col',
           // ui_kits/clients: band, selection row and list in one white panel.
           {
             'bg-surface border border-border-panel rounded-card':
@@ -89,15 +98,21 @@
           },
           // below the top bar; a white-surface host spaces it itself
           { 'mt-(--page-pad-top)': hasResultsBand && !onWhiteSurface },
-          { 'col-span-1': isFiltersPanelExpanded },
-          isFiltersPanelExpanded
+          { 'col-span-1': railOpen },
+          railOpen
             ? hasResultsBand
               ? 'ml-(--gutter-panels)'
               : 'pl-[1%]'
             : '',
-          { 'col-span-2': !isFiltersPanelExpanded },
+          { 'col-span-2': !railOpen },
         ]"
       >
+        <FiltersPane
+          v-if="filtersInPane"
+          :open="isFiltersPanelExpanded"
+          :pane-id="filtersPaneId"
+        />
+        <div class="flex flex-col flex-1 min-w-0 min-h-0">
         <!-- List header (templates/elody-list-screen): one accent-light band
              with count, pager, view modes, page size, sort and the selection
              bar's actions; it wraps when narrow. -->
@@ -107,15 +122,21 @@
           class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
           :class="[
             {
-              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card':
+              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel':
                 hasResultsBand,
             },
+            // beside an open filters pane only the outer corner is round
+            hasResultsBand
+              ? filtersInPane && isFiltersPanelExpanded
+                ? 'rounded-tr-card'
+                : 'rounded-t-card'
+              : '',
             { 'sticky top-0 z-header': hasStickyBars },
           ]"
         >
           <!-- FiltersBase teleports its Filters button here -->
           <span
-            v-if="filtersToggleTarget"
+            v-if="filtersBandSpot"
             :data-filters-toggle="filtersToggleId"
             class="contents"
           />
@@ -256,8 +277,8 @@
               'text-center my-2':
                 baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
             },
-            { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
-            { 'col-span-2': !isFiltersPanelExpanded },
+            { 'col-span-1 pl-[1%]': railOpen },
+            { 'col-span-2': !railOpen },
           ]"
         >
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
@@ -422,6 +443,7 @@
             :setAdvancedFilters="setAdvancedFilters"
           />
         </div>
+        </div>
       </div>
     </div>
   </div>
@@ -439,6 +461,8 @@ import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ResultCountChip from "@/components/library/ResultCountChip.vue";
+import FiltersPane from "@/components/filters/FiltersPane.vue";
+import { filtersLayout } from "@/components/filters/filtersLayout";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
@@ -971,10 +995,30 @@ const insidePanel: boolean = inject("InsidePanel", false);
 const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();
 const filtersToggleId = useId();
-const filtersToggleTarget = computed(() =>
+const filtersBandSpot = computed(() =>
   props.enableAdvancedFilters && showCurrentEntityFlow.value
     ? `[data-filters-toggle="${filtersToggleId}"]`
     : undefined,
+);
+// user, 2026-10-30: the filters open as a pane inside the results panel
+// (lists with a results band); the separate rail stays behind a switch
+const filtersPaneId = useId();
+const layout = filtersLayout();
+const filtersInPane = computed(
+  () => layout === "pane" && !!filtersBandSpot.value && hasResultsBand.value,
+);
+const filtersPaneBody = computed(() =>
+  filtersInPane.value
+    ? `[data-filters-pane-body="${filtersPaneId}"]`
+    : undefined,
+);
+const filtersToggleTarget = computed(() =>
+  filtersInPane.value && isFiltersPanelExpanded.value
+    ? `[data-filters-pane-head="${filtersPaneId}"]`
+    : filtersBandSpot.value,
+);
+const railOpen = computed(
+  () => isFiltersPanelExpanded.value && !filtersInPane.value,
 );
 const hasResultsBand = computed(
   () =>
@@ -1263,6 +1307,9 @@ const deepRelationsInitialized = ref<boolean>(false);
 const hasRestoredViewModesAfterFetch = ref<boolean>(false);
 
 onMounted(async () => {
+  // a FiltersBase teleported into the pane (deferred) mounts after this hook;
+  // its filter promises must be in before the first fetch
+  if (filtersPaneBody.value) await nextTick();
   lastProcessedEntityType.value = entityType.value;
   if (props.fetchDeepRelations) {
     await initializeDeepRelations();

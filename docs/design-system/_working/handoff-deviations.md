@@ -64,6 +64,7 @@ Kinds:
 | L20 | Deviation | filter rail `--filter-panel-width` (250px) | 30% (250px felt too small) | — |
 | L20 | Deviation (shortcut) | option counts as data | counts split from "Label (12)" on the client | DS 6: send counts separately |
 | V29 | Deviation | filter rail beside every list (`filter-panel.md`) | rail closed by default (L18) and opened from a "Filters" button with a count badge at the start of the list band; the applied saved-search chip sits beside the button while closed (user) | — |
+| V30 | Open | 250px filter rail beside the list (`filter-panel.md`) | trial: the filters open as a 300px pane inside the results panel, the Filters button at its top; the rail stays behind a switch | user picks pane or rail; remove the other and `filtersLayout.ts` |
 | L22 | Deviation | one global focus ring | the filter input box carries the ring on `:has(input:focus-visible)` | — |
 | L26 | Deviation | template page box 11.5px | 13px input | — |
 | L27 | Parked | record stepper with a result-list popover | no popover | build |
