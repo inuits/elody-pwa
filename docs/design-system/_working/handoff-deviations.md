@@ -96,5 +96,6 @@ Kinds:
 | V21 | Open | — | a guided-flow upload the server rejects (duplicate) still advances the step | check `DynamicForm`'s upload path |
 | V24 | Parked | search pill shows a spinner while searching | no spinner in the pill (the results list shows its own loading) | add a `loading` state to `BaseSearchPill` |
 | V24d | Deviation | header search trigger is a pill field (`navigation.md`) | round accent icon button, as the UI kits (user) | none unless the handoff is updated |
+| V26 | Open | one step card per step (`guided-flow.md`) | picker steps have no card (the list panel is the chrome); done with a `has-` selector and an `OnWhiteSurface` inject, a minimal fix | redo the picker step cleanly (user): one picker layout for guided-flow steps and the entity-picker modals (`entity-picker.md` library-embedded variant), decide the card vs list chrome there |
 | Step 9 | Parked | DAMS tenants: media-first detail layout | not started (needs vliz-dams) | — |
 | DS 3 note | Open | every button named | recrop modal close button had no name (found in DS 3) | check |

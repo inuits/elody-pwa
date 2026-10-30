@@ -55,9 +55,10 @@
         class="grid gap-4"
         :class="{ 'lg:grid-cols-[1fr_var(--guided-flow-rail-width)]': hasRail }"
       >
+        <!-- a picker step is a list page in the modal: no card around it (G6) -->
         <section
           data-testid="repetitive-flow-step-card"
-          class="bg-surface-group-form rounded-card p-4 min-w-0"
+          class="bg-surface-group-form rounded-card p-4 min-w-0 has-[[data-testid=repetitive-step-picker]]:bg-transparent has-[[data-testid=repetitive-step-picker]]:p-0"
         >
           <p
             v-if="isChainDone"

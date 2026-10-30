@@ -194,6 +194,18 @@ describe("RepetitiveFlow", () => {
     expect(overview(wrapper).props("branches")).toHaveLength(0);
   });
 
+  // G6 (option B): a picker step drops the card (and its tint); forms keep it
+  it("drops the step card look while the step shows a picker", () => {
+    const card = getWrapper().find("[data-testid='repetitive-flow-step-card']");
+    expect(card.classes()).toEqual(
+      expect.arrayContaining([
+        "bg-surface-group-form",
+        "has-[[data-testid=repetitive-step-picker]]:bg-transparent",
+        "has-[[data-testid=repetitive-step-picker]]:p-0",
+      ]),
+    );
+  });
+
   it("titles the modal with the configured flow label", () => {
     const wrapper = getWrapper();
     expect(modal(wrapper).props("title")).toBe("repetitiveForm.omnibus-title");

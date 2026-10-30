@@ -740,8 +740,9 @@ const wrapperClasses = computed(() => {
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
-  // Page background only on the list's own page; inside a panel it's white.
-  if (!insidePanel) classes.push("bg-background-normal");
+  // Page background only on the list's own page; inside a panel or on a
+  // white surface (a guided-flow picker step) it's white.
+  if (!insidePanel && !onWhiteSurface) classes.push("bg-background-normal");
 
   return classes;
 });
@@ -950,6 +951,7 @@ const showListPager = computed(
 // Inside a detail panel the panel is the chrome: no band or border of the
 // list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
+const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();
 const hasResultsBand = computed(
   () =>

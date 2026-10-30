@@ -118,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, provide } from "vue";
 import { useRouter } from "vue-router";
 import {
   DamsIcons,
@@ -150,6 +150,9 @@ type SelectedEntity = {
   details?: StagedEntityDetail[];
   values?: Record<string, unknown>;
 };
+
+// the picker list stands on the modal's white surface: no grey well (G6)
+provide("OnWhiteSurface", true);
 
 const props = withDefaults(
   defineProps<{

@@ -1379,4 +1379,19 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
     ).toBeUndefined();
     wrapper.unmount();
   });
+
+  it("drops only the grey well on a white surface (a guided-flow picker step)", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { OnWhiteSurface: true },
+    );
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
+      "bg-surface-panel-header",
+    );
+    wrapper.unmount();
+  });
 });
