@@ -23,7 +23,7 @@
       :class="wrapperClasses"
     >
       <div
-        class="z-header top-0 pt-3 pb-2"
+        class="z-header top-0 pt-(--page-pad-top) pb-2"
         :class="[
           { hidden: !enableAdvancedFilters },
           { 'row-span-1': !isFiltersPanelExpanded },
@@ -738,7 +738,10 @@ const wrapperClasses = computed(() => {
   const mode = props.baseLibraryMode;
 
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
-    classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
+    // ui_kits ListScreen: the page padding on a list page of its own
+    classes.push(
+      props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-(--page-pad-x)",
+    );
   }
   // Page background only on the list's own page; inside a panel or on a
   // white surface (a guided-flow picker step) it's white.

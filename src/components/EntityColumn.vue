@@ -14,7 +14,11 @@
   >
     <div
       :class="[
-        { 'w-full flex mt-5 overflow-y-auto': !isPreviewElement },
+        // ui_kits DetailScreen: page padding, panel gutter between columns
+        {
+          'w-full flex gap-(--gutter-panels) p-(--page-pad) overflow-y-auto':
+            !isPreviewElement,
+        },
         { 'pb-20': useEditHelper.isEdit && !isPreviewElement },
       ]"
     >
@@ -22,9 +26,8 @@
         v-for="(column, index) in currentColumnConfig[entity.id]"
         :key="index"
         :class="[
-          'h-full',
+          'h-full min-w-0',
           convertSizeToTailwind(column.size),
-          { 'px-5': !isPreviewElement },
         ]"
       >
         <entity-element

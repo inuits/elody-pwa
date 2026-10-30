@@ -331,7 +331,10 @@
   --table-row-pad: 7px 0;
   --gutter-panels: 14px;
   --gutter-field-grid: 4px 18px;
-  --page-pad: 14px 18px 60px;
+  --page-pad-top: 14px;
+  --page-pad-x: 18px;
+  --page-pad-bottom: 60px;
+  --page-pad: var(--page-pad-top) var(--page-pad-x) var(--page-pad-bottom);
   --nav-rail-width: 52px;
   /* Nav rail (navigation.md, catalogue NavRail) and top bar (ui_kits AppShell) */
   --nav-rail-pad: 14px 0;

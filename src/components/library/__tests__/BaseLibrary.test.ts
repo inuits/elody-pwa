@@ -1394,4 +1394,18 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
     );
     wrapper.unmount();
   });
+
+  // ui_kits ListScreen: the list page has the page padding (14px 18px)
+  it("pads the main list page with the page padding", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper({ baseLibraryMode: BaseLibraryModes.NormalBaseLibrary });
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).toContain("px-(--page-pad-x)");
+    expect(wrapper.find(".grid").classes()).not.toContain("px-6");
+    expect(wrapper.find(".grid > .z-header").classes()).toContain(
+      "pt-(--page-pad-top)",
+    );
+    wrapper.unmount();
+  });
 });
