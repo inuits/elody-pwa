@@ -68,3 +68,38 @@ describe("RepetitiveStepModal", () => {
     expect(dialog.attributes("aria-labelledby")).toBe(titleId);
   });
 });
+
+// modal.md, as BaseModal (V23): every modal shares scrim, shadow and header band
+describe("RepetitiveStepModal handoff chrome", () => {
+  it("draws the scrim and the modal shadow", () => {
+    const dialog = getWrapper(true, "Omnibus").find("dialog");
+    expect(dialog.classes()).toEqual(
+      expect.arrayContaining(["shadow-modal", "backdrop:bg-scrim", "bg-surface"]),
+    );
+  });
+
+  it("titles the dialog in the panel header band, as the other modals", () => {
+    const wrapper = getWrapper(true, "Omnibus");
+    const title = wrapper.find("[data-testid='repetitive-step-modal-title']");
+    expect(title.element.tagName).toBe("H2");
+    expect(title.classes()).toEqual(
+      expect.arrayContaining([
+        "text-(length:--text-panel-title)",
+        "text-text-panel-header",
+      ]),
+    );
+    expect(title.element.parentElement!.classList).toContain(
+      "bg-surface-panel-header",
+    );
+  });
+
+  it("uses the modal close button look", () => {
+    const close = getWrapper(true, "Omnibus").find(
+      "[data-testid='repetitive-step-modal-close']",
+    );
+    expect(close.classes()).toEqual(
+      expect.arrayContaining(["rounded-button", "hover:bg-surface-muted"]),
+    );
+    expect(close.find("unicon-stub").attributes("height")).toBe("18");
+  });
+});
