@@ -14,6 +14,7 @@ import Unicon from "vue-unicons";
 import { addComponentToRoutes } from "./views/router";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
+import { getUrlWithoutAuthCallbackParams } from "@/utils/authCallbackUrl";
 import { createRouter, createWebHistory, type Router } from "vue-router";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import {
@@ -102,6 +103,11 @@ const start = async (): Promise<void> => {
 
   if (authCode) {
     await auth.processAuthCode(authCode);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      getUrlWithoutAuthCallbackParams(window.location.href),
+    );
     if (!config.allowAnonymousUsers && !auth.isAuthenticated.value)
       await auth.redirectToLogin();
     config = (await getApplicationDetails()).config;
