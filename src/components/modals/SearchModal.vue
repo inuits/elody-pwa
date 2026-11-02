@@ -1,21 +1,20 @@
 <template>
   <BaseModal
-    class="bg-background-normal h-[70vh]"
+    class="bg-surface h-[70vh]"
     :modal-type="TypeModals.Search"
     :cancel-button-availabe="false"
+    :title="t('search.simple-search')"
     @hide-modal="closeModal(TypeModals.Search)"
   >
-    <div class="bg-background-normal h-full">
-      <h1 class="title pb-4 text-center">
-        {{ t("search.simple-search") }}
-      </h1>
+    <!-- the results scroll inside the modal, under the field -->
+    <div class="flex flex-col gap-4 h-full min-h-0 p-4">
       <search-bar
         :input-enabled="true"
         @search="handleSearch"
       />
       <div
         v-if="isModalOpened && filters.length"
-        class="overflow-y-scroll h-full"
+        class="flex-1 min-h-0 overflow-y-auto"
       >
         <base-library
           :bulk-operations-context="BulkOperationsContextEnum.SearchModal"
@@ -49,7 +48,7 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { ref, watch } from "vue";
+import { provide, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useSimpleSearch } from "@/composables/useSimpleSearch";
 import { useI18n } from "vue-i18n";
@@ -58,6 +57,8 @@ const { t } = useI18n();
 const { closeModal, getModalInfo } = useBaseModal();
 const { buildFilters } = useSimpleSearch();
 const isModalOpened = ref<boolean>(false);
+// the modal is the chrome: no grey well or band of the list's own (L25)
+provide("InsidePanel", true);
 const filters = ref<AdvancedFilterInput[]>([]);
 
 const handleSearch = (term: string) => {

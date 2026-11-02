@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   addRefetchFunction: undefined as unknown as ReturnType<typeof vi.fn>,
   addMutationCallback: undefined as unknown as ReturnType<typeof vi.fn>,
   displayMap: false,
+  toggles: [] as unknown[],
 }));
 
 // Module-level refs shared with the useBaseLibrary mock — cannot go in
@@ -186,7 +187,7 @@ vi.mock("@/composables/useViewModes", () => ({
     displayMap: ref(mocks.displayMap),
     displayPipeline: ref(false),
     expandFilters: ref(false),
-    toggles: ref([]),
+    toggles: ref(mocks.toggles),
     configPerViewMode: ref({}),
     viewModesIncludeViewModesMedia: ref(false),
     showViewModesList: ref(false),
@@ -275,6 +276,7 @@ const getWrapper = (
       stubs: {
         teleport: true,
       },
+      renderStubDefaultSlot: true,
     },
   });
 
@@ -920,6 +922,36 @@ describe("BaseLibrary.vue pager and page size", () => {
     expect(wrapper.find(pageSizeSelector).exists()).toBe(true);
   });
 
+  it("hands the page size to the library bar, which sits on the right of the band", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    const bar = wrapper.findComponent(LibraryBar);
+    expect(bar.find("page-size-select-stub").exists()).toBe(true);
+    expect(bar.element.parentElement?.classList).toContain("ml-auto");
+  });
+
+  // user, 2026-11-02: the view switch ends the band, away from the Filters
+  // button; it changes how results look, like sort and page size
+  it("puts the view switch at the end of the band, after the library bar", async () => {
+    mocks.toggles = [{}, {}];
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    const band = wrapper.find('[data-cy="list-header"]').element;
+    const children = [...band.children];
+    const toggle = wrapper.findComponent({ name: "BaseToggleGroup" }).element;
+    const barWrapper = wrapper.findComponent(LibraryBar).element.parentElement!;
+    expect(children.indexOf(toggle.parentElement!)).toBe(
+      children.indexOf(barWrapper) + 1,
+    );
+    mocks.toggles = [];
+  });
+
   it("leaves the page size out of compact relation lists", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
@@ -1366,5 +1398,136 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
       wrapper.findComponent({ name: "BulkOperationsActionsBar" }).props("listHeaderTarget"),
     ).toBeUndefined();
     wrapper.unmount();
+  });
+
+  it("drops only the grey well on a white surface (a guided-flow picker step)", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      {
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        parentEntityIdentifiers: ["work-1"],
+      },
+      { OnWhiteSurface: true },
+    );
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain(
+      "bg-surface-panel-header",
+    );
+    // the picker lines up with the step strip above it (F4)
+    expect(wrapper.find(".grid").classes()).not.toContain("px-3");
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).not.toContain(
+      "mt-(--page-pad-top)",
+    );
+    expect(wrapper.find(".grid > .z-header").classes()).not.toContain(
+      "pt-(--page-pad-top)",
+    );
+    wrapper.unmount();
+  });
+
+  // ui_kits ListScreen: the list page has the page padding (14px 18px)
+  it("pads the main list page with the page padding", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper({ baseLibraryMode: BaseLibraryModes.NormalBaseLibrary });
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).toContain("px-(--page-pad-x)");
+    expect(wrapper.find(".grid").classes()).not.toContain("px-6");
+    expect(wrapper.find(".grid > .z-header").classes()).toContain(
+      "pt-(--page-pad-top)",
+    );
+    wrapper.unmount();
+  });
+
+  // user, 2026-10-30 (F1–F3): "Filters" opens the rail from the band; no bar
+  // above the list while it is closed
+  describe("filters toggle in the band", () => {
+    const mountMain = async (props = {}) => {
+      mockRoute.path = "/test";
+      const wrapper = getWrapper({
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        enableAdvancedFilters: true,
+        ...props,
+      });
+      await flushPromises();
+      return wrapper;
+    };
+
+    it("leads the band with a spot for the filters toggle and hands it to the filters", async () => {
+      const wrapper = await mountMain();
+      const spot = wrapper.find('[data-cy="list-header"] > [data-filters-toggle]');
+      expect(spot.exists()).toBe(true);
+      expect(spot.element).toBe(
+        wrapper.find('[data-cy="list-header"]').element.firstElementChild,
+      );
+      const id = spot.attributes("data-filters-toggle");
+      expect(wrapper.findComponent({ name: "FiltersBase" }).props("toggleTarget")).toBe(
+        `[data-filters-toggle="${id}"]`,
+      );
+      wrapper.unmount();
+    });
+
+    it("has no toggle spot without filters", async () => {
+      const wrapper = await mountMain({ enableAdvancedFilters: false });
+      expect(wrapper.find("[data-filters-toggle]").exists()).toBe(false);
+      wrapper.unmount();
+    });
+
+    it("in the rail layout, hides the filter column while closed and shows it when open", async () => {
+      localStorage.setItem("elody.filtersLayout", "rail");
+      try {
+        const closed = await mountMain();
+        expect(closed.find(".grid > .z-header").classes()).toContain("hidden");
+        closed.unmount();
+        const open = await mountMain({ forceShowFilters: true });
+        expect(open.find(".grid > .z-header").classes()).not.toContain("hidden");
+        expect(open.findComponent({ name: "FiltersPane" }).exists()).toBe(false);
+        open.unmount();
+      } finally {
+        localStorage.removeItem("elody.filtersLayout");
+      }
+    });
+
+    // user, 2026-10-30 (pane layout, the default): the filters open as a
+    // column inside the results panel, the Filters button at its top
+    it("opens the filters in a pane inside the results panel, the button at its top", async () => {
+      const wrapper = await mountMain({ forceShowFilters: true });
+      const pane = wrapper
+        .find('[data-cy="results-panel"]')
+        .findComponent({ name: "FiltersPane" });
+      expect(pane.props("open")).toBe(true);
+      const id = pane.props("paneId");
+      expect(wrapper.findComponent({ name: "FiltersBase" }).props("toggleTarget")).toBe(
+        `[data-filters-pane-head="${id}"]`,
+      );
+      expect(wrapper.findComponent({ name: "FiltersBase" }).props("inPane")).toBe(true);
+      expect(wrapper.find(".grid > .z-header").classes()).toContain("hidden");
+      expect(wrapper.find('[data-cy="results-panel"]').classes()).toContain("col-span-2");
+      // the band meets the pane: only its outer (right) top corner is round
+      const band = wrapper.find('[data-cy="list-header"]').classes();
+      expect(band).toContain("rounded-tr-card");
+      expect(band).not.toContain("rounded-t-card");
+      wrapper.unmount();
+    });
+
+    it("keeps the pane shut and the button in the band while closed", async () => {
+      const wrapper = await mountMain();
+      const pane = wrapper.findComponent({ name: "FiltersPane" });
+      expect(pane.props("open")).toBe(false);
+      const spot = wrapper.find("[data-filters-toggle]").attributes("data-filters-toggle");
+      expect(wrapper.findComponent({ name: "FiltersBase" }).props("toggleTarget")).toBe(
+        `[data-filters-toggle="${spot}"]`,
+      );
+      wrapper.unmount();
+    });
+
+    it("starts the results panel at the page padding below the top bar", async () => {
+      const wrapper = await mountMain();
+      expect(wrapper.find('[data-cy="results-panel"]').classes()).toContain(
+        "mt-(--page-pad-top)",
+      );
+      wrapper.unmount();
+    });
   });
 });

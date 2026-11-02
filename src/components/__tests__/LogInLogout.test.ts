@@ -105,3 +105,25 @@ describe("LogInLogout", () => {
     );
   });
 });
+
+// navigation.md: the footer rows are rail items like the menu items
+describe("LogInLogout rail rows", () => {
+  it("sizes and centres the collapsed rows as rail items", () => {
+    const wrapper = mountRail(false);
+    expect(wrapper.classes()).toContain("items-center");
+    expect(wrapper.find('[data-cy="log-out"]').classes()).toEqual(
+      expect.arrayContaining([
+        "w-(--nav-rail-item-width)",
+        "h-(--nav-rail-item-height)",
+        "text-text-muted",
+        "hover:bg-accent-highlight",
+      ]),
+    );
+  });
+
+  it("stretches the expanded rows to the menu width", () => {
+    const row = mountRail(true).find('[data-cy="log-out"]');
+    expect(row.classes()).toContain("w-full");
+    expect(row.classes()).not.toContain("w-(--nav-rail-item-width)");
+  });
+});

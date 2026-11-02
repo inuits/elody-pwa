@@ -28,11 +28,13 @@ vi.mock("vue-i18n", () => ({
 const manageMocks = vi.hoisted(() => ({
   createEntity: vi.fn(),
   addRelations: vi.fn().mockResolvedValue(undefined),
+  deleteEntity: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock("@/composables/useManageEntities", () => ({
   useManageEntities: () => ({
     createEntity: manageMocks.createEntity,
     addRelations: manageMocks.addRelations,
+    deleteEntity: manageMocks.deleteEntity,
   }),
 }));
 // deliberately NOT mocked: it is module-scoped state shared with the page the
@@ -61,7 +63,8 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepModal.vue", () => ({
     name: "RepetitiveStepModal",
     props: ["open", "title"],
     emits: ["close"],
-    template: "<div><slot /></div>",
+    template:
+      "<div><div data-testid='header-extra'><slot name='headerExtra' /></div><slot /></div>",
   },
 }));
 vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
@@ -81,8 +84,8 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
 vi.mock("@/components/repetitiveForm/RepetitiveOverview.vue", () => ({
   default: {
     name: "RepetitiveOverview",
-    props: ["branches", "steps", "repeatable"],
-    emits: ["add-another", "finish", "remove"],
+    props: ["branches", "steps", "repeatable", "undoable"],
+    emits: ["remove", "undo"],
     template: "<div data-testid='overview-stub' />",
   },
 }));
@@ -147,7 +150,7 @@ const getWrapper = () =>
       renderStubDefaultSlot: true,
       // render the mocked step field for real so its named `actions` slot
       // (which now hosts the flow's back button) is part of the DOM
-      stubs: { RepetitiveStepField: false },
+      stubs: { RepetitiveStepField: false, RepetitiveStepModal: false },
     },
   });
 
@@ -160,9 +163,14 @@ const form = (w: ReturnType<typeof getWrapper>) =>
 const modal = (w: ReturnType<typeof getWrapper>) =>
   w.findComponent({ name: "RepetitiveStepModal" });
 
+// guided-flow.md: the flow opens on step 1 and starts the next chain itself
 const startBranch = async (w: ReturnType<typeof getWrapper>) => {
-  overview(w).vm.$emit("add-another");
   await w.vm.$nextTick();
+};
+
+const finish = async (w: ReturnType<typeof getWrapper>) => {
+  await w.find("[data-testid='repetitive-flow-save-close']").trigger("click");
+  await flushPromises();
 };
 
 const completeOneBranch = async (w: ReturnType<typeof getWrapper>) => {
@@ -179,21 +187,32 @@ describe("RepetitiveFlow", () => {
     confirmMocks.confirm.mockReset();
   });
 
-  it("initialises the flow and starts on the (empty) overview", () => {
+  it("initialises the flow and opens on the first step beside an empty rail", () => {
     const wrapper = getWrapper();
     expect(useRepetitiveForm().flowConfig.value).not.toBeNull();
+    expect(field(wrapper).props("step").key).toBe("work");
     expect(overview(wrapper).exists()).toBe(true);
     expect(overview(wrapper).props("branches")).toHaveLength(0);
-    expect(overview(wrapper).props("repeatable")).toBe(true);
-    expect(field(wrapper).exists()).toBe(false);
   });
 
-  it("titles the modal with the configured flow label on the overview", () => {
+  // G6 (option B): a picker step drops the card (and its tint); forms keep it
+  it("drops the step card look while the step shows a picker", () => {
+    const card = getWrapper().find("[data-testid='repetitive-flow-step-card']");
+    expect(card.classes()).toEqual(
+      expect.arrayContaining([
+        "bg-surface-group-form",
+        "has-[[data-testid=repetitive-step-picker]]:bg-transparent",
+        "has-[[data-testid=repetitive-step-picker]]:p-0",
+      ]),
+    );
+  });
+
+  it("titles the modal with the configured flow label", () => {
     const wrapper = getWrapper();
     expect(modal(wrapper).props("title")).toBe("repetitiveForm.omnibus-title");
   });
 
-  it("shows the first step field after add-another on the empty overview", async () => {
+  it("shows the first step field on open", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
     expect(field(wrapper).exists()).toBe(true);
@@ -201,9 +220,18 @@ describe("RepetitiveFlow", () => {
     expect(field(wrapper).props("scopeFilter")).toBeNull();
   });
 
-  it("shows the back button by default (no showBackButton on the step)", async () => {
+  it("has no back button on the first step of a fresh chain", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
+    expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(
+      false,
+    );
+  });
+
+  it("shows the back button from the second step (no showBackButton on the step)", async () => {
+    const wrapper = getWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
     expect(wrapper.find("[data-testid='repetitive-flow-back']").exists()).toBe(
       true,
     );
@@ -243,19 +271,49 @@ describe("RepetitiveFlow", () => {
     );
   });
 
-  it("titles the modal with the step counter while in a step", async () => {
+  it("keeps the flow's name as the modal title during a step (the strip shows the position)", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
-    expect(modal(wrapper).props("title")).toBe(
-      "repetitiveForm.step-of|1/2|repetitiveForm.step-work",
-    );
+    expect(modal(wrapper).props("title")).toBe("repetitiveForm.omnibus-title");
+  });
+
+  it("marks the current step and checks the finished ones", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    const items = wrapper.findAll("[data-testid='repetitive-flow-steps'] li");
+    expect(items[0].attributes("aria-current")).toBeUndefined();
+    expect(items[0].find("[data-testid='step-done']").exists()).toBe(true);
+    expect(items[1].attributes("aria-current")).toBe("step");
+    expect(items[1].find("[data-testid='step-done']").exists()).toBe(false);
+  });
+
+  // pickers card WizardSteps: "1. Type" chips in the header; current filled
+  // (accent-dark: white on the accent is 2.8:1 on vlacc), done white with the
+  // strong accent, to come a faded white (secondary text: muted is 4.2:1)
+  it("shows the steps as chips in the modal header", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    const strip = wrapper.find("[data-testid='header-extra'] [data-testid='repetitive-flow-steps']");
+    expect(strip.exists()).toBe(true);
+    const [done, current] = strip.findAll("li");
+    expect(current.text()).toContain("2. expression");
+    expect(current.classes()).toEqual(expect.arrayContaining(["rounded-overlay", "bg-accent-dark", "text-text-on-accent"]));
+    expect(done.classes()).toEqual(expect.arrayContaining(["bg-surface", "text-text-accent-strong"]));
+  });
+
+  it("fades the steps still to come", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    const todo = wrapper.findAll("[data-testid='repetitive-flow-steps'] li")[1];
+    expect(todo.classes()).toEqual(expect.arrayContaining(["bg-surface/55", "text-text-secondary"]));
   });
 
   it("renders a numbered step strip with step labels during a step", async () => {
     const wrapper = getWrapper();
-    expect(wrapper.find("[data-testid='repetitive-flow-steps']").exists()).toBe(
-      false,
-    );
     await startBranch(wrapper);
     const strip = wrapper.find("[data-testid='repetitive-flow-steps']");
     expect(strip.text()).toContain("repetitiveForm.step-work");
@@ -299,18 +357,19 @@ describe("RepetitiveFlow", () => {
     expect(useRepetitiveForm().currentStepIndex.value).toBe(1);
   });
 
-  it("shows the overview after the last step completes", async () => {
+  it("adds the finished chain to the rail and starts the next one on step 1", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     expect(useRepetitiveForm().branches.value).toHaveLength(1);
     expect(overview(wrapper).exists()).toBe(true);
     expect(overview(wrapper).props("branches")).toHaveLength(1);
+    expect(field(wrapper).props("step").key).toBe("work");
   });
 
-  it("starts a new branch when the overview emits add-another", async () => {
+  it("starts a new branch by itself after a chain (no add-another)", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
-    overview(wrapper).vm.$emit("add-another");
+    await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
     expect(useRepetitiveForm().currentStepIndex.value).toBe(0);
     expect(field(wrapper).exists()).toBe(true);
@@ -319,7 +378,7 @@ describe("RepetitiveFlow", () => {
   it("opens the finalize form with heading and prefilled relations on finish", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(form(wrapper).exists()).toBe(true);
     expect(form(wrapper).props("dynamicFormQuery")).toBe(
@@ -339,6 +398,22 @@ describe("RepetitiveFlow", () => {
     ).toBe("repetitiveForm.finalize-omnibus");
   });
 
+  // opened from the menu there is no host; a flow with nothing to link to one
+  // must still reach its finalize screen
+  it("finalizes without a host when no step links to the host", async () => {
+    routeMocks.id = undefined;
+    try {
+      const wrapper = getWrapper();
+      await completeOneBranch(wrapper);
+      await finish(wrapper);
+      expect(
+        wrapper.find("[data-testid='repetitive-flow-finalize-heading']").exists(),
+      ).toBe(true);
+    } finally {
+      routeMocks.id = "org-1";
+    }
+  });
+
   it("goes back from the second step to the first via the back button", async () => {
     const wrapper = getWrapper();
     await startBranch(wrapper);
@@ -347,10 +422,9 @@ describe("RepetitiveFlow", () => {
     expect(field(wrapper).props("step").key).toBe("expression");
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
     expect(field(wrapper).props("step").key).toBe("work");
-    expect(overview(wrapper).exists()).toBe(false);
   });
 
-  it("goes back from the first step to the overview, discarding the branch in progress", async () => {
+  it("goes back from the first step by discarding the branch in progress, staying on step 1", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     await startBranch(wrapper);
@@ -358,13 +432,13 @@ describe("RepetitiveFlow", () => {
     await flushPromises();
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
     await wrapper.find("[data-testid='repetitive-flow-back']").trigger("click");
-    expect(overview(wrapper).exists()).toBe(true);
+    expect(field(wrapper).props("step").key).toBe("work");
     // the half-finished branch is discarded; the completed one remains
     expect(useRepetitiveForm().branches.value).toHaveLength(1);
     expect(useRepetitiveForm().currentBranch.value.entities).toEqual({});
   });
 
-  it("removes a staged branch when the overview emits remove", async () => {
+  it("removes a staged branch when the rail emits remove", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
     overview(wrapper).vm.$emit("remove", 0);
@@ -373,17 +447,94 @@ describe("RepetitiveFlow", () => {
     expect(overview(wrapper).props("branches")).toHaveLength(0);
   });
 
-  it("returns to the overview from the finalize view via the back button", async () => {
+  it("returns to the steps from the finalize view via the back button", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(form(wrapper).exists()).toBe(true);
     await wrapper
       .find("[data-testid='repetitive-flow-back-to-overview']")
       .trigger("click");
     expect(form(wrapper).exists()).toBe(false);
-    expect(overview(wrapper).exists()).toBe(true);
+    expect(field(wrapper).exists()).toBe(true);
+  });
+
+  it("undoes the newest chain by deleting only the records it created", async () => {
+    manageMocks.deleteEntity.mockClear();
+    const wrapper = getWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]); // picked: kept
+    await flushPromises();
+    field(wrapper).vm.$emit("created", { id: "expr-new" }, "expression");
+    await flushPromises();
+    expect(overview(wrapper).props("undoable")).toBe(true);
+    overview(wrapper).vm.$emit("undo", 0);
+    await flushPromises();
+    expect(manageMocks.deleteEntity).toHaveBeenCalledTimes(1);
+    expect(manageMocks.deleteEntity).toHaveBeenCalledWith({
+      id: "expr-new",
+      type: "expression",
+    });
+    expect(useRepetitiveForm().branches.value).toHaveLength(0);
+  });
+
+  it("keeps the chain and reports when undo fails", async () => {
+    manageMocks.deleteEntity.mockRejectedValueOnce(new Error("nope"));
+    notificationMocks.displayErrorNotification.mockClear();
+    const wrapper = getWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("created", { id: "expr-new" }, "expression");
+    await flushPromises();
+    overview(wrapper).vm.$emit("undo", 0);
+    await flushPromises();
+    expect(useRepetitiveForm().branches.value).toHaveLength(1);
+    expect(notificationMocks.displayErrorNotification).toHaveBeenCalled();
+  });
+
+  it("ends undo at the next action (a step of the next chain)", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-2" }]);
+    await flushPromises();
+    expect(overview(wrapper).props("undoable")).toBe(false);
+  });
+
+  it("disables Save and close with a reason while a chain is half done", async () => {
+    const wrapper = getWrapper();
+    await completeOneBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-2" }]);
+    await flushPromises();
+    const button = wrapper.find("[data-testid='repetitive-flow-save-close']");
+    expect(button.attributes("disabled")).toBeDefined();
+    expect(button.attributes("tooltiplabel")).toBe(
+      "repetitiveForm.finish-current-first",
+    );
+  });
+
+  it("disables Save and close until a chain is complete", () => {
+    const wrapper = getWrapper();
+    expect(
+      wrapper
+        .find("[data-testid='repetitive-flow-save-close']")
+        .attributes("disabled"),
+    ).toBeDefined();
+  });
+
+  it("shows a completion note instead of step 1 once a non-repeatable flow has its chain", async () => {
+    const wrapper = shallowMount(RepetitiveFlow, {
+      props: { open: true, config: { ...omnibusConfig(), repeatable: false } },
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { RepetitiveStepField: false },
+      },
+    });
+    await completeOneBranch(wrapper);
+    expect(field(wrapper).exists()).toBe(false);
+    expect(
+      wrapper.find("[data-testid='repetitive-flow-complete']").exists(),
+    ).toBe(true);
   });
 
   it("asks for confirmation before closing once a branch has been staged", async () => {
@@ -420,7 +571,7 @@ describe("RepetitiveFlow", () => {
   it("emits finished when the finalize form creates the manifestation", async () => {
     const wrapper = getWrapper();
     await completeOneBranch(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     form(wrapper).vm.$emit("entityCreated", { id: "manif-1" });
     await wrapper.vm.$nextTick();
@@ -479,8 +630,8 @@ const getLinearWrapper = () =>
     },
   });
 
-// startOnFirstStep only moves the entry point: unlike `linear`, the flow keeps
-// its overview and finalize, it just doesn't open on an empty overview first.
+// Every non-linear flow now opens on step 1 (guided-flow.md); startOnFirstStep
+// no longer changes anything but stays accepted in the config.
 describe("RepetitiveFlow — startOnFirstStep", () => {
   const getStartOnFirstStepWrapper = () =>
     shallowMount(RepetitiveFlow, {
@@ -499,14 +650,13 @@ describe("RepetitiveFlow — startOnFirstStep", () => {
     useRepetitiveForm().resetFlow();
   });
 
-  it("opens directly on the first step instead of the empty overview", () => {
+  it("opens directly on the first step", () => {
     const wrapper = getStartOnFirstStepWrapper();
-    expect(overview(wrapper).exists()).toBe(false);
     expect(field(wrapper).exists()).toBe(true);
     expect(field(wrapper).props("step").key).toBe("work");
   });
 
-  it("still returns to the overview after the last step, with the branch staged", async () => {
+  it("puts the finished chain in the rail", async () => {
     const wrapper = getStartOnFirstStepWrapper();
     field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
     await flushPromises();
@@ -518,11 +668,11 @@ describe("RepetitiveFlow — startOnFirstStep", () => {
     expect(wrapper.emitted("finished")).toBeUndefined();
   });
 
-  it("keeps the overview as the entry point when the flag is absent", () => {
+  it("opens on the first step when the flag is absent too", () => {
     const wrapper = getWrapper();
-    expect(overview(wrapper).exists()).toBe(true);
-    expect(field(wrapper).exists()).toBe(false);
+    expect(field(wrapper).props("step").key).toBe("work");
   });
+
 });
 
 describe("RepetitiveFlow — linear mode", () => {
@@ -648,7 +798,7 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
 
   it("treats a step without a pickerQuery as create-only (skipSearch)", async () => {
     const wrapper = getBulkWrapper();
-    overview(wrapper).vm.$emit("add-another");
+    await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
     expect(field(wrapper).props("step").key).toBe("work");
     expect(field(wrapper).props("skipSearch")).toBe(true);
@@ -656,7 +806,7 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
 
   it("emits finished on finish when there is no finalize config", async () => {
     const wrapper = getBulkWrapper();
-    overview(wrapper).vm.$emit("add-another");
+    await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
     // create the entity (persisted per-step) → branch pushed, back to overview
     field(wrapper).vm.$emit("created", {
@@ -668,7 +818,7 @@ describe("RepetitiveFlow — create-only / no finalize", () => {
     expect(useRepetitiveForm().branches.value).toHaveLength(1);
     // finishing a flow with no finalize emits "finished" with an empty payload
     // (no container entity) so the host can honor refetchOnFinish and close
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("finished")).toBeTruthy();
     expect(wrapper.emitted("finished")?.[0]).toEqual([{}]);
@@ -772,7 +922,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
   it("links the host entity (falling back to the route param) to the picked user with metadata once Afronden is clicked", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(manageMocks.addRelations).toHaveBeenCalledWith({
       entityId: "org-1",
@@ -817,7 +967,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     await flushPromises();
     field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
     await flushPromises();
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
 
     const metadata = [{ key: "roles", value: ["booker_admin"] }];
@@ -843,7 +993,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     useEntitySingle().setEntityUuid("org-resolved-uuid");
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper, { role: "booker_admin" });
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(manageMocks.addRelations).toHaveBeenCalledWith(
       expect.objectContaining({ entityId: "org-resolved-uuid" }),
@@ -862,7 +1012,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     useEntitySingle().setEntityUuid("PERS-PEEKED");
     field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
     await flushPromises();
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
 
     expect(manageMocks.addRelations).toHaveBeenCalledWith(
@@ -874,7 +1024,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     useEntitySingle().setEntityUuid("user-1");
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
 
     expect(manageMocks.addRelations).not.toHaveBeenCalled();
@@ -898,7 +1048,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     });
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
 
     expect(notificationMocks.displayErrorNotification).toHaveBeenCalledWith(
@@ -913,7 +1063,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     routeMocks.id = undefined;
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper);
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
 
     expect(manageMocks.addRelations).not.toHaveBeenCalled();
@@ -925,7 +1075,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     await pickUserAndSubmitRole(wrapper);
     overview(wrapper).vm.$emit("remove", 0);
     await wrapper.vm.$nextTick();
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(manageMocks.addRelations).not.toHaveBeenCalled();
   });
@@ -941,7 +1091,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     ]);
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper, { role: "booker_admin" });
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(refetchParentEntity).toHaveBeenCalledTimes(1);
     expect(refetchLibrary).toHaveBeenCalledTimes(1);
@@ -999,7 +1149,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
   it("finishes the flow after Afronden, since there is no finalize step (the host closes the modal)", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await pickUserAndSubmitRole(wrapper, { role: "booker_member" });
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     // a no-finalize flow emits `finished` (not a bare `close`) so the host can
     // both close the modal and run the refetch callbacks on the way out
@@ -1017,7 +1167,7 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     expect(manageMocks.addRelations).not.toHaveBeenCalled();
     field(wrapper).vm.$emit("metadataSubmitted", { role: "booker_admin" });
     await flushPromises();
-    overview(wrapper).vm.$emit("finish");
+    await finish(wrapper);
     await flushPromises();
     expect(manageMocks.addRelations).toHaveBeenCalledWith(
       expect.objectContaining({

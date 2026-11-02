@@ -116,6 +116,23 @@ export const entitiesFor = (
   stepKey: string,
 ): StagedEntity[] => branch.entities[stepKey] ?? [];
 
+export type UndoDelete = { id: string; type: string };
+
+// What undoing a chain deletes: every record it created, newest first. An upload
+// step reports its host's id as "created" (DynamicForm), not the new mediafile's,
+// so a chain with an upload (an id seen twice) can't be undone (null): its
+// mediafiles can't be found. shortcut: no undo for upload steps; upgrade when
+// the upload reports the created mediafile ids.
+export const undoPlan = (branch: RepetitiveBranch): UndoDelete[] | null => {
+  const all = Object.values(branch.entities).flat().filter((e) => e.id);
+  const ids = all.map((entity) => entity.id);
+  if (new Set(ids).size !== ids.length) return null;
+  return all
+    .filter((entity) => entity.isNew)
+    .reverse()
+    .map(({ id, type }) => ({ id, type }));
+};
+
 export const primaryEntity = (
   branch: RepetitiveBranch,
   stepKey: string,

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
+import { defineComponent, h, inject } from "vue";
 import {
   Entitytyping,
   EntityPickerMode,
@@ -9,7 +10,6 @@ import RepetitiveStepField from "@/components/repetitiveForm/RepetitiveStepField
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 import RepetitiveCreateButton from "@/components/repetitiveForm/RepetitiveCreateButton.vue";
-import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
@@ -545,5 +545,36 @@ describe("RepetitiveStepField", () => {
     });
     await wrapper.vm.$nextTick();
     expect(pickerView(wrapper).exists()).toBe(true);
+  });
+});
+
+// G6 (option B): a picker step is a list page in the modal, on the white surface
+describe("RepetitiveStepField picker surface", () => {
+  it("tells the picker's list it stands on a white surface", () => {
+    const Probe = defineComponent({
+      name: "EntityPickerComponent",
+      setup: () => {
+        const onWhite = inject("OnWhiteSurface", false);
+        return () => h("div", { "data-on-white": String(onWhite) });
+      },
+    });
+    const wrapper = shallowMount(RepetitiveStepField, {
+      props: getDefaultProps(),
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { EntityPickerComponent: Probe },
+      },
+    });
+    expect(wrapper.find("[data-on-white]").attributes("data-on-white")).toBe("true");
+  });
+});
+
+// F4: an empty actions row takes no space above the picker
+describe("RepetitiveStepField actions row", () => {
+  it("only spaces the actions row when it holds something", () => {
+    const row = getWrapper().find("[data-testid='repetitive-step-actions']");
+    expect(row.classes()).toContain("has-[>*]:mb-4");
+    expect(row.classes()).not.toContain("mb-4");
   });
 });

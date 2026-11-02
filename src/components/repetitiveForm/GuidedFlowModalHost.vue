@@ -23,6 +23,7 @@ import { apolloClient } from "@/main";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useModalActions } from "@/composables/useModalActions";
 import { useImport } from "@/composables/useImport";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 import { toRepetitiveFormConfig } from "@/composables/useRepetitiveFlowConfig";
 import RepetitiveFlow from "@/components/repetitiveForm/RepetitiveFlow.vue";
 import RepetitiveStepModal from "@/components/repetitiveForm/RepetitiveStepModal.vue";
@@ -37,8 +38,9 @@ const { loadDocument } = useImport();
 const { getModalInfo, closeModal } = useBaseModal();
 const { getCallbackFunctions } = useModalActions();
 const router = useRouter();
+const { displaySuccessNotification } = useBaseNotification();
 
-const refreshAfterFlow = async (callbacks?: Function[]) => {
+const refreshAfterFlow = async (callbacks?: (() => unknown)[]) => {
   if (callbacks?.length) {
     for (const callback of callbacks) {
       try {
@@ -95,6 +97,7 @@ const onFinished = async (entity: {
   [key: string]: unknown;
 }) => {
   const isHostTerminal = Boolean(config.value.finalizeOnHost);
+  const flowLabel = config.value.label ?? "";
   const returnsSelection = Boolean(config.value.returnsSelection);
   const refetchCallbacks = getCallbackFunctions();
   const onEntitySelected = getModalInfo(TypeModals.GuidedFlow).onEntitySelected as ((entity: unknown) => void) | undefined;
@@ -106,6 +109,11 @@ const onFinished = async (entity: {
   }
   if (isHostTerminal) {
     await refreshAfterFlow(refetchCallbacks);
+    // the page just changes in place; say that the flow saved
+    displaySuccessNotification(
+      flowLabel,
+      "notifications.success.guided-flow-saved.description",
+    );
     return;
   }
 

@@ -26,6 +26,16 @@ const classesOf = (props: Record<string, unknown> = {}) =>
   getWrapper(props).find("button").classes();
 
 describe("BaseButtonNew", () => {
+  // vlacc persons: bulk actions configured with `icon: null` crashed the
+  // render, and the half-patched list stayed on its skeleton
+  it("renders without an icon when the icon is null or unknown", () => {
+    for (const icon of [null, "NotAnIcon"]) {
+      const wrapper = getWrapper({ icon });
+      expect(wrapper.find("button").exists()).toBe(true);
+      expect(wrapper.find("unicon-stub").exists()).toBe(false);
+    }
+  });
+
   it("renders the commit variant as a commit-teal fill", () => {
     expect(classesOf({ buttonStyle: "commit" })).toContain("bg-commit");
   });

@@ -1,79 +1,56 @@
 <template>
   <div data-cy="dynamic-form-upload-button">
     <div class="flex">
+      <!-- upload.md: one banner from start to finish; its message is the
+           role="status" so every count and the result are announced -->
       <div
-        v-if="uploadStatus === 'upload-finished'"
-        class="w-full bg-green-light p-2 font-bold flex"
-        :class="[
-          { 'text-green-default bg-green-light': !failedUploads.length },
-          { 'text-red-default bg-red-light': failedUploads.length },
-        ]"
+        v-if="uploadStatus !== UploadStatus.NoUpload"
+        class="w-full p-2 flex items-center gap-2"
+        :class="toneClasses[tone]"
+        :data-tone="tone"
       >
-        <p class="w-full flex items-center">
-          {{ finishedStatusMessage }}
-        </p>
-        <div class="w-1/5 @max-6xl/modal:hidden">
-          <base-button-new
-            icon="Redo"
-            :label="t('actions.labels.reset-upload')"
-            button-style="commit"
-            @click="resetUpload()"
-          />
-        </div>
-        <div class="@6xl/modal:hidden">
-          <base-button-new
-            icon="Redo"
-            :aria-label="t('actions.labels.reset-upload')"
-            button-style="commit"
-            @click="resetUpload()"
-          />
-        </div>
-        <div class="w-1/5 ml-5 @max-lg/modal:hidden">
-          <base-button-new
-            icon="CheckCircle"
-            :label="t('actions.labels.complete')"
-            button-style="commit"
-            @click="emit('closeAndDeleteForm')"
-          />
-        </div>
-        <div class="ml-5 @lg/modal:hidden">
-          <base-button-new
-            icon="CheckCircle"
-            :aria-label="t('actions.labels.complete')"
-            button-style="commit"
-            @click="emit('closeAndDeleteForm')"
-          />
-        </div>
-      </div>
-      <div
-        v-if="
-          uploadStatus === UploadStatus.Uploading ||
-          uploadStatus === UploadStatus.Paused
-        "
-        class="w-full flex"
-      >
+        <p role="status" class="w-full font-bold">{{ statusMessage }}</p>
         <progress-bar
-          v-if="mediafiles.length > 0"
+          v-if="isUploading && mediafiles.length > 0"
+          class="w-full"
           :progress="amountUploaded"
           progress-bar-type="steps"
           :total-amount-of-steps="mediafiles.length"
         />
-        <!--                      <div class="w-1/4 px-2" v-if="uploadFlow === UploadFlow.MediafilesOnly">-->
-        <!--                        <base-button-new-->
-        <!--                          v-if="uploadStatus === UploadStatus.Uploading"-->
-        <!--                          icon="Pause"-->
-        <!--                          :label="t('actions.labels.pause-upload')"-->
-        <!--                          button-style="commit"-->
-        <!--                          @click="pauseUpload()"-->
-        <!--                        />-->
-        <!--                        <base-button-new-->
-        <!--                          v-if="uploadStatus === UploadStatus.Paused"-->
-        <!--                          icon="Play"-->
-        <!--                          :label="t('actions.labels.resume-upload')"-->
-        <!--                          button-style="commit"-->
-        <!--                          @click="resumeUpload()"-->
-        <!--                        />-->
-        <!--                      </div>-->
+        <template v-if="uploadStatus === UploadStatus.Finished">
+          <div class="w-1/5 @max-6xl/modal:hidden">
+            <base-button-new
+              icon="Redo"
+              :label="t('actions.labels.reset-upload')"
+              button-style="commit"
+              @click="resetUpload()"
+            />
+          </div>
+          <div class="@6xl/modal:hidden">
+            <base-button-new
+              icon="Redo"
+              :aria-label="t('actions.labels.reset-upload')"
+              button-style="commit"
+              @click="resetUpload()"
+            />
+          </div>
+          <div class="w-1/5 ml-3 @max-lg/modal:hidden">
+            <base-button-new
+              icon="CheckCircle"
+              :label="t('actions.labels.complete')"
+              button-style="commit"
+              @click="emit('closeAndDeleteForm')"
+            />
+          </div>
+          <div class="ml-3 @lg/modal:hidden">
+            <base-button-new
+              icon="CheckCircle"
+              :aria-label="t('actions.labels.complete')"
+              button-style="commit"
+              @click="emit('closeAndDeleteForm')"
+            />
+          </div>
+        </template>
       </div>
       <button
         v-if="uploadStatus === 'no-upload'"
@@ -160,7 +137,26 @@ const {
   csvOnlyUploadSFailed,
 } = useUpload(config);
 
-const finishedStatusMessage = computed(() => {
+const isUploading = computed(
+  () =>
+    uploadStatus.value === UploadStatus.Uploading ||
+    uploadStatus.value === UploadStatus.Paused,
+);
+
+const isCsvFlow = computed(
+  () =>
+    uploadFlow.value === UploadFlow.CsvOnly ||
+    uploadFlow.value === UploadFlow.XmlMarc,
+);
+
+const uploadedOf = computed(() =>
+  t("upload-fields.uploaded-of", {
+    done: amountUploaded.value,
+    total: mediafiles.value.length,
+  }),
+);
+
+const statusMessage = computed(() => {
   if (uploadFlow.value === UploadFlow.CsvOnly) {
     if (csvOnlyUploadSFailed.value) return t("actions.labels.csv-errors");
     return t("actions.labels.csv-success");
@@ -168,12 +164,26 @@ const finishedStatusMessage = computed(() => {
   if (uploadFlow.value === UploadFlow.XmlMarc) {
     return t("actions.labels.xml-success");
   }
-  const amountSuccess: number = amountUploaded.value;
+  if (mediafiles.value.length > 0) return uploadedOf.value;
   if (failedUploads.value.length <= 0)
-    return t("actions.labels.success", [amountSuccess]);
-  const amountFailed: number = failedUploads.value.length;
-  return t("actions.upload.errors", [amountFailed]);
+    return t("actions.labels.success", [amountUploaded.value]);
+  return t("actions.upload.errors", [failedUploads.value.length]);
 });
+
+// feedback.md: success, warning for a partial success, danger when nothing went up
+type Tone = "neutral" | "success" | "warning" | "danger";
+const tone = computed<Tone>(() => {
+  if (uploadStatus.value !== UploadStatus.Finished) return "neutral";
+  if (isCsvFlow.value) return csvOnlyUploadSFailed.value ? "danger" : "success";
+  if (!failedUploads.value.length) return "success";
+  return amountUploaded.value > 0 ? "warning" : "danger";
+});
+const toneClasses: Record<Tone, string> = {
+  neutral: "",
+  success: "bg-success-bg text-success-ink",
+  warning: "bg-warning-bg text-text-body",
+  danger: "bg-danger-bg text-danger-ink",
+};
 </script>
 
 <style scoped></style>

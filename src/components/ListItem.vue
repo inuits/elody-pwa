@@ -221,6 +221,15 @@
             : {}
         "
       >
+        <!-- under the column header a badge cell is as narrow as its badge;
+             an invisible copy of the label keeps the header label whole -->
+        <span
+          v-if="isListMode && hideLabels && idx < 1 && teaserMetadata[0]?.value?.formatter && metadataItem?.label"
+          data-cy="list-cell-label-sizer"
+          aria-hidden="true"
+          class="block h-0 overflow-hidden text-label font-bold"
+          >{{ t(metadataItem.label) }}</span
+        >
         <!-- own key per row: the page form's locale must not leak in, and the edit modal reads translations stored under the entity id on save -->
         <MultilingualWrapper
           :metadata="metadataItem"

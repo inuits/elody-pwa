@@ -1,7 +1,7 @@
 <template>
   <BaseModal
     :modal-type="TypeModals.Confirm"
-    :cancel-button-availabe="true"
+    :title="pendingConfirm?.options.title"
     modal-height-style="my-[37.5vh]"
     @hide-modal="resolveConfirm('cancel')"
   >
@@ -14,5 +14,5 @@ import BaseModal from "@/components/base/BaseModal.vue";
 import { TypeModals } from "@/generated-types/queries";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 
-const { resolveConfirm } = useConfirmModal();
+const { pendingConfirm, resolveConfirm } = useConfirmModal();
 </script>

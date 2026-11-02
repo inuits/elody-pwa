@@ -1,9 +1,21 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    te: (key: string) => key === "entity-translations.person",
+    t: (key: string, args?: unknown) =>
+      key === "entity-translations.person"
+        ? "Person-label"
+        : Array.isArray(args)
+          ? `${key}:${args.join(",")}`
+          : key,
+  }),
+}));
+
 import RelationPickerModal from "@/components/metadata/RelationPickerModal.vue";
 
 const EntityPickerStub = {
@@ -23,7 +35,6 @@ const EntityPickerStub = {
 const mountModal = (props: Record<string, unknown> = {}) =>
   mount(RelationPickerModal, {
     props: {
-      label: "Gezelschap",
       entityId: "PR-1",
       acceptedType: "company",
       filters: [{ type: "type", value: "company" }],
@@ -31,8 +42,14 @@ const mountModal = (props: Record<string, unknown> = {}) =>
       ...props,
     },
     global: {
+      mocks: {},
       stubs: {
-        BaseModal: { template: "<div><slot /></div>" },
+        BaseModal: {
+          name: "BaseModal",
+          props: ["title", "cancelButtonAvailabe"],
+          emits: ["hideModal"],
+          template: "<div><slot /></div>",
+        },
         EntityPickerComponent: EntityPickerStub,
         unicon: true,
       },
@@ -67,7 +84,6 @@ describe("RelationPickerModal", () => {
       selectionLimit: 0,
       context: BulkOperationsContextEnum.RelationPickerModal,
     });
-    expect(wrapper.find("h3").text()).toBe("Gezelschap");
   });
 
   it("lets a single select pick one entity", async () => {
@@ -94,14 +110,26 @@ describe("RelationPickerModal", () => {
     expect(getModalInfo(TypeModals.RelationPicker).open).toBe(false);
   });
 
-  it("closes from a named close button", async () => {
+  // entity-picker.md: panel-shell header "Kies {type}" with the close cross,
+  // the title naming the dialog (BaseModal)
+  it("titles the modal header after the entity type, with its close cross", async () => {
     const wrapper = mountModal();
     openModal(TypeModals.RelationPicker, ModalStyle.Center);
     await nextTick();
-    const close = wrapper.find('[data-cy="relation-picker-close"]');
-    expect(close.element.tagName).toBe("BUTTON");
-    expect(close.attributes("aria-label")).toBe("Close");
-    await close.trigger("click");
+    const modal = wrapper.findComponent({ name: "BaseModal" });
+    expect(modal.props("title")).toBe("inline-edit.browse-title:company");
+    expect(modal.props("cancelButtonAvailabe")).toBeFalsy();
+    expect(wrapper.find("h3").exists()).toBe(false);
+    modal.vm.$emit("hideModal");
     expect(getModalInfo(TypeModals.RelationPicker).open).toBe(false);
+  });
+
+  it("names the type in words when it has a translation", async () => {
+    const wrapper = mountModal({ acceptedType: "person" });
+    openModal(TypeModals.RelationPicker, ModalStyle.Center);
+    await nextTick();
+    expect(wrapper.findComponent({ name: "BaseModal" }).props("title")).toBe(
+      "inline-edit.browse-title:person-label",
+    );
   });
 });

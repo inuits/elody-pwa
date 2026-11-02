@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   loadDocument: vi.fn(),
   apolloQuery: vi.fn(),
   refetchQueries: vi.fn(),
+  displaySuccessNotification: vi.fn(),
 }));
 
 const modalInfo = reactive<{
@@ -42,6 +43,11 @@ vi.mock("@/main", () => ({
     query: (...args: any[]) => mocks.apolloQuery(...args),
     refetchQueries: (...args: any[]) => mocks.refetchQueries(...args),
   },
+}));
+vi.mock("@/composables/useBaseNotification", () => ({
+  useBaseNotification: () => ({
+    displaySuccessNotification: mocks.displaySuccessNotification,
+  }),
 }));
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({ loadDocument: mocks.loadDocument }),
@@ -98,6 +104,18 @@ const rawNoFinalizeResult = {
   ],
 };
 
+// A linear flow that saves on the page's own record (move to another expression).
+const rawHostTerminalResult = {
+  __typename: "RepetitiveForm",
+  repeatable: false,
+  linear: true,
+  label: "repetitiveForm.move-manifestation-title",
+  finalizeOnHost: { fromStep: "expression", relationType: "isManifestationOf" },
+  expression: [
+    { __typename: "RepetitiveStep", key: "expression", entityType: "expression" },
+  ],
+};
+
 // A linear pick-only flow that hands its result back to the caller.
 const rawReturnsSelectionResult = {
   __typename: "RepetitiveForm",
@@ -129,6 +147,7 @@ enableAutoUnmount(afterEach);
 describe("GuidedFlowModalHost", () => {
   beforeEach(() => {
     mocks.push.mockReset();
+    mocks.displaySuccessNotification.mockReset();
     mocks.closeModal.mockReset();
     mocks.loadDocument.mockReset();
     mocks.apolloQuery.mockReset();
@@ -278,6 +297,35 @@ describe("GuidedFlowModalHost", () => {
     await wrapper.vm.$nextTick();
     expect(mocks.refetchQueries).toHaveBeenCalledWith({ include: "active" });
     expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  // "reversible actions execute and offer feedback": a move closed silently
+  it("confirms a flow that saved on the page's record with a success toast named after the flow", async () => {
+    mocks.apolloQuery.mockResolvedValue({
+      data: { GetRepetitiveForm: rawHostTerminalResult },
+    });
+    const wrapper = getWrapper();
+    await openModal("GetMoveManifestationFlow");
+    flow(wrapper).vm.$emit("finished", { id: "expr-2" });
+    await flushPromises();
+
+    expect(mocks.displaySuccessNotification).toHaveBeenCalledWith(
+      "repetitiveForm.move-manifestation-title",
+      "notifications.success.guided-flow-saved.description",
+    );
+    expect(mocks.push).not.toHaveBeenCalled();
+  });
+
+  it("shows no toast when a flow hands its selection back", async () => {
+    mocks.apolloQuery.mockResolvedValue({
+      data: { GetRepetitiveForm: rawReturnsSelectionResult },
+    });
+    const wrapper = getWrapper();
+    await openModal("GetTagWemFlow");
+    flow(wrapper).vm.$emit("finished", { id: "work-1" });
+    await flushPromises();
+
+    expect(mocks.displaySuccessNotification).not.toHaveBeenCalled();
   });
 
   it("hands the picked entity to the caller and does not route for a returnsSelection flow", async () => {

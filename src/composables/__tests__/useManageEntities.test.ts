@@ -46,3 +46,26 @@ describe("useManageEntities.addRelations", () => {
     expect(mockMutate).not.toHaveBeenCalled();
   });
 });
+
+describe("useManageEntities.deleteEntity", () => {
+  beforeEach(() => {
+    mockMutate.mockClear();
+    mockLoadDocument.mockClear();
+  });
+
+  it("deletes an entity from the entities collection, leaving its mediafiles", async () => {
+    mockLoadDocument.mockResolvedValueOnce("DELETE_DATA_DOC");
+    await useManageEntities().deleteEntity({ id: "frame-1", type: "web_story_frame" });
+    expect(mockLoadDocument).toHaveBeenCalledWith("DeleteData");
+    expect(mockMutate).toHaveBeenCalledWith({
+      mutation: "DELETE_DATA_DOC",
+      variables: { id: "frame-1", path: Collection.Entities, deleteMediafiles: false },
+    });
+  });
+
+  it("deletes a mediafile from the mediafiles collection", async () => {
+    mockLoadDocument.mockResolvedValueOnce("DELETE_DATA_DOC");
+    await useManageEntities().deleteEntity({ id: "mf-1", type: "mediafile" });
+    expect(mockMutate.mock.calls[0][0].variables.path).toBe(Collection.Mediafiles);
+  });
+});

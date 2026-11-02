@@ -1,6 +1,11 @@
 <template>
-  <!-- Collapsed rail: named icon buttons with a tooltip; expanded: icon + label rows. -->
-  <div class="!bg-background-light flex flex-col gap-3 whitespace-nowrap">
+  <div
+    :class="[
+      'flex flex-col gap-(--nav-rail-gap) whitespace-nowrap',
+      { 'items-center': !isExpanded },
+    ]"
+  >
+    <!-- Collapsed rail: named icon buttons with a tooltip; expanded: icon + label rows. -->
     <BaseTooltip
       v-if="auth.isAuthenticated.value === false"
       position="top-right"
@@ -67,6 +72,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from "vue";
 import { Unicons } from "@/types";
 import { auth } from "@/main";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -75,7 +81,7 @@ import { RouterLink } from "vue-router";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { useAuth } from "@/composables/useAuth";
 
-defineProps({
+const props = defineProps({
   isExpanded: Boolean,
 });
 
@@ -83,8 +89,13 @@ const { t } = useI18n();
 const { confirm } = useConfirmModal();
 const { performLogout, getUserName, elodyUser } = useAuth();
 
-const rowClass =
-  "ml-5 flex items-center gap-4 font-bold text-nav-item hover:text-nav-item-hover hover:no-underline";
+// navigation.md: rail items like the menu items (muted, light wash on hover)
+const rowClass = computed(() => [
+  "flex items-center rounded-(--nav-rail-item-radius) text-text-muted hover:bg-accent-highlight hover:no-underline",
+  props.isExpanded
+    ? "w-full min-h-(--nav-rail-item-height) px-2 gap-2 text-table"
+    : "justify-center w-(--nav-rail-item-width) h-(--nav-rail-item-height)",
+]);
 
 const openConfirmationModal = async () => {
   const choice = await confirm({

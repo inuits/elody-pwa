@@ -1,5 +1,12 @@
 <template>
-  <div class="flex justify-between items-center px-2">
+  <!-- Name, value and text are set per file by updateFileThumbnails (useUpload) -->
+  <div
+    class="flex justify-between items-center px-2"
+    role="progressbar"
+    aria-valuemin="0"
+    aria-valuenow="0"
+    :aria-valuemax="stepCount"
+  >
     <div v-if="!hidePrepareStep" class="px-1 file-validate-container">
       <base-progress-step
         :status="ProgressStepStatus.Empty"
@@ -87,8 +94,9 @@
 <script setup lang="ts">
 import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
 import { ProgressStepStatus } from "@/generated-types/queries";
+import { computed } from "vue";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     isValidationFile: boolean;
     hidePrepareStep?: boolean;
@@ -97,6 +105,12 @@ withDefaults(
     hidePrepareStep: false,
   },
 );
-</script>
 
-<style scoped></style>
+// The steps shown: validate and prepare unless hidden, upload unless a validation file.
+const stepCount = computed(
+  () =>
+    Number(!props.hidePrepareStep) +
+    Number(!props.isValidationFile && !props.hidePrepareStep) +
+    Number(!props.isValidationFile),
+);
+</script>

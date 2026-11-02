@@ -305,3 +305,18 @@ describe("ViewModesList", () => {
     );
   });
 });
+
+// found live (guided flow, vlacc): the only row was not selectable, yet the
+// header's "Select page" box showed ticked next to "nothing selected"
+describe("ViewModesList select-page box", () => {
+  it("is not ticked when no row on the page can be selected", async () => {
+    const wrapper = shallowMount(ViewModesList, {
+      props: {
+        entities: [{ id: "entity1" }],
+        idsOfNonSelectableEntities: ["entity1"],
+      },
+    });
+    await flushPromises();
+    expect(wrapper.vm.pageIsSelected).toBe(false);
+  });
+});

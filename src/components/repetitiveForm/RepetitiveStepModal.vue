@@ -3,27 +3,40 @@
     ref="dialog"
     data-testid="repetitive-step-modal"
     :class="[
-      'relative rounded-lg border-0 p-0 w-[80vw] max-h-[90vh] m-auto bg-neutral-white',
+      'relative rounded-overlay border-0 p-0 w-[80vw] max-h-[90vh] m-auto bg-surface shadow-modal backdrop:bg-scrim',
       // teleport target for tooltips/dropdowns while a modal is open
       // (see BaseTooltip/AdvancedDropdown '.base-modal--opened')
       { 'base-modal--opened': open },
     ]"
+    :aria-labelledby="titleId"
     @cancel.prevent="emit('close')"
   >
     <div
-      class="flex items-center justify-between px-6 py-4 border-b border-neutral-50 sticky top-0 bg-neutral-white z-guided-flow-header"
+      class="flex items-center justify-between gap-2 p-(--panel-header-pad) border-b border-border-panel sticky top-0 bg-surface-panel-header z-guided-flow-header"
     >
-      <h1 data-testid="repetitive-step-modal-title" class="text-lg font-bold">
+      <!-- modal.md: the same header band as BaseModal -->
+      <h2
+        :id="titleId"
+        data-testid="repetitive-step-modal-title"
+        class="m-0 text-(length:--text-panel-title) font-bold text-text-panel-header"
+      >
         {{ title }}
-      </h1>
+      </h2>
+      <div
+        v-if="$slots.headerExtra"
+        data-testid="repetitive-step-modal-header-extra"
+        class="ml-auto flex items-center"
+      >
+        <slot name="headerExtra" />
+      </div>
       <button
         type="button"
         data-testid="repetitive-step-modal-close"
         :aria-label="t('actions.labels.close')"
-        class="cursor-pointer p-1 rounded hover:bg-background-normal"
+        class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted"
         @click="emit('close')"
       >
-        <unicon :name="Unicons.Close.name" height="20" />
+        <unicon :name="Unicons.Close.name" height="18" />
       </button>
     </div>
     <div data-testid="repetitive-step-modal-content" class="p-6">
@@ -34,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount, useId } from "vue";
 import { Unicons } from "@/types";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
@@ -42,6 +55,7 @@ import { useBaseModal } from "@/composables/useBaseModal";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const titleId = useId();
 
 const { isBlocking } = useBlockingLoader();
 const { registerOpenDialog, unregisterOpenDialog } = useBaseModal();

@@ -23,18 +23,29 @@
       :class="wrapperClasses"
     >
       <div
-        class="z-header top-0 pt-3 pb-2"
+        class="z-header top-0 pb-2"
         :class="[
-          { hidden: !enableAdvancedFilters },
-          { 'row-span-1': !isFiltersPanelExpanded },
-          { 'row-span-2': isFiltersPanelExpanded },
+          // level with the results panel's top
+          { 'pt-(--page-pad-top)': !onWhiteSurface },
+          // closed, the rail opens from the band's Filters button (F1)
+          { hidden: !enableAdvancedFilters || !railOpen },
+          { 'row-span-1': !railOpen },
+          { 'row-span-2': railOpen },
           { sticky: hasStickyBars },
         ]"
       >
+        <!-- pane layout: the filters move into the results panel's pane -->
+        <Teleport
+          defer
+          :to="filtersPaneBody || 'body'"
+          :disabled="!filtersPaneBody"
+        >
         <FiltersBase
           v-show="enableAdvancedFilters"
           :simple-search-active="!!simpleSearchTerm"
           :expandFilters="expandFilters"
+          :toggle-target="filtersToggleTarget"
+          :in-pane="filtersInPane"
           :manipulation-query="manipulationQuery"
           :parent-entity-identifiers="parentEntityIdentifiers"
           :route="route"
@@ -73,25 +84,35 @@
             }
           "
         />
+        </Teleport>
       </div>
       <div
         data-cy="results-panel"
         :class="[
-          'row-span-2 flex flex-col min-h-0',
+          'row-span-2 flex min-h-0',
+          filtersInPane ? 'flex-row' : 'flex-col',
           // ui_kits/clients: band, selection row and list in one white panel.
           {
-            'mt-3 bg-surface border border-border-panel rounded-card':
+            'bg-surface border border-border-panel rounded-card':
               hasResultsBand,
           },
-          { 'col-span-1': isFiltersPanelExpanded },
-          isFiltersPanelExpanded
+          // below the top bar; a white-surface host spaces it itself
+          { 'mt-(--page-pad-top)': hasResultsBand && !onWhiteSurface },
+          { 'col-span-1': railOpen },
+          railOpen
             ? hasResultsBand
-              ? 'ml-[1%]'
+              ? 'ml-(--gutter-panels)'
               : 'pl-[1%]'
             : '',
-          { 'col-span-2': !isFiltersPanelExpanded },
+          { 'col-span-2': !railOpen },
         ]"
       >
+        <FiltersPane
+          v-if="filtersInPane"
+          :open="isFiltersPanelExpanded"
+          :pane-id="filtersPaneId"
+        />
+        <div class="flex flex-col flex-1 min-w-0 min-h-0">
         <!-- List header (templates/elody-list-screen): one accent-light band
              with count, pager, view modes, page size, sort and the selection
              bar's actions; it wraps when narrow. -->
@@ -101,12 +122,24 @@
           class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
           :class="[
             {
-              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel rounded-t-card':
+              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel':
                 hasResultsBand,
             },
+            // beside an open filters pane only the outer corner is round
+            hasResultsBand
+              ? filtersInPane && isFiltersPanelExpanded
+                ? 'rounded-tr-card'
+                : 'rounded-t-card'
+              : '',
             { 'sticky top-0 z-header': hasStickyBars },
           ]"
         >
+          <!-- FiltersBase teleports its Filters button here -->
+          <span
+            v-if="filtersBandSpot"
+            :data-filters-toggle="filtersToggleId"
+            class="contents"
+          />
           <ResultCountChip
             v-if="
               !disableLibraryBar &&
@@ -124,37 +157,7 @@
             data-test="list-pager"
             class="shrink-0"
           />
-          <div
-            v-if="
-              !disableLibraryBar &&
-              toggles.length > 1 &&
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
-            "
-          >
-            <BaseToggleGroup
-              :toggles="toggles"
-              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
-            />
-          </div>
-          <PageSizeSelect
-            v-if="showPageSize"
-            class="shrink-0"
-            :set-limit="setPaginationLimit"
-            :selected-pagination-limit-option="paginationStore.limit.value"
-            :total="totalEntityCount"
-            @pagination-limit-options-promise="
-              (promise) => (paginationLimitOptionsPromise = promise)
-            "
-          />
-          <div
-            v-if="
-              !disableLibraryBar &&
-              !predefinedEntities &&
-              (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
-            "
-            class="min-w-0"
-          >
+          <div v-if="showLibraryBar" class="min-w-0 ml-auto">
             <LibraryBar
               :route="route"
               :set-sort-key="setSortKey"
@@ -171,13 +174,34 @@
               @sort-options-promise="
                 (promise) => (sortOptionsPromise = promise)
               "
+            >
+              <PageSizeSelect
+                v-if="showPageSize"
+                class="shrink-0"
+                :set-limit="setPaginationLimit"
+                :selected-pagination-limit-option="paginationStore.limit.value"
+                :total="totalEntityCount"
+                @pagination-limit-options-promise="
+                  (promise) => (paginationLimitOptionsPromise = promise)
+                "
+              />
+            </LibraryBar>
+          </div>
+          <!-- the view switch ends the band, away from the Filters button -->
+          <div
+            v-if="showViewSwitch"
+            :class="{ 'ml-auto': !showLibraryBar }"
+          >
+            <BaseToggleGroup
+              :toggles="toggles"
+              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
             />
           </div>
           <!-- In a detail panel the bar's add pills land here. -->
           <span
             v-if="insidePanel"
             :data-list-actions="listActionsId"
-            class="ml-auto flex items-center gap-2"
+            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar && !showViewSwitch }]"
           />
         </div>
           <BulkOperationsActionsBar
@@ -251,8 +275,8 @@
               'text-center my-2':
                 baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
             },
-            { 'col-span-1 pl-[1%]': isFiltersPanelExpanded },
-            { 'col-span-2': !isFiltersPanelExpanded },
+            { 'col-span-1 pl-[1%]': railOpen },
+            { 'col-span-2': !railOpen },
           ]"
         >
           <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
@@ -417,6 +441,7 @@
             :setAdvancedFilters="setAdvancedFilters"
           />
         </div>
+        </div>
       </div>
     </div>
   </div>
@@ -434,6 +459,8 @@ import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ResultCountChip from "@/components/library/ResultCountChip.vue";
+import FiltersPane from "@/components/filters/FiltersPane.vue";
+import { filtersLayout } from "@/components/filters/filtersLayout";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
 import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
@@ -745,10 +772,16 @@ const wrapperClasses = computed(() => {
   const mode = props.baseLibraryMode;
 
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
-    classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
+    // ui_kits ListScreen: the page padding on a list page of its own
+    // a white surface (guided-flow picker step) is padded by its host
+    if (!onWhiteSurface)
+      classes.push(
+        props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-(--page-pad-x)",
+      );
   }
-  // Page background only on the list's own page; inside a panel it's white.
-  if (!insidePanel) classes.push("bg-background-normal");
+  // Page background only on the list's own page; inside a panel or on a
+  // white surface (a guided-flow picker step) it's white.
+  if (!insidePanel && !onWhiteSurface) classes.push("bg-background-normal");
 
   return classes;
 });
@@ -957,7 +990,34 @@ const showListPager = computed(
 // Inside a detail panel the panel is the chrome: no band or border of the
 // list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
+const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();
+const filtersToggleId = useId();
+const filtersBandSpot = computed(() =>
+  props.enableAdvancedFilters && showCurrentEntityFlow.value
+    ? `[data-filters-toggle="${filtersToggleId}"]`
+    : undefined,
+);
+// user, 2026-10-30: the filters open as a pane inside the results panel
+// (lists with a results band); the separate rail stays behind a switch
+const filtersPaneId = useId();
+const layout = filtersLayout();
+const filtersInPane = computed(
+  () => layout === "pane" && !!filtersBandSpot.value && hasResultsBand.value,
+);
+const filtersPaneBody = computed(() =>
+  filtersInPane.value
+    ? `[data-filters-pane-body="${filtersPaneId}"]`
+    : undefined,
+);
+const filtersToggleTarget = computed(() =>
+  filtersInPane.value && isFiltersPanelExpanded.value
+    ? `[data-filters-pane-head="${filtersPaneId}"]`
+    : filtersBandSpot.value,
+);
+const railOpen = computed(
+  () => isFiltersPanelExpanded.value && !filtersInPane.value,
+);
 const hasResultsBand = computed(
   () =>
     !props.disableLibraryBar &&
@@ -965,7 +1025,20 @@ const hasResultsBand = computed(
     (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
-// Mounted wherever the library bar used to hold it: it registers the
+const showLibraryBar = computed(
+  () =>
+    !props.disableLibraryBar &&
+    !props.predefinedEntities &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
+const showViewSwitch = computed(
+  () =>
+    !props.disableLibraryBar &&
+    toggles.value.length > 1 &&
+    props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
+);
+// Slotted into the library bar, between search and sort: it registers the
 // pagination-limit promise the first fetch waits for.
 const showPageSize = computed(
   () =>
@@ -1238,6 +1311,9 @@ const deepRelationsInitialized = ref<boolean>(false);
 const hasRestoredViewModesAfterFetch = ref<boolean>(false);
 
 onMounted(async () => {
+  // a FiltersBase teleported into the pane (deferred) mounts after this hook;
+  // its filter promises must be in before the first fetch
+  if (filtersPaneBody.value) await nextTick();
   lastProcessedEntityType.value = entityType.value;
   if (props.fetchDeepRelations) {
     await initializeDeepRelations();

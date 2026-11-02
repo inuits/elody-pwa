@@ -18,7 +18,7 @@
     </div>
     <the-navigation class="navbar" />
     <div>
-      <div class="bg-background-normal pl-24 h-screen flex flex-col">
+      <div class="bg-background-normal pl-(--nav-rail-width) h-screen flex flex-col">
         <the-header />
         <div :class="['grow overflow-hidden min-h-0', { 'h-0': isSingle }]">
           <router-view />

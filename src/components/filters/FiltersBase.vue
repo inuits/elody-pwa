@@ -1,11 +1,31 @@
 <template>
   <div
+    :id="railId"
     data-cy="filter-base"
+    role="complementary"
+    :aria-label="t('filters.filter')"
     class="relative bg-background-light w-full"
-    :class="isExpanded ? 'rounded-t' : 'rounded-card'"
+    :class="inPane ? '' : isExpanded ? 'rounded-t' : 'rounded-card'"
     @keydown.enter="applyFilters(true)"
   >
+    <!-- the band's Filters button (F1); in place when no band asks for it -->
+    <Teleport defer :to="toggleTarget || 'body'" :disabled="!toggleTarget">
+      <FiltersToggle
+        :active-count="activeFilterCount"
+        :expanded="!!expandFilters && !simpleSearchActive"
+        :controls="railId"
+        :saved-search-title="appliedSavedSearch?.title"
+        :saved-search-modified="
+          !!appliedSavedSearch &&
+          savedSearchIsModified(appliedSavedSearch.value, filters)
+        "
+        @toggle="() => emit('expandFilters', expandFilters)"
+        @clear-saved-search="() => (clearAllActiveFilters = true)"
+      />
+    </Teleport>
+    <!-- in the pane the Filters button heads the column instead -->
     <FiltersHeader
+      v-if="!inPane"
       :active-count="activeFilterCount"
       :expanded="!!expandFilters"
       :simple-search-active="simpleSearchActive"
@@ -25,7 +45,7 @@
         { hidden: !expandFilters },
         {
           'scrollable border-x border-b border-border-panel rounded-b-card':
-            expandFilters,
+            expandFilters && !inPane,
         },
       ]"
     >
@@ -132,11 +152,12 @@ import ContextMenuActionsShell from "@/components/ContextMenuActionsShell.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import FiltersListItem from "@/components/filters/FiltersListItem.vue";
 import FiltersHeader from "@/components/filters/FiltersHeader.vue";
+import FiltersToggle from "@/components/filters/FiltersToggle.vue";
 import { savedSearchIsModified } from "@/components/filters/savedSearchIsModified";
 import SavedSearches from "@/components/SavedSearches.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { apolloClient } from "@/main";
-import { computed, onMounted, ref, watch, inject } from "vue";
+import { computed, onMounted, ref, watch, inject, useId } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   type SavedSearchType,
@@ -179,6 +200,10 @@ export type FilterMatcherMap = {
 const props = withDefaults(
   defineProps<{
     expandFilters?: boolean;
+    // selector of the band spot the Filters button teleports to
+    toggleTarget?: string;
+    // rendered inside the results panel's FiltersPane
+    inPane?: boolean;
     manipulationQuery: object | undefined;
     parentEntityIdentifiers?: string[];
     route: RouteLocationNormalizedLoaded;
@@ -200,6 +225,8 @@ const props = withDefaults(
     additionalDefaultFiltersEnabled: false,
     onRegisterApi: undefined,
     expandFilters: false,
+    toggleTarget: undefined,
+    inPane: false,
     simpleSearchActive: false,
   },
 );
@@ -222,6 +249,7 @@ const emit = defineEmits<{
   (event: "expandFilters", expandFilters: boolean): void;
 }>();
 
+const railId = useId();
 const clearAllActiveFilters = ref<boolean>(false);
 const fetchEntities = ref<boolean>(false);
 const displayedFilterOptions = ref<DropdownOption[]>([]);

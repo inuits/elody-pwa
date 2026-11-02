@@ -57,4 +57,65 @@ describe("RepetitiveStepModal", () => {
         .attributes("aria-label"),
     ).toBe("actions.labels.close");
   });
+
+  it("is a dialog named by its title", () => {
+    const wrapper = getWrapper(true, "Create web theme frames");
+    const dialog = wrapper.find("dialog");
+    const titleId = wrapper
+      .find("[data-testid='repetitive-step-modal-title']")
+      .attributes("id");
+    expect(titleId).toBeTruthy();
+    expect(dialog.attributes("aria-labelledby")).toBe(titleId);
+  });
+});
+
+// modal.md, as BaseModal (V23): every modal shares scrim, shadow and header band
+describe("RepetitiveStepModal handoff chrome", () => {
+  it("draws the scrim and the modal shadow", () => {
+    const dialog = getWrapper(true, "Omnibus").find("dialog");
+    expect(dialog.classes()).toEqual(
+      expect.arrayContaining(["shadow-modal", "backdrop:bg-scrim", "bg-surface"]),
+    );
+  });
+
+  it("titles the dialog in the panel header band, as the other modals", () => {
+    const wrapper = getWrapper(true, "Omnibus");
+    const title = wrapper.find("[data-testid='repetitive-step-modal-title']");
+    expect(title.element.tagName).toBe("H2");
+    expect(title.classes()).toEqual(
+      expect.arrayContaining([
+        "text-(length:--text-panel-title)",
+        "text-text-panel-header",
+      ]),
+    );
+    expect(title.element.parentElement!.classList).toContain(
+      "bg-surface-panel-header",
+    );
+  });
+
+  // pickers card (ModalShell + WizardSteps): the step strip sits on the right
+  // of the header band, before the close cross
+  it("puts header extras in the header band, before the close cross", () => {
+    const wrapper = mount(RepetitiveStepModal, {
+      props: { open: true, title: "Omnibus" },
+      slots: { headerExtra: "<ol data-testid='steps' />" },
+      global: { stubs: { unicon: true } },
+    });
+    const extra = wrapper.find("[data-testid='repetitive-step-modal-header-extra']");
+    expect(extra.find("[data-testid='steps']").exists()).toBe(true);
+    expect(extra.classes()).toContain("ml-auto");
+    expect(extra.element.nextElementSibling?.getAttribute("data-testid")).toBe(
+      "repetitive-step-modal-close",
+    );
+  });
+
+  it("uses the modal close button look", () => {
+    const close = getWrapper(true, "Omnibus").find(
+      "[data-testid='repetitive-step-modal-close']",
+    );
+    expect(close.classes()).toEqual(
+      expect.arrayContaining(["rounded-button", "hover:bg-surface-muted"]),
+    );
+    expect(close.find("unicon-stub").attributes("height")).toBe("18");
+  });
 });

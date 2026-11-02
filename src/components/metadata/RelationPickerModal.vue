@@ -5,22 +5,10 @@
   <BaseModal
     :modal-type="TypeModals.RelationPicker"
     modal-height-style="min-h-[50vh]"
-    :cancel-button-availabe="true"
+    :title="title"
     @hide-modal="close"
   >
     <div v-if="isOpen" class="p-4 flex flex-col gap-3">
-      <div class="flex items-center justify-between gap-4">
-        <h3 class="text-lg font-bold text-text-body">{{ label }}</h3>
-        <button
-          type="button"
-          data-cy="relation-picker-close"
-          :aria-label="closeLabel"
-          class="inline-flex rounded-button p-(--button-sm-padding-icon) text-text-subtle hover:bg-accent-wash"
-          @click="close"
-        >
-          <unicon :name="Unicons.Cross.name" height="18" aria-hidden="true" />
-        </button>
-      </div>
       <EntityPickerComponent
         :entity-uuid="entityId"
         :accepted-types="[acceptedType]"
@@ -50,7 +38,6 @@ import {
   EntityPickerMode,
   TypeModals,
 } from "@/generated-types/queries";
-import { Unicons } from "@/types";
 import BaseModal from "@/components/base/BaseModal.vue";
 import EntityPickerComponent from "@/components/EntityPickerComponent.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -60,8 +47,7 @@ import {
 } from "@/composables/useBulkOperations";
 import { describePickedItem } from "@/composables/useRepetitiveForm";
 
-defineProps<{
-  label: string;
+const props = defineProps<{
   entityId: string;
   acceptedType: string;
   filters?: AdvancedFilterInput[];
@@ -78,9 +64,12 @@ const { closeModal, getModalInfo } = useBaseModal();
 const isOpen = computed<boolean>(
   () => getModalInfo(TypeModals.RelationPicker).open,
 );
-const closeLabel = computed<string>(() =>
-  te("inline-edit.browse-close") ? t("inline-edit.browse-close") : "Close",
-);
+// entity-picker.md: "Kies persoon", the type in words, sentence case
+const title = computed<string>(() => {
+  const key = `entity-translations.${props.acceptedType.toLowerCase()}`;
+  const type = te(key) ? t(key, 1).toLocaleLowerCase() : props.acceptedType;
+  return t("inline-edit.browse-title", [type]);
+});
 
 const close = () => closeModal(TypeModals.RelationPicker);
 

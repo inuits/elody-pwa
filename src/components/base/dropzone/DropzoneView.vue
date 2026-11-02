@@ -2,17 +2,24 @@
   <div
     ref="dropzoneView"
     :class="[
-      'bg-background-light w-full h-full border-dashed border-[3px] border-text-light rounded-card',
+      'bg-background-light w-full h-full border-2 border-dashed border-border-dashed rounded-card',
       { 'flex justify-center items-center': fileCount === 0 },
       style,
     ]"
   >
-    <div v-show="fileCount === 0" class="text-center inline-block">
-      <div class="dz-message" data-dz-message>
-        <div class="text-body">
-          {{ $t(dropzoneLabel) }}
-        </div>
-      </div>
+    <!-- Dropzone.js opens the file dialog for clicks inside .dz-message, so a
+         real button here gives keyboard access; it stays above the file list -->
+    <div
+      class="dz-message"
+      :class="fileCount === 0 ? 'text-center' : 'mb-2'"
+      data-dz-message
+    >
+      <button
+        type="button"
+        class="text-text-body underline-offset-2 hover:underline cursor-pointer"
+      >
+        {{ $t(dropzoneLabel) }}
+      </button>
     </div>
   </div>
 </template>

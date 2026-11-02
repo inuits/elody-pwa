@@ -326,14 +326,29 @@
   --panel-header-pad: 10px 16px;
   --text-panel-title: 14px;
   --panel-body-pad: 6px 16px 14px;
+  --modal-body-pad: 16px;
+  --modal-footer-pad: 12px 16px;
   --block-pad-y: 9px;
   --field-row-pad: 4px 6px;
   --table-row-pad: 7px 0;
   --gutter-panels: 14px;
   --gutter-field-grid: 4px 18px;
-  --page-pad: 14px 18px 60px;
+  --page-pad-top: 14px;
+  --page-pad-x: 18px;
+  --page-pad-bottom: 60px;
+  --page-pad: var(--page-pad-top) var(--page-pad-x) var(--page-pad-bottom);
   --nav-rail-width: 52px;
+  /* Nav rail (navigation.md, catalogue NavRail) and top bar (ui_kits AppShell) */
+  --nav-rail-pad: 14px 0;
+  --nav-rail-gap: 10px;
+  --nav-rail-logo: 26px;
+  --nav-rail-item-width: 34px;
+  --nav-rail-item-height: 30px;
+  --nav-rail-item-radius: 7px;
+  --nav-flyout-width: 320px;
+  --topbar-pad: 10px 18px;
   --filter-panel-width: 250px;
+  --filter-pane-width: 300px;
   --touch-target-min: 44px;
   --field-grid-breakpoint-2col: 1100px;
   --field-grid-breakpoint-1col: 800px;
@@ -420,6 +435,10 @@
   /* Warn banner under the bar (text viewer's sanitised-content notice) */
   --viewer-banner-accent-width: 3px;
 
+  /* Guided flow (guided-flow.md): the "Created this session" rail beside
+     the step card on wide screens */
+  --guided-flow-rail-width: 280px;
+
   /* List results band (components/entity-list.md): count, pager, view
      modes, page size, sort and the selection bar in one row */
   --list-band-pad: 8px 16px;
@@ -489,6 +508,14 @@ input[type="number"]::-webkit-inner-spin-button {
   font-size: var(--text-table);
   margin: 0 0 8px 10px;
   padding: 10px 14px;
+}
+/* the library clips each toast in a wrapper: let the shadow out */
+.vue-notification-wrapper {
+  overflow: visible !important;
+}
+.vue-notification .notification-title,
+.vue-notification .notification-content {
+  font-size: inherit !important;
 }
 .vue-notification .notification-title {
   font-weight: 700;

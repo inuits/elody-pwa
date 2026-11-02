@@ -104,6 +104,7 @@ describe("BaseModal", () => {
         ...props,
       },
       global: {
+        mocks: { $t: (key: string) => key },
         stubs: {
           unicon: {
             template:
@@ -220,13 +221,17 @@ describe("BaseModal", () => {
     it("should apply icon height correctly", () => {
       const iconHeight = 24;
       wrapper = createWrapper({ iconHeight, cancelButtonAvailabe: false });
-      const icon = wrapper.find('[data-testid="modal-close-button"]');
+      const icon = wrapper.find(
+        '[data-testid="modal-close-button"] [data-testid="unicon"]',
+      );
       expect(icon.attributes("height")).toBe(iconHeight.toString());
     });
 
     it("should use default icon height if not provided", () => {
       wrapper = createWrapper();
-      const icon = wrapper.find('[data-testid="modal-close-button"]');
+      const icon = wrapper.find(
+        '[data-testid="modal-close-button"] [data-testid="unicon"]',
+      );
       expect(icon.attributes("height")).toBe("18");
     });
 
@@ -324,6 +329,43 @@ describe("BaseModal", () => {
           expect(classes).toContain(expectedClass);
         });
       });
+    });
+  });
+
+  describe("Handoff chrome (modal.md)", () => {
+    it("makes the close cross a named button", () => {
+      wrapper = createWrapper();
+      const close = wrapper.find('[data-testid="modal-close-button"]');
+      expect(close.element.tagName).toBe("BUTTON");
+      expect(close.attributes("type")).toBe("button");
+      expect(close.attributes("aria-label")).toBe("actions.labels.close");
+    });
+
+    it("dims the page with the scrim and lifts the dialog with the modal shadow", () => {
+      wrapper = createWrapper();
+      const classes = wrapper.find('[data-testid="modal-dialog"]').classes();
+      expect(classes).toContain("backdrop:bg-scrim");
+      expect(classes).toContain("shadow-modal");
+    });
+
+    it("puts a title in the header row and names the dialog by it", () => {
+      wrapper = createWrapper({ title: "Zoek in Elody" });
+      const title = wrapper.find('[data-testid="modal-title"]');
+      expect(title.text()).toBe("Zoek in Elody");
+      expect(
+        wrapper.find('[data-testid="modal-dialog"]').attributes("aria-labelledby"),
+      ).toBe(title.attributes("id"));
+      expect(
+        wrapper.find('[data-testid="modal-header"]').find('[data-testid="modal-close-button"]').exists(),
+      ).toBe(true);
+    });
+
+    it("has no title or name without a title", () => {
+      wrapper = createWrapper();
+      expect(wrapper.find('[data-testid="modal-title"]').exists()).toBe(false);
+      expect(
+        wrapper.find('[data-testid="modal-dialog"]').attributes("aria-labelledby"),
+      ).toBeUndefined();
     });
   });
 
