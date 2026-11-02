@@ -1,40 +1,57 @@
 ---
 
 # --------------------------------------------------------------
+# Image tags
+# --------------------------------------------------------------
+# master publishes dams-frontend:<pipeline>-<sha> and :latest.
+# A `beta/<name>` branch publishes dams-frontend:beta-<name> only, so clients
+# can opt into it via their FRONTEND_IMAGE while `latest` stays master-only.
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      variables:
+        PWA_IMAGE_TAG: '${CI_PIPELINE_ID}-${CI_COMMIT_SHORT_SHA}'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta\//'
+      variables:
+        PWA_IMAGE_TAG: '${CI_COMMIT_REF_SLUG}'
+
+stages:
+  - build
+  - deliver
+
+
+# --------------------------------------------------------------
 # Includes
 # --------------------------------------------------------------
 include:
-  - project: 'inuits/gitlab-ci/pipeline-templates'
-    ref: 'v4.3.0'
-    file: 
-      - 'pipelines/customers/deploy.yml'
-      - 'jobs/docker/build-npm.yml'
+  - component: $CI_SERVER_FQDN/components/Containers/build@v0.10.3
+    inputs:
+      image_name: inuits/dams-frontend
+      image_tag: ${PWA_IMAGE_TAG}
+      destination_registry: ${HARBOR_URL}/build/elody-dams
+      build_args:
+        - NPM_CONFIG_ALWAYS_AUTH=${NPM_CONFIG_ALWAYS_AUTH}
+        - NPM_CONFIG_REGISTRY=${NPM_CONFIG_REGISTRY}
+        - NPM_CONFIG__AUTH_TOKEN=${NPM_CONFIG__AUTH_TOKEN}
 
+  - component: $CI_SERVER_FQDN/components/Containers/deliver@v0.10.3
+    inputs:
+      rules:
+        - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      image_name: inuits/dams-frontend
+      image_tag: ${PWA_IMAGE_TAG}
+      source_registry: ${HARBOR_URL}/build/elody-dams
+      destination_registries:
+        - ${HARBOR_URL}/elody-dams-dev
 
-# --------------------------------------------------------------
-# Variables
-# --------------------------------------------------------------
-variables:
-  CUSTOMER: inuits
-  PROJECT: dams
-  APPLICATION: frontend
-
-  SKIP_DEPLOY: 'true'
-
-  HARBOR_PROJECT_DEV: elody-dams-dev
-  TARGET_CLUSTER_DEV: inuits-prod
-
-
-# --------------------------------------------------------------
-# Template overrides
-# --------------------------------------------------------------
-
-# Disable uat, not needed
-uat:
-  rules:
-    - when: never
-
-# Disable prod, not needed
-prod:
-  rules:
-    - when: never
+  - component: $CI_SERVER_FQDN/components/Containers/deliver@v0.10.3
+    inputs:
+      job: deliver_beta
+      rules:
+        - if: '$CI_COMMIT_BRANCH =~ /^beta\//'
+      image_name: inuits/dams-frontend
+      image_tag: ${PWA_IMAGE_TAG}
+      source_registry: ${HARBOR_URL}/build/elody-dams
+      destination_registries:
+        - ${HARBOR_URL}/elody-dams-dev
+      push_latest_tag: false
