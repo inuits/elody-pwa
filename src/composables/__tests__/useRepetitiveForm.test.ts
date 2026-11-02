@@ -9,6 +9,7 @@ import {
   describePickedItem,
   describeCreatedEntity,
   buildRelationMetadata,
+  stagedStepValues,
   toDisplayValue,
 } from "@/composables/useRepetitiveForm";
 
@@ -146,6 +147,21 @@ describe("useRepetitiveForm", () => {
     initFlow(omnibusConfig());
     completeStep();
     expect(currentStepIndex.value).toBe(0);
+  });
+
+  it("stagedStepValues exposes the values of the entity staged for a step", () => {
+    const { initFlow, recordCreated } = useRepetitiveForm();
+    initFlow(omnibusConfig());
+    expect(stagedStepValues("work")).toBeUndefined();
+    recordCreated({
+      id: "work-1",
+      values: { original_headtitle: "Abbey Road" },
+    });
+    expect(stagedStepValues("work")).toEqual({
+      original_headtitle: "Abbey Road",
+    });
+    initFlow(omnibusConfig());
+    expect(stagedStepValues("work")).toBeUndefined();
   });
 
   it("pickExisting records a selected entity under the active step key", () => {

@@ -118,6 +118,20 @@ describe("resolveFieldCopyConfig", () => {
     ).toBe("refExpression");
   });
 
+  it("carries a keyMap entry's fromStep", () => {
+    const withMap: CopyFromParentConfig = {
+      ...config,
+      keyMap: [{ key: "title", fromKey: "original_headtitle", fromStep: "work" }],
+    };
+    expect(resolveFieldCopyConfig(field("title"), withMap)).toMatchObject({
+      fromKey: "original_headtitle",
+      fromStep: "work",
+    });
+    expect(
+      resolveFieldCopyConfig(field("subtitle"), withMap)?.fromStep,
+    ).toBeUndefined();
+  });
+
   it("restricts to the keys allowlist when one is configured", () => {
     const withKeys: CopyFromParentConfig = { ...config, keys: ["title"] };
     expect(resolveFieldCopyConfig(field("title"), withKeys)).toBeDefined();
@@ -238,6 +252,65 @@ describe("buildCopyPlan", () => {
     );
 
     expect(plan[0].value).toBe("123");
+  });
+
+  it("reads a fromStep field from that guided-flow step before the host", () => {
+    const plan = buildCopyPlan(
+      [field("title")],
+      {
+        autoCopy: true,
+        keyMap: [
+          { key: "title", fromKey: "original_headtitle", fromStep: "work" },
+        ],
+      },
+      () => parent({ original_headtitle: "Abbey Road: Remastered" }),
+      (stepKey) =>
+        stepKey === "work"
+          ? parent({ original_headtitle: "Abbey Road" })
+          : undefined,
+    );
+
+    expect(plan[0].value).toBe("Abbey Road");
+  });
+
+  it("prefers fromStep over fromRelationType", () => {
+    const plan = buildCopyPlan(
+      [field("title")],
+      {
+        autoCopy: true,
+        keyMap: [
+          {
+            key: "title",
+            fromKey: "original_headtitle",
+            fromStep: "work",
+            fromRelationType: "refWork",
+          },
+        ],
+      },
+      (relationType) =>
+        relationType
+          ? parent({ original_headtitle: "From relation" })
+          : parent({ original_headtitle: "From host" }),
+      () => parent({ original_headtitle: "From step" }),
+    );
+
+    expect(plan[0].value).toBe("From step");
+  });
+
+  it("falls back to the host when the step has no value for the key", () => {
+    const plan = buildCopyPlan(
+      [field("title")],
+      {
+        autoCopy: true,
+        keyMap: [
+          { key: "title", fromKey: "original_headtitle", fromStep: "work" },
+        ],
+      },
+      () => parent({ original_headtitle: "From host" }),
+      () => undefined,
+    );
+
+    expect(plan[0].value).toBe("From host");
   });
 
   it("returns an empty plan when nothing is configured", () => {

@@ -8,6 +8,7 @@ import type {
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { getEntityIdFromRoute } from "@/helpers";
+import { stagedStepValues } from "@/composables/useRepetitiveForm";
 
 
 
@@ -23,6 +24,7 @@ export type FieldCopyConfig = {
   key: string;
   fromKey: string;
   fromRelationType?: string;
+  fromStep?: string;
   label?: string;
   labelFromField: boolean;
   autoCopy: boolean;
@@ -36,6 +38,10 @@ export type CopyPlanEntry = FieldCopyConfig & {
 
 export type ParentValueReader = (
   fromRelationType?: string,
+) => ParentValueBuckets | undefined;
+
+export type StepValueReader = (
+  stepKey: string,
 ) => ParentValueBuckets | undefined;
 
 export type NestedFormValues = Record<string, Record<string, unknown>>;
@@ -101,6 +107,7 @@ export const resolveFieldCopyConfig = (
     fromKey: mapped?.fromKey ?? key,
     fromRelationType:
       mapped?.fromRelationType ?? config.fromRelationType ?? undefined,
+    fromStep: mapped?.fromStep ?? undefined,
     label: labelFor(key, config),
     labelFromField: false,
     autoCopy: formAutoCopy,
@@ -124,6 +131,7 @@ export const buildCopyPlan = (
   fields: PanelMetaData[],
   config: CopyFromParentConfig | undefined | null,
   readParent: ParentValueReader,
+  readStep: StepValueReader = () => undefined,
 ): CopyPlanEntry[] => {
   const plan: CopyPlanEntry[] = [];
 
@@ -131,12 +139,15 @@ export const buildCopyPlan = (
     const fieldConfig = resolveFieldCopyConfig(field, config);
     if (!fieldConfig) continue;
 
-    let value = fieldConfig.fromRelationType
-      ? readParentValue(
-          readParent(fieldConfig.fromRelationType),
-          fieldConfig.fromKey,
-        )
+    let value = fieldConfig.fromStep
+      ? readParentValue(readStep(fieldConfig.fromStep), fieldConfig.fromKey)
       : undefined;
+
+    if (!hasValue(value) && fieldConfig.fromRelationType)
+      value = readParentValue(
+        readParent(fieldConfig.fromRelationType),
+        fieldConfig.fromKey,
+      );
 
     if (!hasValue(value))
       value = readParentValue(readParent(undefined), fieldConfig.fromKey);
@@ -222,8 +233,13 @@ export const useCopyFromParent = (options: {
     return getForm(relatedId)?.values as ParentValueBuckets | undefined;
   };
 
+  const readStep: StepValueReader = (stepKey) => {
+    const values = stagedStepValues(stepKey);
+    return values ? { intialValues: values } : undefined;
+  };
+
   const plan = computed<CopyPlanEntry[]>(() =>
-    buildCopyPlan(options.fields(), options.config(), readParent),
+    buildCopyPlan(options.fields(), options.config(), readParent, readStep),
   );
 
   const entryFor = (field: PanelMetaData): CopyPlanEntry | undefined =>

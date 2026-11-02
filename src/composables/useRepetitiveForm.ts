@@ -164,6 +164,11 @@ const currentStepIndex = ref<number>(0);
 const currentBranch = ref<RepetitiveBranch>(newBranch());
 const branches = ref<RepetitiveBranch[]>([]);
 
+export const stagedStepValues = (
+  stepKey: string,
+): Record<string, unknown> | undefined =>
+  primaryEntity(currentBranch.value, stepKey)?.values ?? undefined;
+
 export const useRepetitiveForm = () => {
   const { createEntity, addRelations, saveEntityValues } = useManageEntities();
   const {
