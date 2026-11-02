@@ -538,6 +538,26 @@ describe("ListItem", () => {
       );
     });
 
+    // the column header puts the label over the first row's cell; a type
+    // badge cell was as narrow as "E", cutting "Main type" to "M…"
+    it("keeps a leading badge cell at least as wide as its header label", () => {
+      const cell = shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "row-1",
+          hideLabels: true,
+          teaserMetadata: [
+            { key: "type", label: "metadata.labels.main-type", value: { formatter: "pill", label: "E" } },
+            { key: "title", value: "Oasis" },
+          ],
+        },
+      }).findAll("[data-cy='list-item-content'] > div")[0];
+      const sizer = cell.find("[data-cy='list-cell-label-sizer']");
+      expect(sizer.text()).toBe("metadata.labels.main-type");
+      expect(sizer.attributes("aria-hidden")).toBe("true");
+      expect(sizer.classes()).toEqual(expect.arrayContaining(["h-0", "overflow-hidden", "text-label", "font-bold"]));
+    });
+
     it("shows cell labels without a header row", () => {
       const content = shallowMount(ListItem, {
         props: { ...defaultProps, itemId: "row-1" },
