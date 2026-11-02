@@ -440,17 +440,20 @@ const measureHeader = () => {
 };
 
 const { isEnqueued } = useBulkOperations();
-const pageIsSelected = computed(
-  () =>
-    processedEntities.value.length > 0 &&
-    processedEntities.value
-      .filter((entity) => !entity.isDisabled)
-      .every(
-        (entity) =>
-          isEnqueued(props.bulkOperationsContext, entity.id) ||
-          isEnqueued(props.bulkOperationsContext, entity.originalEntity.uuid),
-      ),
-);
+const pageIsSelected = computed(() => {
+  const selectable = processedEntities.value.filter(
+    (entity) => !entity.isDisabled,
+  );
+  // no selectable row means nothing to tick, not "all ticked"
+  return (
+    selectable.length > 0 &&
+    selectable.every(
+      (entity) =>
+        isEnqueued(props.bulkOperationsContext, entity.id) ||
+        isEnqueued(props.bulkOperationsContext, entity.originalEntity.uuid),
+    )
+  );
+});
 const headerObserver =
   typeof ResizeObserver === "undefined"
     ? undefined
