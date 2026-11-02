@@ -238,7 +238,10 @@ const unprefixed = ({ bgColor, disabledStyle }: Button): string =>
     .join(" ")
     .replaceAll("disabled:", "");
 
-const hasIcon = computed<boolean>(() => props.icon !== DamsIcons.NoIcon);
+// configs may send `icon: null` or a name the icon set lacks
+const hasIcon = computed<boolean>(
+  () => props.icon !== DamsIcons.NoIcon && !!Unicons[props.icon]?.name,
+);
 
 const sizeClasses = computed<string>(() => {
   const iconOnly = !props.label;
