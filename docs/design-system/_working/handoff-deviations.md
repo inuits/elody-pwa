@@ -101,3 +101,4 @@ Kinds:
 | V26 | Open | one step card per step (`guided-flow.md`) | picker steps have no card (the list panel is the chrome); done with a `has-` selector and an `OnWhiteSurface` inject, a minimal fix | redo the picker step cleanly (user): one picker layout for guided-flow steps and the entity-picker modals (`entity-picker.md` library-embedded variant), decide the card vs list chrome there |
 | Step 9 | Parked | DAMS tenants: media-first detail layout | not started (needs vliz-dams) | — |
 | DS 3 note | Open | every button named | recrop modal close button had no name (found in DS 3) | check |
+| V32 | Deviation | confirm body names the record with its type badge (pickers card) | the type in words in brackets, no badge: `confirm()` takes plain strings | pass a badge to `confirm()` when a second caller needs it |

@@ -36,7 +36,7 @@ import { useAsyncAction } from "@/composables/useAsyncAction";
 
 const config: any = inject("config");
 const entityFormData: any = inject("entityFormData");
-const { t } = useI18n();
+const { t, te } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const entityId = computed<string>(
@@ -69,6 +69,12 @@ const deleteAvailable = computed<boolean>(
 const entityType = computed(() => {
   const slug = String(route.params["type"]);
   return mapUrlToEntityType(slug) || slug;
+});
+
+// the type in words ("Music"), never the internal key ("manifestation_music")
+const entityTypeLabel = computed(() => {
+  const key = `entity-translations.${entityType.value.toLowerCase()}`;
+  return te(key) ? t(key, 1) : entityType.value;
 });
 
 const deleteEntity = (deleteMediafiles: boolean = false) =>
@@ -129,11 +135,11 @@ const openDeleteModal = async () => {
     );
   } else {
     const choice = await confirm({
-      title: t("confirm.delete-entity.title", [entityType.value]),
-      message: t("confirm.delete-entity.message", [
-        `${entityType.value} '${title}'`,
+      title: t("confirm.delete-entity.title"),
+      message: t("confirm.delete-entity.message-named", [
+        `'${title}' (${entityTypeLabel.value})`,
       ]),
-      confirmLabel: t("confirm.delete-entity.confirm", [entityType.value]),
+      confirmLabel: t("confirm.delete-entity.confirm"),
       cancelLabel: t("confirm.delete-entity.cancel"),
     });
     if (choice !== "confirm") return;
