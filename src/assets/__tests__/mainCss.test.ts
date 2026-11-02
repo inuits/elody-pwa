@@ -70,3 +70,18 @@ describe("main.css focus ring", () => {
     },
   );
 });
+
+// feedback.md: one toast, 12.5px text; the library's wrapper clipped the
+// toast shadow into a grey box and its title/text ran at 20px/16px
+describe("main.css toasts", () => {
+  it("lets the toast shadow show past the library's wrapper", () => {
+    expect(blocks(/\.vue-notification-wrapper/).join()).toMatch(/overflow:\s*visible/);
+  });
+
+  it("sets the toast title and text at the toast size", () => {
+    const body = blocks(
+      /\.vue-notification \.notification-title,\s*\.vue-notification \.notification-content/,
+    ).join();
+    expect(body).toMatch(/font-size:\s*inherit/);
+  });
+});
