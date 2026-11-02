@@ -1,54 +1,40 @@
 <template>
   <RepetitiveStepModal :open="open" :title="modalTitle" @close="requestClose">
-    <div data-testid="repetitive-flow">
+    <!-- pickers card WizardSteps: "1. Type" chips on the right of the header;
+         current filled accent-dark (white on the accent fails contrast), done
+         white with a check, to come faded -->
+    <template v-if="view === 'step'" #headerExtra>
       <ol
-        v-if="view === 'step'"
         data-testid="repetitive-flow-steps"
-        class="flex items-center gap-2 mb-6"
+        class="flex items-center gap-1 m-0 p-0 list-none"
       >
         <li
           v-for="(step, index) in flowConfig?.steps ?? []"
           :key="step.key"
-          class="flex items-center gap-2"
+          class="flex items-center gap-1 p-(--chip-padding) rounded-overlay text-hint font-bold whitespace-nowrap"
+          :class="
+            index === currentStepIndex
+              ? 'bg-accent-dark text-text-on-accent'
+              : index < currentStepIndex
+                ? 'bg-surface text-text-accent-strong'
+                : 'bg-surface/55 text-text-secondary'
+          "
           :aria-current="index === currentStepIndex ? 'step' : undefined"
         >
-          <!-- guided-flow.md: filled current step, check on finished ones -->
-          <span
-            class="flex items-center justify-center w-6 h-6 rounded-full text-table font-bold"
-            :class="
-              index === currentStepIndex
-                ? 'bg-accent-dark text-neutral-white'
-                : index < currentStepIndex
-                  ? 'bg-accent-light text-accent-ink'
-                  : 'bg-surface-muted text-text-light'
-            "
-          >
-            <template v-if="index < currentStepIndex">
-              <unicon
-                data-testid="step-done"
-                :name="Unicons.Check.name"
-                height="16"
-                aria-hidden="true"
-              />
-              <span class="sr-only">{{ $t("repetitiveForm.step-done") }}</span>
-            </template>
-            <template v-else>{{ index + 1 }}</template>
-          </span>
-          <span
-            :class="
-              index === currentStepIndex ? 'font-bold' : 'text-text-light'
-            "
-          >
-            {{ $t(step.label ?? step.key) }}
-          </span>
-          <span
-            v-if="index < (flowConfig?.steps.length ?? 0) - 1"
-            class="text-text-light px-1"
-            >›</span
-          >
+          <template v-if="index < currentStepIndex">
+            <unicon
+              data-testid="step-done"
+              :name="Unicons.Check.name"
+              height="12"
+              aria-hidden="true"
+            />
+            <span class="sr-only">{{ $t("repetitiveForm.step-done") }}</span>
+          </template>
+          {{ index + 1 }}. {{ $t(step.label ?? step.key) }}
         </li>
       </ol>
-
+    </template>
+    <div data-testid="repetitive-flow">
       <!-- guided-flow.md: step card beside the "Created this session" rail -->
       <div
         v-if="view === 'step'"

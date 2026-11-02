@@ -63,7 +63,8 @@ vi.mock("@/components/repetitiveForm/RepetitiveStepModal.vue", () => ({
     name: "RepetitiveStepModal",
     props: ["open", "title"],
     emits: ["close"],
-    template: "<div><slot /></div>",
+    template:
+      "<div><div data-testid='header-extra'><slot name='headerExtra' /></div><slot /></div>",
   },
 }));
 vi.mock("@/components/repetitiveForm/RepetitiveStepField.vue", () => ({
@@ -149,7 +150,7 @@ const getWrapper = () =>
       renderStubDefaultSlot: true,
       // render the mocked step field for real so its named `actions` slot
       // (which now hosts the flow's back button) is part of the DOM
-      stubs: { RepetitiveStepField: false },
+      stubs: { RepetitiveStepField: false, RepetitiveStepModal: false },
     },
   });
 
@@ -286,6 +287,29 @@ describe("RepetitiveFlow", () => {
     expect(items[0].find("[data-testid='step-done']").exists()).toBe(true);
     expect(items[1].attributes("aria-current")).toBe("step");
     expect(items[1].find("[data-testid='step-done']").exists()).toBe(false);
+  });
+
+  // pickers card WizardSteps: "1. Type" chips in the header; current filled
+  // (accent-dark: white on the accent is 2.8:1 on vlacc), done white with the
+  // strong accent, to come a faded white (secondary text: muted is 4.2:1)
+  it("shows the steps as chips in the modal header", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    const strip = wrapper.find("[data-testid='header-extra'] [data-testid='repetitive-flow-steps']");
+    expect(strip.exists()).toBe(true);
+    const [done, current] = strip.findAll("li");
+    expect(current.text()).toContain("2. expression");
+    expect(current.classes()).toEqual(expect.arrayContaining(["rounded-overlay", "bg-accent-dark", "text-text-on-accent"]));
+    expect(done.classes()).toEqual(expect.arrayContaining(["bg-surface", "text-text-accent-strong"]));
+  });
+
+  it("fades the steps still to come", async () => {
+    const wrapper = getWrapper();
+    await startBranch(wrapper);
+    const todo = wrapper.findAll("[data-testid='repetitive-flow-steps'] li")[1];
+    expect(todo.classes()).toEqual(expect.arrayContaining(["bg-surface/55", "text-text-secondary"]));
   });
 
   it("renders a numbered step strip with step labels during a step", async () => {

@@ -93,6 +93,22 @@ describe("RepetitiveStepModal handoff chrome", () => {
     );
   });
 
+  // pickers card (ModalShell + WizardSteps): the step strip sits on the right
+  // of the header band, before the close cross
+  it("puts header extras in the header band, before the close cross", () => {
+    const wrapper = mount(RepetitiveStepModal, {
+      props: { open: true, title: "Omnibus" },
+      slots: { headerExtra: "<ol data-testid='steps' />" },
+      global: { stubs: { unicon: true } },
+    });
+    const extra = wrapper.find("[data-testid='repetitive-step-modal-header-extra']");
+    expect(extra.find("[data-testid='steps']").exists()).toBe(true);
+    expect(extra.classes()).toContain("ml-auto");
+    expect(extra.element.nextElementSibling?.getAttribute("data-testid")).toBe(
+      "repetitive-step-modal-close",
+    );
+  });
+
   it("uses the modal close button look", () => {
     const close = getWrapper(true, "Omnibus").find(
       "[data-testid='repetitive-step-modal-close']",

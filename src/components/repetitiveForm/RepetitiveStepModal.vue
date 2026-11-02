@@ -22,6 +22,13 @@
       >
         {{ title }}
       </h2>
+      <div
+        v-if="$slots.headerExtra"
+        data-testid="repetitive-step-modal-header-extra"
+        class="ml-auto flex items-center"
+      >
+        <slot name="headerExtra" />
+      </div>
       <button
         type="button"
         data-testid="repetitive-step-modal-close"
