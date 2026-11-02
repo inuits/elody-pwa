@@ -157,18 +157,6 @@
             data-test="list-pager"
             class="shrink-0"
           />
-          <div
-            v-if="
-              !disableLibraryBar &&
-              toggles.length > 1 &&
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
-            "
-          >
-            <BaseToggleGroup
-              :toggles="toggles"
-              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
-            />
-          </div>
           <div v-if="showLibraryBar" class="min-w-0 ml-auto">
             <LibraryBar
               :route="route"
@@ -199,11 +187,21 @@
               />
             </LibraryBar>
           </div>
+          <!-- the view switch ends the band, away from the Filters button -->
+          <div
+            v-if="showViewSwitch"
+            :class="{ 'ml-auto': !showLibraryBar }"
+          >
+            <BaseToggleGroup
+              :toggles="toggles"
+              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
+            />
+          </div>
           <!-- In a detail panel the bar's add pills land here. -->
           <span
             v-if="insidePanel"
             :data-list-actions="listActionsId"
-            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar }]"
+            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar && !showViewSwitch }]"
           />
         </div>
           <BulkOperationsActionsBar
@@ -1033,6 +1031,12 @@ const showLibraryBar = computed(
     !props.predefinedEntities &&
     (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
+const showViewSwitch = computed(
+  () =>
+    !props.disableLibraryBar &&
+    toggles.value.length > 1 &&
+    props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
 );
 // Slotted into the library bar, between search and sort: it registers the
 // pagination-limit promise the first fetch waits for.

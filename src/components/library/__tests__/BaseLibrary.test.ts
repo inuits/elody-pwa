@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   addRefetchFunction: undefined as unknown as ReturnType<typeof vi.fn>,
   addMutationCallback: undefined as unknown as ReturnType<typeof vi.fn>,
   displayMap: false,
+  toggles: [] as unknown[],
 }));
 
 // Module-level refs shared with the useBaseLibrary mock — cannot go in
@@ -186,7 +187,7 @@ vi.mock("@/composables/useViewModes", () => ({
     displayMap: ref(mocks.displayMap),
     displayPipeline: ref(false),
     expandFilters: ref(false),
-    toggles: ref([]),
+    toggles: ref(mocks.toggles),
     configPerViewMode: ref({}),
     viewModesIncludeViewModesMedia: ref(false),
     showViewModesList: ref(false),
@@ -930,6 +931,25 @@ describe("BaseLibrary.vue pager and page size", () => {
     const bar = wrapper.findComponent(LibraryBar);
     expect(bar.find("page-size-select-stub").exists()).toBe(true);
     expect(bar.element.parentElement?.classList).toContain("ml-auto");
+  });
+
+  // user, 2026-11-02: the view switch ends the band, away from the Filters
+  // button; it changes how results look, like sort and page size
+  it("puts the view switch at the end of the band, after the library bar", async () => {
+    mocks.toggles = [{}, {}];
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    const band = wrapper.find('[data-cy="list-header"]').element;
+    const children = [...band.children];
+    const toggle = wrapper.findComponent({ name: "BaseToggleGroup" }).element;
+    const barWrapper = wrapper.findComponent(LibraryBar).element.parentElement!;
+    expect(children.indexOf(toggle.parentElement!)).toBe(
+      children.indexOf(barWrapper) + 1,
+    );
+    mocks.toggles = [];
   });
 
   it("leaves the page size out of compact relation lists", async () => {
