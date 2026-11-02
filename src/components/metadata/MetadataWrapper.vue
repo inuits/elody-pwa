@@ -187,7 +187,6 @@
             {{ browseLabel }}
           </button>
           <RelationPickerModal
-            :label="t(metadata.label ?? '')"
             :entity-id="entityFormData?.id || formId"
             :accepted-type="pickerEntityType"
             :filters="
