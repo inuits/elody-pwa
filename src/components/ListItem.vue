@@ -262,6 +262,35 @@
                 :break-words="true"
               />
             </ListItemInlineField>
+            <ListItemEditableValue
+              v-else-if="
+                !useEditHelper.isEdit &&
+                metadataItem?.editFormQuery &&
+                !metadataItem?.readOnly &&
+                (intialValues?.id || itemId) &&
+                entityTypename
+              "
+              :edit-form-query="metadataItem.editFormQuery"
+              :label="metadataItem.label"
+              :entity-id="intialValues?.id || itemId"
+              :entity-type="entityTypename"
+              :refetch-entities="refetchEntities"
+            >
+              <ReadOnlyMetadataWrapper
+                :form-id="formId || 'listview'"
+                :metadata="(localizedMetadata || metadataItem) as MetadataField"
+                :is-edit="false"
+                :linked-entity-id="intialValues?.id || itemId"
+                :entity-type="entityTypename"
+                :highlight="
+                  (isPrimaryMediafile &&
+                    metadataItem?.highlightIfPrimaryMediafile) ||
+                  (isPrimaryThumbnail &&
+                    metadataItem?.highlightIfPrimaryThumbnail)
+                "
+                :break-words="true"
+              />
+            </ListItemEditableValue>
             <ReadOnlyMetadataWrapper
               v-else-if="!useEditHelper.isEdit || !metadataItem?.inputField"
               :form-id="formId || 'listview'"
@@ -373,6 +402,7 @@ import ImageViewer from "@/components/base/ImageViewer.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
+import ListItemEditableValue from "@/components/ListItemEditableValue.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";

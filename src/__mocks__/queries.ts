@@ -659,6 +659,11 @@ export enum ContextMenuElodyActionEnum {
   Share = 'Share'
 }
 
+export enum ContextMenuFormFlow {
+  Removal = 'Removal',
+  Update = 'Update'
+}
+
 export type ContextMenuGeneralAction = {
   __typename?: 'ContextMenuGeneralAction';
   action: ContextMenuGeneralActionEnum;

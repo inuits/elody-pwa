@@ -77,16 +77,20 @@ const start = async (): Promise<void> => {
   let { config } = applicationDetails;
   // one id per tab, shared by the traces, the usage events and the error reports
   const sessionId = getSessionId();
-  await initBrowserTracing(config, undefined, sessionId);
+  const { setVersion, getPwaVersion } = useServiceVersionManager();
+  // the build, on the traces and the usage events as well
+  const pwaVersion = await getPwaVersion();
+  const knownPwaVersion =
+    pwaVersion && pwaVersion !== "no-version-found" ? pwaVersion : undefined;
+  await initBrowserTracing(config, undefined, sessionId, knownPwaVersion);
   i18n = setupI18n(translations, config.customization.applicationLocale);
 
   typeUrlMapping = urlMapping;
-  const { setVersion, getPwaVersion } = useServiceVersionManager();
 
   const { initializeInputValidation } = useInputValidation();
 
   setVersion(version["apollo-graphql-version"], ElodyServices.ApolloGraphql);
-  setVersion(await getPwaVersion(), ElodyServices.Pwa);
+  setVersion(pwaVersion, ElodyServices.Pwa);
   initializeInputValidation(translations);
 
   if (config.customization) applyCustomization(config.customization);
@@ -112,7 +116,7 @@ const start = async (): Promise<void> => {
     await auth.verifyServerAuth();
   }
 
-  await initUsageAnalytics(config, sessionId);
+  await initUsageAnalytics(config, sessionId, undefined, knownPwaVersion);
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 

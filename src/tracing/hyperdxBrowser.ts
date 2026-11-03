@@ -1,5 +1,6 @@
 import HyperDX from "@hyperdx/browser";
 import { captureConsole } from "@/tracing/consoleCapture";
+import { uiVersion } from "@/analytics/uiVersion";
 import type {
   BrowserTracing,
   BrowserTracingSettings,
@@ -20,6 +21,8 @@ export const startBrowserTracing = ({
   serviceName,
   apiKey,
   sessionId,
+  pwaVersion,
+  uiVersion: configuredUiVersion,
   attributes,
 }: BrowserTracingSettings): BrowserTracing => {
   const traces = onThisOrigin(tracesUrl);
@@ -58,9 +61,11 @@ export const startBrowserTracing = ({
   });
   const session = {
     ...(sessionId ? { session_id: sessionId } : {}),
+    ui_version: uiVersion(configuredUiVersion),
+    ...(pwaVersion ? { pwa_version: pwaVersion } : {}),
     ...attributes,
   };
-  if (Object.keys(session).length) HyperDX.setGlobalAttributes(session);
+  HyperDX.setGlobalAttributes(session);
   return {
     identify: ({ pseudonym, library }) =>
       HyperDX.setGlobalAttributes({

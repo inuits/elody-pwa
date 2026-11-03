@@ -19,7 +19,13 @@ export type UsageTracker = {
 
 type OpenpanelWebModule = {
   startUsageAnalytics: (
-    settings: UsageAnalyticsSettings & { sessionId: string },
+    settings: UsageAnalyticsSettings & {
+      sessionId: string;
+      /** the build (pwa-version.json), on every event */
+      pwaVersion?: string;
+      /** the UI the deployment runs (the app config), on every event */
+      uiVersion?: string;
+    },
   ) => UsageTracker;
 };
 
@@ -29,16 +35,19 @@ let tracker: UsageTracker | undefined;
 // deployment's app config switches usage analytics on, and an analytics
 // failure never stops the app from starting.
 export const initUsageAnalytics = async (
-  config: { usageAnalytics?: UsageAnalyticsSettings },
+  config: { usageAnalytics?: UsageAnalyticsSettings; uiVersion?: string },
   sessionId: string,
   load: () => Promise<OpenpanelWebModule> = () =>
     import("@/analytics/openpanelWeb"),
+  pwaVersion?: string,
 ): Promise<boolean> => {
   if (!config.usageAnalytics) return false;
   try {
     tracker = (await load()).startUsageAnalytics({
       ...config.usageAnalytics,
       sessionId,
+      ...(pwaVersion ? { pwaVersion } : {}),
+      ...(config.uiVersion ? { uiVersion: config.uiVersion } : {}),
     });
     return true;
   } catch (error) {
@@ -87,11 +96,16 @@ const sendIf = (
   entityType?: string,
 ): void => {
   if (!value) return;
-  trackUsage(name, { ...properties, ...(entityType ? { entity_type: entityType } : {}) });
+  trackUsage(name, {
+    ...properties,
+    ...(entityType ? { entity_type: entityType } : {}),
+  });
 };
 
-export const trackViewMode = (viewMode: string | undefined, entityType?: string) =>
-  sendIf("view_mode_changed", viewMode, { view_mode: viewMode }, entityType);
+export const trackViewMode = (
+  viewMode: string | undefined,
+  entityType?: string,
+) => sendIf("view_mode_changed", viewMode, { view_mode: viewMode }, entityType);
 
 export const trackSort = (sort: string | undefined, entityType?: string) =>
   sendIf("sort_changed", sort, { sort }, entityType);
@@ -114,8 +128,10 @@ export const trackContextAction = (
     entityType,
   );
 
-export const trackFormOpened = (form: string | undefined, entityType?: string) =>
-  sendIf("form_opened", form, { form }, entityType);
+export const trackFormOpened = (
+  form: string | undefined,
+  entityType?: string,
+) => sendIf("form_opened", form, { form }, entityType);
 
 export const trackFormSubmitted = (
   form: string | undefined,

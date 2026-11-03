@@ -1,6 +1,7 @@
 import ListItem from "../ListItem.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";
+import ListItemEditableValue from "@/components/ListItemEditableValue.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
@@ -380,6 +381,57 @@ describe("ListItem", () => {
       for (const multilingual of wrappers)
         // not the entity id itself: the edit modal reads translations stored there on save
         expect(multilingual.props("formId")).toBe("WBI-1_listitem");
+    });
+  });
+
+  describe("click-to-edit teaser metadata", () => {
+    const mountWithField = (field: Record<string, unknown>) =>
+      shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "notification-1",
+          entityTypename: "notification" as any,
+          teaserMetadata: [
+            { key: "status", value: { value: "open" }, ...field },
+          ],
+        },
+        global: {
+          stubs: {
+            MultilingualWrapper: {
+              template: "<div><slot :localizedMetadata='undefined' /></div>",
+            },
+          },
+        },
+      });
+
+    it("makes a value with an editFormQuery editable for the row's entity", () => {
+      const editable = mountWithField({
+        editFormQuery: "GetEditNotificationStatusForm",
+      }).findComponent(ListItemEditableValue);
+
+      expect(editable.exists()).toBe(true);
+      expect(editable.props()).toMatchObject({
+        editFormQuery: "GetEditNotificationStatusForm",
+        entityId: "notification-1",
+        entityType: "notification",
+      });
+    });
+
+    it("keeps a value read-only when the user may not edit it", () => {
+      const wrapper = mountWithField({
+        editFormQuery: "GetEditNotificationStatusForm",
+        readOnly: true,
+      });
+
+      expect(wrapper.findComponent(ListItemEditableValue).exists()).toBe(
+        false,
+      );
+    });
+
+    it("keeps a value without an editFormQuery read-only", () => {
+      expect(
+        mountWithField({}).findComponent(ListItemEditableValue).exists(),
+      ).toBe(false);
     });
   });
 
