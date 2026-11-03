@@ -3,12 +3,19 @@ import type {
   UsageAnalyticsSettings,
   UsageTracker,
 } from "@/analytics/usageAnalytics";
+import { uiVersion } from "@/analytics/uiVersion";
 
 export const startUsageAnalytics = ({
   clientId,
   apiUrl,
   sessionId,
-}: UsageAnalyticsSettings & { sessionId: string }): UsageTracker => {
+  pwaVersion,
+  uiVersion: configuredUiVersion,
+}: UsageAnalyticsSettings & {
+  sessionId: string;
+  pwaVersion?: string;
+  uiVersion?: string;
+}): UsageTracker => {
   const op = new OpenPanel({
     clientId,
     // the app's own telemetry proxy (the GraphQL server) is given as a path
@@ -21,7 +28,11 @@ export const startUsageAnalytics = ({
     // no data-track attributes and no session replay: events are named in code
     trackAttributes: false,
   });
-  op.setGlobalProperties({ session_id: sessionId });
+  op.setGlobalProperties({
+    session_id: sessionId,
+    ui_version: uiVersion(configuredUiVersion),
+    ...(pwaVersion ? { pwa_version: pwaVersion } : {}),
+  });
   return {
     track: (name, properties) => op.track(name, properties),
     identify: (payload) => op.identify(payload),

@@ -44,6 +44,35 @@ describe("initBrowserTracing", () => {
     });
   });
 
+  it("passes the build number to the SDK", async () => {
+    const startBrowserTracing = vi.fn();
+    await initBrowserTracing(
+      { browserTracing: settings },
+      async () => ({ startBrowserTracing }),
+      "s-1",
+      "434875",
+    );
+    expect(startBrowserTracing).toHaveBeenCalledWith({
+      ...settings,
+      sessionId: "s-1",
+      pwaVersion: "434875",
+    });
+  });
+
+  it("hands on which UI the app config says the deployment runs", async () => {
+    const startBrowserTracing = vi.fn();
+    await initBrowserTracing(
+      { browserTracing: settings, uiVersion: "redesign" },
+      async () => ({ startBrowserTracing }),
+      "s-1",
+    );
+    expect(startBrowserTracing).toHaveBeenCalledWith({
+      ...settings,
+      sessionId: "s-1",
+      uiVersion: "redesign",
+    });
+  });
+
   it("keeps the app running when the SDK cannot be loaded", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const load = vi.fn().mockRejectedValue(new Error("chunk failed"));

@@ -62,6 +62,37 @@ describe("initUsageAnalytics", () => {
     });
   });
 
+  it("passes the build number to the SDK", async () => {
+    const startUsageAnalytics = vi.fn().mockReturnValue(fakeTracker());
+    const load = vi.fn().mockResolvedValue({ startUsageAnalytics });
+    await initUsageAnalytics(
+      { usageAnalytics: settings },
+      "s-1",
+      load,
+      "434875",
+    );
+    expect(startUsageAnalytics).toHaveBeenCalledWith({
+      ...settings,
+      sessionId: "s-1",
+      pwaVersion: "434875",
+    });
+  });
+
+  it("hands on which UI the app config says the deployment runs", async () => {
+    const startUsageAnalytics = vi.fn().mockReturnValue(fakeTracker());
+    const load = vi.fn().mockResolvedValue({ startUsageAnalytics });
+    await initUsageAnalytics(
+      { usageAnalytics: settings, uiVersion: "redesign" },
+      "s-1",
+      load,
+    );
+    expect(startUsageAnalytics).toHaveBeenCalledWith({
+      ...settings,
+      sessionId: "s-1",
+      uiVersion: "redesign",
+    });
+  });
+
   it("keeps the app running when the SDK cannot be loaded", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const load = vi.fn().mockRejectedValue(new Error("chunk failed"));
@@ -152,9 +183,9 @@ describe("the user, pseudonymous, in a library", () => {
       name: "brugge.be",
     });
     expect(tracker.setGroup).toHaveBeenCalledWith("brugge.be");
-    expect(JSON.stringify(vi.mocked(tracker.identify).mock.calls)).not.toContain(
-      "ann.peeters",
-    );
+    expect(
+      JSON.stringify(vi.mocked(tracker.identify).mock.calls),
+    ).not.toContain("ann.peeters");
   });
 
   it("still gives the pseudonym (for HyperDX) while usage analytics is off", async () => {
@@ -225,9 +256,9 @@ describe("createUsageLink", () => {
       mutation,
     );
     await run(createUsageLink(track).concat(fail()), mutation);
-    expect(track.mock.calls.map(([, properties]) => properties.outcome)).toEqual(
-      ["error", "error"],
-    );
+    expect(
+      track.mock.calls.map(([, properties]) => properties.outcome),
+    ).toEqual(["error", "error"]);
   });
 
   it("leaves queries alone", async () => {
@@ -246,8 +277,16 @@ describe("appliedFilterPaths", () => {
     expect(
       appliedFilterPaths([
         { type: "type", key: "type", value: "manifestation_word" },
-        { type: "selection", key: "vlacc:1|properties.material_type.value", value: ["BOEK"] },
-        { type: "date", key: ["vlacc:1|audit.created.at"], value: { min: "2026-01-01" } },
+        {
+          type: "selection",
+          key: "vlacc:1|properties.material_type.value",
+          value: ["BOEK"],
+        },
+        {
+          type: "date",
+          key: ["vlacc:1|audit.created.at"],
+          value: { min: "2026-01-01" },
+        },
         { type: "text", key: "vlacc:1|properties.title.value", value: "" },
       ] as any),
     ).toEqual(["properties.material_type.value", "audit.created.at"]);
@@ -273,12 +312,35 @@ describe("the tracking plan's planned events", () => {
     trackFormSubmitted("GetPersonCreateForm", "ok", "person");
     trackFormSubmitted("GetPersonCreateForm", "error");
     expect(vi.mocked(tracker.track).mock.calls).toEqual([
-      ["view_mode_changed", { view_mode: "ViewModesGrid", entity_type: "person" }],
-      ["sort_changed", { sort: "properties.title.value", entity_type: "work_word" }],
-      ["bulk_operation", { operation: "exportCsv", selected: 12, entity_type: "manifestation_word" }],
-      ["context_action", { action: "doElodyAction", action_type: "Delete", entity_type: "reading" }],
+      [
+        "view_mode_changed",
+        { view_mode: "ViewModesGrid", entity_type: "person" },
+      ],
+      [
+        "sort_changed",
+        { sort: "properties.title.value", entity_type: "work_word" },
+      ],
+      [
+        "bulk_operation",
+        {
+          operation: "exportCsv",
+          selected: 12,
+          entity_type: "manifestation_word",
+        },
+      ],
+      [
+        "context_action",
+        {
+          action: "doElodyAction",
+          action_type: "Delete",
+          entity_type: "reading",
+        },
+      ],
       ["form_opened", { form: "GetPersonCreateForm" }],
-      ["form_submitted", { form: "GetPersonCreateForm", outcome: "ok", entity_type: "person" }],
+      [
+        "form_submitted",
+        { form: "GetPersonCreateForm", outcome: "ok", entity_type: "person" },
+      ],
       ["form_submitted", { form: "GetPersonCreateForm", outcome: "error" }],
     ]);
   });

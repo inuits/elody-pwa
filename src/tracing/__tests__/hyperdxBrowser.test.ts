@@ -62,6 +62,32 @@ describe("startBrowserTracing with HyperDX", () => {
     startBrowserTracing({ ...settings, sessionId: "s-1" });
     expect(hyperdx.setGlobalAttributes).toHaveBeenCalledWith({
       session_id: "s-1",
+      ui_version: "current",
+    });
+  });
+
+  it("puts the build number on everything it sends", () => {
+    startBrowserTracing({
+      ...settings,
+      sessionId: "s-1",
+      pwaVersion: "434875",
+    });
+    expect(hyperdx.setGlobalAttributes).toHaveBeenCalledWith({
+      session_id: "s-1",
+      ui_version: "current",
+      pwa_version: "434875",
+    });
+  });
+
+  it("says redesign on everything when the deployment runs the redesign", () => {
+    startBrowserTracing({
+      ...settings,
+      sessionId: "s-1",
+      uiVersion: "redesign",
+    });
+    expect(hyperdx.setGlobalAttributes).toHaveBeenCalledWith({
+      session_id: "s-1",
+      ui_version: "redesign",
     });
   });
 
@@ -70,6 +96,7 @@ describe("startBrowserTracing with HyperDX", () => {
     tracing.identify({ pseudonym: "p-1", library: "brugge.be" });
     expect(hyperdx.setGlobalAttributes).toHaveBeenLastCalledWith({
       session_id: "s-1",
+      ui_version: "current",
       userId: "p-1",
       teamId: "brugge.be",
     });
@@ -86,12 +113,14 @@ describe("startBrowserTracing with HyperDX", () => {
     });
     expect(hyperdx.setGlobalAttributes).toHaveBeenCalledWith({
       session_id: "s-1",
+      ui_version: "current",
       "service.namespace": "vlacc-dams",
       "deployment.environment": "local",
     });
     tracing.identify({ pseudonym: "p-1", library: "brugge.be" });
     expect(hyperdx.setGlobalAttributes).toHaveBeenLastCalledWith({
       session_id: "s-1",
+      ui_version: "current",
       "service.namespace": "vlacc-dams",
       "deployment.environment": "local",
       userId: "p-1",

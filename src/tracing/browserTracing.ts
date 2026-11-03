@@ -6,6 +6,10 @@ export type BrowserTracingSettings = {
   apiKey?: string;
   /** the tab's session id (observability/sessionId), on everything sent */
   sessionId?: string;
+  /** the build (pwa-version.json), on everything sent */
+  pwaVersion?: string;
+  /** the UI the deployment runs (the app config), on everything sent */
+  uiVersion?: string;
   /** on everything sent too: the client (service.namespace) and environment */
   attributes?: Record<string, string>;
 };
@@ -28,10 +32,11 @@ let tracing: BrowserTracing | undefined;
 // separate chunk that only loads when the deployment's app config switches
 // browser tracing on, and a tracing failure never stops the app from starting.
 export const initBrowserTracing = async (
-  config: { browserTracing?: BrowserTracingSettings },
+  config: { browserTracing?: BrowserTracingSettings; uiVersion?: string },
   load: () => Promise<HyperdxBrowserModule> = () =>
     import("@/tracing/hyperdxBrowser"),
   sessionId?: string,
+  pwaVersion?: string,
 ): Promise<boolean> => {
   if (!config.browserTracing) return false;
   try {
@@ -39,6 +44,8 @@ export const initBrowserTracing = async (
       (await load()).startBrowserTracing({
         ...config.browserTracing,
         ...(sessionId ? { sessionId } : {}),
+        ...(pwaVersion ? { pwaVersion } : {}),
+        ...(config.uiVersion ? { uiVersion: config.uiVersion } : {}),
       }) || undefined;
     return true;
   } catch (error) {
