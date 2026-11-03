@@ -94,11 +94,13 @@ const sendIf = (
   value: string | undefined,
   properties: Record<string, unknown>,
   entityType?: string,
+  surface?: string,
 ): void => {
   if (!value) return;
   trackUsage(name, {
     ...properties,
     ...(entityType ? { entity_type: entityType } : {}),
+    ...(surface ? { surface } : {}),
   });
 };
 
@@ -110,11 +112,20 @@ export const trackViewMode = (
 export const trackSort = (sort: string | undefined, entityType?: string) =>
   sendIf("sort_changed", sort, { sort }, entityType);
 
+// surface: the part of the page it was started from (analytics/usageSurface)
 export const trackBulkOperation = (
   operation: string | undefined,
   selected: number,
   entityType?: string,
-) => sendIf("bulk_operation", operation, { operation, selected }, entityType);
+  surface?: string,
+) =>
+  sendIf(
+    "bulk_operation",
+    operation,
+    { operation, selected },
+    entityType,
+    surface,
+  );
 
 export const trackContextAction = (
   action: string | undefined,
@@ -131,13 +142,15 @@ export const trackContextAction = (
 export const trackFormOpened = (
   form: string | undefined,
   entityType?: string,
-) => sendIf("form_opened", form, { form }, entityType);
+  surface?: string,
+) => sendIf("form_opened", form, { form }, entityType, surface);
 
 export const trackFormSubmitted = (
   form: string | undefined,
   outcome: "ok" | "error",
   entityType?: string,
-) => sendIf("form_submitted", form, { form, outcome }, entityType);
+  surface?: string,
+) => sendIf("form_submitted", form, { form, outcome }, entityType, surface);
 
 /** The library a user works for: the domain of their e-mail address. */
 export const libraryOf = (email: string | undefined): string | undefined => {

@@ -345,6 +345,46 @@ describe("the tracking plan's planned events", () => {
     ]);
   });
 
+  it("says which part of the page an action was started from", async () => {
+    const tracker = await started();
+    trackBulkOperation("addRelation", 2, "mediafile", "completenessOverview");
+    trackFormOpened(
+      "GetUploadMediafilesQuery",
+      undefined,
+      "completenessOverview",
+    );
+    trackFormSubmitted(
+      "GetUploadMediafilesQuery",
+      "ok",
+      "mediafile",
+      "completenessOverview",
+    );
+    expect(vi.mocked(tracker.track).mock.calls).toEqual([
+      [
+        "bulk_operation",
+        {
+          operation: "addRelation",
+          selected: 2,
+          entity_type: "mediafile",
+          surface: "completenessOverview",
+        },
+      ],
+      [
+        "form_opened",
+        { form: "GetUploadMediafilesQuery", surface: "completenessOverview" },
+      ],
+      [
+        "form_submitted",
+        {
+          form: "GetUploadMediafilesQuery",
+          outcome: "ok",
+          entity_type: "mediafile",
+          surface: "completenessOverview",
+        },
+      ],
+    ]);
+  });
+
   it("sends nothing without the value the event is about", async () => {
     const tracker = await started();
     trackViewMode(undefined, "person");

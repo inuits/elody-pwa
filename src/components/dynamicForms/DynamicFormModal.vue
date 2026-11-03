@@ -12,7 +12,11 @@
   >
     <div class="flex flex-col w-full max-h-[calc(90vh-34px)] overflow-auto">
       <template v-if="shouldRenderTabs">
-        <baseTabs :tabs="tabsTitles" :tab-navigation-disabled="true" :step-strip="true">
+        <baseTabs
+          :tabs="tabsTitles"
+          :tab-navigation-disabled="true"
+          :step-strip="true"
+        >
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
               class=""
@@ -22,11 +26,15 @@
                 getModalInfo(TypeModals.DynamicForm).formQuery
               "
               :form-key="formTab.formKey"
-              :all-form-keys="formTabArray.map(ft => ft.formKey)"
+              :all-form-keys="formTabArray.map((ft) => ft.formKey)"
               :router="useRouter()"
               :modal-form-fields="formTab.formFields"
               :tab-name="tabsTitles[tabIndex]"
-              :all-form-relation-types="formTabArray.filter(ft => ft.relationType !== undefined).map(ft => ft.relationType)"
+              :all-form-relation-types="
+                formTabArray
+                  .filter((ft) => ft.relationType !== undefined)
+                  .map((ft) => ft.relationType)
+              "
             />
           </baseTab>
         </baseTabs>
@@ -58,10 +66,13 @@ import BaseTab from "@/components/BaseTab.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
 import useUpload from "@/composables/upload/useUpload";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
+import { provideUsageSurface } from "@/analytics/usageSurface";
 
 const formTabs = ref<Form | null>(null);
 const config: any = inject("config");
 const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
+// the form says on its submit which part of the page it was opened from
+provideUsageSurface(() => getModalInfo(TypeModals.DynamicForm).surface);
 const { confirm } = useConfirmModal();
 const { t } = useI18n();
 const { getDynamicFormTabs } = useDynamicForm();
@@ -90,13 +101,14 @@ watch(
   },
 );
 
-
 const tabsTitles = computed(() => {
   return Object.values(formTabs.value ?? {}).flatMap((value) =>
     Object.entries(value)
       .filter(([, nestedValue]) => nestedValue.__typename === "FormTab")
       .map(([nestedKey, nestedValue]) =>
-        (nestedValue as any).label ? t((nestedValue as any).label) : t("entity." + nestedKey),
+        (nestedValue as any).label
+          ? t((nestedValue as any).label)
+          : t("entity." + nestedKey),
       ),
   );
 });

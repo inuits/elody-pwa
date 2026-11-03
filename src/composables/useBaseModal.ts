@@ -1,5 +1,6 @@
 import { computed, reactive, ref, readonly } from "vue";
 import { trackFormOpened } from "@/analytics/usageAnalytics";
+import { useUsageSurface } from "@/analytics/usageSurface";
 import {
   type DeleteQueryOptions,
   ModalStyle,
@@ -51,6 +52,8 @@ const unregisterOpenDialog = (dialog: HTMLElement | undefined): void => {
 };
 
 export const useBaseModal = () => {
+  const usageSurface = useUsageSurface();
+
   const getModalInfo = (modalType: TypeModals): ModalInfo => {
     return modals[modalType];
   };
@@ -67,10 +70,14 @@ export const useBaseModal = () => {
     if (modals[modalType].open) return;
 
     _someModalIsOpened.value = true;
-    if (modalType === TypeModals.DynamicForm) trackFormOpened(formQuery);
+    // the part of the page it was opened from, also for the form's submit
+    const surface = usageSurface();
+    if (modalType === TypeModals.DynamicForm)
+      trackFormOpened(formQuery, undefined, surface);
 
     const updatedModal = {
       open: true,
+      surface,
       formQuery,
       deleteQueryOptions,
       askForCloseConfirmation,

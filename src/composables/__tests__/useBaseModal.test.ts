@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useBaseModal } from "../useBaseModal";
 import { TypeModals, ModalStyle } from "@/generated-types/queries";
 import { trackFormOpened } from "@/analytics/usageAnalytics";
+import { UsageSurface } from "@/analytics/usageSurface";
+import { mount } from "@vue/test-utils";
+import { defineComponent, h } from "vue";
 
 vi.mock("@/analytics/usageAnalytics", () => ({ trackFormOpened: vi.fn() }));
 
@@ -510,16 +513,70 @@ describe("useBaseModal", () => {
   describe("usage events", () => {
     it("tells usage analytics which form opened", () => {
       const { openModal } = useBaseModal();
-      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetPersonCreateForm");
-      expect(trackFormOpened).toHaveBeenCalledWith("GetPersonCreateForm");
+      openModal(
+        TypeModals.DynamicForm,
+        ModalStyle.Center,
+        "GetPersonCreateForm",
+      );
+      expect(trackFormOpened).toHaveBeenCalledWith(
+        "GetPersonCreateForm",
+        undefined,
+        undefined,
+      );
+    });
+
+    it("tells which part of the page the form was opened from, and keeps it for the submit", () => {
+      let modal!: ReturnType<typeof useBaseModal>;
+      const opener = defineComponent({
+        setup() {
+          modal = useBaseModal();
+          return () => h("span");
+        },
+      });
+      mount(UsageSurface, {
+        props: { name: "completenessOverview" },
+        slots: { default: () => h(opener) },
+      });
+      modal.openModal(
+        TypeModals.DynamicForm,
+        ModalStyle.Center,
+        "GetUploadMediafilesQuery",
+      );
+      expect(trackFormOpened).toHaveBeenLastCalledWith(
+        "GetUploadMediafilesQuery",
+        undefined,
+        "completenessOverview",
+      );
+      expect(modal.getModalInfo(TypeModals.DynamicForm).surface).toBe(
+        "completenessOverview",
+      );
+    });
+
+    it("forgets the part of the page when a form is opened from elsewhere", () => {
+      const { openModal, getModalInfo, updateModal } = useBaseModal();
+      updateModal(TypeModals.DynamicForm, { surface: "completenessOverview" });
+      openModal(
+        TypeModals.DynamicForm,
+        ModalStyle.Center,
+        "GetPersonCreateForm",
+      );
+      expect(getModalInfo(TypeModals.DynamicForm).surface).toBeUndefined();
     });
 
     it("sends nothing for other modals, or a form already open", () => {
       vi.mocked(trackFormOpened).mockClear();
       const { openModal } = useBaseModal();
       openModal(TypeModals.Confirm, ModalStyle.Center);
-      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetPersonCreateForm");
-      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetPersonCreateForm");
+      openModal(
+        TypeModals.DynamicForm,
+        ModalStyle.Center,
+        "GetPersonCreateForm",
+      );
+      openModal(
+        TypeModals.DynamicForm,
+        ModalStyle.Center,
+        "GetPersonCreateForm",
+      );
       expect(trackFormOpened).toHaveBeenCalledTimes(1);
     });
   });

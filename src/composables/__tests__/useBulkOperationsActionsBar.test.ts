@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { flushPromises } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
+import { defineComponent, h } from "vue";
+import { UsageSurface } from "@/analytics/usageSurface";
 import { useBulkOperationsActionsBar } from "../useBulkOperationsActionsBar";
 import type {
   BulkOperationsActionsBarProps,
@@ -686,6 +688,36 @@ describe("useBulkOperationsActionsBar", () => {
         BulkOperationTypes.DownloadMediafiles,
         mockBulkOperations.getEnqueuedItemCount(props.context),
         Entitytyping.Asset,
+        undefined,
+      );
+    });
+
+    it("tells which part of the page the operation was started from", async () => {
+      const { trackBulkOperation } = await import("@/analytics/usageAnalytics");
+      const props = createMockProps();
+      let bar!: ReturnType<typeof useBulkOperationsActionsBar>;
+      const host = defineComponent({
+        setup() {
+          bar = useBulkOperationsActionsBar(props, createMockEmit());
+          return () => h("span");
+        },
+      });
+      mount(UsageSurface, {
+        props: { name: "completenessOverview" },
+        slots: { default: () => h(host) },
+      });
+
+      bar.selectedBulkOperation.value = {
+        value: BulkOperationTypes.DownloadMediafiles,
+        bulkOperationModal: undefined,
+      } as any;
+      bar.handleSelectedBulkOperation();
+
+      expect(trackBulkOperation).toHaveBeenLastCalledWith(
+        BulkOperationTypes.DownloadMediafiles,
+        mockBulkOperations.getEnqueuedItemCount(props.context),
+        Entitytyping.Asset,
+        "completenessOverview",
       );
     });
 
@@ -770,7 +802,9 @@ describe("useBulkOperationsActionsBar", () => {
               },
               { key: "status", value: "Queued" },
             ],
-            relations: [{ key: "1", type: "ref_mediafiles", editStatus: "new" }],
+            relations: [
+              { key: "1", type: "ref_mediafiles", editStatus: "new" },
+            ],
           },
         },
       });

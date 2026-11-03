@@ -1,5 +1,6 @@
 import { computed, inject, onMounted, ref, type Ref, watch } from "vue";
 import { trackBulkOperation } from "@/analytics/usageAnalytics";
+import { useUsageSurface } from "@/analytics/usageSurface";
 import { useRoute, useRouter } from "vue-router";
 
 import {
@@ -124,6 +125,7 @@ export const useBulkOperationsActionsBar = (
     useEntityPickerModal();
 
   const { openModal, getModalInfo, closeAllModals } = useBaseModal();
+  const usageSurface = useUsageSurface();
   const { confirm } = useConfirmModal();
   const { t } = useI18n();
   const { trackSeen } = useEntityPageConfig();
@@ -459,6 +461,7 @@ export const useBulkOperationsActionsBar = (
       operationType,
       getEnqueuedItemCount(props.context),
       entityType.value,
+      usageSurface(),
     );
 
     if (operationType === BulkOperationTypes.OpenDropdown) {

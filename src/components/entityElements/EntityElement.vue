@@ -14,114 +14,117 @@
         },
       ]"
     >
-      <entity-element-list
-        v-if="
-          element.__typename === 'EntityListElement' &&
-          isElementVisible(element)
-        "
-        :label="element.label as string"
-        :type="element.type"
-        :isCollapsed="element.isCollapsed"
-        :enable-advanced-filters="element.enableAdvancedFilters"
-        :action-on-click="element.actionOnClick"
-        :types="element.entityTypes as string[]"
-        :custom-query="element.customQuery"
-        :custom-query-relation-type="element.customQueryRelationType"
-        :custom-query-filters="element.customQueryFilters"
-        :custom-bulk-operations="element.customBulkOperations"
-        :custom-query-entity-picker-list="element.customQueryEntityPickerList"
-        :custom-query-entity-picker-list-filters="
-          element.customQueryEntityPickerListFilters
-        "
-        :search-input-type="element.searchInputType"
-        :entity-list="(element.entityList as Entity[]) ?? []"
-        :identifiers="identifiers"
-        :relationType="element.relationType"
-        :entity-id="id"
-        :entity-list-elements="
-          getObjectsBasedOnTypename(element, 'EntityListElement')
-        "
-        :base-library-mode="element.baseLibraryMode"
-        :disable-library-bar="element.disableLibraryBar"
-        :allowed-actions-on-relations="element.allowedActionsOnRelations"
-        :fetch-deep-relations="element.fetchDeepRelations"
-        :entity-type="entityType"
-        :id="id"
-        :preview-label="previewLabel"
-        :cropMediafileCoordinatesKey="element.cropMediafileCoordinatesKey"
-        :open-preview-by-default="element.openPreviewByDefault ?? undefined"
-        :actions-on-result="element.actionsOnResult"
-        :add-entities-to-forms="element.addEntitiesToForms"
-        @toggle-element-collapse="
-          (entityId, elementLabel) =>
-            emit('toggleElementCollapse', entityId, elementLabel)
-        "
-      />
-      <entity-element-media
-        v-if="element.__typename === 'MediaFileElement'"
-        :element="element"
-        :identifiers="identifiers"
-        :relationType="element.relationType"
-        :entity-id="id"
-        @toggle-element-collapse="
-          (entityId, elementLabel) =>
-            emit('toggleElementCollapse', entityId, elementLabel)
-        "
-      />
-      <entity-element-single-media
-        v-if="element.__typename === 'SingleMediaFileElement'"
-        :element="element"
-        @toggle-element-collapse="
-          (entityId, elementLabel) =>
-            emit('toggleElementCollapse', entityId, elementLabel)
-        "
-      />
-      <entity-element-window
-        v-if="element.__typename === 'WindowElement'"
-        :element="element"
-        :form-id="formId"
-        :identifiers="identifiers"
-        :preview-label="previewLabel"
-        :entity-metadata="entityMetadata"
-        :entity-relations="entityRelations"
-        @resize-column="(toggled) => emit('resizeColumn', toggled)"
-      />
-      <entity-element-graph
-        v-if="element.__typename === 'GraphElement' && !isEdit"
-        :element="element"
-        @toggle-element-collapse="
-          (entityId, elementLabel) =>
-            emit('toggleElementCollapse', entityId, elementLabel)
-        "
-      />
-      <entity-element-manifest-viewer
-        v-if="element.__typename === 'ManifestViewerElement'"
-        :element="element"
-      />
-      <entity-element-markdown-viewer
-        v-if="element.__typename === 'MarkdownViewerElement'"
-        :element="element"
-      />
-      <entity-element-map-viewer
-        v-if="element.__typename === 'MapElement'"
-        :element="element"
-        :entity-id="id"
-      />
-      <entity-element-w-y-s-i-w-y-g
-        v-if="element.__typename === 'WysiwygElement'"
-        :form-id="formId"
-        :element="element"
-      />
-      <EntityElementHierarchyListViewer
-        v-if="element.__typename === 'HierarchyListElement'"
-        :element="element"
-        :entity-id="id"
-      />
-      <entity-element-comments
-        v-if="element.__typename === 'CommentsElement'"
-        :element="element"
-        :id="id"
-      />
+      <!-- what is started inside says which element it was (usage events) -->
+      <UsageSurface :name="aliasOf(element)">
+        <entity-element-list
+          v-if="
+            element.__typename === 'EntityListElement' &&
+            isElementVisible(element)
+          "
+          :label="element.label as string"
+          :type="element.type"
+          :isCollapsed="element.isCollapsed"
+          :enable-advanced-filters="element.enableAdvancedFilters"
+          :action-on-click="element.actionOnClick"
+          :types="element.entityTypes as string[]"
+          :custom-query="element.customQuery"
+          :custom-query-relation-type="element.customQueryRelationType"
+          :custom-query-filters="element.customQueryFilters"
+          :custom-bulk-operations="element.customBulkOperations"
+          :custom-query-entity-picker-list="element.customQueryEntityPickerList"
+          :custom-query-entity-picker-list-filters="
+            element.customQueryEntityPickerListFilters
+          "
+          :search-input-type="element.searchInputType"
+          :entity-list="(element.entityList as Entity[]) ?? []"
+          :identifiers="identifiers"
+          :relationType="element.relationType"
+          :entity-id="id"
+          :entity-list-elements="
+            getObjectsBasedOnTypename(element, 'EntityListElement')
+          "
+          :base-library-mode="element.baseLibraryMode"
+          :disable-library-bar="element.disableLibraryBar"
+          :allowed-actions-on-relations="element.allowedActionsOnRelations"
+          :fetch-deep-relations="element.fetchDeepRelations"
+          :entity-type="entityType"
+          :id="id"
+          :preview-label="previewLabel"
+          :cropMediafileCoordinatesKey="element.cropMediafileCoordinatesKey"
+          :open-preview-by-default="element.openPreviewByDefault ?? undefined"
+          :actions-on-result="element.actionsOnResult"
+          :add-entities-to-forms="element.addEntitiesToForms"
+          @toggle-element-collapse="
+            (entityId, elementLabel) =>
+              emit('toggleElementCollapse', entityId, elementLabel)
+          "
+        />
+        <entity-element-media
+          v-if="element.__typename === 'MediaFileElement'"
+          :element="element"
+          :identifiers="identifiers"
+          :relationType="element.relationType"
+          :entity-id="id"
+          @toggle-element-collapse="
+            (entityId, elementLabel) =>
+              emit('toggleElementCollapse', entityId, elementLabel)
+          "
+        />
+        <entity-element-single-media
+          v-if="element.__typename === 'SingleMediaFileElement'"
+          :element="element"
+          @toggle-element-collapse="
+            (entityId, elementLabel) =>
+              emit('toggleElementCollapse', entityId, elementLabel)
+          "
+        />
+        <entity-element-window
+          v-if="element.__typename === 'WindowElement'"
+          :element="element"
+          :form-id="formId"
+          :identifiers="identifiers"
+          :preview-label="previewLabel"
+          :entity-metadata="entityMetadata"
+          :entity-relations="entityRelations"
+          @resize-column="(toggled) => emit('resizeColumn', toggled)"
+        />
+        <entity-element-graph
+          v-if="element.__typename === 'GraphElement' && !isEdit"
+          :element="element"
+          @toggle-element-collapse="
+            (entityId, elementLabel) =>
+              emit('toggleElementCollapse', entityId, elementLabel)
+          "
+        />
+        <entity-element-manifest-viewer
+          v-if="element.__typename === 'ManifestViewerElement'"
+          :element="element"
+        />
+        <entity-element-markdown-viewer
+          v-if="element.__typename === 'MarkdownViewerElement'"
+          :element="element"
+        />
+        <entity-element-map-viewer
+          v-if="element.__typename === 'MapElement'"
+          :element="element"
+          :entity-id="id"
+        />
+        <entity-element-w-y-s-i-w-y-g
+          v-if="element.__typename === 'WysiwygElement'"
+          :form-id="formId"
+          :element="element"
+        />
+        <EntityElementHierarchyListViewer
+          v-if="element.__typename === 'HierarchyListElement'"
+          :element="element"
+          :entity-id="id"
+        />
+        <entity-element-comments
+          v-if="element.__typename === 'CommentsElement'"
+          :element="element"
+          :id="id"
+        />
+      </UsageSurface>
     </div>
   </div>
 </template>
@@ -162,6 +165,7 @@ import type {
 import EntityElementMarkdownViewer from "@/components/entityElements/EntityElementMarkdownViewer.vue";
 import { getObjectsBasedOnTypename } from "@/helpers";
 import { useStateManagement } from "@/composables/useStateManagement";
+import { UsageSurface } from "@/analytics/usageSurface";
 
 export type Elements =
   | EntityListElement
@@ -221,6 +225,12 @@ const elements = computed<Elements[]>(() => {
   graphArray.forEach((graph) => returnArray.push(graph));
   return returnArray;
 });
+
+// the element's alias in the UI declaration (completenessOverview)
+const aliasOf = (element: Elements): string | undefined =>
+  Object.keys(props.elements).find(
+    (alias) => (props.elements as Record<string, unknown>)[alias] === element,
+  );
 
 const isElementVisible = (element: Elements): boolean => {
   if (element.__typename !== "EntityListElement") return true;

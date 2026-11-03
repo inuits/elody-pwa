@@ -259,6 +259,7 @@
 
 <script setup lang="ts">
 import { trackFormSubmitted } from "@/analytics/usageAnalytics";
+import { useUsageSurface } from "@/analytics/usageSurface";
 import { useBaseModal } from "@/composables/useBaseModal";
 import type {
   ActionProgress,
@@ -437,6 +438,7 @@ const {
 const busyActionType = ref<string | undefined>(undefined);
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
+const usageSurface = useUsageSurface();
 const {
   getDynamicForm,
   dynamicForm: dynamicFormValue,
@@ -1007,7 +1009,12 @@ const submitActionFunction = async (field: FormAction) => {
   try {
     entity = (await performSubmitAction(document, entityInput)).data
       .CreateEntity;
-    trackFormSubmitted(props.dynamicFormQuery, "ok", entity?.type);
+    trackFormSubmitted(
+      props.dynamicFormQuery,
+      "ok",
+      entity?.type,
+      usageSurface(),
+    );
     showErrors.value = false;
     await getTenants();
     const callbackFunctions: [() => void] | undefined = extractActionArguments(
@@ -1041,7 +1048,12 @@ const submitActionFunction = async (field: FormAction) => {
     );
   } catch (e: ApolloError) {
     console.error(e);
-    trackFormSubmitted(props.dynamicFormQuery, "error");
+    trackFormSubmitted(
+      props.dynamicFormQuery,
+      "error",
+      undefined,
+      usageSurface(),
+    );
     const errorObject = await getMessageAndCodeFromApolloError(e);
     isPerformingAction.value = false;
     submitErrors.value = errorObject.message;
