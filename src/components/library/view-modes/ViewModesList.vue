@@ -108,6 +108,7 @@
             "
             :is-primary-mediafile="primaryMediafileId === entity.id"
             :is-primary-thumbnail="primaryThumbnailId === entity.id"
+            :highlight-label="entity.isHighlighted ? highlightLabel : undefined"
             :multi-line="multiLine"
             :multi-line-columns="multiLineColumns"
             @navigate-to="
@@ -194,6 +195,8 @@ const props = withDefaults(
     parentEntityIdentifiers?: string[];
     parentEntityType?: Entitytyping;
     idsOfNonSelectableEntities?: string[];
+    highlightedEntityIds?: string[];
+    highlightLabel?: string;
     relationType?: string;
     enableSelection: boolean;
     baseLibraryMode?: BaseLibraryModes;
@@ -216,6 +219,8 @@ const props = withDefaults(
     actionOnClick: ActionOnClick.Navigate,
     parentEntityIdentifiers: () => [],
     idsOfNonSelectableEntities: () => [],
+    highlightedEntityIds: () => [],
+    highlightLabel: undefined,
     enableSelection: true,
     baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     entityListElements: undefined,
@@ -314,6 +319,7 @@ const processedEntities = computed(() => {
     const isDisabled = isEntityDisabled(entity);
     const isSeen = isEntitySeen(entity.id);
     const isNew = isEntityNew(entity.id, entity.intialValues);
+    const isHighlighted = props.highlightedEntityIds.includes(entity.id);
     const formattedMetadata = formatTeaserMetadata(
       entity.teaserMetadata,
       entity.intialValues,
@@ -332,6 +338,7 @@ const processedEntities = computed(() => {
       isDisabled,
       isSeen,
       isNew,
+      isHighlighted,
       currentMode,
       previewEnabled,
       props.entitiesLoading,
@@ -361,6 +368,7 @@ const processedEntities = computed(() => {
         ) && props.parentEntityIdentifiers.length > 0,
       isDisabled: isDisabled,
       isNew,
+      isHighlighted,
       relation: relation,
       isPreviewActive: isPreviewActive,
 

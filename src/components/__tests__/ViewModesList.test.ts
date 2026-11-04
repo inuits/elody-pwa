@@ -270,6 +270,43 @@ describe("ViewModesList", () => {
     });
   });
 
+  describe("highlighted entities", () => {
+    const mountWithHighlight = async () => {
+      const wrapper = shallowMount(ViewModesList, {
+        props: {
+          entities: [{ id: "entity1" }, { id: "entity2" }],
+          highlightedEntityIds: ["entity2"],
+          highlightLabel: "repetitiveForm.current-on-host",
+        },
+      });
+      await flushPromises();
+      return wrapper;
+    };
+
+    it("marks only the highlighted entity", async () => {
+      const wrapper = await mountWithHighlight();
+
+      expect(wrapper.vm.processedEntities[0].isHighlighted).toBe(false);
+      expect(wrapper.vm.processedEntities[1].isHighlighted).toBe(true);
+    });
+
+    it("passes the highlight label only to the highlighted list item", async () => {
+      const wrapper = await mountWithHighlight();
+      const items = wrapper.findAllComponents({ name: "ListItem" });
+
+      expect(items[0].props("highlightLabel")).toBeUndefined();
+      expect(items[1].props("highlightLabel")).toBe(
+        "repetitiveForm.current-on-host",
+      );
+    });
+
+    it("includes the highlight state in the memo key", async () => {
+      const wrapper = await mountWithHighlight();
+
+      expect(wrapper.vm.processedEntities[1].memoKey).toContain(true);
+    });
+  });
+
   describe("new items", () => {
     it("includes the new state in the memo key so the item re-renders when it changes", async () => {
       mockEntityPageConfig.seenTracking.value = {

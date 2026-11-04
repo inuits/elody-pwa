@@ -41,6 +41,8 @@
       :ids-of-non-selectable-entities="
         enableNonSelectableEntities ? alreadySelectedEntityIdsFetched : []
       "
+      :highlighted-entity-ids="highlightedEntityIds"
+      :highlight-label="highlightLabel"
       :actions-on-result="getActionsOnResult()"
       list-item-route-name="SingleEntity"
       @entities-updated="
@@ -136,6 +138,8 @@ const props = withDefaults(
     searchAcceptedTypes?: string[];
     searchStaticFilters?: AdvancedFilterInput[];
     filterParentEntity?: any;
+    highlightedEntityIds?: string[];
+    highlightLabel?: string;
     forceShowFilters?: boolean;
     forceListView?: boolean;
   }>(),
@@ -153,6 +157,8 @@ const props = withDefaults(
     searchAcceptedTypes: () => [],
     searchStaticFilters: () => [],
     filterParentEntity: undefined,
+    highlightedEntityIds: () => [],
+    highlightLabel: undefined,
     forceShowFilters: false,
   },
 );

@@ -284,6 +284,8 @@
             :parent-entity-identifiers="parentEntityIdentifiers"
             :parent-entity-type="parentEntityType"
             :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+            :highlighted-entity-ids="highlightedEntityIds"
+            :highlight-label="highlightLabel"
             :relation-type="relationType"
             :enable-selection="enableSelection"
             :base-library-mode="baseLibraryMode"
@@ -505,6 +507,8 @@ export type BaseLibraryProps = {
   actionOnClick?: ActionOnClick;
   disableNewEntityPreviews?: boolean;
   idsOfNonSelectableEntities?: string[];
+  highlightedEntityIds?: string[];
+  highlightLabel?: string;
   relationType?: string;
   hasStickyBars?: boolean;
   filters?: AdvancedFilterInput[];
@@ -553,6 +557,8 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   actionOnClick: ActionOnClick.Navigate,
   disableNewEntityPreviews: false,
   idsOfNonSelectableEntities: () => [],
+  highlightedEntityIds: () => [],
+  highlightLabel: undefined,
   hasStickyBars: true,
   filters: () => [],
   isSearchLibrary: false,

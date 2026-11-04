@@ -546,4 +546,53 @@ describe("RepetitiveStepField", () => {
     await wrapper.vm.$nextTick();
     expect(pickerView(wrapper).exists()).toBe(true);
   });
+  describe("markCurrentOnHost", () => {
+    const markedStep = (label?: string) => ({
+      ...expressionStep(),
+      markCurrentOnHost: { relationType: "ref_expressions", label },
+    });
+
+    it("highlights the entities the host is currently related to, ignoring staged deletions", () => {
+      mockGetForm.mockReturnValue({
+        values: {
+          relationValues: {
+            ref_expressions: [
+              { key: "expr-1", editStatus: "unchanged" },
+              { key: "expr-2", editStatus: "deleted" },
+            ],
+            ref_work: [{ key: "work-1" }],
+          },
+        },
+      } as any);
+      const wrapper = getWrapper({
+        ...getDefaultProps(),
+        step: markedStep("repetitiveForm.current-relation"),
+      });
+      const picker = wrapper.findComponent(EntityPickerComponent);
+      expect(picker.props("highlightedEntityIds")).toEqual(["expr-1"]);
+      expect(picker.props("highlightLabel")).toBe(
+        "repetitiveForm.current-relation",
+      );
+    });
+
+    it("falls back to a default highlight label", () => {
+      mockGetForm.mockReturnValue({
+        values: { relationValues: { ref_expressions: [{ key: "expr-1" }] } },
+      } as any);
+      const wrapper = getWrapper({ ...getDefaultProps(), step: markedStep() });
+      expect(
+        wrapper.findComponent(EntityPickerComponent).props("highlightLabel"),
+      ).toBe("repetitiveForm.current-on-host");
+    });
+
+    it("highlights nothing when the step has no markCurrentOnHost", () => {
+      mockGetForm.mockReturnValue({
+        values: { relationValues: { ref_expressions: [{ key: "expr-1" }] } },
+      } as any);
+      const wrapper = getWrapper();
+      expect(
+        wrapper.findComponent(EntityPickerComponent).props("highlightedEntityIds"),
+      ).toEqual([]);
+    });
+  });
 });

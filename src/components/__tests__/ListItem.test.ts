@@ -99,6 +99,34 @@ describe("ListItem", () => {
     teaserMetadata: [],
   };
 
+  describe("highlight", () => {
+    it("shows a badge with the highlight label and accents the item", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "e1", highlightLabel: "my-label" },
+      });
+
+      const badge = wrapper.find("[data-cy='list-item-highlight']");
+      expect(badge.exists()).toBe(true);
+      expect(badge.text()).toBe("my-label");
+      expect(wrapper.find("[data-cy='list-item']").classes()).toContain(
+        "!border-accent-accent",
+      );
+    });
+
+    it("shows no badge without a highlight label", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "e1" },
+      });
+
+      expect(wrapper.find("[data-cy='list-item-highlight']").exists()).toBe(
+        false,
+      );
+      expect(wrapper.find("[data-cy='list-item']").classes()).not.toContain(
+        "!border-accent-accent",
+      );
+    });
+  });
+
   describe("seen items", () => {
     const seenItemProps = {
       ...defaultProps,

@@ -252,6 +252,13 @@
       />
     </div>
 
+    <span
+      v-if="highlightLabel"
+      data-cy="list-item-highlight"
+      class="shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold bg-accent-light text-text-body"
+    >
+      {{ highlightLabel }}
+    </span>
     <div v-if="isListMode" class="flex">
       <EntityButtons
         :buttons="buttons"
@@ -403,6 +410,7 @@ const props = withDefaults(
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
     isPrimaryMediafile?: boolean;
     isPrimaryThumbnail?: boolean;
+    highlightLabel?: string;
     multiLine?: boolean;
     multiLineColumns?: number;
   }>(),
@@ -432,6 +440,7 @@ const props = withDefaults(
     previewComponentListItemsCoverage: undefined,
     isPrimaryMediafile: false,
     isPrimaryThumbnail: false,
+    highlightLabel: undefined,
     multiLine: false,
     multiLineColumns: 5,
   },
@@ -555,7 +564,14 @@ const wrapperClasses = computed(() => {
     { "font-semibold": isNew.value },
     { "animate-pulse": loading.value },
     { "bg-background-light": !isActiveListItem.value },
-    { "border-accent-highlight": !isActiveListItem.value },
+    {
+      "border-accent-highlight":
+        !isActiveListItem.value && !props.highlightLabel,
+    },
+    {
+      "!border-accent-accent":
+        !!props.highlightLabel && !isActiveListItem.value,
+    },
     {
       "border-4 border-neutral-800 bg-accent-light/30": isActiveListItem.value,
     },
