@@ -649,9 +649,14 @@ export type ContextMenuElodyActionLabelArgs = {
 };
 
 export enum ContextMenuElodyActionEnum {
+  CreateEntityFromExternalSource = 'CreateEntityFromExternalSource',
   DeleteEntity = 'DeleteEntity',
   DeleteRelation = 'DeleteRelation',
-  Share = 'Share'
+  DownloadQueryResult = 'DownloadQueryResult',
+  EndpointCall = 'EndpointCall',
+  ReplaceRelation = 'ReplaceRelation',
+  Share = 'Share',
+  UpdateMetadata = 'UpdateMetadata'
 }
 
 export enum ContextMenuFormFlow {
