@@ -45,8 +45,6 @@ const hasNoRelations = (
   !!element.relationType &&
   !relationValues[element.relationType]?.length;
 
-// Keeps only the window-element fields whose metadata key is in `keys` and
-// entity lists that have relations; null when nothing is left to render.
 export const filterColumnListByKeys = (
   columnList: ColumnList,
   keys: string[],

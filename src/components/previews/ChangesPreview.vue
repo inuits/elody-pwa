@@ -11,7 +11,6 @@
       :entity-type="changesPreview.entityType"
     />
   </parent-entity-scope>
-  <!-- Lists (e.g. changed media) filter on the previewed entity's relations, so they render with it. -->
   <div v-if="listsColumnList" :class="{ 'mt-4': fieldsColumnList }">
     <entity-column
       :key="entity.id"
@@ -71,7 +70,6 @@ const { result } = useQuery<GetEntityByIdQuery, GetEntityByIdQueryVariables>(
   () => ({ id: relatedEntityId.value!, type: props.changesPreview.entityType }),
   () => ({ enabled: !!relatedEntityId.value, fetchPolicy: "no-cache" }),
 );
-// Suffixed id: the same entity may already have a form in this preview (e.g. a list row) with fewer values.
 const relatedEntity = computed<Entity | undefined>(() => {
   const entity = result.value?.Entity as Entity | undefined;
   return entity ? { ...entity, id: `${entity.id}_changes` } : undefined;

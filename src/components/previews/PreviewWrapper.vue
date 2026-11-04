@@ -104,7 +104,6 @@
       "
     />
   </div>
-  <!-- shortcut: 22rem ≈ page header + list toolbar + preview header; the shared 80vh preview container overflows the window otherwise. Replace when ViewModesList caps the preview at its parent height. -->
   <div
     :class="[
       {
