@@ -1,7 +1,12 @@
 <template>
   <div
     class="flex items-center justify-between"
-    :class="[{ 'my-2': showHeaderCloseButton }]"
+    :class="[
+      { 'my-2': showHeaderCloseButton && !previewComponent.changesPreview },
+      {
+        'bg-accent-normal rounded-t-lg mb-2': previewComponent.changesPreview,
+      },
+    ]"
   >
     <base-tooltip
       v-if="showHeaderCloseButton"
@@ -41,6 +46,13 @@
       data-cy="entity-element-window-title"
       class="subtitle text-text-body p-2 truncate max-w-[90%]"
       v-if="previewComponent.type === PreviewTypes.MediaViewer"
+    >
+      {{ getTitleFromEntity }}
+    </h1>
+    <h1
+      data-cy="entity-element-window-title"
+      class="subtitle p-2 truncate max-w-[90%]"
+      v-if="previewComponent.changesPreview"
     >
       {{ getTitleFromEntity }}
     </h1>
@@ -93,20 +105,41 @@
     />
   </div>
   <div
-    class="metadata-preview"
-    v-if="
-      metadataPreviewElement && previewComponent.type !== PreviewTypes.History
-    "
+    :class="[
+      {
+        'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-22rem)] overflow-y-auto':
+          previewComponent.changesPreview,
+      },
+    ]"
   >
-    <entity-column
-      :key="entityId"
-      :entity="getEntitiesOrEntity()"
-      :column-list="metadataPreviewElement"
-      :identifiers="[entityId]"
-      :entity-type="entityType"
-      :preview-label="getTitleFromEntity"
-      @close-preview-component="emit('closePreviewComponent')"
-    />
+    <div
+      class="metadata-preview min-w-0"
+      v-if="
+        metadataPreviewElement && previewComponent.type !== PreviewTypes.History
+      "
+    >
+      <entity-column
+        :key="entityId"
+        :entity="getEntitiesOrEntity()"
+        :column-list="metadataPreviewElement"
+        :identifiers="[entityId]"
+        :entity-type="entityType"
+        :preview-label="
+          previewComponent.changesPreview ? undefined : getTitleFromEntity
+        "
+        @close-preview-component="emit('closePreviewComponent')"
+      />
+    </div>
+    <div
+      class="changes-preview min-w-0"
+      v-if="previewComponent.changesPreview && previewedEntity"
+    >
+      <ChangesPreview
+        :key="entityId"
+        :changes-preview="previewComponent.changesPreview"
+        :entity="previewedEntity"
+      />
+    </div>
   </div>
   <div
     class="metadata-preview"
@@ -151,6 +184,7 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { apolloClient } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
+import ChangesPreview from "./ChangesPreview.vue";
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
