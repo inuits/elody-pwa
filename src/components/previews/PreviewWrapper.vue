@@ -92,7 +92,7 @@
     class="px-4 pt-2 mb-3.5"
     :class="{
       'mt-2 border-t border-border-subtle': hasViewerAbove,
-      'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-22rem)] overflow-y-auto':
+      'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-29rem)] overflow-y-auto':
         previewComponent.changesPreview,
     }"
   >
