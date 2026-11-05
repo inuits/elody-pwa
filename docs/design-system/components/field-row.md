@@ -82,6 +82,13 @@ person's role or function in an organization (`ListItemInlineField.vue`).
   entity), with the field's validation. The list refreshes and the usual
   notification shows.
 
+A value of the row's own entity is edited the same way when its teaser
+config sets `editFormQuery` (a notification's status on the overview,
+`ListItemEditableValue.vue`): the field's input comes from that form, saving
+sends that one key as the row entity's metadata, and the row's `readOnly`
+decides whether it is editable (no page entity to ask). It replaces the edit
+modal this used to open.
+
 ## Value types
 - **URL:** link ink, opens in a new tab, followed by an external-link glyph
   (`aria-hidden`).

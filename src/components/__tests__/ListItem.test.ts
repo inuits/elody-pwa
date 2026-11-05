@@ -437,8 +437,10 @@ describe("ListItem", () => {
       expect(editable.exists()).toBe(true);
       expect(editable.props()).toMatchObject({
         editFormQuery: "GetEditNotificationStatusForm",
+        metadata: expect.objectContaining({
+          editFormQuery: "GetEditNotificationStatusForm",
+        }),
         entityId: "notification-1",
-        entityType: "notification",
       });
     });
 

@@ -267,13 +267,11 @@
                 !useEditHelper.isEdit &&
                 metadataItem?.editFormQuery &&
                 !metadataItem?.readOnly &&
-                (intialValues?.id || itemId) &&
-                entityTypename
+                (intialValues?.id || itemId)
               "
               :edit-form-query="metadataItem.editFormQuery"
-              :label="metadataItem.label"
+              :metadata="(localizedMetadata || metadataItem) as Metadata"
               :entity-id="intialValues?.id || itemId"
-              :entity-type="entityTypename"
               :refetch-entities="refetchEntities"
             >
               <ReadOnlyMetadataWrapper

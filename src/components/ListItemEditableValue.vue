@@ -1,57 +1,52 @@
 <template>
-  <button
-    type="button"
-    data-cy="list-item-editable-value"
-    class="group flex items-end gap-1.5 w-fit max-w-full -mx-1.5 -my-1 px-1.5 py-1 text-left rounded-md cursor-pointer transition-colors hover:bg-accent-light focus-visible:bg-accent-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-normal"
-    :aria-label="t('modals.entityEdit.editValue', [t(label ?? '')])"
-    @click.stop.prevent="openEditForm"
+  <ListItemInlineField
+    v-if="inputField"
+    :metadata="{ ...metadata, inputField } as Metadata"
+    parent-entity-id=""
+    :linked-entity-id="entityId"
+    :refetch-entities="refetchEntities"
+    own-field
   >
-    <span class="min-w-0"><slot /></span>
-    <unicon
-      :name="Unicons.EditAlt.name"
-      height="12"
-      aria-hidden="true"
-      class="shrink-0 mb-1 fill-neutral-200 transition-colors group-hover:fill-accent-accent group-focus-visible:fill-accent-accent"
-    />
-  </button>
+    <slot />
+  </ListItemInlineField>
+  <slot v-else />
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from "vue-i18n";
-import {
-  ContextMenuFormFlow,
-  ModalStyle,
-  TypeModals,
-  type Entitytyping,
-} from "@/generated-types/queries";
-import { useBaseModal } from "@/composables/useBaseModal";
-import { Unicons } from "@/types";
+import { onMounted, ref } from "vue";
+import type { InputField, Metadata } from "@/generated-types/queries";
+import ListItemInlineField from "@/components/ListItemInlineField.vue";
+import { useImport } from "@/composables/useImport";
+import { apolloClient } from "@/main";
 
 const props = defineProps<{
   editFormQuery: string;
-  label?: string;
+  metadata: Metadata;
   entityId: string;
-  entityType: Entitytyping;
-  refetchEntities?: () => unknown;
+  refetchEntities?: () => Promise<void>;
 }>();
 
-const { t } = useI18n();
-const { openModal } = useBaseModal();
+const { loadDocument } = useImport();
+const inputField = ref<InputField | undefined>(undefined);
 
-const openEditForm = () =>
-  openModal(
-    TypeModals.EntityEditModal,
-    ModalStyle.CenterWide,
-    props.editFormQuery,
-    undefined,
-    undefined,
-    undefined,
-    {
-      entityId: props.entityId,
-      entityType: props.entityType,
-      flow: ContextMenuFormFlow.Update,
-      title: props.label,
-      callback: () => props.refetchEntities?.(),
-    },
+const findInputField = (form: any): InputField | undefined => {
+  const tabs = Object.values(form ?? {}).filter(
+    (tab: any) => tab && typeof tab === "object" && tab.formFields,
   );
+  for (const tab of tabs as any[]) {
+    const field = Object.entries(tab.formFields).find(
+      ([alias, value]: [string, any]) =>
+        (value?.key ?? alias) === props.metadata.key,
+    )?.[1] as any;
+    if (field?.inputField?.type) return field.inputField;
+  }
+  return undefined;
+};
+
+onMounted(async () => {
+  const document = await loadDocument(props.editFormQuery);
+  if (!document) return;
+  const response = await apolloClient.query({ query: document });
+  inputField.value = findInputField(response.data?.GetDynamicForm);
+});
 </script>
