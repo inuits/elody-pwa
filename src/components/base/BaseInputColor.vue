@@ -1,10 +1,11 @@
 <template>
   <div
-    class="flex items-center w-full pl-2 border rounded-lg"
+    data-cy="base-input-color-box"
+    class="flex items-center w-full pl-2 border rounded-input"
     :class="
       disabled
-        ? 'bg-background-normal border-text-disabled'
-        : 'bg-background-light border-[rgba(0,58,82,0.6)]'
+        ? 'bg-surface-muted border-border-subtle'
+        : 'bg-surface border-border-default hover:border-input-border-hover'
     "
   >
     <!-- click.stop: parents use click.prevent, which would keep the native picker from opening -->

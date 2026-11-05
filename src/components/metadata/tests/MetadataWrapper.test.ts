@@ -1537,6 +1537,19 @@ describe("MetadataWrapper — color field view", () => {
     ).toContain("background-color: rgb(255, 0, 0)");
   });
 
+  it("sizes the hex value like other values and outlines the swatch with a token", async () => {
+    const wrapper = await mountWrapper(buildColorProps("#ff0000"));
+    const value = wrapper.find('[data-cy="metadata-color-value"]');
+    const swatch = value.find('[data-cy="metadata-color-swatch"]');
+
+    expect(value.classes()).toContain("text-value");
+    expect(value.classes()).not.toContain("text-sm");
+    expect(swatch.classes()).toEqual(
+      expect.arrayContaining(["border-border-default", "rounded-chip"]),
+    );
+    expect(swatch.classes().join(" ")).not.toMatch(/rgba/);
+  });
+
   it("falls back to the regular view when there is no color", async () => {
     const wrapper = await mountWrapper(buildColorProps(""));
 

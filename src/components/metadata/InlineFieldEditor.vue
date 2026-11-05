@@ -50,6 +50,11 @@
           :disabled="saving"
           ignore-bulk-operations
         />
+        <BaseInputColor
+          v-else-if="type === InputFieldTypes.Color"
+          v-model="draft"
+          :disabled="saving"
+        />
         <BaseInputTextNumberDatetime
           v-else
           v-model="draft"
@@ -120,6 +125,7 @@ import {
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
+import BaseInputColor from "@/components/base/BaseInputColor.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 

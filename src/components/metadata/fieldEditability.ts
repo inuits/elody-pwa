@@ -13,6 +13,7 @@ const IN_PLACE_FIELD_TYPES = new Set<string>([
   InputFieldTypes.Dropdown,
   InputFieldTypes.DropdownSingleselectMetadata,
   InputFieldTypes.DropdownMultiselectMetadata,
+  InputFieldTypes.Color,
 ]);
 
 // Relation dropdowns and relation tables edit in place only when they save as

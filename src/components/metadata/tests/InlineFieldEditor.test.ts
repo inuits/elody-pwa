@@ -43,6 +43,15 @@ vi.mock("@/components/base/BaseButtonNew.vue", () => ({
   },
 }));
 
+vi.mock("@/components/base/BaseInputColor.vue", () => ({
+  default: {
+    name: "BaseInputColor",
+    props: ["modelValue", "disabled"],
+    emits: ["update:modelValue"],
+    template: "<div data-cy='color-input' />",
+  },
+}));
+
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 
 // Each editor listens on the page while it's open; unmount them all so no
@@ -324,6 +333,17 @@ describe("InlineFieldEditor", () => {
           .findComponent({ name: "AdvancedDropdown" })
           .props("clearable"),
       ).toBe(false);
+    });
+
+    it("uses the color picker with its hex field for color fields, and saves the picked value", async () => {
+      const wrapper = editor({ type: "color", modelValue: "#ff0000" });
+      const color = wrapper.findComponent({ name: "BaseInputColor" });
+      expect(color.exists()).toBe(true);
+      expect(color.props("modelValue")).toBe("#ff0000");
+      color.vm.$emit("update:modelValue", "#00ff00");
+      await nextTick();
+      await wrapper.find('[data-cy="button-commit"]').trigger("click");
+      expect(wrapper.emitted("save")).toEqual([["#00ff00"]]);
     });
 
     it("uses a checkbox for boolean fields", () => {

@@ -363,11 +363,11 @@
                   fieldType === InputFieldTypes.Color && fieldValueProxy
                 "
                 data-cy="metadata-color-value"
-                class="flex items-center gap-2 text-sm"
+                class="flex items-center gap-2 text-value"
               >
                 <span
                   data-cy="metadata-color-swatch"
-                  class="w-4 h-4 shrink-0 rounded border border-[rgba(0,58,82,0.6)]"
+                  class="w-4 h-4 shrink-0 rounded-chip border border-border-default"
                   :style="{ backgroundColor: fieldValueProxy }"
                 />
                 {{ fieldValueProxy }}

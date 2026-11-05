@@ -19,6 +19,14 @@ describe("BaseInputColor", () => {
   const hex = (wrapper: ReturnType<typeof mountComponent>) =>
     wrapper.find('[data-cy="base-input-text"]');
 
+  it("draws the design-system input box (tokens, no literals)", () => {
+    const box = mountComponent().find('[data-cy="base-input-color-box"]');
+    expect(box.classes()).toEqual(
+      expect.arrayContaining(["border", "border-border-default", "rounded-input", "bg-surface"]),
+    );
+    expect(box.classes().join(" ")).not.toMatch(/rgba|rounded-lg/);
+  });
+
   it("renders a color picker and a hex text input with the same value", () => {
     const wrapper = mountComponent();
 
