@@ -29,6 +29,11 @@ const normalizeStep = (step: any): RepetitiveStep => {
     normalized.scopeToRelationOf = dropEmpty(normalized.scopeToRelationOf, [
       "filterKey",
     ]);
+  if (normalized.markCurrentOnHost?.relationType)
+    normalized.markCurrentOnHost = dropEmpty(normalized.markCurrentOnHost, [
+      "label",
+    ]);
+  else delete normalized.markCurrentOnHost;
   return normalized;
 };
 

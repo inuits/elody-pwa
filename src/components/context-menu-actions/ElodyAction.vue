@@ -72,7 +72,11 @@ const { dequeueItemForBulkProcessing } = useBulkOperations();
 const { confirm } = useConfirmModal();
 const { displaySuccessNotification } = useBaseNotification();
 const { openModal } = useBaseModal();
-const { initializeGeneralProperties, setLibraryEntities } = useModalActions();
+const {
+  initializeGeneralProperties,
+  setLibraryEntities,
+  setCallbackFunctions,
+} = useModalActions();
 const { t } = useI18n();
 const { mutate } = useMutation<DeleteDataMutation>(DeleteDataDocument);
 const { loadDocument } = useImport();
@@ -300,6 +304,8 @@ const doAction = async () => {
         [],
         BulkOperationTypes.CreateEntity,
       );
+    } else {
+      setCallbackFunctions([]);
     }
     if (props.typeModal === TypeModals.GuidedFlow) {
       openModal(

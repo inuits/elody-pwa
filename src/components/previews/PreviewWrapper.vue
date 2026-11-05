@@ -88,20 +88,40 @@
   <!-- ui_kits/clients: a hairline under the viewer, then the label/value
        rows inside the same panel. -->
   <div
-    class="metadata-preview mx-4 mt-2 mb-3.5 border-t border-border-subtle pt-2"
-    v-if="
-      metadataPreviewElement && previewComponent.type !== PreviewTypes.History
-    "
+    class="mx-4 mt-2 mb-3.5 border-t border-border-subtle pt-2"
+    :class="{
+      'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-22rem)] overflow-y-auto':
+        previewComponent.changesPreview,
+    }"
   >
-    <entity-column
-      :key="entityId"
-      :entity="getEntitiesOrEntity()"
-      :column-list="metadataPreviewElement"
-      :identifiers="[entityId]"
-      :entity-type="entityType"
-      :preview-label="getTitleFromEntity"
-      compact
-    />
+    <div
+      class="metadata-preview min-w-0"
+      v-if="
+        metadataPreviewElement && previewComponent.type !== PreviewTypes.History
+      "
+    >
+      <entity-column
+        :key="entityId"
+        :entity="getEntitiesOrEntity()"
+        :column-list="metadataPreviewElement"
+        :identifiers="[entityId]"
+        :entity-type="entityType"
+        :preview-label="
+          previewComponent.changesPreview ? undefined : getTitleFromEntity
+        "
+        compact
+      />
+    </div>
+    <div
+      class="changes-preview min-w-0"
+      v-if="previewComponent.changesPreview && previewedEntity"
+    >
+      <ChangesPreview
+        :key="entityId"
+        :changes-preview="previewComponent.changesPreview"
+        :entity="previewedEntity"
+      />
+    </div>
   </div>
   <div
     class="metadata-preview"
@@ -147,6 +167,7 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { apolloClient, router } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
+import ChangesPreview from "./ChangesPreview.vue";
 
 const { t } = useI18n();
 const { loadDocument } = useImport();

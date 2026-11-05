@@ -335,6 +335,13 @@
       />
     </div>
 
+    <span
+      v-if="highlightLabel"
+      data-cy="list-item-highlight"
+      class="shrink-0 whitespace-nowrap text-chip font-bold p-(--chip-padding) rounded-chip bg-accent-wash text-text-body"
+    >
+      {{ highlightLabel }}
+    </span>
     <div v-if="isListMode" data-cy="list-item-actions" class="flex ml-auto">
       <EntityButtons
         :buttons="buttons"
@@ -456,6 +463,7 @@ const props = withDefaults(
     previewComponentListItemsCoverage?: ListItemCoverageTypes | undefined;
     isPrimaryMediafile?: boolean;
     isPrimaryThumbnail?: boolean;
+    highlightLabel?: string;
     multiLine?: boolean;
     multiLineColumns?: number;
   }>(),
@@ -485,6 +493,7 @@ const props = withDefaults(
     previewComponentListItemsCoverage: undefined,
     isPrimaryMediafile: false,
     isPrimaryThumbnail: false,
+    highlightLabel: undefined,
     multiLine: false,
     multiLineColumns: 5,
     previewOpen: false,

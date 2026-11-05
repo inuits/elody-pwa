@@ -457,4 +457,37 @@ describe("toRepetitiveFormConfig", () => {
     });
     expect(config.finalizeOnHost).toBeUndefined();
   });
+  it("keeps a configured markCurrentOnHost and drops the empty label echo", () => {
+    const config = toRepetitiveFormConfig({
+      repeatable: false,
+      expression: [
+        {
+          key: "expression",
+          entityType: "expression",
+          markCurrentOnHost: {
+            __typename: "RepetitiveStepHostMark",
+            relationType: "ref_expressions",
+            label: "",
+          },
+        },
+      ],
+    });
+    expect(config.steps[0].markCurrentOnHost).toEqual({
+      relationType: "ref_expressions",
+    });
+  });
+
+  it("drops a markCurrentOnHost without a relationType", () => {
+    const config = toRepetitiveFormConfig({
+      repeatable: false,
+      expression: [
+        {
+          key: "expression",
+          entityType: "expression",
+          markCurrentOnHost: { relationType: "", label: "x" },
+        },
+      ],
+    });
+    expect(config.steps[0].markCurrentOnHost).toBeUndefined();
+  });
 });

@@ -41,6 +41,8 @@
       :ids-of-non-selectable-entities="
         enableNonSelectableEntities ? alreadySelectedEntityIdsFetched : []
       "
+      :highlighted-entity-ids="highlightedEntityIds"
+      :highlight-label="highlightLabel"
       :actions-on-result="getActionsOnResult()"
       list-item-route-name="SingleEntity"
       @entities-updated="
@@ -60,7 +62,6 @@ import type { Entity } from "@/generated-types/queries";
 import {
   type BaseEntity,
   type AdvancedFilterInput,
-  type BaseRelationValuesInput,
   Collection,
   EntityPickerMode,
   EntityPickerSearchMode,
@@ -136,6 +137,8 @@ const props = withDefaults(
     searchAcceptedTypes?: string[];
     searchStaticFilters?: AdvancedFilterInput[];
     filterParentEntity?: any;
+    highlightedEntityIds?: string[];
+    highlightLabel?: string;
     forceShowFilters?: boolean;
     forceListView?: boolean;
   }>(),
@@ -153,6 +156,8 @@ const props = withDefaults(
     searchAcceptedTypes: () => [],
     searchStaticFilters: () => [],
     filterParentEntity: undefined,
+    highlightedEntityIds: () => [],
+    highlightLabel: undefined,
     forceShowFilters: false,
   },
 );
@@ -291,25 +296,6 @@ const getContext = () => {
   if (props.acceptedTypes[0] == Entitytyping.Mediafile)
     return BulkOperationsContextEnum.EntityElementMediaEntityPickerModal;
   return props.context;
-};
-
-const getAlreadySelectedEntityIds = (): string[] => {
-  if (!form) return [];
-  const relationValues = form?.values.relationValues;
-  const normalizedRelationIds = Object.keys(relationValues)
-    .filter((relationKey: string) => Array.isArray(relationValues[relationKey]))
-    .map((relationKey: string) =>
-      relationValues[relationKey].map(
-        (relation: BaseRelationValuesInput) => relation,
-      ),
-    )
-    .flat();
-
-  const filteredRelationIds = normalizedRelationIds
-    .filter((relation: BaseRelationValuesInput) => !relation.editStatus)
-    .map((relation: BaseRelationValuesInput) => relation.key);
-
-  return filteredRelationIds;
 };
 
 const submit = useSubmitForm<EntityValues>(async () => {
