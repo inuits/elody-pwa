@@ -3,6 +3,8 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
 
+const mockFormatTeaserMetadata = vi.hoisted(() => vi.fn());
+
 vi.mock("@/helpers", async () => {
   const actualModule = await vi.importActual("@/helpers");
   return {
@@ -10,7 +12,7 @@ vi.mock("@/helpers", async () => {
     setCssVariable: () => {},
     getEntityPageRoute: () => {},
     getMappedSlug: () => {},
-    formatTeaserMetadata: () => {},
+    formatTeaserMetadata: mockFormatTeaserMetadata,
     updateEntityMediafileOnlyForMediafiles: () => {},
   };
 });
@@ -200,5 +202,55 @@ describe("ViewModesTable", () => {
     expect(wrapper.find(".list-item-table").classes()).toEqual(
       expect.arrayContaining(["hover:no-underline", "text-inherit", "hover:text-inherit"]),
     );
+  });
+
+  it("styles the column-header row like the list-mode header (label token, field-label colour)", async () => {
+    mockFormatTeaserMetadata.mockReturnValue([
+      { key: "title", label: "metadata.labels.production", value: "Silent Garden 1" },
+      { key: "status", label: "metadata.labels.status", value: "published" },
+    ]);
+    const wrapper = shallowMount(ViewModesTable, {
+      props: {
+        entities: [{ id: "entity1", teaserMetadata: [] }],
+        mode: "list",
+      } as any,
+    });
+    await flushPromises();
+
+    const header = wrapper.find('[data-cy="view-modes-table-header"]');
+    expect(header.exists()).toBe(true);
+    expect(header.classes()).toEqual(
+      expect.arrayContaining([
+        "h-(--list-header-height)",
+        "text-label",
+        "font-bold",
+        "text-text-field-label",
+      ]),
+    );
+    expect(header.classes()).not.toContain("text-sm");
+    expect(header.classes()).not.toContain("font-semibold");
+  });
+
+  it("leaves the leading header spacer out when rows have no checkbox or new dot", async () => {
+    mockEntityPageConfig.seenTracking.value = undefined;
+    mockFormatTeaserMetadata.mockReturnValue([
+      { key: "title", label: "metadata.labels.title", value: "x" },
+    ]);
+    const mountTable = (enableSelection: boolean) =>
+      shallowMount(ViewModesTable, {
+        props: {
+          entities: [{ id: "entity1", teaserMetadata: [] }],
+          mode: "list",
+          enableSelection,
+        } as any,
+      });
+
+    const without = mountTable(false);
+    await flushPromises();
+    expect(without.find('[data-cy="view-modes-table-header-leading"]').exists()).toBe(false);
+
+    const withSelection = mountTable(true);
+    await flushPromises();
+    expect(withSelection.find('[data-cy="view-modes-table-header-leading"]').exists()).toBe(true);
   });
 });

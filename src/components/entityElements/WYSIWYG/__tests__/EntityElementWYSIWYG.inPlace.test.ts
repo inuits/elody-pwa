@@ -186,6 +186,14 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       );
     });
 
+    it("in a compact preview, lines up with the other rows and spans the row", async () => {
+      const wrapper = await mountElement({}, { CompactPreview: true });
+      const field = wrapper.find('[data-cy="wysiwyg-field"]');
+      expect(field.classes()).toContain("col-span-full");
+      expect(field.classes()).not.toContain("px-2");
+      expect(field.classes()).not.toContain("py-2");
+    });
+
     it("puts the editor box flush with the label, without its own margin", async () => {
       await mountElement();
       const editorClass = editor().options.editorProps.attributes.class;

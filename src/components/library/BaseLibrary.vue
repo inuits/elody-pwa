@@ -777,7 +777,8 @@ const wrapperClasses = computed(() => {
   const classes: (string | Record<string, boolean>)[] = [];
   const mode = props.baseLibraryMode;
 
-  if (mode !== BaseLibraryModes.BasicBaseLibrary) {
+  if (compactPreview) classes.push("-mx-2");
+  else if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     // ui_kits ListScreen: the page padding on a list page of its own
     // a white surface (guided-flow picker step) is padded by its host
     if (!onWhiteSurface)
@@ -996,6 +997,7 @@ const showListPager = computed(
 // Inside a detail panel the panel is the chrome: no band or border of the
 // list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
+const compactPreview: boolean = inject("CompactPreview", false);
 const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();
 const filtersToggleId = useId();

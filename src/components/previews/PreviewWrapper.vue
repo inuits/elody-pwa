@@ -88,8 +88,10 @@
   <!-- ui_kits/clients: a hairline under the viewer, then the label/value
        rows inside the same panel. -->
   <div
-    class="mx-4 mt-2 mb-3.5 border-t border-border-subtle pt-2"
+    data-cy="preview-body"
+    class="px-4 pt-2 mb-3.5"
     :class="{
+      'mt-2 border-t border-border-subtle': hasViewerAbove,
       'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-22rem)] overflow-y-auto':
         previewComponent.changesPreview,
     }"
@@ -113,7 +115,7 @@
       />
     </div>
     <div
-      class="changes-preview min-w-0"
+      class="changes-preview min-w-0 self-stretch border-l border-border-subtle pl-4"
       v-if="previewComponent.changesPreview && previewedEntity"
     >
       <ChangesPreview
@@ -268,6 +270,13 @@ const title = computed<string>(() =>
   props.previewComponent.title
     ? t(props.previewComponent.title)
     : getTitleFromEntity.value,
+);
+const hasViewerAbove = computed<boolean>(
+  () =>
+    props.previewComponent.type === PreviewTypes.MediaViewer ||
+    props.previewComponent.type === PreviewTypes.Map ||
+    (props.previewComponent.type === PreviewTypes.ColumnList &&
+      !!primaryPreviewElement.value),
 );
 const titleId = useId();
 const header = ref<HTMLElement>();

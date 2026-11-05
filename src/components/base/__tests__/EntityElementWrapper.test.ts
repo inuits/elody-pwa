@@ -88,3 +88,35 @@ describe("EntityElementWrapper as a PanelShell (panel-and-block-shells.md)", () 
     expect(wrapper.find('[data-cy="probe"]').text()).toBe("true");
   });
 });
+
+describe("EntityElementWrapper in a compact preview (preview-panel.md)", () => {
+  const compact = () =>
+    getWrapper(
+      { label: "panel-labels.changed-mediafiles" },
+      { CompactPreview: true },
+    );
+
+  it("draws no card of its own inside the preview panel", () => {
+    const root = compact().find('[data-cy="entity-element-wrapper"]');
+    expect(root.classes()).not.toContain("border");
+    expect(root.classes()).not.toContain("rounded-card");
+    expect(root.classes()).not.toContain("bg-surface");
+  });
+
+  it("shows its label as a block heading instead of the header band", () => {
+    const wrapper = compact();
+    expect(wrapper.find('[data-cy="entity-element-wrapper-header"]').exists()).toBe(false);
+    const heading = wrapper.find('[data-cy="entity-element-wrapper-block-title"]');
+    expect(heading.element.tagName).toBe("H4");
+    expect(heading.text()).toBe("panel-labels.changed-mediafiles");
+    expect(heading.classes()).toEqual(
+      expect.arrayContaining(["text-table", "font-bold", "text-text-body"]),
+    );
+  });
+
+  it("drops the body padding so rows line up with the other compact rows", () => {
+    expect(
+      compact().find('[data-cy="entity-element-wrapper-content"]').classes(),
+    ).not.toContain("p-(--panel-body-pad)");
+  });
+});

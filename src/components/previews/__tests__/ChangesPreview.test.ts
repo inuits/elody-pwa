@@ -14,10 +14,17 @@ vi.mock("@/composables/useImport", () => ({
   useImport: () => ({ loadDocument: vi.fn().mockResolvedValue({}) }),
 }));
 vi.mock("@/generated-types/queries", () => ({ GetEntityByIdDocument: {} }));
+vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (key: string) => key }) }));
 vi.mock("@/components/EntityColumn.vue", () => ({
   default: {
     name: "EntityColumn",
-    props: ["entity", "columnList", "identifiers", "entityType"],
+    props: {
+      entity: null,
+      columnList: null,
+      identifiers: null,
+      entityType: null,
+      compact: Boolean,
+    },
     template: "<div />",
   },
 }));
@@ -27,6 +34,7 @@ const PREVIEW_ELEMENT = {
     elements: {
       windowElement: {
         __typename: "WindowElement",
+        label: "panel-labels.notification-new-values",
         fields: {
           __typename: "WindowElementPanel",
           title: { __typename: "PanelMetaData", key: "title" },
@@ -114,6 +122,7 @@ describe("ChangesPreview", () => {
     const listsColumn = columns(wrapper)[1];
 
     expect(listsColumn.props("entity").id).toBe("NO-1");
+    expect(listsColumn.props("compact")).toBe(true);
   });
 
   it("hides related lists the previewed entity has no relations for", async () => {
@@ -125,5 +134,18 @@ describe("ChangesPreview", () => {
     await flushPromises();
 
     expect(columns(wrapper)).toHaveLength(1);
+  });
+
+  it("shows the changed fields as flat rows under a block heading, not as a nested card", async () => {
+    const wrapper = mountPreview();
+    await flushPromises();
+    const heading = wrapper.find("[data-cy='changes-preview-title']");
+
+    expect(heading.element.tagName).toBe("H4");
+    expect(heading.text()).toBe("panel-labels.notification-new-values");
+    expect(heading.classes()).toEqual(
+      expect.arrayContaining(["text-table", "font-bold", "text-text-body"]),
+    );
+    expect(columns(wrapper)[0].props("compact")).toBe(true);
   });
 });

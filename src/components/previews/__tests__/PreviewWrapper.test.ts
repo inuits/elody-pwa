@@ -440,3 +440,23 @@ describe("PreviewWrapper metadata under the preview", () => {
     expect(column.attributes("data-compact")).toBe("true");
   });
 });
+
+describe("PreviewWrapper line between the viewer and the metadata", () => {
+  const body = (wrapper: ReturnType<typeof getWrapper>) =>
+    wrapper.find('[data-cy="preview-body"]');
+
+  it("runs the full width of the panel under a viewer", async () => {
+    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+    expect(body(wrapper).classes()).toEqual(
+      expect.arrayContaining(["border-t", "border-border-subtle", "px-4"]),
+    );
+    expect(body(wrapper).classes()).not.toContain("mx-4");
+  });
+
+  it("is left out when nothing sits above the metadata", async () => {
+    const wrapper = getWrapper({});
+    await flushPromises();
+    expect(body(wrapper).classes()).not.toContain("border-t");
+  });
+});

@@ -1,8 +1,15 @@
 <template>
   <div
     data-cy="entity-element-wrapper"
-    class="bg-surface border border-border-panel rounded-card"
+    :class="{ 'bg-surface border border-border-panel rounded-card': !compact }"
   >
+    <h4
+      v-if="compact"
+      data-cy="entity-element-wrapper-block-title"
+      class="m-0 mb-2 text-table font-bold text-text-body"
+    >
+      {{ previewLabel ? previewLabel : t(label) }}
+    </h4>
     <!-- panel-and-block-shells.md: PanelShell — white card, accent-light
          header band; the gold section-header fill is not for panels. -->
     <div
@@ -10,7 +17,8 @@
         (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
           baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
           baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary) &&
-        headerStyle !== 'none'
+        headerStyle !== 'none' &&
+        !compact
       "
       data-cy="entity-element-wrapper-header"
       :class="[
@@ -48,7 +56,8 @@
       <div v-if="!useVshowInsteadOfVif && !isCollapsed">
         <div
           data-cy="entity-element-wrapper-content"
-          class="h-full min-h-0 p-(--panel-body-pad) @container/wrapper-content"
+          class="h-full min-h-0 @container/wrapper-content"
+          :class="{ 'p-(--panel-body-pad)': !compact }"
         >
           <slot name="content"></slot>
         </div>
@@ -58,7 +67,8 @@
       <div v-if="useVshowInsteadOfVif" v-show="!isCollapsed">
         <div
           data-cy="entity-element-wrapper-content"
-          class="h-full min-h-0 p-(--panel-body-pad) @container/wrapper-content"
+          class="h-full min-h-0 @container/wrapper-content"
+          :class="{ 'p-(--panel-body-pad)': !compact }"
         >
           <slot name="content"></slot>
         </div>
@@ -103,6 +113,7 @@ const emit = defineEmits<{
 }>();
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
+const compact: boolean = inject("CompactPreview", false);
 
 const { t } = useI18n();
 </script>

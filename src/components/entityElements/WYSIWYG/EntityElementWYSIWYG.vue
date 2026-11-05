@@ -9,7 +9,8 @@
       'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
       // Inline it is a field row: the same padding, label then value.
-      { 'py-2 px-2': displayInline },
+      { 'py-2 px-2': displayInline && !compactPreview },
+      { 'col-span-full': compactPreview },
     ]"
   >
     <div
@@ -216,6 +217,7 @@ import { canEditWysiwygInPlace } from "@/components/metadata/fieldEditability";
 import { useWysiwygInPlaceEditing } from "@/composables/useWysiwygInPlaceEditing";
 import { useParentSavedFlash } from "@/composables/useSavedFlash";
 
+const compactPreview: boolean = inject("CompactPreview", false);
 const props = withDefaults(
   defineProps<{
     formId: string;

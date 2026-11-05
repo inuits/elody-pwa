@@ -1,4 +1,11 @@
 <template>
+  <h4
+    v-if="relatedEntity && fieldsColumnList && fieldsLabel"
+    data-cy="changes-preview-title"
+    class="m-0 mb-2 text-table font-bold text-text-body"
+  >
+    {{ t(fieldsLabel) }}
+  </h4>
   <parent-entity-scope
     v-if="relatedEntity && fieldsColumnList"
     :entity="relatedEntity"
@@ -9,6 +16,7 @@
       :column-list="fieldsColumnList"
       :identifiers="[relatedEntity.id]"
       :entity-type="changesPreview.entityType"
+      compact
     />
   </parent-entity-scope>
   <div v-if="listsColumnList" :class="{ 'mt-4': fieldsColumnList }">
@@ -18,6 +26,7 @@
       :column-list="listsColumnList"
       :identifiers="[entity.id]"
       :entity-type="entity.type as Entitytyping"
+      compact
     />
   </div>
 </template>
@@ -25,6 +34,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
+import { useI18n } from "vue-i18n";
 import {
   type ChangesPreview,
   type ColumnList,
@@ -48,6 +58,7 @@ const props = defineProps<{
   entity: Entity;
 }>();
 
+const { t } = useI18n();
 const { loadDocument } = useImport();
 const columnList = ref<ColumnList | undefined>(undefined);
 
@@ -91,6 +102,10 @@ const fieldsColumnList = computed(() =>
     ? pickColumnElements(filteredColumnList.value, isWindowElement)
     : null,
 );
+const fieldsLabel = computed<string | undefined>(() => {
+  const elements = Object.values(fieldsColumnList.value?.column.elements ?? {});
+  return (elements.find((e: any) => e && isWindowElement(e)) as any)?.label;
+});
 const listsColumnList = computed(() =>
   filteredColumnList.value
     ? pickColumnElements(filteredColumnList.value, (e) => !isWindowElement(e))

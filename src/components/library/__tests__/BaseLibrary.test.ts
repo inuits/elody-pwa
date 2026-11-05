@@ -1531,3 +1531,22 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
     });
   });
 });
+
+describe("BaseLibrary.vue in a compact preview", () => {
+  it("lines its rows' content up with the block heading above it", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      {
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        parentEntityIdentifiers: ["NO-1"],
+      },
+      { InsidePanel: true, CompactPreview: true },
+    );
+    await flushPromises();
+
+    const classes = wrapper.find(".grid").classes();
+    expect(classes).not.toContain("px-3");
+    expect(classes).toContain("-mx-2");
+    wrapper.unmount();
+  });
+});
