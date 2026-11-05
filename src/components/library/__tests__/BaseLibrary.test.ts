@@ -1074,3 +1074,40 @@ describe("BaseLibrary.vue map view", () => {
     expect(wrapper.findComponent(ViewModesTable).exists()).toBe(true);
   });
 });
+
+describe("BaseLibrary.vue library bar wrapper", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+  const barWrapperSelector = '[data-test="library-bar-wrapper"]';
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [];
+    libTotalEntityCount.value = 0;
+    libEntitiesLoading.value = false;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  it("renders the padded bar wrapper when the library bar is enabled", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(barWrapperSelector).exists()).toBe(true);
+  });
+
+  it("drops the padded bar wrapper when the library bar is disabled, so no empty gap is left above the list", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
+      disableLibraryBar: true,
+    });
+    await flushPromises();
+
+    expect(wrapper.find(barWrapperSelector).exists()).toBe(false);
+  });
+});

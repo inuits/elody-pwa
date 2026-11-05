@@ -299,3 +299,41 @@ describe("PreviewWrapper parent entity provide", () => {
     expect(injected?.value ?? injected).toEqual(entity);
   });
 });
+
+describe("PreviewWrapper changes preview header", () => {
+  const TITLE_SELECTOR = '[data-cy="entity-element-window-title"]';
+  const changesPreview = {
+    query: "GetChangesPreviewForNotification",
+    relationType: "ref_production",
+    entityType: "production",
+    changedKeysKey: "updated_keys",
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows the title header when there is no primary preview", async () => {
+    const wrapper = getWrapper({
+      type: PreviewTypes.ColumnList,
+      metadataPreviewQuery: "GetMetadataPreviewForNotification",
+      changesPreview,
+    });
+    await flushPromises();
+    expect(wrapper.find(TITLE_SELECTOR).exists()).toBe(true);
+  });
+
+  it("leaves the title to the primary preview so it is not shown twice", async () => {
+    vi.mocked(apolloClient.query).mockResolvedValue({
+      data: { PreviewElement: PRIMARY_PREVIEW_ELEMENT },
+    });
+    const wrapper = getWrapper({
+      type: PreviewTypes.ColumnList,
+      previewQuery: "GetPreviewInNotification",
+      metadataPreviewQuery: "GetMetadataPreviewForNotification",
+      changesPreview,
+    });
+    await flushPromises();
+    expect(wrapper.find(TITLE_SELECTOR).exists()).toBe(false);
+  });
+});
