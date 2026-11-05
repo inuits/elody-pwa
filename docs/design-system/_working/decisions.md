@@ -173,7 +173,7 @@ Later subtasks:
 |---|---|---|---|---|
 | E1 | Pencil on editable values | appears on hover | always visible, 12px, subtle | **catalogue** (user, 2026-10-07): editability must not depend on hover |
 | E2 | Dashed underline | under the value | under the value text only, square ends; none for pills | **catalogue** (user, 2026-10-07) |
-| E3 | Inline editor actions | text buttons Bewaar + Annuleer | 26px icon buttons ✓ / ✕ | **handoff** (user, 2026-10-07): text buttons, centred vertically on the input. Bewaar dropped since, see E4 |
+| E3 | Inline editor actions | text buttons Bewaar + Annuleer | 26px icon buttons ✓ / ✕ | **handoff** (user, 2026-10-07): text buttons, centred vertically on the input. Bewaar dropped since, see E4. **Revised** (user, 2026-11-05): the handoff's 26px-style icon buttons ✓ (commit) / × (secondary), square `md` icon-only (28px, near the 32px input), in the inline editor and the WYSIWYG field; leaving the field still saves (E4 kept) |
 | E4 | Commit model | pick-then-Bewaar, "don't auto-save on blur" (also CHANGES.md round 2) | — | **deviation** (user, 2026-10-14): no Bewaar per field; leaving the field (click outside, Tab out) saves a changed value, Enter saves, Annuleer/Esc discard. Also for WYSIWYG |
 | E5 | Opening a second field while one is changed | first stays open, nothing saved | — | **deviation** (user, 2026-10-14): the changed field saves first; on failure it stays open with its error and the second doesn't open |
 | E6 | Leaving the page with a changed field | (not specified) | — | **done** (2026-10-15): saves without asking, stays when the save fails; the save/discard/stay prompt is only for the page-wide edit mode |

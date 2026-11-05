@@ -58,23 +58,33 @@ describe("WYSIWYGInPlaceActions", () => {
   });
 
   describe("while editing", () => {
-    // Leaving the field saves it, so there is no Bewaar.
-    it("replaces the edit button with cancel only", () => {
+    const named = (wrapper: ReturnType<typeof mountActions>, name: string) =>
+      wrapper.find(`button[aria-label="${name}"]`);
+
+    // ui_kits InlineEditor: a commit-teal ✓ and a neutral × after the input.
+    it("replaces the edit button with a ✓ and a ×, named after the field", () => {
       const wrapper = mountActions({ editing: true });
       expect(editButton(wrapper).exists()).toBe(false);
-      expect(buttonLabelled(wrapper, "Save")).toBeUndefined();
-      expect(buttonLabelled(wrapper, "Cancel")).toBeDefined();
+      expect(named(wrapper, "Save Beschrijving").exists()).toBe(true);
+      expect(named(wrapper, "Cancel Beschrijving").exists()).toBe(true);
     });
 
-    it("cancels", async () => {
+    it("saves with ✓", async () => {
       const wrapper = mountActions({ editing: true });
-      await buttonLabelled(wrapper, "Cancel")!.trigger("click");
+      await named(wrapper, "Save Beschrijving").trigger("click");
+      expect(wrapper.emitted("save")).toHaveLength(1);
+    });
+
+    it("cancels with ×", async () => {
+      const wrapper = mountActions({ editing: true });
+      await named(wrapper, "Cancel Beschrijving").trigger("click");
       expect(wrapper.emitted("cancel")).toHaveLength(1);
     });
 
-    it("locks cancel and shows a spinner while saving", () => {
+    it("shows only a spinner while saving", () => {
       const wrapper = mountActions({ editing: true, saving: true });
-      expect(buttonLabelled(wrapper, "Cancel")!.attributes("disabled")).toBeDefined();
+      expect(named(wrapper, "Save Beschrijving").exists()).toBe(false);
+      expect(named(wrapper, "Cancel Beschrijving").exists()).toBe(false);
       expect(wrapper.find('[data-cy="wysiwyg-saving"]').exists()).toBe(true);
     });
 

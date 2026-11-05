@@ -153,8 +153,6 @@ const mountElement = async (
 
 const editor = () => mocks.editors[mocks.editors.length - 1];
 const editButton = (wrapper: any) => wrapper.find('[data-cy="wysiwyg-edit-button"]');
-const button = (wrapper: any, label: string) =>
-  wrapper.findAll("button").find((candidate: any) => candidate.text() === label);
 
 // Leaving the field saves it: a click elsewhere on the page.
 const leaveField = () =>
@@ -279,14 +277,24 @@ describe("EntityElementWYSIWYG — in-place editing", () => {
       expect(wrapper.find('[data-cy="transliteration-toggle"]').exists()).toBe(false);
     });
 
-    it("puts Annuleer on the label line, with the keyboard hint below", async () => {
+    it("puts ✓ and × on the label line, with the keyboard hint below", async () => {
       const wrapper = await startEditing();
       expect(editButton(wrapper).exists()).toBe(false);
-      expect(button(wrapper, "Save")).toBeUndefined();
-      expect(button(wrapper, "Cancel")).toBeDefined();
+      expect(wrapper.find('button[aria-label^="Save "]').exists()).toBe(true);
+      expect(wrapper.find('button[aria-label^="Cancel "]').exists()).toBe(true);
       expect(wrapper.find('[data-cy="wysiwyg-hint"]').text()).toBe(
         "Ctrl+Enter saves · Esc cancels",
       );
+    });
+
+    it("saves a changed value with ✓", async () => {
+      mocks.saveScope.mockResolvedValue({});
+      const wrapper = await startEditing();
+      editor().type("<p>Nieuw</p>");
+      await wrapper.vm.$nextTick();
+      await wrapper.find('button[aria-label^="Save "]').trigger("click");
+      await flushPromises();
+      expect(mocks.saveScope).toHaveBeenCalledTimes(1);
     });
 
     it("saves only this field's key and keeps the saved value", async () => {

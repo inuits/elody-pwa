@@ -9,12 +9,11 @@
     class="flex flex-col gap-1 w-full"
     @focusout="handleFocusout"
   >
-    <!-- A dropdown keeps its options' width (AdvancedDropdown's min-width);
-         where it does not fit beside Annuleer, Annuleer wraps below it. -->
+    <!-- An open menu covers what sits below the dropdown, so ✓ and × stay
+         beside it and the dropdown shrinks below its options' width. -->
     <div
       data-cy="inline-editor-row"
       class="flex items-center gap-1.5 w-full"
-      :class="{ 'flex-wrap': isDropdown }"
     >
       <!-- A checkbox is only as wide as its box, so Annuleer sits right
            after it; other inputs take the row. A textarea grows with its
@@ -25,6 +24,7 @@
         data-cy="inline-editor-input"
         :class="[
           type === InputFieldTypes.Checkbox ? 'shrink-0' : 'grow min-w-0',
+          isDropdown && '[&_.vue-advanced-select]:!min-w-0',
           isTextarea &&
             '[&_textarea]:field-sizing-content [&_textarea]:max-h-(--textarea-max-height)',
         ]"
@@ -61,20 +61,30 @@
           :disabled="saving"
         />
       </div>
-      <div class="flex shrink-0 items-center gap-1.5">
+      <div class="flex shrink-0 items-center gap-1">
         <SpinnerLoader
           v-if="saving"
           data-cy="inline-editor-saving"
           :dimensions="4"
         />
-        <BaseButtonNew
-          :label="cancelLabel"
-          button-style="ghost"
-          button-size="sm"
-          force-show-label
-          :disabled="saving"
-          @click="emit('cancel')"
-        />
+        <template v-else>
+          <BaseButtonNew
+            :icon="DamsIcons.Check"
+            :aria-label="`${saveLabel} ${label}`"
+            button-style="commit"
+            button-size="md"
+            class="!w-auto"
+            @click="commit"
+          />
+          <BaseButtonNew
+            :icon="DamsIcons.Close"
+            :aria-label="`${cancelLabel} ${label}`"
+            button-style="secondary"
+            button-size="md"
+            class="!w-auto"
+            @click="emit('cancel')"
+          />
+        </template>
       </div>
     </div>
     <p
@@ -103,6 +113,7 @@ import {
 } from "vue";
 import { useI18n } from "vue-i18n";
 import {
+  DamsIcons,
   InputFieldTypes,
   type DropdownOption,
 } from "@/generated-types/queries";
@@ -174,6 +185,7 @@ watch(isDirty, (dirty) => emit("dirty-change", dirty));
 watch(draft, (value) => emit("draft-change", value), { deep: true });
 
 const cancelLabel = computed(() => translated("inline-edit.cancel", "Cancel"));
+const saveLabel = computed(() => translated("inline-edit.save", "Save"));
 const hint = computed(() =>
   isTextarea.value
     ? translated("inline-edit.hint-textarea", "Ctrl+Enter saves · Esc cancels")

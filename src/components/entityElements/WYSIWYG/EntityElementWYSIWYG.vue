@@ -27,6 +27,7 @@
         :editing="isEditingInPlace"
         :saving="inPlaceSaving"
         @edit="startEditing"
+        @save="saveInPlace"
         @cancel="cancelInPlace"
       />
     </div>
@@ -72,6 +73,7 @@
         :editing="isEditingInPlace"
         :saving="inPlaceSaving"
         @edit="startEditing"
+        @save="saveInPlace"
         @cancel="cancelInPlace"
       />
     </div>
@@ -330,6 +332,7 @@ const {
   error: inPlaceError,
   savedAnnouncement,
   cancel: cancelInPlace,
+  save: saveInPlace,
   handleKeydown: handleInPlaceKeydown,
 } = inPlace;
 const isEditable = computed<boolean>(
