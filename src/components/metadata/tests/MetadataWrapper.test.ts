@@ -477,6 +477,17 @@ describe("MetadataWrapper — in-place editing affordance", () => {
     );
   });
 
+  it("adds no label gap above a value without a label (a panel-header status)", async () => {
+    const props = editableProps();
+    const wrapper = await mountWrapper({
+      ...props,
+      metadata: { ...props.metadata, label: undefined },
+    } as any);
+    expect(wrapper.find('[data-cy="field-label-row"]').classes()).not.toContain(
+      "mb-(--field-label-gap)",
+    );
+  });
+
   it("gives every value row the same minimum height, editable or not", async () => {
     expect((await fieldValue()).classes()).toContain(
       "min-h-(--field-value-min-height)",

@@ -629,3 +629,16 @@ describe("MetadataFormatterPill — type badge in running text (badge prop)", ()
     );
   });
 });
+
+describe("MetadataFormatterPill — vertical position", () => {
+  it.each([
+    ["chip", { formatter: "pill", label: "concept" }],
+    ["badge", { formatter: "pill", label: "manifestation" }],
+  ])("adds no top margin to a %s, so it centres in its row like the pencil", (_, props) => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, { props });
+    wrapper.findAll("div > div").forEach((pill) => {
+      expect(pill.classes()).not.toContain("mt-1");
+    });
+  });
+});

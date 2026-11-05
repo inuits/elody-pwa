@@ -21,7 +21,7 @@
     <div
       data-cy="field-label-row"
       class="flex items-center gap-2"
-      :class="{ 'mb-(--field-label-gap)': !compact }"
+      :class="{ 'mb-(--field-label-gap)': !compact && metadata.label }"
     >
       <metadata-title
         :class="{

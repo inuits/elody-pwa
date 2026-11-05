@@ -47,8 +47,9 @@ vi.mock("@/composables/useWindowOrPanelStatus", () => ({
     registerEditableKey: vi.fn(),
   }),
 }));
+const libraryData = vi.hoisted(() => ({ value: undefined as unknown }));
 vi.mock("@/components/library/useBaseLibrary", () => ({
-  getLibraryDataValue: () => undefined,
+  getLibraryDataValue: () => libraryData.value,
 }));
 vi.mock("@/helpers", () => ({ getMetadataFields: () => state.fields }));
 vi.mock("@/types", () => ({
@@ -393,5 +394,50 @@ describe("EntityElementWindowPanel as a BlockShell (panel-and-block-shells.md)",
     const root = mountPanel().find("[data-cy='window-panel']");
     expect(root.classes()).toContain("py-(--block-pad-y)");
     expect(root.classes()).not.toContain("p-2");
+  });
+});
+
+describe("EntityElementWindowPanel header count chip", () => {
+  const mountWithCount = (value: number) => {
+    libraryData.value = value;
+    const wrapper = mount(EntityElementWindowPanel, {
+      props: {
+        panel: {
+          panelType: "metadata",
+          isCollapsed: false,
+          panelHeaderContent: {
+            label: "Posters",
+            libraryData: { dataKey: "count", label: "files" },
+          },
+        } as any,
+        identifiers: [],
+        isEdit: false,
+        formId: "E-1",
+      },
+      global: { stubs: { unicon: true, WindowPanelContent: true, BaseButtonNew: true } },
+    });
+    libraryData.value = undefined;
+    return wrapper.find('[data-cy="panel-header-library-data"]');
+  };
+
+  it("is a chip on the chip tokens, not the old mint pill", () => {
+    const chip = mountWithCount(1);
+    expect(chip.classes()).toEqual(
+      expect.arrayContaining(["text-chip", "font-bold", "p-(--chip-padding)", "rounded-chip"]),
+    );
+    expect(chip.classes()).not.toEqual(
+      expect.arrayContaining(["bg-accent-normal"]),
+    );
+    expect(chip.classes()).not.toContain("rounded-full");
+    expect(chip.classes()).not.toContain("text-sm");
+  });
+
+  it("uses the relation colours when there are files and neutral ones when there are none", () => {
+    expect(mountWithCount(1).classes()).toEqual(
+      expect.arrayContaining(["bg-chip-relation-bg", "text-chip-relation-text"]),
+    );
+    expect(mountWithCount(0).classes()).toEqual(
+      expect.arrayContaining(["bg-chip-neutral-bg", "text-chip-neutral-text"]),
+    );
   });
 });
