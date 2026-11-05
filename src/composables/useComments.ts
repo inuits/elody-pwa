@@ -91,9 +91,6 @@ export const groupComments = (comments: Comment[]): CommentThread[] => {
     });
 };
 
-export const visibleThreadsOf = (threads: CommentThread[]): CommentThread[] =>
-  threads.filter((thread) => thread.status !== "archived");
-
 export const tagElementName = (tag: string): string =>
   `elody-${tag.toLowerCase()}`;
 

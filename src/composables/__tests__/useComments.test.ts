@@ -31,7 +31,6 @@ const {
   isOwnComment,
   isThreadParticipant,
   statusTransitionsOf,
-  visibleThreadsOf,
   useThreadSeenTracking,
   useComments,
 } = await import("../useComments");
@@ -468,27 +467,6 @@ describe("statusTransitionsOf", () => {
   it("an archived thread can only be reopened, by anyone", () => {
     expect(statusTransitionsOf("archived", true)).toEqual(["open"]);
     expect(statusTransitionsOf("archived", false)).toEqual(["open"]);
-  });
-});
-
-describe("visibleThreadsOf", () => {
-  const threadWith = (id: string, status: string): any => ({
-    subject: comment(id, {}),
-    replies: [],
-    replyCount: 0,
-    status,
-  });
-
-  it("leaves archived threads out", () => {
-    const threads = [
-      threadWith("CMT-1", "open"),
-      threadWith("CMT-2", "archived"),
-      threadWith("CMT-3", "resolved"),
-    ];
-
-    expect(
-      visibleThreadsOf(threads).map((thread) => thread.subject.id),
-    ).toEqual(["CMT-1", "CMT-3"]);
   });
 });
 
