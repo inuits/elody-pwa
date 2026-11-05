@@ -34,6 +34,7 @@
       v-if="hasIcon && !loading"
       :name="Unicons[props.icon].name"
       :height="iconHeight"
+      :width="iconHeight"
     />
     <span
       v-if="label"
@@ -49,11 +50,19 @@
     >
     <slot />
 
-    <div v-if="disabled && tooltipLabel" class="-mb-2 text-text-secondary">
+    <div
+      v-if="disabled && tooltipLabel"
+      data-cy="button-disabled-reason"
+      class="flex items-center text-text-secondary"
+    >
       <base-tooltip position="top-right" :tooltip-offset="8">
         <template #activator="{ on, describedBy }">
-          <div v-on="on" :aria-describedby="describedBy">
-            <unicon :name="Unicons.QuestionCircle.name" height="20" />
+          <div class="flex" v-on="on" :aria-describedby="describedBy">
+            <unicon
+              :name="Unicons.QuestionCircle.name"
+              :height="iconHeight"
+              :width="iconHeight"
+            />
           </div>
         </template>
         <template #default>

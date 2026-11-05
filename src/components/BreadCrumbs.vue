@@ -34,7 +34,13 @@
       aria-current="page"
       class="flex min-w-0 items-center gap-1.5 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body"
     >
-      <MetadataFormatter v-if="typePillLabel" v-bind="typePillLabel" />
+      <MetadataFormatterPill
+        v-if="typePillLabel"
+        :formatter="typePillLabel.formatter"
+        :label="typePillLabel.label"
+        :translation-key="typePillLabel.translationKey"
+        badge
+      />
       <!-- Handoff: the current item is never cut off; a long title wraps the row instead. -->
       <span>{{ currentRouteTitle }}</span>
     </span>
@@ -93,7 +99,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useConfirmModal } from "@/composables/useConfirmModal";
-import MetadataFormatter from "@/components/metadata/MetadataFormatter.vue";
+import MetadataFormatterPill from "@/components/metadata/MetadataFormatterPill.vue";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
 
 const { t, locale } = useI18n();

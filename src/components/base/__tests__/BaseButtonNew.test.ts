@@ -179,6 +179,16 @@ describe("BaseButtonNew", () => {
     },
   );
 
+  it("sizes its icon square, so an icon-only button is square and the label sits --button-gap away", () => {
+    const wrapper = shallowMount(BaseButtonNew, {
+      props: { icon: "Check", iconHeight: 14 },
+      global: { stubs: { unicon: { props: ["name", "height", "width"], template: "<i :data-w='width' :data-h='height' />" } } },
+    });
+    const icon = wrapper.find("i");
+    expect(icon.attributes("data-w")).toBe("14");
+    expect(icon.attributes("data-h")).toBe("14");
+  });
+
   describe("disabled with a reason", () => {
     const getReasoned = (onClick = vi.fn()) =>
       shallowMount(BaseButtonNew, {
@@ -186,6 +196,18 @@ describe("BaseButtonNew", () => {
         attrs: { onClick },
         global: { stubs: { unicon: true } },
       });
+
+    it("centres the reason's help icon on the label, at the button's icon size", () => {
+      const wrapper = shallowMount(BaseButtonNew, {
+        props: { label: "Bewaar", disabled: true, tooltipLabel: "why", icon: "Edit" },
+        global: { stubs: { unicon: { props: ["name", "height"], template: "<i :data-height='height' />" }, BaseTooltip: { template: "<div><slot name='activator' :on='{}' /></div>" } } },
+      });
+      const help = wrapper.find("[data-cy='button-disabled-reason']");
+      expect(help.classes()).not.toContain("-mb-2");
+      expect(help.classes()).toEqual(expect.arrayContaining(["flex", "items-center"]));
+      const heights = wrapper.findAll("i").map((icon) => icon.attributes("data-height"));
+      expect(new Set(heights).size).toBe(1);
+    });
 
     it("stays focusable so keyboard users reach the reason", () => {
       const button = getReasoned().find("button");

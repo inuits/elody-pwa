@@ -322,6 +322,7 @@ const classes = computed(() => {
     result["tags"] =
       "grow shrink flex flex-wrap items-center gap-1 min-w-0 rtl:pl-0 rtl:pr-2";
     result["tag"] = `${result["tag"]} !m-0`;
+    result["tagsSearchWrapper"] = "!hidden";
     // A read-only value is only as tall as its chips, like a text value.
     result["spacer"] = "hidden";
   }

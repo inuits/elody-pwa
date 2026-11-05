@@ -27,7 +27,10 @@ vi.mock("@/composables/useBreadcrumbs", async () => {
   ]);
   return {
     breadcrumbRoutes,
-    rootRoute: ref({ rootTitle: "Work 1" }),
+    rootRoute: ref({
+      rootTitle: "Work 1",
+      typePillLabel: { formatter: "pill|auto", label: "W" },
+    }),
     useBreadcrumbs: () => ({
       clearBreadcrumbPathAndAddOverviewPage:
         mocks.clearBreadcrumbPathAndAddOverviewPage,
@@ -54,7 +57,15 @@ const mountCrumbs = () =>
   mount(BreadCrumbs, {
     global: {
       provide: { config: {} },
-      stubs: { unicon: true, MetadataFormatter: true, CustomIcon: true },
+      stubs: {
+        unicon: true,
+        MetadataFormatterPill: {
+          name: "MetadataFormatterPill",
+          props: { formatter: String, label: String, badge: Boolean },
+          template: "<i />",
+        },
+        CustomIcon: true,
+      },
     },
   });
 
@@ -145,5 +156,14 @@ describe("BreadCrumbs", () => {
     mocks.push.mockResolvedValue({ type: 4 });
     await clickOverview();
     expect(mocks.clearBreadcrumbPathAndAddOverviewPage).not.toHaveBeenCalled();
+  });
+
+  it("shows the current page's type as a badge (catalogue Breadcrumb)", () => {
+    const pill = mountCrumbs().findComponent({ name: "MetadataFormatterPill" });
+    expect(pill.props()).toMatchObject({
+      formatter: "pill|auto",
+      label: "W",
+      badge: true,
+    });
   });
 });
