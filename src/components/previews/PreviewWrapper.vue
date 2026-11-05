@@ -4,7 +4,7 @@
     :class="[
       { 'my-2': showHeaderCloseButton && !previewComponent.changesPreview },
       {
-        'bg-accent-normal rounded-t-lg mb-2': previewComponent.changesPreview,
+        'bg-accent-normal rounded-t-lg mb-2': showChangesHeader,
       },
     ]"
   >
@@ -52,7 +52,7 @@
     <h1
       data-cy="entity-element-window-title"
       class="subtitle p-2 truncate max-w-[90%]"
-      v-if="previewComponent.changesPreview"
+      v-if="showChangesHeader"
     >
       {{ getTitleFromEntity }}
     </h1>
@@ -107,7 +107,7 @@
   <div
     :class="[
       {
-        'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-22rem)] overflow-y-auto':
+        'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-29rem)] overflow-y-auto':
           previewComponent.changesPreview,
       },
     ]"
@@ -291,6 +291,12 @@ const isPrimaryColumnListPreview = computed<boolean>(
 
 const showHeaderCloseButton = computed<boolean>(
   () => !isPrimaryColumnListPreview.value,
+);
+
+const showChangesHeader = computed<boolean>(
+  () =>
+    !!props.previewComponent.changesPreview &&
+    !isPrimaryColumnListPreview.value,
 );
 
 onMounted(async () => {

@@ -75,7 +75,8 @@
         />
       </div>
       <div
-        v-if="showCurrentEntityFlow"
+        v-if="showCurrentEntityFlow && !disableLibraryBar"
+        data-test="library-bar-wrapper"
         :class="[
           'z-header right-0 pb-4 h-fit',
           {
@@ -92,10 +93,7 @@
           { sticky: hasStickyBars },
         ]"
       >
-        <div
-          v-if="!disableLibraryBar"
-          class="h-fit flex flex-row items-center gap-y-4"
-        >
+        <div class="h-fit flex flex-row items-center gap-y-4">
           <div
             v-if="
               toggles.length > 1 &&
@@ -716,6 +714,7 @@ const wrapperClasses = computed(() => {
   if (mode !== BaseLibraryModes.BasicBaseLibrary) {
     classes.push(props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-6");
   }
+  if (props.disableLibraryBar) classes.push("pt-2");
 
   return classes;
 });
