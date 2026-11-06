@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import AppModals from "@/components/AppModals.vue";
 import TheHeader from "@/components/TheHeader.vue";
-import TheNavigation from "@/components/menu/MenuNav.vue";
+import TheNavigation from "@/components/navigation/NavRail.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";

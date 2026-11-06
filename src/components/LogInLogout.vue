@@ -10,6 +10,7 @@
       v-if="auth.isAuthenticated.value === false"
       position="top-right"
       :tooltip-offset="8"
+      :show-delay="0"
     >
       <template #activator="{ on, describedBy }">
         <button
@@ -30,7 +31,7 @@
       </template>
     </BaseTooltip>
     <template v-else>
-      <BaseTooltip position="top-right" :tooltip-offset="8">
+      <BaseTooltip position="top-right" :tooltip-offset="8" :show-delay="0">
         <template #activator="{ on, describedBy }">
           <component
             :is="elodyUser ? RouterLink : 'span'"
@@ -48,7 +49,7 @@
         </template>
         <template v-if="!isExpanded" #default>{{ getUserName() }}</template>
       </BaseTooltip>
-      <BaseTooltip position="top-right" :tooltip-offset="8">
+      <BaseTooltip position="top-right" :tooltip-offset="8" :show-delay="0">
         <template #activator="{ on, describedBy }">
           <button
             v-on="on"

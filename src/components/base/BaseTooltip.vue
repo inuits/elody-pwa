@@ -18,11 +18,11 @@
       <Teleport
         defer
         :to="someModalIsOpened ? modalTeleportTarget() : 'body'"
-        v-if="hasContent && hover"
+        v-if="hasContent() && hover"
       >
         <div
           ref="defaultSlotRef"
-          v-if="hasContent && hover"
+          v-if="hasContent() && hover"
           :id="tooltipId"
           role="tooltip"
           class="rounded-tooltip bg-surface-inverted text-neutral-white text-tooltip p-(--tooltip-padding) z-tooltip"
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, useId, useSlots, VNode } from "vue";
+import { onBeforeUnmount, ref, useId, useSlots, VNode } from "vue";
 import {
   offset,
   useFloating,
@@ -51,11 +51,13 @@ const {
   tooltipOffset = 0,
   maxWidth = "14rem",
   enableAutoPlacement = true,
+  showDelay = 300,
 } = defineProps<{
   position: Placement;
   tooltipOffset: number;
   maxWidth?: number | string;
   enableAutoPlacement?: boolean;
+  showDelay?: number;
 }>();
 const hover = ref(false);
 
@@ -99,13 +101,10 @@ const isVNodeEmpty = (parentVNode: VNode[]): boolean =>
     return vNode.type === Comment;
   });
 
-const hasContent = computed(() => {
-  return hasSlotContent(slots.default);
-});
+const hasContent = () => hasSlotContent(slots.default);
 
-// Design system: inverted surface, shown after 300ms on hover and on focus,
-// dismissed on Escape; never interactive content.
-const SHOW_DELAY_MS = 300;
+// Design system: inverted surface, shown after 300ms (showDelay) on hover and
+// on focus, dismissed on Escape; never interactive content.
 const tooltipId = `tooltip-${useId()}`;
 let showTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -116,9 +115,13 @@ const clearShowTimer = () => {
 
 const show = () => {
   clearShowTimer();
+  if (showDelay === 0) {
+    hover.value = true;
+    return;
+  }
   showTimer = setTimeout(() => {
     hover.value = true;
-  }, SHOW_DELAY_MS);
+  }, showDelay);
 };
 
 const hide = () => {

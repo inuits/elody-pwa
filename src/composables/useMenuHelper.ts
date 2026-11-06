@@ -73,9 +73,14 @@ export const useMenuHelper = () => {
     selectedMenuItemPath.value = undefined;
   };
 
-  const queryVariables = reactive<GetMenuQueryVariables>({ name: "main-menu" });
-  const { onResult } = useQuery<GetMenuQuery>(GetMenuDocument, queryVariables);
   const getMenuEntities = () => {
+    const queryVariables = reactive<GetMenuQueryVariables>({
+      name: "main-menu",
+    });
+    const { onResult } = useQuery<GetMenuQuery>(
+      GetMenuDocument,
+      queryVariables,
+    );
     onResult(async (value) => {
       if (value.loading || value.partial) {
         return;
