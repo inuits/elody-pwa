@@ -76,10 +76,45 @@ describe("MetadataTruncatedText", () => {
 
   it("observes the container with a ResizeObserver on mount", () => {
     const wrapper = getWrapper();
-    expect(ResizeObserverMock.instances).toHaveLength(1);
     expect(ResizeObserverMock.instances[0].observe).toHaveBeenCalledWith(
       wrapper.element,
     );
+  });
+
+  describe("wrapped chips", () => {
+    const rect = (left: number, top: number, right: number) =>
+      ({ left, top, right }) as DOMRect;
+    const mountInRow = (chipRects: DOMRect[]) => {
+      const row = document.createElement("div");
+      document.body.appendChild(row);
+      const wrapper = mount(MetadataTruncatedText, {
+        props: getDefaultProps(),
+        slots: {
+          default: chipRects.map(() => "<span class='multiselect-tag'>x</span>").join(""),
+        },
+        attachTo: row,
+      });
+      const element = wrapper.element as HTMLElement;
+      element.getBoundingClientRect = () => rect(100, 10, 400);
+      element
+        .querySelectorAll(".multiselect-tag")
+        .forEach((chip, i) => ((chip as HTMLElement).getBoundingClientRect = () => chipRects[i]));
+      const rowObserver = ResizeObserverMock.instances.find((observer) =>
+        observer.observe.mock.calls.some(([target]) => target === element.parentElement),
+      )!;
+      rowObserver.trigger();
+      return element;
+    };
+
+    it("hugs chips that wrap, so what follows the value sits next to them", () => {
+      const element = mountInRow([rect(100, 10, 227), rect(100, 34, 231), rect(100, 58, 228)]);
+      expect(element.style.width).toBe("131px");
+    });
+
+    it("leaves a value on one line at its natural width", () => {
+      const element = mountInRow([rect(100, 10, 160), rect(164, 10, 230)]);
+      expect(element.style.width).toBe("");
+    });
   });
 
   it("disconnects the ResizeObserver on unmount", () => {

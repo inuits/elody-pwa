@@ -62,6 +62,11 @@ it follows the row layout (actions width, wrapping, multi-line, preview
 open). Mixed lists and edit mode keep per-cell labels.
 (`sharedColumnLabels.ts`, `ViewModesList.vue`)
 
+Table mode's header row (`ViewModesTable.vue`) uses the same tokens
+(`--list-header-height`, `--text-label`, bold, `--color-text-field-label`,
+`--color-surface`, hairline below). Its column widths are measured with
+`--text-label` at bold weight, so they follow the token.
+
 ## Row states
 `ListItem.vue` (list, grid) and `TableViewRow.vue` (table).
 

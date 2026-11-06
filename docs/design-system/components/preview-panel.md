@@ -15,6 +15,13 @@ The shared panel shell: 1px `--color-border-panel`, `--radius-card`,
     navigates to its entities (`actionOnClick: Navigate`).
   - Close × (`BaseButtonNew` ghost, sm, icon-only, named "Close preview").
 - Body per type: column list, media viewer, map, history.
+- Column-list bodies are compact (`EntityColumn` `compact` → `CompactPreview`):
+  windows and list wrappers draw no card, band or collapse of their own; a
+  list's label becomes a block heading (`h4`, `--text-table`, bold, body ink).
+- Changes preview (`previewComponent.changesPreview`): the body splits 2fr | 3fr
+  with a hairline; the right side shows the related entity's changed fields
+  under the window's label as a block heading, then the changed lists
+  (`ChangesPreview.vue`).
 
 The header is the only close: lists inside a preview no longer carry their
 own ×.

@@ -18,9 +18,14 @@
       >
         <div
           v-if="headerColumns.length > 0"
-          class="sticky top-0 z-10 bg-background-light flex items-center gap-2 px-1.5 py-3 border-b-2 border-border-panel font-semibold text-sm text-text-body"
+          data-cy="view-modes-table-header"
+          class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-1.5 h-(--list-header-height) border-b border-border-subtle text-label font-bold text-text-field-label"
         >
-          <div class="w-10 shrink-0" />
+          <div
+            v-if="hasLeadingColumn"
+            data-cy="view-modes-table-header-leading"
+            class="w-10 shrink-0"
+          />
 
           <div v-if="anyEntityHasThumbnail" class="w-10 shrink-0" />
 
@@ -181,6 +186,7 @@ import { useEntityListHelpers } from "@/components/library/view-modes/composable
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { readCssToken } from "@/utils/cssToken";
 import {
   buildTableItems,
   groupHeaderLabel,
@@ -280,6 +286,12 @@ const previewDetailPath = computed(() => {
 
 const { seenTracking } = useEntityPageConfig();
 const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
+const hasLeadingColumn = computed<boolean>(
+  () =>
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+      props.enableSelection) ||
+    seenTracking.value?.display === "highlightNew",
+);
 
 const isRefetching = computed(
   () => props.entitiesLoading && refEntities.value.length > 0,
@@ -319,8 +331,7 @@ const headerColumns = computed(() => {
 
 const measureColWidths = () => {
   const docStyle = getComputedStyle(document.documentElement);
-  const fontSizePx = Math.round(parseFloat(docStyle.fontSize) * 0.875);
-  const font = `600 ${fontSizePx}px ${docStyle.fontFamily}`;
+  const font = `700 ${readCssToken("--text-label", "11.5px")} ${docStyle.fontFamily}`;
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   colMinWidths.value = headerColumns.value.map((col) => {

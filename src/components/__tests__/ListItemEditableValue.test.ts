@@ -1,92 +1,102 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { shallowMount } from "@vue/test-utils";
+import { flushPromises, shallowMount } from "@vue/test-utils";
 import ListItemEditableValue from "@/components/ListItemEditableValue.vue";
-import {
-  ContextMenuFormFlow,
-  Entitytyping,
-  ModalStyle,
-  TypeModals,
-} from "@/generated-types/queries";
+import ListItemInlineField from "@/components/ListItemInlineField.vue";
 
-const mocks = vi.hoisted(() => ({ openModal: vi.fn() }));
-
-vi.mock("@/composables/useBaseModal", () => ({
-  useBaseModal: () => ({ openModal: mocks.openModal }),
-}));
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+const mocks = vi.hoisted(() => ({
+  loadDocument: vi.fn(),
+  query: vi.fn(),
 }));
 
-const getDefaultProps = () => ({
-  editFormQuery: "GetEditNotificationStatusForm",
-  label: "metadata.labels.status",
-  entityId: "notification-1",
-  entityType: Entitytyping.Notification,
-  refetchEntities: vi.fn(),
+vi.mock("@/composables/useImport", () => ({
+  useImport: () => ({ loadDocument: mocks.loadDocument }),
+}));
+vi.mock("@/main", () => ({ apolloClient: { query: mocks.query } }));
+vi.mock("@/components/ListItemInlineField.vue", () => ({
+  default: {
+    name: "ListItemInlineField",
+    props: {
+      metadata: null,
+      parentEntityId: null,
+      linkedEntityId: null,
+      refetchEntities: null,
+      ownField: Boolean,
+    },
+    template: "<div><slot /></div>",
+  },
+}));
+
+const statusInputField = {
+  type: "dropdownSingleselectMetadata",
+  options: [{ label: "Open", value: "open" }],
+};
+
+const editForm = (formFields: Record<string, unknown>) => ({
+  data: { GetDynamicForm: { label: "x", Notification: { formFields } } },
 });
-const getWrapper = (props = getDefaultProps()) =>
+
+const metadata = {
+  key: "status",
+  label: "metadata.labels.status",
+  value: "open",
+  editFormQuery: "GetEditNotificationStatusForm",
+};
+
+const refetchEntities = vi.fn();
+const getWrapper = () =>
   shallowMount(ListItemEditableValue, {
-    props,
-    slots: { default: "<span>Open</span>" },
-    global: { stubs: { unicon: true } },
+    props: {
+      editFormQuery: "GetEditNotificationStatusForm",
+      metadata: metadata as any,
+      entityId: "notification-1",
+      refetchEntities,
+    },
+    slots: { default: "<span data-cy='read-value'>Open</span>" },
   });
 
 describe("ListItemEditableValue", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.loadDocument.mockResolvedValue({ kind: "Document" });
+    mocks.query.mockResolvedValue(
+      editForm({ status: { inputField: statusInputField } }),
+    );
   });
 
-  it("renders the value as a button", () => {
-    const button = getWrapper().find("[data-cy='list-item-editable-value']");
-    expect(button.element.tagName).toBe("BUTTON");
-    expect(button.text()).toContain("Open");
-  });
-
-  it("opens the entity edit modal with the field's form for this row", async () => {
-    await getWrapper()
-      .find("[data-cy='list-item-editable-value']")
-      .trigger("click");
-    expect(mocks.openModal).toHaveBeenCalledWith(
-      TypeModals.EntityEditModal,
-      ModalStyle.CenterWide,
+  it("loads the field's edit form", async () => {
+    getWrapper();
+    await flushPromises();
+    expect(mocks.loadDocument).toHaveBeenCalledWith(
       "GetEditNotificationStatusForm",
-      undefined,
-      undefined,
-      undefined,
-      expect.objectContaining({
-        entityId: "notification-1",
-        entityType: Entitytyping.Notification,
-        flow: ContextMenuFormFlow.Update,
-      }),
     );
+    expect(mocks.query).toHaveBeenCalledWith({ query: { kind: "Document" } });
   });
 
-  it("does not let the click reach the row", async () => {
-    const rowClick = vi.fn();
-    const wrapper = shallowMount(
-      {
-        components: { ListItemEditableValue },
-        props: ["p"],
-        template:
-          "<div @click='rowClick'><ListItemEditableValue v-bind='p'>x</ListItemEditableValue></div>",
-        methods: { rowClick },
-      },
-      {
-        props: { p: getDefaultProps() },
-        global: { stubs: { ListItemEditableValue: false, unicon: true } },
-      },
-    );
-    await wrapper.find("[data-cy='list-item-editable-value']").trigger("click");
-    expect(rowClick).not.toHaveBeenCalled();
+  it("edits the value in the row with the form field's input, saved on the row's own entity", async () => {
+    const wrapper = getWrapper();
+    await flushPromises();
+    const inline = wrapper.findComponent(ListItemInlineField);
+
+    expect(inline.exists()).toBe(true);
+    expect(inline.props()).toMatchObject({
+      metadata: { ...metadata, inputField: statusInputField },
+      linkedEntityId: "notification-1",
+      ownField: true,
+      refetchEntities,
+    });
   });
 
-  it("refetches the list after the modal saves", async () => {
-    const props = getDefaultProps();
-    await getWrapper(props)
-      .find("[data-cy='list-item-editable-value']")
-      .trigger("click");
-    const { callback } = mocks.openModal.mock.calls[0][6];
-    callback();
-    expect(props.refetchEntities).toHaveBeenCalled();
+  it("shows the plain value while the form loads", () => {
+    const wrapper = getWrapper();
+    expect(wrapper.findComponent(ListItemInlineField).exists()).toBe(false);
+    expect(wrapper.find("[data-cy='read-value']").exists()).toBe(true);
+  });
+
+  it("stays a plain value when the form has no input for this field", async () => {
+    mocks.query.mockResolvedValue(editForm({ other: { inputField: {} } }));
+    const wrapper = getWrapper();
+    await flushPromises();
+    expect(wrapper.findComponent(ListItemInlineField).exists()).toBe(false);
+    expect(wrapper.find("[data-cy='read-value']").exists()).toBe(true);
   });
 });

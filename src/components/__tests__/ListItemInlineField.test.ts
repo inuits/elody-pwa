@@ -430,4 +430,71 @@ describe("ListItemInlineField", () => {
       expect(useEditScope().hasUnsavedChanges.value).toBe(true);
     });
   });
+
+  describe("a field of the row's own entity (ownField)", () => {
+    const statusField = () => ({
+      key: "status",
+      label: "metadata.labels.status",
+      value: "open",
+      inputField: {
+        type: "dropdownSingleselectMetadata",
+        options: [
+          { label: "Open", value: "open" },
+          { label: "Processed", value: "processed" },
+        ],
+      },
+    });
+    const mountOwn = () =>
+      mountField({
+        metadata: statusField(),
+        parentEntityId: "",
+        linkedEntityId: "NO-1",
+        linkedEntityRelations: {},
+        ownField: true,
+      });
+
+    it("is editable without a relation back to a page entity", () => {
+      const wrapper = mountOwn();
+      expect(value(wrapper).attributes("role")).toBe("button");
+      expect(wrapper.find('[data-cy="field-edit-pencil"]').exists()).toBe(true);
+    });
+
+    it("hugs the value and pencil, so the hover wash doesn't fill the whole cell", () => {
+      expect(value(mountOwn()).classes()).toEqual(
+        expect.arrayContaining(["w-fit", "max-w-full"]),
+      );
+    });
+
+    it("doesn't depend on a page entity's edit permission (the row's readOnly gates it)", () => {
+      mocks.editState = reactive({ isEdit: false, permittedEditMode: undefined });
+      expect(value(mountOwn()).attributes("role")).toBe("button");
+    });
+
+    it("opens with the entity's own value", async () => {
+      const wrapper = mountOwn();
+      await value(wrapper).trigger("click");
+      await flushPromises();
+      expect(editor(wrapper).props("modelValue")).toBe("open");
+      expect(useEditScope().isActive("NO-1:status")).toBe(true);
+    });
+
+    it("saves only this key as the entity's own metadata", async () => {
+      mocks.saveScope.mockResolvedValue({ id: "NO-1" });
+      const wrapper = mountOwn();
+      await value(wrapper).trigger("click");
+      await flushPromises();
+      editor(wrapper).vm.$emit("save", "processed");
+      await flushPromises();
+      expect(mocks.saveScope).toHaveBeenCalledWith({
+        entityId: "NO-1",
+        collection: "entities",
+        formInput: {
+          metadata: [{ key: "status", value: "processed" }],
+          relations: [],
+          updateOnlyRelations: false,
+        },
+      });
+      expect(refetchEntities).toHaveBeenCalled();
+    });
+  });
 });

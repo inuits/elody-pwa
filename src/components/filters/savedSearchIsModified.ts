@@ -6,7 +6,7 @@ const essence = (items: FilterListItem[]) =>
   items
     .filter((item) => item.isActive)
     .map((item) => ({
-      key: item.advancedFilter?.key,
+      key: item.advancedFilter?.key ?? null,
       matcher: item.selectedMatcher,
       input: item.inputFromState,
     }))

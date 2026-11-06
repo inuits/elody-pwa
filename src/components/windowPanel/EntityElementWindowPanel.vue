@@ -39,8 +39,12 @@
         >
           <span
             data-cy="panel-header-library-data"
-            class="overflow-hidden px-2 py-0.5 rounded-full text-sm text-text-body whitespace-nowrap"
-            :class="libraryDataValue ? 'bg-accent-normal' : 'bg-neutral-30'"
+            class="overflow-hidden text-chip font-bold p-(--chip-padding) rounded-chip whitespace-nowrap"
+            :class="
+              libraryDataValue
+                ? 'bg-chip-relation-bg text-chip-relation-text'
+                : 'bg-chip-neutral-bg text-chip-neutral-text'
+            "
           >
             {{ libraryDataLabel }}
           </span>

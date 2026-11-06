@@ -15,6 +15,7 @@ vi.mock("@/generated-types/queries", () => ({
     DropdownMultiselectRelations: "dropdownMultiselectRelations",
     InputFieldWithSubFields: "inputFieldWithSubFields",
     FileUpload: "fileUpload",
+    Color: "color",
   },
 }));
 
@@ -45,6 +46,7 @@ describe("canEditFieldInPlace", () => {
     "dropdown",
     "dropdownSingleselectMetadata",
     "dropdownMultiselectMetadata",
+    "color",
   ])("supports the %s field type", (inputFieldType) => {
     expect(canEditFieldInPlace({ ...editable, inputFieldType })).toBe(true);
   });

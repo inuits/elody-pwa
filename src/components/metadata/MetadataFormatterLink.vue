@@ -55,9 +55,9 @@ const shouldOpenInNewTab = computed(() => {
   return !requiredAuthForThisEntity.value && props.openInNewTab;
 });
 
-const PLAIN_LINK = "text-sm underline";
+const PLAIN_LINK = "text-value underline";
 const CHIP =
-  "text-sm inline-flex items-center gap-1 rounded-md py-1 px-2 font-medium";
+  "text-chip font-bold inline-flex items-center gap-1 p-(--chip-padding) rounded-chip border border-transparent";
 const CHIP_HOVER =
   "transition hover:brightness-95 hover:ring-1 hover:ring-current";
 
@@ -67,7 +67,7 @@ const linkClasses = computed<string>(() => {
   const isChip = Boolean(settings.value?.background);
   const isClickable = !requiredAuthForThisEntity.value;
 
-  if (!isChip) return isClickable ? PLAIN_LINK : "text-sm";
+  if (!isChip) return isClickable ? PLAIN_LINK : "text-value";
   return isClickable ? `${CHIP} ${CHIP_HOVER}` : CHIP;
 });
 </script>

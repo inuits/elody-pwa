@@ -132,8 +132,12 @@ const config: any = inject("config");
 const { closeModal, getModalInfo } = useBaseModal();
 const { getEnqueuedItems, dequeueAllItemsForBulkProcessing } =
   useBulkOperations();
-const { getParentId, getCallbackFunctions, getInformationForDelete } =
-  useModalActions();
+const {
+  getParentId,
+  getCallbackFunctions,
+  setCallbackFunctions,
+  getInformationForDelete,
+} = useModalActions();
 const { getTenants } = useTenant(apolloClient as ApolloClient<any>, config);
 const router = useRouter();
 const { pageInfo, previousPageInfo, cleanupPreviousPageInfoById } =
@@ -211,7 +215,8 @@ const cleanupAfterDeletion = async () => {
 const deleteButtonClicked = () =>
   run(async () => {
     await deleteSelectedItems();
-    const callbackFunctions = getCallbackFunctions();
+    const callbackFunctions = getCallbackFunctions() ?? [];
+    setCallbackFunctions(undefined);
     for (const callback of callbackFunctions) {
       if (!callback) continue;
       // awaited: callbacks like DeleteButton's deleteEntity are async and the
@@ -246,9 +251,12 @@ const getContext = () => {
 
 watch(
   () => getModalInfo(TypeModals.Delete).open,
-  async (isDeleteModalOpen: boolean) => {
+  async (isDeleteModalOpen: boolean, wasDeleteModalOpen?: boolean) => {
     modalOpenend.value = isDeleteModalOpen;
-    if (!modalOpenend.value) return;
+    if (!modalOpenend.value) {
+      if (wasDeleteModalOpen) setCallbackFunctions(undefined);
+      return;
+    }
     parentEntityTitle.value = getInformationForDelete()?.title;
     numberOfBlockingQueryEntities.value = undefined;
     numberOfRelatedEntities.value = undefined;

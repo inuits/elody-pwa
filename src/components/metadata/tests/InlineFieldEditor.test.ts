@@ -34,10 +34,21 @@ vi.mock("@/components/base/BaseButtonNew.vue", () => ({
       disabled: Boolean,
       loading: Boolean,
       forceShowLabel: Boolean,
+      icon: String,
+      ariaLabel: String,
     },
     emits: ["click"],
     template:
-      "<button :data-cy=\"'button-' + buttonStyle\" :disabled='disabled' @click=\"$emit('click')\">{{ label }}</button>",
+      "<button :data-cy=\"'button-' + buttonStyle\" :data-icon='icon' :aria-label='ariaLabel' :disabled='disabled' @click=\"$emit('click')\">{{ label }}</button>",
+  },
+}));
+
+vi.mock("@/components/base/BaseInputColor.vue", () => ({
+  default: {
+    name: "BaseInputColor",
+    props: ["modelValue", "disabled"],
+    emits: ["update:modelValue"],
+    template: "<div data-cy='color-input' />",
   },
 }));
 
@@ -62,17 +73,44 @@ describe("InlineFieldEditor", () => {
   });
 
   describe("commit model", () => {
-    // Leaving the editor saves it, so there is no Bewaar per field.
-    it("has no Bewaar button, only Annuleer", () => {
+    // ui_kits InlineEditor: a commit-teal ✓ and a neutral × after the input.
+    it("offers a ✓ that saves and a × that cancels, both named after the field", () => {
       const wrapper = editor();
-      expect(wrapper.find('[data-cy="button-commit"]').exists()).toBe(false);
-      expect(wrapper.find('[data-cy="button-ghost"]').exists()).toBe(true);
+      const save = wrapper.find('[data-cy="button-commit"]');
+      const cancel = wrapper.find('[data-cy="button-secondary"]');
+      expect(save.attributes("data-icon")).toBe("Check");
+      expect(save.attributes("aria-label")).toBe("Save Jaar");
+      expect(cancel.attributes("data-icon")).toBe("Close");
+      expect(cancel.attributes("aria-label")).toBe("Cancel Jaar");
+      expect(save.text()).toBe("");
+      expect(cancel.text()).toBe("");
     });
 
-    it("cancels with Annuleer", async () => {
+    it("saves the changed draft with ✓", async () => {
       const wrapper = editor();
-      await wrapper.find('[data-cy="button-ghost"]').trigger("click");
+      await input(wrapper).setValue("1959");
+      await wrapper.find('[data-cy="button-commit"]').trigger("click");
+      expect(wrapper.emitted("save")).toEqual([["1959"]]);
+    });
+
+    it("just closes with ✓ when nothing changed", async () => {
+      const wrapper = editor();
+      await wrapper.find('[data-cy="button-commit"]').trigger("click");
+      expect(wrapper.emitted("save")).toBeUndefined();
       expect(wrapper.emitted("cancel")).toHaveLength(1);
+    });
+
+    it("cancels with ×", async () => {
+      const wrapper = editor();
+      await wrapper.find('[data-cy="button-secondary"]').trigger("click");
+      expect(wrapper.emitted("cancel")).toHaveLength(1);
+    });
+
+    it("shows only a spinner in place of ✓ and × while saving", () => {
+      const wrapper = editor({ saving: true });
+      expect(wrapper.find('[data-cy="button-commit"]').exists()).toBe(false);
+      expect(wrapper.find('[data-cy="button-secondary"]').exists()).toBe(false);
+      expect(wrapper.find('[data-cy="inline-editor-saving"]').exists()).toBe(true);
     });
 
     it("reports the current draft as it changes", async () => {
@@ -240,29 +278,23 @@ describe("InlineFieldEditor", () => {
       expect(input.classes()).toContain("grow");
     });
 
-    // The dropdown keeps its options' width; where that and Annuleer do
-    // not fit (a narrow window), Annuleer wraps below it.
-    it("wraps Annuleer below a dropdown that does not fit beside it", () => {
-      const row = editor({
+    // An open menu covers whatever sits below the dropdown, so ✓ and ×
+    // stay beside it; the dropdown shrinks below its options' width instead.
+    it("keeps ✓ and × beside a dropdown, letting the dropdown shrink", () => {
+      const wrapper = editor({
         type: "dropdownSingleselectMetadata",
         modelValue: "book",
         options: [{ label: "Boek", value: "book" }],
-      }).find('[data-cy="inline-editor-row"]');
-      expect(row.classes()).toContain("flex-wrap");
+      });
+      expect(wrapper.find('[data-cy="inline-editor-row"]').classes()).not.toContain("flex-wrap");
+      expect(wrapper.find('[data-cy="inline-editor-input"]').classes()).toContain(
+        "[&_.vue-advanced-select]:!min-w-0",
+      );
     });
 
     it("keeps a text input and Annuleer on one row", () => {
       const row = editor().find('[data-cy="inline-editor-row"]');
       expect(row.classes()).not.toContain("flex-wrap");
-    });
-
-    // Annuleer has no icon: a narrow window must not hide its label and
-    // leave an empty button.
-    it("always shows the label of Annuleer", () => {
-      const buttons = editor().findAllComponents({ name: "BaseButtonNew" });
-      expect(buttons.map((button) => button.props("forceShowLabel"))).toEqual([
-        true,
-      ]);
     });
 
     it("keeps a checkbox only as wide as the box, with Annuleer right after it", () => {
@@ -301,6 +333,17 @@ describe("InlineFieldEditor", () => {
           .findComponent({ name: "AdvancedDropdown" })
           .props("clearable"),
       ).toBe(false);
+    });
+
+    it("uses the color picker with its hex field for color fields, and saves the picked value", async () => {
+      const wrapper = editor({ type: "color", modelValue: "#ff0000" });
+      const color = wrapper.findComponent({ name: "BaseInputColor" });
+      expect(color.exists()).toBe(true);
+      expect(color.props("modelValue")).toBe("#ff0000");
+      color.vm.$emit("update:modelValue", "#00ff00");
+      await nextTick();
+      await wrapper.find('[data-cy="button-commit"]').trigger("click");
+      expect(wrapper.emitted("save")).toEqual([["#00ff00"]]);
     });
 
     it("uses a checkbox for boolean fields", () => {
@@ -394,10 +437,10 @@ describe("InlineFieldEditor", () => {
       expect(wrapper.emitted("cancel")).toHaveLength(1);
     });
 
-    it("stays open when focus moves to Annuleer", async () => {
+    it("stays open when focus moves to ×", async () => {
       const wrapper = editor();
       await input(wrapper).setValue("1959");
-      leaveTo(wrapper, wrapper.find('[data-cy="button-ghost"]').element);
+      leaveTo(wrapper, wrapper.find('[data-cy="button-secondary"]').element);
       expect(wrapper.emitted("save")).toBeUndefined();
       expect(wrapper.emitted("cancel")).toBeUndefined();
     });

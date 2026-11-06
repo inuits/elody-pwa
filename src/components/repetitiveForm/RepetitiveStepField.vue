@@ -77,6 +77,10 @@
         :search-static-filters="
           step.entityPickerSearchConfig?.staticFilters ?? undefined
         "
+        :highlighted-entity-ids="currentHostRelationIds"
+        :highlight-label="
+          $t(step.markCurrentOnHost?.label || 'repetitiveForm.current-on-host')
+        "
         @entities-selected="onPicked"
       />
     </div>
@@ -122,6 +126,7 @@ import { ref, computed, watch, provide } from "vue";
 import { useRouter } from "vue-router";
 import {
   DamsIcons,
+  EditStatus,
   EntityPickerMode,
   type AdvancedFilterInput,
   type RepetitiveStep,
@@ -190,6 +195,18 @@ const hasSelection = computed<boolean>(
 // the entity whose detail page hosts the flow (e.g. the boekenbank); parent
 // values are read from its form the same way copyValueFromParent does
 const parentEntityId = getEntityIdFromRoute();
+
+const currentHostRelationIds = computed<string[]>(() => {
+  const relationType = props.step.markCurrentOnHost?.relationType;
+  if (!relationType) return [];
+  const relations =
+    getForm(parentEntityId)?.values?.relationValues?.[relationType];
+  if (!Array.isArray(relations)) return [];
+  return relations
+    .filter((relation: any) => relation?.editStatus !== EditStatus.Deleted)
+    .map((relation: any) => relation?.key)
+    .filter(Boolean);
+});
 
 const allCreatableOptions = computed<RepetitiveCreatableType[]>(() => {
   if (props.step.creatableTypes?.length) return props.step.creatableTypes;

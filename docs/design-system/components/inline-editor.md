@@ -10,12 +10,15 @@ Only through a field row (or a group card). It is never mounted on its own
 and never in a modal.
 
 ## Anatomy
-The input for the field type, then **Annuleer** (ghost button, `sm`) inline
-on the right, vertically centred on the input. There is no Bewaar: leaving
-the field saves it. Inputs take the row's width; a checkbox is only as wide
-as its box, so Annuleer sits right after it. A dropdown keeps its options'
-width; where Annuleer doesn't fit beside it (a narrow window), it wraps below
-it. While saving, a spinner sits before Annuleer.
+The input for the field type, then two square icon buttons (`BaseButtonNew`, `md`,
+icon-only, about the input's height) inline on the right, vertically centred on the input, as in the
+handoff's InlineEditor: **✓** (`commit`, named "Bewaar <veld>") saves, or
+closes when nothing changed; **×** (`secondary`, named "Annuleer <veld>")
+discards. Leaving the field also saves it. Inputs take the row's width; a
+checkbox is only as wide as its box, so the buttons sit right after it. The
+buttons never wrap below a dropdown (its open menu would cover them): the
+dropdown shrinks below its options' width instead, and long options wrap in
+the menu. While saving, a spinner replaces them.
 
 Under the editor:
 - the error message, when there is one;
@@ -28,6 +31,7 @@ Under the editor:
 | text, number, date | [input](./input.md) (bordered) |
 | textarea, resizable textarea | input in textarea mode |
 | checkbox | [checkbox](./checkbox.md) |
+| color | `BaseInputColor`: the native picker and a hex text field in one bordered input box; saves the hex value |
 | dropdown, metadata single / multi select | [dropdown](./dropdown.md), clearable ("— Geen waarde") unless required, multiple for multi-selects |
 | coordinates | two number inputs, Latitude and Longitude; both or neither, latitude within -90…90, longitude within -180…180; emptying both clears the value |
 | relation single / multi select | the relation autocomplete, with its value inputs when the field has metadata on the relation (for example a page number) |
@@ -71,7 +75,7 @@ hover. The trash button is named after the row's first filled value
 |---|---|
 | pristine | leaving closes the editor |
 | dirty | leaving saves |
-| saving | spinner before Annuleer, input locked |
+| saving | spinner in place of ✓ and ×, input locked |
 | error | danger border + message below (`role="alert"`), value kept, editor stays open |
 | saved | editor closes, the "entity updated" notification shows (as after the whole-form save), "Opgeslagen" announced, focus back on the value unless it has moved on (Tab, another field) |
 
@@ -125,6 +129,7 @@ hover. The trash button is named after the row's first filled value
 ## Copy
 | Key | NL | EN fallback |
 |---|---|---|
+| `inline-edit.save` | Bewaar | Save |
 | `inline-edit.cancel` | Annuleer | Cancel |
 | `inline-edit.hint` | Enter bewaart · Esc annuleert | Enter saves · Esc cancels |
 | `inline-edit.hint-textarea` | Ctrl+Enter bewaart · Esc annuleert | Ctrl+Enter saves · Esc cancels |

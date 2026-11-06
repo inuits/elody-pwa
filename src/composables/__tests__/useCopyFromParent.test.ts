@@ -273,6 +273,22 @@ describe("buildCopyPlan", () => {
     expect(plan[0].value).toBe("Abbey Road");
   });
 
+  it("strips search highlight tags from a step value picked from a search result", () => {
+    const plan = buildCopyPlan(
+      [field("title")],
+      {
+        autoCopy: true,
+        keyMap: [
+          { key: "title", fromKey: "original_headtitle", fromStep: "work" },
+        ],
+      },
+      () => parent({}),
+      () => parent({ original_headtitle: "<mark>Abbey</mark> <mark>Road</mark>" }),
+    );
+
+    expect(plan[0].value).toBe("Abbey Road");
+  });
+
   it("prefers fromStep over fromRelationType", () => {
     const plan = buildCopyPlan(
       [field("title")],

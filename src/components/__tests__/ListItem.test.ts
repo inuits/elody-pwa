@@ -135,6 +135,31 @@ describe("ListItem", () => {
     });
   });
 
+  describe("highlight", () => {
+    it("shows the highlight label as a chip", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "e1", highlightLabel: "my-label" },
+      });
+
+      const badge = wrapper.find("[data-cy='list-item-highlight']");
+      expect(badge.exists()).toBe(true);
+      expect(badge.text()).toBe("my-label");
+      expect(badge.classes()).toEqual(
+        expect.arrayContaining(["text-chip", "rounded-chip", "p-(--chip-padding)"]),
+      );
+    });
+
+    it("shows no badge without a highlight label", () => {
+      const wrapper = shallowMount(ListItem, {
+        props: { ...defaultProps, itemId: "e1" },
+      });
+
+      expect(wrapper.find("[data-cy='list-item-highlight']").exists()).toBe(
+        false,
+      );
+    });
+  });
+
   describe("seen items", () => {
     const seenItemProps = {
       ...defaultProps,
@@ -412,8 +437,10 @@ describe("ListItem", () => {
       expect(editable.exists()).toBe(true);
       expect(editable.props()).toMatchObject({
         editFormQuery: "GetEditNotificationStatusForm",
+        metadata: expect.objectContaining({
+          editFormQuery: "GetEditNotificationStatusForm",
+        }),
         entityId: "notification-1",
-        entityType: "notification",
       });
     });
 

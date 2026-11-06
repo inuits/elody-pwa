@@ -28,7 +28,7 @@
     v-else
     ref="valueRef"
     data-cy="list-item-inline-value"
-    class="flex items-center gap-2"
+    class="flex w-fit max-w-full items-center gap-2"
     :class="
       canEdit
         ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) py-(--field-value-pad-y) -my-(--field-value-pad-y) hover:bg-surface-editable-hover'
@@ -44,7 +44,7 @@
       v-if="canEdit"
       data-cy="field-edit-pencil"
       aria-hidden="true"
-      class="ml-auto flex shrink-0 text-text-subtle"
+      class="flex shrink-0 text-text-subtle"
     >
       <unicon :name="Unicons.EditAlt.name" height="12" />
     </span>
@@ -82,6 +82,7 @@ import {
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import {
   asListIfNeeded,
+  buildMetadataInput,
   buildRelationMetadataInput,
   saveScope,
   toMetadataValue,
@@ -97,6 +98,8 @@ const props = defineProps<{
   // holds the value.
   linkedEntityRelations?: Record<string, any[]> | object;
   refetchEntities?: () => Promise<void>;
+  // The value is the row entity's own metadata, not on a relation.
+  ownField?: boolean;
 }>();
 
 const { t } = useI18n();
@@ -119,14 +122,13 @@ const relationType = computed<string | undefined>(() => {
   );
 });
 
-const entityCanUpdate = computed<boolean>(() =>
-  canUpdateEntity(pageEditState as any),
+const entityCanUpdate = computed<boolean>(
+  () => props.ownField || canUpdateEntity(pageEditState as any),
 );
 const canEdit = computed<boolean>(
   () =>
-    !!props.parentEntityId &&
     !!props.linkedEntityId &&
-    !!relationType.value &&
+    (props.ownField || (!!props.parentEntityId && !!relationType.value)) &&
     canEditFieldInPlace({
       inputFieldType: inputFieldType.value,
       nonEditableField: !!(props.metadata as any).nonEditableField,
@@ -152,6 +154,7 @@ const editableAttrs = computed(() =>
 // value is sent: a key stored as a list (podiumnet's roles) gets a single
 // choice as a one-item list, as the whole-form save did.
 const storedValue = computed<unknown>(() => {
+  if (props.ownField) return undefined;
   const relations = (props.linkedEntityRelations ?? {}) as Record<
     string,
     any[]
@@ -203,9 +206,10 @@ const saving = ref<boolean>(false);
 const errorMessage = ref<string | undefined>(undefined);
 const savedAnnouncement = ref<string>("");
 const valueRef = ref<HTMLElement | null>(null);
-const scopeId = computed(
-  () =>
-    `${props.parentEntityId}:${props.linkedEntityId}:${props.metadata.key}`,
+const scopeId = computed(() =>
+  props.ownField
+    ? `${props.linkedEntityId}:${props.metadata.key}`
+    : `${props.parentEntityId}:${props.linkedEntityId}:${props.metadata.key}`,
 );
 const inPlaceScope = useInPlaceScope(() => scopeId.value);
 
@@ -239,11 +243,16 @@ const save = singleFlight(async (value: unknown) => {
     await saveScope({
       entityId: props.linkedEntityId,
       collection: Collection.Entities,
-      formInput: buildRelationMetadataInput(
-        { key: props.parentEntityId, type: relationType.value! },
-        props.metadata.key,
-        toStoredShape(toMetadataValue(value)),
-      ),
+      formInput: props.ownField
+        ? buildMetadataInput(
+            props.metadata.key,
+            toStoredShape(toMetadataValue(value)),
+          )
+        : buildRelationMetadataInput(
+            { key: props.parentEntityId, type: relationType.value! },
+            props.metadata.key,
+            toStoredShape(toMetadataValue(value)),
+          ),
     });
     displaySuccessNotification(
       "notifications.success.entityUpdated.title",

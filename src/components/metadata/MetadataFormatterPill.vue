@@ -79,6 +79,7 @@ const props = withDefaults(
     translationKey?: string;
     valueOptions?: any[];
     size?: "sm" | "lg";
+    badge?: boolean;
   }>(),
   {
     translationKey: undefined,
@@ -183,10 +184,14 @@ type PillEntry = { label: string; values: NestedPillValue[]; nested: boolean };
 // A config entry with shape "badge" renders as a letter badge
 // (e.g. { tone: "tone1", shape: "badge", letter: "W" }).
 const isBadge = (entry: PillEntry): boolean =>
-  !entry.nested && settingsFor(entry.label)?.shape === "badge";
+  !entry.nested &&
+  (props.badge || settingsFor(entry.label)?.shape === "badge");
 
 const badgeLetter = (value: string): string =>
-  settingsFor(value)?.letter ?? displayValue(value).charAt(0).toUpperCase();
+  settingsFor(value)?.letter ??
+  (props.badge
+    ? displayValue(value)
+    : displayValue(value).charAt(0).toUpperCase());
 
 const badgeAttrs = (entry: PillEntry) =>
   isBadge(entry)
@@ -197,22 +202,21 @@ const badgeAttrs = (entry: PillEntry) =>
 const pillClasses = (entry: PillEntry): string[] => {
   const settings = settingsFor(entry.label, entry.nested);
   const layout = "inline-flex items-center gap-1 flex-wrap gap-y-0.5";
-  if (!settings) return [layout, props.size === "lg" ? "text-lg" : "text-sm"];
-
-  const colours = settings.background
+  const colours = settings?.background
     ? []
     : ["bg-chip-neutral-bg", "text-chip-neutral-text"];
   const shape = "rounded-chip border border-transparent";
 
   if (isBadge(entry))
     return [
-      "inline-flex items-center justify-center mt-1",
+      "inline-flex items-center justify-center",
       "text-badge font-black h-(--badge-size) min-w-(--badge-size) px-(--badge-padding-x)",
       shape,
       ...colours,
     ];
+  if (!settings) return [layout, props.size === "lg" ? "text-lg" : "text-sm"];
   if (entry.nested)
-    return [layout, "text-chip py-0.5 pl-2 pr-1 mt-1", shape, ...colours];
+    return [layout, "text-chip py-0.5 pl-2 pr-1", shape, ...colours];
   if (props.size === "lg")
     return [
       layout,
@@ -222,7 +226,7 @@ const pillClasses = (entry: PillEntry): string[] => {
     ];
   return [
     layout,
-    "text-chip font-bold p-(--chip-padding) mt-1",
+    "text-chip font-bold p-(--chip-padding)",
     shape,
     ...colours,
   ];

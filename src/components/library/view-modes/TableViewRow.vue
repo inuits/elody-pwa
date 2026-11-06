@@ -1,6 +1,10 @@
 <template>
   <li data-cy="table-row" :class="wrapperClasses">
-    <div class="w-10 shrink-0 relative">
+    <div
+      v-if="hasLeadingColumn"
+      data-cy="table-row-leading"
+      class="w-10 shrink-0 relative"
+    >
       <span
         v-if="isNew"
         data-cy="new-indicator"
@@ -265,6 +269,11 @@ const showsCheckbox = computed<boolean>(
   () =>
     props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
     props.hasSelection,
+);
+
+const hasLeadingColumn = computed<boolean>(
+  () =>
+    showsCheckbox.value || seenTracking.value?.display === "highlightNew",
 );
 
 const isSeen = computed<boolean>(() => isEntitySeen(props.itemId));

@@ -15,8 +15,9 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
   - the virtual keyboard toggle (while editing, when the field has layouts);
   - the transliteration toggle (at rest only);
   - the language picker, or the language being edited as a chip;
-  - the actions: a pencil at rest, Annuleer while editing (leaving the
-    field saves it; a spinner shows while saving).
+  - the actions: a pencil at rest, ✓ (save) and × (cancel) while editing,
+    as in the inline editor (leaving the field saves it too; a spinner
+    replaces them while saving).
 
   The actions sit on the label line, not under the content, so they stay in
   view however long the text is.
@@ -33,7 +34,7 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 | resting, read-only | content only, no pencil |
 | editing, pristine | toolbar; leaving closes the editor |
 | editing, dirty | leaving saves |
-| saving | spinner before Annuleer, Annuleer locked |
+| saving | spinner in place of ✓ and × |
 | error | message below (`role="alert"`), content kept, editor stays open |
 | saved | editor read-only again, "Opgeslagen" announced |
 
@@ -75,7 +76,7 @@ uses the [field row](./field-row.md) with the [inline editor](./inline-editor.md
 
 ## Copy
 Uses the `inline-edit.*` keys of the [inline editor](./inline-editor.md)
-(`cancel`, `edit-field`, `hint-textarea`, `saved`, `save-failed`).
+(`save`, `cancel`, `edit-field`, `hint-textarea`, `saved`, `save-failed`).
 
 Tests: `useWysiwygInPlaceEditing.test.ts`, `EntityElementWYSIWYG.inPlace.test.ts`,
 `WYSIWYGInPlaceActions.test.ts`, `WYSIWYGButtons.test.ts`.

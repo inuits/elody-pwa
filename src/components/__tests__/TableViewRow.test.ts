@@ -82,6 +82,10 @@ describe("TableViewRow", () => {
   });
 
   it("highlights a row with new activity", () => {
+    mockEntityPageConfig.seenTracking.value = {
+      display: "highlightNew",
+      activityKey: "last_activity_at",
+    } as SeenTracking;
     mockSeenState.isNew.mockReturnValue(true);
 
     const wrapper = shallowMount(TableViewRow, { props });
@@ -102,6 +106,10 @@ describe("TableViewRow", () => {
   });
 
   it("centers the new indicator in the selection column without a checkbox", () => {
+    mockEntityPageConfig.seenTracking.value = {
+      display: "highlightNew",
+      activityKey: "last_activity_at",
+    } as SeenTracking;
     mockSeenState.isNew.mockReturnValue(true);
 
     const wrapper = shallowMount(TableViewRow, { props });
@@ -226,6 +234,34 @@ describe("TableViewRow", () => {
       expect(
         open.findComponent({ name: "PreviewToggle" }).props("active"),
       ).toBe(true);
+    });
+  });
+
+  describe("leading column (checkbox / new dot)", () => {
+    const leading = (wrapper: ReturnType<typeof shallowMount>) =>
+      wrapper.find("[data-cy='table-row-leading']");
+
+    beforeEach(() => {
+      mockEntityPageConfig.seenTracking.value = undefined;
+    });
+
+    it("is left out when the row can't be selected or marked new, so the row starts at its content", () => {
+      expect(leading(shallowMount(TableViewRow, { props })).exists()).toBe(false);
+    });
+
+    it("is there when the row can be selected", () => {
+      const wrapper = shallowMount(TableViewRow, {
+        props: { ...props, hasSelection: true },
+      });
+      expect(leading(wrapper).exists()).toBe(true);
+    });
+
+    it("is there when seen tracking highlights new rows", () => {
+      mockEntityPageConfig.seenTracking.value = {
+        display: "highlightNew",
+        activityKey: "last_activity_at",
+      } as SeenTracking;
+      expect(leading(shallowMount(TableViewRow, { props })).exists()).toBe(true);
     });
   });
 });

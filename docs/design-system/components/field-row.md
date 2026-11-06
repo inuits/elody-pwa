@@ -20,7 +20,9 @@ repeatable row group.
     (dropdowns, pills) and tables have no underline, since their shape
     already marks them. An empty value ("Geen waarde") has no underline (E12);
   - a pencil on the right, always visible, so editability never depends on
-    hovering;
+    hovering. It sits right after the value: chips that wrap onto several
+    lines are hugged to their widest line (`wrappedChipsWidth`), and a
+    read-only chip list has no empty search box after its chips;
   - a hover wash behind the whole value. The wash extends
     `--field-value-pad-x` beyond the text on both sides, while the text stays
     aligned with the label. A read-only dropdown display is transparent, so
@@ -81,6 +83,13 @@ person's role or function in an organization (`ListItemInlineField.vue`).
 - Saving sends that one key on that one relation (stored on the row's
   entity), with the field's validation. The list refreshes and the usual
   notification shows.
+
+A value of the row's own entity is edited the same way when its teaser
+config sets `editFormQuery` (a notification's status on the overview,
+`ListItemEditableValue.vue`): the field's input comes from that form, saving
+sends that one key as the row entity's metadata, and the row's `readOnly`
+decides whether it is editable (no page entity to ask). It replaces the edit
+modal this used to open.
 
 ## Value types
 - **URL:** link ink, opens in a new tab, followed by an external-link glyph

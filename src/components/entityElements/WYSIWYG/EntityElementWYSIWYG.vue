@@ -9,7 +9,8 @@
       'bg-background-light rounded-t-md relative',
       { 'border-solid border-neutral-30 border-2': !displayInline },
       // Inline it is a field row: the same padding, label then value.
-      { 'py-2 px-2': displayInline },
+      { 'py-2 px-2': displayInline && !compactPreview },
+      { 'col-span-full': compactPreview },
     ]"
   >
     <div
@@ -26,6 +27,7 @@
         :editing="isEditingInPlace"
         :saving="inPlaceSaving"
         @edit="startEditing"
+        @save="saveInPlace"
         @cancel="cancelInPlace"
       />
     </div>
@@ -71,6 +73,7 @@
         :editing="isEditingInPlace"
         :saving="inPlaceSaving"
         @edit="startEditing"
+        @save="saveInPlace"
         @cancel="cancelInPlace"
       />
     </div>
@@ -216,6 +219,7 @@ import { canEditWysiwygInPlace } from "@/components/metadata/fieldEditability";
 import { useWysiwygInPlaceEditing } from "@/composables/useWysiwygInPlaceEditing";
 import { useParentSavedFlash } from "@/composables/useSavedFlash";
 
+const compactPreview: boolean = inject("CompactPreview", false);
 const props = withDefaults(
   defineProps<{
     formId: string;
@@ -328,6 +332,7 @@ const {
   error: inPlaceError,
   savedAnnouncement,
   cancel: cancelInPlace,
+  save: saveInPlace,
   handleKeydown: handleInPlaceKeydown,
 } = inPlace;
 const isEditable = computed<boolean>(

@@ -47,7 +47,14 @@
   >
     <spinner-loader theme="accent" :dimensions="10" />
   </div>
-  <div class="primary-preview">
+  <div
+    class="primary-preview"
+    :class="{
+      'px-4 pt-3':
+        primaryPreviewElement &&
+        previewComponent.type === PreviewTypes.ColumnList,
+    }"
+  >
     <entity-column
       :key="entityId"
       v-if="
@@ -58,7 +65,7 @@
       :column-list="primaryPreviewElement"
       :identifiers="[entityId]"
       :entity-type="entityType"
-      :preview-label="getTitleFromEntity"
+      compact
     />
     <ViewModesMap
       v-else-if="previewComponent.type === PreviewTypes.Map"
@@ -88,20 +95,42 @@
   <!-- ui_kits/clients: a hairline under the viewer, then the label/value
        rows inside the same panel. -->
   <div
-    class="metadata-preview mx-4 mt-2 mb-3.5 border-t border-border-subtle pt-2"
-    v-if="
-      metadataPreviewElement && previewComponent.type !== PreviewTypes.History
-    "
+    data-cy="preview-body"
+    class="px-4 pt-2 mb-3.5"
+    :class="{
+      'mt-2 border-t border-border-subtle': hasViewerAbove,
+      'grid grid-cols-[2fr_3fr] gap-x-4 items-start max-h-[calc(100vh-29rem)] overflow-y-auto':
+        previewComponent.changesPreview,
+    }"
   >
-    <entity-column
-      :key="entityId"
-      :entity="getEntitiesOrEntity()"
-      :column-list="metadataPreviewElement"
-      :identifiers="[entityId]"
-      :entity-type="entityType"
-      :preview-label="getTitleFromEntity"
-      compact
-    />
+    <div
+      class="metadata-preview min-w-0"
+      v-if="
+        metadataPreviewElement && previewComponent.type !== PreviewTypes.History
+      "
+    >
+      <entity-column
+        :key="entityId"
+        :entity="getEntitiesOrEntity()"
+        :column-list="metadataPreviewElement"
+        :identifiers="[entityId]"
+        :entity-type="entityType"
+        :preview-label="
+          previewComponent.changesPreview ? undefined : getTitleFromEntity
+        "
+        compact
+      />
+    </div>
+    <div
+      class="changes-preview min-w-0 self-stretch border-l border-border-subtle pl-4"
+      v-if="previewComponent.changesPreview && previewedEntity"
+    >
+      <ChangesPreview
+        :key="entityId"
+        :changes-preview="previewComponent.changesPreview"
+        :entity="previewedEntity"
+      />
+    </div>
   </div>
   <div
     class="metadata-preview"
@@ -147,6 +176,7 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { apolloClient, router } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
+import ChangesPreview from "./ChangesPreview.vue";
 
 const { t } = useI18n();
 const { loadDocument } = useImport();
@@ -247,6 +277,13 @@ const title = computed<string>(() =>
   props.previewComponent.title
     ? t(props.previewComponent.title)
     : getTitleFromEntity.value,
+);
+const hasViewerAbove = computed<boolean>(
+  () =>
+    props.previewComponent.type === PreviewTypes.MediaViewer ||
+    props.previewComponent.type === PreviewTypes.Map ||
+    (props.previewComponent.type === PreviewTypes.ColumnList &&
+      !!primaryPreviewElement.value),
 );
 const titleId = useId();
 const header = ref<HTMLElement>();

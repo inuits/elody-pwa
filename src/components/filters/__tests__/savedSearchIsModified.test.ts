@@ -31,4 +31,18 @@ describe("savedSearchIsModified", () => {
       savedSearchIsModified([item("a", "x")], [item("a", "x", true, "ExactInputMatcher")]),
     ).toBe(true);
   });
+
+  it("handles an active filter without a key, like the hidden type filter", () => {
+    const typeFilter = (key: unknown) => ({
+      ...item("", "production"),
+      advancedFilter: { key },
+      inputFromState: { type: "type", value: "production" },
+    });
+    expect(
+      savedSearchIsModified(
+        [item("a", "x"), typeFilter(undefined)],
+        [typeFilter(null), item("a", "x")],
+      ),
+    ).toBe(false);
+  });
 });

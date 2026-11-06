@@ -7,7 +7,7 @@ import type {
 } from "@/generated-types/queries";
 import { useVeeValidate } from "@/components/metadata/useVeeValidate";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { getEntityIdFromRoute } from "@/helpers";
+import { getEntityIdFromRoute, stripHighlightTags } from "@/helpers";
 import { stagedStepValues } from "@/composables/useRepetitiveForm";
 
 
@@ -140,7 +140,9 @@ export const buildCopyPlan = (
     if (!fieldConfig) continue;
 
     let value = fieldConfig.fromStep
-      ? readParentValue(readStep(fieldConfig.fromStep), fieldConfig.fromKey)
+      ? stripHighlightTags(
+          readParentValue(readStep(fieldConfig.fromStep), fieldConfig.fromKey),
+        )
       : undefined;
 
     if (!hasValue(value) && fieldConfig.fromRelationType)

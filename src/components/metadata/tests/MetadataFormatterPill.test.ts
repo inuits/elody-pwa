@@ -596,3 +596,49 @@ describe("MetadataFormatterPill — search highlights", () => {
     ).toBe("function: programmer");
   });
 });
+
+describe("MetadataFormatterPill — type badge in running text (badge prop)", () => {
+  const typeBadge = (label: string, formatter = "pill|auto") =>
+    mount(MetadataFormatterPill, {
+      props: { formatter, label, badge: true },
+    }).find("[role='img']");
+
+  it("renders a type marker as a badge even without a badge shape in config", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    const badge = typeBadge("P");
+    expect(badge.exists()).toBe(true);
+    expect(badge.classes()).toEqual(
+      expect.arrayContaining(["text-badge", "h-(--badge-size)", "min-w-(--badge-size)"]),
+    );
+  });
+
+  it("keeps the client's letters, so PH stays apart from P", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    expect(typeBadge("PH").text()).toBe("PH");
+  });
+
+  it("sits centred in its line, without the field-row top margin", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    expect(typeBadge("P").classes()).not.toContain("mt-1");
+  });
+
+  it("falls back to the neutral colours when nothing is configured", () => {
+    mocks.t.mockImplementation((key: string) => key);
+    expect(typeBadge("X", "pill").classes()).toEqual(
+      expect.arrayContaining(["bg-chip-neutral-bg", "text-chip-neutral-text"]),
+    );
+  });
+});
+
+describe("MetadataFormatterPill — vertical position", () => {
+  it.each([
+    ["chip", { formatter: "pill", label: "concept" }],
+    ["badge", { formatter: "pill", label: "manifestation" }],
+  ])("adds no top margin to a %s, so it centres in its row like the pencil", (_, props) => {
+    mocks.t.mockImplementation((key: string) => key);
+    const wrapper = mount(MetadataFormatterPill, { props });
+    wrapper.findAll("div > div").forEach((pill) => {
+      expect(pill.classes()).not.toContain("mt-1");
+    });
+  });
+});

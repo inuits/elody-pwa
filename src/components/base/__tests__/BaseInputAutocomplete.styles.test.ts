@@ -143,6 +143,13 @@ describe("BaseInputAutocomplete — design-system styling", () => {
     },
   );
 
+  it.each(["readOnly", "readOnlyAsPlainText"])(
+    "drops the empty search box in %s mode, so the pencil sits as close as on a text value",
+    (style) => {
+      expect(classesFor(style).tagsSearchWrapper).toBe("!hidden");
+    },
+  );
+
   it("renders plain-text relations at the value size, like other values", () => {
     expect(classesFor("readOnlyAsPlainText").tag).toContain("!text-value");
   });
