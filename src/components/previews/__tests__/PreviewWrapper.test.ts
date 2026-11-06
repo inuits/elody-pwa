@@ -460,3 +460,42 @@ describe("PreviewWrapper line between the viewer and the metadata", () => {
     expect(body(wrapper).classes()).not.toContain("border-t");
   });
 });
+
+describe("PreviewWrapper related list on top", () => {
+  it("renders it compact, without repeating the preview's title", async () => {
+    vi.mocked(apolloClient.query).mockResolvedValue({
+      data: { PreviewElement: PRIMARY_PREVIEW_ELEMENT },
+    } as any);
+    const wrapper = mount(PreviewWrapper, {
+      props: {
+        previewComponent: {
+          listItemsCoverage: ListItemCoverageTypes.OneListItem,
+          type: PreviewTypes.ColumnList,
+          previewQuery: "GetPreviewInNotification",
+        },
+        entityType: "notification",
+        entities: [{ id: "e1" }],
+        entitiesLoading: false,
+        configPerViewMode: {},
+        entityId: "e1",
+        parentIds: [],
+        cropMediafileCoordinatesKey: "",
+      },
+      global: {
+        stubs: {
+          ...stubs,
+          EntityColumn: {
+            props: { compact: Boolean, previewLabel: String },
+            template:
+              '<div class="entity-column-stub" :data-compact="compact" :data-label="previewLabel" />',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    const column = wrapper.find(".primary-preview .entity-column-stub");
+    expect(column.attributes("data-compact")).toBe("true");
+    expect(column.attributes("data-label")).toBeUndefined();
+  });
+});

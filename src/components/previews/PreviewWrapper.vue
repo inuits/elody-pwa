@@ -47,7 +47,14 @@
   >
     <spinner-loader theme="accent" :dimensions="10" />
   </div>
-  <div class="primary-preview">
+  <div
+    class="primary-preview"
+    :class="{
+      'px-4 pt-3':
+        primaryPreviewElement &&
+        previewComponent.type === PreviewTypes.ColumnList,
+    }"
+  >
     <entity-column
       :key="entityId"
       v-if="
@@ -58,7 +65,7 @@
       :column-list="primaryPreviewElement"
       :identifiers="[entityId]"
       :entity-type="entityType"
-      :preview-label="getTitleFromEntity"
+      compact
     />
     <ViewModesMap
       v-else-if="previewComponent.type === PreviewTypes.Map"
