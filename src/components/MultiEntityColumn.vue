@@ -7,21 +7,28 @@
         <router-link
           v-if="!editHelper.isEdit"
           :to="entityPageRoute"
-          data-cy="multi-entity-column-header-link"
-          class="flex min-w-0 cursor-pointer hover:opacity-80"
+          custom
+          v-slot="{ href, navigate: routerNavigate }"
         >
-          <metadata-formatter-pill
-            v-if="pillLabel"
-            formatter="pill"
-            size="lg"
-            :label="pillLabel"
-          />
-          <span
-            v-else
-            class="text-lg font-bold text-text-light truncate hover:underline"
+          <a
+            :href="href"
+            data-cy="multi-entity-column-header-link"
+            class="flex min-w-0 cursor-pointer hover:opacity-80"
+            @click="(event: MouseEvent) => onHeaderLinkClick(event, routerNavigate)"
           >
-            {{ columnLabel }}
-          </span>
+            <metadata-formatter-pill
+              v-if="pillLabel"
+              formatter="pill"
+              size="lg"
+              :label="pillLabel"
+            />
+            <span
+              v-else
+              class="text-lg font-bold text-text-light truncate hover:underline"
+            >
+              {{ columnLabel }}
+            </span>
+          </a>
         </router-link>
         <template v-else>
           <metadata-formatter-pill
@@ -97,6 +104,7 @@ import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
 import { auth } from "@/main";
 import { getEntityPageRoute } from "@/helpers";
+import { useScopedEntityNavigation } from "@/composables/useScopedEntityNavigation";
 
 const props = defineProps<{
   entity: BaseEntity;
@@ -134,6 +142,19 @@ const columnLabel = computed<string>(() =>
 const entityPageRoute = computed(() =>
   getEntityPageRoute(props.entity, "SingleEntity"),
 );
+
+const { isScoped, navigate } = useScopedEntityNavigation();
+const onHeaderLinkClick = (
+  event: MouseEvent,
+  routerNavigate: (event: MouseEvent) => unknown,
+) => {
+  if (!isScoped || event.ctrlKey || event.metaKey || event.shiftKey) {
+    routerNavigate(event);
+    return;
+  }
+  event.preventDefault();
+  navigate(entityPageRoute.value);
+};
 
 const focusThisEntity = () => {
   useEntitySingle().setEntityUuid(props.entity.uuid || props.entity.id);

@@ -11,7 +11,7 @@
         ? '#000'
         : settings?.text || 'var(--color-text-link)',
     }"
-    @click.stop
+    @click="onClick"
   >
     <unicon v-if="icon" :name="icon.name" height="14" width="14" />
     {{ label }}
@@ -24,6 +24,7 @@ import { getChildrenOfHomeRoutes, requiresAuthForEntity } from "@/helpers";
 import { formattersSettings } from "@/main";
 import { type DamsIcons } from "@/generated-types/queries";
 import { Unicons } from "@/types";
+import { useScopedEntityNavigation } from "@/composables/useScopedEntityNavigation";
 
 const props = defineProps<{
   formatter: string;
@@ -34,6 +35,7 @@ const props = defineProps<{
 }>();
 
 const config: any = inject("config");
+const { isScoped, navigate, resolveTarget } = useScopedEntityNavigation();
 
 const settings = computed<any>(() => {
   const [formatterType, linkType] = props.formatter.split("|");
@@ -54,6 +56,18 @@ const requiredAuthForThisEntity = computed(() => {
 const shouldOpenInNewTab = computed(() => {
   return !requiredAuthForThisEntity.value && props.openInNewTab;
 });
+
+const isModifiedClick = (event: MouseEvent): boolean =>
+  event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0;
+
+const onClick = (event: MouseEvent) => {
+  event.stopPropagation();
+  if (!isScoped || requiredAuthForThisEntity.value) return;
+  if (shouldOpenInNewTab.value || isModifiedClick(event)) return;
+  if (!resolveTarget(props.link)) return;
+  event.preventDefault();
+  navigate(props.link);
+};
 
 const PLAIN_LINK = "text-sm underline";
 const CHIP =

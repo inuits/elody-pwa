@@ -71,7 +71,11 @@
             () => {
               if (actionOnClick === ActionOnClick.OpenInModal)
                 openEntityInModal(entity.id, entity.type);
-              else entityWrapperHandler(entity.originalEntity);
+              else
+                entityWrapperHandler(
+                  entity.originalEntity,
+                  listItemRouteName,
+                );
             }
           "
           v-memo="entity.memoKey"
@@ -113,7 +117,7 @@
             :multi-line-columns="multiLineColumns"
             @navigate-to="
               () => {
-                router.push(entity.forcedNavigationPath);
+                navigate(entity.forcedNavigationPath);
               }
             "
             @toggle-preview-component="
@@ -175,7 +179,7 @@ import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
 import { computed, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { router } from "@/main";
+import { useScopedEntityNavigation } from "@/composables/useScopedEntityNavigation";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
@@ -249,6 +253,7 @@ watch(
 );
 
 const { openModal } = useBaseModal();
+const { navigate } = useScopedEntityNavigation();
 const {
   previewComponent,
   previewComponentEnabled,

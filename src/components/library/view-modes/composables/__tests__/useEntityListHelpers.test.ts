@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ref } from "vue";
 import { ActionOnClick, type Entity } from "@/generated-types/queries";
 import { useEntityListHelpers } from "../useEntityListHelpers";
@@ -8,8 +8,17 @@ vi.mock("vue", async (importOriginal) => ({
   inject: vi.fn((_key: string, fallback?: unknown) => fallback),
 }));
 
+const scoped = vi.hoisted(() => ({ isScoped: false, navigate: vi.fn() }));
+
+vi.mock("@/composables/useScopedEntityNavigation", () => ({
+  useScopedEntityNavigation: () => scoped,
+}));
+
 vi.mock("@/helpers", () => ({
-  getEntityPageRoute: vi.fn(),
+  getEntityPageRoute: vi.fn((entity: any, name: string) => ({
+    name,
+    params: { id: entity.id },
+  })),
   updateEntityMediafileOnlyForMediafiles: vi.fn(),
 }));
 
@@ -133,5 +142,68 @@ describe("useEntityListHelpers.actionOnClick", () => {
     helpers.entityWrapperHandler(entity);
     expect(openPreviewComponent).not.toHaveBeenCalled();
     expect(togglePreviewForListItem).not.toHaveBeenCalled();
+  });
+});
+
+describe("useEntityListHelpers inside an entity navigation scope", () => {
+  const entity = { id: "W-1", type: "work" } as unknown as Entity;
+
+  const helpersFor = (
+    props: Record<string, unknown> = {},
+    previewOpen = false,
+  ) =>
+    useEntityListHelpers(props, ref([]), ref(previewOpen), vi.fn(), vi.fn());
+
+  beforeEach(() => {
+    scoped.isScoped = true;
+    scoped.navigate.mockClear();
+  });
+
+  afterEach(() => {
+    scoped.isScoped = false;
+  });
+
+  it("renders a div so the router-link never touches the page", () => {
+    expect(helpersFor().getLinkSettings(entity, "SingleEntity").tag).toBe(
+      "div",
+    );
+  });
+
+  it("navigates the scope to the entity on click", () => {
+    helpersFor().entityWrapperHandler(entity, "SingleEntity");
+    expect(scoped.navigate).toHaveBeenCalledWith({
+      name: "SingleEntity",
+      params: { id: "W-1" },
+    });
+  });
+
+  it("does not navigate a disabled entity", () => {
+    helpersFor({ idsOfNonSelectableEntities: ["W-1"] }).entityWrapperHandler(
+      entity,
+      "SingleEntity",
+    );
+    expect(scoped.navigate).not.toHaveBeenCalled();
+  });
+
+  it("does not navigate while a preview is open", () => {
+    helpersFor({}, true).entityWrapperHandler(entity, "SingleEntity");
+    expect(scoped.navigate).not.toHaveBeenCalled();
+  });
+
+  it.each([ActionOnClick.None, ActionOnClick.OpenPreview])(
+    "does not navigate on %s",
+    (actionOnClick) => {
+      helpersFor({ actionOnClick }).entityWrapperHandler(
+        entity,
+        "SingleEntity",
+      );
+      expect(scoped.navigate).not.toHaveBeenCalled();
+    },
+  );
+
+  it("never navigates outside a scope; the router-link does that", () => {
+    scoped.isScoped = false;
+    helpersFor().entityWrapperHandler(entity, "SingleEntity");
+    expect(scoped.navigate).not.toHaveBeenCalled();
   });
 });

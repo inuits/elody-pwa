@@ -88,11 +88,14 @@ import {
   getEntityTitle,
   looksLikeEntityId,
 } from "@/helpers";
-import { getFormattersSettings, goToEntityPageById } from "@/helpers";
+import {
+  getFormattersSettings,
+  getRouterLinkForEntityDetailPage,
+} from "@/helpers";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useManageEntities } from "@/composables/useManageEntities";
-import { useRouter } from "vue-router";
+import { useScopedEntityNavigation } from "@/composables/useScopedEntityNavigation";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 import { useConfirmModal } from "@/composables/useConfirmModal";
@@ -143,7 +146,7 @@ const relatedEntitiesHelper = shallowRef<
 >();
 const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
-const router = useRouter();
+const { navigate } = useScopedEntityNavigation();
 const { confirm } = useConfirmModal();
 const { t } = useI18n();
 const selectedDropdownOptions = ref<DropdownOption[]>([]);
@@ -465,7 +468,13 @@ const handleTagClick = async (tag: DropdownOption) => {
       ([, value]) => (value as any).relationType === props.relationType,
     ) || [];
   if (entityType && linkSetting)
-    goToEntityPageById(tag.value, { type: entityType }, "SingleEntity", router);
+    navigate(
+      getRouterLinkForEntityDetailPage(
+        String(tag.value),
+        { type: entityType },
+        "SingleEntity",
+      ),
+    );
 };
 
 watch(

@@ -13,6 +13,7 @@ import {
 } from "@/helpers";
 import { useLibraryBar } from "@/composables/useLibraryBar";
 import EventBus from "@/EventBus";
+import { useScopedEntityNavigation } from "@/composables/useScopedEntityNavigation";
 import type { OrderItem } from "@/composables/useOrderListItems";
 
 export interface EntityListHelpersProps {
@@ -33,6 +34,7 @@ export const useEntityListHelpers = (
   const mediafileViewerContext: any = inject("mediafileViewerContext");
   const isPreviewElement: boolean = inject("IsPreviewElement", false);
   const { queryVariables } = useLibraryBar();
+  const { isScoped, navigate } = useScopedEntityNavigation();
 
   const containerNameForPreview = computed(() =>
     props.showCurrentEntityFlow
@@ -51,7 +53,8 @@ export const useEntityListHelpers = (
   ) => {
     if (
       (actionOnClick.value !== ActionOnClick.Navigate ||
-        previewComponentEnabled.value) &&
+        previewComponentEnabled.value ||
+        isScoped) &&
       !force
     ) {
       if (
@@ -71,7 +74,10 @@ export const useEntityListHelpers = (
     (props.idsOfNonSelectableEntities ?? []).includes(entity.id) ||
     (props.idsOfNonSelectableEntities ?? []).includes(entity.uuid);
 
-  const entityWrapperHandler = (entity: Entity) => {
+  const entityWrapperHandler = (
+    entity: Entity,
+    listItemRouteName: string = "",
+  ) => {
     const entityId = entity.id || entity.uuid;
     if (actionOnClick.value === ActionOnClick.OpenPreview)
       togglePreviewForListItem?.(entityId);
@@ -79,6 +85,8 @@ export const useEntityListHelpers = (
     if (previewComponentEnabled.value) openPreviewComponent(entityId);
     if (isEntityDisabled(entity)) return;
     updateEntityMediafileOnlyForMediafiles(mediafileViewerContext, entity);
+    if (isScoped && !previewComponentEnabled.value)
+      navigate(getEntityPageRoute(entity, listItemRouteName));
   };
 
   const getButtons = (entity: Entity): Buttons | undefined => {
