@@ -1319,9 +1319,9 @@ const deepRelationsInitialized = ref<boolean>(false);
 const hasRestoredViewModesAfterFetch = ref<boolean>(false);
 
 onMounted(async () => {
-  // a FiltersBase teleported into the pane (deferred) mounts after this hook;
-  // its filter promises must be in before the first fetch
-  if (filtersPaneBody.value) await nextTick();
+  // FiltersBase sits in a deferred Teleport, which mounts after this hook even
+  // when disabled; its filter promises must be in before the first fetch
+  await nextTick();
   lastProcessedEntityType.value = entityType.value;
   if (props.fetchDeepRelations) {
     await initializeDeepRelations();

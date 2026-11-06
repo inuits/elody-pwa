@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import { ref, reactive, watch } from "vue";
+import { defineComponent, onMounted, ref, reactive, watch } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { ViewModes } from "@/generated-types/queries";
 
@@ -19,6 +19,7 @@ const libEntities = ref<any[]>([]);
 const libTotalEntityCount = ref(0);
 const libFetchSequence = ref(0);
 const libGetEntities = vi.fn().mockResolvedValue([]);
+const libEnqueuePromise = vi.fn();
 const libEntitiesLoading = ref(false);
 const libManipulationQuery = ref<any>(undefined);
 const libDetermineViewModes = vi.fn();
@@ -59,7 +60,7 @@ vi.mock("@/composables/useEntitySingle", () => ({
 // --- useBaseLibrary: returns the data/query helpers --------------------------
 vi.mock("@/components/library/useBaseLibrary", () => ({
   useBaseLibrary: () => ({
-    enqueuePromise: vi.fn(),
+    enqueuePromise: libEnqueuePromise,
     entities: libEntities,
     placeholderEntities: ref([]),
     placeholderEntitiesAmount: ref(0),
@@ -1547,6 +1548,48 @@ describe("BaseLibrary.vue in a compact preview", () => {
     const classes = wrapper.find(".grid").classes();
     expect(classes).not.toContain("px-3");
     expect(classes).toContain("-mx-2");
+    wrapper.unmount();
+  });
+});
+
+describe("BaseLibrary.vue first fetch and the filters", () => {
+  it("waits for the filters' promise before its first fetch, without a filters pane", async () => {
+    vi.clearAllMocks();
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    mockRoute.path = "/test";
+    const advancedFiltersPromise = vi.fn();
+    const FiltersBaseStub = defineComponent({
+      name: "FiltersBase",
+      emits: ["advancedFiltersPromise"],
+      setup(_, { emit }) {
+        onMounted(() => emit("advancedFiltersPromise", advancedFiltersPromise));
+        return () => null;
+      },
+    });
+    const wrapper = shallowMount(BaseLibrary, {
+      props: {
+        ...getDefaultProps(),
+        baseLibraryMode: BaseLibraryModes.PreviewBaseLibrary,
+        disableLibraryBar: true,
+        enableAdvancedFilters: true,
+      },
+      attachTo: document.body,
+      global: {
+        provide: {
+          config,
+          [DefaultApolloClient as symbol]: { query: vi.fn(), mutate: vi.fn() },
+          IsPreviewElement: false,
+          showCurrentPreviewFlow: true,
+          ParentEntityProvider: undefined,
+        },
+        stubs: { teleport: false, FiltersBase: FiltersBaseStub },
+        renderStubDefaultSlot: true,
+      },
+    });
+    await flushPromises();
+
+    expect(libEnqueuePromise).toHaveBeenCalledWith(advancedFiltersPromise);
     wrapper.unmount();
   });
 });
