@@ -20,6 +20,7 @@
         :enable-advanced-filters="true"
         :should-use-state-for-route="false"
         :force-list-view="true"
+        :search-by-type-route="true"
         :selection-limit="single ? 1 : 0"
         :context="BulkOperationsContextEnum.RelationPickerModal"
         base-library-height="max-h-[55vh]"

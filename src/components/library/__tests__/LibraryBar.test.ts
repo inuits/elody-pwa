@@ -348,6 +348,18 @@ describe("LibraryBar.vue Simple Search", () => {
     expect(wrapper.emitted("paginationLimitOptionsPromise")).toBeUndefined();
   });
 
+  // the entity picker searches with the keys of the type it lists, not of
+  // the page it opens on
+  it("renders the search box with keys handed in when the route has none", async () => {
+    const wrapper = await mountWithRouteMeta(
+      { queries: { getSortOptions: "MockQuery" } },
+      { simpleSearchKeys: ["person:1|properties.name.value"], autofocusSearch: true },
+    );
+    const pill = wrapper.findComponent({ name: "BaseSearchPill" });
+    expect(pill.exists()).toBe(true);
+    expect(pill.props("autofocus")).toBe(true);
+  });
+
   it("does not render the search box when the route has no simpleSearch keys configured", async () => {
     const wrapper = await mountWithRouteMeta({
       queries: { getSortOptions: "MockQuery" },

@@ -228,6 +228,9 @@ vi.mock("vue-router", () => ({
   useRoute: () => mockRoute,
   useRouter: () => ({
     currentRoute: ref({ name: "TestRoute" }),
+    getRoutes: () => [
+      { meta: { entityType: "person", simpleSearch: { keys: ["person-key"] } } },
+    ],
   }),
 }));
 
@@ -951,6 +954,28 @@ describe("BaseLibrary.vue pager and page size", () => {
       children.indexOf(barWrapper) + 1,
     );
     mocks.toggles = [];
+  });
+
+  // entity-picker.md: the picker searches its own type with the keys of that
+  // type's list route, and focus starts in the search pill
+  it("hands the library bar the search keys of its type's list route when asked", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      entityType: "person",
+      searchByTypeRoute: true,
+    });
+    await flushPromises();
+
+    const bar = wrapper.findComponent(LibraryBar);
+    expect(bar.props("simpleSearchKeys")).toEqual(["person-key"]);
+    expect(bar.props("autofocusSearch")).toBe(true);
+  });
+
+  it("leaves the search keys to the page's route otherwise", async () => {
+    wrapper = getWrapper({ baseLibraryMode: BaseLibraryModes.NormalBaseLibrary });
+    await flushPromises();
+
+    expect(wrapper.findComponent(LibraryBar).props("simpleSearchKeys")).toBeUndefined();
   });
 
   it("leaves the page size out of compact relation lists", async () => {

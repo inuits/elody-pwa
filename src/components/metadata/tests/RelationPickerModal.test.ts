@@ -27,6 +27,7 @@ const EntityPickerStub = {
     "entityPickerMode",
     "selectionLimit",
     "context",
+    "searchByTypeRoute",
   ],
   emits: ["entitiesSelected"],
   template: "<div data-cy='entity-picker' />",
@@ -83,6 +84,7 @@ describe("RelationPickerModal", () => {
       entityPickerMode: "emit",
       selectionLimit: 0,
       context: BulkOperationsContextEnum.RelationPickerModal,
+      searchByTypeRoute: true,
     });
   });
 

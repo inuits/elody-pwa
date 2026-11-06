@@ -50,6 +50,7 @@
       "
       :should-use-state-for-route="shouldUseStateForRoute"
       :force-list-view="forceListView"
+      :search-by-type-route="searchByTypeRoute"
       :save-view-preferences="false"
       :force-show-filters="forceShowFilters"
       @confirm-selection="saveRelations"
@@ -141,6 +142,8 @@ const props = withDefaults(
     highlightLabel?: string;
     forceShowFilters?: boolean;
     forceListView?: boolean;
+    // search with the picked type's own list keys (the relation picker)
+    searchByTypeRoute?: boolean;
   }>(),
   {
     entityPickerMode: EntityPickerMode.Emit,
@@ -159,6 +162,7 @@ const props = withDefaults(
     highlightedEntityIds: () => [],
     highlightLabel: undefined,
     forceShowFilters: false,
+    searchByTypeRoute: false,
   },
 );
 

@@ -10,6 +10,7 @@
       class="shrink-0"
     />
     <input
+      ref="input"
       v-model="model"
       type="text"
       :aria-label="label"
@@ -21,8 +22,19 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, useTemplateRef } from "vue";
 import { Unicons } from "@/types";
 
-defineProps<{ label: string; placeholder?: string; autofocus?: boolean }>();
+const props = defineProps<{
+  label: string;
+  placeholder?: string;
+  autofocus?: boolean;
+}>();
 const model = defineModel<string>({ default: "" });
+const input = useTemplateRef<HTMLInputElement>("input");
+
+// a pill mounted inside an already open dialog misses `autofocus`
+onMounted(() => {
+  if (props.autofocus) input.value?.focus();
+});
 </script>

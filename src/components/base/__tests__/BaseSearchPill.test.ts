@@ -9,6 +9,18 @@ const getWrapper = (props = {}) =>
   });
 
 describe("BaseSearchPill", () => {
+  // entity-picker.md: focus lands in the search pill when the picker opens;
+  // the pill renders after the dialog opened, so `autofocus` alone misses
+  it("takes focus when it mounts with autofocus", () => {
+    const wrapper = mount(BaseSearchPill, {
+      props: { label: "Zoek", autofocus: true },
+      attachTo: document.body,
+      global: { stubs: { unicon: true } },
+    });
+    expect(document.activeElement).toBe(wrapper.find("input").element);
+    wrapper.unmount();
+  });
+
   it("is a pill with a search icon", () => {
     const wrapper = getWrapper();
     expect(wrapper.classes()).toContain("rounded-pill");

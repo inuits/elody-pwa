@@ -11,6 +11,7 @@
       class="w-64"
       data-cy="simple-search"
       v-model="simpleSearchInput"
+      :autofocus="autofocusSearch"
       :label="t('library.search-in-results')"
       :placeholder="t('library.search-in-results')"
     />
@@ -84,12 +85,17 @@ const props = withDefaults(
     setSortOrder: (sortOrder: boolean, force?: boolean) => void;
     simpleSearchValue?: string;
     setSimpleSearch?: (value: string) => void;
+    // keys from elsewhere than this page's route (the entity picker)
+    simpleSearchKeys?: string[];
+    autofocusSearch?: boolean;
     showGroupBy?: boolean;
     setGroupBy?: (config: GroupByConfig | null) => void;
   }>(),
   {
     simpleSearchValue: "",
     setSimpleSearch: undefined,
+    simpleSearchKeys: undefined,
+    autofocusSearch: false,
     showGroupBy: false,
     setGroupBy: undefined,
   },
@@ -113,7 +119,8 @@ const { t } = useI18n();
 const route = useRoute();
 
 const simpleSearchKeys = computed<string[]>(
-  () => (route.meta as any)?.simpleSearch?.keys ?? [],
+  () =>
+    props.simpleSearchKeys ?? (route.meta as any)?.simpleSearch?.keys ?? [],
 );
 const simpleSearchInput = ref<string>(props.simpleSearchValue);
 const debouncedSetSimpleSearch = debounce(

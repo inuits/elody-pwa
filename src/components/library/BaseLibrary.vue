@@ -165,6 +165,8 @@
               :show-group-by="displayTable"
               :set-group-by="(config) => (chosenGroupBy = config)"
               :simple-search-value="simpleSearchTerm"
+              :simple-search-keys="searchByTypeRoute ? simpleSearchKeys : undefined"
+              :autofocus-search="searchByTypeRoute"
               :set-simple-search="
                 isSearchLibrary ||
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
@@ -583,6 +585,9 @@ export type BaseLibraryProps = {
   selectInputFieldValue?: string[];
   baseLibraryMode?: BaseLibraryModes;
   disableLibraryBar?: boolean;
+  // search with the keys of the list route of `entityType`, not this page's
+  // (the entity picker opens on a detail page)
+  searchByTypeRoute?: boolean;
   entityListElements?: EntityListElement[];
   allowedActionsOnRelations?: RelationActions[];
   customBulkOperations?: string | undefined;
@@ -631,6 +636,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   isMultiSelectInputField: false,
   baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
   disableLibraryBar: false,
+  searchByTypeRoute: false,
   entityListElements: undefined,
   allowedActionsOnRelations: () => [],
   customBulkOperations: undefined,
@@ -692,12 +698,27 @@ const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const isInitialLoading = ref<boolean>(true);
 const simpleSearchTerm = ref<string>("");
+const typeRouteSimpleSearch = computed(
+  () =>
+    router
+      .getRoutes()
+      .find(
+        (r) =>
+          (r.meta as any)?.entityType === props.entityType &&
+          (r.meta as any)?.simpleSearch,
+      )?.meta?.simpleSearch as { keys?: string[]; relationKeys?: string[] },
+);
+const simpleSearchConfig = computed(() =>
+  props.searchByTypeRoute
+    ? typeRouteSimpleSearch.value
+    : (route.meta as any)?.simpleSearch,
+);
 const simpleSearchKeys = computed<string[]>(
-  () => (route.meta as any)?.simpleSearch?.keys ?? [],
+  () => simpleSearchConfig.value?.keys ?? [],
 );
 const simpleSearchRelationKeys = computed<string[]>(
   () =>
-    (route.meta as any)?.simpleSearch?.relationKeys ??
+    simpleSearchConfig.value?.relationKeys ??
     config?.features?.simpleSearch?.relationKeys ??
     [],
 );

@@ -231,6 +231,15 @@ describe("EntityPickerComponent", () => {
     expect(wrapper.findComponent(BaseLibrary).props("forceListView")).toBe(true);
   });
 
+  it("forwards searchByTypeRoute to BaseLibrary", async () => {
+    const wrapper = shallowMount(EntityPickerComponent, {
+      props: { ...defaultProps, searchByTypeRoute: true },
+      global: globalConfig,
+    });
+    await flushPromises();
+    expect(wrapper.findComponent(BaseLibrary).props("searchByTypeRoute")).toBe(true);
+  });
+
   it("leaves the view mode to the user by default", async () => {
     const wrapper = shallowMount(EntityPickerComponent, {
       props: { ...defaultProps },
