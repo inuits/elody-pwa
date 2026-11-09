@@ -355,12 +355,9 @@
         @toggle-loading="toggleLoading"
       />
     </div>
+    <!-- small screen: Preview leads the ⋮ sheet instead -->
     <PreviewToggle
-      v-if="
-        previewComponentFeatureEnabled &&
-        (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-          baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
-      "
+      v-if="canPreview && !(isCompact && buttons?.contextMenu)"
       :active="previewOpen"
       :data-preview-for="itemId"
       @toggle="emit('togglePreviewComponent', itemId)"
@@ -411,7 +408,12 @@ import ListItemEditableValue from "@/components/ListItemEditableValue.vue";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
-import { computed, inject, onUpdated, ref, watch } from "vue";
+import { computed, inject, onUpdated, provide, ref, watch } from "vue";
+import { isCompact } from "@/composables/useNavMenu";
+import {
+  rowSheetKey,
+  type RowSheet,
+} from "@/components/context-menu-actions/rowSheet";
 import { auth, router } from "@/main";
 import PreviewToggle from "@/components/PreviewToggle.vue";
 import EntityButtons from "./EntityButtons.vue";
@@ -565,6 +567,30 @@ const rowTitle = computed(() => {
   const value = props.teaserMetadata[0]?.value;
   return typeof value === "string" ? value : undefined;
 });
+
+const canPreview = computed<boolean>(
+  () =>
+    props.previewComponentFeatureEnabled &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
+provide(
+  rowSheetKey,
+  computed<RowSheet>(() => ({
+    id: props.itemId,
+    title: rowTitle.value,
+    thumbnailUrl:
+      props.media && !imageSrcError.value
+        ? mediaIsLink.value
+          ? props.media
+          : `/api/iiif/3/${props.media}/square/^100,/0/default.jpg`
+        : undefined,
+    thumbnailIsLink: mediaIsLink.value,
+    preview: canPreview.value
+      ? () => emit("togglePreviewComponent", props.itemId)
+      : undefined,
+  })),
+);
 
 const onlyReadModeTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode),

@@ -427,6 +427,7 @@
   /* Below 768px a menu is a bottom sheet */
   --sheet-radius: 20px;
   --sheet-padding: 8px 12px 24px;
+  --sheet-thumb-size: 44px;
 
   /* Pager (components/pagination.md): « ‹ page [n] of N › » */
   --pager-button-size: 24px;
