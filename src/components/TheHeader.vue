@@ -1,10 +1,19 @@
 <template>
   <div
-    class="z-header flex items-center gap-2 p-(--topbar-pad) bg-surface border-b border-border-subtle flex-wrap min-[1400px]:flex-nowrap"
+    :class="[
+      'z-header flex items-center gap-2 bg-surface flex-wrap min-[1400px]:flex-nowrap',
+      isCompact
+        ? 'm-(--gutter-panels) mb-0 p-(--panel-header-pad) rounded-card border border-border-subtle *:ml-0 *:pl-0'
+        : 'p-(--topbar-pad) border-b border-border-subtle',
+    ]"
   >
-    <!-- ui_kits AppShell: a flat full-width top bar -->
-    <EntityNavigationArrows class="mr-2" />
-    <BreadCrumbs />
+    <!-- ui_kits AppShell: a flat full-width top bar; a card below md -->
+    <EntityNavigationArrows v-if="!isCompact" class="mr-2" />
+    <BreadCrumbs :class="{ 'basis-full': isCompact }">
+      <template v-if="isCompact" #aside>
+        <EntityNavigationArrows />
+      </template>
+    </BreadCrumbs>
     <!-- The page's create action, teleported in by its main list
          (ui_kits/clients: a pill next to the title). -->
     <div id="page-header-create" class="flex items-center ml-4 empty:hidden" />

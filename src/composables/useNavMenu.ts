@@ -26,7 +26,7 @@ const isOpen = computed(() => mode.value === NavMode.Expanded);
 
 // Matches Tailwind's md breakpoint: below it the rail becomes a drawer.
 const compactQuery = window.matchMedia?.("(width < 48rem)");
-const isCompact = ref(compactQuery?.matches ?? false);
+export const isCompact = ref(compactQuery?.matches ?? false);
 compactQuery?.addEventListener("change", (event) => {
   isCompact.value = event.matches;
 });

@@ -18,6 +18,7 @@ a group shows a chevron and lists its sub-items indented below it.
 |---|---|
 | `--nav-rail-width` | closed width, and the content offset |
 | `--nav-flyout-width` | opened width |
+| `--nav-drawer-width`, `--mobile-top-bar-height` | small-screen drawer and top bar |
 | `--nav-rail-pad`, `--nav-rail-gap`, `--nav-rail-logo` | rail spacing, logo size |
 | `--nav-rail-item-width`, `--nav-rail-item-height`, `--nav-rail-item-radius` | item size |
 | `--nav-rail-avatar-size` | the user's initials circle in the account rows |
@@ -42,6 +43,17 @@ Groups open on click only, one at a time. A group with a page of its own
 when it opens in the open menu; closing it stays on the page. A group whose
 route is just one of its sub-items (podiumnet: Organizations → Venues) only
 opens.
+
+## Small screens (below `md`, 768px)
+The rail gives way to a top bar (`MobileTopBar.vue`): menu button, logo,
+environment chip and search. A dot on the menu button shows when an item has a
+badge. The menu opens as a `--nav-drawer-width` drawer over a scrim, always
+with labels and inline groups; language, tenant and the account rows sit at
+its bottom. The ✕, the scrim, Escape and navigating close it, and focus goes
+back to the menu button. A closed drawer, and the page behind an open one, are
+`inert`. The page header becomes a card: back link and record stepper, the
+title in full, then the actions; entity panels stack full width.
+`useNavMenu().isCompact` follows the same breakpoint in script.
 
 ## Group flyout (closed rail)
 A popover to the right of the group icon (`right-start`, flips and shifts to

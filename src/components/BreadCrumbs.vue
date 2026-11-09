@@ -5,7 +5,7 @@
     :aria-label="t('navigation.breadcrumb')"
     class="relative z-notification flex min-w-0 flex-wrap items-center gap-2"
   >
-    <template v-if="breadcrumbRoutes.length > 1">
+    <template v-if="breadcrumbRoutes.length > 1 && !isCompact">
       <button
         type="button"
         data-cy="breadcrumb-history"
@@ -22,17 +22,35 @@
     <template v-if="previousRoute?.title">
       <a
         :href="crumbHref(previousRoute)"
-        class="max-w-[40vw] truncate rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:text-accent-ink hover:no-underline"
+        class="flex items-center max-w-[40vw] truncate rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body hover:text-accent-ink hover:no-underline"
         :title="resolveTitle(previousRoute.title)"
         @click="onCrumbClick($event, previousRoute)"
       >
-        {{ resolveTitle(previousRoute.title) }}
+        <unicon
+          v-if="isCompact"
+          height="18"
+          :name="Unicons.AngleLeft.name"
+          aria-hidden="true"
+          class="-ml-1.5 shrink-0"
+        />
+        <span class="truncate">{{ resolveTitle(previousRoute.title) }}</span>
       </a>
-      <span class="text-border-dashed" aria-hidden="true">›</span>
+      <span v-if="!isCompact" class="text-border-dashed" aria-hidden="true"
+        >›</span
+      >
     </template>
+    <!-- Small screens: back link and aside on one row, the title in full below -->
+    <div v-if="isCompact && $slots.aside" class="ml-auto">
+      <slot name="aside" />
+    </div>
     <span
       aria-current="page"
-      class="flex min-w-0 items-center gap-1.5 rounded-pill bg-surface-muted p-(--crumb-pad) text-table font-bold text-text-body"
+      :class="[
+        'flex min-w-0 items-center gap-1.5 font-bold text-text-body',
+        isCompact
+          ? 'basis-full text-heading'
+          : 'rounded-pill bg-surface-muted p-(--crumb-pad) text-table',
+      ]"
     >
       <MetadataFormatterPill
         v-if="typePillLabel"
@@ -99,6 +117,7 @@ import { useEditMode } from "@/composables/useEdit";
 import { asString } from "@/helpers";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useConfirmModal } from "@/composables/useConfirmModal";
+import { isCompact } from "@/composables/useNavMenu";
 import MetadataFormatterPill from "@/components/metadata/MetadataFormatterPill.vue";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
 
