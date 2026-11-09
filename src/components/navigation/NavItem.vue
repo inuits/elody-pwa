@@ -147,7 +147,10 @@ const action = computed(() =>
 );
 const groupUrl = computed(() => {
   const destination = props.item.typeLink?.route?.destination;
-  return isGroup.value && destination
+  const isSubItemPage = subItems.value.some(
+    (subItem) => subItem.typeLink?.route?.destination === destination,
+  );
+  return isGroup.value && destination && !isSubItemPage
     ? getUrlForMenuItem(destination)
     : undefined;
 });

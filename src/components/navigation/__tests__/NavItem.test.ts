@@ -208,6 +208,19 @@ describe("NavItem", () => {
       expect(mocks.push).not.toHaveBeenCalled();
     });
 
+    it("only opens when its page is one of its own sub-items", async () => {
+      const settings = {
+        ...organizationsGroup,
+        typeLink: { route: { destination: "companies" } },
+      } as MenuItem;
+      await mountItem(settings).find("button").trigger("click");
+      expect(mocks.push).not.toHaveBeenCalled();
+      const title = mountItem(settings, { open: true, expanded: false }).find(
+        '[data-test="nav-flyout-title"]',
+      );
+      expect(title.element.tagName).toBe("P");
+    });
+
     it("goes nowhere when it has no page of its own", async () => {
       await mountItem({ ...organizationsGroup, typeLink: {} } as MenuItem)
         .find("button")
