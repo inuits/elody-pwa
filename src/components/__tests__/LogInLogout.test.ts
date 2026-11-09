@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   redirectToLogin: vi.fn(),
   performLogout: vi.fn(),
   confirm: vi.fn(),
+  userName: "Ada",
 }));
 const elodyUser = shallowRef<{ id: string } | null>(null);
 
@@ -22,7 +23,7 @@ vi.mock("vue-i18n", () => ({
 vi.mock("@/composables/useAuth", () => ({
   useAuth: () => ({
     performLogout: mocks.performLogout,
-    getUserName: () => "Ada",
+    getUserName: () => mocks.userName,
     elodyUser,
   }),
 }));
@@ -54,6 +55,21 @@ describe("LogInLogout", () => {
     vi.clearAllMocks();
     mocks.isAuthenticated.value = true;
     elodyUser.value = null;
+    mocks.userName = "Ada";
+  });
+
+  it.each([
+    ["Ada Lovelace", "AL"],
+    ["jan van der berg", "JB"],
+    ["ada", "A"],
+    ["  Ada   Lovelace ", "AL"],
+  ])("shows %s as the initials %s in a circle", (name, initials) => {
+    mocks.userName = name;
+    const avatar = mountRail().find('[data-test="user-avatar"]');
+
+    expect(avatar.text()).toBe(initials);
+    expect(avatar.attributes("aria-hidden")).toBe("true");
+    expect(avatar.classes()).toContain("rounded-full");
   });
 
   it("shows the profile in the collapsed rail even without an Elody user record", () => {
@@ -99,7 +115,9 @@ describe("LogInLogout", () => {
   it("names profile and logout in text when the menu is expanded", () => {
     const wrapper = mountRail(true);
 
-    expect(wrapper.find('[data-cy="profile"]').text()).toBe("Ada");
+    expect(
+      wrapper.find('[data-cy="profile"] [data-test="profile-name"]').text(),
+    ).toBe("Ada");
     expect(wrapper.find('[data-cy="log-out"]').text()).toBe(
       "navigation.log-out",
     );

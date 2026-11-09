@@ -7,7 +7,7 @@ menu. Handoff: `navigation.md` (NavRail, Round 2 expanded flyout).
 
 ## Anatomy
 A 52px white rail: logo, environment chip and the collapse/keep-open button
-at the top, then the menu items, then the account rows (`LogInLogout`). Open,
+at the top, then the menu items, then the account rows (`LogInLogout`: the user as a circle with their initials, first and last name, then log out). Open,
 the header is one row: logo and chip on the left, the button on the right. Opened, it becomes 320px wide
 beside the page, with no shadow: the page moves right by the same width
 (`App.vue`, same transition), so nothing is covered. Items show icon, label and badge;
@@ -20,6 +20,7 @@ a group shows a chevron and lists its sub-items indented below it.
 | `--nav-flyout-width` | opened width |
 | `--nav-rail-pad`, `--nav-rail-gap`, `--nav-rail-logo` | rail spacing, logo size |
 | `--nav-rail-item-width`, `--nav-rail-item-height`, `--nav-rail-item-radius` | item size |
+| `--nav-rail-avatar-size` | the user's initials circle in the account rows |
 | `--nav-sub-item-indent` | sub-item list indent |
 | `--nav-flyout-gap` | gap between the rail's edge and a group flyout |
 | `--nav-flyout-viewport-margin` | space a flyout keeps from the viewport edge |

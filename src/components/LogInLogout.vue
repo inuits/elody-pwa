@@ -43,8 +43,16 @@
             :aria-label="isExpanded ? undefined : getUserName()"
             :class="[rowClass, { 'cursor-default': !elodyUser }]"
           >
-            <unicon :name="Unicons.UserCircle.name" height="20" aria-hidden="true" />
-            <span v-if="isExpanded">{{ getUserName() }}</span>
+            <span
+              data-test="user-avatar"
+              aria-hidden="true"
+              class="shrink-0 flex items-center justify-center size-(--nav-rail-avatar-size) rounded-full bg-accent-light text-accent-ink text-micro font-semibold"
+            >
+              {{ initials }}
+            </span>
+            <span v-if="isExpanded" data-test="profile-name">{{
+              getUserName()
+            }}</span>
           </component>
         </template>
         <template v-if="!isExpanded" #default>{{ getUserName() }}</template>
@@ -97,6 +105,12 @@ const rowClass = computed(() => [
     ? "w-full min-h-(--nav-rail-item-height) px-2 gap-2 text-table"
     : "justify-center w-(--nav-rail-item-width) h-(--nav-rail-item-height)",
 ]);
+
+const initials = computed(() => {
+  const words = getUserName().trim().split(/\s+/);
+  const letters = words.length > 1 ? [words[0], words.at(-1)!] : words;
+  return letters.map((word) => word.charAt(0).toUpperCase()).join("");
+});
 
 const openConfirmationModal = async () => {
   const choice = await confirm({
