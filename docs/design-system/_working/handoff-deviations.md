@@ -113,4 +113,4 @@ Kinds:
 |---|---|---|---|---|
 | N1 | Deviation | the rail stays the collapsed default; the flyout opens on demand (`navigation.md` Round 2) | user, 2026-11-06: one Home Assistant-style ≡› / ≡‹ icon button at the top of the rail (under the logo; beside it when open) keeps the menu open (over the content) or collapses it; closed is the default; no open-on-hover (tried and dropped); on the closed rail a group opens a flyout of its sub-items beside its icon instead of opening the whole menu | — |
 | N2 | Deviation | tooltip linked with `aria-describedby` (`accessibility.md`) | rail tooltips not linked: they repeat the item's accessible name | — |
-| N3 | Open | — | new `NavRail` mounted in `App.vue`; old `MenuNav` files kept | swapped in `App.vue` (2026-11-06); remove `components/menu/MenuNav.vue`, `MenuItem.vue`, `MenuSubItem.vue` |
+| N3 | Done | — | new `NavRail` mounted in `App.vue` (2026-11-06); old `MenuNav`, `MenuItem`, `MenuSubItem` and their dead menu state in `useMenuHelper` removed (2026-11-09) | — |

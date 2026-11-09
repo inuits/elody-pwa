@@ -13,10 +13,7 @@ import useTenant from "./useTenant";
 
 const { openModal } = useBaseModal();
 
-const selectedMenuItem = ref<MenuItem | undefined>(undefined);
-const selectedMenuItemPath = ref<string>(undefined);
 const menuItems = ref<Array<MenuItem>>([]);
-const isExpanded = ref<boolean>(false);
 const menuDestinations = ref<{ entityType: string; destination: string }[]>([]);
 
 export enum MenuItemType {
@@ -30,15 +27,6 @@ type MenuAction = {
 };
 
 export const useMenuHelper = () => {
-  const setSelectedMenuItem = (menuItem: MenuItem) => {
-    if (!menuItem) return;
-    selectedMenuItem.value = menuItem;
-    const menu = ref<Array<MenuItem>>([menuItem]);
-    const destinations = getMenuDestinations(menu);
-    if (destinations && destinations.length > 0)
-      selectedMenuItemPath.value = `/${destinations[0].destination}`;
-  };
-
   const getUrlForMenuItem = (destination: string) => {
     const { selectedTenant, getCodeById } = useTenant();
     if (!selectedTenant.value) return `/${destination}`;
@@ -68,11 +56,6 @@ export const useMenuHelper = () => {
     return action;
   };
 
-  const resetSelectedMenuItem = () => {
-    selectedMenuItem.value = undefined;
-    selectedMenuItemPath.value = undefined;
-  };
-
   const getMenuEntities = () => {
     const queryVariables = reactive<GetMenuQueryVariables>({
       name: "main-menu",
@@ -91,7 +74,6 @@ export const useMenuHelper = () => {
       );
 
       menuItems.value = menu;
-      setSelectedMenuItem(menuItems.value[0]);
     });
   };
 
@@ -125,21 +107,11 @@ export const useMenuHelper = () => {
     return menuDestinations.value;
   };
 
-  const changeExpandedState = (newState: boolean) => {
-    isExpanded.value = newState;
-  };
-
   return {
-    setSelectedMenuItem,
     checkIfRouteOrModal,
-    selectedMenuItem,
-    selectedMenuItemPath,
-    resetSelectedMenuItem,
     getMenuEntities,
     menuItems,
     getMenuDestinations,
-    changeExpandedState,
-    isExpanded,
   };
 };
 

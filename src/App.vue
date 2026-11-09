@@ -16,7 +16,7 @@
         <notifications class="pt-2" group="globalNotification" width="700" />
       </div>
     </div>
-    <the-navigation class="navbar" />
+    <the-navigation />
     <div>
       <div class="bg-background-normal pl-(--nav-rail-width) h-screen flex flex-col">
         <the-header />
@@ -79,15 +79,6 @@ onMounted(() => {
 
 <style>
 @import "@/assets/main.css";
-
-.navbar:hover ~ .move-by-nav,
-.navbar:hover + .move-by-nav .move-by-nav {
-  -webkit-transition: padding-left 300ms ease-in-out;
-  -moz-transition: padding-left 300ms ease-in-out;
-  -o-transition: padding-left 300ms ease-in-out;
-  transition: padding-left 300ms ease-in-out;
-  padding-left: 20rem;
-}
 
 .notification-title {
   @apply text-xl;
