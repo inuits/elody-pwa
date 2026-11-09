@@ -88,6 +88,22 @@ describe("RelationPickerModal", () => {
     });
   });
 
+  it("leaves out the field's match-all text filters so the picker's search applies", async () => {
+    const wrapper = mountModal({
+      filters: [
+        { type: "text", key: ["name"], value: "*", match_exact: false },
+        { type: "text", key: ["code"], value: "PR", match_exact: false },
+        { type: "type", value: "company" },
+      ],
+    });
+    openModal(TypeModals.RelationPicker, ModalStyle.Center);
+    await nextTick();
+    expect(picker(wrapper).props("computedFilters")).toEqual([
+      { type: "text", key: ["code"], value: "PR", match_exact: false },
+      { type: "type", value: "company" },
+    ]);
+  });
+
   it("lets a single select pick one entity", async () => {
     const wrapper = mountModal({ single: true });
     openModal(TypeModals.RelationPicker, ModalStyle.Center);

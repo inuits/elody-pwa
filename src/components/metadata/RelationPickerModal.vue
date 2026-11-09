@@ -13,7 +13,7 @@
         :entity-uuid="entityId"
         :accepted-types="[acceptedType]"
         custom-query=""
-        :computed-filters="filters"
+        :computed-filters="pickerFilters"
         :entity-picker-mode="EntityPickerMode.Emit"
         :show-button="true"
         :enable-bulk-operations="true"
@@ -35,6 +35,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   type AdvancedFilterInput,
+  AdvancedFilterTypes,
   type DropdownOption,
   EntityPickerMode,
   TypeModals,
@@ -72,7 +73,14 @@ const title = computed<string>(() => {
   return t("inline-edit.browse-title", [type]);
 });
 
-const close = () => closeModal(TypeModals.RelationPicker);
+const pickerFilters = computed(() =>
+  props.filters?.filter(
+    (filter) =>
+      !(filter.type === AdvancedFilterTypes.Text && filter.value === "*"),
+  ),
+);
+
+const close = () =>closeModal(TypeModals.RelationPicker);
 
 const onPicked = (items: InBulkProcessableItem[]) => {
   emit(
