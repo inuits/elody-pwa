@@ -69,12 +69,18 @@
       :style="floatingStyles"
       class="w-max min-w-(--menu-min-width) p-(--menu-padding) bg-surface border border-border-subtle rounded-card shadow-overlay z-context-menu"
     >
-      <p
+      <component
+        :is="groupUrl ? 'router-link' : 'p'"
         data-test="nav-flyout-title"
-        class="px-2 pt-1 pb-2 text-hint font-semibold text-text-secondary"
+        :to="groupUrl"
+        :class="[
+          'block px-2 pt-1 pb-2 text-hint font-semibold text-text-secondary',
+          { 'hover:text-text-link hover:no-underline': groupUrl },
+        ]"
+        @click="groupUrl && emit('close')"
       >
         {{ label }}
-      </p>
+      </component>
       <ul class="flex flex-col gap-1" @click="emit('close')">
         <NavSubItem
           v-for="subItem in subItems"
@@ -90,6 +96,7 @@
 import { computed, useId, useTemplateRef } from "vue";
 import { autoUpdate, flip, offset, shift, useFloating } from "@floating-ui/vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import type { MenuItem } from "@/generated-types/queries";
 import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { useMenuBadges } from "@/composables/useMenuBadges";
@@ -109,7 +116,8 @@ const props = defineProps<{
 const emit = defineEmits<{ toggle: []; close: [] }>();
 
 const { t } = useI18n();
-const { checkIfRouteOrModal } = useMenuHelper();
+const router = useRouter();
+const { checkIfRouteOrModal, getUrlForMenuItem } = useMenuHelper();
 const { totalBadgeCountOf } = useMenuBadges();
 const { isCurrent, subItemsOf } = useNavMenu();
 const tokenPx = (name: string) => parseFloat(readCssToken(name, "0"));
@@ -137,6 +145,12 @@ const isGroup = computed(() => !!props.item.subMenu);
 const action = computed(() =>
   isGroup.value ? undefined : checkIfRouteOrModal(props.item),
 );
+const groupUrl = computed(() => {
+  const destination = props.item.typeLink?.route?.destination;
+  return isGroup.value && destination
+    ? getUrlForMenuItem(destination)
+    : undefined;
+});
 const isLink = computed(() => action.value?.menuItemType === MenuItemType.link);
 const current = computed(() => isCurrent(props.item));
 const badgeCount = computed(() => totalBadgeCountOf(props.item));
@@ -145,7 +159,11 @@ const uniconIcon = computed(() =>
 );
 
 const onClick = () => {
-  if (isGroup.value) emit("toggle");
+  if (isGroup.value) {
+    if (props.expanded && !props.open && groupUrl.value)
+      router.push(groupUrl.value);
+    emit("toggle");
+  }
   else if (!isLink.value) action.value?.action();
 };
 

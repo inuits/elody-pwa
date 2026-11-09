@@ -108,6 +108,7 @@ export const useMenuHelper = () => {
   };
 
   return {
+    getUrlForMenuItem,
     checkIfRouteOrModal,
     getMenuEntities,
     menuItems,

@@ -35,12 +35,15 @@ a click does: `right-indent-alt` (≡›, "Keep menu open") on the rail,
 | Closed (default) | 52px rail. Hover only highlights an item and shows its name in a tooltip at once (no delay); the rail never opens on hover or focus. Clicking a group opens a flyout beside its icon (see below) |
 | Open | open over the content until the button collapses it; groups open inline under their row |
 
-Groups open on click only, one at a time.
+Groups open on click only, one at a time. A group with a route of its own
+(`typeLink.route`) also goes to that page when it opens in the open menu;
+closing it stays on the page.
 
 ## Group flyout (closed rail)
 A popover to the right of the group icon (`right-start`, flips and shifts to
 stay on screen) with the group name as a small title and the sub-items
-below. It looks like the other menus: `--menu-padding`,
+below. When the group has a route of its own, the title links to that page
+(the group button itself only opens the flyout). It looks like the other menus: `--menu-padding`,
 `--menu-min-width`, card radius, subtle border, overlay shadow.
 
 - Disclosure pattern, not `role="menu"`: the group button has

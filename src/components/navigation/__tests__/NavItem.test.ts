@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   path: "/",
   badge: 0,
   openModal: vi.fn(),
+  push: vi.fn(),
 }));
 
 vi.mock("vue-router", () => ({
@@ -15,6 +16,7 @@ vi.mock("vue-router", () => ({
       return mocks.path;
     },
   }),
+  useRouter: () => ({ push: mocks.push }),
 }));
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (key: string) => key }) }));
 vi.mock("@/main", () => ({ auth: { isAuthenticated: { value: true } } }));
@@ -27,6 +29,7 @@ vi.mock("@/composables/useMenuBadges", () => ({
 vi.mock("@/composables/useMenuHelper", () => ({
   MenuItemType: { modal: "modal", link: "link" },
   default: () => ({
+    getUrlForMenuItem: (destination: string) => `/${destination}`,
     checkIfRouteOrModal: (item: MenuItem) =>
       item.typeLink?.modal
         ? { menuItemType: "modal", action: mocks.openModal }
@@ -102,6 +105,7 @@ describe("NavItem", () => {
     mocks.path = "/";
     mocks.badge = 0;
     mocks.openModal.mockClear();
+    mocks.push.mockClear();
   });
 
   describe("a link", () => {
@@ -192,6 +196,25 @@ describe("NavItem", () => {
       expect(wrapper.emitted("toggle")).toHaveLength(1);
     });
 
+    it("goes to its own page when opened in the open menu", async () => {
+      await mountItem(organizationsGroup).find("button").trigger("click");
+      expect(mocks.push).toHaveBeenCalledWith("/venues");
+    });
+
+    it("stays on the page when closed in the open menu", async () => {
+      await mountItem(organizationsGroup, { open: true })
+        .find("button")
+        .trigger("click");
+      expect(mocks.push).not.toHaveBeenCalled();
+    });
+
+    it("goes nowhere when it has no page of its own", async () => {
+      await mountItem({ ...organizationsGroup, typeLink: {} } as MenuItem)
+        .find("button")
+        .trigger("click");
+      expect(mocks.push).not.toHaveBeenCalled();
+    });
+
     it("controls the list of its sub-items", () => {
       const wrapper = mountItem(organizationsGroup, { open: true });
       const listId = wrapper.find("button").attributes("aria-controls");
@@ -219,6 +242,22 @@ describe("NavItem", () => {
       it("shows its sub-items in a flyout", () => {
         const flyout = mountFlyout().find('[data-cy="nav-flyout"]');
         expect(flyout.findAll('[data-cy="menu-sub-item"]')).toHaveLength(1);
+      });
+
+      it("only opens its flyout when clicked, staying on the page", async () => {
+        await mountItem(organizationsGroup, { expanded: false })
+          .find("button")
+          .trigger("click");
+        expect(mocks.push).not.toHaveBeenCalled();
+      });
+
+      it("links the flyout title to the group's own page", async () => {
+        const wrapper = mountFlyout();
+        const title = wrapper.find('[data-test="nav-flyout-title"]');
+        expect(title.element.tagName).toBe("A");
+        expect(title.attributes("href")).toBe("/venues");
+        await title.trigger("click");
+        expect(wrapper.emitted("close")).toHaveLength(1);
       });
 
       it("titles the flyout with the group name", () => {
