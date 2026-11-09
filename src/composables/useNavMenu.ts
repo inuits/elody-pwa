@@ -29,6 +29,11 @@ const lastSegmentOf = (path: string) =>
 const destinationOf = (item: MenuItem) =>
   item.typeLink?.route?.destination as string | undefined;
 
+export const subItemsOf = (item: MenuItem): MenuItem[] =>
+  Object.values(item.subMenu ?? {}).filter(
+    (subItem: any) => subItem?.typeLink,
+  ) as MenuItem[];
+
 export const useNavMenu = () => {
   const route = useRoute();
 
@@ -40,11 +45,6 @@ export const useNavMenu = () => {
       return;
     }
   };
-
-  const subItemsOf = (item: MenuItem): MenuItem[] =>
-    Object.values(item.subMenu ?? {}).filter(
-      (subItem: any) => subItem?.typeLink,
-    ) as MenuItem[];
 
   const isVisible = (item: MenuItem) => {
     if (item.isLoggedIn && !auth.isAuthenticated.value) return false;

@@ -179,6 +179,27 @@ describe("NavRail", () => {
       expect(document.activeElement).toBe(groupButton().element);
     });
 
+    it("leaves Escape to whatever outside the menu has focus", async () => {
+      await mountRail();
+      await groupButton().trigger("click");
+      const outside = document.createElement("button");
+      document.body.appendChild(outside);
+      outside.focus();
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      await nextTick();
+      expect(isFlyoutOpen()).toBe(true);
+      expect(document.activeElement).toBe(outside);
+      outside.remove();
+    });
+
+    it("rises above page overlays while a flyout is open", async () => {
+      await mountRail();
+      expect(nav().classes()).toContain("z-navigation");
+      await groupButton().trigger("click");
+      expect(nav().classes()).toContain("z-context-menu");
+      expect(nav().classes()).not.toContain("z-navigation");
+    });
+
     it("closes the flyout on a click outside it", async () => {
       await mountRail();
       await groupButton().trigger("click");

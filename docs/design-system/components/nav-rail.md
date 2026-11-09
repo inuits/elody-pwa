@@ -20,6 +20,8 @@ a group shows a chevron and lists its sub-items indented below it.
 | `--nav-rail-pad`, `--nav-rail-gap`, `--nav-rail-logo` | rail spacing, logo size |
 | `--nav-rail-item-width`, `--nav-rail-item-height`, `--nav-rail-item-radius` | item size |
 | `--nav-sub-item-indent` | sub-item list indent |
+| `--nav-flyout-gap` | gap between the rail's edge and a group flyout |
+| `--nav-flyout-viewport-margin` | space a flyout keeps from the viewport edge |
 | `--transition-duration-ui`, `--ease-ui` | width transition (off with reduced motion) |
 
 ## Modes
@@ -45,7 +47,10 @@ below. It looks like the other menus: `--menu-padding`,
   `aria-expanded` and `aria-controls` pointing at the flyout, and the flyout
   holds plain links, so Tab moves through them in reading order (it is not
   teleported out of the rail).
-- Closes on Escape (focus back to the group button), a click outside it,
+- While a flyout is open the rail rises to the context-menu layer
+  (`z-context-menu`), so page dropdowns and overlays don't cover it.
+- Closes on Escape when focus is in the rail or nowhere (focus back to the
+  group button; Escape aimed at another dropdown or dialog is left alone), a click outside it,
   focus moving to another item, picking a sub-item, clicking the group
   again, or navigating.
 - The group's tooltip is hidden while its flyout is open.

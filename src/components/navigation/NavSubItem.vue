@@ -19,6 +19,10 @@
       <MenuBadge :count="badgeCount" />
       <unicon :name="Unicons.Plus.name" height="12" aria-hidden="true" />
     </button>
+    <span v-else :class="rowClass">
+      <span class="flex-1">{{ t(item.label ?? "") }}</span>
+      <MenuBadge :count="badgeCount" />
+    </span>
   </li>
 </template>
 

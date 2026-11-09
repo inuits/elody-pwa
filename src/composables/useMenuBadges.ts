@@ -12,6 +12,7 @@ import { useFiltersBaseNew } from "@/composables/useFiltersBaseNew";
 import { useSeenItems } from "@/composables/useSeenItems";
 import { seenTrackingOf } from "@/composables/useEntityPageConfig";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
+import { subItemsOf } from "@/composables/useNavMenu";
 
 type SeenCandidate = { id: string; activityAt: string | number | undefined };
 
@@ -22,11 +23,6 @@ const seenCandidates = ref<Record<string, SeenCandidate[]>>({});
 
 const badgeKeyOf = (badge: MenuBadge) =>
   [badge.source, badge.query, badge.filterQuery, badge.entityType].join("|");
-
-const subMenuItemsOf = (menuItem: MenuItem): MenuItem[] =>
-  Object.values(menuItem.subMenu ?? {}).filter(
-    (subMenuItem: any) => subMenuItem?.typeLink,
-  ) as MenuItem[];
 
 const seenTrackingForType = (entityType: string): SeenTracking | undefined => {
   const route = router
@@ -90,7 +86,7 @@ export const useMenuBadges = () => {
   const refreshBadges = async (menuItems: MenuItem[]) => {
     const badges = new Map<string, MenuBadge>();
     menuItems
-      .flatMap((menuItem) => [menuItem, ...subMenuItemsOf(menuItem)])
+      .flatMap((menuItem) => [menuItem, ...subItemsOf(menuItem)])
       .forEach((menuItem) => {
         if (menuItem.badge)
           badges.set(badgeKeyOf(menuItem.badge), menuItem.badge);
@@ -122,7 +118,7 @@ export const useMenuBadges = () => {
 
   const badgesInTotalOf = (menuItem: MenuItem): MenuBadge[] => {
     const menuItems = menuItem.showChildBadgeTotal
-      ? [menuItem, ...subMenuItemsOf(menuItem)]
+      ? [menuItem, ...subItemsOf(menuItem)]
       : [menuItem];
     return menuItems
       .map((item) => item.badge)

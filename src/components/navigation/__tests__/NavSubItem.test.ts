@@ -23,7 +23,9 @@ vi.mock("@/composables/useMenuHelper", () => ({
     checkIfRouteOrModal: (item: MenuItem) =>
       item.typeLink?.modal
         ? { menuItemType: "modal", action: mocks.openModal }
-        : {
+        : item.subMenu
+          ? undefined
+          : {
             menuItemType: "link",
             action: `/${item.typeLink?.route?.destination}`,
           },
@@ -73,6 +75,15 @@ describe("NavSubItem", () => {
     expect(mountSubItem(companies).find("a").attributes("aria-current")).toBe(
       "page",
     );
+  });
+
+  it("still shows its label when it has neither a route nor a modal", () => {
+    const deadEnd = {
+      label: "navigation.archive",
+      typeLink: { route: { destination: "archive" } },
+      subMenu: {},
+    } as unknown as MenuItem;
+    expect(mountSubItem(deadEnd).text()).toContain("navigation.archive");
   });
 
   it("opens its modal from a real button", async () => {

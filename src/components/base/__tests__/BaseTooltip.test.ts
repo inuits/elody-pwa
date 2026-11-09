@@ -75,6 +75,19 @@ describe("BaseTooltip", () => {
     expect(tooltip()).toBeNull();
   });
 
+  it("does not render its content while hidden", () => {
+    const content = vi.fn(() => "Hint");
+    mount(BaseTooltip, {
+      props: { position: "top", tooltipOffset: 0 },
+      slots: {
+        activator: `<template #activator="{ on }"><button v-on="on">i</button></template>`,
+        default: content,
+      },
+      attachTo: document.body,
+    }).unmount();
+    expect(content).not.toHaveBeenCalled();
+  });
+
   it("shows at once when its show delay is 0", async () => {
     const wrapper = mount(BaseTooltip, {
       props: { position: "top", tooltipOffset: 0, showDelay: 0 },

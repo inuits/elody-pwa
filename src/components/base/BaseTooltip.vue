@@ -18,11 +18,10 @@
       <Teleport
         defer
         :to="someModalIsOpened ? modalTeleportTarget() : 'body'"
-        v-if="hasContent() && hover"
+        v-if="hover && hasContent()"
       >
         <div
           ref="defaultSlotRef"
-          v-if="hasContent() && hover"
           :id="tooltipId"
           role="tooltip"
           class="rounded-tooltip bg-surface-inverted text-neutral-white text-tooltip p-(--tooltip-padding) z-tooltip"
