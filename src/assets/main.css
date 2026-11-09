@@ -212,9 +212,6 @@
   --color-text-on-inverted: #FFFFFF;
   --color-text-link: var(--color-text-light);
   --color-text-link-hover: var(--color-accent);
-  /* Menu items (left navigation): coloured like links, never underlined */
-  --color-nav-item: var(--color-text-link);
-  --color-nav-item-hover: var(--color-text-link-hover);
   --color-accent-on-inverted: #7DE3EA;
 
   /* Borders */
@@ -345,7 +342,11 @@
   --nav-rail-item-width: 34px;
   --nav-rail-item-height: 30px;
   --nav-rail-item-radius: 7px;
+  --nav-rail-avatar-size: 22px;
   --nav-flyout-width: 320px;
+  --nav-sub-item-indent: 16px;
+  --nav-flyout-gap: 4px;
+  --nav-flyout-viewport-margin: 8px;
   --topbar-pad: 10px 18px;
   --filter-panel-width: 250px;
   --filter-pane-width: 300px;
@@ -456,8 +457,8 @@
   --split-button-divider: color-mix(in srgb, var(--color-neutral-white) 40%, transparent);
   --split-button-chevron-padding-x: 8px;
 
-  /* Tooltip (components/tooltip.md); the 300ms show delay is SHOW_DELAY_MS
-     in BaseTooltip.vue */
+  /* Tooltip (components/tooltip.md); the 300ms show delay is the showDelay
+     prop of BaseTooltip.vue */
   --text-tooltip: var(--text-label);
   --tooltip-padding: 4px 8px;
   --radius-tooltip: var(--radius-button);
@@ -714,9 +715,6 @@ body {
   --color-text-accent-strong: var(--color-accent-dark);
   --color-text-link: var(--color-text-light);
   --color-text-link-hover: var(--color-accent);
-  /* Menu items (left navigation): coloured like links, never underlined */
-  --color-nav-item: var(--color-text-link);
-  --color-nav-item-hover: var(--color-text-link-hover);
   --color-border-panel: var(--color-accent-light-strong);
   --color-commit: var(--color-accent-accent);
   --color-focus-ring: var(--color-accent-accent);

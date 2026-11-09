@@ -11,6 +11,7 @@ import { sha256 } from "crypto-hash";
 import "./assets/main.css";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
+import { uniLeftIndentAlt, uniRightIndentAlt } from "vue-unicons/dist/icons";
 import { addComponentToRoutes } from "./views/router";
 import { createApp } from "vue";
 import { createHead } from "@vueuse/head";
@@ -70,7 +71,7 @@ const applyCustomization = (rulesObject: any) => {
 };
 
 const start = async (): Promise<void> => {
-  Unicon.add(Object.values(Unicons));
+  Unicon.add([...Object.values(Unicons), uniLeftIndentAlt, uniRightIndentAlt]);
 
   const applicationDetails = await getApplicationDetails();
   const { translations, version, urlMapping } = applicationDetails;

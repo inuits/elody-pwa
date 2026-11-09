@@ -23,6 +23,14 @@ const getWrapper = () =>
     attachTo: document.body,
   });
 
+const toListeners = (on: Record<string, () => void>) =>
+  Object.fromEntries(
+    Object.entries(on).map(([event, handler]) => [
+      `on${event[0].toUpperCase()}${event.slice(1)}`,
+      handler,
+    ]),
+  );
+
 const tooltip = () => document.body.querySelector('[role="tooltip"]');
 
 describe("BaseTooltip", () => {
@@ -42,6 +50,60 @@ describe("BaseTooltip", () => {
     await nextTick();
     return wrapper;
   };
+
+  it("hides when its content goes away while shown", async () => {
+    const { defineComponent, h, ref } = await import("vue");
+    const showLabel = ref(true);
+    const Host = defineComponent(
+      () => () =>
+        h(
+          BaseTooltip,
+          { position: "top", tooltipOffset: 0 },
+          {
+            activator: ({ on }: { on: Record<string, () => void> }) =>
+              h("button", { "data-cy": "trigger", ...toListeners(on) }, "i"),
+            ...(showLabel.value ? { default: () => "Contacts" } : {}),
+          },
+        ),
+    );
+    const wrapper = mount(Host, { attachTo: document.body });
+    await wrapper.find('[data-cy="trigger"]').trigger("mouseenter");
+    vi.advanceTimersByTime(300);
+    await nextTick();
+    showLabel.value = false;
+    await nextTick();
+    expect(tooltip()).toBeNull();
+  });
+
+  it("does not render its content while hidden", () => {
+    const content = vi.fn(() => "Hint");
+    mount(BaseTooltip, {
+      props: { position: "top", tooltipOffset: 0 },
+      slots: {
+        activator: `<template #activator="{ on }"><button v-on="on">i</button></template>`,
+        default: content,
+      },
+      attachTo: document.body,
+    }).unmount();
+    expect(content).not.toHaveBeenCalled();
+  });
+
+  it("shows at once when its show delay is 0", async () => {
+    const wrapper = mount(BaseTooltip, {
+      props: { position: "top", tooltipOffset: 0, showDelay: 0 },
+      slots: {
+        activator: `<template #activator="{ on }">
+          <button data-cy="trigger" v-on="on">i</button>
+        </template>`,
+        default: "Contacts",
+      },
+      attachTo: document.body,
+    });
+    await wrapper.find('[data-cy="trigger"]').trigger("mouseenter");
+    vi.advanceTimersByTime(0);
+    await nextTick();
+    expect(tooltip()).not.toBeNull();
+  });
 
   it("waits 300ms before showing on hover", async () => {
     const wrapper = getWrapper();

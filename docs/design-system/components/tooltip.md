@@ -22,7 +22,8 @@ A small inverted surface with white text, placed next to its trigger.
 | `--tooltip-padding` | padding |
 | `--radius-tooltip` | corners |
 
-No shadow. The 300ms show delay is `SHOW_DELAY_MS` in the component.
+No shadow. The show delay is the `showDelay` prop: 300ms by default, 0 on
+the nav rail, where the tooltip is the only visible name of an icon.
 
 ## States
 | State | Trigger |

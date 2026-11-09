@@ -329,7 +329,6 @@ import { useApp } from "@/composables/useApp";
 import { type FormContext, useForm } from "vee-validate";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useBaseNotification } from "@/composables/useBaseNotification";
-import useMenuHelper from "@/composables/useMenuHelper";
 import useTenant from "@/composables/useTenant";
 import { apolloClient } from "@/main";
 import { useMutation } from "@vue/apollo-composable";
@@ -742,7 +741,6 @@ const isButtonDisabled = computed((): boolean =>
 const formClosing = ref<boolean>(false);
 const submitErrors = ref<string | undefined>(undefined);
 const createdEntity = ref<Entity | null>(null);
-const { changeExpandedState } = useMenuHelper();
 const isLoading = computed(() => {
   if (isPerformingAction.value) return true;
   // A caller-supplied field set (bulk edit) has no fetched form behind it.
@@ -1717,7 +1715,6 @@ const seedFormValues = async () => {
 
 const closeAndDeleteForm = () => {
   closeModal(TypeModals.DynamicForm);
-  changeExpandedState(false);
   deleteForm(formId.value);
   resetUpload();
 };

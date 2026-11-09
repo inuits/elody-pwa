@@ -16,9 +16,14 @@
         <notifications class="pt-2" group="globalNotification" width="700" />
       </div>
     </div>
-    <the-navigation class="navbar" />
+    <the-navigation />
     <div>
-      <div class="bg-background-normal pl-(--nav-rail-width) h-screen flex flex-col">
+      <div
+        :class="[
+          'bg-background-normal h-screen flex flex-col transition-[padding] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
+          isMenuOpen ? 'pl-(--nav-flyout-width)' : 'pl-(--nav-rail-width)',
+        ]"
+      >
         <the-header />
         <div :class="['grow overflow-hidden min-h-0', { 'h-0': isSingle }]">
           <router-view />
@@ -39,12 +44,13 @@
 <script setup lang="ts">
 import AppModals from "@/components/AppModals.vue";
 import TheHeader from "@/components/TheHeader.vue";
-import TheNavigation from "@/components/menu/MenuNav.vue";
+import TheNavigation from "@/components/navigation/NavRail.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useNavMenu } from "@/composables/useNavMenu";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
@@ -56,6 +62,7 @@ const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
 const { someModalIsOpened, topmostOpenDialog } = useBaseModal();
 const { isBlocking } = useBlockingLoader();
+const { isOpen: isMenuOpen } = useNavMenu();
 const config: any = inject("config");
 
 useHead({
@@ -79,15 +86,6 @@ onMounted(() => {
 
 <style>
 @import "@/assets/main.css";
-
-.navbar:hover ~ .move-by-nav,
-.navbar:hover + .move-by-nav .move-by-nav {
-  -webkit-transition: padding-left 300ms ease-in-out;
-  -moz-transition: padding-left 300ms ease-in-out;
-  -o-transition: padding-left 300ms ease-in-out;
-  transition: padding-left 300ms ease-in-out;
-  padding-left: 20rem;
-}
 
 .notification-title {
   @apply text-xl;
