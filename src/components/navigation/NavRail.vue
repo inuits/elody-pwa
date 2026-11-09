@@ -4,7 +4,7 @@
     data-cy="menu-nav"
     :aria-label="t('navigation.main')"
     :class="[
-      'fixed left-0 top-0 h-screen flex flex-col overflow-x-hidden bg-surface transition-[width] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
+      'fixed left-0 top-0 h-screen flex flex-col overflow-x-hidden bg-surface border-r border-border-subtle transition-[width] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
       isOpen ? 'w-(--nav-flyout-width)' : 'w-(--nav-rail-width)',
       flyoutGroup ? 'z-context-menu' : 'z-navigation',
     ]"

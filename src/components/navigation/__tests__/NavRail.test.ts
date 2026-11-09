@@ -119,6 +119,18 @@ describe("NavRail", () => {
     expect(nav().attributes("aria-label")).toBe("navigation.main");
   });
 
+  it("is separated from the page by a subtle border, open or closed", async () => {
+    await mountRail();
+    expect(nav().classes()).toEqual(
+      expect.arrayContaining(["border-r", "border-border-subtle"]),
+    );
+    await setMode("expanded");
+    await nextTick();
+    expect(nav().classes()).toEqual(
+      expect.arrayContaining(["border-r", "border-border-subtle"]),
+    );
+  });
+
   it("lists the menu items in a list", async () => {
     await mountRail();
     expect(
