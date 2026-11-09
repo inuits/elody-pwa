@@ -6,7 +6,11 @@
     :options="dropdownOptions"
     :select-type="selectType"
     :disabled="disabled"
-    :create-option-config="{ canCreateOption }"
+    :create-option-config="{
+      canCreateOption,
+      addOnBlur: canCreateOption,
+      editOnTagClick: canCreateOption,
+    }"
     :disable-virtual-keyboard-context="disableVirtualKeyboardContext"
     @search-change="
       (value: string) => {

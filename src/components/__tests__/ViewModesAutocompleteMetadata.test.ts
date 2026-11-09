@@ -84,3 +84,40 @@ describe("ViewModesAutocompleteMetadata — multi-select setter", () => {
     expect(wrapper.emitted("update:modelValue")?.at(-1)).toEqual(["venue_admin"]);
   });
 });
+
+describe("ViewModesAutocompleteMetadata — free-text behaviour", () => {
+  const mountWithCreate = (canCreateOption: boolean) =>
+    mount(ViewModesAutocompleteMetadata, {
+      props: {
+        modelValue: [],
+        metadataDropdownOptions: [],
+        mode: "edit",
+        canCreateOption,
+      },
+      global: {
+        stubs: { BaseInputAutocomplete: true },
+      },
+    });
+
+  it("enables add-on-blur and edit-on-tag-click when options can be created", () => {
+    const wrapper = mountWithCreate(true);
+    expect(
+      wrapper.findComponent({ name: "BaseInputAutocomplete" }).props(
+        "createOptionConfig",
+      ),
+    ).toEqual({ canCreateOption: true, addOnBlur: true, editOnTagClick: true });
+  });
+
+  it("keeps both disabled when options cannot be created", () => {
+    const wrapper = mountWithCreate(false);
+    expect(
+      wrapper.findComponent({ name: "BaseInputAutocomplete" }).props(
+        "createOptionConfig",
+      ),
+    ).toEqual({
+      canCreateOption: false,
+      addOnBlur: false,
+      editOnTagClick: false,
+    });
+  });
+});

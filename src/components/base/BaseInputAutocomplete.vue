@@ -23,6 +23,7 @@
     valueProp="value"
     @search-change="handleSearchChange"
     :on-create="handleTagCreate"
+    @close="handleClose"
   >
     <template v-slot:option="{ option }">
       <div
@@ -45,9 +46,10 @@
     </template>
     <template v-slot:tag="{ option, handleTagRemove, disabled }">
       <div
-        class="cursor-default"
+        data-cy="autocomplete-tag"
         :class="[
           classes.tag,
+          isTagEditable(option) ? 'cursor-text' : 'cursor-default',
           { 'pr-2': !isEdit },
           {
             'hover:!bg-background-normal hover:!text-accent-accent transition-colors duration-300 !cursor-pointer':
@@ -56,7 +58,7 @@
               props.autocompleteStyle !== 'readOnlyAsPlainText',
           },
         ]"
-        @click.stop="() => emit('handleTagClick', option)"
+        @click.stop="() => handleTagClick(option)"
       >
         {{ stripHighlightTags(option.label) }}
         <span v-if="option.secondaryLabel" class="opacity-70">
@@ -137,6 +139,8 @@ const props = withDefaults(
     createOptionConfig?: {
       canCreateOption: boolean;
       createPromptTranslationKey?: string;
+      addOnBlur?: boolean;
+      editOnTagClick?: boolean;
     };
     searchFilter?: (option: any, query: string, context?: any) => any;
     displayInputForTag?: boolean;
@@ -323,6 +327,44 @@ watch(
 const handleTagCreate = async (option: any) => {
   emit("addOption", option);
   return false;
+};
+
+const canEditFreeText = computed(
+  () => props.createOptionConfig.canCreateOption && !props.disabled,
+);
+
+const toFreeTextOption = (
+  search: unknown,
+  selected: DropdownOption[] | undefined,
+): DropdownOption | undefined => {
+  const text = String(search ?? "").trim();
+  if (!text) return undefined;
+  if (selected?.some((option) => option.value === text)) return undefined;
+  return { label: text, value: text } as DropdownOption;
+};
+
+const handleClose = (multiselect: { search?: string } | undefined) => {
+  if (!canEditFreeText.value || !props.createOptionConfig.addOnBlur) return;
+  const option = toFreeTextOption(multiselect?.search, inputValue.value);
+  if (option) emit("addOption", option as any);
+};
+
+const isTagEditable = (option: DropdownOption): boolean =>
+  canEditFreeText.value &&
+  !!props.createOptionConfig.editOnTagClick &&
+  !props.options?.some((predefined) => predefined.value === option.value);
+
+const handleTagClick = (option: DropdownOption) => {
+  emit("handleTagClick", option as any);
+  if (!isTagEditable(option) || !multiselectRef.value) return;
+  const remaining = (inputValue.value ?? []).filter(
+    (selected) => selected.value !== option.value,
+  );
+  const pending = toFreeTextOption(multiselectRef.value.search, remaining);
+  inputValue.value = pending ? [...remaining, pending] : remaining;
+  multiselectRef.value.search = String(option.label ?? option.value);
+  multiselectRef.value.focus?.();
+  multiselectRef.value.open?.();
 };
 
 const handleSearchChange = (value: string) => {
