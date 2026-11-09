@@ -48,8 +48,8 @@ describe("useNavMenu", () => {
 
   describe("mode", () => {
     it("is closed by default", async () => {
-      const { useNavMenu, NavMode } = await loadComposable();
-      expect(useNavMenu().mode.value).toBe(NavMode.Collapsed);
+      const { useNavMenu } = await loadComposable();
+      expect(useNavMenu().isOpen.value).toBe(false);
     });
 
     it("remembers the chosen mode across page loads", async () => {
@@ -57,13 +57,13 @@ describe("useNavMenu", () => {
       first.useNavMenu().setMode(first.NavMode.Expanded);
 
       const second = await loadComposable();
-      expect(second.useNavMenu().mode.value).toBe(second.NavMode.Expanded);
+      expect(second.useNavMenu().isOpen.value).toBe(true);
     });
 
     it("ignores an unknown stored mode", async () => {
       localStorage.setItem("elody.navMode", "sideways");
-      const { useNavMenu, NavMode } = await loadComposable();
-      expect(useNavMenu().mode.value).toBe(NavMode.Collapsed);
+      const { useNavMenu } = await loadComposable();
+      expect(useNavMenu().isOpen.value).toBe(false);
     });
 
     it("is open only while the menu is kept open", async () => {
@@ -76,23 +76,23 @@ describe("useNavMenu", () => {
 
     it("falls back to closed for the retired hover mode", async () => {
       localStorage.setItem("elody.navMode", "hover");
-      const { useNavMenu, NavMode } = await loadComposable();
-      expect(useNavMenu().mode.value).toBe(NavMode.Collapsed);
+      const { useNavMenu } = await loadComposable();
+      expect(useNavMenu().isOpen.value).toBe(false);
     });
   });
 
   describe("subItemsOf", () => {
     it("keeps only children that have a link config", async () => {
-      const { useNavMenu } = await loadComposable();
+      const { subItemsOf } = await loadComposable();
       const companies = link("companies");
-      expect(
-        useNavMenu().subItemsOf(group({ venues: null, companies })),
-      ).toEqual([companies]);
+      expect(subItemsOf(group({ venues: null, companies }))).toEqual([
+        companies,
+      ]);
     });
 
     it("returns nothing for a plain link", async () => {
-      const { useNavMenu } = await loadComposable();
-      expect(useNavMenu().subItemsOf(link("library"))).toEqual([]);
+      const { subItemsOf } = await loadComposable();
+      expect(subItemsOf(link("library"))).toEqual([]);
     });
   });
 

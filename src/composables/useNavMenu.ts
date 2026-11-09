@@ -60,5 +60,5 @@ export const useNavMenu = () => {
     );
   };
 
-  return { mode, isOpen, setMode, subItemsOf, isVisible, isCurrent };
+  return { isOpen, setMode, isVisible, isCurrent };
 };
