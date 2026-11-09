@@ -45,12 +45,8 @@
     </div>
     <span
       aria-current="page"
-      :class="[
-        'flex min-w-0 items-center gap-1.5 font-bold text-text-body',
-        isCompact
-          ? 'basis-full text-heading'
-          : 'rounded-pill bg-surface-muted p-(--crumb-pad) text-table',
-      ]"
+      class="flex min-w-0 items-center gap-1.5 font-bold text-text-body"
+      :class="currentCrumbClasses"
     >
       <MetadataFormatterPill
         v-if="typePillLabel"
@@ -137,6 +133,14 @@ const resolveTitle = (
   }
   return t(value);
 };
+
+const currentCrumbClasses = computed(() => {
+  const styles = {
+    title: "basis-full text-heading",
+    pill: "rounded-pill bg-surface-muted p-(--crumb-pad) text-table",
+  };
+  return isCompact.value ? styles.title : styles.pill;
+});
 
 const showHistory = ref<boolean>(false);
 const breadCrumbRoutesExist = computed(

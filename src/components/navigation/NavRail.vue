@@ -11,19 +11,8 @@
     data-cy="menu-nav"
     :aria-label="t('navigation.main')"
     :inert="(isCompact && !isDrawerOpen) || undefined"
-    :class="[
-      'fixed left-0 top-0 h-screen max-md:h-dvh flex flex-col overflow-x-hidden bg-surface border-r border-border-subtle duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
-      isCompact
-        ? [
-            'w-(--nav-drawer-width) max-w-full z-navigation transition-transform',
-            isDrawerOpen ? 'shadow-overlay' : '-translate-x-full',
-          ]
-        : [
-            'transition-[width]',
-            isOpen ? 'w-(--nav-flyout-width)' : 'w-(--nav-rail-width)',
-            flyoutGroup ? 'z-context-menu' : 'z-navigation',
-          ],
-    ]"
+    class="fixed left-0 top-0 h-screen max-md:h-dvh flex flex-col overflow-x-hidden bg-surface border-r border-border-subtle duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none"
+    :class="navClasses"
     @focusout="onFocusOut"
   >
     <div
@@ -153,6 +142,20 @@ const flyoutGroup = ref<string>();
 
 const expanded = computed(() => isOpen.value || isCompact.value);
 const visibleItems = computed(() => menuItems.value.filter(isVisible));
+const navClasses = computed(() => {
+  const styles = {
+    drawer: [
+      "w-(--nav-drawer-width) max-w-full z-navigation transition-transform",
+      isDrawerOpen.value ? "shadow-overlay" : "-translate-x-full",
+    ],
+    rail: [
+      "transition-[width]",
+      isOpen.value ? "w-(--nav-flyout-width)" : "w-(--nav-rail-width)",
+      flyoutGroup.value ? "z-context-menu" : "z-navigation",
+    ],
+  };
+  return isCompact.value ? styles.drawer : styles.rail;
+});
 const modeToggle = computed(() =>
   isOpen.value
     ? { icon: "left-indent-alt", label: t("navigation.menu-mode.collapse") }

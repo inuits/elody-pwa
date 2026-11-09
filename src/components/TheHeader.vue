@@ -1,11 +1,7 @@
 <template>
   <div
-    :class="[
-      'z-header flex items-center gap-2 bg-surface flex-wrap min-[1400px]:flex-nowrap',
-      isCompact
-        ? 'm-(--gutter-panels) mb-0 p-(--panel-header-pad) rounded-card border border-border-subtle *:ml-0 *:pl-0'
-        : 'p-(--topbar-pad) border-b border-border-subtle',
-    ]"
+    class="z-header flex items-center gap-2 bg-surface flex-wrap min-[1400px]:flex-nowrap"
+    :class="headerClasses"
   >
     <!-- ui_kits AppShell: a flat full-width top bar; a card below md -->
     <EntityNavigationArrows v-if="!isCompact" class="mr-2" />
@@ -76,6 +72,13 @@ const router = useRouter();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
 const { isCompact } = useNavMenu();
+const headerClasses = computed(() => {
+  const styles = {
+    card: "m-(--gutter-panels) mb-0 p-(--panel-header-pad) rounded-card border border-border-subtle *:ml-0 *:pl-0",
+    bar: "p-(--topbar-pad) border-b border-border-subtle",
+  };
+  return isCompact.value ? styles.card : styles.bar;
+});
 const {
   actions: contextMenuActions,
   hasEditMetadataButton: configEditMetadataButton,
