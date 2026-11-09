@@ -26,8 +26,8 @@ export default meta;
 type Story = StoryObj<typeof ListItem>;
 
 const teaser = (title: string, secondary: string) => [
-  { label: "Titel", key: "title", value: title },
-  { label: "Auteur", key: "author", value: secondary },
+  { label: "Title", key: "title", value: title },
+  { label: "Author", key: "author", value: secondary },
 ];
 
 const base = {
@@ -50,8 +50,8 @@ export const Default: Story = {
     setup: () => ({
       base,
       rows: [
-        teaser("Verhalen uit de Noordzee", "Jan Persoon"),
-        teaser("Kustvisserij in de 20e eeuw", "Marie Vermeulen"),
+        teaser("Tales from the North Sea", "Jan Persoon"),
+        teaser("Coastal Fishing in the 20th Century", "Marie Vermeulen"),
       ],
       coverage: ListItemCoverageTypes.OneListItem,
     }),

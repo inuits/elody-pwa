@@ -47,17 +47,17 @@ export const Default: Story = {
     },
     template: `
       <div style="display:flex;flex-direction:column;gap:12px">
-        <base-input-checkbox v-bind="base" v-model="unchecked" label="Niet aangevinkt" />
-        <base-input-checkbox v-bind="base" v-model="checked" label="Aangevinkt" />
+        <base-input-checkbox v-bind="base" v-model="unchecked" label="Unchecked" />
+        <base-input-checkbox v-bind="base" v-model="checked" label="Checked" />
         <span ref="indeterminateBox">
-          <base-input-checkbox v-bind="base" v-model="indeterminate" label="Gedeeltelijke selectie" />
+          <base-input-checkbox v-bind="base" v-model="indeterminate" label="Partial selection" />
         </span>
-        <base-input-checkbox v-bind="base" :model-value="false" label="Uitgeschakeld" disabled />
-        <base-input-checkbox v-bind="base" :model-value="true" label="Uitgeschakeld en aangevinkt" disabled />
+        <base-input-checkbox v-bind="base" :model-value="false" label="Disabled" disabled />
+        <base-input-checkbox v-bind="base" :model-value="true" label="Disabled and checked" disabled />
         <span style="display:flex;align-items:center;gap:8px">
-          <base-input-checkbox v-bind="base" :model-value="false" aria-label="Selecteer rij" />
+          <base-input-checkbox v-bind="base" :model-value="false" aria-label="Select row" />
           <span style="font-size:var(--text-hint);color:var(--color-text-secondary)">
-            no visible label — carries aria-label="Selecteer rij"
+            no visible label — carries aria-label="Select row"
           </span>
         </span>
       </div>`,
@@ -76,6 +76,6 @@ export const FocusRing: Story = {
   render: () => ({
     components: { BaseInputCheckbox },
     setup: () => ({ base }),
-    template: `<base-input-checkbox v-bind="base" :model-value="false" label="Tab hierheen" />`,
+    template: `<base-input-checkbox v-bind="base" :model-value="false" label="Tab here" />`,
   }),
 };

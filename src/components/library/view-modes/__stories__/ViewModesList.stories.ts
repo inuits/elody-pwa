@@ -40,17 +40,17 @@ const entity = (id: string, title: string, author: string) => ({
   uuid: id,
   type: Entitytyping.Asset,
   teaserMetadata: {
-    title: { key: "title", label: "Titel", __typename: "Metadata" },
-    author: { key: "author", label: "Auteur", __typename: "Metadata" },
+    title: { key: "title", label: "Title", __typename: "Metadata" },
+    author: { key: "author", label: "Author", __typename: "Metadata" },
   },
   intialValues: { title, author },
   relationValues: {},
 });
 
 const entities = [
-  entity("e1", "Verhalen uit de Noordzee", "Jan Persoon"),
-  entity("e2", "Kustvisserij in de 20e eeuw", "Marie Vermeulen"),
-  entity("e3", "Getijdenboek van de Schelde", "Pieter Claes"),
+  entity("e1", "Tales from the North Sea", "Jan Persoon"),
+  entity("e2", "Coastal Fishing in the 20th Century", "Marie Vermeulen"),
+  entity("e3", "A Book of Hours of the Scheldt", "Pieter Claes"),
 ];
 
 const base = {

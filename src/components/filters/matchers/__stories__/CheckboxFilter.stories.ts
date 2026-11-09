@@ -12,9 +12,9 @@ const meta: Meta<typeof CheckboxFilter> = {
         component:
           "The checkbox-list matcher with its facet counts. The count is part " +
           "of the option, not decoration: it sits in the accessible name — " +
-          "\"BOEK, 812 resultaten\" — while the visible numeral is a muted " +
+          "\"BOOK, 812 results\" — while the visible numeral is a muted " +
           "chip on the right. An option the facets know nothing about simply " +
-          "shows no number. Picking never applies; that stays with Pas toe.",
+          "shows no number. Picking never applies; that stays with Apply.",
       },
     },
   },
@@ -31,17 +31,17 @@ export const WithCounts: Story = {
     setup() {
       return {
         options: [
-          option("boek", "BOEK"),
-          option("tijdschrift", "Tijdschrift"),
+          option("book", "BOOK"),
+          option("magazine", "Magazine"),
           option("dvd", "DVD"),
-          option("bladmuziek", "Bladmuziek"),
+          option("sheet-music", "Sheet music"),
         ],
         counts: new Map([
-          ["boek", 812],
-          ["tijdschrift", 64],
+          ["book", 812],
+          ["magazine", 64],
           ["dvd", 7],
         ]),
-        filter: { inputFromState: { value: ["boek"] } },
+        filter: { inputFromState: { value: ["book"] } },
       };
     },
     template: `

@@ -45,13 +45,13 @@ export const Default: Story = {
     components: { FolderTreeLine },
     setup() {
       provide("updateSelectedDirectory", () => undefined);
-      provide("selectedDirectory", dir("/archief", "archief", true));
+      provide("selectedDirectory", dir("/archive", "archive", true));
       return {
         QUERY,
         roots: [
-          dir("/archief", "archief", true),
-          dir("/aanwinsten-2026", "aanwinsten-2026", true),
-          dir("/losse-scans", "losse-scans", false),
+          dir("/archive", "archive", true),
+          dir("/acquisitions-2026", "acquisitions-2026", true),
+          dir("/loose-scans", "loose-scans", false),
         ],
       };
     },

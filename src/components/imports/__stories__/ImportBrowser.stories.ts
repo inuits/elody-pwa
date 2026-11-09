@@ -40,20 +40,20 @@ export const Default: Story = {
     setup() {
       provide("updateSelectedDirectory", () => undefined);
       provide("selectedDirectory", {
-        id: "/archief",
-        dir: "archief",
+        id: "/archive",
+        dir: "archive",
         parent: "/",
         has_subdirs: true,
       });
-      const selected = ref("editie-2026-08.zip");
+      const selected = ref("issue-2026-08.zip");
       return {
         QUERY,
         selected,
         roots: [
-          { id: "/archief", dir: "archief", parent: "/", has_subdirs: true },
-          { id: "/instroom", dir: "instroom", parent: "/", has_subdirs: false },
+          { id: "/archive", dir: "archive", parent: "/", has_subdirs: true },
+          { id: "/intake", dir: "intake", parent: "/", has_subdirs: false },
         ],
-        items: ["editie-2026-07.zip", "editie-2026-08.zip", "los-nummer.pdf"],
+        items: ["issue-2026-07.zip", "issue-2026-08.zip", "single-issue.pdf"],
       };
     },
     template: `

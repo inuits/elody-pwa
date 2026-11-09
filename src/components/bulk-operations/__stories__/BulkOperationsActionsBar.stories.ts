@@ -15,9 +15,9 @@ const meta: Meta<typeof BulkOperationsActionsBar> = {
       description: {
         component:
           "Bulk actions on the current selection. The bar is a toolbar named " +
-          '"Acties op selectie" and its count is a live region, so a screen ' +
+          '"Actions on selection" and its count is a live region, so a screen ' +
           "reader hears the selection change instead of having to go looking " +
-          "for it. Wis selectie and Selecteer pagina are real buttons — they " +
+          "for it. Clear selection and Select page are real buttons — they " +
           "were clickable spans, which the keyboard could not reach at all.",
       },
     },
@@ -55,8 +55,8 @@ export const Default: Story = {
 };
 
 /**
- * With a selection the count takes the panel-header pair, and Wis selectie
- * and Selecteer pagina appear — both real buttons, both tabbable.
+ * With a selection the count takes the panel-header pair, and Clear selection
+ * and Select page appear — both real buttons, both tabbable.
  */
 export const Selected: Story = {
   render: () => ({

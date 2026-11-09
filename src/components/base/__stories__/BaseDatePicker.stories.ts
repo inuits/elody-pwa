@@ -13,10 +13,10 @@ const meta: Meta<typeof BaseDatePicker> = {
           "Calendar popup for date and datetime fields, themed through the " +
           "library's own --dp-* variables rather than fought with overrides. " +
           "Typing stays first-class — the placeholder is the format itself, " +
-          "dd-mm-jjjj, and typed input parses on blur. Today wears a " +
+          "dd-mm-yyyy, and typed input parses on blur. Today wears a " +
           "commit-teal ring; the selected day is the tenant accent with a " +
           "white numeral, so the calendar follows the tenant toolbar. " +
-          "Picking fills the input; the commit stays with Bewaar.",
+          "Picking fills the input; the commit stays with Save.",
       },
     },
   },
@@ -31,7 +31,7 @@ export const Default: Story = {
     setup: () => ({ date: ref("2026-08-18") }),
     template: `
       <div style="max-width:280px;padding-bottom:420px">
-        <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">Datum</p>
+        <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">Date</p>
         <base-date-picker v-model="date" type="date" />
       </div>`,
   }),
@@ -44,7 +44,7 @@ export const WithTime: Story = {
     setup: () => ({ date: ref("2026-08-18T10:30:00+00:00") }),
     template: `
       <div style="max-width:280px;padding-bottom:460px">
-        <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">Datum en tijd</p>
+        <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">Date and time</p>
         <base-date-picker v-model="date" type="datetime-local" />
       </div>`,
   }),

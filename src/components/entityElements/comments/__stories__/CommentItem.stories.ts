@@ -35,21 +35,21 @@ export const Thread: Story = {
       open: comment(
         "Marie Vermeulen",
         "2026-08-18T09:14:00",
-        "<p>De uitgever klopt niet — dit is de heruitgave van 1994.</p>",
+        "<p>The publisher is wrong — this is the 1994 reissue.</p>",
       ),
       reply: comment(
         "Jan Persoon",
         "2026-08-18T10:02:00",
-        "<p>Klopt, ik pas het aan.</p>",
+        "<p>Right, I'll fix it.</p>",
       ),
       resolved: comment(
         "Marie Vermeulen",
         "2026-08-12T15:40:00",
-        "<p>Ontbrekend ISBN aangevuld.</p>",
+        "<p>Added the missing ISBN.</p>",
       ),
     }),
     template: `
-      <div role="log" aria-label="Opmerkingen"
+      <div role="log" aria-label="Comments"
            style="display:flex;flex-direction:column;gap:8px;max-width:520px">
         <comment-item :comment="open" status="open" :reply-count="1" :clickable="true" :can-edit="true" />
         <div style="margin-left:12px;border-left:1px solid var(--color-border-subtle);padding-left:12px">

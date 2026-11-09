@@ -49,10 +49,10 @@ export const OnAccent: Story = {
     template: `
       <div style="display:flex;gap:16px">
         <span style="display:inline-flex;align-items:center;gap:6px;background:var(--color-accent);color:var(--color-text-on-accent);padding:6px 14px;border-radius:var(--radius-button);font-size:var(--text-ui);font-weight:700">
-          <spinner-loader theme="inherit" :dimensions="4" /> Bezig met opslaan
+          <spinner-loader theme="inherit" :dimensions="4" /> Saving
         </span>
         <span style="display:inline-flex;align-items:center;gap:6px;background:var(--color-surface);border:1px solid var(--color-border-default);padding:6px 14px;border-radius:var(--radius-input);font-size:var(--text-ui)">
-          <spinner-loader :dimensions="4" /> Laden
+          <spinner-loader :dimensions="4" /> Loading
         </span>
       </div>`,
   }),

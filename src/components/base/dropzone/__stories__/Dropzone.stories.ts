@@ -36,7 +36,7 @@ const fileRow = (name: string, size: string, progress: number, state: string) =>
       </div>
     </div>
     ${state}
-    <button type="button" aria-label="Verwijder bestand"
+    <button type="button" aria-label="Remove file"
             style="flex:none;color:var(--color-text-subtle)">✕</button>
   </li>`;
 
@@ -46,12 +46,12 @@ export const Progress: Story = {
     template: `
       <div style="max-width:520px;display:flex;flex-direction:column;gap:16px">
         <div style="height:120px">
-          <dropzone-view :model-value="undefined" dropzone-label="Sleep bestanden hierheen of blader" :is-validation="false" :file-count="0" style="" />
+          <dropzone-view :model-value="undefined" dropzone-label="Drag files here or browse" :is-validation="false" :file-count="0" style="" />
         </div>
 
         <p role="status" style="padding:6px 12px;background:var(--color-surface-panel-header);
            color:var(--color-text-panel-header);border-radius:var(--radius-input);font-size:var(--text-ui);font-weight:700">
-          2 van 4 geüpload
+          2 of 4 uploaded
         </p>
 
         <ul style="display:flex;flex-direction:column;gap:8px">
@@ -62,11 +62,11 @@ export const Progress: Story = {
                      border:1px solid var(--color-danger);border-radius:var(--radius-input)">
             <div style="flex:1;min-width:0">
               <p style="font-size:var(--text-table);color:var(--color-danger)">
-                scan-004.tiff <span style="opacity:.7">· upload mislukt</span>
+                scan-004.tiff <span style="opacity:.7">· upload failed</span>
               </p>
             </div>
             <button type="button" style="flex:none;font-size:var(--text-table);text-decoration:underline;color:var(--color-text-link)">
-              Opnieuw
+              Retry
             </button>
           </li>
         </ul>

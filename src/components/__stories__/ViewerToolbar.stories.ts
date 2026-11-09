@@ -40,7 +40,7 @@ export const WithToolbar: Story = {
   render: () => ({
     components: { ViewerToolbar },
     template: viewport(
-      `<viewer-toolbar mediafile-id="m1" original-filename="noordzee.jpg" image-filename="noordzee.jpg" />`,
+      `<viewer-toolbar mediafile-id="m1" original-filename="north-sea.jpg" image-filename="north-sea.jpg" />`,
     ),
   }),
 };
@@ -49,7 +49,7 @@ export const Pdf: Story = {
   render: () => ({
     components: { ViewerToolbar },
     template: viewport(
-      `<viewer-toolbar mode="pdf" :page-num="3" :page-count="12" mediafile-id="m1" original-filename="verslag.pdf" />`,
+      `<viewer-toolbar mode="pdf" :page-num="3" :page-count="12" mediafile-id="m1" original-filename="report.pdf" />`,
     ),
   }),
 };

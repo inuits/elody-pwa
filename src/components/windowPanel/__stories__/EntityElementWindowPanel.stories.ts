@@ -16,7 +16,7 @@ const meta: Meta<typeof EntityElementWindowPanel> = {
           "The group scope of per-field editing. Fields that make no sense " +
           "apart — publisher, place, year — carry a tint at rest and lift " +
           "into a card when any one of them is clicked: one gesture opens all " +
-          "of them, one Bewaar/Annuleer pair commits them, and validation " +
+          "of them, one Save/Cancel pair commits them, and validation " +
           "covers the group and stops there. Panels opt in with `isGroup`; " +
           "everything else keeps independent field rows.",
       },
@@ -44,10 +44,10 @@ const panel = (isGroup: boolean) => ({
   isEditable: true,
   canBeMultipleColumns: false,
   isGroup,
-  panelHeaderContent: { label: "Uitgave" },
-  publisher: panelField("publisher", "Uitgever", "Lannoo"),
-  place: panelField("place", "Plaats", "Tielt"),
-  year: panelField("year", "Jaar", "1987"),
+  panelHeaderContent: { label: "Publication" },
+  publisher: panelField("publisher", "Publisher", "Lannoo"),
+  place: panelField("place", "Place", "Tielt"),
+  year: panelField("year", "Year", "1987"),
 });
 
 const setupForm = () => {
@@ -96,7 +96,7 @@ export const Repeatable: Story = {
       return {
         panel: {
           ...panel(false),
-          panelHeaderContent: { label: "Identificatienummers" },
+          panelHeaderContent: { label: "Identifiers" },
           repetitionConfig: { repetitionKey: "identifiers" },
         },
         formId: FORM_ID,

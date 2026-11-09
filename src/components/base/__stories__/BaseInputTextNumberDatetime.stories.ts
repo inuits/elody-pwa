@@ -28,10 +28,10 @@ export const States: Story = {
     components: { BaseInputTextNumberDatetime },
     setup() {
       return {
-        text: ref("Verhalen uit de Noordzee"),
+        text: ref("Tales from the North Sea"),
         empty: ref(""),
         number: ref(1987),
-        area: ref("Een langere annotatie van de catalograaf."),
+        area: ref("A longer note from the cataloguer."),
       };
     },
     template: `
@@ -46,7 +46,7 @@ export const States: Story = {
         <base-input-text-number-datetime id="s-dark" v-model="text" input-style="defaultWithDarkBackgroundInput" />
 
         <label for="s-placeholder">placeholder</label>
-        <base-input-text-number-datetime id="s-placeholder" v-model="empty" input-style="defaultWithBorder" placeholder="Geen waarde" />
+        <base-input-text-number-datetime id="s-placeholder" v-model="empty" input-style="defaultWithBorder" placeholder="No value" />
 
         <label for="s-number">number — right aligned</label>
         <base-input-text-number-datetime id="s-number" v-model="number" type="number" input-style="defaultWithBorder" />
@@ -81,10 +81,10 @@ export const Tooltip: Story = {
               style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;
                      font-size:var(--text-value);background:none;border:0;padding:0;text-align:left;cursor:default"
             >
-              Verhalen uit de Noordzee — een bloemlezing over kustvisserij
+              Tales from the North Sea — an anthology on coastal fishing
             </button>
           </template>
-          <span>Verhalen uit de Noordzee — een bloemlezing over kustvisserij</span>
+          <span>Tales from the North Sea — an anthology on coastal fishing</span>
         </base-tooltip>
 
         <span>hint on an icon</span>
@@ -94,7 +94,7 @@ export const Tooltip: Story = {
               ⓘ
             </button>
           </template>
-          <span>Deze waarde komt uit de import en is niet bewerkbaar.</span>
+          <span>This value comes from the import and cannot be edited.</span>
         </base-tooltip>
       </div>`,
   }),

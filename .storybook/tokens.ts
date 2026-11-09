@@ -79,7 +79,7 @@ export const colourGroups: TokenGroup[] = [
   {
     title: "Commit & focus (never themed)",
     tokens: [
-      { name: "--color-commit", use: "Bewaar, checks" },
+      { name: "--color-commit", use: "Save, checks" },
       { name: "--color-commit-hover", use: "Commit hover" },
       { name: "--color-commit-strong-hover", use: "Commit strong hover" },
       { name: "--color-focus-ring", use: "2px ring, 1px offset" },

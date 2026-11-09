@@ -18,7 +18,7 @@ const meta: Meta<typeof BaseModal> = {
           "come from the platform. The title names the dialog and wears the " +
           "panel-shell header; the close cross is a named button, and first " +
           "focus lands on the body's first interactive element, not on that " +
-          "cross. Commit sits right, Annuleer ghost-left of it — one commit " +
+          "cross. Commit sits right, Cancel ghost-left of it — one commit " +
           "per modal, and the verb is the label, never \"OK\".",
       },
     },
@@ -47,15 +47,15 @@ export const Default: Story = {
     template: `
       <div style="min-height:340px">
         <base-button button-style="primary" label="Open modal" style="width:auto" @click="open" />
-        <base-modal :modal-type="TypeModals.DynamicForm" title="Kies persoon" @hide-modal="close">
+        <base-modal :modal-type="TypeModals.DynamicForm" title="Choose person" @hide-modal="close">
           <div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px;min-width:380px">
             <label style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">
-              Zoek een persoon
-              <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" placeholder="Zoek…" />
+              Search for a person
+              <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" placeholder="Search…" />
             </label>
             <div style="display:flex;justify-content:flex-end;gap:8px">
-              <base-button button-style="ghost" button-size="sm" label="Annuleer" style="width:auto" @click="close" />
-              <base-button button-style="commit" button-size="sm" label="Voeg toe" style="width:auto" />
+              <base-button button-style="ghost" button-size="sm" label="Cancel" style="width:auto" @click="close" />
+              <base-button button-style="commit" button-size="sm" label="Add" style="width:auto" />
             </div>
           </div>
         </base-modal>

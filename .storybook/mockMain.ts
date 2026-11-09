@@ -70,9 +70,9 @@ export const bulkSelectAllSizeLimit = 999999;
 // showing a configured pill needs a group to look its colours up in.
 export const formattersSettings = {
   pill: {
-    concept: { background: "#E8EEF0", text: "#003A52" },
-    gepubliceerd: { background: "#DAF1DC", text: "#15803d" },
-    vervallen: { background: "#FDEBD7", text: "#B95000" },
+    draft: { background: "#E8EEF0", text: "#003A52" },
+    published: { background: "#DAF1DC", text: "#15803d" },
+    expired: { background: "#FDEBD7", text: "#B95000" },
   },
 };
 export const typeUrlMapping = { mapping: {}, reverseMapping: {} };
@@ -87,7 +87,7 @@ export const typeUrlMapping = { mapping: {}, reverseMapping: {} };
 export const i18n = createI18n({
   legacy: false,
   globalInjection: true,
-  locale: "nl",
+  locale: "en",
   fallbackLocale: "en",
   messages: { ...en, ...nl },
   missingWarn: false,

@@ -37,8 +37,8 @@ export const Toolbar: Story = {
       const editor = new Editor({
         extensions: [StarterKit],
         content:
-          "<h2>Verhalen uit de Noordzee</h2><p>Een <strong>bloemlezing</strong> " +
-          "van kustverhalen, samengesteld voor de leesclub.</p>",
+          "<h2>Tales from the North Sea</h2><p>An <strong>anthology</strong> " +
+          "of coastal stories, compiled for the reading club.</p>",
       });
       onBeforeUnmount(() => editor.destroy());
       return { editor, extensions: [WysiwygExtensions.StarterKit], formId: FORM_ID };

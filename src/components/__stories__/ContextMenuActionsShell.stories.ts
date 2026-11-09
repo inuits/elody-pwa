@@ -26,9 +26,9 @@ type Story = StoryObj<typeof ContextMenuActionsShell>;
 
 const menuItems = `
   <div style="display:flex;flex-direction:column">
-    <div>Dupliceer</div>
-    <div>Exporteer</div>
-    <div style="color:var(--color-danger)">Verwijder</div>
+    <div>Duplicate</div>
+    <div>Export</div>
+    <div style="color:var(--color-danger)">Delete</div>
   </div>`;
 
 /** The labelled trigger on its own — click it to open the menu. */

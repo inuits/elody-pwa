@@ -31,20 +31,20 @@ export const Chips: Story = {
         <span>relation chip — navigates</span>
         <metadata-formatter-pill formatter="pill|auto" label="Jan Persoon" />
 
-        <span>configured — concept</span>
-        <metadata-formatter-pill formatter="pill" label="concept" />
+        <span>configured — draft</span>
+        <metadata-formatter-pill formatter="pill" label="draft" />
 
-        <span>configured — gepubliceerd</span>
-        <metadata-formatter-pill formatter="pill" label="gepubliceerd" />
+        <span>configured — published</span>
+        <metadata-formatter-pill formatter="pill" label="published" />
 
-        <span>configured — vervallen</span>
-        <metadata-formatter-pill formatter="pill" label="vervallen" />
+        <span>configured — expired</span>
+        <metadata-formatter-pill formatter="pill" label="expired" />
 
         <span>no colour configured</span>
-        <metadata-formatter-pill formatter="pill" label="onbekende status" />
+        <metadata-formatter-pill formatter="pill" label="unknown status" />
 
         <span>no group configured</span>
-        <metadata-formatter-pill formatter="badge" label="concept" />
+        <metadata-formatter-pill formatter="badge" label="draft" />
       </div>`,
   }),
 };
@@ -58,8 +58,8 @@ export const Large: Story = {
     components: { MetadataFormatterPill },
     template: `
       <div style="display:flex;gap:12px;align-items:center">
-        <metadata-formatter-pill formatter="pill|auto" size="lg" label="Verhalen uit de Noordzee" />
-        <metadata-formatter-pill formatter="pill" size="lg" label="gepubliceerd" />
+        <metadata-formatter-pill formatter="pill|auto" size="lg" label="Tales from the North Sea" />
+        <metadata-formatter-pill formatter="pill" size="lg" label="published" />
       </div>`,
   }),
 };

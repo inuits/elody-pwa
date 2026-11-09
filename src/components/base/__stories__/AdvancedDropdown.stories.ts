@@ -11,7 +11,7 @@ const meta: Meta<typeof AdvancedDropdown> = {
       description: {
         component:
           "The overlay listbox behind every closed-list choice. Picking never " +
-          "saves — the commit is the editor's Bewaar — so the dropdown only " +
+          "saves — the commit is the editor's Save — so the dropdown only " +
           "ever reports a choice upward. A list past ten options gets the " +
           "search field; a shorter one is read at a glance without it, and " +
           "multi-select keeps the popup open while several values are picked.",
@@ -24,23 +24,23 @@ export default meta;
 type Story = StoryObj<typeof AdvancedDropdown>;
 
 const shortOptions = [
-  { label: "Concept", value: "concept" },
-  { label: "Gepubliceerd", value: "published" },
-  { label: "Vervallen", value: "expired" },
+  { label: "Draft", value: "draft" },
+  { label: "Published", value: "published" },
+  { label: "Expired", value: "expired" },
 ];
 
 const provinces = [
-  "Antwerpen",
-  "Oost-Vlaanderen",
-  "West-Vlaanderen",
-  "Vlaams-Brabant",
+  "Antwerp",
+  "East Flanders",
+  "West Flanders",
+  "Flemish Brabant",
   "Limburg",
-  "Henegouwen",
-  "Luik",
-  "Luxemburg",
-  "Namen",
-  "Waals-Brabant",
-  "Brussel",
+  "Hainaut",
+  "Liège",
+  "Luxembourg",
+  "Namur",
+  "Walloon Brabant",
+  "Brussels",
   "Zeeland",
 ].map((name) => ({ label: name, value: name.toLowerCase() }));
 
@@ -64,23 +64,23 @@ export const MultiSearch: Story = {
       <div style="display:grid;grid-template-columns:210px 300px;gap:20px 14px;
                   align-items:start;font-size:var(--text-label);padding-bottom:280px">
         <span>single — 3 options, no search</span>
-        <advanced-dropdown v-model="single" :options="shortOptions" label="Kies een status"
+        <advanced-dropdown v-model="single" :options="shortOptions" label="Choose a status"
                            style-type="defaultWithBorder" />
 
         <span>single — 12 options, search</span>
-        <advanced-dropdown v-model="searchable" :options="provinces" label="Kies een provincie"
+        <advanced-dropdown v-model="searchable" :options="provinces" label="Choose a province"
                            style-type="defaultWithBorder" />
 
         <span>multi — popup stays open</span>
-        <advanced-dropdown v-model="multi" :options="provinces" label="Kies provincies"
+        <advanced-dropdown v-model="multi" :options="provinces" label="Choose provinces"
                            style-type="defaultWithBorder" multiple />
 
         <span>light border</span>
-        <advanced-dropdown v-model="single" :options="shortOptions" label="Kies een status"
+        <advanced-dropdown v-model="single" :options="shortOptions" label="Choose a status"
                            style-type="defaultWithLightBorder" />
 
         <span>disabled</span>
-        <advanced-dropdown v-model="single" :options="shortOptions" label="Kies een status"
+        <advanced-dropdown v-model="single" :options="shortOptions" label="Choose a status"
                            style-type="defaultWithBorder" disable />
       </div>`,
   }),

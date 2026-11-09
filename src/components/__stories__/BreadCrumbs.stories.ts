@@ -14,20 +14,20 @@ const seedTrail = () => {
   breadcrumbRoutes.value = [
     {
       id: "story-work",
-      overviewPage: "Werken",
-      title: "Battle Chasers (werk)",
+      overviewPage: "Works",
+      title: "Battle Chasers (work)",
       type: "work_word",
     },
     {
       id: "story-expression",
-      overviewPage: "Expressies",
-      title: "Battle Chasers compleet (expressie)",
+      overviewPage: "Expressions",
+      title: "Battle Chasers complete (expression)",
       type: "reading",
     },
   ] as never;
   rootRoute.value = {
     rootId: "story-manifestation",
-    rootTitle: "Battle Chasers compleet 2",
+    rootTitle: "Battle Chasers complete 2",
     typePillLabel: undefined,
   } as never;
 };

@@ -25,20 +25,20 @@ export default meta;
 type Story = StoryObj<typeof InlineFieldEditor>;
 
 /**
- * The editor as a row opens it: the value carried over, Bewaar not yet
+ * The editor as a row opens it: the value carried over, Save not yet
  * available because nothing has changed.
  */
 export const Editing: Story = {
   render: () => ({
     components: { InlineFieldEditor },
     setup() {
-      const value = ref("Verhalen uit de Noordzee");
+      const value = ref("Tales from the North Sea");
       return { value, dirty: ref(false) };
     },
     template: `
       <div style="max-width:440px">
         <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">
-          Titel
+          Title
         </p>
         <inline-field-editor :is-dirty="dirty">
           <input
@@ -54,7 +54,7 @@ export const Editing: Story = {
 
 /**
  * The four states side by side. Pristine and dirty differ only in whether
- * Bewaar can be pressed — that is the whole of pick-then-Bewaar.
+ * Save can be pressed — that is the whole of pick-then-Save.
  */
 export const States: Story = {
   render: () => ({
@@ -64,28 +64,28 @@ export const States: Story = {
         <div>
           <p style="font-size:var(--text-label);color:var(--color-text-secondary)">pristine — nothing to save yet</p>
           <inline-field-editor :is-dirty="false">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Verhalen uit de Noordzee" />
+            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the North Sea" />
           </inline-field-editor>
         </div>
 
         <div>
-          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">dirty — Bewaar becomes available</p>
+          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">dirty — Save becomes available</p>
           <inline-field-editor :is-dirty="true">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Verhalen uit de Waddenzee" />
+            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the Wadden Sea" />
           </inline-field-editor>
         </div>
 
         <div>
-          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">saving — inputs locked, spinner on Bewaar</p>
+          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">saving — inputs locked, spinner on Save</p>
           <inline-field-editor :is-dirty="true" :is-saving="true">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Verhalen uit de Waddenzee" disabled />
+            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the Wadden Sea" disabled />
           </inline-field-editor>
         </div>
 
         <div>
           <p style="font-size:var(--text-label);color:var(--color-text-secondary)">error — the value is kept, the editor stays open</p>
           <inline-field-editor :is-dirty="true" error-message="inline-editor.save-failed">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Verhalen uit de Waddenzee" />
+            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the Wadden Sea" />
           </inline-field-editor>
         </div>
       </div>`,
@@ -99,7 +99,7 @@ export const Multiline: Story = {
     template: `
       <div style="max-width:440px">
         <inline-field-editor :is-dirty="true" :multiline="true">
-          <textarea class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" rows="3">Een langere annotatie van de catalograaf.</textarea>
+          <textarea class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" rows="3">A longer note from the cataloguer.</textarea>
         </inline-field-editor>
       </div>`,
   }),

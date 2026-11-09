@@ -14,7 +14,7 @@ const meta: Meta = {
           "Version compare. Changed values are design-owned states, not " +
           "tenant pills: the old value struck in muted ink, the new one on " +
           "the changed tint — and the colour is never the only signal, every " +
-          "diffed value carries a spoken was/nu prefix. Unchanged rows stay " +
+          "diffed value carries a spoken was/now prefix. Unchanged rows stay " +
           "plain. The docs also ask for one table with version column " +
           "headers rather than two aligned lists; that restructuring is " +
           "recorded in DESIGN_SYSTEM.md.",
@@ -39,9 +39,9 @@ export const TwoColumn: Story = {
         </p>
 
         <template v-for="row in [
-          { label: 'Titel', old: 'Verhalen uit de Noordzee', nieuw: 'Verhalen uit de Noordzee', changed: false },
-          { label: 'Uitgever', old: 'Lannoo', nieuw: 'Standaard Uitgeverij', changed: true },
-          { label: 'Jaar', old: '1987', nieuw: '1987', changed: false },
+          { label: 'Title', old: 'Tales from the North Sea', new: 'Tales from the North Sea', changed: false },
+          { label: 'Publisher', old: 'Lannoo', new: 'Standaard Uitgeverij', changed: true },
+          { label: 'Year', old: '1987', new: '1987', changed: false },
         ]" :key="row.label">
           <div :style="row.changed ? 'background:var(--color-accent-tint);border-radius:var(--radius-input);padding:4px 8px' : 'padding:4px 8px'">
             <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">{{ row.label }}</p>
@@ -50,8 +50,8 @@ export const TwoColumn: Story = {
           </div>
           <div :style="row.changed ? 'background:var(--color-accent-tint);border-radius:var(--radius-input);padding:4px 8px' : 'padding:4px 8px'">
             <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">{{ row.label }}</p>
-            <metadata-formatter-pill v-if="row.changed" formatter="pill|added" :label="row.nieuw" />
-            <p v-else>{{ row.nieuw }}</p>
+            <metadata-formatter-pill v-if="row.changed" formatter="pill|added" :label="row.new" />
+            <p v-else>{{ row.new }}</p>
           </div>
         </template>
       </div>`,

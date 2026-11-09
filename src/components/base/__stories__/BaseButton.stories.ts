@@ -31,10 +31,10 @@ type Story = StoryObj<typeof BaseButton>;
 
 const variants = [
   { style: "primary", label: "Open record", note: "the one action a screen leads with" },
-  { style: "commit", label: "Bewaar", note: "writes the change" },
-  { style: "secondary", label: "Annuleer", note: "everything alongside" },
-  { style: "ghost", label: "Toon meer", note: "dense toolbars" },
-  { style: "danger", label: "Verwijder", note: "destructive, always confirmable" },
+  { style: "commit", label: "Save", note: "writes the change" },
+  { style: "secondary", label: "Cancel", note: "everything alongside" },
+  { style: "ghost", label: "Show more", note: "dense toolbars" },
+  { style: "danger", label: "Delete", note: "destructive, always confirmable" },
 ];
 
 export const Variants: Story = {
@@ -85,8 +85,8 @@ export const States: Story = {
           <base-button button-style="primary" :label="state" />
         </span>
         <span style="display:inline-flex;gap:6px">
-          <base-button button-style="commit" label="Bewaar" />
-          <base-button button-style="commit" label="Bewaar" loading />
+          <base-button button-style="commit" label="Save" />
+          <base-button button-style="commit" label="Save" loading />
         </span>
       </div>`,
   }),
@@ -108,8 +108,8 @@ export const IconOnly: Story = {
     setup: () => ({ DamsIcons }),
     template: `
       <div style="display:flex;gap:10px">
-        <base-button button-style="ghost" :icon="DamsIcons.Edit" aria-label="Bewerk veld" />
-        <base-button button-style="secondary" :icon="DamsIcons.Trash" aria-label="Verwijder rij" />
+        <base-button button-style="ghost" :icon="DamsIcons.Edit" aria-label="Edit field" />
+        <base-button button-style="secondary" :icon="DamsIcons.Trash" aria-label="Delete row" />
       </div>`,
   }),
 };

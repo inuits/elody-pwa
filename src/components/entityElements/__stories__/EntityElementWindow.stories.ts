@@ -44,14 +44,14 @@ const panel = (label: string, fields: Record<string, unknown>) => ({
 
 const element = {
   __typename: "WindowElement",
-  label: "Informatie",
-  description: panel("Beschrijving", {
-    title: field("title", "Titel", "Verhalen uit de Noordzee"),
-    author: field("author", "Auteur", "Jan Peeters"),
+  label: "Information",
+  description: panel("Description", {
+    title: field("title", "Title", "Tales from the North Sea"),
+    author: field("author", "Author", "Jan Peeters"),
   }),
-  publication: panel("Uitgave", {
-    publisher: field("publisher", "Uitgever", "Lannoo"),
-    year: field("year", "Jaar", "1987"),
+  publication: panel("Publication", {
+    publisher: field("publisher", "Publisher", "Lannoo"),
+    year: field("year", "Year", "1987"),
   }),
 };
 
@@ -62,7 +62,7 @@ export const Default: Story = {
       useEditMode(FORM_ID);
       useFormHelper().createForm(FORM_ID, {
         intialValues: {
-          title: "Verhalen uit de Noordzee",
+          title: "Tales from the North Sea",
           author: "Jan Peeters",
           publisher: "Lannoo",
           year: "1987",

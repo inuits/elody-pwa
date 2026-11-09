@@ -14,8 +14,8 @@ const meta: Meta<typeof MetadataWrapper> = {
         component:
           "One metadata field: an 11.5px bold label in field-label blue over " +
           "a 13px value. An empty non-required value reads as absent — " +
-          "\"Geen waarde\" at 45% opacity — rather than as a dash that could " +
-          "be mistaken for content. Booleans render as Ja/Nee with a check " +
+          "\"No value\" at 45% opacity — rather than as a dash that could " +
+          "be mistaken for content. Booleans render as Yes/No with a check " +
           "or a dash, never as a checkbox standing in for a value.",
       },
     },
@@ -44,7 +44,7 @@ const field = (
   inputField: { type, label },
 });
 
-/** A boolean only reads as Ja/Nee when the field declares itself a checkbox. */
+/** A boolean only reads as Yes/No when the field declares itself a checkbox. */
 const booleanField = (key: string, label: string, value: boolean) =>
   field(key, label, value, InputFieldTypes.Checkbox);
 
@@ -52,7 +52,7 @@ export const Default: Story = {
   render: () => ({
     components: { MetadataWrapper },
     setup() {
-      // Field rows commit through this; the story resolves it so Bewaar works.
+      // Field rows commit through this; the story resolves it so Save works.
       provide("persistEntity", async () => {
         await new Promise((resolve) => setTimeout(resolve, 600));
       });
@@ -60,7 +60,7 @@ export const Default: Story = {
       const { createForm } = useFormHelper();
       createForm(FORM_ID, {
         intialValues: {
-          title: "Verhalen uit de Noordzee",
+          title: "Tales from the North Sea",
           summary: "",
           digitised: true,
           restricted: false,
@@ -71,10 +71,10 @@ export const Default: Story = {
       return {
         formId: FORM_ID,
         rows: [
-          field("title", "Titel", "Verhalen uit de Noordzee"),
-          field("summary", "Samenvatting", ""),
-          booleanField("digitised", "Gedigitaliseerd", true),
-          booleanField("restricted", "Beperkt raadpleegbaar", false),
+          field("title", "Title", "Tales from the North Sea"),
+          field("summary", "Summary", ""),
+          booleanField("digitised", "Digitised", true),
+          booleanField("restricted", "Restricted access", false),
         ],
       };
     },

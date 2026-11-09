@@ -78,7 +78,7 @@ const registerFixtures = () => {
         title: advancedFilter({
           type: "text",
           key: ["title"],
-          label: "Titel",
+          label: "Title",
         }),
         genre: advancedFilter({
           type: "selection",
@@ -86,15 +86,15 @@ const registerFixtures = () => {
           label: "Genre",
           selectionOption: "checkboxlist",
           options: [
-            { __typename: "DropdownOption", icon: null, label: "avontuur", value: "avontuur" },
+            { __typename: "DropdownOption", icon: null, label: "adventure", value: "adventure" },
             { __typename: "DropdownOption", icon: null, label: "fantasy", value: "fantasy" },
-            { __typename: "DropdownOption", icon: null, label: "sprookje", value: "sprookje" },
+            { __typename: "DropdownOption", icon: null, label: "fairy tale", value: "fairy-tale" },
           ],
         }),
         publication_year: advancedFilter({
           type: "date",
           key: ["publication_year"],
-          label: "Jaar van uitgave",
+          label: "Year of publication",
         }),
       },
     },
@@ -122,8 +122,8 @@ const meta: Meta<typeof FiltersBase> = {
       description: {
         component:
           "The filter rail: sections per filter with the active count in " +
-          "the header, matcher chrome per type, per-section Wis filter and " +
-          "the shared Zoek commit. Definitions come from the entity type's " +
+          "the header, matcher chrome per type, per-section Clear filter and " +
+          "the shared Search commit. Definitions come from the entity type's " +
           "filter query; here they resolve from story fixtures.",
       },
     },
