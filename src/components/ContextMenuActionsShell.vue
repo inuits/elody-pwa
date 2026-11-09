@@ -36,9 +36,27 @@
       >
         <slot name="promoted" />
       </div>
+      <!-- small screen: no room for the label; the ⋮ opens a bottom sheet
+           and keeps the name -->
+      <BaseButtonNew
+        v-if="hasOverflowActions && isCompact"
+        data-cy="overflow-menu-trigger"
+        class="overflow-menu-trigger"
+        button-style="ghost"
+        :aria-label="
+          contextLabel
+            ? t('contextMenu.actions-for', { title: contextLabel })
+            : (triggerLabel ?? t('contextMenu.actions'))
+        "
+        aria-haspopup="menu"
+        :aria-expanded="isOpen"
+        @click.stop.prevent="toggleContextMenu"
+      >
+        <unicon :name="Unicons.EllipsisV.name" height="22" />
+      </BaseButtonNew>
       <!-- Never a bare ⋮: the label is how the actions are found at all. -->
       <BaseButtonNew
-        v-if="hasOverflowActions"
+        v-else-if="hasOverflowActions"
         data-cy="overflow-menu-trigger"
         class="overflow-menu-trigger"
         button-style="secondary"
@@ -77,6 +95,7 @@ import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMen
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
+import { isCompact } from "@/composables/useNavMenu";
 
 defineProps<{
   hasPromotedActions: boolean;

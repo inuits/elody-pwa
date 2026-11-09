@@ -4,7 +4,8 @@
   <section
     role="complementary"
     :aria-labelledby="titleId"
-    class="border border-border-panel rounded-card bg-surface overflow-hidden"
+    class="bg-surface"
+    :class="shellClasses"
     @keydown.esc.stop="close"
   >
     <header
@@ -12,7 +13,18 @@
       data-cy="preview-header"
       tabindex="-1"
       class="flex items-center gap-2 p-(--panel-header-pad) bg-surface-panel-header outline-none"
+      :class="{ 'sticky top-0 z-content-raised': isCompact }"
     >
+      <!-- full-screen on a small screen: back, where the thumb expects it -->
+      <BaseButtonNew
+        v-if="isCompact"
+        data-cy="close-preview-component"
+        class="!w-auto shrink-0"
+        button-style="ghost"
+        :icon="DamsIcons.AngleLeft"
+        :aria-label="t('preview-component.close')"
+        @click="close"
+      />
       <h3
         :id="titleId"
         data-cy="preview-title"
@@ -27,10 +39,12 @@
         class="!w-auto shrink-0"
         button-style="primary"
         button-size="sm"
+        :icon="isCompact ? DamsIcons.Link : undefined"
         :label="t('preview-component.open-detail-page')"
         @click="router.push(detailPath)"
       />
       <BaseButtonNew
+        v-if="!isCompact"
         data-cy="close-preview-component"
         class="!w-auto shrink-0"
         button-style="ghost"
@@ -176,6 +190,7 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import { useMaps } from "@/composables/useMaps";
 import { apolloClient, router } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
+import { isCompact } from "@/composables/useNavMenu";
 import ChangesPreview from "./ChangesPreview.vue";
 
 const { t } = useI18n();
@@ -286,6 +301,13 @@ const hasViewerAbove = computed<boolean>(
       !!primaryPreviewElement.value),
 );
 const titleId = useId();
+const shellClasses = computed(() => {
+  const styles = {
+    fullScreen: "min-h-full",
+    panel: "border border-border-panel rounded-card overflow-hidden",
+  };
+  return isCompact.value ? styles.fullScreen : styles.panel;
+});
 const header = ref<HTMLElement>();
 
 // Focus moves to the header on open and back to the row's eye on close.
@@ -310,8 +332,9 @@ const close = async () => {
 onMounted(async () => {
   opener = document.activeElement as HTMLElement | null;
   // Opened from a control (the eye): move focus. Opened by default on page
-  // load: nothing had focus, so leave it alone.
-  if (opener && opener !== document.body)
+  // load: nothing had focus, so leave it alone. Full-screen it never opens
+  // by default, and covers the page, so it always takes focus.
+  if (isCompact.value || (opener && opener !== document.body))
     header.value?.focus({ preventScroll: true });
   const hasPreviewQuery =
     props.previewComponent.previewQuery ||

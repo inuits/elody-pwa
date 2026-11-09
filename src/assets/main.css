@@ -346,6 +346,9 @@
   --nav-flyout-width: 320px;
   --nav-drawer-width: 316px;
   --mobile-top-bar-height: 60px;
+  --preview-viewer-height-compact: calc(100dvh - var(--mobile-top-bar-height));
+  --thumb-strip-size: 52px;
+  --thumb-strip-pad: 10px 12px;
   --nav-sub-item-indent: 16px;
   --nav-flyout-gap: 4px;
   --nav-flyout-viewport-margin: 8px;
@@ -421,6 +424,9 @@
   --menu-icon-size: 14px;
   /* Item ink; a destructive item (tone Danger) switches it to danger ink */
   --menu-item-ink: var(--color-text-body);
+  /* Below 768px a menu is a bottom sheet */
+  --sheet-radius: 20px;
+  --sheet-padding: 8px 12px 24px;
 
   /* Pager (components/pagination.md): « ‹ page [n] of N › » */
   --pager-button-size: 24px;

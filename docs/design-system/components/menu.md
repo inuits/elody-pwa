@@ -63,6 +63,14 @@ split button).
   returns focus to the trigger, Tab closes and continues from the trigger.
 - Outside click or scroll closes without firing.
 
+## Small screens
+Below 768px (`isCompact`) every menu opens as a bottom sheet: full width,
+`--sheet-radius` top corners, `--sheet-padding`, items at least
+`--touch-target-min` high, over a `bg-scrim` that closes it on tap. The
+overflow trigger shrinks to a ⋮ that keeps its accessible name ("Actions
+for …"). In a detail panel's list header, two or more add pills fold into
+one Add pill whose sheet lists them.
+
 ## Accessibility
 - Trigger: `aria-haspopup="menu"`, `aria-expanded`; its name is
   "Acties voor {titel}" when the caller passes `contextLabel`.

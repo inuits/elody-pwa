@@ -23,7 +23,8 @@
       >
         <!-- entity-list-element.md: list mode gets a column-header row when
              every row shares its fields. -->
-        <div v-if="columnLabels" ref="listHeader">
+        <!-- a small screen drops the header; the labels stay for screen readers -->
+        <div v-if="columnLabels && !isCompact" ref="listHeader">
           <ListColumnHeader
             :labels="columnLabels"
             :cell-styles="headerCellStyles"
@@ -143,12 +144,20 @@
           />
         </component>
       </div>
+      <!-- small screen: the preview covers the page. Not a showModal()
+           dialog: the top layer would hide the dropdowns and tooltips
+           that teleport to body. Teleported, since the container queries'
+           layout containment would hold a fixed overlay in the list. -->
+      <Teleport to="body" :disabled="!isCompact">
       <div
         v-if="
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card"
+        data-cy="preview-host"
+        :role="isCompact ? 'dialog' : undefined"
+        :aria-modal="isCompact || undefined"
+        :class="previewHostClasses"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -167,6 +176,7 @@
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
       </div>
+      </Teleport>
     </div>
   </div>
 </template>
@@ -205,6 +215,7 @@ import { useEntityListHelpers } from "@/components/library/view-modes/composable
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { isCompact } from "@/composables/useNavMenu";
 
 const props = withDefaults(
   defineProps<{
@@ -298,6 +309,15 @@ const {
   openPreviewComponent,
   togglePreviewForListItem,
 );
+
+// PreviewWrapper handles Escape and focus in both.
+const previewHostClasses = computed(() => {
+  const styles = {
+    fullScreen: "fixed inset-0 z-overlay overflow-y-auto overscroll-contain bg-surface",
+    inline: "my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card",
+  };
+  return isCompact.value ? styles.fullScreen : styles.inline;
+});
 
 // "Open detail page" in the preview header, for lists that navigate.
 const previewDetailPath = computed(() => {

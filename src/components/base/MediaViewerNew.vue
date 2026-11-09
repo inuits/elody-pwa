@@ -9,7 +9,7 @@
       class="relative w-full"
     >
       <div
-        v-if="viewerContainsMultipleMediafiles && !showsIiifViewer"
+        v-if="showsNavigationArrows && !showsIiifViewer"
         class="absolute top-0 left-1/2 -translate-x-1/2 z-30 h-10 flex items-center pointer-events-none"
       >
         <MediafileNavigationArrows
@@ -42,7 +42,7 @@
         :show-cropped="showCropped"
         :can-recrop="canRecrop"
       >
-        <template v-if="viewerContainsMultipleMediafiles" #navigation>
+        <template v-if="showsNavigationArrows" #navigation>
           <MediafileNavigationArrows
             @previous="selectPreviousMediafileHandler"
             @next="selectNextMediafileHandler"
@@ -223,6 +223,8 @@ const props = defineProps<{
   parentEntityType?: Entitytyping;
   relationType?: string;
   refetchEntities?: () => Promise<void>;
+  // The host has its own way between the files (the preview's thumbnail strip).
+  hideNavigation?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -380,7 +382,8 @@ const togglePreviewComponent = (id: string): void => {
   emit("togglePreviewComponent", id);
 };
 
-const viewerContainsMultipleMediafiles = computed((): boolean => {
+const showsNavigationArrows = computed((): boolean => {
+  if (props.hideNavigation) return false;
   const mediafiles =
     mediafileSelectionState.value?.[mediafileViewerContext]?.mediafiles || [];
   return mediafiles.length > 1;

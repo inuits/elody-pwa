@@ -1,6 +1,12 @@
 import { mount } from "@vue/test-utils";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import ContextMenuActionsShell from "../ContextMenuActionsShell.vue";
+import { isCompact } from "@/composables/useNavMenu";
+
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
@@ -13,6 +19,7 @@ vi.mock("@/types", () => ({
   Unicons: {
     AngleDown: { name: "angle-down" },
     AngleUp: { name: "angle-up" },
+    EllipsisV: { name: "ellipsis-v" },
     QuestionCircle: { name: "question-circle" },
   },
 }));
@@ -71,6 +78,33 @@ describe("ContextMenuActionsShell", () => {
   it("renders no trigger without overflow actions", () => {
     expect(getWrapper({ hasOverflowActions: false }).find("button").exists())
       .toBe(false);
+  });
+
+  describe("on a small screen", () => {
+    beforeEach(() => {
+      isCompact.value = true;
+    });
+    afterEach(() => {
+      isCompact.value = false;
+    });
+
+    it("shrinks the trigger to a ⋮ that keeps its name", () => {
+      const trigger = getWrapper({ contextLabel: "Brief aan Jan" }).find(
+        "button",
+      );
+
+      expect(trigger.text()).not.toContain("contextMenu.actions");
+      expect(trigger.find('[name="ellipsis-v"]').exists()).toBe(true);
+      expect(trigger.attributes("aria-label")).toBe(
+        "contextMenu.actions-for:Brief aan Jan",
+      );
+    });
+
+    it("still has a name without a scope", () => {
+      expect(getWrapper().find("button").attributes("aria-label")).toBe(
+        "contextMenu.actions",
+      );
+    });
   });
 
   describe("as a split button", () => {
