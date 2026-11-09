@@ -18,7 +18,12 @@
     </div>
     <the-navigation />
     <div>
-      <div class="bg-background-normal pl-(--nav-rail-width) h-screen flex flex-col">
+      <div
+        :class="[
+          'bg-background-normal h-screen flex flex-col transition-[padding] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
+          isMenuOpen ? 'pl-(--nav-flyout-width)' : 'pl-(--nav-rail-width)',
+        ]"
+      >
         <the-header />
         <div :class="['grow overflow-hidden min-h-0', { 'h-0': isSingle }]">
           <router-view />
@@ -45,6 +50,7 @@ import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";
 import { useRoute } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useNavMenu } from "@/composables/useNavMenu";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
@@ -56,6 +62,7 @@ const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
 const { someModalIsOpened, topmostOpenDialog } = useBaseModal();
 const { isBlocking } = useBlockingLoader();
+const { isOpen: isMenuOpen } = useNavMenu();
 const config: any = inject("config");
 
 useHead({

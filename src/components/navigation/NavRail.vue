@@ -5,7 +5,7 @@
     :aria-label="t('navigation.main')"
     :class="[
       'fixed left-0 top-0 h-screen flex flex-col overflow-x-hidden bg-surface transition-[width] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
-      isOpen ? 'w-(--nav-flyout-width) shadow-overlay' : 'w-(--nav-rail-width)',
+      isOpen ? 'w-(--nav-flyout-width)' : 'w-(--nav-rail-width)',
       flyoutGroup ? 'z-context-menu' : 'z-navigation',
     ]"
     @focusout="onFocusOut"
@@ -100,7 +100,7 @@ const { t } = useI18n();
 const router = useRouter();
 const navRef = useTemplateRef<HTMLElement>("navRef");
 const { getMenuEntities, menuItems } = useMenuHelper();
-const { mode, setMode, isVisible } = useNavMenu();
+const { isOpen, setMode, isVisible } = useNavMenu();
 const { refreshBadges } = useMenuBadges();
 
 getMenuEntities();
@@ -109,7 +109,6 @@ watch(menuItems, (items) => refreshBadges(items));
 const openGroup = ref<string>();
 const flyoutGroup = ref<string>();
 
-const isOpen = computed(() => mode.value === NavMode.Expanded);
 const visibleItems = computed(() => menuItems.value.filter(isVisible));
 const modeToggle = computed(() =>
   isOpen.value

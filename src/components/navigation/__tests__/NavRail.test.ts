@@ -265,6 +265,11 @@ describe("NavRail", () => {
       expect(isWide()).toBe(true);
     });
 
+    it("casts no shadow, since it sits beside the page", async () => {
+      await mountRail();
+      expect(nav().classes()).not.toContain("shadow-overlay");
+    });
+
     it("stays open on Escape", async () => {
       await mountRail();
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));

@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import type { MenuItem } from "@/generated-types/queries";
 import { auth } from "@/main";
@@ -22,6 +22,7 @@ const readStoredMode = (): NavMode => {
 };
 
 const mode = ref<NavMode>(readStoredMode());
+const isOpen = computed(() => mode.value === NavMode.Expanded);
 
 const lastSegmentOf = (path: string) =>
   path.substring(path.lastIndexOf("/") + 1);
@@ -59,5 +60,5 @@ export const useNavMenu = () => {
     );
   };
 
-  return { mode, setMode, subItemsOf, isVisible, isCurrent };
+  return { mode, isOpen, setMode, subItemsOf, isVisible, isCurrent };
 };

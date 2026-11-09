@@ -66,6 +66,14 @@ describe("useNavMenu", () => {
       expect(useNavMenu().mode.value).toBe(NavMode.Collapsed);
     });
 
+    it("is open only while the menu is kept open", async () => {
+      const { useNavMenu, NavMode } = await loadComposable();
+      const { isOpen, setMode } = useNavMenu();
+      expect(isOpen.value).toBe(false);
+      setMode(NavMode.Expanded);
+      expect(isOpen.value).toBe(true);
+    });
+
     it("falls back to closed for the retired hover mode", async () => {
       localStorage.setItem("elody.navMode", "hover");
       const { useNavMenu, NavMode } = await loadComposable();

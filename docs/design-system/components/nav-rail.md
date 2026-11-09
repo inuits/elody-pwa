@@ -8,8 +8,9 @@ menu. Handoff: `navigation.md` (NavRail, Round 2 expanded flyout).
 ## Anatomy
 A 52px white rail: logo, environment chip and the collapse/keep-open button
 at the top, then the menu items, then the account rows (`LogInLogout`). Open,
-the header is one row: logo and chip on the left, the button on the right. Opened, it becomes a 320px flyout
-over the content with the overlay shadow. Items show icon, label and badge;
+the header is one row: logo and chip on the left, the button on the right. Opened, it becomes 320px wide
+beside the page, with no shadow: the page moves right by the same width
+(`App.vue`, same transition), so nothing is covered. Items show icon, label and badge;
 a group shows a chevron and lists its sub-items indented below it.
 
 ## Tokens
@@ -33,7 +34,7 @@ a click does: `right-indent-alt` (≡›, "Keep menu open") on the rail,
 | Mode | Behaviour |
 |---|---|
 | Closed (default) | 52px rail. Hover only highlights an item and shows its name in a tooltip at once (no delay); the rail never opens on hover or focus. Clicking a group opens a flyout beside its icon (see below) |
-| Open | open over the content until the button collapses it; groups open inline under their row |
+| Open | 320px beside the page, which moves aside, until the button collapses it; groups open inline under their row |
 
 Groups open on click only, one at a time. A group with a route of its own
 (`typeLink.route`) also goes to that page when it opens in the open menu;
