@@ -48,7 +48,7 @@ const current = computed(() => isCurrent(props.item));
 const badgeCount = computed(() => badgeCountOf(props.item));
 
 const rowClass = computed(() => [
-  "flex w-full items-center gap-2 min-h-(--nav-rail-item-height) px-2 rounded-(--nav-rail-item-radius) text-left text-table hover:no-underline",
+  "flex w-full items-center gap-2 min-h-(--nav-rail-item-height) max-md:min-h-(--touch-target-min) px-2 rounded-(--nav-rail-item-radius) text-left text-table hover:no-underline",
   current.value
     ? "bg-accent-light text-accent-ink"
     : "text-text-muted hover:bg-accent-highlight",

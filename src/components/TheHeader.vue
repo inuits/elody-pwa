@@ -28,13 +28,16 @@
       :entity-id="entityId"
       :entity-type="entityType"
     />
-    <LanguageSelect class="flex justify-end pr-2 ml-auto" />
-    <tenant-switcher
-      class="flex justify-end pr-2"
-      v-if="config.features.hasTenantSelect"
-    />
+    <!-- Below md the drawer holds language and tenant, the top bar holds search -->
+    <template v-if="!isCompact">
+      <LanguageSelect class="flex justify-end pr-2 ml-auto" />
+      <tenant-switcher
+        class="flex justify-end pr-2"
+        v-if="config.features.hasTenantSelect"
+      />
+    </template>
     <SearchBar
-      v-if="showSearch"
+      v-if="showSearch && !isCompact"
       :inputEnabled="false"
     />
   </div>
@@ -55,6 +58,7 @@ import EntityHeaderButton from "@/components/EntityHeaderButton.vue";
 import HeaderContextMenuActions from "@/components/HeaderContextMenuActions.vue";
 import HistoryButton from "@/components/HistoryButton.vue";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useNavMenu } from "@/composables/useNavMenu";
 import { auth } from "@/main";
 import type { EntityButtonConfig, ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
 
@@ -62,6 +66,7 @@ const route = useRoute();
 const router = useRouter();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
+const { isCompact } = useNavMenu();
 const {
   actions: contextMenuActions,
   hasEditMetadataButton: configEditMetadataButton,

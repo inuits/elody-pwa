@@ -173,7 +173,7 @@ const onClick = () => {
 const rowClass = computed(() => [
   "relative flex items-center rounded-(--nav-rail-item-radius) text-left text-table hover:no-underline",
   props.expanded
-    ? "w-full min-h-(--nav-rail-item-height) px-2 gap-2"
+    ? "w-full min-h-(--nav-rail-item-height) max-md:min-h-(--touch-target-min) px-2 gap-2"
     : "justify-center w-(--nav-rail-item-width) h-(--nav-rail-item-height)",
   current.value
     ? "bg-accent-light text-accent-ink"
