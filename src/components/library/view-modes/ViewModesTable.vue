@@ -102,12 +102,15 @@
               :preview-component-enabled="previewComponentEnabled"
               :preview-component-current-active="entity.isPreviewActive"
               :preview-open="entity.isPreviewOpen"
-              :preview-component-feature-enabled="previewComponent !== undefined"
+              :preview-component-feature-enabled="
+                previewComponent !== undefined
+              "
               :preview-component-list-items-coverage="
                 previewComponent?.listItemsCoverage
               "
               @toggle-preview-component="
-                (previewForEntityId) => togglePreviewComponent(previewForEntityId)
+                (previewForEntityId) =>
+                  togglePreviewComponent(previewForEntityId)
               "
             />
           </component>
@@ -360,16 +363,15 @@ const headerColumnClass = (idx: number): string => {
 };
 
 const actionsColumnWidth = computed(() => {
-  const mostButtonsOnARow = Math.max(
-    1,
-    ...refEntities.value.map(
-      (entity) =>
-        Object.entries(getButtons(entity) ?? {}).filter(
-          ([key, value]) => key !== "__typename" && value,
-        ).length,
+  const widestRowInRem = Math.max(
+    2,
+    ...refEntities.value.map((entity) =>
+      Object.entries(getButtons(entity) ?? {})
+        .filter(([key, value]) => key !== "__typename" && value)
+        .reduce((rem, [key]) => rem + (key === "contextMenu" ? 6 : 2), 0),
     ),
   );
-  return `${mostButtonsOnARow * 2}rem`;
+  return `${widestRowInRem}rem`;
 });
 
 const processedEntities = computed(() => {

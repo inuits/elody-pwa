@@ -36,9 +36,28 @@
       >
         <slot name="promoted" />
       </div>
+      <!-- small screen: no room for the label; the ⋮ opens a bottom sheet
+           and keeps the name -->
+      <BaseButtonNew
+        v-if="hasCompactMenu"
+        data-cy="overflow-menu-trigger"
+        :data-preview-for="rowSheet?.id"
+        class="overflow-menu-trigger"
+        button-style="ghost"
+        :aria-label="
+          contextLabel
+            ? t('contextMenu.actions-for', { title: contextLabel })
+            : (triggerLabel ?? t('contextMenu.actions'))
+        "
+        aria-haspopup="menu"
+        :aria-expanded="isOpen"
+        @click.stop.prevent="toggleContextMenu"
+      >
+        <unicon :name="Unicons.EllipsisV.name" height="22" />
+      </BaseButtonNew>
       <!-- Never a bare ⋮: the label is how the actions are found at all. -->
       <BaseButtonNew
-        v-if="hasOverflowActions"
+        v-else-if="hasOverflowActions"
         data-cy="overflow-menu-trigger"
         class="overflow-menu-trigger"
         button-style="secondary"
@@ -62,23 +81,53 @@
       </BaseButtonNew>
     </template>
     <base-context-menu
-      v-if="hasOverflowActions"
+      v-if="hasOverflowActions || hasCompactMenu"
       :context-menu="contextMenuHandler.getContextMenu()"
     >
+      <template v-if="hasCompactMenu && rowSheet">
+        <div
+          data-cy="row-sheet-header"
+          class="flex items-center gap-3 p-(--menu-item-padding) pb-3 mb-1 border-b border-border-subtle"
+        >
+          <div
+            class="flex items-center justify-center shrink-0 size-(--sheet-thumb-size) rounded-sm overflow-hidden bg-surface-muted text-text-subtle"
+          >
+            <ImageViewer
+              v-if="rowSheet.thumbnailUrl"
+              height-class="h-full"
+              width-class="w-full object-cover"
+              :url="rowSheet.thumbnailUrl"
+              :media-is-link="rowSheet.thumbnailIsLink"
+            />
+            <unicon v-else :name="Unicons.Image.name" height="22" />
+          </div>
+          <span class="min-w-0 truncate font-bold">{{ rowSheet.title }}</span>
+        </div>
+        <BaseContextMenuItem
+          v-if="rowSheet.preview"
+          :icon="Unicons.Eye.name"
+          :label="t('preview-component.open')"
+          @clicked="rowSheet.preview()"
+        />
+      </template>
       <slot name="overflow" />
     </base-context-menu>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
 import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import { Unicons } from "@/types";
+import { isCompact } from "@/composables/useNavMenu";
+import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
+import ImageViewer from "@/components/base/ImageViewer.vue";
+import { rowSheetKey } from "@/components/context-menu-actions/rowSheet";
 
-defineProps<{
+const props = defineProps<{
   hasPromotedActions: boolean;
   hasOverflowActions: boolean;
   // One promoted action plus overflow: join them in a split button.
@@ -90,6 +139,14 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{ (event: "open"): void }>();
+
+// Set by a list row; only the small-screen sheet shows it.
+const rowSheet = inject(rowSheetKey, undefined);
+const hasCompactMenu = computed<boolean>(
+  () =>
+    isCompact.value &&
+    (props.hasOverflowActions || !!rowSheet?.value.preview),
+);
 
 const { t } = useI18n();
 const contextMenuHandler = ref<ContextMenuHandler>(new ContextMenuHandler());

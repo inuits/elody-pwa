@@ -1,8 +1,9 @@
 import { mount, flushPromises } from "@vue/test-utils";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import PreviewWrapper from "../PreviewWrapper.vue";
 import { ListItemCoverageTypes, PreviewTypes } from "@/generated-types/queries";
 import { apolloClient, router } from "@/main";
+import { isCompact } from "@/composables/useNavMenu";
 
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (k: string) => k }) }));
 vi.mock("@/main", () => ({
@@ -25,6 +26,10 @@ vi.mock("@/composables/useEntityMediafileSelector", () => ({
 vi.mock("@/composables/useMaps", () => ({
   useMaps: () => ({ getBasicMapProperties: () => ({ mapType: "osm" }) }),
 }));
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 vi.mock("@/helpers", () => ({
   getTitleOrNameFromEntity: () => "Some title",
 }));
@@ -229,6 +234,43 @@ describe("PreviewWrapper panel shell header", () => {
     expect(document.activeElement).toBe(opener);
     wrapper.unmount();
     opener.remove();
+  });
+});
+
+describe("PreviewWrapper on a small screen", () => {
+  beforeEach(() => {
+    isCompact.value = true;
+  });
+  afterEach(() => {
+    isCompact.value = false;
+  });
+
+  it("leads the header with a back button that closes it", async () => {
+    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+    const firstControl = wrapper.find('[data-cy="preview-header"] > *');
+
+    expect(firstControl.attributes("data-cy")).toBe("close-preview-component");
+    await firstControl.trigger("click");
+    expect(wrapper.emitted("closePreviewComponent")).toBeTruthy();
+  });
+
+  it("takes focus even when its opener is gone, so Escape reaches it", async () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    const wrapper = mountAttached({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    expect(document.activeElement).toBe(
+      wrapper.find('[data-cy="preview-header"]').element,
+    );
+    wrapper.unmount();
+  });
+
+  it("has a single close control", async () => {
+    const wrapper = getWrapper({ type: PreviewTypes.MediaViewer });
+    await flushPromises();
+
+    expect(wrapper.findAll(CLOSE_SELECTOR)).toHaveLength(1);
   });
 });
 

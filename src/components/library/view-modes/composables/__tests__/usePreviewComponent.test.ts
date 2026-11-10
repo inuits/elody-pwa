@@ -10,10 +10,15 @@ import {
   type PreviewComponent,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
+import { isCompact } from "@/composables/useNavMenu";
 
 vi.mock("@/main", () => ({
   apolloClient: { query: vi.fn() },
 }));
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 const makeEntity = (id: string): Entity => ({ id }) as Entity;
 
@@ -521,6 +526,14 @@ describe("usePreviewComponent", () => {
       await flushPromises();
       entities.value = [makeEntity("entity-2")];
       await flushPromises();
+
+      expect(previewComponentEnabled.value).toBe(false);
+    });
+
+    it("keeps the preview closed on a small screen, where it would cover the page", async () => {
+      isCompact.value = true;
+      const { previewComponentEnabled } = await setup({ openByDefault: true }, true);
+      isCompact.value = false;
 
       expect(previewComponentEnabled.value).toBe(false);
     });

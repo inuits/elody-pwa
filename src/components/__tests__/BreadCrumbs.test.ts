@@ -34,9 +34,13 @@ vi.mock("@/composables/useBreadcrumbs", async () => {
     useBreadcrumbs: () => ({
       clearBreadcrumbPathAndAddOverviewPage:
         mocks.clearBreadcrumbPathAndAddOverviewPage,
-      previousRoute: computed(() => breadcrumbRoutes.value[0]),
+      previousRoute: computed(() => breadcrumbRoutes.value.at(-1)),
     }),
   };
+});
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
 });
 vi.mock("@/composables/useEdit", () => ({
   useEditMode: () => ({ isEdit: false }),
@@ -50,11 +54,13 @@ vi.mock("@/composables/useConfirmModal", () => ({
 
 import BreadCrumbs from "@/components/BreadCrumbs.vue";
 import { breadcrumbRoutes } from "@/composables/useBreadcrumbs";
+import { isCompact } from "@/composables/useNavMenu";
 
 const overview = { id: "", overviewPage: "Works", title: "Werken", type: "" };
 
-const mountCrumbs = () =>
+const mountCrumbs = (slots = {}) =>
   mount(BreadCrumbs, {
+    slots,
     global: {
       provide: { config: {} },
       stubs: {
@@ -81,6 +87,7 @@ describe("BreadCrumbs", () => {
     mocks.push.mockReset();
     mocks.clearBreadcrumbPathAndAddOverviewPage.mockReset();
     (breadcrumbRoutes as any).value = [overview];
+    isCompact.value = false;
   });
 
   // Catalogue Breadcrumb: capsules in a navigation landmark.
@@ -165,5 +172,47 @@ describe("BreadCrumbs", () => {
       label: "W",
       badge: true,
     });
+  });
+
+  describe("on a small screen", () => {
+    beforeEach(() => {
+      isCompact.value = true;
+      (breadcrumbRoutes as any).value = [
+        overview,
+        { id: "a", title: "Asset A", type: "asset" },
+      ];
+    });
+
+    it("leads back one step with a back link instead of the trail", () => {
+      const wrapper = mountCrumbs();
+      const links = wrapper.findAll("nav a");
+      expect(links.map((link) => link.text())).toEqual(["Asset A"]);
+      expect(wrapper.find('[data-cy="breadcrumb-history"]').exists()).toBe(
+        false,
+      );
+      expect(wrapper.text()).not.toContain("›");
+    });
+
+    it("shows the current page's title in full on a row of its own", () => {
+      const current = mountCrumbs().find('[aria-current="page"]');
+      expect(current.text()).toBe("Work 1");
+      expect(current.classes()).toContain("basis-full");
+      expect(current.classes()).not.toContain("rounded-pill");
+    });
+
+    it("puts the aside next to the back link, before the title", () => {
+      const wrapper = mountCrumbs({ aside: '<span data-test="aside" />' });
+      const aside = wrapper.find('[data-test="aside"]').element;
+      expect(
+        aside.compareDocumentPosition(
+          wrapper.find('[aria-current="page"]').element,
+        ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+  });
+
+  it("leaves the aside out on a wide screen", () => {
+    const wrapper = mountCrumbs({ aside: '<span data-test="aside" />' });
+    expect(wrapper.find('[data-test="aside"]').exists()).toBe(false);
   });
 });

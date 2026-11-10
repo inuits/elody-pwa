@@ -24,6 +24,20 @@ const readStoredMode = (): NavMode => {
 const mode = ref<NavMode>(readStoredMode());
 const isOpen = computed(() => mode.value === NavMode.Expanded);
 
+// Matches Tailwind's md breakpoint: below it the rail becomes a drawer.
+const compactQuery = window.matchMedia?.("(width < 48rem)");
+export const isCompact = ref(compactQuery?.matches ?? false);
+compactQuery?.addEventListener("change", (event) => {
+  isCompact.value = event.matches;
+});
+const isDrawerOpen = ref(false);
+const openDrawer = () => {
+  isDrawerOpen.value = true;
+};
+const closeDrawer = () => {
+  isDrawerOpen.value = false;
+};
+
 const lastSegmentOf = (path: string) =>
   path.substring(path.lastIndexOf("/") + 1);
 
@@ -60,5 +74,14 @@ export const useNavMenu = () => {
     );
   };
 
-  return { isOpen, setMode, isVisible, isCurrent };
+  return {
+    isOpen,
+    setMode,
+    isVisible,
+    isCurrent,
+    isCompact,
+    isDrawerOpen,
+    openDrawer,
+    closeDrawer,
+  };
 };

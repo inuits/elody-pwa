@@ -19,11 +19,11 @@
     <the-navigation />
     <div>
       <div
-        :class="[
-          'bg-background-normal h-screen flex flex-col transition-[padding] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none',
-          isMenuOpen ? 'pl-(--nav-flyout-width)' : 'pl-(--nav-rail-width)',
-        ]"
+        :inert="(isCompact && isDrawerOpen) || undefined"
+        class="bg-background-normal h-screen flex flex-col transition-[padding] duration-(--transition-duration-ui) ease-(--ease-ui) motion-reduce:transition-none"
+        :class="contentOffset"
       >
+        <MobileTopBar v-if="isCompact" />
         <the-header />
         <div :class="['grow overflow-hidden min-h-0', { 'h-0': isSingle }]">
           <router-view />
@@ -45,6 +45,7 @@
 import AppModals from "@/components/AppModals.vue";
 import TheHeader from "@/components/TheHeader.vue";
 import TheNavigation from "@/components/navigation/NavRail.vue";
+import MobileTopBar from "@/components/navigation/MobileTopBar.vue";
 import useRouteHelpers from "@/composables/useRouteHelpers";
 import { useApp } from "@/composables/useApp";
 import { useHead } from "@vueuse/head";
@@ -55,14 +56,21 @@ import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";
-import { inject, onMounted } from "vue";
+import { computed, inject, onMounted } from "vue";
 
 const route = useRoute();
 const { showSplashScreen } = useApp();
 const { isSingle } = useRouteHelpers();
 const { someModalIsOpened, topmostOpenDialog } = useBaseModal();
 const { isBlocking } = useBlockingLoader();
-const { isOpen: isMenuOpen } = useNavMenu();
+const { isOpen: isMenuOpen, isCompact, isDrawerOpen } = useNavMenu();
+const contentOffset = computed(() => {
+  const styles = {
+    drawer: "",
+    rail: isMenuOpen.value ? "pl-(--nav-flyout-width)" : "pl-(--nav-rail-width)",
+  };
+  return isCompact.value ? styles.drawer : styles.rail;
+});
 const config: any = inject("config");
 
 useHead({
