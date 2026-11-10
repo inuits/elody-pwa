@@ -17,7 +17,10 @@
         ? t("bulk-operations.selection-count", {
             count: getEnqueuedItemCount(context),
           })
-        : hasBulkOperationsWithItemsSelection && enableSelection && !isCompact
+        : hasBulkOperationsWithItemsSelection &&
+            enableSelection &&
+            !isCompact &&
+            !listHeaderTarget
           ? t("bulk-operations.nothing-selected")
           : ""
     }}</span>
@@ -32,7 +35,7 @@
     <!-- The list header's checkbox selects/clears the page; this clears what
          sits on other pages too. -->
     <button
-      v-if="offPageCount > 0"
+      v-if="offPageCount > 0 || (listHeaderTarget && itemsSelected)"
       type="button"
       data-cy="selection-bar-link"
       class="text-label text-text-light underline cursor-pointer"
@@ -102,8 +105,51 @@
       defer
       :to="listHeaderTarget"
     >
-      <!-- small screen: one Add, its choices in a bottom sheet -->
-      <template v-if="isCompact && listHeaderOperations.length > 1">
+      <BaseButtonNew
+        v-if="toolOperations.length > 0"
+        data-cy="list-header-tools"
+        class="!w-auto"
+        button-style="secondary"
+        button-size="sm"
+        :icon="DamsIcons.Wrench"
+        :label="t('library.tools')"
+        :force-show-label="true"
+        aria-haspopup="menu"
+        :aria-expanded="toolsMenu.getContextMenu()?.isVisible ?? false"
+        @click.stop.prevent="
+          (event: Event) =>
+            toolsMenu.openContextMenu(
+              { x: 0, y: 0 },
+              event.currentTarget as HTMLElement,
+            )
+        "
+      />
+      <BaseContextMenu
+        v-if="toolOperations.length > 0"
+        :context-menu="toolsMenu.getContextMenu()!"
+      >
+        <BaseContextMenuItem
+          v-for="option in toolOperations"
+          :key="option.value"
+          :icon="option.icon ? Unicons[option.icon]?.name : undefined"
+          :label="t(option.label, [entityTypeLabel])"
+          :disable="
+            !determineActiveState(
+              option,
+              parentEntityId,
+              itemsSelected,
+              getEnqueuedItems(context),
+            )
+          "
+          :tooltip-label="option.actionContext?.labelForTooltip ?? undefined"
+          @clicked="
+            selectedBulkOperation = option;
+            handleSelectedBulkOperation(option);
+          "
+        />
+      </BaseContextMenu>
+      <!-- one Add, its choices in a menu (a bottom sheet on small screens) -->
+      <template v-if="listHeaderOperations.length > 1">
         <BaseButtonNew
           data-cy="list-header-add-menu"
           class="!w-auto !rounded-pill"
@@ -171,11 +217,13 @@ import {
   type InBulkProcessableItem,
 } from "@/composables/useBulkOperations";
 import {
+  determineActiveState,
   useBulkOperationsActionsBar,
   type BulkOperationsActionsBarEmits,
   type BulkOperationsActionsBarProps,
 } from "@/composables/useBulkOperationsActionsBar";
 import {
+  ActionContextEntitiesSelectionType,
   BulkOperationTypes,
   DamsIcons,
   type DropdownOption,
@@ -223,6 +271,7 @@ const props = withDefaults(
 
 const { t } = useI18n();
 const addMenu = new ContextMenuHandler();
+const toolsMenu = new ContextMenuHandler();
 
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 
@@ -280,11 +329,31 @@ const isAdd = (option: DropdownOption) =>
 const listHeaderOperations = computed<DropdownOption[]>(() =>
   props.listHeaderTarget ? (bulkOperations.value ?? []).filter(isAdd) : [],
 );
+// Detail panels (design 1b): actions for the whole list sit in Tools beside
+// Add; actions for a selection only appear once something is selected.
+const isTool = (option: DropdownOption) =>
+  option.actionContext?.entitiesSelectionType ===
+  ActionContextEntitiesSelectionType.NoneSelected;
+const needsSelection = (option: DropdownOption) =>
+  option.actionContext?.entitiesSelectionType ===
+  ActionContextEntitiesSelectionType.SomeSelected;
+const toolOperations = computed<DropdownOption[]>(() =>
+  props.listHeaderTarget
+    ? (bulkOperations.value ?? []).filter(
+        (option) => !isAdd(option) && isTool(option),
+      )
+    : [],
+);
 const barOperations = computed<DropdownOption[] | undefined>(() => {
   if (props.createInPageHeader)
     return bulkOperations.value?.filter((option) => !isCreate(option));
   if (props.listHeaderTarget)
-    return bulkOperations.value?.filter((option) => !isAdd(option));
+    return bulkOperations.value?.filter(
+      (option) =>
+        !isAdd(option) &&
+        !isTool(option) &&
+        (itemsSelected.value || !needsSelection(option)),
+    );
   return bulkOperations.value;
 });
 

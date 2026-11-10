@@ -848,7 +848,8 @@ export enum DamsIcons {
   UserCircle = 'UserCircle',
   VideoSlash = 'VideoSlash',
   WindowGrid = 'WindowGrid',
-  WindowMaximize = 'WindowMaximize'
+  WindowMaximize = 'WindowMaximize',
+  Wrench = 'Wrench'
 }
 
 export enum DeepRelationsFetchStrategy {
