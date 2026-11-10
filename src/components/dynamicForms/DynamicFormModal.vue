@@ -10,7 +10,7 @@
     :modalHeightStyle="'max-h-[90vh]'"
     @hide-modal="handleCloseModal"
   >
-    <div class="flex flex-col w-full max-h-[calc(90vh-34px)] overflow-auto">
+    <div class="flex flex-col w-full max-h-[calc(90vh-34px)] overflow-auto max-md:max-h-none">
       <template v-if="shouldRenderTabs">
         <baseTabs
           :tabs="tabsTitles"
