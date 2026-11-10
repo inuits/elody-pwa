@@ -245,6 +245,7 @@
               :parent-entity-id="formId"
               :linked-entity-id="intialValues?.id || itemId"
               :linked-entity-relations="relationValues"
+              :listing-relation-type="relationTypeOfListing"
               :refetch-entities="refetchEntities"
             >
               <ReadOnlyMetadataWrapper
