@@ -13,7 +13,9 @@ The bar over every media viewer. Implemented by
 ## Anatomy
 A white bar across the top of the viewer, soft shadow. Viewer operations on
 the left, the file arrows (when the selection has several mediafiles) in the
-middle, context actions on the right.
+middle, context actions on the right. Below 768px the bar sits at the
+bottom of the viewer, within thumb reach, and scrolls sideways if the tools
+don't fit.
 
 | Mode | Left | Right |
 |---|---|---|

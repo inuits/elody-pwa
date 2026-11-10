@@ -5,6 +5,13 @@ import ListItemEditableValue from "@/components/ListItemEditableValue.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
+import { isCompact } from "@/composables/useNavMenu";
+import { rowSheetKey } from "@/components/context-menu-actions/rowSheet";
+
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 const mockSeenItems = vi.hoisted(() => ({
   markAsSeen: vi.fn(),
@@ -506,6 +513,63 @@ describe("ListItem", () => {
       toggle.vm.$emit("toggle");
 
       expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["row-1"]);
+    });
+
+    describe("on a small screen", () => {
+      const mountRow = (props: Record<string, unknown> = {}) =>
+        shallowMount(ListItem, {
+          props: {
+            ...defaultProps,
+            itemId: "row-1",
+            baseLibraryMode: "normalBaseLibrary" as any,
+            previewComponentFeatureEnabled: true,
+            media: "sheep.jpg",
+            buttons: { contextMenu: { delete: { label: "delete" } } } as any,
+            ...props,
+          },
+        });
+
+      beforeEach(() => {
+        isCompact.value = true;
+      });
+      afterEach(() => {
+        isCompact.value = false;
+      });
+
+      it("drops the eye: Preview leads the ⋮ sheet", () => {
+        expect(mountRow().findComponent({ name: "PreviewToggle" }).exists())
+          .toBe(false);
+      });
+
+      it("keeps the eye on a row without a ⋮", () => {
+        expect(
+          mountRow({ buttons: undefined })
+            .findComponent({ name: "PreviewToggle" })
+            .exists(),
+        ).toBe(true);
+      });
+
+      it("hands its sheet the file and its preview", () => {
+        const wrapper = mountRow();
+        const sheet = (wrapper.vm.$ as any).provides[rowSheetKey].value;
+
+        expect(sheet.id).toBe("row-1");
+        expect(sheet.thumbnailUrl).toBe(
+          "/api/iiif/3/sheep.jpg/square/^100,/0/default.jpg",
+        );
+        sheet.preview();
+        expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual([
+          "row-1",
+        ]);
+      });
+
+      it("offers no preview where the list has none", () => {
+        const sheet = (
+          mountRow({ previewComponentFeatureEnabled: false }).vm.$ as any
+        ).provides[rowSheetKey].value;
+
+        expect(sheet.preview).toBeUndefined();
+      });
     });
 
     it("keeps the eye while a preview is open", () => {

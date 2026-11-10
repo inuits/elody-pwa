@@ -69,4 +69,12 @@ describe("EntityColumn page layout", () => {
     expect(column.classes()).toContain("min-w-0");
     expect(column.classes()).not.toContain("px-5");
   });
+
+  it("stacks the columns full width below md", async () => {
+    const column = (await mountColumns()).find(".w-sixty");
+    expect(column.element.parentElement!.classList).toContain("max-md:flex-col");
+    expect(column.classes()).toEqual(
+      expect.arrayContaining(["max-md:w-full", "max-md:h-auto"]),
+    );
+  });
 });

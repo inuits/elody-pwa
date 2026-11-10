@@ -16,7 +16,7 @@
       :class="[
         // ui_kits DetailScreen: page padding, panel gutter between columns
         {
-          'w-full flex gap-(--gutter-panels) p-(--page-pad) overflow-y-auto':
+          'w-full flex max-md:flex-col gap-(--gutter-panels) p-(--page-pad) overflow-y-auto':
             !isPreviewElement,
         },
         { 'pb-20': useEditHelper.isEdit && !isPreviewElement },
@@ -26,7 +26,7 @@
         v-for="(column, index) in currentColumnConfig[entity.id]"
         :key="index"
         :class="[
-          'h-full min-w-0',
+          'h-full min-w-0 max-md:w-full max-md:h-auto',
           convertSizeToTailwind(column.size),
         ]"
       >

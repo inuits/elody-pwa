@@ -1,6 +1,14 @@
 import { mount } from "@vue/test-utils";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import ContextMenuActionsShell from "../ContextMenuActionsShell.vue";
+import { isCompact } from "@/composables/useNavMenu";
+import { computed } from "vue";
+import { rowSheetKey, type RowSheet } from "@/components/context-menu-actions/rowSheet";
+
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
@@ -13,6 +21,8 @@ vi.mock("@/types", () => ({
   Unicons: {
     AngleDown: { name: "angle-down" },
     AngleUp: { name: "angle-up" },
+    EllipsisV: { name: "ellipsis-v" },
+    Eye: { name: "eye" },
     QuestionCircle: { name: "question-circle" },
   },
 }));
@@ -71,6 +81,105 @@ describe("ContextMenuActionsShell", () => {
   it("renders no trigger without overflow actions", () => {
     expect(getWrapper({ hasOverflowActions: false }).find("button").exists())
       .toBe(false);
+  });
+
+  describe("on a small screen", () => {
+    beforeEach(() => {
+      isCompact.value = true;
+    });
+    afterEach(() => {
+      isCompact.value = false;
+    });
+
+    it("shrinks the trigger to a ⋮ that keeps its name", () => {
+      const trigger = getWrapper({ contextLabel: "Brief aan Jan" }).find(
+        "button",
+      );
+
+      expect(trigger.text()).not.toContain("contextMenu.actions");
+      expect(trigger.find('[name="ellipsis-v"]').exists()).toBe(true);
+      expect(trigger.attributes("aria-label")).toBe(
+        "contextMenu.actions-for:Brief aan Jan",
+      );
+    });
+
+    describe("in a list row", () => {
+      const preview = vi.fn();
+      const mountRow = (
+        props: Record<string, unknown> = {},
+        sheet: Partial<RowSheet> = {},
+      ) =>
+        mount(ContextMenuActionsShell, {
+          props: { hasPromotedActions: false, hasOverflowActions: true, ...props },
+          slots: { overflow: '<a role="menuitem">Delete mediafile</a>' },
+          attachTo: document.body,
+          global: {
+            stubs: {
+              unicon: true,
+              BaseIcon: true,
+              BaseTooltip: true,
+              ImageViewer: { props: ["url"], template: '<img :src="url" />' },
+              BaseContextMenu: { template: "<div><slot /></div>" },
+            },
+            provide: {
+              [rowSheetKey as symbol]: computed<RowSheet>(() => ({
+                id: "mediafile-1",
+                title: "sheep.JPEG",
+                thumbnailUrl: "/thumb.jpg",
+                thumbnailIsLink: false,
+                preview,
+                ...sheet,
+              })),
+            },
+          },
+        });
+
+      it("tops the sheet with the file it acts on", () => {
+        const header = mountRow().find('[data-cy="row-sheet-header"]');
+
+        expect(header.text()).toContain("sheep.JPEG");
+        expect(header.find("img").attributes("src")).toBe("/thumb.jpg");
+      });
+
+      it("leads with Preview, which opens the row's preview", async () => {
+        const items = mountRow().findAll('[role="menuitem"]');
+
+        expect(items.map((item) => item.text())).toEqual([
+          "preview-component.open",
+          "Delete mediafile",
+        ]);
+        await items[0].trigger("click");
+        expect(preview).toHaveBeenCalled();
+      });
+
+      it("offers the ⋮ for the preview alone", () => {
+        const trigger = mountRow({ hasOverflowActions: false }).find(
+          '[data-cy="overflow-menu-trigger"]',
+        );
+
+        expect(trigger.exists()).toBe(true);
+      });
+
+      it("takes focus back when the preview closes, as the eye did", () => {
+        const trigger = mountRow().find('[data-cy="overflow-menu-trigger"]');
+
+        expect(trigger.attributes("data-preview-for")).toBe("mediafile-1");
+      });
+
+      it("has no Preview without one", () => {
+        const items = mountRow({}, { preview: undefined }).findAll(
+          '[role="menuitem"]',
+        );
+
+        expect(items).toHaveLength(1);
+      });
+    });
+
+    it("still has a name without a scope", () => {
+      expect(getWrapper().find("button").attributes("aria-label")).toBe(
+        "contextMenu.actions",
+      );
+    });
   });
 
   describe("as a split button", () => {

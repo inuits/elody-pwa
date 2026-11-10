@@ -41,6 +41,12 @@ vi.mock("vue-i18n", () => ({
 vi.mock("@/main", () => ({ auth: { isAuthenticated: { value: true } } }));
 vi.mock("@/helpers", () => ({ getEnvironmentLabel: () => "local" }));
 vi.mock("@/types", () => ({ Unicons: {} }));
+vi.mock("@/components/LanguageSelect.vue", () => ({
+  default: { template: '<div data-cy="language-select" />' },
+}));
+vi.mock("@/components/menu/TenantSwitcher.vue", () => ({
+  default: { template: '<div data-cy="tenant-switcher" />' },
+}));
 
 const library = {
   label: "library",
@@ -99,6 +105,9 @@ const setMode = async (mode: string) => {
   const { useNavMenu } = await import("@/composables/useNavMenu");
   useNavMenu().setMode(mode as never);
 };
+
+const navMenu = async () =>
+  (await import("@/composables/useNavMenu")).useNavMenu();
 
 describe("NavRail", () => {
   beforeEach(async () => {
@@ -393,5 +402,102 @@ describe("NavRail", () => {
       await modeButton().trigger("click");
       expect(isWide()).toBe(false);
     });
+  });
+
+  describe("on a small screen", () => {
+    const closeButton = () => wrapper!.find('[data-cy="nav-drawer-close"]');
+    const isDrawerHidden = () => nav().attributes("inert") !== undefined;
+
+    beforeEach(async () => {
+      const menu = await navMenu();
+      menu.isCompact.value = true;
+      menu.closeDrawer();
+    });
+
+    afterEach(async () => {
+      (await navMenu()).isCompact.value = false;
+    });
+
+    it("is a hidden, unreachable drawer until opened", async () => {
+      await mountRail();
+      expect(isDrawerHidden()).toBe(true);
+      expect(nav().classes()).toContain("-translate-x-full");
+    });
+
+    it("slides in over the page when opened", async () => {
+      await mountRail();
+      (await navMenu()).openDrawer();
+      await nextTick();
+      expect(isDrawerHidden()).toBe(false);
+      expect(nav().classes()).not.toContain("-translate-x-full");
+      expect(nav().classes()).toContain("shadow-overlay");
+    });
+
+    it("shows the items with their labels, groups inline", async () => {
+      await mountRail();
+      expect(
+        wrapper!
+          .findAllComponents(NavItemStub)
+          .every((item) => item.props("expanded")),
+      ).toBe(true);
+    });
+
+    it("offers a close button instead of the mode toggle", async () => {
+      await mountRail();
+      expect(modeButton().exists()).toBe(false);
+      expect(closeButton().attributes("aria-label")).toBe(
+        "navigation.close-menu",
+      );
+    });
+
+    describe("closes", () => {
+      beforeEach(async () => {
+        await mountRail();
+        (await navMenu()).openDrawer();
+        await nextTick();
+      });
+
+      it("from its close button", async () => {
+        await closeButton().trigger("click");
+        expect(isDrawerHidden()).toBe(true);
+      });
+
+      it("on a click on the backdrop", async () => {
+        await wrapper!.find('[data-cy="nav-drawer-backdrop"]').trigger("click");
+        expect(isDrawerHidden()).toBe(true);
+      });
+
+      it("on Escape", async () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        await nextTick();
+        expect(isDrawerHidden()).toBe(true);
+      });
+
+      it("after navigating", async () => {
+        mocks.afterEach.mock.calls[0][0]();
+        await nextTick();
+        expect(isDrawerHidden()).toBe(true);
+      });
+    });
+
+    it("has no backdrop while closed", async () => {
+      await mountRail();
+      expect(wrapper!.find('[data-cy="nav-drawer-backdrop"]').exists()).toBe(
+        false,
+      );
+    });
+
+    it("holds the language switcher and the full account row", async () => {
+      await mountRail();
+      expect(wrapper!.find('[data-cy="language-select"]').exists()).toBe(true);
+      expect(
+        wrapper!.findComponent({ name: "LogInLogout" }).props("isExpanded"),
+      ).toBe(true);
+    });
+  });
+
+  it("leaves the language switcher in the page header on a wide screen", async () => {
+    await mountRail();
+    expect(wrapper!.find('[data-cy="language-select"]').exists()).toBe(false);
   });
 });

@@ -1,8 +1,14 @@
 import { mount } from "@vue/test-utils";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ref } from "vue";
 import BulkOperationsActionsBar from "../BulkOperationsActionsBar.vue";
 import type { Entitytyping } from "@/generated-types/queries";
+import { isCompact } from "@/composables/useNavMenu";
+
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 const mocks = vi.hoisted(() => ({
   selected: [] as { id: string }[],
@@ -239,7 +245,7 @@ describe("BulkOperationsActionsBar", () => {
           listHeaderTarget,
         },
         global: {
-          stubs: { ActionMenuGroup: true, BaseTooltip: true, Unicon: true, teleport: true },
+          stubs: { ActionMenuGroup: true, BaseTooltip: true, BaseIcon: true, Unicon: true, teleport: true },
           mocks: { $t: (key: string) => key },
         },
       });
@@ -265,6 +271,39 @@ describe("BulkOperationsActionsBar", () => {
       expect(pill.props("label")).toBe(
         "bulk-operations.add-new:entity-translations.mediafile:",
       );
+    });
+
+    describe("on a small screen", () => {
+      beforeEach(() => {
+        isCompact.value = true;
+      });
+      afterEach(() => {
+        isCompact.value = false;
+      });
+
+      it("folds the pills into one Add that lists them", async () => {
+        const wrapper = mountBar('[data-list-actions="x"]');
+        expect(wrapper.find('[data-cy="list-header-add"]').exists()).toBe(false);
+        const add = wrapper.find('[data-cy="list-header-add-menu"]');
+        expect(add.text()).toBe("library.add");
+
+        await add.trigger("click");
+        const items = wrapper.findAll('[role="menuitem"]');
+        expect(items.map((item) => item.text().split(":")[0])).toEqual([
+          "bulk-operations.add-new",
+          "bulk-operations.add-existing",
+        ]);
+        await items[1].trigger("click");
+        expect(mocks.handle).toHaveBeenCalledWith(addExisting);
+      });
+
+      it("keeps a lone add as its own pill", () => {
+        mocks.operations = [create, exportAll];
+        const wrapper = mountBar('[data-list-actions="x"]');
+
+        expect(wrapper.findAll('[data-cy="list-header-add"]')).toHaveLength(1);
+        expect(wrapper.find('[data-cy="list-header-add-menu"]').exists()).toBe(false);
+      });
     });
 
     it("keeps them in the bar without a list header target", () => {

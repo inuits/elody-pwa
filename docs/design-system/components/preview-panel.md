@@ -41,6 +41,19 @@ below 500px they stack; 500 / 630 / 830 / 1024px → 40/60, 35/65, 30/70,
 container (`preview` container name). While a preview is open the list
 shows only its first field (table: first column).
 
+## Small screens
+Below 768px (`isCompact`) the preview covers the page: a fixed
+`role="dialog"` `aria-modal` overlay at `z-overlay`. It is not a
+`showModal()` dialog, since the top layer would hide the dropdowns and
+tooltips that teleport to body. A back button (‹) leads the
+header instead of the ×, the header sticks while the metadata scrolls,
+and a media viewer fills the screen (`--preview-viewer-height-compact`).
+With more than one mediafile, a thumbnail strip under the viewer jumps
+between them (`--thumb-strip-size`, `--thumb-strip-pad`): the list's
+square IIIF crop, the one on screen ringed in accent and `aria-current`.
+It replaces the viewer's ‹ › arrows (`hideNavigation` on `MediaViewerNew`).
+A preview never opens by default there; only the row's eye opens it.
+
 ## Accessibility
 - `role="complementary"`, named by the title (`aria-labelledby`).
 

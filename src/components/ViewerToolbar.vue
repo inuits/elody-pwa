@@ -2,7 +2,7 @@
   <div
     role="toolbar"
     :aria-label="$t('media-viewer.toolbar')"
-    class="absolute w-full bg-background-light z-[5] px-2 shadow-sm flex justify-between items-center gap-1 h-(--viewer-toolbar-height)"
+    class="absolute w-full bg-background-light z-[5] px-2 shadow-sm flex justify-between items-center gap-1 h-(--viewer-toolbar-height) max-md:bottom-0 max-md:overflow-x-auto"
   >
     <div class="flex items-center gap-1">
       <a

@@ -1,10 +1,15 @@
 <template>
   <div
-    class="z-header flex items-center gap-2 p-(--topbar-pad) bg-surface border-b border-border-subtle flex-wrap min-[1400px]:flex-nowrap"
+    class="z-header flex items-center gap-2 bg-surface flex-wrap min-[1400px]:flex-nowrap"
+    :class="headerClasses"
   >
-    <!-- ui_kits AppShell: a flat full-width top bar -->
-    <EntityNavigationArrows class="mr-2" />
-    <BreadCrumbs />
+    <!-- ui_kits AppShell: a flat full-width top bar; a card below md -->
+    <EntityNavigationArrows v-if="!isCompact" class="mr-2" />
+    <BreadCrumbs :class="{ 'basis-full': isCompact }">
+      <template v-if="isCompact" #aside>
+        <EntityNavigationArrows />
+      </template>
+    </BreadCrumbs>
     <!-- The page's create action, teleported in by its main list
          (ui_kits/clients: a pill next to the title). -->
     <div id="page-header-create" class="flex items-center ml-4 empty:hidden" />
@@ -28,13 +33,16 @@
       :entity-id="entityId"
       :entity-type="entityType"
     />
-    <LanguageSelect class="flex justify-end pr-2 ml-auto" />
-    <tenant-switcher
-      class="flex justify-end pr-2"
-      v-if="config.features.hasTenantSelect"
-    />
+    <!-- Below md the drawer holds language and tenant, the top bar holds search -->
+    <template v-if="!isCompact">
+      <LanguageSelect class="flex justify-end pr-2 ml-auto" />
+      <tenant-switcher
+        class="flex justify-end pr-2"
+        v-if="config.features.hasTenantSelect"
+      />
+    </template>
     <SearchBar
-      v-if="showSearch"
+      v-if="showSearch && !isCompact"
       :inputEnabled="false"
     />
   </div>
@@ -55,6 +63,7 @@ import EntityHeaderButton from "@/components/EntityHeaderButton.vue";
 import HeaderContextMenuActions from "@/components/HeaderContextMenuActions.vue";
 import HistoryButton from "@/components/HistoryButton.vue";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
+import { useNavMenu } from "@/composables/useNavMenu";
 import { auth } from "@/main";
 import type { EntityButtonConfig, ToggleEntityButtonConfig } from "@/types/contextMenuRouteConfig";
 
@@ -62,6 +71,14 @@ const route = useRoute();
 const router = useRouter();
 const config: any = inject("config");
 const showSearch = !!config.features.simpleSearch;
+const { isCompact } = useNavMenu();
+const headerClasses = computed(() => {
+  const styles = {
+    card: "m-(--gutter-panels) mb-0 p-(--panel-header-pad) rounded-card border border-border-subtle *:ml-0 *:pl-0",
+    bar: "p-(--topbar-pad) border-b border-border-subtle",
+  };
+  return isCompact.value ? styles.card : styles.bar;
+});
 const {
   actions: contextMenuActions,
   hasEditMetadataButton: configEditMetadataButton,
