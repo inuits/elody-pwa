@@ -9,6 +9,7 @@ import {
   type PreviewComponent,
 } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
+import { isCompact } from "@/composables/useNavMenu";
 
 export interface PreviewComponentProps {
   entityType: Entitytyping;
@@ -25,7 +26,9 @@ export const usePreviewComponent = (
   const previewForEntity = ref<string | undefined>(undefined);
   const lastPreviewedEntityId = ref<string | undefined>(undefined);
 
+  // On a small screen the preview is full-screen, so it never opens unasked.
   const shouldOpenByDefault = (): boolean =>
+    !isCompact.value &&
     !!previewComponent.value &&
     (props.openPreviewByDefault ?? !!previewComponent.value.openByDefault);
 

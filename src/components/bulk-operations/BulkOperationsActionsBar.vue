@@ -102,6 +102,40 @@
       defer
       :to="listHeaderTarget"
     >
+      <!-- small screen: one Add, its choices in a bottom sheet -->
+      <template v-if="isCompact && listHeaderOperations.length > 1">
+        <BaseButtonNew
+          data-cy="list-header-add-menu"
+          class="!w-auto !rounded-pill"
+          button-style="primary"
+          button-size="sm"
+          :icon="DamsIcons.PlusCircle"
+          :label="t('library.add')"
+          :force-show-label="true"
+          aria-haspopup="menu"
+          :aria-expanded="addMenu.getContextMenu()?.isVisible ?? false"
+          @click.stop.prevent="
+            (event: Event) =>
+              addMenu.openContextMenu(
+                { x: 0, y: 0 },
+                event.currentTarget as HTMLElement,
+              )
+          "
+        />
+        <BaseContextMenu :context-menu="addMenu.getContextMenu()!">
+          <BaseContextMenuItem
+            v-for="option in listHeaderOperations"
+            :key="option.value"
+            :icon="Unicons[option.icon ?? DamsIcons.PlusCircle]?.name"
+            :label="t(option.label, [entityTypeLabel])"
+            @clicked="
+              selectedBulkOperation = option;
+              handleSelectedBulkOperation(option);
+            "
+          />
+        </BaseContextMenu>
+      </template>
+      <template v-else>
       <BaseButtonNew
         v-for="option in listHeaderOperations"
         :key="option.value"
@@ -117,6 +151,7 @@
           handleSelectedBulkOperation(option);
         "
       />
+      </template>
     </Teleport>
   </div>
 </template>
@@ -126,6 +161,11 @@ import { computed, inject } from "vue";
 import { useI18n } from "vue-i18n";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseContextMenu from "@/components/base/BaseContextMenu.vue";
+import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
+import { ContextMenuHandler } from "@/components/context-menu-actions/ContextMenuHandler";
+import { isCompact } from "@/composables/useNavMenu";
+import { Unicons } from "@/types";
 import {
   type Context,
   type InBulkProcessableItem,
@@ -182,6 +222,7 @@ const props = withDefaults(
 );
 
 const { t } = useI18n();
+const addMenu = new ContextMenuHandler();
 
 const parentEntity: Entity = inject("ParentEntityProvider", undefined);
 

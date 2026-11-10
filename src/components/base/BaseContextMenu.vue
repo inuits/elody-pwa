@@ -1,5 +1,12 @@
 <template>
   <Teleport defer :to="someModalIsOpened ? modalTeleportTarget() : 'body'">
+    <!-- small screen: a bottom sheet; a tap on the scrim closes it through
+         the handler's document click listener -->
+    <div
+      v-if="contextMenu.isVisible && isCompact"
+      data-cy="context-menu-scrim"
+      class="fixed inset-0 z-context-menu bg-scrim"
+    />
     <Transition class="base-context-menu-container">
       <div
         ref="menu"
@@ -7,8 +14,8 @@
         @click.prevent
         @keydown="onKeydown"
         v-if="contextMenu.isVisible"
-        class="context-menu"
-        :style="getStyles()"
+        :class="['context-menu', { 'context-menu--sheet': isCompact }]"
+        :style="isCompact ? undefined : getStyles()"
       >
         <slot></slot>
       </div>
@@ -22,6 +29,7 @@ import { ContextMenuDirection } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { modalTeleportTarget } from "@/composables/useModalTeleportTarget";
 import { nextTick, ref, watch } from "vue";
+import { isCompact } from "@/composables/useNavMenu";
 
 const { someModalIsOpened } = useBaseModal();
 
@@ -151,6 +159,17 @@ const getStyles = () => {
   font-size: var(--text-table);
   padding: var(--menu-padding);
   min-width: var(--menu-min-width);
+}
+
+.context-menu--sheet {
+  inset: auto 0 0 0;
+  border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+  padding: var(--sheet-padding);
+  font-size: var(--text-value);
+}
+
+.context-menu--sheet :deep([role="menuitem"]) {
+  min-height: var(--touch-target-min);
 }
 
 .modal-enter-from .base-context-menu-container,

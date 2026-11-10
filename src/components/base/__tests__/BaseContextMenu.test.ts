@@ -3,12 +3,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { defineComponent, h, nextTick, reactive, ref } from "vue";
 import BaseContextMenu from "../BaseContextMenu.vue";
 import type { ContextMenu } from "@/components/context-menu-actions/ContextMenuHandler";
+import { isCompact } from "@/composables/useNavMenu";
 
 const mocks = vi.hoisted(() => ({ someModalIsOpened: true }));
 
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({ someModalIsOpened: mocks.someModalIsOpened }),
 }));
+
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 describe("BaseContextMenu", () => {
   it("survives mounting in the same render that opens its modal", async () => {
@@ -116,6 +122,31 @@ describe("BaseContextMenu", () => {
       await mountMenu();
 
       expect(getMenu()!.style.right).toBe("20px");
+    });
+
+    describe("on a small screen", () => {
+      beforeEach(() => {
+        isCompact.value = true;
+      });
+      afterEach(() => {
+        isCompact.value = false;
+      });
+
+      it("opens as a sheet along the bottom, not at its trigger", async () => {
+        await mountMenu();
+
+        expect(getMenu()!.classList).toContain("context-menu--sheet");
+        expect(getMenu()!.style.top).toBe("");
+        expect(getMenu()!.style.left).toBe("");
+      });
+
+      it("dims the page behind the sheet", async () => {
+        await mountMenu();
+
+        expect(
+          document.body.querySelector('[data-cy="context-menu-scrim"]'),
+        ).not.toBeNull();
+      });
     });
 
     it("moves focus to the first item when it opens", async () => {

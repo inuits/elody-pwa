@@ -393,6 +393,22 @@ describe("MediaViewerNew.vue - Cropping Functionality", () => {
       );
     });
 
+    it("leaves the arrows out when the host offers its own navigation", async () => {
+      mockMediafileSelectionState.value.default.mediafiles = [
+        { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
+        { id: "media2", mimetype: "image/png" } as MediaFileEntity,
+      ];
+      const wrapper = createWrapper({ hideNavigation: true });
+      await nextTick();
+
+      expect(wrapper.find('[data-testid="nav-prev-mediafile"]').exists()).toBe(
+        false,
+      );
+      expect(wrapper.find('[data-testid="nav-next-mediafile"]').exists()).toBe(
+        false,
+      );
+    });
+
     it("renders the arrows inside the IIIF viewer toolbar so they cannot cover its buttons", async () => {
       mockMediafileSelectionState.value.default.mediafiles = [
         { id: "media1", mimetype: "image/jpeg" } as MediaFileEntity,
