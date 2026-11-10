@@ -16,8 +16,9 @@
         class="h-full overflow-y-auto"
         :class="{ 'animate-pulse pointer-events-none': isRefetching }"
       >
+        <!-- a small screen drops the header; the list meta row selects -->
         <div
-          v-if="headerColumns.length > 0"
+          v-if="headerColumns.length > 0 && !isCompact"
           data-cy="view-modes-table-header"
           class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-1.5 h-(--list-header-height) border-b border-border-subtle text-label font-bold text-text-field-label"
         >
@@ -134,12 +135,11 @@
         </div>
       </div>
 
-      <div
+      <PreviewHost
         v-if="
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -157,7 +157,7 @@
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
-      </div>
+      </PreviewHost>
     </div>
   </div>
 </template>
@@ -178,6 +178,7 @@ import {
 import TableViewRow from "@/components/library/view-modes/TableViewRow.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
+import PreviewHost from "@/components/previews/PreviewHost.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
@@ -190,6 +191,7 @@ import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { readCssToken } from "@/utils/cssToken";
+import { isCompact } from "@/composables/useNavMenu";
 import {
   buildTableItems,
   groupHeaderLabel,

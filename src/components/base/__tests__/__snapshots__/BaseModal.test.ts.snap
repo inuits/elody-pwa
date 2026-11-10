@@ -1,49 +1,49 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`BaseModal > Snapshot Tests > matches snapshot for center modal 1`] = `
-"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-overlay min-w-[50vw] w-fit m-auto max-h-[75vh] my-[12.5vh] @container/modal relative shadow-modal backdrop:bg-scrim">
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-overlay min-w-[50vw] w-fit m-auto max-h-[75vh] my-[12.5vh] @container/modal relative shadow-modal backdrop:bg-scrim max-md:w-screen max-md:min-w-0 max-md:h-dvh max-md:max-h-dvh max-md:m-0 max-md:rounded-none max-md:[&amp;_:is(input,select,textarea)]:text-base">
   <div data-v-5078ddf1="" class="flex items-center gap-2 justify-end p-2" data-testid="modal-header">
-    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted">
+    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex items-center justify-center cursor-pointer rounded-button p-1 hover:bg-surface-muted max-md:size-(--touch-target-min)">
       <div data-v-5078ddf1="" data-testid="unicon" aria-label="multiply" height="18"></div>
     </button>
   </div>
-  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <div data-v-5078ddf1="" data-testid="modal-content" class="max-md:min-h-0 max-md:overflow-auto"></div>
   <!--v-if-->
 </dialog>"
 `;
 
 exports[`BaseModal > Snapshot Tests > matches snapshot for center wide modal 1`] = `
-"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-overlay min-w-[80vw] w-fit m-auto max-h-[90vh] @container/modal relative shadow-modal backdrop:bg-scrim">
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened rounded-overlay min-w-[80vw] w-fit m-auto max-h-[90vh] @container/modal relative shadow-modal backdrop:bg-scrim max-md:w-screen max-md:min-w-0 max-md:h-dvh max-md:max-h-dvh max-md:m-0 max-md:rounded-none max-md:[&amp;_:is(input,select,textarea)]:text-base">
   <div data-v-5078ddf1="" class="flex items-center gap-2 justify-end p-2" data-testid="modal-header">
-    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted">
+    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex items-center justify-center cursor-pointer rounded-button p-1 hover:bg-surface-muted max-md:size-(--touch-target-min)">
       <div data-v-5078ddf1="" data-testid="unicon" aria-label="multiply" height="18"></div>
     </button>
   </div>
-  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <div data-v-5078ddf1="" data-testid="modal-content" class="max-md:min-h-0 max-md:overflow-auto"></div>
   <!--v-if-->
 </dialog>"
 `;
 
 exports[`BaseModal > Snapshot Tests > matches snapshot for left modal 1`] = `
-"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened @container/modal relative shadow-modal backdrop:bg-scrim">
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened @container/modal relative shadow-modal backdrop:bg-scrim max-md:w-screen max-md:min-w-0 max-md:h-dvh max-md:max-h-dvh max-md:m-0 max-md:rounded-none max-md:[&amp;_:is(input,select,textarea)]:text-base">
   <div data-v-5078ddf1="" class="flex items-center gap-2 justify-end p-2" data-testid="modal-header">
-    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted">
+    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex items-center justify-center cursor-pointer rounded-button p-1 hover:bg-surface-muted max-md:size-(--touch-target-min)">
       <div data-v-5078ddf1="" data-testid="unicon" aria-label="multiply" height="18"></div>
     </button>
   </div>
-  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <div data-v-5078ddf1="" data-testid="modal-content" class="max-md:min-h-0 max-md:overflow-auto"></div>
   <!--v-if-->
 </dialog>"
 `;
 
 exports[`BaseModal > Snapshot Tests > matches snapshot for right modal 1`] = `
-"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened min-w-[40vw] w-fit h-screen max-h-screen mr-0 my-0 @container/modal relative shadow-modal backdrop:bg-scrim">
+"<dialog data-v-5078ddf1="" data-testid="modal-dialog" closedby="none" class="grid grid-rows-[max-content_1fr] base-modal--opened min-w-[40vw] w-fit h-screen max-h-screen mr-0 my-0 @container/modal relative shadow-modal backdrop:bg-scrim max-md:w-screen max-md:min-w-0 max-md:h-dvh max-md:max-h-dvh max-md:m-0 max-md:rounded-none max-md:[&amp;_:is(input,select,textarea)]:text-base">
   <div data-v-5078ddf1="" class="flex items-center gap-2 justify-end p-2" data-testid="modal-header">
-    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted">
+    <!--v-if--><button data-v-5078ddf1="" type="button" data-testid="modal-close-button" aria-label="actions.labels.close" class="flex items-center justify-center cursor-pointer rounded-button p-1 hover:bg-surface-muted max-md:size-(--touch-target-min)">
       <div data-v-5078ddf1="" data-testid="unicon" aria-label="multiply" height="18"></div>
     </button>
   </div>
-  <div data-v-5078ddf1="" data-testid="modal-content"></div>
+  <div data-v-5078ddf1="" data-testid="modal-content" class="max-md:min-h-0 max-md:overflow-auto"></div>
   <!--v-if-->
 </dialog>"
 `;

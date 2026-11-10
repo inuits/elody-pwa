@@ -85,9 +85,12 @@
       </div>
     </div>
 
+    <!-- small screen: no header to line up with, so no fixed column -->
     <div
-      class="shrink-0 flex justify-center"
-      :style="{ width: actionsColumnWidth }"
+      data-cy="table-row-actions"
+      class="shrink-0 flex"
+      :class="isCompact ? 'justify-end' : 'justify-center'"
+      :style="isCompact ? undefined : { width: actionsColumnWidth }"
       @click.stop
     >
       <EntityButtons
@@ -104,16 +107,17 @@
       />
     </div>
 
-    <div class="w-8 shrink-0 flex justify-center">
+    <!-- small screen: Preview leads the ⋮ sheet instead -->
+    <div
+      v-if="!(isCompact && buttons?.contextMenu)"
+      data-cy="table-row-preview"
+      class="w-8 shrink-0 flex justify-center"
+    >
       <PreviewToggle
-        v-if="
-          previewComponentFeatureEnabled &&
-          (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-            baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
-        "
+        v-if="canPreview"
         :active="previewOpen"
         :data-preview-for="itemId"
-      @toggle="emit('togglePreviewComponent', itemId)"
+        @toggle="emit('togglePreviewComponent', itemId)"
       />
     </div>
   </li>
@@ -141,7 +145,12 @@ import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { stringIsUrl } from "@/helpers";
 import { auth } from "@/main";
-import { computed, ref } from "vue";
+import { computed, provide, ref } from "vue";
+import { isCompact } from "@/composables/useNavMenu";
+import {
+  rowSheetKey,
+  type RowSheet,
+} from "@/components/context-menu-actions/rowSheet";
 import { useI18n } from "vue-i18n";
 
 const props = withDefaults(
@@ -227,6 +236,30 @@ const rowTitle = computed(() => {
   const value = props.teaserMetadata?.[0]?.value;
   return typeof value === "string" ? value : undefined;
 });
+
+const canPreview = computed<boolean>(
+  () =>
+    props.previewComponentFeatureEnabled &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
+provide(
+  rowSheetKey,
+  computed<RowSheet>(() => ({
+    id: props.itemId,
+    title: rowTitle.value,
+    thumbnailUrl:
+      props.media && !imageSrcError.value
+        ? mediaIsLink.value
+          ? props.media
+          : `/api/iiif/3/${props.media}/square/^100,/0/default.jpg`
+        : undefined,
+    thumbnailIsLink: mediaIsLink.value,
+    preview: canPreview.value
+      ? () => emit("togglePreviewComponent", props.itemId)
+      : undefined,
+  })),
+);
 
 const columnClass = (idx: number): string => {
   const base = "flex justify-start flex-col mx-2 break-words";

@@ -17,6 +17,8 @@
       },
       modalStyle,
       `@container/modal relative shadow-modal backdrop:bg-scrim`,
+      // phones: full screen; 16px fields so iOS doesn't zoom on focus
+      'max-md:w-screen max-md:min-w-0 max-md:h-dvh max-md:max-h-dvh max-md:m-0 max-md:rounded-none max-md:[&_:is(input,select,textarea)]:text-base',
     ]"
   >
     <div
@@ -41,13 +43,13 @@
         type="button"
         data-testid="modal-close-button"
         :aria-label="$t('actions.labels.close')"
-        class="flex cursor-pointer rounded-button p-1 hover:bg-surface-muted"
+        class="flex items-center justify-center cursor-pointer rounded-button p-1 hover:bg-surface-muted max-md:size-(--touch-target-min)"
         @click="hideModal"
       >
         <unicon :name="Unicons.Close.name" :height="iconHeight" />
       </button>
     </div>
-    <div data-testid="modal-content">
+    <div data-testid="modal-content" class="max-md:min-h-0 max-md:overflow-auto">
       <slot />
     </div>
     <BlockingOverlay

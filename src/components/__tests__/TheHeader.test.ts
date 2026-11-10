@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import { ref, computed } from "vue";
 import TheHeader from "@/components/TheHeader.vue";
+import { isCompact } from "@/composables/useNavMenu";
 
 const mockRoute = ref({
   name: "SingleEntity",
@@ -228,5 +229,31 @@ describe("TheHeader bar", () => {
       expect.arrayContaining(["rounded-3xl"]),
     );
     expect(classes.some((c) => /^m[xy]-/.test(c))).toBe(false);
+  });
+});
+
+describe("TheHeader on a small screen", () => {
+  beforeEach(() => {
+    isCompact.value = true;
+  });
+  afterEach(() => {
+    isCompact.value = false;
+    mockRoute.value = {
+      name: "SingleEntity",
+      params: { type: "assets", id: "entity-1" },
+    };
+  });
+
+  const crumbs = () =>
+    mountHeader().findComponent({ name: "BreadCrumbs" }).classes();
+
+  it("keeps a list page's create pill on the title row", () => {
+    mockRoute.value = { name: "Productions", params: {} };
+    expect(crumbs()).toContain("flex-1");
+    expect(crumbs()).not.toContain("basis-full");
+  });
+
+  it("gives a detail page's title a row of its own", () => {
+    expect(crumbs()).toContain("basis-full");
   });
 });

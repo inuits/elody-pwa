@@ -1,6 +1,7 @@
 <template>
   <div
     data-cy="entity-element-wrapper"
+    class="@container/entity-element"
     :class="{ 'bg-surface border border-border-panel rounded-card': !compact }"
   >
     <h4
@@ -57,7 +58,9 @@
         <div
           data-cy="entity-element-wrapper-content"
           class="h-full min-h-0 @container/wrapper-content"
-          :class="{ 'p-(--panel-body-pad)': !compact }"
+          :class="{
+            'p-(--panel-body-pad) @max-md/entity-element:p-2': !compact,
+          }"
         >
           <slot name="content"></slot>
         </div>
@@ -68,7 +71,9 @@
         <div
           data-cy="entity-element-wrapper-content"
           class="h-full min-h-0 @container/wrapper-content"
-          :class="{ 'p-(--panel-body-pad)': !compact }"
+          :class="{
+            'p-(--panel-body-pad) @max-md/entity-element:p-2': !compact,
+          }"
         >
           <slot name="content"></slot>
         </div>

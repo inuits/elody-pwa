@@ -27,6 +27,7 @@ vi.mock("vue-i18n", () => ({
 }));
 
 vi.mock("@/composables/useBulkOperationsActionsBar", () => ({
+  determineActiveState: () => true,
   useBulkOperationsActionsBar: () => ({
     bulkOperations: ref(mocks.operations),
     selectedBulkOperation: ref(undefined),
@@ -130,6 +131,33 @@ describe("BulkOperationsActionsBar", () => {
     expect(
       getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
     ).toBe(true);
+  });
+
+  describe("in the small-screen meta row", () => {
+    beforeEach(() => {
+      isCompact.value = true;
+    });
+    afterEach(() => {
+      isCompact.value = false;
+    });
+
+    it("leaves the label to the count until something is selected", () => {
+      expect(getWrapper().find('[role="status"]').text()).toBe("");
+    });
+
+    it("keeps a single action as its own button", () => {
+      mocks.operations = [{ value: "export" }];
+      expect(
+        getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
+      ).toBe(true);
+    });
+
+    it("folds several actions into one menu", () => {
+      mocks.operations = [{ value: "export" }, { value: "delete" }];
+      expect(
+        getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
+      ).toBe(false);
+    });
   });
 
   it("notes selected items that sit on other pages", () => {
@@ -250,59 +278,95 @@ describe("BulkOperationsActionsBar", () => {
         },
       });
 
-    it("moves create and add-relation into the list header as pills", async () => {
+    it("folds create and add-relation into one Add menu", async () => {
       const wrapper = mountBar('[data-list-actions="x"]');
-      const pills = wrapper.findAll('[data-cy="list-header-add"]');
-
-      expect(pills.map((pill) => pill.text().split(":")[0])).toEqual([
-        "bulk-operations.add-new",
-        "bulk-operations.add-existing",
-      ]);
+      expect(wrapper.find('[data-cy="list-header-add"]').exists()).toBe(false);
+      const add = wrapper.find('[data-cy="list-header-add-menu"]');
+      expect(add.text()).toBe("library.add");
       expect(
         wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
       ).toEqual([exportAll]);
-      await pills[1].trigger("click");
+
+      await add.trigger("click");
+      const items = wrapper.findAll('[role="menuitem"]');
+      expect(items.map((item) => item.text().split(":")[0])).toEqual([
+        "bulk-operations.add-new",
+        "bulk-operations.add-existing",
+      ]);
+      await items[1].trigger("click");
       expect(mocks.handle).toHaveBeenCalledWith(addExisting);
     });
 
-    it("always shows the pill labels, with the entity type filled in like the bar did", () => {
-      const pill = mountBar('[data-list-actions="x"]').findComponent({ name: "BaseButtonNew" });
+    it("keeps a lone add as its own pill, label always shown with the entity type", () => {
+      mocks.operations = [create, exportAll];
+      const wrapper = mountBar('[data-list-actions="x"]');
+
+      expect(wrapper.findAll('[data-cy="list-header-add"]')).toHaveLength(1);
+      expect(wrapper.find('[data-cy="list-header-add-menu"]').exists()).toBe(false);
+      const pill = wrapper.findComponent({ name: "BaseButtonNew" });
       expect(pill.props("forceShowLabel")).toBe(true);
       expect(pill.props("label")).toBe(
         "bulk-operations.add-new:entity-translations.mediafile:",
       );
     });
 
-    describe("on a small screen", () => {
+    describe("contextual bulk actions", () => {
+      const reorder = {
+        value: "reorderEntities",
+        label: "bulk-operations.reorder-entities-with-csv",
+        actionContext: { entitiesSelectionType: "noneSelected" },
+      };
+      const download = {
+        value: "downloadMediafiles",
+        label: "bulk-operations.download",
+        actionContext: { entitiesSelectionType: "someSelected" },
+      };
+
       beforeEach(() => {
-        isCompact.value = true;
-      });
-      afterEach(() => {
-        isCompact.value = false;
+        mocks.operations = [create, reorder, download];
       });
 
-      it("folds the pills into one Add that lists them", async () => {
+      it("moves actions for the whole list into a Tools menu in the list header", async () => {
         const wrapper = mountBar('[data-list-actions="x"]');
-        expect(wrapper.find('[data-cy="list-header-add"]').exists()).toBe(false);
-        const add = wrapper.find('[data-cy="list-header-add-menu"]');
-        expect(add.text()).toBe("library.add");
+        const tools = wrapper.find('[data-cy="list-header-tools"]');
+        expect(tools.text()).toBe("library.tools");
 
-        await add.trigger("click");
+        await tools.trigger("click");
         const items = wrapper.findAll('[role="menuitem"]');
         expect(items.map((item) => item.text().split(":")[0])).toEqual([
-          "bulk-operations.add-new",
-          "bulk-operations.add-existing",
+          "bulk-operations.reorder-entities-with-csv",
         ]);
-        await items[1].trigger("click");
-        expect(mocks.handle).toHaveBeenCalledWith(addExisting);
+        await items[0].trigger("click");
+        expect(mocks.handle).toHaveBeenCalledWith(reorder);
       });
 
-      it("keeps a lone add as its own pill", () => {
-        mocks.operations = [create, exportAll];
+      it("hides selection actions, and the bar, until something is selected", () => {
+        const wrapper = mountBar('[data-list-actions="x"]');
+        expect(wrapper.find('[role="toolbar"]').isVisible()).toBe(false);
+        expect(wrapper.find('[role="status"]').text()).toBe("");
+      });
+
+      it("shows selection actions with the count and Clear once selected", async () => {
+        mocks.selected = [{ id: "a" }];
         const wrapper = mountBar('[data-list-actions="x"]');
 
-        expect(wrapper.findAll('[data-cy="list-header-add"]')).toHaveLength(1);
-        expect(wrapper.find('[data-cy="list-header-add-menu"]').exists()).toBe(false);
+        expect(wrapper.find('[role="toolbar"]').isVisible()).toBe(true);
+        expect(
+          wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+        ).toEqual([download]);
+        const clear = wrapper
+          .findAll("button")
+          .find((button) => button.text() === "bulk-operations.clear-selection");
+        await clear!.trigger("click");
+        expect(mocks.dequeueAll).toHaveBeenCalled();
+      });
+
+      it("keeps tools in the bar without a list header target", () => {
+        const wrapper = mountBar();
+        expect(wrapper.find('[data-cy="list-header-tools"]').exists()).toBe(false);
+        expect(
+          wrapper.findComponent({ name: "ActionMenuGroup" }).props("options"),
+        ).toEqual([create, reorder, download]);
       });
     });
 

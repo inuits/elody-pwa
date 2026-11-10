@@ -52,21 +52,15 @@
           </div>
         </template>
       </div>
-      <button
+      <base-button-new
         v-if="uploadStatus === 'no-upload'"
-        type="button"
+        class="self-center"
+        :label="label"
+        :icon="icon"
         :disabled="disabled"
+        button-style="commit"
         @click="emit('clickUploadButton')"
-        class="flex h-max self-center justify-center items-center w-full p-2 rounded-md cursor-pointer outline-none transition-colors duration-300 disabled:cursor-auto text-neutral-white bg-accent-accent hover:text-accent-accent hover:bg-background-normal active:text-accent-accent active:bg-accent-light disabled:text-text-disabled disabled:bg-background-normal"
-      >
-        <unicon
-          v-if="props.icon !== DamsIcons.NoIcon"
-          :class="{ '-ml-1': label }"
-          :name="Unicons[props.icon].name"
-          :height="18"
-        />
-        <span v-if="label" class="ml-0.5 leading-4">{{ label }}</span>
-      </button>
+      />
     </div>
     <div
       v-if="progressIndicatorType === ActionProgressIndicatorType.ProgressSteps"
@@ -107,7 +101,7 @@ import { UploadStatus } from "@/composables/upload/types";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     label: string;
     icon: DamsIcons;

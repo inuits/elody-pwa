@@ -1,11 +1,12 @@
 import { mount } from "@vue/test-utils";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import LibraryBar from "../LibraryBar.vue";
 import { apolloClient } from "@/main";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useRoute } from "vue-router";
 import { nextTick, reactive } from "vue";
 import { flushPromises } from "@vue/test-utils";
+import { isCompact } from "@/composables/useNavMenu";
 
 vi.mock("@/main", () => ({
   apolloClient: {
@@ -31,6 +32,10 @@ vi.mock("@/composables/useStateManagement", () => ({
 
 vi.mock("@/composables/useImport", () => ({
   useImport: () => ({ loadDocument: vi.fn((q) => q) }),
+}));
+
+vi.mock("@/composables/useNavMenu", async () => ({
+  isCompact: (await import("vue")).ref(false),
 }));
 
 vi.mock("lodash.debounce", () => ({
@@ -497,5 +502,121 @@ describe("LibraryBar.vue Group By", () => {
     await navigate(route, worksRoute);
 
     expect(setGroupBy).toHaveBeenLastCalledWith(null);
+  });
+});
+
+describe("LibraryBar.vue on a small screen", () => {
+  const setSortKey = vi.fn();
+  const setSortOrder = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    isCompact.value = true;
+    (useRoute as any).mockReturnValue({
+      name: "Productions",
+      fullPath: "/productions",
+      meta: {
+        queries: { getSortOptions: "MockQuery" },
+        simpleSearch: { keys: ["title"] },
+      },
+    });
+    (useStateManagement as any).mockReturnValue({
+      getStateForRoute: vi.fn(),
+    });
+    (apolloClient.query as any).mockResolvedValue({
+      data: {
+        EntityTypeSortOptions: {
+          sortOptions: {
+            isAsc: "desc",
+            options: [
+              { value: "activity", label: "Last activity" },
+              { value: "name", label: "Name" },
+            ],
+          },
+        },
+      },
+    });
+  });
+
+  afterEach(() => {
+    isCompact.value = false;
+  });
+
+  const mountCompact = async () => {
+    const wrapper = mount(LibraryBar, {
+      props: { setSortKey, setSortOrder, setSimpleSearch: vi.fn() },
+      slots: { default: '<span data-cy="page-size-slot" />' },
+      global: { stubs: { AdvancedDropdown: true, teleport: true } },
+    });
+    await wrapper.emitted("sortOptionsPromise")![0][0]("production");
+    await flushPromises();
+    return wrapper;
+  };
+  const sheet = (wrapper: any) => wrapper.find('[data-cy="sort-sheet"]');
+
+  it("gives the search a row of its own", async () => {
+    const wrapper = await mountCompact();
+
+    expect(wrapper.find('[data-cy="simple-search"]').classes()).toEqual(
+      expect.arrayContaining(["basis-full", "order-first"]),
+    );
+  });
+
+  it("merges sort field and direction into one button", async () => {
+    const wrapper = await mountCompact();
+
+    expect(wrapper.find('[data-cy="sort-options"]').exists()).toBe(false);
+    expect(wrapper.find('[data-cy="sort-toggle"]').exists()).toBe(false);
+    expect(wrapper.find('[data-cy="sort-sheet-toggle"]').text()).toContain(
+      "Last activity",
+    );
+  });
+
+  it("opens the sort sheet from that button", async () => {
+    const wrapper = await mountCompact();
+    expect(sheet(wrapper).isVisible()).toBe(false);
+
+    await wrapper.find('[data-cy="sort-sheet-toggle"]').trigger("click");
+
+    expect(sheet(wrapper).isVisible()).toBe(true);
+  });
+
+  it("sorts on a picked field and closes the sheet", async () => {
+    const wrapper = await mountCompact();
+    await wrapper.find('[data-cy="sort-sheet-toggle"]').trigger("click");
+
+    await wrapper.findAll('[data-cy="sort-sheet-option"]')[1].trigger("click");
+    await flushPromises();
+
+    expect(setSortKey).toHaveBeenLastCalledWith("name", true);
+    expect(sheet(wrapper).isVisible()).toBe(false);
+  });
+
+  it("switches direction without closing the sheet", async () => {
+    const wrapper = await mountCompact();
+    await wrapper.find('[data-cy="sort-sheet-toggle"]').trigger("click");
+
+    await wrapper.find('[data-cy="sort-sheet-asc"]').trigger("click");
+    await flushPromises();
+
+    expect(setSortOrder).toHaveBeenLastCalledWith(true, true);
+    expect(sheet(wrapper).isVisible()).toBe(true);
+  });
+
+  it("holds the page size, kept mounted while closed", async () => {
+    const wrapper = await mountCompact();
+
+    expect(
+      sheet(wrapper).find('[data-cy="page-size-slot"]').exists(),
+    ).toBe(true);
+  });
+
+  it("closes on Escape", async () => {
+    const wrapper = await mountCompact();
+    await wrapper.find('[data-cy="sort-sheet-toggle"]').trigger("click");
+
+    await sheet(wrapper).trigger("keydown", { key: "Escape" });
+
+    expect(sheet(wrapper).isVisible()).toBe(false);
   });
 });

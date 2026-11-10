@@ -92,3 +92,22 @@ describe("DynamicFormUploadButton - status banner", () => {
     );
   });
 });
+
+describe("DynamicFormUploadButton - before an upload", () => {
+  beforeEach(() => setState({ uploadStatus: "no-upload" }));
+
+  it("is a design-system commit button that starts the upload", async () => {
+    const wrapper = getWrapper();
+    const button = wrapper.findComponent({ name: "BaseButtonNew" });
+
+    expect(button.exists()).toBe(true);
+    expect(button.props()).toMatchObject({
+      label: "Upload",
+      icon: DamsIcons.NoIcon,
+      buttonStyle: "commit",
+      disabled: false,
+    });
+    await button.trigger("click");
+    expect(wrapper.emitted("clickUploadButton")).toHaveLength(1);
+  });
+});

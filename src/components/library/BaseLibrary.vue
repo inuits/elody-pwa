@@ -111,6 +111,7 @@
           v-if="filtersInPane"
           :open="isFiltersPanelExpanded"
           :pane-id="filtersPaneId"
+          @close="expandFilters = false"
         />
         <div class="flex flex-col flex-1 min-w-0 min-h-0">
         <!-- List header (templates/elody-list-screen): one accent-light band
@@ -141,12 +142,7 @@
             class="contents"
           />
           <ResultCountChip
-            v-if="
-              !disableLibraryBar &&
-              !isInitialLoading &&
-              (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary)
-            "
+            v-if="showCountChip && !compactMetaRow"
             :count="totalEntityCount"
             :exact-count="exactTotalCount"
             :exact-count-loading="exactCountLoading"
@@ -156,8 +152,13 @@
             v-if="showListPager"
             data-test="list-pager"
             class="shrink-0"
+            :class="{ 'order-last basis-full': isCompact }"
           />
-          <div v-if="showLibraryBar" class="min-w-0 ml-auto">
+          <!-- small screen: the bar's controls join the band's own rows -->
+          <div
+            v-if="showLibraryBar"
+            :class="isCompact ? 'contents' : 'min-w-0 ml-auto'"
+          >
             <LibraryBar
               :route="route"
               :set-sort-key="setSortKey"
@@ -204,13 +205,52 @@
             :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar && !showViewSwitch }]"
           />
         </div>
+        <!-- small screen: select-all, count or selection, and the bar's
+             actions in one meta row; the column headers are gone -->
+        <div
+          :data-cy="compactMetaRow ? 'list-meta-row' : undefined"
+          :class="
+            compactMetaRow
+              ? [
+                  'flex items-center gap-2 min-h-(--touch-target-min) px-(--list-band-pad) border-b border-border-subtle',
+                  { 'bg-accent-wash': selectedCount > 0 },
+                ]
+              : 'contents'
+          "
+        >
+          <BaseInputCheckbox
+            v-if="compactMetaRow && enableSelection"
+            size="compact"
+            :model-value="pageIsSelected"
+            :item="{ id: 'select-page' }"
+            :bulk-operations-context="undefined"
+            :ignore-bulk-operations="true"
+            :aria-label="t('bulk-operations.select-page')"
+            @update:model-value="
+              (selected: boolean) =>
+                selected ? bulkSelect() : clearPageSelection()
+            "
+          />
+          <ResultCountChip
+            v-if="showCountChip && compactMetaRow && selectedCount === 0"
+            :count="totalEntityCount"
+            :exact-count="exactTotalCount"
+            :exact-count-loading="exactCountLoading"
+            @reveal-exact-count="revealExactCount"
+          />
           <BulkOperationsActionsBar
             v-if="
               enableBulkOperations &&
               baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
             "
-            class="py-2 border-b border-border-subtle"
-            :class="{ 'px-(--list-band-pad)': hasResultsBand }"
+            :class="
+              compactMetaRow
+                ? 'flex-1 justify-end'
+                : [
+                    'py-2 border-b border-border-subtle',
+                    { 'px-(--list-band-pad)': hasResultsBand },
+                  ]
+            "
             :list-header-target="
               insidePanel
                 ? `[data-list-actions=&quot;${listActionsId}&quot;]`
@@ -268,6 +308,7 @@
             "
             @refetch="async () => await refetchEntities()"
           />
+        </div>
         <div
           v-if="entities?.length === 0 && !entitiesLoading"
           :class="[
@@ -461,6 +502,8 @@ import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ResultCountChip from "@/components/library/ResultCountChip.vue";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
+import { isCompact } from "@/composables/useNavMenu";
 import FiltersPane from "@/components/filters/FiltersPane.vue";
 import { filtersLayout } from "@/components/filters/filtersLayout";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
@@ -783,7 +826,9 @@ const wrapperClasses = computed(() => {
     // a white surface (guided-flow picker step) is padded by its host
     if (!onWhiteSurface)
       classes.push(
-        props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-(--page-pad-x)",
+        props.parentEntityIdentifiers.length > 0
+          ? "px-3 @max-md/wrapper-content:px-0"
+          : "px-(--page-pad-x)",
       );
   }
   // Page background only on the list's own page; inside a panel or on a
@@ -905,6 +950,8 @@ const {
   enqueueItemForBulkProcessing,
   dequeueItemForBulkProcessing,
   triggerBulkSelectionEvent,
+  getEnqueuedItemCount,
+  isEnqueued,
 } = useBulkOperations();
 const { closeModal } = useBaseModal();
 const { replaceRelationsFromSameType, getForm, createForm, deleteForm } =
@@ -984,6 +1031,16 @@ watch([fetchSequence, isTableGrouped, tableGroupBy], () => {
   else groupedEntities.reset();
 });
 
+const compactMetaRow = computed(
+  () => isCompact.value && hasResultsBand.value && showCurrentEntityFlow.value,
+);
+const showCountChip = computed(
+  () =>
+    !props.disableLibraryBar &&
+    !isInitialLoading.value &&
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
+);
 const showListPager = computed(
   () =>
     !props.predefinedEntities &&
@@ -1164,6 +1221,23 @@ const bulkSelect = (items = entities.value) => {
   }
   triggerBulkSelectionEvent(props.bulkOperationsContext);
 };
+
+const selectedCount = computed(() =>
+  getEnqueuedItemCount(props.bulkOperationsContext),
+);
+const pageIsSelected = computed(() => {
+  const page = (props.predefinedEntities ?? entities.value ?? []).filter(
+    (entity) => !props.idsOfNonSelectableEntities.includes(entity.id),
+  );
+  return (
+    page.length > 0 &&
+    page.every(
+      (entity) =>
+        isEnqueued(props.bulkOperationsContext, entity.uuid) ||
+        isEnqueued(props.bulkOperationsContext, entity.id),
+    )
+  );
+});
 
 // The header's select-all, unticked. Rows enqueue by id, bulkSelect by uuid.
 const clearPageSelection = () => {

@@ -148,6 +148,26 @@ describe("BaseModal", () => {
       expect(dialog.classes()).toContain("@container/modal");
     });
 
+    it("goes full screen below md with a touch-sized close button", () => {
+      wrapper = createWrapper();
+      const classes = wrapper.find('[data-testid="modal-dialog"]').classes();
+      for (const mobileClass of [
+        "max-md:w-screen",
+        "max-md:min-w-0",
+        "max-md:h-dvh",
+        "max-md:max-h-dvh",
+        "max-md:m-0",
+        "max-md:rounded-none",
+      ])
+        expect(classes).toContain(mobileClass);
+      expect(
+        wrapper.find('[data-testid="modal-content"]').classes(),
+      ).toContain("max-md:overflow-auto");
+      expect(
+        wrapper.find('[data-testid="modal-close-button"]').classes(),
+      ).toContain("max-md:size-(--touch-target-min)");
+    });
+
     it("should apply custom height style", () => {
       const customHeight = "max-h-[90vh] my-[5vh]";
       wrapper = createWrapper({ modalHeightStyle: customHeight });

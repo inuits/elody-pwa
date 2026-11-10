@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect } from "vitest";
+import { isCompact } from "@/composables/useNavMenu";
 import { mount } from "@vue/test-utils";
 import FiltersPane from "@/components/filters/FiltersPane.vue";
 
@@ -33,5 +34,38 @@ describe("FiltersPane", () => {
     const wrapper = mount(FiltersPane, { props: { open: false, paneId: "p1" } });
     expect(wrapper.find('[data-filters-pane-body="p1"]').exists()).toBe(true);
     expect((wrapper.element as HTMLElement).style.display).toBe("none");
+  });
+});
+
+describe("FiltersPane on a small screen", () => {
+  beforeEach(() => {
+    isCompact.value = true;
+  });
+  afterEach(() => {
+    isCompact.value = false;
+  });
+
+  it("is a bottom sheet over a scrim instead of a column beside the list", () => {
+    const wrapper = mount(FiltersPane, { props: { open: true, paneId: "p1" } });
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining(["fixed", "inset-0", "bg-scrim"]),
+    );
+    expect(wrapper.classes()).not.toContain("w-(--filter-pane-width)");
+    expect(wrapper.find('[data-cy="filters-pane-sheet"]').classes()).toEqual(
+      expect.arrayContaining(["bg-surface", "rounded-t-(--sheet-radius)"]),
+    );
+  });
+
+  it("closes from its scrim, not from inside the sheet", async () => {
+    const wrapper = mount(FiltersPane, { props: { open: true, paneId: "p1" } });
+    await wrapper.find('[data-filters-pane-body="p1"]').trigger("click");
+    expect(wrapper.emitted("close")).toBeUndefined();
+    await wrapper.trigger("click");
+    expect(wrapper.emitted("close")).toHaveLength(1);
+  });
+
+  it("keeps the filters mounted while closed", () => {
+    const wrapper = mount(FiltersPane, { props: { open: false, paneId: "p1" } });
+    expect(wrapper.find('[data-filters-pane-body="p1"]').exists()).toBe(true);
   });
 });

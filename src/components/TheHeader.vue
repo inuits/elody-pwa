@@ -5,7 +5,13 @@
   >
     <!-- ui_kits AppShell: a flat full-width top bar; a card below md -->
     <EntityNavigationArrows v-if="!isCompact" class="mr-2" />
-    <BreadCrumbs :class="{ 'basis-full': isCompact }">
+    <!-- below md a list page keeps its create pill beside the title -->
+    <BreadCrumbs
+      :class="{
+        'basis-full': isCompact && isSingleEntityPage,
+        'flex-1': isCompact && !isSingleEntityPage,
+      }"
+    >
       <template v-if="isCompact" #aside>
         <EntityNavigationArrows />
       </template>

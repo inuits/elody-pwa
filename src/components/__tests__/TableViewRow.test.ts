@@ -1,7 +1,14 @@
 import TableViewRow from "../library/view-modes/TableViewRow.vue";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
+import { isCompact } from "@/composables/useNavMenu";
+import { rowSheetKey } from "@/components/context-menu-actions/rowSheet";
+
+vi.mock("@/composables/useNavMenu", async () => {
+  const { ref } = await import("vue");
+  return { isCompact: ref(false) };
+});
 
 const mockSeenState = vi.hoisted(() => ({
   tracking: undefined as unknown,
@@ -143,9 +150,78 @@ describe("TableViewRow", () => {
       },
     });
 
+    expect(wrapper.find("[data-cy='table-row-preview']").exists()).toBe(true);
     wrapper.findComponent({ name: "PreviewToggle" }).vm.$emit("toggle");
 
     expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["item"]);
+  });
+
+  describe("on a small screen", () => {
+    const mountRow = (extraProps: Record<string, unknown> = {}) =>
+      shallowMount(TableViewRow, {
+        props: {
+          ...props,
+          baseLibraryMode: "normalBaseLibrary" as any,
+          previewComponentFeatureEnabled: true,
+          media: "sheep.jpg",
+          buttons: { contextMenu: { delete: { label: "delete" } } } as any,
+          ...extraProps,
+        },
+      });
+
+    beforeEach(() => {
+      isCompact.value = true;
+    });
+    afterEach(() => {
+      isCompact.value = false;
+    });
+
+    it("drops the eye: Preview leads the ⋮ sheet", () => {
+      expect(mountRow().findComponent({ name: "PreviewToggle" }).exists())
+        .toBe(false);
+    });
+
+    it("leaves no empty eye column at the row's end", () => {
+      expect(mountRow().find("[data-cy='table-row-preview']").exists()).toBe(
+        false,
+      );
+    });
+
+    it("sizes its actions to their buttons, flush right", () => {
+      const actions = mountRow({ actionsColumnWidth: "8rem" }).find(
+        "[data-cy='table-row-actions']",
+      );
+      expect(actions.attributes("style") ?? "").not.toContain("width");
+      expect(actions.classes()).toContain("justify-end");
+    });
+
+    it("keeps the eye on a row without a ⋮", () => {
+      expect(
+        mountRow({ buttons: undefined })
+          .findComponent({ name: "PreviewToggle" })
+          .exists(),
+      ).toBe(true);
+    });
+
+    it("hands its sheet the file and its preview", () => {
+      const wrapper = mountRow();
+      const sheet = (wrapper.vm.$ as any).provides[rowSheetKey].value;
+
+      expect(sheet.id).toBe("item");
+      expect(sheet.thumbnailUrl).toBe(
+        "/api/iiif/3/sheep.jpg/square/^100,/0/default.jpg",
+      );
+      sheet.preview();
+      expect(wrapper.emitted("togglePreviewComponent")?.[0]).toEqual(["item"]);
+    });
+
+    it("offers no preview where the list has none", () => {
+      const sheet = (
+        mountRow({ previewComponentFeatureEnabled: false }).vm.$ as any
+      ).provides[rowSheetKey].value;
+
+      expect(sheet.preview).toBeUndefined();
+    });
   });
 
   it("is a flat row with a faint hairline instead of a card border", () => {

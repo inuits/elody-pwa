@@ -9,7 +9,6 @@
             baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary &&
             !isPreviewElement,
         },
-        { 'pb-1': baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary },
         { 'ml-2': baseLibraryMode === BaseLibraryModes.BasicBaseLibrary },
       ]"
       :entity-id="entityId"

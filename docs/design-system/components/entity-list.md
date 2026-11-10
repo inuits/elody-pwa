@@ -22,6 +22,23 @@ Compact relation lists keep a plain row without the panel (it may hold only
 a pager). A disabled library bar hides the count, view modes, page size and
 sort; the pager stays.
 
+### Small screens (below md)
+Two control rows instead of five (`isCompact`):
+1. The simple search, full width (`LibraryBar`, `order-first basis-full`).
+2. Filters, one sort button (direction icon, field, ⌄) and the view switch.
+   The sort button opens a bottom sheet (`data-cy="sort-sheet"`,
+   `--sheet-radius`, `--sheet-padding`, scrim): the sort fields (a pick
+   closes it), Ascending / Descending, page size and group-by as chips. The
+   sheet stays mounted while closed, since the page size registers the first
+   fetch's promise. Filters open as a bottom sheet too (`FiltersPane`).
+
+Below the band a meta row (`data-cy="list-meta-row"`, tinted
+`--color-accent-wash` with a selection) holds the select-page checkbox, the
+count chip (or "Selection: n" once rows are selected) and the selection
+bar's actions; it replaces the "nothing selected" line and the
+column-header rows (list and table). The pager moves to the end of the
+band. A list page's create pill stays on the title row (`TheHeader`).
+
 ### Count chip
 `src/components/library/ResultCountChip.vue`. The single source of the list
 total; the selection bar and pager don't repeat it.
