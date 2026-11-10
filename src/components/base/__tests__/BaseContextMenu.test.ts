@@ -47,6 +47,7 @@ describe("BaseContextMenu", () => {
   describe("as a menu", () => {
     let anchor: HTMLButtonElement;
     let contextMenu: ContextMenu;
+    let wrapper: ReturnType<typeof mount> | undefined;
 
     const items = ["Open", "Dupliceer", "Verwijder"];
     const getMenu = () =>
@@ -61,7 +62,7 @@ describe("BaseContextMenu", () => {
       );
 
     const mountMenu = async () => {
-      const wrapper = mount(BaseContextMenu, {
+      wrapper = mount(BaseContextMenu, {
         props: { contextMenu },
         slots: {
           default: items
@@ -99,6 +100,8 @@ describe("BaseContextMenu", () => {
     });
 
     afterEach(() => {
+      wrapper?.unmount();
+      wrapper = undefined;
       document.body.innerHTML = "";
       mocks.someModalIsOpened = true;
     });
