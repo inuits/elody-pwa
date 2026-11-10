@@ -3,6 +3,7 @@ import { setup } from "@storybook/vue3-vite";
 import type { Plugin } from "vue";
 import Notifications from "@kyvg/vue3-notification";
 import Unicon from "vue-unicons";
+import { uniLeftIndentAlt, uniRightIndentAlt } from "vue-unicons/dist/icons";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { Unicons } from "../src/types";
 import { apolloClient, i18n, router } from "./mockMain";
@@ -13,7 +14,7 @@ import "../src/assets/main.css";
 // story containing one throws "No such validator '…' exists".
 useInputValidation().initializeInputValidation({});
 
-Unicon.add(Object.values(Unicons));
+Unicon.add([...Object.values(Unicons), uniLeftIndentAlt, uniRightIndentAlt]);
 
 setup((app) => {
   app

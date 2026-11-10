@@ -8,7 +8,11 @@ import tailwindSvgPlugin from "../plugin/vite-plugin-tailwind-svg.js";
 // carries devtools, compression and the generated-types sourcemap strip, none
 // of which apply to the workshop.
 export default defineConfig({
-  plugins: [vue(), tailwindSvgPlugin(), tailwindcss()],
+  plugins: [
+    vue({ template: { transformAssetUrls: { includeAbsolute: false } } }),
+    tailwindSvgPlugin(),
+    tailwindcss(),
+  ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
     __VUE_I18N_LEGACY_API__: false,
