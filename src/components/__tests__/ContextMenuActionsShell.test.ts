@@ -182,6 +182,62 @@ describe("ContextMenuActionsShell", () => {
     });
   });
 
+  describe("in a list row on a large screen", () => {
+    const mountRow = (props: Record<string, unknown> = {}) =>
+      mount(ContextMenuActionsShell, {
+        props: { hasPromotedActions: false, hasOverflowActions: true, ...props },
+        slots: { overflow: '<a role="menuitem">Delete mediafile</a>' },
+        attachTo: document.body,
+        global: {
+          stubs: {
+            unicon: true,
+            BaseContextMenu: { template: "<div><slot /></div>" },
+          },
+          provide: {
+            [rowSheetKey as symbol]: computed<RowSheet>(() => ({
+              id: "mediafile-1",
+              title: "sheep.JPEG",
+              thumbnailUrl: "/thumb.jpg",
+              thumbnailIsLink: false,
+              preview: vi.fn(),
+            })),
+          },
+        },
+      });
+
+    it("shows a ⋮ under the list's Actions column, named after the row", () => {
+      const trigger = mountRow({ contextLabel: "sheep.JPEG" }).find(
+        '[data-cy="overflow-menu-trigger"]',
+      );
+
+      expect(trigger.text()).not.toContain("contextMenu.actions");
+      expect(trigger.find('[name="ellipsis-v"]').exists()).toBe(true);
+      expect(trigger.attributes("aria-label")).toBe(
+        "contextMenu.actions-for:sheep.JPEG",
+      );
+    });
+
+    it("keeps the dropdown plain: the row has its own eye for the preview", () => {
+      const wrapper = mountRow();
+
+      expect(wrapper.find('[data-cy="row-sheet-header"]').exists()).toBe(false);
+      expect(wrapper.findAll('[role="menuitem"]').map((item) => item.text())).toEqual([
+        "Delete mediafile",
+      ]);
+      expect(
+        wrapper.find('[data-cy="overflow-menu-trigger"]').attributes("data-preview-for"),
+      ).toBeUndefined();
+    });
+
+    it("renders no ⋮ without row actions", () => {
+      expect(
+        mountRow({ hasOverflowActions: false })
+          .find('[data-cy="overflow-menu-trigger"]')
+          .exists(),
+      ).toBe(false);
+    });
+  });
+
   describe("as a split button", () => {
     const getSplit = (props: Record<string, unknown> = {}) =>
       getWrapper({ hasPromotedActions: true, split: true, ...props });

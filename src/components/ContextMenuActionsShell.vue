@@ -37,11 +37,12 @@
         <slot name="promoted" />
       </div>
       <!-- small screen: no room for the label; the ⋮ opens a bottom sheet
-           and keeps the name -->
+           and keeps the name. A list row's ⋮ sits under its "Actions"
+           column header. -->
       <BaseButtonNew
-        v-if="hasCompactMenu"
+        v-if="hasEllipsisTrigger"
         data-cy="overflow-menu-trigger"
-        :data-preview-for="rowSheet?.id"
+        :data-preview-for="hasCompactMenu ? rowSheet?.id : undefined"
         class="overflow-menu-trigger"
         button-style="ghost"
         :aria-label="
@@ -55,7 +56,8 @@
       >
         <unicon :name="Unicons.EllipsisV.name" height="22" />
       </BaseButtonNew>
-      <!-- Never a bare ⋮: the label is how the actions are found at all. -->
+      <!-- Outside a list row, never a bare ⋮: the label is how the actions
+           are found at all. -->
       <BaseButtonNew
         v-else-if="hasOverflowActions"
         data-cy="overflow-menu-trigger"
@@ -146,6 +148,9 @@ const hasCompactMenu = computed<boolean>(
   () =>
     isCompact.value &&
     (props.hasOverflowActions || !!rowSheet?.value.preview),
+);
+const hasEllipsisTrigger = computed<boolean>(
+  () => hasCompactMenu.value || (!!rowSheet && props.hasOverflowActions),
 );
 
 const { t } = useI18n();
