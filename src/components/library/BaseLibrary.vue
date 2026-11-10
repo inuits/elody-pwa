@@ -445,6 +445,11 @@
             :refetch-entities="refetchEntities"
             :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
             :open-preview-by-default="openPreviewByDefault"
+            :page-is-selected="pageIsSelected"
+            @toggle-page-selection="
+              (selected: boolean) =>
+                selected ? bulkSelect() : clearPageSelection()
+            "
           />
           <ViewModesMedia
             v-if="viewModesIncludeViewModesMedia && displayPreview"
