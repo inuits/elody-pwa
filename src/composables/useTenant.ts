@@ -6,6 +6,7 @@ import {
   type GetTenantsQuery,
 } from "@/generated-types/queries";
 import { ref, computed } from "vue";
+import { tenantSelected } from "@/analytics/userGroup";
 import { useRouter } from "vue-router";
 
 const TENANTS_ENDPOINT = "/api/tenants";
@@ -147,6 +148,8 @@ const useTenant = (
     setTenantInSessionStorage(id);
     selectedTenant.value = id;
     selectedTenantName.value = label;
+    // the user's usage and traces are counted in this tenant, when the config says so
+    tenantSelected({ id, label });
   };
 
   const setTenantInSessionStorage = (tenantId: string) => {

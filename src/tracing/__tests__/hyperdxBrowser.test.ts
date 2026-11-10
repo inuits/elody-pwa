@@ -91,9 +91,9 @@ describe("startBrowserTracing with HyperDX", () => {
     });
   });
 
-  it("names the user by pseudonym and the library as team, keeping the session id", () => {
+  it("names the user by pseudonym and their group as team, keeping the session id", () => {
     const tracing = startBrowserTracing({ ...settings, sessionId: "s-1" });
-    tracing.identify({ pseudonym: "p-1", library: "brugge.be" });
+    tracing.identify({ pseudonym: "p-1", group: "brugge.be" });
     expect(hyperdx.setGlobalAttributes).toHaveBeenLastCalledWith({
       session_id: "s-1",
       ui_version: "current",
@@ -117,7 +117,7 @@ describe("startBrowserTracing with HyperDX", () => {
       "service.namespace": "vlacc-dams",
       "deployment.environment": "local",
     });
-    tracing.identify({ pseudonym: "p-1", library: "brugge.be" });
+    tracing.identify({ pseudonym: "p-1", group: "brugge.be" });
     expect(hyperdx.setGlobalAttributes).toHaveBeenLastCalledWith({
       session_id: "s-1",
       ui_version: "current",

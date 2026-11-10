@@ -67,11 +67,11 @@ export const startBrowserTracing = ({
   };
   HyperDX.setGlobalAttributes(session);
   return {
-    identify: ({ pseudonym, library }) =>
+    identify: ({ pseudonym, group }) =>
       HyperDX.setGlobalAttributes({
         ...session,
         userId: pseudonym,
-        ...(library ? { teamId: library } : {}),
+        ...(group ? { teamId: group } : {}),
       }),
   };
 };

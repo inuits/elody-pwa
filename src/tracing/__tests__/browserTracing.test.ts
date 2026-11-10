@@ -86,19 +86,19 @@ describe("initBrowserTracing", () => {
 describe("identifyInBrowserTracing", () => {
   it("does nothing while browser tracing is off", () => {
     expect(() =>
-      identifyInBrowserTracing({ pseudonym: "p-1", library: "brugge.be" }),
+      identifyInBrowserTracing({ pseudonym: "p-1", group: "brugge.be" }),
     ).not.toThrow();
   });
 
-  it("tells the SDK the pseudonymous user and their library", async () => {
+  it("tells the SDK the pseudonymous user and their group", async () => {
     const identify = vi.fn();
     await initBrowserTracing({ browserTracing: settings }, async () => ({
       startBrowserTracing: () => ({ identify }),
     }));
-    identifyInBrowserTracing({ pseudonym: "p-1", library: "brugge.be" });
+    identifyInBrowserTracing({ pseudonym: "p-1", group: "brugge.be" });
     expect(identify).toHaveBeenCalledWith({
       pseudonym: "p-1",
-      library: "brugge.be",
+      group: "brugge.be",
     });
   });
 });

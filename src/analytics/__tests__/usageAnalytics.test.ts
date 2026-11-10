@@ -168,10 +168,10 @@ describe("the user, pseudonymous, in a library", () => {
     await initUsageAnalytics({ usageAnalytics: settings }, "s-1", async () => ({
       startUsageAnalytics: () => tracker,
     }));
-    const pseudonym = await identifyUser({
-      sub: "kc-123",
-      email: "ann.peeters@brugge.be",
-    });
+    const pseudonym = await identifyUser(
+      { sub: "kc-123", email: "ann.peeters@brugge.be" },
+      { id: "brugge.be", name: "brugge.be", type: "library" },
+    );
     expect(pseudonym).toBe(await pseudonymOf("kc-123"));
     expect(tracker.identify).toHaveBeenCalledWith({
       profileId: pseudonym,
@@ -186,6 +186,19 @@ describe("the user, pseudonymous, in a library", () => {
     expect(
       JSON.stringify(vi.mocked(tracker.identify).mock.calls),
     ).not.toContain("ann.peeters");
+  });
+
+  it("identifies without a group while it is not known yet", async () => {
+    const tracker = fakeTracker();
+    await initUsageAnalytics({ usageAnalytics: settings }, "s-1", async () => ({
+      startUsageAnalytics: () => tracker,
+    }));
+    await identifyUser({ sub: "kc-123" });
+    expect(tracker.identify).toHaveBeenCalledWith({
+      profileId: await pseudonymOf("kc-123"),
+      properties: {},
+    });
+    expect(tracker.setGroup).not.toHaveBeenCalled();
   });
 
   it("still gives the pseudonym (for HyperDX) while usage analytics is off", async () => {

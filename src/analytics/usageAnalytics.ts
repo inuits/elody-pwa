@@ -139,7 +139,10 @@ export const trackFormSubmitted = (
   entityType?: string,
 ) => sendIf("form_submitted", form, { form, outcome }, entityType);
 
-/** The library a user works for: the domain of their e-mail address. */
+/** The group a user is counted in (analytics/userGroup.ts says which). */
+export type UserGroup = { id: string; name: string; type: string };
+
+/** The domain of a user's e-mail address: their group, unless the config names another. */
 export const libraryOf = (email: string | undefined): string | undefined => {
   const domain = email?.split("@")[1]?.trim().toLowerCase();
   return domain || undefined;
@@ -149,31 +152,38 @@ export const libraryOf = (email: string | undefined): string | undefined => {
 export const pseudonymOf = async (id: string): Promise<string> =>
   (await sha256(`elody:${id}`)).slice(0, 16);
 
+/** Counts the user's events in a group from now on. */
+export const putUserInGroup = (group: UserGroup): void => {
+  try {
+    tracker?.upsertGroup(group);
+    tracker?.setGroup(group.id);
+  } catch (error) {
+    console.warn("Usage analytics could not set the user's group", error);
+  }
+};
+
 /**
- * Identifies the logged-in user to OpenPanel by pseudonym, in the group of
- * their library; returns the pseudonym (also for HyperDX), or undefined
- * without a user.
+ * Identifies the logged-in user to OpenPanel by pseudonym, in their group
+ * when it is known already; returns the pseudonym (also for HyperDX), or
+ * undefined without a user.
  */
 export const identifyUser = async (
   user: { sub?: string; email?: string } | undefined,
+  group?: UserGroup,
 ): Promise<string | undefined> => {
   const id = user?.sub || user?.email;
   if (!id) return undefined;
   const pseudonym = await pseudonymOf(id);
   if (!tracker) return pseudonym;
-  const library = libraryOf(user?.email);
   try {
     tracker.identify({
       profileId: pseudonym,
-      properties: library ? { library } : {},
+      properties: group ? { [group.type]: group.name } : {},
     });
-    if (library) {
-      tracker.upsertGroup({ id: library, type: "library", name: library });
-      tracker.setGroup(library);
-    }
   } catch (error) {
     console.warn("Usage analytics could not identify the user", error);
   }
+  if (group) putUserInGroup(group);
   return pseudonym;
 };
 

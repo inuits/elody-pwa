@@ -45,8 +45,8 @@ import {
   createUsageLink,
   identifyUser,
   initUsageAnalytics,
-  libraryOf,
 } from "@/analytics/usageAnalytics";
+import { followTenantGroup, initialUserGroup } from "@/analytics/userGroup";
 
 export let auth: typeof OpenIdConnectClient | null;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -192,11 +192,13 @@ const start = async (): Promise<void> => {
     .provide(DefaultApolloClient, apolloClient);
 
   // the user by pseudonym only: in the usage events and in the traces, errors
-  // and replays (with their library), never by name or e-mail address
+  // and replays (with their group: the app config says which, a library by
+  // e-mail domain or the tenant they work in), never by name or e-mail address
   const user = auth.isAuthenticated.value ? auth.user : undefined;
-  const pseudonym = await identifyUser(user);
-  if (pseudonym)
-    identifyInBrowserTracing({ pseudonym, library: libraryOf(user?.email) });
+  const group = initialUserGroup(config.userGroup, user);
+  const pseudonym = await identifyUser(user, group);
+  if (pseudonym) identifyInBrowserTracing({ pseudonym, group: group?.name });
+  followTenantGroup(config.userGroup, pseudonym);
 
   app.mount("#app");
 };

@@ -14,7 +14,8 @@ export type BrowserTracingSettings = {
   attributes?: Record<string, string>;
 };
 
-export type BrowserTracingUser = { pseudonym: string; library?: string };
+/** the user by pseudonym, and the name of the group they are counted in */
+export type BrowserTracingUser = { pseudonym: string; group?: string };
 
 export type BrowserTracing = {
   identify: (user: BrowserTracingUser) => void;
@@ -58,7 +59,7 @@ export const resetBrowserTracing = () => {
   tracing = undefined;
 };
 
-/** The user by pseudonym, and their library, on everything the SDK sends from now on. */
+/** The user by pseudonym, and their group, on everything the SDK sends from now on. */
 export const identifyInBrowserTracing = (user: BrowserTracingUser): void => {
   try {
     tracing?.identify(user);
