@@ -250,9 +250,12 @@ const handleOutsideMousedown = (event: MouseEvent) => {
   if (target && isOutside(target)) commit();
 };
 // Focus going nowhere (a picked option removed, another window) isn't leaving.
+// Neither is focus moving to an element around the editor: a click on a
+// checkbox's hit area (or the box itself in Firefox) focuses the list row's
+// link it sits in. A click really outside is the mousedown handler's.
 const handleFocusout = (event: FocusEvent) => {
   const next = event.relatedTarget as HTMLElement | null;
-  if (next && isOutside(next)) commit();
+  if (next && isOutside(next) && !next.contains(rootRef.value)) commit();
 };
 
 onMounted(async () => {

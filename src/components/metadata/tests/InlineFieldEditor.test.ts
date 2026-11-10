@@ -437,6 +437,21 @@ describe("InlineFieldEditor", () => {
       expect(wrapper.emitted("cancel")).toHaveLength(1);
     });
 
+    // A click on a checkbox's hit area (or the box itself in Firefox)
+    // focuses the nearest focusable ancestor: the list row's link.
+    it("stays open when focus moves to an element around it", () => {
+      const rowLink = document.createElement("a");
+      rowLink.href = "/venue";
+      document.body.appendChild(rowLink);
+      const wrapper = mount(InlineFieldEditor, {
+        props: { type: "text", modelValue: "1958", label: "Jaar" },
+        attachTo: rowLink,
+      });
+      leaveTo(wrapper, rowLink);
+      expect(wrapper.emitted("cancel")).toBeUndefined();
+      expect(wrapper.emitted("save")).toBeUndefined();
+    });
+
     it("stays open when focus moves to ×", async () => {
       const wrapper = editor();
       await input(wrapper).setValue("1959");
