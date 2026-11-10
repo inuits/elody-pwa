@@ -1,5 +1,6 @@
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { isCompact } from "@/composables/useNavMenu";
 import PageSizeSelect from "../PageSizeSelect.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
@@ -20,6 +21,9 @@ vi.mock("@/main", () => ({
 }));
 vi.mock("@/composables/useStateManagement", () => ({
   useStateManagement: () => ({ getStateForRoute: () => mocks.state }),
+}));
+vi.mock("@/composables/useNavMenu", async () => ({
+  isCompact: (await import("vue")).ref(false),
 }));
 vi.mock("vue-router", () => ({ useRoute: () => ({ path: "/test" }) }));
 vi.mock("vue-i18n", () => ({
@@ -87,5 +91,34 @@ describe("PageSizeSelect", () => {
   it("stays when a larger page size was picked for a short list", async () => {
     const { wrapper } = await getWrapper(30);
     expect(wrapper.findComponent(AdvancedDropdown).isVisible()).toBe(true);
+  });
+});
+
+describe("PageSizeSelect in the small-screen sort sheet", () => {
+  beforeEach(() => {
+    mocks.state = undefined;
+    isCompact.value = true;
+  });
+  afterEach(() => {
+    isCompact.value = false;
+  });
+
+  const chips = async () => {
+    const result = await getWrapper();
+    return { ...result, chips: result.wrapper.findAll('[data-cy="page-size-chip"]') };
+  };
+
+  it("offers the page sizes as chips", async () => {
+    const { wrapper, chips: found } = await chips();
+    expect(wrapper.findComponent(AdvancedDropdown).exists()).toBe(false);
+    expect(found.map((chip) => chip.text())).toEqual(["20", "50"]);
+    expect(found[0].attributes("aria-pressed")).toBe("true");
+  });
+
+  it("sets the limit from a chip", async () => {
+    const { setLimit, chips: found } = await chips();
+    await found[1].trigger("click");
+    await flushPromises();
+    expect(setLimit).toHaveBeenLastCalledWith(50, true);
   });
 });

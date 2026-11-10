@@ -17,7 +17,7 @@
         ? t("bulk-operations.selection-count", {
             count: getEnqueuedItemCount(context),
           })
-        : hasBulkOperationsWithItemsSelection && enableSelection
+        : hasBulkOperationsWithItemsSelection && enableSelection && !isCompact
           ? t("bulk-operations.nothing-selected")
           : ""
     }}</span>
@@ -61,7 +61,7 @@
             v-model="selectedBulkOperation"
             @update:modelValue="handleSelectedBulkOperation"
             :options="barOperations"
-            :flat="true"
+            :flat="!isCompact || (barOperations?.length ?? 0) <= 1"
             :items-selected="itemsSelected"
             :selected-items="getEnqueuedItems(context)"
             :entity-type="entityType"

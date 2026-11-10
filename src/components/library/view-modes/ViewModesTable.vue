@@ -16,8 +16,9 @@
         class="h-full overflow-y-auto"
         :class="{ 'animate-pulse pointer-events-none': isRefetching }"
       >
+        <!-- a small screen drops the header; the list meta row selects -->
         <div
-          v-if="headerColumns.length > 0"
+          v-if="headerColumns.length > 0 && !isCompact"
           data-cy="view-modes-table-header"
           class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-1.5 h-(--list-header-height) border-b border-border-subtle text-label font-bold text-text-field-label"
         >
@@ -190,6 +191,7 @@ import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { readCssToken } from "@/utils/cssToken";
+import { isCompact } from "@/composables/useNavMenu";
 import {
   buildTableItems,
   groupHeaderLabel,

@@ -33,6 +33,11 @@ no surface of its own. `--selection-bar-gap`, `--text-ui`. Items wrap when narro
   title (`TheHeader` `#page-header-create`, via `Teleport`), as in
   `ui_kits/clients`. It fires the same bulk-operation handler.
 
+## Small screens
+Below md the bar sits in the list's meta row ([entity list](./entity-list.md)):
+no "nothing selected" label, and more than one action folds into the split
+button with an overflow menu (a bottom sheet) instead of flat buttons.
+
 ## States
 Hidden (`v-show`) when it has nothing to offer: no selection, no "Select
 page", no actions.

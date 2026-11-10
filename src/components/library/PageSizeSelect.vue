@@ -5,8 +5,40 @@
     v-show="total > smallestLimit"
     class="flex items-center"
   >
-    <label :for="inputId" class="sr-only">{{ t("pagination.page-size") }}</label>
+    <!-- small screen: chips in the sort sheet -->
+    <div
+      v-if="isCompact"
+      role="group"
+      :aria-label="t('pagination.page-size')"
+      class="flex flex-col gap-2 px-2 pt-3"
+    >
+      <span class="text-label font-bold text-text-light uppercase">{{
+        t("pagination.page-size")
+      }}</span>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="option in rawOptions"
+          :key="option.value"
+          type="button"
+          data-cy="page-size-chip"
+          :aria-pressed="option.value === selectedOption ? 'true' : 'false'"
+          class="min-h-9 min-w-(--touch-target-min) px-3.5 border rounded-pill font-bold cursor-pointer"
+          :class="
+            option.value === selectedOption
+              ? 'bg-accent-wash text-accent-ink border-accent'
+              : 'bg-surface border-border-default'
+          "
+          @click="selectedOption = option.value"
+        >
+          {{ t(option.label) }}
+        </button>
+      </div>
+    </div>
+    <label v-if="!isCompact" :for="inputId" class="sr-only">{{
+      t("pagination.page-size")
+    }}</label>
     <AdvancedDropdown
+      v-if="!isCompact"
       v-model="selectedOption"
       data-cy="page-size"
       :input-id="inputId"
@@ -33,6 +65,7 @@ import {
 import { apolloClient } from "@/main";
 import { useStateManagement } from "@/composables/useStateManagement";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
+import { isCompact } from "@/composables/useNavMenu";
 
 const props = withDefaults(
   defineProps<{

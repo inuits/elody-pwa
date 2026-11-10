@@ -2,6 +2,7 @@ import ViewModesTable from "../library/view-modes/ViewModesTable.vue";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
 import type { SeenTracking } from "@/types/contextMenuRouteConfig";
+import { isCompact } from "@/composables/useNavMenu";
 
 const mockFormatTeaserMetadata = vi.hoisted(() => vi.fn());
 
@@ -252,5 +253,19 @@ describe("ViewModesTable", () => {
     const withSelection = mountTable(true);
     await flushPromises();
     expect(withSelection.find('[data-cy="view-modes-table-header-leading"]').exists()).toBe(true);
+  });
+
+  it("drops the column-header row on a small screen", async () => {
+    mockFormatTeaserMetadata.mockReturnValue([
+      { key: "title", label: "metadata.labels.production", value: "x" },
+    ]);
+    isCompact.value = true;
+    const wrapper = shallowMount(ViewModesTable, {
+      props: { entities: [{ id: "entity1", teaserMetadata: [] }], mode: "list" } as any,
+    });
+    await flushPromises();
+    isCompact.value = false;
+
+    expect(wrapper.find('[data-cy="view-modes-table-header"]').exists()).toBe(false);
   });
 });

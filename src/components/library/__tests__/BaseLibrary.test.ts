@@ -120,16 +120,24 @@ vi.mock("@/composables/useMaps", () => ({
   useMaps: () => ({ getBasicMapProperties: vi.fn(() => ({ mapType: "" })) }),
 }));
 
+vi.mock("@/composables/useNavMenu", async () => ({
+  isCompact: (await import("vue")).ref(false),
+}));
+
 const bulkMocks = vi.hoisted(() => ({
   enqueue: vi.fn(),
   dequeue: vi.fn(),
   trigger: vi.fn(),
+  count: vi.fn(() => 0),
+  isEnqueued: vi.fn(() => false),
 }));
 vi.mock("@/composables/useBulkOperations", () => ({
   useBulkOperations: () => ({
     enqueueItemForBulkProcessing: bulkMocks.enqueue,
     dequeueItemForBulkProcessing: bulkMocks.dequeue,
     triggerBulkSelectionEvent: bulkMocks.trigger,
+    getEnqueuedItemCount: bulkMocks.count,
+    isEnqueued: bulkMocks.isEnqueued,
   }),
   BulkOperationsContextEnum: {
     EntityElementListEntityPickerModal: "EntityElementListEntityPickerModal",
@@ -236,6 +244,7 @@ import ViewModesList from "../view-modes/ViewModesList.vue";
 import ViewModesTable from "../view-modes/ViewModesTable.vue";
 import LibraryBar from "../LibraryBar.vue";
 import ResultCountChip from "../ResultCountChip.vue";
+import { isCompact } from "@/composables/useNavMenu";
 import { BaseLibraryModes } from "@/generated-types/queries";
 
 // --- Props / wrapper factories ------------------------------------------------
@@ -1252,6 +1261,110 @@ describe("BaseLibrary.vue list header count chip", () => {
   });
 });
 
+describe("BaseLibrary.vue on a small screen", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [
+      { id: "a", uuid: "ua", teaserMetadata: {}, intialValues: {} },
+      { id: "b", uuid: "ub", teaserMetadata: {}, intialValues: {} },
+    ] as any;
+    libTotalEntityCount.value = 2;
+    libEntitiesLoading.value = false;
+    isCompact.value = true;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+    isCompact.value = false;
+  });
+
+  const metaRow = () => wrapper!.find('[data-cy="list-meta-row"]');
+  const selectPage = () =>
+    wrapper!.findComponent({ name: "BaseInputCheckbox" });
+
+  it("moves the count out of the band into the meta row", async () => {
+    wrapper = getWrapper({ enableBulkOperations: true });
+    await flushPromises();
+
+    expect(
+      wrapper.find('[data-cy="list-header"]').findComponent(ResultCountChip)
+        .exists(),
+    ).toBe(false);
+    expect(metaRow().findComponent(ResultCountChip).props("count")).toBe(2);
+  });
+
+  it("puts the selection bar in the meta row", async () => {
+    wrapper = getWrapper({ enableBulkOperations: true });
+    await flushPromises();
+
+    expect(
+      metaRow().findComponent({ name: "BulkOperationsActionsBar" }).exists(),
+    ).toBe(true);
+  });
+
+  it("selects the page from the meta row's checkbox", async () => {
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+
+    selectPage().vm.$emit("update:modelValue", true);
+
+    expect(bulkMocks.enqueue).toHaveBeenCalledTimes(2);
+  });
+
+  it("ticks the checkbox when every row is selected", async () => {
+    bulkMocks.isEnqueued.mockReturnValue(true);
+    bulkMocks.count.mockReturnValue(2);
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+
+    expect(selectPage().props("modelValue")).toBe(true);
+  });
+
+  it("swaps the count for the selection once rows are selected", async () => {
+    bulkMocks.count.mockReturnValue(1);
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+
+    expect(metaRow().findComponent(ResultCountChip).exists()).toBe(false);
+  });
+
+  it("has no checkbox without selection", async () => {
+    wrapper = getWrapper({
+      enableBulkOperations: false,
+      selectionEnabled: false,
+    });
+    await flushPromises();
+
+    expect(selectPage().exists()).toBe(false);
+  });
+
+  it("leaves compact relation lists without a meta row", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.BasicBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(metaRow().exists()).toBe(false);
+    expect(selectPage().exists()).toBe(false);
+  });
+
+  it("keeps the large-screen band unchanged", async () => {
+    isCompact.value = false;
+    wrapper = getWrapper({ enableBulkOperations: true });
+    await flushPromises();
+
+    expect(selectPage().exists()).toBe(false);
+    expect(
+      wrapper.find('[data-cy="list-header"]').findComponent(ResultCountChip)
+        .exists(),
+    ).toBe(true);
+  });
+});
+
 describe("BaseLibrary.vue select-all in the list header", () => {
   let wrapper: ReturnType<typeof getWrapper> | null = null;
 
@@ -1509,6 +1622,17 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
       const band = wrapper.find('[data-cy="list-header"]').classes();
       expect(band).toContain("rounded-tr-card");
       expect(band).not.toContain("rounded-t-card");
+      wrapper.unmount();
+    });
+
+    it("closes the pane when its small-screen sheet is dismissed", async () => {
+      const wrapper = await mountMain({ forceShowFilters: true });
+      const pane = wrapper.findComponent({ name: "FiltersPane" });
+
+      pane.vm.$emit("close");
+      await flushPromises();
+
+      expect(pane.props("open")).toBe(false);
       wrapper.unmount();
     });
 

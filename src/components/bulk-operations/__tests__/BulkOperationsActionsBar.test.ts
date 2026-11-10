@@ -132,6 +132,33 @@ describe("BulkOperationsActionsBar", () => {
     ).toBe(true);
   });
 
+  describe("in the small-screen meta row", () => {
+    beforeEach(() => {
+      isCompact.value = true;
+    });
+    afterEach(() => {
+      isCompact.value = false;
+    });
+
+    it("leaves the label to the count until something is selected", () => {
+      expect(getWrapper().find('[role="status"]').text()).toBe("");
+    });
+
+    it("keeps a single action as its own button", () => {
+      mocks.operations = [{ value: "export" }];
+      expect(
+        getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
+      ).toBe(true);
+    });
+
+    it("folds several actions into one menu", () => {
+      mocks.operations = [{ value: "export" }, { value: "delete" }];
+      expect(
+        getWrapper().findComponent({ name: "ActionMenuGroup" }).props("flat"),
+      ).toBe(false);
+    });
+  });
+
   it("notes selected items that sit on other pages", () => {
     mocks.selected = [{ id: "a" }, { id: "b" }, { id: "c" }];
 
