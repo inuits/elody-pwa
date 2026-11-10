@@ -340,7 +340,19 @@
     >
       {{ highlightLabel }}
     </span>
-    <div v-if="isListMode" data-cy="list-item-actions" class="flex ml-auto">
+    <!-- eye then ⋮, one group: on a narrow row they wrap together -->
+    <div
+      v-if="isListMode"
+      data-cy="list-item-actions"
+      class="flex items-center shrink-0 ml-auto"
+    >
+      <!-- small screen: Preview leads the ⋮ sheet instead -->
+      <PreviewToggle
+        v-if="canPreview && !(isCompact && buttons?.contextMenu)"
+        :active="previewOpen"
+        :data-preview-for="itemId"
+        @toggle="emit('togglePreviewComponent', itemId)"
+      />
       <EntityButtons
         :buttons="buttons"
         :parent-entity-id="formId"
@@ -357,7 +369,7 @@
     </div>
     <!-- small screen: Preview leads the ⋮ sheet instead -->
     <PreviewToggle
-      v-if="canPreview && !(isCompact && buttons?.contextMenu)"
+      v-else-if="canPreview && !(isCompact && buttons?.contextMenu)"
       :active="previewOpen"
       :data-preview-for="itemId"
       @toggle="emit('togglePreviewComponent', itemId)"
