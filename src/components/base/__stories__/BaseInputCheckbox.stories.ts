@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { onMounted, ref } from "vue";
 import BaseInputCheckbox from "../BaseInputCheckbox.vue";
+import { useBulkOperations } from "@/composables/useBulkOperations";
 
 const meta: Meta<typeof BaseInputCheckbox> = {
   title: "Base/BaseInputCheckbox",
@@ -77,5 +78,31 @@ export const FocusRing: Story = {
     components: { BaseInputCheckbox },
     setup: () => ({ base }),
     template: `<base-input-checkbox v-bind="base" :model-value="false" label="Tab here" />`,
+  }),
+};
+
+export const States: Story = {
+  render: () => ({
+    components: { BaseInputCheckbox },
+    setup() {
+      const { createCustomContext, setBulkSelectionLimit, enqueueItemForBulkProcessing } =
+        useBulkOperations();
+      const limited = createCustomContext("StoryCheckboxLimit");
+      setBulkSelectionLimit(limited, 1);
+      enqueueItemForBulkProcessing(limited, { id: "picked", teaserMetadata: [] });
+      return { base, limited, unchecked: ref(false), checked: ref(true) };
+    },
+    template: `
+      <table style="border-spacing:16px 10px;font-size:var(--text-label)">
+        <tr><td>unchecked</td><td><base-input-checkbox v-bind="base" v-model="unchecked" label="Unchecked" /></td></tr>
+        <tr><td>checked</td><td><base-input-checkbox v-bind="base" v-model="checked" label="Checked" /></td></tr>
+        <tr><td>focus</td><td><base-input-checkbox v-bind="base" :model-value="false" label="Tab to me" /></td></tr>
+        <tr><td>disabled</td><td><base-input-checkbox v-bind="base" :model-value="false" label="Disabled" disabled /></td></tr>
+        <tr><td>required</td><td><base-input-checkbox v-bind="base" :model-value="false" label="Required" required /></td></tr>
+        <tr><td>limit reached</td><td>
+          <base-input-checkbox :item="{ id: 'picked', teaserMetadata: [] }" :bulk-operations-context="limited" :model-value="true" label="Selected (1 of 1)" />
+          <base-input-checkbox :item="{ id: 'other', teaserMetadata: [] }" :bulk-operations-context="limited" :model-value="false" label="Not selected: limit reached" />
+        </td></tr>
+      </table>`,
   }),
 };

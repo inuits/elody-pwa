@@ -85,3 +85,40 @@ export const MultiSearch: Story = {
       </div>`,
   }),
 };
+
+export const States: Story = {
+  render: () => ({
+    components: { AdvancedDropdown },
+    setup() {
+      return {
+        shortOptions,
+        provinces,
+        empty: ref(undefined),
+        picked: ref("published"),
+        many: ref(["antwerp", "limburg"]),
+        cleared: ref("draft"),
+      };
+    },
+    template: `
+      <div style="display:grid;grid-template-columns:210px 300px;gap:20px 14px;
+                  align-items:start;font-size:var(--text-label);padding-bottom:280px">
+        <span>closed (click to open; type to search when > 10 options)</span>
+        <advanced-dropdown v-model="empty" :options="provinces" label="Choose a province" style-type="defaultWithBorder" />
+
+        <span>single selected</span>
+        <advanced-dropdown v-model="picked" :options="shortOptions" label="Status" style-type="defaultWithBorder" />
+
+        <span>multi selected</span>
+        <advanced-dropdown v-model="many" :options="provinces" label="Provinces" style-type="defaultWithBorder" multiple />
+
+        <span>loading (open it)</span>
+        <advanced-dropdown v-model="empty" :options="[]" label="Status" style-type="defaultWithBorder" loading />
+
+        <span>empty (open it)</span>
+        <advanced-dropdown v-model="empty" :options="[]" label="Status" style-type="defaultWithBorder" />
+
+        <span>cleared (click ✕: the placeholder returns)</span>
+        <advanced-dropdown v-model="cleared" :options="shortOptions" label="Status" style-type="defaultWithBorder" clearable />
+      </div>`,
+  }),
+};

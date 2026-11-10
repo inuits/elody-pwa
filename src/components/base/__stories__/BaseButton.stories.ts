@@ -88,6 +88,7 @@ export const States: Story = {
           <base-button button-style="commit" label="Save" />
           <base-button button-style="commit" label="Save" loading />
         </span>
+        <span><base-button button-style="primary" label="Export" disabled tooltip-label="Select at least one item first" /></span>
       </div>`,
   }),
 };

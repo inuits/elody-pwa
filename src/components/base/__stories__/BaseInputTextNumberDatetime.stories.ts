@@ -54,6 +54,12 @@ export const States: Story = {
         <label for="s-disabled">disabled</label>
         <base-input-text-number-datetime id="s-disabled" v-model="text" input-style="defaultWithBorder" disabled />
 
+        <label for="s-error">error</label>
+        <base-input-text-number-datetime id="s-error" v-model="empty" input-style="defaultWithBorder" error-message="Title is required" />
+
+        <label for="s-readonly">read-only</label>
+        <base-input-text-number-datetime id="s-readonly" v-model="text" input-style="defaultWithBorder" readonly />
+
         <label for="s-area">textarea</label>
         <base-input-text-number-datetime id="s-area" v-model="area" type="textarea" input-style="defaultWithBorder" />
       </div>`,
