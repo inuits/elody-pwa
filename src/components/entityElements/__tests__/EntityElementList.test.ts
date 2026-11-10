@@ -86,6 +86,18 @@ describe("EntityElementList", () => {
     expect(entityElementList.exists()).toBe(true);
   });
 
+  it("leaves no padding under the panel header when the panel is collapsed", async () => {
+    const wrapper = mount(EntityElementList, {
+      props: { ...getBasicProps(), isCollapsed: true },
+    });
+
+    await flushPromises();
+
+    expect(
+      wrapper.find('[data-test="entity-element-wrapper"]').classes(),
+    ).not.toContain("pb-1");
+  });
+
   it("refetches the parent entity when an upload finishes so $entity-based filters resolve against fresh relations", async () => {
     const refetchParentEntity = vi.fn();
 
