@@ -75,6 +75,16 @@ describe("EntityElementWrapper as a PanelShell (panel-and-block-shells.md)", () 
     );
   });
 
+  it("tightens its body padding when the card itself is narrow", () => {
+    const wrapper = normal();
+    expect(wrapper.find('[data-cy="entity-element-wrapper"]').classes()).toContain(
+      "@container/entity-element",
+    );
+    expect(wrapper.find('[data-cy="entity-element-wrapper-content"]').classes()).toContain(
+      "@max-md/entity-element:p-2",
+    );
+  });
+
   it("tells the list inside that it sits in a panel", () => {
     const Probe = {
       inject: { insidePanel: { from: "InsidePanel", default: false } },

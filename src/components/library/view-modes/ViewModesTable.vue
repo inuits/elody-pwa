@@ -135,12 +135,11 @@
         </div>
       </div>
 
-      <div
+      <PreviewHost
         v-if="
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        class="my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -158,7 +157,7 @@
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
-      </div>
+      </PreviewHost>
     </div>
   </div>
 </template>
@@ -179,6 +178,7 @@ import {
 import TableViewRow from "@/components/library/view-modes/TableViewRow.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
+import PreviewHost from "@/components/previews/PreviewHost.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";

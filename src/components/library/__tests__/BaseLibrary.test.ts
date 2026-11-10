@@ -1657,6 +1657,22 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
   });
 });
 
+describe("BaseLibrary.vue as a relation list in a panel", () => {
+  it("drops its side padding when the panel is narrow", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+      parentEntityIdentifiers: ["NO-1"],
+    });
+    await flushPromises();
+
+    expect(wrapper.find(".grid").classes()).toEqual(
+      expect.arrayContaining(["px-3", "@max-md/wrapper-content:px-0"]),
+    );
+    wrapper.unmount();
+  });
+});
+
 describe("BaseLibrary.vue in a compact preview", () => {
   it("lines its rows' content up with the block heading above it", async () => {
     mockRoute.path = "/test";

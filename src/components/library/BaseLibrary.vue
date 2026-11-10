@@ -826,7 +826,9 @@ const wrapperClasses = computed(() => {
     // a white surface (guided-flow picker step) is padded by its host
     if (!onWhiteSurface)
       classes.push(
-        props.parentEntityIdentifiers.length > 0 ? "px-3" : "px-(--page-pad-x)",
+        props.parentEntityIdentifiers.length > 0
+          ? "px-3 @max-md/wrapper-content:px-0"
+          : "px-(--page-pad-x)",
       );
   }
   // Page background only on the list's own page; inside a panel or on a

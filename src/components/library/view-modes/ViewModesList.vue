@@ -144,20 +144,11 @@
           />
         </component>
       </div>
-      <!-- small screen: the preview covers the page. Not a showModal()
-           dialog: the top layer would hide the dropdowns and tooltips
-           that teleport to body. Teleported, since the container queries'
-           layout containment would hold a fixed overlay in the list. -->
-      <Teleport to="body" :disabled="!isCompact">
-      <div
+      <PreviewHost
         v-if="
           previewComponentEnabled &&
           refEntities?.find((entity) => entity.id === previewForEntity)
         "
-        data-cy="preview-host"
-        :role="isCompact ? 'dialog' : undefined"
-        :aria-modal="isCompact || undefined"
-        :class="previewHostClasses"
       >
         <PreviewWrapper
           :preview-component="previewComponent!"
@@ -175,8 +166,7 @@
           @close-preview-component="closePreviewComponent"
           @toggle-preview-component="(id) => togglePreviewComponent(id)"
         />
-      </div>
-      </Teleport>
+      </PreviewHost>
     </div>
   </div>
 </template>
@@ -210,6 +200,7 @@ import ListColumnHeader from "@/components/library/view-modes/ListColumnHeader.v
 import { useBulkOperations } from "@/composables/useBulkOperations";
 import { useFormHelper } from "@/composables/useFormHelper";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
+import PreviewHost from "@/components/previews/PreviewHost.vue";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
 import { useEntityListHelpers } from "@/components/library/view-modes/composables/useEntityListHelpers";
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
@@ -309,15 +300,6 @@ const {
   openPreviewComponent,
   togglePreviewForListItem,
 );
-
-// PreviewWrapper handles Escape and focus in both.
-const previewHostClasses = computed(() => {
-  const styles = {
-    fullScreen: "fixed inset-0 z-overlay overflow-y-auto overscroll-contain bg-surface",
-    inline: "my-2 h-fit max-h-[80vh] overflow-y-auto rounded-card",
-  };
-  return isCompact.value ? styles.fullScreen : styles.inline;
-});
 
 // "Open detail page" in the preview header, for lists that navigate.
 const previewDetailPath = computed(() => {
