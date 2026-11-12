@@ -88,7 +88,9 @@ pages:
   rules:
     - if: '$CI_COMMIT_BRANCH == "beta/redesign"'
   script:
-    - pnpm build-storybook -o public
+    - pnpm build-storybook
+    - rm -rf public
+    - mv storybook-static public
   artifacts:
     paths:
       - public
