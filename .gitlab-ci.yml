@@ -55,3 +55,25 @@ include:
       destination_registries:
         - ${HARBOR_URL}/elody-dams-dev
       push_latest_tag: false
+
+
+# --------------------------------------------------------------
+# Storybook
+# --------------------------------------------------------------
+pages:
+  stage: .post
+  needs: []
+  image: node:22.23.4-bookworm
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "beta/redesign"'
+  variables:
+    BASE_GRAPHQL_BRANCH: beta/redesign
+  before_script:
+    - git clone --depth 1 --branch "$BASE_GRAPHQL_BRANCH" "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/rnd/inuits/dams/inuits-dams-base-graphql.git" ../modules/baseGraphql
+    - npm install -g pnpm@10.33.4
+    - pnpm install
+  script:
+    - pnpm build-storybook -o public
+  artifacts:
+    paths:
+      - public
