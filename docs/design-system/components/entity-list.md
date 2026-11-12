@@ -56,15 +56,29 @@ total; the selection bar and pager don't repeat it.
 ## Rows
 List and table rows are flat: `--list-row-pad`, `--text-table`, a
 `--color-border-faint` hairline below, no per-row border, radius or gap.
-Grid items are cards: `--grid-card-width` × `--grid-card-height`, 1px
-border, `--radius-card`, no shadow.
-- Media area on top (`--grid-card-media-height`, `--color-surface-muted`),
-  thumbnail letterboxed (full IIIF image, `object-contain`). No image: a
-  muted glyph and "No media" (`library.no-media`), never a blank box.
-- Checkbox and actions overlay the top of the media area.
-- Body (`--grid-card-body-pad`): the first field as the title (13px bold,
-  2-line clamp), every badge, and the first plain field as one secondary
-  line; other fields are hidden. Labels stay for screen readers only.
+Grid view (`ViewModesList.vue`): `auto-fill` columns of at least
+`--grid-card-min-width`, `--grid-gap` apart, `--grid-pad` around. Cards in a
+row share a height. Each card is a 1px `--color-border-subtle` border,
+`--radius-card`, no shadow, and is not itself a link or focusable.
+- Media: a square frame (`aspect-square`, `--color-surface-muted`); the
+  thumbnail fills it (`object-cover`, `alt` = title). No image: the file-type
+  glyph in `--color-text-subtle`.
+- Body (`--grid-card-body-pad`, `--text-value`): the first field is the
+  title, a link to the detail page (`--text-heading`, bold,
+  `--color-text-link`, hover `--color-text-link-hover` + underline), clamped
+  to 2 lines with `--grid-card-title-min-height` so rows line up. Then every
+  other teaser field as label / value rows (`auto minmax(0,1fr)`,
+  `--grid-card-meta-col-gap` / `--grid-card-meta-row-gap`); labels
+  `--color-text-muted`, values truncate with the full value in the tooltip.
+  Only the client's existing teaser metadata is shown, with its own labels.
+- Footer (`--grid-card-footer-pad`, hairline above): the "Select" checkbox
+  on the left, the eye and ⋮ on the right. Tab order: title, Select, eye, ⋮.
+- Selected: `--color-accent-wash` + a `--color-accent` border (no ring: on
+  the rounded corners it reads as separate arcs). Preview open: the same
+  border, no wash.
+- Selection bar: a labelled "Select page" checkbox starts the row. It ticks
+  when the whole page is selected, is indeterminate when part of it is, and
+  selects the page on click (clears it when ticked).
 
 ### Column-header row (list mode)
 When every row on the page has the same fields, list mode shows one sticky
@@ -90,8 +104,8 @@ Table mode's header row (`ViewModesTable.vue`) uses the same tokens
 | State | Cue |
 |---|---|
 | hover | `--color-surface-row-hover` fill only; a navigating row is a link but its text keeps its colour and gets no underline (overrides the base `a:hover`) |
-| selected (checkbox) | `--color-accent-wash` + `--shadow-accent-row`; the checkbox owns the wash |
-| preview open | `--list-row-preview-border` left border in `--color-accent`, no wash; its eye is pressed |
+| selected (checkbox) | `--color-accent-wash` + `--shadow-accent-row`; the checkbox owns the wash (grid: wash + accent border) |
+| preview open | `--list-row-preview-border` left border in `--color-accent`, no wash; its eye is pressed (grid: accent border) |
 | last previewed (`keepLastActiveItemHighlighted`) | same left border, eye not pressed |
 | seen (`seenDisplay: dimSeen`) | first field (the row title) in `--color-text-secondary` |
 | disabled | greyed out, not clickable |

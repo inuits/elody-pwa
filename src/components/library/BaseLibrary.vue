@@ -215,12 +215,17 @@
                   'flex items-center gap-2 min-h-(--touch-target-min) px-(--list-band-pad) border-b border-border-subtle',
                   { 'bg-accent-wash': selectedCount > 0 },
                 ]
-              : 'contents'
+              : gridSelectPage && enableSelection
+                ? 'flex flex-wrap items-center gap-(--selection-bar-gap) py-2 px-(--list-band-pad) border-b border-border-subtle'
+                : 'contents'
           "
         >
           <BaseInputCheckbox
-            v-if="compactMetaRow && enableSelection"
+            v-if="(compactMetaRow || gridSelectPage) && enableSelection"
             size="compact"
+            :class="{ 'text-ui text-text-body': gridSelectPage }"
+            :label="gridSelectPage ? t('bulk-operations.select-page') : ''"
+            :indeterminate="pageIsPartlySelected"
             :model-value="pageIsSelected"
             :item="{ id: 'select-page' }"
             :bulk-operations-context="undefined"
@@ -246,7 +251,9 @@
             :class="
               compactMetaRow
                 ? 'flex-1 justify-end'
-                : [
+                : gridSelectPage && enableSelection
+                  ? ''
+                  : [
                     'py-2 border-b border-border-subtle',
                     { 'px-(--list-band-pad)': hasResultsBand },
                   ]
@@ -1230,19 +1237,28 @@ const bulkSelect = (items = entities.value) => {
 const selectedCount = computed(() =>
   getEnqueuedItemCount(props.bulkOperationsContext),
 );
-const pageIsSelected = computed(() => {
-  const page = (props.predefinedEntities ?? entities.value ?? []).filter(
+const selectablePage = computed(() =>
+  (props.predefinedEntities ?? entities.value ?? []).filter(
     (entity) => !props.idsOfNonSelectableEntities.includes(entity.id),
-  );
-  return (
-    page.length > 0 &&
-    page.every(
-      (entity) =>
-        isEnqueued(props.bulkOperationsContext, entity.uuid) ||
-        isEnqueued(props.bulkOperationsContext, entity.id),
-    )
-  );
-});
+  ),
+);
+const isOnPageSelected = (entity: Entity) =>
+  isEnqueued(props.bulkOperationsContext, entity.uuid) ||
+  isEnqueued(props.bulkOperationsContext, entity.id);
+const pageIsSelected = computed(
+  () =>
+    selectablePage.value.length > 0 &&
+    selectablePage.value.every(isOnPageSelected),
+);
+const pageIsPartlySelected = computed(
+  () => !pageIsSelected.value && selectablePage.value.some(isOnPageSelected),
+);
+const gridSelectPage = computed(
+  () =>
+    !!displayGrid.value &&
+    !isCompact.value &&
+    props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary,
+);
 
 // The header's select-all, unticked. Rows enqueue by id, bulkSelect by uuid.
 const clearPageSelection = () => {

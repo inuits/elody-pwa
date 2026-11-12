@@ -408,11 +408,17 @@
   /* Flat list and table rows: cell padding, hairline below */
   --list-row-pad: 7px 8px;
   --list-header-height: 24px;
-  /* Grid cards: media area on top, then title, badges, one secondary line */
-  --grid-card-width: 300px;
-  --grid-card-height: 350px;
-  --grid-card-media-height: 220px;
-  --grid-card-body-pad: 8px 12px;
+  /* Grid view: auto-fill columns of cards; a card is a square media frame,
+     a 2-line title link, label / value rows and a select + actions footer */
+  --grid-card-min-width: 200px;
+  --grid-gap: 16px;
+  --grid-pad: 20px 18px 24px;
+  --grid-card-body-pad: 12px 14px;
+  --grid-card-title-gap: 5px;
+  --grid-card-title-min-height: 39px;
+  --grid-card-meta-col-gap: 10px;
+  --grid-card-meta-row-gap: 5px;
+  --grid-card-footer-pad: 6px 8px 6px 12px;
   /* The row whose preview is open (entity-list-element.md) */
   --list-row-preview-border: 3px;
 

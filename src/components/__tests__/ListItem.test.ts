@@ -81,7 +81,7 @@ vi.mock("@/composables/useListItemHelper", () => ({
 }));
 
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({ t: (key: string) => key, te: () => true }),
 }));
 
 describe("ListItem", () => {
@@ -717,57 +717,123 @@ describe("ListItem", () => {
       shallowMount(ListItem, {
         props: { ...defaultProps, itemId: "card-1", viewMode: "grid", ...props },
       });
+    const fieldsOf = (wrapper: ReturnType<typeof card>) =>
+      wrapper.findAll('[data-cy="list-item-content"] > div');
 
-    it("has a fixed card size", () => {
-      expect(card().find('[data-cy="list-item"]').classes()).toEqual(
-        expect.arrayContaining([
-          "w-(--grid-card-width)",
-          "h-(--grid-card-height)",
-        ]),
-      );
+    it("fills its grid cell so cards in a row share a height", () => {
+      const classes = card().find('[data-cy="list-item"]').classes();
+      expect(classes).toEqual(expect.arrayContaining(["h-full", "flex-col"]));
+      expect(classes).not.toContain("w-(--grid-card-width)");
     });
 
-    it("always shows a media area, with a placeholder when there is no media", () => {
+    it("shows a square media frame with an icon when there is no media", () => {
       const media = card().find('[data-cy="grid-card-media"]');
       expect(media.classes()).toEqual(
-        expect.arrayContaining(["h-(--grid-card-media-height)", "bg-surface-muted"]),
+        expect.arrayContaining(["aspect-square", "bg-surface-muted"]),
       );
-      expect(media.text()).toContain("library.no-media");
+      expect(media.text()).not.toContain("library.no-media");
     });
 
-    it("letterboxes the thumbnail instead of cropping it square", () => {
+    it("crops the thumbnail to fill the square frame", () => {
       const viewer = card({ media: "file.jpg" }).findComponent({
         name: "ImageViewer",
       });
-      expect(viewer.props("url")).toContain("/full/");
+      expect(viewer.props("widthClass")).toContain("object-cover");
     });
 
-    it("shows the title, badges and one secondary line", () => {
-      const fields = card({
+    it("shows every field, with visible labels except on the title", () => {
+      const wrapper = card({
         teaserMetadata: [
           { key: "title", value: "A title" },
           { key: "type", value: "photo" },
           { key: "status", value: { formatter: "pill" } },
           { key: "credit", value: "Someone" },
         ],
-      }).findAll('[data-cy="list-item-content"] > div');
-
+      });
+      const fields = fieldsOf(wrapper);
       expect(fields.map((field) => field.classes().includes("hidden"))).toEqual(
-        [false, false, false, true],
+        [false, false, false, false],
+      );
+      expect(fields[0].classes()).toContain(
+        "[&_[data-cy=metadata-label]]:sr-only",
+      );
+      expect(fields[1].classes()).not.toContain(
+        "[&_[data-cy=metadata-label]]:sr-only",
       );
     });
 
-    it("shows the first field as a two-line title", () => {
-      const fields = card({
+    it("lays the fields out as label / value columns", () => {
+      const wrapper = card({
         teaserMetadata: [
           { key: "title", value: "A title" },
           { key: "type", value: "Book" },
         ],
-      }).findAll('[data-cy="list-item-content"] > div');
-      expect(fields[0].classes()).toEqual(
-        expect.arrayContaining(["line-clamp-2", "font-bold", "text-value"]),
+      });
+      expect(
+        wrapper.find('[data-cy="list-item-content"]').classes(),
+      ).toContain("grid-cols-[auto_minmax(0,1fr)]");
+      expect(fieldsOf(wrapper)[1].classes()).toEqual(
+        expect.arrayContaining(["col-span-2", "grid-cols-subgrid"]),
       );
-      expect(fields[1].classes()).toContain("text-text-secondary");
+    });
+
+    it("shows the first field as a two-line title in link ink", () => {
+      const fields = fieldsOf(
+        card({
+          teaserMetadata: [
+            { key: "title", value: "A title" },
+            { key: "type", value: "Book" },
+          ],
+        }),
+      );
+      expect(fields[0].classes()).toEqual(
+        expect.arrayContaining([
+          "col-span-2",
+          "line-clamp-2",
+          "font-bold",
+          "text-heading",
+          "text-text-link",
+        ]),
+      );
+    });
+
+    it("links the title to the detail page", () => {
+      const link = card({
+        titleLink: "/asset/card-1",
+        teaserMetadata: [{ key: "title", value: "A title" }],
+      }).find('[data-cy="grid-card-title-link"]');
+      expect(link.exists()).toBe(true);
+      expect(link.attributes("to")).toBe("/asset/card-1");
+    });
+
+    it("puts the labelled checkbox, the eye and the menu in the footer", () => {
+      const footer = card({
+        hasSelection: true,
+        previewComponentFeatureEnabled: true,
+      }).find('[data-cy="grid-card-footer"]');
+      expect(footer.exists()).toBe(true);
+      expect(
+        footer.findComponent(BaseInputCheckbox).props("label"),
+      ).toBeTruthy();
+      expect(footer.findComponent({ name: "PreviewToggle" }).exists()).toBe(
+        true,
+      );
+      expect(footer.findComponent({ name: "EntityButtons" }).exists()).toBe(
+        true,
+      );
+    });
+
+    it("borders the card in accent while its preview is open", () => {
+      const classes = card({
+        previewComponentListItemsCoverage: "OneListItem",
+        previewComponentCurrentActive: true,
+      })
+        .find('[data-cy="list-item"]')
+        .classes();
+      expect(classes).toContain("border-accent");
+      expect(classes).not.toContain("border-border-subtle");
+      expect(classes).not.toContain("ring-1");
+      expect(classes).not.toContain("border-l-accent");
     });
   });
 

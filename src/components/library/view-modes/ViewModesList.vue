@@ -16,7 +16,7 @@
         :class="[
           'h-full overflow-y-auto',
           {
-            'grid grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] gap-2 justify-items-start items-start max-w-full':
+            'grid grid-cols-[repeat(auto-fill,minmax(var(--grid-card-min-width),1fr))] content-start gap-(--grid-gap) p-(--grid-pad) max-w-full':
               mode === 'grid',
           },
         ]"
@@ -80,8 +80,8 @@
         <component
           v-for="entity in processedEntities"
           :key="entity.id + '_list'"
-          :is="entity.componentTag"
-          :to="entity.componentPath"
+          :is="mode === 'grid' ? 'div' : entity.componentTag"
+          :to="mode === 'grid' ? undefined : entity.componentPath"
           :class="[
             // A navigating row is a link: no link underline or colour on hover
             // (the base a:hover rule); the row's own hover fill is enough.
@@ -121,6 +121,7 @@
             :is-enable-navigation="actionOnClick === ActionOnClick.Navigate"
             :entity-list-elements="entityListElements"
             :view-mode="mode"
+            :title-link="entity.componentPath"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
             :preview-component-current-active="entity.isPreviewActive"
@@ -579,6 +580,6 @@ const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
 
 .list-item-grid {
   content-visibility: auto;
-  contain-intrinsic-size: 300px;
+  contain-intrinsic-size: auto 360px;
 }
 </style>

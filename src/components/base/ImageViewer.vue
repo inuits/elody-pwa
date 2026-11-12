@@ -12,6 +12,7 @@
       v-else
       :class="[heightClass, widthClass]"
       :src="imageUrl"
+      :alt="alt"
       @error="handleImageError"
       loading="lazy"
     />
@@ -28,10 +29,12 @@ const props = withDefaults(
     mediaIsLink: boolean;
     heightClass: string;
     widthClass: string;
+    alt?: string;
   }>(),
   {
     heightClass: "h-10",
     widthClass: "w-10",
+    alt: "",
   },
 );
 

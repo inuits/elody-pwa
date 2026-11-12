@@ -69,5 +69,5 @@ The label is the item's own name. The required tooltip uses `tooltip.required`.
 ```
 Tests: `src/components/base/__tests__/BaseInputCheckbox.test.ts`.
 
-Not yet supported: an indeterminate ("some selected") state. It will be added
-together with "Selecteer pagina" in the selection bar.
+`indeterminate` shows the "some selected" state (commit fill, white dash;
+screen readers hear "mixed"). Used by the grid view's "Select page".

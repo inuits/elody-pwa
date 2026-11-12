@@ -114,3 +114,15 @@ Kinds:
 | N1 | Deviation | the rail stays the collapsed default; the flyout opens on demand (`navigation.md` Round 2) | user, 2026-11-06: one Home Assistant-style ≡› / ≡‹ icon button at the top of the rail (under the logo; beside it when open) keeps the menu open (beside the page, which moves aside; user, 2026-11-09) or collapses it; closed is the default; no open-on-hover (tried and dropped); on the closed rail a group opens a flyout of its sub-items beside its icon instead of opening the whole menu | — |
 | N2 | Deviation | tooltip linked with `aria-describedby` (`accessibility.md`) | rail tooltips not linked: they repeat the item's accessible name | — |
 | N3 | Done | — | new `NavRail` mounted in `App.vue` (2026-11-06); old `MenuNav`, `MenuItem`, `MenuSubItem` and their dead menu state in `useMenuHelper` removed (2026-11-09) | — |
+
+## Grid view (redesign/grid-view, 2026-11-12)
+
+| ID | Kind | Handoff | What we did | Follow-up |
+|---|---|---|---|---|
+| G1 | Deviation | hex colours (`#2B56A0`, `#F1F6FC`, `#DFE6EC`…), blue checkbox | mapped to role tokens (`accent`, `accent-wash`, `border-subtle`, `surface-muted`, `text-link`); checkbox stays commit teal | — |
+| G2 | Deviation | short labels ("Access", "Admin") and an "Updated" field | user, 2026-11-12: only existing teaser metadata with its own labels; long labels widen the label column | — |
+| G3 | Deviation | footer has select + eye only | ⋮ (`EntityButtons`) kept next to the eye so no action is lost | confirm with design |
+| G4 | Parked | "Select all" selects every result; "Select all 5,312 results" link after a page | "Select page" (existing key) selects the current page; the off-page note/clear link already exists | cross-page select-all, respecting `bulkSelectAllSizeLimit` |
+| G5 | Deviation | status "2 of 5 selected" | existing "Selection: N" copy kept | — |
+| G6 | Parked | "Select" footer label | `te('bulk-operations.select')` with English fallback; key not yet in baseGraphql translations | add `bulk-operations.select` (en/nl/ar) |
+| G7 | Deviation | Select all in the selection bar in both views | grid only; list keeps its column-header checkbox | — |
