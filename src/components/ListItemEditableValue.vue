@@ -20,7 +20,7 @@ import { useImport } from "@/composables/useImport";
 import { apolloClient } from "@/main";
 
 const props = defineProps<{
-  editFormQuery: string;
+  editFormQuery?: string;
   metadata: Metadata;
   entityId: string;
   refetchEntities?: () => Promise<void>;
@@ -44,6 +44,7 @@ const findInputField = (form: any): InputField | undefined => {
 };
 
 onMounted(async () => {
+  if (!props.editFormQuery) return;
   const document = await loadDocument(props.editFormQuery);
   if (!document) return;
   const response = await apolloClient.query({ query: document });

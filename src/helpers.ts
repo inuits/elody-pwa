@@ -384,6 +384,7 @@ export const getMetadataFields = (
         isMultilingual: (value as PanelMetaData).isMultilingual,
         masked: (value as PanelMetaData).masked,
         revealQuery: (value as PanelMetaData).revealQuery,
+        editFormQuery: (value as PanelMetaData).editFormQuery,
         __typename: (value as PanelMetaData).__typename,
       };
 

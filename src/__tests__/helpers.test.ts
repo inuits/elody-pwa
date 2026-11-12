@@ -986,6 +986,23 @@ describe("getMetadataFields", () => {
     expect(fields[0].value).toBe("Jane");
   });
 
+  it("keeps a field's editFormQuery", () => {
+    mocks.getForm.mockReturnValue({ values: { intialValues: {} } });
+
+    const fields = getMetadataFields(
+      {
+        status: {
+          __typename: "PanelMetaData",
+          key: "status",
+          editFormQuery: "GetEditNotificationStatusForm",
+        },
+      } as any,
+      "entity-1",
+    ) as any[];
+
+    expect(fields[0].editFormQuery).toBe("GetEditNotificationStatusForm");
+  });
+
   it("returns the bulk data list when the panel has bulk data", () => {
     const fields = getMetadataFields(
       { bulkData: [{ key: "codec", value: "h264" }] } as any,

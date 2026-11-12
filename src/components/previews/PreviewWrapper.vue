@@ -231,6 +231,7 @@ const previewedEntity = computed<Entity | undefined>(() =>
   props.entities.find((entity) => entity.id === props.entityId),
 );
 provide("ParentEntityProvider", previewedEntity);
+provide("RefetchPreviewEntities", props.refetchEntities);
 
 const primaryPreviewElement = ref<ColumnList | undefined>(undefined);
 const metadataPreviewElement = ref<ColumnList | undefined>(undefined);
