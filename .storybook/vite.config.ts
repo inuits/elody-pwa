@@ -40,7 +40,7 @@ export default defineConfig({
         ? []
         : [
             {
-              find: /^@\/generated-types\/queries$/,
+              find: /^(@\/|\/src\/)generated-types\/queries(\.ts)?$/,
               replacement: fileURLToPath(
                 new URL("../src/__mocks__/queries.ts", import.meta.url),
               ),
