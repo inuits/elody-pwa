@@ -42,7 +42,8 @@
     </div>
 
     <div
-      :class="['flex flex-col w-full', `${getDropzoneSize(dropzoneSize)}`]"
+      data-cy="upload-dropzone-size"
+      :class="['flex flex-col w-full', dropzoneSizes[dropzoneSize]]"
       :key="uploadFieldType"
     >
       <Dropzone
@@ -114,13 +115,11 @@ const selectedItem = ref<DropdownOption | undefined>(
     : undefined,
 );
 
-const getDropzoneSize = (size: "small" | "normal" | "big") => {
-  const sizeObject = {
-    small: "min-h-[15vh]",
-    normal: "min-h-[50vh]",
-    big: "min-h-[85vh]",
-  };
-  return sizeObject[size];
+// upload.md: a compact zone that grows with its file rows
+const dropzoneSizes = {
+  small: "min-h-(--dropzone-height-small)",
+  normal: "min-h-(--dropzone-height-normal)",
+  big: "min-h-(--dropzone-height-big)",
 };
 
 const setUseUploadVariables = () => {

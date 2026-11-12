@@ -48,6 +48,7 @@ export const useGetDropdownOptionsState = (
 
   const {
     entities,
+    totalEntityCount,
     getEntities,
     setAdvancedFilters,
     setEntityType,
@@ -349,6 +350,7 @@ export const useGetDropdownOptionsState = (
     initialize,
     getAutocompleteOptions,
     entitiesLoading: isLoading,
+    entitiesCount: totalEntityCount,
     entityDropdownOptions,
     getFormWithRelationFieldCheck,
     getVariableValueForFilter,

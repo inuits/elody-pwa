@@ -112,6 +112,8 @@ describe("RepetitiveStepField", () => {
     // a picker in a modal must not inherit the route's saved filter state
     expect(picker.props("shouldUseStateForRoute")).toBe(false);
     expect(picker.props("forceListView")).toBe(true);
+    // a fixed height: the modal doesn't resize as the results change
+    expect(picker.props("baseLibraryHeight")).toBe("h-[55vh]");
   });
 
   it("passes the step's entityPickerSearchConfig to the picker's search props", () => {

@@ -187,14 +187,14 @@
             {{ browseLabel }}
           </button>
           <RelationPickerModal
-            :entity-id="entityFormData?.id || formId"
             :accepted-type="pickerEntityType"
-            :filters="
-              metadata.inputField.advancedFilterInputForRetrievingOptions ??
-              undefined
+            :options-config="fetchAllOptionsConfig"
+            :single="
+              fieldType === InputFieldTypes.DropdownSingleselectRelations
             "
-            :single="fieldType === InputFieldTypes.DropdownSingleselectRelations"
+            :can-create="!!metadata.inputField.canCreateEntityFromOption"
             @picked="(options) => relationAutocomplete?.addPicked(options)"
+            @create="(label) => relationAutocomplete?.createFromLabel(label)"
           />
         </template>
       </template>
@@ -226,211 +226,217 @@
         position="middle-right"
         :tooltip="(metadata as any).lockedTooltip"
       />
-      <base-tooltip
-        class="w-full basis-[fit-content]"
-        position="right-end"
-        :tooltip-offset="8"
+      <ListItemEditableValue
+        :edit-form-query="editFormQuery"
+        :metadata="metadata as Metadata"
+        :entity-id="linkedEntityId || formId"
+        :refetch-entities="refetchPreviewEntities"
       >
-        <template #activator="{ on, describedBy }">
-          <div
-            ref="fieldValueRef"
-            data-cy="field-value"
-            v-on="showTooltip ? on : {}"
-            :aria-describedby="showTooltip ? describedBy : undefined"
-            class="flex column gap-2 items-center"
-            :class="[
-              { 'min-h-(--field-value-min-height)': !compact },
-              canEditInPlace
-                ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) py-(--field-value-pad-y) -my-(--field-value-pad-y) hover:bg-surface-editable-hover'
-                : undefined,
-            ]"
-            v-bind="editableValueAttrs"
-            @click.capture="startEditing"
-            @keydown.enter="onActivateKey"
-            @keydown.space="onActivateKey"
-          >
-            <MetadataMaskedValue
-              v-if="isMaskedField"
-              :metadata-key="metadata.key"
-              :value="fieldValueProxy"
-              :reveal-query="metadata.revealQuery"
-              :entity-id="linkedEntityId || formId"
-              :copy-to-clipboard="metadata.copyToClipboard ?? false"
-            />
-            <MetadataTruncatedText
-              v-else
-              data-cy="field-value-text"
-              :class="{
-                'border-b border-dashed border-border-dashed': underlineValue,
-              }"
-              @overflow-status="handleOverflowStatus"
-              :disabled="!linkedEntityId && !metadata.lineClamp"
-              :line-clamp="metadata.lineClamp || 1"
+        <base-tooltip
+          class="w-full basis-[fit-content]"
+          position="right-end"
+          :tooltip-offset="8"
+        >
+          <template #activator="{ on, describedBy }">
+            <div
+              ref="fieldValueRef"
+              data-cy="field-value"
+              v-on="showTooltip ? on : {}"
+              :aria-describedby="showTooltip ? describedBy : undefined"
+              class="flex column gap-2 items-center"
+              :class="[
+                { 'min-h-(--field-value-min-height)': !compact },
+                canEditInPlace
+                  ? 'cursor-pointer rounded-input px-(--field-value-pad-x) -mx-(--field-value-pad-x) py-(--field-value-pad-y) -my-(--field-value-pad-y) hover:bg-surface-editable-hover'
+                  : undefined,
+              ]"
+              v-bind="editableValueAttrs"
+              @click.capture="startEditing"
+              @keydown.enter="onActivateKey"
+              @keydown.space="onActivateKey"
             >
-              <MetadataFormatter
-                v-if="resolvedMetadataValue?.formatter"
-                v-bind="resolvedMetadataValue"
-                :translation-key="pillTranslationKey"
-                :value-options="metadata.inputField?.options"
-                :unit="metadata.unit"
-                :entity="{ type: entityType }"
-              />
-              <TableInputField
-                v-else-if="
-                  fieldType === InputFieldTypes.InputFieldWithSubFields
-                "
-                v-model:model-value="fieldValueProxy"
-                :is-flow-relation-values="
-                  !metadata.inputField?.isMetadataField &&
-                  metadata.inputField?.relationType !== undefined
-                "
-                :sub-fields="(metadata.inputField as any)?.subFields ?? []"
-                :form-id="formId"
-                :parent-field-key="fieldKey"
-                :relation-type="metadata.inputField?.relationType"
-                :disabled="true"
-              />
-              <ViewModesAutocompleteRelations
-                v-else-if="autoCompleteType === 'relationAutocomplete'"
-                v-model="fieldValueProxy"
-                :is-read-only="true"
-                :field-name="fieldLabel"
-                :formId="linkedEntityId || formId"
-                :metadata-key-to-get-options-for="metadataKeyToGetOptions"
-                :advanced-filter-input-for-retrieving-options="
-                  metadata.inputField.advancedFilterInputForRetrievingOptions
-                "
-                :advanced-filter-input-for-retrieving-related-options="
-                  filtersForRetrievingRelatedOptions
-                "
-                :advanced-filter-input-for-retrieving-all-options="
-                  filtersForRetrievingOptions
-                "
-                :advanced-filter-input-for-searching-options="
-                  metadata.inputField.advancedFilterInputForSearchingOptions
-                "
-                :relation-filter="metadata.inputField.relationFilter"
-                :is-metadata-field="metadata.inputField?.isMetadataField"
-                :relation-type="metadata.inputField?.relationType"
-                :from-relation-type="metadata.inputField?.fromRelationType"
-                :metadataOnRelationConfig="
-                  metadata.inputField?.metadataOnRelationFieldConfig
-                "
-                :disabled="true"
-                :readOnlyValueAsPlainText="
-                  metadata.inputField?.readOnlyValueAsPlainText
-                "
-                @click.stop.prevent
-              />
-              <ViewModesAutocompleteMetadata
-                v-else-if="
-                  autoCompleteType === 'metadataAutocomplete' &&
-                  (metadata.unit !== Unit.Image ||
-                    imageLoadError ||
-                    !fieldValueProxy)
-                "
-                v-model:model-value="fieldValueProxy"
-                :metadata-dropdown-options="metadata.inputField.options"
-                :formId="formId"
-                :select-type="
-                  metadata.inputField.type ===
-                  InputFieldTypes.DropdownSingleselectMetadata
-                    ? 'single'
-                    : 'multi'
-                "
-                :disabled="true"
-                mode="view"
-                @click.stop.prevent
-              />
-              <img
-                v-else-if="
-                  metadata.unit === Unit.Image &&
-                  fieldValueProxy &&
-                  !imageLoadError
-                "
-                :src="`/${fieldValueProxy}`"
-                class="max-h-12 py-2"
-                alt=""
-                data-testid="unit-image"
-                @error="imageLoadError = true"
-              />
-              <MetadataYesNo
-                v-else-if="fieldType === InputFieldTypes.Checkbox"
+              <MetadataMaskedValue
+                v-if="isMaskedField"
+                :metadata-key="metadata.key"
                 :value="fieldValueProxy"
+                :reveal-query="metadata.revealQuery"
+                :entity-id="linkedEntityId || formId"
+                :copy-to-clipboard="metadata.copyToClipboard ?? false"
               />
-              <span
-                v-else-if="
-                  fieldType === InputFieldTypes.Color && fieldValueProxy
-                "
-                data-cy="metadata-color-value"
-                class="flex items-center gap-2 text-value"
+              <MetadataTruncatedText
+                v-else
+                data-cy="field-value-text"
+                :class="{
+                  'border-b border-dashed border-border-dashed': underlineValue,
+                }"
+                @overflow-status="handleOverflowStatus"
+                :disabled="!linkedEntityId && !metadata.lineClamp"
+                :line-clamp="metadata.lineClamp || 1"
+              >
+                <MetadataFormatter
+                  v-if="resolvedMetadataValue?.formatter"
+                  v-bind="resolvedMetadataValue"
+                  :translation-key="pillTranslationKey"
+                  :value-options="metadata.inputField?.options"
+                  :unit="metadata.unit"
+                  :entity="{ type: entityType }"
+                />
+                <TableInputField
+                  v-else-if="
+                    fieldType === InputFieldTypes.InputFieldWithSubFields
+                  "
+                  v-model:model-value="fieldValueProxy"
+                  :is-flow-relation-values="
+                    !metadata.inputField?.isMetadataField &&
+                    metadata.inputField?.relationType !== undefined
+                  "
+                  :sub-fields="(metadata.inputField as any)?.subFields ?? []"
+                  :form-id="formId"
+                  :parent-field-key="fieldKey"
+                  :relation-type="metadata.inputField?.relationType"
+                  :disabled="true"
+                />
+                <ViewModesAutocompleteRelations
+                  v-else-if="autoCompleteType === 'relationAutocomplete'"
+                  v-model="fieldValueProxy"
+                  :is-read-only="true"
+                  :field-name="fieldLabel"
+                  :formId="linkedEntityId || formId"
+                  :metadata-key-to-get-options-for="metadataKeyToGetOptions"
+                  :advanced-filter-input-for-retrieving-options="
+                    metadata.inputField.advancedFilterInputForRetrievingOptions
+                  "
+                  :advanced-filter-input-for-retrieving-related-options="
+                    filtersForRetrievingRelatedOptions
+                  "
+                  :advanced-filter-input-for-retrieving-all-options="
+                    filtersForRetrievingOptions
+                  "
+                  :advanced-filter-input-for-searching-options="
+                    metadata.inputField.advancedFilterInputForSearchingOptions
+                  "
+                  :relation-filter="metadata.inputField.relationFilter"
+                  :is-metadata-field="metadata.inputField?.isMetadataField"
+                  :relation-type="metadata.inputField?.relationType"
+                  :from-relation-type="metadata.inputField?.fromRelationType"
+                  :metadataOnRelationConfig="
+                    metadata.inputField?.metadataOnRelationFieldConfig
+                  "
+                  :disabled="true"
+                  :readOnlyValueAsPlainText="
+                    metadata.inputField?.readOnlyValueAsPlainText
+                  "
+                  @click.stop.prevent
+                />
+                <ViewModesAutocompleteMetadata
+                  v-else-if="
+                    autoCompleteType === 'metadataAutocomplete' &&
+                    (metadata.unit !== Unit.Image ||
+                      imageLoadError ||
+                      !fieldValueProxy)
+                  "
+                  v-model:model-value="fieldValueProxy"
+                  :metadata-dropdown-options="metadata.inputField.options"
+                  :formId="formId"
+                  :select-type="
+                    metadata.inputField.type ===
+                    InputFieldTypes.DropdownSingleselectMetadata
+                      ? 'single'
+                      : 'multi'
+                  "
+                  :disabled="true"
+                  mode="view"
+                  @click.stop.prevent
+                />
+                <img
+                  v-else-if="
+                    metadata.unit === Unit.Image &&
+                    fieldValueProxy &&
+                    !imageLoadError
+                  "
+                  :src="`/${fieldValueProxy}`"
+                  class="max-h-12 py-2"
+                  alt=""
+                  data-testid="unit-image"
+                  @error="imageLoadError = true"
+                />
+                <MetadataYesNo
+                  v-else-if="fieldType === InputFieldTypes.Checkbox"
+                  :value="fieldValueProxy"
+                />
+                <span
+                  v-else-if="
+                    fieldType === InputFieldTypes.Color && fieldValueProxy
+                  "
+                  data-cy="metadata-color-value"
+                  class="flex items-center gap-2 text-value"
+                >
+                  <span
+                    data-cy="metadata-color-swatch"
+                    class="w-4 h-4 shrink-0 rounded-chip border border-border-default"
+                    :style="{ backgroundColor: fieldValueProxy }"
+                  />
+                  {{ fieldValueProxy }}
+                </span>
+                <entity-element-metadata
+                  v-else
+                  :class="{ 'pr-6': fieldIsLocked }"
+                  :label="fieldLabel"
+                  v-model:value="fieldValueProxy"
+                  :link-text="metadata.linkText"
+                  :link-icon="metadata.linkIcon"
+                  :unit="metadata.unit"
+                  :base-library-mode="baseLibraryMode"
+                  :custom-value="metadata.customValue"
+                  :translation-key="pillTranslationKey"
+                  :breakWords="breakWords"
+                />
+              </MetadataTruncatedText>
+              <Transition
+                leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
+                leave-to-class="opacity-0"
+                mode="out-in"
               >
                 <span
-                  data-cy="metadata-color-swatch"
-                  class="w-4 h-4 shrink-0 rounded-chip border border-border-default"
-                  :style="{ backgroundColor: fieldValueProxy }"
-                />
-                {{ fieldValueProxy }}
-              </span>
-              <entity-element-metadata
-                v-else
-                :class="{ 'pr-6': fieldIsLocked }"
-                :label="fieldLabel"
-                v-model:value="fieldValueProxy"
-                :link-text="metadata.linkText"
-                :link-icon="metadata.linkIcon"
-                :unit="metadata.unit"
-                :base-library-mode="baseLibraryMode"
-                :custom-value="metadata.customValue"
-                :translation-key="pillTranslationKey"
-                :breakWords="breakWords"
+                  v-if="canEditInPlace && savedCheck.visible.value"
+                  data-cy="field-saved-check"
+                  aria-hidden="true"
+                  class="ml-auto flex shrink-0 text-success"
+                >
+                  <unicon :name="Unicons.Check.name" height="12" />
+                </span>
+                <span
+                  v-else-if="canEditInPlace"
+                  data-cy="field-edit-pencil"
+                  aria-hidden="true"
+                  class="ml-auto flex shrink-0 text-text-subtle"
+                >
+                  <unicon :name="Unicons.EditAlt.name" height="12" />
+                </span>
+              </Transition>
+              <BaseCopyToClipboard
+                data-inline-edit-ignore
+                v-if="metadata.copyToClipboard && !isMaskedField"
+                :value="fieldValueProxy"
+                @click.stop.prevent
               />
-            </MetadataTruncatedText>
-            <Transition
-              leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
-              leave-to-class="opacity-0"
-              mode="out-in"
-            >
-              <span
-                v-if="canEditInPlace && savedCheck.visible.value"
-                data-cy="field-saved-check"
-                aria-hidden="true"
-                class="ml-auto flex shrink-0 text-success"
-              >
-                <unicon :name="Unicons.Check.name" height="12" />
-              </span>
-              <span
-                v-else-if="canEditInPlace"
-                data-cy="field-edit-pencil"
-                aria-hidden="true"
-                class="ml-auto flex shrink-0 text-text-subtle"
-              >
-                <unicon :name="Unicons.EditAlt.name" height="12" />
-              </span>
-            </Transition>
-            <BaseCopyToClipboard
-              data-inline-edit-ignore
-              v-if="metadata.copyToClipboard && !isMaskedField"
-              :value="fieldValueProxy"
-              @click.stop.prevent
+            </div>
+          </template>
+          <template #default>
+            <entity-element-metadata
+              data-cy="field-value-tooltip"
+              class="!text-inherit"
+              :label="fieldLabel"
+              v-model:value="fieldTooltipValue"
+              :link-text="metadata.linkText"
+              :link-icon="metadata.linkIcon"
+              :unit="metadata.unit"
+              :base-library-mode="baseLibraryMode"
+              :break-words="breakWords"
             />
-          </div>
-        </template>
-        <template #default>
-          <!-- The tooltip's light ink; the value's own secondary ink is dark on dark. -->
-          <entity-element-metadata
-            data-cy="field-value-tooltip"
-            class="!text-inherit"
-            :label="fieldLabel"
-            v-model:value="fieldTooltipValue"
-            :link-text="metadata.linkText"
-            :link-icon="metadata.linkIcon"
-            :unit="metadata.unit"
-            :base-library-mode="baseLibraryMode"
-            :break-words="breakWords"
-          />
-        </template>
-      </base-tooltip>
+          </template>
+        </base-tooltip>
+      </ListItemEditableValue>
       <MetadataValueTooltip
         class="grow-0 shrink-0 basis-0 items-center"
         v-if="metadata.valueTooltip?.type && metadata.value"
@@ -454,6 +460,7 @@ import { resolveValueTranslationKey } from "@/components/metadata/useValueTransl
 import {
   BaseLibraryModes,
   Collection,
+  type Metadata,
   type PanelMetaData,
   InputFieldTypes,
   Unit,
@@ -470,14 +477,7 @@ import {
 } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import RelationPickerModal from "@/components/metadata/RelationPickerModal.vue";
-import {
-  ref,
-  onBeforeMount,
-  computed,
-  inject,
-  provide,
-  watch,
-} from "vue";
+import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
@@ -514,6 +514,7 @@ import {
 import { useEditMode } from "@/composables/useEdit";
 import { canEditFieldInPlace } from "@/components/metadata/fieldEditability";
 import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
+import ListItemEditableValue from "@/components/ListItemEditableValue.vue";
 import {
   asListIfNeeded,
   buildMetadataInput,
@@ -605,6 +606,7 @@ const {
   metadataKeyToGetOptions,
   filtersForRetrievingOptions,
   filtersForRetrievingRelatedOptions,
+  fetchAllOptionsConfig,
 } = useMetadataWrapperDropdownOptions(props, parentEntity);
 const { isValidationRulePresentOnField } = useVeeValidate();
 
@@ -771,6 +773,18 @@ const canEditInPlace = computed<boolean>(() =>
     ),
     relationEditable: relationEditable.value,
   }),
+);
+const editFormQuery = computed<string | undefined>(() =>
+  !props.isEdit &&
+  !canEditInPlace.value &&
+  !(props.metadata as PanelMetaData).readOnly
+    ? (props.metadata as PanelMetaData).editFormQuery || undefined
+    : undefined,
+);
+// From PreviewWrapper: the list the previewed entity comes from.
+const refetchPreviewEntities = inject<(() => Promise<void>) | undefined>(
+  "RefetchPreviewEntities",
+  undefined,
 );
 const editFieldLabel = computed<string>(() =>
   inPlaceScope.messages.editField(),
@@ -1094,9 +1108,7 @@ const onActivateKey = (event: KeyboardEvent) => {
 };
 
 const isEmptyValue = (value: unknown): boolean =>
-  value == null ||
-  value === "" ||
-  (Array.isArray(value) && value.length === 0);
+  value == null || value === "" || (Array.isArray(value) && value.length === 0);
 
 // The dashed underline marks editable text; chip values (dropdowns, pills)
 // carry their own shape instead. An empty value shows "Geen waarde" bare (E12).

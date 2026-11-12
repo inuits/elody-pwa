@@ -13,7 +13,7 @@ vi.mock("@/composables/upload/useUpload", () => ({
   default: () => ({ initializeUpload: vi.fn(), files: ref([]) }),
 }));
 
-const getWrapper = () =>
+const getWrapper = (props: Record<string, unknown> = {}) =>
   shallowMount(UploadInterfaceDropzone, {
     props: {
       uploadFlow: UploadFlow.MediafilesOnly,
@@ -22,6 +22,7 @@ const getWrapper = () =>
       uploadFieldType: UploadFieldType.Batch,
       infoLabelUrl: "https://docs.example/upload",
       templateCsvs: ["template.csv"],
+      ...props,
     },
     global: {
       provide: { config: {} },
@@ -51,4 +52,21 @@ describe("UploadInterfaceDropzone - info notes", () => {
       .find((b) => b.text() === "upload-fields.csv-template-link");
     expect(button?.attributes("type")).toBe("button");
   });
+});
+
+// upload.md: a compact zone; the file rows make it grow, so the form's
+// commit stays in view
+describe("UploadInterfaceDropzone - size", () => {
+  it.each(["small", "normal", "big"] as const)(
+    "a %s zone has a token height, not a share of the screen",
+    (dropzoneSize) => {
+      const zone = getWrapper({ dropzoneSize }).find(
+        "[data-cy='upload-dropzone-size']",
+      );
+      expect(zone.classes()).toContain(
+        `min-h-(--dropzone-height-${dropzoneSize})`,
+      );
+      expect(zone.attributes("class")).not.toMatch(/vh/);
+    },
+  );
 });

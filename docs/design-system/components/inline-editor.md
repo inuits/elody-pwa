@@ -46,10 +46,10 @@ own rows don't have an inline editor yet. They stay read-only in place.
 **Blader…:** under a relation's search, a "Blader…" link opens the entity
 picker (`RelationPickerModal`, `TypeModals.RelationPicker`) for the field's
 entity type (`inputField.entityType`, else the search's first `item_types`).
-Without one there is no link. The picker returns the entities without saving
-(`EntityPickerMode.Emit`); they join the search's chosen entities with their
-labels (`addPicked`), and a single select takes the first. The field saves as
-usual when you leave it. The picker renders inside the editor, so its clicks
+Without one there is no link. The picker ([Entity picker](entity-picker.md))
+returns the entities without saving; they join the search's chosen entities
+with their labels (`addPicked`), and a single select takes the first. The field
+saves as usual when you leave it. The picker renders inside the editor, so its clicks
 and focus count as inside, and Enter and Escape typed in it stay with it.
 
 A field in a repeatable panel (ISBN, EAN, …) edits in its own row: each row

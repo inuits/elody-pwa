@@ -176,6 +176,15 @@ describe("EntityPickerComponent", () => {
     });
   });
 
+  // a fixed height: a modal holding a picker doesn't resize with the results
+  it("has a fixed height that fits a centred modal by default", () => {
+    const wrapper = shallowMount(EntityPickerComponent, {
+      props: { ...defaultProps, searchMode: "Search" as any },
+      global: globalConfig,
+    });
+    expect(wrapper.classes()).toContain("h-(--entity-picker-height)");
+  });
+
   it("does not render SearchBar when searchMode is Filters (default)", () => {
     const wrapper = shallowMount(EntityPickerComponent, {
       props: defaultProps,

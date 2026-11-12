@@ -82,7 +82,7 @@ describe("BaseModal", () => {
   let baseModalMock: ReturnType<typeof createBaseModalMock>;
   let modalActionsMock: ReturnType<typeof createModalActionsMock>;
 
-  const createWrapper = (props = {}, modalInfoOverrides = {}) => {
+  const createWrapper = (props = {}, modalInfoOverrides = {}, slots = {}) => {
     baseModalMock = createBaseModalMock({
       modalInfo: {
         open: true,
@@ -103,6 +103,7 @@ describe("BaseModal", () => {
         modalType: "DynamicForm" as TypeModals,
         ...props,
       },
+      slots,
       global: {
         mocks: { $t: (key: string) => key },
         stubs: {
@@ -160,9 +161,6 @@ describe("BaseModal", () => {
         "max-md:rounded-none",
       ])
         expect(classes).toContain(mobileClass);
-      expect(
-        wrapper.find('[data-testid="modal-content"]').classes(),
-      ).toContain("max-md:overflow-auto");
       expect(
         wrapper.find('[data-testid="modal-close-button"]').classes(),
       ).toContain("max-md:size-(--touch-target-min)");
@@ -378,6 +376,31 @@ describe("BaseModal", () => {
       expect(
         wrapper.find('[data-testid="modal-header"]').find('[data-testid="modal-close-button"]').exists(),
       ).toBe(true);
+    });
+
+    it("puts headerExtra between the title and the close cross", () => {
+      wrapper = createWrapper(
+        { title: "Kies persoon" },
+        {},
+        { headerExtra: "<span data-testid='count'>3 resultaten</span>" },
+      );
+      const ids = ["modal-title", "count", "modal-close-button"];
+      const order = Array.from(
+        wrapper.find('[data-testid="modal-header"]').element.querySelectorAll("*"),
+      )
+        .map((element) => element.getAttribute("data-testid"))
+        .filter((id) => ids.includes(id ?? ""));
+      expect(order).toEqual(ids);
+    });
+
+    // one scroller per modal: the content row scrolls, not the dialog or a
+    // body that guesses the header's height
+    it("scrolls in its content row on every screen size", () => {
+      wrapper = createWrapper({ title: "Kies persoon" });
+      const content = wrapper.find('[data-testid="modal-content"]').classes();
+      expect(content).toContain("min-h-0");
+      expect(content).toContain("overflow-auto");
+      expect(content.some((name) => name.startsWith("max-md:"))).toBe(false);
     });
 
     it("has no title or name without a title", () => {

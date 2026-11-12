@@ -1,7 +1,8 @@
 <template>
   <div
     data-cy="dynamic-form"
-    class="p-4 pt-0 h-full w-full overflow-y-auto"
+    class="p-4 pt-0 h-full w-full"
+    :class="{ 'overflow-y-auto': !stickySubmitZone }"
     :key="dynamicFormQuery"
   >
     <div v-if="!dynamicFormLoaded" class="w-full">
@@ -43,6 +44,10 @@
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
         class="pb-2"
+        :class="{
+          'sticky bottom-0 pt-2 border-t border-border-subtle bg-background-light':
+            stickySubmitZone && isUploadAction(field),
+        }"
       >
         <ImportWrapper
           v-if="
@@ -67,6 +72,9 @@
           :accepted-types="getAcceptedTypes()"
           :custom-query="getCustomGetEntitiesQuery()"
           :entity-picker-mode="EntityPickerMode.Save"
+          :base-library-height="
+            isDrawer ? 'h-(--entity-picker-drawer-height)' : undefined
+          "
           :selection-limit="getSelectionLimit()"
           :show-button="true"
           :enable-advanced-filters="true"
@@ -190,16 +198,7 @@
           </div>
         </div>
         <DynamicFormUploadButton
-          v-if="
-            (field.__typename === 'FormAction' &&
-              (field as FormAction).actionType == ActionType.Upload) ||
-            (field as FormAction).actionType == ActionType.UploadWithMetadata ||
-            (field as FormAction).actionType == ActionType.UploadWithOcr ||
-            (field as FormAction).actionType ==
-              ActionType.UploadCsvForReordening ||
-            (field as FormAction).actionType == ActionType.UpdateMetadata ||
-            (field as FormAction).actionType == ActionType.SubmitWithUpload
-          "
+          v-if="isUploadAction(field)"
           :label="t((field as FormAction).label)"
           :icon="(field as FormAction).icon"
           :disabled="!enableUploadButton || isButtonDisabled"
@@ -292,6 +291,7 @@ import {
   BulkEditModes,
   OcrType,
   RouteNames,
+  ModalStyle,
   TypeModals,
   UploadFlow,
   Entitytyping,
@@ -371,6 +371,7 @@ const props = withDefaults(
     allFormRelationTypes?: string[];
     emitEntityCreated?: boolean;
     skipEntityMutation?: boolean;
+    stickySubmitZone?: boolean;
   }>(),
   {
     formKey: undefined,
@@ -379,6 +380,7 @@ const props = withDefaults(
     allFormRelationTypes: undefined,
     emitEntityCreated: false,
     skipEntityMutation: false,
+    stickySubmitZone: false,
   },
 );
 
@@ -434,9 +436,27 @@ const {
   displayWarningNotification,
   displayErrorNotification,
 } = useBaseNotification();
+
+const uploadActionTypes: string[] = [
+  ActionType.Upload,
+  ActionType.UploadWithMetadata,
+  ActionType.UploadWithOcr,
+  ActionType.UploadCsvForReordening,
+  ActionType.UpdateMetadata,
+  ActionType.SubmitWithUpload,
+];
+const isUploadAction = (field: any): boolean =>
+  field.__typename === "FormAction" &&
+  uploadActionTypes.includes(field.actionType);
 const busyActionType = ref<string | undefined>(undefined);
 const { loadDocument } = useImport();
 const { closeModal, getModalInfo } = useBaseModal();
+// a drawer is screen-tall: its picker fills it instead of the modal height
+const isDrawer = computed<boolean>(() =>
+  (
+    [ModalStyle.Right, ModalStyle.RightWide] as (ModalStyle | undefined)[]
+  ).includes(getModalInfo(TypeModals.DynamicForm).modalStyle),
+);
 const usageSurface = useUsageSurface();
 const {
   getDynamicForm,

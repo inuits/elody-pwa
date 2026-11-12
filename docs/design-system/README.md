@@ -54,6 +54,7 @@ To change what a role means everywhere, change the role token.
   - [Inline editor](components/inline-editor.md)
   - [WYSIWYG field](components/wysiwyg-field.md)
   - [Viewer toolbar](components/viewer-toolbar.md)
+  - [Entity picker](components/entity-picker.md)
   - [Nav rail](components/nav-rail.md)
 - `patterns/`: per-field editing, filters, lists and other multi-component patterns
 

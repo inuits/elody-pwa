@@ -24,6 +24,7 @@ export const useMetadataWrapperDropdownOptions = (
   filtersForRetrievingRelatedOptions: ComputedRef<
     AdvancedFilterInputType[] | undefined
   >;
+  fetchAllOptionsConfig: UseGetDropdownOptionsParams;
 } => {
   const { fieldKey, fieldKind } = useMetadataWrapper(props);
 
@@ -209,5 +210,6 @@ export const useMetadataWrapperDropdownOptions = (
     metadataKeyToGetOptions,
     filtersForRetrievingOptions,
     filtersForRetrievingRelatedOptions,
+    fetchAllOptionsConfig: dropDownoptionsConfigMapping.fetchAll,
   };
 };

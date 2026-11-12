@@ -27,6 +27,15 @@ describe("BaseSearchPill", () => {
     expect(wrapper.find("input").classes()).toContain("focus-visible:!outline-none");
   });
 
+  it("shows a spinner only while loading", () => {
+    expect(getWrapper().findComponent({ name: "SpinnerLoader" }).exists()).toBe(
+      false,
+    );
+    expect(
+      getWrapper({ loading: true }).findComponent({ name: "SpinnerLoader" }).exists(),
+    ).toBe(true);
+  });
+
   it("two-way binds the typed value", async () => {
     const wrapper = getWrapper({ modelValue: "jo" });
     const input = wrapper.find("input");

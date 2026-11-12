@@ -523,6 +523,11 @@ export const useBulkOperationsActionsBar = (
         formQueries: bulkOperationModalConfig.formQueries || undefined,
         survivorSuggestion:
           bulkOperationModalConfig.survivorSuggestion || undefined,
+        title: selectedBulkOperation.value.label
+          ? t(selectedBulkOperation.value.label, [
+              t(`entity-translations.${entityType.value?.toLowerCase()}`, 2),
+            ])
+          : undefined,
       },
     );
   };

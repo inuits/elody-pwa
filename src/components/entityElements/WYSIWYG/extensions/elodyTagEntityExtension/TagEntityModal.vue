@@ -48,7 +48,7 @@
           :computedFilters="computedAdvancedFilterInputs"
           :context="BulkOperationsContextEnum.TagEntityModal"
           :should-use-state-for-route="false"
-          base-library-height="max-h-[50vh]"
+          base-library-height="h-[50vh]"
         />
         <div class="py-2">
           <BaseButtonNew

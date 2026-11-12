@@ -145,7 +145,7 @@ const props = withDefaults(
   {
     entityPickerMode: EntityPickerMode.Emit,
     forceListView: false,
-    baseLibraryHeight: "h-[95vh]",
+    baseLibraryHeight: "h-(--entity-picker-height)",
     enableNonSelectableEntities: true,
     context: BulkOperationsContextEnum.EntityElementListEntityPickerModal,
     shouldUseStateForRoute: true,

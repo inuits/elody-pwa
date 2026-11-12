@@ -82,6 +82,7 @@ export const useBaseModal = () => {
       deleteQueryOptions,
       askForCloseConfirmation,
       modalStyle,
+      title: undefined,
       ...modalTypeSpecificInfo,
     };
 

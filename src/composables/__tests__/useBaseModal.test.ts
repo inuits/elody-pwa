@@ -84,6 +84,16 @@ describe("useBaseModal", () => {
   });
 
   describe("openModal", () => {
+    it("forgets the title of a previous open", () => {
+      const { openModal, closeModal, getModalInfo } = useBaseModal();
+      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetA",
+        undefined, false, undefined, { title: "navigation.a" });
+      expect(getModalInfo(TypeModals.DynamicForm).title).toBe("navigation.a");
+      closeModal(TypeModals.DynamicForm);
+      openModal(TypeModals.DynamicForm, ModalStyle.Center, "GetB");
+      expect(getModalInfo(TypeModals.DynamicForm).title).toBeUndefined();
+    });
+
     it("should open modal with basic properties", () => {
       const { openModal, getModalInfo } = useBaseModal();
 

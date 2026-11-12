@@ -325,6 +325,14 @@
   --panel-body-pad: 6px 16px 14px;
   --modal-body-pad: 16px;
   --modal-footer-pad: 12px 16px;
+  --relation-picker-width: 620px;
+  --dropzone-height-small: 6rem;
+  --dropzone-height-normal: 10rem;
+  --dropzone-height-big: 16rem;
+  /* fixed, so a modal holding a picker doesn't resize with the results */
+  --entity-picker-height: 70vh;
+  --entity-picker-drawer-height: 90vh;
+  --relation-picker-results-height: 50vh;
   --block-pad-y: 9px;
   --field-row-pad: 4px 6px;
   --table-row-pad: 7px 0;

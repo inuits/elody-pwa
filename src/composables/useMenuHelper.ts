@@ -44,6 +44,10 @@ export const useMenuHelper = () => {
             _menuItem.typeLink?.modal?.typeModal as TypeModals,
             ModalStyle.Center,
             _menuItem.typeLink?.modal?.formQuery,
+            undefined,
+            false,
+            undefined,
+            { title: _menuItem.label },
           );
         },
       };

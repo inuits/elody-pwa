@@ -8,9 +8,10 @@
         : 'bg-background-light'
     "
     :modalHeightStyle="'max-h-[90vh]'"
+    :title="title"
     @hide-modal="handleCloseModal"
   >
-    <div class="flex flex-col w-full max-h-[calc(90vh-34px)] overflow-auto max-md:max-h-none">
+    <div class="flex flex-col w-full pt-4">
       <template v-if="shouldRenderTabs">
         <baseTabs
           :tabs="tabsTitles"
@@ -19,7 +20,7 @@
         >
           <baseTab v-for="(formTab, tabIndex) in formTabArray" :key="tabIndex">
             <dynamic-form
-              class=""
+              sticky-submit-zone
               v-if="getModalInfo(TypeModals.DynamicForm).open"
               :key="getModalInfo(TypeModals.DynamicForm).formQuery"
               :dynamic-form-query="
@@ -42,10 +43,12 @@
       <div class="h-full">
         <dynamic-form
           v-if="getModalInfo(TypeModals.DynamicForm).open && !shouldRenderTabs"
+          sticky-submit-zone
           :key="getModalInfo(TypeModals.DynamicForm).formQuery"
           :dynamic-form-query="getModalInfo(TypeModals.DynamicForm).formQuery"
           :router="useRouter()"
           :tab-name="''"
+          :show-form-title="false"
         />
       </div>
     </div>
@@ -74,8 +77,8 @@ const { closeModal, getModalInfo, changeCloseConfirmation } = useBaseModal();
 // the form says on its submit which part of the page it was opened from
 provideUsageSurface(() => getModalInfo(TypeModals.DynamicForm).surface);
 const { confirm } = useConfirmModal();
-const { t } = useI18n();
-const { getDynamicFormTabs } = useDynamicForm();
+const { t, te } = useI18n();
+const { getDynamicFormTabs, dynamicForm, dynamicFormLoaded } = useDynamicForm();
 const { resetUpload } = useUpload(config);
 const { setCropCoordinatesKey, setCropMode } = useEntityPickerModal();
 
@@ -85,6 +88,16 @@ watchEffect(() => {
       formTabs.value = await getDynamicFormTabs();
     }
   })();
+});
+
+const title = computed<string | undefined>(() => {
+  const label =
+    getModalInfo(TypeModals.DynamicForm).title ??
+    (dynamicFormLoaded.value
+      ? dynamicForm.value?.GetDynamicForm?.label
+      : undefined);
+
+  return label && te(label) ? t(label) : label;
 });
 
 // TODO: Move formTab code to dynamicForm composable

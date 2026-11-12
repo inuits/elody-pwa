@@ -377,7 +377,6 @@ const addPicked = (options: DropdownOption[]) => {
     ),
   ]);
 };
-defineExpose({ addPicked });
 
 const handleCreatingFromTag = async (option: any) => {
   if (!props.canCreateOption) return;
@@ -414,6 +413,10 @@ const handleCreatingFromTag = async (option: any) => {
     handleSelect([...selectedDropdownOptions.value, option]);
   }
 };
+// the entity picker's create escape runs the same create flow
+const createFromLabel = (label: string) =>
+  handleCreatingFromTag({ label, value: label });
+defineExpose({ addPicked, createFromLabel });
 
 const preSelectMetadata = (
   preSelectValue: DropdownOption | DropdownOption[] | undefined,

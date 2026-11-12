@@ -17,12 +17,19 @@
       :autofocus="autofocus"
       class="w-full min-w-0 p-0 border-0 bg-transparent text-input text-text-body placeholder:text-text-placeholder focus:ring-0 focus-visible:!outline-none"
     />
+    <SpinnerLoader v-if="loading" theme="accent" dimensions="3" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Unicons } from "@/types";
+import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
-defineProps<{ label: string; placeholder?: string; autofocus?: boolean }>();
+defineProps<{
+  label: string;
+  placeholder?: string;
+  autofocus?: boolean;
+  loading?: boolean;
+}>();
 const model = defineModel<string>({ default: "" });
 </script>

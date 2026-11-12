@@ -26,8 +26,12 @@ vi.mock("@/main", () => ({
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
-    t: (key: string, params?: Record<string, string>) =>
-      params?.title ? `${key}(${params.title})` : key,
+    t: (key: string, params?: Record<string, string> | string[]) =>
+      Array.isArray(params)
+        ? `${key}[${params.join(",")}]`
+        : params?.title
+          ? `${key}(${params.title})`
+          : key,
   }),
 }));
 
@@ -858,6 +862,29 @@ describe("useBulkOperationsActionsBar", () => {
         { parentEntity: undefined, formQueries: ["test-query"] },
       );
     });
+  });
+
+  // modal.md: the dialog is named by its title; the action says what it opens
+  it("titles the modal with the chosen action's label, as the bar shows it", () => {
+    const { handleSelectedBulkOperation, selectedBulkOperation } =
+      useBulkOperationsActionsBar(createMockProps(), createMockEmit());
+    selectedBulkOperation.value = {
+      value: BulkOperationTypes.DownloadMediafiles,
+      label: "bulk-operations.add-poster",
+      bulkOperationModal: { typeModal: "TestModal", formQueries: ["Q"] },
+    } as any;
+    handleSelectedBulkOperation();
+    expect(mockBaseModal.openModal).toHaveBeenLastCalledWith(
+      "TestModal",
+      expect.anything(),
+      "Q",
+      undefined,
+      undefined,
+      expect.anything(),
+      expect.objectContaining({
+        title: "bulk-operations.add-poster[entity-translations.asset]",
+      }),
+    );
   });
 
   describe("Bulk mutation fallback", () => {

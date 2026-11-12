@@ -39,6 +39,9 @@
       >
         {{ title }}
       </h2>
+      <div v-if="$slots.headerExtra" class="ml-auto flex items-center">
+        <slot name="headerExtra" />
+      </div>
       <button
         type="button"
         data-testid="modal-close-button"
@@ -49,7 +52,7 @@
         <unicon :name="Unicons.Close.name" :height="iconHeight" />
       </button>
     </div>
-    <div data-testid="modal-content" class="max-md:min-h-0 max-md:overflow-auto">
+    <div data-testid="modal-content" class="min-h-0 overflow-auto">
       <slot />
     </div>
     <BlockingOverlay

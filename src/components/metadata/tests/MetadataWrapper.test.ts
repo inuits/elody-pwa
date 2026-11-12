@@ -111,6 +111,7 @@ const entityFormData = { onSaved: vi.fn() };
 const panelFlash = vi.fn();
 // Entities handed to the relation search from the picker ("Blader…").
 const relationPicks = vi.fn();
+const relationCreates = vi.fn();
 
 const mountWrapper = async (
   props: ReturnType<typeof buildProps>,
@@ -178,12 +179,15 @@ const mountWrapper = async (
           ],
           template:
             "<div data-cy='relations-stub'><span class='multiselect-tag' data-tag-link data-cy='relation-chip'>Maker<span data-tag-input data-cy='relation-chip-input'><input disabled /></span></span><span class='multiselect-tag' data-cy='relation-chip-plain'>Uitgever</span></div>",
-          methods: { addPicked: (options: unknown) => relationPicks(options) },
+          methods: {
+            addPicked: (options: unknown) => relationPicks(options),
+            createFromLabel: (label: unknown) => relationCreates(label),
+          },
         },
         RelationPickerModal: {
           name: "RelationPickerModal",
-          props: ["label", "entityId", "acceptedType", "filters", "single"],
-          emits: ["picked"],
+          props: ["acceptedType", "optionsConfig", "single", "canCreate"],
+          emits: ["picked", "create"],
           template: "<div data-cy='relation-picker-stub'></div>",
         },
         ViewModesAutocompleteMetadata: true,
@@ -998,7 +1002,11 @@ describe("MetadataWrapper — inline relation editing", () => {
       expect(pickerModal(wrapper).props()).toMatchObject({
         acceptedType: "person",
         single: false,
-        entityId: "MW-TEST",
+        canCreate: false,
+        optionsConfig: expect.objectContaining({
+          dropdownOptionsStateName: expect.stringMatching(/-fetchAll$/),
+          entityType: "person",
+        }),
       });
       await browse(wrapper).trigger("click");
       expect(useBaseModal().getModalInfo(TypeModals.RelationPicker).open).toBe(
@@ -1014,6 +1022,14 @@ describe("MetadataWrapper — inline relation editing", () => {
       expect(relationPicks).toHaveBeenCalledWith(options);
       expect(scopedSave.saveScope).not.toHaveBeenCalled();
       expect(inlineEditor(wrapper).exists()).toBe(true);
+    });
+
+    it("creates from the picker's query through the search's create flow", async () => {
+      const wrapper = await openEditor({ canCreateEntityFromOption: true });
+      expect(pickerModal(wrapper).props("canCreate")).toBe(true);
+      pickerModal(wrapper).vm.$emit("create", "Nieuw Huis");
+      await flushPromises();
+      expect(relationCreates).toHaveBeenCalledWith("Nieuw Huis");
     });
 
     it("lets a single select pick one", async () => {
@@ -1681,5 +1697,62 @@ describe("MetadataWrapper — compact preview row", () => {
     expect(wrapper.find('[data-cy="metadata-wrapper"]').classes()).not.toContain(
       "grid-cols-subgrid",
     );
+  });
+});
+
+// A field with an editFormQuery edits in place as on a list row, e.g. a
+// notification's status in its preview.
+describe("MetadataWrapper — editFormQuery", () => {
+  const editFormQueryProps = (isEdit = false) => {
+    const props = buildProps("status", isEdit);
+    return {
+      ...props,
+      metadata: {
+        ...props.metadata,
+        inputField: undefined,
+        editFormQuery: "GetEditNotificationStatusForm",
+      },
+    } as any;
+  };
+
+  it("edits the value with the form of its editFormQuery, for the form's entity", async () => {
+    const refetch = vi.fn();
+    const wrapper = await mountWrapper(
+      editFormQueryProps(),
+      undefined,
+      {},
+      {
+        RefetchPreviewEntities: refetch,
+      },
+    );
+    const editable = wrapper.findComponent({ name: "ListItemEditableValue" });
+
+    expect(editable.exists()).toBe(true);
+    expect(editable.props()).toMatchObject({
+      editFormQuery: "GetEditNotificationStatusForm",
+      entityId: "MW-TEST",
+      refetchEntities: refetch,
+    });
+    expect(editable.find('[data-cy="field-value"]').exists()).toBe(true);
+  });
+
+  it("keeps a value without an editFormQuery as it is", async () => {
+    const wrapper = await mountWrapper(buildProps("unlocked_key", false));
+
+    expect(
+      wrapper
+        .findComponent({ name: "ListItemEditableValue" })
+        .props("editFormQuery"),
+    ).toBeUndefined();
+  });
+
+  it("leaves the value to the page while the page is in edit mode", async () => {
+    const wrapper = await mountWrapper(editFormQueryProps(true));
+
+    expect(
+      wrapper
+        .findComponent({ name: "ListItemEditableValue" })
+        .props("editFormQuery"),
+    ).toBeUndefined();
   });
 });
