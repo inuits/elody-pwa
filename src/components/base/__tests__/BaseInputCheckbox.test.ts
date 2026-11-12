@@ -60,6 +60,12 @@ describe("BaseInputCheckbox", () => {
     expect(getWrapper().find('input[type="checkbox"]').exists()).toBe(true);
   });
 
+  it("shows the indeterminate (some selected) state", () => {
+    const input = getWrapper({ indeterminate: true }).find("input")
+      .element as HTMLInputElement;
+    expect(input.indeterminate).toBe(true);
+  });
+
   it("checks in commit teal", () => {
     expect(getWrapper().find("input").classes()).toContain("accent-commit");
   });

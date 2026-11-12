@@ -94,7 +94,7 @@ export const Default: Story = {
   }),
 };
 
-/** The same rows as 300px grid cards: 8px radius, 1px border, no shadow. */
+/** The same rows as grid cards: square media, label / value rows, select footer. */
 export const Grid: Story = {
   render: () => ({
     components: { ViewModesList },

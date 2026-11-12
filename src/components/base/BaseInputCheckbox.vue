@@ -27,6 +27,7 @@
         v-model="inputValue"
         type="checkbox"
         :checked="required"
+        :indeterminate="indeterminate"
         :disabled="disabled || isDisabledByContextLimit || required"
         :aria-label="!label ? ariaLabel : undefined"
         @change.stop
@@ -78,6 +79,7 @@ const props = withDefaults(
     ariaLabel?: string;
     // compact: dense option lists (filters); default keeps the 40px touch target
     size?: "default" | "compact";
+    indeterminate?: boolean;
   }>(),
   {
     modelValue: false,
@@ -87,6 +89,7 @@ const props = withDefaults(
     required: false,
     ariaLabel: undefined,
     size: "default",
+    indeterminate: false,
   },
 );
 

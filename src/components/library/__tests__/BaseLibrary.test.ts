@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   addRefetchFunction: undefined as unknown as ReturnType<typeof vi.fn>,
   addMutationCallback: undefined as unknown as ReturnType<typeof vi.fn>,
   displayMap: false,
+  displayGrid: false,
   toggles: [] as unknown[],
 }));
 
@@ -189,8 +190,8 @@ vi.mock("@/composables/useEntityPickerModal", () => ({
 
 vi.mock("@/composables/useViewModes", () => ({
   useViewModes: () => ({
-    displayList: ref(true),
-    displayGrid: ref(false),
+    displayList: ref(!mocks.displayGrid),
+    displayGrid: ref(mocks.displayGrid),
     displayTable: ref(false),
     displayPreview: ref(false),
     displayMap: ref(mocks.displayMap),
@@ -1670,6 +1671,59 @@ describe("BaseLibrary.vue as a relation list in a panel", () => {
       expect.arrayContaining(["px-3", "@max-md/wrapper-content:px-0"]),
     );
     wrapper.unmount();
+  });
+});
+
+describe("BaseLibrary.vue in grid view", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    libEntities.value = [
+      { id: "a", uuid: "ua", teaserMetadata: {}, intialValues: {} },
+      { id: "b", uuid: "ub", teaserMetadata: {}, intialValues: {} },
+    ] as any;
+    libTotalEntityCount.value = 2;
+    libEntitiesLoading.value = false;
+    mocks.displayGrid = true;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+    mocks.displayGrid = false;
+    bulkMocks.isEnqueued.mockImplementation(() => false);
+  });
+
+  const selectPage = () =>
+    wrapper!.findComponent({ name: "BaseInputCheckbox" });
+
+  it("puts a labelled select-page checkbox in the selection bar", async () => {
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+
+    expect(selectPage().props("label")).toBe("bulk-operations.select-page");
+  });
+
+  it("selects the page from it", async () => {
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+
+    selectPage().vm.$emit("update:modelValue", true);
+
+    expect(bulkMocks.enqueue).toHaveBeenCalledTimes(2);
+  });
+
+  it("is indeterminate while only part of the page is selected", async () => {
+    bulkMocks.isEnqueued.mockImplementation(
+      (_context: unknown, id: unknown) => id === "ua",
+    );
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+
+    expect(selectPage().props("modelValue")).toBe(false);
+    expect(selectPage().props("indeterminate")).toBe(true);
   });
 });
 

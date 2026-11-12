@@ -16,36 +16,6 @@
   />
   <li v-else data-cy="list-item" :class="wrapperClasses">
     <div
-      v-if="isGridMode && !isPreviewElement"
-      class="absolute top-0 inset-x-0 z-1 flex justify-between items-center p-2"
-    >
-      <BaseInputCheckbox
-        v-if="
-          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-          !isPreview &&
-          hasSelection &&
-          isGridMode
-        "
-        :class="[{ invisible: isDisabled }, 'text-center']"
-        v-model="isChecked"
-        size="compact"
-        :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
-        :bulk-operations-context="bulkOperationsContext"
-      />
-      <EntityButtons
-        :buttons="buttons"
-        :parent-entity-id="formId"
-        :entity-id="itemId"
-        :entity-type="entityTypename"
-        :relation="relation"
-        :bulk-operations-context="bulkOperationsContext"
-        :intial-values="intialValues"
-        :relation-values="relationValues"
-        :context-label="rowTitle"
-        @toggle-loading="toggleLoading"
-      />
-    </div>
-    <div
       :class="[
         'flex items-center rounded-2xl p-2 bg-accent-wash',
         { 'mb-4': isGridMode },
@@ -108,18 +78,18 @@
         :bulk-operations-context="bulkOperationsContext"
       />
     </div>
-    <!-- entity-list-element.md: grid cards always have a media area; the
-         thumbnail is letterboxed, no media gets a placeholder, never blank. -->
     <div
       v-if="isGridMode"
       data-cy="grid-card-media"
-      class="flex flex-col items-center justify-center gap-1 w-full h-(--grid-card-media-height) shrink-0 overflow-hidden bg-surface-muted"
+      class="relative flex items-center justify-center w-full aspect-square min-h-0 shrink-0 overflow-hidden bg-surface-muted"
     >
       <ImageViewer
         v-if="canShowCopyRight() && media && !imageSrcError"
         :key="`${itemId}-image-${imageSize}`"
+        class="absolute inset-0"
         height-class="h-full"
-        width-class="w-full object-contain"
+        width-class="w-full object-cover"
+        :alt="rowTitle"
         :url="
           mediaIsLink
             ? media
@@ -128,13 +98,12 @@
         :mediaIsLink="mediaIsLink"
         @error="setNoImage()"
       />
-      <template v-else>
-        <unicon
-          :name="thumbIcon || Unicons.NoImage.name"
-          class="size-10 text-text-subtle"
-        />
-        <span class="text-ui text-text-muted">{{ t("library.no-media") }}</span>
-      </template>
+      <unicon
+        v-else
+        :name="thumbIcon || Unicons.NoImage.name"
+        class="size-10 text-text-subtle"
+        aria-hidden="true"
+      />
     </div>
     <div
       v-if="isListMode && canShowCopyRight() && media && !imageSrcError"
@@ -179,25 +148,28 @@
         { 'flex items-center': isListMode && !props.multiLine },
         { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
         {
-          'flex flex-col gap-1 min-h-0 p-(--grid-card-body-pad)': isGridMode,
+          'grid grid-cols-[auto_minmax(0,1fr)] content-start gap-x-(--grid-card-meta-col-gap) gap-y-(--grid-card-meta-row-gap) flex-1 p-(--grid-card-body-pad) text-value':
+            isGridMode,
         },
-        // The list's column-header row shows the labels, a grid card has
-        // none; keep them for screen readers.
-        { '[&_[data-cy=metadata-label]]:sr-only': hideLabels || isGridMode },
+        { '[&_[data-cy=metadata-label]]:sr-only': hideLabels },
       ]"
       :style="multiLineGridStyle"
     >
-      <div
+      <component
         v-for="(metadataItem, idx) in onlyReadModeTeaserMetadata"
         :key="`${formId || idx}_${metadataItem?.key || idx}`"
+        :is="isGridTitleLink(idx) ? RouterLink : 'div'"
+        :to="isGridTitleLink(idx) ? titleLink : undefined"
+        :data-cy="isGridTitleLink(idx) ? 'grid-card-title-link' : undefined"
+        :title="isGridMode && idx === 0 ? rowTitle : undefined"
         :class="[
           teaserMetadataStyle,
           { 'text-text-secondary': idx === 0 && isSeen },
-          // Grid card body: title (2 lines), then badges / one secondary line.
+          // Grid card body: a 2-line title link, then label / value rows.
           isGridMode
             ? idx === 0
-              ? 'line-clamp-2 font-bold text-value'
-              : 'truncate text-ui text-text-secondary'
+              ? 'col-span-2 mb-(--grid-card-title-gap) min-h-(--grid-card-title-min-height) line-clamp-2 font-bold text-heading text-text-link hover:text-text-link-hover hover:underline [&_.line-clamp]:[--line-clamp:2]! [&_[data-cy=entity-element-metadata]]:text-inherit [&_[data-cy=metadata-label]]:sr-only'
+              : 'col-span-2 grid grid-cols-subgrid items-center min-w-0 [&>[data-cy=metadata-wrapper]]:contents [&_[data-cy=metadata-label]]:font-normal [&_[data-cy=metadata-label]]:text-value [&_[data-cy=metadata-label]]:text-text-muted [&_[data-cy=metadata-label]]:truncate'
             : '',
           // List row (ui_kits/clients): bold title in link ink, the rest secondary.
           isListMode
@@ -208,8 +180,9 @@
                 ]
               : 'text-text-secondary'
             : '',
-          { hidden: isGridMode && !isShownOnGridCard(idx) },
-          idx < 1 && teaserMetadata[0]?.value?.formatter
+          isGridMode
+            ? ''
+            : idx < 1 && teaserMetadata[0]?.value?.formatter
             ? 'w-fit whitespace-nowrap mr-4' // keep first and second element tight at the start when first element is a label pill
             : props.multiLine
               ? ''
@@ -322,7 +295,7 @@
             />
           </template>
         </MultilingualWrapper>
-      </div>
+      </component>
     </div>
 
     <div v-if="false" :class="[{ 'flex justify-end': isGridMode }]" @click.stop>
@@ -367,6 +340,46 @@
         :context-label="rowTitle"
         @toggle-loading="toggleLoading"
       />
+    </div>
+    <div
+      v-else-if="isGridMode && !isPreviewElement"
+      data-cy="grid-card-footer"
+      class="flex items-center justify-between mt-auto p-(--grid-card-footer-pad) border-t border-border-subtle"
+    >
+      <BaseInputCheckbox
+        v-if="
+          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+          !isPreview &&
+          hasSelection
+        "
+        :class="[{ invisible: isDisabled }, 'text-ui text-text-body']"
+        v-model="isChecked"
+        size="compact"
+        :label="te('bulk-operations.select') ? t('bulk-operations.select') : 'Select'"
+        :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
+        :bulk-operations-context="bulkOperationsContext"
+      />
+      <div class="flex items-center ml-auto">
+        <PreviewToggle
+          v-if="canPreview && !(isCompact && buttons?.contextMenu)"
+          :active="previewOpen"
+          :data-preview-for="itemId"
+          @toggle="emit('togglePreviewComponent', itemId)"
+        />
+        <EntityButtons
+          :buttons="buttons"
+          :parent-entity-id="formId"
+          :entity-id="itemId"
+          :entity-type="entityTypename"
+          :relation="relation"
+          :bulk-operations-context="bulkOperationsContext"
+          :refetch-entities="refetchEntities"
+          :intial-values="intialValues"
+          :relation-values="relationValues"
+          :context-label="rowTitle"
+          @toggle-loading="toggleLoading"
+        />
+      </div>
     </div>
     <!-- small screen: Preview leads the ⋮ sheet instead -->
     <PreviewToggle
@@ -432,6 +445,7 @@ import PreviewToggle from "@/components/PreviewToggle.vue";
 import EntityButtons from "./EntityButtons.vue";
 import { hoveredListItem } from "@/composables/useListItemHelper";
 import { useI18n } from "vue-i18n";
+import { RouterLink, type RouteLocationRaw } from "vue-router";
 import ReadOnlyMetadataWrapper from "./metadata/ReadOnlyMetadataWrapper.vue";
 import ListItemInlineField from "@/components/ListItemInlineField.vue";
 import PipelineListItemCard from "@/components/library/view-modes/pipeline/PipelineListItemCard.vue";
@@ -464,6 +478,7 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid" | "pipeline";
+    titleLink?: RouteLocationRaw;
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
     // Row highlight: preview open, or last previewed (keepLastActiveItemHighlighted).
@@ -519,7 +534,7 @@ const emit = defineEmits<{
   (event: "addRefetchFunctionToEditState"): void;
 }>();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const { getEntityUuid } = useEntitySingle();
 
@@ -609,17 +624,8 @@ const onlyReadModeTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode),
 );
 
-// Grid card body: the title, every badge, and the first plain field as its
-// one secondary line.
-const gridSecondaryIndex = computed(() =>
-  onlyReadModeTeaserMetadata.value.findIndex(
-    (field, idx) => idx > 0 && !field?.value?.formatter,
-  ),
-);
-const isShownOnGridCard = (idx: number): boolean =>
-  idx === 0 ||
-  idx === gridSecondaryIndex.value ||
-  !!onlyReadModeTeaserMetadata.value[idx]?.value?.formatter;
+const isGridTitleLink = (idx: number): boolean =>
+  isGridMode.value && idx === 0 && !!props.titleLink;
 
 const orderMetadataChild = ref(null);
 onUpdated(() => {
@@ -662,7 +668,7 @@ const wrapperClasses = computed(() => {
         isListMode.value,
     },
     {
-      "relative border border-border-subtle rounded-card mb-2 flex flex-col overflow-hidden w-(--grid-card-width) h-(--grid-card-height)":
+      "relative border rounded-card flex flex-col overflow-hidden h-full":
         isGridMode.value,
     },
     {
@@ -677,10 +683,19 @@ const wrapperClasses = computed(() => {
     // entity-list-element.md: the checkbox owns the wash, the open preview
     // owns the left border; hover fills.
     "hover:bg-surface-row-hover",
-    isChecked.value ? "bg-accent-wash shadow-accent-row" : "bg-background-light",
+    isChecked.value
+      ? isGridMode.value
+        ? "bg-accent-wash"
+        : "bg-accent-wash shadow-accent-row"
+      : "bg-background-light",
+    isGridMode.value
+      ? isChecked.value || isActiveListItem.value
+        ? "border-accent"
+        : "border-border-subtle"
+      : "",
     {
       "border-l-(length:--list-row-preview-border) border-l-accent":
-        isActiveListItem.value,
+        !isGridMode.value && isActiveListItem.value,
     },
   ];
 });
