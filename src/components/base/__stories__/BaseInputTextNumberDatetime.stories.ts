@@ -1,0 +1,154 @@
+import type { Meta, StoryObj } from "@storybook/vue3-vite";
+import { ref, watch } from "vue";
+import BaseInputTextNumberDatetime from "../BaseInputTextNumberDatetime.vue";
+import BaseTooltip from "../BaseTooltip.vue";
+
+const meta: Meta<typeof BaseInputTextNumberDatetime> = {
+  // Story id base-baseinputtext--states, per MANIFEST.md.
+  title: "Base/BaseInputText",
+  component: BaseInputTextNumberDatetime,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          "Text, number and textarea share one ink, one size (--text-value, " +
+          "the reading size) and one focus treatment: a 2px commit-teal ring " +
+          "at 1px offset, on :focus-visible only, so a mouse click does not " +
+          "ring. The three inputStyle values change chrome, nothing else.",
+      },
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof BaseInputTextNumberDatetime>;
+
+export const States: Story = {
+  render: () => ({
+    components: { BaseInputTextNumberDatetime },
+    setup() {
+      return {
+        text: ref("Tales from the North Sea"),
+        empty: ref(""),
+        number: ref(1987),
+        area: ref("A longer note from the cataloguer."),
+      };
+    },
+    template: `
+      <div style="display:grid;grid-template-columns:150px 260px;gap:10px 14px;align-items:center;font-size:var(--text-label)">
+        <label for="s-borderless">default — borderless</label>
+        <base-input-text-number-datetime id="s-borderless" v-model="text" input-style="default" />
+
+        <label for="s-border">defaultWithBorder</label>
+        <base-input-text-number-datetime id="s-border" v-model="text" input-style="defaultWithBorder" />
+
+        <label for="s-dark">dark background</label>
+        <base-input-text-number-datetime id="s-dark" v-model="text" input-style="defaultWithDarkBackgroundInput" />
+
+        <label for="s-placeholder">placeholder</label>
+        <base-input-text-number-datetime id="s-placeholder" v-model="empty" input-style="defaultWithBorder" placeholder="No value" />
+
+        <label for="s-number">number — right aligned</label>
+        <base-input-text-number-datetime id="s-number" v-model="number" type="number" input-style="defaultWithBorder" />
+
+        <label for="s-disabled">disabled</label>
+        <base-input-text-number-datetime id="s-disabled" v-model="text" input-style="defaultWithBorder" disabled />
+
+        <label for="s-error">error</label>
+        <base-input-text-number-datetime id="s-error" v-model="empty" input-style="defaultWithBorder" error-message="Title is required" />
+
+        <label for="s-readonly">read-only</label>
+        <base-input-text-number-datetime id="s-readonly" v-model="text" input-style="defaultWithBorder" readonly />
+
+        <label for="s-area">textarea</label>
+        <base-input-text-number-datetime id="s-area" v-model="area" type="textarea" input-style="defaultWithBorder" />
+      </div>`,
+  }),
+};
+
+/**
+ * The tooltip is supplementary only: an inverted surface that appears after
+ * 300ms on hover, at once on keyboard focus, and closes on Escape. It is the
+ * escape hatch for a truncated value — never the sole carrier of required
+ * information, and never interactive.
+ */
+export const Tooltip: Story = {
+  render: () => ({
+    components: { BaseTooltip },
+    template: `
+      <div style="display:grid;grid-template-columns:150px 260px;gap:18px 14px;align-items:center;
+                  font-size:var(--text-label);padding-top:60px">
+        <span>truncated value</span>
+        <base-tooltip position="top" :tooltip-offset="8">
+          <template #activator="{ on }">
+            <button
+              type="button"
+              v-on="on"
+              style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;
+                     font-size:var(--text-value);background:none;border:0;padding:0;text-align:left;cursor:default"
+            >
+              Tales from the North Sea — an anthology on coastal fishing
+            </button>
+          </template>
+          <span>Tales from the North Sea — an anthology on coastal fishing</span>
+        </base-tooltip>
+
+        <span>hint on an icon</span>
+        <base-tooltip position="top" :tooltip-offset="8">
+          <template #activator="{ on }">
+            <button type="button" v-on="on" style="background:none;border:0;cursor:default;font-size:var(--text-value)">
+              ⓘ
+            </button>
+          </template>
+          <span>This value comes from the import and cannot be edited.</span>
+        </base-tooltip>
+      </div>`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    modelValue: "Tales from the North Sea",
+    inputStyle: "defaultWithBorder",
+    type: "text",
+    size: "default",
+    placeholder: "No value",
+    disabled: false,
+    readonly: false,
+    invalid: false,
+    errorMessage: "",
+    ariaLabel: "Title",
+  },
+  argTypes: {
+    modelValue: { control: "text", type: { name: "string", required: false } },
+    inputStyle: {
+      control: "select",
+      options: [
+        "default",
+        "defaultWithBorder",
+        "defaultWithDarkBackgroundInput",
+      ],
+    },
+    type: {
+      control: "select",
+      options: ["text", "number", "textarea", "date", "datetime-local"],
+    },
+    size: { control: "inline-radio", options: ["default", "compact"] },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+  },
+  render: (args) => ({
+    components: { BaseInputTextNumberDatetime },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `
+      <div style="max-width:320px">
+        <base-input-text-number-datetime v-bind="args" v-model="value" />
+      </div>`,
+  }),
+};

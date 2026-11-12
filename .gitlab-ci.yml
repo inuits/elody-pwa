@@ -14,6 +14,7 @@ workflow:
     - if: '$CI_COMMIT_BRANCH =~ /^beta\//'
       variables:
         PWA_IMAGE_TAG: '${CI_COMMIT_REF_SLUG}'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 stages:
   - build
@@ -26,6 +27,8 @@ stages:
 include:
   - component: $CI_SERVER_FQDN/components/Containers/build@v0.10.3
     inputs:
+      rules:
+        - if: '$CI_PIPELINE_SOURCE != "merge_request_event"'
       image_name: inuits/dams-frontend
       image_tag: ${PWA_IMAGE_TAG}
       destination_registry: ${HARBOR_URL}/build/elody-dams
@@ -55,3 +58,36 @@ include:
       destination_registries:
         - ${HARBOR_URL}/elody-dams-dev
       push_latest_tag: false
+
+
+# --------------------------------------------------------------
+# Storybook
+# --------------------------------------------------------------
+.storybook:
+  stage: .post
+  needs: []
+  image: node:22.23.4-bookworm
+  variables:
+    BASE_GRAPHQL_BRANCH: beta/redesign
+  before_script:
+    - git clone --depth 1 --branch "$BASE_GRAPHQL_BRANCH" "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/rnd/inuits/dams/inuits-dams-base-graphql.git" ../modules/baseGraphql
+    - npm install -g pnpm@10.33.4
+    - pnpm install
+
+storybook:build:
+  extends: .storybook
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - pnpm build-storybook
+
+pages:
+  extends: .storybook
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "beta/redesign"'
+  script:
+    - pnpm build-storybook -o public
+  artifacts:
+    paths:
+      - public
