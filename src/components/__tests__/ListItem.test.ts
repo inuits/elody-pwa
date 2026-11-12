@@ -822,6 +822,23 @@ describe("ListItem", () => {
       );
     });
 
+    it("keeps the eye and the ⋮ together when they wrap, eye first", () => {
+      const actions = shallowMount(ListItem, {
+        props: {
+          ...defaultProps,
+          itemId: "row-1",
+          viewMode: "list" as const,
+          baseLibraryMode: "normalBaseLibrary" as any,
+          previewComponentFeatureEnabled: true,
+        },
+      }).find('[data-cy="list-item-actions"]');
+
+      expect(actions.classes()).toContain("shrink-0");
+      const children = actions.findAll(":scope > *");
+      expect(children[0].attributes("data-preview-for")).toBe("row-1");
+      expect(children.at(-1)!.html()).toContain("entity-buttons");
+    });
+
     it("right-aligns the actions when they wrap", () => {
       expect(
         listRow().find('[data-cy="list-item-actions"]').classes(),

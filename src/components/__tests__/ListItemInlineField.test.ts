@@ -497,4 +497,59 @@ describe("ListItemInlineField", () => {
       expect(refetchEntities).toHaveBeenCalled();
     });
   });
+
+  // A production's venues: the production holds ref_venues, the venue has
+  // no relation back.
+  describe("a value on the page entity's relation to the row (listingRelationType)", () => {
+    const pastField = () => ({
+      key: "past",
+      label: "metadata.labels.past",
+      value: false,
+      inputField: { type: "checkbox" },
+    });
+    const mountVenue = (props: Record<string, unknown> = {}) =>
+      mountField({
+        metadata: pastField(),
+        parentEntityId: "PROD-1",
+        linkedEntityId: "ORG-1",
+        linkedEntityRelations: {},
+        listingRelationType: "ref_venues",
+        ...props,
+      });
+
+    it("is editable without a relation back from the row", () => {
+      expect(value(mountVenue()).attributes("role")).toBe("button");
+    });
+
+    it("is a plain value without a listing relation type", () => {
+      const wrapper = mountVenue({ listingRelationType: undefined });
+      expect(value(wrapper).attributes("role")).toBeUndefined();
+    });
+
+    it("saves only this key on the page entity's relation to the row", async () => {
+      mocks.saveScope.mockResolvedValue({ id: "PROD-1" });
+      const wrapper = mountVenue();
+      await value(wrapper).trigger("click");
+      await flushPromises();
+      expect(editor(wrapper).props("modelValue")).toBe(false);
+      editor(wrapper).vm.$emit("save", true);
+      await flushPromises();
+      expect(mocks.saveScope).toHaveBeenCalledWith({
+        entityId: "PROD-1",
+        collection: "entities",
+        formInput: {
+          metadata: [],
+          relations: [
+            {
+              key: "ORG-1",
+              type: "ref_venues",
+              editStatus: "changed",
+              metadata: [{ key: "past", value: true }],
+            },
+          ],
+          updateOnlyRelations: true,
+        },
+      });
+    });
+  });
 });

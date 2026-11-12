@@ -26,7 +26,21 @@
             v-if="hasLeadingColumn"
             data-cy="view-modes-table-header-leading"
             class="w-10 shrink-0"
-          />
+          >
+            <BaseInputCheckbox
+              v-if="isSelectable"
+              class="text-center"
+              size="compact"
+              :model-value="pageIsSelected"
+              :item="{ id: 'select-page' }"
+              :bulk-operations-context="undefined"
+              :ignore-bulk-operations="true"
+              :aria-label="t('bulk-operations.select-page')"
+              @update:model-value="
+                (selected: boolean) => emit('togglePageSelection', selected)
+              "
+            />
+          </div>
 
           <div v-if="anyEntityHasThumbnail" class="w-10 shrink-0" />
 
@@ -176,6 +190,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import TableViewRow from "@/components/library/view-modes/TableViewRow.vue";
+import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import PreviewWrapper from "@/components/previews/PreviewWrapper.vue";
 import PreviewHost from "@/components/previews/PreviewHost.vue";
@@ -221,6 +236,7 @@ const props = withDefaults(
     groups?: EntityGroup[];
     hasMoreGroups?: boolean;
     groupsLoading?: boolean;
+    pageIsSelected?: boolean;
   }>(),
   {
     actionOnClick: ActionOnClick.Navigate,
@@ -242,6 +258,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "loadMoreInGroup", groupId: string): void;
   (event: "loadMoreGroups"): void;
+  (event: "togglePageSelection", selected: boolean): void;
 }>();
 
 const { t } = useI18n();
@@ -291,11 +308,13 @@ const previewDetailPath = computed(() => {
 
 const { seenTracking } = useEntityPageConfig();
 const { isSeen: isEntitySeen, isNew: isEntityNew } = useSeenState(seenTracking);
-const hasLeadingColumn = computed<boolean>(
+const isSelectable = computed<boolean>(
   () =>
-    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-      props.enableSelection) ||
-    seenTracking.value?.display === "highlightNew",
+    props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+    props.enableSelection,
+);
+const hasLeadingColumn = computed<boolean>(
+  () => isSelectable.value || seenTracking.value?.display === "highlightNew",
 );
 
 const isRefetching = computed(

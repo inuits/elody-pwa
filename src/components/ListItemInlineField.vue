@@ -100,6 +100,9 @@ const props = defineProps<{
   refetchEntities?: () => Promise<void>;
   // The value is the row entity's own metadata, not on a relation.
   ownField?: boolean;
+  // The listing's relation type on the page's entity (a production's
+  // ref_venues): holds the value when the row's entity has no relation back.
+  listingRelationType?: string;
 }>();
 
 const { t } = useI18n();
@@ -112,7 +115,7 @@ const inputFieldType = computed<string>(
 );
 
 // The relation type on the row's entity that points to the page's entity.
-const relationType = computed<string | undefined>(() => {
+const rowRelationType = computed<string | undefined>(() => {
   const relations = (props.linkedEntityRelations ?? {}) as Record<
     string,
     any[]
@@ -121,6 +124,9 @@ const relationType = computed<string | undefined>(() => {
     relations[type]?.some?.((relation) => relation?.key === props.parentEntityId),
   );
 });
+const pageRelationType = computed<string | undefined>(() =>
+  rowRelationType.value ? undefined : props.listingRelationType,
+);
 
 const entityCanUpdate = computed<boolean>(
   () => props.ownField || canUpdateEntity(pageEditState as any),
@@ -128,7 +134,9 @@ const entityCanUpdate = computed<boolean>(
 const canEdit = computed<boolean>(
   () =>
     !!props.linkedEntityId &&
-    (props.ownField || (!!props.parentEntityId && !!relationType.value)) &&
+    (props.ownField ||
+      (!!props.parentEntityId &&
+        !!(rowRelationType.value || pageRelationType.value))) &&
     canEditFieldInPlace({
       inputFieldType: inputFieldType.value,
       nonEditableField: !!(props.metadata as any).nonEditableField,
@@ -159,7 +167,7 @@ const storedValue = computed<unknown>(() => {
     string,
     any[]
   >;
-  const relation = relations[relationType.value ?? ""]?.find?.(
+  const relation = relations[rowRelationType.value ?? ""]?.find?.(
     (candidate) => candidate?.key === props.parentEntityId,
   );
   return relation?.metadata?.find?.(
@@ -240,20 +248,30 @@ const save = singleFlight(async (value: unknown) => {
   saving.value = true;
   errorMessage.value = undefined;
   try {
-    await saveScope({
-      entityId: props.linkedEntityId,
-      collection: Collection.Entities,
-      formInput: props.ownField
-        ? buildMetadataInput(
-            props.metadata.key,
-            toStoredShape(toMetadataValue(value)),
-          )
-        : buildRelationMetadataInput(
-            { key: props.parentEntityId, type: relationType.value! },
-            props.metadata.key,
-            toStoredShape(toMetadataValue(value)),
-          ),
-    });
+    const storedShape = toStoredShape(toMetadataValue(value));
+    await saveScope(
+      pageRelationType.value
+        ? {
+            entityId: props.parentEntityId,
+            collection: Collection.Entities,
+            formInput: buildRelationMetadataInput(
+              { key: props.linkedEntityId, type: pageRelationType.value },
+              props.metadata.key,
+              storedShape,
+            ),
+          }
+        : {
+            entityId: props.linkedEntityId,
+            collection: Collection.Entities,
+            formInput: props.ownField
+              ? buildMetadataInput(props.metadata.key, storedShape)
+              : buildRelationMetadataInput(
+                  { key: props.parentEntityId, type: rowRelationType.value! },
+                  props.metadata.key,
+                  storedShape,
+                ),
+          },
+    );
     displaySuccessNotification(
       "notifications.success.entityUpdated.title",
       "notifications.success.entityUpdated.description",
