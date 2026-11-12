@@ -63,3 +63,57 @@ export const States: Story = {
       </div>`,
   }),
 };
+
+const placements = [
+  "top",
+  "top-start",
+  "top-end",
+  "right",
+  "right-start",
+  "right-end",
+  "bottom",
+  "bottom-start",
+  "bottom-end",
+  "left",
+  "left-start",
+  "left-end",
+];
+
+export const Playground: StoryObj<
+  InstanceType<typeof BaseTooltip>["$props"] & { text: string }
+> = {
+  args: {
+    position: "top",
+    tooltipOffset: 8,
+    maxWidth: "14rem",
+    enableAutoPlacement: true,
+    showDelay: 300,
+    text: "Fields marked with a star are required",
+  },
+  argTypes: {
+    position: { control: "select", options: placements },
+    tooltipOffset: { control: { type: "range", min: 0, max: 32 } },
+    showDelay: { control: { type: "number", min: 0, step: 100 } },
+  },
+  render: (args) => ({
+    components: { BaseTooltip },
+    setup: () => ({ args, Unicons }),
+    template: `
+      <div style="padding:80px;display:flex;justify-content:center">
+        <base-tooltip
+          :position="args.position"
+          :tooltip-offset="args.tooltipOffset"
+          :max-width="args.maxWidth"
+          :enable-auto-placement="args.enableAutoPlacement"
+          :show-delay="args.showDelay"
+        >
+          <template #activator="{ on, describedBy }">
+            <button v-on="on" :aria-describedby="describedBy" aria-label="Help" type="button">
+              <unicon :name="Unicons.QuestionCircle.name" height="18" />
+            </button>
+          </template>
+          {{ args.text }}
+        </base-tooltip>
+      </div>`,
+  }),
+};

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import AdvancedDropdown from "../AdvancedDropdown.vue";
 
 const meta: Meta<typeof AdvancedDropdown> = {
@@ -119,6 +119,46 @@ export const States: Story = {
 
         <span>cleared (click ✕: the placeholder returns)</span>
         <advanced-dropdown v-model="cleared" :options="shortOptions" label="Status" style-type="defaultWithBorder" clearable />
+      </div>`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    modelValue: undefined,
+    options: provinces,
+    label: "Choose a province",
+    labelPosition: "above",
+    styleType: "defaultWithBorder",
+    multiple: false,
+    clearable: true,
+    disable: false,
+    loading: false,
+    selectFirstOptionByDefault: false,
+    addLabelToValue: false,
+    addIconToValue: false,
+  },
+  argTypes: {
+    labelPosition: { control: "inline-radio", options: ["above", "inline"] },
+    styleType: {
+      control: "select",
+      options: ["default", "defaultWithBorder", "defaultWithLightBorder"],
+    },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+  },
+  render: (args) => ({
+    components: { AdvancedDropdown },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `
+      <div style="max-width:300px;padding-bottom:280px">
+        <advanced-dropdown v-bind="args" v-model="value" />
       </div>`,
   }),
 };

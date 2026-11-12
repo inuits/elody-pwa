@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { nextTick, onMounted } from "vue";
+import { nextTick, onMounted, watch } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButtonNew.vue";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 
@@ -58,6 +58,58 @@ export const Default: Story = {
               <base-button button-style="commit" button-size="sm" label="Add" style="width:auto" />
             </div>
           </div>
+        </base-modal>
+      </div>`,
+  }),
+};
+
+type PlaygroundArgs = InstanceType<typeof BaseModal>["$props"] & {
+  open: boolean;
+  modalStyle: ModalStyle;
+};
+
+export const Playground: StoryObj<PlaygroundArgs> = {
+  args: {
+    open: true,
+    modalStyle: ModalStyle.Center,
+    modalType: TypeModals.DynamicForm,
+    title: "Choose person",
+    cancelButtonAvailabe: false,
+    iconHeight: 18,
+    modalColor: "bg-background-light",
+    modalHeightStyle: "max-h-[75vh] my-[12.5vh]",
+  },
+  argTypes: {
+    modalStyle: { control: "select", options: Object.values(ModalStyle) },
+    modalType: { control: false },
+    onHideModal: { action: "hideModal" },
+    "onUpdate:modalState": { action: "update:modalState" },
+  },
+  render: (args) => ({
+    components: { BaseModal, BaseButton },
+    setup() {
+      const { openModal, closeModal, getModalInfo } = useBaseModal();
+      const sync = async () => {
+        if (getModalInfo(args.modalType).open) closeModal(args.modalType);
+        await nextTick();
+        if (args.open) openModal(args.modalType, args.modalStyle);
+      };
+      onMounted(sync);
+      watch(() => [args.open, args.modalStyle], sync);
+      return { args, close: () => closeModal(args.modalType) };
+    },
+    template: `
+      <div style="min-height:340px">
+        <base-modal
+          :modal-type="args.modalType"
+          :title="args.title"
+          :cancel-button-availabe="args.cancelButtonAvailabe"
+          :icon-height="args.iconHeight"
+          :modal-color="args.modalColor"
+          :modal-height-style="args.modalHeightStyle"
+          @hide-modal="args.onHideModal?.(); close()"
+        >
+          <div style="padding:18px 22px;min-width:380px">Modal body</div>
         </base-modal>
       </div>`,
   }),

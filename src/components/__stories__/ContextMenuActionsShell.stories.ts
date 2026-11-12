@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import ContextMenuActionsShell from "../ContextMenuActionsShell.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButtonNew.vue";
 
 const meta: Meta<typeof ContextMenuActionsShell> = {
   // Story ids contextmenuactions-contextmenuactionsshell--overflow-menu and

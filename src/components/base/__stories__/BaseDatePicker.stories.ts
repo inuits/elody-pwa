@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import BaseDatePicker from "../BaseDatePicker.vue";
 
 const meta: Meta<typeof BaseDatePicker> = {
@@ -46,6 +46,35 @@ export const WithTime: Story = {
       <div style="max-width:280px;padding-bottom:460px">
         <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">Date and time</p>
         <base-date-picker v-model="date" type="datetime-local" />
+      </div>`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    modelValue: "2026-08-18",
+    type: "date",
+    placeholder: "Select date",
+    disabled: false,
+  },
+  argTypes: {
+    modelValue: { control: "text", type: { name: "string", required: false } },
+    type: { control: "inline-radio", options: ["date", "datetime-local"] },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+  },
+  render: (args) => ({
+    components: { BaseDatePicker },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `
+      <div style="max-width:280px;padding-bottom:460px">
+        <base-date-picker v-bind="args" v-model="value" />
       </div>`,
   }),
 };

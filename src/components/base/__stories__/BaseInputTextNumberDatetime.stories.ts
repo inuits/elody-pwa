@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import BaseInputTextNumberDatetime from "../BaseInputTextNumberDatetime.vue";
 import BaseTooltip from "../BaseTooltip.vue";
 
@@ -102,6 +102,53 @@ export const Tooltip: Story = {
           </template>
           <span>This value comes from the import and cannot be edited.</span>
         </base-tooltip>
+      </div>`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    modelValue: "Tales from the North Sea",
+    inputStyle: "defaultWithBorder",
+    type: "text",
+    size: "default",
+    placeholder: "No value",
+    disabled: false,
+    readonly: false,
+    invalid: false,
+    errorMessage: "",
+    ariaLabel: "Title",
+  },
+  argTypes: {
+    modelValue: { control: "text", type: { name: "string", required: false } },
+    inputStyle: {
+      control: "select",
+      options: [
+        "default",
+        "defaultWithBorder",
+        "defaultWithDarkBackgroundInput",
+      ],
+    },
+    type: {
+      control: "select",
+      options: ["text", "number", "textarea", "date", "datetime-local"],
+    },
+    size: { control: "inline-radio", options: ["default", "compact"] },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+  },
+  render: (args) => ({
+    components: { BaseInputTextNumberDatetime },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `
+      <div style="max-width:320px">
+        <base-input-text-number-datetime v-bind="args" v-model="value" />
       </div>`,
   }),
 };

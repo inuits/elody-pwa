@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import RepetitiveStepModal from "../RepetitiveStepModal.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButtonNew.vue";
 
 const meta: Meta<typeof RepetitiveStepModal> = {
   // Story id repetitiveform-stepmodal--step, per MANIFEST.md.

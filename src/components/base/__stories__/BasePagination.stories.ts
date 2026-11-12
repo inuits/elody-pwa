@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { provide } from "vue";
+import { provide, watch } from "vue";
 import BasePagination from "../BasePagination.vue";
 import {
   createPaginationStore,
@@ -50,3 +50,27 @@ export const LastPage: Story = { render: () => withStore(12) };
 
 /** Few enough pages that none need eliding. */
 export const FewPages: Story = { render: () => withStore(2, 60) };
+
+export const Playground: StoryObj<{ page: number; total: number }> = {
+  args: { page: 5, total: 240 },
+  argTypes: {
+    page: { control: { type: "number", min: 1 } },
+    total: { control: { type: "number", min: 0, step: 10 } },
+  },
+  render: (args) => ({
+    components: { BasePagination },
+    setup() {
+      const store = createPaginationStore();
+      provide(PaginationStoreKey, store);
+      watch(
+        () => [args.total, args.page],
+        () => {
+          store.updateTotalAmount(args.total);
+          store.goToPage(args.page);
+        },
+        { immediate: true },
+      );
+    },
+    template: `<div style="max-width:640px"><base-pagination /></div>`,
+  }),
+};

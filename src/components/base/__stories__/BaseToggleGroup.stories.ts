@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import BaseToggleGroup from "../BaseToggleGroup.vue";
 import BaseToggle from "../BaseToggle.vue";
 import { DamsIcons } from "@/generated-types/queries";
@@ -45,5 +45,44 @@ export const SingleToggle: Story = {
     components: { BaseToggle },
     setup: () => ({ on: ref(false) }),
     template: `<base-toggle v-model="on" :icon-on="'EyeSlash'" :icon-off="'Eye'" />`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    toggles: [
+      { isOn: true, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
+      { isOn: false, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
+      { isOn: false, iconOn: DamsIcons.Table, iconOff: DamsIcons.Table },
+    ],
+  },
+  argTypes: { onSelected: { action: "selected" } },
+};
+
+export const TogglePlayground: StoryObj<typeof BaseToggle> = {
+  args: {
+    modelValue: false,
+    iconOn: DamsIcons.Eye,
+    iconOff: DamsIcons.Apps,
+    iconHeight: 18,
+    isPartOfToggleGroup: false,
+  },
+  argTypes: {
+    iconOn: { control: "select", options: Object.values(DamsIcons) },
+    iconOff: { control: "select", options: Object.values(DamsIcons) },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+    onTurnAllTogglesInGroupOff: { action: "turnAllTogglesInGroupOff" },
+  },
+  render: (args) => ({
+    components: { BaseToggle },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `<base-toggle v-bind="args" v-model="value" />`,
   }),
 };

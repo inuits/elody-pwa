@@ -73,3 +73,25 @@ export const Progress: Story = {
       </div>`,
   }),
 };
+
+export const Playground: StoryObj<typeof DropzoneView> = {
+  args: {
+    modelValue: undefined,
+    dropzoneLabel: "Drag files here or browse",
+    isValidation: false,
+    fileCount: 0,
+    style: "",
+  },
+  argTypes: {
+    fileCount: { control: { type: "number", min: 0 } },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+  },
+  render: (args) => ({
+    components: { DropzoneView },
+    setup: () => ({ args }),
+    template: `
+      <div style="max-width:520px;height:120px">
+        <dropzone-view v-bind="args" />
+      </div>`,
+  }),
+};

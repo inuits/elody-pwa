@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import BaseInputCheckbox from "../BaseInputCheckbox.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 
@@ -104,5 +104,33 @@ export const States: Story = {
           <base-input-checkbox :item="{ id: 'other', teaserMetadata: [] }" :bulk-operations-context="limited" :model-value="false" label="Not selected: limit reached" />
         </td></tr>
       </table>`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    ...base,
+    modelValue: false,
+    label: "Include in export",
+    size: "default",
+    disabled: false,
+    required: false,
+    ariaLabel: undefined,
+  },
+  argTypes: {
+    size: { control: "inline-radio", options: ["default", "compact"] },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+  },
+  render: (args) => ({
+    components: { BaseInputCheckbox },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `<base-input-checkbox v-bind="args" v-model="value" />`,
   }),
 };

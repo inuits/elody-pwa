@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import BaseInputAutocomplete from "../BaseInputAutocomplete.vue";
 
 const options = [
@@ -77,6 +77,49 @@ export const CreateOption: Story = {
           :create-option-config="createOptionConfig"
           placeholder="Type to add…"
         />
+      </div>`,
+  }),
+};
+
+export const Playground: Story = {
+  args: {
+    modelValue: [{ label: "adventure", value: "adventure" }],
+    options,
+    autocompleteStyle: "defaultWithBorder",
+    selectType: "multi",
+    placeholder: "Search for a genre…",
+    disabled: false,
+    loading: false,
+    relation: false,
+    tagsAreLinks: false,
+    displayInputForTag: false,
+    noOptionsText: "No options",
+    createOptionConfig: { canCreateOption: false },
+  },
+  argTypes: {
+    autocompleteStyle: {
+      control: "select",
+      options: ["default", "defaultWithBorder", "readOnly", "readOnlyAsPlainText"],
+    },
+    selectType: { control: "inline-radio", options: ["multi", "single"] },
+    "onUpdate:modelValue": { action: "update:modelValue" },
+    onAddOption: { action: "addOption" },
+    onHandleTagClick: { action: "handleTagClick" },
+    onSearchChange: { action: "searchChange" },
+  },
+  render: (args) => ({
+    components: { BaseInputAutocomplete },
+    setup() {
+      const value = ref(args.modelValue);
+      watch(
+        () => args.modelValue,
+        (v) => (value.value = v),
+      );
+      return { args, value };
+    },
+    template: `
+      <div style="max-width:420px;padding-bottom:260px">
+        <base-input-autocomplete v-bind="args" v-model="value" />
       </div>`,
   }),
 };

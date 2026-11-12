@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButtonNew.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { InputFieldTypes } from "@/generated-types/queries";

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
@@ -7,6 +8,10 @@ import tailwindSvgPlugin from "../plugin/vite-plugin-tailwind-svg.js";
 // Storybook runs on its own Vite config rather than the app's: the app config
 // carries devtools, compression and the generated-types sourcemap strip, none
 // of which apply to the workshop.
+const generatedQueries = fileURLToPath(
+  new URL("../src/generated-types/queries.ts", import.meta.url),
+);
+
 export default defineConfig({
   plugins: [
     vue({ template: { transformAssetUrls: { includeAbsolute: false } } }),
@@ -31,6 +36,16 @@ export default defineConfig({
         find: /^@\/main(\.ts)?$/,
         replacement: fileURLToPath(new URL("./mockMain.ts", import.meta.url)),
       },
+      ...(existsSync(generatedQueries)
+        ? []
+        : [
+            {
+              find: /^@\/generated-types\/queries$/,
+              replacement: fileURLToPath(
+                new URL("../src/__mocks__/queries.ts", import.meta.url),
+              ),
+            },
+          ]),
       {
         find: "@",
         replacement: fileURLToPath(new URL("../src", import.meta.url)),

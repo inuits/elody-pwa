@@ -3,7 +3,7 @@ import { provide, ref } from "vue";
 import { gql } from "@apollo/client/core";
 import FolderTreeLine from "@/components/FolderTreeLine.vue";
 import ImportListItem from "../ImportListItem.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import BaseButton from "@/components/base/BaseButtonNew.vue";
 
 const meta: Meta = {
   // Story id components-importbrowser--default, per MANIFEST.md.

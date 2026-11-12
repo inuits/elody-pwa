@@ -114,3 +114,19 @@ export const IconOnly: Story = {
       </div>`,
   }),
 };
+
+export const Playground: Story = {
+  args: {
+    label: "Open record",
+    buttonStyle: "primary",
+    buttonSize: "md",
+    icon: DamsIcons.NoIcon,
+    disabled: false,
+    loading: false,
+    tooltipLabel: "",
+  },
+  argTypes: {
+    icon: { control: "select", options: Object.values(DamsIcons) },
+    onClick: { action: "click" },
+  },
+};
