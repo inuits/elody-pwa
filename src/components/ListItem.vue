@@ -168,8 +168,8 @@
           // Grid card body: a 2-line title link, then label / value rows.
           isGridMode
             ? idx === 0
-              ? 'col-span-2 mb-(--grid-card-title-gap) min-h-(--grid-card-title-min-height) line-clamp-2 font-bold text-heading text-text-link hover:text-text-link-hover hover:underline [&_.line-clamp]:[--line-clamp:2]! [&_[data-cy=entity-element-metadata]]:text-inherit [&_[data-cy=metadata-label]]:sr-only'
-              : 'col-span-2 grid grid-cols-subgrid items-center min-w-0 [&>[data-cy=metadata-wrapper]]:contents [&_[data-cy=metadata-label]]:font-normal [&_[data-cy=metadata-label]]:text-value [&_[data-cy=metadata-label]]:text-text-muted [&_[data-cy=metadata-label]]:truncate'
+              ? 'col-span-2 mb-(--grid-card-title-gap) min-h-(--grid-card-title-min-height) line-clamp-2 font-bold text-heading text-text-link hover:text-text-link-hover hover:[&_[data-cy=metadata-value]]:decoration-solid [&_.line-clamp]:[--line-clamp:2]! [&_[data-cy=entity-element-metadata]]:text-inherit [&_[data-cy=metadata-label]]:sr-only'
+              : 'col-span-2 grid grid-cols-subgrid items-center min-w-0 whitespace-nowrap [&>[data-cy=metadata-wrapper]]:contents [&_[data-cy=metadata-label]]:font-normal [&_[data-cy=metadata-label]]:text-value [&_[data-cy=metadata-label]]:text-text-muted [&_[data-cy=metadata-label]]:truncate'
             : '',
           // List row (ui_kits/clients): bold title in link ink, the rest secondary.
           isListMode
@@ -180,6 +180,7 @@
                 ]
               : 'text-text-secondary'
             : '',
+          { [TITLE_UNDERLINE]: isUnderlinedTitle(idx) },
           isGridMode
             ? ''
             : idx < 1 && teaserMetadata[0]?.value?.formatter
@@ -623,6 +624,13 @@ provide(
 const onlyReadModeTeaserMetadata = computed(() =>
   props.teaserMetadata.filter((metadata) => !metadata.showOnlyInEditMode),
 );
+
+const TITLE_UNDERLINE =
+  "[&_[data-cy=metadata-value]]:underline [&_[data-cy=metadata-value]]:decoration-dashed [&_[data-cy=metadata-value]]:decoration-1 [&_[data-cy=metadata-value]]:decoration-border-dashed [&_[data-cy=metadata-value]]:underline-offset-(--title-underline-offset)";
+const isUnderlinedTitle = (idx: number): boolean =>
+  idx === 0 &&
+  (isListMode.value || isGridMode.value) &&
+  !props.teaserMetadata[0]?.value?.formatter;
 
 const isGridTitleLink = (idx: number): boolean =>
   isGridMode.value && idx === 0 && !!props.titleLink;

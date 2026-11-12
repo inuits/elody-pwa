@@ -140,6 +140,34 @@ describe("ListItem", () => {
 
       expect(fields[0].classes()).not.toContain("font-bold");
     });
+
+    it("underlines the title, dashed", () => {
+      const fields = fieldsOf([
+        { key: "title", value: "Oasis" },
+        { key: "script", value: "SC-1" },
+      ]);
+
+      expect(fields[0].classes()).toEqual(
+        expect.arrayContaining([
+          "[&_[data-cy=metadata-value]]:underline",
+          "[&_[data-cy=metadata-value]]:decoration-dashed",
+        ]),
+      );
+      expect(fields[1].classes()).not.toContain(
+        "[&_[data-cy=metadata-value]]:underline",
+      );
+    });
+
+    it("does not underline a leading pill", () => {
+      const fields = fieldsOf([
+        { key: "type", value: { formatter: "pill", label: "Book" } },
+        { key: "title", value: "Oasis" },
+      ]);
+
+      expect(fields[0].classes()).not.toContain(
+        "[&_[data-cy=metadata-value]]:underline",
+      );
+    });
   });
 
   describe("highlight", () => {
@@ -773,7 +801,12 @@ describe("ListItem", () => {
         wrapper.find('[data-cy="list-item-content"]').classes(),
       ).toContain("grid-cols-[auto_minmax(0,1fr)]");
       expect(fieldsOf(wrapper)[1].classes()).toEqual(
-        expect.arrayContaining(["col-span-2", "grid-cols-subgrid"]),
+        expect.arrayContaining([
+          "col-span-2",
+          "grid-cols-subgrid",
+          // a pill in a narrow card must not break mid-word
+          "whitespace-nowrap",
+        ]),
       );
     });
 
@@ -794,6 +827,28 @@ describe("ListItem", () => {
           "text-heading",
           "text-text-link",
         ]),
+      );
+    });
+
+    it("underlines the title, dashed, but not a leading pill", () => {
+      const titled = fieldsOf(
+        card({ teaserMetadata: [{ key: "title", value: "A title" }] }),
+      );
+      expect(titled[0].classes()).toEqual(
+        expect.arrayContaining([
+          "[&_[data-cy=metadata-value]]:underline",
+          "[&_[data-cy=metadata-value]]:decoration-dashed",
+        ]),
+      );
+      const pill = fieldsOf(
+        card({
+          teaserMetadata: [
+            { key: "status", value: { formatter: "pill", label: "Open" } },
+          ],
+        }),
+      );
+      expect(pill[0].classes()).not.toContain(
+        "[&_[data-cy=metadata-value]]:underline",
       );
     });
 

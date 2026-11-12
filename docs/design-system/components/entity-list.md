@@ -65,7 +65,8 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
   glyph in `--color-text-subtle`.
 - Body (`--grid-card-body-pad`, `--text-value`): the first field is the
   title, a link to the detail page (`--text-heading`, bold,
-  `--color-text-link`, hover `--color-text-link-hover` + underline), clamped
+  `--color-text-link`, dashed title underline; hover `--color-text-link-hover`
+  and a solid underline), clamped
   to 2 lines with `--grid-card-title-min-height` so rows line up. Then every
   other teaser field as label / value rows (`auto minmax(0,1fr)`,
   `--grid-card-meta-col-gap` / `--grid-card-meta-row-gap`); labels
@@ -79,6 +80,12 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
 - Selection bar: a labelled "Select page" checkbox starts the row. It ticks
   when the whole page is selected, is indeterminate when part of it is, and
   selects the page on click (clears it when ticked).
+
+### Title (list and grid)
+The first teaser field is the title: bold, `--color-text-link`, with a 1px
+dashed underline in `--color-border-dashed`, `--title-underline-offset`
+below the text. A leading pill is not a title and gets none of this. Values
+in grid rows never wrap (a pill stays whole; text truncates).
 
 ### Column-header row (list mode)
 When every row on the page has the same fields, list mode shows one sticky

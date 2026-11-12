@@ -416,6 +416,8 @@
   /* Flat list and table rows: cell padding, hairline below */
   --list-row-pad: 7px 8px;
   --list-header-height: 24px;
+  /* The row / card title's dashed underline sits this far below the text */
+  --title-underline-offset: 3px;
   /* Grid view: auto-fill columns of cards; a card is a square media frame,
      a 2-line title link, label / value rows and a select + actions footer */
   --grid-card-min-width: 200px;
