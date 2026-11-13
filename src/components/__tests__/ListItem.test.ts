@@ -746,7 +746,7 @@ describe("ListItem", () => {
         props: { ...defaultProps, itemId: "card-1", viewMode: "grid", ...props },
       });
     const fieldsOf = (wrapper: ReturnType<typeof card>) =>
-      wrapper.findAll('[data-cy="list-item-content"] > div');
+      wrapper.findAll('[data-cy="list-item-content"] > div:not([data-cy="grid-card-actions"])');
 
     it("fills its grid cell so cards in a row share a height", () => {
       const classes = card().find('[data-cy="list-item"]').classes();
@@ -790,7 +790,7 @@ describe("ListItem", () => {
       );
     });
 
-    it("lays the fields out as label / value columns", () => {
+    it("stacks each label above its value", () => {
       const wrapper = card({
         teaserMetadata: [
           { key: "title", value: "A title" },
@@ -799,14 +799,34 @@ describe("ListItem", () => {
       });
       expect(
         wrapper.find('[data-cy="list-item-content"]').classes(),
-      ).toContain("grid-cols-[auto_minmax(0,1fr)]");
+      ).toContain("grid-cols-[minmax(0,1fr)_auto]");
       expect(fieldsOf(wrapper)[1].classes()).toEqual(
         expect.arrayContaining([
           "col-span-2",
-          "grid-cols-subgrid",
+          "flex",
+          "flex-col",
+          "min-w-0",
           // a pill in a narrow card must not break mid-word
           "whitespace-nowrap",
         ]),
+      );
+      expect(fieldsOf(wrapper)[1].classes().join(" ")).not.toMatch(
+        /metadata-label\]\]:(text-|font-)/,
+      );
+    });
+
+    it("keeps only the title when compact", () => {
+      const fields = fieldsOf(
+        card({
+          compact: true,
+          teaserMetadata: [
+            { key: "title", value: "A title" },
+            { key: "type", value: "Book" },
+          ],
+        }),
+      );
+      expect(fields.map((field) => field.classes().includes("hidden"))).toEqual(
+        [false, true],
       );
     });
 
@@ -821,11 +841,23 @@ describe("ListItem", () => {
       );
       expect(fields[0].classes()).toEqual(
         expect.arrayContaining([
-          "col-span-2",
+          "row-start-1",
           "line-clamp-2",
           "font-bold",
           "text-heading",
           "text-text-link",
+        ]),
+      );
+    });
+
+    it("drops the title underline on hover", () => {
+      const [title] = fieldsOf(
+        card({ teaserMetadata: [{ key: "title", value: "A title" }] }),
+      );
+      expect(title.classes()).toEqual(
+        expect.arrayContaining([
+          "hover:no-underline",
+          "hover:[&_[data-cy=metadata-value]]:no-underline",
         ]),
       );
     });
@@ -861,21 +893,29 @@ describe("ListItem", () => {
       expect(link.attributes("to")).toBe("/asset/card-1");
     });
 
-    it("puts the labelled checkbox, the eye and the menu in the footer", () => {
-      const footer = card({
+    it("puts the checkbox on the media and the eye and menu beside the title, with no footer", () => {
+      const wrapper = card({
         hasSelection: true,
         previewComponentFeatureEnabled: true,
-      }).find('[data-cy="grid-card-footer"]');
-      expect(footer.exists()).toBe(true);
-      expect(
-        footer.findComponent(BaseInputCheckbox).props("label"),
-      ).toBeTruthy();
-      expect(footer.findComponent({ name: "PreviewToggle" }).exists()).toBe(
+        teaserMetadata: [{ key: "title", value: "A title" }],
+      });
+      const checkbox = wrapper
+        .find('[data-cy="grid-card-media"]')
+        .findComponent(BaseInputCheckbox);
+      expect(checkbox.exists()).toBe(true);
+      expect(checkbox.props("label")).toBeFalsy();
+      expect(checkbox.props("ariaLabel")).toBeTruthy();
+      const actions = wrapper.find('[data-cy="grid-card-actions"]');
+      expect(actions.classes()).toEqual(
+        expect.arrayContaining(["col-start-2", "row-start-1"]),
+      );
+      expect(actions.findComponent({ name: "PreviewToggle" }).exists()).toBe(
         true,
       );
-      expect(footer.findComponent({ name: "EntityButtons" }).exists()).toBe(
+      expect(actions.findComponent({ name: "EntityButtons" }).exists()).toBe(
         true,
       );
+      expect(wrapper.find('[data-cy="grid-card-footer"]').exists()).toBe(false);
     });
 
     it("borders the card in accent while its preview is open", () => {

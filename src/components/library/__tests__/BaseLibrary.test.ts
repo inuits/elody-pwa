@@ -230,7 +230,7 @@ vi.mock("@/main", () => ({
 // templates reference real enum members (e.g. DamsIcons, ActionsOnResultTypes)
 // that must resolve at render time, so the real module is used directly.
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key, locale: ref("en") }),
+  useI18n: () => ({ t: (key: string) => key, te: () => true, locale: ref("en") }),
 }));
 
 vi.mock("vue-router", () => ({
@@ -1713,6 +1713,44 @@ describe("BaseLibrary.vue in grid view", () => {
     selectPage().vm.$emit("update:modelValue", true);
 
     expect(bulkMocks.enqueue).toHaveBeenCalledTimes(2);
+  });
+
+  it("switches the grid between large and compact cards, and remembers it", async () => {
+    localStorage.removeItem("elody.gridCompact");
+    mocks.toggles = [
+      { viewMode: ViewModes.ViewModesList, isOn: false, label: "list" },
+      { viewMode: ViewModes.ViewModesGrid, isOn: true, label: "grid" },
+    ];
+    wrapper = getWrapper({ enableBulkOperations: false });
+    await flushPromises();
+    const groups = () => wrapper!.findAllComponents({ name: "BaseToggleGroup" });
+    const sizeToggles = () => groups()[1].props("toggles");
+    const list = () => wrapper!.findComponent({ name: "ViewModesList" });
+
+    expect(groups()[0].props("toggles").map((t: any) => t.label)).toEqual([
+      "list",
+      "grid",
+    ]);
+    expect(sizeToggles().map((t: any) => t.label)).toEqual([
+      "library.grid-size.large",
+      "library.grid-size.compact",
+    ]);
+    expect(list().props("compact")).toBe(false);
+
+    sizeToggles()[0].isOn.value = false;
+    sizeToggles()[1].isOn.value = true;
+    await flushPromises();
+
+    expect(list().props("compact")).toBe(true);
+    expect(localStorage.getItem("elody.gridCompact")).toBe("true");
+
+    sizeToggles()[0].isOn.value = true;
+    sizeToggles()[1].isOn.value = false;
+    await flushPromises();
+
+    expect(list().props("compact")).toBe(false);
+    mocks.toggles = [];
+    localStorage.removeItem("elody.gridCompact");
   });
 
   it("is indeterminate while only part of the page is selected", async () => {

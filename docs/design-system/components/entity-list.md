@@ -62,18 +62,27 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
 `--radius-card`, no shadow, and is not itself a link or focusable.
 - Media: a square frame (`aspect-square`, `--color-surface-muted`); the
   thumbnail fills it (`object-cover`, `alt` = title). No image: the file-type
-  glyph in `--color-text-subtle`.
+  glyph in `--color-text-subtle`. The select checkbox sits on its top-left
+  corner (`--grid-card-check-inset`) on a `--color-surface` chip
+  (`--grid-card-check-pad`), with an `aria-label`, no visible label.
 - Body (`--grid-card-body-pad`, `--text-value`): the first field is the
   title, a link to the detail page (`--text-heading`, bold,
-  `--color-text-link`, dashed title underline; hover `--color-text-link-hover`
-  and a solid underline), clamped
-  to 2 lines with `--grid-card-title-min-height` so rows line up. Then every
-  other teaser field as label / value rows (`auto minmax(0,1fr)`,
-  `--grid-card-meta-col-gap` / `--grid-card-meta-row-gap`); labels
-  `--color-text-muted`, values truncate with the full value in the tooltip.
-  Only the client's existing teaser metadata is shown, with its own labels.
-- Footer (`--grid-card-footer-pad`, hairline above): the "Select" checkbox
-  on the left, the eye and ⋮ on the right. Tab order: title, Select, eye, ⋮.
+  `--color-text-link`, dashed title underline; hover `--color-text-link-hover`,
+  no underline on hover: the card's hover fill is enough), clamped
+  to 2 lines with `--grid-card-title-min-height` so rows line up. The eye
+  and ⋮ sit beside the title (`--grid-card-title-action-gap`); there is no
+  footer. Then every other
+  teaser field with its label above its value (`--grid-card-meta-label-gap`
+  between, `--grid-card-meta-row-gap` between fields); labels look like the
+  list view's field labels (`--text-label`, bold, `--color-text-field-label`), values take the full card width and truncate with the
+  full value in the tooltip. Only the client's existing teaser metadata is
+  shown, with its own labels.
+- Tab order: Select, title, eye, ⋮.
+- Card size: in grid view a second segmented switch follows the view switch,
+  "Large | Compact" (`BaseToggleGroup` with text segments,
+  `--view-switch-text-pad`, group named "Card size"). Compact keeps only
+  media and title, in `--grid-card-min-width-compact` columns. Remembered
+  per browser (`localStorage` `elody.gridCompact`).
 - Selected: `--color-accent-wash` + a `--color-accent` border (no ring: on
   the rounded corners it reads as separate arcs). Preview open: the same
   border, no wash.

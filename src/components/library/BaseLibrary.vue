@@ -191,11 +191,17 @@
           <!-- the view switch ends the band, away from the Filters button -->
           <div
             v-if="showViewSwitch"
-            :class="{ 'ml-auto': !showLibraryBar }"
+            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar }]"
           >
             <BaseToggleGroup
               :toggles="toggles"
               @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
+            />
+            <BaseToggleGroup
+              v-if="displayGrid"
+              data-cy="grid-size-switch"
+              group-label="library.grid-size.label"
+              :toggles="gridSizeToggles"
             />
           </div>
           <!-- In a detail panel the bar's add pills land here. -->
@@ -371,6 +377,7 @@
           />
           <ViewModesList
             v-if="!displayMap"
+            :compact="!!displayGrid && gridCompact"
             v-show="
               showViewModesList &&
               !isInitialLoading &&
@@ -1109,6 +1116,38 @@ const showLibraryBar = computed(
     (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
+const readGridCompact = (): boolean => {
+  try {
+    return localStorage.getItem("elody.gridCompact") === "true";
+  } catch {
+    return false;
+  }
+};
+const gridCompact = ref<boolean>(readGridCompact());
+const setGridCompact = (on: boolean) => {
+  gridCompact.value = on;
+  try {
+    localStorage.setItem("elody.gridCompact", String(on));
+  } catch {
+    return;
+  }
+};
+const gridSizeToggles = [
+  {
+    isOn: computed<boolean>({
+      get: () => !gridCompact.value,
+      set: (on) => on && setGridCompact(false),
+    }),
+    label: "library.grid-size.large",
+  },
+  {
+    isOn: computed<boolean>({
+      get: () => gridCompact.value,
+      set: (on) => on && setGridCompact(true),
+    }),
+    label: "library.grid-size.compact",
+  },
+];
 const showViewSwitch = computed(
   () =>
     !props.disableLibraryBar &&

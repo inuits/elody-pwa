@@ -18,6 +18,8 @@
           {
             'grid grid-cols-[repeat(auto-fill,minmax(var(--grid-card-min-width),1fr))] content-start gap-(--grid-gap) p-(--grid-pad) max-w-full':
               mode === 'grid',
+            'grid-cols-[repeat(auto-fill,minmax(var(--grid-card-min-width-compact),1fr))]!':
+              mode === 'grid' && compact,
           },
         ]"
       >
@@ -48,7 +50,7 @@
               mode === 'list' ? 'list-item-list' : 'list-item-grid',
               { 'list-item-list-multi-line': mode === 'list' && multiLine },
             ]"
-            v-memo="[item.key, item.editStatus, mode, entitiesLoading]"
+            v-memo="[item.key, item.editStatus, mode, entitiesLoading, compact]"
           >
             <ListItem
               :key="item.key + '_preview'"
@@ -71,6 +73,7 @@
               :relation-type="relationType"
               :has-selection="enableSelection"
               :view-mode="mode"
+              :compact="compact"
               :multi-line="multiLine"
               :multi-line-columns="multiLineColumns"
               :hide-labels="!!columnLabels"
@@ -96,7 +99,7 @@
               else entityWrapperHandler(entity.originalEntity);
             }
           "
-          v-memo="[entity.memoKey, !!columnLabels]"
+          v-memo="[entity.memoKey, !!columnLabels, compact]"
         >
           <ListItem
             :item-id="entity.id"
@@ -121,6 +124,7 @@
             :is-enable-navigation="actionOnClick === ActionOnClick.Navigate"
             :entity-list-elements="entityListElements"
             :view-mode="mode"
+              :compact="compact"
             :title-link="entity.componentPath"
             :refetch-entities="refetchEntities"
             :preview-component-enabled="previewComponentEnabled"
@@ -229,6 +233,7 @@ const props = withDefaults(
     entityListElements?: EntityListElement[];
     allowedActionsOnRelations?: RelationActions[];
     mode: "list" | "grid";
+    compact?: boolean;
     config?: ConfigItem[];
     refetchEntities?: () => Promise<void>;
     expandFilters?: boolean;
