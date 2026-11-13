@@ -59,6 +59,18 @@ include:
         - ${HARBOR_URL}/elody-dams-dev
       push_latest_tag: false
 
+  - component: $CI_SERVER_FQDN/components/Containers/build@v0.10.3
+    inputs:
+      job: storybook_image
+      stage: deliver
+      needs: ["storybook:static"]
+      rules:
+        - if: '$CI_COMMIT_BRANCH == "beta/redesign"'
+      image_name: inuits/elody-storybook
+      image_tag: ${PWA_IMAGE_TAG}
+      dockerfile_path: docker/storybook.Dockerfile
+      destination_registry: ${HARBOR_URL}/elody-dams-dev
+
 
 # --------------------------------------------------------------
 # Storybook
@@ -83,14 +95,23 @@ storybook:build:
   script:
     - pnpm build-storybook
 
-pages:
+storybook:static:
   extends: .storybook
+  stage: build
   rules:
     - if: '$CI_COMMIT_BRANCH == "beta/redesign"'
   script:
     - pnpm build-storybook
-    - rm -rf public
-    - mv storybook-static public
   artifacts:
     paths:
-      - public
+      - storybook-static
+    expire_in: 1 day
+
+storybook:docs:
+  stage: .post
+  needs: [storybook_image]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "beta/redesign"'
+  trigger:
+    project: rnd/inuits/dams/elody-docs
+    branch: master

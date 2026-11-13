@@ -6,7 +6,7 @@ import Unicon from "vue-unicons";
 import { uniLeftIndentAlt, uniRightIndentAlt } from "vue-unicons/dist/icons";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { Unicons } from "../src/types";
-import { apolloClient, i18n, router } from "./mockMain";
+import { apolloClient, i18n, resetQueryFixtures, router } from "./mockMain";
 import { useInputValidation } from "../src/composables/useInputValidation";
 import "../src/assets/main.css";
 
@@ -56,6 +56,7 @@ const previewSplitViewports = {
 };
 
 const preview: Preview = {
+  beforeEach: () => resetQueryFixtures(),
   globalTypes: {
     surface: {
       description: "Background the story sits on",
@@ -84,6 +85,7 @@ const preview: Preview = {
           "Components",
           "Metadata",
           "EntityElements",
+          "History",
           "Library",
           "Filters",
           "ContextMenuActions",

@@ -53,3 +53,28 @@ export const Pdf: Story = {
     ),
   }),
 };
+
+export const States: Story = {
+  render: () => ({
+    components: { ViewerToolbar },
+    setup: () => ({
+      rows: [
+        { name: "image", props: { mode: "image", imageFilename: "north-sea.jpg" } },
+        { name: "image, cropping allowed", props: { mode: "image", imageFilename: "north-sea.jpg", enableSelection: true } },
+        { name: "image, cropped", props: { mode: "image", imageFilename: "north-sea.jpg", hasCropData: true, showingCropped: true, canRecrop: true } },
+        { name: "pdf", props: { mode: "pdf", page: 1, pageCount: 12 } },
+        { name: "text", props: { mode: "text" } },
+        { name: "av", props: { mode: "av" } },
+      ],
+    }),
+    template: `
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div v-for="row in rows" :key="row.name">
+          <code style="font-size:var(--text-label)">{{ row.name }}</code>
+          <div style="position:relative;height:120px;background:var(--color-surface-inverted);border-radius:var(--radius-card);overflow:hidden">
+            <viewer-toolbar v-bind="row.props" mediafile-id="m1" original-filename="north-sea.jpg" />
+          </div>
+        </div>
+      </div>`,
+  }),
+};
