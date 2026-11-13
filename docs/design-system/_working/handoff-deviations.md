@@ -126,3 +126,41 @@ Kinds:
 | G5 | Deviation | status "2 of 5 selected" | existing "Selection: N" copy kept | — |
 | G6 | Parked | "Select" footer label | `te('bulk-operations.select')` with English fallback; key not yet in baseGraphql translations | add `bulk-operations.select` (en/nl/ar) |
 | G7 | Deviation | Select all in the selection bar in both views | grid only; list keeps its column-header checkbox | — |
+
+## Public docs review (2026-11-13)
+
+The public design-system pages (elody-docs) now describe only what is built. These handoff items were removed from them and are not logged above. **Bug** = a product defect found during the review.
+
+| ID | Kind | Handoff | What we have | Follow-up |
+|---|---|---|---|---|
+| R1 | Parked | toggle group as `role="radiogroup"`, ←/→ moves, disabled segment | icon buttons with `aria-pressed` in `role="group"`, no arrow keys, no disabled segment; aria-label hard-coded to "view mode" | make generic, add keys |
+| R2 | Parked | slider: commit-teal fill, value bubble on drag/focus, disabled | mint `--color-accent-normal` fill, `:tooltips="false"`, no disabled prop; range slider has hard-coded "From:/To:" and raw colours | move to tokens + i18n |
+| R3 | Parked | date picker: range, two months, week numbers, min/max, "Today" link, locale format | single date (+ time), fixed `dd/MM/yyyy`, library chrome | decide on range |
+| R4 | Parked | autocomplete: chip focus with ←/→, Backspace removes, type badges in results, "create new item" row | none of these | build with the relation picker work |
+| R5 | Parked | dropdown: result count while searching, labelled search | not built | — |
+| R6 | Parked | dynamic form: tab error dot, tabs pattern with keys, validation summary, Cancel, `role="group"` actions, server error `role="alert"` | none; tabs are clickable divs, the story passes a non-existent `errorTabs` | tabs a11y first |
+| R7 | Parked | guided flow: step valid/error dots, clickable step chips, resume at first invalid step | not built | — |
+| R8 | Parked | split button submenus | no submenu exists | only when a client needs one |
+| R9 | Deviation | never a bare ⋮ | bare ⋮ (with aria-label) in list rows and below 768px (bottom sheet) | keep; documented as the exception |
+| R10 | Parked | selection bar "running" state (progress per operation, bar locked); pagination inside the bar | not built (pagination props exist, render nothing) | — |
+| R11 | Parked | panel status chip with explanation popover + jump to field; expand panel to modal; SectionHeader band | header status is an editable metadata pill; `--color-surface-section-header` unused | — |
+| R12 | Parked | page number in the URL; pager locked while a page loads | not built | — |
+| R13 | Parked | undo toast after "Clear all" / "Clear filter" in the filter rail | not built | with `useUndo` (E14) |
+| R14 | Parked | modal: Escape blocked while busy, inline `role="alert"` error | Escape always closes; no error slot | — |
+| R15 | Parked | saved searches: default/star, share with team, save vs save-as, undo after delete | menu in the filter rail, delete asks to confirm | — |
+| R16 | Parked | media viewer: "no media" state, filename + mimetype line, viewport `role="img"`, keyboard shortcuts | not built (only OpenSeadragon defaults) | — |
+| R17 | Parked | map: enlarged selected marker, loading state, "no location" line, selection shared with the list | not built | — |
+| R18 | Deviation | breadcrumb = entity ancestors with badges | navigation history ("…N", previous route, current) | decide if an ancestor trail is wanted |
+| R19 | Parked | record hierarchy as a tree (badges, counts, persisted expansion, Enter opens) | only the import folder tree exists | — |
+| R20 | Parked | import browser: two-pane modal, file table with checkboxes, path breadcrumb, retry, progress hand-off | one folder tree + "start import" | — |
+| R21 | Parked | audit trail (AuditEntry, `role="log"`), "Compare" from a trail row; diff `role="table"`, "show only changes", "no differences", restore version | history page with a version dropdown per column, red/green diff | — |
+| R22 | Parked | comments inline on the record: Reply/Resolve on hover, Ctrl+Enter, `role="log"`, undo after delete | threads in a modal, open/resolved/archived, Edit/Delete, delete asks to confirm | — |
+| R23 | Parked | upload: per-file % bar, cancel per file, toast for rejected files | step glyphs per file, trash button; over the file limit a file is dropped silently | at least report dropped files |
+| R24 | Parked | WYSIWYG: icon toolbar with link + clear format, `role="toolbar"`, `aria-pressed`; virtual keyboard as a popover (`role="dialog"`, Escape) | text buttons per extension, `is-active` class; keyboard panel fixed bottom-centre | — |
+| R25 | Parked | field values: image thumbnails, "Show on map" for coordinates | not built | — |
+| R26 | Parked | multilingual inline editor (locale chips above one input, dirty dot) | one language per edit | — |
+| R27 | Parked | list: arrow-key row cursor, table mode as a real table | divs without table roles, no row cursor | — |
+| R28 | Bug | — | toasts have no `role="status"`/`"alert"` (library outputs no live region) | add a live region |
+| R29 | Bug | — | virtual-keyboard trigger is a clickable `<div>`: not reachable by keyboard | make it a button |
+| R30 | Bug | — | import folder tree rows are clickable `<div>`/`<a>` without ARIA: not usable by keyboard | tree pattern |
+| R31 | Bug | — | comment thread card is a clickable `<div>` without tabindex; comment edit button has no aria-label | make them buttons |

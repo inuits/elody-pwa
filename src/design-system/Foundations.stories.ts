@@ -144,39 +144,24 @@ export const SpacingAndMotion: Story = {
         <section>
           <h3 style="font-size:var(--text-heading);font-weight:700;margin-bottom:4px">Spacing</h3>
           <p style="font-size:var(--text-hint);color:var(--color-text-muted);margin-bottom:10px;max-width:60ch">
-            A dense scale in 2px steps below 12px — row paddings are tuned in 1–2px on purpose. Namespaced as ds-* so it adds p-ds-4 rather than remapping Tailwind's p-4.
+            Spacing is set per layout role, not from a numeric scale. Components use these tokens; anything else is tuned in the component's own token.
           </p>
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <div v-for="token in tokens" :key="token" style="display:flex;align-items:center;gap:10px">
-              <code style="font-size:var(--text-label);width:140px">{{ token }}</code>
-              <span style="font-size:var(--text-hint);color:var(--color-text-subtle);width:44px">{{ readToken(token) }}</span>
-              <span :style="{ height: '12px', width: 'var(' + token + ')', background: 'var(--color-accent)' }" />
-            </div>
-          </div>
+          <table style="border-collapse:collapse;width:100%;max-width:640px">
+            <tbody>
+              <tr v-for="token in tokens" :key="token.name" style="border-bottom:1px solid var(--color-border-faint)">
+                <td style="padding:6px 10px 6px 0;width:190px"><code style="font-size:var(--text-label)">{{ token.name }}</code></td>
+                <td style="padding:6px 10px 6px 0;width:150px;font-size:var(--text-hint);color:var(--color-text-subtle)">{{ readToken(token.name) }}</td>
+                <td style="padding:6px 0;font-size:var(--text-table)">{{ token.use }}</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section>
           <h3 style="font-size:var(--text-heading);font-weight:700;margin-bottom:4px">Motion</h3>
           <p style="font-size:var(--text-hint);color:var(--color-text-muted);margin-bottom:10px;max-width:60ch">
             One duration, one easing, one press. Hover the tile to see the transition; press it for the active scale.
           </p>
-          <style>
-            .ds-motion-demo {
-              background: var(--color-accent);
-              color: var(--color-text-on-accent);
-              border-radius: var(--radius-button);
-              padding: 8px 14px;
-              font-size: var(--text-ui);
-              transition: background var(--transition-duration-ui) var(--ease-ui),
-                          transform var(--transition-duration-ui) var(--ease-ui);
-            }
-            .ds-motion-demo:hover { background: var(--color-accent-hover); }
-            .ds-motion-demo:active { transform: scale(var(--scale-press)); }
-            .ds-motion-demo:focus-visible {
-              outline: 2px solid var(--color-focus-ring);
-              outline-offset: 1px;
-            }
-          </style>
-          <button type="button" class="ds-motion-demo">{{ readToken('--transition-duration-ui') }} · {{ readToken('--ease-ui') }} · scale({{ readToken('--scale-press') }})</button>
+          <button type="button" class="bg-accent text-text-on-accent rounded-button px-4 py-2 text-ui transition duration-(--transition-duration-ui) ease-(--ease-ui) hover:bg-accent-hover active:scale-(--scale-press)">{{ readToken('--transition-duration-ui') }} · {{ readToken('--ease-ui') }} · scale({{ readToken('--scale-press') }})</button>
         </section>
       </div>`,
   }),

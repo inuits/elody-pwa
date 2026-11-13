@@ -81,7 +81,6 @@ export const colourGroups: TokenGroup[] = [
     tokens: [
       { name: "--color-commit", use: "Save, checks" },
       { name: "--color-commit-hover", use: "Commit hover" },
-      { name: "--color-commit-strong-hover", use: "Commit strong hover" },
       { name: "--color-focus-ring", use: "2px ring, 1px offset" },
     ],
   },
@@ -130,8 +129,8 @@ export const typeTokens = [
   { name: "--text-ui", use: "Header buttons, count chips" },
   { name: "--text-table", use: "Table cells, menu items" },
   { name: "--text-value", use: "Field values and inputs — the reading size" },
-  { name: "--text-body", use: "App body size" },
-  { name: "--text-heading", use: "Page title" },
+  { name: "--text-heading", use: "Headings" },
+  { name: "--text-title", use: "Page titles" },
 ];
 
 export const radiusTokens = [
@@ -151,20 +150,16 @@ export const shadowTokens = [
 ];
 
 export const spacingTokens = [
-  "--spacing-ds-1",
-  "--spacing-ds-2",
-  "--spacing-ds-3",
-  "--spacing-ds-4",
-  "--spacing-ds-5",
-  "--spacing-ds-6",
-  "--spacing-ds-7",
-  "--spacing-ds-8",
-  "--spacing-ds-9",
-  "--spacing-ds-10",
-  "--spacing-ds-11",
-  "--spacing-ds-12",
-  "--spacing-ds-13",
-  "--spacing-ds-14",
+  { name: "--page-pad", use: "Page edges" },
+  { name: "--gutter-panels", use: "Between panels" },
+  { name: "--panel-header-pad", use: "Panel header" },
+  { name: "--panel-body-pad", use: "Panel body" },
+  { name: "--gutter-field-grid", use: "Between fields (row, column)" },
+  { name: "--field-row-pad", use: "Inside a field value" },
+  { name: "--table-row-pad", use: "Table and list rows" },
+  { name: "--modal-body-pad", use: "Modal body" },
+  { name: "--modal-footer-pad", use: "Modal footer" },
+  { name: "--touch-target-min", use: "Minimum hit target on tablets" },
 ];
 
 export const readToken = (name: string): string =>
