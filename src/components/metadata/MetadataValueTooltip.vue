@@ -27,7 +27,7 @@
 import {
   type BaseEntity,
   type PanelMetadataValueTooltip,
-  type PanelMetadataValueTooltipTypes,
+  PanelMetadataValueTooltipTypes,
   type Metadata,
 } from "@/generated-types/queries";
 import { computed } from "vue";

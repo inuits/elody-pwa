@@ -29,6 +29,10 @@ export const registerQueryFixture = (
   queryFixtures[operationName] = data;
 };
 
+export const resetQueryFixtures = (): void => {
+  Object.keys(queryFixtures).forEach((key) => delete queryFixtures[key]);
+};
+
 const fixtureLink = new ApolloLink(
   (operation) =>
     new Observable((observer) => {
