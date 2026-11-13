@@ -850,16 +850,12 @@ describe("ListItem", () => {
       );
     });
 
-    it("drops the title underline on hover", () => {
-      const [title] = fieldsOf(
+    it("keeps the dashed title underline on hover, like a list row", () => {
+      const classes = fieldsOf(
         card({ teaserMetadata: [{ key: "title", value: "A title" }] }),
-      );
-      expect(title.classes()).toEqual(
-        expect.arrayContaining([
-          "hover:no-underline",
-          "hover:[&_[data-cy=metadata-value]]:no-underline",
-        ]),
-      );
+      )[0].classes();
+      expect(classes).toContain("hover:no-underline");
+      expect(classes.join(" ")).not.toMatch(/hover:\[&_\[data-cy=metadata-value\]\]/);
     });
 
     it("underlines the title, dashed, but not a leading pill", () => {

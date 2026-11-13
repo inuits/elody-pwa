@@ -68,7 +68,7 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
 - Body (`--grid-card-body-pad`, `--text-value`): the first field is the
   title, a link to the detail page (`--text-heading`, bold,
   `--color-text-link`, dashed title underline; hover `--color-text-link-hover`,
-  no underline on hover: the card's hover fill is enough), clamped
+  the dashed underline stays on hover, as in list rows), clamped
   to 2 lines with `--grid-card-title-min-height` so rows line up. The eye
   and ⋮ sit beside the title (`--grid-card-title-action-gap`); there is no
   footer. Then every other
