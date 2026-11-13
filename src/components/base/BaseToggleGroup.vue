@@ -3,7 +3,7 @@
        the active view in accent wash. -->
   <div
     role="group"
-    :aria-label="$t('library.view-mode')"
+    :aria-label="$t(groupLabel ?? 'library.view-mode')"
     class="flex w-fit h-fit border border-border-default rounded-input bg-surface overflow-hidden select-none"
   >
     <BaseTooltip
@@ -14,26 +14,31 @@
     >
       <template #activator="{ on, describedBy }">
         <button
-          v-on="on"
+          v-on="toggle.iconOn ? on : {}"
           type="button"
-          class="flex items-center justify-center size-(--view-switch-size) cursor-pointer"
-          :class="
+          class="flex items-center justify-center h-(--view-switch-size) cursor-pointer"
+          :class="[
+            toggle.iconOn
+              ? 'w-(--view-switch-size)'
+              : 'px-(--view-switch-text-pad) text-ui font-bold',
             toggle.isOn
               ? 'bg-accent-wash text-accent-ink'
-              : 'text-text-secondary hover:bg-surface-row-hover'
-          "
-          :aria-label="toggle.label ? $t(toggle.label) : undefined"
-          :aria-describedby="describedBy"
+              : 'text-text-secondary hover:bg-surface-row-hover',
+          ]"
+          :aria-label="toggle.iconOn && toggle.label ? $t(toggle.label) : undefined"
+          :aria-describedby="toggle.iconOn ? describedBy : undefined"
           :aria-pressed="toggle.isOn ? 'true' : 'false'"
           @click="select(index)"
         >
           <unicon
-            :name="Unicons[toggle.isOn ? toggle.iconOn : toggle.iconOff].name"
+            v-if="toggle.iconOn"
+            :name="Unicons[toggle.isOn ? toggle.iconOn : toggle.iconOff!].name"
             height="18"
           />
+          <template v-else-if="toggle.label">{{ $t(toggle.label) }}</template>
         </button>
       </template>
-      <span v-if="toggle.label">{{ $t(toggle.label) }}</span>
+      <span v-if="toggle.iconOn && toggle.label">{{ $t(toggle.label) }}</span>
     </BaseTooltip>
   </div>
 </template>
@@ -47,13 +52,14 @@ import { onMounted, ref, watch, type Ref } from "vue";
 type Toggle = {
   viewMode?: string;
   isOn: Ref<boolean>;
-  iconOn: DamsIcons;
-  iconOff: DamsIcons;
+  iconOn?: DamsIcons;
+  iconOff?: DamsIcons;
   label?: string;
 };
 
 const props = defineProps<{
   toggles: Toggle[];
+  groupLabel?: string;
 }>();
 
 // a toggle the user turned on: a click, not a change the page made

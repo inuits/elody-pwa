@@ -104,6 +104,24 @@
         class="size-10 text-text-subtle"
         aria-hidden="true"
       />
+      <BaseInputCheckbox
+        v-if="
+          !isPreviewElement &&
+          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
+          !isPreview &&
+          hasSelection
+        "
+        :class="[
+          { invisible: isDisabled },
+          'absolute top-(--grid-card-check-inset) left-(--grid-card-check-inset) p-(--grid-card-check-pad) rounded-input bg-surface border border-border-subtle',
+        ]"
+        v-model="isChecked"
+        size="compact"
+        :aria-label="te('bulk-operations.select') ? t('bulk-operations.select') : 'Select'"
+        :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
+        :bulk-operations-context="bulkOperationsContext"
+        @click.stop
+      />
     </div>
     <div
       v-if="isListMode && canShowCopyRight() && media && !imageSrcError"
@@ -148,7 +166,7 @@
         { 'flex items-center': isListMode && !props.multiLine },
         { 'grid gap-x-4 gap-y-3 items-start': isListMode && props.multiLine },
         {
-          'grid grid-cols-[auto_minmax(0,1fr)] content-start gap-x-(--grid-card-meta-col-gap) gap-y-(--grid-card-meta-row-gap) flex-1 p-(--grid-card-body-pad) text-value':
+          'grid grid-cols-[minmax(0,1fr)_auto] content-start gap-x-(--grid-card-title-action-gap) gap-y-(--grid-card-meta-row-gap) flex-1 p-(--grid-card-body-pad) text-value':
             isGridMode,
         },
         { '[&_[data-cy=metadata-label]]:sr-only': hideLabels },
@@ -165,11 +183,14 @@
         :class="[
           teaserMetadataStyle,
           { 'text-text-secondary': idx === 0 && isSeen },
-          // Grid card body: a 2-line title link, then label / value rows.
+          // Grid card body: a 2-line title link, then each label above its value.
           isGridMode
             ? idx === 0
-              ? 'col-span-2 mb-(--grid-card-title-gap) min-h-(--grid-card-title-min-height) line-clamp-2 font-bold text-heading text-text-link hover:text-text-link-hover hover:[&_[data-cy=metadata-value]]:decoration-solid [&_.line-clamp]:[--line-clamp:2]! [&_[data-cy=entity-element-metadata]]:text-inherit [&_[data-cy=metadata-label]]:sr-only'
-              : 'col-span-2 grid grid-cols-subgrid items-center min-w-0 whitespace-nowrap [&>[data-cy=metadata-wrapper]]:contents [&_[data-cy=metadata-label]]:font-normal [&_[data-cy=metadata-label]]:text-value [&_[data-cy=metadata-label]]:text-text-muted [&_[data-cy=metadata-label]]:truncate'
+              ? 'col-start-1 row-start-1 mb-(--grid-card-title-gap) min-h-(--grid-card-title-min-height) line-clamp-2 font-bold text-heading text-text-link hover:text-text-link-hover hover:no-underline [&_.line-clamp]:[--line-clamp:2]! [&_[data-cy=entity-element-metadata]]:text-inherit [&_[data-cy=metadata-label]]:sr-only'
+              : [
+                  'col-span-2 flex flex-col min-w-0 whitespace-nowrap [&>[data-cy=metadata-wrapper]]:flex [&>[data-cy=metadata-wrapper]]:flex-col [&>[data-cy=metadata-wrapper]]:gap-(--grid-card-meta-label-gap) [&_[data-cy=metadata-label]]:truncate',
+                  { hidden: compact },
+                ]
             : '',
           // List row (ui_kits/clients): bold title in link ink, the rest secondary.
           isListMode
@@ -297,6 +318,32 @@
           </template>
         </MultilingualWrapper>
       </component>
+      <div
+        v-if="isGridMode"
+        data-cy="grid-card-actions"
+        class="col-start-2 row-start-1 self-start flex items-center"
+      >
+        <PreviewToggle
+          v-if="canPreview && !(isCompact && buttons?.contextMenu)"
+          :active="previewOpen"
+          :data-preview-for="itemId"
+          @toggle="emit('togglePreviewComponent', itemId)"
+        />
+        <EntityButtons
+          v-if="!isPreviewElement"
+          :buttons="buttons"
+          :parent-entity-id="formId"
+          :entity-id="itemId"
+          :entity-type="entityTypename"
+          :relation="relation"
+          :bulk-operations-context="bulkOperationsContext"
+          :refetch-entities="refetchEntities"
+          :intial-values="intialValues"
+          :relation-values="relationValues"
+          :context-label="rowTitle"
+          @toggle-loading="toggleLoading"
+        />
+      </div>
     </div>
 
     <div v-if="false" :class="[{ 'flex justify-end': isGridMode }]" @click.stop>
@@ -342,49 +389,9 @@
         @toggle-loading="toggleLoading"
       />
     </div>
-    <div
-      v-else-if="isGridMode && !isPreviewElement"
-      data-cy="grid-card-footer"
-      class="flex items-center justify-between mt-auto p-(--grid-card-footer-pad) border-t border-border-subtle"
-    >
-      <BaseInputCheckbox
-        v-if="
-          baseLibraryMode === BaseLibraryModes.NormalBaseLibrary &&
-          !isPreview &&
-          hasSelection
-        "
-        :class="[{ invisible: isDisabled }, 'text-ui text-text-body']"
-        v-model="isChecked"
-        size="compact"
-        :label="te('bulk-operations.select') ? t('bulk-operations.select') : 'Select'"
-        :item="{ id: itemId, teaserMetadata, intialValues, type: itemType }"
-        :bulk-operations-context="bulkOperationsContext"
-      />
-      <div class="flex items-center ml-auto">
-        <PreviewToggle
-          v-if="canPreview && !(isCompact && buttons?.contextMenu)"
-          :active="previewOpen"
-          :data-preview-for="itemId"
-          @toggle="emit('togglePreviewComponent', itemId)"
-        />
-        <EntityButtons
-          :buttons="buttons"
-          :parent-entity-id="formId"
-          :entity-id="itemId"
-          :entity-type="entityTypename"
-          :relation="relation"
-          :bulk-operations-context="bulkOperationsContext"
-          :refetch-entities="refetchEntities"
-          :intial-values="intialValues"
-          :relation-values="relationValues"
-          :context-label="rowTitle"
-          @toggle-loading="toggleLoading"
-        />
-      </div>
-    </div>
     <!-- small screen: Preview leads the ⋮ sheet instead -->
     <PreviewToggle
-      v-else-if="canPreview && !(isCompact && buttons?.contextMenu)"
+      v-else-if="!isGridMode && canPreview && !(isCompact && buttons?.contextMenu)"
       :active="previewOpen"
       :data-preview-for="itemId"
       @toggle="emit('togglePreviewComponent', itemId)"
@@ -479,6 +486,7 @@ const props = withDefaults(
     isEnableNavigation?: boolean;
     entityListElements?: EntityListElement[];
     viewMode?: "list" | "grid" | "pipeline";
+    compact?: boolean;
     titleLink?: RouteLocationRaw;
     refetchEntities?: () => Promise<void>;
     previewComponentEnabled: boolean;
