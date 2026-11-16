@@ -139,7 +139,7 @@ eyebrow (`--eyebrow-tracking`).
 The design system's 2px-step scale is **not** imported as `--spacing-*`,
 because it would redefine Tailwind's numeric utilities (`p-1`, `gap-2`) across
 the app. Exact spacing decisions live in component tokens, and shared rhythms
-in composite tokens: `--panel-header-pad`, `--panel-body-pad`,
+in composite tokens: `--panel-header-pad`, `--panel-body-pad`, `--panel-body-pad-narrow`,
 `--modal-body-pad`, `--modal-footer-pad`,
 `--field-row-pad`, `--table-row-pad`, `--gutter-panels`,
 `--gutter-field-grid`, `--page-pad`.

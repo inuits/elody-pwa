@@ -88,6 +88,45 @@ describe("TableViewRow", () => {
     expect(mockSeenState.isSeen).toHaveBeenCalledWith("item");
   });
 
+  // A narrow table scrolls sideways; its leading columns stay put.
+  it("pins the columns the table asks for, after the badges before them", () => {
+    const wrapper = shallowMount(TableViewRow, {
+      props: {
+        ...props,
+        pinnedCount: 2,
+        teaserMetadata: [
+          { key: "type", value: { formatter: "pill" } },
+          { key: "title", value: "Slaap, baby, slaap" },
+          { key: "author", value: "Schittekatte" },
+        ] as any,
+      },
+    });
+    const columns = wrapper.findAll(".col-primary, .col-secondary");
+
+    expect(columns.map((column) => column.classes("col-pinned"))).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    // every pinned column before the title is a badge of a fixed width
+    expect(columns[1].attributes("style")).toContain(
+      "left: calc(1 * var(--table-col-badge))",
+    );
+    // the hairline after the last pinned column, the title
+    expect(columns.map((column) => column.classes("border-r"))).toEqual([
+      false,
+      true,
+      false,
+    ]);
+    expect(columns[2].attributes("style") ?? "").not.toContain("left");
+  });
+
+  it("keeps every column off a phone, in step with the header", () => {
+    expect(row(shallowMount(TableViewRow, { props })).classes()).not.toContain(
+      "table-row-compact",
+    );
+  });
+
   it("highlights a row with new activity", () => {
     mockEntityPageConfig.seenTracking.value = {
       display: "highlightNew",
@@ -174,6 +213,11 @@ describe("TableViewRow", () => {
     });
     afterEach(() => {
       isCompact.value = false;
+    });
+
+    // Phones have no header and don't scroll sideways: they drop the last columns.
+    it("hides its last columns when narrow", () => {
+      expect(row(mountRow()).classes()).toContain("table-row-compact");
     });
 
     it("drops the eye: Preview leads the ⋮ sheet", () => {

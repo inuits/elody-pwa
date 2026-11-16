@@ -142,12 +142,26 @@
             class="contents"
           />
           <ResultCountChip
-            v-if="showCountChip && !compactMetaRow"
+            v-if="showCountChip && !compactMetaRow && !panelCountTarget"
             :count="totalEntityCount"
             :exact-count="exactTotalCount"
             :exact-count-loading="exactCountLoading"
             @reveal-exact-count="revealExactCount"
           />
+          <!-- in a detail panel the count is a badge next to the panel title -->
+          <Teleport
+            v-if="showCountChip && panelCountTarget"
+            defer
+            :to="panelCountTarget"
+          >
+            <ResultCountChip
+              :count="totalEntityCount"
+              :exact-count="exactTotalCount"
+              :exact-count-loading="exactCountLoading"
+              number-only
+              @reveal-exact-count="revealExactCount"
+            />
+          </Teleport>
           <BasePagination
             v-if="showListPager"
             data-test="list-pager"
@@ -846,7 +860,7 @@ const wrapperClasses = computed(() => {
     if (!onWhiteSurface)
       classes.push(
         props.parentEntityIdentifiers.length > 0
-          ? "px-3 @max-md/wrapper-content:px-0"
+          ? "px-3 @max-2xl/wrapper-content:px-0"
           : "px-(--page-pad-x)",
       );
   }
@@ -1073,6 +1087,10 @@ const showListPager = computed(
 // Inside a detail panel the panel is the chrome: no band or border of the
 // list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
+const panelCountTarget: string | undefined = inject(
+  "PanelCountTarget",
+  undefined,
+);
 const compactPreview: boolean = inject("CompactPreview", false);
 const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();

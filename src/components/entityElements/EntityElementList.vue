@@ -5,7 +5,7 @@
       data-test="entity-element-wrapper"
       :class="[
         {
-          'mb-5':
+          'mb-(--gutter-panels)':
             baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary &&
             !isPreviewElement,
         },

@@ -85,6 +85,29 @@ describe("EntityElementWrapper as a PanelShell (panel-and-block-shells.md)", () 
     );
   });
 
+  it("tightens its body padding further when the card is a narrow side column", () => {
+    expect(normal().find('[data-cy="entity-element-wrapper-content"]').classes()).toContain(
+      "@max-2xl/entity-element:p-(--panel-body-pad-narrow)",
+    );
+  });
+
+  it("gives the list inside a spot for its result count next to the title", () => {
+    const Probe = {
+      inject: { target: { from: "PanelCountTarget", default: undefined } },
+      template: '<i data-cy="probe">{{ target }}</i>',
+    };
+    const wrapper = mount(EntityElementWrapper, {
+      props: { label: "Panel", entityId: "e1", isCollapsed: false },
+      slots: { content: Probe },
+      global: { stubs },
+    });
+    const spot = wrapper.find('[data-cy="entity-element-wrapper-header"] [data-panel-count]');
+    expect(spot.exists()).toBe(true);
+    expect(wrapper.find('[data-cy="probe"]').text()).toBe(
+      `[data-panel-count="${spot.attributes("data-panel-count")}"]`,
+    );
+  });
+
   it("tells the list inside that it sits in a panel", () => {
     const Probe = {
       inject: { insidePanel: { from: "InsidePanel", default: false } },

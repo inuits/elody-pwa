@@ -15,12 +15,13 @@
         data-cy="view-modes-table"
         class="h-full overflow-y-auto"
         :class="{ 'animate-pulse pointer-events-none': isRefetching }"
+        :style="{ '--table-columns': columnsTemplate }"
       >
         <!-- a small screen drops the header; the list meta row selects -->
         <div
           v-if="headerColumns.length > 0 && !isCompact"
           data-cy="view-modes-table-header"
-          class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-1.5 h-(--list-header-height) border-b border-border-subtle text-label font-bold text-text-field-label"
+          class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-2 min-w-min h-(--list-header-height) border-b border-border-subtle text-label font-bold text-text-field-label"
         >
           <div
             v-if="hasLeadingColumn"
@@ -44,11 +45,14 @@
 
           <div v-if="anyEntityHasThumbnail" class="w-10 shrink-0" />
 
-          <div class="flex-1 flex items-center">
+          <div
+            class="flex-1 self-stretch grid grid-cols-(--table-columns) min-w-min bg-inherit"
+          >
             <div
               v-for="(col, idx) in headerColumns"
               :key="'header-' + idx"
-              :class="headerColumnClass(idx)"
+              :class="tableColumnClass(idx, pinnedCount)"
+              :style="tableColumnStyle(idx, pinnedCount)"
             >
               {{ col.label ? t(col.label) : "" }}
             </div>
@@ -82,7 +86,7 @@
             v-if="entity"
             :is="entity.componentTag"
             :to="entity.componentPath"
-            class="list-item-table text-inherit hover:text-inherit hover:no-underline"
+            class="list-item-table block min-w-min text-inherit hover:text-inherit hover:no-underline"
             @click="
               () => {
                 if (actionOnClick === ActionOnClick.OpenInModal)
@@ -112,7 +116,7 @@
               :has-selection="enableSelection"
               :base-library-mode="baseLibraryMode"
               :has-thumbnail="anyEntityHasThumbnail"
-              :col-min-widths="colMinWidths"
+              :pinned-count="pinnedCount"
               :refetch-entities="refetchEntities"
               :preview-component-enabled="previewComponentEnabled"
               :preview-component-current-active="entity.isPreviewActive"
@@ -197,7 +201,7 @@ import PreviewHost from "@/components/previews/PreviewHost.vue";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import useThumbnailHelper from "@/composables/useThumbnailHelper";
 import { formatTeaserMetadata, getMappedSlug } from "@/helpers";
-import { computed, ref, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
 import { usePreviewComponent } from "@/components/library/view-modes/composables/usePreviewComponent";
@@ -205,7 +209,12 @@ import { useEntityListHelpers } from "@/components/library/view-modes/composable
 import { useEntityPageConfig } from "@/composables/useEntityPageConfig";
 import { useSeenState } from "@/composables/useSeenItems";
 import { useBaseModal } from "@/composables/useBaseModal";
-import { readCssToken } from "@/utils/cssToken";
+import {
+  tableColumnClass,
+  tableColumnStyle,
+  tableColumnsTemplate,
+  tablePinnedCount,
+} from "@/components/library/view-modes/tableColumns";
 import { isCompact } from "@/composables/useNavMenu";
 import {
   buildTableItems,
@@ -268,7 +277,6 @@ const { findRelation } = useFormHelper();
 const { openModal } = useBaseModal();
 
 const refEntities = ref<Entity[]>(props.entities);
-const colMinWidths = ref<string[]>([]);
 
 const {
   previewComponent,
@@ -353,35 +361,19 @@ const headerColumns = computed(() => {
   }));
 });
 
-const measureColWidths = () => {
-  const docStyle = getComputedStyle(document.documentElement);
-  const font = `700 ${readCssToken("--text-label", "11.5px")} ${docStyle.fontFamily}`;
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  colMinWidths.value = headerColumns.value.map((col) => {
-    if (!ctx || !col.label) return "";
-    ctx.font = font;
-    return `${Math.ceil(ctx.measureText(t(col.label)).width)}px`;
-  });
-};
-
-const headerColumnClass = (idx: number): string => {
-  const base = "flex justify-start flex-col mx-2 break-words";
-  const pos = idx === 0 ? "col-primary" : "col-secondary";
-  if (headerColumns.value[0]?.hasFormatter) {
-    if (idx === 0) return `${base} ${pos} flex-shrink-0 whitespace-nowrap`;
-    return `${base} ${pos} flex-1 min-w-0`;
-  }
-  const count = headerColumns.value.length;
-  const amount: string | number = count >= 4 ? "default" : count;
-  const widths: Record<string | number, string> = {
-    1: "w-full",
-    2: "w-1/3",
-    3: "w-1/2",
-    default: "w-1/4",
-  };
-  return `${base} ${pos} ${widths[amount]}`;
-};
+const config: any = inject("config");
+// A client can turn sticky columns off (appConfig features.hasStickyTableColumns).
+const pinnedCount = computed(() =>
+  config?.features?.hasStickyTableColumns === false
+    ? 0
+    : tablePinnedCount(headerColumns.value),
+);
+const columnsTemplate = computed(() =>
+  tableColumnsTemplate(
+    headerColumns.value,
+    tablePinnedCount(headerColumns.value),
+  ),
+);
 
 const actionsColumnWidth = computed(() => {
   const widestRowInRem = Math.max(
@@ -479,7 +471,6 @@ const openEntityInModal = (entityId: string, entityType: Entitytyping) => {
   );
 };
 
-watch(headerColumns, measureColWidths, { immediate: true });
 watch(
   () => props.entities,
   (newValue) => {
@@ -552,27 +543,5 @@ watch(
 .list-item-table {
   content-visibility: auto;
   contain-intrinsic-size: 46px;
-}
-
-@container parent (max-width: 640px) {
-  .col-primary,
-  .col-secondary {
-    flex: 1;
-    width: auto;
-    min-width: 0;
-  }
-  .col-secondary:last-child {
-    display: none;
-  }
-}
-@container parent (max-width: 520px) {
-  .col-secondary:nth-last-child(-n + 2) {
-    display: none;
-  }
-}
-@container parent (max-width: 400px) {
-  .col-secondary {
-    display: none;
-  }
 }
 </style>

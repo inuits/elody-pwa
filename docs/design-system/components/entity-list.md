@@ -52,6 +52,16 @@ total; the selection bar and pager don't repeat it.
 - Shown in the main library and in relation lists on detail pages
   (`NormalBaseLibrary`, `PreviewBaseLibrary`); not in compact basic-mode
   relation lists. Hidden until the first page has loaded.
+- In a detail panel the chip moves into the panel header, next to the title,
+  as the number alone (`numberOnly`; the full label stays as its
+  `aria-label`). The list's toolbar then holds only sort, view switch and
+  add pills, so a side column keeps it on one row.
+
+### In a detail panel
+Panels sit `--gutter-panels` apart, the same as the columns. A panel
+narrower than 42rem (a side column) pads its body with
+`--panel-body-pad-narrow`, and the list inside drops its own side padding.
+(`EntityElementWrapper.vue`, `BaseLibrary.vue`)
 
 ## Rows
 List and table rows are flat: `--list-row-pad`, `--text-table`, a
@@ -111,8 +121,21 @@ open). Mixed lists and edit mode keep per-cell labels.
 
 Table mode's header row (`ViewModesTable.vue`) uses the same tokens
 (`--list-header-height`, `--text-label`, bold, `--color-text-field-label`,
-`--color-surface`, hairline below). Its column widths are measured with
-`--text-label` at bold weight, so they follow the token.
+`--color-surface`, hairline below).
+
+The header and every row lay their cells on one grid template
+(`--table-columns`, `tableColumns.ts`), so the columns line up without
+measuring anything. The leading badge columns are `--table-col-badge` wide,
+the title (the first plain column) shares the width down to
+`--table-col-title`, and the other columns down to `--table-col`. A table too narrow for those
+minimums (a side column, or next to an open preview) scrolls sideways. The
+leading badges and the title stay pinned on the left, in the header and in
+every row, with a `--color-border-faint` hairline. Each pinned column sits
+at its index × `--table-col-badge`. A client turns pinning off with
+`features.hasStickyTableColumns: false` in its appConfig; it is on by
+default. Nothing is hidden. Phones keep their own layout: no header, and
+the last columns drop.
+(`ViewModesTable.vue`, `TableViewRow.vue`)
 
 ## Row states
 `ListItem.vue` (list, grid) and `TableViewRow.vue` (table).

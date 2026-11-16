@@ -5,7 +5,7 @@
       :key="index"
       :class="[
         {
-          'mb-5':
+          'mb-(--gutter-panels)':
             index + 1 != elements.length &&
             element.__typename !== 'EntityListElement',
         },

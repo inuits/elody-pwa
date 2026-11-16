@@ -61,17 +61,17 @@
       </div>
     </div>
 
-    <div class="flex-1 flex items-center min-w-0">
+    <div
+      class="table-cells flex-1 self-stretch grid grid-cols-(--table-columns) min-w-min bg-inherit"
+    >
       <div
         v-for="(metadataItem, idx) in visibleMetadata"
         :key="`${itemId}_${metadataItem?.key || idx}`"
         :class="[
-          columnClass(idx),
+          tableColumnClass(idx, pinnedCount),
           { 'text-text-secondary': idx === 0 && isSeen },
         ]"
-        :style="
-          props.colMinWidths?.[idx] ? { minWidth: props.colMinWidths[idx] } : {}
-        "
+        :style="tableColumnStyle(idx, pinnedCount)"
       >
         <ReadOnlyMetadataWrapper
           :form-id="itemId || 'tableview'"
@@ -152,6 +152,10 @@ import {
   type RowSheet,
 } from "@/components/context-menu-actions/rowSheet";
 import { useI18n } from "vue-i18n";
+import {
+  tableColumnClass,
+  tableColumnStyle,
+} from "@/components/library/view-modes/tableColumns";
 
 const props = withDefaults(
   defineProps<{
@@ -185,7 +189,8 @@ const props = withDefaults(
     previewComponentFeatureEnabled: boolean;
     previewComponentListItemsCoverage?: ListItemCoverageTypes;
     loading?: boolean;
-    colMinWidths?: string[];
+    // Leading columns that stay put while a narrow table scrolls sideways.
+    pinnedCount?: number;
   }>(),
   {
     previewOpen: false,
@@ -205,7 +210,7 @@ const props = withDefaults(
     refetchEntities: undefined,
     previewComponentListItemsCoverage: undefined,
     loading: false,
-    colMinWidths: () => [],
+    pinnedCount: 0,
   },
 );
 
@@ -261,24 +266,6 @@ provide(
   })),
 );
 
-const columnClass = (idx: number): string => {
-  const base = "flex justify-start flex-col mx-2 break-words";
-  const pos = idx === 0 ? "col-primary" : "col-secondary";
-  if (visibleMetadata.value[0]?.value?.formatter) {
-    if (idx === 0) return `${base} ${pos} flex-shrink-0 whitespace-nowrap`;
-    return `${base} ${pos} flex-1 min-w-0`;
-  }
-  const count = visibleMetadata.value.length;
-  const amount: string | number = count >= 4 ? "default" : count;
-  const widths: Record<string | number, string> = {
-    1: "w-full",
-    2: "w-1/3",
-    3: "w-1/2",
-    default: "w-1/4",
-  };
-  return `${base} ${pos} ${widths[amount]}`;
-};
-
 const isActiveListItem = computed<boolean>(() => {
   if (
     props.previewComponentListItemsCoverage ===
@@ -317,7 +304,9 @@ const isNew = computed<boolean>(() =>
 const wrapperClasses = computed(() => [
   // entity-list-element.md: the checkbox owns the wash, the open preview owns
   // the left border; hover fills.
-  "flex items-center gap-2 p-(--list-row-pad) border-b border-border-faint text-table cursor-pointer list-none hover:bg-surface-row-hover",
+  "flex items-center gap-2 min-w-min p-(--list-row-pad) border-b border-border-faint text-table cursor-pointer list-none hover:bg-surface-row-hover",
+  // elsewhere a narrow table scrolls sideways instead (ViewModesTable)
+  { "table-row-compact": isCompact.value },
   isChecked.value ? "bg-accent-wash shadow-accent-row" : "bg-background-light",
   {
     "grayscale brightness-95 !cursor-default": props.isDisabled,
@@ -330,24 +319,28 @@ const wrapperClasses = computed(() => [
 </script>
 
 <style scoped>
+/* Phones: no header, no sideways scroll, so the last columns go */
+.table-row-compact .table-cells {
+  display: flex;
+}
 @container parent (max-width: 640px) {
-  .col-primary,
-  .col-secondary {
+  .table-row-compact .col-primary,
+  .table-row-compact .col-secondary {
     flex: 1;
     width: auto;
     min-width: 0;
   }
-  .col-secondary:last-child {
+  .table-row-compact .col-secondary:last-child {
     display: none;
   }
 }
 @container parent (max-width: 520px) {
-  .col-secondary:nth-last-child(-n + 2) {
+  .table-row-compact .col-secondary:nth-last-child(-n + 2) {
     display: none;
   }
 }
 @container parent (max-width: 400px) {
-  .col-secondary {
+  .table-row-compact .col-secondary {
     display: none;
   }
 }

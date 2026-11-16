@@ -3,6 +3,19 @@ import { mount } from "@vue/test-utils";
 import ViewModesTable from "../ViewModesTable.vue";
 import { type Entity } from "@/generated-types/queries";
 
+const appConfig = vi.hoisted(() => ({
+  features: {} as Record<string, unknown>,
+}));
+vi.mock("vue", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("vue")>();
+  return {
+    ...actual,
+    inject: (key: string, ...rest: unknown[]) =>
+      key === "config"
+        ? appConfig
+        : (actual.inject as (...args: unknown[]) => unknown)(key, ...rest),
+  };
+});
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }));
@@ -105,5 +118,90 @@ describe("ViewModesTable header", () => {
     expect(
       wrapper.findComponent({ name: "BaseInputCheckbox" }).exists(),
     ).toBe(false);
+  });
+});
+
+describe("ViewModesTable pinned columns", () => {
+  const work = (id: string): Entity =>
+    ({
+      id,
+      uuid: id,
+      type: "work",
+      teaserMetadata: {
+        type: { label: "Type", key: "type" },
+        title: { label: "Title", key: "title" },
+        author: { label: "Author", key: "author" },
+      },
+      intialValues: {
+        id,
+        type: { formatter: "pill" },
+        title: "Slaap, baby, slaap",
+        author: "Schittekatte",
+      },
+      relationValues: {},
+    }) as unknown as Entity;
+
+  it("pins the leading badges and the title, in the header and the rows", () => {
+    const wrapper = mountTable({ entities: [work("w1"), work("w2")] });
+    const header = wrapper.findAll(
+      '[data-cy="view-modes-table-header"] .col-primary, [data-cy="view-modes-table-header"] .col-secondary',
+    );
+    expect(header.map((column) => column.classes("col-pinned"))).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    expect(
+      wrapper.findComponent({ name: "TableViewRow" }).props("pinnedCount"),
+    ).toBe(2);
+  });
+
+  // Header and rows share one grid template, so their columns line up
+  // without measuring; a narrow table keeps the minimums and scrolls.
+  it("gives the header and rows one column template", () => {
+    const wrapper = mountTable({ entities: [work("w1")] });
+    expect(
+      wrapper.find('[data-cy="view-modes-table"]').attributes("style"),
+    ).toContain(
+      "--table-columns: var(--table-col-badge) minmax(var(--table-col-title), 1fr) minmax(var(--table-col), 1fr)",
+    );
+  });
+
+  // A pill column after the title (podiumnet's organisations) can hold
+  // several pills, so it shares the width like any other column.
+  it("only gives the leading badges a fixed width", () => {
+    const contact = {
+      ...work("c1"),
+      teaserMetadata: {
+        email: { label: "E-mail", key: "email" },
+        organisation: { label: "Organisation", key: "organisation" },
+      },
+      intialValues: {
+        id: "c1",
+        email: "jos@joosens.be",
+        organisation: { formatter: "pill" },
+      },
+    } as unknown as Entity;
+    const wrapper = mountTable({ entities: [contact] });
+    expect(
+      wrapper.find('[data-cy="view-modes-table"]').attributes("style"),
+    ).toContain(
+      "--table-columns: minmax(var(--table-col-title), 1fr) minmax(var(--table-col), 1fr)",
+    );
+  });
+
+  it("pins nothing when the client turns sticky columns off", () => {
+    appConfig.features = { hasStickyTableColumns: false };
+    const wrapper = mountTable({ entities: [work("w1")] });
+    appConfig.features = {};
+    expect(
+      wrapper.findAll('[data-cy="view-modes-table-header"] .col-pinned'),
+    ).toHaveLength(0);
+    expect(
+      wrapper.findComponent({ name: "TableViewRow" }).props("pinnedCount"),
+    ).toBe(0);
+    expect(
+      wrapper.find('[data-cy="view-modes-table"]').attributes("style"),
+    ).toContain("--table-columns: var(--table-col-badge) minmax(");
   });
 });

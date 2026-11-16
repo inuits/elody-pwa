@@ -1484,6 +1484,37 @@ describe("BaseLibrary.vue inside a detail panel", () => {
   });
 });
 
+describe("BaseLibrary.vue result count in a detail panel", () => {
+  it("moves the count into the panel header as a number badge", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { InsidePanel: true, PanelCountTarget: '[data-panel-count="p1"]' },
+    );
+    await flushPromises();
+
+    // the teleport is stubbed in place, so the badge is the only chip
+    const chips = wrapper.findAllComponents(ResultCountChip);
+    expect(chips).toHaveLength(1);
+    expect(chips[0].props("numberOnly")).toBe(true);
+    wrapper.unmount();
+  });
+
+  it("keeps the count in the list header without a panel header to go to", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    expect(
+      wrapper.find('[data-cy="list-header"]').findComponent(ResultCountChip).exists(),
+    ).toBe(true);
+    wrapper.unmount();
+  });
+});
+
 describe("BaseLibrary.vue add pills in a detail panel", () => {
   it("gives the list header a spot for the add pills and points the bar at it", async () => {
     mockRoute.path = "/test";
@@ -1668,7 +1699,7 @@ describe("BaseLibrary.vue as a relation list in a panel", () => {
     await flushPromises();
 
     expect(wrapper.find(".grid").classes()).toEqual(
-      expect.arrayContaining(["px-3", "@max-md/wrapper-content:px-0"]),
+      expect.arrayContaining(["px-3", "@max-2xl/wrapper-content:px-0"]),
     );
     wrapper.unmount();
   });

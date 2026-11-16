@@ -69,4 +69,12 @@ describe("ResultCountChip", () => {
     expect(wrapper.find("button").exists()).toBe(false);
     expect(wrapper.text()).toBe("4,312 results");
   });
+
+  it("shows only the number as a panel header badge, with the full label for screen readers", () => {
+    const chip = getWrapper({ count: 258, numberOnly: true }).find(
+      '[data-cy="list-count-chip"]',
+    );
+    expect(chip.text()).toBe("258");
+    expect(chip.attributes("aria-label")).toBe("258 results");
+  });
 });

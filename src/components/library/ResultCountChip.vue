@@ -9,13 +9,18 @@
       class="underline decoration-dotted cursor-pointer disabled:cursor-wait"
       :disabled="exactCountLoading"
       :title="t('bulk-operations.reveal-exact-count')"
+      :aria-label="numberOnly ? label : undefined"
       @click="emit('revealExactCount')"
     >
-      {{ label }}
+      {{ shownLabel }}
     </button>
-    <span v-else data-cy="list-count-chip" :class="chipClasses">{{
-      label
-    }}</span>
+    <span
+      v-else
+      data-cy="list-count-chip"
+      :class="chipClasses"
+      :aria-label="numberOnly ? label : undefined"
+      >{{ shownLabel }}</span
+    >
     <SpinnerLoader v-if="exactCountLoading" theme="accent" :dimensions="12" />
     <BaseTooltip
       v-else-if="revealable"
@@ -52,8 +57,10 @@ const props = withDefaults(
     count: number;
     exactCount?: number | null;
     exactCountLoading?: boolean;
+    // A badge next to a panel title: the title says what is counted.
+    numberOnly?: boolean;
   }>(),
-  { exactCount: null, exactCountLoading: false },
+  { exactCount: null, exactCountLoading: false, numberOnly: false },
 );
 
 const emit = defineEmits<{ (event: "revealExactCount"): void }>();
@@ -66,11 +73,17 @@ const chipClasses =
 const revealable = computed(() =>
   canRevealExactCount(props.count, props.exactCount),
 );
+const displayCount = computed(() =>
+  formatDisplayCount(props.count, props.exactCount, locale.value),
+);
 const label = computed(() =>
   t(
     "library.result-count",
-    { count: formatDisplayCount(props.count, props.exactCount, locale.value) },
+    { count: displayCount.value },
     props.exactCount ?? props.count,
   ),
+);
+const shownLabel = computed(() =>
+  props.numberOnly ? displayCount.value : label.value,
 );
 </script>

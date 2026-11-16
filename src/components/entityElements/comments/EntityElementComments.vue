@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-5">
+  <div class="mb-(--gutter-panels)">
     <entity-element-wrapper
       :label="element.label"
       :entity-id="id"

@@ -41,6 +41,8 @@
           ]"
           >{{ previewLabel ? previewLabel : t(label) }}</h3
         >
+        <!-- the list inside puts its result count here -->
+        <span :data-panel-count="panelCountId" class="contents" />
         <slot name="actions"></slot>
       </div>
       <span
@@ -59,7 +61,8 @@
           data-cy="entity-element-wrapper-content"
           class="h-full min-h-0 @container/wrapper-content"
           :class="{
-            'p-(--panel-body-pad) @max-md/entity-element:p-2': !compact,
+            'p-(--panel-body-pad) @max-2xl/entity-element:p-(--panel-body-pad-narrow) @max-md/entity-element:p-2':
+              !compact,
           }"
         >
           <slot name="content"></slot>
@@ -72,7 +75,8 @@
           data-cy="entity-element-wrapper-content"
           class="h-full min-h-0 @container/wrapper-content"
           :class="{
-            'p-(--panel-body-pad) @max-md/entity-element:p-2': !compact,
+            'p-(--panel-body-pad) @max-2xl/entity-element:p-(--panel-body-pad-narrow) @max-md/entity-element:p-2':
+              !compact,
           }"
         >
           <slot name="content"></slot>
@@ -86,10 +90,12 @@
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
-import { inject, provide } from "vue";
+import { inject, provide, useId } from "vue";
 
 // Lists and viewers inside know they sit in a panel (no chrome of their own).
 provide("InsidePanel", true);
+const panelCountId = useId();
+provide("PanelCountTarget", `[data-panel-count="${panelCountId}"]`);
 
 withDefaults(
   defineProps<{
