@@ -3,6 +3,9 @@ import ContextMenuActionsShell from "../ContextMenuActionsShell.vue";
 import BaseButton from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { Unicons } from "@/types";
+import { computed, provide } from "vue";
+import { rowSheetKey } from "@/components/context-menu-actions/rowSheet";
+import { isCompact } from "@/composables/useNavMenu";
 
 const meta: Meta<typeof ContextMenuActionsShell> = {
   title: "ContextMenuActions/ContextMenuActionsShell",
@@ -123,6 +126,79 @@ export const DisabledItem: Story = {
           <base-context-menu-item :icon="Unicons.Trash.name" label="Delete" :style="danger" />
         </template>
       </context-menu-actions-shell>`),
+  }),
+  play: openMenu,
+};
+
+/** The "Actions" menu open: destructive item last, in danger ink. */
+export const OverflowMenuOpen: Story = {
+  ...OverflowMenu,
+  play: openMenu,
+};
+
+/** A more specific trigger label where the menu has one subject. */
+export const CustomTriggerLabel: Story = {
+  render: () => ({
+    components,
+    setup,
+    template: frame(`
+      <context-menu-actions-shell
+        :has-promoted-actions="false"
+        :has-overflow-actions="true"
+        trigger-label="Saved searches"
+      >
+        <template #overflow>
+          <base-context-menu-item label="Save current search" />
+          <base-context-menu-item label="Open a saved search" />
+        </template>
+      </context-menu-actions-shell>`),
+  }),
+};
+
+const sampleRow = {
+  id: "story-row",
+  title: "Portrait of a lady",
+  thumbnailIsLink: false,
+  preview: () => undefined,
+};
+
+const rowTemplate = frame(`
+  <div style="display:flex;align-items:center;justify-content:space-between;max-width:480px;padding:8px 12px;background:var(--color-surface);border:1px solid var(--color-border-subtle);border-radius:var(--radius-card)">
+    <span>Portrait of a lady</span>
+    <context-menu-actions-shell
+      :has-promoted-actions="false"
+      :has-overflow-actions="true"
+      context-label="Portrait of a lady"
+    >
+      <template #overflow>${menuItems}</template>
+    </context-menu-actions-shell>
+  </div>`);
+
+/** In a list row the trigger is a bare ⋮ under the "Actions" column header. */
+export const InListRow: Story = {
+  render: () => ({
+    components,
+    setup() {
+      provide(rowSheetKey, computed(() => sampleRow));
+      return setup();
+    },
+    template: rowTemplate,
+  }),
+};
+
+/**
+ * Below 48rem the menu is a bottom sheet. From a list row it shows the record
+ * on top and its preview as the first item.
+ */
+export const SmallScreenSheet: Story = {
+  render: () => ({
+    components,
+    setup() {
+      isCompact.value = true;
+      provide(rowSheetKey, computed(() => sampleRow));
+      return setup();
+    },
+    template: rowTemplate,
   }),
   play: openMenu,
 };

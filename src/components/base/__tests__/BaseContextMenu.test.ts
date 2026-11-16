@@ -168,6 +168,14 @@ describe("BaseContextMenu", () => {
       expect(document.activeElement).toBe(getItems()[0]);
     });
 
+    it("does not scroll the page when it moves focus into the menu", async () => {
+      const focus = vi.spyOn(HTMLElement.prototype, "focus");
+      await mountMenu();
+
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+      focus.mockRestore();
+    });
+
     it("cycles through the items with the arrow keys", async () => {
       await mountMenu();
 

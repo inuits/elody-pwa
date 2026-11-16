@@ -55,7 +55,7 @@ watch(
   async (isVisible) => {
     if (!isVisible) return;
     await nextTick();
-    getItems()[0]?.focus();
+    getItems()[0]?.focus({ preventScroll: true });
   },
 );
 
