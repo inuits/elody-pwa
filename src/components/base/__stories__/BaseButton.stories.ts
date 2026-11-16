@@ -34,7 +34,7 @@ const variants = [
   { style: "commit", label: "Save", note: "writes the change" },
   { style: "secondary", label: "Cancel", note: "everything alongside" },
   { style: "ghost", label: "Show more", note: "dense toolbars" },
-  { style: "danger", label: "Delete", note: "destructive, always confirmable" },
+  { style: "danger", label: "Delete", note: "destructive actions" },
 ];
 
 export const Variants: Story = {
@@ -42,7 +42,7 @@ export const Variants: Story = {
     components: { BaseButton },
     setup: () => ({ variants, DamsIcons }),
     template: `
-      <table style="border-collapse:separate;border-spacing:12px 8px">
+      <table style="border-collapse:separate;border-spacing:8px 6px">
         <thead>
           <tr style="font-size:var(--text-label);color:var(--color-text-secondary);text-align:left">
             <th>variant</th><th>md</th><th>sm</th><th>with icon</th><th>loading</th><th>disabled</th>
@@ -50,9 +50,8 @@ export const Variants: Story = {
         </thead>
         <tbody>
           <tr v-for="variant in variants" :key="variant.style">
-            <td style="font-size:var(--text-label);white-space:nowrap">
+            <td style="font-size:var(--text-label)" :title="variant.note">
               <code>{{ variant.style }}</code>
-              <span style="display:block;color:var(--color-text-secondary)">{{ variant.note }}</span>
             </td>
             <td><base-button :button-style="variant.style" :label="variant.label" /></td>
             <td><base-button :button-style="variant.style" button-size="sm" :label="variant.label" /></td>
