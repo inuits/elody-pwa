@@ -64,7 +64,7 @@ export const router = createRouter({
 
 export const auth = {
   isAuthenticated: { value: true },
-  user: { value: { name: "Storybook" } },
+  user: { name: "Storybook User", email: "storybook@example.com" },
   logout: () => undefined,
   redirectToLogin: () => undefined,
 };

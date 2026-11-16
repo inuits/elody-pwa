@@ -98,7 +98,7 @@ const onKeydown = (event: KeyboardEvent) => {
 
 const getAnchoredStyles = (anchor: HTMLElement) => {
   const rect = anchor.getBoundingClientRect();
-  const { clientWidth, clientHeight } = document.body;
+  const { clientWidth, clientHeight } = document.documentElement;
   const styles: { [key: string]: string } = {};
 
   if (
@@ -126,19 +126,19 @@ const getStyles = () => {
   const styles: { [key: string]: string } = { };
 
   if (
-    document.body.clientWidth - props.contextMenu.position.x < 250 ||
+    document.documentElement.clientWidth - props.contextMenu.position.x < 250 ||
     props.direction === ContextMenuDirection.Left
   ) {
     styles["right"] = `${
-      document.body.clientWidth - props.contextMenu.position.x
+      document.documentElement.clientWidth - props.contextMenu.position.x
     }px`;
   } else {
     styles["left"] = `${props.contextMenu.position.x}px`;
   }
 
-  if (document.body.clientHeight - props.contextMenu.position.y < 250) {
+  if (document.documentElement.clientHeight - props.contextMenu.position.y < 250) {
     styles["bottom"] = `${
-      document.body.clientHeight - props.contextMenu.position.y
+      document.documentElement.clientHeight - props.contextMenu.position.y
     }px`;
   } else {
     styles["top"] = `${props.contextMenu.position.y}px`

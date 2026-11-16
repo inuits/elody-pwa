@@ -8,6 +8,7 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import { Unicons } from "../src/types";
 import { apolloClient, i18n, resetQueryFixtures, router } from "./mockMain";
 import { useInputValidation } from "../src/composables/useInputValidation";
+import { isCompact } from "../src/composables/useNavMenu";
 import "../src/assets/main.css";
 
 // Field rows validate through vee-validate; without the rules registered, any
@@ -56,7 +57,10 @@ const previewSplitViewports = {
 };
 
 const preview: Preview = {
-  beforeEach: () => resetQueryFixtures(),
+  beforeEach: () => {
+    resetQueryFixtures();
+    isCompact.value = false;
+  },
   globalTypes: {
     surface: {
       description: "Background the story sits on",
