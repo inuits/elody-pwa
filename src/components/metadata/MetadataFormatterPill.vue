@@ -143,6 +143,8 @@ const settingsFor = (value: string, isRelationLabel = false): any => {
   const [formatterType, configuredPillType] = props.formatter.split("|");
   if (configuredPillType === "auto")
     return { background: "#6DBBDE", text: "#FFFFFF" };
+  if (configuredPillType === "color")
+    return { background: value, text: textColorFor(value) };
   const pillType = configuredPillType || value.toLowerCase();
   const settings = formattersSettings[formatterType]?.[pillType];
   if (settings || !isRelationLabel) return settings;
@@ -152,6 +154,17 @@ const settingsFor = (value: string, isRelationLabel = false): any => {
 const nestedSettingsFor = (value: string): any => {
   const [formatterType] = props.formatter.split("|");
   return formattersSettings[formatterType]?.[value.toLowerCase()];
+};
+
+const textColorFor = (background: string): string => {
+  const hex = background.replace("#", "");
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(full.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance > 0.179 ? "#000000" : "#FFFFFF";
 };
 
 const iconFor = (value: string) => Unicons[settingsFor(value)?.icon];
