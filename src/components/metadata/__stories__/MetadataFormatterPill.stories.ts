@@ -8,12 +8,10 @@ const meta: Meta<typeof MetadataFormatterPill> = {
     docs: {
       description: {
         component:
-          "Two chips share this component. The relation chip is a design " +
-          "decision — one fill, from the tokens — and means the value " +
-          "navigates when clicked. The status chips are tenant config: their " +
-          "colours come from the client's formatter settings, so they are the " +
-          "one place a colour legitimately arrives from outside the system. " +
-          "A value the client declared no colour for stays plain text.",
+          "Status chips, letter badges and relation chips. Status and badge " +
+          "colours come from the client's pill config, preferably as a tone; " +
+          "relation chips use one platform colour. A value without config " +
+          "stays plain text.",
       },
     },
   },
@@ -22,30 +20,39 @@ const meta: Meta<typeof MetadataFormatterPill> = {
 export default meta;
 type Story = StoryObj<typeof MetadataFormatterPill>;
 
+const row = (label: string, formatter: string, value: string) => `
+  <span>${label}</span>
+  <metadata-formatter-pill formatter="${formatter}" label="${value}" />`;
+
+const grid = (rows: string) => `
+  <div style="display:grid;grid-template-columns:180px auto;gap:10px 14px;
+              align-items:center;justify-items:start;font-size:var(--text-label)">
+    ${rows}
+  </div>`;
+
+/** Status chips: colours come from the client's pill config, by tone. */
 export const Chips: Story = {
   render: () => ({
     components: { MetadataFormatterPill },
-    template: `
-      <div style="display:grid;grid-template-columns:190px auto;gap:10px 14px;
-                  align-items:center;font-size:var(--text-label)">
-        <span>relation chip — navigates</span>
-        <metadata-formatter-pill formatter="pill|auto" label="Jan Persoon" />
+    template: grid(
+      row("tone", "pill", "concept") +
+        row("tone with icon", "pill", "approved") +
+        row("explicit colours", "pill", "published") +
+        row("no config: plain text", "pill", "unknown status") +
+        row("relation chip", "pill|auto", "Jan Persoon"),
+    ),
+  }),
+};
 
-        <span>configured — draft</span>
-        <metadata-formatter-pill formatter="pill" label="draft" />
-
-        <span>configured — published</span>
-        <metadata-formatter-pill formatter="pill" label="published" />
-
-        <span>configured — expired</span>
-        <metadata-formatter-pill formatter="pill" label="expired" />
-
-        <span>no colour configured</span>
-        <metadata-formatter-pill formatter="pill" label="unknown status" />
-
-        <span>no group configured</span>
-        <metadata-formatter-pill formatter="badge" label="draft" />
-      </div>`,
+/** Entity types as one-letter badges, named in full for screen readers. */
+export const Badges: Story = {
+  render: () => ({
+    components: { MetadataFormatterPill },
+    template: grid(
+      row("tone 1", "pill", "work") +
+        row("tone 2", "pill", "expression") +
+        row("tone 3", "pill", "manifestation"),
+    ),
   }),
 };
 

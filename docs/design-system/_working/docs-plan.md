@@ -32,8 +32,8 @@ Keyboard & accessibility → Content → Related. No GraphQL/config section yet.
 | 3 | Checkbox | BaseInputCheckbox | done |
 | 4 | Split button | ContextMenuActionsShell, BaseContextMenu(Item) | done |
 | 5 | Overflow menu | ContextMenuActionsShell, BaseContextMenu(Item) | done |
-| 6 | Chip & badge | MetadataFormatterPill, relation chips, ResultCountChip, BaseSearchPill | next (hex pill colours from `feat-168903-pill-colors` only once merged) |
-| 7 | Loading | SpinnerLoader, skeletons, LoadingList, BlockingOverlay | |
+| 6 | Chip & badge | MetadataFormatterPill, relation chips, ResultCountChip, BaseSearchPill | done (add hex pill colours once `feat-168903-pill-colors` is merged; unconfigured value uses literal `text-sm`) |
+| 7 | Loading | SpinnerLoader, skeletons, LoadingList, BlockingOverlay | next |
 | 8 | Text input | BaseInputTextNumberDatetime, BaseResizableTextarea | |
 | 9 | Tooltip | BaseTooltip | |
 | 10 | Dropdown | AdvancedDropdown | |

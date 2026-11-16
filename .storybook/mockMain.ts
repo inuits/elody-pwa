@@ -77,6 +77,11 @@ export const formattersSettings = {
     draft: { background: "#E8EEF0", text: "#003A52" },
     published: { background: "#DAF1DC", text: "#15803d" },
     expired: { background: "#FDEBD7", text: "#B95000" },
+    concept: { tone: "tone2" },
+    approved: { tone: "tone1", icon: "Check" },
+    work: { tone: "tone1", shape: "badge", letter: "W" },
+    expression: { tone: "tone2", shape: "badge", letter: "E" },
+    manifestation: { tone: "tone3", shape: "badge", letter: "M" },
   },
 };
 export const typeUrlMapping = { mapping: {}, reverseMapping: {} };
