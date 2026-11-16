@@ -278,3 +278,37 @@ describe("typesense search highlighting on the suggestions", () => {
     });
   });
 });
+
+describe("where the dropdown is rendered", () => {
+  const dropdownElement = () =>
+    document.querySelector("[popover]") as HTMLElement | null;
+
+  it("renders inside the open dialog that holds the focused editor", async () => {
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("open", "");
+    const editor = document.createElement("div");
+    editor.tabIndex = 0;
+    dialog.appendChild(editor);
+    document.body.appendChild(dialog);
+    editor.focus();
+
+    const wrapper = await mountDropdown();
+
+    expect(dialog.contains(dropdownElement())).toBe(true);
+    wrapper.unmount();
+    dialog.remove();
+  });
+
+  it("stays in the body when the editor is not inside a dialog", async () => {
+    const editor = document.createElement("div");
+    editor.tabIndex = 0;
+    document.body.appendChild(editor);
+    editor.focus();
+
+    const wrapper = await mountDropdown();
+
+    expect(dropdownElement()?.parentElement).toBe(document.body);
+    wrapper.unmount();
+    editor.remove();
+  });
+});
