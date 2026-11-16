@@ -806,8 +806,9 @@ describe("ListItem", () => {
           "flex",
           "flex-col",
           "min-w-0",
+          "[&_.line-clamp]:[--line-clamp:2]!",
           // a pill in a narrow card must not break mid-word
-          "whitespace-nowrap",
+          "[&_.text-chip]:whitespace-nowrap",
         ]),
       );
       expect(fieldsOf(wrapper)[1].classes().join(" ")).not.toMatch(

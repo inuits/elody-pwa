@@ -74,7 +74,7 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
   footer. Then every other
   teaser field with its label above its value (`--grid-card-meta-label-gap`
   between, `--grid-card-meta-row-gap` between fields); labels look like the
-  list view's field labels (`--text-label`, bold, `--color-text-field-label`), values take the full card width and truncate with the
+  list view's field labels (`--text-label`, bold, `--color-text-field-label`), values take the full card width, wrap to two lines, then truncate with the
   full value in the tooltip. Only the client's existing teaser metadata is
   shown, with its own labels.
 - Tab order: Select, title, eye, ⋮.
@@ -94,7 +94,7 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
 The first teaser field is the title: bold, `--color-text-link`, with a 1px
 dashed underline in `--color-border-dashed`, `--title-underline-offset`
 below the text. A leading pill is not a title and gets none of this. Values
-in grid rows never wrap (a pill stays whole; text truncates).
+in grid cards wrap to two lines before truncating; a pill stays whole.
 
 ### Column-header row (list mode)
 When every row on the page has the same fields, list mode shows one sticky

@@ -188,7 +188,7 @@
             ? idx === 0
               ? 'col-start-1 row-start-1 mb-(--grid-card-title-gap) min-h-(--grid-card-title-min-height) line-clamp-2 font-bold text-heading text-text-link hover:text-text-link-hover hover:no-underline [&_.line-clamp]:[--line-clamp:2]! [&_[data-cy=entity-element-metadata]]:text-inherit [&_[data-cy=metadata-label]]:sr-only'
               : [
-                  'col-span-2 flex flex-col min-w-0 whitespace-nowrap [&>[data-cy=metadata-wrapper]]:flex [&>[data-cy=metadata-wrapper]]:flex-col [&>[data-cy=metadata-wrapper]]:gap-(--grid-card-meta-label-gap) [&_[data-cy=metadata-label]]:truncate',
+                  'col-span-2 flex flex-col min-w-0 [&_.line-clamp]:[--line-clamp:2]! [&_.text-chip]:whitespace-nowrap [&>[data-cy=metadata-wrapper]]:flex [&>[data-cy=metadata-wrapper]]:flex-col [&>[data-cy=metadata-wrapper]]:gap-(--grid-card-meta-label-gap) [&_[data-cy=metadata-label]]:truncate',
                   { hidden: compact },
                 ]
             : '',
