@@ -477,3 +477,30 @@ describe("MetadataFormatterPill — search highlights", () => {
     ).toBe("function: programmer");
   });
 });
+
+describe("MetadataFormatterPill — pill|color", () => {
+  const styleFor = (label: string) =>
+    mount(MetadataFormatterPill, {
+      props: { formatter: "pill|color", label },
+    }).element.children[0].getAttribute("style");
+
+  it("uses the value itself as background", () => {
+    expect(styleFor("#ff0000")).toContain("background: rgb(255, 0, 0)");
+  });
+
+  it.each([
+    ["#ffffff", "rgb(0, 0, 0)"],
+    ["#ffff00", "rgb(0, 0, 0)"],
+    ["#fff", "rgb(0, 0, 0)"],
+    ["#000000", "rgb(255, 255, 255)"],
+    ["#0000ff", "rgb(255, 255, 255)"],
+    ["#757575", "rgb(255, 255, 255)"],
+    ["#767676", "rgb(0, 0, 0)"],
+  ])("picks contrasting text for %s", (background, text) => {
+    expect(styleFor(background)).toContain(`color: ${text}`);
+  });
+
+  it("falls back to white text for a non-hex value", () => {
+    expect(styleFor("red")).toContain("color: rgb(255, 255, 255)");
+  });
+});
