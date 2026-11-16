@@ -34,16 +34,16 @@ Keyboard & accessibility → Content → Related. No GraphQL/config section yet.
 | 5 | Overflow menu | ContextMenuActionsShell, BaseContextMenu(Item) | done |
 | 6 | Chip & badge | MetadataFormatterPill, relation chips, ResultCountChip, BaseSearchPill | done (add hex pill colours once `feat-168903-pill-colors` is merged; unconfigured value uses literal `text-sm`) |
 | 7 | Loading | SpinnerLoader, skeletons, LoadingList, BlockingOverlay | done |
-| 8 | Text input | BaseInputTextNumberDatetime, BaseResizableTextarea | |
-| 9 | Tooltip | BaseTooltip | |
-| 10 | Dropdown | AdvancedDropdown | |
-| 11 | Autocomplete | BaseInputAutocomplete | |
-| 12 | Date picker | BaseDatePicker | |
-| 13 | Toggle & toggle group | BaseToggle, BaseToggleGroup | |
-| 14 | Slider | BaseSlider, BaseRangeSlider (R2: raw colours, hard-coded "From:/To:") | |
-| 15 | Modal | BaseModal, ConfirmModal, InlineConfirmButtons | |
-| 16 | Pagination | BasePagination | |
-| 17 | Upload | Dropzone, DropzonePreview, BaseProgressStep | |
+| 8 | Text input | BaseInputTextNumberDatetime, BaseResizableTextarea | done |
+| 9 | Tooltip | BaseTooltip | done |
+| 10 | Dropdown | AdvancedDropdown | done |
+| 11 | Autocomplete | BaseInputAutocomplete | done |
+| 12 | Date picker | BaseDatePicker | done |
+| 13 | Toggle & toggle group | BaseToggle, BaseToggleGroup | done |
+| 14 | Slider | BaseSlider, BaseRangeSlider (R2: raw colours, hard-coded "From:/To:") | done |
+| 15 | Modal | BaseModal, ConfirmModal, InlineConfirmButtons | done |
+| 16 | Pagination | BasePagination | done |
+| 17 | Upload | Dropzone, DropzonePreview, BaseProgressStep | done |
 | 18 | Small utilities | decided 2026-11-16: colour input + textarea on Text input, info panel on Tooltip, ConfirmModal + InlineConfirmButtons on Modal; copy-to-clipboard and expand button move to stage 2 (field row, panels) | decided |
 | — | Not documented | BaseLabel, BaseVirtualScroll, BasePaginationSkeleton (unused; not deleted in this docs branch, user to decide), BaseVirtualKeyboard (bug R29 first) | |
 
