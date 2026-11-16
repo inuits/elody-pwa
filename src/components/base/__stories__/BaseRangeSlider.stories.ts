@@ -28,7 +28,7 @@ export default meta;
 type Story = StoryObj<typeof BaseRangeSlider>;
 
 export const Default: Story = {
-  args: { from: 1900, to: 1950, min: 1800, max: 2000, unit: "" },
+  args: { from: 4, to: 14, min: 0, max: 20, unit: "" },
   render: (args) => ({
     components: { BaseRangeSlider },
     setup: () => ({ args }),
@@ -39,4 +39,15 @@ export const Default: Story = {
 export const WithUnit: Story = {
   ...Default,
   args: { from: 20, to: 80, min: 0, max: 100, unit: "cm" },
+};
+
+/** Typing a From value above To shows the error under the input. */
+export const InputError: Story = {
+  ...Default,
+  play: async ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>("input");
+    if (!input) return;
+    input.value = "18";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  },
 };

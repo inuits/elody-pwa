@@ -23,6 +23,25 @@ const meta: Meta<typeof BaseInputTextNumberDatetime> = {
 export default meta;
 type Story = StoryObj<typeof BaseInputTextNumberDatetime>;
 
+/** A bordered text input under its field label. */
+export const Default: Story = {
+  render: () => ({
+    components: { BaseInputTextNumberDatetime },
+    setup: () => ({ title: ref("Tales from the North Sea"), year: ref("") }),
+    template: `
+      <div style="display:grid;gap:12px;max-width:320px;font-size:var(--text-label)">
+        <div>
+          <label for="d-title" style="display:block;font-weight:700;color:var(--color-text-field-label);margin-bottom:4px">Title</label>
+          <base-input-text-number-datetime id="d-title" v-model="title" input-style="defaultWithBorder" />
+        </div>
+        <div>
+          <label for="d-year" style="display:block;font-weight:700;color:var(--color-text-field-label);margin-bottom:4px">Year</label>
+          <base-input-text-number-datetime id="d-year" v-model="year" type="number" input-style="defaultWithBorder" placeholder="e.g. 1958" />
+        </div>
+      </div>`,
+  }),
+};
+
 export const States: Story = {
   render: () => ({
     components: { BaseInputTextNumberDatetime },

@@ -50,6 +50,40 @@ export const WithTime: Story = {
   }),
 };
 
+/** The calendar open under its field: month and year header, Monday-first grid. */
+export const Open: Story = {
+  ...Default,
+  play: async ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLInputElement>(".dp__input")?.click();
+  },
+};
+
+/** Empty, filled, date and time, and disabled. */
+export const States: Story = {
+  render: () => ({
+    components: { BaseDatePicker },
+    setup: () => ({
+      empty: ref(undefined),
+      date: ref("2026-08-18"),
+      dateTime: ref("2026-08-18T10:30:00+00:00"),
+    }),
+    template: `
+      <div style="display:grid;grid-template-columns:110px 260px;gap:12px 14px;align-items:center;font-size:var(--text-label)">
+        <span>empty</span>
+        <base-date-picker v-model="empty" type="date" />
+
+        <span>date</span>
+        <base-date-picker v-model="date" type="date" />
+
+        <span>date and time</span>
+        <base-date-picker v-model="dateTime" type="datetime-local" />
+
+        <span>disabled</span>
+        <base-date-picker v-model="date" type="date" disabled />
+      </div>`,
+  }),
+};
+
 export const Playground: Story = {
   args: {
     modelValue: "2026-08-18",

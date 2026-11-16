@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { provide, watch } from "vue";
+import { defineComponent, provide, watch } from "vue";
 import BasePagination from "../BasePagination.vue";
 import {
   createPaginationStore,
@@ -14,11 +14,11 @@ const meta: Meta<typeof BasePagination> = {
     docs: {
       description: {
         component:
-          "Page size on the left, pager on the right. Pages are numbered " +
-          "rather than typed into a box: the numbers are the affordance, and " +
-          "they are real buttons, so the pager can be tabbed through and the " +
-          "current page announces itself. The first and last page stay " +
-          "reachable from anywhere; runs in between collapse to an ellipsis.",
+          "The pager in a list's results band: first and previous page, a " +
+          "page box that jumps on Enter or blur, the number of pages, then " +
+          "next and last page. Edge buttons are real disabled buttons on the " +
+          'first and last page. A capped total reads "of 50+" with a help ' +
+          "tooltip.",
       },
     },
   },
@@ -39,17 +39,57 @@ const withStore = (page: number, total = 240) => ({
   template: `<div style="max-width:640px"><base-pagination /></div>`,
 });
 
-/** Mid-list: a gap on either side of the current page. */
+/** Mid-list: every step is available. */
 export const Default: Story = { render: () => withStore(5) };
 
-/** First page — the ‹ step is disabled rather than hidden. */
+/** First page — the « and ‹ steps are disabled rather than hidden. */
 export const FirstPage: Story = { render: () => withStore(1) };
 
-/** Last page — the › step is disabled. */
+/** Last page — the › and » steps are disabled. */
 export const LastPage: Story = { render: () => withStore(12) };
 
-/** Few enough pages that none need eliding. */
+/** Two pages. */
 export const FewPages: Story = { render: () => withStore(2, 60) };
+
+/** Capped total: the real count is unknown, so the last page reads "50+". */
+export const Capped: Story = { render: () => withStore(3, 1001) };
+
+const PagerAt = defineComponent({
+  components: { BasePagination },
+  props: {
+    page: { type: Number, required: true },
+    total: { type: Number, required: true },
+  },
+  setup(props) {
+    const store = createPaginationStore();
+    store.updateTotalAmount(props.total);
+    store.goToPage(props.page);
+    provide(PaginationStoreKey, store);
+  },
+  template: `<base-pagination />`,
+});
+
+/** Middle, first, last page and a capped total, one under the other. */
+export const States: Story = {
+  render: () => ({
+    components: { PagerAt },
+    setup: () => ({
+      rows: [
+        { label: "Middle page", page: 5, total: 240 },
+        { label: "First page", page: 1, total: 240 },
+        { label: "Last page", page: 12, total: 240 },
+        { label: "Capped total", page: 3, total: 1001 },
+      ],
+    }),
+    template: `
+      <div style="display:grid;grid-template-columns:120px max-content;gap:12px 16px;align-items:center;font-size:var(--text-label)">
+        <template v-for="row in rows" :key="row.label">
+          <span>{{ row.label }}</span>
+          <pager-at :page="row.page" :total="row.total" />
+        </template>
+      </div>`,
+  }),
+};
 
 export const Playground: StoryObj<{ page: number; total: number }> = {
   args: { page: 5, total: 240 },

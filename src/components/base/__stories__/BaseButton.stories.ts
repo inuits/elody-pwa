@@ -108,8 +108,8 @@ export const IconOnly: Story = {
     setup: () => ({ DamsIcons }),
     template: `
       <div style="display:flex;gap:10px">
-        <base-button button-style="ghost" :icon="DamsIcons.Edit" aria-label="Edit field" />
-        <base-button button-style="secondary" :icon="DamsIcons.Trash" aria-label="Delete row" />
+        <span><base-button button-style="ghost" :icon="DamsIcons.Edit" aria-label="Edit field" /></span>
+        <span><base-button button-style="secondary" :icon="DamsIcons.Trash" aria-label="Delete row" /></span>
       </div>`,
   }),
 };

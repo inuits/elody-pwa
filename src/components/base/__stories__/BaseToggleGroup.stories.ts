@@ -30,12 +30,49 @@ export const Default: Story = {
     components: { BaseToggleGroup },
     setup: () => ({
       toggles: ref([
-        { isOn: true, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl },
-        { isOn: false, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps },
-        { isOn: false, iconOn: DamsIcons.Table, iconOff: DamsIcons.Table },
+        { isOn: true, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl, label: "library.view-modes.list" },
+        { isOn: false, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps, label: "library.view-modes.grid" },
+        { isOn: false, iconOn: DamsIcons.Table, iconOff: DamsIcons.Table, label: "library.view-modes.table" },
       ]),
     }),
     template: `<base-toggle-group :toggles="toggles" />`,
+  }),
+};
+
+/** Text segments: the card-size switch next to the grid view. */
+export const TextSegments: Story = {
+  render: () => ({
+    components: { BaseToggleGroup },
+    setup: () => ({
+      toggles: ref([
+        { isOn: true, label: "library.grid-size.large" },
+        { isOn: false, label: "library.grid-size.compact" },
+      ]),
+    }),
+    template: `<base-toggle-group group-label="library.grid-size.label" :toggles="toggles" />`,
+  }),
+};
+
+/** Both kinds side by side, as in the list toolbar: one segment on in each. */
+export const States: Story = {
+  render: () => ({
+    components: { BaseToggleGroup },
+    setup: () => ({
+      views: ref([
+        { isOn: false, iconOn: DamsIcons.ListUl, iconOff: DamsIcons.ListUl, label: "library.view-modes.list" },
+        { isOn: true, iconOn: DamsIcons.Apps, iconOff: DamsIcons.Apps, label: "library.view-modes.grid" },
+        { isOn: false, iconOn: DamsIcons.Table, iconOff: DamsIcons.Table, label: "library.view-modes.table" },
+      ]),
+      sizes: ref([
+        { isOn: false, label: "library.grid-size.large" },
+        { isOn: true, label: "library.grid-size.compact" },
+      ]),
+    }),
+    template: `
+      <div style="display:flex;align-items:center;gap:8px">
+        <base-toggle-group :toggles="views" />
+        <base-toggle-group group-label="library.grid-size.label" :toggles="sizes" />
+      </div>`,
   }),
 };
 

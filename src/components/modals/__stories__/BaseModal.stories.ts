@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { nextTick, onMounted, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, watch } from "vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BaseButton from "@/components/base/BaseButtonNew.vue";
 import { ModalStyle, TypeModals } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 
 const meta: Meta<typeof BaseModal> = {
   // Story id modals-basemodal--default, per MANIFEST.md.
@@ -16,10 +17,9 @@ const meta: Meta<typeof BaseModal> = {
           "The base overlay dialog: the system scrim, a 10px radius, the " +
           "modal shadow, and a native <dialog> so the focus trap and Escape " +
           "come from the platform. The title names the dialog and wears the " +
-          "panel-shell header; the close cross is a named button, and first " +
-          "focus lands on the body's first interactive element, not on that " +
-          "cross. Commit sits right, Cancel ghost-left of it — one commit " +
-          "per modal, and the verb is the label, never \"OK\".",
+          "panel-shell header; the close cross is a named button and, as the " +
+          "first focusable element, takes focus on open. Commit sits right, Cancel ghost-left of it — one commit " +
+          'per modal, and the verb is the label, never "OK".',
       },
     },
   },
@@ -58,6 +58,32 @@ export const Default: Story = {
               <base-button button-style="commit" button-size="sm" label="Add" style="width:auto" />
             </div>
           </div>
+        </base-modal>
+      </div>`,
+  }),
+};
+
+/** Busy: a long operation blocks the dialog behind a spinner and its message. */
+export const Busy: Story = {
+  render: () => ({
+    components: { BaseModal },
+    setup() {
+      const { openModal, closeModal, getModalInfo } = useBaseModal();
+      const { startBlocking, stopBlocking } = useBlockingLoader();
+      onMounted(async () => {
+        if (getModalInfo(TypeModals.DynamicForm).open)
+          closeModal(TypeModals.DynamicForm);
+        await nextTick();
+        openModal(TypeModals.DynamicForm, ModalStyle.Center);
+        startBlocking("Applying your changes, this may take a while...");
+      });
+      onUnmounted(stopBlocking);
+      return { TypeModals, close: () => closeModal(TypeModals.DynamicForm) };
+    },
+    template: `
+      <div style="min-height:340px">
+        <base-modal :modal-type="TypeModals.DynamicForm" title="Edit selected records" @hide-modal="close">
+          <div style="padding:18px 22px;min-width:380px;min-height:180px">Fields of the form</div>
         </base-modal>
       </div>`,
   }),

@@ -33,7 +33,7 @@ Keyboard & accessibility → Content → Related. No GraphQL/config section yet.
 | 4 | Split button | ContextMenuActionsShell, BaseContextMenu(Item) | done |
 | 5 | Overflow menu | ContextMenuActionsShell, BaseContextMenu(Item) | done |
 | 6 | Chip & badge | MetadataFormatterPill, relation chips, ResultCountChip, BaseSearchPill | done (add hex pill colours once `feat-168903-pill-colors` is merged; unconfigured value uses literal `text-sm`) |
-| 7 | Loading | SpinnerLoader, skeletons, LoadingList, BlockingOverlay | next |
+| 7 | Loading | SpinnerLoader, skeletons, LoadingList, BlockingOverlay | done |
 | 8 | Text input | BaseInputTextNumberDatetime, BaseResizableTextarea | |
 | 9 | Tooltip | BaseTooltip | |
 | 10 | Dropdown | AdvancedDropdown | |
@@ -44,10 +44,12 @@ Keyboard & accessibility → Content → Related. No GraphQL/config section yet.
 | 15 | Modal | BaseModal, ConfirmModal, InlineConfirmButtons | |
 | 16 | Pagination | BasePagination | |
 | 17 | Upload | Dropzone, DropzonePreview, BaseProgressStep | |
-| 18 | Small utilities | BaseCopyToClipboard, BaseExpandButton, BaseInputColor, BaseInfoPanel | decide: own page or fold into others |
-| — | Not documented | BaseLabel, BaseVirtualScroll, BasePaginationSkeleton (unused: propose deletion), BaseVirtualKeyboard (bug R29 first) | |
+| 18 | Small utilities | decided 2026-11-16: colour input + textarea on Text input, info panel on Tooltip, ConfirmModal + InlineConfirmButtons on Modal; copy-to-clipboard and expand button move to stage 2 (field row, panels) | decided |
+| — | Not documented | BaseLabel, BaseVirtualScroll, BasePaginationSkeleton (unused; not deleted in this docs branch, user to decide), BaseVirtualKeyboard (bug R29 first) | |
 
-Stage 1 ends with: push both branches, merge MR !15, docs-dev deploy.
+Stage 1 ends with: user review, push both branches, merge MR !15, docs-dev deploy.
+
+Stage 1 status (2026-11-16): all pages written and checked in the browser; awaiting the user's review. Findings S1–S35 in `handoff-deviations.md`.
 
 ## Stage 2: Composite components (hidden pages)
 

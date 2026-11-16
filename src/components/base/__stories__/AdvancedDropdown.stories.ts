@@ -44,6 +44,23 @@ const provinces = [
   "Zeeland",
 ].map((name) => ({ label: name, value: name.toLowerCase() }));
 
+/** A single select on its own, open: the empty option first, then the choices. */
+export const Default: Story = {
+  render: () => ({
+    components: { AdvancedDropdown },
+    setup: () => ({ shortOptions, status: ref("published") }),
+    template: `
+      <div style="max-width:300px;padding-bottom:200px;font-size:var(--text-label)">
+        <label for="dd-status" style="display:block;font-weight:700;color:var(--color-text-field-label);margin-bottom:4px">Status</label>
+        <advanced-dropdown v-model="status" :options="shortOptions" input-id="dd-status"
+                           label="Choose a status" style-type="defaultWithBorder" />
+      </div>`,
+  }),
+  play: async ({ canvasElement }) => {
+    canvasElement.querySelector<HTMLElement>(".control")?.click();
+  },
+};
+
 /**
  * The two halves of the contract side by side: a long list that earns its
  * search field, and a multi-select that stays open while picking.
@@ -112,10 +129,10 @@ export const States: Story = {
         <advanced-dropdown v-model="many" :options="provinces" label="Provinces" style-type="defaultWithBorder" multiple />
 
         <span>loading (open it)</span>
-        <advanced-dropdown v-model="empty" :options="[]" label="Status" style-type="defaultWithBorder" loading />
+        <advanced-dropdown v-model="empty" :options="[]" label="Status" style-type="defaultWithBorder" :clearable="false" loading />
 
         <span>empty (open it)</span>
-        <advanced-dropdown v-model="empty" :options="[]" label="Status" style-type="defaultWithBorder" />
+        <advanced-dropdown v-model="empty" :options="[]" label="Status" style-type="defaultWithBorder" :clearable="false" />
 
         <span>cleared (click ✕: the placeholder returns)</span>
         <advanced-dropdown v-model="cleared" :options="shortOptions" label="Status" style-type="defaultWithBorder" clearable />

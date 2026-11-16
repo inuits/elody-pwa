@@ -56,6 +56,13 @@ const previewSplitViewports = {
   },
 };
 
+if (window.top !== window.self) {
+  const focus = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function (options?: FocusOptions) {
+    focus.call(this, { ...options, preventScroll: true });
+  };
+}
+
 const preview: Preview = {
   beforeEach: () => {
     resetQueryFixtures();

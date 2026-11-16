@@ -7,6 +7,14 @@ const buttonSizes = ["md", "sm"];
 const meta: Meta<typeof InlineConfirmButtons> = {
   title: "Base/InlineConfirmButtons",
   component: InlineConfirmButtons,
+  decorators: [
+    () => ({
+      template: `
+        <div style="max-width:480px;padding:0 16px 16px;background:var(--color-surface);border:1px solid var(--color-border-panel);border-radius:var(--radius-overlay)">
+          <story />
+        </div>`,
+    }),
+  ],
   argTypes: {
     confirmLabel: { control: "text" },
     cancelLabel: { control: "text" },
@@ -22,7 +30,7 @@ const meta: Meta<typeof InlineConfirmButtons> = {
     docs: {
       description: {
         component:
-          "Cancel and confirm button pair shown inline, for example under " +
+          "Confirm and cancel button pair shown inline, for example under " +
           "the question in the delete modal. Confirm can show a loading " +
           "state while the action runs.",
       },
@@ -39,8 +47,8 @@ export const Default: Story = {
     cancelLabel: "Cancel",
     confirmButtonStyle: "danger",
     cancelButtonStyle: "secondary",
-    confirmButtonSize: "md",
-    cancelButtonSize: "md",
+    confirmButtonSize: "sm",
+    cancelButtonSize: "sm",
     confirmLoading: false,
   },
 };

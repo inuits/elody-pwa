@@ -26,7 +26,7 @@ export const Default: Story = {
     template: `
       <div style="display:flex;align-items:flex-end;gap:20px">
         <span v-for="size in [4, 5, 10, 16, 20]" :key="size" style="text-align:center">
-          <spinner-loader :dimensions="size" />
+          <spinner-loader theme="accent" :dimensions="size" />
           <code style="display:block;font-size:var(--text-hint);color:var(--color-text-secondary)">{{ size }}</code>
         </span>
       </div>`,
@@ -39,8 +39,9 @@ export const OnAccent: Story = {
     docs: {
       description: {
         story:
-          'theme="inherit" takes the surrounding ink instead of commit teal — ' +
-          "how it renders inside a filled button.",
+          "The default theme takes the surrounding ink instead of commit " +
+          'teal, which is how it renders inside a filled button; theme="accent" ' +
+          "is for surfaces.",
       },
     },
   },
@@ -49,10 +50,10 @@ export const OnAccent: Story = {
     template: `
       <div style="display:flex;gap:16px">
         <span style="display:inline-flex;align-items:center;gap:6px;background:var(--color-accent);color:var(--color-text-on-accent);padding:6px 14px;border-radius:var(--radius-button);font-size:var(--text-ui);font-weight:700">
-          <spinner-loader theme="inherit" :dimensions="4" /> Saving
+          <spinner-loader :dimensions="4" /> Saving
         </span>
         <span style="display:inline-flex;align-items:center;gap:6px;background:var(--color-surface);border:1px solid var(--color-border-default);padding:6px 14px;border-radius:var(--radius-input);font-size:var(--text-ui)">
-          <spinner-loader :dimensions="4" /> Loading
+          <spinner-loader theme="accent" :dimensions="4" /> Loading
         </span>
       </div>`,
   }),

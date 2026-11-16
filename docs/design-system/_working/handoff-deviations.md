@@ -167,3 +167,45 @@ The public design-system pages (elody-docs) now describe only what is built. The
 | R30 | Bug | — | import folder tree rows are clickable `<div>`/`<a>` without ARIA: not usable by keyboard | tree pattern |
 | R31 | Bug | — | comment thread card is a clickable `<div>` without tabindex; comment edit button has no aria-label | make them buttons |
 | R32 | Open | — | checkbox: disabled + checked fills with label-blue (`text-text-light`), disabled labels keep body ink and a pointer cursor | done 2026-11-16: muted grey via `--checkbox-disabled-*` tokens |
+
+## Stage 1 docs review findings (2026-11-16)
+
+Found while writing the stage 1 component pages; not fixed in the docs branch. **Check** = reported from reading the code, not yet confirmed in the app.
+
+| ID | Kind | Where | Finding | Follow-up |
+|---|---|---|---|---|
+| S1 | Bug | `useDropzone.ts:12,27` | `maxFileSize` is not a dropzone.js option (`maxFilesize`), so the configured size limit is ignored (dropzone default 256 MB) | user decides: fixing it starts enforcing limits |
+| S2 | Security (check) | `useUpload.ts:1056,1090` | upload error/warning messages inserted with `innerHTML`; XSS if a message contains file names or CSV content | trace message sources; escape or use text |
+| S3 | Bug (check) | `useBaseRangeSlider.ts:16-17,69` | min/max copied once at setup; `RangeMatcher` sets them in `onMounted`, so the range filter may get a 0–0 scale | confirm in the app |
+| S4 | Bug | `BaseRangeSlider.vue:94` | composable `unit` shadows `props.unit`; the unit never renders | — |
+| S5 | A11y | `BaseRangeSlider.vue:32,50,44,63,20` | hard-coded "From:/To:" divs (inputs unnamed), error not announced, raw colours (`text-red-default`, `text-gray-300`) | with R2 |
+| S6 | A11y | `BaseSlider.vue:2,35` | handles have no accessible name; own grey focus ring with `outline: none` instead of the global ring | with R2 |
+| S7 | A11y | `BaseToggleGroup.vue:7,29` | `overflow-hidden` clips the focus ring; icon segments read their name twice (aria-label + tooltip) | — |
+| S8 | A11y | `BaseToggle.vue:2` | clickable `<div>`, no role/keyboard/name; only use is behind `v-if="false"` | delete or rebuild |
+| S9 | Bug | `Dropzone.vue:66` | files over the max count removed silently (= R23) | report dropped files |
+| S10 | A11y | `BaseProgressStep.vue:8,36` | status only in `title`; spinning cog ignores reduced motion | — |
+| S11 | A11y | `DropzonePreview.vue:34` | remove button "Remove file" without the file name | — |
+| S12 | Bug (check) | dropzone | a rejected file type probably shows no error and may still queue | confirm |
+| S13 | Out of date | R1 | toggle group now has a `groupLabel` prop (default "View") and text segments | update R1 |
+| S14 | A11y | `MetadataTitle.vue:31,43-50` | help-tooltip trigger and info-panel trigger are unfocusable `div`s (info trigger also unnamed): keyboard users can't reach either | make them buttons |
+| S15 | A11y | `BaseInfoPanel.vue:5,18` | `role="dialog"` without name/`aria-modal`, no focus move, no Escape; close button label `t('close')` has no key (raw "close") | use `actions.labels.close` |
+| S16 | A11y | `BasePagination.vue:41-45` | help icon next to a capped count is an unfocusable `span` | — |
+| S17 | Bug | `BasePagination.vue:101` | `Number(localPage)` accepts decimals (2.5 becomes the page) | round/validate |
+| S18 | Bug (check) | `BaseModal.vue:104-128` | each modal adds a document Escape listener; one Escape may close stacked modals together | confirm |
+| S19 | Bug | `BaseTooltip.vue:3,74` | auto placement ignores `position`; `top-right` (MetadataTitle, LogInLogout) is not a valid placement; anchors to a block wrapper | — |
+| S20 | A11y | `BlockingOverlay.vue:13` | `role="alert"` with no message says nothing | require a message |
+| S21 | A11y | `SpinnerLoader.vue:4`, skeletons | no `prefers-reduced-motion` handling anywhere in the project | add a global rule |
+| S22 | Tokens | `ListItemSkeleton.vue:9`, `DynamicFormSkeleton.vue` | literals `bg-gray-300`, `h-[16px]` | move to tokens |
+| S23 | A11y | `DeleteModal.vue:2-6` | no title: delete dialog has no accessible name; without blocking relations the whole header (and close button) is hidden | — |
+| S24 | Consistency | `InlineConfirmButtons.vue:2` | confirm left / cancel right, opposite of the confirm dialog | align order |
+| S25 | Dead code | `BaseModal.vue:80` | `modalColor` prop unused | remove |
+| S26 | A11y | `AdvancedDropdown.vue:25` | lists of ≤ 10 options (no search) get `tabindex=-1` + `aria-hidden` from the library: not reachable by Tab, ✕ unreachable too | high priority |
+| S27 | A11y | `AdvancedDropdown.vue` | no `aria` prop to VueSelect: combobox named by its value, not the field label; placeholder text in `aria-describedby` | pass label |
+| S28 | Bug | `AdvancedDropdown.vue:245` | clearable single select always lists "— No value", so loading skeleton and "No options" never show | — |
+| S29 | A11y | `BaseInputAutocomplete.vue:102` | Enter on a chip ✕ does nothing (library ignores non-mouse events), Space unhandled | — |
+| S30 | Bug/A11y | `main.css:712`, `multiselect-custom-theme.css:142` | `--bg-multiselect-remove` undefined: clear-all button invisible but tabbable and unnamed | — |
+| S31 | A11y | `BaseInputAutocomplete.vue:2,5` | combobox not named by the field label; shared ids `assist`/`multiselect-options` across instances; Escape drops focus to body; "No results found" untranslated; nothing renders when `modelValue` is undefined | — |
+| S32 | A11y | `BaseDatePicker.vue:2` | field always named "Datepicker input"; no arrow keys in the calendar (42 tab stops); weekday headers are `gridcell`; invalid typed text shows no error | — |
+| S33 | A11y | `BaseInputColor.vue:14` | swatch and hex field unnamed, no prop to name them | — |
+| S34 | Bug | `BaseInputTextNumberDatetime.vue:60` | `resizableTextarea` mode drops `disabled`, `readonly`, `placeholder`: a disabled growing textarea stays editable | — |
+| S35 | Dead code | `InputField.vue` | old separate input, only used by its own stories | delete |
