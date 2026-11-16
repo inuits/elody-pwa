@@ -182,6 +182,7 @@ const initialize = async () => {
         route.meta.entityType) as Entitytyping,
       filterOptionsMapping: props.filter.advancedFilter.filterOptionsMapping,
       limitConfig: props.filter.advancedFilter.limitConfig,
+      optionLabelKeys: props.filter.advancedFilter.optionLabelKeys ?? undefined,
       selectedOptions: selectedOptions.value,
       parentEntity,
     });

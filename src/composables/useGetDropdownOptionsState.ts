@@ -18,6 +18,10 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { omitDeep } from "@apollo/client/utilities";
 import { useI18n } from "vue-i18n";
 import type { TranslationEntry } from "@/composables/useMultilingualField";
+import {
+  getOptionLabelParts,
+  resolveTranslationLabel,
+} from "@/composables/optionLabelParts";
 
 const isTypeKey = (key: unknown): boolean =>
   (Array.isArray(key) ? key : [key]).some(
@@ -214,37 +218,21 @@ export const useGetDropdownOptionsState = (
     return { ...filterProps, value };
   };
 
-  const resolveLabel = (value: string | TranslationEntry[]): string => {
-    if (Array.isArray(value)) {
-      return (
-        value.find((entry) => entry.lang === locale.value)?.value ??
-        value[0]?.value ??
-        ""
-      );
-    }
-    return value;
-  };
-
-  const resolveOptionLabelValue = (value: unknown): string => {
-    if (!Array.isArray(value)) return value ? String(value) : "";
-    if (value.some((entry) => typeof entry === "object" && entry?.lang))
-      return resolveLabel(value as TranslationEntry[]);
-    return value.filter(Boolean).join(", ");
-  };
-
   const toDropdownOption = (entity: BaseEntity): DropdownOption => {
-    const labelParts = (optionLabelKeys ?? [])
-      .map((key) => resolveOptionLabelValue(entity.intialValues?.[key]))
-      .filter(Boolean);
-    const [label, ...secondaryLabelParts] = labelParts;
+    const { label, secondaryLabel } = getOptionLabelParts(
+      entity.intialValues,
+      optionLabelKeys,
+      locale.value,
+    );
     return {
       icon: DamsIcons.NoIcon,
       label:
         label ??
-        resolveLabel(
+        resolveTranslationLabel(
           getEntityTitle(entity) as unknown as string | TranslationEntry[],
+          locale.value,
         ),
-      secondaryLabel: secondaryLabelParts.join(" · ") || undefined,
+      secondaryLabel,
       value: entity.id,
     };
   };

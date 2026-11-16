@@ -129,6 +129,16 @@ describe("ExactSelectionFilter init call arguments", () => {
       parentEntity,
     });
   });
+
+  it("passes the configured option label keys to init", async () => {
+    const optionLabelKeys = ["name", "life_dates"];
+    getWrapper(makeFilter({ optionLabelKeys }));
+    await flushPromises();
+
+    expect(mocks.init).toHaveBeenCalledWith(
+      expect.objectContaining({ optionLabelKeys }),
+    );
+  });
 });
 
 describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {

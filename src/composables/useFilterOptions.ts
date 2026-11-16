@@ -23,6 +23,7 @@ import type { TranslationEntry } from "@/composables/useMultilingualField";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
 import { useI18n } from "vue-i18n";
+import { getOptionLabelParts } from "@/composables/optionLabelParts";
 
 type FilterOptionsMappingType = {
   label?: string;
@@ -40,6 +41,7 @@ type InitOptions = {
   selectedOptions?: string[];
   parentEntity?: Entity;
   limitConfig?: LimitOptions;
+  optionLabelKeys?: string[];
 };
 
 export const useFilterOptions = () => {
@@ -62,6 +64,7 @@ export const useFilterOptions = () => {
   const hasFacets = ref<boolean>(false);
   const selectedOptions = ref<string[] | undefined>([]);
   const limitConfig = ref<LimitOptions | undefined>(undefined);
+  const optionLabelKeys = ref<string[] | undefined>(undefined);
 
   const currentRequestId = ref(0);
 
@@ -71,6 +74,7 @@ export const useFilterOptions = () => {
     selectedOptions: filterSelectedOptions,
     parentEntity,
     limitConfig: limitConfigValue,
+    optionLabelKeys: optionLabelKeysValue,
   }: InitOptions) => {
     query.value = await loadDocument("GetFilterOptions");
     entityType.value = entityTypeToSet;
@@ -82,6 +86,7 @@ export const useFilterOptions = () => {
     filterOptionsMapping.value = filterOptionsMappingValue;
     selectedOptions.value = filterSelectedOptions;
     limitConfig.value = limitConfigValue;
+    optionLabelKeys.value = optionLabelKeysValue;
   };
 
   const getBaseOptions = async () => {
@@ -278,12 +283,20 @@ export const useFilterOptions = () => {
       extractValueFromObject(entity, valuePath),
     ) as string | undefined;
 
-    const baseOption = {
+    const { label: configuredLabel, secondaryLabel } = getOptionLabelParts(
+      entity.intialValues,
+      optionLabelKeys.value,
+      locale.value,
+    );
+
+    const baseOption: DropdownOption = {
       icon: DamsIcons.NoIcon,
       label:
+        configuredLabel ||
         translateOptionLabel(getReadableProp(labelValue)) ||
         String(resolveTranslatableValue(getEntityTitle(entity)) ?? ""),
       value: getReadableProp(valueValue) || entity.id,
+      ...(secondaryLabel && { secondaryLabel }),
     };
 
     if (hasFacets.value) {
