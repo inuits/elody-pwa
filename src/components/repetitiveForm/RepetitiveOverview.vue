@@ -35,7 +35,7 @@
             :key="step.key"
             class="flex flex-col min-w-0"
           >
-            <span class="text-text-light">
+            <span class="text-label font-bold text-text-light uppercase">
               {{ $t(step.label ?? step.key) }}
             </span>
             <span class="font-bold truncate">
@@ -44,9 +44,10 @@
             <span
               v-for="entry in overviewEntries(branches[index], step)"
               :key="entry.label"
-              class="text-text-light truncate"
+              class="truncate"
             >
-              {{ $t(entry.label) }}: {{ entry.value }}
+              <span class="text-text-light">{{ $t(entry.label) }}:</span>
+              {{ entry.value }}
             </span>
           </div>
         </div>

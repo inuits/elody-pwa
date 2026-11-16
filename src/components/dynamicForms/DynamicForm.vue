@@ -1006,7 +1006,11 @@ const submitActionFunction = async (field: FormAction) => {
     // used by guided flow's metadataOnly steps: this form just collects field
     // values (e.g. relation metadata) — no entity gets created or updated.
     showErrors.value = false;
-    emit("valuesSubmitted", form.value?.values.intialValues ?? {});
+    emit(
+      "valuesSubmitted",
+      form.value?.values.intialValues ?? {},
+      copyableFields(),
+    );
     deleteForm(formId.value);
     return;
   }

@@ -164,6 +164,7 @@ import {
   type RepetitiveForm,
   type RepetitiveCreatableType,
   type Entitytyping,
+  type PanelMetaData,
 } from "@/generated-types/queries";
 import {
   useRepetitiveForm,
@@ -374,7 +375,18 @@ const onCreated = async (
   await advance();
 };
 
-const onMetadataSubmitted = async (values: Record<string, unknown>) => {
+// A dropdown stores option values ("admin"); the overview shows their labels.
+const optionLabel = (field: PanelMetaData | undefined, value: unknown) => {
+  const option = field?.inputField?.options?.find(
+    (candidate) => candidate?.value === value,
+  );
+  return option?.label ? t(option.label) : value;
+};
+
+const onMetadataSubmitted = async (
+  values: Record<string, unknown>,
+  fields: PanelMetaData[] = [],
+) => {
   const step = activeStep.value;
   if (step) {
     store.stagePendingHostRelation(step, values);
@@ -386,10 +398,17 @@ const onMetadataSubmitted = async (values: Record<string, unknown>) => {
       type: step.entityType as Entitytyping,
       isNew: false,
       details: Object.entries(values)
-        .map(([key, value]) => ({
-          label: `metadata.labels.${key.replace(/_/g, "-")}`,
-          value: toDisplayValue(value),
-        }))
+        .map(([key, value]) => {
+          const field = fields.find((candidate) => candidate.key === key);
+          return {
+            label: `metadata.labels.${key.replace(/_/g, "-")}`,
+            value: toDisplayValue(
+              Array.isArray(value)
+                ? value.map((entry) => optionLabel(field, entry))
+                : optionLabel(field, value),
+            ),
+          };
+        })
         .filter((detail) => detail.value),
     });
   }

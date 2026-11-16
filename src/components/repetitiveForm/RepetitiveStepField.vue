@@ -131,6 +131,7 @@ import {
   type AdvancedFilterInput,
   type RepetitiveStep,
   type RepetitiveCreatableType,
+  type PanelMetaData,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
@@ -178,7 +179,11 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: "selected", entities: SelectedEntity[]): void;
   (e: "created", entity: any, entityType?: string): void;
-  (e: "metadataSubmitted", values: Record<string, unknown>): void;
+  (
+    e: "metadataSubmitted",
+    values: Record<string, unknown>,
+    fields?: PanelMetaData[],
+  ): void;
   (e: "terminalSelected", items: InBulkProcessableItem[]): void;
 }>();
 
@@ -326,8 +331,11 @@ const onCreated = (entity: any) => {
   emit("created", entity, selectedType.value?.entityType);
 };
 
-const onMetadataSubmitted = (values: Record<string, unknown>) => {
-  emit("metadataSubmitted", values);
+const onMetadataSubmitted = (
+  values: Record<string, unknown>,
+  fields?: PanelMetaData[],
+) => {
+  emit("metadataSubmitted", values, fields);
 };
 
 const onTerminalAction = () => {

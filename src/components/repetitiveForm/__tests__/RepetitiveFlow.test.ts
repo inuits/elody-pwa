@@ -902,6 +902,46 @@ describe("RepetitiveFlow — metadataOnly step", () => {
     await flushPromises();
   };
 
+  it("shows a metadataOnly step's dropdown values by their option labels in the overview", async () => {
+    const wrapper = getMetadataOnlyWrapper();
+    await startBranch(wrapper);
+    field(wrapper).vm.$emit("selected", [{ id: "user-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit(
+      "metadataSubmitted",
+      { role: "admin", function: ["programmer_music", "technical"], note: "Free text" },
+      [
+        {
+          key: "role",
+          inputField: {
+            options: [{ label: "metadata.labels.roles-options.admin", value: "admin" }],
+          },
+        },
+        {
+          key: "function",
+          inputField: {
+            options: [
+              { label: "metadata.labels.user-function.programmer_music", value: "programmer_music" },
+              { label: "metadata.labels.user-function.technical", value: "technical" },
+            ],
+          },
+        },
+        { key: "note", inputField: { options: null } },
+      ],
+    );
+    await flushPromises();
+
+    const [branch] = overview(wrapper).props("branches");
+    expect(branch.entities.role[0].details).toEqual([
+      { label: "metadata.labels.role", value: "metadata.labels.roles-options.admin" },
+      {
+        label: "metadata.labels.function",
+        value: "metadata.labels.user-function.programmer_music, metadata.labels.user-function.technical",
+      },
+      { label: "metadata.labels.note", value: "Free text" },
+    ]);
+  });
+
   it("advances to the metadataOnly step after picking the user", async () => {
     const wrapper = getMetadataOnlyWrapper();
     await startBranch(wrapper);

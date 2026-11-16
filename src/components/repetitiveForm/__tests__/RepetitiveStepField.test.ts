@@ -438,6 +438,20 @@ describe("RepetitiveStepField", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("metadataSubmitted")?.[0]).toEqual([
       { role: "booker_admin", function: "Coordinator" },
+      undefined,
+    ]);
+  });
+
+  it("passes the form's fields along with the submitted values", async () => {
+    const wrapper = getWrapper({ ...getDefaultProps(), step: metadataOnlyStep() });
+    const fields = [{ key: "role", inputField: { options: [] } }];
+    wrapper
+      .findComponent(DynamicForm)
+      .vm.$emit("valuesSubmitted", { role: "admin" }, fields);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("metadataSubmitted")?.[0]).toEqual([
+      { role: "admin" },
+      fields,
     ]);
   });
 
