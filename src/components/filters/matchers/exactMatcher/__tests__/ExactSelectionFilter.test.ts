@@ -372,3 +372,73 @@ describe("ExactSelectionFilter seed resolution ranking", () => {
     ]);
   });
 });
+
+describe("ExactSelectionFilter preferredOptionIds", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.options.value = [
+      { label: "Williams, John", value: "entities/1" },
+      { label: "Williams, John", value: "entities/2" },
+    ];
+  });
+
+  const makePreferredFilter = () =>
+    makeFilter({
+      selectionOption: AutocompleteSelectionOptions.Autocomplete,
+      options: [],
+      advancedFilterInputForRetrievingOptions: [
+        {
+          type: AdvancedFilterTypes.Text,
+          key: ["vlacc:1|properties.name.value"],
+          value: "$entity.intialValues.primary_author_name",
+          match_exact: false,
+          resolveDefaultValueToOptionIds: true,
+          preferredOptionIds: "$entity.intialValues.primary_author_ids",
+        },
+      ],
+    });
+
+  const mountWithParent = (parentEntity: any) =>
+    shallowMount(ExactSelectionFilter, {
+      props: {
+        filter: makePreferredFilter(),
+        lastTypedValue: "",
+        isOpen: true,
+        getNormalizedActiveFilters: () => [],
+        refetchFilterOptions: false,
+      },
+      global: {
+        stubs: { SpinnerLoader: true },
+        provide: { ParentEntityProvider: parentEntity },
+      },
+    });
+
+  it("auto-fills only the preferred ids among the seed options", async () => {
+    const wrapper = mountWithParent({
+      intialValues: { primary_author_ids: ["entities/2"] },
+    });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")![0]).toEqual([["entities/2"]]);
+  });
+
+  it("falls back to all seed options when no preferred id is among them", async () => {
+    const wrapper = mountWithParent({
+      intialValues: { primary_author_ids: ["entities/9"] },
+    });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")![0]).toEqual([
+      ["entities/1", "entities/2"],
+    ]);
+  });
+
+  it("falls back to all seed options when the parent has no preferred ids", async () => {
+    const wrapper = mountWithParent({ intialValues: {} });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")![0]).toEqual([
+      ["entities/1", "entities/2"],
+    ]);
+  });
+});
