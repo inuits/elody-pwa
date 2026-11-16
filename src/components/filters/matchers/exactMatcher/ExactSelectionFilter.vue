@@ -167,7 +167,9 @@ const hasWildcardTextFilter = computed(() => {
 const showFilters = computed(() => {
   return (
     !isLoading.value &&
-    (initialAmountOfOptions.value !== 0 || hasWildcardTextFilter.value)
+    (initialAmountOfOptions.value !== 0 ||
+      hasWildcardTextFilter.value ||
+      shouldResolveOptionIds.value)
   );
 });
 

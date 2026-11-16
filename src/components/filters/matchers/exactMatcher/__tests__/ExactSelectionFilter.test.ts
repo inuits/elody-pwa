@@ -204,6 +204,27 @@ describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
     expect(wrapper.emitted("updateValue")).toBeFalsy();
   });
 
+  it("keeps the autocomplete searchable when the seed value has no matches", async () => {
+    mocks.options.value = [];
+    const wrapper = getWrapper(makeAutocompleteFilter(true));
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: "AutocompleteFilter" }).exists()).toBe(
+      true,
+    );
+    expect(wrapper.text()).not.toContain("filters.noOptionsAvailable");
+  });
+
+  it("still reports no options for an unflagged filter without matches", async () => {
+    mocks.options.value = [];
+    const wrapper = getWrapper(makeAutocompleteFilter(false));
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: "AutocompleteFilter" }).exists()).toBe(
+      false,
+    );
+  });
+
   it("auto-fills only once and not again on a subsequent option load", async () => {
     mocks.options.value = [{ label: "Jef Geeraerts", value: "entities/1" }];
     const filter = makeAutocompleteFilter(true);
