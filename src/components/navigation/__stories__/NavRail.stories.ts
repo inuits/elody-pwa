@@ -6,6 +6,7 @@ import MobileTopBar from "../MobileTopBar.vue";
 import useMenuHelper from "@/composables/useMenuHelper";
 import { NavMode, isCompact, useNavMenu } from "@/composables/useNavMenu";
 import type { MenuItem } from "@/generated-types/queries";
+import { registerQueryFixture } from "@/main";
 
 const link = (label: string, icon: string, destination: string) => ({
   label,
@@ -28,6 +29,8 @@ const sampleMenu = [
 ] as unknown as MenuItem[];
 
 const useSampleMenu = (mode: NavMode, compact: boolean, drawerOpen = false) => {
+  registerQueryFixture("GetMenu", { Menu: null });
+  registerQueryFixture("getElodyUser", { getElodyUser: null });
   const { menuItems } = useMenuHelper();
   const { setMode, openDrawer, closeDrawer } = useNavMenu();
   menuItems.value = sampleMenu;

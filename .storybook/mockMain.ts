@@ -29,6 +29,8 @@ export const registerQueryFixture = (
   queryFixtures[operationName] = data;
 };
 
+export const PENDING_QUERY = Symbol("pending");
+
 export const resetQueryFixtures = (): void => {
   Object.keys(queryFixtures).forEach((key) => delete queryFixtures[key]);
 };
@@ -36,17 +38,18 @@ export const resetQueryFixtures = (): void => {
 const fixtureLink = new ApolloLink(
   (operation) =>
     new Observable((observer) => {
+      if (queryFixtures[operation.operationName] === PENDING_QUERY) return;
       if (!(operation.operationName in queryFixtures)) {
         // Silent empty answers are hard to debug; say what was asked.
         console.debug(
           `[storybook] unfixtured query "${operation.operationName}" answered {}`,
         );
       }
+      const fixture = queryFixtures[operation.operationName];
       observer.next({
-        data: (queryFixtures[operation.operationName] ?? {}) as Record<
-          string,
-          unknown
-        >,
+        data: (typeof fixture === "function"
+          ? fixture(operation.variables)
+          : (fixture ?? {})) as Record<string, unknown>,
       });
       observer.complete();
     }),

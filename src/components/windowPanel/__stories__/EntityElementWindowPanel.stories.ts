@@ -2,23 +2,20 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { provide } from "vue";
 import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
+import { useEditMode } from "@/composables/useEdit";
 import { InputFieldTypes, PanelType } from "@/generated-types/queries";
 
 const meta: Meta<typeof EntityElementWindowPanel> = {
-  // Story id entityelements-entityelementwindowpanel--group-editing,
-  // per MANIFEST.md.
   title: "EntityElements/EntityElementWindowPanel",
   component: EntityElementWindowPanel,
   parameters: {
     docs: {
       description: {
         component:
-          "The group scope of per-field editing. Fields that make no sense " +
-          "apart — publisher, place, year — carry a tint at rest and lift " +
-          "into a card when any one of them is clicked: one gesture opens all " +
-          "of them, one Save/Cancel pair commits them, and validation " +
-          "covers the group and stops there. Panels opt in with `isGroup`; " +
-          "everything else keeps independent field rows.",
+          "A block of field rows under a bold label. Each row edits and " +
+          "saves on its own. A panel with a `repetitionConfig` repeats its " +
+          "rows for every value in a stored list: rows are added from the " +
+          "header and removed one by one.",
       },
     },
   },
@@ -27,112 +24,115 @@ const meta: Meta<typeof EntityElementWindowPanel> = {
 export default meta;
 type Story = StoryObj<typeof EntityElementWindowPanel>;
 
-const FORM_ID = "story-group-panel";
-
-const panelField = (key: string, label: string, value: unknown) => ({
+const panelField = (key: string, label: string, value?: unknown) => ({
   __typename: "PanelMetaData",
   key,
   label,
-  value,
+  ...(value !== undefined ? { value } : {}),
   inputField: { type: InputFieldTypes.Text, label },
 });
 
-const panel = (isGroup: boolean) => ({
+const basePanel = {
   __typename: "WindowElementPanel",
   panelType: PanelType.Metadata,
   isCollapsed: false,
   isEditable: true,
   canBeMultipleColumns: false,
-  isGroup,
-  panelHeaderContent: { label: "Publication" },
-  publisher: panelField("publisher", "Publisher", "Lannoo"),
-  place: panelField("place", "Place", "Tielt"),
-  year: panelField("year", "Year", "1987"),
-});
+};
 
-const setupForm = () => {
-  provide("persistEntity", async () => {
-    await new Promise((resolve) => setTimeout(resolve, 700));
-  });
-  useFormHelper().createForm(FORM_ID, {
-    intialValues: { publisher: "Lannoo", place: "Tielt", year: "1987" },
+const setupForm = (
+  formId: string,
+  intialValues: Record<string, unknown>,
+  canUpdate = true,
+) => {
+  provide("entityFormData", { id: formId });
+  useEditMode(formId).setPermittedEditMode({ canUpdate });
+  useFormHelper().createForm(formId, {
+    intialValues,
     relationValues: {},
   } as never);
 };
 
-/**
- * Clicking any of the three values opens all three; the pair at the bottom
- * right commits them together.
- */
-export const GroupEditing: Story = {
+const template = `
+  <div style="max-width:560px">
+    <entity-element-window-panel
+      :panel="panel"
+      :identifiers="['story-entity']"
+      :is-edit="false"
+      :form-id="formId"
+    />
+  </div>`;
+
+const repeatablePanel = {
+  ...basePanel,
+  panelHeaderContent: { label: "ISBN" },
+  repetitionConfig: { repetitionKey: "isbn_group" },
+  isbn: panelField("isbn", "ISBN"),
+  edition: panelField("edition", "Edition"),
+};
+
+const storedRows = [
+  { isbn: "978-90-209-1234-5", edition: "Hardcover" },
+  { isbn: "978-90-209-5678-9", edition: "Paperback" },
+];
+
+const repeatableStory = (
+  formId: string,
+  rows: Record<string, unknown>[] | undefined,
+  canUpdate = true,
+): Story => ({
   render: () => ({
     components: { EntityElementWindowPanel },
     setup() {
-      setupForm();
-      return { panel: panel(true), formId: FORM_ID };
+      setupForm(formId, rows ? { isbn_group: rows } : {}, canUpdate);
+      return { panel: repeatablePanel, formId };
     },
-    template: `
-      <div style="max-width:560px">
-        <entity-element-window-panel
-          :panel="panel"
-          :identifiers="['story-entity']"
-          :is-edit="false"
-          :form-id="formId"
-        />
-      </div>`,
+    template,
   }),
-};
+});
 
-/**
- * A panel with a repetitionConfig repeats its row block: "Add more" appends a
- * block, each block after the first carries its own remove, and a rule
- * separates the blocks (repeatable-row-group.md).
- */
-export const Repeatable: Story = {
-  render: () => ({
-    components: { EntityElementWindowPanel },
-    setup() {
-      setupForm();
-      return {
-        panel: {
-          ...panel(false),
-          panelHeaderContent: { label: "Identifiers" },
-          repetitionConfig: { repetitionKey: "identifiers" },
-        },
-        formId: FORM_ID,
-      };
-    },
-    template: `
-      <div style="max-width:560px">
-        <entity-element-window-panel
-          :panel="panel"
-          :identifiers="['story-entity']"
-          :is-edit="true"
-          :form-id="formId"
-        />
-      </div>`,
-  }),
-};
-
-/**
- * The same three fields without the flag: independent rows, each saving on its
- * own. This is what every panel does unless the form definition says otherwise.
- */
 export const IndependentRows: Story = {
   render: () => ({
     components: { EntityElementWindowPanel },
     setup() {
-      setupForm();
-      return { panel: panel(false), formId: FORM_ID };
+      const formId = "story-panel-rows";
+      setupForm(formId, { publisher: "Lannoo", place: "Tielt", year: "1987" });
+      return {
+        panel: {
+          ...basePanel,
+          panelHeaderContent: { label: "Publication" },
+          publisher: panelField("publisher", "Publisher", "Lannoo"),
+          place: panelField("place", "Place", "Tielt"),
+          year: panelField("year", "Year", "1987"),
+        },
+        formId,
+      };
     },
-    template: `
-      <div style="max-width:560px">
-        <entity-element-window-panel
-          :panel="panel"
-          :identifiers="['story-entity']"
-          :is-edit="false"
-          :form-id="formId"
-        />
-      </div>`,
+    template,
   }),
 };
+
+export const Repeatable: Story = repeatableStory(
+  "story-repeatable",
+  storedRows,
+);
+
+export const RepeatableNewRow: Story = {
+  ...repeatableStory("story-repeatable-new", storedRows.slice(0, 1)),
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-cy="repeatable-add-row"]')
+      ?.click();
+  },
+};
+
+export const RepeatableEmpty: Story = repeatableStory(
+  "story-repeatable-empty",
+  undefined,
+);
+
+export const RepeatableReadOnly: Story = repeatableStory(
+  "story-repeatable-read-only",
+  storedRows,
+  false,
+);

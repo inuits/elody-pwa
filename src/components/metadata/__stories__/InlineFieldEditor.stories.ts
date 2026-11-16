@@ -1,21 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { ref } from "vue";
 import InlineFieldEditor from "../InlineFieldEditor.vue";
+import { InputFieldTypes } from "@/generated-types/queries";
 
 const meta: Meta<typeof InlineFieldEditor> = {
-  // Story id metadata-inlinefieldeditor--editing, per MANIFEST.md.
   title: "Metadata/InlineFieldEditor",
   component: InlineFieldEditor,
   parameters: {
     docs: {
       description: {
         component:
-          "The commit chrome a field row swaps to. It never mounts on its " +
-          "own in the product — the row owns it — but its states are worth " +
-          "pinning here, because saving is a flicker in the real app and the " +
-          "error state needs a server that says no. The input arrives through " +
-          "a slot, which is how every field type gets an inline editor " +
-          "without re-implementing its input.",
+          "The input a field row swaps to while one field is edited: the " +
+          "input for the field type, a save (✓) and a cancel (×) button, and " +
+          "a keyboard hint below. The field row opens it, validates and saves; " +
+          "the editor itself only emits save and cancel.",
       },
     },
   },
@@ -24,83 +21,67 @@ const meta: Meta<typeof InlineFieldEditor> = {
 export default meta;
 type Story = StoryObj<typeof InlineFieldEditor>;
 
-/**
- * The editor as a row opens it: the value carried over, Save not yet
- * available because nothing has changed.
- */
+const statusOptions = [
+  { label: "Draft", value: "draft" },
+  { label: "Published", value: "published" },
+  { label: "Expired", value: "expired" },
+];
+
+const label = (text: string) =>
+  `<p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label);margin-bottom:var(--field-label-gap)">${text}</p>`;
+
 export const Editing: Story = {
   render: () => ({
     components: { InlineFieldEditor },
-    setup() {
-      const value = ref("Tales from the North Sea");
-      return { value, dirty: ref(false) };
-    },
     template: `
       <div style="max-width:440px">
-        <p style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">
-          Title
-        </p>
-        <inline-field-editor :is-dirty="dirty">
-          <input
-            class="ds-input ds-input--defaultWithBorder"
-            style="width:100%;font-size:var(--text-value)"
-            v-model="value"
-            @input="dirty = true"
-          />
-        </inline-field-editor>
+        ${label("Title")}
+        <inline-field-editor type="text" model-value="Tales from the North Sea" label="Title" />
       </div>`,
   }),
 };
 
-/**
- * The four states side by side. Pristine and dirty differ only in whether
- * Save can be pressed — that is the whole of pick-then-Save.
- */
+export const FieldTypes: Story = {
+  render: () => ({
+    components: { InlineFieldEditor },
+    setup: () => ({ InputFieldTypes, statusOptions }),
+    template: `
+      <div style="display:flex;flex-direction:column;gap:18px;max-width:440px">
+        <div>
+          ${label("Year")}
+          <inline-field-editor :type="InputFieldTypes.Number" :model-value="1987" label="Year" />
+        </div>
+        <div>
+          ${label("Summary")}
+          <inline-field-editor :type="InputFieldTypes.Textarea" model-value="A longer note from the cataloguer." label="Summary" />
+        </div>
+        <div>
+          ${label("Status")}
+          <inline-field-editor :type="InputFieldTypes.Dropdown" model-value="draft" label="Status" :options="statusOptions" />
+        </div>
+        <div>
+          ${label("Digitised")}
+          <inline-field-editor :type="InputFieldTypes.Checkbox" :model-value="true" label="Digitised" />
+        </div>
+        <div>
+          ${label("Colour")}
+          <inline-field-editor :type="InputFieldTypes.Color" model-value="#2f7f8c" label="Colour" />
+        </div>
+      </div>`,
+  }),
+};
+
 export const States: Story = {
   render: () => ({
     components: { InlineFieldEditor },
     template: `
-      <div style="display:flex;flex-direction:column;gap:26px;max-width:440px">
-        <div>
-          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">pristine — nothing to save yet</p>
-          <inline-field-editor :is-dirty="false">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the North Sea" />
-          </inline-field-editor>
-        </div>
-
-        <div>
-          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">dirty — Save becomes available</p>
-          <inline-field-editor :is-dirty="true">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the Wadden Sea" />
-          </inline-field-editor>
-        </div>
-
-        <div>
-          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">saving — inputs locked, spinner on Save</p>
-          <inline-field-editor :is-dirty="true" :is-saving="true">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the Wadden Sea" disabled />
-          </inline-field-editor>
-        </div>
-
-        <div>
-          <p style="font-size:var(--text-label);color:var(--color-text-secondary)">error — the value is kept, the editor stays open</p>
-          <inline-field-editor :is-dirty="true" error-message="inline-editor.save-failed">
-            <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" value="Tales from the Wadden Sea" />
-          </inline-field-editor>
-        </div>
-      </div>`,
-  }),
-};
-
-/** A textarea keeps Enter for newlines; Ctrl+Enter commits. */
-export const Multiline: Story = {
-  render: () => ({
-    components: { InlineFieldEditor },
-    template: `
-      <div style="max-width:440px">
-        <inline-field-editor :is-dirty="true" :multiline="true">
-          <textarea class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" rows="3">A longer note from the cataloguer.</textarea>
-        </inline-field-editor>
+      <div style="display:grid;grid-template-columns:90px minmax(0,360px);gap:18px 16px;align-items:start">
+        <span style="font-size:var(--text-label);color:var(--color-text-secondary);padding-top:10px">editing</span>
+        <inline-field-editor type="text" model-value="Tales from the North Sea" label="Title" />
+        <span style="font-size:var(--text-label);color:var(--color-text-secondary);padding-top:10px">saving</span>
+        <inline-field-editor type="text" model-value="Tales from the Wadden Sea" label="Title" :saving="true" />
+        <span style="font-size:var(--text-label);color:var(--color-text-secondary);padding-top:10px">error</span>
+        <inline-field-editor type="text" model-value="" label="Title" error-message="Title is required" />
       </div>`,
   }),
 };

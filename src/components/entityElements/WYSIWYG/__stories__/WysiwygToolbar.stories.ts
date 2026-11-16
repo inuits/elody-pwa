@@ -7,18 +7,15 @@ import { useEditMode } from "@/composables/useEdit";
 import { WysiwygExtensions } from "@/generated-types/queries";
 
 const meta: Meta<typeof WYSIWYGButtons> = {
-  // Story id components-wysiwyg--toolbar, embedded by wysiwyg-editor.md.
   title: "Components/WYSIWYG",
   component: WYSIWYGButtons,
   parameters: {
     docs: {
       description: {
         component:
-          "The rich-text toolbar over a live tiptap editor: block and mark " +
-          "controls light up with the cursor's context, and the whole strip " +
-          "disables outside edit mode. Which controls render follows the " +
-          "field's configured extensions; entity tagging enters through " +
-          "typed triggers (@, #), not a toolbar button.",
+          "The rich-text toolbar over a live tiptap editor. The button for " +
+          "the current format is filled; the buttons are disabled outside " +
+          "edit mode. Which buttons render follows the field's extensions.",
       },
     },
   },

@@ -209,3 +209,43 @@ Found while writing the stage 1 component pages; not fixed in the docs branch. *
 | S33 | A11y | `BaseInputColor.vue:14` | swatch and hex field unnamed, no prop to name them | — |
 | S34 | Bug | `BaseInputTextNumberDatetime.vue:60` | `resizableTextarea` mode drops `disabled`, `readonly`, `placeholder`: a disabled growing textarea stays editable | — |
 | S35 | Dead code | `InputField.vue` | old separate input, only used by its own stories | delete |
+
+## Stage 2 docs review findings (2026-11-16)
+
+Found while writing the stage 2 composite pages. **Check** = from reading the code, not confirmed in the app. Fixed in the docs branch: T1–T3 (keyboard + `aria-expanded`, with tests).
+
+| ID | Kind | Where | Finding | Follow-up |
+|---|---|---|---|---|
+| T1 | A11y | `BaseExpandButton.vue` | expand tab was a clickable `div` | **fixed**: button, `aria-expanded`, named Expand/Collapse (English fallback; add `expand-button.expand/collapse` keys in baseGraphql) |
+| T2 | A11y | `EntityElementWindowPanel.vue` | block collapse only via a clickable header `div` | **fixed**: the expand/compress icon is a button named by the block title, `aria-expanded` |
+| T3 | A11y | `EntityElementWrapper.vue` | panel collapse chevron was a clickable `span` | **fixed**: button named by the panel title, `aria-expanded` |
+| T4 | Not built | group form card (E18) | no grouped editing in code; the old story faked `isGroup` | page stays hidden; story removed |
+| T5 | A11y | `FolderTreeLine.vue:21,41` | rows are clickable divs, chevron an `<a>` without href: mouse-only; no tree ARIA; selection by colour only; raw colours (`bg-blue-75`, blue-500) | rebuild (reverted POC `ab3fdc7b`) |
+| T6 | A11y | `ListItem.vue:61-79`, `TableViewRow.vue:17-29` | row checkboxes in list and table mode have no accessible name | — |
+| T7 | i18n | `ListItem.vue:120` | `bulk-operations.select` missing from en.json (falls back to "Select") | add key |
+| T8 | A11y | `PreviewHost.vue:9` | small-screen preview `role="dialog"` without accessible name | — |
+| T9 | Bug | `PreviewWrapper.vue:119` | changes-preview body `max-h-[calc(100vh-29rem)]` collapses to 0 in short viewports | — |
+| T10 | i18n | `metadata.tooltips.locked-field` (`LockedFieldIndicator.vue:16`) | only ugent-aicap defines it; others show the raw key | add key |
+| T11 | i18n | `navigation.close-menu` (`NavRail.vue:45`), `navigation.open-menu` (`MobileTopBar.vue:12`), `map.center-map` (`HeatMap.vue:136`) | keys missing; raw key is read out / shown | add keys |
+| T12 | Copy | en.json:500, :530 | "1 of these fields are required"; "Entity successfully Updated" | fix copy |
+| T13 | Tokens | `EntityElementWindowPanel.vue:181`, `MenuBadge.vue:5`, `useMaps.ts:166` | raw palette classes / rgb heat colours instead of role tokens | — |
+| T14 | Legacy UI | `ImportFromNetworkDrive.vue:24,249`, `MediaViewerNew.vue:117,141,166` | raw `<button>`s with `bg-accent-accent` / `bg-accent-normal` instead of `BaseButtonNew`; "no directories" text has no padding (:18) | — |
+| T15 | Dead code | `ImportListItem.vue` | unused | delete |
+| T16 | Bug | `FiltersToggle.vue:34` | applied saved-search chip shown only while the pane is closed; pane layout has no `FiltersHeader` | — |
+| T17 | Rules | `SavedSearches.vue:26` | Delete is neither danger ink nor last (recent searches follow it) | use the overflow-menu rules |
+| T18 | A11y | `SavedSearchesPickerModal.vue:2,63` | modal has no title (no accessible name); select-all shown although limit is 1 | — |
+| T19 | A11y | `BreadCrumbs.vue:96` | history list closes only by backdrop click: no Escape, no focus handling | — |
+| T20 | Bug | `BaseSearchPill.vue:20` | `dimensions="3"` string to a number prop (Vue warning) | — |
+| T21 | Behaviour | `FiltersBase.vue:311` | filters that resolve option ids apply on input, not on Apply | design decision |
+| T22 | Licence | `BaseMap.vue:11` | `attributionControl: false`: no OSM attribution on the location map; uses Leaflet zoom, not `MapChrome`; leftover `console.log` (:106,108) | show attribution |
+| T23 | Tokens | `PointMap.vue:56` | without clustering, points use OpenLayers' default blue style, not the accent marker | — |
+| T24 | Bug | `TextViewer.vue:78` + `SanitizedHtml.vue:49` | `<br/>` vs DOMPurify `<br>`: every multi-line text file shows the "sanitized" notice | compare after normalising |
+| T25 | A11y | `main.css:465-466`, `ViewerToolbar.vue` | viewer buttons 28×24 (< `--touch-target-min`); rotate/zoom/fullscreen have no tooltip | — |
+| T26 | A11y/i18n | `WYSIWYGButtons.vue:47,262` | hard-coded English labels; no `role="toolbar"`/`aria-pressed`; raw `0.25rem`; stray `s` attribute | — |
+| T27 | A11y | `MetadataTitle.vue:3` | field label is a `<p>`, not tied to its input: dynamic-form fields have no programmatic label | — |
+| T28 | Not built | DynamicForm, BaseTabs | handoff extras: tab error dots, validation summary, `role="group"` submit zone, pristine-disabled Save | — |
+| T29 | Not built | guided flow, media viewer, map viewer | Escape-without-asking when pristine; filmstrip, file title line, +/−/0/F shortcuts; keyboard panning | — |
+| T30 | Not built | list/table | real `<table>`, arrow-key rows, SectionHeader, StatusChip quality popover, expand-to-modal panel, promoted row pills | — |
+| T31 | Design | `MetadataWrapper.vue` `underlineValue` | Yes/No values get the dashed underline, chips don't | design look |
+| T32 | Docs | internal `components/field-row.md`, `inline-editor.md` | coordinates edit via `EntityElementCoordinateEdit.vue`; multilingual fields do have an inline editor now | update notes |
+| T33 | Tooling (check) | Storybook | every story logs one generic 404 resource; HMR sometimes fails once with "Cannot redefine property: $route" | — |

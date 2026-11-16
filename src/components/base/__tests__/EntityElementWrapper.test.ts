@@ -153,3 +153,21 @@ describe("EntityElementWrapper in a compact preview (preview-panel.md)", () => {
     ).not.toContain("p-(--panel-body-pad)");
   });
 });
+
+describe("EntityElementWrapper collapse toggle", () => {
+  it("is a button named after the panel that says whether it is open", async () => {
+    const wrapper = getWrapper({ isCollapsed: false });
+    const toggle = wrapper.find('button[data-cy="entity-element-wrapper-toggle"]');
+    expect(toggle.attributes("aria-expanded")).toBe("true");
+    expect(toggle.attributes("aria-label")).toBe("Panel");
+    await toggle.trigger("click");
+    expect(wrapper.emitted("toggleElementCollapse")?.[0]).toEqual(["e1", "Panel"]);
+  });
+
+  it("says when the panel is collapsed", () => {
+    const toggle = getWrapper({ isCollapsed: true }).find(
+      'button[data-cy="entity-element-wrapper-toggle"]',
+    );
+    expect(toggle.attributes("aria-expanded")).toBe("false");
+  });
+});

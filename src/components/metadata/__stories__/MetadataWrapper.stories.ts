@@ -1,22 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { provide } from "vue";
 import MetadataWrapper from "../MetadataWrapper.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
-import { InputFieldTypes } from "@/generated-types/queries";
+import { useEditMode } from "@/composables/useEdit";
+import { InputFieldTypes, ValidationRules } from "@/generated-types/queries";
 
 const meta: Meta<typeof MetadataWrapper> = {
-  // Story id metadata-metadatawrapper--default, per MANIFEST.md.
   title: "Metadata/MetadataWrapper",
   component: MetadataWrapper,
   parameters: {
     docs: {
       description: {
         component:
-          "One metadata field: an 11.5px bold label in field-label blue over " +
-          "a 13px value. An empty non-required value reads as absent — " +
-          "\"No value\" at 45% opacity — rather than as a dash that could " +
-          "be mistaken for content. Booleans render as Yes/No with a check " +
-          "or a dash, never as a checkbox standing in for a value.",
+          "The field row: one metadata field, its label over its value. " +
+          "When the user may update the entity and the field type has an " +
+          "inline editor, the value is a button with a dashed underline and " +
+          "a pencil; a click opens the inline editor in its place.",
       },
     },
   },
@@ -25,68 +23,156 @@ const meta: Meta<typeof MetadataWrapper> = {
 export default meta;
 type Story = StoryObj<typeof MetadataWrapper>;
 
-const FORM_ID = "story-field-row";
+type Row = {
+  key: string;
+  label: string;
+  value: unknown;
+  inputField?: Record<string, unknown>;
+  [extra: string]: unknown;
+};
 
-/**
- * A row is only editable when it declares an input field and the record can be
- * written; the story provides both so the hover, focus and editing states are
- * reachable.
- */
-const field = (
+const row = (
   key: string,
   label: string,
   value: unknown,
   type: InputFieldTypes = InputFieldTypes.Text,
-) => ({
-  label,
+  extra: Record<string, unknown> = {},
+): Row => ({
   key,
+  label,
   value,
   inputField: { type, label },
+  ...extra,
 });
 
-/** A boolean only reads as Yes/No when the field declares itself a checkbox. */
-const booleanField = (key: string, label: string, value: boolean) =>
-  field(key, label, value, InputFieldTypes.Checkbox);
+const setupRows = (formId: string, rows: Row[], extraValues = {}) => {
+  useEditMode(formId).setPermittedEditMode({ canUpdate: true });
+  useFormHelper().createForm(formId, {
+    intialValues: {
+      ...Object.fromEntries(rows.map((field) => [field.key, field.value])),
+      ...extraValues,
+    },
+    relationValues: {},
+  } as never);
+  return { formId, rows };
+};
+
+const rowsTemplate = (width = 420) => `
+  <div style="display:flex;flex-direction:column;gap:16px;max-width:${width}px">
+    <metadata-wrapper
+      v-for="field in rows"
+      :key="field.key"
+      :is-edit="false"
+      :form-id="formId"
+      :metadata="field"
+    />
+  </div>`;
+
+const notedRowsTemplate = `
+  <div style="display:grid;grid-template-columns:110px minmax(0,320px);gap:14px 16px;align-items:start">
+    <template v-for="field in rows" :key="field.key">
+      <span style="font-size:var(--text-label);color:var(--color-text-secondary);padding-top:2px">{{ field.note }}</span>
+      <metadata-wrapper :is-edit="false" :form-id="formId" :metadata="field" />
+    </template>
+  </div>`;
 
 export const Default: Story = {
   render: () => ({
     components: { MetadataWrapper },
-    setup() {
-      // Field rows commit through this; the story resolves it so Save works.
-      provide("persistEntity", async () => {
-        await new Promise((resolve) => setTimeout(resolve, 600));
-      });
-
-      const { createForm } = useFormHelper();
-      createForm(FORM_ID, {
-        intialValues: {
-          title: "Tales from the North Sea",
-          summary: "",
-          digitised: true,
-          restricted: false,
-        },
-        relationValues: {},
-      } as never);
-
-      return {
-        formId: FORM_ID,
-        rows: [
-          field("title", "Title", "Tales from the North Sea"),
-          field("summary", "Summary", ""),
-          booleanField("digitised", "Digitised", true),
-          booleanField("restricted", "Restricted access", false),
-        ],
-      };
-    },
-    template: `
-      <div style="display:flex;flex-direction:column;gap:16px;max-width:420px">
-        <metadata-wrapper
-          v-for="row in rows"
-          :key="row.key"
-          :is-edit="false"
-          :form-id="formId"
-          :metadata="row"
-        />
-      </div>`,
+    setup: () =>
+      setupRows("story-field-row", [
+        row("title", "Title", "Tales from the North Sea"),
+        row("inventory", "Inventory number", "tg:lhpa:9783:m1", undefined, {
+          copyToClipboard: true,
+        }),
+        row("digitised", "Digitised", true, InputFieldTypes.Checkbox),
+      ]),
+    template: rowsTemplate(),
   }),
+};
+
+export const ValueTypes: Story = {
+  render: () => ({
+    components: { MetadataWrapper },
+    setup: () =>
+      setupRows("story-field-row-types", [
+        { ...row("title", "Title", "Tales from the North Sea"), note: "text" },
+        {
+          ...row("website", "Website", "https://www.example.org/collection"),
+          note: "URL",
+        },
+        {
+          ...row("digitised", "Digitised", true, InputFieldTypes.Checkbox),
+          note: "checkbox",
+        },
+        {
+          ...row("restricted", "Restricted", false, InputFieldTypes.Checkbox),
+          note: "checkbox",
+        },
+        {
+          ...row("colour", "Colour", "#2f7f8c", InputFieldTypes.Color),
+          note: "colour",
+        },
+        {
+          ...row("inventory", "Inventory number", "tg:lhpa:9783:m1", undefined, {
+            copyToClipboard: true,
+          }),
+          note: "copy",
+        },
+      ]),
+    template: notedRowsTemplate,
+  }),
+};
+
+export const States: Story = {
+  render: () => ({
+    components: { MetadataWrapper },
+    setup: () =>
+      setupRows(
+        "story-field-row-states",
+        [
+          { ...row("title", "Title", "Tales from the North Sea"), note: "editable" },
+          { ...row("summary", "Summary", ""), note: "empty" },
+          {
+            ...row("author", "Author", "Jan Peeters", InputFieldTypes.Text, {
+              inputField: {
+                type: InputFieldTypes.Text,
+                label: "Author",
+                validation: { value: [ValidationRules.Required] },
+              },
+            }),
+            note: "required",
+          },
+          {
+            ...row("source", "Source", "Imported from the catalogue", undefined, {
+              readOnly: true,
+            }),
+            note: "read-only",
+          },
+          {
+            ...row("isbn", "ISBN", "978-90-209-1234-5"),
+            note: "locked",
+          },
+        ],
+        { lockedProperties: ["isbn"] },
+      ),
+    template: notedRowsTemplate,
+  }),
+};
+
+export const Editing: Story = {
+  render: () => ({
+    components: { MetadataWrapper },
+    setup: () =>
+      setupRows("story-field-row-editing", [
+        row("title", "Title", "Tales from the North Sea"),
+        row("place", "Place", "Tielt"),
+      ]),
+    template: rowsTemplate(),
+  }),
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-cy="field-value"][role="button"]')
+      ?.click();
+  },
 };

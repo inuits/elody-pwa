@@ -51,33 +51,32 @@ Stage 1 ends with: user review, push both branches, merge MR !15, docs-dev deplo
 
 Stage 1 status (2026-11-16): all pages written and checked in the browser; awaiting the user's review. Findings S1–S35 in `handoff-deviations.md`.
 
-## Stage 2: Composite components (hidden pages)
+## Stage 2: Composite components
 
-Fields & editing: field row, inline editor, group form card, repeatable row
-group. Lists & actions: entity list element, preview panel, selection action
-bar, panel & block shells. Filters & overlays: filter panel, entity picker,
-saved searches. Forms & flows: dynamic form, guided flow, WYSIWYG editor.
-Viewers: media viewer (ImageViewer, PDFViewer, TextViewer,
-AudioAndVideoPlayer), map viewer (BaseMap). Navigation: navigation chrome,
-hierarchy & folder trees, import browser.
+Status (2026-11-16): 18 pages written from code, embeds checked on the docs
+site, in the sidebar under "Composite components"; awaiting the user's review.
+Findings T1–T33 in `handoff-deviations.md` (T1–T3 fixed with tests).
 
-Stories to fix before their page:
-
-| Story | Problem |
+| Group | Pages |
 |---|---|
-| `bulkoperations-selectionactionbar--default` | renders nothing |
-| `bulkoperations-selectionactionbar--selected` | count only, no actions (needs bulk-operation fixtures) |
-| `components-mediaviewer--with-toolbar` | no image (fixture 404) |
-| `components-pointmap--default` | points without map tiles (check) |
-| `entityelements-entityelementwindowpanel--group-editing` | ignores `isGroup` |
-| `modals-savedsearches--picker` | skeletons only, missing query fixtures |
-| `navigation-navrail--*` | missing `Menu` / `getElodyUser` fixtures (renders) |
-| InlineFieldEditor stories | old API |
+| Fields & editing | field row (+ copy to clipboard), inline editor, repeatable row group |
+| Lists & actions | entity list element, preview panel, selection action bar, panel & block shells (+ expand button) |
+| Filters & overlays | filter panel, entity picker, saved searches |
+| Forms & flows | dynamic form, guided flow, WYSIWYG editor |
+| Viewers | media viewer, map viewer |
+| Navigation | navigation chrome, folder tree (was "hierarchy tree": no record tree exists), import browser |
+| Hidden | group form card: not built (T4) |
+
+Decisions: superseded drafts deleted (autocomplete-tag-input, dropdown-select,
+inputs-and-tooltips, primitives, toggle-and-slider); the filter rail layout
+(localStorage trial) is not documented; viewers and pickers show their
+small-screen layout in the ~690px embed.
 
 ## Stage 3: Patterns
 
 Per-field editing, action discovery, feedback (drop the
 `components-toast--undo` embed: undo is not built), history diff, comments.
+These pages stay in `srcExclude` until then.
 
 ## Stage 4: Release and upkeep
 

@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import EntityElementWindow from "../EntityElementWindow.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
-import { InputFieldTypes, PanelType } from "@/generated-types/queries";
+import {
+  InputFieldTypes,
+  Orientations,
+  PanelType,
+} from "@/generated-types/queries";
 
 const meta: Meta<typeof EntityElementWindow> = {
   title: "EntityElements/EntityElementWindow",
@@ -55,26 +59,54 @@ const element = {
   }),
 };
 
+const setupForm = () => {
+  useEditMode(FORM_ID);
+  useFormHelper().createForm(FORM_ID, {
+    intialValues: {
+      title: "Tales from the North Sea",
+      author: "Jan Peeters",
+      publisher: "Lannoo",
+      year: "1987",
+    },
+    relationValues: {},
+  } as never);
+};
+
 export const Default: Story = {
   render: () => ({
     components: { EntityElementWindow },
     setup() {
-      useEditMode(FORM_ID);
-      useFormHelper().createForm(FORM_ID, {
-        intialValues: {
-          title: "Tales from the North Sea",
-          author: "Jan Peeters",
-          publisher: "Lannoo",
-          year: "1987",
-        },
-        relationValues: {},
-      } as never);
+      setupForm();
       return { element, formId: FORM_ID };
     },
     template: `
       <div style="max-width:560px">
         <entity-element-window
           :element="element"
+          :identifiers="['story-entity']"
+          :form-id="formId"
+        />
+      </div>`,
+  }),
+};
+
+/** A collapsed block, and the expand button on the panel's edge. */
+export const States: Story = {
+  render: () => ({
+    components: { EntityElementWindow },
+    setup() {
+      setupForm();
+      const states = {
+        ...element,
+        publication: { ...element.publication, isCollapsed: true },
+        expandButtonOptions: { shown: true, orientation: Orientations.Right },
+      };
+      return { states, formId: FORM_ID };
+    },
+    template: `
+      <div style="max-width:560px">
+        <entity-element-window
+          :element="states"
           :identifiers="['story-entity']"
           :form-id="formId"
         />
