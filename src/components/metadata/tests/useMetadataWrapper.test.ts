@@ -15,7 +15,7 @@ vi.mock("@/main", () => ({
 import { useMetadataWrapper } from "../useMetadataWrapper";
 import { useForm, defineRule } from "vee-validate";
 import { defineComponent, h, nextTick, type Ref, type ComputedRef } from "vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { useMetadataWrapperDropdownOptions } from "@/components/metadata/useMetadataWrapperDropdownOptions";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { InputFieldTypes } from "@/generated-types/queries";
@@ -543,5 +543,42 @@ describe("useMetadataWrapper — checkbox empty string initialization", () => {
 
   it("preserves a true value", async () => {
     expect((await mountCheckboxWithValue(true)).value).toBe(true);
+  });
+});
+
+describe("useMetadataWrapper — editable fields", () => {
+  const FORM_ID = "M-EDITABLE-TEST";
+
+  const mountWithReadOnly = async (readOnly: boolean) => {
+    const { editableFields } = useFormHelper();
+    editableFields.value[FORM_ID] = ["title", "otherField"];
+
+    const component = defineComponent({
+      setup() {
+        useForm();
+        defineRule("no_xss", () => true);
+        useMetadataWrapper(
+          {
+            ...basicMetadataWrapperProps,
+            formId: FORM_ID,
+            metadata: { ...basicMetadataWrapperProps.metadata, readOnly },
+          },
+          () => undefined,
+        );
+        return () => h("div");
+      },
+    });
+
+    mount(component);
+    await flushPromises();
+    return editableFields.value[FORM_ID];
+  };
+
+  it("removes a read-only field from the form's editable fields", async () => {
+    expect(await mountWithReadOnly(true)).toEqual(["otherField"]);
+  });
+
+  it("keeps an editable field in the form's editable fields", async () => {
+    expect(await mountWithReadOnly(false)).toEqual(["title", "otherField"]);
   });
 });

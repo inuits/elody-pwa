@@ -25,13 +25,12 @@ import { mount, shallowMount, flushPromises } from "@vue/test-utils";
 
 // 1. Hoisted mutable state (only needed when mock values change between tests)
 const mocks = vi.hoisted(() => ({
-  advancedPermissions: {} as Record<string, boolean>,
+  openModal: vi.fn(),
 }));
 
 // 2. Module mocks (always hoisted by Vitest regardless of position)
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({ advancedPermissions: mocks.advancedPermissions }),
-  advancedPermissions: mocks.advancedPermissions,
+vi.mock("@/composables/useBaseModal", () => ({
+  useBaseModal: () => ({ openModal: mocks.openModal }),
 }));
 
 // 3. Prop/data factories — always functions, never shared objects
@@ -42,7 +41,6 @@ const getWrapper = (props = getDefaultProps()) =>
 describe("MyComponent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.advancedPermissions = {};   // reset hoisted state
   });
   afterEach(() => {
     vi.resetAllMocks();
