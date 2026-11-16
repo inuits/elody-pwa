@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import BaseInputCheckbox from "../BaseInputCheckbox.vue";
 import { useBulkOperations } from "@/composables/useBulkOperations";
 
@@ -10,11 +10,8 @@ const meta: Meta<typeof BaseInputCheckbox> = {
     docs: {
       description: {
         component:
-          "A real <input type=\"checkbox\"> with a 1.5px border and a " +
-          "commit-teal check. In a list the checkbox — not the row — owns the " +
-          "accent wash and the accent row shadow; the row whose preview is " +
-          "open is marked by a 3px accent left border instead. The two never " +
-          "collapse into one state.",
+          'A real <input type="checkbox"> with a commit-teal check and a ' +
+          "touch-sized hit area. The label is a real <label>.",
       },
     },
   },
@@ -36,23 +33,13 @@ export const Default: Story = {
     setup() {
       const unchecked = ref(false);
       const checked = ref(true);
-      const indeterminate = ref(false);
-      const indeterminateBox = ref<HTMLElement>();
-
-      onMounted(() => {
-        const input = indeterminateBox.value?.querySelector("input");
-        if (input) (input as HTMLInputElement).indeterminate = true;
-      });
-
-      return { base, unchecked, checked, indeterminate, indeterminateBox };
+      return { base, unchecked, checked };
     },
     template: `
-      <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;flex-direction:column">
         <base-input-checkbox v-bind="base" v-model="unchecked" label="Unchecked" />
         <base-input-checkbox v-bind="base" v-model="checked" label="Checked" />
-        <span ref="indeterminateBox">
-          <base-input-checkbox v-bind="base" v-model="indeterminate" label="Partial selection" />
-        </span>
+        <base-input-checkbox v-bind="base" :model-value="false" indeterminate label="Partial selection" />
         <base-input-checkbox v-bind="base" :model-value="false" label="Disabled" disabled />
         <base-input-checkbox v-bind="base" :model-value="true" label="Disabled and checked" disabled />
         <span style="display:flex;align-items:center;gap:8px">

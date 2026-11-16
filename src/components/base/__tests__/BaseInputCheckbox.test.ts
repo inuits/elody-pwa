@@ -20,6 +20,7 @@ vi.mock("@/generated-types/queries", () => ({
 }));
 
 const modalState = vi.hoisted(() => ({ BulkOperations: { open: false } }));
+const bulkState = vi.hoisted(() => ({ limitReached: false }));
 
 vi.mock("@/composables/useBaseModal", async () => {
   const { reactive } = await import("vue");
@@ -39,7 +40,7 @@ vi.mock("@/composables/useBulkOperations", () => ({
     dequeueItemForBulkProcessing: vi.fn(),
     isEnqueued: () => false,
     getEnqueuedItemCount: () => 0,
-    isBulkSelectionLimitReached: () => false,
+    isBulkSelectionLimitReached: () => bulkState.limitReached,
   }),
 }));
 
@@ -117,6 +118,26 @@ describe("BaseInputCheckbox", () => {
         .classes();
     expect(label(false)).toContain("ml-1.5");
     expect(label(true)).toEqual(label(false));
+  });
+
+  it("keeps a steady label gap by default, checked or not", () => {
+    const label = (modelValue: boolean) =>
+      getWrapper({ label: "Include in export", modelValue })
+        .find("label")
+        .classes();
+    expect(label(true)).toEqual(label(false));
+  });
+
+  it("looks disabled when the selection limit disables it", () => {
+    bulkState.limitReached = true;
+    const input = getWrapper({
+      ignoreBulkOperations: false,
+      bulkOperationsContext: "Home",
+    }).find("input");
+    bulkState.limitReached = false;
+
+    expect(input.attributes("disabled")).toBeDefined();
+    expect(input.classes()).toContain("disabled:text-text-light");
   });
 
   it("keeps its click from reaching the parent row", async () => {

@@ -21,7 +21,7 @@
           {
             'cursor-pointer': !disabled,
             'disabled:text-text-light disabled:accent-neutral-white disabled:border-border-subtle':
-              disabled,
+              disabled || isDisabledByContextLimit,
           },
         ]"
         v-model="inputValue"
@@ -38,7 +38,7 @@
       v-if="label"
       :for="checkboxId"
       class="flex flex-row select-none cursor-pointer"
-      :class="size === 'compact' ? 'ml-1.5' : { 'ml-2': inputValue }"
+      :class="{ 'ml-1.5': size === 'compact' }"
       @click.prevent.stop="handleItemSelection"
     >
       {{ label }}

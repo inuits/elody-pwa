@@ -166,3 +166,4 @@ The public design-system pages (elody-docs) now describe only what is built. The
 | R29 | Bug | — | virtual-keyboard trigger is a clickable `<div>`: not reachable by keyboard | make it a button |
 | R30 | Bug | — | import folder tree rows are clickable `<div>`/`<a>` without ARIA: not usable by keyboard | tree pattern |
 | R31 | Bug | — | comment thread card is a clickable `<div>` without tabindex; comment edit button has no aria-label | make them buttons |
+| R32 | Open | — | checkbox: disabled + checked fills with label-blue (`text-text-light`), disabled labels keep body ink and a pointer cursor | user decides on a muted disabled look |
