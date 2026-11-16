@@ -128,6 +128,26 @@ describe("BaseInputCheckbox", () => {
     expect(label(true)).toEqual(label(false));
   });
 
+  it("greys out a disabled box, checked or not", () => {
+    const classes = getWrapper({ disabled: true, modelValue: true })
+      .find("input")
+      .classes();
+    expect(classes).toEqual(
+      expect.arrayContaining([
+        "disabled:text-(--checkbox-disabled-fill)",
+        "disabled:border-(--checkbox-disabled-border)",
+      ]),
+    );
+  });
+
+  it("mutes a disabled label and drops its pointer", () => {
+    const label = getWrapper({ disabled: true, label: "Include in export" })
+      .find("label")
+      .classes();
+    expect(label).toContain("text-(--checkbox-disabled-label)");
+    expect(label).not.toContain("cursor-pointer");
+  });
+
   it("looks disabled when the selection limit disables it", () => {
     bulkState.limitReached = true;
     const input = getWrapper({
@@ -137,7 +157,7 @@ describe("BaseInputCheckbox", () => {
     bulkState.limitReached = false;
 
     expect(input.attributes("disabled")).toBeDefined();
-    expect(input.classes()).toContain("disabled:text-text-light");
+    expect(input.classes()).toContain("disabled:text-(--checkbox-disabled-fill)");
   });
 
   it("keeps its click from reaching the parent row", async () => {

@@ -385,6 +385,10 @@
   /* Checkbox (components/checkbox.md) */
   --checkbox-hit-area: var(--touch-target-min);
   --checkbox-hit-area-compact: 24px;
+  /* Disabled: a muted grey box and label, checked or not */
+  --checkbox-disabled-fill: var(--color-neutral-60);
+  --checkbox-disabled-border: var(--color-border-subtle);
+  --checkbox-disabled-label: var(--color-neutral-200);
 
   /* Input (components/input.md) */
   --text-input: var(--text-value);
