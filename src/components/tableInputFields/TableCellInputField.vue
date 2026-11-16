@@ -31,6 +31,7 @@
       :form-id="formId"
       :cell-key="fieldKey"
       :disabled="disabled"
+      :candidate-ids="candidateIds"
       @linked-entity-missing="emit('linked-entity-missing', $event)"
     />
     <ViewModesAutocompleteMetadata
@@ -49,7 +50,7 @@
       :mode="disabled ? 'view' : 'edit'"
     />
     <p
-      v-if="errorMessage && !disabled"
+      v-if="errorMessage && !disabled && !candidateIds?.length"
       data-testid="inputfield-error"
       class="mt-0.5 text-xs text-red-default"
     >
@@ -61,6 +62,7 @@
 <script lang="ts" setup>
 import { computed, watch } from "vue";
 import { useField } from "vee-validate";
+import { useI18n } from "vue-i18n";
 import {
   type DropdownOption,
   type SubField,
@@ -71,7 +73,7 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 import AutocompleteRelationCell from "@/components/tableInputFields/AutocompleteRelationCell.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
-import { getTranslatedMessage } from "@/helpers";
+import { getTranslatedMessage, looksLikeEntityId } from "@/helpers";
 
 const props = defineProps<{
   modelValue: any;
@@ -79,7 +81,10 @@ const props = defineProps<{
   fieldKey: string;
   formId: string;
   disabled?: boolean;
+  candidateIds?: string[];
 }>();
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: "linked-entity-missing", value: boolean): void;
@@ -94,9 +99,13 @@ const { getValidationRules } = useFieldValidation(
 );
 // Read-only cells (e.g. a detail view) must not validate: a disabled screen should
 // never surface "required" errors for empty values.
-const validationRules = computed(() =>
-  props.disabled ? undefined : getValidationRules(true, false),
-);
+const validationRules = computed(() => {
+  if (props.disabled) return undefined;
+  if (props.candidateIds?.length)
+    return (value: unknown) =>
+      looksLikeEntityId(value as string) || t("autocomplete.choose-candidate");
+  return getValidationRules(true, false);
+});
 const { value, validate, errorMessage } = useField<any>(
   () => props.fieldKey,
   validationRules,

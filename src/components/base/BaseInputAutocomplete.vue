@@ -24,6 +24,7 @@
     @search-change="handleSearchChange"
     :on-create="handleTagCreate"
     @close="handleClose"
+    @open="repositionDropdown"
   >
     <template v-slot:option="{ option }">
       <div
@@ -111,7 +112,7 @@ import SanitizedHtml from "@/components/SanitizedHtml.vue";
 import { stripHighlightTags } from "@/helpers";
 import useEntitySingle from "@/composables/useEntitySingle";
 import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDatetime.vue";
-import { computed, inject, ref, watch } from "vue";
+import { computed, inject, nextTick, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useEditMode } from "@/composables/useEdit";
 import { useI18n } from "vue-i18n";
@@ -146,6 +147,7 @@ const props = withDefaults(
     displayInputForTag?: boolean;
     initialTagInputValues?: Map<string | number, string>;
     disableVirtualKeyboardContext?: boolean;
+    replaceOnTagClick?: boolean;
   }>(),
   {
     selectType: "multi",
@@ -158,6 +160,7 @@ const props = withDefaults(
     displayInputForTag: false,
     initialTagInputValues: undefined,
     disableVirtualKeyboardContext: false,
+    replaceOnTagClick: false,
   },
 );
 
@@ -173,6 +176,7 @@ const { isEdit } = useEditMode(useEntitySingle().getEntityUuid());
 const { someModalIsOpened } = useBaseModal();
 const { t } = useI18n();
 const searchValue = ref<string>();
+const isReplacing = ref(false);
 const multiselectRef = ref();
 const virtualKeyboardContext = inject<VirtualKeyboardContext | null>("virtualKeyboardContext", null);
 
@@ -234,11 +238,19 @@ const inputValue = computed<DropdownOption[] | undefined>({
     return props.modelValue;
   },
   set(value) {
+    if (props.selectType === "single" && value && value.length > 1)
+      value = value.slice(-1);
+    isReplacing.value = false;
     emit("update:modelValue", value);
   },
 });
 
 const safeOptions = computed(() => props.options?.map((o) => ({ ...o })) ?? []);
+
+const repositionDropdown = async () => {
+  await nextTick();
+  requestAnimationFrame(() => multiselectRef.value?.updatePopper?.());
+};
 
 const defaultSearchFilter = (option: DropdownOption, query: string) => {
   const label = stripHighlightTags(String(option?.label ?? "")).toLowerCase();
@@ -255,11 +267,16 @@ const resolvedSearchFilter = computed(
 
 const searchable = computed<boolean>(() => {
   return (
+    isReplacing.value ||
     !inputValue.value ||
     inputValue.value[0]?.value === "" ||
     props.selectType === "multi" ||
     (props.selectType === "single" && inputValue.value.length < 1)
   );
+});
+
+watch([safeOptions, searchable], () => {
+  if (multiselectRef.value?.isOpen) repositionDropdown();
 });
 
 const shouldShowTypingHint = computed(() => {
@@ -344,6 +361,7 @@ const toFreeTextOption = (
 };
 
 const handleClose = (multiselect: { search?: string } | undefined) => {
+  isReplacing.value = false;
   if (!canEditFreeText.value || !props.createOptionConfig.addOnBlur) return;
   const option = toFreeTextOption(multiselect?.search, inputValue.value);
   if (option) emit("addOption", option as any);
@@ -354,8 +372,20 @@ const isTagEditable = (option: DropdownOption): boolean =>
   !!props.createOptionConfig.editOnTagClick &&
   !props.options?.some((predefined) => predefined.value === option.value);
 
-const handleTagClick = (option: DropdownOption) => {
+const handleTagClick = async (option: DropdownOption) => {
   emit("handleTagClick", option as any);
+  if (
+    props.replaceOnTagClick &&
+    props.selectType === "single" &&
+    !props.disabled &&
+    multiselectRef.value
+  ) {
+    isReplacing.value = true;
+    await nextTick();
+    multiselectRef.value.focus?.();
+    multiselectRef.value.open?.();
+    return;
+  }
   if (!isTagEditable(option) || !multiselectRef.value) return;
   const remaining = (inputValue.value ?? []).filter(
     (selected) => selected.value !== option.value,
