@@ -74,9 +74,14 @@ small-screen layout in the ~690px embed.
 
 ## Stage 3: Patterns
 
-Per-field editing, action discovery, feedback (drop the
-`components-toast--undo` embed: undo is not built), history diff, comments.
-These pages stay in `srcExclude` until then.
+Status (2026-11-17): written from code, embeds checked, in the sidebar; awaiting the user's review.
+Findings U1–U17 in `handoff-deviations.md`.
+
+- Patterns (new sidebar group, pattern template: purpose + example → When it applies → How it works
+  (numbered rules + why) → Components → Keyboard & accessibility → Content → Related): action discovery,
+  feedback (no undo: not built; `components-toast--undo` dropped, Notification stories added), per-field editing.
+- Composite components: history diff, comments (component template).
+- Only `group-form-card` stays in `srcExclude`.
 
 ## Stage 4: Release and upkeep
 

@@ -85,6 +85,8 @@ export const formattersSettings = {
     work: { tone: "tone1", shape: "badge", letter: "W" },
     expression: { tone: "tone2", shape: "badge", letter: "E" },
     manifestation: { tone: "tone3", shape: "badge", letter: "M" },
+    modified: { background: "#ecdada", text: "#ac1113" },
+    added: { background: "#daecdd", text: "#0b8319" },
   },
 };
 export const typeUrlMapping = { mapping: {}, reverseMapping: {} };

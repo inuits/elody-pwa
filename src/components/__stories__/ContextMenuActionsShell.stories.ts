@@ -89,25 +89,6 @@ export const SplitButtonOpen: Story = {
   play: openMenu,
 };
 
-/**
- * More than one promoted action: separate buttons before a labelled
- * "Actions" trigger instead of a split button.
- */
-export const PromotedAndMenu: Story = {
-  render: () => ({
-    components,
-    setup,
-    template: frame(`
-      <context-menu-actions-shell :has-promoted-actions="true" :has-overflow-actions="true">
-        <template #promoted>
-          <base-button button-style="secondary" button-size="sm" label="Preview" icon="Eye" :force-show-label="true" />
-          <base-button button-style="primary" button-size="sm" label="Open record" :force-show-label="true" />
-        </template>
-        <template #overflow>${menuItems}</template>
-      </context-menu-actions-shell>`),
-  }),
-};
-
 /** A disabled item keeps its place and explains why on a help icon. */
 export const DisabledItem: Story = {
   render: () => ({

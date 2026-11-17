@@ -6,16 +6,16 @@ import type {
 
 export type HistoryVariant = "previous" | "current";
 
-const values: Record<HistoryVariant, Record<string, unknown>> = {
+export const values: Record<HistoryVariant, Record<string, unknown>> = {
   previous: {
     title: "Tales from the North Sea",
-    publisher: "Lannoo",
+    publisher: { formatter: "pill|modified", label: "Lannoo" },
     year: "1987",
     description: "<p>A collection of fishermen's tales.</p>",
   },
   current: {
     title: "Tales from the North Sea",
-    publisher: "Standaard Uitgeverij",
+    publisher: { formatter: "pill|added", label: "Standaard Uitgeverij" },
     year: "1987",
     description:
       "<p>A collection of fishermen's tales, <strong>illustrated</strong>.</p>",

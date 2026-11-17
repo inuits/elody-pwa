@@ -249,3 +249,27 @@ Found while writing the stage 2 composite pages. **Check** = from reading the co
 | T31 | Design | `MetadataWrapper.vue` `underlineValue` | Yes/No values get the dashed underline, chips don't | design look |
 | T32 | Docs | internal `components/field-row.md`, `inline-editor.md` | coordinates edit via `EntityElementCoordinateEdit.vue`; multilingual fields do have an inline editor now | update notes |
 | T33 | Tooling (check) | Storybook | every story logs one generic 404 resource; HMR sometimes fails once with "Cannot redefine property: $route" | — |
+
+## Stage 3 docs review findings (2026-11-17)
+
+Found while writing history diff, comments and the three pattern pages. **Check** = from reading the code, not confirmed in the app. Docs corrected on the way: split-button.md (several promoted actions → one primary, the rest lead the menu; the impossible `promoted-and-menu` story removed) and inline-editor.md (no focus-back claim, see U2).
+
+| ID | Kind | Where | Finding | Follow-up |
+|---|---|---|---|---|
+| U1 | A11y | @kyvg/vue3-notification 3.4.1 | notifications have no role / live region (not announced), can't be closed by keyboard, don't pause on hover | wrap with a `role="status"`/`alert` region or replace |
+| U2 | A11y | `useEditScope.requestOpen` + `MetadataWrapper.vue:1031`, `ListItemInlineField`, `EntityElementCoordinateEdit` | after a failed save blocks another field, focus doesn't return to the failing field (only WYSIWYG passes `focus`) | pass `focus` callbacks |
+| U3 | Bug | edit scopes | no `beforeunload` guard: closing the tab or reloading drops an open field's draft silently | add guard while a scope is dirty |
+| U4 | Rules | `TheHeader.vue` | danger Delete sits before History and the Actions menu (not last) | — |
+| U5 | Rules | `LogInLogout.vue:117`, `ViewModesAutocompleteRelations.vue:385` | confirm dialogs that guard no loss (logout, create from dropdown) | drop or justify |
+| U6 | Bug (check) | inline save on blur | rows shift up after a save, so a click aimed at the next field can land on another row (seen once in Storybook) | confirm |
+| U7 | A11y | `CommentItem.vue` | discussion card is a click-only div (no role/tabindex): keyboard users can't open a discussion; tag chips are mouse-only | make it a button/link |
+| U8 | A11y | `CommentThreadModal` | close control is a div, not a button (Esc works) | — |
+| U9 | A11y | comments | Edit/Delete names don't say which comment; nothing announces a new or posted comment | — |
+| U10 | Contrast (check) | comments | white on `--color-accent-normal` (New/Open), accent-normal text (Edit/Delete), `text-placeholder` dates: likely < 4.5:1 | measure, use role tokens |
+| U11 | Tokens/UI | comment components, `HistoryComparison.vue` | primitive colour classes; composer Post is full-width, Cancel unstyled | — |
+| U12 | A11y | `EntityHistoryWindowPanel` | panel header is a clickable div (same as T2) | reuse the T2 fix |
+| U13 | A11y | `EntityHistoryWindow` | window title is an `h1` → several h1s on the page | — |
+| U14 | A11y | history diff | changed rich-text blocks are marked by border and tint only; old/new only by colour and column | add a text cue |
+| U15 | Tokens | history diff | changed values coloured from the client pill config (`pill.modified`/`pill.added`), not `--color-diff-*` | decide which wins |
+| U16 | Dead code | `WysiwygDiffFlag.vue` | stories and tests, no use in the app | delete or use |
+| U17 | Docs | internal `components/field-row.md`; code comments | "nothing saved implicitly" is wrong (opening another scope saves the changed one); comments point to a non-existent `patterns/per-field-editing.md` | update notes |
