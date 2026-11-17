@@ -61,6 +61,18 @@ if (window.top !== window.self) {
   HTMLElement.prototype.focus = function (options?: FocusOptions) {
     focus.call(this, { ...options, preventScroll: true });
   };
+  const showModal = HTMLDialogElement.prototype.showModal;
+  HTMLDialogElement.prototype.showModal = function () {
+    this.inert = true;
+    showModal.call(this);
+    this.inert = false;
+    (
+      this.querySelector<HTMLElement>("[autofocus]") ??
+      this.querySelector<HTMLElement>(
+        "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+      )
+    )?.focus();
+  };
 }
 
 const preview: Preview = {

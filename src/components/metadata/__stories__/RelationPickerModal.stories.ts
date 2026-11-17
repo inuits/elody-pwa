@@ -60,7 +60,7 @@ const render = (single: boolean, canCreate = false) => () => ({
 });
 
 const meta: Meta<typeof RelationPickerModal> = {
-  title: "Modals/EntityPicker",
+  title: "Modals/RelationPicker",
   component: RelationPickerModal,
   parameters: {
     docs: {

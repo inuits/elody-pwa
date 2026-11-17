@@ -273,3 +273,10 @@ Found while writing history diff, comments and the three pattern pages. **Check*
 | U15 | Tokens | history diff | changed values coloured from the client pill config (`pill.modified`/`pill.added`), not `--color-diff-*` | decide which wins |
 | U16 | Dead code | `WysiwygDiffFlag.vue` | stories and tests, no use in the app | delete or use |
 | U17 | Docs | internal `components/field-row.md`; code comments | "nothing saved implicitly" is wrong (opening another scope saves the changed one); comments point to a non-existent `patterns/per-field-editing.md` | update notes |
+| U18 | Bug | `BaseLibrary.vue:2` vs `EntityPickerComponent.vue:19-22` | root `h-full` overrides `h-(--entity-picker-height)` in filters mode: the picker resizes with its results (411px instead of 70vh) | — |
+| U19 | Bug | `BaseLibrary.vue:1259-1260` | "select page" skips an already-linked entity only when both id and uuid match (`\|\|` should be `&&`): linked entities can be enqueued | fix with a test |
+| U20 | A11y | `ListItem.vue:61-78` | list-mode row checkbox has no `aria-label` (grid card has one); confirmed in the picker DOM (= T6) | — |
+| U21 | Bug | `ViewModesList.vue:95-99`, `useEntityListHelpers.ts:80` | already-linked (greyed) rows still open in the detail modal on click; the disabled check only covers Navigate | — |
+| U22 | Dead config | `DynamicForm.vue:66-95` | `highlightedEntityIds` / `highlightLabel` never passed; only the guided flow highlights | — |
+| U23 | Check | entity picker DOM | 12 checkbox inputs for 5 rows + header (a second set per row) | find the source |
+| U24 | Docs | entity-picker.md | the main picker is `EntityPickerComponent` (library + filters); the page documented only `RelationPickerModal`. Rewritten; relation picker stories renamed `modals-relationpicker--*` | done |
