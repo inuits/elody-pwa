@@ -280,3 +280,22 @@ Found while writing history diff, comments and the three pattern pages. **Check*
 | U22 | Dead config | `DynamicForm.vue:66-95` | `highlightedEntityIds` / `highlightLabel` never passed; only the guided flow highlights | — |
 | U23 | Check | entity picker DOM | 12 checkbox inputs for 5 rows + header (a second set per row) | find the source |
 | U24 | Docs | entity-picker.md | the main picker is `EntityPickerComponent` (library + filters); the page documented only `RelationPickerModal`. Rewritten; relation picker stories renamed `modals-relationpicker--*` | done |
+
+## Story audit (2026-11-17)
+
+Every docs embed checked against the component the app actually shows. 16 stories rebuilt on the real container (HistoryComparison view, EntityElementComments + CommentThreadModal, MediaViewerNew, DynamicFormModal, Dropzone + useUpload, EntityElementWindow, ListItem, MetadataWrapper, RepetitiveFlow picker step). Storybook gets `.storybook/queryLoader.ts` (history queries are not in this client's generated types). Findings:
+
+| ID | Kind | Where | Finding | Follow-up |
+|---|---|---|---|---|
+| U25 | Bug | `useDropzone.ts:16` | `dropzone = ref<Dropzone>;` stores Vue's `ref` function, not a ref: `.value` is shared by every instance | fix with a test |
+| U26 | A11y | `EntityElementMetadataEdit.vue:94-96` | form field errors are a plain red div: no `aria-describedby`, `aria-invalid`, `role="alert"` or red border (inline editor has all) | align with the inline editor |
+| U27 | Tokens | `main.css:194` | `--color-surface-section-header` unused; client theme doesn't reach block headers as client-theming.md implies | check the page claim |
+| U28 | Test | `useBreadcrumbs.test.ts:416` | `typePillLabel` passed as a string; real data is `{label, formatter}` | fix test data |
+| U29 | Bug | `helpers.ts:751`, `ElodyAction.vue` | `getChildrenOfHomeRoutes` returns undefined without `routerConfig`; `.map` then crashes | default to [] |
+| U30 | Layout | `HistoryComparison.vue:13,56` | long version labels widen the dropdown past its column at ~800px, clipping the chevron | truncate |
+| U31 | Dead code | `FolderTree.vue` | not imported anywhere | delete |
+| U32 | Bug | `ImportFromNetworkDrive.vue:12-13` | passes `selected-directory` props FolderTreeLine doesn't declare (it injects them): stray attributes | remove |
+| U33 | Bug (check) | `useViewModes.ts:216-217` | no `_displayPreferences` → no view mode on, library shows no rows until a route change; may hit a fresh browser | confirm in the app |
+| U34 | Bug | `useMetadataWrapperDropdownOptions.ts:177-183` | relation field throws without `advancedFilterInputForSearchingOptions` | guard |
+| U35 | Config | generated `GetEntityPickerForm` | no `label`, no `entityPickerSearchConfig`: title only from the opener, search mode only from client form queries | — |
+| U36 | Docs | chip-and-badge.md | tones and letter badges are supported config no client uses; the only real badge is the breadcrumb type badge (full value) | page reframed |

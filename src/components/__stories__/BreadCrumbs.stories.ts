@@ -81,3 +81,21 @@ export const HistoryOpen: Story = {
       ?.click();
   },
 };
+
+/** The current record's type as a badge before its title, the one badge the app shows. */
+export const TypeBadge: Story = {
+  name: "Type badge",
+  render: () => ({
+    components: { BreadCrumbs },
+    setup() {
+      seedTrail();
+      rootRoute.value.typePillLabel = { formatter: "pill|auto", label: "M" };
+      provide("config", configFixture);
+      return {};
+    },
+    template: `
+      <div style="padding:16px;background:var(--color-surface)">
+        <bread-crumbs />
+      </div>`,
+  }),
+};

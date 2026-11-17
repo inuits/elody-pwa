@@ -83,6 +83,7 @@ export const States: Story = {
       <table style="border-spacing:16px 10px;font-size:var(--text-label)">
         <tr><td>unchecked</td><td><base-input-checkbox v-bind="base" v-model="unchecked" label="Unchecked" /></td></tr>
         <tr><td>checked</td><td><base-input-checkbox v-bind="base" v-model="checked" label="Checked" /></td></tr>
+        <tr><td>compact</td><td><base-input-checkbox v-bind="base" :model-value="true" size="compact" label="Compact" /></td></tr>
         <tr><td>focus</td><td><base-input-checkbox v-bind="base" :model-value="false" label="Tab to me" /></td></tr>
         <tr><td>disabled</td><td><base-input-checkbox v-bind="base" :model-value="false" label="Disabled" disabled /></td></tr>
         <tr><td>required</td><td><base-input-checkbox v-bind="base" :model-value="false" label="Required" required /></td></tr>

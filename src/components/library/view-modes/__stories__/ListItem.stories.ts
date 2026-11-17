@@ -2,6 +2,10 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import ListItem from "@/components/ListItem.vue";
 import { BaseLibraryModes, ListItemCoverageTypes } from "@/generated-types/queries";
 import { Unicons } from "@/types";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
 
 const meta: Meta<typeof ListItem> = {
   // Story id library-viewmodes-listitem--default, per MANIFEST.md.
@@ -70,6 +74,67 @@ export const Default: Story = {
           :preview-component-current-active="true"
           :preview-component-list-items-coverage="coverage"
         />
+      </ul>`,
+  }),
+};
+
+const CONTEXT = BulkOperationsContextEnum.Home;
+
+export const States: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Resting (hover it), selected, preview open (eye pressed), last previewed (border without a pressed eye), " +
+          "disabled and loading. The seen and new cues depend on the route's entity config and are not shown here.",
+      },
+    },
+  },
+  render: () => ({
+    components: { ListItem },
+    setup() {
+      const { enqueueItemForBulkProcessing, dequeueAllItemsForBulkProcessing } =
+        useBulkOperations();
+      dequeueAllItemsForBulkProcessing(CONTEXT);
+      enqueueItemForBulkProcessing(CONTEXT, { id: "row-selected" } as never);
+      const rows = [
+        { note: "resting", id: "row-resting", props: {} },
+        { note: "selected", id: "row-selected", props: {} },
+        {
+          note: "preview open",
+          id: "row-preview",
+          props: {
+            previewComponentEnabled: true,
+            previewComponentCurrentActive: true,
+            previewOpen: true,
+          },
+        },
+        {
+          note: "last previewed",
+          id: "row-last",
+          props: { previewComponentCurrentActive: true },
+        },
+        { note: "disabled", id: "row-disabled", props: { isDisabled: true } },
+        { note: "loading", id: "row-loading", props: { loading: true } },
+      ];
+      return {
+        states: {
+          ...base,
+          bulkOperationsContext: CONTEXT,
+          hasSelection: true,
+          previewComponentFeatureEnabled: true,
+          previewComponentListItemsCoverage: ListItemCoverageTypes.OneListItem,
+        },
+        rows,
+        metadata: teaser("Coastal Fishing in the 20th Century", "Marie Vermeulen"),
+      };
+    },
+    template: `
+      <ul style="max-width:620px;padding:0;list-style:none">
+        <template v-for="row in rows" :key="row.id">
+          <li style="font-size:var(--text-label);color:var(--color-text-secondary);margin:12px 0 4px">{{ row.note }}</li>
+          <list-item v-bind="{ ...states, ...row.props }" :item-id="row.id" :teaser-metadata="metadata" />
+        </template>
       </ul>`,
   }),
 };

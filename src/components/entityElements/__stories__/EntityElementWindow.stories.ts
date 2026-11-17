@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
+import { onUnmounted } from "vue";
+import { applyClientTheme } from "@/utils/clientTheme";
 import EntityElementWindow from "../EntityElementWindow.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
@@ -107,6 +109,42 @@ export const States: Story = {
       <div style="max-width:560px">
         <entity-element-window
           :element="states"
+          :identifiers="['story-entity']"
+          :form-id="formId"
+        />
+      </div>`,
+  }),
+};
+
+const sampleTheme = {
+  "--color-accent": "#7A4FB5",
+  "--color-accent-hover": "#5E3A8E",
+  "--color-accent-light": "#F1EAFA",
+  "--color-accent-light-strong": "#DCCDF0",
+  "--color-accent-ink": "#4A2C73",
+  "--color-accent-wash": "#F6F1FC",
+  "--color-accent-tint": "#F8F4FD",
+};
+
+/** The same panel with a client theme applied the way the app does at boot. */
+export const ClientTheme: Story = {
+  name: "Client theme",
+  render: () => ({
+    components: { EntityElementWindow },
+    setup() {
+      setupForm();
+      applyClientTheme(sampleTheme);
+      onUnmounted(() =>
+        Object.keys(sampleTheme).forEach((name) =>
+          document.body.style.removeProperty(name),
+        ),
+      );
+      return { element, formId: FORM_ID };
+    },
+    template: `
+      <div style="max-width:560px">
+        <entity-element-window
+          :element="element"
           :identifiers="['story-entity']"
           :form-id="formId"
         />

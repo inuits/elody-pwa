@@ -44,7 +44,7 @@ export const Chips: Story = {
   }),
 };
 
-/** Entity types as one-letter badges, named in full for screen readers. */
+/** What a pill config with shape "badge" and a letter produces; no client config uses it yet. */
 export const Badges: Story = {
   render: () => ({
     components: { MetadataFormatterPill },

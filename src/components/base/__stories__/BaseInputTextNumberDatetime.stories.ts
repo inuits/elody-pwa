@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { ref, watch } from "vue";
 import BaseInputTextNumberDatetime from "../BaseInputTextNumberDatetime.vue";
 import BaseTooltip from "../BaseTooltip.vue";
+import EntityElementMetadataEdit from "@/components/metadata/EntityElementMetadataEdit.vue";
+import InlineFieldEditor from "@/components/metadata/InlineFieldEditor.vue";
 
 const meta: Meta<typeof BaseInputTextNumberDatetime> = {
   // Story id base-baseinputtext--states, per MANIFEST.md.
@@ -44,9 +46,10 @@ export const Default: Story = {
 
 export const States: Story = {
   render: () => ({
-    components: { BaseInputTextNumberDatetime },
+    components: { BaseInputTextNumberDatetime, EntityElementMetadataEdit, InlineFieldEditor },
     setup() {
       return {
+        titleField: { key: "title", label: "Title", type: "text" },
         text: ref("Tales from the North Sea"),
         empty: ref(""),
         number: ref(1987),
@@ -61,9 +64,6 @@ export const States: Story = {
         <label for="s-border">defaultWithBorder</label>
         <base-input-text-number-datetime id="s-border" v-model="text" input-style="defaultWithBorder" />
 
-        <label for="s-dark">dark background</label>
-        <base-input-text-number-datetime id="s-dark" v-model="text" input-style="defaultWithDarkBackgroundInput" />
-
         <label for="s-placeholder">placeholder</label>
         <base-input-text-number-datetime id="s-placeholder" v-model="empty" input-style="defaultWithBorder" placeholder="No value" />
 
@@ -73,11 +73,11 @@ export const States: Story = {
         <label for="s-disabled">disabled</label>
         <base-input-text-number-datetime id="s-disabled" v-model="text" input-style="defaultWithBorder" disabled />
 
-        <label for="s-error">error</label>
-        <base-input-text-number-datetime id="s-error" v-model="empty" input-style="defaultWithBorder" error-message="Title is required" />
+        <span style="align-self:start;padding-top:10px">error — form</span>
+        <entity-element-metadata-edit field-key="title" :value="''" :field="titleField" form-id="story-text-input-states" error="Title is required" :show-errors="true" :field-is-valid="false" :is-field-required="true" />
 
-        <label for="s-readonly">read-only</label>
-        <base-input-text-number-datetime id="s-readonly" v-model="text" input-style="defaultWithBorder" readonly />
+        <span style="align-self:start;padding-top:10px">error — inline editor</span>
+        <inline-field-editor type="text" model-value="" label="Title" error-message="Title is required" />
 
         <label for="s-area">textarea</label>
         <base-input-text-number-datetime id="s-area" v-model="area" type="textarea" input-style="defaultWithBorder" />
@@ -133,20 +133,14 @@ export const Playground: Story = {
     size: "default",
     placeholder: "No value",
     disabled: false,
-    readonly: false,
     invalid: false,
-    errorMessage: "",
     ariaLabel: "Title",
   },
   argTypes: {
     modelValue: { control: "text", type: { name: "string", required: false } },
     inputStyle: {
       control: "select",
-      options: [
-        "default",
-        "defaultWithBorder",
-        "defaultWithDarkBackgroundInput",
-      ],
+      options: ["default", "defaultWithBorder"],
     },
     type: {
       control: "select",

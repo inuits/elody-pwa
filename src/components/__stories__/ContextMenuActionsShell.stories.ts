@@ -3,9 +3,15 @@ import ContextMenuActionsShell from "../ContextMenuActionsShell.vue";
 import BaseButton from "@/components/base/BaseButtonNew.vue";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { Unicons } from "@/types";
-import { computed, provide } from "vue";
-import { rowSheetKey } from "@/components/context-menu-actions/rowSheet";
+import { provide } from "vue";
+import ListItem from "@/components/ListItem.vue";
 import { isCompact } from "@/composables/useNavMenu";
+import {
+  ActionTone,
+  BaseLibraryModes,
+  ContextMenuElodyActionEnum,
+  ContextMenuFormFlow,
+} from "@/generated-types/queries";
 
 const meta: Meta<typeof ContextMenuActionsShell> = {
   title: "ContextMenuActions/ContextMenuActionsShell",
@@ -136,33 +142,61 @@ export const CustomTriggerLabel: Story = {
   }),
 };
 
-const sampleRow = {
-  id: "story-row",
-  title: "Portrait of a lady",
-  thumbnailIsLink: false,
-  preview: () => undefined,
+const elodyAction = (
+  label: string,
+  icon: string,
+  action: ContextMenuElodyActionEnum,
+  tone = ActionTone.Default,
+) => ({
+  __typename: "ContextMenuElodyAction",
+  label,
+  icon,
+  action,
+  tone,
+  hidden: false,
+  formFlow: ContextMenuFormFlow.Update,
+});
+
+const rowButtons = {
+  __typename: "Buttons",
+  contextMenu: {
+    __typename: "ContextMenuActions",
+    share: elodyAction("Share", "Link", ContextMenuElodyActionEnum.Share),
+    edit: elodyAction("Edit", "Edit", ContextMenuElodyActionEnum.UpdateMetadata),
+    delete: elodyAction("Delete", "Trash", ContextMenuElodyActionEnum.DeleteEntity, ActionTone.Danger),
+  },
+};
+
+const rowSetup = () => {
+  provide("config", { features: {}, routerConfig: [{ name: "Home", children: [] }] });
+  return {
+    buttons: rowButtons,
+    mode: BaseLibraryModes.NormalBaseLibrary,
+    teaser: [{ label: "Title", key: "title", value: "Portrait of a lady" }],
+  };
 };
 
 const rowTemplate = frame(`
-  <div style="display:flex;align-items:center;justify-content:space-between;max-width:480px;padding:8px 12px;background:var(--color-surface);border:1px solid var(--color-border-subtle);border-radius:var(--radius-card)">
-    <span>Portrait of a lady</span>
-    <context-menu-actions-shell
-      :has-promoted-actions="false"
-      :has-overflow-actions="true"
-      context-label="Portrait of a lady"
-    >
-      <template #overflow>${menuItems}</template>
-    </context-menu-actions-shell>
-  </div>`);
+  <ul style="max-width:620px;padding:0;list-style:none">
+    <list-item
+      item-id="story-row"
+      :teaser-metadata="teaser"
+      :buttons="buttons"
+      :bulk-operations-context="undefined"
+      relation="no-relation-found"
+      :base-library-mode="mode"
+      view-mode="list"
+      :is-enable-navigation="false"
+      :preview-component-enabled="true"
+      :preview-component-feature-enabled="true"
+    />
+  </ul>`);
 
 /** In a list row the trigger is a bare ⋮ under the "Actions" column header. */
 export const InListRow: Story = {
   render: () => ({
-    components,
-    setup() {
-      provide(rowSheetKey, computed(() => sampleRow));
-      return setup();
-    },
+    components: { ListItem },
+    setup: rowSetup,
     template: rowTemplate,
   }),
 };
@@ -173,11 +207,10 @@ export const InListRow: Story = {
  */
 export const SmallScreenSheet: Story = {
   render: () => ({
-    components,
+    components: { ListItem },
     setup() {
       isCompact.value = true;
-      provide(rowSheetKey, computed(() => sampleRow));
-      return setup();
+      return rowSetup();
     },
     template: rowTemplate,
   }),

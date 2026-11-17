@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { provide } from "vue";
 import EntityElementWindowPanel from "../EntityElementWindowPanel.vue";
+import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import { InputFieldTypes, PanelType } from "@/generated-types/queries";
@@ -37,7 +38,7 @@ const basePanel = {
   panelType: PanelType.Metadata,
   isCollapsed: false,
   isEditable: true,
-  canBeMultipleColumns: false,
+  canBeMultipleColumns: true,
 };
 
 const setupForm = (
@@ -53,12 +54,17 @@ const setupForm = (
   } as never);
 };
 
+const inWindow = (panel: Record<string, unknown>) => ({
+  __typename: "WindowElement",
+  label: "Information",
+  panel,
+});
+
 const template = `
   <div style="max-width:560px">
-    <entity-element-window-panel
-      :panel="panel"
+    <entity-element-window
+      :element="element"
       :identifiers="['story-entity']"
-      :is-edit="false"
       :form-id="formId"
     />
   </div>`;
@@ -82,10 +88,10 @@ const repeatableStory = (
   canUpdate = true,
 ): Story => ({
   render: () => ({
-    components: { EntityElementWindowPanel },
+    components: { EntityElementWindow },
     setup() {
       setupForm(formId, rows ? { isbn_group: rows } : {}, canUpdate);
-      return { panel: repeatablePanel, formId };
+      return { element: inWindow(repeatablePanel), formId };
     },
     template,
   }),
@@ -93,18 +99,18 @@ const repeatableStory = (
 
 export const IndependentRows: Story = {
   render: () => ({
-    components: { EntityElementWindowPanel },
+    components: { EntityElementWindow },
     setup() {
       const formId = "story-panel-rows";
       setupForm(formId, { publisher: "Lannoo", place: "Tielt", year: "1987" });
       return {
-        panel: {
+        element: inWindow({
           ...basePanel,
           panelHeaderContent: { label: "Publication" },
           publisher: panelField("publisher", "Publisher", "Lannoo"),
           place: panelField("place", "Place", "Tielt"),
           year: panelField("year", "Year", "1987"),
-        },
+        }),
         formId,
       };
     },

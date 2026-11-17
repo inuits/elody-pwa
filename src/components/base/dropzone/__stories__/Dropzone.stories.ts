@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
+import type { DropzoneFile } from "dropzone";
+import Dropzone from "../Dropzone.vue";
 import DropzoneView from "../DropzoneView.vue";
-import DropzonePreview from "../DropzonePreview.vue";
+import { useDropzone } from "@/composables/useDropzone";
+import useUpload from "@/composables/upload/useUpload";
+import { ProgressStepStatus, ProgressStepType } from "@/generated-types/queries";
 
 const meta: Meta = {
   // Story id components-dropzone--progress, per MANIFEST.md.
@@ -12,9 +16,9 @@ const meta: Meta = {
         component:
           "The upload surface: a dashed zone whose label is a real button " +
           "(dropzone.js opens the file dialog on click), and one row per file " +
-          "cloned from the preview template: name, size, a status glyph per " +
-          "step (validate, prepare, upload) and a remove button. A failed " +
-          "step turns the row's border red and lists the errors under it.",
+          "added by dropzone.js: name, size, a status glyph per step " +
+          "(validate, prepare, upload) and a remove button. A failed step " +
+          "turns the row's border red and lists the errors under it.",
       },
     },
   },
@@ -23,46 +27,37 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const rows = [
-  { name: "scan-001.tiff", size: "48", steps: { validate: "complete", prepare: "complete", upload: "complete" } },
-  { name: "scan-002.tiff", size: "51", steps: { validate: "complete", prepare: "complete", upload: "loading" } },
-  { name: "scan-003.tiff", size: "47", steps: { validate: "complete", prepare: "complete", upload: "failed" }, error: "Something went wrong while uploading" },
+const rows: { name: string; megabytes: number; upload: ProgressStepStatus; errors?: string[] }[] = [
+  { name: "scan-003.tiff", megabytes: 47, upload: ProgressStepStatus.Failed, errors: ["Something went wrong while uploading"] },
+  { name: "scan-001.tiff", megabytes: 48, upload: ProgressStepStatus.Complete },
+  { name: "scan-002.tiff", megabytes: 51, upload: ProgressStepStatus.Loading },
 ];
 
-/** Three file rows in the zone: uploaded, uploading and failed. */
+/** Three files added to the real dropzone, then driven by useUpload: uploaded, uploading and failed. */
 export const Progress: Story = {
   render: () => ({
-    components: { DropzoneView, DropzonePreview },
+    components: { Dropzone },
     setup() {
-      const view = ref<HTMLDivElement>();
-      const template = ref<HTMLDivElement>();
+      const dropzone = new useDropzone();
+      const { resetUpload, updateFileThumbnails } = useUpload();
+      resetUpload();
       onMounted(() => {
+        const instance = (dropzone.dropzone as any).value;
         rows.forEach((row) => {
-          const preview = template.value!.cloneNode(true) as HTMLDivElement;
-          preview.querySelector("[data-dz-name]")!.textContent = row.name;
-          preview.querySelector("[data-dz-size]")!.innerHTML = `<strong>${row.size}</strong> MB`;
-          Object.entries(row.steps).forEach(([step, status]) => {
-            const container = preview.querySelector(`.file-${step}-container`)!;
-            [...container.children].forEach((child) => child.classList.add("hidden"));
-            container.querySelector(`.file-${step}-${status}`)!.classList.remove("hidden");
-          });
-          if (row.error) {
-            const errors = preview.querySelector(".error-message-container")!;
-            errors.innerHTML = `<ul class="list-disc"><li>${row.error}</li></ul>`;
-            errors.classList.remove("hidden");
-            preview.classList.add("border-2", "border-danger");
-          }
-          view.value!.appendChild(preview);
+          const file = new File([""], row.name, { type: "image/tiff" });
+          Object.defineProperty(file, "size", { value: row.megabytes * 1000 * 1000 });
+          instance.addFile(file);
+          const added = file as unknown as DropzoneFile;
+          updateFileThumbnails(added, ProgressStepType.Prepare, ProgressStepStatus.Complete);
+          updateFileThumbnails(added, ProgressStepType.Upload, row.upload, row.errors);
         });
       });
-      return { view, template };
+      return { dropzone };
     },
     template: `
-      <div style="max-width:640px">
-        <dropzone-view v-model="view" dropzone-label="upload-fields.labels.file-upload" :is-validation="false" :file-count="rows.length" :style="'p-3'" />
-        <dropzone-preview v-model="template" :is-validation-file="false" />
+      <div style="max-width:640px;display:flex;flex-direction:column">
+        <dropzone :dropzone="dropzone" dropzone-label="upload-fields.labels.file-upload" view-style="p-3 h-full overflow-x-hidden mb-4 grow" :is-validation-file="false" />
       </div>`,
-    data: () => ({ rows }),
   }),
 };
 

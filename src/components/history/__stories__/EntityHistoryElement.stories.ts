@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { computed } from "vue";
 import EntityHistoryElement from "../EntityHistoryElement.vue";
-import EntityHistoryColumn from "../EntityHistoryColumn.vue";
 import {
   createHistoryForm,
   relationDiffsFor,
-  values,
   windowElements,
   wysiwygDiffsFor,
   type HistoryVariant,
@@ -22,9 +20,7 @@ const meta: Meta<Args> = {
         component:
           "One version of a record in the history view: its windows and " +
           "relation lists, read-only, with the version's diff marks. The " +
-          "history page shows two of these side by side; by default the " +
-          "current version is on the left and the version before it on " +
-          "the right.",
+          "history page (History/HistoryComparison) shows two side by side.",
       },
     },
   },
@@ -64,38 +60,6 @@ export const Default: Story = {
           :entity="entity"
           :relation-diffs="relationDiffs"
           :wysiwyg-diffs="wysiwygDiffs"
-        />
-      </div>`,
-  }),
-};
-
-export const Versions: Story = {
-  render: () => ({
-    components: { EntityHistoryColumn },
-    setup: () => {
-      const column = (variant: HistoryVariant) => ({
-        id: `story-history-column-${variant}`,
-        entityView: { main: { elements: structuredClone(windowElements) } },
-        intialValues: values[variant],
-      });
-      return {
-        current: column("current"),
-        previous: column("previous"),
-        relationDiffsFor,
-        wysiwygDiffsFor,
-      };
-    },
-    template: `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:960px">
-        <entity-history-column
-          :entity="current"
-          :relation-diffs="relationDiffsFor('current')"
-          :wysiwyg-diffs="wysiwygDiffsFor('current')"
-        />
-        <entity-history-column
-          :entity="previous"
-          :relation-diffs="relationDiffsFor('previous')"
-          :wysiwyg-diffs="wysiwygDiffsFor('previous')"
         />
       </div>`,
   }),

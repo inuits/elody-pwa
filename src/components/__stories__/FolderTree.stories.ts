@@ -8,7 +8,7 @@ import {
 } from "@/components/imports/__stories__/importFixtures";
 
 const meta: Meta<typeof FolderTreeLine> = {
-  title: "Components/HierarchyTree",
+  title: "Components/FolderTree",
   component: FolderTreeLine,
   parameters: {
     docs: {
@@ -41,7 +41,7 @@ const render = () => ({
     return { roots, query: GetDirectoriesDocument };
   },
   template: `
-    <ul style="max-width:420px;list-style:none;padding:0">
+    <ul class="max-h-[75vh] p-4 overflow-y-auto">
       <li v-for="root in roots" :key="root.id">
         <folder-tree-line :query-for-sub-directories="query" :directory="root" :dictionary="roots" :default-open="false" />
       </li>

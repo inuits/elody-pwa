@@ -155,11 +155,11 @@ export const ConfirmSelection: Story = {
     components: { BulkOperationsActionsBar },
     setup() {
       registerBulkOperations();
-      select(BulkOperationsContextEnum.RelationPickerModal, ["a", "b"]);
+      select(BulkOperationsContextEnum.EntityElementListEntityPickerModal, ["a", "b"]);
       return { base, BulkOperationsContextEnum };
     },
     template: bar(
-      ':context="BulkOperationsContextEnum.RelationPickerModal" :confirm-selection-button="true"',
+      ':context="BulkOperationsContextEnum.EntityElementListEntityPickerModal" :confirm-selection-button="true"',
     ),
   }),
 };

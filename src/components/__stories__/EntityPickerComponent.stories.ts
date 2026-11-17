@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { nextTick, onMounted, provide } from "vue";
-import { useRouter } from "vue-router";
+import { nextTick, onMounted, provide, watch } from "vue";
 import EntityPickerComponent from "../EntityPickerComponent.vue";
-import BaseModal from "@/components/base/BaseModal.vue";
-import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
+import DynamicFormModal from "@/components/dynamicForms/DynamicFormModal.vue";
+import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useStateManagement } from "@/composables/useStateManagement";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";
 import {
   BulkOperationsContextEnum,
@@ -15,6 +15,7 @@ import {
   EntityPickerSearchMode,
   ModalStyle,
   TypeModals,
+  ViewModes,
 } from "@/generated-types/queries";
 import { registerQueryFixture } from "@/main";
 import { registerLibraryFixtures } from "@/components/library/__stories__/libraryFixtures";
@@ -26,7 +27,16 @@ const asset = (id: string, title: string, year: string) => ({
   uuid: id,
   type: "asset",
   intialValues: { __typename: "IntialValues", title, publication_year: year },
-  allowedViewModes: null,
+  allowedViewModes: {
+    __typename: "AllowedViewModes",
+    viewModes: [
+      {
+        __typename: "ViewModesWithConfig",
+        viewMode: ViewModes.ViewModesList,
+        config: [],
+      },
+    ],
+  },
   teaserMetadata: {
     __typename: "teaserMetadata",
     title: {
@@ -72,23 +82,32 @@ const registerFixtures = () => {
   });
 };
 
-const pickerField = (mode?: EntityPickerSearchMode) => ({
-  picker: {
-    __typename: "PanelMetaData",
-    key: "picker",
-    label: "",
-    inputField: {
-      __typename: "InputField",
-      type: BaseFieldType.BaseEntityPickerField,
-      entityPickerSearchConfig: mode
-        ? {
-            __typename: "EntityPickerSearchConfig",
-            mode,
-            metadataKeys: ["title"],
-            acceptedTypes: [],
-            staticFilters: [],
-          }
-        : null,
+const pickerForm = (mode?: EntityPickerSearchMode) => ({
+  GetDynamicForm: {
+    __typename: "Form",
+    import: {
+      __typename: "FormTab",
+      formFields: {
+        __typename: "FormFields",
+        entityPicker: {
+          __typename: "PanelMetaData",
+          key: "entityPicker",
+          label: "metadata.labels.entity-picker",
+          inputField: {
+            __typename: "InputField",
+            type: BaseFieldType.BaseEntityPickerField,
+            entityPickerSearchConfig: mode
+              ? {
+                  __typename: "EntityPickerSearchConfig",
+                  mode,
+                  metadataKeys: ["title"],
+                  acceptedTypes: [],
+                  staticFilters: [],
+                }
+              : null,
+          },
+        },
+      },
     },
   },
 });
@@ -103,9 +122,13 @@ const waitFor = async <T>(find: () => T | null | undefined, tries = 160) => {
 const render =
   (options: { linked?: string[]; mode?: EntityPickerSearchMode } = {}) =>
   () => ({
-    components: { BaseModal, DynamicForm },
+    components: { DynamicFormModal },
     setup() {
       registerFixtures();
+      registerQueryFixture("GetEntityPickerForm", { GetDynamicForm: null });
+      useStateManagement().updateGlobalState("_displayPreferences", {
+        lang: "en",
+      });
       provide("config", {
         features: {},
         routerConfig: [{ name: "Home", children: [] }],
@@ -123,40 +146,27 @@ const render =
       useBulkOperations().dequeueAllItemsForBulkProcessing(
         BulkOperationsContextEnum.EntityElementListEntityPickerModal,
       );
+      const { dynamicForm, dynamicFormLoaded } = useDynamicForm();
+      watch(dynamicFormLoaded, (loaded) => {
+        if (loaded) dynamicForm.value = pickerForm(options.mode);
+      });
       const { openModal, closeModal, getModalInfo } = useBaseModal();
       onMounted(async () => {
         if (getModalInfo(TypeModals.DynamicForm).open)
           closeModal(TypeModals.DynamicForm);
         await nextTick();
-        openModal(TypeModals.DynamicForm, ModalStyle.CenterWide);
+        openModal(
+          TypeModals.DynamicForm,
+          ModalStyle.CenterWide,
+          "GetEntityPickerForm",
+          undefined,
+          false,
+          undefined,
+          { title: "Add existing assets" },
+        );
       });
-      return {
-        TypeModals,
-        router: useRouter(),
-        fields: pickerField(options.mode),
-        open: () => getModalInfo(TypeModals.DynamicForm).open,
-        close: () => closeModal(TypeModals.DynamicForm),
-      };
     },
-    template: `
-      <base-modal
-        :modal-type="TypeModals.DynamicForm"
-        :cancel-button-availabe="false"
-        modal-color="bg-background-light"
-        modal-height-style="max-h-[90vh]"
-        title="Add existing assets"
-        @hide-modal="close"
-      >
-        <div class="flex flex-col w-full pt-4">
-          <dynamic-form
-            v-if="open()"
-            dynamic-form-query="StoryAddExistingAssets"
-            :router="router"
-            :modal-form-fields="fields"
-            :show-form-title="false"
-          />
-        </div>
-      </base-modal>`,
+    template: `<dynamic-form-modal />`,
   });
 
 const meta: Meta<typeof EntityPickerComponent> = {
@@ -183,6 +193,7 @@ export const FiltersOpen: Story = {
   name: "Filters open",
   render: render(),
   play: async () => {
+    await waitFor(() => modal()?.querySelector("[data-cy=list-item]"));
     const toggle = await waitFor(() =>
       modal()?.querySelector<HTMLElement>("[data-cy=filters-toggle]"),
     );

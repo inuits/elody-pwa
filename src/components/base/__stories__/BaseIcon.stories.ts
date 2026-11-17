@@ -36,8 +36,13 @@ export const Default: Story = {
   }),
 };
 
-const registeredIcons = Object.values(Unicons)
-  .map((icon) => icon.name)
+const registeredIcons = [
+  ...Object.values(Unicons).map((icon) => icon.name),
+  "left-indent-alt",
+  "right-indent-alt",
+  "link-broken",
+  "exclamation-circle",
+]
   .filter(
     (name, index, names) =>
       name &&
