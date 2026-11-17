@@ -325,3 +325,10 @@ New pages view-modes, bulk-edit, merge-entities, multi-entity-view. Fixed on the
 | U53 | Docs | `BulkOperationsSubmitBar.stories.ts:12` | says the bar is bulk edit's footer; bulk edit uses DynamicForm's Apply | fix description |
 | U54 | Backend | `collection-api/.../merge.py:126` | carrying relations over in a merge is per client | page says so only where implemented — check wording |
 | U55 | Layout | bulk edit modal | side by side only from 56rem modal width; docs embed renders it at 1200px (small text) | — |
+| U56 | Bug | `EntityElementHierarchyListViewer.vue:2`, `EntityElement.vue:117` | hierarchy panel chevron emits `toggleElementCollapse` but nothing handles it: the panel can't collapse | wire it up |
+| U57 | Bug | `EntityElementHierarchyListViewer.vue:84,88` | empty `hierarchyRelationList` or no form returns before `finally`: spinner never stops | fix with a test |
+| U58 | Bug | `EntityElementHierarchyListViewer.vue:96-97,135` | no `ref_point` → TypeError; `onMounted` promise not caught (unhandled rejection) | guard |
+| U59 | Copy | `EntityElementHierarchyListViewer.vue:36` | empty text is `search.noresult` ("No results match your filters") in a panel without filters | own empty text |
+| U60 | A11y | `EntityElementHierarchyListViewer.vue:15` | spinner `aria-hidden`, no status text while loading | — |
+| U61 | Bug | `EntityElementHierarchyListViewer.vue:121` | `preferredLanguage` hard-coded "en" | use locale |
+| U62 | Config | `HierarchyListElement.can` | never checked in the PWA (maybe enforced in GraphQL, unchecked) | — |
