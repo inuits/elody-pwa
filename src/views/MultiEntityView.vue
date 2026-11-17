@@ -10,7 +10,7 @@
       v-else-if="!entities.length"
       class="min-h-[30vh] flex justify-center items-center text-text-light"
     >
-      {{ t("multi-entity.no-results") }}
+      {{ noResultsLabel }}
     </div>
     <div
       v-else
@@ -42,7 +42,10 @@ import MultiEntityColumn from "@/components/MultiEntityColumn.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
 
 const route = useRoute();
-const { t } = useI18n();
+const { t, te } = useI18n();
+const noResultsLabel = computed(() =>
+  te("multi-entity.no-results") ? t("multi-entity.no-results") : "No results",
+);
 const { loadDocument } = useImport();
 const config: any = inject("config");
 const { determineBreadcrumbsFromRouteConfig } = useBreadcrumbs(config);

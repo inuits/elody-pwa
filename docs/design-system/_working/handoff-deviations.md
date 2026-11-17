@@ -299,3 +299,29 @@ Every docs embed checked against the component the app actually shows. 16 storie
 | U34 | Bug | `useMetadataWrapperDropdownOptions.ts:177-183` | relation field throws without `advancedFilterInputForSearchingOptions` | guard |
 | U35 | Config | generated `GetEntityPickerForm` | no `label`, no `entityPickerSearchConfig`: title only from the opener, search mode only from client form queries | — |
 | U36 | Docs | chip-and-badge.md | tones and letter badges are supported config no client uses; the only real badge is the breadcrumb type badge (full value) | page reframed |
+
+## View modes, bulk edit, merge, multi-entity view (2026-11-17)
+
+New pages view-modes, bulk-edit, merge-entities, multi-entity-view. Fixed on the way: `MultiEntityView.vue` empty state fell back to the raw key `multi-entity.no-results` for clients without it (English fallback, with test).
+
+| ID | Kind | Where | Finding | Follow-up |
+|---|---|---|---|---|
+| U37 | i18n | `multi-entity.no-results` | only one client defines it | **fixed** (fallback); add the key to baseGraphql |
+| U38 | Bug | `MultiEntityView.vue:78` | a failed query shows the same "no results" as an empty result; no error state | — |
+| U39 | A11y | `MultiEntityColumn.vue:5-19` | heading link named only by the type letter ("W") | add the record title |
+| U40 | Tokens | `MultiEntityColumn.vue:2-4,38`, `MultiEntityView.vue:2,17` | palette/Tailwind values instead of role tokens; header buttons centred | — |
+| U41 | Cleanup | `MultiEntityColumn.vue:116-117` | `useEditMode` called twice | — |
+| U42 | Deprecated | `ViewModesMedia`, `useViewModes.ts:172` | media mode deprecated in the schema, no client enables it; its toggle reuses `displayPreview` | remove |
+| U43 | A11y | `PipelineCanvas.vue:7-10` | pipeline pans only by dragging | keyboard pan |
+| U44 | Behaviour | `useViewModes.ts:265,299`, `BaseToggleGroup.vue` | one remembered mode for all libraries; first mode differs between "nothing saved" (first toggle) and "something saved" (list wins) | decide |
+| U45 | Bug (check) | `SearchModal.vue:28` | forces list view but keeps `saveViewPreferences` true | — |
+| U46 | Bug | `BulkOperationsMergeModal.vue:174-177` | compares only selection items 0 and 1; relies on config min/max 2 | guard |
+| U47 | i18n | `BulkOperationsMergeModal.vue` ~300, ~355 | failed merge shows `String(error)`, not the translated description | — |
+| U48 | UI/Tokens | `BulkOperationsMergeModal.vue:22-27,78-101`, `MergeDiffTable.vue:46-62` | Cancel stretches; default-blue radios and legacy colour classes; lock only in the right column | — |
+| U49 | A11y | `BulkOperationsMergeModal.vue:87` | blocked reason not tied to the disabled Merge button | `aria-describedby` |
+| U50 | Bug | `useBulkOperationsActionsBar.ts:519` | `askForCloseConfirmation` passed for bulk edit and merge but never read: Escape/× drop bulk-edit changes silently | wire it up |
+| U51 | A11y | `BulkEditClearFieldButton.vue:11`, `BulkEditFieldScopeNote.vue:2` | clear buttons don't name their field; scope note not linked to its field | — |
+| U52 | Tokens | `BulkEditRelationModeSelector.vue:2` | legacy classes | — |
+| U53 | Docs | `BulkOperationsSubmitBar.stories.ts:12` | says the bar is bulk edit's footer; bulk edit uses DynamicForm's Apply | fix description |
+| U54 | Backend | `collection-api/.../merge.py:126` | carrying relations over in a merge is per client | page says so only where implemented — check wording |
+| U55 | Layout | bulk edit modal | side by side only from 56rem modal width; docs embed renders it at 1200px (small text) | — |
