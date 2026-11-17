@@ -46,11 +46,12 @@ const fixtureLink = new ApolloLink(
         );
       }
       const fixture = queryFixtures[operation.operationName];
-      observer.next({
-        data: (typeof fixture === "function"
+      const data =
+        typeof fixture === "function"
           ? fixture(operation.variables)
-          : (fixture ?? {})) as Record<string, unknown>,
-      });
+          : (fixture ?? {});
+      if (data === PENDING_QUERY) return;
+      observer.next({ data: data as Record<string, unknown> });
       observer.complete();
     }),
 );
