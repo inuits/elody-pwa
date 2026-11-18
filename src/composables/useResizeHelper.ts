@@ -38,7 +38,7 @@ const useColumnResizeHelper = () => {
     sizeList: ColumnSizes[],
   ): Column[] | void => {
     try {
-      if (sizeList.length != currentColumnConfig.value.length) {
+      if (sizeList.length != currentColumnConfig.value[entityId]?.length) {
         throw Error("Not all columns received sizes");
       }
       sizeList.forEach((size: ColumnSizes, index: number) => {

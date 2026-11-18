@@ -6,7 +6,6 @@ import { useFormHelper } from "@/composables/useFormHelper";
 import { useEditMode } from "@/composables/useEdit";
 import {
   InputFieldTypes,
-  Orientations,
   PanelType,
 } from "@/generated-types/queries";
 
@@ -92,7 +91,7 @@ export const Default: Story = {
   }),
 };
 
-/** A collapsed block, and the expand button on the panel's edge. */
+/** A collapsed block. */
 export const States: Story = {
   render: () => ({
     components: { EntityElementWindow },
@@ -101,7 +100,6 @@ export const States: Story = {
       const states = {
         ...element,
         publication: { ...element.publication, isCollapsed: true },
-        expandButtonOptions: { shown: true, orientation: Orientations.Right },
       };
       return { states, formId: FORM_ID };
     },

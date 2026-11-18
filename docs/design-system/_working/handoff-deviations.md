@@ -332,3 +332,6 @@ New pages view-modes, bulk-edit, merge-entities, multi-entity-view. Fixed on the
 | U60 | A11y | `EntityElementHierarchyListViewer.vue:15` | spinner `aria-hidden`, no status text while loading | — |
 | U61 | Bug | `EntityElementHierarchyListViewer.vue:121` | `preferredLanguage` hard-coded "en" | use locale |
 | U62 | Config | `HierarchyListElement.can` | never checked in the PWA (maybe enforced in GraphQL, unchecked) | — |
+| U63 | Bug | `useResizeHelper.ts:41` | the panel expand button never resized the columns in the app: the guard compared against `currentColumnConfig.value.length` (a Record, always undefined) and always threw | **fixed** (`[entityId]?.length`), with tests |
+| U64 | Bug | `useResizeHelper.ts:41-49`, `EntityColumn.vue:191` | with a column count other than 2 the resize still fails silently (`console.log`); several single-column configs turn the expand button on, so it shows and does nothing | hide the button unless there are 2 columns |
+| U65 | State | `BaseExpandButton.vue:43` | toggled state lives only in the button, not synced with the column sizes | — |
