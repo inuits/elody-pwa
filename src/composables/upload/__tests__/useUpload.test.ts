@@ -142,6 +142,22 @@ describe("useUpload - Missing Mediafiles validation", () => {
   };
 
 
+  it("shows upload errors and warnings as text, never as markup", () => {
+    const file = createFakeFile("<img src=x onerror=alert(1)>.tiff", "image/tiff");
+    const { __handleFileThumbnailError, __handleFileThumbnailWarning } =
+      useUpload({});
+    const message = `${file.name} could not be uploaded`;
+
+    __handleFileThumbnailError(file, [message]);
+    __handleFileThumbnailWarning(file, [message]);
+
+    for (const selector of [".error-message-container", ".warning-message-container"]) {
+      const container = file.previewTemplate.querySelector(selector);
+      expect(container.querySelector("img")).toBeNull();
+      expect(container.querySelector("li").textContent).toBe(message);
+    }
+  });
+
   it("calls the error handler and updates DOM for missing mediafiles in a CSV file", async () => {
     const csvFile = createFakeFile("data.csv", "text/csv");
     const { addFileToUpload, resetUpload } = useUpload({});

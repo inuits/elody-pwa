@@ -1279,13 +1279,14 @@ if (useOtherQuery.value) {
   setParentEntityIdentifiers(props.parentEntityIdentifiers || []);
 }
 
+const isSelectable = (entity: Entity) =>
+  !props.idsOfNonSelectableEntities.includes(entity.id) &&
+  !props.idsOfNonSelectableEntities.includes(entity.uuid);
+
 const bulkSelect = (items = entities.value) => {
   if (props.predefinedEntities) items = props.predefinedEntities;
   for (const entity of items) {
-    if (
-      !props.idsOfNonSelectableEntities.includes(entity.id) ||
-      !props.idsOfNonSelectableEntities.includes(entity.uuid)
-    ) {
+    if (isSelectable(entity)) {
       enqueueItemForBulkProcessing(props.bulkOperationsContext, {
         id: entity.uuid,
         teaserMetadata: formatTeaserMetadata(
@@ -1304,9 +1305,7 @@ const selectedCount = computed(() =>
   getEnqueuedItemCount(props.bulkOperationsContext),
 );
 const selectablePage = computed(() =>
-  (props.predefinedEntities ?? entities.value ?? []).filter(
-    (entity) => !props.idsOfNonSelectableEntities.includes(entity.id),
-  ),
+  (props.predefinedEntities ?? entities.value ?? []).filter(isSelectable),
 );
 const isOnPageSelected = (entity: Entity) =>
   isEnqueued(props.bulkOperationsContext, entity.uuid) ||
