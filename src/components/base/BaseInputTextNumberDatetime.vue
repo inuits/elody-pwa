@@ -244,7 +244,7 @@ input[type="number"] {
   width: 100%;
   overflow: hidden;
   resize: both;
-  min-height: 40px;
-  line-height: 20px;
+  min-height: 2.5rem;
+  line-height: 1.25rem;
 }
 </style>

@@ -9,7 +9,7 @@ import WKT from "ol/format/WKT.js";
 import { Feature } from "ol";
 import { Point } from "ol/geom";
 import { Style, Icon, Fill, Stroke, Circle as CircleStyle, Text } from "ol/style";
-import { readCssToken, withAlpha } from "@/utils/cssToken";
+import { readCssToken, readCssTokenPx, withAlpha } from "@/utils/cssToken";
 import type { FeatureLike } from "ol/Feature";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
@@ -195,7 +195,7 @@ export const useMaps = () => {
           : new Text({
               text: String(count),
               fill: new Fill({ color: white() }),
-              font: `bold ${readCssToken("--text-ui", "12px")} ${readCssToken("--font-sans", "sans-serif")}`,
+              font: `bold ${readCssTokenPx("--text-ui") || 12}px ${readCssToken("--font-sans", "sans-serif")}`,
             }),
       });
     }

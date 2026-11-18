@@ -9,7 +9,7 @@
       'vue-advanced-select',
     ]"
     :style="{
-      minWidth: shouldCalculateWidth ? `${calculatedWidth}px` : 'auto',
+      minWidth: shouldCalculateWidth ? `calc(${calculatedWidth}px + 3.5rem)` : 'auto',
     }"
   >
     <VueSelect
@@ -49,7 +49,7 @@
         <div
           v-else-if="isOptionSelected(option)"
           data-cy="option-check"
-          class="mr-2 w-[18px] h-[18px]"
+          class="mr-2 w-4.5 h-4.5"
         >
           <unicon :name="Unicons.Check.name" height="18" width="18" />
         </div>
@@ -110,7 +110,7 @@
             :style="{ width: `${90 - row * 15}%` }"
           ></div>
         </div>
-        <div v-else class="px-2.5 py-[5px] text-table text-text-muted">
+        <div v-else class="px-2.5 py-[0.3125rem] text-table text-text-muted">
           {{ noOptionsLabel }}
         </div>
       </template>
@@ -270,7 +270,7 @@ const selectedCountLabel = computed<string>(() => {
 
 const root = ref<HTMLElement>();
 const shouldCalculateWidth = ref(false);
-const calculatedWidth = ref(200);
+const calculatedWidth = ref(144);
 
 const checkIfCalculationNeeded = () => {
   if (props.alwaysCalcualteWidth) {
@@ -306,7 +306,7 @@ const calculateWidth = () => {
   });
 
   document.body.removeChild(span);
-  calculatedWidth.value = maxWidth + 56;
+  calculatedWidth.value = maxWidth;
 };
 
 onMounted(() => {

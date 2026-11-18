@@ -43,6 +43,7 @@ import { useServiceVersionManager } from "@/composables/useServiceVersionManager
 import { ElodyServices } from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { applyClientTheme } from "@/utils/clientTheme";
+import { initUiScale } from "@/composables/useUiScale";
 import { useApp } from "@/composables/useApp";
 import { aliasAsKeyTransform } from "@/aliasAsKeyTransform";
 import {
@@ -198,6 +199,8 @@ const start = async (): Promise<void> => {
   await useApp().initApp(auth, config, apolloClient);
 
   addRouterNavigationGuards(router, config);
+
+  initUiScale();
 
   const app = createApp(App)
     .use(i18n)

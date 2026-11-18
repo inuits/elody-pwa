@@ -19,7 +19,7 @@
       v-else
       :class="[
         {
-          'grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2 max-w-full':
+          'grid grid-cols-[repeat(auto-fit,_minmax(15.625rem,_1fr))] gap-2 max-w-full':
             canBeMultipleColumns,
         },
       ]"

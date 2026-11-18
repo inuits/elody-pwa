@@ -232,6 +232,20 @@ describe("TheHeader bar", () => {
   });
 });
 
+describe("TheHeader display preferences", () => {
+  it("puts the display size menu right after the colour scheme toggle", () => {
+    const html = mountHeader().html();
+    const toggle = html.indexOf("<color-scheme-toggle-stub");
+    const scale = html.indexOf("<ui-scale-menu-stub");
+    const language = html.indexOf("<language-select-stub");
+    expect([toggle > -1, toggle < scale, scale < language]).toEqual([
+      true,
+      true,
+      true,
+    ]);
+  });
+});
+
 describe("TheHeader on a small screen", () => {
   beforeEach(() => {
     isCompact.value = true;

@@ -102,7 +102,7 @@ import useMenuHelper, { MenuItemType } from "@/composables/useMenuHelper";
 import { useMenuBadges } from "@/composables/useMenuBadges";
 import { subItemsOf, useNavMenu } from "@/composables/useNavMenu";
 import { Unicons } from "@/types";
-import { readCssToken } from "@/utils/cssToken";
+import { readCssTokenPx } from "@/utils/cssToken";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import CustomIcon from "@/components/CustomIcon.vue";
 import MenuBadge from "@/components/menu/MenuBadge.vue";
@@ -120,7 +120,6 @@ const router = useRouter();
 const { checkIfRouteOrModal, getUrlForMenuItem } = useMenuHelper();
 const { totalBadgeCountOf } = useMenuBadges();
 const { isCurrent } = useNavMenu();
-const tokenPx = (name: string) => parseFloat(readCssToken(name, "0"));
 const listId = useId();
 const triggerRef = useTemplateRef<HTMLElement>("triggerRef");
 const flyoutRef = useTemplateRef<HTMLElement>("flyoutRef");
@@ -130,11 +129,13 @@ const { floatingStyles } = useFloating(triggerRef, flyoutRef, {
   middleware: [
     offset(
       () =>
-        (tokenPx("--nav-rail-width") - tokenPx("--nav-rail-item-width")) / 2 +
-        tokenPx("--nav-flyout-gap"),
+        (readCssTokenPx("--nav-rail-width") -
+          readCssTokenPx("--nav-rail-item-width")) /
+          2 +
+        readCssTokenPx("--nav-flyout-gap"),
     ),
     flip(),
-    shift(() => ({ padding: tokenPx("--nav-flyout-viewport-margin") })),
+    shift(() => ({ padding: readCssTokenPx("--nav-flyout-viewport-margin") })),
   ],
   whileElementsMounted: autoUpdate,
 });

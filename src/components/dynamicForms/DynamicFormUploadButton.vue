@@ -64,7 +64,7 @@
     </div>
     <div
       v-if="progressIndicatorType === ActionProgressIndicatorType.ProgressSteps"
-      class="w-full flex items-center p-2 bg-background-light h-[48px]"
+      class="w-full flex items-center p-2 bg-background-light h-12"
     >
       <div
         v-for="(progressStep, index) in uploadProgress"

@@ -144,4 +144,8 @@ describe("LogInLogout rail rows", () => {
     expect(row.classes()).toContain("w-full");
     expect(row.classes()).not.toContain("w-(--nav-rail-item-width)");
   });
+
+  it("leaves the display size to the top bar", () => {
+    expect(mountRail().find('[data-cy="ui-scale"]').exists()).toBe(false);
+  });
 });

@@ -42,6 +42,7 @@
     <!-- Below md the drawer holds language and tenant, the top bar holds search -->
     <template v-if="!isCompact">
       <ColorSchemeToggle class="ml-auto" />
+      <UiScaleMenu />
       <LanguageSelect class="flex justify-end pr-2" />
       <tenant-switcher
         class="flex justify-end pr-2"
@@ -62,6 +63,7 @@ import MetadataEditButton from "@/components/MetadataEditButton.vue";
 import { useRoute, useRouter } from "vue-router";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import ColorSchemeToggle from "@/components/ColorSchemeToggle.vue";
+import UiScaleMenu from "@/components/UiScaleMenu.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import { inject, computed } from "vue";

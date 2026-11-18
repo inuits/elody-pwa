@@ -32,7 +32,7 @@
         compact
           ? 'grid grid-cols-[minmax(0,max-content)_minmax(0,1fr)] gap-x-3.5 gap-y-1.5'
           : {
-              'grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2 max-w-full':
+              'grid grid-cols-[repeat(auto-fit,_minmax(15.625rem,_1fr))] gap-2 max-w-full':
                 canBeMultipleColumns,
             },
       ]"

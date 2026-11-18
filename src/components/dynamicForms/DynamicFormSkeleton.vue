@@ -10,12 +10,12 @@
     <template v-for="(component, idx) in components" :key="idx">
       <div
         v-if="component === SkeletonComponentType.Title"
-        class="animate-pulse h-[52px] bg-gray-300 rounded-[3px] max-w-[380px] mb-4"
+        class="animate-pulse h-13 bg-gray-300 rounded-[3px] max-w-95 mb-4"
       />
 
       <div
         v-if="component === SkeletonComponentType.Subtitle"
-        class="animate-pulse h-[36px] bg-gray-300 rounded-[3px] w-full mb-4"
+        class="animate-pulse h-9 bg-gray-300 rounded-[3px] w-full mb-4"
       />
 
       <div
@@ -25,34 +25,34 @@
 
       <div
         v-else-if="component === SkeletonComponentType.UploadInfoLink"
-        class="animate-pulse h-[44px] w-full bg-gray-300 rounded-[3px] mb-2"
+        class="animate-pulse h-11 w-full bg-gray-300 rounded-[3px] mb-2"
       />
 
       <div
         v-else-if="component === SkeletonComponentType.UploadCsvTemplates"
-        class="animate-pulse h-[62px] w-full bg-gray-300 rounded-[3px] mb-4"
+        class="animate-pulse h-15.5 w-full bg-gray-300 rounded-[3px] mb-4"
       />
 
       <div
         v-else-if="component === SkeletonComponentType.DropzoneInfo"
-        class="animate-pulse h-[19px] w-full bg-gray-300 rounded-[3px] mb-2"
+        class="animate-pulse h-[1.1875rem] w-full bg-gray-300 rounded-[3px] mb-2"
       />
 
       <div v-else-if="component === SkeletonComponentType.Dropdown">
         <div
-          class="animate-pulse h-[19px] bg-gray-300 rounded-[3px] max-w-[100px] mb-[1px]"
+          class="animate-pulse h-[1.1875rem] bg-gray-300 rounded-[3px] max-w-25 mb-px"
         />
         <div
-          class="animate-pulse h-[36px] bg-gray-300 rounded-[3px] w-full mb-2"
+          class="animate-pulse h-9 bg-gray-300 rounded-[3px] w-full mb-2"
         />
       </div>
 
       <div v-else-if="component === SkeletonComponentType.RelationDropdown">
         <div
-          class="animate-pulse h-[19px] bg-gray-300 rounded-[3px] max-w-[100px] mb-[1px]"
+          class="animate-pulse h-[1.1875rem] bg-gray-300 rounded-[3px] max-w-25 mb-px"
         />
         <div
-          class="animate-pulse h-[40px] bg-gray-300 rounded-[3px] w-full mb-2"
+          class="animate-pulse h-10 bg-gray-300 rounded-[3px] w-full mb-2"
         />
       </div>
 
@@ -66,50 +66,50 @@
 
       <div
         v-else-if="component === SkeletonComponentType.Button"
-        class="button animate-pulse h-[42px] bg-gray-300 rounded-[3px] w-full mb-2 mt-5"
+        class="button animate-pulse h-10.5 bg-gray-300 rounded-[3px] w-full mb-2 mt-5"
       />
 
       <div
         v-else-if="component === SkeletonComponentType.DisabledButton"
-        class="button animate-pulse h-[34px] bg-gray-300 rounded-[3px] w-full mb-2"
+        class="button animate-pulse h-8.5 bg-gray-300 rounded-[3px] w-full mb-2"
       />
 
       <div v-else-if="component === SkeletonComponentType.ButtonWithProgress">
         <div
-          class="animate-pulse h-[34px] bg-gray-300 rounded-[3px] w-full mb-2"
+          class="animate-pulse h-8.5 bg-gray-300 rounded-[3px] w-full mb-2"
         />
-        <div class="animate-pulse h-[48px] bg-gray-300 rounded-[3px] w-full" />
+        <div class="animate-pulse h-12 bg-gray-300 rounded-[3px] w-full" />
       </div>
 
       <div
         v-else-if="component === SkeletonComponentType.Progress"
-        class="animate-pulse h-[48px] bg-gray-300 rounded-[3px] w-full p-2"
+        class="animate-pulse h-12 bg-gray-300 rounded-[3px] w-full p-2"
       />
 
       <div v-else-if="component === SkeletonComponentType.Textarea">
         <div
-          class="animate-pulse h-[19px] bg-gray-300 rounded-[3px] max-w-[100px] mb-[1px]"
+          class="animate-pulse h-[1.1875rem] bg-gray-300 rounded-[3px] max-w-25 mb-px"
         />
         <div
-          class="animate-pulse h-[90px] bg-gray-300 rounded-[3px] w-full mb-2"
+          class="animate-pulse h-22.5 bg-gray-300 rounded-[3px] w-full mb-2"
         />
       </div>
 
       <div v-else-if="component === SkeletonComponentType.Input">
         <div
-          class="animate-pulse h-[19px] bg-gray-300 rounded-[3px] max-w-[100px] mb-[1px]"
+          class="animate-pulse h-[1.1875rem] bg-gray-300 rounded-[3px] max-w-25 mb-px"
         />
         <div
-          class="animate-pulse h-[36px] bg-gray-300 rounded-[3px] w-full mb-2"
+          class="animate-pulse h-9 bg-gray-300 rounded-[3px] w-full mb-2"
         />
       </div>
 
       <div v-else-if="component === SkeletonComponentType.Checkbox">
         <div
-          class="animate-pulse h-[19px] bg-gray-300 rounded-[3px] max-w-[100px] mb-[1px]"
+          class="animate-pulse h-[1.1875rem] bg-gray-300 rounded-[3px] max-w-25 mb-px"
         />
         <div
-          class="animate-pulse h-[24px] w-[35px] bg-gray-300 rounded-[3px] mb-2"
+          class="animate-pulse h-6 w-[2.1875rem] bg-gray-300 rounded-[3px] mb-2"
         />
       </div>
     </template>

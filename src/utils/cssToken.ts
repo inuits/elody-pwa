@@ -10,6 +10,14 @@ export const readCssToken = (
   return value || fallback;
 };
 
+export const readCssTokenPx = (name: string): number => {
+  const value = readCssToken(name, "0");
+  const rootPx = value.endsWith("rem")
+    ? parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+    : 1;
+  return parseFloat(value) * rootPx || 0;
+};
+
 export const withAlpha = (color: string, alpha: number): string => {
   const match = color.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
   if (!match) return color;

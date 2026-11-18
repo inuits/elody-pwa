@@ -7,7 +7,7 @@
       <div
         v-for="index in 3"
         :key="`pipeline-skeleton-${index}`"
-        class="w-[272px] h-40 rounded border border-accent-highlight bg-background-light animate-pulse"
+        class="w-68 h-40 rounded border border-accent-highlight bg-background-light animate-pulse"
       ></div>
     </div>
     <PipelineCanvas

@@ -77,7 +77,7 @@ import { useMaps } from "@/composables/useMaps";
 import { useHeatMapDetailPopUp } from "@/components/maps/useHeatMapDetailPopUp";
 import { useQuery } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
-import { readCssToken } from "@/utils/cssToken";
+import { readCssToken, readCssTokenPx } from "@/utils/cssToken";
 import MapChrome from "@/components/maps/MapChrome.vue";
 import MapFeaturePopUp from "@/components/maps/MapFeaturePopUp.vue";
 import {
@@ -182,7 +182,7 @@ const clusterStyle = (feature: any) => {
       text: new Text({
         text: String(size),
         fill: new Fill({ color: readCssToken("--color-white", "white") }),
-        font: `bold ${readCssToken("--text-ui", "12px")} ${readCssToken("--font-sans", "sans-serif")}`,
+        font: `bold ${readCssTokenPx("--text-ui") || 12}px ${readCssToken("--font-sans", "sans-serif")}`,
       }),
     });
   }

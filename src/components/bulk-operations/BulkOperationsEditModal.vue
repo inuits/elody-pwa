@@ -1,6 +1,6 @@
 <template>
   <div
-    class="@container flex flex-col p-8 h-[calc(90vh-34px)] overflow-y-auto @4xl:overflow-y-hidden"
+    class="@container flex flex-col p-8 h-[calc(90vh-2.125rem)] overflow-y-auto @4xl:overflow-y-hidden"
   >
     <div class="flex flex-col @4xl:flex-row flex-1 min-h-0 gap-8">
       <div class="flex flex-col min-h-0 @4xl:basis-[56%]">

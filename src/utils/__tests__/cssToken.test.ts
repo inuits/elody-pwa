@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { readCssToken, withAlpha } from "@/utils/cssToken";
+import { readCssToken, readCssTokenPx, withAlpha } from "@/utils/cssToken";
 
 describe("readCssToken", () => {
   afterEach(() => {
@@ -13,6 +13,28 @@ describe("readCssToken", () => {
 
   it("returns the fallback when the token is not defined", () => {
     expect(readCssToken("--color-missing", "#3BA6CB")).toBe("#3BA6CB");
+  });
+});
+
+describe("readCssTokenPx", () => {
+  afterEach(() => {
+    document.body.removeAttribute("style");
+    document.documentElement.removeAttribute("style");
+  });
+
+  it("resolves a rem token against the root font size", () => {
+    document.documentElement.style.fontSize = "20px";
+    document.body.style.setProperty("--nav-rail-width", "3.25rem");
+    expect(readCssTokenPx("--nav-rail-width")).toBe(65);
+  });
+
+  it("reads a px token as is", () => {
+    document.body.style.setProperty("--radius-card", "8px");
+    expect(readCssTokenPx("--radius-card")).toBe(8);
+  });
+
+  it("returns 0 when the token is not defined", () => {
+    expect(readCssTokenPx("--missing")).toBe(0);
   });
 });
 
