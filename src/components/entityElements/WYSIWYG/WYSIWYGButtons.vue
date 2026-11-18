@@ -272,6 +272,6 @@ button {
 }
 
 .transparent-bg {
-  background-color: color-mix(in srgb, var(--color-white) 95%, transparent);
+  background-color: color-mix(in srgb, var(--color-surface) 95%, transparent);
 }
 </style>

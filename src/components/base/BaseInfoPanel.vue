@@ -21,7 +21,7 @@
           <unicon :name="Unicons.Close.name" height="20" />
         </button>
       </div>
-      <div class="prose prose-sm max-w-full overflow-y-auto p-4">
+      <div class="prose prose-sm dark:prose-invert max-w-full overflow-y-auto p-4">
         <sanitized-html :content="content" :mode="SanitizeMode.Html" />
       </div>
     </div>

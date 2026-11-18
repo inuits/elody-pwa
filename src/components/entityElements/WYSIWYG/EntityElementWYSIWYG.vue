@@ -464,7 +464,7 @@ onMounted(async () => {
     extensions: editorExtensions,
     editorProps: {
       attributes: {
-        class: `prose prose-sm ${props.displayInline ? "min-h-[125px]" : "mx-4 min-h-[250px]"} border border-border-default rounded-input p-2 ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
+        class: `prose prose-sm dark:prose-invert ${props.displayInline ? "min-h-[125px]" : "mx-4 min-h-[250px]"} border border-border-default rounded-input p-2 ${wysiwygElementConfiguration.value?.customEditorStyles || ""} max-w-full!`,
       },
       handleClickOn: (_view, _pos, node, nodePos, event) => {
         if (!node.attrs.entityId) return false;

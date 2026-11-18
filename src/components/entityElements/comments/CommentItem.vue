@@ -92,7 +92,7 @@
       </div>
     </div>
     <div
-      class="comment-body prose prose-sm max-w-full mt-2 text-text-body"
+      class="comment-body prose prose-sm dark:prose-invert max-w-full mt-2 text-text-body"
       @click="handleBodyClick"
     >
       <sanitized-html
