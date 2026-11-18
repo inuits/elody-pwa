@@ -51,6 +51,7 @@ import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useManageEntities } from "@/composables/useManageEntities";
 import { apolloClient } from "@/main";
 import { getEntityTitle, looksLikeEntityId } from "@/helpers";
+import { createEntityFromOptionMetadata } from "@/composables/createEntityFromOptionMetadata";
 
 const props = defineProps<{
   modelValue: string | undefined;
@@ -186,14 +187,11 @@ const handleCreateFromTag = async (option: DropdownOption) => {
   try {
     const newEntity = await createEntity({
       entityType: props.inputField.entityType as any,
-      metadata: props.inputField.metadataKeyToCreateEntityFromOption
-        ? [
-            {
-              key: props.inputField.metadataKeyToCreateEntityFromOption,
-              value: option.label,
-            },
-          ]
-        : [],
+      metadata: createEntityFromOptionMetadata(
+        props.inputField.metadataKeyToCreateEntityFromOption,
+        option.label,
+        props.inputField.metadataToCreateEntityFromOption,
+      ),
     });
     const newOption: DropdownOption = {
       value: newEntity.uuid,

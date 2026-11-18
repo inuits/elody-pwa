@@ -100,6 +100,7 @@ import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
+import { createEntityFromOptionMetadata } from "@/composables/createEntityFromOptionMetadata";
 
 defineOptions({ inheritAttrs: false });
 
@@ -122,6 +123,7 @@ const props = withDefaults(
     disabled: boolean;
     canCreateOption?: boolean;
     metadataKeyToCreateEntityFromOption?: string;
+    metadataToCreateEntityFromOption?: unknown[] | null;
     isReadOnly?: boolean;
     isMetadataField?: boolean;
     metadataOnRelationConfig?: MetadataOnRelationFieldConfig | null;
@@ -374,12 +376,11 @@ const handleCreatingFromTag = async (option: any) => {
 
     const newEntity = await createEntity({
       entityType: props.metadataKeyToGetOptionsFor as Entitytyping,
-      metadata: [
-        {
-          key: props.metadataKeyToCreateEntityFromOption,
-          value: option.label,
-        },
-      ],
+      metadata: createEntityFromOptionMetadata(
+        props.metadataKeyToCreateEntityFromOption,
+        option.label,
+        props.metadataToCreateEntityFromOption,
+      ),
     });
     const normalizedOption = {
       value: newEntity.uuid,
