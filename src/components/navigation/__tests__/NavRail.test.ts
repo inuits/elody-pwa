@@ -418,6 +418,16 @@ describe("NavRail", () => {
       (await navMenu()).isCompact.value = false;
     });
 
+    it("offers the display size under the colour scheme toggle", async () => {
+      await mountRail();
+      const html = wrapper!.html();
+      const toggle = html.indexOf('data-cy="color-scheme-toggle"');
+      expect([toggle > -1, html.indexOf('data-cy="ui-scale"') > toggle]).toEqual([
+        true,
+        true,
+      ]);
+    });
+
     it("is a hidden, unreachable drawer until opened", async () => {
       await mountRail();
       expect(isDrawerHidden()).toBe(true);

@@ -142,6 +142,18 @@ One value, `--ui-scale` on `html` (default `1`), sets the root font size, so
 the whole UI scales together and the browser's font-size setting is honoured.
 Values are the old px divided by 16, so `1` looks exactly as before.
 
+`useUiScale` sets `--ui-scale` before the app mounts. By default it follows
+the screen's short side in CSS px (not the window, so resizing never changes
+it): below 1400 → 1, from 1400 (1440p, 4K at 150%, ultrawide 3440×1440) →
+1.15, from 2000 (4K at 100%) → 1.5.
+
+The display size menu (`UiScaleMenu`) sits next to the colour scheme toggle:
+in the top bar, and in the navigation drawer below `md`. It offers Automatic
+(with its current percentage), 90, 100, 115, 130 and 150%, the active choice
+highlighted. A choice overrides the automatic value and is stored per device
+in `localStorage` (`elody.uiScale`, next to `elody.colorScheme`), because the
+right size depends on the screen, not the person.
+
 Stay in px: borders and hairlines, radii, shadows, the focus ring, letter
 spacing and breakpoints. A unit test fails on any other px token in `main.css`.
 

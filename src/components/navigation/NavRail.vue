@@ -88,6 +88,7 @@
       <LanguageSelect />
       <TenantSwitcher v-if="config?.features?.hasTenantSelect" />
       <ColorSchemeToggle is-expanded class="col-span-2" />
+      <UiScaleMenu is-expanded class="col-span-2" />
     </div>
     <LogInLogout
       :is-expanded="expanded"
@@ -117,6 +118,7 @@ import { getEnvironmentLabel } from "@/helpers";
 import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import LanguageSelect from "@/components/LanguageSelect.vue";
 import ColorSchemeToggle from "@/components/ColorSchemeToggle.vue";
+import UiScaleMenu from "@/components/UiScaleMenu.vue";
 import LogInLogout from "@/components/LogInLogout.vue";
 import TenantSwitcher from "@/components/menu/TenantSwitcher.vue";
 import NavItem from "@/components/navigation/NavItem.vue";
