@@ -122,7 +122,7 @@ const primaryButton: Button = {
 // Secondary: white surface, 1px border, body ink.
 const secondaryButton: Button = {
   textColor: "text-text-body",
-  bgColor: "bg-neutral-white border border-neutral-40",
+  bgColor: "bg-surface border border-neutral-40",
   hoverStyle: {
     textColor: "hover:text-text-body",
     bgColor: "hover:bg-accent-wash",

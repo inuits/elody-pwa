@@ -34,7 +34,7 @@ describe("main.css client theming", () => {
       }),
     );
     const bodyAliases = new Map<string, string>();
-    blocks(/body\.?(?![\w-])/).forEach((block) =>
+    blocks(/(?<!\.dark )body\.?(?![\w-])/).forEach((block) =>
       declarations(block).forEach((value, name) => bodyAliases.set(name, value)),
     );
 

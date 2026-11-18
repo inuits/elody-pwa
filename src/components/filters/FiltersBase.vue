@@ -49,7 +49,7 @@
         },
       ]"
     >
-      <div v-if="expandFilters" class="p-4 sticky top-0 bg-white z-10">
+      <div v-if="expandFilters" class="p-4 sticky top-0 bg-surface z-10">
         <!-- Catalogue FilterActionBar: small "Clear all ×" + full-width
              primary "Apply filter(s)". -->
         <div class="flex gap-1.5 pb-4">

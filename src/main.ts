@@ -9,13 +9,16 @@ import {
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { sha256 } from "crypto-hash";
 import "./assets/main.css";
+import "@/composables/useColorScheme";
 import App from "./App.vue";
 import Unicon from "vue-unicons";
 import {
   uniExclamationCircle,
   uniLeftIndentAlt,
   uniLinkBroken,
+  uniMoon,
   uniRightIndentAlt,
+  uniSun,
 } from "vue-unicons/dist/icons";
 import { addComponentToRoutes } from "./views/router";
 import { createApp } from "vue";
@@ -82,6 +85,8 @@ const start = async (): Promise<void> => {
     uniRightIndentAlt,
     uniLinkBroken,
     uniExclamationCircle,
+    uniMoon,
+    uniSun,
   ]);
 
   const applicationDetails = await getApplicationDetails();

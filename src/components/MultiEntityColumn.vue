@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full bg-neutral-0 rounded-lg overflow-hidden">
+  <div class="flex flex-col h-full bg-surface rounded-lg overflow-hidden">
     <div
       class="flex items-center gap-2 px-4 py-3 border-b border-neutral-100 bg-neutral-10"
     >

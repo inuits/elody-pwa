@@ -5,6 +5,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap");
 @import "tailwindcss";
 
+/* dark: follows the toggle (html.dark, src/composables/useColorScheme.ts),
+   not the OS setting directly */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Fonts */
   --font-sans: "Lato", system-ui, sans-serif;
@@ -696,24 +700,24 @@ input[type="number"]::-webkit-inner-spin-button {
 
 /* Other utilities */
 @utility checkboard {
-  background-color: #fff;
+  background-color: var(--color-surface);
   background-size: 60px 60px;
   background-position: 0 0, 30px 30px;
   background-image: linear-gradient(
           45deg,
-          #f4f5f7 25%,
+          var(--color-surface-muted) 25%,
           transparent 25%,
           transparent 75%,
-          #f4f5f7 75%,
-          #f4f5f7
+          var(--color-surface-muted) 75%,
+          var(--color-surface-muted)
   ),
   linear-gradient(
           45deg,
-          #f4f5f7 25%,
+          var(--color-surface-muted) 25%,
           transparent 25%,
           transparent 75%,
-          #f4f5f7 75%,
-          #f4f5f7
+          var(--color-surface-muted) 75%,
+          var(--color-surface-muted)
   );
 }
 
@@ -775,4 +779,141 @@ body {
   --color-diff-new-border: var(--color-success);
   /* Follows the client accent (selected list rows) */
   --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────
+   html.dark (src/composables/useColorScheme.ts) redefines the literal
+   tokens; every alias resolves against them. White and black stay put: they
+   are ink on accent and commit fills. ── */
+html.dark {
+  color-scheme: dark;
+
+  --color-accent-highlight: #263240;
+  --color-highlight-bg: #3654B8;
+  --color-tag-neutral: #333D4A;
+  --color-tag-selected: #DCE6EC;
+
+  --color-text-disabled: #5F7F8A;
+  --color-text-light: #8DB4F0;
+  --color-text-body: #DCE6EC;
+  --color-text-placeholder: #6B7889;
+
+  --color-background-normal: #11171F;
+  --color-background-light: #1B2430;
+  --color-background-frosted: rgba(27, 36, 48, 0.6);
+
+  --color-gray-50: #18181b;
+  --color-gray-100: #27272a;
+  --color-gray-200: #3f3f46;
+  --color-gray-300: #52525b;
+  --color-gray-400: #71717a;
+  --color-gray-500: #a1a1aa;
+  --color-gray-600: #d4d4d8;
+  --color-gray-700: #e4e4e7;
+  --color-gray-800: #f4f4f5;
+  --color-gray-900: #fafafa;
+
+  --color-green-50: #102A1A;
+  --color-green-100: #173A24;
+  --color-green-light: #173A24;
+
+  --color-neutral-10: #1F2833;
+  --color-neutral-20: #222C38;
+  --color-neutral-30: #2A3441;
+  --color-neutral-40: #34404E;
+  --color-neutral-50: #435061;
+  --color-neutral-60: #4E5B6C;
+  --color-neutral-70: #5B6879;
+  --color-neutral-80: #6B7889;
+  --color-neutral-90: #7A8798;
+  --color-neutral-100: #8A96A6;
+  --color-neutral-200: #9AA5B4;
+  --color-neutral-300: #A9B4C2;
+  --color-neutral-400: #B8C2CE;
+  --color-neutral-500: #C6CED8;
+  --color-neutral-600: #D3DAE2;
+  --color-neutral-700: #DFE5EB;
+  --color-neutral-800: #EAEFF3;
+  --color-neutral-900: #F4F7F9;
+  --color-neutral-lightest: #11171F;
+  --color-neutral-light: #263240;
+
+  --color-blue-50: #1E2F4A;
+  --color-main-light: #1E2F4A;
+  --color-red-lightest: #2E1A1A;
+  --color-red-light: #4A1E1E;
+  --color-red-dark: #FFB4AB;
+
+  --color-surface: #1B2430;
+  --color-surface-app: #11171F;
+  --color-surface-muted: #222C38;
+  --color-surface-sunken: #0D1218;
+  --color-surface-group-form: #1E2834;
+  --color-surface-row-hover: #222E3B;
+  --color-surface-repeat-row: #1E2834;
+  --color-surface-note: #3A3220;
+  --color-surface-inverted: #2C3A4D;
+
+  --color-text-strong: #F1F5F9;
+  --color-text-secondary: #A9B6C6;
+  --color-text-muted: #8C99AA;
+  --color-text-subtle: #6B7889;
+
+  --color-border-default: #34404E;
+  --color-border-subtle: #2A3441;
+  --color-border-faint: #222B36;
+  --color-border-dashed: #4A5768;
+  --color-border-note: #5A4B25;
+
+  --color-danger: #F06A5A;
+  --color-danger-bg: #4A1E1E;
+  --color-danger-wash: #2E1A1A;
+  --color-success: #4ADE80;
+  --color-success-strong: #86EFAC;
+  --color-success-bg: #173A24;
+  --color-success-ink: #9FE3B4;
+  --color-warning: #F0A050;
+  --color-warning-bg: #3D2A14;
+  --color-info: #8DB4F0;
+  --color-info-bg: #1E3A4F;
+
+  --color-badge-tone1-bg: #173A24;
+  --color-badge-tone1-text: #9FE3B4;
+  --color-badge-tone2-bg: #1E3A4F;
+  --color-badge-tone2-text: #A8CCF5;
+  --color-badge-tone3-bg: #3D2A14;
+  --color-badge-tone3-text: #F5B97A;
+  --color-badge-subtype-bg: #2A3441;
+  --color-badge-subtype-text: #A9B6C6;
+
+  --color-chip-relation-bg: #2B5F78;
+  --color-chip-neutral-bg: #2A3441;
+  --color-chip-neutral-text: #DCE6EC;
+  --color-chip-count-bg: #222C38;
+  --color-scrim: rgba(0, 0, 0, 0.6);
+
+  --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
+  --shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* The light accent set is client-themable and set inline on <body>
+   (clientTheme.ts): !important outranks that, and mixing from the client's
+   own --color-accent keeps every deployment's hue. */
+html.dark body {
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 22%, var(--color-surface)) !important;
+  --color-accent-light-strong: color-mix(in srgb, var(--color-accent) 40%, var(--color-surface)) !important;
+  --color-accent-wash: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface)) !important;
+  --color-accent-tint: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface)) !important;
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 50%, #FFFFFF) !important;
+  --color-accent-ink: var(--color-accent-dark) !important;
+}
+
+/* @tailwindcss/forms paints inputs #fff; in base so bg-* utilities still win */
+@layer base {
+  html.dark :is(input:not([type="checkbox"], [type="radio"]), textarea, select),
+  html.dark :is([type="checkbox"], [type="radio"]):not(:checked, :indeterminate) {
+    background-color: var(--color-surface);
+  }
 }

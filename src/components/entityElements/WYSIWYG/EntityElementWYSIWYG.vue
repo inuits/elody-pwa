@@ -157,7 +157,7 @@
       v-if="tagContextMenu"
       data-tag-context-menu
       data-wysiwyg-overlay
-      class="fixed z-[9999] bg-white border border-neutral-30 rounded shadow-lg py-1"
+      class="fixed z-[9999] bg-surface border border-neutral-30 rounded shadow-lg py-1"
       :style="{ left: tagContextMenu.x + 'px', top: tagContextMenu.y + 'px' }"
     >
       <button

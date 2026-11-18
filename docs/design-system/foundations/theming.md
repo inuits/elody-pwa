@@ -106,3 +106,18 @@ Each client repo may still have `dashboard/client-customization/theme.txt`,
 which its Dockerfile `sed`s into `main.css` at build time. The runtime theme
 overrides it. Once a client's `customization.theme` is verified, remove its
 `theme.txt` and the `sed` step.
+
+## Dark mode
+
+A per-user choice, not a client setting. The toggle (`ColorSchemeToggle.vue`)
+sits in the top bar, and in the navigation drawer below `md`. It sets `dark`
+on `<html>` (`src/composables/useColorScheme.ts`), stored in localStorage
+under `elody.colorScheme`. Without a stored choice the OS setting applies.
+
+- `html.dark` in `main.css` redefines the literal role and scale tokens;
+  aliases follow. `dark:` utilities follow the toggle, not the OS.
+- White and black are not redefined: they are ink on accent and commit fills.
+  A surface uses `bg-surface`, never `bg-white`.
+- The light accent set (`-light`, `-light-strong`, `-wash`, `-tint`, `-dark`,
+  `-ink`) is re-mixed from the client's `--color-accent` with `!important`,
+  so a client theme keeps its hue in dark mode without dark values of its own.

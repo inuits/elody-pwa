@@ -61,7 +61,7 @@ describe("BaseButtonNew", () => {
   it("defaults to the secondary variant", () => {
     const classes = classesOf();
     expect(classes).toEqual(
-      expect.arrayContaining(["bg-neutral-white", "border"]),
+      expect.arrayContaining(["bg-surface", "border"]),
     );
   });
 

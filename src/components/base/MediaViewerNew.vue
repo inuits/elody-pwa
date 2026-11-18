@@ -105,7 +105,7 @@
     </div>
     <div
       v-else-if="!loading && !viewerType && embedUrl"
-      class="flex flex-col h-full w-full bg-neutral-0"
+      class="flex flex-col h-full w-full bg-surface"
     >
       <div
         class="flex items-center justify-between gap-2 px-3 py-2 border-b border-neutral-30"

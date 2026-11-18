@@ -3,13 +3,13 @@
     ref="dialog"
     data-testid="recrop-modal"
     :class="[
-      'relative flex-col rounded-lg border-0 p-0 w-[80vw] h-[90vh] m-auto overflow-hidden bg-neutral-white',
+      'relative flex-col rounded-lg border-0 p-0 w-[80vw] h-[90vh] m-auto overflow-hidden bg-surface',
       { 'flex base-modal--opened': open },
     ]"
     @cancel.prevent="$emit('close')"
   >
     <div
-      class="shrink-0 flex items-center justify-between px-6 py-4 border-b border-neutral-50 bg-neutral-white"
+      class="shrink-0 flex items-center justify-between px-6 py-4 border-b border-neutral-50 bg-surface"
     >
       <h1 class="text-lg font-bold">
         {{ $t("media-viewer.recrop-modal.title") }}
@@ -37,7 +37,7 @@
       />
     </div>
     <div
-      class="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-neutral-50 bg-neutral-white"
+      class="shrink-0 flex justify-end gap-2 px-6 py-4 border-t border-neutral-50 bg-surface"
     >
       <button
         type="button"

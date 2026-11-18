@@ -9,7 +9,7 @@
     </div>
     <div class="flex-1 min-h-0" v-if="mediaType === 'Video'">
       <video
-        class="w-full h-full bg-white"
+        class="w-full h-full bg-surface"
         preload="auto"
         controls
         controlsList="nodownload"
@@ -19,10 +19,10 @@
       </video>
     </div>
     <div class="grid grid-rows-2 flex-1 min-h-0" v-else>
-      <div class="flex justify-center items-end w-full bg-white">
+      <div class="flex justify-center items-end w-full bg-surface">
         <unicon class="h-24 w-24 text-neutral-70" :name="Unicons.Music.name" />
       </div>
-      <audio class="w-full bg-white" controls controlsList="nodownload">
+      <audio class="w-full bg-surface" controls controlsList="nodownload">
         <source :src="getFileUrl()" :type="mimetype" />
         {{ $t("audio.no-support") }}
       </audio>
