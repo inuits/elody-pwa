@@ -620,8 +620,10 @@ import {
   onUnmounted,
   provide,
   ref,
+  unref,
   useId,
   watch,
+  type MaybeRef,
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -1087,10 +1089,12 @@ const showListPager = computed(
 // Inside a detail panel the panel is the chrome: no band or border of the
 // list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
-const panelCountTarget: string | undefined = inject(
+// A ref: the panel only offers the spot while its header is rendered.
+const injectedPanelCountTarget = inject<MaybeRef<string | undefined>>(
   "PanelCountTarget",
   undefined,
 );
+const panelCountTarget = computed(() => unref(injectedPanelCountTarget));
 const compactPreview: boolean = inject("CompactPreview", false);
 const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();

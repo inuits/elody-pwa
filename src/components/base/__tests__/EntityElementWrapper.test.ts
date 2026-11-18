@@ -108,6 +108,27 @@ describe("EntityElementWrapper as a PanelShell (panel-and-block-shells.md)", () 
     );
   });
 
+  it.each([
+    ["without a header", { headerStyle: "none" }, {}],
+    ["in basic mode", { baseLibraryMode: BaseLibraryModes.BasicBaseLibrary }, {}],
+    ["as a compact preview block", {}, { CompactPreview: true }],
+  ])(
+    "offers no count spot %s, so the list keeps its own count",
+    (_, props, provide) => {
+      const Probe = {
+        inject: { target: { from: "PanelCountTarget", default: undefined } },
+        template: '<i data-cy="probe">{{ target ?? "none" }}</i>',
+      };
+      const wrapper = mount(EntityElementWrapper, {
+        props: { label: "Panel", entityId: "e1", isCollapsed: false, ...props },
+        slots: { content: Probe },
+        global: { stubs, provide },
+      });
+      expect(wrapper.find("[data-panel-count]").exists()).toBe(false);
+      expect(wrapper.find('[data-cy="probe"]').text()).toBe("none");
+    },
+  );
+
   it("tells the list inside that it sits in a panel", () => {
     const Probe = {
       inject: { insidePanel: { from: "InsidePanel", default: false } },

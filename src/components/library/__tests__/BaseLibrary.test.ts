@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shallowMount, flushPromises } from "@vue/test-utils";
-import { defineComponent, onMounted, ref, reactive, watch } from "vue";
+import { computed, defineComponent, onMounted, ref, reactive, watch } from "vue";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { ViewModes } from "@/generated-types/queries";
 
@@ -1497,6 +1497,20 @@ describe("BaseLibrary.vue result count in a detail panel", () => {
     const chips = wrapper.findAllComponents(ResultCountChip);
     expect(chips).toHaveLength(1);
     expect(chips[0].props("numberOnly")).toBe(true);
+    wrapper.unmount();
+  });
+
+  it("keeps the count in the list header when the panel has no count spot", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { InsidePanel: true, PanelCountTarget: computed(() => undefined) },
+    );
+    await flushPromises();
+
+    const chips = wrapper.findAllComponents(ResultCountChip);
+    expect(chips).toHaveLength(1);
+    expect(chips[0].props("numberOnly")).toBe(false);
     wrapper.unmount();
   });
 

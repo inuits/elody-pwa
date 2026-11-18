@@ -14,13 +14,7 @@
     <!-- panel-and-block-shells.md: PanelShell — white card, accent-light
          header band; the gold section-header fill is not for panels. -->
     <div
-      v-if="
-        (baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
-          baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
-          baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary) &&
-        headerStyle !== 'none' &&
-        !compact
-      "
+      v-if="hasHeader"
       data-cy="entity-element-wrapper-header"
       :class="[
         'flex items-center justify-between relative p-(--panel-header-pad) bg-surface-panel-header',
@@ -90,14 +84,13 @@
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
-import { inject, provide, useId } from "vue";
+import { computed, inject, provide, useId } from "vue";
 
 // Lists and viewers inside know they sit in a panel (no chrome of their own).
 provide("InsidePanel", true);
 const panelCountId = useId();
-provide("PanelCountTarget", `[data-panel-count="${panelCountId}"]`);
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     label: string;
     entityId: string;
@@ -125,6 +118,24 @@ const emit = defineEmits<{
 
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const compact: boolean = inject("CompactPreview", false);
+
+const hasHeader = computed(
+  () =>
+    (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
+      props.baseLibraryMode === BaseLibraryModes.BasicBaseLibraryWithBorder ||
+      props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary) &&
+    props.headerStyle !== "none" &&
+    !compact,
+);
+
+// Only offer the count spot while it is rendered: a Teleport into a missing
+// target crashes on unmount, which aborts route changes away from the page.
+provide(
+  "PanelCountTarget",
+  computed(() =>
+    hasHeader.value ? `[data-panel-count="${panelCountId}"]` : undefined,
+  ),
+);
 
 const { t } = useI18n();
 </script>
