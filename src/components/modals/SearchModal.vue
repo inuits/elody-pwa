@@ -3,7 +3,7 @@
     class="bg-surface md:mt-[10vh] md:mb-auto"
     :modal-type="TypeModals.Search"
     :cancel-button-availabe="false"
-    :title="t('search.simple-search')"
+    :title="t('search.simple-search', { applicationTitle })"
     @hide-modal="closeModal(TypeModals.Search)"
   >
     <!-- the results scroll inside the modal, under the field -->
@@ -74,12 +74,14 @@ import BaseLibrary from "@/components/library/BaseLibrary.vue";
 import BaseModal from "@/components/base/BaseModal.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import { BulkOperationsContextEnum } from "@/composables/useBulkOperations";
-import { computed, provide, ref, watch } from "vue";
+import { computed, inject, provide, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useSimpleSearch } from "@/composables/useSimpleSearch";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const config: any = inject("config");
+const applicationTitle = config?.customization?.applicationTitle || "Elody";
 const { closeModal, getModalInfo } = useBaseModal();
 const { buildFilters, itemTypes } = useSimpleSearch();
 const isModalOpened = ref<boolean>(false);

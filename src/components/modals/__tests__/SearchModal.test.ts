@@ -9,6 +9,19 @@ vi.mock("vue-i18n", () => ({
       typeof values === "object" ? `${key} ${JSON.stringify(values)}` : key,
   }),
 }));
+const customization = vi.hoisted(
+  () => ({}) as { applicationTitle?: string },
+);
+vi.mock("vue", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("vue")>();
+  return {
+    ...actual,
+    inject: (key: string, ...rest: unknown[]) =>
+      key === "config"
+        ? { features: {}, customization }
+        : (actual.inject as (...args: unknown[]) => unknown)(key, ...rest),
+  };
+});
 vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({
     closeModal: vi.fn(),
@@ -46,8 +59,17 @@ describe("SearchModal", () => {
     const wrapper = getWrapper();
     expect(
       wrapper.findComponent({ name: "BaseModal" }).props("title"),
-    ).toBe("search.simple-search");
+    ).toBe('search.simple-search {"applicationTitle":"Elody"}');
     expect(wrapper.find("h1").exists()).toBe(false);
+  });
+
+  it("names the client's application title in the modal header", () => {
+    customization.applicationTitle = "Podiumnet";
+    const wrapper = getWrapper();
+    expect(
+      wrapper.findComponent({ name: "BaseModal" }).props("title"),
+    ).toBe('search.simple-search {"applicationTitle":"Podiumnet"}');
+    delete customization.applicationTitle;
   });
 
   it("sits on the white surface", () => {
