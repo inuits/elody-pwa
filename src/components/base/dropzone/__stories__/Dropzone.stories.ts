@@ -18,7 +18,8 @@ const meta: Meta = {
           "(dropzone.js opens the file dialog on click), and one row per file " +
           "added by dropzone.js: name, size, a status glyph per step " +
           "(validate, prepare, upload) and a remove button. A failed step " +
-          "turns the row's border red and lists the errors under it.",
+          "turns the row's border red and lists the errors under it; " +
+          "warnings show as a yellow list under a row that still completes.",
       },
     },
   },
@@ -27,19 +28,20 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const rows: { name: string; megabytes: number; upload: ProgressStepStatus; errors?: string[] }[] = [
+const rows: { name: string; megabytes: number; upload: ProgressStepStatus; errors?: string[]; warnings?: string[] }[] = [
+  { name: "scan-004.tiff", megabytes: 45, upload: ProgressStepStatus.Complete, warnings: ["No metadata row was found in the CSV for this file"] },
   { name: "scan-003.tiff", megabytes: 47, upload: ProgressStepStatus.Failed, errors: ["Something went wrong while uploading"] },
   { name: "scan-001.tiff", megabytes: 48, upload: ProgressStepStatus.Complete },
   { name: "scan-002.tiff", megabytes: 51, upload: ProgressStepStatus.Loading },
 ];
 
-/** Three files added to the real dropzone, then driven by useUpload: uploaded, uploading and failed. */
+/** Four files added to the real dropzone, then driven by useUpload: uploaded, uploading, failed and uploaded with a warning. */
 export const Progress: Story = {
   render: () => ({
     components: { Dropzone },
     setup() {
       const dropzone = new useDropzone();
-      const { resetUpload, updateFileThumbnails } = useUpload();
+      const { resetUpload, updateFileThumbnails, __handleFileThumbnailWarning } = useUpload();
       resetUpload();
       onMounted(() => {
         const instance = (dropzone.dropzone as any).value;
@@ -50,6 +52,7 @@ export const Progress: Story = {
           const added = file as unknown as DropzoneFile;
           updateFileThumbnails(added, ProgressStepType.Prepare, ProgressStepStatus.Complete);
           updateFileThumbnails(added, ProgressStepType.Upload, row.upload, row.errors);
+          if (row.warnings) __handleFileThumbnailWarning(added, row.warnings);
         });
       });
       return { dropzone };
