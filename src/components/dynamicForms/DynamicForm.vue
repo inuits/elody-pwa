@@ -42,7 +42,7 @@
       <div
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
-        class="pb-2"
+        class="pb-2 empty:hidden"
       >
         <ImportWrapper
           v-if="
