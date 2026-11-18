@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ref } from "vue";
-import { createEditScopeStore } from "@/composables/useEditScope";
+import { createEditScopeStore, useEditScope } from "@/composables/useEditScope";
 
 const scope = (id: string, dirty = false) => {
   const isDirty = ref(dirty);
@@ -119,5 +119,32 @@ describe("useEditScope — leaving with changes", () => {
 
   it("treats saving with nothing open as done", async () => {
     expect(await createEditScopeStore().saveActive()).toBe(true);
+  });
+
+  describe("closing or reloading the tab", () => {
+    const unload = () => {
+      const event = new Event("beforeunload", { cancelable: true });
+      window.dispatchEvent(event);
+      return event;
+    };
+
+    beforeEach(() => {
+      const shared = useEditScope();
+      if (shared.activeScope.value) shared.release(shared.activeScope.value.id);
+    });
+
+    it("asks before leaving while the open field has unsaved changes", async () => {
+      await useEditScope().requestOpen(scope("title", true));
+      expect(unload().defaultPrevented).toBe(true);
+    });
+
+    it("lets the tab close when the open field is unchanged", async () => {
+      await useEditScope().requestOpen(scope("title"));
+      expect(unload().defaultPrevented).toBe(false);
+    });
+
+    it("lets the tab close when nothing is being edited", () => {
+      expect(unload().defaultPrevented).toBe(false);
+    });
   });
 });

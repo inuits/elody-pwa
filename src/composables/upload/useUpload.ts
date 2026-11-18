@@ -1053,7 +1053,7 @@ const useUpload = (config: any = {}) => {
       if (htmlLinkElement) {
         errorNode.appendChild(htmlLinkElement);
       } else {
-        errorNode.innerHTML = error;
+        errorNode.textContent = error;
       }
       errorList.appendChild(errorNode);
     });
@@ -1087,7 +1087,7 @@ const useUpload = (config: any = {}) => {
       if (htmlLinkElement) {
         warningNode.appendChild(htmlLinkElement);
       } else {
-        warningNode.innerHTML = warning;
+        warningNode.textContent = warning;
       }
       warningList.appendChild(warningNode);
     });

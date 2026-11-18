@@ -1860,3 +1860,43 @@ describe("BaseLibrary.vue first fetch and the filters", () => {
     wrapper.unmount();
   });
 });
+
+describe("BaseLibrary.vue select page", () => {
+  const entity = (id: string, uuid: string) => ({
+    id,
+    uuid,
+    type: "asset",
+    teaserMetadata: [],
+    intialValues: {},
+    relationValues: {},
+    allowedViewModes: { viewModes: [] },
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    libEntities.value = [];
+    libEntitiesLoading.value = false;
+  });
+
+  it("skips entities that are already linked, whether listed by id or by uuid", async () => {
+    const wrapper = getWrapper({
+      predefinedEntities: [
+        entity("linked-by-id", "uuid-1"),
+        entity("id-2", "linked-by-uuid"),
+        entity("id-3", "uuid-3"),
+      ],
+      idsOfNonSelectableEntities: ["linked-by-id", "linked-by-uuid"],
+    });
+    await flushPromises();
+
+    (wrapper.vm as any).bulkSelect();
+
+    expect(
+      bulkMocks.enqueue.mock.calls.map(([, item]: any[]) => item.id),
+    ).toEqual(["uuid-3"]);
+    expect(
+      (wrapper.vm as any).selectablePage.map((e: any) => e.uuid),
+    ).toEqual(["uuid-3"]);
+    wrapper.unmount();
+  });
+});

@@ -694,6 +694,12 @@ const bulkEditContext = computed(
     contextOfOpenModal(TypeModals.DynamicForm),
 );
 
+const ownModalType = computed<TypeModals>(() =>
+  isBulkEditForm.value && contextOfOpenModal(TypeModals.BulkOperationsEdit)
+    ? TypeModals.BulkOperationsEdit
+    : TypeModals.DynamicForm,
+);
+
 const bulkItems = computed(() =>
   bulkEditContext.value ? getEnqueuedItems(bulkEditContext.value as any) : [],
 );
@@ -1585,6 +1591,10 @@ const bulkUpdateMetadataActionFunction = async () => {
     const failedCount = ids.length - succeededIds.length;
     if (failedCount === 0) {
       closeAndDeleteForm();
+      useBaseModal().changeCloseConfirmation(
+        TypeModals.BulkOperationsEdit,
+        false,
+      );
       closeModal(TypeModals.BulkOperationsEdit);
     }
 
@@ -1702,6 +1712,7 @@ const resetVeeValidateForDynamicForm = (
   if (oldQueryName) deleteForm(oldQueryName);
   form.value = createForm(newQueryName, {
     intialValues: {},
+    relationValues: {},
   } as {
     [key: string]: object;
   });
@@ -1784,7 +1795,7 @@ watch(
     if (intialValues && intialValues.standaloneUploadType)
       standaloneFileType.value = intialValues.standaloneUploadType;
     useBaseModal().changeCloseConfirmation(
-      TypeModals.DynamicForm,
+      ownModalType.value,
       form.value?.meta.dirty && !formClosing.value,
     );
   },

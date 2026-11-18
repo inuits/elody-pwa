@@ -3,7 +3,8 @@ import { computed, shallowRef, type ComputedRef } from "vue";
 // Per-field editing: exactly one edit scope (a field, a group or a row) is
 // open at a time. Opening another one saves a changed scope first; when that
 // save fails it stays open, focused, and the other one doesn't open. Leaving
-// the page with a changed scope goes through the usual unsaved-changes prompt.
+// the page with a changed scope goes through the usual unsaved-changes prompt;
+// closing or reloading the tab gets the browser's own prompt.
 // See docs/design-system/patterns/per-field-editing.md.
 
 export type EditScope = {
@@ -67,5 +68,11 @@ export const createEditScopeStore = () => {
 };
 
 const store = createEditScopeStore();
+
+window.addEventListener("beforeunload", (event: BeforeUnloadEvent) => {
+  if (!store.activeScope.value?.isDirty()) return;
+  event.preventDefault();
+  event.returnValue = "";
+});
 
 export const useEditScope = () => store;
