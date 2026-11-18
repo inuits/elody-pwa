@@ -8,18 +8,21 @@ import {
 export function useSimpleSearch() {
   const config = inject("config") as any;
 
-  const entityTypeFilters = computed<AdvancedFilterInput[]>(() => {
-    const allowedTypes = config.features.simpleSearch.itemTypes;
-    if (!allowedTypes || allowedTypes.length === 0) return [];
+  const itemTypes = computed<string[]>(
+    () => config.features.simpleSearch.itemTypes ?? [],
+  );
+
+  const entityTypeFilters = (types: string[]): AdvancedFilterInput[] => {
+    if (types.length === 0) return [];
     return [
       {
         match_exact: true,
         type: AdvancedFilterTypes.Selection,
         key: "type",
-        value: allowedTypes,
+        value: types,
       },
     ];
-  });
+  };
 
   const createKeyBasedOnFormat = (metadataKey: string | object): string[] => {
     if (
@@ -37,8 +40,11 @@ export function useSimpleSearch() {
     );
   };
 
-  const buildFilters = (searchTerm: string): AdvancedFilterInput[] => {
-    const filters: AdvancedFilterInput[] = [...entityTypeFilters.value];
+  const buildFilters = (
+    searchTerm: string,
+    types: string[] = itemTypes.value,
+  ): AdvancedFilterInput[] => {
+    const filters: AdvancedFilterInput[] = [...entityTypeFilters(types)];
     const metadataKeys = config.features.simpleSearch.simpleSearchMetadataKey;
     const relationKeys = config.features.simpleSearch.relationKeys;
     if (relationKeys?.length) {
@@ -66,5 +72,5 @@ export function useSimpleSearch() {
     return filters;
   };
 
-  return { buildFilters };
+  return { buildFilters, itemTypes };
 }

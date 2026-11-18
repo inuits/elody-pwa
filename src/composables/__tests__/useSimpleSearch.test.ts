@@ -50,6 +50,18 @@ describe("useSimpleSearch", () => {
       expect(typeFilter?.value).toEqual(["production"]);
     });
 
+    it("narrows the type filter to the scope the user picked", () => {
+      const { buildFilters } = useSimpleSearch();
+      const typeFilter = buildFilters("venice", ["venue"]).find(
+        (f) => f.type === AdvancedFilterTypes.Selection,
+      );
+      expect(typeFilter?.value).toEqual(["venue"]);
+    });
+
+    it("exposes the searchable types for the scope chips", () => {
+      expect(useSimpleSearch().itemTypes.value).toEqual(["production", "venue"]);
+    });
+
     it("omits entity type filter when itemTypes is empty", () => {
       mockConfig = makeConfig({ itemTypes: [] });
       const { buildFilters } = useSimpleSearch();
