@@ -75,5 +75,5 @@ const portStyle = (side: "in" | "out", index: number, count: number) => ({
 
 // every drawn port has an edge attached, so all dots share one style
 const portClasses =
-  "absolute w-[10px] h-[10px] rounded-full border-2 z-content-raised bg-accent-normal border-accent-normal shadow-[0_0_0_3px_var(--color-accent-light)]";
+  "absolute w-2.5 h-2.5 rounded-full border-2 z-content-raised bg-accent-normal border-accent-normal shadow-[0_0_0_3px_var(--color-accent-light)]";
 </script>

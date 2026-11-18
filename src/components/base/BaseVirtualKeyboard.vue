@@ -73,7 +73,7 @@ watch(
 .hg-theme-default {
   position: fixed;
   align-content: center;
-  bottom: 30px;
+  bottom: 1.875rem;
   z-index: var(--z-virtual-keyboard);
   max-width: 50%;
   left: 50%;
@@ -86,7 +86,7 @@ watch(
 
 .customButton {
   flex-grow: 0 !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
+  padding-left: 0.625rem !important;
+  padding-right: 0.625rem !important;
 }
 </style>

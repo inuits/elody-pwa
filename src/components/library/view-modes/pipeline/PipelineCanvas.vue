@@ -2,7 +2,7 @@
   <div
     ref="viewport"
     data-cy="pipeline-canvas"
-    class="relative h-full min-h-[480px] w-full overflow-hidden rounded bg-background-normal select-none"
+    class="relative h-full min-h-120 w-full overflow-hidden rounded bg-background-normal select-none"
     :style="gridStyle"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"

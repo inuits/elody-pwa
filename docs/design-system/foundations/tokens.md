@@ -132,7 +132,24 @@ Weights: `--weight-regular`, `--weight-bold`, `--weight-black`. Leading:
 `--leading-tight`, `-normal`, `-relaxed`. Uppercase only on the audit-trail
 eyebrow (`--eyebrow-tracking`).
 
-`text-base` keeps Tailwind's default. The app's 14px base is set on `body`.
+`text-base` keeps Tailwind's default. The app's 14px base is set on `body`
+(as `0.875rem`).
+
+## Units and UI scale
+
+Sizes are in `rem`: type, spacing, control heights, panel and column widths.
+One value, `--ui-scale` on `html` (default `1`), sets the root font size, so
+the whole UI scales together and the browser's font-size setting is honoured.
+Values are the old px divided by 16, so `1` looks exactly as before.
+
+Stay in px: borders and hairlines, radii, shadows, the focus ring, letter
+spacing and breakpoints. A unit test fails on any other px token in `main.css`.
+
+Icons get their size from their `width`/`height` attributes; `main.css`
+turns those into rem with `attr()`, so they scale too. Browsers without typed
+`attr()` (non-Chromium at the time of writing) keep icons at their px size.
+In components, use spacing utilities (`h-10`) or rem, never `[..px]`. To read a
+size token in JS, use `readCssTokenPx()` (`src/utils/cssToken.ts`).
 
 ## Spacing
 

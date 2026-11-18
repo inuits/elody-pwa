@@ -15,10 +15,10 @@
 
       <div class="w-full flex flex-col">
         <div
-          class="h-[16px] bg-gray-300 animate-pulse rounded w-1/2 mb-[2px]"
+          class="h-4 bg-gray-300 animate-pulse rounded w-1/2 mb-0.5"
         ></div>
         <div
-          class="h-[16px] bg-gray-300 animate-pulse rounded w-3/4 mt-[2px]"
+          class="h-4 bg-gray-300 animate-pulse rounded w-3/4 mt-0.5"
         ></div>
       </div>
     </div>

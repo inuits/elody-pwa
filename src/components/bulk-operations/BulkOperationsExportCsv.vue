@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col p-8 h-[calc(90vh-34px)]">
+  <div class="flex flex-col p-8 h-[calc(90vh-2.125rem)]">
     <div class="flex flex-1 min-h-0 gap-8">
       <div v-if="!isRelatedExport" class="flex flex-col min-h-0 basis-[56%]">
-        <div class="h-[40px] mb-6">
+        <div class="h-10 mb-6">
           <LibraryBar
             v-model:limit="limit"
             :total-items="getEnqueuedItemCount(context)"
@@ -21,7 +21,7 @@
         </div>
       </div>
       <div class="flex flex-col min-h-0 grow">
-        <div class="flex items-center h-[40px] mb-6">
+        <div class="flex items-center h-10 mb-6">
           <BulkOperationsActionsBar
             :context="BulkOperationsContextEnum.BulkOperationsCsvExport"
             :total-items-count="csvExportOptions.length"
@@ -45,7 +45,7 @@
             <div
               v-for="(_, index) in Array(8).fill(null)"
               :key="index"
-              class="animate-pulse h-[40px] bg-gray-300 rounded-[3px] w-full my-1"
+              class="animate-pulse h-10 bg-gray-300 rounded-[3px] w-full my-1"
             />
           </div>
           <div v-else>
@@ -65,7 +65,7 @@
         </div>
       </div>
     </div>
-    <div class="shrink-0 h-[55px] mt-6">
+    <div class="shrink-0 h-[3.4375rem] mt-6">
       <BulkOperationsSubmitBar
         :button-label="t('bulk-operations.export-to-csv')"
         tooltip-label="export-csv"

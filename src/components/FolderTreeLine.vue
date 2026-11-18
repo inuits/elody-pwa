@@ -218,9 +218,9 @@ export default defineComponent({
 }
 
 .circle {
-  width: 10px;
-  flex-basis: 10px;
-  height: 10px;
+  width: 0.625rem;
+  flex-basis: 0.625rem;
+  height: 0.625rem;
   flex-grow: 0;
   flex-shrink: 0;
 }

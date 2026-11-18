@@ -103,7 +103,7 @@ const readModeTeaserMetadata = computed(() =>
 const wrapperClasses = computed(() => [
   // `relative` anchors the corner menu; the !z-0 keeps the card above its
   // canvas wrapper for hit-testing (the list-wide base style carries z-[-1])
-  "relative !z-0 border rounded list-none p-3 flex flex-col w-[272px] !cursor-default",
+  "relative !z-0 border rounded list-none p-3 flex flex-col w-68 !cursor-default",
   "bg-background-light border-accent-highlight",
   { "grayscale brightness-95": props.isDisabled },
   { "animate-pulse": loading.value },

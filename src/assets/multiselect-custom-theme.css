@@ -232,7 +232,7 @@
 }
 
 .multiselect-option {
-  @apply flex items-center justify-start box-border text-left cursor-pointer text-table text-text-body leading-snug py-[5px] px-2.5;
+  @apply flex items-center justify-start box-border text-left cursor-pointer text-table text-text-body leading-snug py-[0.3125rem] px-2.5;
 }
 .multiselect-option.is-pointed {
   @apply text-text-body bg-accent-wash;

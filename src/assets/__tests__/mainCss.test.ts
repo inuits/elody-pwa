@@ -65,10 +65,55 @@ describe("main.css toasts", () => {
     expect(blocks(/\.vue-notification-wrapper/).join()).toMatch(/overflow:\s*visible/);
   });
 
+  it("sets the toast size over the library's own 12px", () => {
+    expect(blocks(/\.vue-notification/).join()).toMatch(
+      /font-size:\s*var\(--text-table\)\s*!important/,
+    );
+  });
+
   it("sets the toast title and text at the toast size", () => {
     const body = blocks(
       /\.vue-notification \.notification-title,\s*\.vue-notification \.notification-content/,
     ).join();
     expect(body).toMatch(/font-size:\s*inherit/);
+  });
+});
+
+describe("main.css units", () => {
+  const pxByDesign =
+    /radius|border|shadow|focus-ring|tracking|breakpoint|underline-offset|accent-width/;
+
+  it("sizes type, spacing and layout tokens in rem", () => {
+    const pxTokens = [...css.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)]
+      .filter(
+        ([, name, value]) =>
+          /\d+(\.\d+)?px/.test(value) && !pxByDesign.test(name),
+      )
+      .map(([, name, value]) => `${name}: ${value.trim()}`)
+      .filter((decl) => !/--multiselect-spacer-height/.test(decl));
+    expect(pxTokens).toEqual([]);
+  });
+
+  it("sets the app base font size in rem", () => {
+    expect(blocks(/body/).join()).toMatch(/font-size:\s*0\.875rem/);
+  });
+});
+
+describe("main.css UI scale", () => {
+  it("derives the root font size from --ui-scale", () => {
+    expect(blocks(/html/).join()).toMatch(
+      /font-size:\s*calc\(var\(--ui-scale\)\s*\*\s*100%\)/,
+    );
+  });
+
+  it("sizes icons from their width and height attributes in rem", () => {
+    const body = blocks(/\.unicon > svg,\s*\.custom-icon > svg/).join();
+    expect(body).toMatch(
+      /height:\s*calc\(attr\(height type\(<number>\),\s*24\)\s*\*\s*0\.0625rem\)/,
+    );
+    expect(body).toMatch(
+      /width:\s*calc\(attr\(width type\(<number>\),\s*24\)\s*\*\s*0\.0625rem\)/,
+    );
+    expect(body).not.toMatch(/zoom/);
   });
 });

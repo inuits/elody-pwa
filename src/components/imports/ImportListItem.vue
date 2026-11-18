@@ -12,7 +12,7 @@
         @click="emit('updateSelectedItem', item)"
       >
         <span
-          class="inline-block h-[1px] bg-neutral-700 group=hover:bg-blue-500"
+          class="inline-block h-px bg-neutral-700 group=hover:bg-blue-500"
         />
         <span
           class="w-2.5 h-2.5 rounded-full bg-neutral-700 inline-block mr-4 -ml-1 z-10 group-hover:bg-blue-500"
