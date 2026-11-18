@@ -2,7 +2,10 @@
   <div
     ref="panelRef"
     data-cy="window-panel"
-    :class="[{ 'pl-10 py-0': parentIsListItem }, 'py-(--block-pad-y) w-full']"
+    :class="[
+      { 'pl-10 py-0': parentIsListItem },
+      'py-(--block-pad-y) w-full @container/panel',
+    ]"
   >
     <!-- panel-and-block-shells.md: BlockShell — unboxed, bold label. -->
     <div
@@ -10,24 +13,33 @@
       @click="toggleIsCollapsed()"
       class="flex items-center justify-between cursor-pointer"
     >
-      <div class="flex gap-4 w-2/3 items-center">
-        <h4 class="m-0 text-table font-bold text-text-body">
-          {{ t(panel.panelHeaderContent.label) }}
-        </h4>
-        <!-- The row itself announces the save; this only shows it -->
-        <Transition
-          leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
-          leave-to-class="opacity-0"
+      <!-- In a narrow panel the title gets a line of its own and the count
+           and status wrap underneath, instead of squeezing all into one row. -->
+      <div
+        class="flex gap-4 w-2/3 items-center @max-[520px]/panel:flex-1 @max-[520px]/panel:min-w-0 @max-[520px]/panel:flex-wrap @max-[520px]/panel:gap-x-1.5 @max-[520px]/panel:gap-y-1.5"
+      >
+        <div
+          data-cy="panel-header-title"
+          class="flex gap-4 items-center @max-[520px]/panel:basis-full"
         >
-          <span
-            v-if="panelSaved.visible.value"
-            data-cy="panel-saved-check"
-            aria-hidden="true"
-            class="flex text-success"
+          <h4 class="m-0 text-table font-bold text-text-body">
+            {{ t(panel.panelHeaderContent.label) }}
+          </h4>
+          <!-- The row itself announces the save; this only shows it -->
+          <Transition
+            leave-active-class="transition-opacity duration-(--transition-duration-ui) ease-(--ease-ui)"
+            leave-to-class="opacity-0"
           >
-            <unicon :name="Unicons.Check.name" height="14" />
-          </span>
-        </Transition>
+            <span
+              v-if="panelSaved.visible.value"
+              data-cy="panel-saved-check"
+              aria-hidden="true"
+              class="flex text-success"
+            >
+              <unicon :name="Unicons.Check.name" height="14" />
+            </span>
+          </Transition>
+        </div>
         <div
           v-if="panel.panelHeaderContent.libraryData"
           class="grid transition-[grid-template-columns,opacity] duration-300 ease-out"
@@ -56,7 +68,7 @@
         <div
           v-if="panel.panelHeaderContent.panelStatus"
           data-cy="panel-header-status"
-          class="w-fit max-w-[50%] min-w-0 has-[[data-cy=inline-field-editor]]:w-full"
+          class="w-fit max-w-[50%] min-w-0 @max-[520px]/panel:max-w-full has-[[data-cy=inline-field-editor]]:w-full"
           @click.stop
         >
           <MetadataWrapper
@@ -98,15 +110,13 @@
         <button
           type="button"
           data-cy="panel-collapse-toggle"
-          class="flex"
+          class="flex items-center justify-center @max-[520px]/panel:size-11 @max-[520px]/panel:-my-2"
           :aria-expanded="!isCollapsed"
           :aria-label="t(panel.panelHeaderContent.label)"
           @click.stop="toggleIsCollapsed()"
         >
           <unicon
-            :name="
-              !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
-            "
+            :name="!isCollapsed ? Unicons.AngleUp.name : Unicons.AngleDown.name"
             aria-hidden="true"
           />
         </button>

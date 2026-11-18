@@ -54,8 +54,8 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
 vi.mock("@/helpers", () => ({ getMetadataFields: () => state.fields }));
 vi.mock("@/types", () => ({
   Unicons: {
-    CompressAlt: { name: "compress" },
-    ExpandAlt: { name: "expand" },
+    AngleDown: { name: "angle-down" },
+    AngleUp: { name: "angle-up" },
     Plus: { name: "plus" },
     Check: { name: "check" },
   },
@@ -115,6 +115,27 @@ describe("EntityElementWindowPanel header", () => {
     await toggle.trigger("click");
     expect(isCollapsed(wrapper)).toBe(true);
     expect(toggle.attributes("aria-expanded")).toBe("false");
+  });
+
+  it("shows a chevron on the toggle, not a full-screen icon", async () => {
+    const wrapper = mountPanel();
+    const icon = () =>
+      wrapper
+        .find('button[data-cy="panel-collapse-toggle"] unicon-stub')
+        .attributes("name");
+    expect(icon()).toBe("angle-up");
+    await wrapper.find("h4").trigger("click");
+    expect(icon()).toBe("angle-down");
+  });
+
+  it("puts the count and status on a line under the title in a narrow panel", () => {
+    const wrapper = mountPanel();
+    expect(wrapper.find('[data-cy="window-panel"]').classes()).toContain(
+      "@container/panel",
+    );
+    expect(wrapper.find('[data-cy="panel-header-title"]').classes()).toContain(
+      "@max-[520px]/panel:basis-full",
+    );
   });
 
   it("keeps the status only as wide as its value, so the rest of the header toggles", () => {
@@ -424,7 +445,9 @@ describe("EntityElementWindowPanel header count chip", () => {
         isEdit: false,
         formId: "E-1",
       },
-      global: { stubs: { unicon: true, WindowPanelContent: true, BaseButtonNew: true } },
+      global: {
+        stubs: { unicon: true, WindowPanelContent: true, BaseButtonNew: true },
+      },
     });
     libraryData.value = undefined;
     return wrapper.find('[data-cy="panel-header-library-data"]');
@@ -433,7 +456,12 @@ describe("EntityElementWindowPanel header count chip", () => {
   it("is a chip on the chip tokens, not the old mint pill", () => {
     const chip = mountWithCount(1);
     expect(chip.classes()).toEqual(
-      expect.arrayContaining(["text-chip", "font-bold", "p-(--chip-padding)", "rounded-chip"]),
+      expect.arrayContaining([
+        "text-chip",
+        "font-bold",
+        "p-(--chip-padding)",
+        "rounded-chip",
+      ]),
     );
     expect(chip.classes()).not.toEqual(
       expect.arrayContaining(["bg-accent-normal"]),
@@ -444,7 +472,10 @@ describe("EntityElementWindowPanel header count chip", () => {
 
   it("uses the relation colours when there are files and neutral ones when there are none", () => {
     expect(mountWithCount(1).classes()).toEqual(
-      expect.arrayContaining(["bg-chip-relation-bg", "text-chip-relation-text"]),
+      expect.arrayContaining([
+        "bg-chip-relation-bg",
+        "text-chip-relation-text",
+      ]),
     );
     expect(mountWithCount(0).classes()).toEqual(
       expect.arrayContaining(["bg-chip-neutral-bg", "text-chip-neutral-text"]),
