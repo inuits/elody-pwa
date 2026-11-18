@@ -2,8 +2,12 @@ import { mount } from "@vue/test-utils";
 import { describe, it, expect, vi } from "vitest";
 import EntityElementWrapper from "../EntityElementWrapper.vue";
 import { BaseLibraryModes } from "@/generated-types/queries";
+import { inject, type Ref } from "vue";
+import type { PanelCount } from "@/composables/useResultCount";
 
-vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (k: string) => k }) }));
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({ t: (k: string) => k, locale: { value: "en" } }),
+}));
 
 const CLOSE_SELECTOR = '[data-cy="close-preview-component"]';
 
@@ -91,20 +95,36 @@ describe("EntityElementWrapper as a PanelShell (panel-and-block-shells.md)", () 
     );
   });
 
-  it("gives the list inside a spot for its result count next to the title", () => {
+  it("shows the result count the list inside hands it, next to the title", async () => {
+    const reveal = vi.fn();
     const Probe = {
-      inject: { target: { from: "PanelCountTarget", default: undefined } },
-      template: '<i data-cy="probe">{{ target }}</i>',
+      setup() {
+        const panelCount = inject<Ref<PanelCount | undefined>>("PanelCount")!;
+        panelCount.value = {
+          count: 258,
+          exactCount: null,
+          exactCountLoading: false,
+          reveal,
+        };
+      },
+      template: "<i />",
     };
     const wrapper = mount(EntityElementWrapper, {
       props: { label: "Panel", entityId: "e1", isCollapsed: false },
       slots: { content: Probe },
       global: { stubs },
     });
-    const spot = wrapper.find('[data-cy="entity-element-wrapper-header"] [data-panel-count]');
-    expect(spot.exists()).toBe(true);
-    expect(wrapper.find('[data-cy="probe"]').text()).toBe(
-      `[data-panel-count="${spot.attributes("data-panel-count")}"]`,
+    await wrapper.vm.$nextTick();
+
+    const chip = wrapper.find(
+      '[data-cy="entity-element-wrapper-header"] [data-cy="list-count-chip"]',
+    );
+    expect(chip.text()).toBe("258");
+  });
+
+  it("shows no count without a list that hands one", () => {
+    expect(getWrapper().find('[data-cy="list-count-chip"]').exists()).toBe(
+      false,
     );
   });
 

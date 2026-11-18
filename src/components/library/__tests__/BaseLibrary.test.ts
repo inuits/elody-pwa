@@ -1485,19 +1485,23 @@ describe("BaseLibrary.vue inside a detail panel", () => {
 });
 
 describe("BaseLibrary.vue result count in a detail panel", () => {
-  it("moves the count into the panel header as a number badge", async () => {
+  it("hands the count to the panel header instead of showing it itself", async () => {
     mockRoute.path = "/test";
+    const panelCount = ref();
     const wrapper = getWrapper(
       { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
-      { InsidePanel: true, PanelCountTarget: '[data-panel-count="p1"]' },
+      { InsidePanel: true, PanelCount: panelCount },
     );
     await flushPromises();
 
-    // the teleport is stubbed in place, so the badge is the only chip
-    const chips = wrapper.findAllComponents(ResultCountChip);
-    expect(chips).toHaveLength(1);
-    expect(chips[0].props("numberOnly")).toBe(true);
+    expect(wrapper.findAllComponents(ResultCountChip)).toHaveLength(0);
+    expect(panelCount.value).toMatchObject({
+      count: libTotalEntityCount.value,
+      exactCount: null,
+      exactCountLoading: false,
+    });
     wrapper.unmount();
+    expect(panelCount.value).toBeUndefined();
   });
 
   it("keeps the count in the list header without a panel header to go to", async () => {

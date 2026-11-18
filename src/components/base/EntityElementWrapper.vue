@@ -24,7 +24,9 @@
       data-cy="entity-element-wrapper-header"
       :class="[
         'flex items-center justify-between relative p-(--panel-header-pad) bg-surface-panel-header',
-        isCollapsed ? 'rounded-card' : 'rounded-t-card border-b border-border-panel',
+        isCollapsed
+          ? 'rounded-card'
+          : 'rounded-t-card border-b border-border-panel',
         { 'cursor-pointer': !isPreviewElement },
       ]"
       @click.self="emit('toggleElementCollapse', entityId, label)"
@@ -39,10 +41,18 @@
                 baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary,
             },
           ]"
-          >{{ previewLabel ? previewLabel : t(label) }}</h3
         >
-        <!-- the list inside puts its result count here -->
-        <span :data-panel-count="panelCountId" class="contents" />
+          {{ previewLabel ? previewLabel : t(label) }}
+        </h3>
+        <!-- the list inside hands its result count to the panel -->
+        <ResultCountChip
+          v-if="panelCount"
+          :count="panelCount.count"
+          :exact-count="panelCount.exactCount"
+          :exact-count-loading="panelCount.exactCountLoading"
+          number-only
+          @reveal-exact-count="panelCount.reveal()"
+        />
         <slot name="actions"></slot>
       </div>
       <button
@@ -95,12 +105,14 @@
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import { BaseLibraryModes } from "@/generated-types/queries";
-import { inject, provide, useId } from "vue";
+import { inject, provide, ref } from "vue";
+import ResultCountChip from "@/components/library/ResultCountChip.vue";
+import type { PanelCount } from "@/composables/useResultCount";
 
 // Lists and viewers inside know they sit in a panel (no chrome of their own).
 provide("InsidePanel", true);
-const panelCountId = useId();
-provide("PanelCountTarget", `[data-panel-count="${panelCountId}"]`);
+const panelCount = ref<PanelCount>();
+provide("PanelCount", panelCount);
 
 withDefaults(
   defineProps<{

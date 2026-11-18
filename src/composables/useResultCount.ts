@@ -68,3 +68,11 @@ export const formatDisplayCount = (
   exactCount != null
     ? exactCount.toLocaleString(locale)
     : formatResultCount(count, locale);
+
+// A list in a detail panel hands its count to the panel header.
+export type PanelCount = {
+  count: number;
+  exactCount: number | null;
+  exactCountLoading: boolean;
+  reveal: () => void;
+};

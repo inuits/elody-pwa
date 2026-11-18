@@ -40,50 +40,52 @@
           :to="filtersPaneBody || 'body'"
           :disabled="!filtersPaneBody"
         >
-        <FiltersBase
-          v-show="enableAdvancedFilters"
-          :simple-search-active="!!simpleSearchTerm"
-          :expandFilters="expandFilters"
-          :toggle-target="filtersToggleTarget"
-          :in-pane="filtersInPane"
-          :manipulation-query="manipulationQuery"
-          :parent-entity-identifiers="parentEntityIdentifiers"
-          :route="route"
-          :set-advanced-filters="setAdvancedFilters"
-          :additional-default-filters-enabled="additionalDefaultFiltersEnabled"
-          :enable-save-search-filters="enableSaveSearchFilters"
-          :entity-type="entityType as Entitytyping"
-          :should-use-state-for-route="ownsRouteState"
-          :filters-need-context="filtersNeedContext"
-          :predefined-filters="filters"
-          :on-register-api="handleRegisterAPI"
-          @filter-matcher-mapping-promise="
-            (promise) => (filterMatcherMappingPromise = promise)
-          "
-          @advanced-filters-promise="
-            (promise) => (advancedFiltersPromise = promise)
-          "
-          @apply-filters="
-            async (
-              filters: AdvancedFilterInput[],
-              stateSaved: boolean = false,
-              force: boolean = true,
-            ) => {
-              if (simpleSearchTerm) simpleSearchTerm = '';
-              await setAdvancedFilters(filters, stateSaved, force, route);
-            }
-          "
-          @expand-filters="
-            async () => {
-              if (simpleSearchTerm) {
-                expandFilters = true;
-                await handleSetSimpleSearch('');
-              } else {
-                expandFilters = !expandFilters;
+          <FiltersBase
+            v-show="enableAdvancedFilters"
+            :simple-search-active="!!simpleSearchTerm"
+            :expandFilters="expandFilters"
+            :toggle-target="filtersToggleTarget"
+            :in-pane="filtersInPane"
+            :manipulation-query="manipulationQuery"
+            :parent-entity-identifiers="parentEntityIdentifiers"
+            :route="route"
+            :set-advanced-filters="setAdvancedFilters"
+            :additional-default-filters-enabled="
+              additionalDefaultFiltersEnabled
+            "
+            :enable-save-search-filters="enableSaveSearchFilters"
+            :entity-type="entityType as Entitytyping"
+            :should-use-state-for-route="ownsRouteState"
+            :filters-need-context="filtersNeedContext"
+            :predefined-filters="filters"
+            :on-register-api="handleRegisterAPI"
+            @filter-matcher-mapping-promise="
+              (promise) => (filterMatcherMappingPromise = promise)
+            "
+            @advanced-filters-promise="
+              (promise) => (advancedFiltersPromise = promise)
+            "
+            @apply-filters="
+              async (
+                filters: AdvancedFilterInput[],
+                stateSaved: boolean = false,
+                force: boolean = true,
+              ) => {
+                if (simpleSearchTerm) simpleSearchTerm = '';
+                await setAdvancedFilters(filters, stateSaved, force, route);
               }
-            }
-          "
-        />
+            "
+            @expand-filters="
+              async () => {
+                if (simpleSearchTerm) {
+                  expandFilters = true;
+                  await handleSetSimpleSearch('');
+                } else {
+                  expandFilters = !expandFilters;
+                }
+              }
+            "
+          />
         </Teleport>
       </div>
       <div
@@ -99,11 +101,7 @@
           // below the top bar; a white-surface host spaces it itself
           { 'mt-(--page-pad-top)': hasResultsBand && !onWhiteSurface },
           { 'col-span-1': railOpen },
-          railOpen
-            ? hasResultsBand
-              ? 'ml-(--gutter-panels)'
-              : 'pl-[1%]'
-            : '',
+          railOpen ? (hasResultsBand ? 'ml-(--gutter-panels)' : 'pl-[1%]') : '',
           { 'col-span-2': !railOpen },
         ]"
       >
@@ -114,409 +112,407 @@
           @close="expandFilters = false"
         />
         <div class="flex flex-col flex-1 min-w-0 min-h-0">
-        <!-- List header (templates/elody-list-screen): one accent-light band
+          <!-- List header (templates/elody-list-screen): one accent-light band
              with count, pager, view modes, page size, sort and the selection
              bar's actions; it wraps when narrow. -->
-        <div
-          v-if="showCurrentEntityFlow"
-          data-cy="list-header"
-          class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
-          :class="[
-            {
-              'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel':
-                hasResultsBand,
-            },
-            // beside an open filters pane only the outer corner is round
-            hasResultsBand
-              ? filtersInPane && isFiltersPanelExpanded
-                ? 'rounded-tr-card'
-                : 'rounded-t-card'
-              : '',
-            { 'sticky top-0 z-header': hasStickyBars },
-          ]"
-        >
-          <!-- FiltersBase teleports its Filters button here -->
-          <span
-            v-if="filtersBandSpot"
-            :data-filters-toggle="filtersToggleId"
-            class="contents"
-          />
-          <ResultCountChip
-            v-if="showCountChip && !compactMetaRow && !panelCountTarget"
-            :count="totalEntityCount"
-            :exact-count="exactTotalCount"
-            :exact-count-loading="exactCountLoading"
-            @reveal-exact-count="revealExactCount"
-          />
-          <!-- in a detail panel the count is a badge next to the panel title -->
-          <Teleport
-            v-if="showCountChip && panelCountTarget"
-            defer
-            :to="panelCountTarget"
+          <div
+            v-if="showCurrentEntityFlow"
+            data-cy="list-header"
+            class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
+            :class="[
+              {
+                'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel':
+                  hasResultsBand,
+              },
+              // beside an open filters pane only the outer corner is round
+              hasResultsBand
+                ? filtersInPane && isFiltersPanelExpanded
+                  ? 'rounded-tr-card'
+                  : 'rounded-t-card'
+                : '',
+              { 'sticky top-0 z-header': hasStickyBars },
+            ]"
           >
+            <!-- FiltersBase teleports its Filters button here -->
+            <span
+              v-if="filtersBandSpot"
+              :data-filters-toggle="filtersToggleId"
+              class="contents"
+            />
             <ResultCountChip
+              v-if="showCountChip && !compactMetaRow && !panelCount"
               :count="totalEntityCount"
               :exact-count="exactTotalCount"
               :exact-count-loading="exactCountLoading"
-              number-only
               @reveal-exact-count="revealExactCount"
             />
-          </Teleport>
-          <BasePagination
-            v-if="showListPager"
-            data-test="list-pager"
-            class="shrink-0"
-            :class="{ 'order-last basis-full': isCompact }"
-          />
-          <!-- small screen: the bar's controls join the band's own rows -->
-          <div
-            v-if="showLibraryBar"
-            :class="isCompact ? 'contents' : 'min-w-0 ml-auto'"
-          >
-            <LibraryBar
-              :route="route"
-              :set-sort-key="setSortKey"
-              :set-sort-order="setSortOrder"
-              :show-group-by="displayTable"
-              :set-group-by="(config) => (chosenGroupBy = config)"
-              :simple-search-value="simpleSearchTerm"
-              :set-simple-search="
-                isSearchLibrary ||
-                baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
-                  ? undefined
-                  : handleSetSimpleSearch
-              "
-              @sort-options-promise="
-                (promise) => (sortOptionsPromise = promise)
-              "
+            <BasePagination
+              v-if="showListPager"
+              data-test="list-pager"
+              class="shrink-0"
+              :class="{ 'order-last basis-full': isCompact }"
+            />
+            <!-- small screen: the bar's controls join the band's own rows -->
+            <div
+              v-if="showLibraryBar"
+              :class="isCompact ? 'contents' : 'min-w-0 ml-auto'"
             >
-              <PageSizeSelect
-                v-if="showPageSize"
-                class="shrink-0"
-                :set-limit="setPaginationLimit"
-                :selected-pagination-limit-option="paginationStore.limit.value"
-                :total="totalEntityCount"
-                @pagination-limit-options-promise="
-                  (promise) => (paginationLimitOptionsPromise = promise)
+              <LibraryBar
+                :route="route"
+                :set-sort-key="setSortKey"
+                :set-sort-order="setSortOrder"
+                :show-group-by="displayTable"
+                :set-group-by="(config) => (chosenGroupBy = config)"
+                :simple-search-value="simpleSearchTerm"
+                :set-simple-search="
+                  isSearchLibrary ||
+                  baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary
+                    ? undefined
+                    : handleSetSimpleSearch
+                "
+                @sort-options-promise="
+                  (promise) => (sortOptionsPromise = promise)
+                "
+              >
+                <PageSizeSelect
+                  v-if="showPageSize"
+                  class="shrink-0"
+                  :set-limit="setPaginationLimit"
+                  :selected-pagination-limit-option="
+                    paginationStore.limit.value
+                  "
+                  :total="totalEntityCount"
+                  @pagination-limit-options-promise="
+                    (promise) => (paginationLimitOptionsPromise = promise)
+                  "
+                />
+              </LibraryBar>
+            </div>
+            <!-- the view switch ends the band, away from the Filters button -->
+            <div
+              v-if="showViewSwitch"
+              :class="[
+                'flex items-center gap-2',
+                { 'ml-auto': !showLibraryBar },
+              ]"
+            >
+              <BaseToggleGroup
+                :toggles="toggles"
+                @selected="
+                  (toggle) => trackViewMode(toggle.viewMode, entityType)
                 "
               />
-            </LibraryBar>
-          </div>
-          <!-- the view switch ends the band, away from the Filters button -->
-          <div
-            v-if="showViewSwitch"
-            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar }]"
-          >
-            <BaseToggleGroup
-              :toggles="toggles"
-              @selected="(toggle) => trackViewMode(toggle.viewMode, entityType)"
+              <BaseToggleGroup
+                v-if="displayGrid"
+                data-cy="grid-size-switch"
+                group-label="library.grid-size.label"
+                :toggles="gridSizeToggles"
+              />
+            </div>
+            <!-- In a detail panel the bar's add pills land here. -->
+            <span
+              v-if="insidePanel"
+              :data-list-actions="listActionsId"
+              :class="[
+                'flex items-center gap-2',
+                { 'ml-auto': !showLibraryBar && !showViewSwitch },
+              ]"
             />
-            <BaseToggleGroup
-              v-if="displayGrid"
-              data-cy="grid-size-switch"
-              group-label="library.grid-size.label"
-              :toggles="gridSizeToggles"
-            />
           </div>
-          <!-- In a detail panel the bar's add pills land here. -->
-          <span
-            v-if="insidePanel"
-            :data-list-actions="listActionsId"
-            :class="['flex items-center gap-2', { 'ml-auto': !showLibraryBar && !showViewSwitch }]"
-          />
-        </div>
-        <!-- small screen: select-all, count or selection, and the bar's
+          <!-- small screen: select-all, count or selection, and the bar's
              actions in one meta row; the column headers are gone -->
-        <div
-          :data-cy="compactMetaRow ? 'list-meta-row' : undefined"
-          :class="
-            compactMetaRow
-              ? [
-                  'flex items-center gap-2 min-h-(--touch-target-min) px-(--list-band-pad) border-b border-border-subtle',
-                  { 'bg-accent-wash': selectedCount > 0 },
-                ]
-              : gridSelectPage && enableSelection
-                ? 'flex flex-wrap items-center gap-(--selection-bar-gap) py-2 px-(--list-band-pad) border-b border-border-subtle'
-                : 'contents'
-          "
-        >
-          <BaseInputCheckbox
-            v-if="(compactMetaRow || gridSelectPage) && enableSelection"
-            size="compact"
-            :class="{ 'text-ui text-text-body': gridSelectPage }"
-            :label="gridSelectPage ? t('bulk-operations.select-page') : ''"
-            :indeterminate="pageIsPartlySelected"
-            :model-value="pageIsSelected"
-            :item="{ id: 'select-page' }"
-            :bulk-operations-context="undefined"
-            :ignore-bulk-operations="true"
-            :aria-label="t('bulk-operations.select-page')"
-            @update:model-value="
-              (selected: boolean) =>
-                selected ? bulkSelect() : clearPageSelection()
-            "
-          />
-          <ResultCountChip
-            v-if="showCountChip && compactMetaRow && selectedCount === 0"
-            :count="totalEntityCount"
-            :exact-count="exactTotalCount"
-            :exact-count-loading="exactCountLoading"
-            @reveal-exact-count="revealExactCount"
-          />
-          <BulkOperationsActionsBar
-            v-if="
-              enableBulkOperations &&
-              baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
-            "
+          <div
+            :data-cy="compactMetaRow ? 'list-meta-row' : undefined"
             :class="
               compactMetaRow
-                ? 'flex-1 justify-end'
-                : gridSelectPage && enableSelection
-                  ? ''
-                  : [
-                    'py-2 border-b border-border-subtle',
-                    { 'px-(--list-band-pad)': hasResultsBand },
+                ? [
+                    'flex items-center gap-2 min-h-(--touch-target-min) px-(--list-band-pad) border-b border-border-subtle',
+                    { 'bg-accent-wash': selectedCount > 0 },
                   ]
+                : gridSelectPage && enableSelection
+                  ? 'flex flex-wrap items-center gap-(--selection-bar-gap) py-2 px-(--list-band-pad) border-b border-border-subtle'
+                  : 'contents'
             "
-            :list-header-target="
-              insidePanel
-                ? `[data-list-actions=&quot;${listActionsId}&quot;]`
-                : undefined
-            "
-            :create-in-page-header="
-              ownsRouteState &&
-              !isSearchLibrary &&
-              props.parentEntityIdentifiers.length === 0
-            "
-            :context="bulkOperationsContext"
-            :use-extended-bulk-operations="!isSearchLibrary"
-            :show-button="showButton"
-            :confirm-selection-button="confirmSelectionButton"
-            :relation-type="relationType"
-            :entity-type="entityType as Entitytyping"
-            :custom-bulk-operations="customBulkOperations"
-            :refetch-entities="refetchEntities"
-            :enable-selection="enableSelection"
-            :parent-entity-id="props.parentEntityIdentifiers[0]"
-            :selected-pagination-limit-option="paginationStore.limit.value"
-            :total-items="totalEntityCount || NaN"
-            :show-pagination="
-              !displayMap && !displayPipeline && !isTableGrouped
-            "
-            :is-loading="isInitialLoading"
-            :page-item-ids="
-              (predefinedEntities ?? entities).map((entity) => entity.uuid)
-            "
-            @custom-bulk-operations-promise="
-              (promise) => (customBulkOperationsPromise = promise)
-            "
-            @confirm-selection="
-              (selection) => emit('confirmSelection', selection)
-            "
-            @set-bulk-operations-available="
-              (value: boolean) => (hasBulkOperations = value)
-            "
-            @apply-custom-bulk-operations="
-              async () => await applyCustomBulkOperations()
-            "
-            @initialize-entity-picker-component="
-              (
-                cropState: boolean,
-                keyToSaveCropCoordinates: string,
-                customQueryEntityPickerList?: string,
-                customQueryEntityPickerListFilters?: string,
-              ) =>
-                initializeEntityPickerComponent(
-                  cropState,
-                  keyToSaveCropCoordinates,
-                  customQueryEntityPickerList,
-                  customQueryEntityPickerListFilters,
-                )
-            "
-            @refetch="async () => await refetchEntities()"
-          />
-        </div>
-        <div
-          v-if="entities?.length === 0 && !entitiesLoading"
-          :class="[
-            {
-              'text-center my-2':
-                baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
-            },
-            { 'col-span-1 pl-[1%]': railOpen },
-            { 'col-span-2': !railOpen },
-          ]"
-        >
-          <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
-            -
+          >
+            <BaseInputCheckbox
+              v-if="(compactMetaRow || gridSelectPage) && enableSelection"
+              size="compact"
+              :class="{ 'text-ui text-text-body': gridSelectPage }"
+              :label="gridSelectPage ? t('bulk-operations.select-page') : ''"
+              :indeterminate="pageIsPartlySelected"
+              :model-value="pageIsSelected"
+              :item="{ id: 'select-page' }"
+              :bulk-operations-context="undefined"
+              :ignore-bulk-operations="true"
+              :aria-label="t('bulk-operations.select-page')"
+              @update:model-value="
+                (selected: boolean) =>
+                  selected ? bulkSelect() : clearPageSelection()
+              "
+            />
+            <ResultCountChip
+              v-if="showCountChip && compactMetaRow && selectedCount === 0"
+              :count="totalEntityCount"
+              :exact-count="exactTotalCount"
+              :exact-count-loading="exactCountLoading"
+              @reveal-exact-count="revealExactCount"
+            />
+            <BulkOperationsActionsBar
+              v-if="
+                enableBulkOperations &&
+                baseLibraryMode === BaseLibraryModes.NormalBaseLibrary
+              "
+              :class="
+                compactMetaRow
+                  ? 'flex-1 justify-end'
+                  : gridSelectPage && enableSelection
+                    ? ''
+                    : [
+                        'py-2 border-b border-border-subtle',
+                        { 'px-(--list-band-pad)': hasResultsBand },
+                      ]
+              "
+              :list-header-target="
+                insidePanel
+                  ? `[data-list-actions=&quot;${listActionsId}&quot;]`
+                  : undefined
+              "
+              :create-in-page-header="
+                ownsRouteState &&
+                !isSearchLibrary &&
+                props.parentEntityIdentifiers.length === 0
+              "
+              :context="bulkOperationsContext"
+              :use-extended-bulk-operations="!isSearchLibrary"
+              :show-button="showButton"
+              :confirm-selection-button="confirmSelectionButton"
+              :relation-type="relationType"
+              :entity-type="entityType as Entitytyping"
+              :custom-bulk-operations="customBulkOperations"
+              :refetch-entities="refetchEntities"
+              :enable-selection="enableSelection"
+              :parent-entity-id="props.parentEntityIdentifiers[0]"
+              :selected-pagination-limit-option="paginationStore.limit.value"
+              :total-items="totalEntityCount || NaN"
+              :show-pagination="
+                !displayMap && !displayPipeline && !isTableGrouped
+              "
+              :is-loading="isInitialLoading"
+              :page-item-ids="
+                (predefinedEntities ?? entities).map((entity) => entity.uuid)
+              "
+              @custom-bulk-operations-promise="
+                (promise) => (customBulkOperationsPromise = promise)
+              "
+              @confirm-selection="
+                (selection) => emit('confirmSelection', selection)
+              "
+              @set-bulk-operations-available="
+                (value: boolean) => (hasBulkOperations = value)
+              "
+              @apply-custom-bulk-operations="
+                async () => await applyCustomBulkOperations()
+              "
+              @initialize-entity-picker-component="
+                (
+                  cropState: boolean,
+                  keyToSaveCropCoordinates: string,
+                  customQueryEntityPickerList?: string,
+                  customQueryEntityPickerListFilters?: string,
+                ) =>
+                  initializeEntityPickerComponent(
+                    cropState,
+                    keyToSaveCropCoordinates,
+                    customQueryEntityPickerList,
+                    customQueryEntityPickerListFilters,
+                  )
+              "
+              @refetch="async () => await refetchEntities()"
+            />
           </div>
-          <div v-else-if="accessDenied">
-            {{ t("error-pages.access-denied.title") }}
-          </div>
-          <div v-else>
-            <div>{{ noResultTranslations.noResult }}</div>
-            <div class="text-sm">
-              {{ noResultTranslations.searchTip }}
+          <div
+            v-if="entities?.length === 0 && !entitiesLoading"
+            :class="[
+              {
+                'text-center my-2':
+                  baseLibraryMode !== BaseLibraryModes.BasicBaseLibrary,
+              },
+              { 'col-span-1 pl-[1%]': railOpen },
+              { 'col-span-2': !railOpen },
+            ]"
+          >
+            <div v-if="baseLibraryMode === BaseLibraryModes.BasicBaseLibrary">
+              -
             </div>
-            <div
-              v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
-              class="flex justify-center my-2"
-            >
-              <ActionMenuGroup
-                v-if="
-                  bulkOperations !== undefined && auth.isAuthenticated.value
-                "
-                v-model="selectedBulkOperation"
-                @update:modelValue="handleSelectedBulkOperation"
-                :options="actionsOnResult.options"
-                :entity-type="entityType"
-                :parent-entity-id="id"
-                :sub-dropdown-options="subDropdownOptions"
-                :clear-sub-dropdown-options="clearSubDropdownOptions"
-              />
+            <div v-else-if="accessDenied">
+              {{ t("error-pages.access-denied.title") }}
+            </div>
+            <div v-else>
+              <div>{{ noResultTranslations.noResult }}</div>
+              <div class="text-sm">
+                {{ noResultTranslations.searchTip }}
+              </div>
+              <div
+                v-if="actionsOnResult?.type === ActionsOnResultTypes.NoResult"
+                class="flex justify-center my-2"
+              >
+                <ActionMenuGroup
+                  v-if="
+                    bulkOperations !== undefined && auth.isAuthenticated.value
+                  "
+                  v-model="selectedBulkOperation"
+                  @update:modelValue="handleSelectedBulkOperation"
+                  :options="actionsOnResult.options"
+                  :entity-type="entityType"
+                  :parent-entity-id="id"
+                  :sub-dropdown-options="subDropdownOptions"
+                  :clear-sub-dropdown-options="clearSubDropdownOptions"
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          v-if="entities?.length !== 0 || relations?.length !== 0"
-          class="flex-1 min-h-0"
-          data-cy="base-library-grid-container"
-          @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
-        >
-          <ListItemSkeleton
-            v-show="
-              entitiesLoadingWithoutData && !displayMap && !displayPipeline
-            "
-            :amount="placeholderEntitiesAmount"
-          />
-          <ViewModesList
-            v-if="!displayMap"
-            :compact="!!displayGrid && gridCompact"
-            v-show="
-              showViewModesList &&
-              !isInitialLoading &&
-              (!entitiesLoading || !!entities?.length)
-            "
-            :entities="entities as Entity[]"
-            :placeholder-entities="placeholderEntities as Entity[]"
-            :entities-loading="entitiesLoading"
-            :bulk-operations-context="bulkOperationsContext"
-            :list-item-route-name="listItemRouteName"
-            :disable-previews="disableNewEntityPreviews"
-            :action-on-click="actionOnClick"
-            :parent-entity-identifiers="parentEntityIdentifiers"
-            :parent-entity-type="parentEntityType"
-            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-            :highlighted-entity-ids="highlightedEntityIds"
-            :highlight-label="highlightLabel"
-            :relation-type="relationType"
-            :enable-selection="enableSelection"
-            :base-library-mode="baseLibraryMode"
-            :entity-list-elements="entityListElements"
-            :allowed-actions-on-relations="allowedActionsOnRelations"
-            :mode="displayGrid ? 'grid' : 'list'"
-            :config="
-              configPerViewMode[
-                displayList
-                  ? ViewModes.ViewModesList
-                  : (displayGrid ?? ViewModes.ViewModesGrid)
-              ]
-            "
-            :config-per-view-mode="configPerViewMode"
-            :expandFilters="isFiltersPanelExpanded"
-            :refetch-entities="refetchEntities"
-            :entity-type="entityType"
-            :show-current-entity-flow="showCurrentEntityFlow"
-            @add-refetch-function-to-edit-state="syncEditStateCallbacks"
-            @toggle-page-selection="
-              (selected: boolean) =>
-                selected ? bulkSelect() : clearPageSelection()
-            "
-            :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
-            :open-preview-by-default="openPreviewByDefault"
-            :primaryMediafileId="primaryMediafileId"
-            :primaryThumbnailId="primaryThumbnailId"
-          />
-          <ViewModesTable
-            v-if="!displayMap"
-            v-show="
-              displayTable &&
-              !isInitialLoading &&
-              (!entitiesLoading || !!entities?.length)
-            "
-            :entities="
-              (isTableGrouped
-                ? groupedEntities.entities.value
-                : entities) as Entity[]
-            "
-            :groups="isTableGrouped ? groupedEntities.groups.value : undefined"
-            :has-more-groups="
-              isTableGrouped && groupedEntities.hasMoreGroups.value
-            "
-            :groups-loading="groupedEntities.loading.value"
-            @load-more-in-group="groupedEntities.loadMoreInGroup"
-            @load-more-groups="groupedEntities.loadMoreGroups"
-            :entities-loading="entitiesLoading"
-            :bulk-operations-context="bulkOperationsContext"
-            :list-item-route-name="listItemRouteName"
-            :action-on-click="actionOnClick"
-            :parent-entity-identifiers="parentEntityIdentifiers"
-            :parent-entity-type="parentEntityType"
-            :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
-            :relation-type="relationType"
-            :enable-selection="enableSelection"
-            :base-library-mode="baseLibraryMode"
-            :allowed-actions-on-relations="allowedActionsOnRelations"
-            :entity-type="entityType"
-            :show-current-entity-flow="showCurrentEntityFlow"
-            :config-per-view-mode="configPerViewMode"
-            :refetch-entities="refetchEntities"
-            :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
-            :open-preview-by-default="openPreviewByDefault"
-            :page-is-selected="pageIsSelected"
-            @toggle-page-selection="
-              (selected: boolean) =>
-                selected ? bulkSelect() : clearPageSelection()
-            "
-          />
-          <ViewModesMedia
-            v-if="viewModesIncludeViewModesMedia && displayPreview"
-            :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
-            :config="configPerViewMode[ViewModes.ViewModesMedia]"
-          />
-          <ViewModesPipeline
-            v-if="displayPipeline"
-            :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
-            :bulk-operations-context="bulkOperationsContext"
-            :list-item-route-name="listItemRouteName"
-            :action-on-click="actionOnClick"
-            :parent-entity-identifiers="parentEntityIdentifiers"
-            :relation-type="relationType"
-            :enable-selection="enableSelection"
-            :base-library-mode="baseLibraryMode"
-            :allowed-actions-on-relations="allowedActionsOnRelations"
-            :config="configPerViewMode[ViewModes.ViewModesPipeline]"
-            :refetch-entities="refetchEntities"
-            :set-pagination-limit="setPaginationLimit"
-          />
-          <ViewModesMap
-            v-if="displayMap"
-            :map-type="
-              getBasicMapProperties(configPerViewMode[ViewModes.ViewModesMap])
-                .mapType
-            "
-            :entities="entities as Entity[]"
-            :entities-loading="entitiesLoading"
-            :config="configPerViewMode[ViewModes.ViewModesMap]"
-            :filters-base-api="filtersBaseAPI"
-            :entityTypeAsCenterPoint="entityTypeAsCenterPoint"
-            :centerCoordinatesKey="centerCoordinatesKey"
-            :setPaginationLimit="setPaginationLimit"
-            :setAdvancedFilters="setAdvancedFilters"
-          />
-        </div>
+          <div
+            v-if="entities?.length !== 0 || relations?.length !== 0"
+            class="flex-1 min-h-0"
+            data-cy="base-library-grid-container"
+            @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
+          >
+            <ListItemSkeleton
+              v-show="
+                entitiesLoadingWithoutData && !displayMap && !displayPipeline
+              "
+              :amount="placeholderEntitiesAmount"
+            />
+            <ViewModesList
+              v-if="!displayMap"
+              :compact="!!displayGrid && gridCompact"
+              v-show="
+                showViewModesList &&
+                !isInitialLoading &&
+                (!entitiesLoading || !!entities?.length)
+              "
+              :entities="entities as Entity[]"
+              :placeholder-entities="placeholderEntities as Entity[]"
+              :entities-loading="entitiesLoading"
+              :bulk-operations-context="bulkOperationsContext"
+              :list-item-route-name="listItemRouteName"
+              :disable-previews="disableNewEntityPreviews"
+              :action-on-click="actionOnClick"
+              :parent-entity-identifiers="parentEntityIdentifiers"
+              :parent-entity-type="parentEntityType"
+              :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+              :highlighted-entity-ids="highlightedEntityIds"
+              :highlight-label="highlightLabel"
+              :relation-type="relationType"
+              :enable-selection="enableSelection"
+              :base-library-mode="baseLibraryMode"
+              :entity-list-elements="entityListElements"
+              :allowed-actions-on-relations="allowedActionsOnRelations"
+              :mode="displayGrid ? 'grid' : 'list'"
+              :config="
+                configPerViewMode[
+                  displayList
+                    ? ViewModes.ViewModesList
+                    : (displayGrid ?? ViewModes.ViewModesGrid)
+                ]
+              "
+              :config-per-view-mode="configPerViewMode"
+              :expandFilters="isFiltersPanelExpanded"
+              :refetch-entities="refetchEntities"
+              :entity-type="entityType"
+              :show-current-entity-flow="showCurrentEntityFlow"
+              @add-refetch-function-to-edit-state="syncEditStateCallbacks"
+              @toggle-page-selection="
+                (selected: boolean) =>
+                  selected ? bulkSelect() : clearPageSelection()
+              "
+              :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+              :open-preview-by-default="openPreviewByDefault"
+              :primaryMediafileId="primaryMediafileId"
+              :primaryThumbnailId="primaryThumbnailId"
+            />
+            <ViewModesTable
+              v-if="!displayMap"
+              v-show="
+                displayTable &&
+                !isInitialLoading &&
+                (!entitiesLoading || !!entities?.length)
+              "
+              :entities="
+                (isTableGrouped
+                  ? groupedEntities.entities.value
+                  : entities) as Entity[]
+              "
+              :groups="
+                isTableGrouped ? groupedEntities.groups.value : undefined
+              "
+              :has-more-groups="
+                isTableGrouped && groupedEntities.hasMoreGroups.value
+              "
+              :groups-loading="groupedEntities.loading.value"
+              @load-more-in-group="groupedEntities.loadMoreInGroup"
+              @load-more-groups="groupedEntities.loadMoreGroups"
+              :entities-loading="entitiesLoading"
+              :bulk-operations-context="bulkOperationsContext"
+              :list-item-route-name="listItemRouteName"
+              :action-on-click="actionOnClick"
+              :parent-entity-identifiers="parentEntityIdentifiers"
+              :parent-entity-type="parentEntityType"
+              :ids-of-non-selectable-entities="idsOfNonSelectableEntities"
+              :relation-type="relationType"
+              :enable-selection="enableSelection"
+              :base-library-mode="baseLibraryMode"
+              :allowed-actions-on-relations="allowedActionsOnRelations"
+              :entity-type="entityType"
+              :show-current-entity-flow="showCurrentEntityFlow"
+              :config-per-view-mode="configPerViewMode"
+              :refetch-entities="refetchEntities"
+              :cropMediafileCoordinatesKey="cropMediafileCoordinatesKey"
+              :open-preview-by-default="openPreviewByDefault"
+              :page-is-selected="pageIsSelected"
+              @toggle-page-selection="
+                (selected: boolean) =>
+                  selected ? bulkSelect() : clearPageSelection()
+              "
+            />
+            <ViewModesMedia
+              v-if="viewModesIncludeViewModesMedia && displayPreview"
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+              :config="configPerViewMode[ViewModes.ViewModesMedia]"
+            />
+            <ViewModesPipeline
+              v-if="displayPipeline"
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+              :bulk-operations-context="bulkOperationsContext"
+              :list-item-route-name="listItemRouteName"
+              :action-on-click="actionOnClick"
+              :parent-entity-identifiers="parentEntityIdentifiers"
+              :relation-type="relationType"
+              :enable-selection="enableSelection"
+              :base-library-mode="baseLibraryMode"
+              :allowed-actions-on-relations="allowedActionsOnRelations"
+              :config="configPerViewMode[ViewModes.ViewModesPipeline]"
+              :refetch-entities="refetchEntities"
+              :set-pagination-limit="setPaginationLimit"
+            />
+            <ViewModesMap
+              v-if="displayMap"
+              :map-type="
+                getBasicMapProperties(configPerViewMode[ViewModes.ViewModesMap])
+                  .mapType
+              "
+              :entities="entities as Entity[]"
+              :entities-loading="entitiesLoading"
+              :config="configPerViewMode[ViewModes.ViewModesMap]"
+              :filters-base-api="filtersBaseAPI"
+              :entityTypeAsCenterPoint="entityTypeAsCenterPoint"
+              :centerCoordinatesKey="centerCoordinatesKey"
+              :setPaginationLimit="setPaginationLimit"
+              :setAdvancedFilters="setAdvancedFilters"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -535,6 +531,7 @@ import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
 import ResultCountChip from "@/components/library/ResultCountChip.vue";
+import type { PanelCount } from "@/composables/useResultCount";
 import BaseInputCheckbox from "@/components/base/BaseInputCheckbox.vue";
 import { isCompact } from "@/composables/useNavMenu";
 import FiltersPane from "@/components/filters/FiltersPane.vue";
@@ -616,12 +613,15 @@ import {
   computed,
   inject,
   nextTick,
+  onBeforeUnmount,
   onMounted,
   onUnmounted,
   provide,
   ref,
   useId,
   watch,
+  watchEffect,
+  type Ref,
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
@@ -1082,15 +1082,24 @@ const showListPager = computed(
     !isTableGrouped.value &&
     paginationStore.totalPages.value > 1,
 );
-// Main and preview lists get the accent-light results band; compact
-// relation lists keep a plain row (it may hold only a pager).
-// Inside a detail panel the panel is the chrome: no band or border of the
-// list's own (panel → block → rows, never a fourth box).
 const insidePanel: boolean = inject("InsidePanel", false);
-const panelCountTarget: string | undefined = inject(
-  "PanelCountTarget",
+const panelCount: Ref<PanelCount | undefined> | undefined = inject(
+  "PanelCount",
   undefined,
 );
+if (panelCount) {
+  watchEffect(() => {
+    panelCount.value = showCountChip.value
+      ? {
+          count: totalEntityCount.value,
+          exactCount: exactTotalCount.value,
+          exactCountLoading: exactCountLoading.value,
+          reveal: revealExactCount,
+        }
+      : undefined;
+  });
+  onBeforeUnmount(() => (panelCount.value = undefined));
+}
 const compactPreview: boolean = inject("CompactPreview", false);
 const onWhiteSurface: boolean = inject("OnWhiteSurface", false);
 const listActionsId = useId();
