@@ -78,6 +78,20 @@ const enableTimePicker = computed<boolean>(() => {
   --dp-border-color: var(--color-border-default);
   --dp-border-color-hover: var(--color-input-border-hover);
   --dp-font-family: var(--font-sans);
+  /* Surfaces from tokens, so the picker follows dark mode */
+  --dp-background-color: var(--color-surface);
+  --dp-hover-color: var(--color-surface-muted);
+  --dp-hover-text-color: var(--color-text-body);
+  --dp-hover-icon-color: var(--color-text-secondary);
+  --dp-icon-color: var(--color-text-muted);
+  --dp-menu-border-color: var(--color-border-default);
+  --dp-border-color-focus: var(--color-input-border-hover);
+  --dp-disabled-color: var(--color-surface-muted);
+  --dp-disabled-color-text: var(--color-text-muted);
+  --dp-secondary-color: var(--color-text-subtle);
+  --dp-scroll-bar-background: var(--color-surface-muted);
+  --dp-scroll-bar-color: var(--color-text-muted);
+  --dp-tooltip-color: var(--color-surface-muted);
 }
 
 .base-date-picker .dp__input {
