@@ -1,6 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
+import { onMounted } from "vue";
+import type { DropzoneFile } from "dropzone";
+import Dropzone from "../Dropzone.vue";
 import DropzoneView from "../DropzoneView.vue";
-import ProgressBar from "@/components/ProgressBar.vue";
+import { useDropzone } from "@/composables/useDropzone";
+import useUpload from "@/composables/upload/useUpload";
+import { ProgressStepStatus, ProgressStepType } from "@/generated-types/queries";
 
 const meta: Meta = {
   // Story id components-dropzone--progress, per MANIFEST.md.
@@ -9,12 +14,12 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          "The upload surface: a focusable dashed zone (Enter opens the file " +
-          "dialog; dropzone.js binds the click), one row per file with a " +
-          "commit-teal progress bar, a per-file state glyph and a named " +
-          "cancel, and a status banner counting the batch. A failed row " +
-          "keeps its place with a retry link — failures never abort the " +
-          "batch, and failed rows are never cleared automatically.",
+          "The upload surface: a dashed zone whose label is a real button " +
+          "(dropzone.js opens the file dialog on click), and one row per file " +
+          "added by dropzone.js: name, size, a status glyph per step " +
+          "(validate, prepare, upload) and a remove button. A failed step " +
+          "turns the row's border red and lists the errors under it; " +
+          "warnings show as a yellow list under a row that still completes.",
       },
     },
   },
@@ -23,53 +28,38 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const fileRow = (name: string, size: string, progress: number, state: string) => `
-  <li style="display:flex;align-items:center;gap:10px;padding:8px 12px;
-             border:1px solid var(--color-border-subtle);border-radius:var(--radius-input)">
-    <div style="flex:1;min-width:0">
-      <p style="font-size:var(--text-table)">
-        ${name}
-        <span style="color:var(--color-text-subtle)">· ${size}</span>
-      </p>
-      <div style="height:4px;margin-top:4px">
-        <progress-bar :progress="${progress}" progress-bar-type="percentage" style="height:4px;display:block" />
-      </div>
-    </div>
-    ${state}
-    <button type="button" aria-label="Remove file"
-            style="flex:none;color:var(--color-text-subtle)">✕</button>
-  </li>`;
+const rows: { name: string; megabytes: number; upload: ProgressStepStatus; errors?: string[]; warnings?: string[] }[] = [
+  { name: "scan-004.tiff", megabytes: 45, upload: ProgressStepStatus.Complete, warnings: ["No metadata row was found in the CSV for this file"] },
+  { name: "scan-003.tiff", megabytes: 47, upload: ProgressStepStatus.Failed, errors: ["Something went wrong while uploading"] },
+  { name: "scan-001.tiff", megabytes: 48, upload: ProgressStepStatus.Complete },
+  { name: "scan-002.tiff", megabytes: 51, upload: ProgressStepStatus.Loading },
+];
 
+/** Four files added to the real dropzone, then driven by useUpload: uploaded, uploading, failed and uploaded with a warning. */
 export const Progress: Story = {
   render: () => ({
-    components: { DropzoneView, ProgressBar },
+    components: { Dropzone },
+    setup() {
+      const dropzone = new useDropzone();
+      const { resetUpload, updateFileThumbnails, __handleFileThumbnailWarning } = useUpload();
+      resetUpload();
+      onMounted(() => {
+        const instance = (dropzone.dropzone as any).value;
+        rows.forEach((row) => {
+          const file = new File([""], row.name, { type: "image/tiff" });
+          Object.defineProperty(file, "size", { value: row.megabytes * 1000 * 1000 });
+          instance.addFile(file);
+          const added = file as unknown as DropzoneFile;
+          updateFileThumbnails(added, ProgressStepType.Prepare, ProgressStepStatus.Complete);
+          updateFileThumbnails(added, ProgressStepType.Upload, row.upload, row.errors);
+          if (row.warnings) __handleFileThumbnailWarning(added, row.warnings);
+        });
+      });
+      return { dropzone };
+    },
     template: `
-      <div style="max-width:520px;display:flex;flex-direction:column;gap:16px">
-        <div style="height:120px">
-          <dropzone-view :model-value="undefined" dropzone-label="Drag files here or browse" :is-validation="false" :file-count="0" style="" />
-        </div>
-
-        <p role="status" style="padding:6px 12px;background:var(--color-surface-panel-header);
-           color:var(--color-text-panel-header);border-radius:var(--radius-input);font-size:var(--text-ui);font-weight:700">
-          2 of 4 uploaded
-        </p>
-
-        <ul style="display:flex;flex-direction:column;gap:8px">
-          ${fileRow("scan-001.tiff", "48 MB", 100, '<span aria-hidden="true" style="color:var(--color-success)">✓</span>')}
-          ${fileRow("scan-002.tiff", "51 MB", 100, '<span aria-hidden="true" style="color:var(--color-success)">✓</span>')}
-          ${fileRow("scan-003.tiff", "47 MB", 62, '<span style="font-size:var(--text-hint);color:var(--color-text-secondary)">62%</span>')}
-          <li role="alert" style="display:flex;align-items:center;gap:10px;padding:8px 12px;
-                     border:1px solid var(--color-danger);border-radius:var(--radius-input)">
-            <div style="flex:1;min-width:0">
-              <p style="font-size:var(--text-table);color:var(--color-danger)">
-                scan-004.tiff <span style="opacity:.7">· upload failed</span>
-              </p>
-            </div>
-            <button type="button" style="flex:none;font-size:var(--text-table);text-decoration:underline;color:var(--color-text-link)">
-              Retry
-            </button>
-          </li>
-        </ul>
+      <div style="max-width:640px;display:flex;flex-direction:column">
+        <dropzone :dropzone="dropzone" dropzone-label="upload-fields.labels.file-upload" view-style="p-3 h-full overflow-x-hidden mb-4 grow" :is-validation-file="false" />
       </div>`,
   }),
 };

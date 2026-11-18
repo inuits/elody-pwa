@@ -1,97 +1,154 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
+import { onMounted, provide, ref } from "vue";
+import { useRouter } from "vue-router";
+import DynamicForm from "../DynamicForm.vue";
+import DynamicFormSkeleton from "../DynamicFormSkeleton.vue";
 import BaseTabs from "@/components/BaseTabs.vue";
 import BaseTab from "@/components/BaseTab.vue";
-import BaseButton from "@/components/base/BaseButtonNew.vue";
-import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
-import { useFormHelper } from "@/composables/useFormHelper";
-import { InputFieldTypes } from "@/generated-types/queries";
+import {
+  ActionType,
+  DamsIcons,
+  InputFieldTypes,
+  ValidationRules,
+} from "@/generated-types/queries";
 
-const meta: Meta = {
-  // Story id repetitiveform-dynamicform--tabs, per MANIFEST.md. The full form
-  // is a self-describing GraphQL query — its definition lives in client query
-  // documents — so the story shows the chrome the docs page specifies: the
-  // tab row with its error dot, field rows, and the one submit zone.
+const meta: Meta<typeof DynamicForm> = {
   title: "RepetitiveForm/DynamicForm",
+  component: DynamicForm,
   parameters: {
     docs: {
       description: {
         component:
-          "The form's structure comes entirely from a client query document; " +
-          "what the design system owns is the chrome. Tabs follow the tabs " +
-          "pattern — 12.5px bold, active underlined in the accent, a danger " +
-          "dot on a tab holding errors — and every form ends in one sticky " +
-          "submit zone: validation summary left, Save and Cancel right. " +
-          "Never a save button per section.",
+          "A form built from configuration: the fields in configured order, " +
+          "then the action button. The stories pass the fields directly " +
+          "(modalFormFields), so no form query is fetched.",
       },
     },
   },
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof DynamicForm>;
 
-const FORM_ID = "story-dynamic-form";
+const field = (
+  key: string,
+  label: string,
+  type: InputFieldTypes,
+  required = false,
+) => ({
+  __typename: "PanelMetaData",
+  key,
+  label,
+  inputField: {
+    __typename: "InputField",
+    type,
+    validation: required
+      ? { __typename: "Validation", value: [ValidationRules.Required] }
+      : undefined,
+  },
+});
 
-export const Tabs: Story = {
+const action = (label: string, actionType: ActionType, icon?: DamsIcons) => ({
+  __typename: "FormAction",
+  label,
+  icon,
+  actionType,
+  actionQuery: "CreateEntity",
+  creationType: "asset",
+});
+
+const createFields = {
+  title: field("title", "Title", InputFieldTypes.Text, true),
+  description: field("description", "Description", InputFieldTypes.Textarea),
+  date: field("date", "Date", InputFieldTypes.Date),
+  create: action("Create", ActionType.Submit, DamsIcons.Create),
+};
+
+const setup = (pressSubmit = false) => {
+  provide("config", { features: {} });
+  const root = ref<HTMLElement>();
+  onMounted(() => {
+    if (!pressSubmit) return;
+    setTimeout(
+      () =>
+        root.value
+          ?.querySelector<HTMLButtonElement>("button:not([disabled])")
+          ?.click(),
+      300,
+    );
+  });
+  return { root, router: useRouter(), fields: createFields };
+};
+
+export const Default: Story = {
   render: () => ({
-    components: { BaseTabs, BaseTab, BaseButton, MetadataWrapper },
+    components: { DynamicForm },
+    setup: () => setup(),
+    template: `
+      <div ref="root" style="max-width:480px;background:var(--color-surface)">
+        <dynamic-form
+          dynamic-form-query="StoryCreateForm"
+          :router="router"
+          :modal-form-fields="fields"
+          :show-form-title="false"
+        />
+      </div>`,
+  }),
+};
+
+export const Steps: Story = {
+  render: () => ({
+    components: { DynamicForm, BaseTabs, BaseTab },
     setup() {
-      useFormHelper().createForm(FORM_ID, {
-        intialValues: { title: "Tales from the North Sea", author: "" },
-        relationValues: {},
-      } as never);
+      provide("config", { features: {} });
       return {
-        formId: FORM_ID,
-        fields: [
-          {
-            label: "Title",
-            key: "title",
-            value: "Tales from the North Sea",
-            inputField: { type: InputFieldTypes.Text, label: "Title" },
-          },
-          {
-            label: "Author",
-            key: "author",
-            value: "",
-            inputField: { type: InputFieldTypes.Text, label: "Author" },
-          },
-        ],
+        router: useRouter(),
+        work: {
+          title: field("title", "Title", InputFieldTypes.Text, true),
+          next: action("Next", ActionType.NextFormTab, DamsIcons.AngleRight),
+        },
+        expression: {
+          language: field("language", "Language", InputFieldTypes.Text),
+          create: action("Create", ActionType.SubmitAllFormTabs),
+        },
       };
     },
     template: `
-      <div style="max-width:560px">
-        <base-tabs
-          :tabs="['Work', 'Expression', 'Manifestation']"
-          :tab-navigation-disabled="false"
-          :error-tabs="[1]"
-          error-dot-title="This tab contains errors"
-        >
+      <div style="max-width:560px;background:var(--color-surface);padding-top:16px">
+        <base-tabs :tabs="['Work', 'Expression']" :tab-navigation-disabled="true" step-strip>
           <base-tab>
-            <div style="display:flex;flex-direction:column;gap:12px;padding:6px 0">
-              <metadata-wrapper
-                v-for="field in fields"
-                :key="field.key"
-                :is-edit="false"
-                :form-id="formId"
-                :metadata="field"
-              />
-            </div>
+            <dynamic-form dynamic-form-query="StoryWorkForm" form-key="work" :router="router" :modal-form-fields="work" :show-form-title="false" />
           </base-tab>
-          <base-tab><p style="font-size:var(--text-value)">…</p></base-tab>
-          <base-tab><p style="font-size:var(--text-value)">…</p></base-tab>
+          <base-tab>
+            <dynamic-form dynamic-form-query="StoryExpressionForm" form-key="expression" :router="router" :modal-form-fields="expression" :show-form-title="false" />
+          </base-tab>
         </base-tabs>
+      </div>`,
+  }),
+};
 
-        <div
-          role="group"
-          aria-label="Form actions"
-          style="display:flex;align-items:center;justify-content:flex-end;gap:10px;
-                 margin-top:10px;padding:8px 0;border-top:1px solid var(--color-border-subtle)"
-        >
-          <p role="alert" style="margin-right:auto;font-size:var(--text-hint);color:var(--color-danger)">
-            Check the highlighted fields (2)
-          </p>
-          <base-button button-style="ghost" button-size="sm" label="Cancel" style="width:auto" />
-          <base-button button-style="commit" button-size="sm" label="Save" style="width:auto" />
+export const States: Story = {
+  render: () => ({
+    components: { DynamicForm, DynamicFormSkeleton },
+    setup: () => setup(true),
+    template: `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+        <div>
+          <code style="font-size:var(--text-label)">loading</code>
+          <div style="position:relative;min-height:220px;background:var(--color-surface);padding:16px">
+            <dynamic-form-skeleton form-key="StoryCreateForm" />
+          </div>
+        </div>
+        <div>
+          <code style="font-size:var(--text-label)">submitted with errors</code>
+          <div ref="root" style="background:var(--color-surface)">
+            <dynamic-form
+              dynamic-form-query="StoryCreateFormErrors"
+              :router="router"
+              :modal-form-fields="fields"
+              :show-form-title="false"
+            />
+          </div>
         </div>
       </div>`,
   }),

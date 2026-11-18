@@ -79,11 +79,11 @@ describe("BaseContextMenu", () => {
 
     beforeEach(() => {
       mocks.someModalIsOpened = false;
-      Object.defineProperty(document.body, "clientWidth", {
+      Object.defineProperty(document.documentElement, "clientWidth", {
         value: 1000,
         configurable: true,
       });
-      Object.defineProperty(document.body, "clientHeight", {
+      Object.defineProperty(document.documentElement, "clientHeight", {
         value: 800,
         configurable: true,
       });
@@ -117,6 +117,16 @@ describe("BaseContextMenu", () => {
 
       expect(getMenu()!.style.top).toBe("40px");
       expect(getMenu()!.style.left).toBe("100px");
+    });
+
+    it("measures the viewport, not a body shorter than the window", async () => {
+      Object.defineProperty(document.body, "clientHeight", {
+        value: 100,
+        configurable: true,
+      });
+      await mountMenu();
+
+      expect(getMenu()!.style.top).toBe("40px");
     });
 
     it("aligns to the trigger's right edge near the viewport edge", async () => {
@@ -156,6 +166,14 @@ describe("BaseContextMenu", () => {
       await mountMenu();
 
       expect(document.activeElement).toBe(getItems()[0]);
+    });
+
+    it("does not scroll the page when it moves focus into the menu", async () => {
+      const focus = vi.spyOn(HTMLElement.prototype, "focus");
+      await mountMenu();
+
+      expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+      focus.mockRestore();
     });
 
     it("cycles through the items with the arrow keys", async () => {

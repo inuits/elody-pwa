@@ -1,9 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import { nextTick, onMounted, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, provide, watch } from "vue";
+import { useRouter } from "vue-router";
 import BaseModal from "@/components/base/BaseModal.vue";
 import BaseButton from "@/components/base/BaseButtonNew.vue";
-import { ModalStyle, TypeModals } from "@/generated-types/queries";
+import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
+import {
+  ActionType,
+  DamsIcons,
+  InputFieldTypes,
+  ModalStyle,
+  TypeModals,
+  ValidationRules,
+} from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { useBlockingLoader } from "@/composables/useBlockingLoader";
 
 const meta: Meta<typeof BaseModal> = {
   // Story id modals-basemodal--default, per MANIFEST.md.
@@ -16,10 +26,8 @@ const meta: Meta<typeof BaseModal> = {
           "The base overlay dialog: the system scrim, a 10px radius, the " +
           "modal shadow, and a native <dialog> so the focus trap and Escape " +
           "come from the platform. The title names the dialog and wears the " +
-          "panel-shell header; the close cross is a named button, and first " +
-          "focus lands on the body's first interactive element, not on that " +
-          "cross. Commit sits right, Cancel ghost-left of it — one commit " +
-          "per modal, and the verb is the label, never \"OK\".",
+          "panel-shell header; the close cross is a named button and, as the " +
+          "first focusable element, takes focus on open.",
       },
     },
   },
@@ -28,10 +36,39 @@ const meta: Meta<typeof BaseModal> = {
 export default meta;
 type Story = StoryObj<typeof BaseModal>;
 
+const createFields = {
+  title: {
+    __typename: "PanelMetaData",
+    key: "title",
+    label: "Title",
+    inputField: {
+      __typename: "InputField",
+      type: InputFieldTypes.Text,
+      validation: { __typename: "Validation", value: [ValidationRules.Required] },
+    },
+  },
+  description: {
+    __typename: "PanelMetaData",
+    key: "description",
+    label: "Description",
+    inputField: { __typename: "InputField", type: InputFieldTypes.Textarea },
+  },
+  create: {
+    __typename: "FormAction",
+    label: "Create",
+    icon: DamsIcons.Create,
+    actionType: ActionType.Submit,
+    actionQuery: "CreateEntity",
+    creationType: "asset",
+  },
+};
+
+/** A centred modal with a form inside, as the app opens a create form. */
 export const Default: Story = {
   render: () => ({
-    components: { BaseModal, BaseButton },
+    components: { BaseModal, BaseButton, DynamicForm },
     setup() {
+      provide("config", { features: {} });
       const { openModal, closeModal, getModalInfo } = useBaseModal();
       const open = () => openModal(TypeModals.DynamicForm, ModalStyle.Center);
       const close = () => closeModal(TypeModals.DynamicForm);
@@ -42,22 +79,48 @@ export const Default: Story = {
         await nextTick();
         open();
       });
-      return { TypeModals, open, close };
+      return { TypeModals, open, close, router: useRouter(), fields: createFields };
     },
     template: `
       <div style="min-height:340px">
         <base-button button-style="primary" label="Open modal" style="width:auto" @click="open" />
-        <base-modal :modal-type="TypeModals.DynamicForm" title="Choose person" @hide-modal="close">
-          <div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px;min-width:380px">
-            <label style="font-size:var(--text-label);font-weight:700;color:var(--color-text-field-label)">
-              Search for a person
-              <input class="ds-input ds-input--defaultWithBorder" style="width:100%;font-size:var(--text-value)" placeholder="Search…" />
-            </label>
-            <div style="display:flex;justify-content:flex-end;gap:8px">
-              <base-button button-style="ghost" button-size="sm" label="Cancel" style="width:auto" @click="close" />
-              <base-button button-style="commit" button-size="sm" label="Add" style="width:auto" />
-            </div>
+        <base-modal
+          :modal-type="TypeModals.DynamicForm"
+          :cancel-button-availabe="false"
+          modal-color="bg-background-light"
+          modal-height-style="max-h-[90vh]"
+          title="Create asset"
+          @hide-modal="close"
+        >
+          <div class="flex flex-col w-full pt-4">
+            <dynamic-form dynamic-form-query="StoryCreateForm" :router="router" :modal-form-fields="fields" :show-form-title="false" />
           </div>
+        </base-modal>
+      </div>`,
+  }),
+};
+
+/** Busy: a long operation blocks the dialog behind a spinner and its message. */
+export const Busy: Story = {
+  render: () => ({
+    components: { BaseModal },
+    setup() {
+      const { openModal, closeModal, getModalInfo } = useBaseModal();
+      const { startBlocking, stopBlocking } = useBlockingLoader();
+      onMounted(async () => {
+        if (getModalInfo(TypeModals.DynamicForm).open)
+          closeModal(TypeModals.DynamicForm);
+        await nextTick();
+        openModal(TypeModals.DynamicForm, ModalStyle.Center);
+        startBlocking("Applying your changes, this may take a while...");
+      });
+      onUnmounted(stopBlocking);
+      return { TypeModals, close: () => closeModal(TypeModals.DynamicForm) };
+    },
+    template: `
+      <div style="min-height:340px">
+        <base-modal :modal-type="TypeModals.DynamicForm" title="Edit selected records" @hide-modal="close">
+          <div style="padding:18px 22px;min-width:380px;min-height:180px">Fields of the form</div>
         </base-modal>
       </div>`,
   }),

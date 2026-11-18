@@ -25,7 +25,9 @@ item shows a warning icon after the label, with the "required" tooltip.
 | `--checkbox-hit-area-compact` | hit area in dense lists |
 | `--border-width-control` | box outline |
 | `--color-commit` | check and checked border |
-| `--color-text-disabled`, `--color-border-subtle` | disabled |
+| `--checkbox-disabled-fill` | disabled box ink (grey check when checked) |
+| `--checkbox-disabled-border` | disabled box outline |
+| `--checkbox-disabled-label` | disabled label ink |
 
 ## Sizes
 `size`:
@@ -40,7 +42,7 @@ item shows a warning icon after the label, with the "required" tooltip.
 | unchecked | neutral outline |
 | checked | commit-teal check and border |
 | focus | the global focus ring |
-| disabled | muted outline, no pointer |
+| disabled | muted grey box and label, no pointer, checked or not |
 | required | always checked, cannot be unchecked, warning icon with tooltip |
 | limit reached | disabled when the bulk-selection limit is reached and it isn't selected |
 

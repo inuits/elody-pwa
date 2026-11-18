@@ -1,7 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { ref, watch } from "vue";
 import EntityElementWrapper from "../EntityElementWrapper.vue";
-import { BaseLibraryModes } from "@/generated-types/queries";
+import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
+import {
+  BaseLibraryModes,
+  Entitytyping,
+  GetPreviewComponentsDocument,
+} from "@/generated-types/queries";
+import {
+  BulkOperationsContextEnum,
+  useBulkOperations,
+} from "@/composables/useBulkOperations";
+import { apolloClient } from "@/main";
 
 type WrapperArgs = {
   label: string;
@@ -11,7 +21,6 @@ type WrapperArgs = {
   useVshowInsteadOfVif: boolean;
   previewLabel: string;
   headerStyle: "normal" | "none";
-  content: string;
   onToggleElementCollapse?: (entityId: string, label: string) => void;
 };
 
@@ -25,7 +34,6 @@ const meta: Meta<WrapperArgs> = {
     },
     headerStyle: { control: "inline-radio", options: ["normal", "none"] },
     previewLabel: { control: "text" },
-    content: { control: "text", description: "Placeholder for the content slot" },
     onToggleElementCollapse: { action: "toggleElementCollapse" },
   },
   parameters: {
@@ -43,9 +51,45 @@ const meta: Meta<WrapperArgs> = {
 export default meta;
 type Story = StoryObj<WrapperArgs>;
 
+const CONTEXT = BulkOperationsContextEnum.EntityElementMedia;
+
+const mediafile = (id: string, title: string, attribution: string) => ({
+  id,
+  uuid: id,
+  type: Entitytyping.Mediafile,
+  teaserMetadata: {
+    title: { key: "title", label: "File name", __typename: "Metadata" },
+    attribution: { key: "attribution", label: "Attribution", __typename: "Metadata" },
+  },
+  intialValues: { title, attribution },
+  relationValues: {},
+});
+
+const list = {
+  entities: [
+    mediafile("m1", "harbour-1920.tif", "City Archive"),
+    mediafile("m2", "fish-market.jpg", "Jan Persoon"),
+    mediafile("m3", "lighthouse.png", "Marie Vermeulen"),
+  ],
+  placeholderEntities: [],
+  entitiesLoading: false,
+  bulkOperationsContext: CONTEXT,
+  listItemRouteName: "",
+  enableSelection: true,
+  enableNavigation: false,
+  entityType: Entitytyping.Mediafile,
+  configPerViewMode: {},
+};
+
 const render: Story["render"] = (args) => ({
-  components: { EntityElementWrapper },
+  components: { EntityElementWrapper, ViewModesList },
   setup() {
+    apolloClient.writeQuery({
+      query: GetPreviewComponentsDocument,
+      variables: { entityType: Entitytyping.Mediafile },
+      data: { PreviewComponents: { __typename: "PreviewComponents" } },
+    });
+    useBulkOperations().dequeueAllItemsForBulkProcessing(CONTEXT);
     const collapsed = ref(args.isCollapsed);
     watch(
       () => args.isCollapsed,
@@ -55,7 +99,7 @@ const render: Story["render"] = (args) => ({
       collapsed.value = !collapsed.value;
       args.onToggleElementCollapse?.(entityId, label);
     };
-    return { args, collapsed, toggle };
+    return { args, collapsed, toggle, list };
   },
   template: `
     <div style="max-width:720px">
@@ -69,7 +113,9 @@ const render: Story["render"] = (args) => ({
         :header-style="args.headerStyle"
         @toggle-element-collapse="toggle"
       >
-        <template #content><p>{{ args.content }}</p></template>
+        <template #content>
+          <view-modes-list v-bind="list" mode="list" />
+        </template>
       </entity-element-wrapper>
     </div>`,
 });
@@ -82,7 +128,6 @@ const args: WrapperArgs = {
   useVshowInsteadOfVif: false,
   previewLabel: "",
   headerStyle: "normal",
-  content: "Slot content: a list, viewer or map renders here.",
 };
 
 export const Default: Story = { args, render };

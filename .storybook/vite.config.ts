@@ -47,6 +47,10 @@ export default defineConfig({
             },
           ]),
       {
+        find: /^@\/queryLoader(\.ts)?$/,
+        replacement: fileURLToPath(new URL("./queryLoader.ts", import.meta.url)),
+      },
+      {
         find: "@",
         replacement: fileURLToPath(new URL("../src", import.meta.url)),
       },

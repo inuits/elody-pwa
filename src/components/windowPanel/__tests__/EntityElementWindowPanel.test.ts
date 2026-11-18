@@ -107,6 +107,16 @@ describe("EntityElementWindowPanel header", () => {
     expect(isCollapsed(wrapper)).toBe(true);
   });
 
+  it("collapses the panel from a keyboard-reachable toggle that says whether it is open", async () => {
+    const wrapper = mountPanel();
+    const toggle = wrapper.find('button[data-cy="panel-collapse-toggle"]');
+    expect(toggle.attributes("aria-expanded")).toBe("true");
+    expect(toggle.attributes("aria-label")).toBe("Status");
+    await toggle.trigger("click");
+    expect(isCollapsed(wrapper)).toBe(true);
+    expect(toggle.attributes("aria-expanded")).toBe("false");
+  });
+
   it("keeps the status only as wide as its value, so the rest of the header toggles", () => {
     const status = mountPanel().find('[data-cy="panel-header-status"]');
     expect(status.classes()).toContain("w-fit");

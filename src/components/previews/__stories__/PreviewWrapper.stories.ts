@@ -14,6 +14,8 @@ import {
   registerChangedEntity,
   registerPreviewFixtures,
 } from "./previewFixtures";
+import { PENDING_QUERY, registerQueryFixture } from "@/main";
+import { isCompact } from "@/composables/useNavMenu";
 
 const entities = [
   previewEntity("m1", {
@@ -132,4 +134,57 @@ export const WithChanges: Story = {
       changesPreview: changesPreviewConfig,
     },
   },
+};
+
+const LOADING_QUERY = "GetSortOptions";
+
+export const States: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Loading: a spinner while the preview's fields are fetched. Open: the header and the fields.",
+      },
+    },
+  },
+  render: (args) => ({
+    components: { PreviewWrapper },
+    setup() {
+      registerPreviewFixtures();
+      providePreviewConfig();
+      registerQueryFixture(LOADING_QUERY, PENDING_QUERY);
+      const loading = {
+        ...args.previewComponent,
+        metadataPreviewQuery: LOADING_QUERY,
+      };
+      return { args, loading };
+    },
+    template: `<div style="display:grid;gap:16px;max-width:480px">
+      <preview-wrapper v-bind="args" :preview-component="loading" />
+      <preview-wrapper v-bind="args" />
+    </div>`,
+  }),
+  args: { ...Default.args },
+};
+
+export const SmallScreen: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Below 48rem the preview covers the page: a back button leads the header instead of the close button.",
+      },
+    },
+  },
+  render: (args) => ({
+    components: { PreviewWrapper },
+    setup() {
+      isCompact.value = true;
+      registerPreviewFixtures();
+      providePreviewConfig();
+      return { args };
+    },
+    template: `<div style="max-width:360px"><preview-wrapper v-bind="args" /></div>`,
+  }),
+  args: { ...Default.args },
 };

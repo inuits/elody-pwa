@@ -95,11 +95,21 @@
           <unicon :name="Unicons.Plus.name" height="14" aria-hidden="true" />
           {{ rowMessages.add() }}
         </button>
-        <unicon
-          :name="
-            !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
-          "
-        />
+        <button
+          type="button"
+          data-cy="panel-collapse-toggle"
+          class="flex"
+          :aria-expanded="!isCollapsed"
+          :aria-label="t(panel.panelHeaderContent.label)"
+          @click.stop="toggleIsCollapsed()"
+        >
+          <unicon
+            :name="
+              !isCollapsed ? Unicons.CompressAlt.name : Unicons.ExpandAlt.name
+            "
+            aria-hidden="true"
+          />
+        </button>
       </div>
     </div>
 

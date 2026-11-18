@@ -29,6 +29,8 @@ export const registerQueryFixture = (
   queryFixtures[operationName] = data;
 };
 
+export const PENDING_QUERY = Symbol("pending");
+
 export const resetQueryFixtures = (): void => {
   Object.keys(queryFixtures).forEach((key) => delete queryFixtures[key]);
 };
@@ -36,18 +38,20 @@ export const resetQueryFixtures = (): void => {
 const fixtureLink = new ApolloLink(
   (operation) =>
     new Observable((observer) => {
+      if (queryFixtures[operation.operationName] === PENDING_QUERY) return;
       if (!(operation.operationName in queryFixtures)) {
         // Silent empty answers are hard to debug; say what was asked.
         console.debug(
           `[storybook] unfixtured query "${operation.operationName}" answered {}`,
         );
       }
-      observer.next({
-        data: (queryFixtures[operation.operationName] ?? {}) as Record<
-          string,
-          unknown
-        >,
-      });
+      const fixture = queryFixtures[operation.operationName];
+      const data =
+        typeof fixture === "function"
+          ? fixture(operation.variables)
+          : (fixture ?? {});
+      if (data === PENDING_QUERY) return;
+      observer.next({ data: data as Record<string, unknown> });
       observer.complete();
     }),
 );
@@ -64,7 +68,7 @@ export const router = createRouter({
 
 export const auth = {
   isAuthenticated: { value: true },
-  user: { value: { name: "Storybook" } },
+  user: { name: "Storybook User", email: "storybook@example.com" },
   logout: () => undefined,
   redirectToLogin: () => undefined,
 };
@@ -77,6 +81,16 @@ export const formattersSettings = {
     draft: { background: "#E8EEF0", text: "#003A52" },
     published: { background: "#DAF1DC", text: "#15803d" },
     expired: { background: "#FDEBD7", text: "#B95000" },
+    concept: { tone: "tone2" },
+    approved: { tone: "tone1", icon: "Check" },
+    work: { tone: "tone1", shape: "badge", letter: "W" },
+    expression: { tone: "tone2", shape: "badge", letter: "E" },
+    manifestation: { tone: "tone3", shape: "badge", letter: "M" },
+    w: { tone: "tone1" },
+    e: { tone: "tone2" },
+    m: { tone: "tone3" },
+    modified: { background: "#ecdada", text: "#ac1113" },
+    added: { background: "#daecdd", text: "#0b8319" },
   },
 };
 export const typeUrlMapping = { mapping: {}, reverseMapping: {} };

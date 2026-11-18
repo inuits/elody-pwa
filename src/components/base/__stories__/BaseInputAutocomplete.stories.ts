@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { ref, watch } from "vue";
+import { userEvent } from "storybook/test";
 import BaseInputAutocomplete from "../BaseInputAutocomplete.vue";
 
 const options = [
@@ -60,23 +61,69 @@ export const Tags: Story = {
 export const CreateOption: Story = {
   render: () => ({
     components: { BaseInputAutocomplete },
-    setup: () => ({
-      value: ref([{ label: "adventure", value: "adventure" }]),
-      options,
-      createOptionConfig: {
-        canCreateOption: true,
-        createPromptTranslationKey: "dropdown.create-option",
-      },
-    }),
+    setup() {
+      const value = ref([{ label: "adventure", value: "adventure" }]);
+      const add = (option: { label: string; value: string }) => {
+        value.value = [...value.value, { label: option.label, value: option.value }];
+      };
+      return {
+        value,
+        add,
+        options,
+        createOptionConfig: {
+          canCreateOption: true,
+          createPromptTranslationKey: "actions.labels.create-entity-from-dropdown",
+        },
+      };
+    },
     template: `
-      <div style="max-width:420px">
+      <div style="max-width:420px;padding-bottom:160px">
         <base-input-autocomplete
           v-model="value"
           :options="options"
           autocomplete-style="defaultWithBorder"
           :create-option-config="createOptionConfig"
           placeholder="Type to add…"
+          @add-option="add"
         />
+      </div>`,
+  }),
+  play: async ({ canvasElement }) => {
+    const search = canvasElement.querySelector<HTMLInputElement>(
+      ".multiselect-tags-search",
+    );
+    if (search) await userEvent.type(search, "poetry");
+  },
+};
+
+/** Values, empty, loading, disabled and read-only side by side. */
+export const States: Story = {
+  render: () => ({
+    components: { BaseInputAutocomplete },
+    setup: () => ({
+      options,
+      picked: ref([
+        { label: "adventure", value: "adventure" },
+        { label: "fantasy", value: "fantasy" },
+      ]),
+      empty: ref([]),
+    }),
+    template: `
+      <div style="display:grid;grid-template-columns:110px 360px;gap:12px 14px;align-items:center;font-size:var(--text-label)">
+        <span>with values</span>
+        <base-input-autocomplete v-model="picked" :options="options" autocomplete-style="defaultWithBorder" />
+
+        <span>empty</span>
+        <base-input-autocomplete v-model="empty" :options="options" autocomplete-style="defaultWithBorder" placeholder="Search for a genre…" />
+
+        <span>loading</span>
+        <base-input-autocomplete v-model="empty" :options="[]" autocomplete-style="defaultWithBorder" placeholder="Search for a genre…" loading />
+
+        <span>disabled</span>
+        <base-input-autocomplete v-model="picked" :options="options" autocomplete-style="defaultWithBorder" disabled />
+
+        <span>read-only</span>
+        <base-input-autocomplete v-model="picked" :options="options" autocomplete-style="readOnly" disabled />
       </div>`,
   }),
 };

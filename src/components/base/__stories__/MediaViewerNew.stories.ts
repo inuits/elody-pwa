@@ -47,3 +47,12 @@ export const Default: Story = {
     template: `<div style="height:520px"><media-viewer-new v-bind="args" /></div>`,
   }),
 };
+
+export const Unsupported: Story = {
+  args: { ...Default.args, mediafiles: "unsupported" as never },
+  render: (args) => ({
+    components: { MediaViewerNew },
+    setup: () => ({ args }),
+    template: `<div style="height:280px"><media-viewer-new v-bind="args" /></div>`,
+  }),
+};

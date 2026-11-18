@@ -45,15 +45,20 @@
         <span :data-panel-count="panelCountId" class="contents" />
         <slot name="actions"></slot>
       </div>
-      <span
+      <button
         v-if="!isPreviewElement"
+        type="button"
+        data-cy="entity-element-wrapper-toggle"
         class="flex text-text-panel-header"
+        :aria-expanded="!isCollapsed"
+        :aria-label="previewLabel ? previewLabel : t(label)"
         @click="emit('toggleElementCollapse', entityId, label)"
       >
         <unicon
           :name="isCollapsed ? Unicons.AngleDown.name : Unicons.AngleUp.name"
+          aria-hidden="true"
         />
-      </span>
+      </button>
     </div>
     <transition name="collapse">
       <div v-if="!useVshowInsteadOfVif && !isCollapsed">

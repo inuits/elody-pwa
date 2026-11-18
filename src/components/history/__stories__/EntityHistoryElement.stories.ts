@@ -20,8 +20,7 @@ const meta: Meta<Args> = {
         component:
           "One version of a record in the history view: its windows and " +
           "relation lists, read-only, with the version's diff marks. The " +
-          "history modal shows two of these side by side, the earlier " +
-          "version left and the later one right.",
+          "history page (History/HistoryComparison) shows two side by side.",
       },
     },
   },
@@ -61,32 +60,6 @@ export const Default: Story = {
           :entity="entity"
           :relation-diffs="relationDiffs"
           :wysiwyg-diffs="wysiwygDiffs"
-        />
-      </div>`,
-  }),
-};
-
-export const Versions: Story = {
-  render: () => ({
-    components: { EntityHistoryElement },
-    setup: () => ({
-      elements: windowElements,
-      previous: versionSetup(() => "previous"),
-      current: versionSetup(() => "current"),
-    }),
-    template: `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:960px">
-        <entity-history-element
-          :elements="elements"
-          :entity="previous.entity.value"
-          :relation-diffs="previous.relationDiffs.value"
-          :wysiwyg-diffs="previous.wysiwygDiffs.value"
-        />
-        <entity-history-element
-          :elements="elements"
-          :entity="current.entity.value"
-          :relation-diffs="current.relationDiffs.value"
-          :wysiwyg-diffs="current.wysiwygDiffs.value"
         />
       </div>`,
   }),

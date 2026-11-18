@@ -100,7 +100,11 @@ export const States: Story = {
         {
           note: "preview open",
           id: "row-preview",
-          props: { previewComponentCurrentActive: true, previewOpen: true },
+          props: {
+            previewComponentEnabled: true,
+            previewComponentCurrentActive: true,
+            previewOpen: true,
+          },
         },
         {
           note: "last previewed",

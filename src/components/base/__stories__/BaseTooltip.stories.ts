@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
+import { onMounted, ref } from "vue";
 import BaseTooltip from "../BaseTooltip.vue";
 import { Unicons } from "@/types";
 
@@ -19,6 +20,34 @@ const meta: Meta<typeof BaseTooltip> = {
 
 export default meta;
 type Story = StoryObj<typeof BaseTooltip>;
+
+/** A shown tooltip above its trigger, opened on mount. */
+export const Shown: Story = {
+  render: () => ({
+    components: { BaseTooltip },
+    setup() {
+      const trigger = ref<HTMLElement>();
+      onMounted(() => trigger.value?.dispatchEvent(new Event("mouseenter")));
+      return { Unicons, trigger };
+    },
+    template: `
+      <div style="display:flex;padding:120px 0 0 240px">
+        <base-tooltip
+          position="top"
+          :tooltip-offset="8"
+          :show-delay="0"
+          :enable-auto-placement="false"
+        >
+          <template #activator="{ on, describedBy }">
+            <button ref="trigger" v-on="on" :aria-describedby="describedBy" aria-label="Help" type="button">
+              <unicon :name="Unicons.QuestionCircle.name" height="18" />
+            </button>
+          </template>
+          Fields marked with a star are required
+        </base-tooltip>
+      </div>`,
+  }),
+};
 
 export const States: Story = {
   render: () => ({

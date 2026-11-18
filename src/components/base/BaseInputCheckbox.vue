@@ -20,8 +20,8 @@
           CHECKBOX_BOX_CLASSES,
           {
             'cursor-pointer': !disabled,
-            'disabled:text-text-light disabled:accent-neutral-white disabled:border-border-subtle':
-              disabled,
+            'disabled:text-(--checkbox-disabled-fill) disabled:accent-(--checkbox-disabled-fill) disabled:border-(--checkbox-disabled-border)':
+              isDisabled,
           },
         ]"
         v-model="inputValue"
@@ -37,8 +37,11 @@
     <label
       v-if="label"
       :for="checkboxId"
-      class="flex flex-row select-none cursor-pointer"
-      :class="size === 'compact' ? 'ml-1.5' : { 'ml-2': inputValue }"
+      class="flex flex-row select-none"
+      :class="[
+        isDisabled ? 'text-(--checkbox-disabled-label)' : 'cursor-pointer',
+        { 'ml-1.5': size === 'compact' },
+      ]"
       @click.prevent.stop="handleItemSelection"
     >
       {{ label }}
@@ -141,6 +144,9 @@ const isDisabledByContextLimit = computed<boolean>(() => {
     isBulkSelectionLimitReached(props.bulkOperationsContext)
   );
 });
+const isDisabled = computed<boolean>(
+  () => props.disabled || isDisabledByContextLimit.value,
+);
 
 onMounted(() => {
   if (props.required)

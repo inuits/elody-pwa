@@ -66,7 +66,35 @@ export const Default: Story = {
       return {};
     },
     template: `
-      <div style="min-height:220px;padding:var(--spacing-ds-8)">
+      <div style="min-height:220px;padding:16px;background:var(--color-surface)">
+        <bread-crumbs />
+      </div>`,
+  }),
+};
+
+export const HistoryOpen: Story = {
+  name: "Earlier pages open",
+  render: Default.render,
+  play: async ({ canvasElement }) => {
+    canvasElement
+      .querySelector<HTMLElement>('[data-cy="breadcrumb-history"]')
+      ?.click();
+  },
+};
+
+/** The current record's type as a badge before its title, the one badge the app shows. */
+export const TypeBadge: Story = {
+  name: "Type badge",
+  render: () => ({
+    components: { BreadCrumbs },
+    setup() {
+      seedTrail();
+      rootRoute.value.typePillLabel = { formatter: "pill|auto", label: "M" };
+      provide("config", configFixture);
+      return {};
+    },
+    template: `
+      <div style="padding:16px;background:var(--color-surface)">
         <bread-crumbs />
       </div>`,
   }),

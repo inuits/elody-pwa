@@ -3,18 +3,30 @@ import { setup } from "@storybook/vue3-vite";
 import type { Plugin } from "vue";
 import Notifications from "@kyvg/vue3-notification";
 import Unicon from "vue-unicons";
-import { uniLeftIndentAlt, uniRightIndentAlt } from "vue-unicons/dist/icons";
+import {
+  uniExclamationCircle,
+  uniLeftIndentAlt,
+  uniLinkBroken,
+  uniRightIndentAlt,
+} from "vue-unicons/dist/icons";
 import { DefaultApolloClient } from "@vue/apollo-composable";
 import { Unicons } from "../src/types";
 import { apolloClient, i18n, resetQueryFixtures, router } from "./mockMain";
 import { useInputValidation } from "../src/composables/useInputValidation";
+import { isCompact } from "../src/composables/useNavMenu";
 import "../src/assets/main.css";
 
 // Field rows validate through vee-validate; without the rules registered, any
 // story containing one throws "No such validator '…' exists".
 useInputValidation().initializeInputValidation({});
 
-Unicon.add([...Object.values(Unicons), uniLeftIndentAlt, uniRightIndentAlt]);
+Unicon.add([
+  ...Object.values(Unicons),
+  uniLeftIndentAlt,
+  uniRightIndentAlt,
+  uniLinkBroken,
+  uniExclamationCircle,
+]);
 
 setup((app) => {
   app
@@ -55,8 +67,30 @@ const previewSplitViewports = {
   },
 };
 
+if (window.top !== window.self) {
+  const focus = HTMLElement.prototype.focus;
+  HTMLElement.prototype.focus = function (options?: FocusOptions) {
+    focus.call(this, { ...options, preventScroll: true });
+  };
+  const showModal = HTMLDialogElement.prototype.showModal;
+  HTMLDialogElement.prototype.showModal = function () {
+    this.inert = true;
+    showModal.call(this);
+    this.inert = false;
+    (
+      this.querySelector<HTMLElement>("[autofocus]") ??
+      this.querySelector<HTMLElement>(
+        "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+      )
+    )?.focus();
+  };
+}
+
 const preview: Preview = {
-  beforeEach: () => resetQueryFixtures(),
+  beforeEach: () => {
+    resetQueryFixtures();
+    isCompact.value = false;
+  },
   globalTypes: {
     surface: {
       description: "Background the story sits on",

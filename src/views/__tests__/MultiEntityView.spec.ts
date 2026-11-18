@@ -26,8 +26,9 @@ vi.mock("@/components/SpinnerLoader.vue", () => ({
   default: { name: "SpinnerLoader", template: "<div />" },
 }));
 
+const i18n = vi.hoisted(() => ({ hasKey: true }));
 vi.mock("vue-i18n", () => ({
-  useI18n: () => ({ t: (key: string) => key }),
+  useI18n: () => ({ t: (key: string) => key, te: () => i18n.hasKey }),
 }));
 
 vi.mock("@/main", () => ({
@@ -104,6 +105,18 @@ describe("MultiEntityView", () => {
     ).toHaveLength(0);
     expect(wrapper.text()).toContain("multi-entity.no-results");
     wrapper.unmount();
+  });
+
+  it("falls back to English when the client has no translation for the empty state", async () => {
+    i18n.hasKey = false;
+    mocks.queryResult.data.WemOverview = [];
+    const wrapper = getWrapper();
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("No results");
+    expect(wrapper.text()).not.toContain("multi-entity.no-results");
+    wrapper.unmount();
+    i18n.hasKey = true;
   });
 
   it("builds the breadcrumbs from the route's configuration, for the requested entity among all loaded ones", async () => {

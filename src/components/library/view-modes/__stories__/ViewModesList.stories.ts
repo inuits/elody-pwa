@@ -3,12 +3,20 @@ import ViewModesList from "../ViewModesList.vue";
 import {
   Entitytyping,
   GetPreviewComponentsDocument,
+  ListItemCoverageTypes,
+  PreviewTypes,
 } from "@/generated-types/queries";
 import {
   BulkOperationsContextEnum,
   useBulkOperations,
 } from "@/composables/useBulkOperations";
 import { apolloClient } from "@/main";
+import {
+  METADATA_PREVIEW_QUERY,
+  previewEntity,
+  providePreviewConfig,
+  registerPreviewFixtures,
+} from "@/components/previews/__stories__/previewFixtures";
 
 const meta: Meta<typeof ViewModesList> = {
   // Story id library-viewmodes-viewmodeslist--default, per MANIFEST.md.
@@ -105,6 +113,67 @@ export const Grid: Story = {
     template: `
       <div style="max-width:980px">
         <view-modes-list v-bind="base" :entities="entities" mode="grid" />
+      </div>`,
+  }),
+};
+
+const mediafile = (id: string, filename: string, attribution: string) => ({
+  ...previewEntity(id, {
+    title: filename,
+    original_filename: filename,
+    license: "CC BY 4.0",
+    minimal_attribution: attribution,
+  }),
+  teaserMetadata: {
+    title: { key: "title", label: "File name", __typename: "Metadata" },
+    minimal_attribution: {
+      key: "minimal_attribution",
+      label: "Attribution",
+      __typename: "Metadata",
+    },
+  },
+});
+
+const mediafiles = [
+  mediafile("m1", "harbour-1920.tif", "City Archive"),
+  mediafile("m2", "fish-market.jpg", "Jan Persoon"),
+  mediafile("m3", "lighthouse.png", "Marie Vermeulen"),
+];
+
+/** The preview open beside the list: the list keeps its first field, the open row gets the accent border. */
+export const WithPreview: Story = {
+  render: () => ({
+    components: { ViewModesList },
+    setup() {
+      registerPreviewFixtures();
+      providePreviewConfig();
+      apolloClient.writeQuery({
+        query: GetPreviewComponentsDocument,
+        variables: { entityType: Entitytyping.Mediafile },
+        data: {
+          PreviewComponents: {
+            __typename: "MediaFileEntity",
+            previewComponent: {
+              __typename: "PreviewComponent",
+              type: PreviewTypes.ColumnList,
+              listItemsCoverage: ListItemCoverageTypes.OneListItem,
+              openByDefault: true,
+              metadataPreviewQuery: METADATA_PREVIEW_QUERY,
+            },
+          },
+        },
+      });
+      useBulkOperations().dequeueAllItemsForBulkProcessing(CONTEXT);
+      return { base, mediafiles, Entitytyping };
+    },
+    template: `
+      <div style="max-width:720px;height:300px">
+        <view-modes-list
+          v-bind="base"
+          :entity-type="Entitytyping.Mediafile"
+          :entities="mediafiles"
+          mode="list"
+        />
       </div>`,
   }),
 };
