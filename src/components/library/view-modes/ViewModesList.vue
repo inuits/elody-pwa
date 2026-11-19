@@ -14,8 +14,9 @@
         v-if="showCurrentEntityFlow"
         data-cy="view-modes-list"
         :class="[
-          'h-full overflow-y-auto',
+          'relative h-full overflow-y-auto rounded-b-card',
           {
+            '[&>:last-child_li]:border-b-0': mode === 'list',
             'grid grid-cols-[repeat(auto-fill,minmax(var(--grid-card-min-width),1fr))] content-start gap-(--grid-gap) p-(--grid-pad) max-w-full':
               mode === 'grid',
             'grid-cols-[repeat(auto-fill,minmax(var(--grid-card-min-width-compact),1fr))]!':

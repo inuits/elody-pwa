@@ -95,11 +95,15 @@
           filtersInPane ? 'flex-row' : 'flex-col',
           // ui_kits/clients: band, selection row and list in one white panel.
           {
-            'bg-surface border border-border-panel rounded-card':
+            'bg-surface border border-border-panel rounded-card self-start':
               hasResultsBand,
           },
           // below the top bar; a white-surface host spaces it itself
-          { 'mt-(--page-pad-top)': hasResultsBand && !onWhiteSurface },
+          hasResultsBand
+            ? onWhiteSurface
+              ? 'max-h-full'
+              : 'mt-(--page-pad-top) max-h-[calc(100%-var(--page-pad-top))]'
+            : '',
           { 'col-span-1': railOpen },
           railOpen ? (hasResultsBand ? 'ml-(--gutter-panels)' : 'pl-[1%]') : '',
           { 'col-span-2': !railOpen },

@@ -156,6 +156,23 @@ describe("ViewModesTable pinned columns", () => {
     ).toBe(2);
   });
 
+  it("keeps hidden row labels inside its own scroll", () => {
+    const wrapper = mountTable({ entities: [work("w1")] });
+    expect(wrapper.find('[data-cy="view-modes-table"]').classes()).toEqual(
+      expect.arrayContaining(["relative", "overflow-y-auto"]),
+    );
+  });
+
+  it("ends inside the panel's rounded bottom without a double line", () => {
+    const wrapper = mountTable({ entities: [work("w1")] });
+    expect(wrapper.find('[data-cy="view-modes-table"]').classes()).toEqual(
+      expect.arrayContaining([
+        "rounded-b-card",
+        "[&>:last-child_li]:border-b-0",
+      ]),
+    );
+  });
+
   // Header and rows share one grid template, so their columns line up
   // without measuring; a narrow table keeps the minimums and scrolls.
   it("gives the header and rows one column template", () => {

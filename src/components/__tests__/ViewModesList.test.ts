@@ -246,6 +246,25 @@ describe("ViewModesList", () => {
       return wrapper;
     };
 
+    it("keeps hidden row labels inside its own scroll", async () => {
+      const wrapper = await mountWithEntities();
+
+      expect(wrapper.find('[data-cy="view-modes-list"]').classes()).toEqual(
+        expect.arrayContaining(["relative", "overflow-y-auto"]),
+      );
+    });
+
+    it("ends inside the panel's rounded bottom without a double line", async () => {
+      const wrapper = await mountWithEntities();
+
+      expect(wrapper.find('[data-cy="view-modes-list"]').classes()).toEqual(
+        expect.arrayContaining([
+          "rounded-b-card",
+          "[&>:last-child_li]:border-b-0",
+        ]),
+      );
+    });
+
     it("does not disable a seen entity, so it stays selectable", async () => {
       const wrapper = await mountWithEntities();
 

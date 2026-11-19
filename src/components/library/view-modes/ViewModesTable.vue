@@ -13,7 +13,7 @@
       <div
         v-if="showCurrentEntityFlow"
         data-cy="view-modes-table"
-        class="h-full overflow-y-auto"
+        class="relative h-full overflow-y-auto rounded-b-card [&>:last-child_li]:border-b-0"
         :class="{ 'animate-pulse pointer-events-none': isRefetching }"
         :style="{ '--table-columns': columnsTemplate }"
       >

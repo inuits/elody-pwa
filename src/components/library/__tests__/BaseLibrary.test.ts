@@ -883,6 +883,21 @@ describe("BaseLibrary.vue pager and page size", () => {
     );
   });
 
+  it("sizes the white panel to its rows, up to the available height", async () => {
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).toEqual(
+      expect.arrayContaining([
+        "self-start",
+        "mt-(--page-pad-top)",
+        "max-h-[calc(100%-var(--page-pad-top))]",
+      ]),
+    );
+  });
+
   it("styles the header of the main library as the accent-light results band", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -1475,6 +1490,9 @@ describe("BaseLibrary.vue inside a detail panel", () => {
     );
     expect(wrapper.find('[data-cy="results-panel"]').classes()).not.toContain(
       "border-border-panel",
+    );
+    expect(wrapper.find('[data-cy="results-panel"]').classes()).not.toContain(
+      "self-start",
     );
     expect(wrapper.find(".grid").classes()).not.toContain("bg-background-normal");
     expect(
