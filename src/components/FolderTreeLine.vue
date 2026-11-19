@@ -16,8 +16,11 @@
           selectedDirectory && selectedDirectory.id === directory.id,
       }"
     >
-      <div
-        class="py-4 flex items-center grow mr-10 group cursor-pointer"
+      <button
+        type="button"
+        data-cy="folder-select"
+        :aria-pressed="String(isSelected)"
+        class="py-4 flex items-center grow mr-10 group cursor-pointer text-left"
         @click="updateSelectedDirectory && updateSelectedDirectory(directory)"
       >
         <span
@@ -31,17 +34,18 @@
           v-show="open && depth !== 0"
           class="absolute w-1px h-3/6 bg-neutral-700 left-8 top-2/4 group-hover:bg-blue-500"
         />
-        <span class="inline-block mr-3 group-hover:text-blue-500"
-          >{{ directory.dir }}
-        </span>
-      </div>
-      <div
-        class="grow-0"
-        :class="{ 'w-11': !hasSubDirectories() }"
-        @click="toggle"
-      >
-        <a
+        <span class="inline-block mr-3 group-hover:text-blue-500">{{
+          directory.dir
+        }}</span>
+      </button>
+      <div class="grow-0" :class="{ 'w-11': !hasSubDirectories() }">
+        <button
           v-if="hasSubDirectories()"
+          type="button"
+          data-cy="folder-toggle"
+          :aria-expanded="String(open)"
+          :aria-label="toggleLabel"
+          @click="toggle"
           class="inline-block cursor-pointer transform duration-200 px-4 w-11 h-full"
           :class="{
             'rotate-0': open,
@@ -49,6 +53,7 @@
           }"
         >
           <svg
+            aria-hidden="true"
             width="100%"
             height="100%"
             viewBox="0 0 10 6"
@@ -62,7 +67,7 @@
               fill="var(--color-text-strong)"
             />
           </svg>
-        </a>
+        </button>
       </div>
     </li>
     <loading-list v-if="loading" />
@@ -85,7 +90,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref } from "vue";
+import { computed, defineComponent, inject, ref, unref } from "vue";
+import { useI18n } from "vue-i18n";
 import type { PropType } from "vue";
 import type { Directory } from "@/generated-types/queries";
 
@@ -168,9 +174,22 @@ export default defineComponent({
       "selectedDirectory",
     );
 
+    const { t, te } = useI18n();
+    const toggleLabel = computed<string>(() => {
+      const key = open.value ? "tree.collapse" : "tree.expand";
+      if (te(key)) return t(key, [props.directory.dir]);
+      return `${open.value ? "Collapse" : "Expand"} ${props.directory.dir}`;
+    });
+
+    const isSelected = computed<boolean>(
+      () => unref(selectedDirectory)?.id === props.directory.id,
+    );
+
     return {
       open,
       toggle,
+      toggleLabel,
+      isSelected,
       hasSubDirectories,
       updateSelectedDirectory,
       selectedDirectory,

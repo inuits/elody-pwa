@@ -1,6 +1,7 @@
 <template>
   <div v-if="metadata.label" class="flex items-center gap-1">
     <p
+      :id="labelId"
       data-cy="metadata-label"
       class="text-label font-bold text-text-field-label"
     >
@@ -28,9 +29,16 @@
       :tooltip-offset="8"
     >
       <template #activator="{ on, describedBy }">
-        <div v-on="on" :aria-describedby="describedBy" class="pl-1">
+        <button
+          type="button"
+          data-cy="field-help-trigger"
+          v-on="on"
+          :aria-label="helpLabel"
+          :aria-describedby="describedBy"
+          class="pl-1"
+        >
           <unicon :name="Unicons.QuestionCircle.name" height="14" />
-        </div>
+        </button>
       </template>
       <template #default>
         <span>
@@ -40,16 +48,18 @@
         </span>
       </template>
     </base-tooltip>
-    <div
+    <button
       v-if="infoPanel?.content && !isLocked"
+      type="button"
       data-testid="info-panel-trigger"
-      class="cursor-pointer pl-1 text-text-light"
+      class="pl-1 text-text-light"
+      :aria-label="helpLabel"
       @click="
         openPanel({ title: infoPanel.title ?? '', content: infoPanel.content })
       "
     >
       <unicon :name="Unicons.QuestionCircle.name" height="14" />
-    </div>
+    </button>
   </div>
 </template>
 
@@ -71,6 +81,7 @@ const props = withDefaults(
     isFieldRequired?: boolean;
     isOneOfRequired?: boolean;
     isLocked?: boolean;
+    labelId?: string;
   }>(),
   {
     isOneOfRequired: false,
@@ -78,8 +89,15 @@ const props = withDefaults(
     isLocked: false,
   },
 );
-const { t } = useI18n();
+const { t, te } = useI18n();
 const { openPanel } = useInfoPanel();
+
+const helpLabel = computed<string>(() => {
+  const label = t(props.metadata.label ?? "");
+  return te("metadata.labels.field-help")
+    ? t("metadata.labels.field-help", [label])
+    : `About ${label}`;
+});
 
 const infoPanel = computed(() => props.metadata.infoPanel ?? null);
 </script>

@@ -9,7 +9,9 @@
       'vue-advanced-select',
     ]"
     :style="{
-      minWidth: shouldCalculateWidth ? `calc(${calculatedWidth}px + 3.5rem)` : 'auto',
+      minWidth: shouldCalculateWidth
+        ? `calc(${calculatedWidth}px + 3.5rem)`
+        : 'auto',
     }"
   >
     <VueSelect
@@ -27,6 +29,10 @@
       :close-on-select="!multiple"
       :hide-selected-options="false"
       :should-autofocus-option="false"
+      :input-attrs="{ tabindex: 0, 'aria-hidden': undefined }"
+      :aria="labelledBy ? { labelledby: labelledBy } : undefined"
+      :get-option-label="optionLabel"
+      @option-selected="keepFocus"
       @option-deselected="deselectItem"
       @update:modelValue="handleUpdateItem"
       :classes="{
@@ -61,10 +67,7 @@
             width="24"
           />
         </div>
-        <div
-          v-if="option.value === NO_VALUE"
-          class="text-text-placeholder"
-        >
+        <div v-if="option.value === NO_VALUE" class="text-text-placeholder">
           — {{ option.label }}
         </div>
         <div v-else class="text-text-body">
@@ -119,7 +122,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch, inject, onMounted } from "vue";
+import { computed, ref, watch, inject, onMounted, useId, nextTick } from "vue";
 import {
   ActionContextEntitiesSelectionType,
   ActionContextViewModeTypes,
@@ -149,6 +152,7 @@ const props = withDefaults(
     label?: string;
     // Pairs the select with an external <label for>.
     inputId?: string;
+    labelledBy?: string;
     disable?: boolean;
     itemsSelected?: boolean;
     multiple?: boolean;
@@ -309,10 +313,31 @@ const calculateWidth = () => {
   calculatedWidth.value = maxWidth;
 };
 
+const optionLabel = (option: DropdownOption): string =>
+  stripHighlightTags(t(option.label));
+
+const keepFocus = () =>
+  nextTick(() =>
+    root.value?.querySelector<HTMLInputElement>("input.search-input")?.focus(),
+  );
+
+const comboboxId = `dropdown-value-${useId()}`;
+const nameInputByLabel = () => {
+  if (!props.labelledBy) return;
+  const input = root.value?.querySelector("input.search-input");
+  const combobox = root.value?.querySelector('[role="combobox"]');
+  if (!input || !combobox) return;
+  combobox.id = comboboxId;
+  input.setAttribute("aria-labelledby", `${props.labelledBy} ${comboboxId}`);
+};
+
 onMounted(() => {
   checkIfCalculationNeeded();
   calculateWidth();
+  nameInputByLabel();
 });
+
+watch(() => props.labelledBy, nameInputByLabel, { flush: "post" });
 
 watch(
   () => props.options.length,

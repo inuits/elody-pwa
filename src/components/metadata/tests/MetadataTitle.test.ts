@@ -92,12 +92,18 @@ describe("MetadataTitle - field-row label", () => {
 
   it("renders the label at the label size, bold, in field-label ink", () => {
     expect(title().find('[data-cy="metadata-label"]').classes()).toEqual(
-      expect.arrayContaining(["text-label", "font-bold", "text-text-field-label"]),
+      expect.arrayContaining([
+        "text-label",
+        "font-bold",
+        "text-text-field-label",
+      ]),
     );
   });
 
   it("marks a required field with an asterisk in danger ink", () => {
-    const marker = title({ isFieldRequired: true }).find('[data-cy="required-marker"]');
+    const marker = title({ isFieldRequired: true }).find(
+      '[data-cy="required-marker"]',
+    );
     expect(marker.text()).toBe("*");
     expect(marker.classes()).toContain("text-danger");
   });
@@ -111,7 +117,9 @@ describe("MetadataTitle - field-row label", () => {
       '[data-cy="one-of-required-marker"]',
     );
     expect(marker.text()).toBe("◦");
-    expect(marker.attributes("aria-label")).toBe("metadata.labels.one-of-required");
+    expect(marker.attributes("aria-label")).toBe(
+      "metadata.labels.one-of-required",
+    );
   });
 });
 
@@ -150,5 +158,51 @@ describe("MetadataTitle - help icons", () => {
     expect(wrapper.findComponent(uniconStub).props("height")).toBe(
       LABEL_ICON_HEIGHT,
     );
+  });
+});
+
+describe("MetadataTitle - keyboard and screen readers", () => {
+  const tooltipStub = {
+    name: "BaseTooltip",
+    template:
+      '<div><slot name="activator" :on="{}" describedBy="tip-1" /><slot /></div>',
+  };
+  const mountTitle = (metadata: Record<string, any>, props = {}) =>
+    shallowMount(MetadataTitle, {
+      props: { metadata, ...props } as any,
+      global: { stubs: { unicon: uniconStub, BaseTooltip: tooltipStub } },
+    });
+
+  it("gives the label the id the input is named by", () => {
+    const wrapper = mountTitle(
+      { label: "metadata.labels.title" },
+      { labelId: "field-label-7" },
+    );
+    expect(wrapper.find('[data-cy="metadata-label"]').attributes("id")).toBe(
+      "field-label-7",
+    );
+  });
+
+  it("makes the help tooltip trigger a named button tied to the tooltip", () => {
+    const wrapper = mountTitle({
+      label: "metadata.labels.title",
+      tooltip: "metadata.tooltips.title",
+    });
+    const trigger = wrapper.find('[data-cy="field-help-trigger"]');
+    expect(trigger.element.tagName).toBe("BUTTON");
+    expect(trigger.attributes("type")).toBe("button");
+    expect(trigger.attributes("aria-label")).toContain("metadata.labels.title");
+    expect(trigger.attributes("aria-describedby")).toBe("tip-1");
+  });
+
+  it("makes the info-panel trigger a named button", () => {
+    const wrapper = mountTitle({
+      label: "metadata.labels.title",
+      infoPanel: { title: "x", content: "<p>y</p>" },
+    });
+    const trigger = wrapper.find('[data-testid="info-panel-trigger"]');
+    expect(trigger.element.tagName).toBe("BUTTON");
+    expect(trigger.attributes("type")).toBe("button");
+    expect(trigger.attributes("aria-label")).toContain("metadata.labels.title");
   });
 });

@@ -100,7 +100,10 @@ const defaultInput: Input = {
   textColor: "text-text-body",
   bgColor: "bg-surface",
   borderColor: "border-transparent",
-  disabledStyle: { ...disabledStyle, borderColor: "disabled:border-transparent" },
+  disabledStyle: {
+    ...disabledStyle,
+    borderColor: "disabled:border-transparent",
+  },
 };
 // The design-system input: 1px default border, one step darker on hover.
 const defaultWithBorderInput: Input = {
@@ -113,7 +116,10 @@ const defaultWithDarkBackgroundInput: Input = {
   textColor: "text-text-body",
   bgColor: "bg-accent-tint",
   borderColor: "border-transparent",
-  disabledStyle: { ...disabledStyle, borderColor: "disabled:border-transparent" },
+  disabledStyle: {
+    ...disabledStyle,
+    borderColor: "disabled:border-transparent",
+  },
 };
 
 type InputStyle =
@@ -142,6 +148,7 @@ const props = withDefaults(
     // An external hint or message; kept alongside errorMessage.
     describedBy?: string;
     ariaLabel?: string;
+    labelledBy?: string;
     isValidPredicate?: (
       value: string | number | boolean | undefined,
     ) => boolean;
@@ -183,7 +190,9 @@ const inputValue = computed<string | number | boolean | undefined>({
 const selectedInputStyle = computed<Input>(() => inputStyles[props.inputStyle]);
 
 const errorId = `input-error-${useId()}`;
-const isInvalid = computed<boolean>(() => props.invalid || !!props.errorMessage);
+const isInvalid = computed<boolean>(
+  () => props.invalid || !!props.errorMessage,
+);
 
 // Design-system input; values come from the input component tokens. Focus is
 // the global :focus-visible ring, so the forms-plugin ring is suppressed.
@@ -216,6 +225,7 @@ const a11yAttrs = computed(() => ({
   "aria-invalid": isInvalid.value ? "true" : undefined,
   "aria-describedby": describedByIds.value,
   "aria-label": props.ariaLabel,
+  "aria-labelledby": props.labelledBy,
 }));
 
 const handleBadNumberInput = (event: Event) => {

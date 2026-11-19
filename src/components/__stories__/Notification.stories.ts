@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import { onMounted } from "vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import BaseNotifications from "@/components/base/BaseNotifications.vue";
 import { useBaseNotification } from "@/composables/useBaseNotification";
 import { useAsyncAction } from "@/composables/useAsyncAction";
 import { DamsIcons } from "@/generated-types/queries";
@@ -15,7 +16,9 @@ const meta: Meta = {
           "@kyvg/vue3-notification <notifications> host that App.vue mounts. " +
           "Success, warning and error share the inverted surface; warnings " +
           "and errors add an accent bar. They stack in the top right, close " +
-          "on click and disappear after 10 seconds unless persistent.",
+          "on click or with their close button, pause while hovered and " +
+          "disappear after 10 seconds unless persistent. Errors are " +
+          "announced at once; the others through a polite live region.",
       },
     },
   },
@@ -26,6 +29,7 @@ type Story = StoryObj;
 
 export const Types: Story = {
   render: () => ({
+    components: { BaseNotifications },
     setup() {
       const {
         displaySuccessNotification,
@@ -51,7 +55,7 @@ export const Types: Story = {
         );
       });
     },
-    template: `<div style="min-height:280px"><notifications /></div>`,
+    template: `<div style="min-height:280px"><base-notifications /></div>`,
   }),
 };
 
@@ -68,7 +72,7 @@ export const AfterAnAction: Story = {
     },
   },
   render: () => ({
-    components: { BaseButtonNew },
+    components: { BaseButtonNew, BaseNotifications },
     setup() {
       const { displaySuccessNotification } = useBaseNotification();
       const { isBusy, run } = useAsyncAction();
@@ -108,7 +112,7 @@ export const AfterAnAction: Story = {
             @click="fail"
           />
         </div>
-        <notifications />
+        <base-notifications />
       </div>`,
   }),
 };

@@ -31,6 +31,7 @@
         :is-field-required="isFieldRequired && (isEdit || canEditInPlace)"
         :is-one-of-required="isOneOfRequired && (isEdit || canEditInPlace)"
         :is-locked="fieldIsLocked"
+        :label-id="labelId"
       />
       <MultilingualLocaleSelector
         v-if="!isEditingInPlace"
@@ -89,6 +90,7 @@
         :repeatable-panel-config="repeatablePanelConfig"
         :disabled="metadata.disabled"
         :default-value="metadata.defaultValue"
+        :labelled-by="metadata.label ? labelId : undefined"
         @click.stop.prevent
         @update:value="(value) => (fieldValueProxy = value)"
       />
@@ -477,7 +479,15 @@ import {
 } from "@/generated-types/queries";
 import { useBaseModal } from "@/composables/useBaseModal";
 import RelationPickerModal from "@/components/metadata/RelationPickerModal.vue";
-import { ref, onBeforeMount, computed, inject, provide, watch } from "vue";
+import {
+  ref,
+  onBeforeMount,
+  computed,
+  inject,
+  provide,
+  watch,
+  useId,
+} from "vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import TableInputField from "@/components/tableInputFields/TableInputField.vue";
@@ -559,6 +569,7 @@ const emit = defineEmits<{
 
 const { t, te } = useI18n();
 const { openModal } = useBaseModal();
+const labelId = `field-label-${useId()}`;
 
 const parentEntity: BaseEntity = inject("ParentEntityProvider", undefined);
 const compact: boolean = inject("CompactPreview", false);
