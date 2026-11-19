@@ -12,13 +12,12 @@
         group="serviceVersionManager"
         @click="refreshPage()"
       />
-      <div class="pt-2" v-if="config.features?.globalNotification">
-        <BaseNotifications
-          class="pt-2"
-          group="globalNotification"
-          width="700"
-        />
-      </div>
+      <BaseNotifications
+        v-if="config.features?.globalNotification"
+        class="pt-2"
+        group="globalNotification"
+        width="700"
+      />
     </div>
     <the-navigation />
     <div>
