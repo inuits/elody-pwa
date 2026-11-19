@@ -1044,6 +1044,16 @@ describe("AutocompleteRelationCell — candidates", () => {
     );
   });
 
+  it("shows the warning as hint-size warning text, announced as a status", async () => {
+    const warning = (await mountCell(["PERS-1", "PERS-2"])).find(
+      '[data-testid="candidate-warning"]',
+    );
+    expect(warning.classes()).toEqual(
+      expect.arrayContaining(["text-hint", "text-warning"]),
+    );
+    expect(warning.attributes("role")).toBe("status");
+  });
+
   it("offers every option again once the user searches", async () => {
     const wrapper = await mountCell(["PERS-1", "PERS-2"]);
     await wrapper.findComponent(BaseInputAutocomplete).vm.$emit("search-change", "King");

@@ -20,7 +20,8 @@
     <p
       v-if="isChoosingCandidate"
       data-testid="candidate-warning"
-      class="mt-0.5 text-xs text-orange-default"
+      role="status"
+      class="mt-0.5 text-hint text-warning"
     >
       {{ t("autocomplete.choose-candidate") }}
     </p>

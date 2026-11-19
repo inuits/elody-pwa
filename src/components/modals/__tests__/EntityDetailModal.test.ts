@@ -192,6 +192,19 @@ describe("EntityDetailModal — navigating to a relation", () => {
     wrapper.unmount();
   });
 
+  it("labels the icon-only back button", async () => {
+    const wrapper = getWrapper();
+    openWithAuthor();
+    await flushPromises();
+    goTo("work", "W-2");
+    await flushPromises();
+
+    expect(
+      wrapper.find("[data-cy='entity-detail-modal-back']").attributes("aria-label"),
+    ).toBeTruthy();
+    wrapper.unmount();
+  });
+
   it("goes back to the previous entity", async () => {
     const wrapper = getWrapper();
     openWithAuthor();

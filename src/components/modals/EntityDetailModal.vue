@@ -14,6 +14,7 @@
             v-if="trail.length > 0"
             type="button"
             data-cy="entity-detail-modal-back"
+            :aria-label="backLabel"
             class="cursor-pointer"
             @click="goBack"
           >
@@ -47,6 +48,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import { computed, provide, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { useBaseModal } from "@/composables/useBaseModal";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -97,6 +99,11 @@ watch(
   () => {
     refetch();
   },
+);
+
+const { t, te } = useI18n();
+const backLabel = computed(() =>
+  te("entity-detail-modal.back") ? t("entity-detail-modal.back") : "Back",
 );
 
 const trail = ref<EntityNavigationTarget[]>([]);
