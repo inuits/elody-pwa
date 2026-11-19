@@ -91,17 +91,18 @@ import {
   getEntityTitle,
   looksLikeEntityId,
 } from "@/helpers";
-import { goToEntityPageById } from "@/helpers";
+import { getRouterLinkForEntityDetailPage } from "@/helpers";
 import { formattersSettings } from "@/main";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useManageEntities } from "@/composables/useManageEntities";
-import { useRouter } from "vue-router";
+import { useScopedEntityNavigation } from "@/composables/useScopedEntityNavigation";
 import { useGetDropdownOptions } from "@/composables/useGetDropdownOptions";
 import { useGetDropdownOptionsState } from "@/composables/useGetDropdownOptionsState";
 import { useConfirmModal } from "@/composables/useConfirmModal";
 import { useI18n } from "vue-i18n";
 import { useEmptyValueLabel } from "@/composables/useEmptyValueLabel";
+import { createEntityFromOptionMetadata } from "@/composables/createEntityFromOptionMetadata";
 
 defineOptions({ inheritAttrs: false });
 
@@ -125,6 +126,7 @@ const props = withDefaults(
     labelledBy?: string;
     canCreateOption?: boolean;
     metadataKeyToCreateEntityFromOption?: string;
+    metadataToCreateEntityFromOption?: unknown[] | null;
     isReadOnly?: boolean;
     isMetadataField?: boolean;
     metadataOnRelationConfig?: MetadataOnRelationFieldConfig | null;
@@ -151,7 +153,7 @@ const relatedEntitiesHelper = shallowRef<
 >();
 const entityId = getEntityIdFromRoute();
 const isCreatingEntity = ref<boolean>(false);
-const router = useRouter();
+const { navigate } = useScopedEntityNavigation();
 const { confirm } = useConfirmModal();
 const emptyValueLabel = useEmptyValueLabel();
 const { t } = useI18n();
@@ -397,12 +399,11 @@ const handleCreatingFromTag = async (option: any) => {
 
     const newEntity = await createEntity({
       entityType: props.metadataKeyToGetOptionsFor as Entitytyping,
-      metadata: [
-        {
-          key: props.metadataKeyToCreateEntityFromOption,
-          value: option.label,
-        },
-      ],
+      metadata: createEntityFromOptionMetadata(
+        props.metadataKeyToCreateEntityFromOption,
+        option.label,
+        props.metadataToCreateEntityFromOption,
+      ),
     });
     const normalizedOption = {
       value: newEntity.uuid,
@@ -497,11 +498,12 @@ const linkEntityType = computed<string | undefined>(
 
 const handleTagClick = (tag: DropdownOption) => {
   if (isEditing.value || !linkEntityType.value) return;
-  goToEntityPageById(
-    tag.value,
-    { type: linkEntityType.value },
-    "SingleEntity",
-    router,
+  navigate(
+    getRouterLinkForEntityDetailPage(
+      String(tag.value),
+      { type: linkEntityType.value },
+      "SingleEntity",
+    ),
   );
 };
 

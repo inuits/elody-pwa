@@ -86,26 +86,25 @@ it("cleans up event listener on unmount", () => {
 ## Async composables
 
 ```typescript
-it("fetches permissions and caches the result", async () => {
-  const mockFetch = vi.fn().mockResolvedValue({ canEdit: true });
-  vi.mock("@/api/permissions", () => ({ fetchPermissions: mockFetch }));
+const mocks = vi.hoisted(() => ({ fetchThing: vi.fn() }));
+vi.mock("@/api/things", () => ({ fetchThing: mocks.fetchThing }));
 
-  const { getPermission } = usePermissions();
-  const first = await getPermission("edit");
-  const second = await getPermission("edit"); // should use cache
+it("fetches once and caches the result", async () => {
+  mocks.fetchThing.mockResolvedValue({ id: "1" });
 
-  expect(mockFetch).toHaveBeenCalledOnce();
-  expect(first).toBe(true);
-  expect(second).toBe(true);
+  const { getThing } = useThing();
+  await getThing("1");
+  const second = await getThing("1");
+
+  expect(mocks.fetchThing).toHaveBeenCalledOnce();
+  expect(second).toEqual({ id: "1" });
 });
 
 it("re-throws API errors", async () => {
-  vi.mock("@/api/permissions", () => ({
-    fetchPermissions: vi.fn().mockRejectedValueOnce(new Error("API Error")),
-  }));
+  mocks.fetchThing.mockRejectedValueOnce(new Error("API Error"));
 
-  const { getPermission } = usePermissions();
-  await expect(getPermission("edit")).rejects.toThrow("API Error");
+  const { getThing } = useThing();
+  await expect(getThing("1")).rejects.toThrow("API Error");
 });
 ```
 
@@ -115,11 +114,9 @@ If the composable holds module-level state, use a project-provided reset helper 
 `vi.resetModules()` between tests (expensive — prefer having a `reset` export):
 
 ```typescript
-import { usePermissions, resetAdvancedPermissions, setIgnorePermissions } from "@/composables/usePermissions";
-
-beforeEach(() => {
-  vi.clearAllMocks();
-  resetAdvancedPermissions();
-  setIgnorePermissions(false);
+beforeEach(async () => {
+  vi.resetModules();
+  const { useThing } = await import("@/composables/useThing");
+  // ...
 });
 ```

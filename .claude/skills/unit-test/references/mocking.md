@@ -3,10 +3,10 @@
 ## Basic module mock
 
 ```typescript
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: vi.fn(),
-    fetchAdvancedPermission: vi.fn(),
+vi.mock("@/composables/useBaseModal", () => ({
+  useBaseModal: () => ({
+    openModal: vi.fn(),
+    closeModal: vi.fn(),
   }),
 }));
 ```
@@ -18,30 +18,23 @@ Use when the mock return value needs to differ between tests. The factory passed
 
 ```typescript
 const mocks = vi.hoisted(() => ({
-  advancedPermissions: {} as Record<string, boolean>,
-  fetchAdvancedPermissions: vi.fn(),
+  getEntityIdFromRoute: vi.fn(),
 }));
 
-vi.mock("@/composables/usePermissions", () => ({
-  usePermissions: () => ({
-    can: mocks.fetchAdvancedPermissions,
-    fetchAdvancedPermission: mocks.fetchAdvancedPermissions,
-  }),
-  advancedPermissions: mocks.advancedPermissions,
+vi.mock("@/helpers", () => ({
+  getEntityIdFromRoute: mocks.getEntityIdFromRoute,
 }));
 
-// In beforeEach — reset the mutable state
 beforeEach(() => {
   vi.clearAllMocks();
-  mocks.advancedPermissions = {};
 });
 
 // In a test — set before mounting
-it("hides button when permission is denied", async () => {
-  mocks.advancedPermissions["entity:delete"] = false;
+it("shows nothing when there is no entity in the route", async () => {
+  mocks.getEntityIdFromRoute.mockReturnValue(undefined);
   const wrapper = getWrapper();
   await flushPromises();
-  expect(wrapper.vm.availableOptions.length).toBe(0);
+  expect(wrapper.text()).toBe("");
 });
 ```
 
@@ -77,7 +70,7 @@ vi.mock("@/helpers", () => {
 `src/main.ts` calls `start()` unconditionally at module scope (real router/App creation, network
 calls via `getApplicationDetails()`, etc.). Partial-mocking it with `importActual`/`importOriginal`
 actually executes that bootstrap in the test process — at best slow, at worst it throws confusing
-errors deep in unrelated composables (e.g. `usePermissions is not a function`). Combined with the
+errors deep in unrelated composables (e.g. `useX is not a function`). Combined with the
 unawaited-import pitfall above, this was the exact cause of a flaky-CI-only test failure.
 
 `@/main`'s exports (`apolloClient`, `auth`, `router`, `i18n`, ...) are just live bindings — tests

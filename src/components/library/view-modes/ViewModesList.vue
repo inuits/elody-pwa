@@ -97,7 +97,11 @@
             () => {
               if (actionOnClick === ActionOnClick.OpenInModal)
                 openEntityInModal(entity.id, entity.type);
-              else entityWrapperHandler(entity.originalEntity);
+              else
+                entityWrapperHandler(
+                  entity.originalEntity,
+                  listItemRouteName,
+                );
             }
           "
           v-memo="[entity.memoKey, !!columnLabels, compact]"

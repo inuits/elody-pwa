@@ -9,9 +9,20 @@
       <div
         class="p-2 bg-neutral-100 rounded-t-md text-white flex justify-between items-center"
       >
-        <h3 class="text-lg font-bold">
-          {{ getEntityTitle(result.Entity) }}
-        </h3>
+        <div class="flex items-center gap-2 min-w-0">
+          <button
+            v-if="trail.length > 0"
+            type="button"
+            data-cy="entity-detail-modal-back"
+            class="cursor-pointer"
+            @click="goBack"
+          >
+            <unicon :name="Unicons.AngleLeft.name" />
+          </button>
+          <h3 class="text-lg font-bold truncate">
+            {{ getEntityTitle(result.Entity) }}
+          </h3>
+        </div>
         <div
           class="cursor-pointer"
           @click="closeModal(TypeModals.EntityDetailModal)"
@@ -35,7 +46,7 @@ import {
   type GetEntityByIdQuery,
   TypeModals,
 } from "@/generated-types/queries";
-import { computed, provide, watch } from "vue";
+import { computed, provide, ref, watch } from "vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import BaseModal from "@/components/base/BaseModal.vue";
 import { useQuery } from "@vue/apollo-composable";
@@ -44,8 +55,12 @@ import { Unicons } from "@/types";
 import useEntitySingle from "@/composables/useEntitySingle";
 import EntitySingle from "@/views/EntitySingle.vue";
 import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
+import {
+  provideEntityNavigationScope,
+  type EntityNavigationTarget,
+} from "@/composables/useScopedEntityNavigation";
 
-const { getModalInfo, closeModal } = useBaseModal();
+const { getModalInfo, closeModal, updateModal } = useBaseModal();
 const {
   getEntityUuid,
   setEntityUuid,
@@ -84,6 +99,25 @@ watch(
   },
 );
 
+const trail = ref<EntityNavigationTarget[]>([]);
+
+const showEntity = (target: EntityNavigationTarget) =>
+  updateModal(TypeModals.EntityDetailModal, {
+    entityId: target.id,
+    entityType: target.type,
+  });
+
+provideEntityNavigationScope((target: EntityNavigationTarget) => {
+  if (target.id === entityId.value && target.type === entityType.value) return;
+  trail.value.push({ id: entityId.value, type: entityType.value });
+  showEntity(target);
+});
+
+const goBack = () => {
+  const previous = trail.value.pop();
+  if (previous) showEntity(previous);
+};
+
 let pageEntity:
   | { uuid?: string; type?: string; refetch?: () => void }
   | undefined;
@@ -91,6 +125,7 @@ let pageEntity:
 watch(
   () => getModalInfo(TypeModals.EntityDetailModal).open,
   (isOpen: boolean) => {
+    trail.value = [];
     if (isOpen) {
       pageEntity = {
         uuid: getEntityUuid(),

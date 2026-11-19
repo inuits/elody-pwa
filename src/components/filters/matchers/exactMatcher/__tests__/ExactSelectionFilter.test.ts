@@ -129,6 +129,16 @@ describe("ExactSelectionFilter init call arguments", () => {
       parentEntity,
     });
   });
+
+  it("passes the configured option label keys to init", async () => {
+    const optionLabelKeys = ["name", "life_dates"];
+    getWrapper(makeFilter({ optionLabelKeys }));
+    await flushPromises();
+
+    expect(mocks.init).toHaveBeenCalledWith(
+      expect.objectContaining({ optionLabelKeys }),
+    );
+  });
 });
 
 describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
@@ -202,6 +212,27 @@ describe("ExactSelectionFilter resolveDefaultValueToOptionIds", () => {
     await flushPromises();
 
     expect(wrapper.emitted("updateValue")).toBeFalsy();
+  });
+
+  it("keeps the autocomplete searchable when the seed value has no matches", async () => {
+    mocks.options.value = [];
+    const wrapper = getWrapper(makeAutocompleteFilter(true));
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: "AutocompleteFilter" }).exists()).toBe(
+      true,
+    );
+    expect(wrapper.text()).not.toContain("filters.noOptionsAvailable");
+  });
+
+  it("still reports no options for an unflagged filter without matches", async () => {
+    mocks.options.value = [];
+    const wrapper = getWrapper(makeAutocompleteFilter(false));
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: "AutocompleteFilter" }).exists()).toBe(
+      false,
+    );
   });
 
   it("auto-fills only once and not again on a subsequent option load", async () => {
@@ -408,5 +439,76 @@ describe("ExactSelectionFilter while options load", () => {
     await flushPromises();
 
     expect((wrapper.vm as any).rendersList).toBe(true);
+  });
+});
+
+describe("ExactSelectionFilter preferredOptionIds", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.loadOptionsAndFacetsInParallel.mockResolvedValue(undefined);
+    mocks.options.value = [
+      { label: "Williams, John", value: "entities/1" },
+      { label: "Williams, John", value: "entities/2" },
+    ];
+  });
+
+  const makePreferredFilter = () =>
+    makeFilter({
+      selectionOption: AutocompleteSelectionOptions.Autocomplete,
+      options: [],
+      advancedFilterInputForRetrievingOptions: [
+        {
+          type: AdvancedFilterTypes.Text,
+          key: ["vlacc:1|properties.name.value"],
+          value: "$entity.intialValues.primary_author_name",
+          match_exact: false,
+          resolveDefaultValueToOptionIds: true,
+          preferredOptionIds: "$entity.intialValues.primary_author_ids",
+        },
+      ],
+    });
+
+  const mountWithParent = (parentEntity: any) =>
+    shallowMount(ExactSelectionFilter, {
+      props: {
+        filter: makePreferredFilter(),
+        lastTypedValue: "",
+        isOpen: true,
+        getNormalizedActiveFilters: () => [],
+        refetchFilterOptions: false,
+      },
+      global: {
+        stubs: { SpinnerLoader: true },
+        provide: { ParentEntityProvider: parentEntity },
+      },
+    });
+
+  it("auto-fills only the preferred ids among the seed options", async () => {
+    const wrapper = mountWithParent({
+      intialValues: { primary_author_ids: ["entities/2"] },
+    });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")![0]).toEqual([["entities/2"]]);
+  });
+
+  it("falls back to all seed options when no preferred id is among them", async () => {
+    const wrapper = mountWithParent({
+      intialValues: { primary_author_ids: ["entities/9"] },
+    });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")![0]).toEqual([
+      ["entities/1", "entities/2"],
+    ]);
+  });
+
+  it("falls back to all seed options when the parent has no preferred ids", async () => {
+    const wrapper = mountWithParent({ intialValues: {} });
+    await flushPromises();
+
+    expect(wrapper.emitted("updateValue")![0]).toEqual([
+      ["entities/1", "entities/2"],
+    ]);
   });
 });

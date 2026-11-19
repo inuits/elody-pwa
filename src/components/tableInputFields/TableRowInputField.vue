@@ -29,6 +29,9 @@
       :field-key="getCellFieldKey(subField)"
       :form-id="formId"
       :disabled="disabled || isLinkedEntityMissing"
+      :candidate-ids="
+        subField.inputField?.isMetadataField ? undefined : candidateIds
+      "
       @linked-entity-missing="isLinkedEntityMissing = $event"
     />
   </div>
@@ -117,6 +120,15 @@ const getCellModelValue = (subField: SubField): any => {
   );
   return props.item.metadata?.[metaIdx]?.value;
 };
+
+const candidateIds = computed<string[] | undefined>(() => {
+  const candidateSubField = props.subFields.find((sf) => sf.isCandidateList);
+  if (!candidateSubField || !props.relationType) return undefined;
+  if (looksLikeEntityId(props.item?.key)) return undefined;
+  const value = getCellModelValue(candidateSubField);
+  const ids = Array.isArray(value) ? value.filter(Boolean) : [];
+  return ids.length ? ids : undefined;
+});
 
 // --- Read-only columns sourced from the row's related entity ------------------
 // A sub-field with `entitySourceKey` displays a property of the entity the row

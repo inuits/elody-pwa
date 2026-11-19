@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportTarget">
     <div
       v-if="suggestion"
       :ref="showInTopLayer"
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { apolloClient } from "@/main";
 import { useImport } from "@/composables/useImport";
@@ -73,6 +73,12 @@ const emit = defineEmits<{ pick: [entity: any, label: string] }>();
 const { t } = useI18n();
 const { loadDocument } = useImport();
 const { buildFilters } = useSimpleSearch();
+
+const teleportTarget = computed<HTMLElement | string>(() =>
+  props.suggestion
+    ? (document.activeElement?.closest<HTMLElement>("dialog[open]") ?? "body")
+    : "body",
+);
 
 const results = ref<any[]>([]);
 const isLoading = ref<boolean>(false);

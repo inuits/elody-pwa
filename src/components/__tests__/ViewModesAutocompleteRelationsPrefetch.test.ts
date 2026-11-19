@@ -10,6 +10,11 @@ const mocks = vi.hoisted(() => ({
   loading: undefined as undefined | { as: "ref" | "plain"; value: boolean },
   formattersSettings: {} as Record<string, unknown>,
   replaceRelationsFromSameType: vi.fn(),
+  navigate: vi.fn(),
+}));
+
+vi.mock("@/composables/useScopedEntityNavigation", () => ({
+  useScopedEntityNavigation: () => ({ isScoped: false, navigate: mocks.navigate }),
 }));
 
 vi.mock("@/main", () => ({
@@ -70,7 +75,13 @@ vi.mock("@/helpers", async (importOriginal) => {
     ...actual,
     getEntityIdFromRoute: () => undefined,
     getFormattersSettings: vi.fn().mockResolvedValue({}),
-    goToEntityPageById: vi.fn(),
+    getRouterLinkForEntityDetailPage: vi.fn(
+      (id: string, entity: { type: string }, routeName: string) => ({
+        id,
+        type: entity.type,
+        routeName,
+      }),
+    ),
     looksLikeEntityId: vi.fn(() => false),
     getEntityTitle: vi.fn(() => "title"),
   };
@@ -269,13 +280,12 @@ describe("ViewModesAutocompleteRelations chips as links", () => {
     link: Record<string, unknown>,
     relationType: string,
   ) => {
-    const helpers = await import("@/helpers");
     mocks.formattersSettings = { link };
     const wrapper = mountWith({ relationType, mode: "view", disabled: true });
     await flushPromises();
     return {
       autocomplete: wrapper.findComponent({ name: "BaseInputAutocomplete" }),
-      goTo: vi.mocked(helpers.goToEntityPageById),
+      goTo: mocks.navigate,
     };
   };
   const clickTag = async (autocomplete: any) => {
@@ -290,12 +300,11 @@ describe("ViewModesAutocompleteRelations chips as links", () => {
     );
     expect(autocomplete.props("tagsAreLinks")).toBe(true);
     await clickTag(autocomplete);
-    expect(goTo).toHaveBeenCalledWith(
-      "org-1",
-      { type: "genre" },
-      "SingleEntity",
-      expect.anything(),
-    );
+    expect(goTo).toHaveBeenCalledWith({
+      id: "org-1",
+      type: "genre",
+      routeName: "SingleEntity",
+    });
   });
 
   it("keeps the chips plain when no link setting names the relation type", async () => {

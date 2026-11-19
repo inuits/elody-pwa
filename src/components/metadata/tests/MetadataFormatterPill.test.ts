@@ -642,3 +642,30 @@ describe("MetadataFormatterPill — vertical position", () => {
     });
   });
 });
+
+describe("MetadataFormatterPill — pill|color", () => {
+  const styleFor = (label: string) =>
+    mount(MetadataFormatterPill, {
+      props: { formatter: "pill|color", label },
+    }).element.children[0].getAttribute("style");
+
+  it("uses the value itself as background", () => {
+    expect(styleFor("#ff0000")).toContain("background: rgb(255, 0, 0)");
+  });
+
+  it.each([
+    ["#ffffff", "var(--color-black)"],
+    ["#ffff00", "var(--color-black)"],
+    ["#fff", "var(--color-black)"],
+    ["#000000", "var(--color-white)"],
+    ["#0000ff", "var(--color-white)"],
+    ["#757575", "var(--color-white)"],
+    ["#767676", "var(--color-black)"],
+  ])("picks contrasting text for %s", (background, text) => {
+    expect(styleFor(background)).toContain(`color: ${text}`);
+  });
+
+  it("falls back to white text for a non-hex value", () => {
+    expect(styleFor("red")).toContain("color: var(--color-white)");
+  });
+});

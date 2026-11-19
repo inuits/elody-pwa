@@ -612,3 +612,77 @@ describe("useFilterOptions - nested array values", () => {
     ]);
   });
 });
+
+describe("useFilterOptions - optionLabelKeys", () => {
+  const person = {
+    id: "entities/1",
+    title: "fallback title",
+    intialValues: {
+      name: "Bender, Justus",
+      life_dates: "1981-",
+      roman_numeral: "",
+      qualification: ["journalist", "auteur"],
+    },
+  };
+
+  it("builds the label and secondary label from the configured keys", async () => {
+    const { options, entities, init } = useFilterOptions();
+    entities.value = [person];
+
+    await init({
+      entityType: "person",
+      optionLabelKeys: ["name", "life_dates", "roman_numeral", "qualification"],
+    });
+
+    expect(options.value).toEqual([
+      {
+        icon: expect.anything(),
+        label: "Bender, Justus",
+        secondaryLabel: "1981- · journalist, auteur",
+        value: "entities/1",
+      },
+    ]);
+  });
+
+  it("omits the secondary label when only the first key has a value", async () => {
+    const { options, entities, init } = useFilterOptions();
+    entities.value = [{ ...person, intialValues: { name: "Bender, Justus" } }];
+
+    await init({ entityType: "person", optionLabelKeys: ["name", "life_dates"] });
+
+    expect(options.value).toEqual([
+      { icon: expect.anything(), label: "Bender, Justus", value: "entities/1" },
+    ]);
+  });
+
+  it("falls back to the entity title when no configured key has a value", async () => {
+    const { options, entities, init } = useFilterOptions();
+    entities.value = [{ ...person, intialValues: {} }];
+
+    await init({ entityType: "person", optionLabelKeys: ["name"] });
+
+    expect(options.value).toEqual([
+      { icon: expect.anything(), label: "fallback title", value: "entities/1" },
+    ]);
+  });
+
+  it("keeps the mapped value as option value", async () => {
+    const { options, entities, init } = useFilterOptions();
+    entities.value = [{ ...person, code: "P1" }];
+
+    await init({
+      entityType: "person",
+      filterOptionsMapping: { value: "code" },
+      optionLabelKeys: ["name", "life_dates"],
+    });
+
+    expect(options.value).toEqual([
+      {
+        icon: expect.anything(),
+        label: "Bender, Justus",
+        secondaryLabel: "1981-",
+        value: "P1",
+      },
+    ]);
+  });
+});

@@ -878,3 +878,226 @@ describe("TableRowInputField — missing linked entity", () => {
     expect(cells.every((cell) => cell.props("disabled") === true)).toBe(true);
   });
 });
+
+// ─── Rows with several matching candidates ────────────────────────────────────
+
+const candidateListSubField: SubField = {
+  ...makeSubField(
+    "candidates",
+    "metadata.labels.candidates",
+    InputFieldTypes.Text,
+    true,
+    [],
+    true,
+  ),
+  isCandidateList: true,
+};
+
+describe("TableRowInputField — candidates", () => {
+  const subFields = [relationKeySubField, functionSubField, candidateListSubField];
+
+  const mountRow = (key: string, candidates: unknown) =>
+    mount(
+      {
+        render: () =>
+          h("div", [
+            h(TableRowInputField, {
+              rowIndex: 0,
+              item: {
+                key,
+                type: "ref_authors",
+                metadata: [
+                  { key: "function_indication", value: "aut" },
+                  { key: "candidates", value: candidates },
+                ],
+              },
+              subFields,
+              formId: "form-1",
+              parentFieldKey: "relationValues.ref_authors",
+              relationType: "ref_authors",
+            }),
+          ]),
+      },
+      { global: { stubs: { TableCellInputField: true, BaseButtonNew: true } } },
+    );
+
+  it("passes the candidate ids to the relation key cell while it is unresolved", () => {
+    const cells = mountRow("King, Stephen", ["PERS-1", "PERS-2"]).findAllComponents(
+      TableCellInputField,
+    );
+    expect(cells[0].props("candidateIds")).toEqual(["PERS-1", "PERS-2"]);
+    expect(cells[1].props("candidateIds")).toBeUndefined();
+  });
+
+  it("drops the candidates once the row points at an entity", () => {
+    const cells = mountRow("PERS-2", ["PERS-1", "PERS-2"]).findAllComponents(
+      TableCellInputField,
+    );
+    expect(cells[0].props("candidateIds")).toBeUndefined();
+  });
+
+  it("has no candidates when the candidate list is empty", () => {
+    const cells = mountRow("Di Giorgio", "").findAllComponents(TableCellInputField);
+    expect(cells[0].props("candidateIds")).toBeUndefined();
+  });
+});
+
+describe("TableCellInputField — candidates", () => {
+  beforeEach(() => {
+    vi.mocked(useField).mockClear();
+  });
+
+  const mountCell = (candidateIds?: string[]) =>
+    shallowMount(TableCellInputField, {
+      props: {
+        modelValue: "King, Stephen",
+        subField: relationKeySubField,
+        fieldKey: "relationValues.ref_authors[0].key",
+        formId: "form-1",
+        candidateIds,
+      },
+    });
+
+  const rules = () => (vi.mocked(useField).mock.calls[0][1] as any).value;
+
+  it("forwards the candidate ids to the relation cell", () => {
+    const wrapper = mountCell(["PERS-1", "PERS-2"]);
+    expect(
+      wrapper.findComponent(AutocompleteRelationCell).props("candidateIds"),
+    ).toEqual(["PERS-1", "PERS-2"]);
+  });
+
+  it("blocks saving until an entity is chosen", () => {
+    mountCell(["PERS-1", "PERS-2"]);
+    expect(rules()("King, Stephen")).toBe("autocomplete.choose-candidate");
+    expect(rules()("PERS-2")).toBe(true);
+  });
+
+  it("leaves the message to the candidate warning instead of repeating it", async () => {
+    vi.mocked(useField).mockReturnValueOnce({
+      value: ref("King, Stephen"),
+      validate: () => {},
+      errorMessage: ref("autocomplete.choose-candidate"),
+    } as any);
+    const wrapper = mountCell(["PERS-1", "PERS-2"]);
+    expect(wrapper.find('[data-testid="inputfield-error"]').exists()).toBe(false);
+  });
+
+  it("keeps the configured rules without candidates", () => {
+    mountCell();
+    expect(rules()).toBe("no_xss");
+  });
+});
+
+describe("AutocompleteRelationCell — candidates", () => {
+  const inputField = {
+    type: InputFieldTypes.DropdownSingleselectRelations,
+    isMetadataField: false,
+    relationType: "ref_authors",
+    entityType: "person",
+  } as InputField;
+
+  const lastDropdownHelper = async () => {
+    const { useGetDropdownOptions } = await import(
+      "@/composables/useGetDropdownOptions"
+    );
+    return vi.mocked(useGetDropdownOptions).mock.results.at(-1)!.value;
+  };
+
+  const mountCell = async (candidateIds?: string[]) => {
+    const wrapper = shallowMount(AutocompleteRelationCell, {
+      props: {
+        modelValue: "King, Stephen",
+        inputField,
+        formId: "form-1",
+        candidateIds,
+      },
+    });
+    await flushPromises();
+    return wrapper;
+  };
+
+  beforeEach(() => {
+    mockEntityDropdownOptions.value = [
+      { value: "PERS-1", label: "King, Stephen", secondaryLabel: "1947-" },
+      { value: "PERS-9", label: "King, Stephen R." },
+      { value: "PERS-2", label: "King, Stephen", secondaryLabel: "1958-" },
+    ];
+  });
+
+  it("searches the row label and offers only the candidates", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    const helper = await lastDropdownHelper();
+
+    expect(helper.getAutocompleteOptions).toHaveBeenCalledWith("King, Stephen");
+    expect(
+      (wrapper.findComponent(BaseInputAutocomplete).props("options") as any[]).map(
+        (option) => option.value,
+      ),
+    ).toEqual(["PERS-1", "PERS-2"]);
+  });
+
+  it("shows a warning while unresolved", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    expect(wrapper.find('[data-testid="candidate-warning"]').text()).toBe(
+      "autocomplete.choose-candidate",
+    );
+  });
+
+  it("offers every option again once the user searches", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    await wrapper.findComponent(BaseInputAutocomplete).vm.$emit("search-change", "King");
+
+    expect(
+      (wrapper.findComponent(BaseInputAutocomplete).props("options") as any[]).length,
+    ).toBe(3);
+  });
+
+  it("keeps offering the candidates when the search is cleared", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    const helper = await lastDropdownHelper();
+    const autocomplete = wrapper.findComponent(BaseInputAutocomplete);
+    await autocomplete.vm.$emit("search-change", "King");
+    await autocomplete.vm.$emit("search-change", "");
+
+    expect(
+      (autocomplete.props("options") as any[]).map((option) => option.value),
+    ).toEqual(["PERS-1", "PERS-2"]);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(helper.getAutocompleteOptions).toHaveBeenLastCalledWith("King, Stephen");
+  });
+
+  it("keeps searching the original label after the value is cleared", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    const helper = await lastDropdownHelper();
+    await wrapper.setProps({ modelValue: undefined });
+    await wrapper.findComponent(BaseInputAutocomplete).vm.$emit("search-change", "");
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    expect(helper.getAutocompleteOptions).toHaveBeenLastCalledWith("King, Stephen");
+    expect(wrapper.find('[data-testid="candidate-warning"]').exists()).toBe(true);
+  });
+
+  it("lets a click on the selected value open the candidate list", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    expect(
+      wrapper.findComponent(BaseInputAutocomplete).props("replaceOnTagClick"),
+    ).toBe(true);
+  });
+
+  it("keeps the normal click behaviour once an entity is chosen", async () => {
+    const wrapper = await mountCell(["PERS-1", "PERS-2"]);
+    await wrapper.setProps({ modelValue: "PERS-1" });
+    expect(
+      wrapper.findComponent(BaseInputAutocomplete).props("replaceOnTagClick"),
+    ).toBe(false);
+  });
+
+  it("has no warning and no candidate search without candidates", async () => {
+    const wrapper = await mountCell();
+    const helper = await lastDropdownHelper();
+
+    expect(wrapper.find('[data-testid="candidate-warning"]').exists()).toBe(false);
+    expect(helper.getAutocompleteOptions).not.toHaveBeenCalled();
+  });
+});

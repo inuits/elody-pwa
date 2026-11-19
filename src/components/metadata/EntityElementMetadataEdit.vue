@@ -37,6 +37,9 @@
       :metadataKeyToCreateEntityFromOption="
         field.metadataKeyToCreateEntityFromOption
       "
+      :metadataToCreateEntityFromOption="
+        field.metadataToCreateEntityFromOption
+      "
       :depends-on="field.dependsOn"
       :metadataOnRelationConfig="field?.metadataOnRelationFieldConfig"
       :labelled-by="labelledBy"

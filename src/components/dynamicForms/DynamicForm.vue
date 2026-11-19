@@ -43,7 +43,7 @@
       <div
         v-for="(field, index) in getSortedFieldArray"
         :key="`${dynamicFormQuery}_field_${index}`"
-        class="pb-2"
+        class="pb-2 empty:hidden"
         :class="{
           'sticky bottom-0 pt-2 border-t border-border-subtle bg-background-light':
             stickySubmitZone && isUploadAction(field),

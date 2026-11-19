@@ -7,7 +7,11 @@
     :select-type="selectType"
     :disabled="disabled"
     :labelled-by="labelledBy"
-    :create-option-config="{ canCreateOption }"
+    :create-option-config="{
+      canCreateOption,
+      addOnBlur: canCreateOption,
+      editOnTagClick: canCreateOption,
+    }"
     :disable-virtual-keyboard-context="disableVirtualKeyboardContext"
     @search-change="
       (value: string) => {

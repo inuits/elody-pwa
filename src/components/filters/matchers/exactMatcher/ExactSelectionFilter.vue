@@ -56,6 +56,7 @@ import type {
   Entitytyping,
 } from "@/generated-types/queries";
 import { extractOrderKeyFromFilters } from "./helpers";
+import { extractValueFromObject } from "@/helpers";
 
 const props = defineProps<{
   filter: FilterListItem;
@@ -117,12 +118,28 @@ const fetchSeedOptions = async (filters: AdvancedFilterInput[]) => {
   return true;
 };
 
+const preferredOptionIds = (): string[] => {
+  const path =
+    props.filter.advancedFilter.advancedFilterInputForRetrievingOptions
+      ?.find((input) => input.preferredOptionIds)
+      ?.preferredOptionIds?.replace(/^\$/, "");
+  if (!path) return [];
+  const ids = extractValueFromObject({ entity: parentEntity }, path);
+  return Array.isArray(ids) ? ids : [];
+};
+
 const autoFillParentWithOptionIds = (onlyBestRanked: boolean) => {
   hasResolvedOptionIds.value = true;
 
-  const resolvedOptions = onlyBestRanked
-    ? options.value.slice(0, 1)
-    : options.value;
+  const preferredIds = preferredOptionIds();
+  const preferredOptions = options.value.filter((option) =>
+    preferredIds.includes(option.value),
+  );
+  const resolvedOptions = preferredOptions.length
+    ? preferredOptions
+    : onlyBestRanked
+      ? options.value.slice(0, 1)
+      : options.value;
   const optionIds = resolvedOptions.map((option) => option.value);
   if (optionIds.length) emit("updateValue", optionIds);
 };
@@ -166,7 +183,9 @@ const loading = computed(
 const showFilters = computed(() => {
   return (
     !isLoading.value &&
-    (initialAmountOfOptions.value !== 0 || hasWildcardTextFilter.value)
+    (initialAmountOfOptions.value !== 0 ||
+      hasWildcardTextFilter.value ||
+      shouldResolveOptionIds.value)
   );
 });
 
@@ -179,6 +198,7 @@ const initialize = async () => {
         route.meta.entityType) as Entitytyping,
       filterOptionsMapping: props.filter.advancedFilter.filterOptionsMapping,
       limitConfig: props.filter.advancedFilter.limitConfig,
+      optionLabelKeys: props.filter.advancedFilter.optionLabelKeys ?? undefined,
       selectedOptions: selectedOptions.value,
       parentEntity,
     });
