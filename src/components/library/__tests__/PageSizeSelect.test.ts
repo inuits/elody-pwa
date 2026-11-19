@@ -6,6 +6,7 @@ import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
 
 const mocks = vi.hoisted(() => ({
   state: undefined as any,
+  cached: null as any,
   options: [
     { label: "20", value: 20 },
     { label: "50", value: 50 },
@@ -17,6 +18,7 @@ vi.mock("@/main", () => ({
     query: vi.fn(async () => ({
       data: { PaginationLimitOptions: { options: mocks.options } },
     })),
+    readQuery: vi.fn(() => mocks.cached),
   },
 }));
 vi.mock("@/composables/useStateManagement", () => ({
@@ -47,6 +49,7 @@ const getWrapper = async (total = 100) => {
 describe("PageSizeSelect", () => {
   beforeEach(() => {
     mocks.state = undefined;
+    mocks.cached = null;
   });
 
   it("reads 'Items: 20' like the list-screen template", async () => {
@@ -86,6 +89,19 @@ describe("PageSizeSelect", () => {
   it("hides when every result fits on the smallest page", async () => {
     const { wrapper } = await getWrapper(4);
     expect(wrapper.findComponent(AdvancedDropdown).isVisible()).toBe(false);
+  });
+
+  it("shows again when remounted after a breakpoint change, without re-running the loader", async () => {
+    mocks.cached = { PaginationLimitOptions: { options: mocks.options } };
+    const setLimit = vi.fn();
+    const wrapper = shallowMount(PageSizeSelect, {
+      props: { setLimit, selectedPaginationLimitOption: 50, total: 100 },
+    });
+    await flushPromises();
+    const dropdown = wrapper.findComponent(AdvancedDropdown);
+    expect(dropdown.exists()).toBe(true);
+    expect(dropdown.props("modelValue")).toBe(50);
+    expect(setLimit).not.toHaveBeenCalled();
   });
 
   it("stays when a larger page size was picked for a short list", async () => {

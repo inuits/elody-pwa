@@ -126,6 +126,13 @@ const paginationLimitOptionsPromise = async () => {
 };
 
 onMounted(() => {
+  const cached = apolloClient.readQuery<GetPaginationLimitOptionsQuery>({
+    query: GetPaginationLimitOptionsDocument,
+  });
+  if (cached?.PaginationLimitOptions.options.length) {
+    rawOptions.value = cached.PaginationLimitOptions.options;
+    isResolved.value = true;
+  }
   emit("paginationLimitOptionsPromise", paginationLimitOptionsPromise);
 });
 
