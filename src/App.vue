@@ -4,16 +4,20 @@
   </div>
   <div v-else-if="!showSplashScreen">
     <Teleport :to="topmostOpenDialog ?? 'body'" :disabled="!topmostOpenDialog">
-      <notifications class="pt-2" />
+      <BaseNotifications class="pt-2" />
     </Teleport>
     <div v-if="!someModalIsOpened">
-      <notifications
+      <BaseNotifications
         class="pt-2 cursor-pointer"
         group="serviceVersionManager"
         @click="refreshPage()"
       />
       <div class="pt-2" v-if="config.features?.globalNotification">
-        <notifications class="pt-2" group="globalNotification" width="700" />
+        <BaseNotifications
+          class="pt-2"
+          group="globalNotification"
+          width="700"
+        />
       </div>
     </div>
     <the-navigation />
@@ -53,6 +57,7 @@ import { useRoute } from "vue-router";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useNavMenu } from "@/composables/useNavMenu";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
+import BaseNotifications from "@/components/base/BaseNotifications.vue";
 import { useBlockingLoader } from "@/composables/useBlockingLoader";
 import { useCrossTabAuthSync } from "@/composables/useCrossTabAuthSync";
 import { useGlobalNotification } from "./composables/useGlobalNotification";
@@ -67,7 +72,9 @@ const { isOpen: isMenuOpen, isCompact, isDrawerOpen } = useNavMenu();
 const contentOffset = computed(() => {
   const styles = {
     drawer: "",
-    rail: isMenuOpen.value ? "pl-(--nav-flyout-width)" : "pl-(--nav-rail-width)",
+    rail: isMenuOpen.value
+      ? "pl-(--nav-flyout-width)"
+      : "pl-(--nav-rail-width)",
   };
   return isCompact.value ? styles.drawer : styles.rail;
 });

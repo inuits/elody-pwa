@@ -17,6 +17,7 @@
     :select-type="selectType"
     :model-value="selectedDropdownOptions"
     :disabled="disabled"
+    :labelled-by="labelledBy"
     :loading="isLoading"
     @search-change="debouncedGetAutocompleteOptions"
     @update:model-value="
@@ -121,6 +122,7 @@ const props = withDefaults(
     formId: string;
     autoSelectable: boolean;
     disabled: boolean;
+    labelledBy?: string;
     canCreateOption?: boolean;
     metadataKeyToCreateEntityFromOption?: string;
     isReadOnly?: boolean;

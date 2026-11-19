@@ -12,6 +12,7 @@
     :classes="classes"
     :caret="!disabled"
     :placeholder="placeholder"
+    :aria="labelledBy ? { 'aria-labelledby': labelledBy } : undefined"
     :append-to="someModalIsOpened ? modalTeleportTarget() : 'body'"
     :loading="loading"
     :disabled="disabled"
@@ -143,6 +144,7 @@ const props = withDefaults(
     tagsAreLinks?: boolean;
     selectType?: "multi" | "single";
     placeholder?: string;
+    labelledBy?: string;
     disabled?: boolean;
     relation?: boolean;
     loading?: boolean;

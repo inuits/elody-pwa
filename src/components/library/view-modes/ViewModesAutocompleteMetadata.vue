@@ -6,6 +6,7 @@
     :options="dropdownOptions"
     :select-type="selectType"
     :disabled="disabled"
+    :labelled-by="labelledBy"
     :create-option-config="{ canCreateOption }"
     :disable-virtual-keyboard-context="disableVirtualKeyboardContext"
     @search-change="
@@ -15,11 +16,7 @@
     "
     @add-option="handleCreatingFromTag"
   />
-  <p
-    v-else
-    data-cy="metadata-value"
-    class="opacity-[var(--opacity-empty)]"
-  >
+  <p v-else data-cy="metadata-value" class="opacity-[var(--opacity-empty)]">
     {{ emptyValueLabel }}
   </p>
 </template>
@@ -47,6 +44,7 @@ const props = withDefaults(
     selectType?: "multi" | "single";
     autoSelectable?: boolean;
     disabled?: boolean;
+    labelledBy?: string;
     canCreateOption?: boolean;
     mode: "view" | "edit";
     disableVirtualKeyboardContext?: boolean;
@@ -61,10 +59,15 @@ const props = withDefaults(
   },
 );
 
-const filteredOptions = ref<DropdownOption[]>(props.metadataDropdownOptions || []);
+const filteredOptions = ref<DropdownOption[]>(
+  props.metadataDropdownOptions || [],
+);
 
 const dropdownOptions = computed<DropdownOption[]>(() =>
-  filteredOptions.value.map((option) => ({ ...option, label: t(option.label) })),
+  filteredOptions.value.map((option) => ({
+    ...option,
+    label: t(option.label),
+  })),
 );
 
 const inputValue = computed<DropdownOption[] | undefined>({

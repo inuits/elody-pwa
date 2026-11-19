@@ -12,10 +12,18 @@
   >
     <div class="flex items-baseline justify-between gap-2">
       <div class="flex items-baseline gap-2 min-w-0">
-        <span class="font-bold text-text-body truncate">
-          {{
-            comment.intialValues?.author_name || t("comments.unknown-author")
-          }}
+        <button
+          v-if="clickable"
+          type="button"
+          data-cy="comment-open"
+          aria-haspopup="dialog"
+          class="font-bold text-text-body truncate text-left hover:underline"
+          @click.stop="emit('open')"
+        >
+          {{ authorName }}
+        </button>
+        <span v-else class="font-bold text-text-body truncate">
+          {{ authorName }}
         </span>
         <span class="text-sm text-text-placeholder shrink-0">
           {{ formattedDate }}
@@ -169,6 +177,10 @@ const plainLabelOf = (createField: CreateFieldDisplayValue): string => {
   const key = resolveOptionLabel(createField.value, createField.options);
   return key ? t(key) : String(createField.value);
 };
+
+const authorName = computed<string>(
+  () => props.comment.intialValues?.author_name || t("comments.unknown-author"),
+);
 
 const formattedDate = computed<string>(() => {
   const createdAt = props.comment.intialValues?.created_at;

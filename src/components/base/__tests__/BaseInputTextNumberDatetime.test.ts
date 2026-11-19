@@ -145,6 +145,14 @@ describe("BaseInputTextNumberDatetime", () => {
       ).toBe("isbn-error");
     });
 
+    it("is named by a visible label elsewhere on the page", () => {
+      expect(
+        textInput({ labelledBy: "field-label-1" }).attributes(
+          "aria-labelledby",
+        ),
+      ).toBe("field-label-1");
+    });
+
     it("accepts an accessible name when there is no visible label", () => {
       expect(textInput({ ariaLabel: "Jaar" }).attributes("aria-label")).toBe(
         "Jaar",
@@ -162,7 +170,9 @@ describe("BaseInputTextNumberDatetime", () => {
 
     describe("read-only", () => {
       it("is read-only for the browser", () => {
-        expect(textInput({ readonly: true }).attributes("readonly")).toBeDefined();
+        expect(
+          textInput({ readonly: true }).attributes("readonly"),
+        ).toBeDefined();
       });
 
       it("shows a plain value without border or fill", () => {
@@ -174,7 +184,11 @@ describe("BaseInputTextNumberDatetime", () => {
 
     describe("error message", () => {
       const withError = (props: Record<string, unknown> = {}) =>
-        mountComponent({ type: "text", errorMessage: "ISBN is ongeldig", ...props });
+        mountComponent({
+          type: "text",
+          errorMessage: "ISBN is ongeldig",
+          ...props,
+        });
 
       it("renders the message below the input as an alert", () => {
         const alert = withError().find('[role="alert"]');
@@ -184,7 +198,9 @@ describe("BaseInputTextNumberDatetime", () => {
       it("links the message to the input", () => {
         const wrapper = withError();
         expect(
-          wrapper.find('[data-cy="base-input-text"]').attributes("aria-describedby"),
+          wrapper
+            .find('[data-cy="base-input-text"]')
+            .attributes("aria-describedby"),
         ).toBe(wrapper.find('[role="alert"]').attributes("id"));
       });
 
@@ -207,7 +223,9 @@ describe("BaseInputTextNumberDatetime", () => {
       });
 
       it("renders no alert without a message", () => {
-        expect(mountComponent({ type: "text" }).find('[role="alert"]').exists()).toBe(false);
+        expect(
+          mountComponent({ type: "text" }).find('[role="alert"]').exists(),
+        ).toBe(false);
       });
     });
 

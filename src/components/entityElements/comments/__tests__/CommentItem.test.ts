@@ -187,3 +187,27 @@ describe("CommentItem new marker", () => {
     expect(wrapper.classes()).not.toContain("border-l-accent-normal");
   });
 });
+
+describe("CommentItem keyboard access", () => {
+  it("opens a discussion from a button on the author's name", async () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({ author_name: "Jan" }), clickable: true },
+    });
+    const open = wrapper.find('[data-cy="comment-open"]');
+    expect(open.element.tagName).toBe("BUTTON");
+    expect(open.attributes("type")).toBe("button");
+    expect(open.attributes("aria-haspopup")).toBe("dialog");
+    expect(open.text()).toBe("Jan");
+
+    await open.trigger("click");
+    expect(wrapper.emitted("open")).toHaveLength(1);
+  });
+
+  it("keeps the author as plain text when the card opens nothing", () => {
+    const wrapper = mount(CommentItem, {
+      props: { comment: comment({ author_name: "Jan" }) },
+    });
+    expect(wrapper.find('[data-cy="comment-open"]').exists()).toBe(false);
+    expect(wrapper.text()).toContain("Jan");
+  });
+});

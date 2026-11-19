@@ -39,6 +39,7 @@
       "
       :depends-on="field.dependsOn"
       :metadataOnRelationConfig="field?.metadataOnRelationFieldConfig"
+      :labelled-by="labelledBy"
     />
     <ViewModesAutocompleteMetadata
       v-else-if="
@@ -55,6 +56,7 @@
           : 'multi'
       "
       :disabled="fieldEditIsDisabled"
+      :labelled-by="labelledBy"
       mode="edit"
     />
     <AdvancedDropdown
@@ -64,6 +66,7 @@
       :clearable="!isFieldRequired"
       :multiple="field.multiple || false"
       :disable="fieldEditIsDisabled"
+      :labelled-by="labelledBy"
       style-type="defaultWithBorder"
     />
     <TableInputField
@@ -90,12 +93,19 @@
       :type="field.type as any"
       input-style="defaultWithBorder"
       :disabled="fieldEditIsDisabled"
+      :labelled-by="labelledBy"
+      :invalid="hasError"
+      :described-by="hasError ? errorId : undefined"
     />
-    <div v-if="showErrors && !fieldIsValid" class="text-red-default">
-      <p>
-        {{ computedError }}
-      </p>
-    </div>
+    <p
+      v-if="hasError"
+      :id="errorId"
+      data-cy="field-error"
+      role="alert"
+      class="mt-0.5 text-hint text-danger"
+    >
+      {{ computedError }}
+    </p>
   </div>
 </template>
 
@@ -114,7 +124,7 @@ import BaseInputTextNumberDatetime from "@/components/base/BaseInputTextNumberDa
 import BaseInputColor from "@/components/base/BaseInputColor.vue";
 import ViewModesAutocompleteRelations from "@/components/library/view-modes/ViewModesAutocompleteRelations.vue";
 import { addCurrentTimeZoneToDateTimeString, isDateTime } from "@/helpers";
-import { computed, inject, onMounted } from "vue";
+import { computed, inject, onMounted, useId } from "vue";
 import { useI18n } from "vue-i18n";
 import ViewModesAutocompleteMetadata from "@/components/library/view-modes/ViewModesAutocompleteMetadata.vue";
 import AdvancedDropdown from "@/components/base/AdvancedDropdown.vue";
@@ -146,7 +156,10 @@ const props = defineProps<{
   repeatablePanelConfig?: PanelRepetitionProps;
   disabled?: boolean;
   defaultValue?: string;
+  labelledBy?: string;
 }>();
+
+const errorId = `field-error-${useId()}`;
 
 const mediafileViewerContext: any = inject("mediafileViewerContext", "");
 const computedError = computed<string>(() => {
@@ -157,6 +170,9 @@ const computedError = computed<string>(() => {
   if (props.error) return t(props.error);
   return "";
 });
+const hasError = computed<boolean>(
+  () => props.showErrors && !props.fieldIsValid,
+);
 
 const { addEditableMetadataKeys } = useFormHelper();
 const metadataValue = computed<string | string[] | number | number[] | object>({
