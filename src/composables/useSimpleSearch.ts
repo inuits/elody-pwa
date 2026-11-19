@@ -9,7 +9,7 @@ export function useSimpleSearch() {
   const config = inject("config") as any;
 
   const itemTypes = computed<string[]>(
-    () => config.features.simpleSearch.itemTypes ?? [],
+    () => config.features.simpleSearch?.itemTypes ?? [],
   );
 
   const entityTypeFilters = (types: string[]): AdvancedFilterInput[] => {

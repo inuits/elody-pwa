@@ -62,6 +62,11 @@ describe("useSimpleSearch", () => {
       expect(useSimpleSearch().itemTypes.value).toEqual(["production", "venue"]);
     });
 
+    it("offers no types when the client has no simple search configured", () => {
+      mockConfig = { features: {} };
+      expect(useSimpleSearch().itemTypes.value).toEqual([]);
+    });
+
     it("omits entity type filter when itemTypes is empty", () => {
       mockConfig = makeConfig({ itemTypes: [] });
       const { buildFilters } = useSimpleSearch();
