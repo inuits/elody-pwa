@@ -944,7 +944,7 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
   if (!enableUploadButton.value) return;
   const isFilelessCreate =
     mediafiles.value.length === 0 && isLinkedUpload.value;
-  if (isFilelessCreate && !(await isFormValid())) return;
+  if (!(await isFormValid())) return;
   const entityInput = await createEntityFromFormInput(field.creationType);
 
   const uploadedFilenames = mediafiles.value
