@@ -11,11 +11,26 @@
     :isValidationFile="isValidationFile"
     :hidePrepareStep="hidePrepareStep"
   />
+  <Teleport
+    v-for="duplicate in duplicateMediafiles"
+    :key="duplicate.file.name"
+    :to="
+      duplicate.file.previewTemplate.querySelector(
+        '.duplicate-choice-container',
+      )
+    "
+  >
+    <DuplicateMediafileChoice
+      v-model:link="duplicate.link"
+      :duplicate="duplicate"
+    />
+  </Teleport>
 </template>
 
 <script lang="ts" setup>
 import DropzonePreview from "@/components/base/dropzone/DropzonePreview.vue";
 import DropzoneView from "@/components/base/dropzone/DropzoneView.vue";
+import DuplicateMediafileChoice from "@/components/base/dropzone/DuplicateMediafileChoice.vue";
 import { onMounted, ref, watch } from "vue";
 import useUpload from "@/composables/upload/useUpload";
 import { UploadStatus } from "@/composables/upload/types";
@@ -47,8 +62,14 @@ defineEmits<{
 }>();
 const { dynamicFormUploadFields } = useDynamicForm();
 
-const { addFileToUpload, removeFileToUpload, files, uploadStatus, sortFiles } =
-  useUpload();
+const {
+  addFileToUpload,
+  removeFileToUpload,
+  files,
+  uploadStatus,
+  sortFiles,
+  duplicateMediafiles,
+} = useUpload();
 
 onMounted(() => {
   const dropzone = props.dropzone.initDropzone(

@@ -42,6 +42,7 @@
       <div
         class="warning-message-container hidden bg-warning-bg text-text-body text-table px-5 py-1"
       ></div>
+      <div class="duplicate-choice-container"></div>
       <div
         role="alert"
         class="error-message-container hidden bg-danger-bg text-danger-ink text-table px-5 py-1"

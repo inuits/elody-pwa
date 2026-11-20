@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import type { DropzoneFile } from "dropzone";
-import { UploadStatus } from "./types";
+import { type DuplicateMediafile, UploadStatus } from "./types";
 import {
   type ActionProgressStep,
   UploadEntityTypes,
@@ -34,6 +34,7 @@ const extraMediafileType = ref<string | undefined>(undefined);
 const optionalFileNames = ref<string[]>([]);
 const typeToIncludeInUrl = ref<string | undefined>(undefined);
 const shouldIncludeTypeInUrl = ref<boolean>(false);
+const duplicateMediafiles = ref<DuplicateMediafile[]>([]);
 
 export const useUploadState = () => {
   const resetState = () => {
@@ -74,6 +75,7 @@ export const useUploadState = () => {
     optionalFileNames,
     typeToIncludeInUrl,
     shouldIncludeTypeInUrl,
+    duplicateMediafiles,
 
     // Actions
     resetState,

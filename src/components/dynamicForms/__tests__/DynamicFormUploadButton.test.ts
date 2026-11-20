@@ -9,6 +9,13 @@ const state = vi.hoisted(() => ({}) as Record<string, any>);
 vi.mock("@/composables/upload/useUpload", () => ({
   default: () => state,
 }));
+const notifications = vi.hoisted(() => ({
+  displaySuccessNotification: vi.fn(),
+  displayErrorNotification: vi.fn(),
+}));
+vi.mock("@/composables/useBaseNotification", () => ({
+  useBaseNotification: () => notifications,
+}));
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
     t: (key: string, named?: unknown) =>
@@ -26,6 +33,8 @@ const setState = (overrides: Record<string, unknown>) => {
     failedUploads: ref([]),
     uploadFlow: ref(UploadFlow.MediafilesOnly),
     csvOnlyUploadSFailed: ref(false),
+    duplicateMediafiles: ref([]),
+    linkDuplicateMediafiles: vi.fn().mockResolvedValue(0),
   });
   Object.entries(overrides).forEach(([key, value]) => (state[key].value = value));
 };
@@ -109,5 +118,49 @@ describe("DynamicFormUploadButton - before an upload", () => {
     });
     await button.trigger("click");
     expect(wrapper.emitted("clickUploadButton")).toHaveLength(1);
+  });
+});
+
+describe("DynamicFormUploadButton - duplicate mediafiles", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setState({
+      uploadStatus: "upload-finished",
+      amountUploaded: 3,
+      duplicateMediafiles: [{ link: true }, { link: false }],
+    });
+  });
+
+  const complete = async () => {
+    const wrapper = getWrapper();
+    await wrapper
+      .findAllComponents({ name: "BaseButtonNew" })
+      .find((button) => button.props("icon") === "CheckCircle")!
+      .trigger("click");
+    await new Promise((resolve) => setTimeout(resolve));
+    return wrapper;
+  };
+
+  it("tells how many existing mediafiles will be linked", () => {
+    expect(status().text()).toBe(
+      'upload-fields.uploaded-of {"done":3,"total":3} · upload-fields.duplicate.will-link {"count":1}',
+    );
+  });
+
+  it("links the chosen duplicates before closing on Complete", async () => {
+    state.linkDuplicateMediafiles.mockResolvedValue(1);
+    const wrapper = await complete();
+
+    expect(state.linkDuplicateMediafiles).toHaveBeenCalledTimes(1);
+    expect(notifications.displaySuccessNotification).toHaveBeenCalled();
+    expect(wrapper.emitted("closeAndDeleteForm")).toHaveLength(1);
+  });
+
+  it("stays open and reports when linking fails", async () => {
+    state.linkDuplicateMediafiles.mockRejectedValue(new Error("nope"));
+    const wrapper = await complete();
+
+    expect(notifications.displayErrorNotification).toHaveBeenCalled();
+    expect(wrapper.emitted("closeAndDeleteForm")).toBeUndefined();
   });
 });

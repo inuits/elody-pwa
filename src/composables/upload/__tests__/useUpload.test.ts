@@ -3,7 +3,7 @@ import { ref } from "vue";
 import { flushPromises } from "@vue/test-utils";
 import useUpload from "../useUpload";
 import { UploadFlow } from "@/generated-types/queries";
-import { UploadStatus } from "../types";
+import { DuplicateMediafileError, UploadStatus } from "../types";
 
 vi.mock("@/helpers", () => ({
   getTranslatedMessage: vi.fn((key, args) => `Missing ${args[0]}`),
@@ -15,17 +15,46 @@ vi.mock("@/composables/useErrorCodes", () => ({
     getMessageAndCodeFromErrorString: vi
       .fn()
       .mockResolvedValue({ message: "Error" }),
-    getSeverityFromErrorString: vi.fn(async (raw: string) =>
-      raw.includes("A4011")
-        ? {
-            code: "A4011",
-            message: "File empty.txt is empty.",
-            severity: "warning",
-          }
-        : { code: "W0001", message: "Error", severity: "error" },
-    ),
+    getSeverityFromErrorString: vi.fn(async (raw: string) => {
+      if (raw.includes("A4011"))
+        return {
+          code: "A4011",
+          message: "File empty.txt is empty.",
+          severity: "warning",
+        };
+      if (raw.includes("A4009"))
+        return { code: "A4009", message: "Duplicate file", severity: "warning" };
+      return { code: "W0001", message: "Error", severity: "error" };
+    }),
   }),
 }));
+
+const apolloMock = vi.hoisted(() => ({
+  mutate: vi.fn(),
+  refetchQueries: vi.fn(),
+}));
+
+vi.mock("@/main", () => ({
+  apolloClient: apolloMock,
+  router: { resolve: () => ({ fullPath: "" }) },
+}));
+
+const importMock = vi.hoisted(() => ({
+  loadDocument: async (name: string): Promise<string | undefined> =>
+    `${name}Document`,
+}));
+vi.mock("@/composables/useImport", () => ({
+  useImport: () => ({ loadDocument: (name: string) => importMock.loadDocument(name) }),
+}));
+
+vi.mock("@/composables/useEntitySingle", () => ({
+  default: () => ({
+    getEntityUuid: () => "entity-1",
+    getRefetch: () => entityRefetch,
+  }),
+}));
+
+const entityRefetch = vi.hoisted(() => vi.fn());
 
 const uploadUrlMock = vi.hoisted(() => ({
   getUploadUrl: async (): Promise<string> =>
@@ -72,6 +101,7 @@ vi.mock("../useUploadState", async () => {
   const currentUploadAbortController = ref(undefined);
   const uploadProgressPercentage = ref(0);
   const uploadType = ref("");
+  const duplicateMediafiles = ref([]);
 
   return {
     useUploadState: () => ({
@@ -96,6 +126,7 @@ vi.mock("../useUploadState", async () => {
       currentUploadAbortController,
       uploadProgressPercentage,
       uploadType,
+      duplicateMediafiles,
       reinitializeDynamicFormFunc: ref(() => {}),
       resetState: vi.fn(),
     }),
@@ -659,5 +690,140 @@ describe("useUpload - per-file progressbar", () => {
     const file = createRow("scan_001.tiff");
     useUpload().updateFileThumbnails(file, "upload" as any, "loading" as any);
     expect(bar(file).getAttribute("aria-valuetext")).toBe("upload loading");
+  });
+});
+
+describe("useUpload - Duplicate mediafiles", () => {
+  const createFakeMediafile = (name: string) => {
+    const previewTemplate = document.createElement("div");
+    const warningContainer = document.createElement("div");
+    warningContainer.classList.add("warning-message-container", "hidden");
+    previewTemplate.appendChild(warningContainer);
+    return { name, type: "image/jpeg", previewTemplate, status: "added" } as any;
+  };
+
+  const uploadDuplicate = async (isLinkedUpload: boolean) => {
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: false,
+        text: () =>
+          Promise.resolve(
+            "A4009 | existing_file:6d3c9201451f9d39123db0d1c6131d52-sunset rio.jpeg - Duplicate file sunset rio.jpeg matches existing file.",
+          ),
+      } as unknown as Response),
+    );
+    const upload = useUpload({ api: { storageApiUrl: "http://storage.test" } });
+    upload.resetUpload();
+    upload.uploadFlow.value = UploadFlow.MediafilesOnly;
+    upload.uploadStatus.value = UploadStatus.NoUpload;
+    const mediafile = createFakeMediafile("sunset-rio.jpeg");
+    upload.files.value = [mediafile];
+    await upload.upload(isLinkedUpload, {} as any, {} as any);
+    await flushPromises();
+    return { ...upload, mediafile };
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("offers the existing mediafile for linking instead of showing the warning", async () => {
+    const { duplicateMediafiles, mediafile } = await uploadDuplicate(true);
+
+    expect(duplicateMediafiles.value).toEqual([
+      {
+        file: mediafile,
+        existingId: "6d3c9201451f9d39123db0d1c6131d52",
+        existingName: "sunset rio.jpeg",
+        link: true,
+      },
+    ]);
+    expect(
+      mediafile.previewTemplate
+        .querySelector(".warning-message-container")
+        ?.classList.contains("hidden"),
+    ).toBe(true);
+  });
+
+  it("keeps the plain warning for uploads that are not on an entity", async () => {
+    const { duplicateMediafiles, mediafile } = await uploadDuplicate(false);
+
+    expect(duplicateMediafiles.value).toEqual([]);
+    expect(
+      mediafile.previewTemplate
+        .querySelector(".warning-message-container")
+        ?.classList.contains("hidden"),
+    ).toBe(false);
+  });
+
+  it("keeps the plain warning when the client lacks the link mutation", async () => {
+    const original = importMock.loadDocument;
+    importMock.loadDocument = async () => undefined;
+    const { duplicateMediafiles, mediafile } = await uploadDuplicate(true);
+    importMock.loadDocument = original;
+
+    expect(duplicateMediafiles.value).toEqual([]);
+    expect(
+      mediafile.previewTemplate
+        .querySelector(".warning-message-container")
+        ?.classList.contains("hidden"),
+    ).toBe(false);
+  });
+
+  it("links only the duplicates the user kept selected", async () => {
+    const { duplicateMediafiles, linkDuplicateMediafiles } =
+      await uploadDuplicate(true);
+    duplicateMediafiles.value.push({
+      ...duplicateMediafiles.value[0],
+      existingId: "skipped",
+      link: false,
+    });
+
+    await expect(linkDuplicateMediafiles()).resolves.toBe(1);
+
+    expect(apolloMock.mutate).toHaveBeenCalledTimes(1);
+    expect(apolloMock.mutate).toHaveBeenCalledWith({
+      mutation: "LinkMediafileToEntityDocument",
+      variables: {
+        entityId: "entity-1",
+        mediaFileInput: { _id: "6d3c9201451f9d39123db0d1c6131d52" },
+      },
+    });
+    expect(apolloMock.refetchQueries).toHaveBeenCalledWith({ include: "active" });
+    expect(entityRefetch).toHaveBeenCalled();
+  });
+
+  it("offers the existing mediafile when its creation hit a duplicate identifier", async () => {
+    const original = uploadUrlMock.getUploadUrl;
+    uploadUrlMock.getUploadUrl = async () => {
+      throw new DuplicateMediafileError("sheep.JPEG");
+    };
+    const upload = useUpload({ api: { storageApiUrl: "http://storage.test" } });
+    upload.resetUpload();
+    upload.uploadFlow.value = UploadFlow.MediafilesOnly;
+    upload.uploadStatus.value = UploadStatus.NoUpload;
+    const mediafile = createFakeMediafile("sheep.JPEG");
+    upload.files.value = [mediafile];
+    await upload.upload(true, {} as any, {} as any);
+    await flushPromises();
+    uploadUrlMock.getUploadUrl = original;
+
+    expect(upload.duplicateMediafiles.value).toEqual([
+      {
+        file: mediafile,
+        existingId: "sheep.JPEG",
+        existingName: "sheep.JPEG",
+        link: true,
+      },
+    ]);
+    expect(upload.failedUploads.value).not.toContain("sheep.JPEG");
+  });
+
+  it("clears the duplicates on reset", async () => {
+    const { duplicateMediafiles, resetUpload } = await uploadDuplicate(true);
+
+    resetUpload();
+
+    expect(duplicateMediafiles.value).toEqual([]);
   });
 });

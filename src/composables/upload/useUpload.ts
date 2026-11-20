@@ -15,7 +15,8 @@ import useEntitySingle from "@/composables/useEntitySingle";
 import { useDynamicForm } from "@/components/dynamicForms/useDynamicForm";
 import { useBaseModal } from "@/composables/useBaseModal";
 import { useErrorCodes } from "@/composables/useErrorCodes";
-import { router } from "@/main";
+import { apolloClient, router } from "@/main";
+import { useImport } from "@/composables/useImport";
 import { getTranslatedMessage } from "@/helpers";
 import { useOcrUpload } from "@/composables/upload/useOcrUpload";
 import {
@@ -23,7 +24,11 @@ import {
   useUploadFlowConfiguration,
 } from "@/composables/upload/useUploadFlowConfiguration";
 import { useUploadState } from "./useUploadState";
-import { type UploadSettings, UploadStatus } from "./types";
+import {
+  DuplicateMediafileError,
+  type UploadSettings,
+  UploadStatus,
+} from "./types";
 import { deepToRaw } from "@/utils/deepToRaw";
 
 const mainFileTypes = [
@@ -99,6 +104,7 @@ const {
   extraMediafileType,
   typeToIncludeInUrl,
   shouldIncludeTypeInUrl,
+  duplicateMediafiles,
 } = useUploadState();
 
 const useUpload = (config: any = {}) => {
@@ -623,7 +629,12 @@ const useUpload = (config: any = {}) => {
     }
   };
 
-  const __uploadFile = async (file: DropzoneFile, url: string, config: any) => {
+  const __uploadFile = async (
+    file: DropzoneFile,
+    url: string,
+    config: any,
+    isLinkedUpload: boolean = false,
+  ) => {
     updateFileThumbnails(
       file,
       ProgressStepType.Upload,
@@ -645,9 +656,9 @@ const useUpload = (config: any = {}) => {
     });
 
     if (!response.ok) {
-      const { message, severity } = await getSeverityFromErrorString(
-        await response.text(),
-      );
+      const errorText = await response.text();
+      const { code, message, severity } =
+        await getSeverityFromErrorString(errorText);
 
       if (severity === "warning") {
         updateFileThumbnails(
@@ -655,7 +666,24 @@ const useUpload = (config: any = {}) => {
           ProgressStepType.Upload,
           ProgressStepStatus.Complete,
         );
-        __handleFileThumbnailWarning(file, [message]);
+        // The storage key is "<md5>-<filename>", and the md5 identifies the existing mediafile
+        const existingFile =
+          code === "A4009"
+            ? errorText.match(/existing_file:(?:.*\/)?([0-9a-f]{32})-(.+?) - /)
+            : null;
+        // Clients without the mediafile module's link mutation keep the plain warning
+        const canLink =
+          isLinkedUpload &&
+          existingFile &&
+          (await useImport().loadDocument("LinkMediafileToEntity"));
+        if (canLink && existingFile)
+          duplicateMediafiles.value.push({
+            file,
+            existingId: existingFile[1],
+            existingName: existingFile[2],
+            link: true,
+          });
+        else __handleFileThumbnailWarning(file, [message]);
         file.status = "uploaded";
         return {
           response,
@@ -717,8 +745,28 @@ const useUpload = (config: any = {}) => {
           ProgressStepStatus.Complete,
         );
         prepared = true;
-        yield await __uploadFile(file, url, config);
+        yield await __uploadFile(file, url, config, !!entityId);
       } catch (error) {
+        if (error instanceof DuplicateMediafileError) {
+          updateFileThumbnails(
+            file,
+            ProgressStepType.Prepare,
+            ProgressStepStatus.Complete,
+          );
+          duplicateMediafiles.value.push({
+            file,
+            existingId: error.existingId,
+            existingName: error.existingId,
+            link: true,
+          });
+          file.status = "uploaded";
+          yield {
+            file,
+            response: { ok: false, text: () => error.message },
+            warning: error.message,
+          };
+          continue;
+        }
         // A rejected upload-URL request (e.g. a duplicate) left the prepare step spinning
         if (!prepared)
           updateFileThumbnails(
@@ -832,6 +880,7 @@ const useUpload = (config: any = {}) => {
       reinitializeDynamicFormFunc.value();
     }
     prefetchedUploadUrls.value = [];
+    duplicateMediafiles.value = [];
     lastUploadedFileIndex.value = -1;
     dryRunFeedback.value = { errors: [], warnings: [] };
     dryRunComplete.value = false;
@@ -1201,6 +1250,27 @@ const useUpload = (config: any = {}) => {
     });
   };
 
+  const linkDuplicateMediafiles = async (): Promise<number> => {
+    const toLink = duplicateMediafiles.value.filter(
+      (duplicate) => duplicate.link,
+    );
+    if (!toLink.length) return 0;
+    const entityId = useEntitySingle().getEntityUuid();
+    const mutation = await useImport().loadDocument("LinkMediafileToEntity");
+    await Promise.all(
+      toLink.map((duplicate) =>
+        apolloClient.mutate({
+          mutation,
+          variables: { entityId, mediaFileInput: { _id: duplicate.existingId } },
+        }),
+      ),
+    );
+    await apolloClient.refetchQueries({ include: "active" });
+    // Entity element lists with a custom query only refetch through the entity page
+    await useEntitySingle().getRefetch()?.();
+    return toLink.length;
+  };
+
   const sortFiles = (): void => {
     files.value = files.value.sort((a, b) => {
       if (a.name < b.name) return -1;
@@ -1253,6 +1323,8 @@ const useUpload = (config: any = {}) => {
     getExcelFile,
     sortFiles,
     prefetchedUploadUrls,
+    duplicateMediafiles,
+    linkDuplicateMediafiles,
   };
 };
 

@@ -39,7 +39,8 @@
               icon="CheckCircle"
               :label="t('actions.labels.complete')"
               button-style="commit"
-              @click="emit('closeAndDeleteForm')"
+              :disabled="isLinking"
+              @click="complete"
             />
           </div>
           <div class="ml-3 @lg/modal:hidden">
@@ -47,7 +48,8 @@
               icon="CheckCircle"
               :aria-label="t('actions.labels.complete')"
               button-style="commit"
-              @click="emit('closeAndDeleteForm')"
+              :disabled="isLinking"
+              @click="complete"
             />
           </div>
         </template>
@@ -94,12 +96,13 @@ import {
 } from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import BaseProgressStep from "@/components/base/progressStep/BaseProgressStep.vue";
 import useUpload from "@/composables/upload/useUpload";
 import { UploadStatus } from "@/composables/upload/types";
 import ProgressBar from "@/components/ProgressBar.vue";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
+import { useBaseNotification } from "@/composables/useBaseNotification";
 
 withDefaults(
   defineProps<{
@@ -129,7 +132,11 @@ const {
   failedUploads,
   uploadFlow,
   csvOnlyUploadSFailed,
+  duplicateMediafiles,
+  linkDuplicateMediafiles,
 } = useUpload(config);
+const { displaySuccessNotification, displayErrorNotification } =
+  useBaseNotification();
 
 const isUploading = computed(
   () =>
@@ -158,11 +165,38 @@ const statusMessage = computed(() => {
   if (uploadFlow.value === UploadFlow.XmlMarc) {
     return t("actions.labels.xml-success");
   }
-  if (mediafiles.value.length > 0) return uploadedOf.value;
+  if (mediafiles.value.length > 0) {
+    if (!duplicateMediafiles.value.length) return uploadedOf.value;
+    const toLink = duplicateMediafiles.value.filter(
+      (duplicate) => duplicate.link,
+    ).length;
+    return `${uploadedOf.value} · ${t("upload-fields.duplicate.will-link", { count: toLink })}`;
+  }
   if (failedUploads.value.length <= 0)
     return t("actions.labels.success", [amountUploaded.value]);
   return t("actions.upload.errors", [failedUploads.value.length]);
 });
+
+const isLinking = ref(false);
+const complete = async () => {
+  isLinking.value = true;
+  try {
+    const linked = await linkDuplicateMediafiles();
+    if (linked)
+      displaySuccessNotification(
+        t("upload-fields.duplicate.linked-title"),
+        t("upload-fields.duplicate.linked", { count: linked }),
+      );
+    emit("closeAndDeleteForm");
+  } catch (error) {
+    displayErrorNotification(
+      t("upload-fields.duplicate.link-failed"),
+      String(error),
+    );
+  } finally {
+    isLinking.value = false;
+  }
+};
 
 // feedback.md: success, warning for a partial success, danger when nothing went up
 type Tone = "neutral" | "success" | "warning" | "danger";

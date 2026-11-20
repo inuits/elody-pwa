@@ -6,6 +6,8 @@ import {
   ProgressStepType,
 } from "@/generated-types/queries";
 import { useErrorCodes } from "@/composables/useErrorCodes";
+import { useImport } from "@/composables/useImport";
+import { DuplicateMediafileError } from "@/composables/upload/types";
 
 export const useSharedUploadLogic = (): {
   getUploadUrl: (file: DropzoneFile) => Promise<string>;
@@ -66,6 +68,22 @@ export const useSharedUploadLogic = (): {
     return JSON.parse(await response.text());
   };
 
+  // Clients that use the filename as identifier reject a second upload of it when creating the mediafile
+  const __getDuplicateIdentifier = async (
+    response: Response,
+  ): Promise<string | undefined> => {
+    try {
+      const body = await response.json();
+      const errorBody = body?.extensions?.response?.body;
+      const message: string = errorBody?.message ?? errorBody ?? "";
+      return String(message).match(
+        /\bW2004\b.*duplicate_keys:(.+?)(?:, | - )/,
+      )?.[1];
+    } catch {
+      return undefined;
+    }
+  };
+
   const getUploadUrlForMediafileOnEntity = async (
     entityId: string,
     file: DropzoneFile,
@@ -83,6 +101,12 @@ export const useSharedUploadLogic = (): {
     );
 
     if (!response.ok) {
+      const existingId = await __getDuplicateIdentifier(response.clone());
+      if (
+        existingId &&
+        (await useImport().loadDocument("LinkMediafileToEntity"))
+      )
+        throw new DuplicateMediafileError(existingId);
       const httpErrorMessage = await handleHttpError(response);
       updateFileThumbnails(
         file,
