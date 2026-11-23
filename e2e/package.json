@@ -3,8 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:ui": "playwright test --ui --headed --workers=1",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 pnpm --dir .. exec vite build --outDir e2e/.dist --emptyOutDir --logLevel warn",
+    "test": "pnpm build && playwright test",
+    "test:ui": "pnpm build && playwright test --ui --headed --workers=1",
+    "test:dev": "E2E_FRONTEND=dev playwright test",
     "report": "playwright show-report",
     "codegen": "playwright codegen"
   },

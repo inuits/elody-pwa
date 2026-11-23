@@ -6,6 +6,12 @@ const envFile = path.join(import.meta.dirname, ".env");
 if (existsSync(envFile)) process.loadEnvFile(envFile);
 
 const { client, clientDir, authFile } = await import("./client");
+const { distDir, usesBuiltFrontend } = await import("./fixtures/frontend");
+
+if (usesBuiltFrontend && !existsSync(path.join(distDir, "index.html")))
+  throw new Error(
+    "No built frontend in e2e/.dist: run `pnpm build` in e2e/, or set E2E_FRONTEND=dev to test against the Vite dev server.",
+  );
 
 export default defineConfig({
   testMatch: "**/*.e2e.ts",
@@ -18,6 +24,7 @@ export default defineConfig({
   use: {
     baseURL: client.baseURL,
     testIdAttribute: "data-cy",
+    serviceWorkers: "block",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

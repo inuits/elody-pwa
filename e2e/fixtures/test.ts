@@ -1,12 +1,17 @@
 import { test as base, expect } from "@playwright/test";
 import { client } from "../client";
 import { createEntity, deleteEntity, type CreatedEntity } from "./entities";
+import { serveBuiltFrontend, usesBuiltFrontend } from "./frontend";
 
 export const test = base.extend<{
   expectedAppError: RegExp | undefined;
   appErrors: string[];
   createdEntity: CreatedEntity;
 }>({
+  context: async ({ context }, use) => {
+    if (usesBuiltFrontend) await serveBuiltFrontend(context);
+    await use(context);
+  },
   expectedAppError: [undefined, { option: true }],
   appErrors: [
     async ({ page, expectedAppError }, use) => {
@@ -51,4 +56,4 @@ export const test = base.extend<{
 export { expect };
 export { client };
 export { visibleResults } from "./entities";
-export { logIn } from "./auth";
+export { logIn, loginNoise } from "./auth";

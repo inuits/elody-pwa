@@ -34,6 +34,7 @@ test("filters on text with the contains and is exactly matchers", async ({
 
   await pane.getByRole("combobox", { name: "contains text" }).click();
   await page.getByRole("option", { name: "is exactly" }).click();
+  await expect(keyword).toHaveValue("");
   await keyword.fill(createdEntity.title.slice(0, -2));
   await apply(pane);
   await expect(visibleResults(page)).toHaveCount(0);

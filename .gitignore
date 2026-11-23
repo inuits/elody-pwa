@@ -39,3 +39,4 @@ session-vue-3-oidc-library
 pnpm-lock.yaml
 
 storybook-static
+e2e/.dist

@@ -48,9 +48,9 @@ test("switches to grid view and remembers it", async ({ page }) => {
   await expect(
     page.getByTestId("table-row").filter({ visible: true }),
   ).toHaveCount(0);
-  await expect(
-    page.getByTestId("grid-card-title-link").first(),
-  ).toContainText(firstInTable);
+  await expect(page.getByTestId("grid-card-title-link").first()).toContainText(
+    firstInTable,
+  );
 
   await page.getByRole("button", { name: "Compact" }).click();
   await expect(page.getByRole("button", { name: "Compact" })).toHaveAttribute(
