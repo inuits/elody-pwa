@@ -194,6 +194,8 @@ Exactly two levels. **Cards** have a 1px border and no shadow
 listboxes), `--shadow-popover`, `--shadow-modal`, `--shadow-toast`. Accent
 shadows (`--shadow-accent-hover`, `--shadow-accent-row`,
 `--shadow-commit-hover`) are hover/selection cues, not elevation.
+`--shadow-reorder-drop-before` / `--shadow-reorder-drop-after` draw the
+accent drop line above or below a row while reordering (EntityReorder).
 
 `--opacity-empty` dims empty, non-required values.
 

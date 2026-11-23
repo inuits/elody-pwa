@@ -315,7 +315,10 @@
               @set-bulk-operations-available="
                 (value: boolean) => (hasBulkOperations = value)
               "
-              @start-reorder="reordering = true"
+              @start-reorder="
+                // the order endpoint is asked for mediafiles only
+                reordering = entityType === Entitytyping.Mediafile
+              "
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
