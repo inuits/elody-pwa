@@ -315,10 +315,7 @@
               @set-bulk-operations-available="
                 (value: boolean) => (hasBulkOperations = value)
               "
-              @start-reorder="
-                // the order endpoint is asked for mediafiles only
-                reordering = entityType === Entitytyping.Mediafile
-              "
+              @start-reorder="reordering = isMediafileList"
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
@@ -1239,6 +1236,10 @@ const entityType = computed(() =>
     : route.meta.entityType
       ? (route.meta.entityType as Entitytyping)
       : ("BaseEntity" as Entitytyping),
+);
+
+const isMediafileList = computed(
+  () => entityType.value === Entitytyping.Mediafile,
 );
 
 const relations = computed<BaseRelationValuesInput[]>(

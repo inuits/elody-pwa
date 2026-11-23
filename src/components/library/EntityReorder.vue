@@ -95,7 +95,7 @@
         draggable="true"
         data-cy="entity-reorder-row"
         class="flex items-center gap-2 min-h-12 py-0.5 pr-2 pl-1 border-b border-border-subtle last:border-b-0 cursor-grab"
-        :class="dropIndicatorClasses(pageStart + offset)"
+        :class="desktopRowClasses(pageStart + offset)"
         @dragstart="(event) => startDrag(event, pageStart + offset)"
         @dragover="(event) => dragOver(event, pageStart + offset)"
         @drop.prevent="dropAt(pageStart + offset)"
@@ -113,12 +113,10 @@
           :aria-label="t('reorder.position')"
           :value="drafts[id] ?? pageStart + offset + 1"
           class="w-12 h-8.5 shrink-0 border border-border-default rounded-input text-center font-bold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-          @focus="(event) => (event.target as HTMLInputElement).select()"
-          @input="
-            (event) => (drafts[id] = (event.target as HTMLInputElement).value)
-          "
-          @keydown.enter="(event) => (event.target as HTMLInputElement).blur()"
-          @keydown.esc="delete drafts[id]"
+          @focus="selectInputText"
+          @input="(event) => updateDraft(id, event)"
+          @keydown.enter="blurInput"
+          @keydown.esc="discardDraft(id)"
           @blur="commitDraft(id)"
         />
         <img
@@ -136,21 +134,16 @@
         }}</span>
         <span class="flex justify-center gap-0.5 w-20">
           <button
-            v-for="direction in [-1, 1]"
-            :key="direction"
+            v-for="arrow in arrows"
+            :key="arrow.direction"
             type="button"
             class="w-8.5 h-8.5 flex items-center justify-center rounded-button hover:bg-accent-wash cursor-pointer disabled:text-text-disabled disabled:cursor-not-allowed"
-            :disabled="!canMove(pageStart + offset, direction)"
-            :title="arrowTitle(offset, direction)"
-            :aria-label="arrowTitle(offset, direction)"
-            @click="arrowMove(pageStart + offset, direction)"
+            :disabled="!canMove(pageStart + offset, arrow.direction)"
+            :title="arrowTitle(offset, arrow)"
+            :aria-label="arrowTitle(offset, arrow)"
+            @click="arrowMove(pageStart + offset, arrow.direction)"
           >
-            <unicon
-              :name="
-                direction < 0 ? Unicons.AngleUp.name : Unicons.AngleDown.name
-              "
-              height="22"
-            />
+            <unicon :name="arrow.icon" height="22" />
           </button>
         </span>
       </div>
@@ -176,22 +169,11 @@
         :key="pageNumber"
         type="button"
         class="min-w-9 h-9 px-2 border border-border-default rounded-button font-bold cursor-pointer"
-        :class="
-          pageNumber - 1 === page
-            ? 'bg-accent text-text-on-accent'
-            : dragIndex !== undefined
-              ? 'bg-accent-wash'
-              : 'bg-surface'
-        "
-        :aria-current="pageNumber - 1 === page ? 'page' : undefined"
+        :class="pagerButtonClasses(pageNumber)"
+        :aria-current="isCurrentPage(pageNumber) ? 'page' : undefined"
         @click="goToPage(pageNumber - 1)"
-        @dragover="
-          (event) =>
-            dragIndex !== undefined &&
-            pageNumber - 1 !== page &&
-            event.preventDefault()
-        "
-        @drop.prevent="dropAt((pageNumber - 1) * pageSize)"
+        @dragover="(event) => allowDropOnPage(event, pageNumber)"
+        @drop.prevent="dropAt(startOfPage(pageNumber))"
       >
         {{ pageNumber }}
       </button>
@@ -243,18 +225,8 @@
           <div
             :data-reorder-index="index"
             class="relative flex items-center gap-3 h-15 pl-4 border-b border-border-subtle cursor-pointer"
-            :class="[
-              flashIndex === index ? 'bg-accent-wash' : 'bg-surface',
-              pointerDrag?.index === index
-                ? 'z-content-raised shadow-overlay'
-                : '',
-              dropIndicatorClasses(index),
-            ]"
-            :style="
-              pointerDrag?.index === index
-                ? { transform: `translateY(${pointerDrag.offsetY}px)` }
-                : undefined
-            "
+            :class="mobileRowClasses(index)"
+            :style="mobileRowStyle(index)"
             @click="openSheet(id)"
           >
             <span
@@ -419,6 +391,8 @@ import {
   serializeOrderCsv,
 } from "@/composables/useEntityReorder";
 
+type Arrow = { direction: number; icon: string; label: string };
+
 const props = defineProps<{
   parentId: string;
   pageSize: number;
@@ -426,6 +400,18 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{ (event: "close", saved: boolean): void }>();
+
+const AUTOSCROLL_EDGE_SIZE = 50;
+const AUTOSCROLL_STEP = 14;
+const MOBILE_MESSAGE_DURATION = 2600;
+
+const arrows: Arrow[] = [
+  { direction: -1, icon: Unicons.AngleUp.name, label: "reorder.move-up" },
+  { direction: 1, icon: Unicons.AngleDown.name, label: "reorder.move-down" },
+];
+
+const dropZoneClasses =
+  "flex items-center justify-center gap-1.5 h-11 border-2 border-dashed border-accent rounded-card bg-accent-wash text-label font-bold text-text-link";
 
 const { t } = useI18n();
 const { getMediaFilenameFromEntity } = useListItemHelper();
@@ -463,6 +449,7 @@ const pageIds = computed(() =>
 const sheetIndex = computed(() =>
   sheetId.value === undefined ? -1 : order.value.indexOf(sheetId.value),
 );
+const lastIndex = computed(() => order.value.length - 1);
 const sheetActions = computed(() => [
   { label: "reorder.to-start", icon: Unicons.AngleDoubleLeft.name, target: 0 },
   {
@@ -473,17 +460,14 @@ const sheetActions = computed(() => [
   {
     label: "reorder.down-one",
     icon: Unicons.AngleDown.name,
-    target: Math.min(order.value.length - 1, sheetIndex.value + 1),
+    target: Math.min(lastIndex.value, sheetIndex.value + 1),
   },
   {
     label: "reorder.to-end",
     icon: Unicons.AngleDoubleRight.name,
-    target: order.value.length - 1,
+    target: lastIndex.value,
   },
 ]);
-
-const dropZoneClasses =
-  "flex items-center justify-center gap-1.5 h-11 border-2 border-dashed border-accent rounded-card bg-accent-wash text-label font-bold text-text-link";
 
 const isValidPosition = (position: number) =>
   Number.isInteger(position) && position >= 1 && position <= order.value.length;
@@ -491,88 +475,149 @@ const isValidPosition = (position: number) =>
 const thumbnailUrl = (entity: Entity): string | undefined => {
   const media = getMediaFilenameFromEntity(entity);
   if (!media) return undefined;
-  return stringIsUrl(media)
-    ? media
-    : `/api/iiif/3/${media}/square/^100,/0/default.jpg`;
+  if (stringIsUrl(media)) return media;
+  return `/api/iiif/3/${media}/square/^100,/0/default.jpg`;
 };
 
-onMounted(async () => {
+const loadOrder = async (): Promise<boolean> => {
   try {
     const parsed = parseOrderCsv(await fetchOrderCsv(props.parentId));
     rows.value = parsed.rows;
     order.value = parsed.rows.map((row) => row.id);
     savedOrder.value = [...order.value];
     header.value = parsed.header;
+    return true;
   } catch (error) {
     console.error(error);
     displayErrorNotification(
       t("notifications.errors.generic.title"),
       t("notifications.errors.generic.description"),
     );
-    emit("close", false);
-    return;
+    return false;
   }
-  // thumbnails only; the rows already show their filenames
+};
+
+const loadThumbnails = async () => {
   const entities = await props
     .fetchEntities(order.value.length)
     .catch(() => [] as Entity[]);
-  thumbnails.value = Object.fromEntries(
-    entities.flatMap((entity) =>
-      [entity.id, entity.uuid].map((id) => [id, thumbnailUrl(entity)]),
-    ),
-  );
-});
-
-const move = (from: number, to: number) => {
-  const target = Math.max(0, Math.min(order.value.length - 1, to));
-  if (target === from) return;
-  const id = order.value[from];
-  order.value = moveItem(order.value, from, target);
-  const targetPage = pageOfIndex(target, props.pageSize);
-  if (isCompact.value) return landOnMobile(target, id);
-  if (targetPage !== page.value)
-    message.value = {
-      text: t("reorder.moved", {
-        name: names.value[id],
-        position: target + 1,
-        page: targetPage + 1,
-      }),
-      page: targetPage,
-    };
+  const thumbnailsById: Record<string, string | undefined> = {};
+  for (const entity of entities) {
+    const url = thumbnailUrl(entity);
+    thumbnailsById[entity.id] = url;
+    thumbnailsById[entity.uuid] = url;
+  }
+  thumbnails.value = thumbnailsById;
 };
 
-const goToPage = (target: number) => {
-  page.value = target;
+onMounted(async () => {
+  const loaded = await loadOrder();
+  if (!loaded) {
+    emit("close", false);
+    return;
+  }
+  await loadThumbnails();
+});
+
+const movedMessage = (movedId: string, target: number) => {
+  const targetPage = pageOfIndex(target, props.pageSize);
+  return {
+    text: t("reorder.moved", {
+      name: names.value[movedId],
+      position: target + 1,
+      page: targetPage + 1,
+    }),
+    page: targetPage,
+  };
+};
+
+const move = (from: number, to: number) => {
+  const target = Math.max(0, Math.min(lastIndex.value, to));
+  if (target === from) return;
+  const movedId = order.value[from];
+  order.value = moveItem(order.value, from, target);
+
+  if (isCompact.value) {
+    showMoveOnMobile(movedId, target);
+    return;
+  }
+  const landsOnOtherPage = pageOfIndex(target, props.pageSize) !== page.value;
+  if (landsOnOtherPage) message.value = movedMessage(movedId, target);
+};
+
+const goToPage = (pageIndex: number) => {
+  page.value = pageIndex;
   message.value = undefined;
 };
 
-const canMove = (index: number, direction: number) =>
-  index + direction >= 0 && index + direction < order.value.length;
+const isCurrentPage = (pageNumber: number) => pageNumber - 1 === page.value;
 
-const arrowTitle = (offset: number, direction: number) => {
+const startOfPage = (pageNumber: number) => (pageNumber - 1) * props.pageSize;
+
+const pagerButtonClasses = (pageNumber: number) => {
+  const styles = {
+    current: "bg-accent text-text-on-accent",
+    dropTarget: "bg-accent-wash",
+    idle: "bg-surface",
+  };
+  if (isCurrentPage(pageNumber)) return styles.current;
+  if (dragIndex.value !== undefined) return styles.dropTarget;
+  return styles.idle;
+};
+
+const allowDropOnPage = (event: DragEvent, pageNumber: number) => {
+  if (dragIndex.value === undefined || isCurrentPage(pageNumber)) return;
+  event.preventDefault();
+};
+
+const canMove = (index: number, direction: number) =>
+  index + direction >= 0 && index + direction <= lastIndex.value;
+
+const arrowTitle = (offset: number, arrow: Arrow) => {
   const index = pageStart.value + offset;
-  if (direction < 0 && offset === 0 && index > 0)
+  const isFirstRowOfPage = offset === 0;
+  const isLastRowOfPage = offset === props.pageSize - 1;
+  const movesToPreviousPage =
+    arrow.direction < 0 && isFirstRowOfPage && canMove(index, -1);
+  const movesToNextPage =
+    arrow.direction > 0 && isLastRowOfPage && canMove(index, 1);
+
+  if (movesToPreviousPage)
     return t("reorder.to-end-of-page", { page: page.value });
-  if (direction > 0 && offset === props.pageSize - 1 && canMove(index, 1))
+  if (movesToNextPage)
     return t("reorder.to-start-of-page", { page: page.value + 2 });
-  return t(direction < 0 ? "reorder.move-up" : "reorder.move-down");
+  return t(arrow.label);
 };
 
 const arrowMove = (index: number, direction: number) => {
   if (canMove(index, direction)) move(index, index + direction);
 };
 
+const selectInputText = (event: FocusEvent) =>
+  (event.target as HTMLInputElement).select();
+
+const blurInput = (event: KeyboardEvent) =>
+  (event.target as HTMLInputElement).blur();
+
+const updateDraft = (id: string, event: Event) => {
+  drafts.value[id] = (event.target as HTMLInputElement).value;
+};
+
+const discardDraft = (id: string) => {
+  delete drafts.value[id];
+};
+
 const commitDraft = (id: string) => {
   const position = Number(drafts.value[id]);
-  delete drafts.value[id];
+  discardDraft(id);
   if (isValidPosition(position)) move(order.value.indexOf(id), position - 1);
 };
 
 const startDrag = (event: DragEvent, index: number) => {
   event.dataTransfer!.effectAllowed = "move";
-  // Firefox only starts a drag with data set
+  // Firefox only starts a drag when data is set
   event.dataTransfer!.setData("text/plain", String(index));
-  // a tick later, so the drag image is taken before the row dims
+  // Dim the row a tick later, after the browser took the drag image
   setTimeout(() => (dragIndex.value = index));
 };
 
@@ -592,15 +637,48 @@ const endDrag = () => {
   overIndex.value = undefined;
 };
 
-const dropIndicatorClasses = (index: number) => {
-  const from = pointerDrag.value?.index ?? dragIndex.value;
-  const over = pointerDrag.value?.over ?? overIndex.value;
-  if (from === undefined) return "";
-  if (from === index && !pointerDrag.value) return "opacity-40";
-  if (over !== index || from === index) return "";
-  return from > index
-    ? "shadow-reorder-drop-before"
-    : "shadow-reorder-drop-after";
+const dropLineClass = (
+  index: number,
+  draggedIndex: number | undefined,
+  hoveredIndex: number | undefined,
+) => {
+  const isDropTarget =
+    draggedIndex !== undefined &&
+    index === hoveredIndex &&
+    index !== draggedIndex;
+  if (!isDropTarget) return "";
+  const styles = {
+    before: "shadow-reorder-drop-before",
+    after: "shadow-reorder-drop-after",
+  };
+  if (draggedIndex > index) return styles.before;
+  return styles.after;
+};
+
+const desktopRowClasses = (index: number) => {
+  if (index === dragIndex.value) return "opacity-40";
+  return dropLineClass(index, dragIndex.value, overIndex.value);
+};
+
+const mobileRowClasses = (index: number) => {
+  const styles = {
+    lifted: "z-content-raised shadow-overlay bg-surface",
+    flashed: "bg-accent-wash",
+    idle: "bg-surface",
+  };
+  if (pointerDrag.value?.index === index) return styles.lifted;
+  const background = flashIndex.value === index ? styles.flashed : styles.idle;
+  const dropLine = dropLineClass(
+    index,
+    pointerDrag.value?.index,
+    pointerDrag.value?.over,
+  );
+  return [background, dropLine];
+};
+
+const mobileRowStyle = (index: number) => {
+  if (pointerDrag.value?.index !== index) return undefined;
+  return { transform: `translateY(${pointerDrag.value.offsetY}px)` };
 };
 
 let pointerStart = { y: 0, scrollTop: 0 };
@@ -612,24 +690,43 @@ const startPointerDrag = (event: PointerEvent, index: number) => {
   pointerDrag.value = { index, over: index, offsetY: 0 };
 };
 
+const autoScrollNearEdges = (
+  scrollContainer: HTMLElement,
+  pointerY: number,
+) => {
+  const bounds = scrollContainer.getBoundingClientRect();
+  if (pointerY < bounds.top + AUTOSCROLL_EDGE_SIZE)
+    scrollContainer.scrollTop -= AUTOSCROLL_STEP;
+  else if (pointerY > bounds.bottom - AUTOSCROLL_EDGE_SIZE)
+    scrollContainer.scrollTop += AUTOSCROLL_STEP;
+};
+
+const rowIndexUnderPointer = (
+  event: PointerEvent,
+  draggedIndex: number,
+): number | undefined => {
+  const elements = document.elementsFromPoint(event.clientX, event.clientY);
+  for (const element of elements) {
+    const row = element.closest<HTMLElement>("[data-reorder-index]");
+    if (!row) continue;
+    const rowIndex = Number(row.dataset.reorderIndex);
+    if (rowIndex !== draggedIndex) return rowIndex;
+  }
+  return undefined;
+};
+
 const movePointerDrag = (event: PointerEvent) => {
-  if (!pointerDrag.value || !scroller.value) return;
-  const bounds = scroller.value.getBoundingClientRect();
-  if (event.clientY < bounds.top + 50) scroller.value.scrollTop -= 14;
-  else if (event.clientY > bounds.bottom - 50) scroller.value.scrollTop += 14;
-  const draggedIndex = String(pointerDrag.value.index);
-  const hit = document
-    .elementsFromPoint(event.clientX, event.clientY)
-    .map((element) => element.closest<HTMLElement>("[data-reorder-index]"))
-    .find((row) => row && row.dataset.reorderIndex !== draggedIndex);
+  const drag = pointerDrag.value;
+  const scrollContainer = scroller.value;
+  if (!drag || !scrollContainer) return;
+
+  autoScrollNearEdges(scrollContainer, event.clientY);
+  const scrolledDistance = scrollContainer.scrollTop - pointerStart.scrollTop;
+  const movedDistance = event.clientY - pointerStart.y;
   pointerDrag.value = {
-    index: pointerDrag.value.index,
-    over: hit ? Number(hit.dataset.reorderIndex) : pointerDrag.value.over,
-    offsetY:
-      event.clientY -
-      pointerStart.y +
-      scroller.value.scrollTop -
-      pointerStart.scrollTop,
+    index: drag.index,
+    over: rowIndexUnderPointer(event, drag.index) ?? drag.over,
+    offsetY: movedDistance + scrolledDistance,
   };
 };
 
@@ -639,27 +736,22 @@ const endPointerDrag = () => {
   if (drag) move(drag.index, drag.over);
 };
 
-let flashTimeout: ReturnType<typeof setTimeout>;
+let mobileMessageTimeout: ReturnType<typeof setTimeout>;
 
-const landOnMobile = async (target: number, id: string) => {
+const showMoveOnMobile = async (movedId: string, target: number) => {
   flashIndex.value = target;
-  message.value = {
-    text: t("reorder.moved", {
-      name: names.value[id],
-      position: target + 1,
-      page: pageOfIndex(target, props.pageSize) + 1,
-    }),
-    page: pageOfIndex(target, props.pageSize),
-  };
-  clearTimeout(flashTimeout);
-  flashTimeout = setTimeout(() => {
+  message.value = movedMessage(movedId, target);
+  clearTimeout(mobileMessageTimeout);
+  mobileMessageTimeout = setTimeout(() => {
     flashIndex.value = undefined;
     message.value = undefined;
-  }, 2600);
+  }, MOBILE_MESSAGE_DURATION);
+
   await nextTick();
-  scroller.value
-    ?.querySelector(`[data-reorder-index="${target}"]`)
-    ?.scrollIntoView({ block: "center" });
+  const movedRow = scroller.value?.querySelector(
+    `[data-reorder-index="${target}"]`,
+  );
+  movedRow?.scrollIntoView({ block: "center" });
 };
 
 const openSheet = (id: string) => {
@@ -678,10 +770,8 @@ const save = async () => {
   if (!dirty.value || saving.value) return;
   saving.value = true;
   try {
-    await saveOrderCsv(
-      props.parentId,
-      serializeOrderCsv(header.value!, order.value, rows.value),
-    );
+    const csv = serializeOrderCsv(header.value!, order.value, rows.value);
+    await saveOrderCsv(props.parentId, csv);
     displaySuccessNotification(t("reorder.saved"), "");
     emit("close", true);
   } catch (error) {

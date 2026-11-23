@@ -1,24 +1,29 @@
 export type OrderCsvRow = { id: string; name: string; line: string };
 
-// Base serves `filename`, clients may serve their own column.
-const NAME_COLUMNS = ["filename", "file_identifier", "title"];
+const FILENAME_COLUMNS = ["filename", "file_identifier", "title"];
 
 const splitCsvLine = (line: string): string[] => {
   const fields: string[] = [];
-  let field = "";
-  let quoted = false;
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (quoted && char === '"' && line[i + 1] === '"') {
-      field += '"';
-      i++;
-    } else if (char === '"') quoted = !quoted;
-    else if (char === "," && !quoted) {
-      fields.push(field);
-      field = "";
-    } else field += char;
+  let currentField = "";
+  let insideQuotes = false;
+  for (let position = 0; position < line.length; position++) {
+    const character = line[position];
+    const isEscapedQuote =
+      insideQuotes && character === '"' && line[position + 1] === '"';
+
+    if (isEscapedQuote) {
+      currentField += '"';
+      position++;
+    } else if (character === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (character === "," && !insideQuotes) {
+      fields.push(currentField);
+      currentField = "";
+    } else {
+      currentField += character;
+    }
   }
-  fields.push(field);
+  fields.push(currentField);
   return fields;
 };
 
@@ -38,12 +43,12 @@ export const parseOrderCsv = (
 ): { header: string; rows: OrderCsvRow[] } => {
   const [header, ...lines] = csv.split(/\r?\n/).filter((line) => line !== "");
   const columns = splitCsvLine(header);
-  const nameIndex = columns.findIndex((column) =>
-    NAME_COLUMNS.includes(column),
+  const filenameIndex = columns.findIndex((column) =>
+    FILENAME_COLUMNS.includes(column),
   );
   const rows = lines.map((line) => {
     const fields = splitCsvLine(line);
-    return { id: fields[0], name: fields[nameIndex] ?? fields[0], line };
+    return { id: fields[0], name: fields[filenameIndex] ?? fields[0], line };
   });
   return { header, rows };
 };
@@ -57,8 +62,7 @@ export const serializeOrderCsv = (
   return [header, ...order.map((id) => lineById.get(id))].join("\n");
 };
 
-// The parent's order endpoint reads and writes its own CSV format, so the
-// rows are sent back as they came, only in a new order.
+// Each client's order endpoint has its own CSV columns, so rows go back unchanged
 export const fetchOrderCsv = async (parentId: string): Promise<string> => {
   const response = await fetch("/api/download/csv?return_type=mediafile", {
     method: "POST",
