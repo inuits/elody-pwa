@@ -19,6 +19,7 @@
     </div>
     <div
       v-else
+      v-show="!reordering"
       class="@container grid grid-cols-[30%_70%] grid-rows-[auto_1fr_0px] gap-y-[0.5vh] w-full h-full"
       :class="wrapperClasses"
     >
@@ -314,6 +315,7 @@
               @set-bulk-operations-available="
                 (value: boolean) => (hasBulkOperations = value)
               "
+              @start-reorder="reordering = true"
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
@@ -520,6 +522,18 @@
         </div>
       </div>
     </div>
+    <EntityReorder
+      v-if="reordering && props.parentEntityIdentifiers[0]"
+      :parent-id="props.parentEntityIdentifiers[0]"
+      :page-size="paginationStore.limit.value"
+      :fetch-entities="fetchAllEntities"
+      @close="
+        async (saved: boolean) => {
+          reordering = false;
+          if (saved) await refetchEntities();
+        }
+      "
+    />
   </div>
 </template>
 
@@ -531,6 +545,7 @@ import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BasePagination from "@/components/base/BasePagination.vue";
 import PageSizeSelect from "@/components/library/PageSizeSelect.vue";
+import EntityReorder from "@/components/library/EntityReorder.vue";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";
@@ -771,6 +786,7 @@ const abortController = ref<AbortController | null>(null);
 const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const isInitialLoading = ref<boolean>(true);
+const reordering = ref<boolean>(false);
 const simpleSearchTerm = ref<string>("");
 const simpleSearchKeys = computed<string[]>(
   () => (route.meta as any)?.simpleSearch?.keys ?? [],
@@ -924,6 +940,11 @@ const {
 );
 
 const paginationStore = createPaginationStore();
+
+const fetchAllEntities = async (limit: number) =>
+  (await fetchEntitiesWithVariables({ ...getQueryVariables(), skip: 1, limit }))
+    .results;
+
 provide(PaginationStoreKey, paginationStore);
 provide("libraryEntities", entities);
 

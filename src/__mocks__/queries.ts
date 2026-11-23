@@ -491,6 +491,7 @@ export enum BulkEditModes {
 export enum BulkOperationTypes {
   AddRelation = 'addRelation',
   BulkUpdateMetadata = 'bulkUpdateMetadata',
+  ChangeOrder = 'changeOrder',
   CreateEntity = 'createEntity',
   DeleteEntities = 'deleteEntities',
   DeleteRelations = 'deleteRelations',

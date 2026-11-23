@@ -1080,6 +1080,21 @@ describe("useBulkOperationsActionsBar", () => {
     });
   });
 
+  describe("Change order operation", () => {
+    it("asks the library to start reordering instead of opening a modal", () => {
+      const emit = createMockEmit();
+      const composable = useBulkOperationsActionsBar(createMockProps(), emit);
+      composable.selectedBulkOperation.value = {
+        value: BulkOperationTypes.ChangeOrder,
+        bulkOperationModal: { typeModal: "DynamicForm" },
+      } as any;
+      composable.handleSelectedBulkOperation();
+
+      expect(emit).toHaveBeenCalledWith("startReorder");
+      expect(mockBaseModal.openModal).not.toHaveBeenCalled();
+    });
+  });
+
   describe("Exposed Functions", () => {
     it("should expose all necessary functions from useBulkOperations", () => {
       const props = createMockProps();

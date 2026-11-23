@@ -472,6 +472,10 @@
   --pager-gap: 0.125rem;
   --pager-input-width: 3.5rem;
 
+  /* Reorder (EntityReorder): drop line above or below the hovered row */
+  --shadow-reorder-drop-before: inset 0 3px 0 var(--color-accent);
+  --shadow-reorder-drop-after: inset 0 -3px 0 var(--color-accent);
+
   /* Viewer toolbar (media-viewer.md, catalogue ViewerToolbar): one white
      bar over every viewer mode, 20px icons in 28×24 buttons */
   --viewer-toolbar-height: 2.5rem;

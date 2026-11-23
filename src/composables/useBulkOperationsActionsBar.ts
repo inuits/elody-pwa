@@ -75,6 +75,7 @@ export interface BulkOperationsActionsBarEmits {
     bulkOperationsPromise: () => Promise<void>,
   ): void;
   (event: "applyCustomBulkOperations"): void;
+  (event: "startReorder"): void;
   (
     event: "initializeEntityPickerComponent",
     enableCropMode: boolean,
@@ -479,6 +480,11 @@ export const useBulkOperationsActionsBar = (
 
     if (operationType && seenBulkOperationTypes.includes(operationType)) {
       handleSeenOperation(operationType);
+      return;
+    }
+
+    if (operationType === BulkOperationTypes.ChangeOrder) {
+      emit("startReorder");
       return;
     }
 

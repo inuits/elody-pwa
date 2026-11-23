@@ -288,6 +288,7 @@ const emit = defineEmits<{
     bulkOperationsPromise: () => Promise<void>,
   ): void;
   (event: "applyCustomBulkOperations"): void;
+  (event: "startReorder"): void;
   (
     event: "initializeEntityPickerComponent",
     enableCropMode: boolean,
