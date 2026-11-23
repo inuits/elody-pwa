@@ -482,6 +482,34 @@ describe("useErrorCodes", () => {
         );
       });
 
+      it("returns the error message for a network error without GraphQL errors", async () => {
+        const apolloError = {
+          message: "Response not successful: Received status code 502",
+          graphQLErrors: [],
+          networkError: { statusCode: 502 },
+        } as unknown as ApolloError;
+
+        const result =
+          await errorCodes.getMessageAndCodeFromApolloError(apolloError);
+
+        expect(result).toEqual({
+          code: undefined,
+          message: "Response not successful: Received status code 502",
+        });
+      });
+
+      it("returns the GraphQL error message when there is no response body", async () => {
+        const apolloError = {
+          message: "Internal server error",
+          graphQLErrors: [{ message: "Cannot reach collection API" }],
+        } as unknown as ApolloError;
+
+        const result =
+          await errorCodes.getMessageAndCodeFromApolloError(apolloError);
+
+        expect(result.message).toBe("Cannot reach collection API");
+      });
+
       it("falls back to the backend text when the code has no translation", async () => {
         const result = await errorCodes.getMessageAndCodeFromErrorString(
           "W4012 - This production has no mediafiles to download",

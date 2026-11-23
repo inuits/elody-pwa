@@ -264,8 +264,11 @@ export const useErrorCodes = (): {
   const getMessageAndCodeFromApolloError = async (
     apolloError: ApolloError,
   ): Promise<{ code: string; message: string }> => {
+    const graphQLError = apolloError.graphQLErrors?.[0];
     let apolloMessage: string =
-      apolloError.graphQLErrors[0].extensions.response.body;
+      graphQLError?.extensions?.response?.body ??
+      graphQLError?.message ??
+      apolloError.message;
     if (apolloMessage.message) apolloMessage = apolloMessage.message;
 
     return await getMessageAndCodeFromErrorString(apolloMessage);
