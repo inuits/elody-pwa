@@ -27,6 +27,7 @@ import { useStateManagement } from "@/composables/useStateManagement";
 import { useI18n } from "vue-i18n";
 import { isAbortError } from "@/helpers";
 import { useImport } from "@/composables/useImport";
+import { sortEntitiesByIntialValue } from "@/utils/sortEntitiesByIntialValue";
 
 const isForbidden = (error: any): boolean =>
   (error?.graphQLErrors ?? []).some(
@@ -60,6 +61,7 @@ export const useBaseLibrary = (
   let _route: RouteLocationNormalizedLoaded | undefined;
   const config: any = inject("config");
   const entities = shallowRef<Entity[]>([]);
+  let localSortKey: string | undefined;
   const facets = shallowRef<any>([]);
   const placeholderEntities = shallowRef<Entity[]>([]);
   const placeholderEntitiesAmount = ref<number>(0);
@@ -113,6 +115,10 @@ export const useBaseLibrary = (
 
   const setParentEntityIdentifiers = (identifiers: string[]) => {
     queryVariables.userUuid = identifiers[0];
+  };
+
+  const setLocalSortKey = (key: string | undefined) => {
+    localSortKey = key || undefined;
   };
 
   const setParentEntityId = (identifier: string | undefined) => {
@@ -350,8 +356,12 @@ export const useBaseLibrary = (
       totalEntityCount.value = fetchedEntities?.count || 0;
       facets.value = fetchedEntities.facets || [];
       fetchSequence.value += 1;
-      if (!isEqual(entities.value, fetchedEntities?.results as Entity[])) {
-        entities.value = fetchedEntities?.results as Entity[];
+      const fetchedResults = (fetchedEntities?.results ?? []) as Entity[];
+      const results = localSortKey
+        ? sortEntitiesByIntialValue(fetchedResults, localSortKey)
+        : (fetchedEntities?.results as Entity[]);
+      if (!isEqual(entities.value, results)) {
+        entities.value = results;
       }
       if (shouldUseStateForRoute) {
         updateStateForRoute(_route, {
@@ -516,6 +526,7 @@ export const useBaseLibrary = (
     setManipulationOfQuery,
     setParentEntityIdentifiers,
     setParentEntityId,
+    setLocalSortKey,
     setsearchInputType,
     setSkip,
     setSortKey,

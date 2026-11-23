@@ -492,3 +492,52 @@ describe("useBaseLibrary – superseded requests", () => {
     expect(query).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("useBaseLibrary – local sort key", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+  const result = (entities: any[]) => ({
+    data: {
+      Entities: { results: entities, count: entities.length, facets: [] },
+    },
+  });
+  const withValue = (id: string, value: string) => ({
+    id,
+    intialValues: { volume_number_label: value },
+  });
+
+  it("sorts the fetched entities on the configured intial value", async () => {
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValue(
+          result([
+            withValue("c", "3a"),
+            withValue("x", ""),
+            withValue("a", "1b"),
+          ]),
+        ),
+    } as any;
+    const { entities, getEntities, setLocalSortKey } =
+      useBaseLibrary(apolloClient);
+
+    setLocalSortKey("volume_number_label");
+    await getEntities(mockRoute);
+
+    expect(entities.value.map((entity) => entity.id)).toEqual(["a", "c", "x"]);
+  });
+
+  it("keeps the backend order without a local sort key", async () => {
+    const apolloClient = {
+      query: vi
+        .fn()
+        .mockResolvedValue(
+          result([withValue("c", "3a"), withValue("a", "1b")]),
+        ),
+    } as any;
+    const { entities, getEntities } = useBaseLibrary(apolloClient);
+
+    await getEntities(mockRoute);
+
+    expect(entities.value.map((entity) => entity.id)).toEqual(["c", "a"]);
+  });
+});

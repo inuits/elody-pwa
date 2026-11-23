@@ -52,6 +52,7 @@
         :open-preview-by-default="element.openPreviewByDefault ?? undefined"
         :actions-on-result="element.actionsOnResult"
         :add-entities-to-forms="element.addEntitiesToForms"
+        :local-sort-key="element.localSortKey ?? undefined"
         @close-preview-component="emit('closePreviewComponent')"
         @toggle-element-collapse="
           (entityId, elementLabel) =>

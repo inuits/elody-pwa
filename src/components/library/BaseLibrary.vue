@@ -535,6 +535,7 @@ export type BaseLibraryProps = {
   openPreviewByDefault?: boolean;
   actionsOnResult?: ActionsOnResult;
   addEntitiesToForms?: boolean;
+  localSortKey?: string;
   saveViewPreferences?: boolean;
   persistExpandFilters?: boolean;
   forceShowFilters?: boolean;
@@ -576,6 +577,7 @@ const props = withDefaults(defineProps<BaseLibraryProps>(), {
   cropMediafileCoordinatesKey: "",
   openPreviewByDefault: undefined,
   addEntitiesToForms: false,
+  localSortKey: undefined,
   saveViewPreferences: true,
   forceShowFilters: false,
 });
@@ -749,6 +751,7 @@ const {
   setManipulationOfQuery,
   setParentEntityIdentifiers,
   setParentEntityId,
+  setLocalSortKey,
   setsearchInputType,
   setSkip,
   setLocale,
@@ -998,6 +1001,7 @@ const mapDropdownOptionsToBulkProcessableItem = (
 const useOtherQuery = computed(() => props.useOtherQuery !== undefined);
 
 setParentEntityId(props.parentEntityIdentifiers?.[0]);
+setLocalSortKey(props.localSortKey);
 
 if (useOtherQuery.value) {
   setManipulationOfQuery(true, props.useOtherQuery);

@@ -108,6 +108,7 @@
             :library-data-key="libraryDataKey"
             :actions-on-result="actionsOnResult"
             :add-entities-to-forms="addEntitiesToForms"
+            :local-sort-key="localSortKey"
             :open-preview-by-default="openPreviewByDefault"
           />
         </div>
@@ -192,6 +193,7 @@ const props = withDefaults(
     openPreviewByDefault?: boolean;
     actionsOnResult?: ActionsOnResult;
     addEntitiesToForms?: boolean;
+    localSortKey?: string;
     headerStyle?: "normal" | "none";
   }>(),
   {
@@ -207,6 +209,7 @@ const props = withDefaults(
     previewLabel: undefined,
     openPreviewByDefault: undefined,
     addEntitiesToForms: false,
+    localSortKey: undefined,
     headerStyle: "normal",
   },
 );
