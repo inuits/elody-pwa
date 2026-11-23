@@ -67,6 +67,7 @@ const viteConfig = defineConfig(({ mode }) => ({
     },
     watch: {
       usePolling: true,
+      ignored: ["**/e2e/**"],
     },
     // Pre-transform the heavy generated GraphQL module while the server
     // starts, so the first browser load doesn't wait for it.

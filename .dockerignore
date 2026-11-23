@@ -5,3 +5,4 @@ dist-legacy
 coverage
 .vite
 *.log
+e2e
