@@ -1,0 +1,17 @@
+{
+  "name": "elody-e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 pnpm --dir .. exec vite build --outDir e2e/.dist --emptyOutDir --logLevel warn",
+    "test": "pnpm build && playwright test",
+    "test:ui": "pnpm build && playwright test --ui --headed --workers=1",
+    "test:dev": "E2E_FRONTEND=dev playwright test",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "^26.6.6"
+  }
+}

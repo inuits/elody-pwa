@@ -56,6 +56,7 @@ const setSelectedLanguageOption = (): void => {
   selectedLanguageOption.value = languageOptions.value.find(
     (language) => language.value === locale.value,
   )?.value;
+  document.documentElement.lang = locale.value;
   setLanguageDirection(locale.value);
   setLocale(locale.value);
 };
