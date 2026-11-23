@@ -545,7 +545,7 @@ import ListItemSkeleton from "@/components/base/skeletons/ListItemSkeleton.vue";
 import BulkOperationsActionsBar from "@/components/bulk-operations/BulkOperationsActionsBar.vue";
 import BasePagination from "@/components/base/BasePagination.vue";
 import PageSizeSelect from "@/components/library/PageSizeSelect.vue";
-import EntityReorder from "@/components/library/EntityReorder.vue";
+import EntityReorder from "@/components/library/entity-reorder/EntityReorder.vue";
 import type { FiltersBaseAPI } from "@/components/filters/FiltersBase.vue";
 import FiltersBase from "@/components/filters/FiltersBase.vue";
 import LibraryBar from "@/components/library/LibraryBar.vue";

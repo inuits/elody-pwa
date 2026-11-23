@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  dropLineClass,
+  isValidPosition,
   moveItem,
   pageOfIndex,
   parseOrderCsv,
   serializeOrderCsv,
-} from "@/composables/useEntityReorder";
+} from "@/composables/reorder/reorderHelpers";
 
 describe("moveItem", () => {
   it("moves an item down and up", () => {
@@ -70,5 +72,29 @@ describe("order csv", () => {
         'm2,mediafile,"second, with comma.jpg",a1',
       ].join("\n"),
     );
+  });
+});
+
+describe("isValidPosition", () => {
+  it("accepts whole positions from 1 to the total", () => {
+    expect(isValidPosition(1, 7)).toBe(true);
+    expect(isValidPosition(7, 7)).toBe(true);
+    expect(isValidPosition(0, 7)).toBe(false);
+    expect(isValidPosition(8, 7)).toBe(false);
+    expect(isValidPosition(2.5, 7)).toBe(false);
+    expect(isValidPosition(NaN, 7)).toBe(false);
+  });
+});
+
+describe("dropLineClass", () => {
+  it("draws the line on the side the dragged row comes from", () => {
+    expect(dropLineClass(2, 5, 2)).toBe("shadow-reorder-drop-before");
+    expect(dropLineClass(5, 2, 5)).toBe("shadow-reorder-drop-after");
+  });
+
+  it("draws nothing on rows that are not the drop target", () => {
+    expect(dropLineClass(3, undefined, 3)).toBe("");
+    expect(dropLineClass(3, 1, 4)).toBe("");
+    expect(dropLineClass(3, 3, 3)).toBe("");
   });
 });

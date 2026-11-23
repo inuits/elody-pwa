@@ -37,6 +37,27 @@ export const moveItem = <T>(order: T[], from: number, to: number): T[] => {
 export const pageOfIndex = (index: number, pageSize: number): number =>
   Math.floor(index / pageSize);
 
+export const isValidPosition = (position: number, total: number): boolean =>
+  Number.isInteger(position) && position >= 1 && position <= total;
+
+export const dropLineClass = (
+  index: number,
+  draggedIndex: number | undefined,
+  hoveredIndex: number | undefined,
+): string => {
+  const isDropTarget =
+    draggedIndex !== undefined &&
+    index === hoveredIndex &&
+    index !== draggedIndex;
+  if (!isDropTarget) return "";
+  const styles = {
+    before: "shadow-reorder-drop-before",
+    after: "shadow-reorder-drop-after",
+  };
+  if (draggedIndex > index) return styles.before;
+  return styles.after;
+};
+
 // ponytail: one record per line; a filename with a newline in it breaks this
 export const parseOrderCsv = (
   csv: string,

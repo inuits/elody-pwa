@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { ref } from "vue";
-import EntityReorder from "@/components/library/EntityReorder.vue";
+import EntityReorder from "@/components/library/entity-reorder/EntityReorder.vue";
 
 vi.mock("vue-i18n", () => ({
   useI18n: () => ({
