@@ -88,11 +88,10 @@ row share a height. Each card is a 1px `--color-border-subtle` border,
   full value in the tooltip. Only the client's existing teaser metadata is
   shown, with its own labels.
 - Tab order: Select, title, eye, ⋮.
-- Card size: in grid view a second segmented switch follows the view switch,
-  "Large | Compact" (`BaseToggleGroup` with text segments,
-  `--view-switch-text-pad`, group named "Card size"). Compact keeps only
-  media and title, in `--grid-card-min-width-compact` columns. Remembered
-  per browser (`localStorage` `elody.gridCompact`).
+- Card size: the view switch holds the grid twice, "Grid view" (4 squares,
+  `Apps`) and "Compact grid view" (9 squares, `Th`). Compact keeps only
+  media and title, in `--grid-card-min-width-compact` columns. The size is
+  remembered per browser (`localStorage` `elody.gridCompact`).
 - Selected: `--color-accent-wash` + a `--color-accent` border (no ring: on
   the rounded corners it reads as separate arcs). Preview open: the same
   border, no wash.

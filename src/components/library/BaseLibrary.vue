@@ -125,10 +125,9 @@
             data-cy="list-header"
             class="h-fit flex flex-wrap items-center gap-2 [--vs-font-size:var(--text-ui)]"
             :class="[
-              {
-                'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel':
-                  hasResultsBand,
-              },
+              hasResultsBand
+                ? 'p-(--list-band-pad) bg-surface-panel-header border-b border-border-panel'
+                : 'pb-2',
               // beside an open filters pane only the outer corner is round
               hasResultsBand
                 ? filtersInPane && isFiltersPanelExpanded
@@ -152,10 +151,9 @@
               @reveal-exact-count="revealExactCount"
             />
             <BasePagination
-              v-if="showListPager"
+              v-if="showListPager && isCompact"
               data-test="list-pager"
-              class="shrink-0"
-              :class="{ 'order-last basis-full': isCompact }"
+              class="shrink-0 order-last basis-full"
             />
             <!-- small screen: the bar's controls join the band's own rows -->
             <div
@@ -180,7 +178,7 @@
                 "
               >
                 <PageSizeSelect
-                  v-if="showPageSize"
+                  v-if="showPageSize && isCompact"
                   class="shrink-0"
                   :set-limit="setPaginationLimit"
                   :selected-pagination-limit-option="
@@ -206,12 +204,6 @@
                 @selected="
                   (toggle) => trackViewMode(toggle.viewMode, entityType)
                 "
-              />
-              <BaseToggleGroup
-                v-if="displayGrid"
-                data-cy="grid-size-switch"
-                group-label="library.grid-size.label"
-                :toggles="gridSizeToggles"
               />
             </div>
             <!-- In a detail panel the bar's add pills land here. -->
@@ -379,7 +371,11 @@
           </div>
           <div
             v-if="entities?.length !== 0 || relations?.length !== 0"
-            class="flex-1 min-h-0"
+            class="flex-1 min-h-0 overflow-y-auto"
+            :class="{
+              'max-h-(--panel-list-max-height)':
+                insidePanel && !isSearchLibrary,
+            }"
             data-cy="base-library-grid-container"
             @click="isSearchLibrary ? closeModal(TypeModals.Search) : undefined"
           >
@@ -517,6 +513,27 @@
               :centerCoordinatesKey="centerCoordinatesKey"
               :setPaginationLimit="setPaginationLimit"
               :setAdvancedFilters="setAdvancedFilters"
+            />
+          </div>
+          <div
+            v-if="!isCompact && (showListPager || showPageSize)"
+            data-cy="list-footer"
+            class="sticky bottom-0 z-header flex flex-wrap items-center justify-end gap-2 p-(--list-band-pad) border-t border-border-subtle bg-surface rounded-b-card not-has-[>:not([style*='display:_none'])]:hidden"
+          >
+            <PageSizeSelect
+              v-if="showPageSize"
+              class="shrink-0"
+              :set-limit="setPaginationLimit"
+              :selected-pagination-limit-option="paginationStore.limit.value"
+              :total="totalEntityCount"
+              @pagination-limit-options-promise="
+                (promise) => (paginationLimitOptionsPromise = promise)
+              "
+            />
+            <BasePagination
+              v-if="showListPager"
+              data-test="list-pager"
+              class="shrink-0"
             />
           </div>
         </div>
@@ -1032,6 +1049,7 @@ const {
 const {
   displayList,
   displayGrid,
+  gridCompact,
   displayTable,
   displayPreview,
   displayMap,
@@ -1168,38 +1186,6 @@ const showLibraryBar = computed(
     (props.baseLibraryMode === BaseLibraryModes.NormalBaseLibrary ||
       props.baseLibraryMode === BaseLibraryModes.PreviewBaseLibrary),
 );
-const readGridCompact = (): boolean => {
-  try {
-    return localStorage.getItem("elody.gridCompact") === "true";
-  } catch {
-    return false;
-  }
-};
-const gridCompact = ref<boolean>(readGridCompact());
-const setGridCompact = (on: boolean) => {
-  gridCompact.value = on;
-  try {
-    localStorage.setItem("elody.gridCompact", String(on));
-  } catch {
-    return;
-  }
-};
-const gridSizeToggles = [
-  {
-    isOn: computed<boolean>({
-      get: () => !gridCompact.value,
-      set: (on) => on && setGridCompact(false),
-    }),
-    label: "library.grid-size.large",
-  },
-  {
-    isOn: computed<boolean>({
-      get: () => gridCompact.value,
-      set: (on) => on && setGridCompact(true),
-    }),
-    label: "library.grid-size.compact",
-  },
-];
 const showViewSwitch = computed(
   () =>
     !props.disableLibraryBar &&

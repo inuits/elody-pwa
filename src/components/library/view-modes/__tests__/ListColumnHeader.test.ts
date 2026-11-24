@@ -31,6 +31,10 @@ describe("ListColumnHeader", () => {
     );
   });
 
+  it("reads at the rows' text size", () => {
+    expect(getWrapper().classes()).toContain("text-table");
+  });
+
   it("is sticky at the top of the list", () => {
     expect(getWrapper().classes()).toEqual(
       expect.arrayContaining(["sticky", "top-0"]),

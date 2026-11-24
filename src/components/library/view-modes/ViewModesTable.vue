@@ -13,7 +13,11 @@
       <div
         v-if="showCurrentEntityFlow"
         data-cy="view-modes-table"
-        class="relative h-full overflow-y-auto rounded-b-card [&>:last-child_li]:border-b-0"
+        class="group/table relative h-full overflow-y-auto rounded-b-card [&>:last-child_li]:border-b-0"
+        :data-scrolled="scrolledSideways || undefined"
+        @scroll="
+          scrolledSideways = ($event.target as HTMLElement).scrollLeft > 0
+        "
         :class="{ 'animate-pulse pointer-events-none': isRefetching }"
         :style="{ '--table-columns': columnsTemplate }"
       >
@@ -21,7 +25,7 @@
         <div
           v-if="headerColumns.length > 0 && !isCompact"
           data-cy="view-modes-table-header"
-          class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-2 min-w-min h-(--list-header-height) border-b border-border-subtle text-label font-bold text-text-field-label"
+          class="sticky top-0 z-10 bg-surface flex items-center gap-2 px-2 min-w-min h-(--list-header-height) border-b border-border-subtle text-table font-bold text-text-field-label"
         >
           <div
             v-if="hasLeadingColumn"
@@ -281,6 +285,7 @@ const { findRelation } = useFormHelper();
 const { openModal } = useBaseModal();
 
 const refEntities = ref<Entity[]>(props.entities);
+const scrolledSideways = ref(false);
 
 const {
   previewComponent,

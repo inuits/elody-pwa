@@ -26,10 +26,10 @@ describe("BaseToggleGroup (view switch)", () => {
   it("shows the label as text on a toggle without an icon, under its own group name", () => {
     const wrapper = mount(BaseToggleGroup, {
       props: {
-        groupLabel: "library.grid-size.label",
+        groupLabel: "Card size",
         toggles: [
-          { isOn: ref(true), label: "library.grid-size.large" },
-          { isOn: ref(false), label: "library.grid-size.compact" },
+          { isOn: ref(true), label: "Large" },
+          { isOn: ref(false), label: "Compact" },
         ],
       },
       global: {
@@ -38,12 +38,12 @@ describe("BaseToggleGroup (view switch)", () => {
       },
     });
     expect(wrapper.find('[role="group"]').attributes("aria-label")).toBe(
-      "library.grid-size.label",
+      "Card size",
     );
     const buttons = wrapper.findAll("button");
     expect(buttons.map((b) => b.text())).toEqual([
-      "library.grid-size.large",
-      "library.grid-size.compact",
+      "Large",
+      "Compact",
     ]);
     expect(buttons[0].attributes("aria-label")).toBeUndefined();
     expect(wrapper.find("unicon-stub").exists()).toBe(false);

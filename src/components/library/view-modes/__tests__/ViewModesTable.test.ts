@@ -141,6 +141,28 @@ describe("ViewModesTable pinned columns", () => {
       relationValues: {},
     }) as unknown as Entity;
 
+  it("marks itself scrolled only while scrolled sideways", async () => {
+    const wrapper = mountTable({ entities: [work("w1")] });
+    const table = wrapper.find('[data-cy="view-modes-table"]');
+    expect(table.classes()).toContain("group/table");
+    expect(table.attributes("data-scrolled")).toBeUndefined();
+
+    (table.element as HTMLElement).scrollLeft = 40;
+    await table.trigger("scroll");
+    expect(table.attributes("data-scrolled")).toBeDefined();
+
+    (table.element as HTMLElement).scrollLeft = 0;
+    await table.trigger("scroll");
+    expect(table.attributes("data-scrolled")).toBeUndefined();
+  });
+
+  it("reads its header at the rows' text size", () => {
+    const wrapper = mountTable({ entities: [work("w1")] });
+    expect(
+      wrapper.find('[data-cy="view-modes-table-header"]').classes(),
+    ).toContain("text-table");
+  });
+
   it("pins the leading badges and the title, in the header and the rows", () => {
     const wrapper = mountTable({ entities: [work("w1"), work("w2")] });
     const header = wrapper.findAll(

@@ -52,6 +52,15 @@ const writeSessionExpandFilters = (value: boolean): void => {
   }
 };
 
+const GRID_COMPACT_KEY = "elody.gridCompact";
+const readGridCompact = (): boolean => {
+  try {
+    return window.localStorage.getItem(GRID_COMPACT_KEY) === "true";
+  } catch {
+    return false;
+  }
+};
+
 export const useViewModes = (options: UseViewModesOptions) => {
   const { getGlobalState, updateGlobalState } = useStateManagement();
 
@@ -70,6 +79,28 @@ export const useViewModes = (options: UseViewModesOptions) => {
   );
 
   const toggles = ref<ViewModeToggle[]>([]);
+
+  const gridCompact = ref<boolean>(readGridCompact());
+  const setGridCompact = (compact: boolean): void => {
+    gridCompact.value = compact;
+    try {
+      window.localStorage.setItem(GRID_COMPACT_KEY, String(compact));
+    } catch {
+      return;
+    }
+  };
+  // the switch turns every other button off: only the button showing the
+  // grid in its current size may hide it
+  const gridSizeIsOn = (compact: boolean) =>
+    computed<boolean>({
+      get: () => displayGrid.value && gridCompact.value === compact,
+      set: (on) => {
+        if (on) {
+          setGridCompact(compact);
+          displayGrid.value = true;
+        } else if (gridCompact.value === compact) displayGrid.value = false;
+      },
+    });
 
   // ── Computed ──────────────────────────────────────────────────────────────
 
@@ -143,13 +174,22 @@ export const useViewModes = (options: UseViewModesOptions) => {
           label: "library.view-modes.list",
         });
       } else if (viewMode === ViewModes.ViewModesGrid) {
-        newToggles.push({
-          viewMode: ViewModes.ViewModesGrid,
-          isOn: displayGrid,
-          iconOn: DamsIcons.Apps,
-          iconOff: DamsIcons.Apps,
-          label: "library.view-modes.grid",
-        });
+        newToggles.push(
+          {
+            viewMode: ViewModes.ViewModesGrid,
+            isOn: gridSizeIsOn(false),
+            iconOn: DamsIcons.Apps,
+            iconOff: DamsIcons.Apps,
+            label: "library.view-modes.grid",
+          },
+          {
+            viewMode: ViewModes.ViewModesGrid,
+            isOn: gridSizeIsOn(true),
+            iconOn: DamsIcons.Th,
+            iconOff: DamsIcons.Th,
+            label: "library.view-modes.grid-compact",
+          },
+        );
       } else if (viewMode === ViewModes.Table) {
         if (hasMixedTeaserMetadata.value) {
           console.error(
@@ -308,6 +348,7 @@ export const useViewModes = (options: UseViewModesOptions) => {
   return {
     displayList,
     displayGrid,
+    gridCompact,
     displayTable,
     displayPreview,
     displayMap,

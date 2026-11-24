@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   addMutationCallback: undefined as unknown as ReturnType<typeof vi.fn>,
   displayMap: false,
   displayGrid: false,
+  gridCompact: false,
   toggles: [] as unknown[],
 }));
 
@@ -192,6 +193,7 @@ vi.mock("@/composables/useViewModes", () => ({
   useViewModes: () => ({
     displayList: ref(!mocks.displayGrid),
     displayGrid: ref(mocks.displayGrid),
+    gridCompact: ref(mocks.gridCompact),
     displayTable: ref(false),
     displayPreview: ref(false),
     displayMap: ref(mocks.displayMap),
@@ -784,7 +786,7 @@ describe("BaseLibrary.vue optimistic entity add does not re-initialize view mode
 describe("BaseLibrary.vue pager and page size", () => {
   let wrapper: ReturnType<typeof getWrapper> | null = null;
   const paginationSelector = '[data-test="list-pager"]';
-  const pageSizeSelector = '[data-cy="list-header"] page-size-select-stub';
+  const pageSizeSelector = '[data-cy="list-footer"] page-size-select-stub';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -833,7 +835,7 @@ describe("BaseLibrary.vue pager and page size", () => {
     expect(wrapper.find(paginationSelector).exists()).toBe(false);
   });
 
-  it("puts the pager in the list header, next to the count", async () => {
+  it("puts the pager in the list footer, under the results", async () => {
     libPaginationTotalPages.value = 4;
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
@@ -841,8 +843,44 @@ describe("BaseLibrary.vue pager and page size", () => {
     await flushPromises();
 
     expect(
+      wrapper.find('[data-cy="list-footer"] [data-test="list-pager"]').exists(),
+    ).toBe(true);
+    expect(
+      wrapper.find('[data-cy="list-header"] [data-test="list-pager"]').exists(),
+    ).toBe(false);
+  });
+
+  it("lines the footer up on the right: page size, then pager", async () => {
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    const footer = wrapper.find('[data-cy="list-footer"]');
+    expect(footer.classes()).toContain("justify-end");
+    const order = [...footer.element.children].map((el) =>
+      el.matches("page-size-select-stub") ? "size" : "pager",
+    );
+    expect(order).toEqual(["size", "pager"]);
+  });
+
+  it("keeps the pager and page size in the band on a small screen", async () => {
+    isCompact.value = true;
+    libPaginationTotalPages.value = 4;
+    wrapper = getWrapper({
+      baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+    });
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-footer"]').exists()).toBe(false);
+    expect(
       wrapper.find('[data-cy="list-header"] [data-test="list-pager"]').exists(),
     ).toBe(true);
+    expect(
+      wrapper.findComponent(LibraryBar).find("page-size-select-stub").exists(),
+    ).toBe(true);
+    isCompact.value = false;
   });
 
   it("keeps the pager when the library bar is disabled", async () => {
@@ -931,15 +969,7 @@ describe("BaseLibrary.vue pager and page size", () => {
     );
   });
 
-  it("has no list footer", async () => {
-    libPaginationTotalPages.value = 4;
-    wrapper = getWrapper();
-    await flushPromises();
-
-    expect(wrapper.find('[data-cy="list-footer"]').exists()).toBe(false);
-  });
-
-  it("puts the page size in the list header of the main library", async () => {
+  it("puts the page size in the list footer of the main library", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });
@@ -948,14 +978,14 @@ describe("BaseLibrary.vue pager and page size", () => {
     expect(wrapper.find(pageSizeSelector).exists()).toBe(true);
   });
 
-  it("hands the page size to the library bar, which sits on the right of the band", async () => {
+  it("keeps the library bar on the right of the band, without the page size", async () => {
     wrapper = getWrapper({
       baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
     });
     await flushPromises();
 
     const bar = wrapper.findComponent(LibraryBar);
-    expect(bar.find("page-size-select-stub").exists()).toBe(true);
+    expect(bar.find("page-size-select-stub").exists()).toBe(false);
     expect(bar.element.parentElement?.classList).toContain("ml-auto");
   });
 
@@ -1477,6 +1507,49 @@ describe("BaseLibrary.vue filter rail width", () => {
 });
 
 describe("BaseLibrary.vue inside a detail panel", () => {
+  it("caps the relation list's height, so its pager stays in view", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      {
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        parentEntityIdentifiers: ["PR-1"],
+      },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    expect(
+      wrapper.find('[data-cy="base-library-grid-container"]').classes(),
+    ).toContain("max-h-(--panel-list-max-height)");
+    wrapper.unmount();
+  });
+
+  it("leaves a gap between its bar and the list", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    expect(wrapper.find('[data-cy="list-header"]').classes()).toContain("pb-2");
+    wrapper.unmount();
+  });
+
+  it("leaves the search modal's results uncapped", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      { baseLibraryMode: BaseLibraryModes.NormalBaseLibrary, isSearchLibrary: true },
+      { InsidePanel: true },
+    );
+    await flushPromises();
+
+    expect(
+      wrapper.find('[data-cy="base-library-grid-container"]').classes(),
+    ).not.toContain("max-h-(--panel-list-max-height)");
+    wrapper.unmount();
+  });
+
   it("draws no results band or border of its own (never a box inside a panel)", async () => {
     mockRoute.path = "/test";
     const wrapper = getWrapper(
@@ -1768,42 +1841,23 @@ describe("BaseLibrary.vue in grid view", () => {
     expect(bulkMocks.enqueue).toHaveBeenCalledTimes(2);
   });
 
-  it("switches the grid between large and compact cards, and remembers it", async () => {
-    localStorage.removeItem("elody.gridCompact");
+  it("has one view switch, and shows compact cards for the compact grid", async () => {
     mocks.toggles = [
       { viewMode: ViewModes.ViewModesList, isOn: false, label: "list" },
       { viewMode: ViewModes.ViewModesGrid, isOn: true, label: "grid" },
     ];
+    mocks.displayGrid = true;
+    mocks.gridCompact = true;
     wrapper = getWrapper({ enableBulkOperations: false });
     await flushPromises();
-    const groups = () => wrapper!.findAllComponents({ name: "BaseToggleGroup" });
-    const sizeToggles = () => groups()[1].props("toggles");
-    const list = () => wrapper!.findComponent({ name: "ViewModesList" });
 
-    expect(groups()[0].props("toggles").map((t: any) => t.label)).toEqual([
-      "list",
-      "grid",
-    ]);
-    expect(sizeToggles().map((t: any) => t.label)).toEqual([
-      "library.grid-size.large",
-      "library.grid-size.compact",
-    ]);
-    expect(list().props("compact")).toBe(false);
-
-    sizeToggles()[0].isOn.value = false;
-    sizeToggles()[1].isOn.value = true;
-    await flushPromises();
-
-    expect(list().props("compact")).toBe(true);
-    expect(localStorage.getItem("elody.gridCompact")).toBe("true");
-
-    sizeToggles()[0].isOn.value = true;
-    sizeToggles()[1].isOn.value = false;
-    await flushPromises();
-
-    expect(list().props("compact")).toBe(false);
+    expect(wrapper.findAllComponents({ name: "BaseToggleGroup" })).toHaveLength(1);
+    expect(
+      wrapper.findComponent({ name: "ViewModesList" }).props("compact"),
+    ).toBe(true);
     mocks.toggles = [];
-    localStorage.removeItem("elody.gridCompact");
+    mocks.displayGrid = false;
+    mocks.gridCompact = false;
   });
 
   it("is indeterminate while only part of the page is selected", async () => {

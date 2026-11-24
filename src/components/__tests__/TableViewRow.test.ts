@@ -112,8 +112,12 @@ describe("TableViewRow", () => {
     expect(columns[1].attributes("style")).toContain(
       "left: calc(1 * var(--table-col-badge))",
     );
-    // the hairline after the last pinned column, the title
-    expect(columns.map((column) => column.classes("border-r"))).toEqual([
+    // the hairline after the last pinned column, only while the table scrolls sideways
+    expect(
+      columns.map((column) =>
+        column.classes("group-data-[scrolled]/table:border-r"),
+      ),
+    ).toEqual([
       false,
       true,
       false,

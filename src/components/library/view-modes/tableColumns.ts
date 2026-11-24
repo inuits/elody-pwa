@@ -26,7 +26,9 @@ export const tableColumnClass = (idx: number, pinnedCount: number) => {
     "flex flex-col justify-center min-w-0 px-(--table-col-pad-x) break-words",
     isFirstColumn ? "col-primary" : "col-secondary",
     { "col-pinned sticky z-1 bg-inherit": isPinned },
-    { "border-r border-border-faint": isLastPinned },
+    {
+      "group-data-[scrolled]/table:border-r border-border-faint": isLastPinned,
+    },
   ];
 };
 

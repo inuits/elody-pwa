@@ -425,7 +425,10 @@
   --list-row-content-min: 8rem;
   /* Flat list and table rows: cell padding, hairline below */
   --list-row-pad: 0.4375rem 0.5rem;
-  --list-header-height: 1.5rem;
+  --list-header-height: 2.25rem;
+  /* A relation list in a detail panel scrolls inside this height, so its
+     pager stays in view */
+  --panel-list-max-height: calc(100dvh - 16rem);
   /* Table columns (one grid for header and rows): the leading badges are
      fixed, the title and the rest share the width down to these minimums,
      then the table scrolls sideways */

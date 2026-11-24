@@ -129,6 +129,7 @@ import {
   uniCancel,
   uniBolt,
   uniTable,
+  uniTh,
   uniLock,
 } from "vue-unicons/dist/icons";
 
@@ -263,5 +264,6 @@ export const Unicons: Record<DamsIcons, { name: string }> = {
   Keyboard: uniKeyboard,
   Bolt: uniBolt,
   Table: uniTable,
+  Th: uniTh,
   Lock: uniLock,
 };

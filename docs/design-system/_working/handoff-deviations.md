@@ -127,7 +127,7 @@ Kinds:
 | G6 | Parked | "Select" footer label | `te('bulk-operations.select')` with English fallback; key not yet in baseGraphql translations | add `bulk-operations.select` (en/nl/ar) |
 | G7 | Deviation | Select all in the selection bar in both views | grid only; list keeps its column-header checkbox | — |
 | G8 | Deviation | label / value rows; select + eye in the footer | user, 2026-11-13: label above value (labels styled like list field labels), checkbox on the media corner (aria-label only), eye and ⋮ beside the title, no footer, title keeps its dashed underline on hover (as in list rows) | — |
-| G9 | Deviation | — | grid card size switch "Large / Compact" after the view switch (user, 2026-11-13); keys `library.grid-size.*` en/nl, ar falls back | — |
+| G9 | Deviation | — | grid card size as two view-switch buttons, "Grid view" (4 squares) and "Compact grid view" (9 squares), replacing the "Large / Compact" switch (redmine #169365, 2026-11-23); key `library.view-modes.grid-compact` en/nl, ar falls back | — |
 
 ## Public docs review (2026-11-13)
 

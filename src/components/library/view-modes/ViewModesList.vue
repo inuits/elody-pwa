@@ -27,7 +27,11 @@
         <!-- entity-list-element.md: list mode gets a column-header row when
              every row shares its fields. -->
         <!-- a small screen drops the header; the labels stay for screen readers -->
-        <div v-if="columnLabels && !isCompact" ref="listHeader">
+        <div
+          v-if="columnLabels && !isCompact"
+          ref="listHeader"
+          class="sticky top-0 z-1"
+        >
           <ListColumnHeader
             :labels="columnLabels"
             :cell-styles="headerCellStyles"
