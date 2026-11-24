@@ -52,6 +52,7 @@ import {
 } from "@/tracing/browserTracing";
 import { getSessionId } from "@/observability/sessionId";
 import { createSessionLink } from "@/observability/sessionLink";
+import { createConfigCacheLink } from "@/configCacheLink";
 import {
   createUsageLink,
   identifyUser,
@@ -184,6 +185,7 @@ const start = async (): Promise<void> => {
       // with tracing on, the backend's spans name the tab's session too
       ...(config.browserTracing ? [createSessionLink(sessionId)] : []),
       createUsageLink(),
+      createConfigCacheLink(),
       apqLink,
       httpLink,
     ]),
