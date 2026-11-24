@@ -74,6 +74,12 @@ import SpinnerLoader from "@/components/SpinnerLoader.vue";
 import EditModal from "@/components/modals/EditModal.vue";
 import DeleteModal from "@/components/modals/DeleteModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
+import {
+  cachedEntityLayout,
+  layoutIsCacheable,
+  leanEntityDocument,
+  storeEntityLayout,
+} from "@/entityLayoutCache";
 
 const config: any = inject("config");
 const router = useRouter();
@@ -128,8 +134,22 @@ watch(entityType, (value) => {
   queryVariables.type = value;
 });
 
+const layoutKey = () => ({
+  tenant: sessionStorage.getItem("active_tenant_id") ?? "",
+  user: auth.isAuthenticated.value
+    ? String(auth.user?.sub ?? auth.user?.email ?? "user")
+    : "anonymous",
+  entityType: entityType.value,
+});
+const cachedLayout = ref(cachedEntityLayout(layoutKey()));
+const queryDocument = computed(() =>
+  cachedLayout.value
+    ? leanEntityDocument(GetEntityByIdDocument)
+    : GetEntityByIdDocument,
+);
+
 const { result, refetch } = useQuery<GetEntityByIdQuery>(
-  GetEntityByIdDocument,
+  queryDocument,
   queryVariables,
   () => ({
     notifyOnNetworkStatusChange: true,
@@ -207,6 +227,7 @@ router.beforeEach(() => {
 // Another record loads only once the navigation is confirmed: a leave prompt
 // further down (unsaved changes) can still cancel it.
 watch(id, (newId) => {
+  cachedLayout.value = cachedEntityLayout(layoutKey());
   queryVariables.id = newId;
   queryVariables.type = entityType.value;
   columnList.value = "no-values";
@@ -216,7 +237,16 @@ watch(id, (newId) => {
 watch(
   () => result.value,
   () => {
-    entity.value = result.value?.Entity as BaseEntity;
+    const fetched = result.value?.Entity as BaseEntity | undefined;
+    if (
+      fetched?.entityView &&
+      layoutIsCacheable(GetEntityByIdDocument, fetched.__typename ?? "")
+    )
+      storeEntityLayout(layoutKey(), fetched.entityView);
+    entity.value = fetched && {
+      ...fetched,
+      entityView: fetched.entityView ?? (cachedLayout.value as ColumnList),
+    };
     if (!entity.value || !entity.value.intialValues) return;
     if (
       trackSeen.value &&
