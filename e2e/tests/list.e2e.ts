@@ -38,8 +38,12 @@ test("shows more results per page", async ({ page }) => {
   await expect(pageCount).not.toHaveText(pagesBefore);
 });
 
-test("switches to grid view and remembers it", async ({ page }) => {
-  const gridButton = page.getByRole("button", { name: "Grid view" });
+test("switches to grid view and remembers its size", async ({ page }) => {
+  const gridButton = page.getByRole("button", {
+    name: "Grid view",
+    exact: true,
+  });
+  const compactButton = page.getByRole("button", { name: "Compact grid view" });
   test.skip((await gridButton.count()) === 0, "client has no grid view");
   const firstInTable = await firstLine(page);
 
@@ -52,16 +56,10 @@ test("switches to grid view and remembers it", async ({ page }) => {
     firstInTable,
   );
 
-  await page.getByRole("button", { name: "Compact" }).click();
-  await expect(page.getByRole("button", { name: "Compact" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await compactButton.click();
+  await expect(compactButton).toHaveAttribute("aria-pressed", "true");
+  await expect(gridButton).toHaveAttribute("aria-pressed", "false");
 
   await page.reload();
-  await expect(gridButton).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "Compact" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await expect(compactButton).toHaveAttribute("aria-pressed", "true");
 });
