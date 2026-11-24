@@ -260,5 +260,84 @@ window.PERF_RESULTS = [
       "GetNotifications": 1,
       "GetEditNotificationStatusForm": 1
     }
+  },
+  {
+    "label": "step 3 lazy collapsed panels",
+    "date": "2026-11-24T12:42:13.004Z",
+    "client": "podiumnet",
+    "commit": "1719f528+changes",
+    "frontend": "built",
+    "runs": 5,
+    "detailPath": "/production/PR-000001",
+    "profiles": {
+      "local": {
+        "reload": {
+          "requests": 37,
+          "persistedQueryMisses": 0,
+          "entityMs": 660,
+          "doneMs": 1620,
+          "kb": 21
+        },
+        "listToDetail": {
+          "requests": 32,
+          "persistedQueryMisses": 0,
+          "entityMs": 190,
+          "doneMs": 985,
+          "kb": 18
+        },
+        "session": {
+          "requests": 72,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 3173,
+          "kb": 43
+        }
+      },
+      "100ms latency": {
+        "reload": {
+          "requests": 37,
+          "persistedQueryMisses": 0,
+          "entityMs": 1155,
+          "doneMs": 2067,
+          "kb": 21
+        },
+        "listToDetail": {
+          "requests": 32,
+          "persistedQueryMisses": 0,
+          "entityMs": 319,
+          "doneMs": 1225,
+          "kb": 18
+        },
+        "session": {
+          "requests": 72,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 4097,
+          "kb": 43
+        }
+      }
+    },
+    "operations": {
+      "getEntityById": 1,
+      "GetRelatedMediafilesWithTypePosterFilters": 1,
+      "GetRelatedMediafilesWithTypeSceneImagesFilters": 1,
+      "GetRelatedMediafilesWithTypeMusicFragmentsFilters": 1,
+      "GetRelatedMediafilesWithTypeTrailerFilters": 1,
+      "GetRelatedMediafilesWithTypeRiderFilters": 1,
+      "GetRelatedMediafilesWithTypeReviewFilters": 1,
+      "GetRelatedMediafilesWithTypeFramingFilters": 1,
+      "GetRelatedMediafilesWithTypeSocialMediaFilters": 1,
+      "getEntities": 4,
+      "getPreviewComponents": 2,
+      "GetBulkOperations": 1,
+      "GetBulkOperationsForVenueInProduction": 1,
+      "GetVenueInProductionFilters": 1,
+      "GetSortOptions": 2,
+      "GetNotificationsInProductionFilters": 1,
+      "GetEntitiesCount": 8,
+      "GetVenuesInProduction": 1,
+      "GetNotifications": 1,
+      "GetEditNotificationStatusForm": 1
+    }
   }
 ];

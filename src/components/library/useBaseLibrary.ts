@@ -50,6 +50,19 @@ export const getLibraryDataValue = (
   return library.count.value;
 };
 
+export const registerLibraryDataCount = (
+  key: string,
+  count: number,
+): (() => void) => {
+  if (registeredLibraryData[key]) return () => {};
+  const entry = { count: ref(count), fetchSequence: ref(1) };
+  registeredLibraryData[key] = entry;
+  return () => {
+    if (registeredLibraryData[key] === entry)
+      delete registeredLibraryData[key];
+  };
+};
+
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
   shouldUseStateForRoute: boolean = true,

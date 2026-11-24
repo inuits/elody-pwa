@@ -3,7 +3,7 @@ import { shallowMount } from "@vue/test-utils";
 
 vi.mock("vue-i18n", () => ({ useI18n: () => ({ t: (key: string) => key }) }));
 vi.mock("@/components/entityElements/EntityElementList.vue", () => ({
-  default: {},
+  default: { name: "EntityElementList", template: "<div />" },
 }));
 vi.mock("@/components/metadata/MetadataWrapper.vue", () => ({ default: {} }));
 vi.mock("@/components/EntityElementCoordinateEdit.vue", () => ({
@@ -92,5 +92,49 @@ describe("WindowPanelContent — compact preview", () => {
     expect(
       mountFields(false).find('[data-cy="preview-field-grid"]').exists(),
     ).toBe(false);
+  });
+});
+
+describe("WindowPanelContent — a list in a panel not opened yet", () => {
+  const mountList = (deferLists: boolean) =>
+    shallowMount(WindowPanelContent, {
+      props: {
+        panelType: "metadata",
+        relationArray: [],
+        metadatafields: [
+          {
+            __typename: "EntityListElement",
+            key: "files",
+            entityTypes: ["mediafile"],
+          },
+        ],
+        canBeMultipleColumns: true,
+        formId: "E-1",
+        isEdit: false,
+        editState: {},
+        identifiers: [],
+        parentIsListItem: false,
+        deferLists,
+      } as any,
+      global: {
+        provide: { config: { customization: {} } },
+        stubs: {
+          MultilingualWrapper: {
+            template: "<div><slot :localizedMetadata='undefined' /></div>",
+          },
+        },
+      },
+    });
+
+  it("leaves the list out while the panel holds it back", () => {
+    expect(
+      mountList(true).findComponent({ name: "EntityElementList" }).exists(),
+    ).toBe(false);
+  });
+
+  it("shows the list once the panel lets it load", () => {
+    expect(
+      mountList(false).findComponent({ name: "EntityElementList" }).exists(),
+    ).toBe(true);
   });
 });
