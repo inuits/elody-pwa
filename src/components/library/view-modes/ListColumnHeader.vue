@@ -1,7 +1,7 @@
 <template>
   <div
     data-cy="list-column-header"
-    class="sticky top-0 z-1 h-(--list-header-height) bg-surface border-b border-border-subtle text-label font-bold text-text-field-label"
+    class="sticky top-0 z-1 h-(--list-header-height) bg-surface border-b border-border-subtle text-table font-bold text-text-field-label"
   >
     <!-- ui_kits/clients: the list's column-header row — select-all, the field
          labels over the measured cells of the first row, and "Actions". -->

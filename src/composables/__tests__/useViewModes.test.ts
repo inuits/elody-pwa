@@ -62,9 +62,11 @@ describe("useViewModes", () => {
 
       determineViewModes([ViewModes.Table, ViewModes.ViewModesGrid]);
 
-      expect(toggles.value).toHaveLength(2);
-      expect(toggles.value[0].iconOn).toBe(DamsIcons.Table);
-      expect(toggles.value[1].iconOn).toBe(DamsIcons.Apps);
+      expect(toggles.value.map((toggle) => toggle.iconOn)).toEqual([
+        DamsIcons.Table,
+        DamsIcons.Apps,
+        DamsIcons.Th,
+      ]);
     });
 
     it("preserves config order: Grid first, Table second", () => {
@@ -73,9 +75,11 @@ describe("useViewModes", () => {
 
       determineViewModes([ViewModes.ViewModesGrid, ViewModes.Table]);
 
-      expect(toggles.value).toHaveLength(2);
-      expect(toggles.value[0].iconOn).toBe(DamsIcons.Apps);
-      expect(toggles.value[1].iconOn).toBe(DamsIcons.Table);
+      expect(toggles.value.map((toggle) => toggle.iconOn)).toEqual([
+        DamsIcons.Apps,
+        DamsIcons.Th,
+        DamsIcons.Table,
+      ]);
     });
 
     it("returns empty toggles for empty viewModes array", () => {
@@ -163,7 +167,7 @@ describe("useViewModes", () => {
       expect(toggles.value[0].iconOn).toBe(DamsIcons.Table);
     });
 
-    it("includes all 5 view modes in correct order", () => {
+    it("includes all 5 view modes in correct order, the grid in two sizes", () => {
       const entities = ref<Entity[]>([makeEntity("production")]);
       const { determineViewModes, toggles } = useViewModes({ entities });
 
@@ -175,12 +179,14 @@ describe("useViewModes", () => {
         ViewModes.ViewModesMap,
       ]);
 
-      expect(toggles.value).toHaveLength(5);
-      expect(toggles.value[0].iconOn).toBe(DamsIcons.ListUl);
-      expect(toggles.value[1].iconOn).toBe(DamsIcons.Apps);
-      expect(toggles.value[2].iconOn).toBe(DamsIcons.Table);
-      expect(toggles.value[3].iconOn).toBe(DamsIcons.Image);
-      expect(toggles.value[4].iconOn).toBe(DamsIcons.Map);
+      expect(toggles.value.map((toggle) => toggle.iconOn)).toEqual([
+        DamsIcons.ListUl,
+        DamsIcons.Apps,
+        DamsIcons.Th,
+        DamsIcons.Table,
+        DamsIcons.Image,
+        DamsIcons.Map,
+      ]);
     });
 
     it("binds displayList ref to the List toggle's isOn", () => {
@@ -1078,6 +1084,86 @@ describe("useViewModes", () => {
       ]);
 
       expect(displayList.value).toBe(true);
+    });
+  });
+
+  describe("grid size buttons", () => {
+    const setup = () => {
+      const entities = ref<Entity[]>([makeEntity("production")]);
+      const viewModes = useViewModes({ entities });
+      viewModes.determineViewModes([
+        ViewModes.ViewModesList,
+        ViewModes.ViewModesGrid,
+      ]);
+      return viewModes;
+    };
+    const select = (
+      toggles: ReturnType<typeof setup>["toggles"],
+      index: number,
+    ) => toggles.value.forEach((toggle, i) => (toggle.isOn = i === index));
+
+    beforeEach(() => localStorage.removeItem("elody.gridCompact"));
+
+    it("offers the grid as a normal and a compact button", () => {
+      const { toggles } = setup();
+
+      expect(toggles.value.map((toggle) => toggle.iconOn)).toEqual([
+        DamsIcons.ListUl,
+        DamsIcons.Apps,
+        DamsIcons.Th,
+      ]);
+      expect(toggles.value[2].viewMode).toBe(ViewModes.ViewModesGrid);
+      expect(toggles.value[2].label).toBe("library.view-modes.grid-compact");
+    });
+
+    it("shows the compact grid and remembers it", () => {
+      const { toggles, displayGrid, gridCompact } = setup();
+
+      select(toggles, 2);
+
+      expect(displayGrid.value).toBe(true);
+      expect(gridCompact.value).toBe(true);
+      expect(toggles.value.map((toggle) => toggle.isOn)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+      expect(localStorage.getItem("elody.gridCompact")).toBe("true");
+    });
+
+    it("switches from the compact grid back to the normal grid", () => {
+      const { toggles, displayGrid, gridCompact } = setup();
+      select(toggles, 2);
+
+      select(toggles, 1);
+
+      expect(displayGrid.value).toBe(true);
+      expect(gridCompact.value).toBe(false);
+      expect(localStorage.getItem("elody.gridCompact")).toBe("false");
+    });
+
+    it("leaves the grid for the list from either size", () => {
+      const { toggles, displayGrid } = setup();
+      select(toggles, 2);
+
+      select(toggles, 0);
+
+      expect(displayGrid.value).toBe(false);
+      expect(toggles.value.map((toggle) => toggle.isOn)).toEqual([
+        true,
+        false,
+        false,
+      ]);
+    });
+
+    it("starts in the size the user chose last", () => {
+      localStorage.setItem("elody.gridCompact", "true");
+      const { toggles, displayGrid } = setup();
+
+      displayGrid.value = true;
+
+      expect(toggles.value[1].isOn).toBe(false);
+      expect(toggles.value[2].isOn).toBe(true);
     });
   });
 });

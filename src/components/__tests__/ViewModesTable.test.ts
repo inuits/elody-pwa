@@ -205,7 +205,7 @@ describe("ViewModesTable", () => {
     );
   });
 
-  it("styles the column-header row like the list-mode header (label token, field-label colour)", async () => {
+  it("styles the column-header row like the list-mode header (row text size, field-label colour)", async () => {
     mockFormatTeaserMetadata.mockReturnValue([
       { key: "title", label: "metadata.labels.production", value: "Silent Garden 1" },
       { key: "status", label: "metadata.labels.status", value: "published" },
@@ -223,7 +223,7 @@ describe("ViewModesTable", () => {
     expect(header.classes()).toEqual(
       expect.arrayContaining([
         "h-(--list-header-height)",
-        "text-label",
+        "text-table",
         "font-bold",
         "text-text-field-label",
       ]),

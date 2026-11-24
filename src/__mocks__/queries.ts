@@ -842,6 +842,7 @@ export enum DamsIcons {
   Sitemap = 'Sitemap',
   Table = 'Table',
   Text = 'Text',
+  Th = 'Th',
   Trash = 'Trash',
   Update = 'Update',
   Upload = 'Upload',
