@@ -1,6 +1,6 @@
-export type OrderCsvRow = { id: string; name: string; line: string };
+export type OrderCsvRow = { id: string; name?: string; line: string };
 
-const FILENAME_COLUMNS = ["filename", "file_identifier", "title"];
+const NAME_COLUMNS = ["name", "filename", "file_identifier", "title"];
 
 const splitCsvLine = (line: string): string[] => {
   const fields: string[] = [];
@@ -64,12 +64,13 @@ export const parseOrderCsv = (
 ): { header: string; rows: OrderCsvRow[] } => {
   const [header, ...lines] = csv.split(/\r?\n/).filter((line) => line !== "");
   const columns = splitCsvLine(header);
-  const filenameIndex = columns.findIndex((column) =>
-    FILENAME_COLUMNS.includes(column),
+  const nameIndex = columns.findIndex((column) =>
+    NAME_COLUMNS.includes(column),
   );
   const rows = lines.map((line) => {
     const fields = splitCsvLine(line);
-    return { id: fields[0], name: fields[filenameIndex] ?? fields[0], line };
+    const name = nameIndex >= 0 ? fields[nameIndex] : undefined;
+    return { id: fields[0], name, line };
   });
   return { header, rows };
 };
@@ -84,8 +85,16 @@ export const serializeOrderCsv = (
 };
 
 // Each client's order endpoint has its own CSV columns, so rows go back unchanged
-export const fetchOrderCsv = async (parentId: string): Promise<string> => {
-  const response = await fetch("/api/download/csv?return_type=mediafile", {
+export const fetchOrderCsv = async (
+  parentId: string,
+  returnType: string,
+  relationType: string,
+): Promise<string> => {
+  const query = new URLSearchParams({
+    return_type: returnType,
+    relation_type: relationType,
+  });
+  const response = await fetch(`/api/download/csv?${query}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ parentId }),
@@ -96,9 +105,14 @@ export const fetchOrderCsv = async (parentId: string): Promise<string> => {
 
 export const saveOrderCsv = async (
   parentId: string,
+  relationType: string,
   csv: string,
 ): Promise<void> => {
-  const response = await fetch(`/api/upload/csv?parentId=${parentId}`, {
+  const query = new URLSearchParams({
+    parentId,
+    relation_type: relationType,
+  });
+  const response = await fetch(`/api/upload/csv?${query}`, {
     method: "POST",
     headers: { "Content-Type": "text/csv" },
     body: csv,

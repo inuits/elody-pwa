@@ -51,6 +51,11 @@ describe("order csv", () => {
     expect(parsed.rows[1].name).toBe("second, with comma.jpg");
   });
 
+  it("leaves the name out when the endpoint sends none", () => {
+    const parsed = parseOrderCsv("id,type\nf,web_story_frame\n");
+    expect(parsed.rows[0].name).toBeUndefined();
+  });
+
   it("falls back to the base filename column", () => {
     const parsed = parseOrderCsv(
       "identifier,type,filename\r\nx,mediafile,x.tif\r\n",

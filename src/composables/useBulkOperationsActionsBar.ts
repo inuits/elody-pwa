@@ -142,8 +142,10 @@ export const useBulkOperationsActionsBar = (
     get: () =>
       availableBulkOperations.value.filter(
         (operation: DropdownOption) =>
-          trackSeen.value ||
-          !seenBulkOperationTypes.includes(String(operation.value)),
+          (trackSeen.value ||
+            !seenBulkOperationTypes.includes(String(operation.value))) &&
+          (operation.value !== BulkOperationTypes.ChangeOrder ||
+            !!props.relationType),
       ),
     set: (operations: DropdownOption[]) => {
       availableBulkOperations.value = operations;

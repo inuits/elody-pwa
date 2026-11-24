@@ -1093,6 +1093,21 @@ describe("useBulkOperationsActionsBar", () => {
       expect(emit).toHaveBeenCalledWith("startReorder");
       expect(mockBaseModal.openModal).not.toHaveBeenCalled();
     });
+
+    it("hides the action on a list without a relation type", () => {
+      const composable = useBulkOperationsActionsBar(
+        { ...createMockProps(), relationType: undefined },
+        createMockEmit(),
+      );
+      composable.bulkOperations.value = [
+        { value: BulkOperationTypes.ChangeOrder },
+        { value: BulkOperationTypes.ExportXlsx },
+      ] as any;
+
+      expect(
+        composable.bulkOperations.value.map((operation) => operation.value),
+      ).toEqual([BulkOperationTypes.ExportXlsx]);
+    });
   });
 
   describe("Exposed Functions", () => {

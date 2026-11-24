@@ -30,9 +30,17 @@ const csv = [
 
 const fetchMock = vi.fn();
 
-const mountEditor = async () => {
+const mountEditor = async (
+  fetchEntities: () => Promise<unknown[]> = async () => [],
+) => {
   const wrapper = mount(EntityReorder, {
-    props: { parentId: "asset-1", pageSize: 3, fetchEntities: async () => [] },
+    props: {
+      parentId: "asset-1",
+      returnType: "web_story_frame",
+      relationType: "ref_story_frames",
+      pageSize: 3,
+      fetchEntities,
+    },
     global: {
       stubs: {
         unicon: true,
@@ -62,6 +70,25 @@ describe("EntityReorder across pages", () => {
     fetchMock.mockReset();
     fetchMock.mockResolvedValue({ ok: true, text: async () => csv });
     vi.stubGlobal("fetch", fetchMock);
+  });
+
+  it("names the items after the list's own entities when the order has no names", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      text: async () => "id,type\na,web_story_frame\nb,web_story_frame\n",
+    });
+    const wrapper = await mountEditor(async () => [
+      { id: "a", uuid: "a", intialValues: { title: "Frame A" } },
+    ]);
+
+    expect(visibleNames(wrapper)).toEqual(["Frame A", "b"]);
+  });
+
+  it("asks the order endpoint for the list's own type", async () => {
+    await mountEditor();
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "/api/download/csv?return_type=web_story_frame&relation_type=ref_story_frames",
+    );
   });
 
   it("shows the page of the full order", async () => {
@@ -133,7 +160,9 @@ describe("EntityReorder across pages", () => {
     await flushPromises();
 
     const [url, request] = fetchMock.mock.calls[1];
-    expect(url).toBe("/api/upload/csv?parentId=asset-1");
+    expect(url).toBe(
+      "/api/upload/csv?parentId=asset-1&relation_type=ref_story_frames",
+    );
     expect(
       request.body.split("\n").map((line: string) => line.split(",")[0]),
     ).toEqual(["id", "b", "a", "c", "d", "e", "f", "g"]);

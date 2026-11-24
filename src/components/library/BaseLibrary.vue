@@ -307,7 +307,7 @@
               @set-bulk-operations-available="
                 (value: boolean) => (hasBulkOperations = value)
               "
-              @start-reorder="reordering = isMediafileList"
+              @start-reorder="reordering = true"
               @apply-custom-bulk-operations="
                 async () => await applyCustomBulkOperations()
               "
@@ -540,16 +540,15 @@
       </div>
     </div>
     <EntityReorder
-      v-if="reordering && props.parentEntityIdentifiers[0]"
+      v-if="
+        reordering && props.parentEntityIdentifiers[0] && props.relationType
+      "
       :parent-id="props.parentEntityIdentifiers[0]"
+      :return-type="entityType"
+      :relation-type="props.relationType"
       :page-size="paginationStore.limit.value"
       :fetch-entities="fetchAllEntities"
-      @close="
-        async (saved: boolean) => {
-          reordering = false;
-          if (saved) await refetchEntities();
-        }
-      "
+      @close="closeReorder"
     />
   </div>
 </template>
@@ -804,6 +803,10 @@ const filtersBaseAPI = ref<FiltersBaseAPI | undefined>(undefined);
 const hasBulkOperations = ref<boolean>(true);
 const isInitialLoading = ref<boolean>(true);
 const reordering = ref<boolean>(false);
+const refetchParentEntity = inject<(() => Promise<unknown>) | undefined>(
+  "RefetchParentEntity",
+  undefined,
+);
 const simpleSearchTerm = ref<string>("");
 const simpleSearchKeys = computed<string[]>(
   () => (route.meta as any)?.simpleSearch?.keys ?? [],
@@ -957,6 +960,14 @@ const {
 );
 
 const paginationStore = createPaginationStore();
+
+// The list's filter reads the parent's relations, so the parent goes first
+const closeReorder = async (saved: boolean) => {
+  reordering.value = false;
+  if (!saved) return;
+  await refetchParentEntity?.();
+  await refetchEntities();
+};
 
 const fetchAllEntities = async (limit: number) =>
   (await fetchEntitiesWithVariables({ ...getQueryVariables(), skip: 1, limit }))
@@ -1222,10 +1233,6 @@ const entityType = computed(() =>
     : route.meta.entityType
       ? (route.meta.entityType as Entitytyping)
       : ("BaseEntity" as Entitytyping),
-);
-
-const isMediafileList = computed(
-  () => entityType.value === Entitytyping.Mediafile,
 );
 
 const relations = computed<BaseRelationValuesInput[]>(

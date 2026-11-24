@@ -32,6 +32,8 @@ import { useReorderState } from "@/composables/reorder/useReorderState";
 
 const props = defineProps<{
   parentId: string;
+  returnType: string;
+  relationType: string;
   pageSize: number;
   fetchEntities: (limit: number) => Promise<Entity[]>;
 }>();
@@ -41,7 +43,12 @@ const emit = defineEmits<{ (event: "close", saved: boolean): void }>();
 const { t } = useI18n();
 const { displaySuccessNotification, displayErrorNotification } =
   useBaseNotification();
-const state = useReorderState(props.parentId, props.fetchEntities);
+const state = useReorderState(
+  props.parentId,
+  props.returnType,
+  props.relationType,
+  props.fetchEntities,
+);
 
 const showError = (error: unknown) => {
   console.error(error);
@@ -59,7 +66,7 @@ onMounted(async () => {
     emit("close", false);
     return;
   }
-  await state.loadThumbnails();
+  await state.loadEntityDetails();
 });
 
 const save = async () => {
