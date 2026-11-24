@@ -248,16 +248,6 @@ export const useBaseLibrary = (
       promiseQueue.value.push(promise);
   };
 
-  const getCustomBulkOperations = async () => {
-    const bulkOperationsPromise = promiseQueue.value.find(
-      (promise) => promise.name === "customBulkOperationsPromise",
-    );
-    if (bulkOperationsPromise) await bulkOperationsPromise();
-    promiseQueue.value = promiseQueue.value.filter(
-      (promise) => promise.name !== "customBulkOperationsPromise",
-    );
-  };
-
   const fetchAllPromises = async () => {
     await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
@@ -502,7 +492,6 @@ export const useBaseLibrary = (
     placeholderEntitiesAmount,
     entitiesLoading,
     accessDenied,
-    getCustomBulkOperations,
     fetchAllPromises,
     getEntities,
     getEntityById,

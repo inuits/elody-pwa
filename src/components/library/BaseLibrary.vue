@@ -924,7 +924,6 @@ const {
   placeholderEntitiesAmount,
   entitiesLoading,
   accessDenied,
-  getCustomBulkOperations,
   fetchAllPromises,
   getEntities,
   getEntityById,
@@ -1441,8 +1440,7 @@ const initializeDeepRelations = async () => {
 
 const applyCustomBulkOperations = async () => {
   if (!props.customBulkOperations) return;
-  enqueuePromise(customBulkOperationsPromise);
-  await getCustomBulkOperations();
+  await customBulkOperationsPromise?.();
 };
 
 const initializeEntityPickerComponent = (

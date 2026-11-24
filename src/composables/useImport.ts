@@ -1,7 +1,11 @@
+let queries: Promise<typeof import("@/generated-types/queries")> | undefined;
+
 export const useImport = () => {
-  const getQueries = async () => {
-    return await import(`/src/generated-types/queries.ts`);
-  };
+  const getQueries = () =>
+    (queries ??= import(`/src/generated-types/queries.ts`).catch((error) => {
+      queries = undefined;
+      throw error;
+    }));
 
   const loadDocument = async (queryName: string) => {
     try {

@@ -173,5 +173,92 @@ window.PERF_RESULTS = [
       "GetNotifications": 1,
       "GetEditNotificationStatusForm": 1
     }
+  },
+  {
+    "label": "step 2 parallel list setup",
+    "date": "2026-11-24T11:43:42.815Z",
+    "client": "podiumnet",
+    "commit": "0a2d30c0+changes",
+    "frontend": "built",
+    "runs": 5,
+    "detailPath": "/production/PR-000001",
+    "profiles": {
+      "local": {
+        "reload": {
+          "requests": 47,
+          "persistedQueryMisses": 0,
+          "entityMs": 826,
+          "doneMs": 2028,
+          "kb": 27
+        },
+        "listToDetail": {
+          "requests": 42,
+          "persistedQueryMisses": 0,
+          "entityMs": 190,
+          "doneMs": 1109,
+          "kb": 25
+        },
+        "session": {
+          "requests": 98,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 3250,
+          "kb": 63
+        }
+      },
+      "100ms latency": {
+        "reload": {
+          "requests": 47,
+          "persistedQueryMisses": 0,
+          "entityMs": 1139,
+          "doneMs": 2377,
+          "kb": 27
+        },
+        "listToDetail": {
+          "requests": 42,
+          "persistedQueryMisses": 0,
+          "entityMs": 284,
+          "doneMs": 1387,
+          "kb": 25
+        },
+        "session": {
+          "requests": 98,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 4501,
+          "kb": 63
+        }
+      }
+    },
+    "operations": {
+      "getEntityById": 1,
+      "getEntities": 4,
+      "getPreviewComponents": 3,
+      "GetBulkOperations": 1,
+      "GetBulkOperationsForPosterInProduction": 1,
+      "GetBulkOperationsForSceneImagesInProduction": 1,
+      "GetBulkOperationsForMusicFragmentsInProduction": 1,
+      "GetBulkOperationsForTrailerInProduction": 1,
+      "GetBulkOperationsForRiderInProduction": 1,
+      "GetBulkOperationsForReviewInProduction": 1,
+      "GetBulkOperationsForFramingInProduction": 1,
+      "GetBulkOperationsForSocialMediaInProduction": 1,
+      "GetBulkOperationsForVenueInProduction": 1,
+      "GetRelatedMediafilesWithTypePosterFilters": 1,
+      "GetSortOptions": 3,
+      "GetRelatedMediafilesWithTypeSceneImagesFilters": 1,
+      "GetRelatedMediafilesWithTypeMusicFragmentsFilters": 1,
+      "GetRelatedMediafilesWithTypeTrailerFilters": 1,
+      "GetRelatedMediafilesWithTypeRiderFilters": 1,
+      "GetRelatedMediafilesWithTypeReviewFilters": 1,
+      "GetRelatedMediafilesWithTypeFramingFilters": 1,
+      "GetRelatedMediafilesWithTypeSocialMediaFilters": 1,
+      "GetVenueInProductionFilters": 1,
+      "GetNotificationsInProductionFilters": 1,
+      "GetMediafilesInCompletenessOverview": 8,
+      "GetVenuesInProduction": 1,
+      "GetNotifications": 1,
+      "GetEditNotificationStatusForm": 1
+    }
   }
 ];

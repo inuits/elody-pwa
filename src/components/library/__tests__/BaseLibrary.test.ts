@@ -67,7 +67,6 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     placeholderEntities: ref([]),
     placeholderEntitiesAmount: ref(0),
     entitiesLoading: libEntitiesLoading,
-    getCustomBulkOperations: vi.fn(),
     fetchAllPromises: vi.fn().mockResolvedValue(undefined),
     getEntities: libGetEntities,
     getEntityById: vi.fn().mockResolvedValue(undefined),
@@ -1970,5 +1969,42 @@ describe("BaseLibrary.vue select page", () => {
       (wrapper.vm as any).selectablePage.map((e: any) => e.uuid),
     ).toEqual(["uuid-3"]);
     wrapper.unmount();
+  });
+});
+
+describe("BaseLibrary.vue custom bulk operations", () => {
+  let wrapper: ReturnType<typeof getWrapper> | null = null;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRoute.path = "/test";
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+  });
+
+  const applyFromBar = async (fetchBulkOperations: () => Promise<void>) => {
+    wrapper = getWrapper({ customBulkOperations: "GetCustomBulkOperations" });
+    await flushPromises();
+    const bar = wrapper.findComponent({ name: "BulkOperationsActionsBar" });
+    bar.vm.$emit("customBulkOperationsPromise", fetchBulkOperations);
+    bar.vm.$emit("applyCustomBulkOperations");
+    await flushPromises();
+  };
+
+  it("fetches the custom bulk operations when the bar asks for them", async () => {
+    const fetchBulkOperations = vi.fn().mockResolvedValue(undefined);
+    await applyFromBar(fetchBulkOperations);
+    expect(fetchBulkOperations).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not make the list data wait for the custom bulk operations", async () => {
+    const fetchBulkOperations = vi.fn().mockResolvedValue(undefined);
+    await applyFromBar(fetchBulkOperations);
+    expect(libEnqueuePromise).not.toHaveBeenCalledWith(fetchBulkOperations);
   });
 });
