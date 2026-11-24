@@ -8,6 +8,8 @@
     "test:ui": "pnpm build && playwright test --ui --headed --workers=1",
     "test:dev": "E2E_FRONTEND=dev playwright test",
     "report": "playwright show-report",
+    "perf": "pnpm build && E2E_PERF=1 playwright test --project=perf",
+    "perf:dev": "E2E_FRONTEND=dev E2E_PERF=1 playwright test --project=perf",
     "codegen": "playwright codegen"
   },
   "devDependencies": {
