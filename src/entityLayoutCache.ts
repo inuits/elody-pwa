@@ -22,6 +22,7 @@ const ENTITY_READING_FIELDS = new Set([
   "manifestViewerElement",
 ]);
 const PERMISSION_LIST_FIELDS = new Set(["permitted", "readOnly"]);
+const ENTITY_VALUE_FIELDS = new Set(["selectedOptions"]);
 
 const fragmentsOf = (document: DocumentNode) =>
   new Map(
@@ -52,13 +53,63 @@ const usedFragmentNames = (document: DocumentNode): Set<string> => {
   return used;
 };
 
+const pruneToEntityValues = (
+  selectionSet: SelectionSetNode,
+  fragments: Map<string, FragmentDefinitionNode>,
+  prunedFragments: Map<string, FragmentDefinitionNode | null>,
+): SelectionSetNode | undefined => {
+  const prune = (set: SelectionSetNode) =>
+    pruneToEntityValues(set, fragments, prunedFragments);
+  const selections = selectionSet.selections.flatMap(
+    (selection): SelectionNode[] => {
+      if (selection.kind === Kind.FIELD) {
+        if (ENTITY_VALUE_FIELDS.has(selection.name.value)) return [selection];
+        const pruned = selection.selectionSet && prune(selection.selectionSet);
+        return pruned ? [{ ...selection, selectionSet: pruned }] : [];
+      }
+      if (selection.kind === Kind.INLINE_FRAGMENT) {
+        const pruned = prune(selection.selectionSet);
+        return pruned ? [{ ...selection, selectionSet: pruned }] : [];
+      }
+      const name = `${selection.name.value}__entityValues`;
+      if (!prunedFragments.has(name)) {
+        prunedFragments.set(name, null);
+        const fragment = fragments.get(selection.name.value);
+        const pruned = fragment && prune(fragment.selectionSet);
+        prunedFragments.set(
+          name,
+          pruned && fragment
+            ? {
+                ...fragment,
+                name: { kind: Kind.NAME, value: name },
+                selectionSet: pruned,
+              }
+            : null,
+        );
+      }
+      return prunedFragments.get(name)
+        ? [{ ...selection, name: { kind: Kind.NAME, value: name } }]
+        : [];
+    },
+  );
+  return selections.length ? { ...selectionSet, selections } : undefined;
+};
+
 const leanDocuments = new WeakMap<DocumentNode, DocumentNode>();
 
 export const leanEntityDocument = (document: DocumentNode): DocumentNode => {
   const known = leanDocuments.get(document);
   if (known) return known;
+  const fragments = fragmentsOf(document);
+  const prunedFragments = new Map<string, FragmentDefinitionNode | null>();
   const withoutLayout = visit(document, {
-    Field: (field) => (field.name.value === LAYOUT_FIELD ? null : undefined),
+    Field: (field) => {
+      if (field.name.value !== LAYOUT_FIELD) return undefined;
+      const pruned =
+        field.selectionSet &&
+        pruneToEntityValues(field.selectionSet, fragments, prunedFragments);
+      return pruned ? { ...field, selectionSet: pruned } : null;
+    },
     SelectionSet: {
       leave: (selectionSet): SelectionSetNode | undefined =>
         selectionSet.selections.length
@@ -74,10 +125,19 @@ export const leanEntityDocument = (document: DocumentNode): DocumentNode => {
             },
     },
   });
-  const used = usedFragmentNames(withoutLayout);
-  const lean: DocumentNode = {
+  const withPrunedFragments: DocumentNode = {
     ...withoutLayout,
-    definitions: withoutLayout.definitions.filter(
+    definitions: [
+      ...withoutLayout.definitions,
+      ...[...prunedFragments.values()].filter(
+        (fragment): fragment is FragmentDefinitionNode => !!fragment,
+      ),
+    ],
+  };
+  const used = usedFragmentNames(withPrunedFragments);
+  const lean: DocumentNode = {
+    ...withPrunedFragments,
+    definitions: withPrunedFragments.definitions.filter(
       (definition) =>
         definition.kind !== Kind.FRAGMENT_DEFINITION ||
         used.has(definition.name.value),
@@ -201,8 +261,34 @@ const keyOf = ({ tenant, user, entityType }: EntityLayoutKey) =>
 export const cachedEntityLayout = (key: EntityLayoutKey): unknown =>
   layouts.get(keyOf(key));
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const withoutEntityValues = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(withoutEntityValues);
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !ENTITY_VALUE_FIELDS.has(key))
+      .map(([key, item]) => [key, withoutEntityValues(item)]),
+  );
+};
+
+export const mergeEntityLayout = (base: unknown, overlay: unknown): unknown => {
+  if (overlay === undefined) return base;
+  if (Array.isArray(base) && Array.isArray(overlay))
+    return base.map((item, index) => mergeEntityLayout(item, overlay[index]));
+  if (isPlainObject(base) && isPlainObject(overlay))
+    return Object.fromEntries(
+      [...new Set([...Object.keys(base), ...Object.keys(overlay)])].map(
+        (key) => [key, mergeEntityLayout(base[key], overlay[key])],
+      ),
+    );
+  return overlay;
+};
+
 export const storeEntityLayout = (key: EntityLayoutKey, layout: unknown) => {
-  layouts.set(keyOf(key), layout);
+  layouts.set(keyOf(key), withoutEntityValues(layout));
 };
 
 export const clearEntityLayouts = () => layouts.clear();

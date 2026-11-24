@@ -132,6 +132,7 @@ export const useMetadataWrapperDropdownOptions = (
     c.relationFilter,
     c.optionsOrderByKey,
     c.optionLabelKeys,
+    c.selectedOptions,
   ];
 
   const dropDownoptionsConfigMapping: {
@@ -170,6 +171,10 @@ export const useMetadataWrapperDropdownOptions = (
         ?.relationFilter as AdvancedFilterInputType,
       optionsOrderByKey: optionsOrderByKey.value,
       optionLabelKeys: optionLabelKeys.value,
+      selectedOptions:
+        props.listItemEntity === undefined && !props.linkedEntityId
+          ? props.metadata.inputField?.selectedOptions
+          : undefined,
     },
   };
 
