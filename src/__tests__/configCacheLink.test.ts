@@ -140,7 +140,7 @@ describe("createConfigCacheLink", () => {
     expect(handle).toHaveBeenCalledTimes(2);
   });
 
-  it("never caches filters with a default taken from the user's session", async () => {
+  it("caches filters with a default taken from the user's session, which stays the same until the next login", async () => {
     const { handle, link } = setup();
     const sessionFilters = gql`
       query GetFilters($entityType: String!) {
@@ -155,7 +155,7 @@ describe("createConfigCacheLink", () => {
     `;
     await run(link, sessionFilters);
     await run(link, sessionFilters);
-    expect(handle).toHaveBeenCalledTimes(2);
+    expect(handle).toHaveBeenCalledTimes(1);
   });
 
   it("asks again after an error response", async () => {

@@ -19,7 +19,7 @@ const CONFIG_ROOT_FIELDS = new Set([
   "CustomBulkOperations",
 ]);
 
-const USER_DEPENDENT = /\bcan\b|session-\$/;
+const PERMISSION_TRIMMED = /\bcan\b/;
 
 const cacheKey = (operation: Operation): string | undefined => {
   const definition = getMainDefinition(operation.query);
@@ -35,7 +35,7 @@ const cacheKey = (operation: Operation): string | undefined => {
   );
   if (!isConfigOnly) return undefined;
   const source = print(operation.query);
-  if (USER_DEPENDENT.test(source)) return undefined;
+  if (PERMISSION_TRIMMED.test(source)) return undefined;
   const tenant = operation.getContext().headers?.["X-Tenant-ID"] ?? "";
   return JSON.stringify([tenant, source, operation.variables]);
 };
