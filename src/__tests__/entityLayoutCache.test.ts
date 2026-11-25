@@ -6,8 +6,10 @@ import {
   clearEntityLayouts,
   layoutIsCacheable,
   leanEntityDocument,
-  mergeEntityLayout,
+  selectedOptionsByRelation,
+  selectedOptionsDocument,
   storeEntityLayout,
+  withoutSelectedOptions,
 } from "@/entityLayoutCache";
 
 const entityQuery = (productionView: string, userView = "label") => gql`
@@ -171,7 +173,7 @@ describe("entity layout cache", () => {
   });
 });
 
-describe("entity-specific values inside the layout", () => {
+describe("relation labels in their own query", () => {
   const withSelectedOptions = gql`
     query getEntityById($id: String!, $type: String!) {
       Entity(id: $id, type: $type) {
@@ -193,45 +195,54 @@ describe("entity-specific values inside the layout", () => {
     }
     fragment inputfield on InputField {
       type
+      relationType
       selectedOptions
     }
   `;
 
-  it("asks the lean query only for the paths to them", () => {
-    const lean = print(leanEntityDocument(withSelectedOptions));
-    expect(lean).toContain("genres: metaData");
-    expect(lean).toContain("inputField(type: genreTypeField)");
-    expect(lean).toContain("selectedOptions");
-    expect(lean).not.toMatch(/\blabel\b/);
-    expect(lean).not.toMatch(/\btype\n/);
+  it("leaves them out of the entity query", () => {
+    const entity = print(withoutSelectedOptions(withSelectedOptions));
+    expect(entity).not.toContain("selectedOptions");
+    expect(entity).toContain("relationType");
+    expect(entity).toContain("intialValues");
   });
 
-  it("stores the layout without them", () => {
-    clearEntityLayouts();
-    const key = { tenant: "", user: "u", entityType: "production" };
-    storeEntityLayout(key, {
-      genres: { inputField: { type: "x", selectedOptions: [{ id: "GN-1" }] } },
-    });
-    expect(cachedEntityLayout(key)).toEqual({
-      genres: { inputField: { type: "x" } },
-    });
+  it("asks the labels query only for the paths to them and their relation type", () => {
+    const labels = print(selectedOptionsDocument(withSelectedOptions));
+    expect(labels).toContain("genres: metaData");
+    expect(labels).toContain("inputField(type: genreTypeField)");
+    expect(labels).toContain("selectedOptions");
+    expect(labels).toContain("relationType");
+    expect(labels).toContain("query getEntityByIdSelectedOptions");
+    expect(labels).not.toContain("intialValues");
+    expect(labels).not.toMatch(/\blabel\b/);
+    expect(labels).not.toMatch(/\btype\n/);
   });
 
-  it("puts this entity's values back into the cached layout", () => {
+  it("finds the labels of each relation type in the labels result", () => {
+    const genres = [{ id: "GN-1" }];
     expect(
-      mergeEntityLayout(
-        {
-          label: "Info",
-          genres: { label: "Genres", inputField: { type: "x" } },
+      selectedOptionsByRelation({
+        entityView: {
+          genres: {
+            inputField: { relationType: "ref_genres", selectedOptions: genres },
+          },
+          title: { inputField: { relationType: null, selectedOptions: null } },
         },
-        { genres: { inputField: { selectedOptions: [{ id: "GN-2" }] } } },
-      ),
-    ).toEqual({
-      label: "Info",
-      genres: {
-        label: "Genres",
-        inputField: { type: "x", selectedOptions: [{ id: "GN-2" }] },
-      },
-    });
+      }),
+    ).toEqual(new Map([["ref_genres", genres]]));
+  });
+
+  it("gives no labels for a relation type that two fields show differently", () => {
+    expect(
+      selectedOptionsByRelation({
+        a: {
+          inputField: { relationType: "ref_x", selectedOptions: [{ id: "1" }] },
+        },
+        b: {
+          inputField: { relationType: "ref_x", selectedOptions: [{ id: "2" }] },
+        },
+      }).get("ref_x"),
+    ).toBeNull();
   });
 });

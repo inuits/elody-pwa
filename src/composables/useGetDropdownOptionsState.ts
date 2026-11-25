@@ -43,10 +43,11 @@ export const useGetDropdownOptionsState = (
   relationFilter?: AdvancedFilterInput,
   optionsOrderByKey?: string,
   optionLabelKeys?: string[],
-  selectedOptions?: BaseEntity[] | null,
+  selectedOptions?: () => Promise<BaseEntity[] | null | undefined>,
 ) => {
   const { locale } = useI18n();
-  let serverOptionsPending = !!selectedOptions;
+  let serverOptions: Promise<BaseEntity[] | null | undefined> | undefined;
+  let serverOptionsUsed = !selectedOptions;
   const apolloClient = inject(DefaultApolloClient);
   const abortController = ref<AbortController | null>(null);
   const currentRequestId = ref(0);
@@ -103,10 +104,14 @@ export const useGetDropdownOptionsState = (
   };
 
   const initialize = async () => {
-    if (serverOptionsPending && parent?.value !== "fetchAll") {
-      serverOptionsPending = false;
-      entities.value = selectedOptions as typeof entities.value;
-      return;
+    if (!serverOptionsUsed && parent?.value !== "fetchAll") {
+      serverOptions ??= selectedOptions!().catch(() => null);
+      const options = await serverOptions;
+      serverOptionsUsed = true;
+      if (options) {
+        entities.value = options as typeof entities.value;
+        return;
+      }
     }
     if (abortController.value) {
       return;
