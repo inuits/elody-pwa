@@ -140,6 +140,41 @@ describe("createConfigCacheLink", () => {
     expect(handle).toHaveBeenCalledTimes(2);
   });
 
+  it.each(["permitted", "readOnly"])(
+    "never caches config with a %s permission check",
+    async (field) => {
+      const { handle, link } = setup();
+      const checked = gql`
+        query GetFilters($entityType: String!) {
+          EntityTypeFilters(type: $entityType) {
+            panel {
+              ${field}(input: ["update:x"])
+            }
+          }
+        }
+      `;
+      await run(link, checked);
+      await run(link, checked);
+      expect(handle).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it("caches config with a readOnly flag that is not a permission check", async () => {
+    const { handle, link } = setup();
+    const flag = gql`
+      query GetFilters($entityType: String!) {
+        EntityTypeFilters(type: $entityType) {
+          panel {
+            readOnly
+          }
+        }
+      }
+    `;
+    await run(link, flag);
+    await run(link, flag);
+    expect(handle).toHaveBeenCalledTimes(1);
+  });
+
   it("caches filters with a default taken from the user's session, which stays the same until the next login", async () => {
     const { handle, link } = setup();
     const sessionFilters = gql`

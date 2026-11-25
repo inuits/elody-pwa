@@ -19,7 +19,7 @@ const CONFIG_ROOT_FIELDS = new Set([
   "CustomBulkOperations",
 ]);
 
-const PERMISSION_TRIMMED = /\bcan\b/;
+const PERMISSION_TRIMMED = /\bcan\b|\b(permitted|readOnly)\s*\(/;
 
 const cacheKey = (operation: Operation): string | undefined => {
   const definition = getMainDefinition(operation.query);
