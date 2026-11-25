@@ -11,7 +11,8 @@ name or colours.
    tokens under `customization.theme`.
 2. baseGraphql's app-config endpoint passes `customization` to the PWA.
 3. At boot, before the app mounts, `applyClientTheme()`
-   (`src/utils/clientTheme.ts`) sets each token on `<body>`.
+   (`src/utils/clientTheme.ts`) sets each token in a `body { … }` style rule
+   (not inline, so dark mode can outrank it).
 4. `main.css` re-declares every derived colour alias on `body`, so an override
    also reaches everything built on it. For example, setting `--color-accent`
    also changes the section-header fill. A unit test keeps that alias list complete.
@@ -118,6 +119,10 @@ under `elody.colorScheme`. Without a stored choice the OS setting applies.
   aliases follow. `dark:` utilities follow the toggle, not the OS.
 - White and black are not redefined: they are ink on accent and commit fills.
   A surface uses `bg-surface`, never `bg-white`.
+- A client theme is a light theme. The dark block is `html.dark, html.dark
+  body`, which outranks the client's `body` rule: every token dark mode
+  redefines (text, surfaces, borders, highlight) ignores the client in dark
+  mode. The client's accent, commit and link colours still apply.
 - The light accent set (`-light`, `-light-strong`, `-wash`, `-tint`, `-dark`,
-  `-ink`) is re-mixed from the client's `--color-accent` with `!important`,
-  so a client theme keeps its hue in dark mode without dark values of its own.
+  `-ink`) is re-mixed from the client's `--color-accent`, so a client theme
+  keeps its hue in dark mode without dark values of its own.

@@ -133,9 +133,9 @@ export const ClientTheme: Story = {
       setupForm();
       applyClientTheme(sampleTheme);
       onUnmounted(() =>
-        Object.keys(sampleTheme).forEach((name) =>
-          document.body.style.removeProperty(name),
-        ),
+        document.head
+          .querySelectorAll("style[data-client-theme]")
+          .forEach((style) => style.remove()),
       );
       return { element, formId: FORM_ID };
     },

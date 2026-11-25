@@ -802,8 +802,11 @@ body {
 /* ── Dark mode ────────────────────────────────────────────────────────
    html.dark (src/composables/useColorScheme.ts) redefines the literal
    tokens; every alias resolves against them. White and black stay put: they
-   are ink on accent and commit fills. ── */
-html.dark {
+   are ink on accent and commit fills. Repeated on body: a client theme is a
+   plain `body` rule (clientTheme.ts), which html.dark body outranks, so a
+   client's light colours never leak into dark mode. ── */
+html.dark,
+html.dark body {
   color-scheme: dark;
 
   --color-accent-highlight: #263240;
@@ -914,18 +917,15 @@ html.dark {
   --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.55);
   --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
   --shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.6);
-}
 
-/* The light accent set is client-themable and set inline on <body>
-   (clientTheme.ts): !important outranks that, and mixing from the client's
-   own --color-accent keeps every deployment's hue. */
-html.dark body {
-  --color-accent-light: color-mix(in srgb, var(--color-accent) 22%, var(--color-surface)) !important;
-  --color-accent-light-strong: color-mix(in srgb, var(--color-accent) 40%, var(--color-surface)) !important;
-  --color-accent-wash: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface)) !important;
-  --color-accent-tint: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface)) !important;
-  --color-accent-dark: color-mix(in srgb, var(--color-accent) 50%, #FFFFFF) !important;
-  --color-accent-ink: var(--color-accent-dark) !important;
+  /* The light accent set, mixed from the (client's) --color-accent so every
+     deployment keeps its hue */
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 22%, var(--color-surface));
+  --color-accent-light-strong: color-mix(in srgb, var(--color-accent) 40%, var(--color-surface));
+  --color-accent-wash: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+  --color-accent-tint: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 50%, #FFFFFF);
+  --color-accent-ink: var(--color-accent-dark);
 }
 
 /* @tailwindcss/forms paints inputs #fff; in base so bg-* utilities still win */
