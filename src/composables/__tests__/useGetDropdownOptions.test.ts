@@ -1,4 +1,4 @@
-import { beforeEach, describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { shallowRef } from "vue";
 import { useGetDropdownOptionsState } from "../useGetDropdownOptionsState";
 import { EditStatus, type Entitytyping } from "@/generated-types/queries";
@@ -10,7 +10,6 @@ const mocks = vi.hoisted(() => {
     calls: [] as string[],
     advancedFilters: [] as any[],
     entityType: undefined as string | undefined,
-    getEntities: vi.fn(),
   };
 });
 
@@ -34,7 +33,7 @@ vi.mock("@/composables/useFormHelper", () => ({
 vi.mock("@/components/library/useBaseLibrary", () => ({
   useBaseLibrary: () => ({
     entities: entitiesRef,
-    getEntities: mocks.getEntities,
+    getEntities: vi.fn(),
     setAdvancedFilters: vi.fn((filters: any[]) => {
       mocks.advancedFilters = filters;
     }),
@@ -478,58 +477,5 @@ describe("selected options of a relation field", () => {
       item_types: [],
     });
     expect(mocks.entityType).toBe("genre");
-  });
-});
-
-describe("labels the server already sent with the entity", () => {
-  const selectedOptions = [
-    { id: "GN-1", type: "genre", intialValues: { name: "Comedy" } },
-  ];
-  const createState = (options?: unknown[]) =>
-    useGetDropdownOptionsState(
-      "genre" as Entitytyping,
-      shallowRef({ id: "PR-1" } as any),
-      "ref_genres",
-      "",
-      undefined,
-      [
-        { type: "selection", key: "type", value: ["genre"], match_exact: true },
-      ] as any,
-      "PR-1",
-      {
-        type: "selection",
-        key: ["podiumnet:1|identifiers"],
-        value: "$relationValues.ref_genres.key",
-        match_exact: true,
-      } as any,
-      undefined,
-      undefined,
-      options as any,
-    );
-
-  beforeEach(() => {
-    mocks.getEntities.mockClear();
-    entitiesRef.value = [];
-  });
-
-  it("shows them without asking for them again", async () => {
-    const state = createState(selectedOptions);
-    await state.initialize();
-    expect(mocks.getEntities).not.toHaveBeenCalled();
-    expect(
-      state.entityDropdownOptions.value.map((option) => option.label),
-    ).toEqual(["Comedy"]);
-  });
-
-  it("asks for them on a later load, when the relations may have changed", async () => {
-    const state = createState(selectedOptions);
-    await state.initialize();
-    await state.initialize();
-    expect(mocks.getEntities).toHaveBeenCalledTimes(1);
-  });
-
-  it("asks for them when the server sent none", async () => {
-    await createState(undefined).initialize();
-    expect(mocks.getEntities).toHaveBeenCalledTimes(1);
   });
 });

@@ -78,7 +78,6 @@ import {
   cachedEntityLayout,
   layoutIsCacheable,
   leanEntityDocument,
-  mergeEntityLayout,
   storeEntityLayout,
 } from "@/entityLayoutCache";
 
@@ -240,19 +239,13 @@ watch(
   () => {
     const fetched = result.value?.Entity as BaseEntity | undefined;
     if (
-      !cachedLayout.value &&
       fetched?.entityView &&
       layoutIsCacheable(GetEntityByIdDocument, fetched.__typename ?? "")
     )
       storeEntityLayout(layoutKey(), fetched.entityView);
     entity.value = fetched && {
       ...fetched,
-      entityView: cachedLayout.value
-        ? (mergeEntityLayout(
-            cachedLayout.value,
-            fetched.entityView,
-          ) as ColumnList)
-        : fetched.entityView,
+      entityView: fetched.entityView ?? (cachedLayout.value as ColumnList),
     };
     if (!entity.value || !entity.value.intialValues) return;
     if (

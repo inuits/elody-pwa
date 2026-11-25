@@ -6,7 +6,6 @@ import {
   clearEntityLayouts,
   layoutIsCacheable,
   leanEntityDocument,
-  mergeEntityLayout,
   storeEntityLayout,
 } from "@/entityLayoutCache";
 
@@ -159,70 +158,5 @@ describe("entity layout cache", () => {
     expect(cachedEntityLayout({ ...key, tenant: "t2" })).toBeUndefined();
     expect(cachedEntityLayout({ ...key, user: "u2" })).toBeUndefined();
     expect(cachedEntityLayout({ ...key, entityType: "tag" })).toBeUndefined();
-  });
-});
-
-describe("entity-specific values inside the layout", () => {
-  const withSelectedOptions = gql`
-    query getEntityById($id: String!, $type: String!) {
-      Entity(id: $id, type: $type) {
-        ... on Production {
-          intialValues {
-            title
-          }
-          entityView {
-            label
-            genres: metaData {
-              label
-              inputField(type: genreTypeField) {
-                ...inputfield
-              }
-            }
-          }
-        }
-      }
-    }
-    fragment inputfield on InputField {
-      type
-      selectedOptions
-    }
-  `;
-
-  it("asks the lean query only for the paths to them", () => {
-    const lean = print(leanEntityDocument(withSelectedOptions));
-    expect(lean).toContain("genres: metaData");
-    expect(lean).toContain("inputField(type: genreTypeField)");
-    expect(lean).toContain("selectedOptions");
-    expect(lean).not.toMatch(/\blabel\b/);
-    expect(lean).not.toMatch(/\btype\n/);
-  });
-
-  it("stores the layout without them", () => {
-    clearEntityLayouts();
-    const key = { tenant: "", user: "u", entityType: "production" };
-    storeEntityLayout(key, {
-      genres: { inputField: { type: "x", selectedOptions: [{ id: "GN-1" }] } },
-    });
-    expect(cachedEntityLayout(key)).toEqual({
-      genres: { inputField: { type: "x" } },
-    });
-  });
-
-  it("puts this entity's values back into the cached layout", () => {
-    expect(
-      mergeEntityLayout(
-        {
-          label: "Info",
-          genres: { label: "Genres", inputField: { type: "x" } },
-        },
-        { genres: { inputField: { selectedOptions: [{ id: "GN-2" }] } } },
-      ),
-    ).toEqual({
-      label: "Info",
-      genres: {
-        label: "Genres",
-        inputField: { type: "x", selectedOptions: [{ id: "GN-2" }] },
-      },
-    });
   });
 });
