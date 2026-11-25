@@ -20,6 +20,6 @@ export const logIn = async (page: Page) => {
   await page.waitForURL((url) => url.origin === new URL(client.baseURL).origin);
   if (usesBuiltFrontend) await page.reload();
   await expect(
-    page.getByRole("navigation", { name: "Main navigation" }),
+    page.getByRole("navigation", { name: /^(Main navigation|Hoofdnavigatie)$/ }),
   ).toBeVisible();
 };

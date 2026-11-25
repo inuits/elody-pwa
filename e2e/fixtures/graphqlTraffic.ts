@@ -62,9 +62,11 @@ export const trackGraphql = (page: Page) => {
   page.on("requestfailed", finish);
 
   const settled = async (quietMs = 1500, timeoutMs = 30_000) => {
-    const deadline = Date.now() + timeoutMs;
+    const since = Date.now();
+    const deadline = since + timeoutMs;
     while (Date.now() < deadline) {
-      if (open.size === 0 && Date.now() - lastActivity >= quietMs) break;
+      const quietFor = Date.now() - Math.max(lastActivity, since);
+      if (open.size === 0 && quietFor >= quietMs) break;
       await page.waitForTimeout(100);
     }
     await Promise.all(reading);

@@ -1020,5 +1020,344 @@ window.PERF_RESULTS = [
       "GetInscriptionRefs": 1,
       "GetMediafilesInEntity": 1
     }
+  },
+  {
+    "label": "vlacc expressions: branch",
+    "date": "2026-11-25T15:08:13.802Z",
+    "client": "vlacc-dams",
+    "commit": "35c993f1+changes",
+    "frontend": "built",
+    "runs": 5,
+    "detailPath": "/easy_reading/E-O6GURG70AS",
+    "profiles": {
+      "local": {
+        "reload": {
+          "requests": 45,
+          "persistedQueryMisses": 0,
+          "entityMs": 1897,
+          "doneMs": 3125,
+          "kb": 22
+        },
+        "listToDetail": {
+          "requests": 38,
+          "persistedQueryMisses": 0,
+          "entityMs": 516,
+          "doneMs": 1287,
+          "kb": 16
+        },
+        "session": {
+          "requests": 78,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 5432,
+          "kb": 35
+        }
+      },
+      "100ms latency": {
+        "reload": {
+          "requests": 45,
+          "persistedQueryMisses": 0,
+          "entityMs": 2068,
+          "doneMs": 3264,
+          "kb": 22
+        },
+        "listToDetail": {
+          "requests": 38,
+          "persistedQueryMisses": 0,
+          "entityMs": 679,
+          "doneMs": 1789,
+          "kb": 16
+        },
+        "session": {
+          "requests": 78,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 5720,
+          "kb": 35
+        }
+      }
+    },
+    "operations": {
+      "getEntityById": 1,
+      "GetCommentsPage": 2,
+      "getEntities": 4,
+      "getPreviewComponents": 6,
+      "GetEmptyBulkOperations": 1,
+      "GetBulkOperationsForAuthorsInExpression": 1,
+      "GetBulkOperationsForFormGenresInExpression": 1,
+      "GetBulkOperationsForAwardsInEntity": 1,
+      "GetEntityHistoryVersionListBulkOperations": 1,
+      "GetBulkOperationsForManifestationsInExpression": 1,
+      "GetBulkOperationsForOmnibusInExpression": 1,
+      "GetWorkAuthorsInDetailFilters": 1,
+      "GetAuthorsInDetailFilters": 1,
+      "GetFormGenresInExpressionFilters": 1,
+      "GetAwardsInEntityFilters": 1,
+      "GetEntityHistoryVersionListFilters": 1,
+      "GetWorkInExpressionFilters": 1,
+      "GetSortOptions": 2,
+      "GetManifestationsInExpressionFilters": 1,
+      "GetOmnibusInExpressionsFilters": 1,
+      "GetAuthorsInExpression": 1,
+      "GetParentAuthorsInDetail": 1,
+      "GetGenres": 1,
+      "GetAwardsInDetail": 1,
+      "GetEntityHistoryVersionList": 1,
+      "GetWorksInExpression": 1,
+      "GetManifestations": 1,
+      "GetManifestationsAsOmnibus": 1
+    }
+  },
+  {
+    "label": "vlacc manifestations: branch",
+    "date": "2026-11-25T15:13:24.083Z",
+    "client": "vlacc-dams",
+    "commit": "35c993f1+changes",
+    "frontend": "built",
+    "runs": 5,
+    "detailPath": "/manifestation_music/M-84IS671O66",
+    "profiles": {
+      "local": {
+        "reload": {
+          "requests": 29,
+          "persistedQueryMisses": 0,
+          "entityMs": 1575,
+          "doneMs": 2172,
+          "kb": 17
+        },
+        "listToDetail": {
+          "requests": 22,
+          "persistedQueryMisses": 0,
+          "entityMs": 598,
+          "doneMs": 1247,
+          "kb": 11
+        },
+        "session": {
+          "requests": 55,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 5227,
+          "kb": 38
+        }
+      },
+      "100ms latency": {
+        "reload": {
+          "requests": 29,
+          "persistedQueryMisses": 0,
+          "entityMs": 2132,
+          "doneMs": 2955,
+          "kb": 17
+        },
+        "listToDetail": {
+          "requests": 22,
+          "persistedQueryMisses": 0,
+          "entityMs": 733,
+          "doneMs": 1561,
+          "kb": 11
+        },
+        "session": {
+          "requests": 55,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 5922,
+          "kb": 38
+        }
+      }
+    },
+    "operations": {
+      "getEntityById": 1,
+      "GetCommentsPage": 2,
+      "getEntities": 7,
+      "getPreviewComponents": 3,
+      "GetEmptyBulkOperations": 1,
+      "GetEntityHistoryVersionListBulkOperations": 1,
+      "GetMoveExpressionBulkOperations": 1,
+      "GetEntityHistoryVersionListFilters": 1,
+      "GetExpressionInManifestationFilters": 1,
+      "GetSortOptions": 2,
+      "GetEntityHistoryVersionList": 1,
+      "GetExpressions": 1
+    }
+  },
+  {
+    "label": "vlacc expressions: baseline",
+    "date": "2026-11-25T15:22:52.100Z",
+    "client": "vlacc-dams",
+    "commit": "35c993f1+changes",
+    "frontend": "built",
+    "runs": 5,
+    "detailPath": "/easy_reading/E-O6GURG70AS",
+    "profiles": {
+      "local": {
+        "reload": {
+          "requests": 45,
+          "persistedQueryMisses": 0,
+          "entityMs": 2626,
+          "doneMs": 3717,
+          "kb": 22
+        },
+        "listToDetail": {
+          "requests": 41,
+          "persistedQueryMisses": 0,
+          "entityMs": 1191,
+          "doneMs": 2227,
+          "kb": 19
+        },
+        "session": {
+          "requests": 129,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 7856,
+          "kb": 69
+        }
+      },
+      "100ms latency": {
+        "reload": {
+          "requests": 45,
+          "persistedQueryMisses": 0,
+          "entityMs": 2566,
+          "doneMs": 3487,
+          "kb": 22
+        },
+        "listToDetail": {
+          "requests": 41,
+          "persistedQueryMisses": 0,
+          "entityMs": 1147,
+          "doneMs": 2076,
+          "kb": 19
+        },
+        "session": {
+          "requests": 129,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 8225,
+          "kb": 69
+        }
+      }
+    },
+    "operations": {
+      "getEntityById": 1,
+      "GetAdvancedFiltersForMyCommentsPage": 1,
+      "GetAdvancedFiltersForMyTaggedCommentsPage": 1,
+      "GetCommentsPage": 2,
+      "getEntities": 4,
+      "getPreviewComponents": 6,
+      "GetFilterMatcherMapping": 1,
+      "GetWorkAuthorsInDetailFilters": 1,
+      "GetAuthorsInDetailFilters": 1,
+      "GetFormGenresInExpressionFilters": 1,
+      "GetAwardsInEntityFilters": 1,
+      "GetEntityHistoryVersionListFilters": 1,
+      "GetWorkInExpressionFilters": 1,
+      "GetManifestationsInExpressionFilters": 1,
+      "GetOmnibusInExpressionsFilters": 1,
+      "GetEmptyBulkOperations": 1,
+      "GetBulkOperationsForAuthorsInExpression": 1,
+      "GetBulkOperationsForFormGenresInExpression": 1,
+      "GetBulkOperationsForAwardsInEntity": 1,
+      "GetEntityHistoryVersionListBulkOperations": 1,
+      "GetSortOptions": 2,
+      "GetBulkOperationsForManifestationsInExpression": 1,
+      "GetBulkOperationsForOmnibusInExpression": 1,
+      "GetParentAuthorsInDetail": 1,
+      "GetGenres": 1,
+      "GetAuthorsInExpression": 1,
+      "GetWorksInExpression": 1,
+      "GetEntityHistoryVersionList": 1,
+      "GetAwardsInDetail": 1,
+      "GetManifestationsAsOmnibus": 1,
+      "GetManifestations": 1
+    }
+  },
+  {
+    "label": "vlacc manifestations: baseline",
+    "date": "2026-11-25T15:33:39.338Z",
+    "client": "vlacc-dams",
+    "commit": "35c993f1+changes",
+    "frontend": "built",
+    "runs": 5,
+    "detailPath": "/manifestation_music/M-84IS671O66",
+    "profiles": {
+      "local": {
+        "reload": {
+          "requests": 50,
+          "persistedQueryMisses": 0,
+          "entityMs": 1847,
+          "doneMs": 3132,
+          "kb": 23
+        },
+        "listToDetail": {
+          "requests": 46,
+          "persistedQueryMisses": 0,
+          "entityMs": 945,
+          "doneMs": 1691,
+          "kb": 20
+        },
+        "session": {
+          "requests": 141,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 7260,
+          "kb": 76
+        }
+      },
+      "100ms latency": {
+        "reload": {
+          "requests": 50,
+          "persistedQueryMisses": 0,
+          "entityMs": 15463,
+          "doneMs": 17060,
+          "kb": 23
+        },
+        "listToDetail": {
+          "requests": 46,
+          "persistedQueryMisses": 0,
+          "entityMs": 1041,
+          "doneMs": 2402,
+          "kb": 20
+        },
+        "session": {
+          "requests": 141,
+          "persistedQueryMisses": 0,
+          "entityMs": 0,
+          "doneMs": 10188,
+          "kb": 76
+        }
+      }
+    },
+    "operations": {
+      "getEntityById": 1,
+      "GetAdvancedFiltersForMyCommentsPage": 1,
+      "GetAdvancedFiltersForMyTaggedCommentsPage": 1,
+      "GetCommentsPage": 2,
+      "getEntities": 7,
+      "getPreviewComponents": 7,
+      "GetFilterMatcherMapping": 1,
+      "GetWorkAuthorsInDetailFilters": 1,
+      "GetExpressionAuthorsInDetailFilters": 1,
+      "GetAuthorsInDetailFilters": 1,
+      "GetFlemishMusicClassificationInDetailFilters": 1,
+      "GetGenresInManifestationFilters": 1,
+      "GetSerieInDetailFilters": 1,
+      "GetParentSerieInDetailFilters": 1,
+      "GetEntityHistoryVersionListFilters": 1,
+      "GetExpressionInManifestationFilters": 1,
+      "GetEmptyBulkOperations": 1,
+      "GetBulkOperationsForAuthorsInManifestation": 1,
+      "GetBulkOperationsForCodeWordingsInWork": 1,
+      "GetBulkOperationsForGenresInManifestation": 1,
+      "GetBulkOperationsForSerieInDetail": 1,
+      "GetEntityHistoryVersionListBulkOperations": 1,
+      "GetMoveExpressionBulkOperations": 1,
+      "GetSortOptions": 2,
+      "GetParentAuthorsInDetail": 1,
+      "GetParentSerieInDetail": 1,
+      "GetCodeWordings": 1,
+      "GetAuthorsInManifestationMusic": 1,
+      "GetSerieInManifestationDetail": 1,
+      "GetGenres": 1,
+      "GetEntityHistoryVersionList": 1,
+      "GetExpressions": 1
+    }
   }
 ];

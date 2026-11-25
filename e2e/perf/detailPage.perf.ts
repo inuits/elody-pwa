@@ -87,7 +87,12 @@ test("measure detail page loading", async ({ page }) => {
 
   const openList = async () => {
     await page.goto(listPath);
-    await expect(visibleResults(page).first()).toBeVisible();
+    await expect(visibleResults(page).first())
+      .toBeVisible()
+      .catch(async () => {
+        await page.reload();
+        await expect(visibleResults(page).first()).toBeVisible();
+      });
     await traffic.settled();
   };
 
