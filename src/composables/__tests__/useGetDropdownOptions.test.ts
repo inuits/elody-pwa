@@ -481,11 +481,11 @@ describe("selected options of a relation field", () => {
   });
 });
 
-describe("labels the server already sent with the entity", () => {
+describe("labels the server sends in the separate labels query", () => {
   const selectedOptions = [
     { id: "GN-1", type: "genre", intialValues: { name: "Comedy" } },
   ];
-  const createState = (options?: unknown[]) =>
+  const createState = (labels?: () => Promise<unknown[] | null>) =>
     useGetDropdownOptionsState(
       "genre" as Entitytyping,
       shallowRef({ id: "PR-1" } as any),
@@ -504,7 +504,7 @@ describe("labels the server already sent with the entity", () => {
       } as any,
       undefined,
       undefined,
-      options as any,
+      labels as any,
     );
 
   beforeEach(() => {
@@ -513,7 +513,7 @@ describe("labels the server already sent with the entity", () => {
   });
 
   it("shows them without asking for them again", async () => {
-    const state = createState(selectedOptions);
+    const state = createState(async () => selectedOptions);
     await state.initialize();
     expect(mocks.getEntities).not.toHaveBeenCalled();
     expect(
@@ -521,14 +521,39 @@ describe("labels the server already sent with the entity", () => {
     ).toEqual(["Comedy"]);
   });
 
+  it("waits for labels that arrive after the field is shown", async () => {
+    let arrive: (options: unknown[]) => void = () => {};
+    const state = createState(
+      () => new Promise((resolve) => (arrive = resolve)),
+    );
+    const initialized = state.initialize();
+    expect(mocks.getEntities).not.toHaveBeenCalled();
+    arrive(selectedOptions);
+    await initialized;
+    expect(mocks.getEntities).not.toHaveBeenCalled();
+    expect(
+      state.entityDropdownOptions.value.map((option) => option.label),
+    ).toEqual(["Comedy"]);
+  });
+
   it("asks for them on a later load, when the relations may have changed", async () => {
-    const state = createState(selectedOptions);
+    const state = createState(async () => selectedOptions);
     await state.initialize();
     await state.initialize();
     expect(mocks.getEntities).toHaveBeenCalledTimes(1);
   });
 
-  it("asks for them when the server sent none", async () => {
+  it("asks for them when the labels query has none for the field", async () => {
+    await createState(async () => null).initialize();
+    expect(mocks.getEntities).toHaveBeenCalledTimes(1);
+  });
+
+  it("asks for them when the labels query failed", async () => {
+    await createState(() => Promise.reject(new Error("down"))).initialize();
+    expect(mocks.getEntities).toHaveBeenCalledTimes(1);
+  });
+
+  it("asks for them when there is no labels query", async () => {
     await createState(undefined).initialize();
     expect(mocks.getEntities).toHaveBeenCalledTimes(1);
   });

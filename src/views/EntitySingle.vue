@@ -45,10 +45,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import {
-  asString,
-  mapUrlToEntityType,
-} from "@/helpers";
+import { asString, mapUrlToEntityType } from "@/helpers";
 import {
   reactive,
   ref,
@@ -57,13 +54,14 @@ import {
   computed,
   provide,
   onUnmounted,
+  shallowRef,
 } from "vue";
 import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
 import { useI18n } from "vue-i18n";
-import { useQuery } from "@vue/apollo-composable";
+import { useApolloClient, useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import useEntitySingle from "@/composables/useEntitySingle";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
@@ -78,15 +76,17 @@ import {
   cachedEntityLayout,
   layoutIsCacheable,
   leanEntityDocument,
-  mergeEntityLayout,
+  selectedOptionsByRelation,
+  selectedOptionsDocument,
   storeEntityLayout,
+  withoutSelectedOptions,
+  type EntitySelectedOptions,
 } from "@/entityLayoutCache";
 
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const { trackSeen, jobStatusPolling } =
-  useEntityPageConfig();
+const { trackSeen, jobStatusPolling } = useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
@@ -143,11 +143,29 @@ const layoutKey = () => ({
   entityType: entityType.value,
 });
 const cachedLayout = ref(cachedEntityLayout(layoutKey()));
+const entityDocument = withoutSelectedOptions(GetEntityByIdDocument);
 const queryDocument = computed(() =>
-  cachedLayout.value
-    ? leanEntityDocument(GetEntityByIdDocument)
-    : GetEntityByIdDocument,
+  cachedLayout.value ? leanEntityDocument(entityDocument) : entityDocument,
 );
+
+const { resolveClient } = useApolloClient();
+const entitySelectedOptions = shallowRef<EntitySelectedOptions>();
+const fetchSelectedOptions = () => {
+  const variables = { ...queryVariables };
+  entitySelectedOptions.value = {
+    entityId: variables.id,
+    byRelation: resolveClient()
+      .query({
+        query: selectedOptionsDocument(GetEntityByIdDocument),
+        variables,
+        fetchPolicy: "no-cache",
+      })
+      .then(({ data }) => selectedOptionsByRelation(data))
+      .catch(() => new Map()),
+  };
+};
+fetchSelectedOptions();
+provide("EntitySelectedOptions", entitySelectedOptions);
 
 const { result, refetch } = useQuery<GetEntityByIdQuery>(
   queryDocument,
@@ -231,6 +249,7 @@ watch(id, (newId) => {
   cachedLayout.value = cachedEntityLayout(layoutKey());
   queryVariables.id = newId;
   queryVariables.type = entityType.value;
+  fetchSelectedOptions();
   columnList.value = "no-values";
   useEditHelper.value.disableEdit();
 });
@@ -247,12 +266,7 @@ watch(
       storeEntityLayout(layoutKey(), fetched.entityView);
     entity.value = fetched && {
       ...fetched,
-      entityView: cachedLayout.value
-        ? (mergeEntityLayout(
-            cachedLayout.value,
-            fetched.entityView,
-          ) as ColumnList)
-        : fetched.entityView,
+      entityView: fetched.entityView ?? (cachedLayout.value as ColumnList),
     };
     if (!entity.value || !entity.value.intialValues) return;
     if (

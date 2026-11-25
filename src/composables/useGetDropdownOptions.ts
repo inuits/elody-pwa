@@ -23,7 +23,7 @@ export type UseGetDropdownOptionsParams = {
   relationFilter?: AdvancedFilterInput;
   optionsOrderByKey?: string;
   optionLabelKeys?: string[];
-  selectedOptions?: BaseEntity[] | null;
+  selectedOptions?: () => Promise<BaseEntity[] | null | undefined>;
 };
 
 export const useGetDropdownOptions = (
@@ -39,7 +39,7 @@ export const useGetDropdownOptions = (
   relationFilter?: AdvancedFilterInput,
   optionsOrderByKey?: string,
   optionLabelKeys?: string[],
-  selectedOptions?: BaseEntity[] | null,
+  selectedOptions?: () => Promise<BaseEntity[] | null | undefined>,
 ): ReturnType<typeof useGetDropdownOptionsState> => {
   const createNewDropdownOptionsState = () => {
     const newDropdownOptionsState = useGetDropdownOptionsState(

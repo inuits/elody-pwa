@@ -1,4 +1,12 @@
-import { computed, type ComputedRef, onUnmounted, type Ref, toRef } from "vue";
+import {
+  computed,
+  type ComputedRef,
+  inject,
+  onUnmounted,
+  type Ref,
+  type ShallowRef,
+  toRef,
+} from "vue";
 import { type MetadataWrapperProps } from "./MetadataWrapper.vue";
 import {
   type BaseEntity,
@@ -11,6 +19,7 @@ import {
   type UseGetDropdownOptionsParams,
 } from "@/composables/useGetDropdownOptions";
 import { useModalActions } from "@/composables/useModalActions";
+import { type EntitySelectedOptions } from "@/entityLayoutCache";
 
 export const useMetadataWrapperDropdownOptions = (
   props: MetadataWrapperProps,
@@ -27,6 +36,20 @@ export const useMetadataWrapperDropdownOptions = (
   fetchAllOptionsConfig: UseGetDropdownOptionsParams;
 } => {
   const { fieldKey, fieldKind } = useMetadataWrapper(props);
+  const entitySelectedOptions = inject<
+    ShallowRef<EntitySelectedOptions | undefined> | undefined
+  >("EntitySelectedOptions", undefined);
+
+  const selectedOptionsFromEntityQuery = async () => {
+    const labels = entitySelectedOptions?.value;
+    const parent = parentEntity?.value;
+    const relation = props.metadata.inputField?.relationType;
+    if (!labels || !parent || !relation) return null;
+    if (![parent.id, parent.uuid].includes(labels.entityId)) return null;
+    return ((await labels.byRelation).get(relation) ?? null) as
+      | BaseEntity[]
+      | null;
+  };
 
   const getMetadataKeyToGetOptions = (): string | undefined => {
     try {
@@ -173,7 +196,7 @@ export const useMetadataWrapperDropdownOptions = (
       optionLabelKeys: optionLabelKeys.value,
       selectedOptions:
         props.listItemEntity === undefined && !props.linkedEntityId
-          ? props.metadata.inputField?.selectedOptions
+          ? selectedOptionsFromEntityQuery
           : undefined,
     },
   };
