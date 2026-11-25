@@ -26,7 +26,11 @@ export const test = base.extend<{
       page.on("response", async (response) => {
         if (!response.url().includes("/api/graphql")) return;
         const body = await response.json().catch(() => null);
-        if (body?.errors?.length)
+        const realErrors = body?.errors?.filter(
+          (error: { extensions?: { code?: string } }) =>
+            error.extensions?.code !== "PERSISTED_QUERY_NOT_FOUND",
+        );
+        if (realErrors?.length)
           errors.push(`graphql: ${JSON.stringify(body.errors)}`);
       });
 

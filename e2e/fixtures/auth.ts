@@ -10,7 +10,11 @@ export const logIn = async (page: Page) => {
     throw new Error("Set E2E_USERNAME and E2E_PASSWORD in e2e/.env");
 
   await page.goto("/");
-  await page.getByLabel("Username or email").fill(E2E_USERNAME);
+  const username = page.getByLabel("Username or email");
+  const logInButton = page.getByRole("button", { name: "Log in" });
+  await expect(username.or(logInButton)).toBeVisible();
+  if (await logInButton.isVisible()) await logInButton.click();
+  await username.fill(E2E_USERNAME);
   await page.getByLabel("Password", { exact: true }).fill(E2E_PASSWORD);
   await page.getByRole("button", { name: "Sign In" }).click();
   await page.waitForURL((url) => url.origin === new URL(client.baseURL).origin);
