@@ -116,6 +116,15 @@ describe("layoutIsCacheable", () => {
     ).toBe(false);
   });
 
+  it("never caches a layout with comments, whose posting right depends on the entity", () => {
+    expect(
+      layoutIsCacheable(
+        entityQuery("comments: commentsElement { label readOnly }"),
+        "Production",
+      ),
+    ).toBe(false);
+  });
+
   it("judges each entity type by its own layout", () => {
     const document = entityQuery("label", 'panels { can(input: ["x"]) }');
     expect(layoutIsCacheable(document, "Production")).toBe(true);
