@@ -123,7 +123,13 @@ describe("createConfigCacheLink", () => {
   });
 
   it("never caches config the server trims by permission", async () => {
-    const { handle, link } = setup();
+    const { handle, link } = setup(() => ({
+      data: {
+        BulkOperations: {
+          bulkOperationOptions: { options: [{ value: "edit" }] },
+        },
+      },
+    }));
     const permitted = gql`
       query GetBulkOperations($entityType: String!) {
         BulkOperations(entityType: $entityType) {
@@ -266,6 +272,51 @@ describe("createConfigCacheLink", () => {
       expect(handle).toHaveBeenCalledTimes(1);
     });
 
+    const withFilterForAdmins = gql`
+      query getAdvancedFilters($entityType: String!) {
+        EntityTypeFilters(type: $entityType) {
+          ... on Production {
+            advancedFilters {
+              title: advancedFilter(type: text, key: "title") {
+                key
+              }
+            }
+          }
+          ... on User {
+            advancedFilters {
+              roles: advancedFilter(
+                type: selection
+                key: "roles"
+                can: ["read:roles"]
+              ) {
+                key
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    it("caches it for a type without the filter the server shows by permission", async () => {
+      const { handle, link } = setup(
+        answering("Production", {
+          advancedFilters: { title: { key: "title" } },
+        }),
+      );
+      await run(link, withFilterForAdmins);
+      await run(link, withFilterForAdmins);
+      expect(handle).toHaveBeenCalledTimes(1);
+    });
+
+    it("never caches it for a type with the filter the server shows by permission", async () => {
+      const { handle, link } = setup(
+        answering("User", { advancedFilters: { roles: { key: "roles" } } }),
+      );
+      await run(link, withFilterForAdmins, { entityType: "user" });
+      await run(link, withFilterForAdmins, { entityType: "user" });
+      expect(handle).toHaveBeenCalledTimes(2);
+    });
+
     it("never caches it for a type whose part has a permission check", async () => {
       const { handle, link } = setup(
         answering("User", { panel: { permitted: true } }),
@@ -274,5 +325,27 @@ describe("createConfigCacheLink", () => {
       await run(link, shared, { entityType: "user" });
       expect(handle).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it("caches config whose labels contain the word can", async () => {
+    const { handle, link } = setup();
+    const labelled = gql`
+      query GetFilters($entityType: String!) {
+        EntityTypeFilters(type: $entityType) {
+          advancedFilters {
+            title: advancedFilter(
+              type: text
+              key: "title"
+              label: "you can search"
+            ) {
+              key
+            }
+          }
+        }
+      }
+    `;
+    await run(link, labelled);
+    await run(link, labelled);
+    expect(handle).toHaveBeenCalledTimes(1);
   });
 });
