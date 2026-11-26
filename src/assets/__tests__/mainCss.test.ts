@@ -56,6 +56,8 @@ describe("main.css client theming", () => {
     "--color-text-light",
     "--color-chip-relation-bg",
     "--color-surface-row-hover",
+    "--color-surface-repeat-row",
+    "--color-surface-group-form",
   ];
 
   it.each(seededTokens)("derives %s from --color-accent in light mode", (name) => {
