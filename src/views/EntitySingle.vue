@@ -45,10 +45,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import EntityColumn from "@/components/EntityColumn.vue";
-import {
-  asString,
-  mapUrlToEntityType,
-} from "@/helpers";
+import { asString, mapUrlToEntityType } from "@/helpers";
 import {
   reactive,
   ref,
@@ -58,7 +55,9 @@ import {
   provide,
   onUnmounted,
 } from "vue";
-import { auth } from "@/main";
+import { apolloClient, auth } from "@/main";
+import { useImport } from "@/composables/useImport";
+import { prefetchListFilters } from "@/prefetchListFilters";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -84,8 +83,7 @@ import {
 const config: any = inject("config");
 const router = useRouter();
 const route = useRoute();
-const { trackSeen, jobStatusPolling } =
-  useEntityPageConfig();
+const { trackSeen, jobStatusPolling } = useEntityPageConfig();
 const { markAsSeen } = useSeenItems();
 const { getModalInfo } = useBaseModal();
 const { locale } = useI18n();
@@ -238,6 +236,12 @@ watch(
   () => result.value,
   () => {
     const fetched = result.value?.Entity as BaseEntity | undefined;
+    if (fetched?.entityView && apolloClient)
+      void prefetchListFilters(
+        fetched.entityView,
+        apolloClient,
+        useImport().loadDocument,
+      );
     if (
       fetched?.entityView &&
       layoutIsCacheable(GetEntityByIdDocument, fetched.__typename ?? "")

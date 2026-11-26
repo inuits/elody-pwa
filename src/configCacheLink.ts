@@ -2,6 +2,7 @@ import {
   ApolloLink,
   Observable,
   type FetchResult,
+  type DocumentNode,
   type Operation,
 } from "@apollo/client/core";
 import { getMainDefinition } from "@apollo/client/utilities";
@@ -21,23 +22,25 @@ const CONFIG_ROOT_FIELDS = new Set([
 
 const PERMISSION_TRIMMED = /\bcan\b|\b(permitted|readOnly)\s*\(/;
 
-const cacheKey = (operation: Operation): string | undefined => {
-  const definition = getMainDefinition(operation.query);
+export const isSessionCachedConfig = (query: DocumentNode): boolean => {
+  const definition = getMainDefinition(query);
   if (
     definition.kind !== Kind.OPERATION_DEFINITION ||
     definition.operation !== "query"
   )
-    return undefined;
+    return false;
   const isConfigOnly = definition.selectionSet.selections.every(
     (selection) =>
       selection.kind === Kind.FIELD &&
       CONFIG_ROOT_FIELDS.has(selection.name.value),
   );
-  if (!isConfigOnly) return undefined;
-  const source = print(operation.query);
-  if (PERMISSION_TRIMMED.test(source)) return undefined;
+  return isConfigOnly && !PERMISSION_TRIMMED.test(print(query));
+};
+
+const cacheKey = (operation: Operation): string | undefined => {
+  if (!isSessionCachedConfig(operation.query)) return undefined;
   const tenant = operation.getContext().headers?.["X-Tenant-ID"] ?? "";
-  return JSON.stringify([tenant, source, operation.variables]);
+  return JSON.stringify([tenant, print(operation.query), operation.variables]);
 };
 
 export const createConfigCacheLink = (): ApolloLink => {
