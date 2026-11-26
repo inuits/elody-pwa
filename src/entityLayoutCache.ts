@@ -20,6 +20,7 @@ const ENTITY_READING_FIELDS = new Set([
   "entityViewerElement",
   "markdownViewerElement",
   "manifestViewerElement",
+  "commentsElement",
 ]);
 const PERMISSION_LIST_FIELDS = new Set(["permitted", "readOnly"]);
 
