@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApolloClient,
   ApolloLink,
@@ -17,12 +17,16 @@ const entityQuery = gql`
   }
 `;
 
-const setup = () => {
+const setup = (delay = 0) => {
   const handle = vi.fn(
     () =>
       new Observable<FetchResult>((observer) => {
-        observer.next({ data: { Entity: { id: "1", __typename: "Entity" } } });
-        observer.complete();
+        setTimeout(() => {
+          observer.next({
+            data: { Entity: { id: "1", __typename: "Entity" } },
+          });
+          observer.complete();
+        }, delay);
       }),
   );
   const client = new ApolloClient({
@@ -49,5 +53,28 @@ describe("warmUpQueries", () => {
     });
     expect(handle).toHaveBeenCalledTimes(1);
     expect(result.data.Entity.id).toBe("1");
+  });
+
+  describe("while other requests are running", () => {
+    afterEach(() => vi.useRealTimers());
+
+    it("waits until requests have been quiet for a while", async () => {
+      vi.useFakeTimers();
+      const { client } = setup(1000);
+      const prepare = vi.spyOn(client, "query");
+      client
+        .query({
+          query: entityQuery,
+          variables: { id: "2" },
+          fetchPolicy: "no-cache",
+        })
+        .catch(() => undefined);
+      const warmUp = warmUpQueries(client, [entityQuery], 500);
+      await vi.advanceTimersByTimeAsync(1200);
+      expect(prepare).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(3000);
+      await warmUp;
+      expect(prepare).toHaveBeenCalledTimes(2);
+    });
   });
 });
