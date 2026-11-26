@@ -143,7 +143,9 @@ describe("createConfigCacheLink", () => {
   it.each(["permitted", "readOnly"])(
     "never caches config with a %s permission check",
     async (field) => {
-      const { handle, link } = setup();
+      const { handle, link } = setup(() => ({
+        data: { EntityTypeFilters: { panel: { [field]: true } } },
+      }));
       const checked = gql`
         query GetFilters($entityType: String!) {
           EntityTypeFilters(type: $entityType) {
@@ -229,5 +231,48 @@ describe("createConfigCacheLink", () => {
     (first.data!.list as string[]).push("changed");
     const second = await run(link, sortOptions);
     expect(second.data).toEqual({ list: ["a"] });
+  });
+
+  describe("a filters query shared by several entity types", () => {
+    const shared = gql`
+      query getAdvancedFilters($entityType: String!) {
+        EntityTypeFilters(type: $entityType) {
+          ... on Production {
+            ...filtersForProduction
+          }
+          ... on User {
+            panel {
+              permitted(input: ["update:user"])
+            }
+          }
+        }
+      }
+      fragment filtersForProduction on Production {
+        advancedFilters {
+          type
+        }
+      }
+    `;
+    const answering =
+      (__typename: string, extra: object = {}) =>
+      () => ({
+        data: { EntityTypeFilters: { __typename, ...extra } },
+      });
+
+    it("caches it for a type whose part has no permission check", async () => {
+      const { handle, link } = setup(answering("Production"));
+      await run(link, shared);
+      await run(link, shared);
+      expect(handle).toHaveBeenCalledTimes(1);
+    });
+
+    it("never caches it for a type whose part has a permission check", async () => {
+      const { handle, link } = setup(
+        answering("User", { panel: { permitted: true } }),
+      );
+      await run(link, shared, { entityType: "user" });
+      await run(link, shared, { entityType: "user" });
+      expect(handle).toHaveBeenCalledTimes(2);
+    });
   });
 });
