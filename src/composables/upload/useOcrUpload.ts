@@ -5,9 +5,9 @@ import {
   type ActionProgressStep,
   ProgressStepStatus,
   ProgressStepType,
+  UploadFlow,
 } from "@/generated-types/queries";
 import { getTranslatedMessage } from "@/helpers";
-import { UploadFlow } from "@/__mocks__/queries";
 import { useUploadState } from "./useUploadState";
 
 const { optionalFileNames } = useUploadState();
