@@ -157,7 +157,7 @@ import { savedSearchIsModified } from "@/components/filters/savedSearchIsModifie
 import SavedSearches from "@/components/SavedSearches.vue";
 import { useEditMode } from "@/composables/useEdit";
 import { apolloClient } from "@/main";
-import { computed, onMounted, ref, watch, inject, useId } from "vue";
+import { computed, onMounted, ref, watch, inject, useId, type Ref } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   type SavedSearchType,
@@ -313,6 +313,10 @@ const handleActivateFilter = (
 
 const config = inject("config") as any;
 const parentEntity: any = inject("ParentEntityProvider", undefined);
+const filterVariables = inject<Ref<Record<string, unknown> | undefined>>(
+  "FilterVariables",
+  ref(undefined),
+);
 const isPreviewElement: boolean = inject("IsPreviewElement", false);
 const hasSavedSearch = config.features.savedSearch?.enabled ?? false;
 
@@ -629,6 +633,7 @@ const updateFilterVariables = () => {
     routeEntityType: props.route?.meta?.entityType as string | undefined,
     entity: parentEntity?.value || parentEntity,
     dateToday: DateTime.now().toISO(),
+    ...filterVariables.value,
   });
 };
 

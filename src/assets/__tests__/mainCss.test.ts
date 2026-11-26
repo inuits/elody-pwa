@@ -43,6 +43,33 @@ describe("main.css client theming", () => {
     );
     expect(missing).toEqual([]);
   });
+
+  // A client sets only --color-accent; every accent shade and the label/link
+  // colour must follow it instead of staying platform blue
+  const seededTokens = [
+    "--color-accent-hover",
+    "--color-accent-light",
+    "--color-accent-light-strong",
+    "--color-accent-wash",
+    "--color-accent-tint",
+    "--color-accent-dark",
+    "--color-text-light",
+    "--color-chip-relation-bg",
+    "--color-surface-row-hover",
+  ];
+
+  it.each(seededTokens)("derives %s from --color-accent in light mode", (name) => {
+    const themeValues = new Map<string, string>();
+    blocks(/@theme/).forEach((block) =>
+      declarations(block).forEach((value, token) => themeValues.set(token, value)),
+    );
+    expect(themeValues.get(name)).toMatch(/var\(--color-accent\)/);
+  });
+
+  it.each(seededTokens)("derives %s from --color-accent in dark mode", (name) => {
+    const darkValues = declarations(blocks(/html\.dark,\s*html\.dark body/).join());
+    expect(darkValues.get(name) ?? "").toMatch(/var\(--color-accent\)/);
+  });
 });
 
 // @tailwindcss/forms resets the outline on `[type='text']:focus` (0,2,0),

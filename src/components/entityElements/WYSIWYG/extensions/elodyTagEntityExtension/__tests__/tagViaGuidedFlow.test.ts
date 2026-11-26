@@ -1,5 +1,5 @@
 /**
- * The third way into tagging, next to the toolbar modal and the inline trigger:
+ * The way into tagging next to the inline trigger:
  * a configuration that names a guided flow gets a toolbar button which opens
  * that flow, and the entity the flow returns is inserted as a tag node.
  *
@@ -36,7 +36,6 @@ vi.mock("@/composables/useEntitySingle", () => ({
 
 const { createTipTapNodeExtension, createTaggingCommandsExtension } =
   await import("../ElodyTaggingExtension");
-const { isTaggedByTriggerOnly } = await import("../inlineTagSuggestion");
 const { ref } = await import("vue");
 
 const wemConfiguration = () => ({
@@ -209,23 +208,140 @@ describe("tagEntityFromFlow", () => {
   });
 });
 
-describe("isTaggedByTriggerOnly", () => {
-  it("counts a guided-flow configuration as having its own entry point", () => {
-    // otherwise adding the flow button brings the legacy toolbar Tag modal back
-    expect(
-      isTaggedByTriggerOnly([
-        { tag: "user", inlineTrigger: { character: "@" } } as any,
-        wemConfiguration() as any,
-      ]),
-    ).toBe(true);
+// AICAP: one configuration fans out into a tag per epi_doc_tag entity, and the
+// flow searches on (and creates from) the selected word.
+const wordConfiguration = () => ({
+  taggableEntityType: "word",
+  relationType: "ref_words",
+  metadataFilterForTagContent: "aicap:1|properties.original_word.value",
+  replaceCharacterFromTagSettings: [
+    { replacementCharactersRegex: "/[\\[\\]]/g", characterToReplaceWith: "" },
+    { replacementCharactersRegex: "/<br>/g", characterToReplaceWith: " " },
+  ],
+  metadataKeysToSetAsAttribute: ["lemma"],
+  guidedFlowQuery: "GetTagWordFlow",
+});
+
+const nounConfiguration = () => ({
+  ...wordConfiguration(),
+  tag: "w",
+  configurationEntityId: "epi-doc-tag-noun",
+  attributes: { type: "noun" },
+  tagConfigurationByEntity: { metadataKeysToSetAsAttribute: ["type"] },
+});
+
+const buildWordEditor = async (content: string) => {
+  const { Editor } = await import("@tiptap/core");
+  const { default: Document } = await import("@tiptap/extension-document");
+  const { default: Paragraph } = await import("@tiptap/extension-paragraph");
+  const { default: Text } = await import("@tiptap/extension-text");
+  const { default: HardBreak } = await import("@tiptap/extension-hard-break");
+
+  const noun = nounConfiguration();
+  const tagNode = createTipTapNodeExtension(noun as any);
+  return new Editor({
+    extensions: [
+      Document,
+      Paragraph,
+      Text,
+      HardBreak,
+      tagNode,
+      createTaggingCommandsExtension({
+        instanceId: "reading",
+        configuration: ref([noun]) as any,
+      }),
+    ],
+    content,
+  });
+};
+
+describe("openTagFlow with a search on the tagged word", () => {
+  beforeEach(() => {
+    modalMocks.openModal.mockReset();
   });
 
-  it("is still false for a configuration reachable only through the toolbar", () => {
+  it("hands the flow the selection, cleaned up, as a filter variable", async () => {
+    const editor = await buildWordEditor("<p>a [mlk]<br>bn</p>");
+    editor.commands.setTextSelection({ from: 3, to: 11 });
+
+    editor.commands.openTagFlow(wordConfiguration() as any);
+
+    expect(modalMocks.openModal.mock.calls[0][6].filterVariables).toEqual({
+      taggedText: "mlk bn",
+    });
+    editor.destroy();
+  });
+
+  it("prefills the cleaned-up selection as the new word's title", async () => {
+    const editor = await buildWordEditor("<p>a [mlk]</p>");
+    editor.commands.setTextSelection({ from: 3, to: 8 });
+
+    editor.commands.openTagFlow(wordConfiguration() as any);
+
+    expect(modalMocks.openModal.mock.calls[0][6].createPrefill).toEqual({
+      intialValues: { original_word: "mlk" },
+    });
+    editor.destroy();
+  });
+
+  it("passes no search along for a flow that does not search on the tag content", async () => {
+    const configuration = wemConfiguration();
+    const editor = await buildEditor("<p>hello</p>", configuration);
+    editor.commands.setTextSelection({ from: 1, to: 6 });
+
+    editor.commands.openTagFlow(configuration);
+
+    const info = modalMocks.openModal.mock.calls[0][6];
+    expect(info.filterVariables).toBeUndefined();
+    expect(info.createPrefill).toBeUndefined();
+    editor.destroy();
+  });
+});
+
+describe("tagEntityFromFlow for a configuration that fans out per entity", () => {
+  const word = () => ({
+    id: "word-1",
+    type: "word",
+    intialValues: { original_word: "mlk", lemma: "mlk-lemma" },
+    relationValues: { ref_epi_doc_tag: [{ key: "epi-doc-tag-noun" }] },
+  });
+
+  it("tags with the node of the word's own epi_doc_tag", async () => {
+    const editor = await buildWordEditor("<p>a mlk</p>");
+    editor.commands.setTextSelection({ from: 3, to: 6 });
+
+    editor.commands.tagEntityFromFlow(word() as any, wordConfiguration() as any);
+
+    const html = editor.getHTML();
+    expect(html).toContain("<elody-w");
+    expect(html).toContain('data-entity-id="word-1"');
+    expect(html).toContain(">mlk<");
+    editor.destroy();
+  });
+
+  it("sets the configured attributes from the word", async () => {
+    const editor = await buildWordEditor("<p>a mlk</p>");
+    editor.commands.setTextSelection({ from: 3, to: 6 });
+
+    editor.commands.tagEntityFromFlow(word() as any, wordConfiguration() as any);
+
+    const html = editor.getHTML();
+    expect(html).toContain('lemma="mlk-lemma"');
+    expect(html).toContain('type="noun"');
+    editor.destroy();
+  });
+
+  it("tags nothing when the word has no epi_doc_tag with a tag", async () => {
+    const editor = await buildWordEditor("<p>a mlk</p>");
+    editor.commands.setTextSelection({ from: 3, to: 6 });
+
     expect(
-      isTaggedByTriggerOnly([
-        { tag: "user", inlineTrigger: { character: "@" } } as any,
-        { tag: "word", createNewEntityFormQuery: "GetWordCreateForm" } as any,
-      ]),
+      editor.commands.tagEntityFromFlow(
+        { ...word(), relationValues: { ref_epi_doc_tag: [{ key: "x" }] } } as any,
+        wordConfiguration() as any,
+      ),
     ).toBe(false);
+    expect(editor.getHTML()).not.toContain("elody-w");
+    editor.destroy();
   });
 });

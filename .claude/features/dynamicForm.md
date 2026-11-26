@@ -102,7 +102,7 @@ Key composables: `useDynamicForm` (fetch/execute), `useFormHelper` (vee-validate
 - **baseGraphql** for the form-definition query and action resolvers; **collection-api** for entity CRUD, CSV import/reorder, metadata update; **ocr-service** (via OCR query → AMQP); **storage/upload** endpoints (via `useUpload`).
 - **vee-validate** for all form state/validation; **Apollo Client** (`apolloClient` from `@/main`) for all GraphQL.
 - Triggers downstream: `CreateEntity` → AMQP `entity_changed`; OCR action → `ocr_request`; navigation to `SingleEntity`/`Downloads`/job page on success.
-- Coupled UI: `MetadataWrapper`, `UploadInterfaceDropzone`, `EntityPickerComponent`, `ImportWrapper`, `DynamicFormUploadButton`, and the `DynamicForm` modal (`TypeModals.DynamicForm`), plus the entity-tagging modal flow (`ElodyEntityTaggingModal`) for WYSIWYG tagging of newly created entities.
+- Coupled UI: `MetadataWrapper`, `UploadInterfaceDropzone`, `EntityPickerComponent`, `ImportWrapper`, `DynamicFormUploadButton`, and the `DynamicForm` modal (`TypeModals.DynamicForm`), plus the guided flow (`RepetitiveStepField`), which creates entities with `emitEntityCreated` (WYSIWYG tagging of new words goes through it).
 
 ### Action Type → Function Map (quick reference)
 `performActionButtonClickEvent` dispatch table (`actionType` → handler):

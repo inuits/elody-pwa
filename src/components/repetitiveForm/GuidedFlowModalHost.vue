@@ -10,13 +10,14 @@
   <RepetitiveFlow
     :open="isOpen && config.steps.length > 0"
     :config="config"
+    :create-prefill="getModalInfo(TypeModals.GuidedFlow).createPrefill"
     @close="closeModal(TypeModals.GuidedFlow)"
     @finished="onFinished"
   />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, provide, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { TypeModals, type RepetitiveForm } from "@/generated-types/queries";
 import { apolloClient } from "@/main";
@@ -35,7 +36,7 @@ const emptyConfig = (): RepetitiveForm => ({
 });
 
 const { loadDocument } = useImport();
-const { getModalInfo, closeModal } = useBaseModal();
+const { getModalInfo, closeModal, updateModal } = useBaseModal();
 const { getCallbackFunctions } = useModalActions();
 const router = useRouter();
 const { displaySuccessNotification } = useBaseNotification();
@@ -57,6 +58,11 @@ const refreshAfterFlow = async (callbacks?: (() => unknown)[]) => {
 const config = ref<RepetitiveForm>(emptyConfig());
 const isLoadingConfig = ref<boolean>(false);
 const isOpen = computed(() => getModalInfo(TypeModals.GuidedFlow).open);
+
+provide(
+  "FilterVariables",
+  computed(() => getModalInfo(TypeModals.GuidedFlow).filterVariables),
+);
 
 // The modal's formQuery carries the name of the self-describing query that
 // holds the flow configuration (e.g. "GetRepetitiveFormForOmnibus").
@@ -80,12 +86,23 @@ const fetchFlowConfig = async () => {
 
 watch(
   isOpen,
-  (open) => {
-    if (open) fetchFlowConfig();
+  (open, wasOpen) => {
+    if (open) {
+      fetchFlowConfig();
+      return;
+    }
     // clear the config on close so a stale previous-flow config can't briefly
     // drive `props.open`/`start()` on the next open (which showed the prior
     // flow's last step); the next open refetches the correct config
-    else config.value = emptyConfig();
+    config.value = emptyConfig();
+    if (!wasOpen) return;
+    // openModal merges into the previous info: a flow opened without these
+    // would otherwise inherit the last caller's
+    updateModal(TypeModals.GuidedFlow, {
+      createPrefill: undefined,
+      filterVariables: undefined,
+      onEntitySelected: undefined,
+    });
   },
   { immediate: true },
 );

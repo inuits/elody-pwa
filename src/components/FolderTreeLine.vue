@@ -10,9 +10,9 @@
     <li
       data-test="li-tree"
       :data-test-depth="`depth-${depth}`"
-      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
+      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-accent border-r-4"
       :class="{
-        'bg-blue-75':
+        'bg-accent-light':
           selectedDirectory && selectedDirectory.id === directory.id,
       }"
     >
@@ -24,17 +24,17 @@
         @click="updateSelectedDirectory && updateSelectedDirectory(directory)"
       >
         <span
-          class="inline-block h-1px bg-neutral-700 group=hover:bg-blue-500"
+          class="inline-block h-1px bg-neutral-700 group=hover:bg-accent"
           :class="{ 'line-width': depth !== 0 }"
         />
         <span
-          class="rounded-full bg-neutral-700 circle inline-block mr-4 -ml-1 z-10 group-hover:bg-blue-500"
+          class="rounded-full bg-neutral-700 circle inline-block mr-4 -ml-1 z-10 group-hover:bg-accent"
         />
         <span
           v-show="open && depth !== 0"
-          class="absolute w-1px h-3/6 bg-neutral-700 left-8 top-2/4 group-hover:bg-blue-500"
+          class="absolute w-1px h-3/6 bg-neutral-700 left-8 top-2/4 group-hover:bg-accent"
         />
-        <span class="inline-block mr-3 group-hover:text-blue-500">{{
+        <span class="inline-block mr-3 group-hover:text-accent">{{
           directory.dir
         }}</span>
       </button>

@@ -94,6 +94,7 @@ vi.mock("../useUploadState", async () => {
   const csvOnlyUploadSFailed = ref(false);
   const jobIdentifier = ref("");
   const prefetchedUploadUrls = ref([]);
+  const batchUploadError = ref(undefined);
   const extraMediafileType = ref("");
   const typeToIncludeInUrl = ref("");
   const shouldIncludeTypeInUrl = ref(false);
@@ -119,6 +120,7 @@ vi.mock("../useUploadState", async () => {
       csvOnlyUploadSFailed,
       jobIdentifier,
       prefetchedUploadUrls,
+      batchUploadError,
       extraMediafileType,
       typeToIncludeInUrl,
       shouldIncludeTypeInUrl,

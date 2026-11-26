@@ -91,24 +91,8 @@
       </div>
       <div
         data-cy="results-panel"
-        :class="[
-          'row-span-2 flex min-h-0',
-          filtersInPane ? 'flex-row' : 'flex-col',
-          // ui_kits/clients: band, selection row and list in one white panel.
-          {
-            'bg-surface border border-border-panel rounded-card self-start':
-              hasResultsBand,
-          },
-          // below the top bar; a white-surface host spaces it itself
-          hasResultsBand
-            ? onWhiteSurface
-              ? 'max-h-full'
-              : 'mt-(--page-pad-top) max-h-[calc(100%-var(--page-pad-top))]'
-            : '',
-          { 'col-span-1': railOpen },
-          railOpen ? (hasResultsBand ? 'ml-(--gutter-panels)' : 'pl-[1%]') : '',
-          { 'col-span-2': !railOpen },
-        ]"
+        class="row-span-2 flex min-h-0"
+        :class="resultsPanelClasses"
       >
         <FiltersPane
           v-if="filtersInPane"
@@ -1176,6 +1160,28 @@ const filtersBandSpot = computed(() =>
 // (lists with a results band); the separate rail stays behind a switch
 const filtersPaneId = useId();
 const layout = filtersLayout();
+const resultsPanelClasses = computed<string[]>(() => {
+  // ui_kits/clients: band, selection row and list in one white panel
+  const bandStyles = {
+    none: [],
+    onPage: [
+      "bg-surface border border-border-panel rounded-card self-start",
+      "mt-(--page-pad-top) max-h-[calc(100%-var(--page-pad-top))]",
+    ],
+    onWhiteSurface: ["bg-surface border border-border-panel rounded-card h-full"],
+  };
+  const railStyles = {
+    open: ["col-span-1", hasResultsBand.value ? "ml-(--gutter-panels)" : "pl-[1%]"],
+    closed: ["col-span-2"],
+  };
+
+  let band = bandStyles.none;
+  if (hasResultsBand.value)
+    band = onWhiteSurface ? bandStyles.onWhiteSurface : bandStyles.onPage;
+  const rail = railOpen.value ? railStyles.open : railStyles.closed;
+
+  return [filtersInPane.value ? "flex-row" : "flex-col", ...band, ...rail];
+});
 const filtersInPane = computed(
   () => layout === "pane" && !!filtersBandSpot.value && hasResultsBand.value,
 );

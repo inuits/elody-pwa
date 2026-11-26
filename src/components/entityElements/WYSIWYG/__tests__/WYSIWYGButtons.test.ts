@@ -18,17 +18,26 @@ vi.mock("@/components/base/BaseTooltip.vue", () => ({
   },
 }));
 
-const editorStub = () => ({
+const editorStub = (selection = { from: 0, to: 0 }) => ({
   isActive: () => false,
-  state: { selection: { from: 0, to: 0 } },
-  commands: { openTagModal: vi.fn(), openTagFlow: vi.fn() },
+  state: {
+    selection,
+    doc: { nodesBetween: () => undefined },
+  },
+  commands: { openTagFlow: vi.fn() },
   chain: () => ({ focus: () => ({ setParagraph: () => ({ run: vi.fn() }) }) }),
 });
 
-const taggingInstance = (configurations: any[]) => ({
+const taggingInstance = (
+  configurations: any[],
+  isInNeedOfConfigurationEntities = false,
+) => ({
   configuration: ref(configurations),
+  flowConfigurations: ref(
+    configurations.filter((configuration) => configuration.guidedFlowQuery),
+  ),
   configurationsByEntity: ref([]),
-  isInNeedOfConfigurationEntities: ref(false),
+  isInNeedOfConfigurationEntities: ref(isInNeedOfConfigurationEntities),
 });
 
 const triggerConfiguration = () => ({
@@ -46,15 +55,22 @@ const flowConfiguration = () => ({
   guidedFlowButtonLabel: "tagging.tag-wem",
 });
 
-const getWrapper = (configurations: any[], extraProps = {}) =>
+const getWrapper = (
+  configurations: any[],
+  extraProps = {},
+  { selection = { from: 0, to: 0 }, isInNeedOfConfigurationEntities = false } = {},
+) =>
   shallowMount(WYSIWYGButtons, {
     props: {
-      ...extraProps,
       formId: "comment-new-1",
-      editor: editorStub() as any,
+      editor: editorStub(selection) as any,
       extensions: [WysiwygExtensions.ElodyTaggingExtension],
       displayInline: true,
-      tagging: taggingInstance(configurations) as any,
+      tagging: taggingInstance(
+        configurations,
+        isInNeedOfConfigurationEntities,
+      ) as any,
+      ...extraProps,
     },
     global: { mocks: { $t: (k: string) => k }, renderStubDefaultSlot: true },
   });
@@ -94,9 +110,45 @@ describe("WYSIWYGButtons — guided-flow tagging", () => {
     );
   });
 
-  it("hides the legacy Tag button when every configuration has its own entry point", () => {
+  it("renders no separate Tag button next to the flow buttons", () => {
     const wrapper = getWrapper([triggerConfiguration(), flowConfiguration()]);
     expect(wrapper.text()).not.toContain("Tag");
+  });
+});
+
+// AICAP: the flow searches on the selected word, so it needs one
+const wordFlowConfiguration = () => ({
+  taggableEntityType: "word",
+  relationType: "ref_words",
+  metadataFilterForTagContent: "aicap:1|properties.original_word.value",
+  guidedFlowQuery: "GetTagWordFlow",
+  guidedFlowButtonLabel: "tagging.tag-word",
+});
+
+describe("WYSIWYGButtons — a flow that searches on the selection", () => {
+  it("is disabled while nothing is selected", () => {
+    const wrapper = getWrapper([wordFlowConfiguration()]);
+    expect(flowButtons(wrapper)[0].attributes("disabled")).toBeDefined();
+  });
+
+  it("is enabled once text is selected", () => {
+    const wrapper = getWrapper([wordFlowConfiguration()], {}, {
+      selection: { from: 1, to: 4 },
+    });
+    expect(flowButtons(wrapper)[0].attributes("disabled")).toBeUndefined();
+  });
+
+  it("is disabled while the configuration entities it tags with are missing", () => {
+    const wrapper = getWrapper([wordFlowConfiguration()], {}, {
+      selection: { from: 1, to: 4 },
+      isInNeedOfConfigurationEntities: true,
+    });
+    expect(flowButtons(wrapper)[0].attributes("disabled")).toBeDefined();
+  });
+
+  it("leaves a flow that does not search on the selection enabled without one", () => {
+    const wrapper = getWrapper([flowConfiguration()]);
+    expect(flowButtons(wrapper)[0].attributes("disabled")).toBeUndefined();
   });
 });
 

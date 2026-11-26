@@ -1306,6 +1306,64 @@ describe("RepetitiveFlow — returnsSelection", () => {
     expect(wrapper.emitted("finished")?.[0]).toEqual([manifestation]);
   });
 
+  it("returns the raw picker item, so the caller can read its relations", async () => {
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("selected", [{ id: "expr-1" }]);
+    await flushPromises();
+    const manifestation = {
+      id: "manif-1",
+      type: Entitytyping.Manifestation,
+      relationValues: { isManifestationOf: [{ key: "expr-1" }] },
+    };
+    field(wrapper).vm.$emit(
+      "selected",
+      [{ id: "manif-1", label: "1e druk" }],
+      [manifestation],
+    );
+    await flushPromises();
+    expect(wrapper.emitted("finished")?.[0]).toEqual([manifestation]);
+  });
+
+  it("returns the entity created on the last step", async () => {
+    const wrapper = getReturningWrapper();
+    field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);
+    await flushPromises();
+    field(wrapper).vm.$emit("selected", [{ id: "expr-1" }]);
+    await flushPromises();
+    const created = {
+      id: "manif-2",
+      intialValues: { title: "2e druk" },
+      relationValues: {},
+    };
+    field(wrapper).vm.$emit("created", created, Entitytyping.Manifestation);
+    await flushPromises();
+    expect(wrapper.emitted("finished")?.[0]).toEqual([
+      { ...created, type: Entitytyping.Manifestation },
+    ]);
+  });
+
+  it("prefills the create form with the values the caller handed in", async () => {
+    const wrapper = shallowMount(RepetitiveFlow, {
+      props: {
+        open: true,
+        config: returnsSelectionConfig(),
+        createPrefill: { intialValues: { title: "Het verdriet" } },
+      },
+      global: {
+        mocks: { $t: (k: string) => k },
+        renderStubDefaultSlot: true,
+        stubs: { RepetitiveStepField: false },
+      },
+    });
+    await flushPromises();
+    expect(field(wrapper).props("createPrefill")).toEqual({
+      relationValues: {},
+      intialValues: { title: "Het verdriet" },
+    });
+  });
+
   it("never creates or relates anything on the way out", async () => {
     const wrapper = getReturningWrapper();
     field(wrapper).vm.$emit("selected", [{ id: "work-1" }]);

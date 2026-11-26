@@ -67,16 +67,6 @@ export const suggestionStateFor = (
   };
 };
 
-export const isTaggedByTriggerOnly = (
-  configurations: ResolvedTagConfiguration[],
-): boolean =>
-  configurations.length > 0 &&
-  configurations.every(
-    (configuration) =>
-      !!configuration.inlineTrigger?.character ||
-      !!configuration.guidedFlowQuery,
-  );
-
 export const createInlineTagSuggestionExtension = async (
   configurations: ResolvedTagConfiguration[],
   suggestionState: Ref<InlineSuggestionState>,

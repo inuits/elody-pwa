@@ -30,6 +30,8 @@ const reinitializeDynamicFormFunc = ref<() => void>(() => {});
 const csvOnlyUploadSFailed = ref<boolean>(false);
 const jobIdentifier = ref<string | undefined>(undefined);
 const prefetchedUploadUrls = ref<string[]>([]);
+// Set when the CSV/Excel import itself failed: every file of that batch shows it
+const batchUploadError = ref<string | undefined>(undefined);
 const extraMediafileType = ref<string | undefined>(undefined);
 const optionalFileNames = ref<string[]>([]);
 const typeToIncludeInUrl = ref<string | undefined>(undefined);
@@ -71,6 +73,7 @@ export const useUploadState = () => {
     csvOnlyUploadSFailed,
     jobIdentifier,
     prefetchedUploadUrls,
+    batchUploadError,
     extraMediafileType,
     optionalFileNames,
     typeToIncludeInUrl,

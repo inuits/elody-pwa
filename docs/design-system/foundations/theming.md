@@ -30,20 +30,19 @@ export const exampleAppConfig: FullyOptionalEnvironmentInput = {
     applicationTitle: "Example",
     theme: {
       "--color-accent": "#7A4FB5",
-      "--color-accent-hover": "#5E3A8E",
-      "--color-accent-light": "#F1EAFA",
-      "--color-accent-light-strong": "#DCCDF0",
-      "--color-accent-ink": "#4A2C73",
-      "--color-accent-wash": "#F6F1FC",
-      "--color-accent-tint": "#F8F4FD",
     },
   },
 };
 ```
 
-Setting only these seven gives a complete accent theme. Panel headers, section
-headers, hover washes, primary buttons, links on hover and panel borders all
-follow.
+Setting `--color-accent` alone gives a complete accent theme. `main.css` mixes
+the shades from it: `-light`, `-light-strong`, `-wash` and `-tint` (with the
+surface), the list row hover `--color-surface-row-hover`, `-hover`, `-dark`/`-ink` and the label and link colour
+`--color-text-light` (with black). Dark mode does the same against its own
+surface. Panel headers, section headers, hover washes, primary buttons, links,
+labels and panel borders all follow. Any derived token can still be set
+explicitly. Pick a seed that carries white text (at least 3:1), because it
+fills primary buttons and section headers.
 
 ## Which token colours what
 
@@ -64,7 +63,7 @@ follow.
 |---|---|
 | `--color-text-body` | all default text |
 | `--color-text-field-label` | field labels |
-| `--color-text-light` | legacy label blue: labels, ghost buttons, links in older components |
+| `--color-text-light` | labels, ghost buttons, links (mixed from `--color-accent`) |
 | `--color-text-link` | links |
 | `--color-surface` | cards, panels, inputs |
 | `--color-surface-app` | page background |
@@ -84,7 +83,8 @@ client. Override these only when a client's brand requires it, and set
 
 ### Never themed
 Semantic colours (`--color-danger`, `-success`, `-warning`, `-info`), badge
-tones, chips, borders, neutrals.
+tones, neutral chips, borders, neutrals. Relation chips
+(`--color-chip-relation-bg`) are mixed from `--color-accent`.
 
 ### Legacy tokens
 Older components still use the five legacy names (`--color-accent-light`,

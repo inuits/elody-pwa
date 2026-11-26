@@ -112,8 +112,10 @@ describe("RepetitiveStepField", () => {
     // a picker in a modal must not inherit the route's saved filter state
     expect(picker.props("shouldUseStateForRoute")).toBe(false);
     expect(picker.props("forceListView")).toBe(true);
-    // a fixed height: the modal doesn't resize as the results change
-    expect(picker.props("baseLibraryHeight")).toBe("h-[55vh]");
+    // a fixed height on the picker itself: the modal doesn't resize as the
+    // results change or the filters pane opens; the library fills it
+    expect(picker.classes()).toContain("h-[55vh]");
+    expect(picker.props("baseLibraryHeight")).toBe("h-full");
   });
 
   it("passes the step's entityPickerSearchConfig to the picker's search props", () => {
@@ -245,6 +247,18 @@ describe("RepetitiveStepField", () => {
       id: "expr-1",
       values: { record_type: "tekst" },
     });
+  });
+
+  it("passes the raw picked items along, for flows that hand them back", async () => {
+    const wrapper = getWrapper();
+    const item = {
+      id: "word-1",
+      type: "word",
+      relationValues: { ref_epi_doc_tag: [{ key: "tag-1" }] },
+    };
+    wrapper.findComponent(EntityPickerComponent).vm.$emit("entitiesSelected", [item]);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("selected")?.[0]?.[1]).toEqual([item]);
   });
 
   it("switches from picker to create when a type is chosen", async () => {

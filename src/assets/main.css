@@ -14,10 +14,10 @@
   --font-sans: "Lato", system-ui, sans-serif;
 
   /* Theme colors */
-  --color-accent-light: #DEF1FA;
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 17%, var(--color-surface));
   --color-accent-normal: #6BC6B3;
   --color-accent-accent: #0CB2BC;
-  --color-accent-dark: #1d5c7a;
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 55%, #000000);
   --color-accent-highlight: #E8EEF0;
   --color-highlight-bg: #4169E1;
   --color-highlight-text: #FFFFFF;
@@ -31,7 +31,7 @@
   --color-tag-selected: #2d242a;
 
   --color-text-disabled: #6795A2;
-  --color-text-light: #355BA9;
+  --color-text-light: color-mix(in srgb, var(--color-accent) 65%, #000000);
   --color-text-body: #003A52;
   /* Was #FFFFFF for the pre-redesign dark header bar; every header is a
      light/accent-light surface now, so subtitles read in body ink. */
@@ -176,18 +176,19 @@
    nothing above is replaced. The design system's --spacing-* scale and
    --text-base are deliberately NOT imported — they would redefine Tailwind's
    numeric spacing utilities (p-1, gap-2, ...) and text-base across the app.
-   CLIENT THEMING RULE: a client theme may swap only the accent set
-   (--color-accent, --color-accent-light + derived -hover/-ink/-wash/-tint/
-   -light-strong); commit teal, focus ring, neutrals, semantic and badge
-   colours are platform-fixed. */
+   CLIENT THEMING RULE: a client theme sets --color-accent; the accent shades
+   (-light, -light-strong, -wash, -tint, -hover, -dark/-ink) and the
+   label/link colour (--color-text-light) are mixed from it, and a client may
+   still override any of them. Commit teal, focus ring, neutrals, semantic and
+   badge colours are platform-fixed. */
 @theme {
   /* Accent roles (client-swappable set) */
   --color-accent: #3BA6CB;
-  --color-accent-hover: #1D8FB8;
-  --color-accent-light-strong: #C8EAF7;
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 80%, #000000);
+  --color-accent-light-strong: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
   --color-accent-ink: var(--color-accent-dark);
-  --color-accent-wash: #EAF6FB;
-  --color-accent-tint: #EDF7FC;
+  --color-accent-wash: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
+  --color-accent-tint: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
 
   /* Surfaces */
   --color-surface: #FFFFFF;
@@ -199,7 +200,7 @@
   --color-surface-editable-hover: var(--color-accent-wash);
   --color-surface-group-tint: var(--color-accent-tint);
   --color-surface-group-form: #F6FCFE;
-  --color-surface-row-hover: #F6FBFE;
+  --color-surface-row-hover: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
   --color-surface-repeat-row: #F6FCFD;
   --color-surface-note: #FFF8E9;
   --color-surface-inverted: #172B4D;
@@ -260,7 +261,7 @@
   --color-badge-subtype-text: #505F79;
 
   /* Relation chips + scrim */
-  --color-chip-relation-bg: #6DBBDE;
+  --color-chip-relation-bg: color-mix(in srgb, var(--color-accent) 70%, var(--color-surface));
   --color-chip-relation-text: var(--color-text-body); /* white was 2.14:1 */
   /* Chosen values (not links): follow the client accent */
   --color-chip-value-bg: var(--color-accent-light);
@@ -305,7 +306,7 @@
   --shadow-popover: 0 12px 32px rgba(9, 30, 66, 0.2);
   --shadow-modal: 0 24px 64px rgba(9, 30, 66, 0.4);
   --shadow-toast: 0 12px 32px rgba(9, 30, 66, 0.35);
-  --shadow-accent-hover: 0 2px 6px rgba(59, 166, 203, 0.4);
+  --shadow-accent-hover: 0 2px 6px color-mix(in srgb, var(--color-accent) 40%, transparent);
   --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
   --shadow-commit-hover: 0 2px 8px rgba(12, 178, 188, 0.35);
   --opacity-empty: 0.45;
@@ -795,6 +796,17 @@ body {
   --color-diff-new: var(--color-success-ink);
   --color-diff-new-bg: var(--color-success-bg);
   --color-diff-new-border: var(--color-success);
+  /* The accent set is mixed from --color-accent, so a client sets one colour */
+  --color-accent-light: color-mix(in srgb, var(--color-accent) 17%, var(--color-surface));
+  --color-accent-light-strong: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
+  --color-accent-wash: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
+  --color-accent-tint: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+  --color-surface-row-hover: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 80%, #000000);
+  --color-accent-dark: color-mix(in srgb, var(--color-accent) 55%, #000000);
+  --color-text-light: color-mix(in srgb, var(--color-accent) 65%, #000000);
+  --color-chip-relation-bg: color-mix(in srgb, var(--color-accent) 70%, var(--color-surface));
+  --shadow-accent-hover: 0 2px 6px color-mix(in srgb, var(--color-accent) 40%, transparent);
   /* Follows the client accent (selected list rows) */
   --shadow-accent-row: 0 1px 4px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
@@ -815,7 +827,6 @@ html.dark body {
   --color-tag-selected: #DCE6EC;
 
   --color-text-disabled: #5F7F8A;
-  --color-text-light: #8DB4F0;
   --color-text-body: #DCE6EC;
   --color-text-placeholder: #6B7889;
 
@@ -870,7 +881,7 @@ html.dark body {
   --color-surface-muted: #222C38;
   --color-surface-sunken: #0D1218;
   --color-surface-group-form: #1E2834;
-  --color-surface-row-hover: #222E3B;
+  --color-surface-row-hover: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
   --color-surface-repeat-row: #1E2834;
   --color-surface-note: #3A3220;
   --color-surface-inverted: #2C3A4D;
@@ -907,7 +918,7 @@ html.dark body {
   --color-badge-subtype-bg: #2A3441;
   --color-badge-subtype-text: #A9B6C6;
 
-  --color-chip-relation-bg: #2B5F78;
+  --color-chip-relation-bg: color-mix(in srgb, var(--color-accent) 55%, var(--color-surface));
   --color-chip-neutral-bg: #2A3441;
   --color-chip-neutral-text: #DCE6EC;
   --color-chip-count-bg: #222C38;
@@ -925,6 +936,8 @@ html.dark body {
   --color-accent-wash: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
   --color-accent-tint: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
   --color-accent-dark: color-mix(in srgb, var(--color-accent) 50%, #FFFFFF);
+  --color-accent-hover: color-mix(in srgb, var(--color-accent) 80%, #FFFFFF);
+  --color-text-light: color-mix(in srgb, var(--color-accent) 50%, #FFFFFF);
   --color-accent-ink: var(--color-accent-dark);
 }
 

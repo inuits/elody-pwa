@@ -7,6 +7,7 @@ type FilterVariables = {
   routeEntityType?: Entitytyping | string;
   entity?: Entity;
   dateToday?: string;
+  [variable: string]: unknown;
 };
 
 export const useFilterVariables = () => {
