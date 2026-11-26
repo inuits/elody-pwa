@@ -85,6 +85,14 @@ const applyCustomization = (rulesObject: any) => {
   applyClientTheme(rulesObject.theme);
 };
 
+const sessionStorageIfAllowed = () => {
+  try {
+    return window.sessionStorage;
+  } catch {
+    return undefined;
+  }
+};
+
 const start = async (): Promise<void> => {
   Unicon.add([
     ...Object.values(Unicons),
@@ -197,7 +205,16 @@ const start = async (): Promise<void> => {
       // with tracing on, the backend's spans name the tab's session too
       ...(config.browserTracing ? [createSessionLink(sessionId)] : []),
       createUsageLink(),
-      createConfigCacheLink(),
+      createConfigCacheLink({
+        storage: sessionStorageIfAllowed(),
+        scope: [
+          pwaVersion,
+          version["apollo-graphql-version"],
+          auth.isAuthenticated.value
+            ? String(auth.user?.sub ?? auth.user?.email ?? "user")
+            : "anonymous",
+        ].join("|"),
+      }),
       apqLink,
       warmUpLink,
       httpLink,
