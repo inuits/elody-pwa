@@ -101,6 +101,7 @@ const {
   csvOnlyUploadSFailed,
   jobIdentifier,
   prefetchedUploadUrls,
+  batchUploadError,
   extraMediafileType,
   typeToIncludeInUrl,
   shouldIncludeTypeInUrl,
@@ -880,6 +881,7 @@ const useUpload = (config: any = {}) => {
       reinitializeDynamicFormFunc.value();
     }
     prefetchedUploadUrls.value = [];
+    batchUploadError.value = undefined;
     duplicateMediafiles.value = [];
     lastUploadedFileIndex.value = -1;
     dryRunFeedback.value = { errors: [], warnings: [] };
@@ -1323,6 +1325,7 @@ const useUpload = (config: any = {}) => {
     getExcelFile,
     sortFiles,
     prefetchedUploadUrls,
+    batchUploadError,
     duplicateMediafiles,
     linkDuplicateMediafiles,
   };

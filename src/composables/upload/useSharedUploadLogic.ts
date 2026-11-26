@@ -17,7 +17,7 @@ export const useSharedUploadLogic = (): {
     entityInput: EntityInput | undefined,
   ) => Promise<string>;
 } => {
-  const { prefetchedUploadUrls } = useUpload({});
+  const { prefetchedUploadUrls, batchUploadError } = useUpload({});
   const {
     containsFileOfType,
     getCsvBlob,
@@ -35,12 +35,19 @@ export const useSharedUploadLogic = (): {
   };
 
   const _getUploadUrlBatch = async (file: DropzoneFile): Promise<string> => {
+    // A failed import has no upload links; don't send the CSV again per file
+    if (batchUploadError.value) throw batchUploadError.value;
     if (!prefetchedUploadUrls.value.length) {
       const file = containsFileOfType.value.excel
         ? getExcelFile()
         : getCsvBlob();
       const result = await batchEntities(file, false);
-      prefetchedUploadUrls.value = (result as { links: string[] })?.links;
+      const links = (result as { links?: string[] })?.links;
+      if (!Array.isArray(links)) {
+        batchUploadError.value = __getBatchErrorMessage(result);
+        throw batchUploadError.value;
+      }
+      prefetchedUploadUrls.value = links;
     }
 
     const fileUploadUrl = prefetchedUploadUrls.value.find((url: string) =>
@@ -49,6 +56,22 @@ export const useSharedUploadLogic = (): {
     if (!fileUploadUrl)
       throw Error(`Could not find uploadUrl for ${file.name}`);
     return fileUploadUrl;
+  };
+
+  // The import's own errors, e.g. "2) keyword 'haven' does not exist"
+  const __getBatchErrorMessage = (result: unknown): string => {
+    const body = result as {
+      errors?: { entities?: unknown[]; mediafiles?: unknown[] };
+      message?: unknown;
+    };
+    const messages = [
+      ...(body?.errors?.entities ?? []),
+      ...(body?.errors?.mediafiles ?? []),
+      ...(body?.message ? [body.message] : []),
+    ]
+      .map((message) => String(message).trim())
+      .filter(Boolean);
+    return messages.length ? messages.join("\n") : "Something went wrong";
   };
 
   const _getUploadUrlStandalone = async (file: DropzoneFile) => {
