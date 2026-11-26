@@ -50,6 +50,19 @@ export const getLibraryDataValue = (
   return library.count.value;
 };
 
+export const registerLibraryDataCount = (
+  key: string,
+  count: number,
+): (() => void) => {
+  if (registeredLibraryData[key]) return () => {};
+  const entry = { count: ref(count), fetchSequence: ref(1) };
+  registeredLibraryData[key] = entry;
+  return () => {
+    if (registeredLibraryData[key] === entry)
+      delete registeredLibraryData[key];
+  };
+};
+
 export const useBaseLibrary = (
   apolloClient: ApolloClient<any>,
   shouldUseStateForRoute: boolean = true,
@@ -246,16 +259,6 @@ export const useBaseLibrary = (
     // onto the same short name, which made them get wrongly skipped here.
     if (promise && !promiseQueue.value.includes(promise))
       promiseQueue.value.push(promise);
-  };
-
-  const getCustomBulkOperations = async () => {
-    const bulkOperationsPromise = promiseQueue.value.find(
-      (promise) => promise.name === "customBulkOperationsPromise",
-    );
-    if (bulkOperationsPromise) await bulkOperationsPromise();
-    promiseQueue.value = promiseQueue.value.filter(
-      (promise) => promise.name !== "customBulkOperationsPromise",
-    );
   };
 
   const fetchAllPromises = async () => {
@@ -502,7 +505,6 @@ export const useBaseLibrary = (
     placeholderEntitiesAmount,
     entitiesLoading,
     accessDenied,
-    getCustomBulkOperations,
     fetchAllPromises,
     getEntities,
     getEntityById,

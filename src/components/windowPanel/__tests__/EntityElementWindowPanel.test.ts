@@ -52,6 +52,16 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
   getLibraryDataValue: () => libraryData.value,
 }));
 vi.mock("@/helpers", () => ({ getMetadataFields: () => state.fields }));
+const deferredCount = vi.hoisted(() => ({
+  fetch: vi.fn(),
+  release: vi.fn(),
+}));
+vi.mock("@/components/windowPanel/fetchDeferredLibraryCount", () => ({
+  fetchDeferredLibraryCount: (...args: unknown[]) => {
+    deferredCount.fetch(...args);
+    return Promise.resolve(deferredCount.release);
+  },
+}));
 vi.mock("@/types", () => ({
   Unicons: {
     AngleDown: { name: "angle-down" },
@@ -480,5 +490,91 @@ describe("EntityElementWindowPanel header count chip", () => {
     expect(mountWithCount(0).classes()).toEqual(
       expect.arrayContaining(["bg-chip-neutral-bg", "text-chip-neutral-text"]),
     );
+  });
+});
+
+describe("EntityElementWindowPanel lists in a closed panel", () => {
+  const filesList = {
+    __typename: "EntityListElement",
+    customQuery: "GetFiles",
+    customQueryFilters: "GetPosterFilters",
+    entityTypes: ["mediafile"],
+  };
+  const mountWithList = (isCollapsed: boolean) =>
+    mount(EntityElementWindowPanel, {
+      props: {
+        panel: {
+          panelType: "metadata",
+          isCollapsed,
+          panelHeaderContent: {
+            label: "Posters",
+            libraryData: {
+              queryName: "GetPosterFilters",
+              dataKey: "count",
+              label: "files",
+            },
+          },
+          entityListElement: filesList,
+        } as any,
+        identifiers: ["PR-1"],
+        isEdit: false,
+        formId: "PR-1",
+      },
+      global: {
+        stubs: { unicon: true, WindowPanelContent: true, BaseButtonNew: true },
+      },
+    });
+  const listsDeferred = (wrapper: ReturnType<typeof mountWithList>) =>
+    wrapper.findComponent({ name: "WindowPanelContent" }).props("deferLists");
+
+  beforeEach(() => {
+    deferredCount.fetch.mockClear();
+    deferredCount.release.mockClear();
+  });
+
+  it("holds back the lists of a closed panel", () => {
+    expect(listsDeferred(mountWithList(true))).toBe(true);
+  });
+
+  it("loads the lists when the panel is opened", async () => {
+    const wrapper = mountWithList(true);
+    await wrapper.find("h4").trigger("click");
+    expect(listsDeferred(wrapper)).toBe(false);
+  });
+
+  it("keeps the lists loaded when the panel is closed again", async () => {
+    const wrapper = mountWithList(true);
+    await wrapper.find("h4").trigger("click");
+    await wrapper.find("h4").trigger("click");
+    expect(listsDeferred(wrapper)).toBe(false);
+  });
+
+  it("loads the lists of an open panel at once", () => {
+    expect(listsDeferred(mountWithList(false))).toBe(false);
+  });
+
+  it("fetches only the count of a closed panel's list for its header", async () => {
+    mountWithList(true);
+    await flushPromises();
+    expect(deferredCount.fetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        list: filesList,
+        libraryDataKey: "GetPosterFilters",
+        identifiers: ["PR-1"],
+      }),
+    );
+  });
+
+  it("fetches no separate count for an open panel", async () => {
+    mountWithList(false);
+    await flushPromises();
+    expect(deferredCount.fetch).not.toHaveBeenCalled();
+  });
+
+  it("drops its count when it goes away", async () => {
+    const wrapper = mountWithList(true);
+    await flushPromises();
+    wrapper.unmount();
+    expect(deferredCount.release).toHaveBeenCalled();
   });
 });

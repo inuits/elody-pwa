@@ -40,7 +40,10 @@ import { type I18n } from "vue-i18n";
 
 import { setContext } from "@apollo/client/link/context";
 import { useServiceVersionManager } from "@/composables/useServiceVersionManager";
-import { ElodyServices } from "@/generated-types/queries";
+import {
+  ElodyServices,
+  GetEntityByIdDocument,
+} from "@/generated-types/queries";
 import { useInputValidation } from "@/composables/useInputValidation";
 import { applyClientTheme } from "@/utils/clientTheme";
 import { initUiScale } from "@/composables/useUiScale";
@@ -52,6 +55,9 @@ import {
 } from "@/tracing/browserTracing";
 import { getSessionId } from "@/observability/sessionId";
 import { createSessionLink } from "@/observability/sessionLink";
+import { createConfigCacheLink } from "@/configCacheLink";
+import { warmUpLink, warmUpQueries } from "@/warmUpQuery";
+import { leanEntityDocument } from "@/entityLayoutCache";
 import {
   createUsageLink,
   identifyUser,
@@ -184,7 +190,9 @@ const start = async (): Promise<void> => {
       // with tracing on, the backend's spans name the tab's session too
       ...(config.browserTracing ? [createSessionLink(sessionId)] : []),
       createUsageLink(),
+      createConfigCacheLink(),
       apqLink,
+      warmUpLink,
       httpLink,
     ]),
     cache: new InMemoryCache(),
@@ -222,5 +230,9 @@ const start = async (): Promise<void> => {
     identifyInBrowserTracing({ pseudonym, library: libraryOf(user?.email) });
 
   app.mount("#app");
+  warmUpQueries(apolloClient, [
+    GetEntityByIdDocument,
+    leanEntityDocument(GetEntityByIdDocument),
+  ]);
 };
 start();

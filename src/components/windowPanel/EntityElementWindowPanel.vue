@@ -174,6 +174,7 @@
           </div>
           <WindowPanelContent
             :data-repeatable-row="idx - 1"
+            :defer-lists="!listsLoaded"
             :relation-array="relationArray"
             :metadatafields="getMetadataFields(panel, formId, idx - 1)"
             :can-be-multiple-columns="canBeMultipleColumns"
@@ -207,7 +208,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, ref, watchEffect } from "vue";
+import {
+  computed,
+  inject,
+  nextTick,
+  onUnmounted,
+  ref,
+  watch,
+  unref,
+  watchEffect,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { Unicons } from "@/types";
 import WindowPanelContent from "./WindowPanelContent.vue";
@@ -233,6 +243,7 @@ import {
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useWindowOrPanelStatus } from "@/composables/useWindowOrPanelStatus";
 import { getLibraryDataValue } from "@/components/library/useBaseLibrary";
+import { fetchDeferredLibraryCount } from "@/components/windowPanel/fetchDeferredLibraryCount";
 
 const props = withDefaults(
   defineProps<{
@@ -273,6 +284,33 @@ const libraryDataLabel = computed(() => {
     [libraryData.dataKey]: libraryDataValue.value,
     count: libraryDataValue.value,
   });
+});
+
+const listsLoaded = ref<boolean>(!isCollapsed.value);
+watch(isCollapsed, (collapsed) => {
+  if (!collapsed) listsLoaded.value = true;
+});
+
+const deferredList = Object.values(props.panel).find(
+  (value) =>
+    (value as { __typename?: string })?.__typename === "EntityListElement",
+);
+const libraryData = props.panel.panelHeaderContent?.libraryData;
+let releaseDeferredCount: (() => void) | undefined;
+let unmounted = false;
+if (!listsLoaded.value && deferredList && libraryData?.dataKey === "count")
+  fetchDeferredLibraryCount({
+    list: deferredList,
+    libraryDataKey: libraryData.queryName,
+    identifiers: props.identifiers,
+    parentEntity: unref(inject("ParentEntityProvider", undefined)),
+  }).then((release) => {
+    if (unmounted) release();
+    else releaseDeferredCount = release;
+  });
+onUnmounted(() => {
+  unmounted = true;
+  releaseDeferredCount?.();
 });
 
 const toggleIsCollapsed = () => {

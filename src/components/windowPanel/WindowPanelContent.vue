@@ -85,7 +85,9 @@
             />
 
             <entity-element-list
-              v-if="metadata.__typename === nonStandardFieldTypes[0]"
+              v-if="
+                metadata.__typename === nonStandardFieldTypes[0] && !deferLists
+              "
               :id="formId"
               :types="metadata.entityTypes"
               :entity-id="formId"
@@ -155,6 +157,7 @@ defineProps<{
   identifiers: string[];
   parentIsListItem: boolean;
   repeatablePanelConfig?: PanelRepetitionProps;
+  deferLists?: boolean;
 }>();
 
 const { t } = useI18n();

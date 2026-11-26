@@ -46,7 +46,6 @@ vi.mock("@/components/library/useBaseLibrary", () => ({
     placeholderEntities: ref([]),
     placeholderEntitiesAmount: ref(0),
     entitiesLoading: libEntitiesLoading,
-    getCustomBulkOperations: vi.fn(),
     fetchAllPromises: vi.fn().mockResolvedValue(undefined),
     getEntities: libGetEntities,
     getEntityById: vi.fn().mockResolvedValue(undefined),

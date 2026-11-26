@@ -18,6 +18,7 @@ export type ClientConfig = {
     date: string;
   };
   ignoredErrors?: RegExp[];
+  detailRequestBudget?: number;
 };
 
 export const clientName = process.env.E2E_CLIENT ?? "";

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { effectScope, nextTick, shallowRef, watch } from "vue";
+import { shallowRef } from "vue";
 import { useGetDropdownOptionsState } from "../useGetDropdownOptionsState";
-import { useGetDropdownOptions } from "../useGetDropdownOptions";
 import { EditStatus, type Entitytyping } from "@/generated-types/queries";
 import { type FormContext } from "vee-validate";
 
