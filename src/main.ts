@@ -206,11 +206,12 @@ const start = async (): Promise<void> => {
     documentTransform: aliasAsKeyTransform,
   });
 
-  const [formattersSettingsResult] = await Promise.all([
-    getFormattersSettings(),
-    useApp().initApp(auth, config, apolloClient),
-  ]);
-  formattersSettings = formattersSettingsResult;
+  const formattersLoaded = getFormattersSettings().then((settings) => {
+    formattersSettings = settings;
+  });
+  router.beforeEach(() => formattersLoaded);
+
+  await useApp().initApp(auth, config, apolloClient);
 
   addRouterNavigationGuards(router, config);
 
