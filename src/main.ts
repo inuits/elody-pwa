@@ -208,10 +208,9 @@ const start = async (): Promise<void> => {
 
   const [formattersSettingsResult] = await Promise.all([
     getFormattersSettings(),
+    useApp().initApp(auth, config, apolloClient),
   ]);
   formattersSettings = formattersSettingsResult;
-
-  await useApp().initApp(auth, config, apolloClient);
 
   addRouterNavigationGuards(router, config);
 
