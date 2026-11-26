@@ -1667,6 +1667,23 @@ describe("BaseLibrary.vue add pills in a detail panel", () => {
     wrapper.unmount();
   });
 
+  it("fills the white surface's fixed height, so opening the filters pane doesn't resize it", async () => {
+    mockRoute.path = "/test";
+    const wrapper = getWrapper(
+      {
+        baseLibraryMode: BaseLibraryModes.NormalBaseLibrary,
+        parentEntityIdentifiers: ["work-1"],
+      },
+      { OnWhiteSurface: true },
+    );
+    await flushPromises();
+
+    const panelClasses = wrapper.find('[data-cy="results-panel"]').classes();
+    expect(panelClasses).toContain("h-full");
+    expect(panelClasses).not.toContain("self-start");
+    wrapper.unmount();
+  });
+
   // ui_kits ListScreen: the list page has the page padding (14px 18px)
   it("pads the main list page with the page padding", async () => {
     mockRoute.path = "/test";

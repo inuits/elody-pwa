@@ -984,13 +984,6 @@ const uploadWithMetadataActionFunction = async (field: FormAction) => {
   }
 };
 
-const tagNewlyCreatedEntity = (entity: Entity): void => {
-  // The editor that opened the tagging modal owns the configuration, so it resolves
-  // the relation type and links the tag itself.
-  const modalInfo = getModalInfo(TypeModals.ElodyEntityTaggingModal);
-  modalInfo.editor?.commands.tagAndLinkEntity(entity, route.params["id"]);
-};
-
 const submitActionFunction = async (field: FormAction) => {
   const useEditHelper = useEditMode(getParentId());
   if (useEditHelper?.isEdit) {
@@ -1060,8 +1053,6 @@ const submitActionFunction = async (field: FormAction) => {
         for (const callback of callbackFunctions) {
           if (callback) await callback();
         }
-      } else if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
-        tagNewlyCreatedEntity(entity);
       } else {
         setTimeout(
           () => goToEntityPage(entity, "SingleEntity", props.router),
@@ -1146,13 +1137,10 @@ const submitAllFormTabsActionFunction = async (field: FormAction) => {
         if (callback) await callback();
       }
     } else {
-      if (getModalInfo(TypeModals.ElodyEntityTaggingModal).open) {
-        entities.forEach((entity: Entity) => tagNewlyCreatedEntity(entity));
-      } else
-        setTimeout(
-          () => goToEntityPage(entities[0], "SingleEntity", props.router),
-          1,
-        );
+      setTimeout(
+        () => goToEntityPage(entities[0], "SingleEntity", props.router),
+        1,
+      );
     }
     closeAndDeleteForm();
     displaySuccessNotification(

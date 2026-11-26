@@ -138,15 +138,6 @@
       </p>
       <p role="status" class="sr-only">{{ savedAnnouncement }}</p>
     </div>
-    <TagEntityModal
-      v-if="
-        element.extensions.includes(WysiwygExtensions.ElodyTaggingExtension)
-      "
-      :element="element"
-      :editor="editor"
-      :editor-id="instanceId"
-      :tagging="tagging"
-    />
     <inline-tag-suggestion-dropdown
       v-if="tagging?.inlineSuggestion?.value"
       :suggestion="tagging?.inlineSuggestion?.value"
@@ -204,7 +195,6 @@ import {
 import MetadataTitle from "@/components/metadata/MetadataTitle.vue";
 import LockedFieldIndicator from "@/components/metadata/LockedFieldIndicator.vue";
 import MultilingualLocaleSelector from "@/components/metadata/MultilingualLocaleSelector.vue";
-import TagEntityModal from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/TagEntityModal.vue";
 import InlineTagSuggestionDropdown from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/InlineTagSuggestionDropdown.vue";
 import WYSIGYGVirtualKeyboard from "@/components/entityElements/WYSIWYG/WYSIGYGVirtualKeyboard.vue";
 import WYSIWYGTransliterationToggle from "@/components/entityElements/WYSIWYG/WYSIWYGTransliterationToggle.vue";

@@ -66,7 +66,8 @@
         :should-use-state-for-route="false"
         :force-list-view="true"
         :selection-limit="step.maxSelection ?? undefined"
-        base-library-height="h-[55vh]"
+        class="h-[55vh]"
+        base-library-height="h-full"
         :search-mode="step.entityPickerSearchConfig?.mode ?? undefined"
         :search-metadata-keys="
           step.entityPickerSearchConfig?.metadataKeys ?? undefined
@@ -177,7 +178,11 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "selected", entities: SelectedEntity[]): void;
+  (
+    e: "selected",
+    entities: SelectedEntity[],
+    pickedItems: InBulkProcessableItem[],
+  ): void;
   (e: "created", entity: any, entityType?: string): void;
   (
     e: "metadataSubmitted",
@@ -324,6 +329,7 @@ const onPicked = (items: InBulkProcessableItem[]) => {
       const { label, details } = describePickedItem(item);
       return { id: item.id, label, details, values: item.intialValues };
     }),
+    items,
   );
 };
 

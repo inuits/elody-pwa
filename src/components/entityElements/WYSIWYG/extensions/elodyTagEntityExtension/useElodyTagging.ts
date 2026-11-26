@@ -19,6 +19,8 @@ export type ElodyTaggingInstance = {
   /** Extensions for exactly ONE editor. Pass straight into `new Editor({extensions})`. */
   extensions: (Node<any, any> | Extension<any, any>)[];
   configuration: Ref<ResolvedTagConfiguration[]>;
+  /** Configurations as given, before they fan out per entity: one toolbar button each. */
+  flowConfigurations: Ref<TaggableEntityConfiguration[]>;
   configurationsByEntity: Ref<TaggableEntityConfiguration[]>;
   isInNeedOfConfigurationEntities: ComputedRef<boolean>;
   getConfigurationForEntity: (
@@ -65,6 +67,11 @@ export const useElodyTagging = async (
       ...(inlineSuggestionExtension ? [inlineSuggestionExtension] : []),
     ],
     configuration,
+    flowConfigurations: ref(
+      (taggableEntityConfiguration ?? []).filter(
+        (configurationItem) => !!configurationItem.guidedFlowQuery,
+      ),
+    ),
     configurationsByEntity,
     isInNeedOfConfigurationEntities: computed<boolean>(
       () =>

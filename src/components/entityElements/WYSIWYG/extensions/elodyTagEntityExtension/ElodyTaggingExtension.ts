@@ -15,21 +15,21 @@ import {
 import { type Editor } from "@tiptap/vue-3";
 import {
   BulkOperationsContextEnum,
-  type Context,
   type InBulkProcessableItem,
-  useBulkOperations,
 } from "@/composables/useBulkOperations";
-import { useFormHelper } from "@/composables/useFormHelper";
 import { useDeleteRelations } from "@/composables/useDeleteRelations";
 import useEntitySingle from "@/composables/useEntitySingle";
-import { getEntityTitle, stripHighlightTags } from "@/helpers";
+import {
+  extractTitleKeyFromMetadataFilter,
+  getEntityTitle,
+  parseRegexFromString,
+  stripHighlightTags,
+} from "@/helpers";
 import type { Ref } from "vue";
 import { apolloClient } from "@/main";
 import { DOMSerializer, type DOMOutputSpec } from "prosemirror-model";
 
-const { addRelations } = useFormHelper();
 const { deleteRelations } = useDeleteRelations();
-const { dequeueAllItemsForBulkProcessing } = useBulkOperations();
 
 export type TaggableEntityConfigurationFromEntity =
   TaggableEntityConfiguration & {
@@ -161,6 +161,32 @@ const getSelectedText = (state: EditorState): string =>
     getAdjustedSelectionFrom(state),
     state.selection.to,
   ).replaceAll(LINE_BREAK, "<br>");
+
+const applyCharacterReplacements = (
+  configurationItem: ResolvedTagConfiguration,
+  text: string,
+): string =>
+  (configurationItem.replaceCharacterFromTagSettings ?? []).reduce(
+    (result, settingsItem) => {
+      const regex = parseRegexFromString(settingsItem.replacementCharactersRegex);
+      return regex ? result.replace(regex, settingsItem.characterToReplaceWith) : result;
+    },
+    text,
+  );
+
+const buildSearchOnTaggedText = (
+  configurationItem: ResolvedTagConfiguration,
+  selectedText: string,
+) => {
+  const taggedText = applyCharacterReplacements(configurationItem, selectedText);
+  const titleKey = extractTitleKeyFromMetadataFilter(
+    configurationItem.metadataFilterForTagContent,
+  );
+  return {
+    filterVariables: { taggedText },
+    createPrefill: { intialValues: { [titleKey]: taggedText } },
+  };
+};
 
 export const createTipTapNodeExtension = (
   extensionConfiguration: TaggableEntityConfiguration,
@@ -378,28 +404,18 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
     },
     addCommands() {
       return {
-        openTagModal:
-          () =>
-          ({ state, editor }: CommandProps) => {
-            const selectedText = getSelectedText(state);
-
-            const { openModal } = useBaseModal();
-            openModal(
-              TypeModals.ElodyEntityTaggingModal,
-              ModalStyle.Center,
-              undefined,
-              undefined,
-              false,
-              undefined,
-              { selectedText, editor, editorId: context.instanceId },
-            );
-          },
         openTagFlow:
           (configurationItem: ResolvedTagConfiguration) =>
-          ({ editor }: CommandProps) => {
+          ({ editor, state }: CommandProps) => {
             if (!configurationItem?.guidedFlowQuery) return false;
 
             const { openModal } = useBaseModal();
+            const searchOnTaggedText = configurationItem.metadataFilterForTagContent
+              ? buildSearchOnTaggedText(
+                  configurationItem,
+                  getSelectedText(state),
+                )
+              : {};
             openModal(
               TypeModals.GuidedFlow,
               ModalStyle.CenterWide,
@@ -409,6 +425,7 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
               undefined,
               {
                 editorId: context.instanceId,
+                ...searchOnTaggedText,
                 onEntitySelected: (entity: InBulkProcessableItem) =>
                   editor.commands.tagEntityFromFlow(entity, configurationItem),
               },
@@ -421,7 +438,14 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
             configurationItem: ResolvedTagConfiguration,
           ) =>
           ({ commands, state }: { commands: any; state: EditorState }) => {
-            if (!entity || !configurationItem?.tag) return false;
+            if (!entity) return false;
+            const tagConfiguration = configurationItem?.tag
+              ? configurationItem
+              : resolveConfigurationForEntity(
+                  context.configuration.value,
+                  entity,
+                );
+            if (!tagConfiguration?.tag) return false;
 
             const { to } = state.selection;
             const from = getAdjustedSelectionFrom(state);
@@ -434,7 +458,7 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
               { from, to },
               {
                 type: (
-                  configurationItem as TaggableEntityConfigurationFromEntity
+                  tagConfiguration as TaggableEntityConfigurationFromEntity
                 ).extensionName,
                 attrs: {
                   entityId: entity.id,
@@ -442,78 +466,12 @@ export const createTaggingCommandsExtension = (context: TaggingContext) =>
                   label: taggedText,
                   entityType: entity.type ?? null,
                   ...buildTagAttributes(
-                    configurationItem as TaggableEntityConfigurationFromEntity,
+                    tagConfiguration as TaggableEntityConfigurationFromEntity,
                     entity,
                   ),
                 },
               },
             );
-          },
-        tagAndLinkEntity:
-          (entity: InBulkProcessableItem, parentEntityId: string) =>
-          ({ commands }: CommandProps) => {
-            const configurationItem = resolveConfigurationForEntity(
-              context.configuration.value,
-              entity,
-            );
-            if (!configurationItem) return false;
-
-            tagEntity(
-              entity,
-              configurationItem.relationType,
-              parentEntityId,
-              BulkOperationsContextEnum.TagEntityModal,
-            );
-            return commands.linkEntityToTaggedText(entity);
-          },
-        linkEntityToTaggedText:
-          (entity: InBulkProcessableItem) =>
-          async ({
-            commands,
-            state,
-          }: {
-            commands: any;
-            state: EditorState;
-          }) => {
-            const configurationItem:
-              | TaggableEntityConfigurationFromEntity
-              | undefined = resolveConfigurationForEntity(
-              context.configuration.value,
-              entity,
-            ) as TaggableEntityConfigurationFromEntity | undefined;
-            const additionalAttributes: { [key: string]: string } = {};
-
-            if (!entity) throw Error("Error tagging text: no entity to tag");
-            if (!configurationItem || !configurationItem.tag)
-              throw Error(
-                "Error tagging text: config should contain 'tag' or should have received the 'tag' property from its 'tagConfigurationByEntity' block",
-              );
-
-            Object.assign(
-              additionalAttributes,
-              buildTagAttributes(configurationItem, entity),
-            );
-
-            const { selection } = state;
-            const { to } = selection;
-            const from = getAdjustedSelectionFrom(state);
-            const taggedText = getTextBetween(state, from, to);
-
-            const newNodeContent = {
-              type: configurationItem.extensionName,
-              attrs: {
-                entityId: entity.id,
-                taggedText,
-                ...additionalAttributes,
-              },
-            };
-
-            Object.assign(newNodeContent.attrs, additionalAttributes);
-            commands.deleteRange({ from, to });
-            commands.insertContentAt(from, newNodeContent);
-            commands.setTextSelection(from + 1);
-
-            useBaseModal().closeModal(TypeModals.ElodyEntityTaggingModal);
           },
         untagSelectedText:
           () =>
@@ -622,8 +580,6 @@ const createConfigurationItemsFromMapping = (
     const config = mappingItem.configurationEntities.map(
       (configurationEntity: BaseEntity) => {
         return {
-          createNewEntityFormQuery:
-            mappingItem.configurationItem.createNewEntityFormQuery,
           metadataFilterForTagContent:
             mappingItem.configurationItem.metadataFilterForTagContent,
           metadataKeysToSetAsAttribute:
@@ -824,16 +780,6 @@ export const hasSelectionBeenTagged = (editor: Editor) => {
   });
 
   return isTagged;
-};
-
-export const tagEntity = (
-  entityToTag: InBulkProcessableItem,
-  relationType: string,
-  parentEntityId: string,
-  context: Context,
-) => {
-  addRelations([entityToTag], relationType, parentEntityId, true);
-  dequeueAllItemsForBulkProcessing(context);
 };
 
 export const openDetailModal = (

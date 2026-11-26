@@ -15,6 +15,8 @@ const mocks = vi.hoisted(() => ({
     open: boolean;
     formQuery?: string;
     onEntitySelected?: (entity: any) => void;
+    filterVariables?: Record<string, unknown>;
+    createPrefill?: object;
   },
   loadDocument: vi.fn(),
   apolloQuery: vi.fn(),
@@ -26,6 +28,8 @@ const modalInfo = reactive<{
   open: boolean;
   formQuery?: string;
   onEntitySelected?: (entity: any) => void;
+  filterVariables?: Record<string, unknown>;
+  createPrefill?: object;
 }>({
   open: false,
   formQuery: undefined,
@@ -56,13 +60,16 @@ vi.mock("@/composables/useBaseModal", () => ({
   useBaseModal: () => ({
     getModalInfo: () => mocks.modalInfo,
     closeModal: mocks.closeModal,
+    updateModal: (_: unknown, input: object) =>
+      Object.assign(mocks.modalInfo, input),
   }),
 }));
 vi.mock("@/components/repetitiveForm/RepetitiveFlow.vue", () => ({
   default: {
     name: "RepetitiveFlow",
-    props: ["open", "config"],
+    props: ["open", "config", "createPrefill"],
     emits: ["close", "finished"],
+    inject: { filterVariables: { from: "FilterVariables", default: null } },
     template: "<div data-testid='flow-stub' />",
   },
 }));
@@ -156,6 +163,8 @@ describe("GuidedFlowModalHost", () => {
     modalInfo.open = false;
     modalInfo.formQuery = undefined;
     modalInfo.onEntitySelected = undefined;
+    modalInfo.filterVariables = undefined;
+    modalInfo.createPrefill = undefined;
     mocks.loadDocument.mockResolvedValue(flowDocument);
     mocks.apolloQuery.mockResolvedValue({
       data: { GetRepetitiveForm: rawOmnibusResult },
@@ -241,6 +250,42 @@ describe("GuidedFlowModalHost", () => {
     await flushPromises();
     await openModal();
     expect(mocks.apolloQuery).toHaveBeenCalledTimes(2);
+  });
+
+  it("hands the caller's filter variables to the flow's filters", async () => {
+    modalInfo.filterVariables = { taggedText: "mlk" };
+    // rendered for real, so its inject sees what the host provides
+    const wrapper = shallowMount(GuidedFlowModalHost, {
+      global: { stubs: { RepetitiveFlow: false } },
+    });
+    await openModal();
+    expect((flow(wrapper).vm as any).filterVariables).toEqual({
+      taggedText: "mlk",
+    });
+  });
+
+  it("hands the caller's create prefill to the flow", async () => {
+    modalInfo.createPrefill = { intialValues: { original_word: "mlk" } };
+    const wrapper = getWrapper();
+    await openModal();
+    expect(flow(wrapper).props("createPrefill")).toEqual({
+      intialValues: { original_word: "mlk" },
+    });
+  });
+
+  it("forgets what the caller handed in once the flow closes", async () => {
+    // openModal merges into the previous info, so a flow opened from a menu
+    // would otherwise inherit the last tag's prefill and callback
+    modalInfo.createPrefill = { intialValues: { original_word: "mlk" } };
+    modalInfo.filterVariables = { taggedText: "mlk" };
+    modalInfo.onEntitySelected = vi.fn();
+    getWrapper();
+    await openModal();
+    modalInfo.open = false;
+    await flushPromises();
+    expect(modalInfo.createPrefill).toBeUndefined();
+    expect(modalInfo.filterVariables).toBeUndefined();
+    expect(modalInfo.onEntitySelected).toBeUndefined();
   });
 
   it("closes the modal and routes to the created entity on finished", async () => {

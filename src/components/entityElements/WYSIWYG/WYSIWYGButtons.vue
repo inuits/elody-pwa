@@ -146,53 +146,30 @@
       <i>I</i>
     </button>
     <button
-      v-for="configurationItem in guidedFlowConfigurations"
-      :key="`tag-flow-${configurationItem.tag}`"
+      v-for="configurationItem in flowConfigurations"
+      :key="`tag-flow-${configurationItem.guidedFlowQuery}`"
       data-testid="wysiwyg-tag-flow-button"
-      :disabled="buttonsDisabled"
+      :class="{ 'opacity-30': isFlowDisabled(configurationItem) }"
+      :disabled="buttonsDisabled || isFlowDisabled(configurationItem)"
       @click="editor.commands.openTagFlow(configurationItem)"
-      :title="t(labelForFlow(configurationItem))"
+      :title="flowTitle(configurationItem)"
     >
       {{ t(labelForFlow(configurationItem)) }}
     </button>
-    <base-tooltip v-if="showTagButton" position="top-right" :tooltip-offset="8">
-      <template #activator="{ on, describedBy }">
-        <div v-on="on" :aria-describedby="describedBy">
-          <button
-            :class="[{ 'opacity-30': tagButtonDisabled }]"
-            :disabled="buttonsDisabled || tagButtonDisabled"
-            @click="editor.commands.openTagModal()"
-            title="Tag"
-          >
-            Tag
-          </button>
-        </div>
-      </template>
-      <template #default>
-        <span v-if="isInNeedOfConfigurationEntities">
-          <div>
-            {{
-              t("tagging.configuration-entity-required", {
-                entityType: neededConfigurationEntityTypes,
-              })
-            }}
-          </div>
-        </span>
-      </template>
-    </base-tooltip>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Editor } from "@tiptap/vue-3";
-import { WysiwygExtensions } from "@/generated-types/queries";
+import {
+  type TaggableEntityConfiguration,
+  WysiwygExtensions,
+} from "@/generated-types/queries";
 import { Unicons } from "@/types";
 import { useEditMode } from "@/composables/useEdit";
 import { computed } from "vue";
-import BaseTooltip from "@/components/base/BaseTooltip.vue";
 import { hasSelectionBeenTagged } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/ElodyTaggingExtension";
 import type { ElodyTaggingInstance } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/useElodyTagging";
-import { isTaggedByTriggerOnly } from "@/components/entityElements/WYSIWYG/extensions/elodyTagEntityExtension/inlineTagSuggestion";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -218,21 +195,8 @@ const editorHasSelection = computed(() => {
 const isNonTaggedTextSelected = computed(() => {
   return !hasSelectionBeenTagged(props.editor);
 });
-/**
- * The toolbar's Tag button opens TagEntityModal, a different flow from the inline
- * trigger: it tags the current selection and can create a new entity. Where every
- * configured tag has a trigger character, it is a second inconsistent route to the same
- * feature, so it goes away and typing `@` / `#` is the only way in.
- */
-const showTagButton = computed<boolean>(
-  () =>
-    props.extensions.includes(WysiwygExtensions.ElodyTaggingExtension) &&
-    !isTaggedByTriggerOnly(props.tagging?.configuration.value ?? []),
-);
-const guidedFlowConfigurations = computed(() =>
-  (props.tagging?.configuration.value ?? []).filter(
-    (configurationItem) => !!configurationItem.guidedFlowQuery,
-  ),
+const flowConfigurations = computed<TaggableEntityConfiguration[]>(
+  () => props.tagging?.flowConfigurations.value ?? [],
 );
 const labelForFlow = (configurationItem: {
   guidedFlowButtonLabel?: string | null;
@@ -241,11 +205,20 @@ const labelForFlow = (configurationItem: {
 const isInNeedOfConfigurationEntities = computed<boolean>(
   () => !!props.tagging?.isInNeedOfConfigurationEntities?.value,
 );
-const tagButtonDisabled = computed(() => {
-  if (!editorHasSelection.value || isInNeedOfConfigurationEntities.value)
-    return true;
-  return !isNonTaggedTextSelected.value;
-});
+// A flow that searches on the selection has nothing to search on without one
+const isFlowDisabled = (
+  configurationItem: TaggableEntityConfiguration,
+): boolean => {
+  if (isInNeedOfConfigurationEntities.value) return true;
+  if (!configurationItem.metadataFilterForTagContent) return false;
+  return !editorHasSelection.value || !isNonTaggedTextSelected.value;
+};
+const flowTitle = (configurationItem: TaggableEntityConfiguration): string =>
+  isInNeedOfConfigurationEntities.value
+    ? t("tagging.configuration-entity-required", {
+        entityType: neededConfigurationEntityTypes.value,
+      })
+    : t(labelForFlow(configurationItem));
 const neededConfigurationEntityTypes = computed<string>(() => {
   const configurationEntityTypes: string[] = (
     props.tagging?.configurationsByEntity?.value ?? []

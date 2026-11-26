@@ -196,7 +196,11 @@ import DynamicForm from "@/components/dynamicForms/DynamicForm.vue";
 
 const FLOW_ID = "repetitive-flow";
 
-const props = defineProps<{ open: boolean; config: RepetitiveForm }>();
+const props = defineProps<{
+  open: boolean;
+  config: RepetitiveForm;
+  createPrefill?: object;
+}>();
 const emit = defineEmits<{
   (e: "close"): void;
   (
@@ -274,7 +278,9 @@ const skipSearch = computed(() =>
     : false,
 );
 const createPrefill = computed(() =>
-  activeStep.value ? store.buildCreatePrefill(activeStep.value) : undefined,
+  activeStep.value
+    ? { ...store.buildCreatePrefill(activeStep.value), ...props.createPrefill }
+    : undefined,
 );
 const pickerParentUuid = computed(() => {
   const scopeStep = activeStep.value?.scopeToRelationOf?.step;
@@ -337,9 +343,12 @@ const advance = async (
   completeCurrentStep();
 };
 
-const onSelected = (entities: { id: string; label?: string }[]) =>
+const onSelected = (
+  entities: { id: string; label?: string }[],
+  pickedItems?: Record<string, any>[],
+) =>
   run(async () => {
-    lastPicked.value = entities[0];
+    lastPicked.value = pickedItems?.[0] ?? entities[0];
     store.pickExisting(entities);
     // persist the link to the prior step before advancing (link-on-select)
     const step = activeStep.value;
@@ -362,6 +371,7 @@ const onCreated = async (
   },
   entityType?: string,
 ) => {
+  lastPicked.value = { ...entity, type: entityType ?? (entity as any).type };
   const { label, details } = describeCreatedEntity(entity);
   // the created entity's intialValues feed the overview's configured fields;
   // entityType is the concrete subtype the user picked on the create screen

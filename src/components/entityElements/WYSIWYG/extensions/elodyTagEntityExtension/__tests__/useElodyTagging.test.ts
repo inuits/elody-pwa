@@ -39,7 +39,6 @@ const configurationFor = (tag: string, entityType: string) =>
       tag,
       taggableEntityType: entityType,
       relationType: `ref_${tag}`,
-      createNewEntityFormQuery: "q",
       metadataFilterForTagContent: "title",
       metadataKeysToSetAsAttribute: [],
       tagConfigurationByEntity: null,
@@ -143,6 +142,20 @@ describe("useElodyTagging", () => {
     const style = document.getElementById("elody-tagging-instance-uncoloured");
     expect(style?.textContent).toContain("elody-user");
 
+    tagging.destroy();
+  });
+
+  it("offers the flows of the configurations as given, before they fan out per entity", async () => {
+    const tagging = await useElodyTagging("instance-flow", [
+      ...configurationFor("word", "word"),
+      { taggableEntityType: "word", guidedFlowQuery: "GetTagWordFlow" },
+    ] as any);
+
+    expect(
+      tagging.flowConfigurations.value.map(
+        (configuration) => configuration.guidedFlowQuery,
+      ),
+    ).toEqual(["GetTagWordFlow"]);
     tagging.destroy();
   });
 

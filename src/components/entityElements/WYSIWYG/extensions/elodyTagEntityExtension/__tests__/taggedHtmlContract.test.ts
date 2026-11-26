@@ -45,7 +45,6 @@ const aicapConfiguration = () => ({
   configurationEntityId: "EDT-1",
   taggableEntityType: "word",
   relationType: "refWords",
-  createNewEntityFormQuery: "GetWordCreateForm",
   metadataFilterForTagContent: "aicap:1|properties.original_word.value",
   metadataKeysToSetAsAttribute: ["lemma"],
   tagColor: "#123456",
@@ -59,6 +58,22 @@ const aicapConfiguration = () => ({
     secondaryAttributeToDetermineTagConfig: "type",
   },
 });
+
+// the configuration as given: no tag of its own, the word's epi_doc_tag decides
+const wordFlowConfiguration = () =>
+  ({
+    ...aicapConfiguration(),
+    tag: undefined,
+    configurationEntityId: undefined,
+    guidedFlowQuery: "GetTagWordFlow",
+  }) as any;
+
+const taggedWord = () =>
+  ({
+    id: "W-42",
+    type: "word",
+    relationValues: { refEpiDocTag: [{ key: "EDT-1" }] },
+  }) as any;
 
 const buildEditor = async (
   content: string,
@@ -252,10 +267,7 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
       const editor = await buildTaggingEditor("<p>ab=<br>cd</p>");
 
       editor.commands.setTextSelection({ from: 2, to: 6 });
-      await editor.commands.linkEntityToTaggedText({
-        id: "W-42",
-        type: "word",
-      } as any);
+      editor.commands.tagEntityFromFlow(taggedWord(), wordFlowConfiguration());
 
       const html = editor.getHTML();
       expect(html).toMatch(/a<elody-w[^>]*>b=<br>c<\/elody-w>d/);
@@ -267,10 +279,7 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
       const editor = await buildTaggingEditor("<p>ab=</p><p>cd</p>");
 
       editor.commands.setTextSelection({ from: 2, to: 7 });
-      await editor.commands.linkEntityToTaggedText({
-        id: "W-42",
-        type: "word",
-      } as any);
+      editor.commands.tagEntityFromFlow(taggedWord(), wordFlowConfiguration());
 
       expect(editor.getHTML()).toMatch(
         /^<p>a<elody-w[^>]*>b=<br>c<\/elody-w>d<\/p>$/,
@@ -318,28 +327,28 @@ describe("tagged HTML contract (AICAP backend depends on this)", () => {
       ["a hard break", "<p>عبد<br>الله</p>", 9],
       ["two paragraphs", "<p>عبد</p><p>الله</p>", 10],
     ])(
-      "hands the tag modal a <br> for a selection across %s",
+      "hands the tag flow a <br> for a selection across %s",
       async (_, content, to) => {
         const editor = await buildTaggingEditor(content);
         openModal.mockClear();
 
         editor.commands.setTextSelection({ from: 1, to });
-        editor.commands.openTagModal();
+        editor.commands.openTagFlow(wordFlowConfiguration());
 
-        expect(openModal.mock.calls[0][6].selectedText).toBe("عبد<br>الله");
+        expect(openModal.mock.calls[0][6].filterVariables.taggedText).toBe("عبد<br>الله");
 
         editor.destroy();
       },
     );
 
-    it("hands the tag modal literal angle brackets, not HTML entities", async () => {
+    it("hands the tag flow literal angle brackets, not HTML entities", async () => {
       const editor = await buildTaggingEditor("<p>mo&lt;x&gt;on</p>");
       openModal.mockClear();
 
       editor.commands.setTextSelection({ from: 1, to: 8 });
-      editor.commands.openTagModal();
+      editor.commands.openTagFlow(wordFlowConfiguration());
 
-      expect(openModal.mock.calls[0][6].selectedText).toBe("mo<x>on");
+      expect(openModal.mock.calls[0][6].filterVariables.taggedText).toBe("mo<x>on");
 
       editor.destroy();
     });

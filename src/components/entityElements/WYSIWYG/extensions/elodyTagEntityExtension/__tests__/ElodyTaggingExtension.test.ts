@@ -262,11 +262,19 @@ describe("metadata copied from the picked entity onto the tag", () => {
     });
 
     editor.commands.setTextSelection({ from: 1, to: 6 });
-    await editor.commands.linkEntityToTaggedText({
-      id: "U-1",
-      type: "user",
-      intialValues: { name: "<mark>Ad</mark>a" },
-    } as any);
+    editor.commands.tagEntityFromFlow(
+      {
+        id: "U-1",
+        type: "user",
+        intialValues: { name: "<mark>Ad</mark>a" },
+      } as any,
+      {
+        tag: "user",
+        extensionName: TAG_TYPE,
+        taggableEntityType: "user",
+        metadataKeysToSetAsAttribute: ["name"],
+      } as any,
+    );
 
     let tagNode: any = null;
     editor.state.doc.descendants((node: any) => {

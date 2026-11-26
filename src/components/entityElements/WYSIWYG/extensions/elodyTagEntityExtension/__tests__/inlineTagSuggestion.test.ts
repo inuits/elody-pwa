@@ -3,7 +3,6 @@ import { ref as vueRef } from "vue";
 import {
   configurationForEntity,
   createInlineTagSuggestionExtension,
-  isTaggedByTriggerOnly,
   suggestionStateFor,
 } from "../inlineTagSuggestion";
 
@@ -60,40 +59,6 @@ describe("suggestionStateFor", () => {
 
     expect(suggestionStateFor([configuration], propsWith(""))).toBeNull();
     expect(suggestionStateFor([configuration], propsWith("a"))).not.toBeNull();
-  });
-});
-
-describe("isTaggedByTriggerOnly", () => {
-  it("is true when every configuration has a trigger", () => {
-    expect(
-      isTaggedByTriggerOnly([
-        configurationWithTrigger("user", "@"),
-        configurationWithTrigger("entity", "#"),
-      ]),
-    ).toBe(true);
-  });
-
-  it("is false when one configuration has no trigger", () => {
-    // Mixed sets must keep the toolbar button: the trigger-less entry has no other
-    // way to be tagged.
-    expect(
-      isTaggedByTriggerOnly([
-        configurationWithTrigger("user", "@"),
-        { extensionName: "w", tag: "w" } as any,
-      ]),
-    ).toBe(false);
-  });
-
-  it("is false for AICAP's trigger-less configuration", () => {
-    expect(
-      isTaggedByTriggerOnly([{ extensionName: "w", tag: "w" } as any]),
-    ).toBe(false);
-  });
-
-  it("is false when there is no configuration at all", () => {
-    // An empty set means the configuration entities have not resolved yet; hiding the
-    // button here would make it flicker in once they do.
-    expect(isTaggedByTriggerOnly([])).toBe(false);
   });
 });
 
