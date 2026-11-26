@@ -6,7 +6,7 @@ import {
   type Operation,
 } from "@apollo/client/core";
 import { getMainDefinition } from "@apollo/client/utilities";
-import { Kind, print, visit } from "graphql";
+import { Kind, print, visit, type FieldNode } from "graphql";
 
 const CONFIG_ROOT_FIELDS = new Set([
   "PaginationLimitOptions",
@@ -19,8 +19,6 @@ const CONFIG_ROOT_FIELDS = new Set([
   "BulkOperations",
   "CustomBulkOperations",
 ]);
-
-const PERMISSION_TRIMMED = /\bcan\b|\b(permitted|readOnly)\s*\(/;
 
 const configQuery = (query: DocumentNode) => {
   const definition = getMainDefinition(query);
@@ -37,31 +35,40 @@ const configQuery = (query: DocumentNode) => {
   return isConfigOnly ? definition : undefined;
 };
 
-export const isSessionCachedConfig = (query: DocumentNode): boolean =>
-  !!configQuery(query) && !PERMISSION_TRIMMED.test(print(query));
+const hasCanArgument = (field: FieldNode) => {
+  let found = false;
+  (field.arguments ?? []).forEach((argument) =>
+    visit(argument, {
+      Argument(node) {
+        if (node.name.value === "can") found = true;
+      },
+      ObjectField(node) {
+        if (node.name.value === "can") found = true;
+      },
+    }),
+  );
+  return found;
+};
 
 const permissionFields = (query: DocumentNode) => {
   const keys = new Set<string>();
-  let inArgument = false;
   visit(query, {
     Field(field) {
       const name = field.name.value;
       if (
         name === "can" ||
         ((name === "permitted" || name === "readOnly") &&
-          field.arguments?.length)
+          field.arguments?.length) ||
+        hasCanArgument(field)
       )
         keys.add(field.alias?.value ?? name);
     },
-    ObjectField(field) {
-      if (field.name.value === "can") inArgument = true;
-    },
-    Argument(argument) {
-      if (argument.name.value === "can") inArgument = true;
-    },
   });
-  return { keys, inArgument };
+  return keys;
 };
+
+export const isSessionCachedConfig = (query: DocumentNode): boolean =>
+  !!configQuery(query) && permissionFields(query).size === 0;
 
 const containsKey = (value: unknown, keys: Set<string>): boolean => {
   if (!value || typeof value !== "object") return false;
@@ -74,8 +81,8 @@ const containsKey = (value: unknown, keys: Set<string>): boolean => {
 
 const cacheableFor = (query: DocumentNode, result: FetchResult): boolean => {
   if (result.errors?.length || !result.data) return false;
-  const { keys, inArgument } = permissionFields(query);
-  return !inArgument && keys.size > 0 && !containsKey(result.data, keys);
+  const keys = permissionFields(query);
+  return keys.size > 0 && !containsKey(result.data, keys);
 };
 
 const cacheKey = (operation: Operation): string | undefined => {
