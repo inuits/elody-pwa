@@ -31,7 +31,7 @@ use the same tokens.
 | `--radius-chip` | all shapes |
 | `--color-badge-tone{1,2,3}-{bg,text}`, `--color-badge-subtype-*` | tones |
 | `--color-chip-neutral-{bg,text}` | fallback when config gives no colours, and default relation pills |
-| `--color-chip-relation-{bg,text}` | relation chips (platform blue, same on every client) |
+| `--color-chip-relation-{bg,text}` | relation chips; mixed from `--color-accent` (70% light, 55% dark), so they follow the client theme |
 | `--color-chip-value-{bg,text}` | value chips; derived from accent-light / accent-ink, so they follow the client theme |
 
 ## Configuration

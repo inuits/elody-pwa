@@ -2,9 +2,9 @@
   <ul v-if="item" class="border-neutral-700">
     <li
       data-test="li-tree"
-      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-blue-500 border-r-4"
+      class="text-neutral-700 font-bold flex items-center relative grow justify-between border-neutral-50 hover:border-accent border-r-4"
       :class="{
-        'bg-blue-75': selectedItem && selectedItem === item,
+        'bg-accent-light': selectedItem && selectedItem === item,
       }"
     >
       <div
@@ -12,12 +12,12 @@
         @click="emit('updateSelectedItem', item)"
       >
         <span
-          class="inline-block h-px bg-neutral-700 group=hover:bg-blue-500"
+          class="inline-block h-px bg-neutral-700 group=hover:bg-accent"
         />
         <span
-          class="w-2.5 h-2.5 rounded-full bg-neutral-700 inline-block mr-4 -ml-1 z-10 group-hover:bg-blue-500"
+          class="w-2.5 h-2.5 rounded-full bg-neutral-700 inline-block mr-4 -ml-1 z-10 group-hover:bg-accent"
         />
-        <span class="inline-block mr-3 group-hover:text-blue-500">
+        <span class="inline-block mr-3 group-hover:text-accent">
           {{ item }}
         </span>
       </div>

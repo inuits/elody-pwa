@@ -252,7 +252,7 @@ const buttonClass = computed(() => {
     "bg-neutral-100": !selectedDirectory.value,
     "text-neutral-0": true,
     "px-4 py-2 rounded": true,
-    "hover:bg-blue-100": selectedDirectory.value,
+    "hover:bg-accent-wash": selectedDirectory.value,
   };
 });
 
