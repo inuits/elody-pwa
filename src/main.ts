@@ -96,14 +96,16 @@ const start = async (): Promise<void> => {
     uniSun,
   ]);
 
-  const applicationDetails = await getApplicationDetails();
+  const { setVersion, getPwaVersion } = useServiceVersionManager();
+  // the build, on the traces and the usage events as well
+  const [applicationDetails, pwaVersion] = await Promise.all([
+    getApplicationDetails(),
+    getPwaVersion(),
+  ]);
   const { translations, version, urlMapping } = applicationDetails;
   let { config } = applicationDetails;
   // one id per tab, shared by the traces, the usage events and the error reports
   const sessionId = getSessionId();
-  const { setVersion, getPwaVersion } = useServiceVersionManager();
-  // the build, on the traces and the usage events as well
-  const pwaVersion = await getPwaVersion();
   const knownPwaVersion =
     pwaVersion && pwaVersion !== "no-version-found" ? pwaVersion : undefined;
   await initBrowserTracing(config, undefined, sessionId, knownPwaVersion);
@@ -140,7 +142,12 @@ const start = async (): Promise<void> => {
     await auth.verifyServerAuth();
   }
 
-  await initUsageAnalytics(config, sessionId, undefined, knownPwaVersion);
+  const usageAnalyticsStarted = initUsageAnalytics(
+    config,
+    sessionId,
+    undefined,
+    knownPwaVersion,
+  );
 
   bulkSelectAllSizeLimit = config.bulkSelectAllSizeLimit;
 
@@ -225,6 +232,7 @@ const start = async (): Promise<void> => {
   // the user by pseudonym only: in the usage events and in the traces, errors
   // and replays (with their library), never by name or e-mail address
   const user = auth.isAuthenticated.value ? auth.user : undefined;
+  await usageAnalyticsStarted;
   const pseudonym = await identifyUser(user);
   if (pseudonym)
     identifyInBrowserTracing({ pseudonym, library: libraryOf(user?.email) });

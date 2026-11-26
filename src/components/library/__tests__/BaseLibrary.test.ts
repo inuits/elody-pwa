@@ -2008,3 +2008,40 @@ describe("BaseLibrary.vue custom bulk operations", () => {
     expect(libEnqueuePromise).not.toHaveBeenCalledWith(fetchBulkOperations);
   });
 });
+
+describe("BaseLibrary.vue before its first fetch", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.addRefetchFunction = vi.fn();
+    mocks.addMutationCallback = vi.fn();
+    mockRoute.path = "/test";
+    libEntities.value = [];
+    libEntitiesLoading.value = false;
+  });
+  afterEach(() => {
+    libGetEntities.mockResolvedValue([]);
+  });
+
+  it("shows no empty result while the first fetch has not finished", async () => {
+    libGetEntities.mockReturnValue(new Promise(() => {}));
+    const wrapper = getWrapper();
+    await flushPromises();
+    expect(wrapper.text()).not.toContain("search.noresult");
+  });
+
+  it("shows the loading rows while the first fetch has not finished", async () => {
+    libGetEntities.mockReturnValue(new Promise(() => {}));
+    const wrapper = getWrapper();
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: "ListItemSkeleton" }).attributes("style") ??
+        "",
+    ).not.toContain("display: none");
+  });
+
+  it("shows the empty result once the first fetch found nothing", async () => {
+    const wrapper = getWrapper();
+    await flushPromises();
+    expect(wrapper.text()).toContain("search.noresult");
+  });
+});

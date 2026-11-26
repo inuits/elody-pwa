@@ -329,7 +329,9 @@
             />
           </div>
           <div
-            v-if="entities?.length === 0 && !entitiesLoading"
+            v-if="
+              entities?.length === 0 && !entitiesLoading && !awaitingFirstFetch
+            "
             :class="[
               {
                 'text-center my-2':
@@ -863,10 +865,18 @@ const additionalDefaultFiltersEnabled = computed(() => {
   );
 });
 
+const awaitingFirstFetch = computed(
+  () =>
+    isInitialLoading.value &&
+    !props.ignoreFetchingData &&
+    !props.predefinedEntities,
+);
+
 const entitiesLoadingWithoutData = computed(
   () =>
-    entitiesLoading.value &&
-    (isInitialLoading.value || !entities.value?.length),
+    awaitingFirstFetch.value ||
+    (entitiesLoading.value &&
+      (isInitialLoading.value || !entities.value?.length)),
 );
 
 const syncTotalCountWithOptimisticChange = (

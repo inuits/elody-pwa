@@ -39,6 +39,7 @@ vi.mock("@/main", async () => {
   const { ref } = await import("vue");
   return {
     auth: { isAuthenticated: ref(true) },
+    apolloClient: undefined,
     typeUrlMapping: { mapping: {}, reverseMapping: {} },
   };
 });
