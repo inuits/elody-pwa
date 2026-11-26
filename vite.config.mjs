@@ -26,6 +26,21 @@ const stripGeneratedQueriesSourcemap = () => ({
   },
 });
 
+const lazyGeneratedDocuments = () => ({
+  name: "lazy-generated-documents",
+  enforce: "pre",
+  transform(code, id) {
+    if (!id.includes("/generated-types/queries.ts")) return;
+    return {
+      code: code.replace(
+        "import { gql } from '@apollo/client';",
+        "import { gql } from '@/lazyGql';",
+      ),
+      map: null,
+    };
+  },
+});
+
 const cacheDir =
   process.env.NODE_ENV === "development-docker"
     ? "/app/node_modules/.vite"
@@ -40,6 +55,7 @@ const viteConfig = defineConfig(({ mode }) => ({
     tailwindSvgPlugin(),
     tailwindcss(),
     stripGeneratedQueriesSourcemap(),
+    lazyGeneratedDocuments(),
   ],
   define: {
     __VUE_I18N_FULL_INSTALL__: true,
