@@ -37,7 +37,7 @@ export const exampleAppConfig: FullyOptionalEnvironmentInput = {
 
 Setting `--color-accent` alone gives a complete accent theme. `main.css` mixes
 the shades from it: `-light`, `-light-strong`, `-wash` and `-tint` (with the
-surface), `-hover`, `-dark`/`-ink` and the label and link colour
+surface), the list row hover `--color-surface-row-hover`, `-hover`, `-dark`/`-ink` and the label and link colour
 `--color-text-light` (with black). Dark mode does the same against its own
 surface. Panel headers, section headers, hover washes, primary buttons, links,
 labels and panel borders all follow. Any derived token can still be set

@@ -200,7 +200,7 @@
   --color-surface-editable-hover: var(--color-accent-wash);
   --color-surface-group-tint: var(--color-accent-tint);
   --color-surface-group-form: #F6FCFE;
-  --color-surface-row-hover: #F6FBFE;
+  --color-surface-row-hover: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
   --color-surface-repeat-row: #F6FCFD;
   --color-surface-note: #FFF8E9;
   --color-surface-inverted: #172B4D;
@@ -801,6 +801,7 @@ body {
   --color-accent-light-strong: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
   --color-accent-wash: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
   --color-accent-tint: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+  --color-surface-row-hover: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
   --color-accent-hover: color-mix(in srgb, var(--color-accent) 80%, #000000);
   --color-accent-dark: color-mix(in srgb, var(--color-accent) 55%, #000000);
   --color-text-light: color-mix(in srgb, var(--color-accent) 65%, #000000);
@@ -880,7 +881,7 @@ html.dark body {
   --color-surface-muted: #222C38;
   --color-surface-sunken: #0D1218;
   --color-surface-group-form: #1E2834;
-  --color-surface-row-hover: #222E3B;
+  --color-surface-row-hover: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
   --color-surface-repeat-row: #1E2834;
   --color-surface-note: #3A3220;
   --color-surface-inverted: #2C3A4D;
