@@ -55,9 +55,7 @@ import {
   provide,
   onUnmounted,
 } from "vue";
-import { apolloClient, auth } from "@/main";
-import { useImport } from "@/composables/useImport";
-import { prefetchListFilters } from "@/prefetchListFilters";
+import { auth } from "@/main";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";
 import { useEditMode } from "@/composables/useEdit";
 import { useFormHelper } from "@/composables/useFormHelper";
@@ -236,12 +234,6 @@ watch(
   () => result.value,
   () => {
     const fetched = result.value?.Entity as BaseEntity | undefined;
-    if (fetched?.entityView && apolloClient)
-      void prefetchListFilters(
-        fetched.entityView,
-        apolloClient,
-        useImport().loadDocument,
-      );
     if (
       fetched?.entityView &&
       layoutIsCacheable(GetEntityByIdDocument, fetched.__typename ?? "")
