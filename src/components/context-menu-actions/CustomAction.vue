@@ -12,6 +12,7 @@ import { Unicons } from "@/types";
 import { useI18n } from "vue-i18n";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseNotification } from "@/composables/useBaseNotification";
+import { callEntityEndpoint } from "@/composables/endpointAction";
 import { inject } from "vue";
 
 const emit = defineEmits(["toggleLoading"]);
@@ -36,16 +37,11 @@ const doAction = async () => {
       t("notifications.success.action-started.description"),
     );
 
-    const response = await fetch(createUrl(), {
-      method: props.endpointMethod?.toUpperCase() || "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
+    await callEntityEndpoint(
+      props.endpointUrl,
+      props.endpointMethod,
+      props.entityId,
+    );
 
     await refetchParentEntity();
 
@@ -61,9 +57,5 @@ const doAction = async () => {
   } finally {
     emit("toggleLoading");
   }
-};
-
-const createUrl = () => {
-  return `/${props.endpointUrl.replace("$id", props.entityId)}`;
 };
 </script>

@@ -10,6 +10,7 @@
 import { Unicons } from "@/types";
 import BaseContextMenuItem from "@/components/base/BaseContextMenuItem.vue";
 import { useBaseNotification } from "@/composables/useBaseNotification";
+import { callEntityEndpoint } from "@/composables/endpointAction";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
@@ -35,19 +36,13 @@ const resolveFilename = (response: Response): string => {
   return "download.zip";
 };
 
-const createUrl = (): string => {
-  return `/${props.endpointUrl.replace("$id", props.entityId)}`;
-};
-
 const doAction = async () => {
   try {
-    const response = await fetch(createUrl(), {
-      method: props.endpointMethod?.toUpperCase() || "GET",
-    });
-
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
+    const response = await callEntityEndpoint(
+      props.endpointUrl,
+      props.endpointMethod,
+      props.entityId,
+    );
 
     const filename = resolveFilename(response);
     const blob = await response.blob();

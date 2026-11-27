@@ -11,6 +11,7 @@ import { sha256 } from "crypto-hash";
 import "./assets/main.css";
 import "@/composables/useColorScheme";
 import App from "./App.vue";
+import Maintenance from "@/views/errorViews/Maintenance.vue";
 import Unicon from "vue-unicons";
 import {
   uniExclamationCircle,
@@ -128,6 +129,17 @@ const start = async (): Promise<void> => {
   initializeInputValidation(translations);
 
   if (config.customization) applyCustomization(config.customization);
+
+  // Before login and Apollo: the backend may be down during maintenance.
+  if (config.maintenanceMode) {
+    createApp(Maintenance, {
+      applicationTitle: config.customization.applicationTitle,
+    })
+      .use(i18n)
+      .mount("#app");
+    return;
+  }
+
   auth = auth != null ? auth : (auth = new OpenIdConnectClient(config.oidc));
 
   const head = createHead();
