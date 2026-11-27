@@ -121,6 +121,10 @@
   </div>
 </template>
 
+<script lang="ts">
+const measuredWidths = new Map<string, number>();
+</script>
+
 <script lang="ts" setup>
 import { computed, ref, watch, inject, onMounted, useId, nextTick } from "vue";
 import {
@@ -296,20 +300,30 @@ const calculateWidth = () => {
   // The host may scale --vs-font-size (list band), so measure where it renders.
   const style = getComputedStyle(root.value ?? document.body);
   span.style.font = `
-    ${style.getPropertyValue("--vs-font-weight")} 
-    ${style.getPropertyValue("--vs-font-size")} 
+    ${style.getPropertyValue("--vs-font-weight")}
+    ${style.getPropertyValue("--vs-font-size")}
     ${style.getPropertyValue("--vs-font-family")}
   `;
+  const labels = props.options.map((option) =>
+    stripHighlightTags(t(option.label)),
+  );
+  const key = [span.style.font, ...labels].join("\u0000");
+  const known = measuredWidths.get(key);
+  if (known !== undefined) {
+    calculatedWidth.value = known;
+    return;
+  }
 
   document.body.appendChild(span);
 
   let maxWidth = 0;
-  props.options.forEach((option) => {
-    span.textContent = stripHighlightTags(t(option.label));
+  labels.forEach((label) => {
+    span.textContent = label;
     maxWidth = Math.max(maxWidth, span.offsetWidth);
   });
 
   document.body.removeChild(span);
+  measuredWidths.set(key, maxWidth);
   calculatedWidth.value = maxWidth;
 };
 

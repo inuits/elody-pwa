@@ -213,3 +213,53 @@ describe("AdvancedDropdown — selected option", () => {
     expect(optionEls[1].find('[data-cy="option-check"]').exists()).toBe(true);
   });
 });
+
+describe("AdvancedDropdown width", () => {
+  const measure = () => {
+    const reads = vi.fn();
+    const original = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetWidth",
+    );
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      configurable: true,
+      get() {
+        reads(this.textContent);
+        return (this.textContent ?? "").length * 10;
+      },
+    });
+    const restore = () =>
+      Object.defineProperty(HTMLElement.prototype, "offsetWidth", original!);
+    return { reads, restore };
+  };
+  const options = [
+    { label: "Sort by title", value: "title" },
+    { label: "Sort by date", value: "date" },
+  ];
+
+  it("sizes the trigger to its widest option", async () => {
+    const { restore } = measure();
+    const wrapper = shallowMount(AdvancedDropdown, {
+      props: { modelValue: undefined, options },
+    });
+    restore();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.attributes("style")).toContain("calc(130px + 3.5rem)");
+  });
+
+  it("measures the same options only once for several dropdowns", () => {
+    const { reads, restore } = measure();
+    const same = [
+      { label: "Items: 10", value: "10" },
+      { label: "Items: 20", value: "20" },
+    ];
+    shallowMount(AdvancedDropdown, {
+      props: { modelValue: undefined, options: same },
+    });
+    shallowMount(AdvancedDropdown, {
+      props: { modelValue: undefined, options: same },
+    });
+    restore();
+    expect(reads).toHaveBeenCalledTimes(2);
+  });
+});
