@@ -51,6 +51,11 @@ describe("lazy gql", () => {
     expect(() => broken.definitions).toThrow();
   });
 
+  it("keeps no source locations on its nodes", () => {
+    const definitions = build(gql).definitions;
+    expect(JSON.stringify(definitions)).not.toContain('"loc"');
+  });
+
   it("parses a document once", () => {
     const document = build(gql);
     expect(document.definitions).toBe(document.definitions);
