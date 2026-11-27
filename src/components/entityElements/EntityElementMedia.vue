@@ -74,6 +74,7 @@
 </template>
 
 <script lang="ts" setup>
+import { defineAsyncComponent } from "vue";
 import {
   ActionOnClick,
   Entitytyping,
@@ -86,7 +87,7 @@ import {
   TypeModals,
 } from "@/generated-types/queries";
 import BaseLibrary from "@/components/library/BaseLibrary.vue";
-import BaseMap from "../base/BaseMap.vue";
+const BaseMap = defineAsyncComponent(() => import("../base/BaseMap.vue"));
 import EntityElementWrapper from "@/components/base/EntityElementWrapper.vue";
 import { useEditMode } from "@/composables/useEdit";
 import useEntityPickerModal from "@/composables/useEntityPickerModal";

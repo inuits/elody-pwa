@@ -257,6 +257,7 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from "vue";
 import { trackFormSubmitted } from "@/analytics/usageAnalytics";
 import { useUsageSurface } from "@/analytics/usageSurface";
 import { useBaseModal } from "@/composables/useBaseModal";
@@ -309,7 +310,7 @@ import {
   onUnmounted,
 } from "vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
-import UploadInterfaceDropzone from "@/components/UploadInterfaceDropzone.vue";
+const UploadInterfaceDropzone = defineAsyncComponent(() => import("@/components/UploadInterfaceDropzone.vue"));
 import { useI18n } from "vue-i18n";
 import useUpload from "@/composables/upload/useUpload";
 import {

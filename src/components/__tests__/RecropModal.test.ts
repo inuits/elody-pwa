@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import RecropModal from "@/components/RecropModal.vue";
 
 const mocks = vi.hoisted(() => ({
@@ -26,7 +26,7 @@ vi.mock("@/composables/useBaseModal", () => ({
   }),
 }));
 
-vi.mock("@/components/IIIFViewer.vue", () => ({ default: mocks.IIIFViewer }));
+vi.mock("@/components/IIIFViewer.vue", () => ({ __esModule: true, default: mocks.IIIFViewer }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -34,8 +34,8 @@ beforeEach(() => {
   HTMLDialogElement.prototype.close = vi.fn();
 });
 
-const getWrapper = (props = {}) =>
-  mount(RecropModal, {
+const getWrapper = async (props = {}) => {
+  const w = mount(RecropModal, {
     props: {
       open: true,
       imageFilename: "display-test.jpg",
@@ -48,15 +48,18 @@ const getWrapper = (props = {}) =>
       stubs: { unicon: true, BlockingOverlay: true },
     },
   });
+  await flushPromises();
+  return w;
+};
 
 describe("RecropModal", () => {
-  it("does not render the viewer when closed", () => {
-    const wrapper = getWrapper({ open: false });
+  it("does not render the viewer when closed", async () => {
+    const wrapper = await getWrapper({ open: false });
     expect(wrapper.findComponent(mocks.IIIFViewer).exists()).toBe(false);
   });
 
-  it("renders the viewer, always without a crop, with selection enabled and isRecropModal set, when open", () => {
-    const wrapper = getWrapper();
+  it("renders the viewer, always without a crop, with selection enabled and isRecropModal set, when open", async () => {
+    const wrapper = await getWrapper();
 
     const viewer = wrapper.findComponent(mocks.IIIFViewer);
     expect(viewer.exists()).toBe(true);
@@ -68,7 +71,7 @@ describe("RecropModal", () => {
   });
 
   it("disables the save button until a selection has been drawn", async () => {
-    const wrapper = getWrapper();
+    const wrapper = await getWrapper();
 
     expect(
       wrapper.find('[data-testid="recrop-modal-save"]').attributes("disabled"),
@@ -84,7 +87,7 @@ describe("RecropModal", () => {
   });
 
   it("re-disables the save button when the viewer reports the selection was cleared (undo)", async () => {
-    const wrapper = getWrapper();
+    const wrapper = await getWrapper();
     const viewer = wrapper.findComponent(mocks.IIIFViewer);
 
     await viewer.vm.$emit(
@@ -104,7 +107,7 @@ describe("RecropModal", () => {
   });
 
   it("emits save with the drawn coordinates and the mediafileId when clicked", async () => {
-    const wrapper = getWrapper();
+    const wrapper = await getWrapper();
     const coordinates = { x: 1, y: 2, w: 3, h: 4 };
 
     await wrapper
@@ -116,20 +119,20 @@ describe("RecropModal", () => {
   });
 
   it("emits close when the header close button is clicked", async () => {
-    const wrapper = getWrapper();
+    const wrapper = await getWrapper();
     await wrapper.find('[data-testid="recrop-modal-close"]').trigger("click");
     expect(wrapper.emitted("close")).toBeTruthy();
   });
 
-  it("disables the save button while saving is true", () => {
-    const wrapper = getWrapper({ saving: true });
+  it("disables the save button while saving is true", async () => {
+    const wrapper = await getWrapper({ saving: true });
     expect(
       wrapper.find('[data-testid="recrop-modal-save"]').attributes("disabled"),
     ).toBeDefined();
   });
 
   it("resets the pending selection state when reopened", async () => {
-    const wrapper = getWrapper();
+    const wrapper = await getWrapper();
     await wrapper
       .findComponent(mocks.IIIFViewer)
       .vm.$emit("selectArea", { x: 1, y: 2, w: 3, h: 4 }, "mediafile-1");
@@ -146,25 +149,25 @@ describe("RecropModal", () => {
   });
 
   it("calls showModal when open becomes true and registers the dialog", async () => {
-    const wrapper = getWrapper({ open: false });
+    const wrapper = await getWrapper({ open: false });
     await wrapper.setProps({ open: true });
     expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
     expect(mocks.registerOpenDialog).toHaveBeenCalled();
   });
 });
 
-describe("RecropModal - page scroll lock", () => {
+describe("RecropModal - page scroll lock", async () => {
   afterEach(() => {
     document.body.classList.remove("overflow-hidden");
   });
 
-  it("locks page scroll (adds overflow-hidden on body) once open, on mount", () => {
+  it("locks page scroll (adds overflow-hidden on body) once open, on mount", async () => {
     getWrapper({ open: true });
     expect(document.body.classList.contains("overflow-hidden")).toBe(true);
   });
 
   it("locks page scroll when open transitions from false to true", async () => {
-    const wrapper = getWrapper({ open: false });
+    const wrapper = await getWrapper({ open: false });
     expect(document.body.classList.contains("overflow-hidden")).toBe(false);
 
     await wrapper.setProps({ open: true });
@@ -173,7 +176,7 @@ describe("RecropModal - page scroll lock", () => {
   });
 
   it("releases the scroll lock when closed", async () => {
-    const wrapper = getWrapper({ open: true });
+    const wrapper = await getWrapper({ open: true });
     expect(document.body.classList.contains("overflow-hidden")).toBe(true);
 
     await wrapper.setProps({ open: false });
@@ -181,8 +184,8 @@ describe("RecropModal - page scroll lock", () => {
     expect(document.body.classList.contains("overflow-hidden")).toBe(false);
   });
 
-  it("releases the scroll lock when unmounted while open", () => {
-    const wrapper = getWrapper({ open: true });
+  it("releases the scroll lock when unmounted while open", async () => {
+    const wrapper = await getWrapper({ open: true });
     expect(document.body.classList.contains("overflow-hidden")).toBe(true);
 
     wrapper.unmount();

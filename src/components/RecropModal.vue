@@ -54,11 +54,12 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from "vue";
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { Unicons } from "@/types";
 import { useBaseModal } from "@/composables/useBaseModal";
 import BlockingOverlay from "@/components/base/BlockingOverlay.vue";
-import IIIFViewer from "@/components/IIIFViewer.vue";
+const IIIFViewer = defineAsyncComponent(() => import("@/components/IIIFViewer.vue"));
 import type { CropAreaCoordinates } from "@/composables/useMediafileCrop";
 
 const props = defineProps<{

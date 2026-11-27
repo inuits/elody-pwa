@@ -166,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from "vue";
 import {
   type ColumnList,
   DamsIcons,
@@ -176,7 +177,7 @@ import {
   PreviewTypes,
   ViewModes,
 } from "@/generated-types/queries";
-import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
+const ViewModesMap = defineAsyncComponent(() => import("@/components/library/view-modes/ViewModesMap.vue"));
 import MediaViewerPreview from "@/components/previews/MediaViewerPreview.vue";
 import { useI18n } from "vue-i18n";
 import type { RouteLocationRaw } from "vue-router";
@@ -187,7 +188,7 @@ import EntityColumn from "@/components/EntityColumn.vue";
 import { getTitleOrNameFromEntity } from "@/helpers";
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import SpinnerLoader from "@/components/SpinnerLoader.vue";
-import { useMaps } from "@/composables/useMaps";
+import { getBasicMapProperties } from "@/utils/mapProperties";
 import { apolloClient, router } from "@/main";
 import HistoryDiffPreview from "./HistoryDiffPreview.vue";
 import { isCompact } from "@/composables/useNavMenu";
@@ -196,7 +197,6 @@ import ChangesPreview from "./ChangesPreview.vue";
 const { t } = useI18n();
 const { loadDocument } = useImport();
 const { addMediafileSelectionStateContext } = useEntityMediafileSelector();
-const { getBasicMapProperties } = useMaps();
 
 const props = withDefaults(
   defineProps<{

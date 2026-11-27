@@ -557,6 +557,7 @@
 </template>
 
 <script lang="ts" setup>
+import { defineAsyncComponent } from "vue";
 import ActionMenuGroup from "@/components/ActionMenuGroup.vue";
 import BaseInputAutocomplete from "@/components/base/BaseInputAutocomplete.vue";
 import BaseToggleGroup from "@/components/base/BaseToggleGroup.vue";
@@ -576,7 +577,7 @@ import FiltersPane from "@/components/filters/FiltersPane.vue";
 import { filtersLayout } from "@/components/filters/filtersLayout";
 import { useBaseLibrary } from "@/components/library/useBaseLibrary";
 import ViewModesList from "@/components/library/view-modes/ViewModesList.vue";
-import ViewModesMap from "@/components/library/view-modes/ViewModesMap.vue";
+const ViewModesMap = defineAsyncComponent(() => import("@/components/library/view-modes/ViewModesMap.vue"));
 import ViewModesPipeline from "@/components/library/view-modes/ViewModesPipeline.vue";
 import ViewModesMedia from "@/components/library/view-modes/ViewModesMedia.vue";
 import ViewModesTable from "@/components/library/view-modes/ViewModesTable.vue";
@@ -610,7 +611,7 @@ import {
   saveRelatedEntityData,
   toParentRelation,
 } from "@/composables/useUpdateRelation";
-import { useMaps } from "@/composables/useMaps";
+import { getBasicMapProperties } from "@/utils/mapProperties";
 import { useStateManagement } from "@/composables/useStateManagement";
 import { useViewModes } from "@/composables/useViewModes";
 import {
@@ -798,7 +799,6 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { getStateForRoute } = useStateManagement();
 const { iterateOverBreadcrumbs } = useBreadcrumbs(config);
-const { getBasicMapProperties } = useMaps();
 const useEditHelper = useEditMode(getEntityUuid());
 
 const abortController = ref<AbortController | null>(null);
