@@ -33,6 +33,11 @@ vi.mock("@vue/apollo-composable", async () => {
         refetch: vi.fn(),
       };
     },
+    useApolloClient: () => ({
+      resolveClient: () => ({
+        query: () => Promise.resolve({ data: {} }),
+      }),
+    }),
   };
 });
 vi.mock("@/main", async () => {
