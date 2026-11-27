@@ -31,6 +31,36 @@ const cacheDir =
     ? "/app/node_modules/.vite"
     : "../node_modules/.vite";
 
+const vendorChunk = (id) => {
+    // App: generated GraphQL types/queries
+    if (id.includes("/src/generated-types/")) return "generated-queries";
+
+    if (!id.includes("node_modules")) return;
+
+    // Vendor chunks
+    if (id.includes("/mirador/")) return "mirador";
+    if (id.includes("/tify/")) return "tify";
+    if (id.match(/\/node_modules\/(vue\/|vue-router\/)/)) return "vue";
+    if (
+      id.includes("/@apollo/") ||
+      id.includes("/@vue/apollo-composable")
+    )
+      return "apollo";
+    if (id.includes("/leaflet/") || id.includes("/@vue-leaflet/"))
+      return "leaflet";
+    // browser observability, loaded only when the app config switches it on
+    if (id.includes("/@hyperdx/")) return "hyperdx";
+    if (id.includes("/openseadragon")) return "openseadragon";
+    if (id.includes("/pdfjs-dist/")) return "pdfjs";
+    if (id.match(/\/node_modules\/ol\//)) return "ol";
+    if (id.includes("/chart.js/") || id.includes("/chartjs"))
+      return "chart";
+    if (id.includes("/vue3-openlayers/")) return "openlayers";
+    if (id.includes("/dropzone/")) return "dropzone";
+    if (id.includes("/vue-unicons/")) return "unicons";
+    if (id.includes("/@tiptap/")) return "tiptap";
+  };
+
 // https://vitejs.dev/config/
 const viteConfig = defineConfig(({ mode }) => ({
   plugins: [
@@ -87,34 +117,17 @@ const viteConfig = defineConfig(({ mode }) => ({
     rollupOptions: {
       external: ["pdfjs-dist/types/src/display/api"],
       output: {
-        manualChunks(id) {
-          // App: generated GraphQL types/queries
-          if (id.includes("/src/generated-types/")) return "generated-queries";
-
-          if (!id.includes("node_modules")) return;
-
-          // Vendor chunks
-          if (id.includes("/mirador/")) return "mirador";
-          if (id.includes("/tify/")) return "tify";
-          if (id.match(/\/node_modules\/(vue\/|vue-router\/)/)) return "vue";
-          if (
-            id.includes("/@apollo/") ||
-            id.includes("/@vue/apollo-composable")
-          )
-            return "apollo";
-          if (id.includes("/leaflet/") || id.includes("/@vue-leaflet/"))
-            return "leaflet";
-          // browser observability, loaded only when the app config switches it on
-          if (id.includes("/@hyperdx/")) return "hyperdx";
-          if (id.includes("/openseadragon")) return "openseadragon";
-          if (id.includes("/pdfjs-dist/")) return "pdfjs";
-          if (id.match(/\/node_modules\/ol\//)) return "ol";
-          if (id.includes("/chart.js/") || id.includes("/chartjs"))
-            return "chart";
-          if (id.includes("/vue3-openlayers/")) return "openlayers";
-          if (id.includes("/dropzone/")) return "dropzone";
-          if (id.includes("/vue-unicons/")) return "unicons";
-          if (id.includes("/@tiptap/")) return "tiptap";
+        codeSplitting: {
+          groups: [
+            {
+              name: "vue",
+              priority: 10,
+              test: /vite\/preload-helper|\/node_modules\/(vue|vue-router|@vue\/(runtime-[a-z]+|reactivity|shared))\//,
+            },
+            { name: "date-fns", priority: 10, test: /\/node_modules\/date-fns\// },
+            { name: "floating-ui", priority: 10, test: /\/node_modules\/@floating-ui\// },
+            { name: vendorChunk },
+          ],
         },
       },
     },

@@ -262,8 +262,14 @@ export const useBaseLibrary = (
   };
 
   const fetchAllPromises = async () => {
-    await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
+    const results = await Promise.allSettled(
+      promiseQueue.value.map((promise) => promise(entityType)),
+    );
     while (promiseQueue.value.length > 0) promiseQueue.value.shift();
+    results.forEach((result) => {
+      if (result.status === "rejected")
+        console.error("Failed to load list setup:", result.reason);
+    });
   };
 
   const determineEntitiesQuery = async (
@@ -312,8 +318,7 @@ export const useBaseLibrary = (
     exactTotalCount.value = null;
     exactCountLoading.value = false;
 
-    await Promise.all(promiseQueue.value.map((promise) => promise(entityType)));
-    while (promiseQueue.value.length > 0) promiseQueue.value.shift();
+    await fetchAllPromises();
 
     _route = route;
     let variables = getStoredQueryVariables(_route);

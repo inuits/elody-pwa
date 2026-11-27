@@ -73,7 +73,7 @@ import {
   type MediaFileEntity,
 } from "@/generated-types/queries";
 import EntityImageSelection from "@/components/EntityImageSelection.vue";
-import IIIFViewer from "@/components/IIIFViewer.vue";
+const IIIFViewer = defineAsyncComponent(() => import("@/components/IIIFViewer.vue"));
 import TextViewer from "@/components/base/TextViewer.vue";
 import { computed, toRefs, watch, inject, defineAsyncComponent } from "vue";
 import { useEntityMediafileSelector } from "@/composables/useEntityMediafileSelector";

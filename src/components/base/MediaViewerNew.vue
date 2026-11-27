@@ -184,7 +184,7 @@ import {
   KeyValueSource,
   type MediaFileEntity,
 } from "@/generated-types/queries";
-import IIIFViewer from "@/components/IIIFViewer.vue";
+const IIIFViewer = defineAsyncComponent(() => import("@/components/IIIFViewer.vue"));
 import RecropModal from "@/components/RecropModal.vue";
 import TextViewer from "@/components/base/TextViewer.vue";
 import MediafileNavigationArrows from "@/components/base/MediafileNavigationArrows.vue";

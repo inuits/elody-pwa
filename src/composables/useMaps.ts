@@ -1,7 +1,6 @@
 import {
   type AdvancedFilter,
   type AdvancedFilters,
-  type ConfigItem,
   type Entity,
   type MapElement,
 } from "@/generated-types/queries";
@@ -14,6 +13,7 @@ import type { FeatureLike } from "ol/Feature";
 import { useListItemHelper } from "@/composables/useListItemHelper";
 import { useGraphqlAsync } from "@/composables/useGraphqlAsync";
 import { ref } from "vue";
+import { getBasicMapProperties } from "@/utils/mapProperties";
 import type { Map as OLMap } from "vue3-openlayers";
 import type { default as MapType } from "ol/Map";
 import GeoJSON, { type GeoJSONGeometry } from "ol/format/GeoJSON";
@@ -79,16 +79,6 @@ export const useMaps = () => {
 
   const hoveredFeature = ref<string | undefined>(undefined);
   const hotspotZoomed = ref<boolean>(false);
-
-  const getBasicMapProperties = (config: ConfigItem[]) => {
-    if (!config) return [];
-    return (
-      config.reduce((resultObject: any, configItem: ConfigItem) => {
-        resultObject[configItem.key] = configItem.value;
-        return resultObject;
-      }, {}) || []
-    );
-  };
 
   // This function will map coordinates following the normal longitude latitude projection (-180, 180) to the Mercator projection
   // ! Not used anymore as it is not needed with EPSG:4326 !

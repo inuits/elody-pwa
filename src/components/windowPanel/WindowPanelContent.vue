@@ -124,6 +124,7 @@
 </template>
 
 <script lang="ts" setup>
+import { defineAsyncComponent } from "vue";
 import { inject } from "vue";
 import { useI18n } from "vue-i18n";
 import {
@@ -136,7 +137,7 @@ import {
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import EntityElementCoordinateEdit from "@/components/EntityElementCoordinateEdit.vue";
-import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
+const EntityElementWYSIWYG = defineAsyncComponent(() => import("@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue"));
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import EntityElementRelation from "@/components/EntityElementRelation.vue";
 import MultilingualWrapper from "@/components/metadata/MultilingualWrapper.vue";

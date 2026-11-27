@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, flushPromises } from "@vue/test-utils";
 import { reactive } from "vue";
 
 vi.mock("@/main", () => ({ apolloClient: {} }));
@@ -39,6 +39,7 @@ vi.mock("@/composables/useFormHelper", () => ({
 
 let formExistedAtChildMount: boolean | undefined;
 vi.mock("@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue", () => ({
+  __esModule: true,
   default: {
     name: "EntityElementWYSIWYG",
     props: ["formId", "element", "displayInline"],
@@ -95,12 +96,13 @@ const mountComposer = (props: Record<string, unknown> = {}) =>
   } as any);
 
 describe("CommentComposer", () => {
-  it("creates its scratch form before the editor child mounts", () => {
+  it("creates its scratch form before the editor child mounts", async () => {
     formExistedAtChildMount = undefined;
     createdForms.length = 0;
     formStore.clear();
 
     const wrapper = mountComposer();
+    await flushPromises();
 
     expect(createdForms).toContain("comment-new-W-1");
     // The assertion that matters: creating the form in onMounted makes this false.

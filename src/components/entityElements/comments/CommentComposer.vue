@@ -39,9 +39,10 @@
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from "vue";
 import { computed, onUnmounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
+const EntityElementWYSIWYG = defineAsyncComponent(() => import("@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue"));
 import BaseButtonNew from "@/components/base/BaseButtonNew.vue";
 import MetadataWrapper from "@/components/metadata/MetadataWrapper.vue";
 import { useFormHelper } from "@/composables/useFormHelper";

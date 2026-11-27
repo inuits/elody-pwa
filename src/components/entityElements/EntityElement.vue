@@ -130,14 +130,15 @@
 </template>
 
 <script lang="ts" setup>
-import EntityElementGraph from "@/components/entityElements/EntityElementGraph.vue";
+import { defineAsyncComponent } from "vue";
+const EntityElementGraph = defineAsyncComponent(() => import("@/components/entityElements/EntityElementGraph.vue"));
 import EntityElementList from "@/components/entityElements/EntityElementList.vue";
 import EntityElementManifestViewer from "@/components/entityElements/EntityElementManifestViewer.vue";
 import EntityElementMedia from "@/components/entityElements/EntityElementMedia.vue";
 import EntityElementSingleMedia from "@/components/entityElements/EntityElementSingleMedia.vue";
 import EntityElementWindow from "@/components/entityElements/EntityElementWindow.vue";
-import EntityElementWYSIWYG from "@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue";
-import EntityElementMapViewer from "@/components/entityElements/EntityElementMapViewer.vue";
+const EntityElementWYSIWYG = defineAsyncComponent(() => import("@/components/entityElements/WYSIWYG/EntityElementWYSIWYG.vue"));
+const EntityElementMapViewer = defineAsyncComponent(() => import("@/components/entityElements/EntityElementMapViewer.vue"));
 import EntityElementHierarchyListViewer from "@/components/entityElements/EntityElementHierarchyListViewer.vue";
 import EntityElementComments from "@/components/entityElements/comments/EntityElementComments.vue";
 
