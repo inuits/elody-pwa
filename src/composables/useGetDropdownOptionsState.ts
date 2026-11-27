@@ -106,10 +106,12 @@ export const useGetDropdownOptionsState = (
   const initialize = async () => {
     if (!serverOptionsUsed && parent?.value !== "fetchAll") {
       serverOptions ??= selectedOptions!().catch(() => null);
+      isLoading.value = true;
       const options = await serverOptions;
       serverOptionsUsed = true;
       if (options) {
         entities.value = options as typeof entities.value;
+        isLoading.value = false;
         return;
       }
     }
