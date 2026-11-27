@@ -4,6 +4,7 @@ import { Kind, print, type DocumentNode } from "graphql";
 import {
   cachedEntityLayout,
   clearEntityLayouts,
+  entityPageDocuments,
   layoutIsCacheable,
   leanEntityDocument,
   selectedOptionsByRelation,
@@ -199,6 +200,17 @@ describe("relation labels in their own query", () => {
       selectedOptions
     }
   `;
+
+  it("gives the record page and the warm-up the same documents", () => {
+    const page = entityPageDocuments(withSelectedOptions);
+    const warmUp = entityPageDocuments(withSelectedOptions);
+    expect(warmUp.entity).toBe(page.entity);
+    expect(warmUp.lean).toBe(page.lean);
+    expect(warmUp.labels).toBe(page.labels);
+    expect(page.entity).toBe(withoutSelectedOptions(withSelectedOptions));
+    expect(page.lean).toBe(leanEntityDocument(page.entity));
+    expect(page.labels).toBe(selectedOptionsDocument(withSelectedOptions));
+  });
 
   it("leaves them out of the entity query", () => {
     const entity = print(withoutSelectedOptions(withSelectedOptions));

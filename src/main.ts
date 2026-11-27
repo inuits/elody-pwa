@@ -58,7 +58,7 @@ import { getSessionId } from "@/observability/sessionId";
 import { createSessionLink } from "@/observability/sessionLink";
 import { createConfigCacheLink } from "@/configCacheLink";
 import { warmUpLink, warmUpQueries } from "@/warmUpQuery";
-import { leanEntityDocument } from "@/entityLayoutCache";
+import { entityPageDocuments } from "@/entityLayoutCache";
 import {
   createUsageLink,
   identifyUser,
@@ -267,9 +267,7 @@ const start = async (): Promise<void> => {
     identifyInBrowserTracing({ pseudonym, library: libraryOf(user?.email) });
 
   app.mount("#app");
-  warmUpQueries(apolloClient, [
-    GetEntityByIdDocument,
-    leanEntityDocument(GetEntityByIdDocument),
-  ]);
+  const { entity, lean, labels } = entityPageDocuments(GetEntityByIdDocument);
+  warmUpQueries(apolloClient, [entity, labels, lean]);
 };
 start();

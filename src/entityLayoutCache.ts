@@ -310,6 +310,15 @@ const typeSwitches = (
   return found;
 };
 
+export const entityPageDocuments = (document: DocumentNode) => {
+  const entity = withoutSelectedOptions(document);
+  return {
+    entity,
+    lean: leanEntityDocument(entity),
+    labels: selectedOptionsDocument(document),
+  };
+};
+
 const cacheableByDocument = new WeakMap<DocumentNode, Map<string, boolean>>();
 
 export const layoutIsCacheable = (

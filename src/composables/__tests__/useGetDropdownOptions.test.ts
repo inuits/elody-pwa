@@ -536,6 +536,18 @@ describe("labels the server sends in the separate labels query", () => {
     ).toEqual(["Comedy"]);
   });
 
+  it("is loading while it waits for the labels, so the field shows no empty value", async () => {
+    let arrive: (options: unknown[]) => void = () => {};
+    const state = createState(
+      () => new Promise((resolve) => (arrive = resolve)),
+    );
+    const initialized = state.initialize();
+    expect(state.entitiesLoading.value).toBe(true);
+    arrive(selectedOptions);
+    await initialized;
+    expect(state.entitiesLoading.value).toBe(false);
+  });
+
   it("asks for them on a later load, when the relations may have changed", async () => {
     const state = createState(async () => selectedOptions);
     await state.initialize();
