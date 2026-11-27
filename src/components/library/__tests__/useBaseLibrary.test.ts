@@ -492,3 +492,43 @@ describe("useBaseLibrary – superseded requests", () => {
     expect(query).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("useBaseLibrary – failing setup queries", () => {
+  const mockRoute = { name: "TestRoute", meta: {} } as any;
+  const failingSetup = async () => {
+    throw new Error("Response not successful: Received status code 502");
+  };
+
+  it("still loads the entities when one of the list's setup queries fails", async () => {
+    const apolloClient = {
+      query: vi.fn().mockResolvedValue({
+        data: { Entities: { results: [{ id: "a" }], count: 1, facets: [] } },
+      }),
+    } as any;
+    const { entities, entitiesLoading, enqueuePromise, getEntities } =
+      useBaseLibrary(apolloClient);
+
+    enqueuePromise(failingSetup);
+    await getEntities(mockRoute);
+
+    expect(entities.value).toEqual([{ id: "a" }]);
+    expect(entitiesLoading.value).toBe(false);
+  });
+});
+
+describe("useBaseLibrary – fetchAllPromises", () => {
+  it("finishes when one of the queued setup queries fails", async () => {
+    const { enqueuePromise, fetchAllPromises } =
+      useBaseLibrary(mockApolloClient);
+    let ran = 0;
+    enqueuePromise(async () => {
+      throw new Error("502");
+    });
+    enqueuePromise(async () => {
+      ran++;
+    });
+
+    await expect(fetchAllPromises()).resolves.toBeUndefined();
+    expect(ran).toBe(1);
+  });
+});
