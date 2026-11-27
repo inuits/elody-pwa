@@ -102,20 +102,81 @@ const answer = (response: Promise<FetchResult>) =>
     );
   });
 
-export const createConfigCacheLink = (): ApolloLink => {
-  const responses = new Map<string, Promise<FetchResult>>();
+type ConfigStorage = Pick<
+  Storage,
+  "getItem" | "setItem" | "removeItem" | "key" | "length"
+>;
+
+const STORAGE_PREFIX = "config-cache|";
+
+const hashOf = (text: string) => {
+  let a = 0xdeadbeef;
+  let b = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    a = Math.imul(a ^ code, 2654435761);
+    b = Math.imul(b ^ code, 1597334677);
+  }
+  a =
+    Math.imul(a ^ (a >>> 16), 2246822507) ^
+    Math.imul(b ^ (b >>> 13), 3266489909);
+  b =
+    Math.imul(b ^ (b >>> 16), 2246822507) ^
+    Math.imul(a ^ (a >>> 13), 3266489909);
+  return (4294967296 * (2097151 & b) + (a >>> 0)).toString(36);
+};
+
+const loadStored = (storage: ConfigStorage | undefined, name: string) => {
+  try {
+    if (!storage) return {};
+    for (let i = storage.length - 1; i >= 0; i--) {
+      const key = storage.key(i);
+      if (key?.startsWith(STORAGE_PREFIX) && key !== name)
+        storage.removeItem(key);
+    }
+    return JSON.parse(storage.getItem(name) ?? "{}") as Record<
+      string,
+      FetchResult
+    >;
+  } catch {
+    return {};
+  }
+};
+
+export const createConfigCacheLink = ({
+  storage,
+  scope = "",
+}: { storage?: ConfigStorage; scope?: string } = {}): ApolloLink => {
+  const storageName = `${STORAGE_PREFIX}${scope}`;
+  const stored = loadStored(storage, storageName);
+  const responses = new Map<string, Promise<FetchResult>>(
+    Object.entries(stored).map(([key, result]) => [
+      key,
+      Promise.resolve(result),
+    ]),
+  );
+  const remember = (key: string, result: FetchResult) => {
+    stored[key] = result;
+    try {
+      storage?.setItem(storageName, JSON.stringify(stored));
+    } catch {}
+  };
 
   return new ApolloLink((operation, forward) => {
-    const key = cacheKey(operation);
-    if (!key) return forward(operation);
+    const fullKey = cacheKey(operation);
+    if (!fullKey) return forward(operation);
+    const key = hashOf(fullKey);
 
     const known = responses.get(key);
     if (known) return answer(known);
 
     if (!isSessionCachedConfig(operation.query))
       return forward(operation).map((result) => {
-        if (cacheableFor(operation.query, result))
-          responses.set(key, Promise.resolve(structuredClone(result)));
+        if (cacheableFor(operation.query, result)) {
+          const copy = structuredClone(result);
+          responses.set(key, Promise.resolve(copy));
+          remember(key, copy);
+        }
         return result;
       });
 
@@ -126,6 +187,7 @@ export const createConfigCacheLink = (): ApolloLink => {
     response.then(
       (result) => {
         if (result.errors?.length) responses.delete(key);
+        else remember(key, result);
       },
       () => responses.delete(key),
     );

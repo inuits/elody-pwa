@@ -348,4 +348,64 @@ describe("createConfigCacheLink", () => {
     await run(link, labelled);
     expect(handle).toHaveBeenCalledTimes(1);
   });
+
+  describe("across page loads", () => {
+    const memoryStorage = () => {
+      const items = new Map<string, string>();
+      return {
+        getItem: (key: string) => items.get(key) ?? null,
+        setItem: (key: string, value: string) => void items.set(key, value),
+        removeItem: (key: string) => void items.delete(key),
+        key: (index: number) => [...items.keys()][index] ?? null,
+        get length() {
+          return items.size;
+        },
+      };
+    };
+    const linkFor = (
+      storage: ReturnType<typeof memoryStorage>,
+      scope: string,
+      terminal: ApolloLink,
+    ) => ApolloLink.from([createConfigCacheLink({ storage, scope }), terminal]);
+
+    it("answers config from the previous page load of the same version and user", async () => {
+      const storage = memoryStorage();
+      const { handle, terminal } = createServer();
+      await run(linkFor(storage, "v1|anna", terminal), sortOptions);
+      const second = await run(
+        linkFor(storage, "v1|anna", terminal),
+        sortOptions,
+      );
+      expect(handle).toHaveBeenCalledTimes(1);
+      expect(second.data).toEqual({ value: "config" });
+    });
+
+    it("asks again after a deploy", async () => {
+      const storage = memoryStorage();
+      const { handle, terminal } = createServer();
+      await run(linkFor(storage, "v1|anna", terminal), sortOptions);
+      await run(linkFor(storage, "v2|anna", terminal), sortOptions);
+      expect(handle).toHaveBeenCalledTimes(2);
+    });
+
+    it("asks again for another user", async () => {
+      const storage = memoryStorage();
+      const { handle, terminal } = createServer();
+      await run(linkFor(storage, "v1|anna", terminal), sortOptions);
+      await run(linkFor(storage, "v1|ben", terminal), sortOptions);
+      expect(handle).toHaveBeenCalledTimes(2);
+    });
+
+    it("keeps working when the browser refuses storage", async () => {
+      const storage = memoryStorage();
+      storage.setItem = () => {
+        throw new Error("quota");
+      };
+      const { handle, terminal } = createServer();
+      const link = linkFor(storage, "v1|anna", terminal);
+      await run(link, sortOptions);
+      await run(link, sortOptions);
+      expect(handle).toHaveBeenCalledTimes(1);
+    });
+  });
 });
