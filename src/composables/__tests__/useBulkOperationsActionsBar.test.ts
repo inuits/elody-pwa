@@ -759,6 +759,61 @@ describe("useBulkOperationsActionsBar", () => {
       ).not.toHaveBeenCalled();
     });
 
+    it("calls the operation's endpoint for the parent entity without a modal", async () => {
+      const fetchMock = vi.fn(() => Promise.resolve({ ok: true }));
+      vi.stubGlobal("fetch", fetchMock);
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(
+          createMockProps({ parentEntityId: "A-1" }),
+          createMockEmit(),
+        );
+
+      selectedBulkOperation.value = {
+        value: "regenerateTranscodes",
+        endpointInformation: {
+          endpointName: "api/entities/$id/generate-transcodes",
+          method: "POST",
+        },
+      } as any;
+      handleSelectedBulkOperation();
+      await flushPromises();
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/entities/A-1/generate-transcodes",
+        { method: "POST", headers: { "Content-Type": "application/json" } },
+      );
+      expect(mockBaseModal.openModal).not.toHaveBeenCalled();
+      expect(selectedBulkOperation.value).toBeUndefined();
+      expect(mockNotification.displaySuccessNotification).toHaveBeenCalledWith(
+        "notifications.success.action-started.title",
+        "notifications.success.action-started.description",
+      );
+      vi.unstubAllGlobals();
+    });
+
+    it("shows an error when the operation's endpoint fails", async () => {
+      vi.stubGlobal("fetch", vi.fn(() => Promise.resolve({ ok: false })));
+      const { handleSelectedBulkOperation, selectedBulkOperation } =
+        useBulkOperationsActionsBar(
+          createMockProps({ parentEntityId: "A-1" }),
+          createMockEmit(),
+        );
+
+      selectedBulkOperation.value = {
+        value: "regenerateTranscodes",
+        endpointInformation: {
+          endpointName: "api/entities/$id/generate-transcodes",
+          method: "POST",
+        },
+      } as any;
+      handleSelectedBulkOperation();
+      await flushPromises();
+
+      expect(mockNotification.displaySuccessNotification).not.toHaveBeenCalled();
+      expect(mockNotification.displayErrorNotification).toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    });
+
     it("creates the download without a modal for downloadMediafilesDirectly", async () => {
       const { apolloClient } = await import("@/main");
       vi.mocked(apolloClient.query).mockResolvedValueOnce({

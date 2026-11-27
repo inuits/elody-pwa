@@ -8,6 +8,7 @@ import {
   PaginationStoreKey,
 } from "@/components/library/usePaginationStore";
 import { useBaseModal } from "@/composables/useBaseModal";
+import { callEntityEndpoint } from "@/composables/endpointAction";
 import {
   type Context,
   type InBulkProcessableItem,
@@ -35,6 +36,7 @@ import {
   type BulkOperationModal,
   BulkOperationTypes,
   type DropdownOption,
+  type EndpointInformation,
   Entitytyping,
   ModalStyle,
   RouteNames,
@@ -132,7 +134,8 @@ export const useBulkOperationsActionsBar = (
   const { trackSeen } = useEntityPageConfig();
   const { markManyAsSeen, unmarkManyAsSeen } = useSeenItems();
   const { exportEntitiesToXlsx } = useExportXlsx();
-  const { displaySuccessNotification } = useBaseNotification();
+  const { displaySuccessNotification, displayErrorNotification } =
+    useBaseNotification();
 
   const subDropdownOptions = ref<DropdownOption[]>([]);
   const refetchEnabled = ref<boolean>(false);
@@ -319,6 +322,27 @@ export const useBulkOperationsActionsBar = (
     setCallbackFunctions(getRefetchCallbacks());
   };
 
+  const callOperationEndpoint = async (
+    endpointInformation: EndpointInformation,
+  ) => {
+    try {
+      await callEntityEndpoint(
+        endpointInformation.endpointName ?? "",
+        endpointInformation.method,
+        props.parentEntityId ?? "",
+      );
+      displaySuccessNotification(
+        t("notifications.success.action-started.title"),
+        t("notifications.success.action-started.description"),
+      );
+    } catch {
+      displayErrorNotification(
+        t("notifications.errors.validation-error.title"),
+        "",
+      );
+    }
+  };
+
   const createDownloadWithoutModal = async () => {
     selectedBulkOperation.value = undefined;
     const parentIntialValues =
@@ -492,6 +516,13 @@ export const useBulkOperationsActionsBar = (
 
     if (operationType === BulkOperationTypes.ExportXlsx) {
       exportEntitiesToXlsx(entityType.value);
+      return;
+    }
+
+    const endpointInformation = selectedBulkOperation.value.endpointInformation;
+    if (endpointInformation) {
+      selectedBulkOperation.value = undefined;
+      callOperationEndpoint(endpointInformation);
       return;
     }
 
