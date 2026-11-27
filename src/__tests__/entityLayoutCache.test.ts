@@ -6,7 +6,10 @@ import {
   clearEntityLayouts,
   layoutIsCacheable,
   leanEntityDocument,
+  selectedOptionsByRelation,
+  selectedOptionsDocument,
   storeEntityLayout,
+  withoutSelectedOptions,
 } from "@/entityLayoutCache";
 
 const entityQuery = (productionView: string, userView = "label") => gql`
@@ -167,5 +170,79 @@ describe("entity layout cache", () => {
     expect(cachedEntityLayout({ ...key, tenant: "t2" })).toBeUndefined();
     expect(cachedEntityLayout({ ...key, user: "u2" })).toBeUndefined();
     expect(cachedEntityLayout({ ...key, entityType: "tag" })).toBeUndefined();
+  });
+});
+
+describe("relation labels in their own query", () => {
+  const withSelectedOptions = gql`
+    query getEntityById($id: String!, $type: String!) {
+      Entity(id: $id, type: $type) {
+        ... on Production {
+          intialValues {
+            title
+          }
+          entityView {
+            label
+            genres: metaData {
+              label
+              inputField(type: genreTypeField) {
+                ...inputfield
+              }
+            }
+          }
+        }
+      }
+    }
+    fragment inputfield on InputField {
+      type
+      relationType
+      selectedOptions
+    }
+  `;
+
+  it("leaves them out of the entity query", () => {
+    const entity = print(withoutSelectedOptions(withSelectedOptions));
+    expect(entity).not.toContain("selectedOptions");
+    expect(entity).toContain("relationType");
+    expect(entity).toContain("intialValues");
+  });
+
+  it("asks the labels query only for the paths to them and their relation type", () => {
+    const labels = print(selectedOptionsDocument(withSelectedOptions));
+    expect(labels).toContain("genres: metaData");
+    expect(labels).toContain("inputField(type: genreTypeField)");
+    expect(labels).toContain("selectedOptions");
+    expect(labels).toContain("relationType");
+    expect(labels).toContain("query getEntityByIdSelectedOptions");
+    expect(labels).not.toContain("intialValues");
+    expect(labels).not.toMatch(/\blabel\b/);
+    expect(labels).not.toMatch(/\btype\n/);
+  });
+
+  it("finds the labels of each relation type in the labels result", () => {
+    const genres = [{ id: "GN-1" }];
+    expect(
+      selectedOptionsByRelation({
+        entityView: {
+          genres: {
+            inputField: { relationType: "ref_genres", selectedOptions: genres },
+          },
+          title: { inputField: { relationType: null, selectedOptions: null } },
+        },
+      }),
+    ).toEqual(new Map([["ref_genres", genres]]));
+  });
+
+  it("gives no labels for a relation type that two fields show differently", () => {
+    expect(
+      selectedOptionsByRelation({
+        a: {
+          inputField: { relationType: "ref_x", selectedOptions: [{ id: "1" }] },
+        },
+        b: {
+          inputField: { relationType: "ref_x", selectedOptions: [{ id: "2" }] },
+        },
+      }).get("ref_x"),
+    ).toBeNull();
   });
 });

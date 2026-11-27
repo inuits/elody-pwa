@@ -23,6 +23,16 @@ const ENTITY_READING_FIELDS = new Set([
   "commentsElement",
 ]);
 const PERMISSION_LIST_FIELDS = new Set(["permitted", "readOnly"]);
+const ENTITY_VALUE_FIELDS = new Set(["selectedOptions"]);
+const RELATION_TYPE_FIELD = "relationType";
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const fieldNode = (name: string): SelectionNode => ({
+  kind: Kind.FIELD,
+  name: { kind: Kind.NAME, value: name },
+});
 
 const fragmentsOf = (document: DocumentNode) =>
   new Map(
@@ -53,13 +63,95 @@ const usedFragmentNames = (document: DocumentNode): Set<string> => {
   return used;
 };
 
+const pruneToEntityValues = (
+  selectionSet: SelectionSetNode,
+  fragments: Map<string, FragmentDefinitionNode>,
+  prunedFragments: Map<string, FragmentDefinitionNode | null>,
+): SelectionSetNode | undefined => {
+  const prune = (set: SelectionSetNode) =>
+    pruneToEntityValues(set, fragments, prunedFragments);
+  const selections = selectionSet.selections.flatMap(
+    (selection): SelectionNode[] => {
+      if (selection.kind === Kind.FIELD) {
+        if (ENTITY_VALUE_FIELDS.has(selection.name.value)) return [selection];
+        const pruned = selection.selectionSet && prune(selection.selectionSet);
+        return pruned ? [{ ...selection, selectionSet: pruned }] : [];
+      }
+      if (selection.kind === Kind.INLINE_FRAGMENT) {
+        const pruned = prune(selection.selectionSet);
+        return pruned ? [{ ...selection, selectionSet: pruned }] : [];
+      }
+      const name = `${selection.name.value}__entityValues`;
+      if (!prunedFragments.has(name)) {
+        prunedFragments.set(name, null);
+        const fragment = fragments.get(selection.name.value);
+        const pruned = fragment && prune(fragment.selectionSet);
+        prunedFragments.set(
+          name,
+          pruned && fragment
+            ? {
+                ...fragment,
+                name: { kind: Kind.NAME, value: name },
+                selectionSet: pruned,
+              }
+            : null,
+        );
+      }
+      return prunedFragments.get(name)
+        ? [{ ...selection, name: { kind: Kind.NAME, value: name } }]
+        : [];
+    },
+  );
+  if (
+    selections.some(
+      (selection) =>
+        selection.kind === Kind.FIELD &&
+        ENTITY_VALUE_FIELDS.has(selection.name.value),
+    )
+  )
+    selections.push(fieldNode(RELATION_TYPE_FIELD));
+  return selections.length ? { ...selectionSet, selections } : undefined;
+};
+
+const withUsedFragments = (
+  document: DocumentNode,
+  prunedFragments: Map<string, FragmentDefinitionNode | null>,
+): DocumentNode => {
+  const withPrunedFragments: DocumentNode = {
+    ...document,
+    definitions: [
+      ...document.definitions,
+      ...[...prunedFragments.values()].filter(
+        (fragment): fragment is FragmentDefinitionNode => !!fragment,
+      ),
+    ],
+  };
+  const used = usedFragmentNames(withPrunedFragments);
+  return {
+    ...withPrunedFragments,
+    definitions: withPrunedFragments.definitions.filter(
+      (definition) =>
+        definition.kind !== Kind.FRAGMENT_DEFINITION ||
+        used.has(definition.name.value),
+    ),
+  };
+};
+
 const leanDocuments = new WeakMap<DocumentNode, DocumentNode>();
 
 export const leanEntityDocument = (document: DocumentNode): DocumentNode => {
   const known = leanDocuments.get(document);
   if (known) return known;
+  const fragments = fragmentsOf(document);
+  const prunedFragments = new Map<string, FragmentDefinitionNode | null>();
   const withoutLayout = visit(document, {
-    Field: (field) => (field.name.value === LAYOUT_FIELD ? null : undefined),
+    Field: (field) => {
+      if (field.name.value !== LAYOUT_FIELD) return undefined;
+      const pruned =
+        field.selectionSet &&
+        pruneToEntityValues(field.selectionSet, fragments, prunedFragments);
+      return pruned ? { ...field, selectionSet: pruned } : null;
+    },
     SelectionSet: {
       leave: (selectionSet): SelectionSetNode | undefined =>
         selectionSet.selections.length
@@ -75,17 +167,98 @@ export const leanEntityDocument = (document: DocumentNode): DocumentNode => {
             },
     },
   });
-  const used = usedFragmentNames(withoutLayout);
-  const lean: DocumentNode = {
-    ...withoutLayout,
-    definitions: withoutLayout.definitions.filter(
-      (definition) =>
-        definition.kind !== Kind.FRAGMENT_DEFINITION ||
-        used.has(definition.name.value),
-    ),
-  };
+  const lean = withUsedFragments(withoutLayout, prunedFragments);
   leanDocuments.set(document, lean);
   return lean;
+};
+
+const withoutSelectedOptionsDocuments = new WeakMap<
+  DocumentNode,
+  DocumentNode
+>();
+
+export const withoutSelectedOptions = (
+  document: DocumentNode,
+): DocumentNode => {
+  const known = withoutSelectedOptionsDocuments.get(document);
+  if (known) return known;
+  const stripped = visit(document, {
+    Field: (field) =>
+      ENTITY_VALUE_FIELDS.has(field.name.value) ? null : undefined,
+  });
+  withoutSelectedOptionsDocuments.set(document, stripped);
+  return stripped;
+};
+
+const selectedOptionsDocuments = new WeakMap<DocumentNode, DocumentNode>();
+
+export const selectedOptionsDocument = (
+  document: DocumentNode,
+): DocumentNode => {
+  const known = selectedOptionsDocuments.get(document);
+  if (known) return known;
+  const fragments = fragmentsOf(document);
+  const prunedFragments = new Map<string, FragmentDefinitionNode | null>();
+  const pruned = visit(document, {
+    OperationDefinition: (operation) => ({
+      ...operation,
+      name: operation.name && {
+        ...operation.name,
+        value: `${operation.name.value}SelectedOptions`,
+      },
+      selectionSet: {
+        ...operation.selectionSet,
+        selections: operation.selectionSet.selections.map((root) =>
+          root.kind === Kind.FIELD && root.selectionSet
+            ? {
+                ...root,
+                selectionSet: pruneToEntityValues(
+                  root.selectionSet,
+                  fragments,
+                  prunedFragments,
+                ) ?? {
+                  kind: Kind.SELECTION_SET,
+                  selections: [fieldNode("__typename")],
+                },
+              }
+            : root,
+        ),
+      },
+    }),
+  });
+  const labels = withUsedFragments(pruned, prunedFragments);
+  selectedOptionsDocuments.set(document, labels);
+  return labels;
+};
+
+export type EntitySelectedOptions = {
+  entityId: string;
+  byRelation: Promise<Map<string, unknown[] | null>>;
+};
+
+export const selectedOptionsByRelation = (
+  result: unknown,
+): Map<string, unknown[] | null> => {
+  const byRelation = new Map<string, unknown[] | null>();
+  const walk = (value: unknown) => {
+    if (Array.isArray(value)) return value.forEach(walk);
+    if (!isPlainObject(value)) return;
+    const options = value.selectedOptions;
+    const relationType = value[RELATION_TYPE_FIELD];
+    if (Array.isArray(options) && typeof relationType === "string") {
+      const known = byRelation.get(relationType);
+      byRelation.set(
+        relationType,
+        known === undefined ||
+          (known && JSON.stringify(known) === JSON.stringify(options))
+          ? options
+          : null,
+      );
+    }
+    Object.values(value).forEach(walk);
+  };
+  walk(result);
+  return byRelation;
 };
 
 const readsTheEntity = (
