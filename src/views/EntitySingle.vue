@@ -74,12 +74,10 @@ import DeleteModal from "@/components/modals/DeleteModal.vue";
 import { useBaseModal } from "@/composables/useBaseModal";
 import {
   cachedEntityLayout,
+  entityPageDocuments,
   layoutIsCacheable,
-  leanEntityDocument,
   selectedOptionsByRelation,
-  selectedOptionsDocument,
   storeEntityLayout,
-  withoutSelectedOptions,
   type EntitySelectedOptions,
 } from "@/entityLayoutCache";
 
@@ -143,9 +141,9 @@ const layoutKey = () => ({
   entityType: entityType.value,
 });
 const cachedLayout = ref(cachedEntityLayout(layoutKey()));
-const entityDocument = withoutSelectedOptions(GetEntityByIdDocument);
+const entityDocuments = entityPageDocuments(GetEntityByIdDocument);
 const queryDocument = computed(() =>
-  cachedLayout.value ? leanEntityDocument(entityDocument) : entityDocument,
+  cachedLayout.value ? entityDocuments.lean : entityDocuments.entity,
 );
 
 const { resolveClient } = useApolloClient();
@@ -156,7 +154,7 @@ const fetchSelectedOptions = () => {
     entityId: variables.id,
     byRelation: resolveClient()
       .query({
-        query: selectedOptionsDocument(GetEntityByIdDocument),
+        query: entityDocuments.labels,
         variables,
         fetchPolicy: "no-cache",
       })
