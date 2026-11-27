@@ -25,7 +25,9 @@ export const gql = (
   let definitions: readonly DefinitionNode[] | undefined;
   const parseOnce = () => {
     if (definitions) return definitions;
-    const merged = [...parse(strings.join("\n")).definitions];
+    const merged = [
+      ...parse(strings.join("\n"), { noLocation: true }).definitions,
+    ];
     const seen = new Set(merged.map(nameOf));
     fragments
       .flatMap((fragment) => fragment.definitions)
